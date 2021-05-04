@@ -64,7 +64,7 @@ If you ran your program at 22:30 (10:30pm), you would expect the following:
 21:00
 ```
 
-However, in certain timezones and in certain browsers, you would be surprised:
+However, in certain time zones and in certain browsers, you would be surprised:
 
 ```
 scenario 1     scenario 2     scenario 3
@@ -181,7 +181,7 @@ Aside from more robust date manipulation, Dateless has other advantages over oth
 
 ### 1) Other calendar systems
 
-The 12-month "gregorian" calendar system that most of the world uses is not the only calendar system. There are others like "buddhist", "chinese", "coptic", and "ethiopia". Most date libraries allow you to string-format to another calendar system but none of them allow date manipulation. For example, you won't be able to print the first day in each month in the Jalali (aka Persion) calendar. You'll need to use a hard fork such as [jalaliday](https://github.com/alibaba-aero/jalaliday) (for dayjs) or [date-fns-jalali](https://github.com/date-fns-jalali/date-fns-jalali) (for date-fns).
+The 12-month "gregorian" calendar system that most of the world uses is not the only calendar system. There are others like "buddhist", "chinese", "coptic", and "ethiopia". Most date libraries allow you to string-format to another calendar system but none of them allow date manipulation. For example, you won't be able to print the first day in each month in the Jalali (aka Persion) calendar. You'll need to use a hard fork such as [jalaliday](https://github.com/alibaba-aero/jalaliday) (for Day.js) or [date-fns-jalali](https://github.com/date-fns-jalali/date-fns-jalali) (for date-fns).
 
 ### 2) No external locale files
 
@@ -189,7 +189,7 @@ Most libraries require you to import external files for formatting in locales ot
 
 ### 3) Tree-shakeable
 
-Date libraries either take a function-based approach, like date-fns, or an object-based approach, like Dayjs and Luxon. A function-based approach allows your bundler to automatically remove unnused functions, resulting in smaller bundler sizes.
+Date libraries either take a function-based approach, like date-fns, or an object-based approach, like Day.js and Luxon. A function-based approach allows your bundler to automatically remove unnused functions, resulting in smaller bundler sizes.
 
 ### 4) Ease of installation
 
@@ -201,7 +201,11 @@ If a library uses data types and function/property names that are already famili
 
 ### 6) Chainable
 
-Many people prefer chainable APIs where you can do things like `dayjs().startOf('day').add(1, 'hour).format()`
+Many people prefer chainable APIs for doing things like:
+
+```js
+dayjs().startOf('day').add(1, 'hour).format()
+```
 
 ### Results
 
@@ -861,7 +865,11 @@ Gets the UTC offset for a timestamp in a specific time zone.
 function getTimeZoneOffsetForTimestamp(timestamp: number, timeZone?: string): number
 ```
 
-This function is a shortcut for `getTimeZoneOffset(parseTimestamp(timestamp, timeZone), timeZone)`
+This function is a shortcut for:
+
+```js
+getTimeZoneOffset(parseTimestamp(timestamp, timeZone), timeZone)
+```
 
 ### `getIsDst`
 
@@ -879,7 +887,11 @@ Whether the year is a leap year (assumed to be Gregorian calendar).
 function getIsLeapYear(year: number): boolean
 ```
 
-This function accepts a `year` value. For a marker, do `getIsLeapYear(getYear(marker))`
+This function accepts a `year` value. For a marker, do:
+
+```js
+getIsLeapYear(getYear(marker))
+```
 
 ### `getYearDays`
 
@@ -897,7 +909,11 @@ Returns the number of days in a month.
 function getMonthDays(year: number, month: number, calendar?: string): number
 ```
 
-This function accepts `year` and `month` values. For a marker, do `getMonthDays(getYear(marker), getMonth(marker))`
+This function accepts `year` and `month` values. For a marker, do:
+
+```js
+getMonthDays(getYear(marker), getMonth(marker))
+```
 
 ### `getWeekStart`
 
