@@ -397,7 +397,7 @@ Returns an array of locale codes that have been verified to work well in all bro
 function getAvailableLocales(): string[] // like ['en-US', 'es', 'fr',...]
 ```
 
-This method returns locale codes like `'en-US'`. To display a locale code translated into an arbitrary language, use the [`formatLocale`](#formatlocale) method.
+This method returns locale codes like `'en-US'`. To display a locale name translated into an arbitrary language, use the [`formatLocale`](#formatlocale) method.
 
 
 ## Creating
@@ -518,8 +518,10 @@ function formatNative(marker: number): Date
 Format an ISO8601 string like `'2021-05-04T03:08:03-07:00'`
 
 ```ts
-function formatIso(marker: number, timeZone = 'local'): string
+function formatIso(marker: number, timeZone?: string): string
 ```
+
+If no `timeZone` is specified, the [default time zone](#environmental-defaults) will be used. To generate an ISO string without including the time zone, use [`formatIsoDateTime`](#formatisodatetime) instead.
 
 ### `formatIsoMonth`
 
@@ -547,13 +549,13 @@ function formatIsoDate(marker: number): string
 
 ### `formatIntl`
 
-Format a DateMarker using the Intl API's options. This is the preferred way to format a human-readable string for maximum internationalization.
+Format a DateMarker using the Intl API. This is the preferred way to format a human-readable string for maximum internationalization.
 
 ```ts
 function formatIntl(marker: number, options: FormatIntlOptions): string
 ```
 
-Accepts the same type of object that [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters) accepts, in addition to more:
+Accepts the same options as [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters) in addition to a few more:
 
 ```ts
 interface FormatIntlOptions {
@@ -576,14 +578,14 @@ interface FormatIntlOptions {
   minute?,
   second?,
   fractionalSecondDigits?,
-  omitZeroTime?: boolean, // remove strings like ':00'
+  omitZeroTime?: boolean, // removes strings like ':00'
   separator?: string, // for ranges. see formatRangeIntl
 }
 ```
 
 ### `formatStr`
 
-Formats a date marker into a string using date-formatting tokens just like MomentJS/Dayjs.
+Formats a date marker into a string using date-formatting tokens. Uses the same tokens as MomentJS/Dayjs.
 
 ```ts
 function formatStr(marker: number, tokens: string, options?: FormatStrOptions): string
@@ -630,7 +632,7 @@ Available options:
 
 ```ts
 interface FormatStrOptions {
-  timeZone?: string,
+  timeZone?: string, // like 'America/New_York'
   locale?: string | string[], // one or more locale codes
   months?: string[], // like 'January'
   monthsShort?: string[], // like 'Jan'
@@ -674,11 +676,92 @@ Accepts the same tokens as [formatStr](#formatstr).
 Accepts the same options as [formatStr](#formatstr). Uses the `separator` property.
 
 ### `formatDurationIso`
+
+Formats an [ISO duration](https://en.wikipedia.org/wiki/ISO_8601#Durations).
+```ts
+function formatDurationIso(duration: LooseDuration): string // like 'P1D'
+```
+
 ### `formatDurationIntl`
+
+```ts
+function formatDurationIntl( // like '3 days'
+  duration: LooseDuration,
+  options: {
+    locale?: string | string[],
+    timeZone?: string,
+  }
+): string
+```
+
 ### `formatDurationStr`
+
+Uses a subset of the [`formatStr`](#formatstr) tokens. Can only display numeric values.
+
+```ts
+function formatDurationStr(duration: LooseDuration, tokens: string): string
+```
+
 ### `formatRelative`
+
+Formats a unit of time like `'1 day ago'` or `'yesterday'`. You must specify a number of units:
+
+```ts
+function formatRelative(
+  num: number,
+  unit: 'year' | 'month' | 'day' | 'hour' | 'second',
+  options?: FormatRelativeOptions,
+): string
+```
+
+Accepts a superset of the [RelativeTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat) options:
+
+```ts
+interface FormatRelativeOptions {
+  locale?: string | string[],
+  numeric?: 'always' | 'auto',
+  style?: 'long' | 'short' | 'narrow',
+}
+```
+
 ### `formatRelativeDuration`
+
+Just like `formatRelative` but accepts a duration. If the duration has multiple units (like months **and** days) it will display in the larger unit.
+
+```ts
+function formatRelativeDuration(
+  duration: LooseDuration,
+  options?: FormatRelativeDurationOptions
+): string
+```
+
+Accepts a superset of the [RelativeTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat) options:
+
+```ts
+interface FormatRelativeDurationOptions {
+  locale?: string | string[],
+  numeric?: 'always' | 'auto',
+  style?: 'long' | 'short' | 'narrow',
+  alwaysRound?: boolean
+}
+```
+
 ### `formatLocale`
+
+Displays a locale name translated into an arbitrary language.
+
+```ts
+function formatLocale(locale: string, displayInLocale: string): string
+```
+
+Examples:
+
+```ts
+formatLocale('en-US', 'es') // Inglés (Estados Unidos)
+formatLocale('en-US', 'fr') // Anglais (États Unis)
+```
+
+NOTE: there are browser support implications for this.
 
 ## Getting
 
@@ -784,5 +867,6 @@ Accepts the same options as [formatStr](#formatstr). Uses the `separator` proper
 ## Optimizing
 
 (use same object)
+(added benefit: good for memo)
 
 ## ESLint plugin
