@@ -766,23 +766,146 @@ NOTE: there are browser support implications for this.
 ## Getting
 
 ### `getYear`
+
+Returns a 4-digit year.
+
+```ts
+function getYear(marker: number, calendar?: string): number
+```
+
 ### `getMonth`
+
+Returns a month number. For a gregorian calendar, this will be from `1` to `12`.
+
+```ts
+function getMonth(marker: number, calendar?: string): number
+```
+
 ### `getMonthDay`
+
+Returns the day-of-month. For a gregorian calendar, this will be from `1` to `31`.
+
+```ts
+function getMonthDay(marker: number, calendar?: string): number
+```
+
 ### `getHours`
+
+```ts
+function getHours(marker: number): number
+```
+
 ### `getMinutes`
+
+```ts
+function getMinutes(marker: number): number
+```
+
 ### `getSeconds`
+
+```ts
+function getSeconds(marker: number): number
+```
+
 ### `getMilliseconds`
+
+```ts
+function getMilliseconds(marker: number): number
+```
+
 ### `getIsoWeek`
+
+Returns the week number of the year, according to ISO standards.
+
+```ts
+function getIsoWeek(marker: number): number
+```
+
 ### `getIsoWeekday`
+
+Returns the day-of-week, with `0` signifying Monday.
+
+```ts
+function getIsoWeekday(marker: number): number
+```
+
 ### `getWeek`
+
+Returns the week number of the year, according to the locale.
+
+```ts
+function getWeek(marker: number, locale?: string): number
+```
+
 ### `getWeekday`
-### `getIsLeapYear`
-### `getIsDst`
+
+Returns the day-of-week, with `0` signifying the first day of the week according to the locale.
+
+```ts
+function getWeekday(marker: number, locale?: string): number
+```
+
 ### `getTimeZoneOffset`
+
+Given a date marker in a specific time zone, returns the number of minutes offset from UTC. A UTC offset of `-01:00` would yield `-60`.
+
+```ts
+function getTimeZoneOffset(marker: number, timeZone?: string): number
+```
+
 ### `getTimeZoneOffsetForTimestamp`
+
+Gets the UTC offset for a timestamp in a specific time zone.
+
+```ts
+function getTimeZoneOffsetForTimestamp(timestamp: number, timeZone?: string): number
+```
+
+This function is a shortcut for `getTimeZoneOffset(parseTimestamp(timestamp, timeZone), timeZone)`
+
+### `getIsDst`
+
+Whether the marker is in a period of Daylight Saving Time.
+
+```ts
+function getIsDst(marker: number, timeZone?: string): boolean
+```
+
+### `getIsLeapYear`
+
+Whether the year is a leap year (assumed to be Gregorian calendar).
+
+```ts
+function getIsLeapYear(year: number): boolean
+```
+
+This function accepts a `year` value. For a marker, do `getIsLeapYear(getYear(marker))`
+
 ### `getYearDays`
+
+Returns the number of days in a year.
+
+```ts
+function getYearDays(year: number, calendar?: string): number
+```
+
 ### `getMonthDays`
+
+Returns the number of days in a month.
+
+```ts
+function getMonthDays(year: number, month: number, calendar?: string): number
+```
+
+This function accepts `year` and `month` values. For a marker, do `getMonthDays(getYear(marker), getMonth(marker))`
+
 ### `getWeekStart`
+
+Returns the day-of-week each week starts on according to a the locale. `0` always signifies Monday.
+
+```ts
+function getWeekStart(locale?: string): number
+```
 
 ## Setting
 
@@ -862,11 +985,23 @@ NOTE: there are browser support implications for this.
 
 ## Comparing
 
+Date markers are just integers. Compare them use the numeric comparison operators `===`, `!==`, `<`, `>`, `<=`, `>=`
+
 ## Converting
+
+Date makers can be converted to/from other formats using functions that have previously been discussed:
+
+- [parseNative](#parsenative)
+- [parseTimestamp](#parsetimestamp)
+- [formatNative](#formatnative)
+- [formatTimestamp](#formattimestamp)
 
 ## Optimizing
 
-(use same object)
+TODO
+(use same options object for formatting)
 (added benefit: good for memo)
 
 ## ESLint plugin
+
+Many applications allow the end-user to select their time zone and locale. Some applications might even allow the user to select their calendar system. If so, when working with Dateless functions that accept `timeZone`/`locale`/`calendar` paremeters, you must always specify these. There is no way to elegantly enforce this during TypeScript compilation nor at runtime, so Dateless offers an ESLint plugin to help you.
