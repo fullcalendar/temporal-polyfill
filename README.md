@@ -378,7 +378,7 @@ function setDefaults(defaults: {
 
 This function is not recommended when creating distributable libraries.
 
-### `setLocalDefaults`
+### `setLocaleDefaults`
 
 The [`formatStr`](#formatstr) and [`formatRangeStr`](#formatrangestr) functions can have their locale-specific month/weekday strings changed. This takes effect globally:
 
@@ -503,7 +503,7 @@ Most of the time "formatting" means converting an object to a string, but in Dat
 
 ### `formatTimestamp`
 
-Convert a DateMarker into a UNIX timestamp.
+Convert a DateMarker into a Unix timestamp.
 
 ```ts
 function formatTimestamp(marker: number): number
@@ -851,7 +851,7 @@ function getWeekday(marker: number, locale?: string): number
 
 ### `getTimeZoneOffset`
 
-Given a date marker in a specific time zone, returns the number of minutes offset from UTC. A UTC offset of `-01:00` would yield `-60`.
+Given a date marker, returns the UTC offset in the time zone. A UTC offset of `-01:00` would yield `-60`.
 
 ```ts
 function getTimeZoneOffset(marker: number, timeZone?: string): number
@@ -859,7 +859,7 @@ function getTimeZoneOffset(marker: number, timeZone?: string): number
 
 ### `getTimeZoneOffsetForTimestamp`
 
-Gets the UTC offset for a timestamp in a specific time zone.
+Given a Unix timestamp, returns the UTC offset in the time zone.
 
 ```ts
 function getTimeZoneOffsetForTimestamp(timestamp: number, timeZone?: string): number
