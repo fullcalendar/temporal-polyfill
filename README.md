@@ -870,12 +870,6 @@ Given a Unix timestamp, returns the UTC offset in the time zone.
 function getTimeZoneOffsetForTimestamp(timestamp: number, timeZone?: string): number
 ```
 
-This function is a shortcut for:
-
-```js
-getTimeZoneOffset(parseTimestamp(timestamp, timeZone), timeZone)
-```
-
 ### `getIsDst`
 
 Whether the marker is in a period of Daylight Saving Time.
