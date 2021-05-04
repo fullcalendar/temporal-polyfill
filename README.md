@@ -149,7 +149,7 @@ create/parse ----> manipulate ----> format
 
 Dateless takes a different approach. Its API completely sidesteps using time zones (and DST) during date manipulation.
 
-# Getting Started
+## Getting Started
 
 Install the lib:
 
@@ -173,7 +173,7 @@ while (marker < endMarker) {
 }
 ```
 
-You might say it's similar to [date-fns](https://date-fns.org/) in its function-based approach, but instead of leveraging the built-in [Date object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) it leverages a date "marker", which is just an number. It's an integer that represent chronology in a zone-less UTC-like mode. Its bulletproof for date manipulation.
+You might say it's similar to [date-fns](https://date-fns.org/) in its function-based approach, but instead of leveraging the built-in [Date object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) it leverages a date "marker", which is just an number. It's an integer that represent chronology in a zoneless UTC-like mode. Its bulletproof for date manipulation.
 
 ## Comparison with other libs
 
@@ -213,7 +213,7 @@ Here's how the libraries stack up:
   </thead>
   <tbody>
     <tr>
-      <td>Zone-less date manipulation</td>
+      <td>Zoneless date manipulation</td>
       <td>yes</td>
       <td></td>
       <td></td>
@@ -647,7 +647,11 @@ interface FormatStrOptions {
 For creating strings like `'Jun 8 - 9, 2021'` using the robust Intl API.
 
 ```ts
-function formatRangeIntl(marker0: number, marker1: number, options?: FormatRangeIntlOptions): string
+function formatRangeIntl(
+  marker0: number,
+  marker1: number,
+  options?: FormatRangeIntlOptions,
+): string
 ```
 
 Accepts the same options as [formatIntl](#formatintl). Uses the `separator` property.
@@ -657,7 +661,12 @@ Accepts the same options as [formatIntl](#formatintl). Uses the `separator` prop
 For creating strings like `'Jun 8 - 9, 2021'` using a token string.
 
 ```ts
-formatRangeStr(marker0: number, marker1: number, format: string, options?: FormatRangeStrOptions): string
+function formatRangeStr(
+  marker0: number,
+  marker1: number,
+  tokens: string,
+  options?: FormatRangeStrOptions,
+): string
 ```
 
 Accepts the same tokens as [formatStr](#formatstr).
