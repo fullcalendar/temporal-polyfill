@@ -463,25 +463,31 @@ Most of the time "parsing" means deriving meaning from a string, but in Dateless
 ### `parseNow`
 
 ```ts
-function parseNow(): number
+function parseNow(timeZone?: string): number
 ```
 
 ### `parseTimestamp`
 
 ```ts
-function parseTimestamp(timestamp: number): number
+function parseTimestamp(timestamp: number, timeZone?: string): number
 ```
 
 ### `parseNative`
 
 ```ts
-function parseNative(dateObj: Date): number
+function parseNative(dateObj: Date, timeZone?: string): number
 ```
 
 ### `parseIso`
 
 ```ts
-function parseIso(isoDateStr: string, timeZone?: string): number // like '2021-05-01T12:00:00Z'
+function parseIso(isoDateStr: string, timeZone?: string): number // like '2021-05-01T12:00:00-07:00'
+```
+
+### `parseIsoDateTime`
+
+```ts
+function parseIsoDateTime(isoDateStr: string): number // like '2021-05-01T12:00:00' (no time zone offset)
 ```
 
 ### `parseDuration`
@@ -496,7 +502,6 @@ function parseDuration(isoDurationStr: string): number // like '1.12:30:00'
 function parseIsoDuration(durationStr: string): number // like 'P1D'
 ```
 
-
 ## Formatting
 
 Most of the time "formatting" means converting an object to a string, but in Dateless it also means converting a [DateMaker](#datemarker) into a different data type.
@@ -506,7 +511,7 @@ Most of the time "formatting" means converting an object to a string, but in Dat
 Convert a DateMarker into a Unix timestamp.
 
 ```ts
-function formatTimestamp(marker: number): number
+function formatTimestamp(marker: number, timeZone?: string): number
 ```
 
 ### `formatNative`
@@ -514,7 +519,7 @@ function formatTimestamp(marker: number): number
 Convert a DateMarker into a native Date object.
 
 ```ts
-function formatNative(marker: number): Date
+function formatNative(marker: number, timeZone?: string): Date
 ```
 
 ### `formatIso`
@@ -527,12 +532,12 @@ function formatIso(marker: number, timeZone?: string): string
 
 If no `timeZone` is specified, the [default time zone](#environmental-defaults) will be used. To generate an ISO string without including the time zone, use [`formatIsoDateTime`](#formatisodatetime) instead.
 
-### `formatIsoMonth`
+### `formatIsoDateTime`
 
-Format an ISO8601 string with only year and month, like `'2021-05'`
+Format an ISO8601 string WITHOUT the time zone part, like `'2021-05-04T03:08:03'`
 
 ```ts
-function formatIsoMonth(marker: number): string
+function formatIsoDate(marker: number): string
 ```
 
 ### `formatIsoDate`
@@ -543,12 +548,12 @@ Format an ISO8601 string with only year/month/date, like `'2021-05-04'`
 function formatIsoDate(marker: number): string
 ```
 
-### `formatIsoDateTime`
+### `formatIsoMonth`
 
-Format an ISO8601 string WITHOUT the time zone part, like `'2021-05-04T03:08:03'`
+Format an ISO8601 string with only year and month, like `'2021-05'`
 
 ```ts
-function formatIsoDate(marker: number): string
+function formatIsoMonth(marker: number): string
 ```
 
 ### `formatIntl`
@@ -865,18 +870,24 @@ Given a Unix timestamp, returns the UTC offset in the time zone.
 function getTimeZoneOffsetForTimestamp(timestamp: number, timeZone?: string): number
 ```
 
-This function is a shortcut for:
-
-```js
-getTimeZoneOffset(parseTimestamp(timestamp, timeZone), timeZone)
-```
-
 ### `getIsDst`
 
 Whether the marker is in a period of Daylight Saving Time.
 
 ```ts
 function getIsDst(marker: number, timeZone?: string): boolean
+```
+
+### `getIsDstGap`
+
+```ts
+function getIsDstGap(marker: number, timeZone?: string): boolean
+```
+
+### `getIsDstOverlap`
+
+```ts
+function getIsDstOverlap(marker: number, timeZone?: string): boolean
 ```
 
 ### `getIsLeapYear`
@@ -964,7 +975,7 @@ function getWeekStart(locale?: string): number
 
 ## Multiplying
 
-### `multDurations`
+### `multDuration`
 
 ## Diffing
 
