@@ -23,14 +23,15 @@ A new JavaScript date library
 - [As-unit](#as-unit)
 - [Comparing](#comparison-with-other-libs)
 - [Converting](#converting)
+- [Optimizing](#optimizing)
 - [ESLint Plugin](#eslint-plugin)
 
 ## Why?
 
-Why does the world need another JavaScript date library? I was inspired by a series of bugs encountered while developing [FullCalendar]. Imagine the following scenario: you need to print out each hour for the next 24 hours. You might write:
+Why does the world need another JavaScript date library? I was inspired by a series of bugs encountered while developing [FullCalendar](https://fullcalendar.io/). Imagine the following scenario: you need to print out each hour for the next 24 hours. You might write:
 
 ```js
-// compute the star of the current hour
+// compute the start of the current hour
 let date = new Date()
 date.setMinutes(0)
 date.setSeconds(0)
@@ -40,8 +41,9 @@ date.setMilliseconds(0)
 let endDate = new Date(date.valueOf()) // clone date
 endDate.setHours(date.getHours() + 24)
 
+// increment by an hour in a loop
 while (date.valueOf() < endDate.valueOf()) {
-  console.log(
+  console.log( // produce a string like '06:00'
     String(date.getHours()).padStart(2, '0') + ':' +
     String(date.getMinutes()).padStart(2, '0')
   )
@@ -57,7 +59,8 @@ If you ran your program at 22:30 (10:30pm), you would expect the following:
 00:00
 01:00
 02:00
-...etc...
+(etc)
+20:00
 21:00
 ```
 
@@ -70,23 +73,24 @@ scenario 1     scenario 2     scenario 3
 00:00          00:00          00:00
 00:00 (!)      02:00 (!)      01:00
 02:00          03:00          01:00
-...etc...      ...etc...      01:00  
+(etc)          (etc)          01:00
+20:00          20:00          01:00
 21:00          21:00          (infinite loop!)
 ```
 
-This is due to the fact our program is running in whatever local time zone the end-user is in. Each local zone has its own DST rules. DST rules cause certain hours of time to omitted or double-added. Certain browsers handle these omissions and additions differently.
+This is due to the fact our program is running in whatever time zone the end-user is in. Each time zone has its own DST rules. DST rules cause certain hours of time to be omitted or double-added. Certain browsers handle these omissions and additions differently.
 
 A time zone with no DST:
 
 ```
-           2017                                         2018
+           2020                                         2021
 ------------+--------------------------------------------+----------
 ```
 
 A time zone with DST:
 
 ```
-           2017                                         2018
+           2020                                         2021
 ------------+-----------                      -----------+----------
                          ----------------------
                         ^                     ^
@@ -97,7 +101,7 @@ If you iterate over dates/times using the browser's local time zone, you are set
 
 ![Image of a train wreck](https://westernnews.media.clients.ellingtoncms.com/img/photos/2018/06/06/Train_t670.JPG?b3f6a5d7692ccc373d56e40cf708e3fa67d9af9d)
 
-What's the solution? Operate in UTC instead, which is guaranteed not to have DST and which operates across all browsers consistently. Our modified example:
+What's the solution? Do date math in UTC instead, which is guaranteed not to have DST and which operates across all browsers consistently. Our modified example:
 
 ```js
 // coerce current local date to UTC
@@ -106,7 +110,7 @@ let date = new Date(
   localDate.getYear(),
   localDate.getMonth(),
   localDate.getDate(),
-  0, 0, 0, 0
+  0, 0, 0, 0, // more info about this later
 ) 
 
 // compute 24 hours later
@@ -126,7 +130,7 @@ We must remember to use the UTC-style methods instead. Most third-party date lib
 
 ```js
 // dayjs
-dayjs().tz('UTC').format()
+dayjs().utc().format()
 
 // luxon
 new DateTime().setZone('UTC').format()
@@ -143,7 +147,7 @@ create/parse ----> manipulate ----> format
  (with tz)        (without tz)     (with tz)
 ```
 
-Dateless takes a different approach. Its API completely sidesteps using time zones (and DST) for during date manipulation. See the "Getting Started" examples...
+Dateless takes a different approach. Its API completely sidesteps using time zones (and DST) during date manipulation.
 
 # Getting Started
 
@@ -153,7 +157,7 @@ Install the lib:
 npm install --save dateless
 ```
 
-Then import it and write you program. The following program prints each hour for the next 24 hours:
+The following program prints each hour for the next 24 hours:
 
 ```js
 import { parseNow, addDays, addHours, formatIntl } from 'dateless'
@@ -169,11 +173,11 @@ while (marker < endMarker) {
 }
 ```
 
-You might say it's similar to [date-fns] in its function-based approach, but instead of leveraging the built-in [Date object] it leverages a date "marker", which is just an integer. It's an integer that represent chronology in a zone-less UTC-like mode. Its bulletproof for date manipulation.
+You might say it's similar to [date-fns](https://date-fns.org/) in its function-based approach, but instead of leveraging the built-in [Date object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) it leverages a date "marker", which is just an number. It's an integer that represent chronology in a zone-less UTC-like mode. Its bulletproof for date manipulation.
 
 ## Comparison with other libs
 
-Aside from being better for date manipulation, Dateless is better than other date libraries in a few other regards. Let's compare it to [Luxon], [Date-fns], and [Dayjs].
+Aside from more robust date manipulation, Dateless has other advantages over other date libraries. Let's compare it to [Luxon](https://moment.github.io/luxon/index.html), [date-fns](https://date-fns.org/), and [Day.js](https://day.js.org/).
 
 ### 1) Other calendar systems
 
@@ -181,23 +185,23 @@ The 12-month "gregorian" calendar system that most of the world uses is not the 
 
 ### 2) No external locale files
 
-Most libraries require you to import external files for formatting in a locale other than en-US. 
+Most libraries require you to import external files for formatting in locales other than `en-US`. 
 
 ### 3) Tree-shakeable
 
-Date libraries either take a function-based approach, like date-fns, or an object-based approach, like dayjs and Luxon. A function-based approach allows your bundler to automatically remove unnused functions, resulting in smaller bundler sizes.
+Date libraries either take a function-based approach, like date-fns, or an object-based approach, like Dayjs and Luxon. A function-based approach allows your bundler to automatically remove unnused functions, resulting in smaller bundler sizes.
 
 ### 4) Ease of installation
 
-Some libraries are easier to install and import than others. Date-fns is a bit awkward because there are multiple entrypoints you can import functions from (`date-fns`, `date-fns/addDays`, `date-fns/utc`, `date-fns/utc/addDays`, `date-fns/fp`, etc). Dayjs can be clunky because each plugin is imported globally, and if you stop using a certain plugin's functionality, you must remember to unregister it.
+Some libraries are easier to install and import than others. Date-fns is a bit awkward because there are multiple entrypoints you can import functions from (`date-fns`, `date-fns/addDays`, `date-fns/utc`, `date-fns/utc/addDays`, `date-fns/fp`, etc). Day.js can be clunky because each plugin is imported globally, and if you stop using a certain plugin's functionality, you must remember to unregister it.
 
 ### 5) Familiarity
 
-No third-party date library is identical to the built-in Date object, but the more similar it is the less learning is required. The less custom objects the better. Naming conventions for methods and proprerties are also part of the equation.
+If a library uses data types and function/property names that are already familiar to the developer because of their exposure to the built-in Date object and Intl API, then the library will be easier to learn.
 
 ### 6) Chainable
 
-Many people prefer chainable APIs like `dayjs().startOf('day').add(1, 'hour).format()`
+Many people prefer chainable APIs where you can do things like `dayjs().startOf('day').add(1, 'hour).format()`
 
 ### Results
 
@@ -205,9 +209,16 @@ Here's how the libraries stack up:
 
 <table>
   <thead>
-    <tr><th></th><th>Dateless</th><th>Luxon</th><th>Date-fns</th><th>Dayjs</th></tr>
+    <tr><th></th><th>Dateless</th><th>Luxon</th><th>date-fns</th><th>Day.js</th></tr>
   </thead>
   <tbody>
+    <tr>
+      <td>Zone-less date manipulation</td>
+      <td>yes</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
     <tr>
       <td>Other calendar systems</td>
       <td>yes</td>
@@ -255,20 +266,24 @@ Here's how the libraries stack up:
 
 ## Browser support
 
-Dateless is able to achieve its small footprint and simple API due to its reliance on the Intl API. As a result, the following browers are NOT supported:
+Dateless is able to achieve its small footprint and simple API due to its reliance on the [Intl API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl). As a result, the following browers are NOT supported:
 
 - IE (any version)
-- Safari < 14 (though a small shim is provided for lower versions)
+- Safari < 14 (though a small shim provides support)
 
 Dateless uses a number of clever tricks to avoid needing a fully implemented Intl API.
 
 ## Types
 
-A "date marker" is simply a number. The `DateMarker` type is an optional alias for readability:
+### DateMarker
+
+A "date marker" is simply a number:
 
 ```ts
 type DateMarker = number
 ```
+
+### Duration
 
 A duration represents a length of time:
 
@@ -283,6 +298,8 @@ interface Duration {
   milliseconds: number
 }
 ```
+
+### LooseDuration
 
 A more flexible duration object is allowed as input for all duration-related functions:
 
@@ -299,17 +316,23 @@ interface LooseDuration {
 }
 ```
 
+### Locale
+
 All locales are represented as simple strings:
 
 ```ts
 type Locale = string // like 'en-US'
 ```
 
-All time zones are represented as IANA strings. There are special cases for UTC and local time:
+### TimeZone
+
+All time zones are represented as [IANA strings](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). There are special cases for UTC and local time:
 
 ```ts
-type TimeZone = 'UTC' | 'local' | string // like 'America/New_York'
+type TimeZone = 'local' | 'UTC' | string // like 'America/New_York'
 ```
+
+### Calendar
 
 A calendar system is a simple string. The same type of string [DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters) accepts:
 
@@ -317,20 +340,20 @@ A calendar system is a simple string. The same type of string [DateTimeFormat](h
 type Calendar = string // like 'buddhist' or 'chinese'
 ```
 
-## Environment defaults
+## Environmental defaults
 
 Many of the functions Dateless provides accept `timeZone`, `locale`, and `calendar` paremeters. If these are not specified, certain defaults are used:
 
 - `timeZone` - defaults to the browser's
 - `locale` - defaults to browser's
-- `calendar` - defaults to `'gregory'` for date manipulation, defaults for browser's for string-formatting
+- `calendar` - defaults to `'gregory'` for date manipulation, defaults to browser's for string-formatting
 
 ### `getDefaults`
 
 Returns the current defaults that will be used across the API.
 
 ```ts
-getDefaults(): {
+function getDefaults(): {
   timeZone: string,
   locale: string,
   calendar: string,
@@ -342,7 +365,7 @@ getDefaults(): {
 Resets the the environmental defaults. All function calls that use these parameters will leverage the new defaults going forward.
 
 ```ts
-setDefaults(defaults: {
+function setDefaults(defaults: {
   timeZone?: string,
   locale?: string,
   calendar?: string,
@@ -353,10 +376,10 @@ This function is not recommended when creating distributable libraries.
 
 ### `setLocalDefaults`
 
-Certain string-formatting functions that rely on tokens such as `formatStr` and `formatRangeStr` can have their default month/weekday strings changed for certain locales. This takes effect globally:
+The [`formatStr`](#formatstr) and [`formatRangeStr`](#formatrangestr) functions can have their locale-specific month/weekday strings changed. This takes effect globally:
 
 ```ts
-setLocaleDefaults(locale: string, localeDefaults: {
+function setLocaleDefaults(locale: string, localeDefaults: {
   months?: string[],
   monthsShort?: string[],
   monthsNarrow?: string[],
@@ -368,48 +391,57 @@ setLocaleDefaults(locale: string, localeDefaults: {
 
 ### `getAvailableLocales`
 
-Returns an array of locale names that have been verified to work well in all browsers. The browser might be capable of more. This is no an exhaustive list but rather an easy way to display a local-chooser to the end-user.
+Returns an array of locale codes that have been verified to work well in all browsers. The browser might be capable of more. This is not an exhaustive list but rather an easy way to display a locale-chooser to the end-user.
 
 ```ts
-getAvailableLocales(): string[]
+function getAvailableLocales(): string[] // like ['en-US', 'es', 'fr',...]
 ```
 
-This method returns locale codes like `'en-US'`. To display a full locale name translated into an arbitrary language, use the `formatLocale` method.
+This method returns locale codes like `'en-US'`. To display a locale code translated into an arbitrary language, use the [`formatLocale`](#formatlocale) method.
 
 
 ## Creating
 
 ### `createMarker`
 
-Creates a new marker from literal year/month/day/etc values.
+Creates a new marker from literal year/month/day/hours/minutes/seconds/ms values.
 
 ```ts
-createMarker(input: CreateMarkerInput, calendar?: string): number
+function createMarker(input: CreateMarkerInput, calendar?: string): number
 ```
 
 Accepts:
 
 ```ts
-type CreateMarkerInput =
-  { year?: number,
-    month?: number,
-    monthDay?: number,
-    hours?: number,
-    minutes?: number,
-    seconds?: number,
-    milliseconds?: number
-  } |
-  [ number?, number?, number?, number?, number?, number?, number? ]
+type CreateMarkerInput = {
+  year?: number,
+  month?: number,
+  monthDay?: number,
+  hours?: number,
+  minutes?: number,
+  seconds?: number,
+  milliseconds?: number
+} | [
+  number?, // year
+  number?, // month
+  number?, // monthDay
+  number?, // hours
+  number?, // minutes
+  number?, // seconds
+  number?, // milliseconds
+]
 ```
 
 ## Normalizing
 
+
+
 ### `normalizeDuration`
 
-Given a duration in the `LooseDuration` format, returns a stricter `Duration` object with guaranteed properties:
+Given a [`LooseDuration`](#looseduration) object, returns a stricter [`Duration`](#duration) object with guaranteed properties.
 
 ```ts
-normalizeDuration(input: LooseDuration): Duration
+function normalizeDuration(input: LooseDuration): Duration
 ```
 
 ### `normalizeLocale`
@@ -417,60 +449,60 @@ normalizeDuration(input: LooseDuration): Duration
 Given a list of potentially valid locale codes, returns the first recognized locale in a normalized form.
 
 ```ts
-normalizeLocale(locale: string | string[]): string
+function normalizeLocale(locale: string | string[]): string
 ```
 
 ## Parsing
 
-Most of the time "parsing" means deriving meaning from a string, but in Dateless it also means converting from a different format into a DateMarker.
+Most of the time "parsing" means deriving meaning from a string, but in Dateless it also means converting from a different format into a [DateMarker](#datemarker).
 
 ### `parseNow`
 
 ```ts
-parseNow(): number
+function parseNow(): number
 ```
 
 ### `parseTimestamp`
 
 ```ts
-parseTimestamp(timestamp: number): number
+function parseTimestamp(timestamp: number): number
 ```
 
 ### `parseNative`
 
 ```ts
-parseNative(dateObj: Date): number
+function parseNative(dateObj: Date): number
 ```
 
 ### `parseIso`
 
 ```ts
-parseIso(isoDateStr: string, timeZone?: string): number // like '2021-05-01T12:00:00Z'
+function parseIso(isoDateStr: string, timeZone?: string): number // like '2021-05-01T12:00:00Z'
 ```
 
 ### `parseDuration`
 
 ```ts
-parseDuration(isoDurationStr: string): number // like '1.12:30:00'
+function parseDuration(isoDurationStr: string): number // like '1.12:30:00'
 ```
 
 ### `parseIsoDuration`
 
 ```ts
-parseIsoDuration(durationStr: string): number // like 'P1D'
+function parseIsoDuration(durationStr: string): number // like 'P1D'
 ```
 
 
 ## Formatting
 
-Most of the time "formatting" means converting an object to a string, but in Dateless it also means converting a DateMaker into a different format.
+Most of the time "formatting" means converting an object to a string, but in Dateless it also means converting a [DateMaker](#datemarker) into a different data type.
 
 ### `formatTimestamp`
 
 Convert a DateMarker into a UNIX timestamp.
 
 ```ts
-formatTimestamp(marker: number): number
+function formatTimestamp(marker: number): number
 ```
 
 ### `formatNative`
@@ -478,7 +510,7 @@ formatTimestamp(marker: number): number
 Convert a DateMarker into a native Date object.
 
 ```ts
-formatNative(marker: number): Date
+function formatNative(marker: number): Date
 ```
 
 ### `formatIso`
@@ -486,7 +518,7 @@ formatNative(marker: number): Date
 Format an ISO8601 string like `'2021-05-04T03:08:03-07:00'`
 
 ```ts
-formatIso(marker: number, timeZone = 'local'): string
+function formatIso(marker: number, timeZone = 'local'): string
 ```
 
 ### `formatIsoMonth`
@@ -494,7 +526,7 @@ formatIso(marker: number, timeZone = 'local'): string
 Format an ISO8601 string with only year and month, like `'2021-05'`
 
 ```ts
-formatIsoMonth(marker: number): string
+function formatIsoMonth(marker: number): string
 ```
 
 ### `formatIsoDate`
@@ -502,7 +534,7 @@ formatIsoMonth(marker: number): string
 Format an ISO8601 string with only year/month/date, like `'2021-05-04'`
 
 ```ts
-formatIsoDate(marker: number): string
+function formatIsoDate(marker: number): string
 ```
 
 ### `formatIsoDateTime`
@@ -510,28 +542,26 @@ formatIsoDate(marker: number): string
 Format an ISO8601 string WITHOUT the time zone part, like `'2021-05-04T03:08:03'`
 
 ```ts
-formatIsoDate(marker: number): string
+function formatIsoDate(marker: number): string
 ```
 
 ### `formatIntl`
 
-Format a DateMarker using Intl flags. This is the preferred way to format a human-readable string for maximum internationalization.
+Format a DateMarker using the Intl API's options. This is the preferred way to format a human-readable string for maximum internationalization.
 
 ```ts
-formatIntl(marker: number, formatOptions: FormatIntlOptions): string
+function formatIntl(marker: number, options: FormatIntlOptions): string
 ```
 
 Accepts the same type of object that [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters) accepts, in addition to more:
 
 ```ts
 interface FormatIntlOptions {
-  locale?: string | string[],
-  omitZeroTime?: boolean,
-
-  // standard DateTimeFormat options:
-  timeZone?: string,
-  calendar?,
-  numberingSystem?,
+  timeZone?: string, // like 'America/New_York'
+  timeZoneName?: 'long' | 'short', // how to display timeZone
+  locale?: string | string[], // unlike Intl API, included within this object
+  calendar?: string, // like 'gregory' or 'buddhist'
+  numberingSystem?: string,
   dateStyle?,
   timeStyle?,
   dayPeriod?,
@@ -546,66 +576,93 @@ interface FormatIntlOptions {
   minute?,
   second?,
   fractionalSecondDigits?,
-  timeZoneName?,
+  omitZeroTime?: boolean, // remove strings like ':00'
+  separator?: string, // for ranges. see formatRangeIntl
 }
 ```
 
 ### `formatStr`
 
-Formats a date marker into a string using date-formatting tokens similar to MomentJS/Dayjs. More info: https://day.js.org/docs/en/display/format
+Formats a date marker into a string using date-formatting tokens just like MomentJS/Dayjs.
 
 ```ts
-formatStr(marker: number, format: string, options?: FormatStrOptions): string
+function formatStr(marker: number, tokens: string, options?: FormatStrOptions): string
 ```
 
-The final optional option accepts:
+Available tokens:
+
+<table>
+<thead>
+<tr><th>Format</th><th>Output</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>YY</code></td><td>18</td><td>Two-digit year</td></tr>
+<tr><td><code>YYYY</code></td><td>2018</td><td>Four-digit year</td></tr>
+<tr><td><code>M</code></td><td>1-12</td><td>The month, beginning at 1</td></tr>
+<tr><td><code>MM</code></td><td>01-12</td><td>The month, 2-digits</td></tr>
+<tr><td><code>MMM</code></td><td>Jan-Dec</td><td>The abbreviated month name</td></tr>
+<tr><td><code>MMMM</code></td><td>January-December</td><td>The full month name</td></tr>
+<tr><td><code>D</code></td><td>1-31</td><td>The day of the month</td></tr>
+<tr><td><code>DD</code></td><td>01-31</td><td>The day of the month, 2-digits</td></tr>
+<tr><td><code>d</code></td><td>0-6</td><td>The day of the week, with Sunday as 0</td></tr>
+<tr><td><code>dd</code></td><td>Su-Sa</td><td>The min name of the day of the week</td></tr>
+<tr><td><code>ddd</code></td><td>Sun-Sat</td><td>The short name of the day of the week</td></tr>
+<tr><td><code>dddd</code></td><td>Sunday-Saturday</td><td>The name of the day of the week</td></tr>
+<tr><td><code>H</code></td><td>0-23</td><td>The hour</td></tr>
+<tr><td><code>HH</code></td><td>00-23</td><td>The hour, 2-digits</td></tr>
+<tr><td><code>h</code></td><td>1-12</td><td>The hour, 12-hour clock</td></tr>
+<tr><td><code>hh</code></td><td>01-12</td><td>The hour, 12-hour clock, 2-digits</td></tr>
+<tr><td><code>m</code></td><td>0-59</td><td>The minute</td></tr>
+<tr><td><code>mm</code></td><td>00-59</td><td>The minute, 2-digits</td></tr>
+<tr><td><code>s</code></td><td>0-59</td><td>The second</td></tr>
+<tr><td><code>ss</code></td><td>00-59</td><td>The second, 2-digits</td></tr>
+<tr><td><code>SSS</code></td><td>000-999</td><td>The millisecond, 3-digits</td></tr>
+<tr><td><code>Z</code></td><td>+05:00</td><td>The offset from UTC, ±HH:mm</td></tr>
+<tr><td><code>ZZ</code></td><td>+0500</td><td>The offset from UTC, ±HHmm</td></tr>
+<tr><td><code>A</code></td><td>AM PM</td><td></td></tr>
+<tr><td><code>a</code></td><td>am pm</td><td></td></tr>
+</tbody>
+</table>
+
+To escape characters, wrap them in square brackets (e.g. `[MM]`).
+
+Available options:
 
 ```ts
 interface FormatStrOptions {
-  locale?: string | string[],
   timeZone?: string,
-
-  // for customizing the locale
-  months?: string[],
-  monthsShort?: string[],
-  monthsNarrow?: string[],
-  weekdays?: string[],
-  weekdaysShort?: string[],
-  weekdaysNarrow?: string[],
+  locale?: string | string[], // one or more locale codes
+  months?: string[], // like 'January'
+  monthsShort?: string[], // like 'Jan'
+  monthsNarrow?: string[], // like 'J'
+  weekdays?: string[], // like 'Saturday'
+  weekdaysShort?: string[], // like 'Sat'
+  weekdaysNarrow?: string[], // like 'S'
+  separator?: string, // for ranges. see formatRangeStr
 }
 ```
 
 ### `formatRangeIntl`
 
-For creating strings like `Jun 8 - 9, 2018`.
+For creating strings like `'Jun 8 - 9, 2021'` using the robust Intl API.
 
 ```ts
-formatRangeIntl(marker0: number, marker1: number, options?: FormatRangeIntlOptions): string
+function formatRangeIntl(marker0: number, marker1: number, options?: FormatRangeIntlOptions): string
 ```
 
-The optional option accepts:
-
-```ts
-interface FormatRangeIntlOptions extends FormatIntlOptions {
-  separator?: string // defaults ' - '
-}
-```
+Accepts the same options as [formatIntl](#formatintl). Uses the `separator` property.
 
 ### `formatRangeStr`
 
-For creating strings like `Jun 8 - 9, 2018`.
+For creating strings like `'Jun 8 - 9, 2021'` using a token string.
 
 ```ts
 formatRangeStr(marker0: number, marker1: number, format: string, options?: FormatRangeStrOptions): string
 ```
 
-The optional option accepts:
+Accepts the same tokens as [formatStr](#formatstr).
 
-```ts
-interface FormatRangeStrOptions extends FormatStrOptions {
-  separator?: string // defaults ' - '
-}
-```
+Accepts the same options as [formatStr](#formatstr). Uses the `separator` property.
 
 ### `formatDurationIso`
 ### `formatDurationIntl`
@@ -714,5 +771,9 @@ interface FormatRangeStrOptions extends FormatStrOptions {
 ## Comparing
 
 ## Converting
+
+## Optimizing
+
+(use same object)
 
 ## ESLint plugin
