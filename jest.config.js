@@ -1,8 +1,7 @@
 export default {
   preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['src'],
-  globals: {
-    'ts-jest': {},
-  },
+  modulePaths: ['<rootDir>'],
+  // globals: {
+  //   'ts-jest': {},
+  // },
 }

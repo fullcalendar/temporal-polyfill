@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc",
     "test": "TZ=America/New_York jest --coverage",
-    "test:dev": "TZ=America/New_York jest --watch"
+    "dev": "TZ=America/New_York jest --watch"
   },
   "dependencies": {},
   "devDependencies": {
