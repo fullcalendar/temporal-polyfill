@@ -1,19 +1,17 @@
 {
+  "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
-    "allowJs": false,
-    "strict": true,
-    "lib": ["ESNext"],
-    "module": "ESNext",
-    "outDir": "./dist",
+    "module": "ES2020",
     "moduleResolution": "Node",
+    "rootDir": "src",
+    "outDir": "dist",
     "baseUrl": ".",
-    "esModuleInterop": true,
+    "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "paths": {}
+    "typeRoots": ["node_modules/@types", "src/types"]
   },
-  "include": ["./src"],
-  "exclude": ["./node_modules", "./dist"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }
