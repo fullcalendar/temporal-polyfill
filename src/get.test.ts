@@ -1,4 +1,4 @@
-import { createMarker } from '../create'
+import { createMarker } from './create'
 import {
   getHours,
   getMilliseconds,
@@ -9,7 +9,7 @@ import {
   getTimeZoneOffset,
   getTimeZoneOffsetForTimestamp,
   getYear,
-} from '.'
+} from './get'
 
 const unixEpoch = {
   year: 1970,

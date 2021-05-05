@@ -3,14 +3,12 @@
   "compilerOptions": {
     "module": "ES2020",
     "moduleResolution": "Node",
-    "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
     "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "typeRoots": ["node_modules/@types", "src/types"]
+    "declaration": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "src/**/*.test.ts"]

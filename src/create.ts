@@ -1,4 +1,4 @@
-import { Calendar, DateMarker } from 'src/types'
+import { Calendar, DateMarker } from './types'
 
 type CreateMarkerObject = {
   year: number

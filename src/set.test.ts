@@ -6,8 +6,8 @@ import {
   setMinutes,
   setSeconds,
   setMilliseconds,
-} from '.'
-import createMarker from '../create'
+} from './set'
+import createMarker from './create'
 
 describe('setYear is able to', () => {
   test('set to 2000', () => {

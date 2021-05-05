@@ -1,4 +1,4 @@
-import { parseISO, parseNative, parseNow } from '.'
+import { parseISO, parseNative, parseNow } from './parse'
 
 describe('can parse', () => {
   test('now', () => {

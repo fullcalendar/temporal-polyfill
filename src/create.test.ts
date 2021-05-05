@@ -1,4 +1,4 @@
-import { createMarker } from '.'
+import { createMarker } from './create'
 
 describe('create marker from', () => {
   test('object', () => {

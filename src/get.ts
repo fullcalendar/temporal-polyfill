@@ -1,4 +1,4 @@
-import { Calendar, DateMarker, TimeZone } from 'src/types'
+import { Calendar, DateMarker, TimeZone } from './types'
 
 // TODO: Add calendar functionality
 export const getYear = (marker: DateMarker, _calendar?: Calendar) =>

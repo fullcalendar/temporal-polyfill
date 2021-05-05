@@ -1,5 +1,5 @@
-import { getTimeZoneOffsetForTimestamp } from 'src/get'
-import { TimeZone } from 'src/types'
+import { getTimeZoneOffsetForTimestamp } from './get'
+import { TimeZone } from './types'
 
 export const parseTimestamp = (timestamp: number, timeZone?: TimeZone) => {
   return timestamp + getTimeZoneOffsetForTimestamp(timestamp, timeZone ?? 'utc')
