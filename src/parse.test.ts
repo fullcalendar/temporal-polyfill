@@ -1,5 +1,7 @@
 import { parseISO, parseNative, parseNow } from './parse'
 
+jest.useFakeTimers('modern')
+
 describe('can parse', () => {
   test('now', () => {
     expect(parseNow()).toBe(Date.now())
