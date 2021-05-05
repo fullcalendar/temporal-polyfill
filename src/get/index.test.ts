@@ -14,21 +14,21 @@ import {
 const unixEpoch = {
   year: 1970,
   month: 1,
-  day: 1,
-  hour: 0,
-  minute: 0,
-  second: 0,
-  millisecond: 0,
+  monthDay: 1,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  milliseconds: 0,
 }
 const date = new Date()
 const now = {
   year: date.getUTCFullYear(),
   month: date.getUTCMonth(),
-  day: date.getUTCDate(),
-  hour: date.getUTCHours(),
-  minute: date.getUTCMinutes(),
-  second: date.getUTCSeconds(),
-  millisecond: date.getUTCMilliseconds(),
+  monthDay: date.getUTCDate(),
+  hours: date.getUTCHours(),
+  minutes: date.getUTCMinutes(),
+  seconds: date.getUTCSeconds(),
+  milliseconds: date.getUTCMilliseconds(),
 }
 
 describe('getYear is able to', () => {
@@ -58,60 +58,60 @@ describe('getMonth is able to', () => {
 describe('getMonthDay is able to', () => {
   test('get epoch', () => {
     const marker = createMarker(unixEpoch)
-    expect(getMonthDay(marker)).toBe(unixEpoch.day)
+    expect(getMonthDay(marker)).toBe(unixEpoch.monthDay)
   })
 
   test('get current', () => {
     const marker = createMarker(now)
-    expect(getMonthDay(marker)).toBe(now.day)
+    expect(getMonthDay(marker)).toBe(now.monthDay)
   })
 })
 
 describe('getHours is able to', () => {
   test('get epoch', () => {
     const marker = createMarker(unixEpoch)
-    expect(getHours(marker)).toBe(unixEpoch.hour)
+    expect(getHours(marker)).toBe(unixEpoch.hours)
   })
 
   test('get current', () => {
     const marker = createMarker(now)
-    expect(getHours(marker)).toBe(now.hour)
+    expect(getHours(marker)).toBe(now.hours)
   })
 })
 
 describe('getMinutes is able to', () => {
   test('get epoch', () => {
     const marker = createMarker(unixEpoch)
-    expect(getMinutes(marker)).toBe(unixEpoch.minute)
+    expect(getMinutes(marker)).toBe(unixEpoch.minutes)
   })
 
   test('get current', () => {
     const marker = createMarker(now)
-    expect(getMinutes(marker)).toBe(now.minute)
+    expect(getMinutes(marker)).toBe(now.minutes)
   })
 })
 
 describe('getSeconds is able to', () => {
   test('get epoch', () => {
     const marker = createMarker(unixEpoch)
-    expect(getSeconds(marker)).toBe(unixEpoch.second)
+    expect(getSeconds(marker)).toBe(unixEpoch.seconds)
   })
 
   test('get current', () => {
     const marker = createMarker(now)
-    expect(getSeconds(marker)).toBe(now.second)
+    expect(getSeconds(marker)).toBe(now.seconds)
   })
 })
 
 describe('getMilliseconds is able to', () => {
   test('get epoch', () => {
     const marker = createMarker(unixEpoch)
-    expect(getMilliseconds(marker)).toBe(unixEpoch.millisecond)
+    expect(getMilliseconds(marker)).toBe(unixEpoch.milliseconds)
   })
 
   test('get current', () => {
     const marker = createMarker(now)
-    expect(getMilliseconds(marker)).toBe(now.millisecond)
+    expect(getMilliseconds(marker)).toBe(now.milliseconds)
   })
 })
 
@@ -133,16 +133,18 @@ describe('TimeZone offset is', () => {
 
 describe('TimeZone offset for timestamp is', () => {
   test('0 in UTC', () => {
-    expect(getTimeZoneOffsetForTimestamp(Date(), 'utc')).toBe(0)
+    expect(getTimeZoneOffsetForTimestamp(new Date().valueOf(), 'utc')).toBe(0)
   })
 
   test('correctly calculated for local (America/New_York)', () => {
-    expect(getTimeZoneOffsetForTimestamp(Date(), 'local')).toBe(-240)
+    expect(getTimeZoneOffsetForTimestamp(new Date().valueOf(), 'local')).toBe(
+      -240
+    )
   })
 
   test('throwing for other strings', () => {
     expect(() => {
-      getTimeZoneOffsetForTimestamp(Date(), 'America/New_York')
+      getTimeZoneOffsetForTimestamp(new Date().valueOf(), 'America/New_York')
     }).toThrow('Unimplemented')
   })
 })

@@ -1,25 +1,25 @@
 import { Calendar, DateMarker } from 'src/types'
 
-type CreateMarkerInput =
-  | {
-      year: number
-      month?: number
-      day?: number
-      hour?: number
-      minute?: number
-      second?: number
-      millisecond?: number
-    }
-  // FIXME: This array type doesn't work for most use cases
-  | [
-      number, // year
-      number?, // month
-      number?, // day
-      number?, // hour
-      number?, // minute
-      number?, // second
-      number? // millisecond
-    ]
+type CreateMarkerObject = {
+  year: number
+  month?: number
+  monthDay?: number
+  hours?: number
+  minutes?: number
+  seconds?: number
+  milliseconds?: number
+}
+// FIXME: This array type doesn't work for most use cases
+type CreateMarkerArray = [
+  year: number,
+  month?: number,
+  monthDay?: number,
+  hours?: number,
+  minutes?: number,
+  seconds?: number,
+  milliseconds?: number
+]
+type CreateMarkerInput = CreateMarkerObject | CreateMarkerArray
 
 export const createMarker: (
   input?: CreateMarkerInput,
@@ -29,27 +29,27 @@ export const createMarker: (
   if (!input) return Date.now()
 
   if (Array.isArray(input)) {
-    const [year, month, day, hour, minute, second, millisecond] = input
+    const [year, month, monthDay, hours, minutes, seconds, milliseconds] = input
     return Date.UTC(
       year,
       (month || 1) - 1,
-      day || 1,
-      hour || 0,
-      minute || 0,
-      second || 0,
-      millisecond || 0
+      monthDay || 1,
+      hours || 0,
+      minutes || 0,
+      seconds || 0,
+      milliseconds || 0
     )
   }
 
-  const { year, month, day, hour, minute, second, millisecond } = input
+  const { year, month, monthDay, hours, minutes, seconds, milliseconds } = input
   return Date.UTC(
     year,
     (month || 1) - 1,
-    day || 1,
-    hour || 0,
-    minute || 0,
-    second || 0,
-    millisecond || 0
+    monthDay || 1,
+    hours || 0,
+    minutes || 0,
+    seconds || 0,
+    milliseconds || 0
   )
 }
 

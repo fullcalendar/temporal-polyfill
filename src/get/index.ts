@@ -51,13 +51,12 @@ export const getTimeZoneOffset = (marker: DateMarker, timeZone: TimeZone) => {
 }
 
 export const getTimeZoneOffsetForTimestamp = (
-  timestamp: string,
+  timestamp: number,
   timeZone: TimeZone
 ) => {
   if (timeZone.toLowerCase() === 'local') {
-    const localDate = new Date(timestamp)
     // Native date returns value with flipped sign :(
-    return -localDate.getTimezoneOffset()
+    return -new Date(timestamp).getTimezoneOffset()
   } else if (timeZone.toLowerCase() === 'utc') return 0
 
   // TODO: Implement for other strings
