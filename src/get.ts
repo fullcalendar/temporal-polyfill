@@ -45,10 +45,8 @@ export const getTimeZoneOffset = (
     )
     // Native date returns value with flipped sign :(
     return -localDate.getTimezoneOffset()
-  } else if (timeZone.toLowerCase() === 'utc') return 0
-
-  // TODO: Implement for other strings
-  throw new Error('Unimplemented')
+  }
+  return 0
 }
 
 export const getTimeZoneOffsetForTimestamp = (
@@ -58,8 +56,6 @@ export const getTimeZoneOffsetForTimestamp = (
   if (timeZone.toLowerCase() === 'local') {
     // Native date returns value with flipped sign :(
     return -new Date(timestamp).getTimezoneOffset()
-  } else if (timeZone.toLowerCase() === 'utc') return 0
-
-  // TODO: Implement for other strings
-  throw new Error('Unimplemented')
+  }
+  return 0
 }

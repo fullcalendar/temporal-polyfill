@@ -1,3 +1,4 @@
+import { advanceTo } from 'jest-date-mock'
 import { createMarker } from './create'
 
 describe('create marker from', () => {
@@ -21,15 +22,16 @@ describe('create marker from', () => {
 })
 
 test('equivalent to JS date value from object', () => {
-  const marker = createMarker({
-    year: 2021,
-    month: 1,
-    monthDay: 1,
-    hours: 12,
-    minutes: 30,
-    seconds: 30,
-    milliseconds: 500,
-  })
-
-  expect(marker).toBe(new Date(marker).valueOf())
+  advanceTo(0)
+  expect(
+    createMarker({
+      year: 1970,
+      month: 1,
+      monthDay: 1,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    })
+  ).toBe(0)
 })

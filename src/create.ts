@@ -1,17 +1,6 @@
 import { Calendar, DateMarker, ExpandedDateMarker } from './types'
 
-// FIXME: This tuple type doesn't work for most use cases
-export type CreateMarkerArray = [
-  year: number,
-  month?: number,
-  monthDay?: number,
-  hours?: number,
-  minutes?: number,
-  seconds?: number,
-  milliseconds?: number
-]
-
-type CreateMarkerInput = ExpandedDateMarker | CreateMarkerArray
+type CreateMarkerInput = ExpandedDateMarker | number[]
 
 /**
  * Returns the number of milliseconds between 00:00:00 January 1, 1970 and the specified date.

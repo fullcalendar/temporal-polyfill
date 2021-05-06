@@ -25,6 +25,6 @@ export type LooseDuration = Partial<Duration>
 
 export type Locale = string
 
-export type TimeZone = 'local' | 'UTC' | string
+export type TimeZone = 'local' | 'utc'
 
 export type Calendar = string

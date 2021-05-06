@@ -11,8 +11,6 @@ import {
   getYear,
 } from './get'
 
-jest.useFakeTimers('modern')
-
 const unixEpoch = {
   year: 1970,
   month: 1,
@@ -123,14 +121,8 @@ describe('TimeZone offset is', () => {
   })
 
   // Needs to account for DST
-  // test('correctly calculated for local (America/New_York)', () => {
-  //   expect(getTimeZoneOffset(createMarker(now), 'local')).toBe(-300)
-  // })
-
-  test('throwing for other strings', () => {
-    expect(() => {
-      getTimeZoneOffset(createMarker(now), 'America/New_York')
-    }).toThrow('Unimplemented')
+  test.skip('correctly calculated for local (America/New_York)', () => {
+    expect(getTimeZoneOffset(createMarker(now), 'local')).toBe(-300)
   })
 })
 
@@ -140,15 +132,9 @@ describe('TimeZone offset for timestamp is', () => {
   })
 
   // Needs to account for DST
-  // test('correctly calculated for local (America/New_York)', () => {
-  //   expect(getTimeZoneOffsetForTimestamp(new Date().valueOf(), 'local')).toBe(
-  //     -300
-  //   )
-  // })
-
-  test('throwing for other strings', () => {
-    expect(() => {
-      getTimeZoneOffsetForTimestamp(new Date().valueOf(), 'America/New_York')
-    }).toThrow('Unimplemented')
+  test.skip('correctly calculated for local (America/New_York)', () => {
+    expect(getTimeZoneOffsetForTimestamp(new Date().valueOf(), 'local')).toBe(
+      -300
+    )
   })
 })

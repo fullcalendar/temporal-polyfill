@@ -1,22 +1,22 @@
+import { advanceTo } from 'jest-date-mock'
 import { createMarker } from './create'
 import { formatNative, formatTimestamp } from './format'
 
-jest.useFakeTimers('modern')
-
-const date = new Date()
-const marker = createMarker([
-  date.getUTCFullYear(),
-  date.getUTCMonth() + 1,
-  date.getUTCDate(),
-  date.getUTCHours(),
-  date.getUTCMinutes(),
-  date.getUTCSeconds(),
-  date.getUTCMilliseconds(),
-])
-
 describe('can format into', () => {
+  advanceTo()
+  const date = new Date()
+  const marker = createMarker([
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
+    date.getMilliseconds(),
+  ])
+
   test('timestamp', () => {
-    expect(formatTimestamp(marker)).toBe(date.valueOf())
+    expect(formatTimestamp(marker)).toBe(0)
   })
 
   test('Date', () => {

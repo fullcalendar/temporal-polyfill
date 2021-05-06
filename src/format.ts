@@ -9,8 +9,9 @@ import {
 } from './get'
 import { DateMarker, TimeZone } from './types'
 
-export const formatTimestamp = (marker: DateMarker, timeZone?: TimeZone) =>
-  marker + getTimeZoneOffset(marker, timeZone)
+export const formatTimestamp = (marker: DateMarker, timeZone?: TimeZone) => {
+  return marker - getTimeZoneOffset(marker, timeZone) * 60 * 1000
+}
 
 export const formatNative = (marker: DateMarker, timeZone?: TimeZone) =>
   new Date(formatTimestamp(marker, timeZone))
