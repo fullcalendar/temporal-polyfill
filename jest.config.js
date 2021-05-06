@@ -1,6 +1,5 @@
 export default {
   preset: 'ts-jest',
-  // globals: {
-  //   'ts-jest': {},
-  // },
+  // timers: 'modern',
+  setupFiles: ['jest-date-mock'],
 }
