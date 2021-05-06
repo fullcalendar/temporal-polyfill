@@ -1,18 +1,18 @@
 import { getTimeZoneOffsetForTimestamp } from './get'
-import { TimeZone } from './types'
+import { DateMarker, TimeZone } from './types'
 
-export const parseTimestamp = (timestamp: number, timeZone?: TimeZone) => {
-  return timestamp + getTimeZoneOffsetForTimestamp(timestamp, timeZone ?? 'utc')
+export const parseTimestamp = (
+  timestamp: number,
+  timeZone?: TimeZone
+): DateMarker => {
+  return timestamp - getTimeZoneOffsetForTimestamp(timestamp, timeZone)
 }
 
-export const parseNow = (timeZone?: TimeZone) => {
-  return parseTimestamp(Date.now(), timeZone)
-}
+export const parseNow = (timeZone?: TimeZone): DateMarker =>
+  parseTimestamp(Date.now(), timeZone)
 
-export const parseNative = (dateObj: Date, timeZone?: TimeZone) => {
-  return parseTimestamp(dateObj.valueOf(), timeZone)
-}
+export const parseNative = (dateObj: Date, timeZone?: TimeZone): DateMarker =>
+  parseTimestamp(dateObj.valueOf(), timeZone)
 
-export const parseISO = (isoString: string, timeZone?: TimeZone) => {
-  return parseTimestamp(Date.parse(isoString), timeZone)
-}
+export const parseISO = (isoString: string, timeZone?: TimeZone): DateMarker =>
+  parseTimestamp(Date.parse(isoString), timeZone)

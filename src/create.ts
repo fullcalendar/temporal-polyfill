@@ -1,16 +1,7 @@
-import { Calendar, DateMarker } from './types'
+import { Calendar, DateMarker, ExpandedDateMarker } from './types'
 
-type CreateMarkerObject = {
-  year: number
-  month?: number
-  monthDay?: number
-  hours?: number
-  minutes?: number
-  seconds?: number
-  milliseconds?: number
-}
-// FIXME: This array type doesn't work for most use cases
-type CreateMarkerArray = [
+// FIXME: This tuple type doesn't work for most use cases
+export type CreateMarkerArray = [
   year: number,
   month?: number,
   monthDay?: number,
@@ -19,15 +10,21 @@ type CreateMarkerArray = [
   seconds?: number,
   milliseconds?: number
 ]
-type CreateMarkerInput = CreateMarkerObject | CreateMarkerArray
 
+type CreateMarkerInput = ExpandedDateMarker | CreateMarkerArray
+
+/**
+ * Returns the number of milliseconds between 00:00:00 January 1, 1970 and the specified date.
+ * @param {CreateMarkerInput} input The expanded Date
+ * @param {Calendar=} calendar The calendar used to represent the input
+ *
+ * @returns A DateMarker representation of the date entered into the input field using the specified calendar
+ */
 export const createMarker: (
-  input?: CreateMarkerInput,
+  input: CreateMarkerInput,
   // TODO: Add calendar functionality
   calendar?: Calendar
 ) => DateMarker = (input) => {
-  if (!input) return Date.now()
-
   if (Array.isArray(input)) {
     const [year, month, monthDay, hours, minutes, seconds, milliseconds] = input
     return Date.UTC(
