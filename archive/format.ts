@@ -7,7 +7,7 @@ import {
   getMinutes,
   getMilliseconds,
 } from './get'
-import { DateMarker, TimeZone } from './types'
+import { DateMarker, FormatStrOptions, TimeZone } from './types'
 
 export const formatTimestamp = (marker: DateMarker, timeZone?: TimeZone) => {
   return marker - getTimeZoneOffset(marker, timeZone) * 60 * 1000
@@ -30,4 +30,23 @@ export const formatISODateTime = (marker: DateMarker) =>
 export const formatISO = (marker: DateMarker, timeZone?: TimeZone) => {
   const offset = getTimeZoneOffset(marker, timeZone)
   return `${formatISODateTime(marker)}-${offset / 60}:${offset % 60}`
+}
+
+export const formatStr = (
+  marker: DateMarker,
+  tokens: string,
+  options?: FormatStrOptions
+) => {
+  // FIXME: Incomplete Function
+  const year = String(getYear(marker))
+  const month = String(getMonth(marker) + 1)
+  const day = String(getMonthDay(marker))
+  const formats = {
+    YY: year.slice(-2),
+    YYYY: year,
+    M: month,
+    MM: month.length == 2 ? month : '0' + month,
+  }
+
+  return tokens
 }
