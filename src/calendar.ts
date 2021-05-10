@@ -3,10 +3,7 @@ import { CalendarType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Calendar {
-  readonly id: CalendarType
-  constructor(id: string = 'iso8601') {
-    this.id = id as CalendarType
-  }
+  constructor(readonly id: CalendarType = 'iso8601') {}
 
   year(dt: PlainDateTime | ZonedDateTime) {}
   month(dt: PlainDateTime | ZonedDateTime) {}

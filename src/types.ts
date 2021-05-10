@@ -11,5 +11,5 @@ export type ExpandDateTimeType = {
   hour: number
   minute: number
   second: number
-  milliseconds: number
+  millisecond: number
 }
