@@ -121,11 +121,11 @@ import { getLocaleWeekInfo } from 'locale-info'
 console.log(getLocaleWeekInfo('af'))
 // { firstDay: 7, weekendStart: 6, weekendEnd: 7, minimalDays: 1 }
 
-import { getLocaleWeekOfYear } from 'local-info'
+import { getLocaleWeekOfYear } from 'locale-info'
 console.log(getLocaleWeekOfYear('af', datetime))
 // 33
 ```
 
 The `getLocaleWeekOfYear` function will leverage `getLocaleWeekInfo`'s output and use an algorithm. The algorithm can be derived from [moment's source code](https://github.com/moment/moment/blob/develop/src/lib/units/week-calendar-utils.js#L39) in combination with the `dow` and `doy` properties that appear in the [locale data](https://github.com/moment/moment/blob/develop/src/locale/af.js#L67).
 
-As previously mentioned, no external locale data is required. The information for all locales will be included the source code in a very compressed format.
+As previously mentioned, no external locale data is required. The information for all locales will be included in the source code in a very compressed format.
