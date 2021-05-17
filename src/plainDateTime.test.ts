@@ -1,8 +1,17 @@
 import { PlainDateTime } from './plainDateTime'
+import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
   const date = new PlainDateTime(1970, 1, 1)
   expect(date).toBeDefined()
+})
+
+test('is equivalent to utc ZonedDatTime', () => {
+  const pdt = new PlainDateTime(1970, 1, 1)
+  const zdt = new ZonedDateTime(0)
+  expect(pdt.year).toBe(zdt.year)
+  expect(pdt.month).toBe(zdt.month)
+  expect(pdt.day).toBe(zdt.day)
 })
 
 describe.each([

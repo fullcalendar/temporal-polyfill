@@ -2,6 +2,16 @@ import { Calendar } from './calendar'
 import { CalendarType, LocaleType, TimeZoneType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
+type PlainDateTimeLikeType = {
+  isoYear?: number
+  isoMonth?: number
+  isoDay?: number
+  isoHour?: number
+  isoMinute?: number
+  isoSecond?: number
+  isoMillisecond?: number
+  calendar?: Calendar | CalendarType
+}
 export class PlainDateTime {
   readonly epochMilliseconds
   readonly calendar
@@ -16,7 +26,7 @@ export class PlainDateTime {
     isoMillisecond: number = 0,
     calendar: Calendar | CalendarType = new Calendar()
   ) {
-    const temp = new Date(
+    this.epochMilliseconds = Date.UTC(
       isoYear,
       isoMonth - 1,
       isoDay,
@@ -25,8 +35,17 @@ export class PlainDateTime {
       isoSecond,
       isoMillisecond
     )
-    temp.setMinutes(temp.getMinutes() - temp.getTimezoneOffset())
-    this.epochMilliseconds = temp.valueOf()
+    // const temp = new Date(
+    //   isoYear,
+    //   isoMonth - 1,
+    //   isoDay,
+    //   isoHour,
+    //   isoMinute,
+    //   isoSecond,
+    //   isoMillisecond
+    // )
+    // temp.setMinutes(temp.getMinutes() - temp.getTimezoneOffset())
+    // this.epochMilliseconds = temp.valueOf()
 
     this.calendar =
       typeof calendar === 'string' ? new Calendar(calendar) : calendar
@@ -36,9 +55,38 @@ export class PlainDateTime {
     return new Date(this.epochMilliseconds)
   }
 
-  static from() {}
+  static from(thing: any) {
+    if (thing.epochMilliseconds) {
+      const date = new Date(thing.epochMilliseconds)
+      return new PlainDateTime(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+        date.getUTCSeconds(),
+        date.getUTCMilliseconds(),
+        thing.calendar
+      )
+    } else if (thing.year && thing.month && thing.day)
+      return new PlainDateTime(
+        thing.year,
+        thing.month,
+        thing.day,
+        thing.hour,
+        thing.minute,
+        thing.second,
+        thing.millisecond,
+        thing.calendar
+      )
+    throw new Error('Invalid Object')
+  }
 
-  static compare(one: PlainDateTime, two: PlainDateTime) {}
+  static compare(one: PlainDateTime, two: PlainDateTime) {
+    if (one.epochMilliseconds < two.epochMilliseconds) return -1
+    else if (one.epochMilliseconds > two.epochMilliseconds) return 1
+    else return 0
+  }
 
   get year() {
     return this.calendar.year(this)
@@ -68,7 +116,19 @@ export class PlainDateTime {
     return this.calendar.weekOfYear(this)
   }
 
-  with() {}
+  with(dateTimeLike: PlainDateTimeLikeType | string) {
+    if (typeof dateTimeLike === 'string') throw new Error('Unimplemented')
+    return new PlainDateTime(
+      dateTimeLike.isoYear || this.year,
+      dateTimeLike.isoMonth || this.month,
+      dateTimeLike.isoDay || this.day,
+      dateTimeLike.isoHour || this.hour,
+      dateTimeLike.isoMinute || this.minute,
+      dateTimeLike.isoSecond || this.second,
+      dateTimeLike.isoMillisecond || this.millisecond,
+      dateTimeLike.calendar || this.calendar
+    )
+  }
   withCalendar(calendar: Calendar | CalendarType) {
     const date = this.asDate()
     return new PlainDateTime(

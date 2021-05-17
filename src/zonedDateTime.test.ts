@@ -53,3 +53,12 @@ describe.each([
     })
   }
 )
+
+test('can compare two dates', () => {
+  const a = new ZonedDateTime(0)
+  const b = new ZonedDateTime(1000)
+  const c = new ZonedDateTime(1000)
+  expect(ZonedDateTime.compare(a, b)).toBe(-1)
+  expect(ZonedDateTime.compare(b, a)).toBe(1)
+  expect(ZonedDateTime.compare(b, c)).toBe(0)
+})

@@ -2,6 +2,12 @@ import { Calendar } from './calendar'
 import { TimeZone } from './timezone'
 import { CalendarType, LocaleType, TimeZoneType } from './types'
 
+type ZonedDateTimeLikeType = {
+  epochMilliseconds?: number
+  timeZone?: TimeZone | TimeZoneType
+  calendar?: Calendar | CalendarType
+}
+
 export class ZonedDateTime {
   readonly timeZone: TimeZone
   readonly calendar: Calendar
@@ -18,9 +24,22 @@ export class ZonedDateTime {
       calendar instanceof Calendar ? calendar : new Calendar(calendar)
   }
 
-  static from() {}
+  static from(thing: any) {
+    if (thing.epochMilliseconds) {
+      return new ZonedDateTime(
+        thing.epochMilliseconds,
+        thing.timeZone,
+        thing.calendar
+      )
+    }
+    throw new Error('Invalid Object')
+  }
 
-  static compare(a: ZonedDateTime, b: ZonedDateTime) {}
+  static compare(one: ZonedDateTime, two: ZonedDateTime) {
+    if (one.epochMilliseconds < two.epochMilliseconds) return -1
+    else if (one.epochMilliseconds > two.epochMilliseconds) return 1
+    else return 0
+  }
 
   get year() {
     return this.calendar.year(this)
@@ -50,7 +69,14 @@ export class ZonedDateTime {
     return this.calendar.weekOfYear(this)
   }
 
-  with() {}
+  with(dateTimeLike: ZonedDateTimeLikeType | string) {
+    if (typeof dateTimeLike === 'string') throw new Error('Unimplemented')
+    return new ZonedDateTime(
+      dateTimeLike.epochMilliseconds || this.epochMilliseconds,
+      dateTimeLike.timeZone || this.timeZone,
+      dateTimeLike.calendar || this.calendar
+    )
+  }
   withTimeZone(timeZone: TimeZone | TimeZoneType) {
     return new ZonedDateTime(this.epochMilliseconds, timeZone, this.calendar)
   }
