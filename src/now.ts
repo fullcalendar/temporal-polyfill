@@ -30,7 +30,7 @@ export class Now {
     const date = new Date(this.instant())
     return new PlainDateTime(
       date.getFullYear(),
-      date.getMonth(),
+      date.getMonth() + 1,
       date.getDate(),
       date.getHours(),
       date.getMinutes(),
