@@ -51,15 +51,37 @@ export class ZonedDateTime {
   }
 
   with() {}
-  withTimeZone(timeZone: TimeZone | string) {}
-  withCalendar(calendar: Calendar | string) {}
+  withTimeZone(timeZone: TimeZone | TimeZoneType) {
+    return new ZonedDateTime(this.epochMilliseconds, timeZone, this.calendar)
+  }
+  withCalendar(calendar: Calendar | CalendarType) {
+    return new ZonedDateTime(this.epochMilliseconds, this.timeZone, calendar)
+  }
 
   toString() {
-    return `${this.year}-${this.month}-${this.day}T${this.hour}:${
-      this.minute
-    }:${this.second}.${this.millisecond}${this.timeZone.getOffsetStringFor(
-      this.epochMilliseconds
+    const {
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond,
+      timeZone,
+      epochMilliseconds,
+    } = this
+    const yearStr = `000${year}`.slice(-4)
+    const monthStr = `0${month}`.slice(-2)
+    const dayStr = `0${day}`.slice(-2)
+    const hourStr = `0${hour}`.slice(-2)
+    const minStr = `0${minute}`.slice(-2)
+    const secStr = `0${second}`.slice(-2)
+    const msStr = `00${millisecond}`.slice(-3)
+    return `${yearStr}-${monthStr}-${dayStr}T${hourStr}:${minStr}:${secStr}.${msStr}${timeZone.getOffsetStringFor(
+      epochMilliseconds
     )}`
   }
-  toLocaleString(locale: LocaleType, options: unknown) {}
+  toLocaleString(locale: LocaleType, options?: Intl.DateTimeFormatOptions) {
+    return Intl.DateTimeFormat(locale, options).format(this.epochMilliseconds)
+  }
 }
