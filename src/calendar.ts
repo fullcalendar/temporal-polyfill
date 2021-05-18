@@ -3,17 +3,23 @@ import { CalendarType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Calendar {
-  private format
+  constructor(readonly id: CalendarType = 'iso8601') {}
 
-  constructor(readonly id: CalendarType = 'iso8601') {
-    this.format = Intl.DateTimeFormat('en-us', { calendar: id })
+  private getFormat(timeZone: string) {
+    return Intl.DateTimeFormat('en-us', {
+      calendar: this.id,
+      timeZone,
+    })
   }
 
   private formattedPropertyValue(
     dt: PlainDateTime | ZonedDateTime,
     property: string
   ) {
-    return this.format.formatToParts(dt.epochMilliseconds).reduce(
+    const format = this.getFormat(
+      dt instanceof ZonedDateTime ? dt.timeZone.id : 'UTC'
+    )
+    return format.formatToParts(dt.epochMilliseconds).reduce(
       (acc: { [type: string]: string }, { type, value }) => ({
         ...acc,
         [type]: value,
@@ -23,16 +29,22 @@ export class Calendar {
   }
 
   year(dt: PlainDateTime | ZonedDateTime) {
-    return parseInt(this.formattedPropertyValue(dt, 'year') || '1970')
+    return parseInt(this.formattedPropertyValue(dt, 'year'))
   }
   month(dt: PlainDateTime | ZonedDateTime) {
-    return parseInt(this.formattedPropertyValue(dt, 'month') || '1')
+    return parseInt(this.formattedPropertyValue(dt, 'month'))
   }
   day(dt: PlainDateTime | ZonedDateTime) {
-    return parseInt(this.formattedPropertyValue(dt, 'day') || '1')
+    return parseInt(this.formattedPropertyValue(dt, 'day'))
   }
   dayOfWeek(dt: PlainDateTime | ZonedDateTime) {
     return this.formattedPropertyValue(dt, 'weekday')
   }
-  weekOfYear(dt: PlainDateTime | ZonedDateTime) {}
+  weekOfYear(dt: PlainDateTime | ZonedDateTime) {
+    const yearStart = Date.UTC(dt.year, 0, 1)
+    const weekNum = Math.ceil(
+      ((dt.epochMilliseconds - yearStart) / 86400000 + 1) / 7
+    )
+    return weekNum
+  }
 }

@@ -6,12 +6,17 @@ test('can instantiate', () => {
   expect(date).toBeDefined()
 })
 
-test('is equivalent to utc ZonedDatTime', () => {
-  const pdt = new PlainDateTime(1970, 1, 1)
-  const zdt = new ZonedDateTime(0)
+test('is equivalent to utc ZonedDateTime', () => {
+  const pdt = new PlainDateTime(1970, 1, 1, 0, 0, 0, 1)
+  const zdt = new ZonedDateTime(1, 'utc')
+  expect(pdt.toZonedDateTime('utc')).toEqual(zdt)
   expect(pdt.year).toBe(zdt.year)
   expect(pdt.month).toBe(zdt.month)
   expect(pdt.day).toBe(zdt.day)
+  expect(pdt.hour).toBe(zdt.hour)
+  expect(pdt.minute).toBe(zdt.minute)
+  expect(pdt.second).toBe(zdt.second)
+  expect(pdt.millisecond).toBe(zdt.millisecond)
 })
 
 describe.each([

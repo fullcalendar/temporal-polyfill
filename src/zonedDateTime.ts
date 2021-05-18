@@ -24,6 +24,10 @@ export class ZonedDateTime {
       calendar instanceof Calendar ? calendar : new Calendar(calendar)
   }
 
+  private asDate() {
+    return new Date(this.epochMilliseconds)
+  }
+
   static from(thing: any) {
     if (thing.epochMilliseconds) {
       return new ZonedDateTime(
@@ -51,16 +55,22 @@ export class ZonedDateTime {
     return this.calendar.day(this)
   }
   get hour() {
-    return new Date(this.epochMilliseconds).getHours()
+    const date = this.asDate()
+    return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
   }
   get minute() {
-    return new Date(this.epochMilliseconds).getMinutes()
+    const date = this.asDate()
+    return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
   }
   get second() {
-    return new Date(this.epochMilliseconds).getSeconds()
+    const date = this.asDate()
+    return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
   }
   get millisecond() {
-    return new Date(this.epochMilliseconds).getMilliseconds()
+    const date = this.asDate()
+    return this.timeZone.id === 'utc'
+      ? date.getUTCMilliseconds()
+      : date.getMilliseconds()
   }
   get dayOfWeek() {
     return this.calendar.dayOfWeek(this)

@@ -6,24 +6,13 @@ test('can instantiate', () => {
 })
 
 describe.each([
-  [1970, 1, 1, 0, 0, 0, 0],
-  [1970, 1, 1, 12, 30, 30, 500],
-  [2020, 12, 25, 0, 0, 0, 0],
+  [0, 1970, 1, 1, 0, 0, 0, 0],
+  [45030500, 1970, 1, 1, 12, 30, 30, 500],
+  [1608854400000, 2020, 12, 25, 0, 0, 0, 0],
 ])(
-  'can get values for %d-%d-%dT%d:%d:%d.%d',
-  (year, month, day, hour, minute, second, millisecond) => {
-    const date = new ZonedDateTime(
-      new Date(
-        year,
-        month - 1,
-        day,
-        hour,
-        minute,
-        second,
-        millisecond
-      ).valueOf(),
-      'utc'
-    )
+  'can get values for %d which is %d-%d-%dT%d:%d:%d.%d',
+  (epochMilliseconds, year, month, day, hour, minute, second, millisecond) => {
+    const date = new ZonedDateTime(epochMilliseconds, 'utc')
 
     test('of year', () => {
       expect(date.year).toBe(year)

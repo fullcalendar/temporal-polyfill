@@ -43,16 +43,10 @@ export class TimeZone {
     epochMilliseconds: number,
     calendar: Calendar | CalendarType
   ) {
-    const date = new Date(epochMilliseconds)
-    return new PlainDateTime(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds(),
-      date.getMilliseconds(),
-      calendar
-    )
+    return PlainDateTime.from({
+      epochMilliseconds:
+        epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds),
+      calendar,
+    })
   }
 }

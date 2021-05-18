@@ -35,17 +35,6 @@ export class PlainDateTime {
       isoSecond,
       isoMillisecond
     )
-    // const temp = new Date(
-    //   isoYear,
-    //   isoMonth - 1,
-    //   isoDay,
-    //   isoHour,
-    //   isoMinute,
-    //   isoSecond,
-    //   isoMillisecond
-    // )
-    // temp.setMinutes(temp.getMinutes() - temp.getTimezoneOffset())
-    // this.epochMilliseconds = temp.valueOf()
 
     this.calendar =
       typeof calendar === 'string' ? new Calendar(calendar) : calendar
@@ -60,7 +49,7 @@ export class PlainDateTime {
       const date = new Date(thing.epochMilliseconds)
       return new PlainDateTime(
         date.getUTCFullYear(),
-        date.getUTCMonth(),
+        date.getUTCMonth() + 1,
         date.getUTCDate(),
         date.getUTCHours(),
         date.getUTCMinutes(),
@@ -68,15 +57,15 @@ export class PlainDateTime {
         date.getUTCMilliseconds(),
         thing.calendar
       )
-    } else if (thing.year && thing.month && thing.day)
+    } else if (thing.isoYear && thing.isoMonth && thing.isoDay)
       return new PlainDateTime(
-        thing.year,
-        thing.month,
-        thing.day,
-        thing.hour,
-        thing.minute,
-        thing.second,
-        thing.millisecond,
+        thing.isoYear,
+        thing.isoMonth,
+        thing.isoDay,
+        thing.isoHour,
+        thing.isoMinute,
+        thing.isoSecond,
+        thing.isoMillisecond,
         thing.calendar
       )
     throw new Error('Invalid Object')

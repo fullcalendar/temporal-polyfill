@@ -27,17 +27,7 @@ export class Now {
   }
 
   static plainDateTime(calendar?: CalendarType | Calendar) {
-    const date = new Date(this.instant())
-    return new PlainDateTime(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds(),
-      date.getMilliseconds(),
-      calendar
-    )
+    return PlainDateTime.from({ epochMilliseconds: this.instant(), calendar })
   }
 
   static plainDateTimeISO() {
