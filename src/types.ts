@@ -13,3 +13,14 @@ export type ExpandDateTimeType = {
   second: number
   millisecond: number
 }
+
+export type DurationType = {
+  years: number
+  months: number
+  weeks: number
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+  milliseconds: number
+}
