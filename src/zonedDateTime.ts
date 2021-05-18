@@ -1,6 +1,7 @@
 import { Calendar } from './calendar'
 import { TimeZone } from './timezone'
 import { CalendarType, LocaleType, TimeZoneType } from './types'
+import { asDate } from './utils'
 
 type ZonedDateTimeLikeType = {
   epochMilliseconds?: number
@@ -22,10 +23,6 @@ export class ZonedDateTime {
 
     this.calendar =
       calendar instanceof Calendar ? calendar : new Calendar(calendar)
-  }
-
-  private asDate() {
-    return new Date(this.epochMilliseconds)
   }
 
   static from(thing: any) {
@@ -55,19 +52,19 @@ export class ZonedDateTime {
     return this.calendar.day(this)
   }
   get hour() {
-    const date = this.asDate()
+    const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
   }
   get minute() {
-    const date = this.asDate()
+    const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
   }
   get second() {
-    const date = this.asDate()
+    const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
   }
   get millisecond() {
-    const date = this.asDate()
+    const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc'
       ? date.getUTCMilliseconds()
       : date.getMilliseconds()

@@ -1,5 +1,6 @@
 import { Calendar } from './calendar'
 import { CalendarType, LocaleType, TimeZoneType } from './types'
+import { asDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 type PlainDateTimeLikeType = {
@@ -38,10 +39,6 @@ export class PlainDateTime {
 
     this.calendar =
       typeof calendar === 'string' ? new Calendar(calendar) : calendar
-  }
-
-  private asDate() {
-    return new Date(this.epochMilliseconds)
   }
 
   static from(thing: any) {
@@ -87,16 +84,16 @@ export class PlainDateTime {
     return this.calendar.day(this)
   }
   get hour() {
-    return this.asDate().getUTCHours()
+    return asDate(this.epochMilliseconds).getUTCHours()
   }
   get minute() {
-    return this.asDate().getUTCMinutes()
+    return asDate(this.epochMilliseconds).getUTCMinutes()
   }
   get second() {
-    return this.asDate().getUTCSeconds()
+    return asDate(this.epochMilliseconds).getUTCSeconds()
   }
   get millisecond() {
-    return this.asDate().getUTCMilliseconds()
+    return asDate(this.epochMilliseconds).getUTCMilliseconds()
   }
   get dayOfWeek() {
     return this.calendar.dayOfWeek(this)
@@ -119,7 +116,7 @@ export class PlainDateTime {
     )
   }
   withCalendar(calendar: Calendar | CalendarType) {
-    const date = this.asDate()
+    const date = asDate(this.epochMilliseconds)
     return new PlainDateTime(
       date.getUTCFullYear(),
       date.getUTCMonth() + 1,
@@ -131,6 +128,7 @@ export class PlainDateTime {
       calendar
     )
   }
+
   add() {}
   subtract() {}
   since() {}
