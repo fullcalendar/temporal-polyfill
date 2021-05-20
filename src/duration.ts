@@ -2,52 +2,14 @@ import { DurationType, DurationUnitType, LocaleType } from './types'
 
 export type DurationLikeType = Partial<DurationType>
 
-const rawDuration = ({
-  years,
-  months,
-  weeks,
-  days,
-  hours,
-  minutes,
-  seconds,
-  milliseconds,
-}: DurationLikeType) => {
-  const duration = new Date(0)
-  duration.setUTCFullYear(years || 0)
-  duration.setUTCMonth(months || 0)
-  // Deal with weeks in date
-  duration.setUTCDate((days || 0) + (weeks || 0) * 7)
-  duration.setUTCHours(hours || 0)
-  duration.setUTCMinutes(minutes || 0)
-  duration.setUTCSeconds(seconds || 0)
-  duration.setUTCMilliseconds(milliseconds || 0)
-  return duration.valueOf()
-}
+const getNumberUnitFormat = (number: number, unit: string) => ({
+  negative: number < 0,
+  format: number ? `${Math.abs(number)}${unit}` : '',
+})
 
-// Credit goes to DayJS
-const getNumberUnitFormat = (number: number, unit: string) => {
-  if (!number)
-    return {
-      negative: false,
-      format: '',
-    }
-  else if (number < 0) {
-    return {
-      negative: true,
-      format: `${Math.abs(number)}${unit}`,
-    }
-  }
-  return {
-    negative: false,
-    format: `${number}${unit}`,
-  }
-}
-
+// TODO: We need to deal with overflow on any of the fields
 export class Duration {
-  private epochMilliseconds = 0
-
   constructor(
-    // TODO: Redo the setters for this
     readonly years: number = 0,
     readonly months: number = 0,
     readonly weeks: number = 0,
@@ -56,18 +18,7 @@ export class Duration {
     readonly minutes: number = 0,
     readonly seconds: number = 0,
     readonly milliseconds: number = 0
-  ) {
-    const duration = new Date(0)
-    duration.setUTCFullYear(years)
-    duration.setUTCMonth(months)
-    // Deal with weeks in date
-    duration.setUTCDate(days + weeks * 7)
-    duration.setUTCHours(hours)
-    duration.setUTCMinutes(minutes)
-    duration.setUTCSeconds(seconds)
-    duration.setUTCMilliseconds(milliseconds)
-    this.epochMilliseconds = duration.valueOf()
-  }
+  ) {}
 
   static from(thing: any) {
     if (typeof thing === 'string') {
@@ -82,8 +33,17 @@ export class Duration {
           hours,
           minutes,
           seconds,
-        ] = matches.slice(2).map((value) => Number(value))
-        return new Duration(years, months, weeks, days, hours, minutes, seconds)
+        ] = matches.slice(2).map((value) => Number(value || 0))
+        return new Duration(
+          years,
+          months,
+          weeks,
+          days,
+          hours,
+          minutes,
+          Math.floor(seconds),
+          Math.floor((seconds % 1) * 1000)
+        )
       }
       throw new Error('Invalid String')
     } else if (
@@ -132,29 +92,24 @@ export class Duration {
     )
   }
 
-  add(durationLike: DurationLikeType) {
-    this.epochMilliseconds += rawDuration(durationLike)
-  }
-  subtract(durationLike: DurationLikeType) {
-    this.epochMilliseconds -= rawDuration(durationLike)
-  }
+  add(durationLike: DurationLikeType) {}
+  subtract(durationLike: DurationLikeType) {}
   total(unit: DurationUnitType) {}
 
   toString() {
     const Y = getNumberUnitFormat(this.years, 'Y')
     const M = getNumberUnitFormat(this.months, 'M')
-    const D = getNumberUnitFormat(this.days || 0 + (this.weeks || 0 * 7), 'D')
+    const W = getNumberUnitFormat(this.weeks, 'W')
+    const D = getNumberUnitFormat(this.days, 'D')
     const H = getNumberUnitFormat(this.hours, 'H')
     const m = getNumberUnitFormat(this.minutes, 'M')
-    const S = getNumberUnitFormat(
-      this.seconds || 0 + (this.milliseconds || 0 / 1000),
-      'S'
-    )
+    const S = getNumberUnitFormat(this.seconds + this.milliseconds / 1000, 'S')
 
     const T = H.format || m.format || S.format ? 'T' : ''
     const P =
       Y.negative ||
       M.negative ||
+      W.negative ||
       D.negative ||
       H.negative ||
       m.negative ||
@@ -162,8 +117,8 @@ export class Duration {
         ? '-'
         : ''
 
-    const result = `${P}P${Y.format}${M.format}${D.format}${T}${H.format}${m.format}${S.format}`
-    return result === 'P' || result === '-P' ? 'P0D' : result
+    const result = `P${Y.format}${M.format}${W.format}${D.format}${T}${H.format}${m.format}${S.format}`
+    return result === 'P' ? 'P0D' : `${P}${result}`
   }
   toLocaleString(locale: LocaleType) {}
 }
