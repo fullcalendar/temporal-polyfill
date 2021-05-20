@@ -51,3 +51,16 @@ test('can compare two dates', () => {
   expect(ZonedDateTime.compare(b, a)).toBe(1)
   expect(ZonedDateTime.compare(b, c)).toBe(0)
 })
+
+test('can create dates from string', () => {
+  const str = '2020-08-05T20:06:13+09:00[Asia/Tokyo]'
+  const zdt = ZonedDateTime.from(str)
+  expect(zdt.year).toBe(2020)
+  expect(zdt.month).toBe(8)
+  expect(zdt.day).toBe(6)
+  expect(zdt.hour).toBe(5)
+  expect(zdt.minute).toBe(6)
+  expect(zdt.second).toBe(13)
+  expect(zdt.millisecond).toBe(0)
+  // expect(zdt.timeZone.id).toBe('Asia/Tokyo')
+})

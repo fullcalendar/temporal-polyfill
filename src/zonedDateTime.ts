@@ -26,7 +26,61 @@ export class ZonedDateTime {
   }
 
   static from(thing: any) {
-    if (thing.epochMilliseconds) {
+    if (typeof thing === 'string') {
+      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:(Z|[+-][01]\d:[0-5]\d))?(?:\[(\w+\/\w+)\])?$/
+      const matches = thing.match(regex)
+      if (matches) {
+        const [
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond,
+          offset,
+        ] = matches.slice(1).map((val, index) => {
+          if (index === 7) {
+            // TimeZone Offset
+            const offsetRegex = /([+-])(\d{2}):(\d{2})/
+            const offsetMatches = val.match(offsetRegex)
+            if (offsetMatches) {
+              const [plusminus, hrs, mins] = offsetMatches.slice(1)
+              return (
+                (plusminus ? 1 : -1) *
+                (Number(hrs) * 3.6e6 + Number(mins) * 60000)
+              )
+            }
+            return 0
+          }
+          return Number(val)
+        })
+        const timezone = new TimeZone(matches[9] as TimeZoneType)
+        const epochMilliseconds =
+          Date.UTC(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute,
+            second,
+            millisecond || 0
+          ) + offset
+        console.log(
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond,
+          offset,
+          timezone.id
+        )
+        return new ZonedDateTime(epochMilliseconds, 'utc')
+      }
+      throw new Error('Invalid String')
+    } else if (thing.epochMilliseconds) {
       return new ZonedDateTime(
         thing.epochMilliseconds,
         thing.timeZone,
