@@ -135,8 +135,48 @@ export class PlainDateTime {
     )
   }
 
-  add(amount: Duration | DurationLikeType | string) {}
-  subtract(amount: Duration | DurationLikeType | string) {}
+  add(amount: Duration | DurationLikeType | string) {
+    const {
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds,
+    } = amount instanceof Duration ? amount : Duration.from(amount)
+    return new PlainDateTime(
+      this.year + years,
+      this.month + months,
+      this.day + days + weeks * 7,
+      this.hour + hours,
+      this.minute + minutes,
+      this.second + seconds,
+      this.millisecond + milliseconds
+    )
+  }
+  subtract(amount: Duration | DurationLikeType | string) {
+    const {
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds,
+    } = amount instanceof Duration ? amount : Duration.from(amount)
+    return new PlainDateTime(
+      this.year - years,
+      this.month - months,
+      this.day - days - weeks * 7,
+      this.hour - hours,
+      this.minute - minutes,
+      this.second - seconds,
+      this.millisecond - milliseconds
+    )
+  }
   since(
     pdt: PlainDateTime,
     {

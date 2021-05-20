@@ -63,3 +63,17 @@ describe.each([
     })
   }
 )
+
+test.each([
+  ['P1Y', new PlainDateTime(1970, 1, 1), new PlainDateTime(1971, 1, 1)],
+  ['P1Y1M1D', new PlainDateTime(2000, 1, 1), new PlainDateTime(2001, 2, 2)],
+  [{ years: 1 }, new PlainDateTime(1970, 1, 1), new PlainDateTime(1971, 1, 1)],
+  [
+    { months: 1 },
+    new PlainDateTime(1982, 12, 1),
+    new PlainDateTime(1983, 1, 1),
+  ],
+])('can add %s to %s', (add, orig, expected) => {
+  const date = orig.add(add)
+  expect(date).toMatchObject(expected)
+})

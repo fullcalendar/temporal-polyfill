@@ -26,3 +26,12 @@ export type DurationType = {
   milliseconds: number
 }
 export type DurationUnitType = keyof DurationType
+
+// TODO: Currently unused, might be useful for durations later down the line
+export enum MS_FROM {
+  SECOND = 1000,
+  MINUTE = SECOND * 60,
+  HOUR = MINUTE * 60,
+  DAY = HOUR * 24,
+  WEEK = DAY * 7,
+}
