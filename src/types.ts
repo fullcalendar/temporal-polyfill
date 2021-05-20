@@ -4,7 +4,7 @@ export type TimeZoneType = 'utc' | 'local'
 
 export type LocaleType = 'en-US'
 
-export type ExpandDateTimeType = {
+export type ExpandedDateTimeType = {
   year: number
   month: number
   day: number
@@ -13,6 +13,7 @@ export type ExpandDateTimeType = {
   second: number
   millisecond: number
 }
+export type ExpandedDateTimeUnitType = keyof ExpandedDateTimeType
 
 export type DurationType = {
   years: number
@@ -24,3 +25,4 @@ export type DurationType = {
   seconds: number
   milliseconds: number
 }
+export type DurationUnitType = keyof DurationType

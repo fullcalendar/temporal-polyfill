@@ -1,5 +1,11 @@
 import { Calendar } from './calendar'
-import { CalendarType, LocaleType, TimeZoneType } from './types'
+import { Duration, DurationLikeType } from './duration'
+import {
+  CalendarType,
+  ExpandedDateTimeUnitType,
+  LocaleType,
+  TimeZoneType,
+} from './types'
 import { asDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -129,10 +135,19 @@ export class PlainDateTime {
     )
   }
 
-  add() {}
-  subtract() {}
-  since() {}
-  round() {}
+  add(amount: Duration | DurationLikeType | string) {}
+  subtract(amount: Duration | DurationLikeType | string) {}
+  since(
+    pdt: PlainDateTime,
+    {
+      largestUnit,
+      smallestUnit,
+    }: {
+      largestUnit: ExpandedDateTimeUnitType
+      smallestUnit: ExpandedDateTimeUnitType
+    }
+  ) {}
+  round(smallestUnit: ExpandedDateTimeUnitType) {}
 
   toString() {
     const { year, month, day, hour, minute, second, millisecond } = this
