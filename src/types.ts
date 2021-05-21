@@ -28,10 +28,20 @@ export type DurationType = {
 export type DurationUnitType = keyof DurationType
 
 // TODO: Currently unused, might be useful for durations later down the line
-export enum MS_FROM {
+export enum UNIT_INCREMENT {
   SECOND = 1000,
-  MINUTE = SECOND * 60,
-  HOUR = MINUTE * 60,
-  DAY = HOUR * 24,
-  WEEK = DAY * 7,
+  MINUTE = 60,
+  HOUR = 60,
+  DAY = 24,
+  WEEK = 7,
+  // MONTH = ???
+  YEAR = 12,
+}
+
+export enum MS_FROM {
+  SECOND = UNIT_INCREMENT.SECOND,
+  MINUTE = SECOND * UNIT_INCREMENT.MINUTE,
+  HOUR = MINUTE * UNIT_INCREMENT.HOUR,
+  DAY = HOUR * UNIT_INCREMENT.DAY,
+  WEEK = DAY * UNIT_INCREMENT.WEEK,
 }

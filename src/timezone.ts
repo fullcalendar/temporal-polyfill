@@ -1,6 +1,6 @@
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { CalendarType, TimeZoneType } from './types'
+import { CalendarType, TimeZoneType, UNIT_INCREMENT } from './types'
 
 export class TimeZone {
   constructor(readonly id: TimeZoneType = 'local') {}
@@ -18,7 +18,11 @@ export class TimeZone {
         utcDate.getUTCMilliseconds()
       )
       // Native date returns value with flipped sign :(
-      return -localDate.getTimezoneOffset() * 60 * 1000
+      return (
+        -localDate.getTimezoneOffset() *
+        UNIT_INCREMENT.MINUTE *
+        UNIT_INCREMENT.SECOND
+      )
     } else if (this.id === 'utc') {
       // Case of UTC is always 0
       return 0
@@ -31,8 +35,16 @@ export class TimeZone {
     const sign = offset < 0 ? '-' : '+'
     // const ms = offset % 1000
     // const secs = (offset / 1000) % 60
-    const mins = Math.abs((offset / 1000 / 60) % 60)
-    const hours = Math.abs(offset / 1000 / 60 / 60)
+    const mins = Math.abs(
+      (offset / UNIT_INCREMENT.MINUTE / UNIT_INCREMENT.SECOND) %
+        UNIT_INCREMENT.MINUTE
+    )
+    const hours = Math.abs(
+      offset /
+        UNIT_INCREMENT.SECOND /
+        UNIT_INCREMENT.MINUTE /
+        UNIT_INCREMENT.HOUR
+    )
 
     const minStr = `0${mins}`.slice(-2)
     const hourStr = `0${hours}`.slice(-2)

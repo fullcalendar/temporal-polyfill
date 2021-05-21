@@ -1,6 +1,6 @@
 import { Calendar } from './calendar'
 import { TimeZone } from './timezone'
-import { CalendarType, LocaleType, TimeZoneType } from './types'
+import { CalendarType, LocaleType, MS_FROM, TimeZoneType } from './types'
 import { asDate } from './utils'
 
 type ZonedDateTimeLikeType = {
@@ -48,7 +48,7 @@ export class ZonedDateTime {
               const [plusminus, hrs, mins] = offsetMatches.slice(1)
               return (
                 (plusminus ? 1 : -1) *
-                (Number(hrs) * 3.6e6 + Number(mins) * 60000)
+                (Number(hrs) * MS_FROM.HOUR + Number(mins) * MS_FROM.MINUTE)
               )
             }
             return 0
