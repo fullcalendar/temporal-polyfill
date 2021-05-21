@@ -2,7 +2,7 @@ import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
 import {
   CalendarType,
-  ExpandedDateTimeUnitType,
+  DurationUnitType,
   LocaleType,
   TimeZoneType,
 } from './types'
@@ -178,16 +178,53 @@ export class PlainDateTime {
     )
   }
   since(
-    pdt: PlainDateTime,
+    other: PlainDateTime,
     {
       largestUnit,
       smallestUnit,
+      roundingIncrement,
     }: {
-      largestUnit: ExpandedDateTimeUnitType
-      smallestUnit: ExpandedDateTimeUnitType
+      largestUnit: DurationUnitType
+      smallestUnit: DurationUnitType
+      roundingIncrement: number
+    } = {
+      largestUnit: 'years',
+      smallestUnit: 'milliseconds',
+      roundingIncrement: 1,
     }
-  ) {}
-  round(smallestUnit: ExpandedDateTimeUnitType) {}
+  ) {
+    const priorities = [
+      'years',
+      'months',
+      'weeks',
+      'days',
+      'hours',
+      'minutes',
+      'seconds',
+      'milliseconds',
+    ]
+    if (priorities.indexOf(largestUnit) > priorities.indexOf(smallestUnit))
+      throw new RangeError('largestUnit cannot be smaller than smallestUnit')
+    const duration = Duration.from({
+      milliseconds: this.epochMilliseconds - other.epochMilliseconds,
+    })
+    return duration
+  }
+  from(
+    other: PlainDateTime,
+    options: {
+      largestUnit: DurationUnitType
+      smallestUnit: DurationUnitType
+      roundingIncrement: number
+    } = {
+      largestUnit: 'years',
+      smallestUnit: 'milliseconds',
+      roundingIncrement: 1,
+    }
+  ) {
+    return other.since(this, options)
+  }
+  round(smallestUnit: DurationUnitType) {}
 
   toString() {
     const { year, month, day, hour, minute, second, millisecond } = this

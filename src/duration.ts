@@ -1,7 +1,52 @@
-import { DurationType, DurationUnitType, LocaleType } from './types'
+import {
+  DurationType,
+  DurationUnitType,
+  LocaleType,
+  UNIT_INCREMENT,
+} from './types'
 
 export type DurationLikeType = Partial<DurationType>
 
+const rollover = ({
+  years,
+  months,
+  weeks,
+  days,
+  hours,
+  minutes,
+  seconds,
+  milliseconds,
+}: DurationType): DurationType => {
+  //MS
+  seconds += Math.trunc(milliseconds / UNIT_INCREMENT.SECOND)
+  milliseconds = Math.trunc(milliseconds % UNIT_INCREMENT.SECOND)
+  //SECS
+  minutes += Math.trunc(seconds / UNIT_INCREMENT.MINUTE)
+  seconds = Math.trunc(seconds % UNIT_INCREMENT.MINUTE)
+  //MINS
+  hours += Math.trunc(minutes / UNIT_INCREMENT.HOUR)
+  minutes = Math.trunc(minutes % UNIT_INCREMENT.HOUR)
+  //HOURS
+  days += Math.trunc(hours / UNIT_INCREMENT.DAY)
+  hours = Math.trunc(hours % UNIT_INCREMENT.DAY)
+  //DAYS
+  weeks += Math.trunc(days / UNIT_INCREMENT.WEEK)
+  days = Math.trunc(days % UNIT_INCREMENT.WEEK)
+  //MONTHS
+  years += Math.trunc(months / UNIT_INCREMENT.YEAR)
+  months = Math.trunc(months % UNIT_INCREMENT.YEAR)
+
+  return {
+    years: years || 0,
+    months: months || 0,
+    weeks: weeks || 0,
+    days: days || 0,
+    hours: hours || 0,
+    minutes: minutes || 0,
+    seconds: seconds || 0,
+    milliseconds: milliseconds || 0,
+  }
+}
 const getNumberUnitFormat = (number: number, unit: string) => ({
   negative: number < 0,
   format: number ? `${Math.abs(number)}${unit}` : '',
@@ -18,7 +63,26 @@ export class Duration {
     readonly minutes: number = 0,
     readonly seconds: number = 0,
     readonly milliseconds: number = 0
-  ) {}
+  ) {
+    const rolled = rollover({
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds,
+    })
+    this.years = rolled.years
+    this.months = rolled.months
+    this.weeks = rolled.weeks
+    this.days = rolled.days
+    this.hours = rolled.hours
+    this.minutes = rolled.minutes
+    this.seconds = rolled.seconds
+    this.milliseconds = rolled.milliseconds
+  }
 
   static from(thing: any) {
     if (typeof thing === 'string') {
@@ -42,7 +106,7 @@ export class Duration {
           hours,
           minutes,
           Math.floor(seconds),
-          Math.floor((seconds % 1) * 1000)
+          Math.floor((seconds % 1) * UNIT_INCREMENT.SECOND)
         )
       }
       throw new Error('Invalid String')
@@ -103,7 +167,10 @@ export class Duration {
     const D = getNumberUnitFormat(this.days, 'D')
     const H = getNumberUnitFormat(this.hours, 'H')
     const m = getNumberUnitFormat(this.minutes, 'M')
-    const S = getNumberUnitFormat(this.seconds + this.milliseconds / 1000, 'S')
+    const S = getNumberUnitFormat(
+      this.seconds + this.milliseconds / UNIT_INCREMENT.SECOND,
+      'S'
+    )
 
     const T = H.format || m.format || S.format ? 'T' : ''
     const P =

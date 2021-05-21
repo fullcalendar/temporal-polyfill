@@ -1,3 +1,4 @@
+import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -76,4 +77,19 @@ test.each([
 ])('can add %s to %s', (add, orig, expected) => {
   const date = orig.add(add)
   expect(date).toMatchObject(expected)
+})
+
+test.each([
+  [
+    new PlainDateTime(1970, 1, 1),
+    new PlainDateTime(1970, 1, 2),
+    new Duration(0, 0, 0, -1),
+  ],
+  [
+    new PlainDateTime(1970, 2, 5),
+    new PlainDateTime(1970, 1, 1),
+    new Duration(0, 1, 0, 4),
+  ],
+])('can get duration since other time', (date, other, expected) => {
+  expect(date.since(other)).toEqual(expected)
 })
