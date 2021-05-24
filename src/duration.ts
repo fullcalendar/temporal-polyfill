@@ -1,22 +1,28 @@
+import { PlainDateTime } from './plainDateTime'
 import {
+  CompareReturnType,
   DurationType,
   DurationUnitType,
   LocaleType,
+  RoundLikeType,
+  RoundType,
   UNIT_INCREMENT,
 } from './types'
+import { roundDefaults } from './utils'
+import { ZonedDateTime } from './zonedDateTime'
 
 export type DurationLikeType = Partial<DurationType>
 
 const rollover = ({
-  years,
-  months,
-  weeks,
-  days,
-  hours,
-  minutes,
-  seconds,
-  milliseconds,
-}: DurationType): DurationType => {
+  years = 0,
+  months = 0,
+  weeks = 0,
+  days = 0,
+  hours = 0,
+  minutes = 0,
+  seconds = 0,
+  milliseconds = 0,
+}: DurationLikeType): Duration => {
   //MS
   seconds += Math.trunc(milliseconds / UNIT_INCREMENT.SECOND)
   milliseconds = Math.trunc(milliseconds % UNIT_INCREMENT.SECOND)
@@ -32,20 +38,24 @@ const rollover = ({
   //DAYS
   weeks += Math.trunc(days / UNIT_INCREMENT.WEEK)
   days = Math.trunc(days % UNIT_INCREMENT.WEEK)
+  //WEEKS
+  months += Math.trunc(weeks / UNIT_INCREMENT.MONTH)
+  weeks = Math.trunc(weeks % UNIT_INCREMENT.MONTH)
   //MONTHS
   years += Math.trunc(months / UNIT_INCREMENT.YEAR)
   months = Math.trunc(months % UNIT_INCREMENT.YEAR)
 
-  return {
-    years: years || 0,
-    months: months || 0,
-    weeks: weeks || 0,
-    days: days || 0,
-    hours: hours || 0,
-    minutes: minutes || 0,
-    seconds: seconds || 0,
-    milliseconds: milliseconds || 0,
-  }
+  // The '|| 0' is done to prevent -0 from cropping up
+  return new Duration(
+    years || 0,
+    months || 0,
+    weeks || 0,
+    days || 0,
+    hours || 0,
+    minutes || 0,
+    seconds || 0,
+    milliseconds || 0
+  )
 }
 const getNumberUnitFormat = (number: number, unit: string) => ({
   negative: number < 0,
@@ -63,28 +73,9 @@ export class Duration {
     readonly minutes: number = 0,
     readonly seconds: number = 0,
     readonly milliseconds: number = 0
-  ) {
-    const rolled = rollover({
-      years,
-      months,
-      weeks,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds,
-    })
-    this.years = rolled.years
-    this.months = rolled.months
-    this.weeks = rolled.weeks
-    this.days = rolled.days
-    this.hours = rolled.hours
-    this.minutes = rolled.minutes
-    this.seconds = rolled.seconds
-    this.milliseconds = rolled.milliseconds
-  }
+  ) {}
 
-  static from(thing: any) {
+  static from(thing: any): Duration {
     if (typeof thing === 'string') {
       const regex = /^(-|\+)?P(?:([-+]?[\d,.]*)Y)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)W)?(?:([-+]?[\d,.]*)D)?(?:T(?:([-+]?[\d,.]*)H)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)S)?)?$/
       const matches = thing.match(regex)
@@ -110,6 +101,8 @@ export class Duration {
         )
       }
       throw new Error('Invalid String')
+    } else if (typeof thing === 'number') {
+      return rollover({ milliseconds: thing })
     } else if (
       thing.years ||
       thing.months ||
@@ -120,19 +113,27 @@ export class Duration {
       thing.seconds ||
       thing.milliseconds
     )
-      return new Duration(
-        thing.years,
-        thing.months,
-        thing.weeks,
-        thing.days,
-        thing.hours,
-        thing.minutes,
-        thing.seconds,
-        thing.milliseconds
-      )
+      return rollover({
+        years: thing.years,
+        months: thing.months,
+        weeks: thing.weeks,
+        days: thing.days,
+        hours: thing.hours,
+        minutes: thing.minutes,
+        seconds: thing.seconds,
+        milliseconds: thing.milliseconds,
+      })
     throw new Error('Invalid Object')
   }
-  static compare(one: Duration, two: Duration) {}
+  static compare(
+    one: Duration,
+    two: Duration,
+    {
+      relativeTo = new PlainDateTime(1970, 1, 1),
+    }: { relativeTo: PlainDateTime } // FIXME: It would be better to use ZonedDateTime here but it doesn't have an add method for now
+  ): CompareReturnType {
+    return PlainDateTime.compare(relativeTo.add(one), relativeTo.add(two))
+  }
 
   with({
     years,
@@ -159,6 +160,25 @@ export class Duration {
   add(durationLike: DurationLikeType) {}
   subtract(durationLike: DurationLikeType) {}
   total(unit: DurationUnitType) {}
+  round(options?: RoundLikeType) {
+    const { largestUnit, smallestUnit }: RoundType = {
+      ...roundDefaults,
+      ...options,
+    }
+    const priorities = [
+      'years',
+      'months',
+      'weeks',
+      'days',
+      'hours',
+      'minutes',
+      'seconds',
+      'milliseconds',
+    ]
+    if (priorities.indexOf(largestUnit) > priorities.indexOf(smallestUnit))
+      throw new RangeError('largestUnit cannot be smaller than smallestUnit')
+    return this
+  }
 
   toString() {
     const Y = getNumberUnitFormat(this.years, 'Y')

@@ -16,14 +16,23 @@ export type DurationType = {
 }
 export type DurationUnitType = keyof DurationType
 
-// TODO: Currently unused, might be useful for durations later down the line
+export type RoundType = {
+  smallestUnit: DurationUnitType
+  largestUnit: DurationUnitType
+  roundingIncrement: number
+  roundingMode: 'halfExpand' | 'ceil' | 'trunc' | 'floor'
+}
+export type RoundLikeType = Partial<RoundType>
+
+export type CompareReturnType = -1 | 0 | 1
+
 export enum UNIT_INCREMENT {
   SECOND = 1000,
   MINUTE = 60,
   HOUR = 60,
   DAY = 24,
   WEEK = 7,
-  // MONTH = ???
+  MONTH = 4.34524, // There's problems with using a static number for something thats constantly different
   YEAR = 12,
 }
 

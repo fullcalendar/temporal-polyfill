@@ -2,11 +2,15 @@ import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
 import {
   CalendarType,
+  CompareReturnType,
   DurationUnitType,
   LocaleType,
+  RoundLikeType,
+  RoundType,
   TimeZoneType,
+  UNIT_INCREMENT,
 } from './types'
-import { asDate } from './utils'
+import { asDate, roundDefaults, roundModeMap, roundPriorities } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 type PlainDateTimeLikeType = {
@@ -47,8 +51,32 @@ export class PlainDateTime {
       typeof calendar === 'string' ? new Calendar(calendar) : calendar
   }
 
-  static from(thing: any) {
-    if (thing.epochMilliseconds) {
+  static from(thing: any): PlainDateTime {
+    if (typeof thing === 'string') {
+      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?$/
+      const matches = thing.match(regex)
+      if (matches) {
+        const [
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond,
+        ] = matches.slice(1).map((val) => Number(val))
+        return new PlainDateTime(
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond
+        )
+      }
+      throw new Error('Invalid String')
+    } else if (thing.epochMilliseconds) {
       const date = new Date(thing.epochMilliseconds)
       return new PlainDateTime(
         date.getUTCFullYear(),
@@ -74,7 +102,7 @@ export class PlainDateTime {
     throw new Error('Invalid Object')
   }
 
-  static compare(one: PlainDateTime, two: PlainDateTime) {
+  static compare(one: PlainDateTime, two: PlainDateTime): CompareReturnType {
     if (one.epochMilliseconds < two.epochMilliseconds) return -1
     else if (one.epochMilliseconds > two.epochMilliseconds) return 1
     else return 0
@@ -108,7 +136,7 @@ export class PlainDateTime {
     return this.calendar.weekOfYear(this)
   }
 
-  with(dateTimeLike: PlainDateTimeLikeType | string) {
+  with(dateTimeLike: PlainDateTimeLikeType | string): PlainDateTime {
     if (typeof dateTimeLike === 'string') throw new Error('Unimplemented')
     return new PlainDateTime(
       dateTimeLike.isoYear || this.year,
@@ -121,7 +149,7 @@ export class PlainDateTime {
       dateTimeLike.calendar || this.calendar
     )
   }
-  withCalendar(calendar: Calendar | CalendarType) {
+  withCalendar(calendar: Calendar | CalendarType): PlainDateTime {
     const date = asDate(this.epochMilliseconds)
     return new PlainDateTime(
       date.getUTCFullYear(),
@@ -135,7 +163,7 @@ export class PlainDateTime {
     )
   }
 
-  add(amount: Duration | DurationLikeType | string) {
+  add(amount: Duration | DurationLikeType | string): PlainDateTime {
     const {
       years,
       months,
@@ -156,7 +184,7 @@ export class PlainDateTime {
       this.millisecond + milliseconds
     )
   }
-  subtract(amount: Duration | DurationLikeType | string) {
+  subtract(amount: Duration | DurationLikeType | string): PlainDateTime {
     const {
       years,
       months,
@@ -177,56 +205,46 @@ export class PlainDateTime {
       this.millisecond - milliseconds
     )
   }
-  since(
-    other: PlainDateTime,
-    {
-      largestUnit,
-      smallestUnit,
-      roundingIncrement,
-    }: {
-      largestUnit: DurationUnitType
-      smallestUnit: DurationUnitType
-      roundingIncrement: number
-    } = {
-      largestUnit: 'years',
-      smallestUnit: 'milliseconds',
-      roundingIncrement: 1,
-    }
-  ) {
-    const priorities = [
-      'years',
-      'months',
-      'weeks',
-      'days',
-      'hours',
-      'minutes',
-      'seconds',
-      'milliseconds',
-    ]
-    if (priorities.indexOf(largestUnit) > priorities.indexOf(smallestUnit))
-      throw new RangeError('largestUnit cannot be smaller than smallestUnit')
-    const duration = Duration.from({
-      milliseconds: this.epochMilliseconds - other.epochMilliseconds,
-    })
-    return duration
+  since(other: PlainDateTime, options?: RoundLikeType): Duration {
+    return Duration.from(
+      this.epochMilliseconds - other.epochMilliseconds
+    ).round(options)
   }
-  from(
-    other: PlainDateTime,
-    options: {
-      largestUnit: DurationUnitType
-      smallestUnit: DurationUnitType
-      roundingIncrement: number
-    } = {
-      largestUnit: 'years',
-      smallestUnit: 'milliseconds',
-      roundingIncrement: 1,
+  round(options?: RoundLikeType): PlainDateTime {
+    const { smallestUnit, largestUnit, roundingMode }: RoundType = {
+      ...roundDefaults,
+      ...options,
     }
-  ) {
-    return other.since(this, options)
-  }
-  round(smallestUnit: DurationUnitType) {}
+    const roundingMethod = roundModeMap[roundingMode]
 
-  toString() {
+    const smallestIndex = roundPriorities.indexOf(smallestUnit)
+    const largestIndex = roundPriorities.indexOf(largestUnit)
+    let [years, months, days, hours, minutes, seconds, milliseconds] = [
+      this.year,
+      this.month,
+      this.day,
+      this.hour,
+      this.minute,
+      this.second,
+      this.millisecond,
+    ]
+
+    // Round Time
+
+    // Balance???
+
+    return new PlainDateTime(
+      years,
+      months,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds
+    )
+  }
+
+  toString(): string {
     const { year, month, day, hour, minute, second, millisecond } = this
     const yearStr = `000${year}`.slice(-4)
     const monthStr = `0${month}`.slice(-2)
@@ -237,10 +255,13 @@ export class PlainDateTime {
     const msStr = `00${millisecond}`.slice(-3)
     return `${yearStr}-${monthStr}-${dayStr}T${hourStr}:${minStr}:${secStr}.${msStr}`
   }
-  toLocaleString(locale: LocaleType, options?: Intl.DateTimeFormatOptions) {
+  toLocaleString(
+    locale: LocaleType,
+    options?: Intl.DateTimeFormatOptions
+  ): string {
     return Intl.DateTimeFormat(locale, options).format(this.epochMilliseconds)
   }
-  toZonedDateTime(timeZone: TimeZoneType) {
+  toZonedDateTime(timeZone: TimeZoneType): ZonedDateTime {
     return new ZonedDateTime(this.epochMilliseconds, timeZone)
   }
 }

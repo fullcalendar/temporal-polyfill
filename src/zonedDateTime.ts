@@ -1,6 +1,12 @@
 import { Calendar } from './calendar'
 import { TimeZone } from './timezone'
-import { CalendarType, LocaleType, MS_FROM, TimeZoneType } from './types'
+import {
+  CalendarType,
+  CompareReturnType,
+  LocaleType,
+  MS_FROM,
+  TimeZoneType,
+} from './types'
 import { asDate } from './utils'
 
 type ZonedDateTimeLikeType = {
@@ -66,17 +72,6 @@ export class ZonedDateTime {
             second,
             millisecond || 0
           ) + offset
-        console.log(
-          year,
-          month,
-          day,
-          hour,
-          minute,
-          second,
-          millisecond,
-          offset,
-          timezone.id
-        )
         return new ZonedDateTime(epochMilliseconds, 'utc')
       }
       throw new Error('Invalid String')
@@ -90,7 +85,7 @@ export class ZonedDateTime {
     throw new Error('Invalid Object')
   }
 
-  static compare(one: ZonedDateTime, two: ZonedDateTime) {
+  static compare(one: ZonedDateTime, two: ZonedDateTime): CompareReturnType {
     if (one.epochMilliseconds < two.epochMilliseconds) return -1
     else if (one.epochMilliseconds > two.epochMilliseconds) return 1
     else return 0
