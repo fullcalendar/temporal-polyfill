@@ -27,6 +27,7 @@ export type RoundLikeType = Partial<RoundType>
 export type CompareReturnType = -1 | 0 | 1
 
 export enum UNIT_INCREMENT {
+  MILLISECOND = 1,
   SECOND = 1000,
   MINUTE = 60,
   HOUR = 60,
@@ -37,9 +38,12 @@ export enum UNIT_INCREMENT {
 }
 
 export enum MS_FROM {
+  MILLISECOND = 1,
   SECOND = UNIT_INCREMENT.SECOND,
   MINUTE = SECOND * UNIT_INCREMENT.MINUTE,
   HOUR = MINUTE * UNIT_INCREMENT.HOUR,
   DAY = HOUR * UNIT_INCREMENT.DAY,
   WEEK = DAY * UNIT_INCREMENT.WEEK,
+  MONTH = WEEK * UNIT_INCREMENT.MONTH,
+  YEAR = MONTH * UNIT_INCREMENT.YEAR,
 }

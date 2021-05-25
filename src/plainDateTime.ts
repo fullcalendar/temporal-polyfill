@@ -5,6 +5,7 @@ import {
   CompareReturnType,
   DurationUnitType,
   LocaleType,
+  MS_FROM,
   RoundLikeType,
   RoundType,
   TimeZoneType,
@@ -76,6 +77,17 @@ export class PlainDateTime {
         )
       }
       throw new Error('Invalid String')
+    } else if (typeof thing === 'number') {
+      const date = new Date(thing)
+      return new PlainDateTime(
+        date.getUTCFullYear(),
+        date.getUTCMonth() + 1,
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+        date.getUTCSeconds(),
+        date.getUTCMilliseconds()
+      )
     } else if (thing.epochMilliseconds) {
       const date = new Date(thing.epochMilliseconds)
       return new PlainDateTime(
@@ -211,27 +223,80 @@ export class PlainDateTime {
     ).round(options)
   }
   round(options?: RoundLikeType): PlainDateTime {
-    const { smallestUnit, largestUnit, roundingMode }: RoundType = {
+    const {
+      smallestUnit,
+      largestUnit,
+      roundingIncrement,
+      roundingMode,
+    }: RoundType = {
       ...roundDefaults,
       ...options,
     }
-    const roundingMethod = roundModeMap[roundingMode]
 
     const smallestIndex = roundPriorities.indexOf(smallestUnit)
     const largestIndex = roundPriorities.indexOf(largestUnit)
-    let [years, months, days, hours, minutes, seconds, milliseconds] = [
-      this.year,
-      this.month,
-      this.day,
-      this.hour,
-      this.minute,
-      this.second,
-      this.millisecond,
+    if (smallestIndex < largestIndex)
+      throw new RangeError('largestUnit cannot be smaller than smallestUnit')
+
+    const arr: Array<{
+      value: number
+      field: DurationUnitType
+      increment: number
+    }> = [
+      {
+        value: this.millisecond,
+        field: 'milliseconds',
+        increment: UNIT_INCREMENT.MILLISECOND,
+      },
+      {
+        value: this.second,
+        field: 'seconds',
+        increment: UNIT_INCREMENT.SECOND,
+      },
+      {
+        value: this.minute,
+        field: 'minutes',
+        increment: UNIT_INCREMENT.MINUTE,
+      },
+      { value: this.hour, field: 'hours', increment: UNIT_INCREMENT.HOUR },
+      { value: this.day, field: 'days', increment: UNIT_INCREMENT.DAY },
+      {
+        value: this.month,
+        field: 'months',
+        increment: UNIT_INCREMENT.MONTH * UNIT_INCREMENT.WEEK,
+      },
+      { value: this.year, field: 'years', increment: UNIT_INCREMENT.YEAR },
     ]
 
-    // Round Time
+    const [
+      milliseconds,
+      seconds,
+      minutes,
+      hours,
+      days,
+      months,
+      years,
+    ] = arr.reduce(
+      (acc, { value, field, increment }, idx) => {
+        const roundIndex = roundPriorities.indexOf(field)
 
-    // Balance???
+        // Round Smallest
+        if (smallestIndex < roundIndex) {
+          acc[idx] = 0
+          // TODO: Implement usage of roundingIncrement
+          acc[idx + 1] += roundModeMap[roundingMode](value / increment)
+        }
+        // Round Largest
+        else if (largestIndex > roundIndex) {
+          acc[idx] = 0
+          acc[idx - 1] += value * arr[idx - 1].increment
+        } else {
+          acc[idx] += value
+        }
+        return acc
+      },
+      [0, 0, 0, 0, 0, 0, 0]
+    )
 
     return new PlainDateTime(
       years,

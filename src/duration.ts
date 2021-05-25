@@ -8,7 +8,7 @@ import {
   RoundType,
   UNIT_INCREMENT,
 } from './types'
-import { roundDefaults } from './utils'
+import { roundDefaults, roundPriorities } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type DurationLikeType = Partial<DurationType>
@@ -161,23 +161,22 @@ export class Duration {
   subtract(durationLike: DurationLikeType) {}
   total(unit: DurationUnitType) {}
   round(options?: RoundLikeType) {
-    const { largestUnit, smallestUnit }: RoundType = {
+    const {
+      smallestUnit,
+      largestUnit,
+      roundingIncrement,
+      roundingMode,
+    }: RoundType = {
       ...roundDefaults,
       ...options,
     }
-    const priorities = [
-      'years',
-      'months',
-      'weeks',
-      'days',
-      'hours',
-      'minutes',
-      'seconds',
-      'milliseconds',
-    ]
-    if (priorities.indexOf(largestUnit) > priorities.indexOf(smallestUnit))
+
+    const smallestIndex = roundPriorities.indexOf(smallestUnit)
+    const largestIndex = roundPriorities.indexOf(largestUnit)
+    if (smallestIndex < largestIndex)
       throw new RangeError('largestUnit cannot be smaller than smallestUnit')
-    return this
+
+    return Duration.from(this)
   }
 
   toString() {

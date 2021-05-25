@@ -1,5 +1,6 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
+import { RoundLikeType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
@@ -97,4 +98,24 @@ test.each([
   ],
 ])('can get duration since other time', (date, other, expected) => {
   expect(date.since(other)).toEqual(expected)
+})
+
+test.each<[PlainDateTime, PlainDateTime, RoundLikeType]>([
+  [
+    new PlainDateTime(1970, 1, 1, 0, 55),
+    new PlainDateTime(1970, 1, 1, 1),
+    { smallestUnit: 'hours', roundingMode: 'halfExpand' },
+  ],
+  [
+    new PlainDateTime(1970, 1, 1, 1, 1, 1, 1),
+    new PlainDateTime(1970, 1, 1, 1, 1, 1, 1),
+    {},
+  ],
+  [
+    new PlainDateTime(2000, 1, 1, 1),
+    new PlainDateTime(2000, 1, 2),
+    { smallestUnit: 'days', roundingMode: 'ceil' },
+  ],
+])('can round %s', (date, expected, options) => {
+  expect(date.round(options)).toEqual(expected)
 })
