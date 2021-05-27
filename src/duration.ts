@@ -8,8 +8,7 @@ import {
   RoundType,
   UNIT_INCREMENT,
 } from './types'
-import { roundDefaults, roundPriorities } from './utils'
-import { ZonedDateTime } from './zonedDateTime'
+import { incrementMap, roundDefaults, roundPriorities, toUnitMS } from './utils'
 
 export type DurationLikeType = Partial<DurationType>
 
@@ -61,6 +60,28 @@ const getNumberUnitFormat = (number: number, unit: string) => ({
   negative: number < 0,
   format: number ? `${Math.abs(number)}${unit}` : '',
 })
+export const separateDuration = (
+  duration: Duration
+): [macroDuration: Duration, durationTimeMs: number] => {
+  return [
+    new Duration(
+      duration.years,
+      duration.months,
+      duration.weeks,
+      duration.days
+    ),
+    new Duration(
+      0,
+      0,
+      0,
+      0,
+      duration.hours,
+      duration.minutes,
+      duration.seconds,
+      duration.milliseconds
+    ).total({ unit: 'milliseconds' }),
+  ]
+}
 
 // TODO: We need to deal with overflow on any of the fields
 export class Duration {
@@ -157,10 +178,65 @@ export class Duration {
     )
   }
 
-  add(durationLike: DurationLikeType) {}
-  subtract(durationLike: DurationLikeType) {}
-  total(unit: DurationUnitType) {}
-  round(options?: RoundLikeType) {
+  add({
+    years = 0,
+    months = 0,
+    weeks = 0,
+    days = 0,
+    hours = 0,
+    minutes = 0,
+    seconds = 0,
+    milliseconds = 0,
+  }: DurationLikeType) {
+    return rollover(
+      new Duration(
+        this.years + years,
+        this.months + months,
+        this.weeks + weeks,
+        this.days + days,
+        this.hours + hours,
+        this.minutes + minutes,
+        this.seconds + seconds,
+        this.milliseconds + milliseconds
+      )
+    )
+  }
+  subtract({
+    years = 0,
+    months = 0,
+    weeks = 0,
+    days = 0,
+    hours = 0,
+    minutes = 0,
+    seconds = 0,
+    milliseconds = 0,
+  }: DurationLikeType) {
+    return rollover(
+      new Duration(
+        this.years - years,
+        this.months - months,
+        this.weeks - weeks,
+        this.days - days,
+        this.hours - hours,
+        this.minutes - minutes,
+        this.seconds - seconds,
+        this.milliseconds - milliseconds
+      )
+    )
+  }
+  total({
+    unit,
+    relativeTo = new PlainDateTime(1970, 1, 1),
+  }: {
+    unit: DurationUnitType
+    relativeTo?: PlainDateTime
+  }): number {
+    return (
+      (relativeTo.add(this).epochMilliseconds - relativeTo.epochMilliseconds) /
+      toUnitMS(unit)
+    )
+  }
+  round(options?: RoundLikeType): Duration {
     const {
       smallestUnit,
       largestUnit,

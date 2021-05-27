@@ -1,5 +1,7 @@
+import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { CalendarType } from './types'
+import { CalendarType, PlainDate } from './types'
+import { asDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Calendar {
@@ -46,5 +48,25 @@ export class Calendar {
       ((dt.epochMilliseconds - yearStart) / 86400000 + 1) / 7
     )
     return weekNum
+  }
+
+  dateAdd(
+    { isoYear, isoMonth, isoDay }: PlainDate,
+    duration: Duration,
+    options?: { overflow?: 'constrain' | 'reject' }
+  ): PlainDate {
+    // TODO: Make overflow do something
+    const { overflow } = { overflow: 'constrain', ...options }
+    const jsDate = new Date(isoYear, isoMonth, isoDay)
+    jsDate.setFullYear(
+      jsDate.getFullYear() + duration.years,
+      jsDate.getMonth() + duration.months,
+      jsDate.getDate() + duration.days + duration.weeks * 7
+    )
+    return {
+      isoYear: jsDate.getFullYear(),
+      isoMonth: jsDate.getMonth(),
+      isoDay: jsDate.getDate(),
+    }
   }
 }

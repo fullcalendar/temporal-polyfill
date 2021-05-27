@@ -4,10 +4,9 @@ import {
   CalendarType,
   CompareReturnType,
   LocaleType,
-  MS_FROM,
   TimeZoneType,
 } from './types'
-import { asDate } from './utils'
+import { asDate, toUnitMS } from './utils'
 
 type ZonedDateTimeLikeType = {
   epochMilliseconds?: number
@@ -33,7 +32,7 @@ export class ZonedDateTime {
 
   static from(thing: any) {
     if (typeof thing === 'string') {
-      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:(Z|[+-][01]\d:[0-5]\d))?(?:\[(\w+\/\w+)\])?$/
+      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:(Z|[+-][01]\d:[0-5]\d))?(?:\[(\w+\/\w+)\])?(?:\[u-ca=(\w+)\])?$/
       const matches = thing.match(regex)
       if (matches) {
         const [
@@ -45,23 +44,32 @@ export class ZonedDateTime {
           second,
           millisecond,
           offset,
-        ] = matches.slice(1).map((val, index) => {
-          if (index === 7) {
-            // TimeZone Offset
-            const offsetRegex = /([+-])(\d{2}):(\d{2})/
-            const offsetMatches = val.match(offsetRegex)
-            if (offsetMatches) {
-              const [plusminus, hrs, mins] = offsetMatches.slice(1)
-              return (
-                (plusminus ? 1 : -1) *
-                (Number(hrs) * MS_FROM.HOUR + Number(mins) * MS_FROM.MINUTE)
-              )
+          timezone,
+          calendar,
+        ] = matches.slice(1).reduce(
+          (acc, val, index) => {
+            if (index === 7) {
+              // TimeZone Offset
+              const offsetRegex = /([+-])(\d{2}):(\d{2})/
+              const offsetMatches = val.match(offsetRegex)
+              if (offsetMatches) {
+                const [plusminus, hrs, mins] = offsetMatches.slice(1)
+                acc[index] =
+                  (plusminus ? 1 : -1) *
+                  (Number(hrs) * toUnitMS('hours') +
+                    Number(mins) * toUnitMS('minutes'))
+              }
+              acc[index] = 0
+            } else if (index === 8 || index === 9) {
+              // Timezone and Calendar
+              acc[index] = val
+            } else {
+              acc[index] = Number(val)
             }
-            return 0
-          }
-          return Number(val)
-        })
-        const timezone = new TimeZone(matches[9] as TimeZoneType)
+            return acc
+          },
+          [0, 0, 0, 0, 0, 0, 0, 0, '', '']
+        )
         const epochMilliseconds =
           Date.UTC(
             year,
@@ -72,7 +80,11 @@ export class ZonedDateTime {
             second,
             millisecond || 0
           ) + offset
-        return new ZonedDateTime(epochMilliseconds, 'utc')
+        return new ZonedDateTime(
+          epochMilliseconds,
+          timezone,
+          calendar as CalendarType
+        )
       }
       throw new Error('Invalid String')
     } else if (thing.epochMilliseconds) {

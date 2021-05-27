@@ -1,11 +1,11 @@
 import { Calendar } from './calendar'
-import { Duration, DurationLikeType } from './duration'
+import { Duration, DurationLikeType, separateDuration } from './duration'
 import {
   CalendarType,
   CompareReturnType,
   DurationUnitType,
   LocaleType,
-  MS_FROM,
+  PlainTime,
   RoundLikeType,
   RoundType,
   TimeZoneType,
@@ -24,6 +24,29 @@ type PlainDateTimeLikeType = {
   isoMillisecond?: number
   calendar?: Calendar | CalendarType
 }
+
+const balanceTime = ({
+  isoHour,
+  isoMinute,
+  isoSecond,
+  isoMillisecond,
+}: PlainTime): PlainTime & { isoDay: number } => {
+  //MS
+  isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND)
+  isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND)
+  //SECS
+  isoMinute += Math.trunc(isoSecond / UNIT_INCREMENT.MINUTE)
+  isoSecond = Math.trunc(isoSecond % UNIT_INCREMENT.MINUTE)
+  //MINS
+  isoHour += Math.trunc(isoMinute / UNIT_INCREMENT.HOUR)
+  isoMinute = Math.trunc(isoMinute % UNIT_INCREMENT.HOUR)
+  //HOURS
+  const isoDay = Math.trunc(isoHour / UNIT_INCREMENT.DAY)
+  isoHour = Math.trunc(isoHour % UNIT_INCREMENT.DAY)
+
+  return { isoDay, isoHour, isoMinute, isoSecond, isoMillisecond }
+}
+
 export class PlainDateTime {
   readonly epochMilliseconds
   readonly calendar
@@ -54,7 +77,7 @@ export class PlainDateTime {
 
   static from(thing: any): PlainDateTime {
     if (typeof thing === 'string') {
-      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?$/
+      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:\[u-ca=(\w+)\])?$/
       const matches = thing.match(regex)
       if (matches) {
         const [
@@ -65,7 +88,18 @@ export class PlainDateTime {
           minute,
           second,
           millisecond,
-        ] = matches.slice(1).map((val) => Number(val))
+          calendar,
+        ] = matches.slice(1).reduce(
+          (acc, val, index) => {
+            if (index === 7) {
+              acc[index] = val
+            } else {
+              acc[index] = Number(val)
+            }
+            return acc
+          },
+          [0, 0, 0, 0, 0, 0, 0, '']
+        )
         return new PlainDateTime(
           year,
           month,
@@ -73,7 +107,8 @@ export class PlainDateTime {
           hour,
           minute,
           second,
-          millisecond
+          millisecond,
+          calendar as CalendarType
         )
       }
       throw new Error('Invalid String')
@@ -176,25 +211,15 @@ export class PlainDateTime {
   }
 
   add(amount: Duration | DurationLikeType | string): PlainDateTime {
-    const {
-      years,
-      months,
-      weeks,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds,
-    } = amount instanceof Duration ? amount : Duration.from(amount)
-    return new PlainDateTime(
-      this.year + years,
-      this.month + months,
-      this.day + days + weeks * 7,
-      this.hour + hours,
-      this.minute + minutes,
-      this.second + seconds,
-      this.millisecond + milliseconds
+    const duration = amount instanceof Duration ? amount : Duration.from(amount)
+
+    const [macro, ms] = separateDuration(duration)
+
+    const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
+      { isoYear: this.year, isoMonth: this.month, isoDay: this.day },
+      macro
     )
+    return new PlainDateTime(isoYear, isoMonth, isoDay)
   }
   subtract(amount: Duration | DurationLikeType | string): PlainDateTime {
     const {
@@ -207,10 +232,14 @@ export class PlainDateTime {
       seconds,
       milliseconds,
     } = amount instanceof Duration ? amount : Duration.from(amount)
+    const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
+      { isoYear: this.year, isoMonth: this.month, isoDay: this.day },
+      new Duration(-years, -months, -weeks, -days)
+    )
     return new PlainDateTime(
-      this.year - years,
-      this.month - months,
-      this.day - days - weeks * 7,
+      isoYear,
+      isoMonth,
+      isoDay,
       this.hour - hours,
       this.minute - minutes,
       this.second - seconds,
@@ -223,12 +252,7 @@ export class PlainDateTime {
     ).round(options)
   }
   round(options?: RoundLikeType): PlainDateTime {
-    const {
-      smallestUnit,
-      largestUnit,
-      roundingIncrement,
-      roundingMode,
-    }: RoundType = {
+    const { smallestUnit, largestUnit, roundingMode }: RoundType = {
       ...roundDefaults,
       ...options,
     }

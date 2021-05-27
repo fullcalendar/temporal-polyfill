@@ -1,4 +1,5 @@
 import { Duration } from './duration'
+import { DurationUnitType } from './types'
 
 test('can instantiate duration', () => {
   const duration = new Duration(1, 1, 1)
@@ -37,4 +38,16 @@ describe('duration strings', () => {
   ])('can be created as %s', (duration, expected) => {
     expect(duration.toString()).toBe(expected)
   })
+})
+
+test.each<[Duration, { unit: DurationUnitType }, number]>([
+  [new Duration(0, 0, 0, 1), { unit: 'hours' }, 24],
+  [new Duration(1, 0, 0, 1), { unit: 'months' }, 12],
+  [new Duration(0, 0, 0, 1), { unit: 'minutes' }, 1440],
+  [new Duration(0, 0, 0, 1), { unit: 'weeks' }, 1 / 7],
+  [new Duration(0, 0, 1, 1), { unit: 'weeks' }, 8 / 7],
+  [new Duration(0, 0, 0, 0, 12, 32, 30), { unit: 'minutes' }, 752.5],
+  [new Duration(0, 0, 0, 0, 130, 20), { unit: 'seconds' }, 469200],
+])('can find total of %s', (dur, options, expected) => {
+  expect(dur.total(options)).toBe(expected)
 })
