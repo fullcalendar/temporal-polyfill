@@ -1,12 +1,15 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
+import { asRoundOptions } from './round'
 import {
   CalendarType,
-  DateMathOptionsLikeType,
-  DateMathOptionsType,
+  AssignmentOptionsLikeType,
+  AssignmentOptionsType,
   PlainDate,
+  RoundOptionsLikeType,
+  RoundOptionsType,
 } from './types'
-import { asDate } from './utils'
+import { comparePlainDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Calendar {
@@ -58,10 +61,10 @@ export class Calendar {
   dateAdd(
     { isoYear, isoMonth, isoDay }: PlainDate,
     duration: Duration,
-    options?: DateMathOptionsLikeType
+    options?: AssignmentOptionsLikeType
   ): PlainDate {
     // TODO: Make overflow do something
-    const { overflow }: DateMathOptionsType = {
+    const { overflow }: AssignmentOptionsType = {
       overflow: 'constrain',
       ...options,
     }
@@ -76,5 +79,15 @@ export class Calendar {
       isoMonth: jsDate.getMonth(),
       isoDay: jsDate.getDate(),
     }
+  }
+
+  dateUntil(
+    one: PlainDate,
+    two: PlainDate,
+    options?: RoundOptionsLikeType
+  ): Duration {
+    const { largestUnit, smallestUnit, roundingMode } = asRoundOptions(options)
+
+    return new Duration()
   }
 }

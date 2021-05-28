@@ -46,8 +46,8 @@ export type RoundOptionsType = {
 }
 export type RoundOptionsLikeType = Partial<RoundOptionsType>
 
-export type DateMathOptionsType = { overflow: 'constrain' | 'reject' }
-export type DateMathOptionsLikeType = Partial<DateMathOptionsType>
+export type AssignmentOptionsType = { overflow: 'constrain' | 'reject' }
+export type AssignmentOptionsLikeType = Partial<AssignmentOptionsType>
 
 export type CompareReturnType = -1 | 0 | 1
 

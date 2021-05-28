@@ -1,6 +1,6 @@
 import { Calendar } from './calendar'
 import { Duration } from './duration'
-import { CalendarType } from './types'
+import { CalendarType, PlainDate } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
@@ -45,4 +45,15 @@ test.each([
 ])('can do dateAdd', (date, dur, expected) => {
   const calendar = new Calendar()
   expect(calendar.dateAdd(date, dur)).toEqual(expected)
+})
+
+test.each<[PlainDate, PlainDate, Duration]>([
+  [
+    { isoYear: 2021, isoMonth: 5, isoDay: 24 },
+    { isoYear: 2021, isoMonth: 5, isoDay: 28 },
+    new Duration(0, 0, 0, 4),
+  ],
+])('can do dateUntil', (one, two, expected) => {
+  const calendar = new Calendar()
+  expect(calendar.dateUntil(one, two)).toBe(expected)
 })

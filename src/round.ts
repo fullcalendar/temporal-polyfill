@@ -1,4 +1,9 @@
-import { DurationUnitType, RoundModeType, RoundOptionsType } from './types'
+import {
+  DurationUnitType,
+  RoundModeType,
+  RoundOptionsLikeType,
+  RoundOptionsType,
+} from './types'
 
 export const roundPriorities: Array<DurationUnitType> = [
   'years',
@@ -11,11 +16,23 @@ export const roundPriorities: Array<DurationUnitType> = [
   'milliseconds',
 ]
 
-export const roundDefaults: RoundOptionsType = {
+const roundDefaults: RoundOptionsType = {
   largestUnit: roundPriorities[0],
   smallestUnit: roundPriorities[roundPriorities.length - 1],
   roundingIncrement: 1,
   roundingMode: 'trunc',
+}
+export const asRoundOptions = (options?: RoundOptionsLikeType) => {
+  const combined = {
+    ...roundDefaults,
+    ...options,
+  }
+  if (
+    roundPriorities.indexOf(combined.smallestUnit) <
+    roundPriorities.indexOf(combined.largestUnit)
+  )
+    throw new RangeError('largestUnit cannot be smaller than smallestUnit')
+  return combined
 }
 
 export const roundModeMap: {

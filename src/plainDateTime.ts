@@ -1,12 +1,12 @@
 import { balanceTime } from './balance'
 import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
-import { roundDefaults, roundModeMap, roundPriorities } from './round'
+import { asRoundOptions, roundModeMap, roundPriorities } from './round'
 import { separateDuration } from './separate'
 import {
   CalendarType,
   CompareReturnType,
-  DateMathOptionsType,
+  AssignmentOptionsType,
   DurationUnitType,
   LocaleType,
   PlainTime,
@@ -194,7 +194,7 @@ export class PlainDateTime {
 
   add(
     amount: Duration | DurationLikeType | string,
-    options?: DateMathOptionsType
+    options?: AssignmentOptionsType
   ): PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
@@ -272,15 +272,14 @@ export class PlainDateTime {
     ).round(options)
   }
   round(options?: RoundOptionsLikeType): PlainDateTime {
-    const { smallestUnit, largestUnit, roundingMode }: RoundOptionsType = {
-      ...roundDefaults,
-      ...options,
-    }
+    const {
+      smallestUnit,
+      largestUnit,
+      roundingMode,
+    }: RoundOptionsType = asRoundOptions(options)
 
     const smallestIndex = roundPriorities.indexOf(smallestUnit)
     const largestIndex = roundPriorities.indexOf(largestUnit)
-    if (smallestIndex < largestIndex)
-      throw new RangeError('largestUnit cannot be smaller than smallestUnit')
 
     const arr: Array<{
       value: number

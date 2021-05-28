@@ -6,7 +6,7 @@ import {
   LocaleType,
   TimeZoneType,
 } from './types'
-import { asDate, toUnitMS } from './utils'
+import { asDate, toUnitMs } from './utils'
 
 type ZonedDateTimeLikeType = {
   epochMilliseconds?: number
@@ -56,8 +56,8 @@ export class ZonedDateTime {
                 const [plusminus, hrs, mins] = offsetMatches.slice(1)
                 acc[index] =
                   (plusminus ? 1 : -1) *
-                  (Number(hrs) * toUnitMS('hours') +
-                    Number(mins) * toUnitMS('minutes'))
+                  (Number(hrs) * toUnitMs('hours') +
+                    Number(mins) * toUnitMs('minutes'))
               }
               acc[index] = 0
             } else if (index === 8 || index === 9) {

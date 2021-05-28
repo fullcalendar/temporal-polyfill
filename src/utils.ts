@@ -1,5 +1,10 @@
 import { roundPriorities } from './round'
-import { DurationUnitType, UNIT_INCREMENT } from './types'
+import {
+  CompareReturnType,
+  DurationUnitType,
+  PlainDate,
+  UNIT_INCREMENT,
+} from './types'
 
 export const asDate = (epochMilliseconds: number): Date =>
   new Date(epochMilliseconds)
@@ -15,9 +20,22 @@ export const incrementMap: { [Property in DurationUnitType]: number } = {
   milliseconds: UNIT_INCREMENT.MILLISECOND,
 }
 
-export const toUnitMS = (unit: DurationUnitType): number =>
+export const toUnitMs = (unit: DurationUnitType): number =>
   roundPriorities.reduce(
     (acc, val, index) =>
       index >= roundPriorities.indexOf(unit) ? acc * incrementMap[val] : acc,
     1
   )
+
+export const comparePlainDate = (
+  one: PlainDate,
+  two: PlainDate
+): CompareReturnType => {
+  if (one.isoYear > two.isoYear) return 1
+  else if (one.isoYear < two.isoYear) return -1
+  if (one.isoMonth > two.isoMonth) return 1
+  else if (one.isoMonth < two.isoMonth) return -1
+  if (one.isoDay > two.isoDay) return 1
+  else if (one.isoDay < two.isoDay) return -1
+  return 0
+}

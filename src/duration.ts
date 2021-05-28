@@ -1,6 +1,6 @@
 import { balanceDuration } from './balance'
 import { PlainDateTime } from './plainDateTime'
-import { roundDefaults, roundPriorities } from './round'
+import { asRoundOptions, roundPriorities } from './round'
 import {
   CompareReturnType,
   DurationType,
@@ -10,7 +10,7 @@ import {
   RoundOptionsType,
   UNIT_INCREMENT,
 } from './types'
-import { toUnitMS } from './utils'
+import { toUnitMs } from './utils'
 
 export type DurationLikeType = Partial<DurationType>
 
@@ -113,26 +113,21 @@ export class Duration {
     )
   }
 
-  add({
-    years = 0,
-    months = 0,
-    weeks = 0,
-    days = 0,
-    hours = 0,
-    minutes = 0,
-    seconds = 0,
-    milliseconds = 0,
-  }: DurationLikeType) {
+  add(
+    other: Duration | DurationLikeType | string,
+    options: { relativeTo: PlainDateTime }
+  ): Duration {
+    const duration = other instanceof Duration ? other : Duration.from(other)
     return balanceDuration(
       new Duration(
-        this.years + years,
-        this.months + months,
-        this.weeks + weeks,
-        this.days + days,
-        this.hours + hours,
-        this.minutes + minutes,
-        this.seconds + seconds,
-        this.milliseconds + milliseconds
+        this.years + duration.years,
+        this.months + duration.months,
+        this.weeks + duration.weeks,
+        this.days + duration.days,
+        this.hours + duration.hours,
+        this.minutes + duration.minutes,
+        this.seconds + duration.seconds,
+        this.milliseconds + duration.milliseconds
       )
     )
   }
@@ -145,7 +140,7 @@ export class Duration {
     minutes = 0,
     seconds = 0,
     milliseconds = 0,
-  }: DurationLikeType) {
+  }: DurationLikeType): Duration {
     return balanceDuration(
       new Duration(
         this.years - years,
@@ -168,7 +163,7 @@ export class Duration {
   }): number {
     return (
       (relativeTo.add(this).epochMilliseconds - relativeTo.epochMilliseconds) /
-      toUnitMS(unit)
+      toUnitMs(unit)
     )
   }
   round(options?: RoundOptionsLikeType): Duration {
@@ -177,15 +172,7 @@ export class Duration {
       largestUnit,
       roundingIncrement,
       roundingMode,
-    }: RoundOptionsType = {
-      ...roundDefaults,
-      ...options,
-    }
-
-    const smallestIndex = roundPriorities.indexOf(smallestUnit)
-    const largestIndex = roundPriorities.indexOf(largestUnit)
-    if (smallestIndex < largestIndex)
-      throw new RangeError('largestUnit cannot be smaller than smallestUnit')
+    }: RoundOptionsType = asRoundOptions(options)
 
     return Duration.from(this)
   }

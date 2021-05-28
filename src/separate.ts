@@ -1,6 +1,18 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { toUnitMS } from './utils'
+import { PlainTime } from './types'
+import { toUnitMs } from './utils'
+
+export const extractTimeMs = ({
+  isoHour,
+  isoMinute,
+  isoSecond,
+  isoMillisecond,
+}: PlainTime): number =>
+  isoHour * toUnitMs('hours') +
+  isoMinute * toUnitMs('minutes') +
+  isoSecond * toUnitMs('seconds') +
+  isoMillisecond * toUnitMs('milliseconds')
 
 export const separateDuration = (
   duration: Duration
@@ -12,16 +24,19 @@ export const separateDuration = (
       duration.weeks,
       duration.days
     ),
-    duration.hours * toUnitMS('hours') +
-      duration.minutes * toUnitMS('minutes') +
-      duration.seconds * toUnitMS('seconds') +
-      duration.milliseconds * toUnitMS('milliseconds'),
+    extractTimeMs({
+      isoHour: duration.hours,
+      isoMinute: duration.minutes,
+      isoSecond: duration.seconds,
+      isoMillisecond: duration.milliseconds,
+    }),
   ]
 }
 
 // TODO: Implement this
 export const separateDateTime = (
-  date: PlainDateTime
+  date: PlainDateTime,
+  minTimeMs: number = 0
 ): [isoDate: Date, timeOfDayMs: number] => {
   return [new Date(), 0]
 }
