@@ -1,4 +1,4 @@
-import { balanceTime } from './balance'
+import { balanceDateTime } from './balance'
 import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
 import { asRoundOptions, roundModeMap, roundPriorities } from './round'
@@ -9,7 +9,6 @@ import {
   AssignmentOptionsType,
   DurationUnitType,
   LocaleType,
-  PlainTime,
   RoundOptionsLikeType,
   RoundOptionsType,
   TimeZoneType,
@@ -199,23 +198,15 @@ export class PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
 
-    const {
-      deltaDays,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = balanceTime({
-      isoHour: this.hour,
-      isoMinute: this.minute,
-      isoSecond: this.second,
-      isoMillisecond: this.millisecond + ms,
+    const constrained = balanceDateTime({
+      isoMillisecond: this.epochMilliseconds + ms,
     })
+
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
       {
-        isoYear: this.year,
-        isoMonth: this.month,
-        isoDay: this.day + deltaDays,
+        isoYear: constrained.isoYear,
+        isoMonth: constrained.isoMonth,
+        isoDay: constrained.isoDay,
       },
       macro,
       options
@@ -225,10 +216,10 @@ export class PlainDateTime {
       isoYear,
       isoMonth,
       isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
+      constrained.isoHour,
+      constrained.isoMinute,
+      constrained.isoSecond,
+      constrained.isoMillisecond,
       this.calendar
     )
   }
@@ -236,23 +227,14 @@ export class PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
 
-    const {
-      deltaDays,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = balanceTime({
-      isoHour: this.hour,
-      isoMinute: this.minute,
-      isoSecond: this.second,
-      isoMillisecond: this.millisecond - ms,
+    const constrained = balanceDateTime({
+      isoMillisecond: this.epochMilliseconds - ms,
     })
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
       {
-        isoYear: this.year,
-        isoMonth: this.month,
-        isoDay: this.day + deltaDays,
+        isoYear: constrained.isoYear,
+        isoMonth: constrained.isoMonth,
+        isoDay: constrained.isoDay,
       },
       new Duration(-macro.years, -macro.months, -macro.weeks, -macro.days)
     )
@@ -260,10 +242,10 @@ export class PlainDateTime {
       isoYear,
       isoMonth,
       isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond
+      constrained.isoHour,
+      constrained.isoMinute,
+      constrained.isoSecond,
+      constrained.isoMillisecond
     )
   }
   since(other: PlainDateTime, options?: RoundOptionsLikeType): Duration {

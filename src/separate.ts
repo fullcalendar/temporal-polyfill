@@ -1,6 +1,6 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { PlainTime } from './types'
+import { PlainTimeType } from './types'
 import { toUnitMs } from './utils'
 
 export const extractTimeMs = ({
@@ -8,7 +8,7 @@ export const extractTimeMs = ({
   isoMinute,
   isoSecond,
   isoMillisecond,
-}: PlainTime): number =>
+}: PlainTimeType): number =>
   isoHour * toUnitMs('hours') +
   isoMinute * toUnitMs('minutes') +
   isoSecond * toUnitMs('seconds') +

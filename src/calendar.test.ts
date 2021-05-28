@@ -1,6 +1,6 @@
 import { Calendar } from './calendar'
 import { Duration } from './duration'
-import { CalendarType, PlainDate } from './types'
+import { CalendarType, PlainDateType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
@@ -47,7 +47,7 @@ test.each([
   expect(calendar.dateAdd(date, dur)).toEqual(expected)
 })
 
-test.each<[PlainDate, PlainDate, Duration]>([
+test.each<[PlainDateType, PlainDateType, Duration]>([
   [
     { isoYear: 2021, isoMonth: 5, isoDay: 24 },
     { isoYear: 2021, isoMonth: 5, isoDay: 28 },

@@ -5,7 +5,7 @@ import {
   CalendarType,
   AssignmentOptionsLikeType,
   AssignmentOptionsType,
-  PlainDate,
+  PlainDateType,
   RoundOptionsLikeType,
   RoundOptionsType,
 } from './types'
@@ -59,10 +59,10 @@ export class Calendar {
   }
 
   dateAdd(
-    { isoYear, isoMonth, isoDay }: PlainDate,
+    { isoYear, isoMonth, isoDay }: PlainDateType,
     duration: Duration,
     options?: AssignmentOptionsLikeType
-  ): PlainDate {
+  ): PlainDateType {
     // TODO: Make overflow do something
     const { overflow }: AssignmentOptionsType = {
       overflow: 'constrain',
@@ -82,12 +82,21 @@ export class Calendar {
   }
 
   dateUntil(
-    one: PlainDate,
-    two: PlainDate,
+    one: PlainDateType,
+    two: PlainDateType,
     options?: RoundOptionsLikeType
   ): Duration {
-    const { largestUnit, smallestUnit, roundingMode } = asRoundOptions(options)
+    const { largestUnit } = asRoundOptions(options)
 
-    return new Duration()
+    switch (largestUnit) {
+      case 'years':
+      case 'months':
+        return new Duration()
+      case 'weeks':
+      case 'days':
+        return new Duration()
+      default:
+        throw new Error('Invalid units')
+    }
   }
 }

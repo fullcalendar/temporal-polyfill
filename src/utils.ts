@@ -2,7 +2,8 @@ import { roundPriorities } from './round'
 import {
   CompareReturnType,
   DurationUnitType,
-  PlainDate,
+  PlainDateTimeType,
+  PlainDateType,
   UNIT_INCREMENT,
 } from './types'
 
@@ -28,8 +29,8 @@ export const toUnitMs = (unit: DurationUnitType): number =>
   )
 
 export const comparePlainDate = (
-  one: PlainDate,
-  two: PlainDate
+  one: PlainDateType,
+  two: PlainDateType
 ): CompareReturnType => {
   if (one.isoYear > two.isoYear) return 1
   else if (one.isoYear < two.isoYear) return -1

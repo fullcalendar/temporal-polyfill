@@ -1,12 +1,17 @@
 import { Duration, DurationLikeType } from './duration'
-import { PlainTime, PlainDate, UNIT_INCREMENT } from './types'
+import {
+  PlainTimeType,
+  PlainDateType,
+  UNIT_INCREMENT,
+  PlainDateTimeType,
+} from './types'
 
 export const balanceTime = ({
   isoHour,
   isoMinute,
   isoSecond,
   isoMillisecond,
-}: PlainTime): PlainTime & { deltaDays: number } => {
+}: PlainTimeType): PlainTimeType & { deltaDays: number } => {
   //MS
   isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND) || 0
   isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND) || 0
@@ -23,16 +28,36 @@ export const balanceTime = ({
   return { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond }
 }
 
-// TODO: Implement this
-export const balanceDate = ({
-  isoYear,
-  isoMonth,
-  isoDay,
-}: PlainDate): PlainDate => {
+// Leverages JS Date objects overflow management to organize our Date objects
+// Note: bear in mind that month uses index 0 in this
+export const balanceDateTime = ({
+  isoYear = 0,
+  isoMonth = 0,
+  isoDay = 0,
+  isoHour = 0,
+  isoMinute = 0,
+  isoSecond = 0,
+  isoMillisecond = 0,
+}: Partial<PlainDateTimeType>): PlainDateTimeType => {
+  const date = new Date(
+    Date.UTC(
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond
+    )
+  )
   return {
-    isoYear,
-    isoMonth,
-    isoDay,
+    isoYear: date.getUTCFullYear(),
+    isoMonth: date.getUTCMonth(),
+    isoDay: date.getUTCDate(),
+    isoHour: date.getUTCHours(),
+    isoMinute: date.getUTCMinutes(),
+    isoSecond: date.getUTCSeconds(),
+    isoMillisecond: date.getUTCMilliseconds(),
   }
 }
 

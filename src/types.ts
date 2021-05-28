@@ -17,13 +17,18 @@ export type TimeZoneType = 'utc' | 'local' | string
 
 export type LocaleType = 'en-US'
 
-export type PlainDate = { isoYear: number; isoMonth: number; isoDay: number }
-export type PlainTime = {
+export type PlainDateType = {
+  isoYear: number
+  isoMonth: number
+  isoDay: number
+}
+export type PlainTimeType = {
   isoHour: number
   isoMinute: number
   isoSecond: number
   isoMillisecond: number
 }
+export type PlainDateTimeType = PlainDateType & PlainTimeType
 
 export type DurationType = {
   years: number
