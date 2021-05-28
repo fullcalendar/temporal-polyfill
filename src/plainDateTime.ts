@@ -1,17 +1,21 @@
+import { balanceTime } from './balance'
 import { Calendar } from './calendar'
-import { Duration, DurationLikeType, separateDuration } from './duration'
+import { Duration, DurationLikeType } from './duration'
+import { roundDefaults, roundModeMap, roundPriorities } from './round'
+import { separateDuration } from './separate'
 import {
   CalendarType,
   CompareReturnType,
+  DateMathOptionsType,
   DurationUnitType,
   LocaleType,
   PlainTime,
-  RoundLikeType,
-  RoundType,
+  RoundOptionsLikeType,
+  RoundOptionsType,
   TimeZoneType,
   UNIT_INCREMENT,
 } from './types'
-import { asDate, roundDefaults, roundModeMap, roundPriorities } from './utils'
+import { asDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 type PlainDateTimeLikeType = {
@@ -23,28 +27,6 @@ type PlainDateTimeLikeType = {
   isoSecond?: number
   isoMillisecond?: number
   calendar?: Calendar | CalendarType
-}
-
-const balanceTime = ({
-  isoHour,
-  isoMinute,
-  isoSecond,
-  isoMillisecond,
-}: PlainTime): PlainTime & { isoDay: number } => {
-  //MS
-  isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND)
-  isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND)
-  //SECS
-  isoMinute += Math.trunc(isoSecond / UNIT_INCREMENT.MINUTE)
-  isoSecond = Math.trunc(isoSecond % UNIT_INCREMENT.MINUTE)
-  //MINS
-  isoHour += Math.trunc(isoMinute / UNIT_INCREMENT.HOUR)
-  isoMinute = Math.trunc(isoMinute % UNIT_INCREMENT.HOUR)
-  //HOURS
-  const isoDay = Math.trunc(isoHour / UNIT_INCREMENT.DAY)
-  isoHour = Math.trunc(isoHour % UNIT_INCREMENT.DAY)
-
-  return { isoDay, isoHour, isoMinute, isoSecond, isoMillisecond }
 }
 
 export class PlainDateTime {
@@ -210,49 +192,87 @@ export class PlainDateTime {
     )
   }
 
-  add(amount: Duration | DurationLikeType | string): PlainDateTime {
+  add(
+    amount: Duration | DurationLikeType | string,
+    options?: DateMathOptionsType
+  ): PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
-
     const [macro, ms] = separateDuration(duration)
 
+    const {
+      deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceTime({
+      isoHour: this.hour,
+      isoMinute: this.minute,
+      isoSecond: this.second,
+      isoMillisecond: this.millisecond + ms,
+    })
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
-      { isoYear: this.year, isoMonth: this.month, isoDay: this.day },
-      macro
+      {
+        isoYear: this.year,
+        isoMonth: this.month,
+        isoDay: this.day + deltaDays,
+      },
+      macro,
+      options
     )
-    return new PlainDateTime(isoYear, isoMonth, isoDay)
+
+    return new PlainDateTime(
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      this.calendar
+    )
   }
   subtract(amount: Duration | DurationLikeType | string): PlainDateTime {
+    const duration = amount instanceof Duration ? amount : Duration.from(amount)
+    const [macro, ms] = separateDuration(duration)
+
     const {
-      years,
-      months,
-      weeks,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds,
-    } = amount instanceof Duration ? amount : Duration.from(amount)
+      deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceTime({
+      isoHour: this.hour,
+      isoMinute: this.minute,
+      isoSecond: this.second,
+      isoMillisecond: this.millisecond - ms,
+    })
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
-      { isoYear: this.year, isoMonth: this.month, isoDay: this.day },
-      new Duration(-years, -months, -weeks, -days)
+      {
+        isoYear: this.year,
+        isoMonth: this.month,
+        isoDay: this.day + deltaDays,
+      },
+      new Duration(-macro.years, -macro.months, -macro.weeks, -macro.days)
     )
     return new PlainDateTime(
       isoYear,
       isoMonth,
       isoDay,
-      this.hour - hours,
-      this.minute - minutes,
-      this.second - seconds,
-      this.millisecond - milliseconds
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond
     )
   }
-  since(other: PlainDateTime, options?: RoundLikeType): Duration {
+  since(other: PlainDateTime, options?: RoundOptionsLikeType): Duration {
     return Duration.from(
       this.epochMilliseconds - other.epochMilliseconds
     ).round(options)
   }
-  round(options?: RoundLikeType): PlainDateTime {
-    const { smallestUnit, largestUnit, roundingMode }: RoundType = {
+  round(options?: RoundOptionsLikeType): PlainDateTime {
+    const { smallestUnit, largestUnit, roundingMode }: RoundOptionsType = {
       ...roundDefaults,
       ...options,
     }

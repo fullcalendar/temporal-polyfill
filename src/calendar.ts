@@ -1,6 +1,11 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { CalendarType, PlainDate } from './types'
+import {
+  CalendarType,
+  DateMathOptionsLikeType,
+  DateMathOptionsType,
+  PlainDate,
+} from './types'
 import { asDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -53,10 +58,13 @@ export class Calendar {
   dateAdd(
     { isoYear, isoMonth, isoDay }: PlainDate,
     duration: Duration,
-    options?: { overflow?: 'constrain' | 'reject' }
+    options?: DateMathOptionsLikeType
   ): PlainDate {
     // TODO: Make overflow do something
-    const { overflow } = { overflow: 'constrain', ...options }
+    const { overflow }: DateMathOptionsType = {
+      overflow: 'constrain',
+      ...options,
+    }
     const jsDate = new Date(isoYear, isoMonth, isoDay)
     jsDate.setFullYear(
       jsDate.getFullYear() + duration.years,

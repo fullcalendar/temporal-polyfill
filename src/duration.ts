@@ -1,89 +1,24 @@
+import { balanceDuration } from './balance'
 import { PlainDateTime } from './plainDateTime'
+import { roundDefaults, roundPriorities } from './round'
 import {
   CompareReturnType,
   DurationType,
   DurationUnitType,
   LocaleType,
-  RoundLikeType,
-  RoundType,
+  RoundOptionsLikeType,
+  RoundOptionsType,
   UNIT_INCREMENT,
 } from './types'
-import { incrementMap, roundDefaults, roundPriorities, toUnitMS } from './utils'
+import { toUnitMS } from './utils'
 
 export type DurationLikeType = Partial<DurationType>
 
-const rollover = ({
-  years = 0,
-  months = 0,
-  weeks = 0,
-  days = 0,
-  hours = 0,
-  minutes = 0,
-  seconds = 0,
-  milliseconds = 0,
-}: DurationLikeType): Duration => {
-  //MS
-  seconds += Math.trunc(milliseconds / UNIT_INCREMENT.SECOND)
-  milliseconds = Math.trunc(milliseconds % UNIT_INCREMENT.SECOND)
-  //SECS
-  minutes += Math.trunc(seconds / UNIT_INCREMENT.MINUTE)
-  seconds = Math.trunc(seconds % UNIT_INCREMENT.MINUTE)
-  //MINS
-  hours += Math.trunc(minutes / UNIT_INCREMENT.HOUR)
-  minutes = Math.trunc(minutes % UNIT_INCREMENT.HOUR)
-  //HOURS
-  days += Math.trunc(hours / UNIT_INCREMENT.DAY)
-  hours = Math.trunc(hours % UNIT_INCREMENT.DAY)
-  //DAYS
-  weeks += Math.trunc(days / UNIT_INCREMENT.WEEK)
-  days = Math.trunc(days % UNIT_INCREMENT.WEEK)
-  //WEEKS
-  months += Math.trunc(weeks / UNIT_INCREMENT.MONTH)
-  weeks = Math.trunc(weeks % UNIT_INCREMENT.MONTH)
-  //MONTHS
-  years += Math.trunc(months / UNIT_INCREMENT.YEAR)
-  months = Math.trunc(months % UNIT_INCREMENT.YEAR)
-
-  // The '|| 0' is done to prevent -0 from cropping up
-  return new Duration(
-    years || 0,
-    months || 0,
-    weeks || 0,
-    days || 0,
-    hours || 0,
-    minutes || 0,
-    seconds || 0,
-    milliseconds || 0
-  )
-}
 const getNumberUnitFormat = (number: number, unit: string) => ({
   negative: number < 0,
   format: number ? `${Math.abs(number)}${unit}` : '',
 })
-export const separateDuration = (
-  duration: Duration
-): [macroDuration: Duration, durationTimeMs: number] => {
-  return [
-    new Duration(
-      duration.years,
-      duration.months,
-      duration.weeks,
-      duration.days
-    ),
-    new Duration(
-      0,
-      0,
-      0,
-      0,
-      duration.hours,
-      duration.minutes,
-      duration.seconds,
-      duration.milliseconds
-    ).total({ unit: 'milliseconds' }),
-  ]
-}
 
-// TODO: We need to deal with overflow on any of the fields
 export class Duration {
   constructor(
     readonly years: number = 0,
@@ -123,7 +58,7 @@ export class Duration {
       }
       throw new Error('Invalid String')
     } else if (typeof thing === 'number') {
-      return rollover({ milliseconds: thing })
+      return balanceDuration({ milliseconds: thing })
     } else if (
       thing.years ||
       thing.months ||
@@ -134,16 +69,16 @@ export class Duration {
       thing.seconds ||
       thing.milliseconds
     )
-      return rollover({
-        years: thing.years,
-        months: thing.months,
-        weeks: thing.weeks,
-        days: thing.days,
-        hours: thing.hours,
-        minutes: thing.minutes,
-        seconds: thing.seconds,
-        milliseconds: thing.milliseconds,
-      })
+      return new Duration(
+        thing.years,
+        thing.months,
+        thing.weeks,
+        thing.days,
+        thing.hours,
+        thing.minutes,
+        thing.seconds,
+        thing.milliseconds
+      )
     throw new Error('Invalid Object')
   }
   static compare(
@@ -188,7 +123,7 @@ export class Duration {
     seconds = 0,
     milliseconds = 0,
   }: DurationLikeType) {
-    return rollover(
+    return balanceDuration(
       new Duration(
         this.years + years,
         this.months + months,
@@ -211,7 +146,7 @@ export class Duration {
     seconds = 0,
     milliseconds = 0,
   }: DurationLikeType) {
-    return rollover(
+    return balanceDuration(
       new Duration(
         this.years - years,
         this.months - months,
@@ -236,13 +171,13 @@ export class Duration {
       toUnitMS(unit)
     )
   }
-  round(options?: RoundLikeType): Duration {
+  round(options?: RoundOptionsLikeType): Duration {
     const {
       smallestUnit,
       largestUnit,
       roundingIncrement,
       roundingMode,
-    }: RoundType = {
+    }: RoundOptionsType = {
       ...roundDefaults,
       ...options,
     }

@@ -1,6 +1,6 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { RoundLikeType } from './types'
+import { RoundOptionsLikeType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
@@ -71,6 +71,11 @@ test.each([
   ['P1Y1M1D', new PlainDateTime(2000, 1, 1), new PlainDateTime(2001, 2, 2)],
   [{ years: 1 }, new PlainDateTime(1970, 1, 1), new PlainDateTime(1971, 1, 1)],
   [
+    { years: 1, months: 1, days: 1, hours: 1 },
+    new PlainDateTime(2020, 1, 1),
+    new PlainDateTime(2021, 2, 2, 1),
+  ],
+  [
     { months: 1 },
     new PlainDateTime(1982, 12, 1),
     new PlainDateTime(1983, 1, 1),
@@ -100,7 +105,7 @@ test.each([
   expect(date.since(other)).toEqual(expected)
 })
 
-test.each<[PlainDateTime, PlainDateTime, RoundLikeType]>([
+test.each<[PlainDateTime, PlainDateTime, RoundOptionsLikeType]>([
   [
     new PlainDateTime(1970, 1, 1, 0, 55),
     new PlainDateTime(1970, 1, 1, 1),

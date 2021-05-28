@@ -13,6 +13,10 @@ export type CalendarType =
   | 'persian'
   | 'roc'
 
+export type TimeZoneType = 'utc' | 'local' | string
+
+export type LocaleType = 'en-US'
+
 export type PlainDate = { isoYear: number; isoMonth: number; isoDay: number }
 export type PlainTime = {
   isoHour: number
@@ -20,10 +24,6 @@ export type PlainTime = {
   isoSecond: number
   isoMillisecond: number
 }
-
-export type TimeZoneType = 'utc' | 'local' | string
-
-export type LocaleType = 'en-US'
 
 export type DurationType = {
   years: number
@@ -38,13 +38,16 @@ export type DurationType = {
 export type DurationUnitType = keyof DurationType
 
 export type RoundModeType = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
-export type RoundType = {
+export type RoundOptionsType = {
   smallestUnit: DurationUnitType
   largestUnit: DurationUnitType
   roundingIncrement: number
   roundingMode: RoundModeType
 }
-export type RoundLikeType = Partial<RoundType>
+export type RoundOptionsLikeType = Partial<RoundOptionsType>
+
+export type DateMathOptionsType = { overflow: 'constrain' | 'reject' }
+export type DateMathOptionsLikeType = Partial<DateMathOptionsType>
 
 export type CompareReturnType = -1 | 0 | 1
 
