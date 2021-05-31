@@ -81,8 +81,7 @@ test.each([
     new PlainDateTime(1983, 1, 1),
   ],
 ])('can add %s to %s', (add, orig, expected) => {
-  const date = orig.add(add)
-  expect(date).toMatchObject(expected)
+  expect(orig.add(add).epochMilliseconds).toBe(expected.epochMilliseconds)
 })
 
 test.each([

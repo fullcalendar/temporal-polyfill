@@ -1,10 +1,5 @@
 import { Duration, DurationLikeType } from './duration'
-import {
-  PlainTimeType,
-  PlainDateType,
-  UNIT_INCREMENT,
-  PlainDateTimeType,
-} from './types'
+import { PlainTimeType, UNIT_INCREMENT, PlainDateTimeType } from './types'
 
 export const balanceTime = ({
   isoHour,
@@ -29,27 +24,32 @@ export const balanceTime = ({
 }
 
 // Leverages JS Date objects overflow management to organize our Date objects
-// Note: bear in mind that month uses index 0 in this
+// Note: This only accepts proper values and not values since unix epoch
 export const balanceDateTime = ({
-  isoYear = 0,
+  isoYear = 1970,
   isoMonth = 0,
-  isoDay = 0,
+  isoDay = 1,
   isoHour = 0,
   isoMinute = 0,
   isoSecond = 0,
   isoMillisecond = 0,
 }: Partial<PlainDateTimeType>): PlainDateTimeType => {
-  const date = new Date(
-    Date.UTC(
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond
-    )
-  )
+  const date = new Date(0)
+  date.setUTCFullYear(isoYear, isoMonth, isoDay)
+  date.setUTCHours(isoHour, isoMinute, isoSecond, isoMillisecond)
+  return {
+    isoYear: date.getUTCFullYear(),
+    isoMonth: date.getUTCMonth(),
+    isoDay: date.getUTCDate(),
+    isoHour: date.getUTCHours(),
+    isoMinute: date.getUTCMinutes(),
+    isoSecond: date.getUTCSeconds(),
+    isoMillisecond: date.getUTCMilliseconds(),
+  }
+}
+
+export const balanceFromMs = (ms: number): PlainDateTimeType => {
+  const date = new Date(ms)
   return {
     isoYear: date.getUTCFullYear(),
     isoMonth: date.getUTCMonth(),

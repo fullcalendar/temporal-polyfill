@@ -57,8 +57,6 @@ export class Duration {
         )
       }
       throw new Error('Invalid String')
-    } else if (typeof thing === 'number') {
-      return balanceDuration({ milliseconds: thing })
     } else if (
       thing.years ||
       thing.months ||
@@ -175,6 +173,31 @@ export class Duration {
     }: RoundOptionsType = asRoundOptions(options)
 
     return Duration.from(this)
+  }
+
+  negated(): Duration {
+    return new Duration(
+      -this.years,
+      -this.months,
+      -this.weeks,
+      -this.days,
+      -this.hours,
+      -this.minutes,
+      -this.seconds,
+      -this.milliseconds
+    )
+  }
+  abs(): Duration {
+    return new Duration(
+      Math.abs(this.years),
+      Math.abs(this.months),
+      Math.abs(this.weeks),
+      Math.abs(this.days),
+      Math.abs(this.hours),
+      Math.abs(this.minutes),
+      Math.abs(this.seconds),
+      Math.abs(this.milliseconds)
+    )
   }
 
   toString() {

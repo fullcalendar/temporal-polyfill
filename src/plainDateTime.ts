@@ -1,4 +1,4 @@
-import { balanceDateTime } from './balance'
+import { balanceDuration, balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
 import { asRoundOptions, roundModeMap, roundPriorities } from './round'
@@ -198,9 +198,7 @@ export class PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
 
-    const constrained = balanceDateTime({
-      isoMillisecond: this.epochMilliseconds + ms,
-    })
+    const constrained = balanceFromMs(this.epochMilliseconds + ms)
 
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
       {
@@ -214,7 +212,7 @@ export class PlainDateTime {
 
     return new PlainDateTime(
       isoYear,
-      isoMonth,
+      isoMonth + 1,
       isoDay,
       constrained.isoHour,
       constrained.isoMinute,
@@ -223,35 +221,17 @@ export class PlainDateTime {
       this.calendar
     )
   }
-  subtract(amount: Duration | DurationLikeType | string): PlainDateTime {
+  subtract(
+    amount: Duration | DurationLikeType | string,
+    options?: AssignmentOptionsType
+  ): PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
-    const [macro, ms] = separateDuration(duration)
-
-    const constrained = balanceDateTime({
-      isoMillisecond: this.epochMilliseconds - ms,
-    })
-    const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
-      {
-        isoYear: constrained.isoYear,
-        isoMonth: constrained.isoMonth,
-        isoDay: constrained.isoDay,
-      },
-      new Duration(-macro.years, -macro.months, -macro.weeks, -macro.days)
-    )
-    return new PlainDateTime(
-      isoYear,
-      isoMonth,
-      isoDay,
-      constrained.isoHour,
-      constrained.isoMinute,
-      constrained.isoSecond,
-      constrained.isoMillisecond
-    )
+    return this.add(duration.negated(), options)
   }
   since(other: PlainDateTime, options?: RoundOptionsLikeType): Duration {
-    return Duration.from(
-      this.epochMilliseconds - other.epochMilliseconds
-    ).round(options)
+    return balanceDuration({
+      milliseconds: this.epochMilliseconds - other.epochMilliseconds,
+    }).round(options)
   }
   round(options?: RoundOptionsLikeType): PlainDateTime {
     const {
