@@ -40,9 +40,24 @@ describe('duration strings', () => {
   })
 })
 
+test.each([
+  [
+    new Duration(0, 0, 0, 1),
+    new Duration(0, 0, 0, 1),
+    new Duration(0, 0, 0, 2),
+  ],
+  [
+    new Duration(0, 0, 0, 1, 15),
+    new Duration(0, 0, 0, 1, 45),
+    new Duration(0, 0, 0, 3),
+  ],
+])('can take %s and add %s', (one, two, expected) => {
+  expect(one.add(two)).toEqual(expected)
+})
+
 test.each<[Duration, { unit: DurationUnitType }, number]>([
   [new Duration(0, 0, 0, 1), { unit: 'hours' }, 24],
-  [new Duration(1, 0, 0, 1), { unit: 'months' }, 12],
+  [new Duration(1, 0, 0, 1), { unit: 'months' }, 12.032871437645396],
   [new Duration(0, 0, 0, 1), { unit: 'minutes' }, 1440],
   [new Duration(0, 0, 0, 1), { unit: 'weeks' }, 1 / 7],
   [new Duration(0, 0, 1, 1), { unit: 'weeks' }, 8 / 7],

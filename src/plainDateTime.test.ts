@@ -105,6 +105,11 @@ test.each([
     new PlainDateTime(2010, 1, 1),
     new Duration(10, 1, 0, 8),
   ],
+  [
+    new PlainDateTime(2020, 6, 2, 11),
+    new PlainDateTime(2020, 6, 1, 12),
+    new Duration(0, 0, 0, 0, 23),
+  ],
 ])('can get duration till %s since %s', (date, other, expected) => {
   expect(date.since(other)).toEqual(expected)
 })

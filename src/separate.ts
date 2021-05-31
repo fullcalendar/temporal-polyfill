@@ -49,8 +49,11 @@ export const separateDateTime = (
   } = balanceFromMs(date.epochMilliseconds)
   const jsDate = new Date(0)
   jsDate.setUTCFullYear(isoYear, isoMonth, isoDay)
-  const ms = extractTimeMs({ isoHour, isoMinute, isoSecond, isoMillisecond })
-  if (ms < minTimeMs) jsDate.setUTCDate(jsDate.getUTCDate() - 1)
+  let ms = extractTimeMs({ isoHour, isoMinute, isoSecond, isoMillisecond })
+  if (ms < minTimeMs) {
+    jsDate.setUTCDate(jsDate.getUTCDate() - 1)
+    ms += toUnitMs('days')
+  }
   return [
     {
       isoYear: jsDate.getUTCFullYear(),

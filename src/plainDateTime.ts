@@ -1,4 +1,4 @@
-import { balanceDuration, balanceFromMs } from './balance'
+import { balanceFromMs, balanceTime } from './balance'
 import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
 import { asRoundOptions, roundModeMap, roundMs, roundPriorities } from './round'
@@ -17,7 +17,7 @@ import {
 import { asDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
-type PlainDateTimeLikeType = {
+export type PlainDateTimeLikeType = {
   isoYear?: number
   isoMonth?: number
   isoDay?: number
@@ -229,19 +229,27 @@ export class PlainDateTime {
     return this.add(duration.negated(), options)
   }
   since(other: PlainDateTime, options?: RoundOptionsLikeType): Duration {
-    const negative = this.epochMilliseconds >= other.epochMilliseconds
-    const larger = negative ? this : other
-    const smaller = negative ? other : this
+    const positiveSign = this.epochMilliseconds >= other.epochMilliseconds
+    const larger = positiveSign ? this : other
+    const smaller = positiveSign ? other : this
 
-    const [largerDate, largerMs] = separateDateTime(larger)
-    const [smallerDate, smallerMs] = separateDateTime(smaller, largerMs)
+    const [smallerDate, smallerMs] = separateDateTime(smaller)
+    const [largerDate, largerMs] = separateDateTime(larger, smallerMs)
 
-    const dateDiff = this.calendar.dateUntil(largerDate, smallerDate, options)
-    const timeDiff = balanceDuration({
-      milliseconds: roundMs(smallerMs - largerMs, options),
+    const dateDiff = this.calendar.dateUntil(smallerDate, largerDate, options)
+    const { isoHour, isoMinute, isoSecond, isoMillisecond } = balanceTime(
+      {
+        isoMillisecond: roundMs(largerMs - smallerMs, options),
+      },
+      options
+    )
+    const combined = dateDiff.with({
+      hours: isoHour,
+      minutes: isoMinute,
+      seconds: isoSecond,
+      milliseconds: isoMillisecond,
     })
-    const combined = dateDiff.add(timeDiff)
-    return negative ? combined.negated() : combined
+    return positiveSign ? combined : combined.negated()
   }
   round(options?: RoundOptionsLikeType): PlainDateTime {
     const {

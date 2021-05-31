@@ -1,6 +1,7 @@
-import { balanceDuration } from './balance'
-import { PlainDateTime } from './plainDateTime'
-import { asRoundOptions, roundPriorities } from './round'
+import { balanceTime } from './balance'
+import { PlainDateTime, PlainDateTimeLikeType } from './plainDateTime'
+import { asRoundOptions } from './round'
+import { extractTimeMs } from './separate'
 import {
   CompareReturnType,
   DurationType,
@@ -113,44 +114,60 @@ export class Duration {
 
   add(
     other: Duration | DurationLikeType | string,
-    options?: { relativeTo?: PlainDateTime }
+    options?: { relativeTo?: PlainDateTime | PlainDateTimeLikeType | string }
   ): Duration {
-    const duration = other instanceof Duration ? other : Duration.from(other)
-    return balanceDuration(
-      new Duration(
-        this.years + duration.years,
-        this.months + duration.months,
-        this.weeks + duration.weeks,
-        this.days + duration.days,
-        this.hours + duration.hours,
-        this.minutes + duration.minutes,
-        this.seconds + duration.seconds,
-        this.milliseconds + duration.milliseconds
-      )
+    const otherDuration =
+      other instanceof Duration ? other : Duration.from(other)
+
+    if (options?.relativeTo) {
+      const start =
+        options.relativeTo instanceof PlainDateTime
+          ? options.relativeTo
+          : PlainDateTime.from(options.relativeTo)
+      const end = start.add(this).add(otherDuration)
+      return end.since(start)
+    } else if (
+      this.years ||
+      this.months ||
+      this.weeks ||
+      otherDuration.years ||
+      otherDuration.months ||
+      otherDuration.weeks
+    )
+      throw new Error('relativeTo is required for date units')
+
+    const {
+      deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceTime({
+      isoMillisecond: extractTimeMs({
+        isoHour: this.hours + otherDuration.hours,
+        isoMinute: this.minutes + otherDuration.minutes,
+        isoSecond: this.seconds + otherDuration.seconds,
+        isoMillisecond: this.milliseconds + otherDuration.milliseconds,
+      }),
+    })
+    return new Duration(
+      0,
+      0,
+      0,
+      this.days + otherDuration.days + deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond
     )
   }
-  subtract({
-    years = 0,
-    months = 0,
-    weeks = 0,
-    days = 0,
-    hours = 0,
-    minutes = 0,
-    seconds = 0,
-    milliseconds = 0,
-  }: DurationLikeType): Duration {
-    return balanceDuration(
-      new Duration(
-        this.years - years,
-        this.months - months,
-        this.weeks - weeks,
-        this.days - days,
-        this.hours - hours,
-        this.minutes - minutes,
-        this.seconds - seconds,
-        this.milliseconds - milliseconds
-      )
-    )
+  subtract(
+    other: Duration | DurationLikeType | string,
+    options?: { relativeTo?: PlainDateTime | PlainDateTimeLikeType | string }
+  ): Duration {
+    const otherDuration =
+      other instanceof Duration ? other : Duration.from(other)
+    return this.add(otherDuration.negated(), options)
   }
   total({
     unit,

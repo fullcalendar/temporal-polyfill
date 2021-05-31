@@ -1,51 +1,47 @@
-import { Duration, DurationLikeType } from './duration'
-import { PlainTimeType, UNIT_INCREMENT, PlainDateTimeType } from './types'
+import { DurationLikeType } from './duration'
+import { asRoundOptions, roundPriorities } from './round'
+import {
+  PlainTimeType,
+  UNIT_INCREMENT,
+  PlainDateTimeType,
+  RoundOptionsLikeType,
+  DurationType,
+} from './types'
 
-export const balanceTime = ({
-  isoHour,
-  isoMinute,
-  isoSecond,
-  isoMillisecond,
-}: PlainTimeType): PlainTimeType & { deltaDays: number } => {
+export const balanceTime = (
+  {
+    isoHour = 0,
+    isoMinute = 0,
+    isoSecond = 0,
+    isoMillisecond = 0,
+  }: Partial<PlainTimeType>,
+  options?: RoundOptionsLikeType
+): PlainTimeType & { deltaDays: number } => {
+  const { largestUnit } = asRoundOptions(options)
+  const largestIndex = roundPriorities.indexOf(largestUnit)
   //MS
-  isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND) || 0
-  isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND) || 0
+  if (roundPriorities.indexOf('seconds') >= largestIndex) {
+    isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND) || 0
+    isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND) || 0
+  }
   //SECS
-  isoMinute += Math.trunc(isoSecond / UNIT_INCREMENT.MINUTE) || 0
-  isoSecond = Math.trunc(isoSecond % UNIT_INCREMENT.MINUTE) || 0
+  if (roundPriorities.indexOf('minutes') >= largestIndex) {
+    isoMinute += Math.trunc(isoSecond / UNIT_INCREMENT.MINUTE) || 0
+    isoSecond = Math.trunc(isoSecond % UNIT_INCREMENT.MINUTE) || 0
+  }
   //MINS
-  isoHour += Math.trunc(isoMinute / UNIT_INCREMENT.HOUR) || 0
-  isoMinute = Math.trunc(isoMinute % UNIT_INCREMENT.HOUR) || 0
+  if (roundPriorities.indexOf('hours') >= largestIndex) {
+    isoHour += Math.trunc(isoMinute / UNIT_INCREMENT.HOUR) || 0
+    isoMinute = Math.trunc(isoMinute % UNIT_INCREMENT.HOUR) || 0
+  }
   //HOURS
-  const deltaDays = Math.trunc(isoHour / UNIT_INCREMENT.DAY) || 0
-  isoHour = Math.trunc(isoHour % UNIT_INCREMENT.DAY) || 0
+  let deltaDays = 0
+  if (roundPriorities.indexOf('days') >= largestIndex) {
+    deltaDays = Math.trunc(isoHour / UNIT_INCREMENT.DAY) || 0
+    isoHour = Math.trunc(isoHour % UNIT_INCREMENT.DAY) || 0
+  }
 
   return { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond }
-}
-
-// Leverages JS Date objects overflow management to organize our Date objects
-// Note: This only accepts proper values and not values since unix epoch
-export const balanceDateTime = ({
-  isoYear = 1970,
-  isoMonth = 0,
-  isoDay = 1,
-  isoHour = 0,
-  isoMinute = 0,
-  isoSecond = 0,
-  isoMillisecond = 0,
-}: Partial<PlainDateTimeType>): PlainDateTimeType => {
-  const date = new Date(0)
-  date.setUTCFullYear(isoYear, isoMonth, isoDay)
-  date.setUTCHours(isoHour, isoMinute, isoSecond, isoMillisecond)
-  return {
-    isoYear: date.getUTCFullYear(),
-    isoMonth: date.getUTCMonth(),
-    isoDay: date.getUTCDate(),
-    isoHour: date.getUTCHours(),
-    isoMinute: date.getUTCMinutes(),
-    isoSecond: date.getUTCSeconds(),
-    isoMillisecond: date.getUTCMilliseconds(),
-  }
 }
 
 export const balanceFromMs = (ms: number): PlainDateTimeType => {
@@ -61,42 +57,24 @@ export const balanceFromMs = (ms: number): PlainDateTimeType => {
   }
 }
 
-export const balanceDuration = ({
-  years = 0,
-  months = 0,
-  weeks = 0,
-  days = 0,
-  hours = 0,
-  minutes = 0,
-  seconds = 0,
-  milliseconds = 0,
-}: DurationLikeType): Duration => {
-  const {
-    deltaDays,
-    isoHour,
-    isoMinute,
-    isoSecond,
-    isoMillisecond,
-  } = balanceTime({
-    isoHour: hours,
-    isoMinute: minutes,
-    isoSecond: seconds,
-    isoMillisecond: milliseconds,
-  })
-  days += deltaDays
-
-  //MONTHS
-  years += Math.trunc(months / UNIT_INCREMENT.YEAR) || 0
-  months = Math.trunc(months % UNIT_INCREMENT.YEAR) || 0
-
-  return new Duration(
-    years,
-    months,
-    weeks,
-    days,
-    isoHour,
-    isoMinute,
-    isoSecond,
-    isoMillisecond
+export const balanceDateTime = ({
+  isoYear = 1970,
+  isoMonth = 0,
+  isoDay = 1,
+  isoHour = 0,
+  isoMinute = 0,
+  isoSecond = 0,
+  isoMillisecond = 0,
+}: Partial<PlainDateTimeType>): PlainDateTimeType => {
+  return balanceFromMs(
+    Date.UTC(
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond
+    )
   )
 }

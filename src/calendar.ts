@@ -107,8 +107,8 @@ export class Calendar {
         const sign = -comparePlainDate(one, two)
         if (sign === 0) return new Duration()
 
-        const start: PlainDateType = { ...one }
-        const end: PlainDateType = { ...two }
+        const start = one
+        const end = two
 
         let years = end.isoYear - start.isoYear
         let mid: PlainDateType = balanceDateTime({
@@ -175,16 +175,10 @@ export class Calendar {
       }
       case 'weeks':
       case 'days': {
-        let larger: PlainDateType, smaller: PlainDateType, sign: 1 | -1
-        if (comparePlainDate(one, two) < 0) {
-          smaller = { ...one }
-          larger = { ...two }
-          sign = 1
-        } else {
-          smaller = { ...two }
-          larger = { ...one }
-          sign = -1
-        }
+        const sign = comparePlainDate(one, two) < 0 ? 1 : -1
+        const smaller = sign === 1 ? one : two
+        const larger = sign === 1 ? two : one
+
         let years = larger.isoYear - smaller.isoYear
         let days = this.dayOfYear(larger) - this.dayOfYear(smaller)
         while (years > 0) {
@@ -195,16 +189,14 @@ export class Calendar {
           })
             ? 366
             : 365
-          years -= 1
+          years--
         }
         let weeks = 0
         if (largestUnit === 'weeks') {
           weeks = Math.floor(days / 7)
           days %= 7
         }
-        weeks *= sign
-        days *= sign
-        return new Duration(0, 0, weeks, days)
+        return new Duration(0, 0, weeks * sign, days * sign)
       }
       default:
         throw new Error('Invalid units')
