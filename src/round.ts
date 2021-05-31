@@ -4,6 +4,7 @@ import {
   RoundOptionsLikeType,
   RoundOptionsType,
 } from './types'
+import { toUnitMs } from './utils'
 
 export const roundPriorities: Array<DurationUnitType> = [
   'years',
@@ -42,4 +43,13 @@ export const roundModeMap: {
   ceil: Math.ceil,
   floor: Math.floor,
   halfExpand: Math.round,
+}
+
+export const roundMs = (ms: number, options?: RoundOptionsLikeType): number => {
+  const { smallestUnit, roundingIncrement, roundingMode } = asRoundOptions(
+    options
+  )
+  const msInSmallest = toUnitMs(smallestUnit) * roundingIncrement
+  const countSmallest = roundModeMap[roundingMode](ms / msInSmallest)
+  return countSmallest * msInSmallest
 }

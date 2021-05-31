@@ -2,7 +2,6 @@ import { roundPriorities } from './round'
 import {
   CompareReturnType,
   DurationUnitType,
-  PlainDateTimeType,
   PlainDateType,
   UNIT_INCREMENT,
 } from './types'

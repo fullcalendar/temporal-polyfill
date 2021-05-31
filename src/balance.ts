@@ -84,12 +84,7 @@ export const balanceDuration = ({
     isoMillisecond: milliseconds,
   })
   days += deltaDays
-  //DAYS
-  weeks += Math.trunc(days / UNIT_INCREMENT.WEEK) || 0
-  days = Math.trunc(days % UNIT_INCREMENT.WEEK) || 0
-  //WEEKS
-  months += Math.trunc(weeks / UNIT_INCREMENT.MONTH) || 0
-  weeks = Math.trunc(weeks % UNIT_INCREMENT.MONTH) || 0
+
   //MONTHS
   years += Math.trunc(months / UNIT_INCREMENT.YEAR) || 0
   months = Math.trunc(months % UNIT_INCREMENT.YEAR) || 0

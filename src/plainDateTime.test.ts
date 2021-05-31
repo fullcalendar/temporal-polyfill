@@ -90,17 +90,22 @@ test.each([
     new PlainDateTime(1970, 1, 2),
     new Duration(0, 0, 0, -1),
   ],
-  // [
-  //   new PlainDateTime(1970, 2, 5),
-  //   new PlainDateTime(1970, 1, 1),
-  //   new Duration(0, 1, 0, 4),
-  // ],
+  [
+    new PlainDateTime(1970, 2, 5),
+    new PlainDateTime(1970, 1, 1),
+    new Duration(0, 1, 0, 4),
+  ],
   [
     new PlainDateTime(1970, 1, 1, 3, 30, 30),
     new PlainDateTime(1970, 1, 1, 1),
     new Duration(0, 0, 0, 0, 2, 30, 30),
   ],
-])('can get duration since other time', (date, other, expected) => {
+  [
+    new PlainDateTime(2020, 2, 9),
+    new PlainDateTime(2010, 1, 1),
+    new Duration(10, 1, 0, 8),
+  ],
+])('can get duration till %s since %s', (date, other, expected) => {
   expect(date.since(other)).toEqual(expected)
 })
 

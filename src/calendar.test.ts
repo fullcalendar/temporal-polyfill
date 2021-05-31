@@ -55,5 +55,5 @@ test.each<[PlainDateType, PlainDateType, Duration]>([
   ],
 ])('can do dateUntil', (one, two, expected) => {
   const calendar = new Calendar()
-  expect(calendar.dateUntil(one, two)).toBe(expected)
+  expect(calendar.dateUntil(one, two)).toEqual(expected)
 })

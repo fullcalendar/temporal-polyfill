@@ -1,8 +1,8 @@
 import { balanceDuration, balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
-import { asRoundOptions, roundModeMap, roundPriorities } from './round'
-import { separateDuration } from './separate'
+import { asRoundOptions, roundModeMap, roundMs, roundPriorities } from './round'
+import { separateDateTime, separateDuration } from './separate'
 import {
   CalendarType,
   CompareReturnType,
@@ -229,9 +229,19 @@ export class PlainDateTime {
     return this.add(duration.negated(), options)
   }
   since(other: PlainDateTime, options?: RoundOptionsLikeType): Duration {
-    return balanceDuration({
-      milliseconds: this.epochMilliseconds - other.epochMilliseconds,
-    }).round(options)
+    const negative = this.epochMilliseconds >= other.epochMilliseconds
+    const larger = negative ? this : other
+    const smaller = negative ? other : this
+
+    const [largerDate, largerMs] = separateDateTime(larger)
+    const [smallerDate, smallerMs] = separateDateTime(smaller, largerMs)
+
+    const dateDiff = this.calendar.dateUntil(largerDate, smallerDate, options)
+    const timeDiff = balanceDuration({
+      milliseconds: roundMs(smallerMs - largerMs, options),
+    })
+    const combined = dateDiff.add(timeDiff)
+    return negative ? combined.negated() : combined
   }
   round(options?: RoundOptionsLikeType): PlainDateTime {
     const {

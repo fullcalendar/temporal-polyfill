@@ -113,7 +113,7 @@ export class Duration {
 
   add(
     other: Duration | DurationLikeType | string,
-    options: { relativeTo: PlainDateTime }
+    options?: { relativeTo?: PlainDateTime }
   ): Duration {
     const duration = other instanceof Duration ? other : Duration.from(other)
     return balanceDuration(
@@ -165,26 +165,21 @@ export class Duration {
     )
   }
   round(options?: RoundOptionsLikeType): Duration {
-    const {
-      smallestUnit,
-      largestUnit,
-      roundingIncrement,
-      roundingMode,
-    }: RoundOptionsType = asRoundOptions(options)
+    const {}: RoundOptionsType = asRoundOptions(options)
 
     return Duration.from(this)
   }
 
   negated(): Duration {
     return new Duration(
-      -this.years,
-      -this.months,
-      -this.weeks,
-      -this.days,
-      -this.hours,
-      -this.minutes,
-      -this.seconds,
-      -this.milliseconds
+      -this.years || 0,
+      -this.months || 0,
+      -this.weeks || 0,
+      -this.days || 0,
+      -this.hours || 0,
+      -this.minutes || 0,
+      -this.seconds || 0,
+      -this.milliseconds || 0
     )
   }
   abs(): Duration {
