@@ -1,3 +1,4 @@
+import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { TimeZone } from './timezone'
 import {
@@ -104,13 +105,13 @@ export class ZonedDateTime {
   }
 
   get year() {
-    return this.calendar.year(this)
+    return this.calendar.year(balanceFromMs(this.epochMilliseconds))
   }
   get month() {
-    return this.calendar.month(this)
+    return this.calendar.month(balanceFromMs(this.epochMilliseconds))
   }
   get day() {
-    return this.calendar.day(this)
+    return this.calendar.day(balanceFromMs(this.epochMilliseconds))
   }
   get hour() {
     const date = asDate(this.epochMilliseconds)
@@ -131,10 +132,10 @@ export class ZonedDateTime {
       : date.getMilliseconds()
   }
   get dayOfWeek() {
-    return this.calendar.dayOfWeek(this)
+    return this.calendar.dayOfWeek(balanceFromMs(this.epochMilliseconds))
   }
   get weekOfYear() {
-    return this.calendar.weekOfYear(this)
+    return this.calendar.weekOfYear(balanceFromMs(this.epochMilliseconds))
   }
 
   with(dateTimeLike: ZonedDateTimeLikeType | string) {

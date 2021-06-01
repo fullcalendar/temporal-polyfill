@@ -10,8 +10,11 @@ export const asDate = (epochMilliseconds: number): Date =>
   new Date(epochMilliseconds)
 
 export const incrementMap: { [Property in DurationUnitType]: number } = {
+  /**@deprecated */
   years: UNIT_INCREMENT.YEAR,
+  /**@deprecated */
   months: UNIT_INCREMENT.MONTH,
+  /**@deprecated */
   weeks: UNIT_INCREMENT.WEEK,
   days: UNIT_INCREMENT.DAY,
   hours: UNIT_INCREMENT.HOUR,
@@ -20,6 +23,11 @@ export const incrementMap: { [Property in DurationUnitType]: number } = {
   milliseconds: UNIT_INCREMENT.MILLISECOND,
 }
 
+/**
+ * Calculates milliseconds for a given unit
+ * @param unit days, hours, minutes, seconds, milliseconds
+ * @returns milliseconds
+ */
 export const toUnitMs = (unit: DurationUnitType): number =>
   roundPriorities.reduce(
     (acc, val, index) =>

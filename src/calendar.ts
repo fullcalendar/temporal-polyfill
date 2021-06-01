@@ -10,75 +10,92 @@ import {
   RoundOptionsLikeType,
   UNIT_INCREMENT,
 } from './types'
-import { comparePlainDate } from './utils'
+import { comparePlainDate, toUnitMs } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Calendar {
-  constructor(readonly id: CalendarType = 'iso8601') {}
+  private format: Intl.DateTimeFormat
 
-  private getFormat(timeZone: string) {
-    return Intl.DateTimeFormat('en-us', {
+  constructor(readonly id: CalendarType = 'iso8601') {
+    this.format = Intl.DateTimeFormat('en-us', {
       calendar: this.id,
-      timeZone,
     })
   }
 
-  private formattedPropertyValue(
-    dt: PlainDateTime | ZonedDateTime,
-    property: string
-  ) {
-    const format = this.getFormat(
-      dt instanceof ZonedDateTime ? dt.timeZone.id : 'UTC'
-    )
-    return format.formatToParts(dt.epochMilliseconds).reduce(
-      (acc: { [type: string]: string }, { type, value }) => ({
-        ...acc,
-        [type]: value,
-      }),
-      {}
-    )[property]
+  private formattedPropertyValue(dt: PlainDateType, property: string): string {
+    return this.format
+      .formatToParts(new Date(dt.isoYear, dt.isoMonth, dt.isoDay))
+      .reduce(
+        (acc: { [type: string]: string }, { type, value }) => ({
+          ...acc,
+          [type]: value,
+        }),
+        {}
+      )[property]
   }
 
-  year(dt: PlainDateTime | ZonedDateTime): number {
+  year(dt: PlainDateType): number {
     return parseInt(this.formattedPropertyValue(dt, 'year'))
   }
-  month(dt: PlainDateTime | ZonedDateTime): number {
+  month(dt: PlainDateType): number {
     return parseInt(this.formattedPropertyValue(dt, 'month'))
   }
-  day(dt: PlainDateTime | ZonedDateTime): number {
+  day(dt: PlainDateType): number {
     return parseInt(this.formattedPropertyValue(dt, 'day'))
   }
-  dayOfWeek(dt: PlainDateTime | ZonedDateTime): string {
-    return this.formattedPropertyValue(dt, 'weekday')
-  }
-  weekOfYear(dt: PlainDateTime | ZonedDateTime): number {
-    const yearStart = Date.UTC(dt.year, 0)
-    const weekNum = Math.ceil(
-      ((dt.epochMilliseconds - yearStart) / 86400000 + 1) / 7
-    )
-    return weekNum
-  }
-  // TODO: Implement this
+
+  // IN methods
   daysInWeek(dt: PlainDateType): number {
     return 7
   }
-  // TODO: Implement this
-  daysInMonth(dt: PlainDateType): number {
-    return 30
+  daysInMonth({ isoYear, isoMonth }: PlainDateType): number {
+    return new Date(isoYear, isoMonth + 1, 0).getDate()
   }
-  // TODO: Implement this
-  monthsInYear(dt: PlainDateType): number {
-    return 12
+  daysInYear({ isoYear }: PlainDateType): number {
+    return new Date(isoYear + 1, 0, 0).getDate()
   }
-  // TODO: Implement this
-  dayOfYear(dt: PlainDateType): number {
-    return 1
-  }
-  // TODO: Implement this
-  inLeapYear(dt: PlainDateType): boolean {
-    return false
+  monthsInYear({ isoYear }: PlainDateType): number {
+    return new Date(isoYear + 1, 0, 0).getMonth() + 1
   }
 
+  // OF methods
+  dayOfWeek(dt: PlainDateType): string {
+    return this.formattedPropertyValue(dt, 'weekday')
+  }
+  dayOfYear(dt: PlainDateType): number {
+    return this.dateUntil(
+      { isoYear: dt.isoYear, isoMonth: 0, isoDay: 1 },
+      dt
+    ).total({ unit: 'days' })
+  }
+  weekOfYear(dt: PlainDateType): number {
+    return Math.ceil(
+      ((Date.UTC(dt.isoYear, dt.isoMonth, dt.isoDay) -
+        Date.UTC(dt.isoYear, 0)) /
+        toUnitMs('days') +
+        1) /
+        UNIT_INCREMENT.WEEK
+    )
+  }
+
+  // Boolean methods
+  inLeapYear({ isoYear }: PlainDateType): boolean {
+    return isoYear % 400 === 0 || (isoYear % 4 === 0 && isoYear % 100 !== 0)
+  }
+
+  // TODO: Implement this
+  dateFromFields(
+    fields: {
+      year: number
+      month: number
+      day: number
+    },
+    options: AssignmentOptionsType
+  ): PlainDateType {
+    return { isoYear: fields.year, isoMonth: fields.month, isoDay: fields.day }
+  }
+
+  // Calendar Math
   dateAdd(
     { isoYear, isoMonth, isoDay }: PlainDateType,
     duration: Duration,
@@ -101,7 +118,6 @@ export class Calendar {
       isoDay: jsDate.getUTCDate(),
     }
   }
-
   dateUntil(
     one: PlainDateType,
     two: PlainDateType,

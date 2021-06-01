@@ -1,6 +1,7 @@
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { CalendarType, TimeZoneType, UNIT_INCREMENT } from './types'
+import { toUnitMs } from './utils'
 
 export class TimeZone {
   constructor(readonly id: TimeZoneType = 'local') {}
@@ -33,15 +34,9 @@ export class TimeZone {
 
     const sign = offset < 0 ? '-' : '+'
     const mins = Math.abs(
-      (offset / UNIT_INCREMENT.MINUTE / UNIT_INCREMENT.SECOND) %
-        UNIT_INCREMENT.MINUTE
+      (offset / toUnitMs('minutes')) % UNIT_INCREMENT.MINUTE
     )
-    const hours = Math.abs(
-      offset /
-        UNIT_INCREMENT.SECOND /
-        UNIT_INCREMENT.MINUTE /
-        UNIT_INCREMENT.HOUR
-    )
+    const hours = Math.abs(offset / toUnitMs('hours'))
 
     const minStr = `0${mins}`.slice(-2)
     const hourStr = `0${hours}`.slice(-2)

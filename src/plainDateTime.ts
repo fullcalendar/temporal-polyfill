@@ -137,31 +137,31 @@ export class PlainDateTime {
   }
 
   get year() {
-    return this.calendar.year(this)
+    return this.calendar.year(balanceFromMs(this.epochMilliseconds))
   }
   get month() {
-    return this.calendar.month(this)
+    return this.calendar.month(balanceFromMs(this.epochMilliseconds))
   }
   get day() {
-    return this.calendar.day(this)
+    return this.calendar.day(balanceFromMs(this.epochMilliseconds))
   }
   get hour() {
-    return asDate(this.epochMilliseconds).getUTCHours()
+    return balanceFromMs(this.epochMilliseconds).isoHour
   }
   get minute() {
-    return asDate(this.epochMilliseconds).getUTCMinutes()
+    return balanceFromMs(this.epochMilliseconds).isoMinute
   }
   get second() {
-    return asDate(this.epochMilliseconds).getUTCSeconds()
+    return balanceFromMs(this.epochMilliseconds).isoSecond
   }
   get millisecond() {
-    return asDate(this.epochMilliseconds).getUTCMilliseconds()
+    return balanceFromMs(this.epochMilliseconds).isoMillisecond
   }
   get dayOfWeek() {
-    return this.calendar.dayOfWeek(this)
+    return this.calendar.dayOfWeek(balanceFromMs(this.epochMilliseconds))
   }
   get weekOfYear() {
-    return this.calendar.weekOfYear(this)
+    return this.calendar.weekOfYear(balanceFromMs(this.epochMilliseconds))
   }
 
   with(dateTimeLike: PlainDateTimeLikeType | string): PlainDateTime {

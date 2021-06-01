@@ -1,3 +1,4 @@
+import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { CalendarType, PlainDateType } from './types'
@@ -19,8 +20,7 @@ test.each([
   [1608876000000, 52], // Christmas 2020
 ])('can get weekOfYear for %d as %d', (epochMilliseconds, expected) => {
   const calendar = new Calendar()
-  const dt = new ZonedDateTime(epochMilliseconds, 'utc', calendar)
-  expect(calendar.weekOfYear(dt)).toBe(expected)
+  expect(calendar.weekOfYear(balanceFromMs(epochMilliseconds))).toBe(expected)
 })
 
 test.each([
