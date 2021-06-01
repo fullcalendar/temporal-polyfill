@@ -50,6 +50,5 @@ export const roundMs = (ms: number, options?: RoundOptionsLikeType): number => {
     options
   )
   const msInSmallest = toUnitMs(smallestUnit) * roundingIncrement
-  const countSmallest = roundModeMap[roundingMode](ms / msInSmallest)
-  return countSmallest * msInSmallest
+  return roundModeMap[roundingMode](ms / msInSmallest) * msInSmallest
 }

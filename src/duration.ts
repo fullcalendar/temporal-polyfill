@@ -18,11 +18,6 @@ type RelativeOptionsType = {
   relativeTo?: PlainDateTime | PlainDateTimeLikeType | string
 }
 
-const getNumberUnitFormat = (number: number, unit: string) => ({
-  negative: number < 0,
-  format: number ? `${Math.abs(number)}${unit}` : '',
-})
-
 export class Duration {
   constructor(
     readonly years: number = 0,
@@ -116,26 +111,24 @@ export class Duration {
   }
 
   add(
-    other: Duration | DurationLikeType | string,
+    amount: Duration | DurationLikeType | string,
     options?: RelativeOptionsType
   ): Duration {
-    const otherDuration =
-      other instanceof Duration ? other : Duration.from(other)
+    const other = amount instanceof Duration ? amount : Duration.from(amount)
 
     if (options?.relativeTo) {
       const start =
         options.relativeTo instanceof PlainDateTime
           ? options.relativeTo
           : PlainDateTime.from(options.relativeTo)
-      const end = start.add(this).add(otherDuration)
-      return end.since(start)
+      return start.add(this).add(other).since(start)
     } else if (
       this.years ||
       this.months ||
       this.weeks ||
-      otherDuration.years ||
-      otherDuration.months ||
-      otherDuration.weeks
+      other.years ||
+      other.months ||
+      other.weeks
     )
       throw new Error('relativeTo is required for date units')
 
@@ -147,17 +140,17 @@ export class Duration {
       isoMillisecond,
     } = balanceTime({
       isoMillisecond: extractTimeMs({
-        isoHour: this.hours + otherDuration.hours,
-        isoMinute: this.minutes + otherDuration.minutes,
-        isoSecond: this.seconds + otherDuration.seconds,
-        isoMillisecond: this.milliseconds + otherDuration.milliseconds,
+        isoHour: this.hours + other.hours,
+        isoMinute: this.minutes + other.minutes,
+        isoSecond: this.seconds + other.seconds,
+        isoMillisecond: this.milliseconds + other.milliseconds,
       }),
     })
     return new Duration(
       0,
       0,
       0,
-      this.days + otherDuration.days + deltaDays,
+      this.days + other.days + deltaDays,
       isoHour,
       isoMinute,
       isoSecond,
@@ -165,22 +158,26 @@ export class Duration {
     )
   }
   subtract(
-    other: Duration | DurationLikeType | string,
+    amount: Duration | DurationLikeType | string,
     options?: RelativeOptionsType
   ): Duration {
-    const otherDuration =
-      other instanceof Duration ? other : Duration.from(other)
-    return this.add(otherDuration.negated(), options)
+    const other = amount instanceof Duration ? amount : Duration.from(amount)
+    return this.add(other.negated(), options)
   }
-  total({
-    unit,
-    relativeTo = new PlainDateTime(1970, 1, 1),
-  }: {
-    unit: DurationUnitType
-    relativeTo?: PlainDateTime
-  }): number {
+  total(
+    options: {
+      unit: DurationUnitType
+    } & RelativeOptionsType
+  ): number {
+    const { unit } = options
+    const relative = options.relativeTo
+      ? options.relativeTo instanceof PlainDateTime
+        ? options.relativeTo
+        : PlainDateTime.from(options.relativeTo)
+      : new PlainDateTime(1970, 1, 1)
+    // FIXME: This doesn't properly account for weeks/months/years
     return (
-      (relativeTo.add(this).epochMilliseconds - relativeTo.epochMilliseconds) /
+      (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /
       toUnitMs(unit)
     )
   }
@@ -251,30 +248,32 @@ export class Duration {
   }
 
   toString() {
-    const Y = getNumberUnitFormat(this.years, 'Y')
-    const M = getNumberUnitFormat(this.months, 'M')
-    const W = getNumberUnitFormat(this.weeks, 'W')
-    const D = getNumberUnitFormat(this.days, 'D')
-    const H = getNumberUnitFormat(this.hours, 'H')
-    const m = getNumberUnitFormat(this.minutes, 'M')
-    const S = getNumberUnitFormat(
-      this.seconds + this.milliseconds / UNIT_INCREMENT.SECOND,
-      'S'
-    )
+    const [year, month, week, day, hour, minute, second] = [
+      [this.years, 'Y'],
+      [this.months, 'M'],
+      [this.weeks, 'W'],
+      [this.days, 'D'],
+      [this.hours, 'H'],
+      [this.minutes, 'M'],
+      [this.seconds + this.milliseconds / UNIT_INCREMENT.SECOND, 'S'],
+    ].map(([number, unit]) => ({
+      negative: number < 0,
+      format: number ? `${Math.abs(number as number)}${unit}` : '',
+    }))
 
-    const T = H.format || m.format || S.format ? 'T' : ''
+    const T = hour.format || minute.format || second.format ? 'T' : ''
     const P =
-      Y.negative ||
-      M.negative ||
-      W.negative ||
-      D.negative ||
-      H.negative ||
-      m.negative ||
-      S.negative
+      year.negative ||
+      month.negative ||
+      week.negative ||
+      day.negative ||
+      hour.negative ||
+      minute.negative ||
+      second.negative
         ? '-'
         : ''
 
-    const result = `P${Y.format}${M.format}${W.format}${D.format}${T}${H.format}${m.format}${S.format}`
+    const result = `P${year.format}${month.format}${week.format}${day.format}${T}${hour.format}${minute.format}${second.format}`
     return result === 'P' ? 'P0D' : `${P}${result}`
   }
   toLocaleString(locale: LocaleType) {}

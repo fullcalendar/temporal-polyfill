@@ -24,7 +24,6 @@ export class TimeZone {
         UNIT_INCREMENT.SECOND
       )
     } else if (this.id === 'utc') {
-      // Case of UTC is always 0
       return 0
     }
     throw new Error('Unimplemented')
@@ -33,8 +32,6 @@ export class TimeZone {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
 
     const sign = offset < 0 ? '-' : '+'
-    // const ms = offset % 1000
-    // const secs = (offset / 1000) % 60
     const mins = Math.abs(
       (offset / UNIT_INCREMENT.MINUTE / UNIT_INCREMENT.SECOND) %
         UNIT_INCREMENT.MINUTE

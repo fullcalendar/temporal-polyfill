@@ -23,7 +23,7 @@ export class Now {
   }
 
   static zonedDateTimeISO() {
-    return this.zonedDateTime(new Calendar())
+    return this.zonedDateTime()
   }
 
   static plainDateTime(calendar?: CalendarType | Calendar) {
@@ -31,6 +31,6 @@ export class Now {
   }
 
   static plainDateTimeISO() {
-    return this.plainDateTime(new Calendar())
+    return this.plainDateTime()
   }
 }

@@ -1,4 +1,4 @@
-import { balanceFromMs, balanceTime } from './balance'
+import { balanceFromMs, balanceTime, balanceTimeFromMs } from './balance'
 import { Calendar } from './calendar'
 import { Duration, DurationLikeType } from './duration'
 import { asRoundOptions, roundModeMap, roundMs, roundPriorities } from './round'
@@ -236,19 +236,18 @@ export class PlainDateTime {
     const [smallerDate, smallerMs] = separateDateTime(smaller)
     const [largerDate, largerMs] = separateDateTime(larger, smallerMs)
 
-    const dateDiff = this.calendar.dateUntil(smallerDate, largerDate, options)
-    const { isoHour, isoMinute, isoSecond, isoMillisecond } = balanceTime(
-      {
-        isoMillisecond: roundMs(largerMs - smallerMs, options),
-      },
+    const { isoHour, isoMinute, isoSecond, isoMillisecond } = balanceTimeFromMs(
+      roundMs(largerMs - smallerMs, options),
       options
     )
-    const combined = dateDiff.with({
-      hours: isoHour,
-      minutes: isoMinute,
-      seconds: isoSecond,
-      milliseconds: isoMillisecond,
-    })
+    const combined = this.calendar
+      .dateUntil(smallerDate, largerDate, options)
+      .with({
+        hours: isoHour,
+        minutes: isoMinute,
+        seconds: isoSecond,
+        milliseconds: isoMillisecond,
+      })
     return positiveSign ? combined : combined.negated()
   }
   round(options?: RoundOptionsLikeType): PlainDateTime {

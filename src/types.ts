@@ -62,7 +62,7 @@ export enum UNIT_INCREMENT {
   MINUTE = 60,
   HOUR = 60,
   DAY = 24,
-  WEEK = 7,
-  MONTH = 4.34524, // FIXME: There's problems with using a static number for something thats constantly different
+  WEEK = 7, // Increments beyond day should not be used, they should instead defer to a calendar
+  MONTH = 4.34524, // There's problems with using a static number for something thats constantly different
   YEAR = 12,
 }
