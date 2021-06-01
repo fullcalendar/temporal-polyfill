@@ -8,7 +8,6 @@ import {
   AssignmentOptionsType,
   PlainDateType,
   RoundOptionsLikeType,
-  RoundOptionsType,
 } from './types'
 import { comparePlainDate } from './utils'
 import { ZonedDateTime } from './zonedDateTime'

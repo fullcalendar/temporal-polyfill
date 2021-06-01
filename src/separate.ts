@@ -15,6 +15,12 @@ export const extractTimeMs = ({
   isoSecond * toUnitMs('seconds') +
   isoMillisecond * toUnitMs('milliseconds')
 
+export const extractTimeWithDaysMs = ({
+  isoDay,
+  ...isoTime
+}: PlainTimeType & Pick<PlainDateType, 'isoDay'>): number =>
+  extractTimeMs(isoTime) + isoDay * toUnitMs('days')
+
 export const separateDuration = (
   duration: Duration
 ): [macroDuration: Duration, durationTimeMs: number] => {

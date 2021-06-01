@@ -1,11 +1,9 @@
-import { DurationLikeType } from './duration'
 import { asRoundOptions, roundPriorities } from './round'
 import {
   PlainTimeType,
   UNIT_INCREMENT,
   PlainDateTimeType,
   RoundOptionsLikeType,
-  DurationType,
 } from './types'
 
 export const balanceTime = (
@@ -43,6 +41,12 @@ export const balanceTime = (
 
   return { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond }
 }
+
+export const balanceTimeFromMs = (
+  ms: number,
+  options?: RoundOptionsLikeType
+): PlainTimeType & { deltaDays: number } =>
+  balanceTime({ isoMillisecond: ms }, options)
 
 export const balanceFromMs = (ms: number): PlainDateTimeType => {
   const date = new Date(ms)

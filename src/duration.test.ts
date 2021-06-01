@@ -1,5 +1,5 @@
 import { Duration } from './duration'
-import { DurationUnitType } from './types'
+import { DurationUnitType, RoundOptionsLikeType } from './types'
 
 test('can instantiate duration', () => {
   const duration = new Duration(1, 1, 1)
@@ -47,8 +47,8 @@ test.each([
     new Duration(0, 0, 0, 2),
   ],
   [
-    new Duration(0, 0, 0, 1, 15),
-    new Duration(0, 0, 0, 1, 45),
+    new Duration(0, 0, 0, 1, 12),
+    new Duration(0, 0, 0, 1, 12),
     new Duration(0, 0, 0, 3),
   ],
 ])('can take %s and add %s', (one, two, expected) => {
@@ -65,4 +65,24 @@ test.each<[Duration, { unit: DurationUnitType }, number]>([
   [new Duration(0, 0, 0, 0, 130, 20), { unit: 'seconds' }, 469200],
 ])('can find total of %s', (dur, options, expected) => {
   expect(dur.total(options)).toBe(expected)
+})
+
+test.each<[Duration, RoundOptionsLikeType, Duration]>([
+  [
+    new Duration(0, 0, 0, 1),
+    { largestUnit: 'hours' },
+    new Duration(0, 0, 0, 0, 24),
+  ],
+  [
+    new Duration(0, 0, 0, 0, 0, 100),
+    { largestUnit: 'hours' },
+    new Duration(0, 0, 0, 0, 1, 40),
+  ],
+  [
+    new Duration(0, 0, 0, 0, 1, 120, 50, 10),
+    { largestUnit: 'hours' },
+    new Duration(0, 0, 0, 0, 3, 0, 50, 10),
+  ],
+])('can round %s', (dur, options, expected) => {
+  expect(dur.round(options)).toEqual(expected)
 })

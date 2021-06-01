@@ -1,19 +1,22 @@
-import { balanceTime } from './balance'
+import { balanceTime, balanceTimeFromMs } from './balance'
 import { PlainDateTime, PlainDateTimeLikeType } from './plainDateTime'
-import { asRoundOptions } from './round'
-import { extractTimeMs } from './separate'
+import { roundMs } from './round'
+import { extractTimeMs, extractTimeWithDaysMs } from './separate'
 import {
   CompareReturnType,
   DurationType,
   DurationUnitType,
   LocaleType,
   RoundOptionsLikeType,
-  RoundOptionsType,
   UNIT_INCREMENT,
 } from './types'
 import { toUnitMs } from './utils'
 
 export type DurationLikeType = Partial<DurationType>
+
+type RelativeOptionsType = {
+  relativeTo?: PlainDateTime | PlainDateTimeLikeType | string
+}
 
 const getNumberUnitFormat = (number: number, unit: string) => ({
   negative: number < 0,
@@ -114,7 +117,7 @@ export class Duration {
 
   add(
     other: Duration | DurationLikeType | string,
-    options?: { relativeTo?: PlainDateTime | PlainDateTimeLikeType | string }
+    options?: RelativeOptionsType
   ): Duration {
     const otherDuration =
       other instanceof Duration ? other : Duration.from(other)
@@ -163,7 +166,7 @@ export class Duration {
   }
   subtract(
     other: Duration | DurationLikeType | string,
-    options?: { relativeTo?: PlainDateTime | PlainDateTimeLikeType | string }
+    options?: RelativeOptionsType
   ): Duration {
     const otherDuration =
       other instanceof Duration ? other : Duration.from(other)
@@ -181,10 +184,45 @@ export class Duration {
       toUnitMs(unit)
     )
   }
-  round(options?: RoundOptionsLikeType): Duration {
-    const {}: RoundOptionsType = asRoundOptions(options)
+  round(options?: RoundOptionsLikeType & RelativeOptionsType): Duration {
+    if (options?.relativeTo) {
+      const relative =
+        options.relativeTo instanceof PlainDateTime
+          ? options.relativeTo
+          : PlainDateTime.from(options.relativeTo)
+      return relative.add(this).since(relative, options)
+    } else if (this.years || this.months || this.weeks)
+      throw new Error('relativeTo is required for date units')
 
-    return Duration.from(this)
+    const {
+      deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceTimeFromMs(
+      roundMs(
+        extractTimeWithDaysMs({
+          isoDay: this.days,
+          isoHour: this.hours,
+          isoMinute: this.minutes,
+          isoSecond: this.seconds,
+          isoMillisecond: this.milliseconds,
+        }),
+        options
+      ),
+      options
+    )
+    return new Duration(
+      0,
+      0,
+      0,
+      deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond
+    )
   }
 
   negated(): Duration {
