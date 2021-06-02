@@ -1,3 +1,4 @@
+import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { CalendarType, TimeZoneType, UNIT_INCREMENT } from './types'
@@ -47,10 +48,26 @@ export class TimeZone {
     epochMilliseconds: number,
     calendar: Calendar | CalendarType
   ) {
-    return PlainDateTime.from({
-      epochMilliseconds:
-        epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds),
-      calendar,
-    })
+    const {
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceFromMs(
+      epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds)
+    )
+    return new PlainDateTime(
+      isoYear,
+      isoMonth + 1,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      calendar
+    )
   }
 }

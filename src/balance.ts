@@ -1,52 +1,57 @@
-import { asRoundOptions, roundPriorities } from './round'
+import { asRoundOptions } from './round'
 import {
   PlainTimeType,
   UNIT_INCREMENT,
   PlainDateTimeType,
   RoundOptionsLikeType,
 } from './types'
+import { priorities } from './utils'
 
 export const balanceTime = (
-  {
-    isoHour = 0,
-    isoMinute = 0,
-    isoSecond = 0,
-    isoMillisecond = 0,
-  }: Partial<PlainTimeType>,
+  time: Partial<PlainTimeType> | number,
   options?: RoundOptionsLikeType
 ): PlainTimeType & { deltaDays: number } => {
   const { largestUnit } = asRoundOptions(options)
-  const largestIndex = roundPriorities.indexOf(largestUnit)
+  const largestIndex = priorities.indexOf(largestUnit)
+  let { isoHour, isoMinute, isoSecond, isoMillisecond } =
+    typeof time === 'number'
+      ? {
+          isoHour: 0,
+          isoMinute: 0,
+          isoSecond: 0,
+          isoMillisecond: time,
+        }
+      : {
+          isoHour: time.isoHour || 0,
+          isoMinute: time.isoMinute || 0,
+          isoSecond: time.isoSecond || 0,
+          isoMillisecond: time.isoMillisecond || 0,
+        }
+
   //MS
-  if (roundPriorities.indexOf('seconds') >= largestIndex) {
+  if (priorities.indexOf('seconds') >= largestIndex) {
     isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND) || 0
     isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND) || 0
   }
   //SECS
-  if (roundPriorities.indexOf('minutes') >= largestIndex) {
+  if (priorities.indexOf('minutes') >= largestIndex) {
     isoMinute += Math.trunc(isoSecond / UNIT_INCREMENT.MINUTE) || 0
     isoSecond = Math.trunc(isoSecond % UNIT_INCREMENT.MINUTE) || 0
   }
   //MINS
-  if (roundPriorities.indexOf('hours') >= largestIndex) {
+  if (priorities.indexOf('hours') >= largestIndex) {
     isoHour += Math.trunc(isoMinute / UNIT_INCREMENT.HOUR) || 0
     isoMinute = Math.trunc(isoMinute % UNIT_INCREMENT.HOUR) || 0
   }
   //HOURS
   let deltaDays = 0
-  if (roundPriorities.indexOf('days') >= largestIndex) {
+  if (priorities.indexOf('days') >= largestIndex) {
     deltaDays = Math.trunc(isoHour / UNIT_INCREMENT.DAY) || 0
     isoHour = Math.trunc(isoHour % UNIT_INCREMENT.DAY) || 0
   }
 
   return { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond }
 }
-
-export const balanceTimeFromMs = (
-  ms: number,
-  options?: RoundOptionsLikeType
-): PlainTimeType & { deltaDays: number } =>
-  balanceTime({ isoMillisecond: ms }, options)
 
 export const balanceFromMs = (ms: number): PlainDateTimeType => {
   const date = new Date(ms)
@@ -59,26 +64,4 @@ export const balanceFromMs = (ms: number): PlainDateTimeType => {
     isoSecond: date.getUTCSeconds(),
     isoMillisecond: date.getUTCMilliseconds(),
   }
-}
-
-export const balanceDateTime = ({
-  isoYear = 1970,
-  isoMonth = 0,
-  isoDay = 1,
-  isoHour = 0,
-  isoMinute = 0,
-  isoSecond = 0,
-  isoMillisecond = 0,
-}: Partial<PlainDateTimeType>): PlainDateTimeType => {
-  return balanceFromMs(
-    Date.UTC(
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond
-    )
-  )
 }

@@ -1,3 +1,4 @@
+import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZone } from './timezone'
@@ -27,7 +28,25 @@ export class Now {
   }
 
   static plainDateTime(calendar?: CalendarType | Calendar) {
-    return PlainDateTime.from({ epochMilliseconds: this.instant(), calendar })
+    const {
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceFromMs(this.instant())
+    return new PlainDateTime(
+      isoYear,
+      isoMonth + 1,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      calendar
+    )
   }
 
   static plainDateTimeISO() {

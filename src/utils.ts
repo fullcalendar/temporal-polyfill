@@ -1,4 +1,3 @@
-import { roundPriorities } from './round'
 import {
   CompareReturnType,
   DurationUnitType,
@@ -14,7 +13,6 @@ export const incrementMap: { [Property in DurationUnitType]: number } = {
   years: UNIT_INCREMENT.YEAR,
   /**@deprecated */
   months: UNIT_INCREMENT.MONTH,
-  /**@deprecated */
   weeks: UNIT_INCREMENT.WEEK,
   days: UNIT_INCREMENT.DAY,
   hours: UNIT_INCREMENT.HOUR,
@@ -23,15 +21,26 @@ export const incrementMap: { [Property in DurationUnitType]: number } = {
   milliseconds: UNIT_INCREMENT.MILLISECOND,
 }
 
+export const priorities: Array<DurationUnitType> = [
+  'years',
+  'months',
+  'weeks',
+  'days',
+  'hours',
+  'minutes',
+  'seconds',
+  'milliseconds',
+]
+
 /**
  * Calculates milliseconds for a given unit
  * @param unit days, hours, minutes, seconds, milliseconds
  * @returns milliseconds
  */
 export const toUnitMs = (unit: DurationUnitType): number =>
-  roundPriorities.reduce(
+  priorities.reduce(
     (acc, val, index) =>
-      index >= roundPriorities.indexOf(unit) ? acc * incrementMap[val] : acc,
+      index >= priorities.indexOf(unit) ? acc * incrementMap[val] : acc,
     1
   )
 

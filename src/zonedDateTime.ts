@@ -114,18 +114,22 @@ export class ZonedDateTime {
     return this.calendar.day(balanceFromMs(this.epochMilliseconds))
   }
   get hour() {
+    // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
   }
   get minute() {
+    // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
   }
   get second() {
+    // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
   }
   get millisecond() {
+    // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc'
       ? date.getUTCMilliseconds()
@@ -147,10 +151,10 @@ export class ZonedDateTime {
     )
   }
   withTimeZone(timeZone: TimeZone | TimeZoneType) {
-    return new ZonedDateTime(this.epochMilliseconds, timeZone, this.calendar)
+    return this.with({ timeZone })
   }
   withCalendar(calendar: Calendar | CalendarType) {
-    return new ZonedDateTime(this.epochMilliseconds, this.timeZone, calendar)
+    return this.with({ calendar })
   }
 
   toString() {
@@ -177,6 +181,8 @@ export class ZonedDateTime {
     )}`
   }
   toLocaleString(locale: LocaleType, options?: Intl.DateTimeFormatOptions) {
-    return Intl.DateTimeFormat(locale, options).format(this.epochMilliseconds)
+    return new Intl.DateTimeFormat(locale, options).format(
+      this.epochMilliseconds
+    )
   }
 }

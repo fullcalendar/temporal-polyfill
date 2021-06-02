@@ -1,25 +1,9 @@
-import {
-  DurationUnitType,
-  RoundModeType,
-  RoundOptionsLikeType,
-  RoundOptionsType,
-} from './types'
-import { toUnitMs } from './utils'
-
-export const roundPriorities: Array<DurationUnitType> = [
-  'years',
-  'months',
-  'weeks',
-  'days',
-  'hours',
-  'minutes',
-  'seconds',
-  'milliseconds',
-]
+import { RoundModeType, RoundOptionsLikeType, RoundOptionsType } from './types'
+import { priorities, toUnitMs } from './utils'
 
 const roundDefaults: RoundOptionsType = {
-  largestUnit: roundPriorities[0],
-  smallestUnit: roundPriorities[roundPriorities.length - 1],
+  largestUnit: priorities[0],
+  smallestUnit: priorities[priorities.length - 1],
   roundingIncrement: 1,
   roundingMode: 'trunc',
 }
@@ -29,8 +13,8 @@ export const asRoundOptions = (options?: RoundOptionsLikeType) => {
     ...options,
   }
   if (
-    roundPriorities.indexOf(combined.smallestUnit) <
-    roundPriorities.indexOf(combined.largestUnit)
+    priorities.indexOf(combined.smallestUnit) <
+    priorities.indexOf(combined.largestUnit)
   )
     throw new RangeError('largestUnit cannot be smaller than smallestUnit')
   return combined

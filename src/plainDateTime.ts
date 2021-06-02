@@ -1,7 +1,7 @@
-import { balanceFromMs, balanceTime, balanceTimeFromMs } from './balance'
+import { balanceFromMs, balanceTime } from './balance'
 import { Calendar } from './calendar'
-import { Duration, DurationLikeType } from './duration'
-import { asRoundOptions, roundModeMap, roundMs, roundPriorities } from './round'
+import { Duration } from './duration'
+import { asRoundOptions, roundModeMap, roundMs } from './round'
 import { separateDateTime, separateDuration } from './separate'
 import {
   CalendarType,
@@ -13,20 +13,12 @@ import {
   RoundOptionsType,
   TimeZoneType,
   UNIT_INCREMENT,
+  PlainDateTimeType,
+  PlainDateTimeLikeType,
+  DurationLikeType,
 } from './types'
-import { asDate } from './utils'
+import { asDate, priorities } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
-
-export type PlainDateTimeLikeType = {
-  isoYear?: number
-  isoMonth?: number
-  isoDay?: number
-  isoHour?: number
-  isoMinute?: number
-  isoSecond?: number
-  isoMillisecond?: number
-  calendar?: Calendar | CalendarType
-}
 
 export class PlainDateTime {
   readonly epochMilliseconds
@@ -236,7 +228,7 @@ export class PlainDateTime {
     const [smallerDate, smallerMs] = separateDateTime(smaller)
     const [largerDate, largerMs] = separateDateTime(larger, smallerMs)
 
-    const { isoHour, isoMinute, isoSecond, isoMillisecond } = balanceTimeFromMs(
+    const { isoHour, isoMinute, isoSecond, isoMillisecond } = balanceTime(
       roundMs(largerMs - smallerMs, options),
       options
     )
@@ -257,8 +249,8 @@ export class PlainDateTime {
       roundingMode,
     }: RoundOptionsType = asRoundOptions(options)
 
-    const smallestIndex = roundPriorities.indexOf(smallestUnit)
-    const largestIndex = roundPriorities.indexOf(largestUnit)
+    const smallestIndex = priorities.indexOf(smallestUnit)
+    const largestIndex = priorities.indexOf(largestUnit)
 
     const arr: Array<{
       value: number
@@ -300,7 +292,7 @@ export class PlainDateTime {
       years,
     ] = arr.reduce(
       (acc, { value, field, increment }, idx) => {
-        const roundIndex = roundPriorities.indexOf(field)
+        const roundIndex = priorities.indexOf(field)
 
         // Round Smallest
         if (smallestIndex < roundIndex) {
@@ -346,7 +338,9 @@ export class PlainDateTime {
     locale: LocaleType,
     options?: Intl.DateTimeFormatOptions
   ): string {
-    return Intl.DateTimeFormat(locale, options).format(this.epochMilliseconds)
+    return new Intl.DateTimeFormat(locale, options).format(
+      this.epochMilliseconds
+    )
   }
   toZonedDateTime(timeZone: TimeZoneType): ZonedDateTime {
     return new ZonedDateTime(this.epochMilliseconds, timeZone)

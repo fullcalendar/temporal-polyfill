@@ -2,7 +2,6 @@ import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { CalendarType, PlainDateType } from './types'
-import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
   const calendar = new Calendar()
@@ -29,20 +28,20 @@ test.each([
     new Duration(1, 1),
     {
       isoYear: 1972,
-      isoMonth: 0,
-      isoDay: 1,
-    },
-  ],
-  [
-    { isoYear: 1970, isoMonth: 0, isoDay: 25 },
-    new Duration(0, 0, 1),
-    {
-      isoYear: 1970,
       isoMonth: 1,
       isoDay: 1,
     },
   ],
-])('can do dateAdd', (date, dur, expected) => {
+  [
+    { isoYear: 1970, isoMonth: 1, isoDay: 25 },
+    new Duration(0, 0, 1),
+    {
+      isoYear: 1970,
+      isoMonth: 2,
+      isoDay: 1,
+    },
+  ],
+])('can do %s + %s to get %s', (date, dur, expected) => {
   const calendar = new Calendar()
   expect(calendar.dateAdd(date, dur)).toEqual(expected)
 })

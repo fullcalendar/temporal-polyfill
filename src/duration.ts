@@ -1,18 +1,18 @@
-import { balanceTime, balanceTimeFromMs } from './balance'
-import { PlainDateTime, PlainDateTimeLikeType } from './plainDateTime'
+import { balanceTime } from './balance'
+import { PlainDateTime } from './plainDateTime'
 import { roundMs } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
 import {
   CompareReturnType,
+  DurationLikeType,
   DurationType,
   DurationUnitType,
   LocaleType,
+  PlainDateTimeLikeType,
   RoundOptionsLikeType,
   UNIT_INCREMENT,
 } from './types'
 import { toUnitMs } from './utils'
-
-export type DurationLikeType = Partial<DurationType>
 
 type RelativeOptionsType = {
   relativeTo?: PlainDateTime | PlainDateTimeLikeType | string
@@ -197,7 +197,7 @@ export class Duration {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = balanceTimeFromMs(
+    } = balanceTime(
       roundMs(
         extractTimeWithDaysMs({
           isoDay: this.days,
@@ -247,7 +247,7 @@ export class Duration {
     )
   }
 
-  toString() {
+  toString(): string {
     const [year, month, week, day, hour, minute, second] = [
       [this.years, 'Y'],
       [this.months, 'M'],
@@ -276,5 +276,14 @@ export class Duration {
     const result = `P${year.format}${month.format}${week.format}${day.format}${T}${hour.format}${minute.format}${second.format}`
     return result === 'P' ? 'P0D' : `${P}${result}`
   }
-  toLocaleString(locale: LocaleType) {}
+  toLocaleString(
+    locale: LocaleType,
+    options?: Intl.RelativeTimeFormatOptions
+  ): string {
+    // TODO: This needs a proper implementation
+    return new Intl.RelativeTimeFormat(locale, options).format(
+      this.total({ unit: 'seconds' }),
+      'seconds'
+    )
+  }
 }

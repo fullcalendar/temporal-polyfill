@@ -1,3 +1,5 @@
+import { Calendar } from './calendar'
+
 export type CalendarType =
   | 'buddhist'
   | 'chinese'
@@ -28,7 +30,9 @@ export type PlainTimeType = {
   isoSecond: number
   isoMillisecond: number
 }
-export type PlainDateTimeType = PlainDateType & PlainTimeType
+export type PlainDateTimeType = PlainDateType &
+  PlainTimeType & { calendar?: Calendar | CalendarType }
+export type PlainDateTimeLikeType = Partial<PlainDateTimeType>
 
 export type DurationType = {
   years: number
@@ -40,6 +44,7 @@ export type DurationType = {
   seconds: number
   milliseconds: number
 }
+export type DurationLikeType = Partial<DurationType>
 export type DurationUnitType = keyof DurationType
 
 export type RoundModeType = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
@@ -62,10 +67,12 @@ export enum UNIT_INCREMENT {
   MINUTE = 60,
   HOUR = 60,
   DAY = 24,
-  /** @deprecated */
-  WEEK = 7, // Increments beyond day should not be used, they should instead defer to a calendar
-  /** @deprecated */
-  MONTH = 4.34524, // There's problems with using a static number for something thats constantly different
-  /** @deprecated */
+  WEEK = 7,
+  /** @deprecated This increment should not be used, it should instead defer to a calendar */
+  MONTH = 4.34524,
+  /** @deprecated This increment should not be used, it should instead defer to a calendar */
   YEAR = 12,
 }
+
+/** Constructs a type with specified properties set to required and the rest as optional */
+export type Part<A, B extends keyof A> = Required<Pick<A, B>> & Partial<A>
