@@ -49,8 +49,8 @@ export type DurationUnitType = keyof DurationType
 
 export type RoundModeType = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
 export type RoundOptionsType = {
-  smallestUnit: DurationUnitType
-  largestUnit: DurationUnitType
+  smallestUnit: DurationUnitType | 'auto'
+  largestUnit: DurationUnitType | 'auto'
   roundingIncrement: number
   roundingMode: RoundModeType
 }

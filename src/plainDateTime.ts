@@ -13,7 +13,6 @@ import {
   RoundOptionsType,
   TimeZoneType,
   UNIT_INCREMENT,
-  PlainDateTimeType,
   PlainDateTimeLikeType,
   DurationLikeType,
 } from './types'
@@ -249,8 +248,12 @@ export class PlainDateTime {
       roundingMode,
     }: RoundOptionsType = asRoundOptions(options)
 
-    const smallestIndex = priorities.indexOf(smallestUnit)
-    const largestIndex = priorities.indexOf(largestUnit)
+    const smallestIndex =
+      smallestUnit !== 'auto'
+        ? priorities.indexOf(smallestUnit)
+        : priorities.length - 1
+    const largestIndex =
+      largestUnit !== 'auto' ? priorities.indexOf(largestUnit) : 0
 
     const arr: Array<{
       value: number

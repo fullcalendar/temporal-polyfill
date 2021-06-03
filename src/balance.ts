@@ -12,7 +12,8 @@ export const balanceTime = (
   options?: RoundOptionsLikeType
 ): PlainTimeType & { deltaDays: number } => {
   const { largestUnit } = asRoundOptions(options)
-  const largestIndex = priorities.indexOf(largestUnit)
+  const largestIndex =
+    largestUnit === 'auto' ? 0 : priorities.indexOf(largestUnit)
   let { isoHour, isoMinute, isoSecond, isoMillisecond } =
     typeof time === 'number'
       ? {
