@@ -9,56 +9,132 @@ import {
   RoundOptionsLikeType,
   UNIT_INCREMENT,
   Part,
+  CompareReturnType,
 } from './types'
 import { comparePlainDate, toUnitMs } from './utils'
 
-type DateFieldsType = {
+type CalendarDateType = {
   year: number
   month: number
   day: number
 }
 
-// const handleMonthOverflow = (
-//   calendar: Calendar,
-//   { isoYear, isoMonth }: PlainDateType,
-//   rejectOverflow: boolean
-// ): [number, number] => {
-//   const totalMonths = calendar.monthsInYear({ isoYear })
-//   if (rejectOverflow && isoMonth > totalMonths)
-//     throw new Error('Month overflow is disabled')
-//   return [isoMonth % totalMonths, Math.trunc(isoMonth / totalMonths)]
-// }
-// const handleDayOverflow = (
-//   calendar: Calendar,
-//   { isoYear, isoMonth, isoDay }: PlainDateType,
-//   rejectOverflow: boolean
-// ): [number, number] => {
-//   const totalDays = calendar.daysInMonth({ isoYear, isoMonth })
-//   if (rejectOverflow && isoDay > totalDays)
-//     throw new Error('Day overflow is disabled')
-//   return [isoDay % totalDays, Math.trunc(isoDay / totalDays)]
-// }
+// Diff Utils
+const diffYears = (
+  one: Part<CalendarDateType, 'year'>,
+  two: Part<CalendarDateType, 'year'>,
+  calendar: Calendar
+): [number, CalendarDateType] => {
+  let current = { month: 1, day: 1, ...one }
+  const end = { month: 1, day: 1, ...two }
+
+  let years = end.year - current.year
+  current = addYears(current, years)
+  if (compareCalendarDates(current, end, calendar) > 0) {
+    current.year--
+    years--
+  }
+  return [years, current]
+}
+const diffMonths = (
+  one: Part<CalendarDateType, 'year' | 'month'>,
+  two: Part<CalendarDateType, 'year' | 'month'>,
+  calendar: Calendar
+): [number, CalendarDateType] => {
+  let current = { day: 1, ...one }
+  const end = { day: 1, ...two }
+
+  let months = 0
+  while (current.year < end.year) {
+    current.year++
+    months += calendar.monthsInYear(calendar.dateFromFields(current))
+  }
+  if (compareCalendarDates(current, end, calendar) > 0) {
+    current.year--
+    months--
+  }
+  months += end.month - current.month
+
+  current = addMonths(current, months)
+  if (compareCalendarDates(current, end, calendar) > 0) {
+    current.month--
+    months--
+  }
+
+  return [months, current]
+}
+const diffDays = (one: PlainDateType, two: PlainDateType): number => {
+  const start = Date.UTC(one.isoYear, one.isoMonth - 1, one.isoDay)
+  const end = Date.UTC(two.isoYear, two.isoMonth - 1, two.isoDay)
+  return Math.trunc((end - start) / toUnitMs('days'))
+}
+
+// Add Utils
+const addYears = (
+  date: Part<CalendarDateType, 'year'>,
+  years: number,
+  rejectOverflow: boolean = false
+): CalendarDateType => {
+  return { year: date.year + years, month: date.month || 1, day: date.day || 1 }
+}
+const addMonths = (
+  date: CalendarDateType,
+  months: number,
+  rejectOverflow: boolean = false
+): CalendarDateType => {
+  return { year: date.year, month: date.month + months, day: date.day || 1 }
+}
+const addDays = (date: PlainDateType, days: number): PlainDateType => {
+  return balanceFromMs(
+    Date.UTC(date.isoYear, date.isoMonth - 1, date.isoDay) +
+      days * toUnitMs('days')
+  )
+}
+
+// Conversion Utils
+const isoToCal = (
+  date: PlainDateType,
+  calendar: Calendar
+): CalendarDateType => {
+  return {
+    year: calendar.year(date),
+    month: calendar.month(date),
+    day: calendar.day(date),
+  }
+}
+const compareCalendarDates = (
+  one: CalendarDateType,
+  two: CalendarDateType,
+  calendar: Calendar
+): CompareReturnType =>
+  comparePlainDate(calendar.dateFromFields(one), calendar.dateFromFields(two))
+
+// Overflow Utils
+// TODO: Use this
 const handleMonthOverflow = (
   calendar: Calendar,
-  fields: DateFieldsType,
+  fields: CalendarDateType | PlainDateType,
   rejectOverflow: boolean
-): number => {
-  const { isoYear, isoMonth } = calendar.dateFromFields(fields)
-  const totalMonths = calendar.monthsInYear({ isoYear })
+): [number, number] => {
+  const { isoYear, isoMonth } =
+    'year' in fields ? calendar.dateFromFields(fields) : fields
+  const totalMonths = calendar.monthsInYear({ isoYear }) + 1
   if (rejectOverflow && isoMonth > totalMonths)
     throw new Error('Month overflow is disabled')
-  return isoMonth % totalMonths
+  return [isoMonth % totalMonths, Math.trunc(isoMonth / totalMonths)]
 }
+// TODO: Use this
 const handleDayOverflow = (
   calendar: Calendar,
-  fields: DateFieldsType,
+  fields: CalendarDateType | PlainDateType,
   rejectOverflow: boolean
-): number => {
-  const { isoYear, isoMonth, isoDay } = calendar.dateFromFields(fields)
-  const totalDays = calendar.daysInMonth({ isoYear, isoMonth })
+): [number, number] => {
+  const { isoYear, isoMonth, isoDay } =
+    'year' in fields ? calendar.dateFromFields(fields) : fields
+  const totalDays = calendar.daysInMonth({ isoYear, isoMonth }) + 1
   if (rejectOverflow && isoDay > totalDays)
     throw new Error('Day overflow is disabled')
-  return isoDay % totalDays
+  return [isoDay % totalDays, Math.trunc(isoDay / totalDays)]
 }
 
 export class Calendar {
@@ -77,7 +153,7 @@ export class Calendar {
 
   private formattedPropertyValue(dt: PlainDateType, property: string): string {
     return this.formatter
-      .formatToParts(new Date(Date.UTC(dt.isoYear, dt.isoMonth, dt.isoDay)))
+      .formatToParts(new Date(Date.UTC(dt.isoYear, dt.isoMonth - 1, dt.isoDay)))
       .reduce(
         (acc: { [type: string]: string }, { type, value }) => ({
           ...acc,
@@ -89,7 +165,7 @@ export class Calendar {
 
   year({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
     return parseInt(
-      this.formattedPropertyValue({ isoYear, isoMonth: 0, isoDay: 1 }, 'year')
+      this.formattedPropertyValue({ isoYear, isoMonth: 1, isoDay: 1 }, 'year')
     )
   }
   month({
@@ -133,7 +209,7 @@ export class Calendar {
   }
   weekOfYear(dt: PlainDateType): number {
     return Math.ceil(
-      ((Date.UTC(dt.isoYear, dt.isoMonth, dt.isoDay) -
+      ((Date.UTC(dt.isoYear, dt.isoMonth - 1, dt.isoDay) -
         Date.UTC(dt.isoYear, 0)) /
         toUnitMs('days') +
         1) /
@@ -146,97 +222,39 @@ export class Calendar {
     return isoYear % 400 === 0 || (isoYear % 4 === 0 && isoYear % 100 !== 0)
   }
 
-  // TODO: Implement this
   dateFromFields(
-    fields: DateFieldsType,
+    fields: Part<CalendarDateType, 'year' | 'month'>,
     options?: AssignmentOptionsType
   ): PlainDateType {
+    // FIXME: Overflow does nothing
     const overflow = options?.overflow || 'constrain'
-    return { isoYear: fields.year, isoMonth: fields.month, isoDay: fields.day }
+    return {
+      isoYear: fields.year,
+      isoMonth: fields.month,
+      isoDay: fields.day || 1,
+    }
   }
 
   // Calendar Math
-
-  // dateAdd(
-  //   date: PlainDateType,
-  //   duration: Duration,
-  //   options?: AssignmentOptionsLikeType
-  // ): PlainDateType {
-  //   let { years, months, weeks, days } = duration
-  //   let { isoYear, isoMonth, isoDay } = this.dateFromFields({
-  //     year: this.year(date) + years,
-  //     month: this.month(date) - 1 + months,
-  //     day: this.day(date) + weeks * UNIT_INCREMENT.WEEK + days,
-  //   })
-  //   const rejectOverflow = options?.overflow === 'reject'
-
-  //   const [newMonths, deltaYears] = handleMonthOverflow(
-  //     this,
-  //     { isoYear, isoMonth, isoDay },
-  //     rejectOverflow
-  //   )
-  //   isoYear += deltaYears
-  //   isoMonth = newMonths
-  //   const [newDays, deltaMonths] = handleDayOverflow(
-  //     this,
-  //     { isoYear, isoMonth, isoDay },
-  //     rejectOverflow
-  //   )
-  //   isoMonth += deltaMonths
-  //   isoDay = newDays
-
-  //   return { isoYear, isoMonth, isoDay }
-  // }
   dateAdd(
     date: PlainDateType,
     duration: Duration,
     options?: AssignmentOptionsLikeType
   ): PlainDateType {
-    let fields: DateFieldsType = {
+    let { years, months, weeks, days } = duration
+    let fields: CalendarDateType = {
       year: this.year(date),
       month: this.month(date),
       day: this.day(date),
     }
-    let { years, months, weeks, days } = duration
     const rejectOverflow = options?.overflow === 'reject'
-
-    if (years) {
-      fields.year += years
-      fields.month = handleMonthOverflow(this, fields, rejectOverflow)
-    }
-
-    if (months) {
-      while (months > 0) {
-        const monthsLeft =
-          this.monthsInYear({ isoYear: fields.year }) - fields.month
-        if (months <= monthsLeft) {
-          fields.month += months
-          break
-        } else {
-          // move to next year
-          fields.year += 1
-          fields.month = 1
-          months -= monthsLeft
-        }
-      }
-      while (months < 0) {
-        if (fields.month + months > 0) {
-          fields.month += months
-          break
-        } else {
-          // move to prior year
-          fields.year -= 1
-          fields.month = this.monthsInYear({ isoYear: fields.year })
-          months += fields.month + 1 // reduce the remaining travel by the # of months just moved
-        }
-      }
-      fields.day = handleDayOverflow(this, fields, rejectOverflow)
-    }
-
-    days += weeks * UNIT_INCREMENT.WEEK
-
-    const { isoYear, isoMonth, isoDay } = this.dateFromFields(fields)
-    return balanceFromMs(Date.UTC(isoYear, isoMonth, isoDay))
+    fields = addYears(fields, years, rejectOverflow)
+    fields = addMonths(fields, months, rejectOverflow)
+    const { isoYear, isoMonth, isoDay } = addDays(
+      this.dateFromFields(fields),
+      days + weeks * UNIT_INCREMENT.WEEK
+    )
+    return { isoYear, isoMonth, isoDay }
   }
   dateUntil(
     one: PlainDateType,
@@ -245,97 +263,32 @@ export class Calendar {
   ): Duration {
     const { largestUnit } = asRoundOptions(options)
 
-    if (largestUnit === 'years' || largestUnit === 'months') {
-      const sign = -comparePlainDate(one, two)
-      if (sign === 0) return new Duration()
+    const negative =
+      compareCalendarDates(isoToCal(one, this), isoToCal(two, this), this) > 0
+    let current = isoToCal(negative ? two : one, this)
+    const end = isoToCal(negative ? one : two, this)
+    let years = 0,
+      months = 0,
+      weeks = 0,
+      days = 0
 
-      const start = one
-      const end = two
-
-      let years = end.isoYear - start.isoYear
-      let months = end.isoMonth - start.isoMonth
-      let days = 0
-
-      let mid: PlainDateType = {
-        ...one,
-        isoYear: one.isoYear + years,
-      }
-      let midSign = -comparePlainDate(mid, two)
-      if (midSign === 0) {
-        return largestUnit === 'years'
-          ? new Duration(years)
-          : new Duration(0, years * UNIT_INCREMENT.YEAR)
-      }
-
-      if (midSign !== sign) {
-        years -= sign
-        months += sign * UNIT_INCREMENT.YEAR
-      }
-      mid = balanceFromMs(
-        Date.UTC(one.isoYear + years, one.isoMonth + months, one.isoDay)
-      )
-      midSign = -comparePlainDate(mid, two)
-      if (midSign === 0) {
-        return largestUnit === 'years'
-          ? new Duration(years, months)
-          : new Duration(0, months + years * UNIT_INCREMENT.YEAR)
-      }
-      if (midSign !== sign) {
-        // The end date is later in the month than mid date (or earlier for negative durations). Back up one month.
-        months -= sign
-        if (months === -sign) {
-          years -= sign
-          months = 11 * sign
-        }
-        mid = balanceFromMs(
-          Date.UTC(one.isoYear + years, one.isoMonth + months, one.isoDay)
-        )
-        midSign = -comparePlainDate(one, mid)
-      }
-
-      // If we get here, months and years are correct (no overflow), and `mid` is within the range from `start` to `end`. To count the days between `mid` and `end`, there are 3 cases:
-      if (mid.isoMonth === end.isoMonth && mid.isoYear === end.isoYear) {
-        // 1) same month: use simple subtraction
-        days = end.isoDay - mid.isoDay
-      } else if (sign < 0) {
-        // 2) end is previous month from intermediate (negative duration)
-        // Example: intermediate: Feb 1, end: Jan 30, DaysInMonth = 31, days = -2
-        days = -mid.isoDay - (this.daysInMonth(end) - end.isoDay)
-      } else {
-        // 3) end is next month from intermediate (positive duration)
-        // Example: intermediate: Jan 29, end: Feb 1, DaysInMonth = 31, days = 3
-        days = end.isoDay + (this.daysInMonth(mid) - mid.isoDay)
-      }
-
-      if (largestUnit === 'months') {
-        months += years * UNIT_INCREMENT.YEAR
-        years = 0
-      }
-      return new Duration(years, months, 0, days)
-    } else if (largestUnit === 'weeks' || largestUnit === 'days') {
-      const sign = comparePlainDate(one, two) < 0 ? 1 : -1
-      const smaller = sign === 1 ? one : two
-      const larger = sign === 1 ? two : one
-
-      let years = larger.isoYear - smaller.isoYear
-      let days = this.dayOfYear(larger) - this.dayOfYear(smaller)
-      while (years > 0) {
-        days += this.inLeapYear({
-          isoYear: smaller.isoYear + years - 1,
-          isoMonth: 0,
-          isoDay: 1,
-        })
-          ? 366
-          : 365
-        years--
-      }
-      let weeks = 0
-      if (largestUnit === 'weeks') {
-        weeks = Math.floor(days / UNIT_INCREMENT.WEEK)
-        days %= UNIT_INCREMENT.WEEK
-      }
-      return new Duration(0, 0, weeks * sign, days * sign)
+    switch (largestUnit) {
+      case 'years':
+        ;[years, current] = diffYears(current, end, this)
+      case 'months':
+        ;[months, current] = diffMonths(current, end, this)
+      case 'weeks':
+      case 'days':
+      default:
+        days = diffDays(this.dateFromFields(current), negative ? one : two)
     }
-    throw new Error('Invalid units')
+
+    if (largestUnit === 'weeks') {
+      weeks = Math.trunc(days / UNIT_INCREMENT.WEEK)
+      days = days % UNIT_INCREMENT.WEEK
+    }
+
+    const dur = new Duration(years, months, weeks, days)
+    return negative ? dur.negated() : dur
   }
 }

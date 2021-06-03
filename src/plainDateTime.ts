@@ -203,7 +203,7 @@ export class PlainDateTime {
 
     return new PlainDateTime(
       isoYear,
-      isoMonth + 1,
+      isoMonth,
       isoDay,
       constrained.isoHour,
       constrained.isoMinute,

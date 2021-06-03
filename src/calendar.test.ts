@@ -22,9 +22,9 @@ test.each([
   expect(calendar.weekOfYear(balanceFromMs(epochMilliseconds))).toBe(expected)
 })
 
-test.each([
+test.each<[PlainDateType, Duration, PlainDateType]>([
   [
-    { isoYear: 1970, isoMonth: 11, isoDay: 1 },
+    { isoYear: 1970, isoMonth: 12, isoDay: 1 },
     new Duration(1, 1),
     {
       isoYear: 1972,
@@ -41,18 +41,33 @@ test.each([
       isoDay: 1,
     },
   ],
-])('can do %s + %s to get %s', (date, dur, expected) => {
+])('can dateAdd %s + %s = %s', (date, dur, expected) => {
   const calendar = new Calendar()
   expect(calendar.dateAdd(date, dur)).toEqual(expected)
 })
 
 test.each<[PlainDateType, PlainDateType, Duration]>([
   [
+    { isoYear: 1970, isoMonth: 1, isoDay: 1 },
+    { isoYear: 1972, isoMonth: 3, isoDay: 5 },
+    new Duration(2, 2, 0, 4),
+  ],
+  [
+    { isoYear: 1970, isoMonth: 5, isoDay: 30 },
+    { isoYear: 1972, isoMonth: 1, isoDay: 1 },
+    new Duration(1, 7, 0, 2),
+  ],
+  [
     { isoYear: 2021, isoMonth: 5, isoDay: 24 },
     { isoYear: 2021, isoMonth: 5, isoDay: 28 },
     new Duration(0, 0, 0, 4),
   ],
-])('can do dateUntil', (one, two, expected) => {
-  const calendar = new Calendar()
-  expect(calendar.dateUntil(one, two)).toEqual(expected)
+  [
+    { isoYear: 2022, isoMonth: 6, isoDay: 3 },
+    { isoYear: 2021, isoMonth: 5, isoDay: 1 },
+    new Duration(-1, -1, 0, -2),
+  ],
+])('can do dateUntil from %s to %s', (one, two, expected) => {
+  const received = new Calendar().dateUntil(one, two, { largestUnit: 'years' })
+  expect(received).toEqual(expected)
 })

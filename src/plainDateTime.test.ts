@@ -111,7 +111,7 @@ test.each([
     new Duration(0, 0, 0, 0, 23),
   ],
 ])('can get duration till %s since %s', (date, other, expected) => {
-  expect(date.since(other)).toEqual(expected)
+  expect(date.since(other, { largestUnit: 'years' })).toEqual(expected)
 })
 
 test.each<[PlainDateTime, PlainDateTime, RoundOptionsLikeType]>([

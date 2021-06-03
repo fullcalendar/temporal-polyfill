@@ -48,11 +48,11 @@ export const comparePlainDate = (
   one: PlainDateType,
   two: PlainDateType
 ): CompareReturnType => {
-  if (one.isoYear > two.isoYear) return 1
-  else if (one.isoYear < two.isoYear) return -1
-  if (one.isoMonth > two.isoMonth) return 1
-  else if (one.isoMonth < two.isoMonth) return -1
-  if (one.isoDay > two.isoDay) return 1
-  else if (one.isoDay < two.isoDay) return -1
+  const diff =
+    one.isoYear - two.isoYear ||
+    one.isoMonth - two.isoMonth ||
+    one.isoDay - two.isoDay
+  if (diff < 0) return -1
+  else if (diff > 0) return 1
   return 0
 }

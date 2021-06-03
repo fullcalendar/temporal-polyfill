@@ -5,7 +5,6 @@ import { extractTimeMs, extractTimeWithDaysMs } from './separate'
 import {
   CompareReturnType,
   DurationLikeType,
-  DurationType,
   DurationUnitType,
   LocaleType,
   PlainDateTimeLikeType,
@@ -13,6 +12,10 @@ import {
   UNIT_INCREMENT,
 } from './types'
 import { toUnitMs } from './utils'
+
+type UnitOptionsType = {
+  unit: DurationUnitType
+}
 
 type RelativeOptionsType = {
   relativeTo?: PlainDateTime | PlainDateTimeLikeType | string
@@ -164,17 +167,15 @@ export class Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
     return this.add(other.negated(), options)
   }
-  total(
-    options: {
-      unit: DurationUnitType
-    } & RelativeOptionsType
-  ): number {
-    const { unit } = options
-    const relative = options.relativeTo
-      ? options.relativeTo instanceof PlainDateTime
-        ? options.relativeTo
-        : PlainDateTime.from(options.relativeTo)
-      : new PlainDateTime(1970, 1, 1)
+  total({
+    unit,
+    relativeTo = new PlainDateTime(1970, 1, 1),
+  }: UnitOptionsType & RelativeOptionsType): number {
+    const relative =
+      relativeTo instanceof PlainDateTime
+        ? relativeTo
+        : PlainDateTime.from(relativeTo)
+
     // FIXME: This doesn't properly account for weeks/months/years
     return (
       (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /

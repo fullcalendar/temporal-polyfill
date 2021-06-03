@@ -58,7 +58,7 @@ export const balanceFromMs = (ms: number): PlainDateTimeType => {
   const date = new Date(ms)
   return {
     isoYear: date.getUTCFullYear(),
-    isoMonth: date.getUTCMonth(),
+    isoMonth: date.getUTCMonth() + 1,
     isoDay: date.getUTCDate(),
     isoHour: date.getUTCHours(),
     isoMinute: date.getUTCMinutes(),
