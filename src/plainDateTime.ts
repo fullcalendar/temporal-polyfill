@@ -16,7 +16,7 @@ import {
   PlainDateTimeLikeType,
   DurationLikeType,
 } from './types'
-import { asDate, priorities } from './utils'
+import { asDate, dateValue, priorities } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class PlainDateTime {
@@ -33,15 +33,15 @@ export class PlainDateTime {
     isoMillisecond: number = 0,
     calendar: Calendar | CalendarType = new Calendar()
   ) {
-    this.epochMilliseconds = Date.UTC(
+    this.epochMilliseconds = dateValue({
       isoYear,
-      isoMonth - 1,
+      isoMonth,
       isoDay,
       isoHour,
       isoMinute,
       isoSecond,
-      isoMillisecond
-    )
+      isoMillisecond,
+    })
 
     this.calendar =
       typeof calendar === 'string' ? new Calendar(calendar) : calendar
@@ -85,7 +85,7 @@ export class PlainDateTime {
       }
       throw new Error('Invalid String')
     } else if (typeof thing === 'number') {
-      const date = new Date(thing)
+      const date = asDate(thing)
       return new PlainDateTime(
         date.getUTCFullYear(),
         date.getUTCMonth() + 1,
@@ -96,7 +96,7 @@ export class PlainDateTime {
         date.getUTCMilliseconds()
       )
     } else if (thing.epochMilliseconds) {
-      const date = new Date(thing.epochMilliseconds)
+      const date = asDate(thing.epochMilliseconds)
       return new PlainDateTime(
         date.getUTCFullYear(),
         date.getUTCMonth() + 1,
@@ -242,87 +242,22 @@ export class PlainDateTime {
     return positiveSign ? combined : combined.negated()
   }
   round(options?: RoundOptionsLikeType): PlainDateTime {
+    const [date, ms] = separateDateTime(this)
     const {
-      smallestUnit,
-      largestUnit,
-      roundingMode,
-    }: RoundOptionsType = asRoundOptions(options)
-
-    const smallestIndex =
-      smallestUnit !== 'auto'
-        ? priorities.indexOf(smallestUnit)
-        : priorities.length - 1
-    const largestIndex =
-      largestUnit !== 'auto' ? priorities.indexOf(largestUnit) : 0
-
-    const arr: Array<{
-      value: number
-      field: DurationUnitType
-      increment: number
-    }> = [
-      {
-        value: this.millisecond,
-        field: 'milliseconds',
-        increment: UNIT_INCREMENT.MILLISECOND,
-      },
-      {
-        value: this.second,
-        field: 'seconds',
-        increment: UNIT_INCREMENT.SECOND,
-      },
-      {
-        value: this.minute,
-        field: 'minutes',
-        increment: UNIT_INCREMENT.MINUTE,
-      },
-      { value: this.hour, field: 'hours', increment: UNIT_INCREMENT.HOUR },
-      { value: this.day, field: 'days', increment: UNIT_INCREMENT.DAY },
-      {
-        value: this.month,
-        field: 'months',
-        increment: UNIT_INCREMENT.MONTH * UNIT_INCREMENT.WEEK,
-      },
-      { value: this.year, field: 'years', increment: UNIT_INCREMENT.YEAR },
-    ]
-
-    const [
-      milliseconds,
-      seconds,
-      minutes,
-      hours,
-      days,
-      months,
-      years,
-    ] = arr.reduce(
-      (acc, { value, field, increment }, idx) => {
-        const roundIndex = priorities.indexOf(field)
-
-        // Round Smallest
-        if (smallestIndex < roundIndex) {
-          acc[idx] = 0
-          // TODO: Implement usage of roundingIncrement
-          acc[idx + 1] += roundModeMap[roundingMode](value / increment)
-        }
-        // Round Largest
-        else if (largestIndex > roundIndex) {
-          acc[idx] = 0
-          acc[idx - 1] += value * arr[idx - 1].increment
-        } else {
-          acc[idx] += value
-        }
-        return acc
-      },
-      [0, 0, 0, 0, 0, 0, 0]
-    )
-
+      deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = balanceTime(roundMs(ms, options), options)
     return new PlainDateTime(
-      years,
-      months,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds
+      date.isoYear,
+      date.isoMonth,
+      date.isoDay + deltaDays,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond
     )
   }
 

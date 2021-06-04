@@ -5,7 +5,7 @@ import {
   PlainDateTimeType,
   RoundOptionsLikeType,
 } from './types'
-import { priorities } from './utils'
+import { asDate, priorities } from './utils'
 
 export const balanceTime = (
   time: Partial<PlainTimeType> | number,
@@ -55,7 +55,7 @@ export const balanceTime = (
 }
 
 export const balanceFromMs = (ms: number): PlainDateTimeType => {
-  const date = new Date(ms)
+  const date = asDate(ms)
   return {
     isoYear: date.getUTCFullYear(),
     isoMonth: date.getUTCMonth() + 1,

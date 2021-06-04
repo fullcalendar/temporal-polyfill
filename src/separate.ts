@@ -2,7 +2,7 @@ import { balanceFromMs } from './balance'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
 import { PlainDateType, PlainTimeType } from './types'
-import { toUnitMs } from './utils'
+import { asDate, toUnitMs } from './utils'
 
 export const extractTimeMs = ({
   isoHour,
@@ -53,8 +53,7 @@ export const separateDateTime = (
     isoSecond,
     isoMillisecond,
   } = balanceFromMs(date.epochMilliseconds)
-  const jsDate = new Date(0)
-  jsDate.setUTCFullYear(isoYear, isoMonth, isoDay)
+  const jsDate = asDate({ isoYear, isoMonth, isoDay })
   let ms = extractTimeMs({ isoHour, isoMinute, isoSecond, isoMillisecond })
   if (ms < minTimeMs) {
     jsDate.setUTCDate(jsDate.getUTCDate() - 1)
@@ -63,7 +62,7 @@ export const separateDateTime = (
   return [
     {
       isoYear: jsDate.getUTCFullYear(),
-      isoMonth: jsDate.getUTCMonth(),
+      isoMonth: jsDate.getUTCMonth() + 1,
       isoDay: jsDate.getUTCDate(),
     },
     ms,

@@ -2,14 +2,14 @@ import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { CalendarType, TimeZoneType, UNIT_INCREMENT } from './types'
-import { toUnitMs } from './utils'
+import { asDate, toUnitMs } from './utils'
 
 export class TimeZone {
   constructor(readonly id: TimeZoneType = 'local') {}
 
   getOffsetMillisecondsFor(epochMilliseconds: number) {
     if (this.id === 'local') {
-      const utcDate = new Date(epochMilliseconds)
+      const utcDate = asDate(epochMilliseconds)
       const localDate = new Date(
         utcDate.getUTCFullYear(),
         utcDate.getUTCMonth(),

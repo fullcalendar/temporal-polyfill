@@ -1,12 +1,31 @@
 import {
   CompareReturnType,
   DurationUnitType,
+  Part,
+  PlainDateTimeType,
   PlainDateType,
   UNIT_INCREMENT,
 } from './types'
 
-export const asDate = (epochMilliseconds: number): Date =>
-  new Date(epochMilliseconds)
+export const dateValue = (date: Part<PlainDateTimeType, 'isoYear'>): number => {
+  const utc = Date.UTC(
+    date.isoYear,
+    date.isoMonth !== undefined ? date.isoMonth - 1 : 0,
+    date.isoDay !== undefined ? date.isoDay : 1,
+    date.isoHour !== undefined ? date.isoHour : 0,
+    date.isoMinute !== undefined ? date.isoMinute : 0,
+    date.isoSecond !== undefined ? date.isoSecond : 0,
+    date.isoMillisecond !== undefined ? date.isoMillisecond : 0
+  )
+
+  return utc
+}
+
+export const asDate = (
+  date: Part<PlainDateTimeType, 'isoYear'> | number
+): Date => {
+  return new Date(typeof date === 'number' ? date : dateValue(date))
+}
 
 export const incrementMap: { [Property in DurationUnitType]: number } = {
   /**@deprecated */

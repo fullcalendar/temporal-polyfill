@@ -11,7 +11,7 @@ import {
   Part,
   CompareReturnType,
 } from './types'
-import { comparePlainDate, toUnitMs } from './utils'
+import { asDate, comparePlainDate, dateValue, toUnitMs } from './utils'
 
 type CalendarDateType = {
   year: number
@@ -64,9 +64,7 @@ const diffMonths = (
   return [months, current]
 }
 const diffDays = (one: PlainDateType, two: PlainDateType): number => {
-  const start = Date.UTC(one.isoYear, one.isoMonth - 1, one.isoDay)
-  const end = Date.UTC(two.isoYear, two.isoMonth - 1, two.isoDay)
-  return Math.trunc((end - start) / toUnitMs('days'))
+  return Math.trunc((dateValue(two) - dateValue(one)) / toUnitMs('days'))
 }
 
 // Add Utils
@@ -85,10 +83,7 @@ const addMonths = (
   return { year: date.year, month: date.month + months, day: date.day || 1 }
 }
 const addDays = (date: PlainDateType, days: number): PlainDateType => {
-  return balanceFromMs(
-    Date.UTC(date.isoYear, date.isoMonth - 1, date.isoDay) +
-      days * toUnitMs('days')
-  )
+  return balanceFromMs(dateValue(date) + days * toUnitMs('days'))
 }
 
 // Conversion Utils
@@ -152,15 +147,13 @@ export class Calendar {
   }
 
   private formattedPropertyValue(dt: PlainDateType, property: string): string {
-    return this.formatter
-      .formatToParts(new Date(Date.UTC(dt.isoYear, dt.isoMonth - 1, dt.isoDay)))
-      .reduce(
-        (acc: { [type: string]: string }, { type, value }) => ({
-          ...acc,
-          [type]: value,
-        }),
-        {}
-      )[property]
+    return this.formatter.formatToParts(asDate(dt)).reduce(
+      (acc: { [type: string]: string }, { type, value }) => ({
+        ...acc,
+        [type]: value,
+      }),
+      {}
+    )[property]
   }
 
   year({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
@@ -188,13 +181,13 @@ export class Calendar {
     isoYear,
     isoMonth,
   }: Part<PlainDateType, 'isoYear' | 'isoMonth'>): number {
-    return new Date(Date.UTC(isoYear, isoMonth + 1, 0)).getUTCDate()
+    return asDate({ isoYear, isoMonth: isoMonth + 1 }).getUTCDate()
   }
   daysInYear({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
-    return new Date(Date.UTC(isoYear + 1, 0, 0)).getUTCDate()
+    return asDate({ isoYear: isoYear + 1 }).getUTCDate()
   }
   monthsInYear({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
-    return new Date(Date.UTC(isoYear + 1, 0, 0)).getUTCMonth() + 1
+    return asDate({ isoYear: isoYear + 1, isoDay: 0 }).getUTCMonth() + 1
   }
 
   // OF methods
@@ -209,8 +202,7 @@ export class Calendar {
   }
   weekOfYear(dt: PlainDateType): number {
     return Math.ceil(
-      ((Date.UTC(dt.isoYear, dt.isoMonth - 1, dt.isoDay) -
-        Date.UTC(dt.isoYear, 0)) /
+      ((dateValue(dt) - dateValue({ isoYear: dt.isoYear, isoMonth: 1 })) /
         toUnitMs('days') +
         1) /
         UNIT_INCREMENT.WEEK

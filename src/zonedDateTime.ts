@@ -7,7 +7,7 @@ import {
   LocaleType,
   TimeZoneType,
 } from './types'
-import { asDate, toUnitMs } from './utils'
+import { asDate, dateValue, toUnitMs } from './utils'
 
 type ZonedDateTimeLikeType = {
   epochMilliseconds?: number
@@ -37,13 +37,13 @@ export class ZonedDateTime {
       const matches = thing.match(regex)
       if (matches) {
         const [
-          year,
-          month,
-          day,
-          hour,
-          minute,
-          second,
-          millisecond,
+          isoYear,
+          isoMonth,
+          isoDay,
+          isoHour,
+          isoMinute,
+          isoSecond,
+          isoMillisecond,
           offset,
           timezone,
           calendar,
@@ -72,15 +72,15 @@ export class ZonedDateTime {
           [0, 0, 0, 0, 0, 0, 0, 0, '', '']
         )
         const epochMilliseconds =
-          Date.UTC(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute,
-            second,
-            millisecond || 0
-          ) + offset
+          dateValue({
+            isoYear,
+            isoMonth,
+            isoDay,
+            isoHour,
+            isoMinute,
+            isoSecond,
+            isoMillisecond,
+          }) + offset
         return new ZonedDateTime(
           epochMilliseconds,
           timezone,
