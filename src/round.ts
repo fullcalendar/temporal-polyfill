@@ -1,16 +1,14 @@
-import { RoundModeType, RoundOptionsLikeType, RoundOptionsType } from './types'
+import { RoundMode, RoundOptionsLike, RoundOptions } from './types'
 import { priorities, toUnitMs } from './utils'
 
-const roundDefaults: RoundOptionsType = {
+const roundDefaults: RoundOptions = {
   largestUnit: 'auto',
   smallestUnit: 'auto',
   roundingIncrement: 1,
   roundingMode: 'trunc',
 }
 
-export const asRoundOptions = (
-  options?: RoundOptionsLikeType
-): RoundOptionsType => {
+export const asRoundOptions = (options?: RoundOptionsLike): RoundOptions => {
   const combined = {
     ...roundDefaults,
     ...options,
@@ -31,7 +29,7 @@ export const asRoundOptions = (
 }
 
 export const roundModeMap: {
-  [Property in RoundModeType]: (x: number) => number
+  [Property in RoundMode]: (x: number) => number
 } = {
   trunc: Math.trunc,
   ceil: Math.ceil,
@@ -39,7 +37,7 @@ export const roundModeMap: {
   halfExpand: Math.round,
 }
 
-export const roundMs = (ms: number, options?: RoundOptionsLikeType): number => {
+export const roundMs = (ms: number, options?: RoundOptionsLike): number => {
   const { smallestUnit, roundingIncrement, roundingMode } = asRoundOptions(
     options
   )

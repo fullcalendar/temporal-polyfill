@@ -2,14 +2,14 @@ import { mstoIsoDate } from './convert'
 import { Duration } from './duration'
 import { asRoundOptions } from './round'
 import {
-  CalendarType,
-  AssignmentOptionsLikeType,
-  AssignmentOptionsType,
-  PlainDateType,
-  RoundOptionsLikeType,
+  CalendarId,
+  AssignmentOptionsLike,
+  AssignmentOptions,
+  PlainDate,
+  RoundOptionsLike,
   UNIT_INCREMENT,
   Part,
-  CompareReturnType,
+  CompareReturn,
 } from './types'
 import { asDate, comparePlainDate, dateValue, toUnitMs } from './utils'
 
@@ -71,7 +71,7 @@ const diffMonths = (
   return [months, current]
 }
 
-const diffDays = (one: PlainDateType, two: PlainDateType): number => {
+const diffDays = (one: PlainDate, two: PlainDate): number => {
   return Math.trunc((dateValue(two) - dateValue(one)) / toUnitMs('days'))
 }
 
@@ -110,15 +110,12 @@ const addMonths = (
   }
 }
 
-const addDays = (date: PlainDateType, days: number): PlainDateType => {
+const addDays = (date: PlainDate, days: number): PlainDate => {
   return mstoIsoDate(dateValue(date) + days * toUnitMs('days'))
 }
 
 // Conversion Utils
-const isoToCal = (
-  date: PlainDateType,
-  calendar: Calendar
-): CalendarDateType => {
+const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDateType => {
   return {
     year: calendar.year(date),
     month: calendar.month(date),
@@ -130,7 +127,7 @@ const compareCalendarDates = (
   one: CalendarDateType,
   two: CalendarDateType,
   calendar: Calendar
-): CompareReturnType => {
+): CompareReturn => {
   return comparePlainDate(
     calendar.dateFromFields(one),
     calendar.dateFromFields(two)
@@ -171,7 +168,7 @@ const handleDayOverflow = (
 export class Calendar {
   private formatter: Intl.DateTimeFormat
 
-  constructor(readonly id: CalendarType = 'iso8601') {
+  constructor(readonly id: CalendarId = 'iso8601') {
     this.formatter = Intl.DateTimeFormat('en-us', {
       calendar: this.id,
       weekday: 'long',
@@ -182,7 +179,7 @@ export class Calendar {
     })
   }
 
-  private formattedPropertyValue(dt: PlainDateType, property: string): string {
+  private formattedPropertyValue(dt: PlainDate, property: string): string {
     return this.formatter
       .formatToParts(asDate(dt))
       .reduce((acc: { [type: string]: string }, { type, value }) => {
@@ -193,7 +190,7 @@ export class Calendar {
       }, {})[property]
   }
 
-  year({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
+  year({ isoYear }: Part<PlainDate, 'isoYear'>): number {
     return parseInt(
       this.formattedPropertyValue({ isoYear, isoMonth: 1, isoDay: 1 }, 'year')
     )
@@ -201,12 +198,12 @@ export class Calendar {
   month({
     isoYear,
     isoMonth,
-  }: Part<PlainDateType, 'isoYear' | 'isoMonth'>): number {
+  }: Part<PlainDate, 'isoYear' | 'isoMonth'>): number {
     return parseInt(
       this.formattedPropertyValue({ isoYear, isoMonth, isoDay: 1 }, 'month')
     )
   }
-  day(dt: PlainDateType): number {
+  day(dt: PlainDate): number {
     return parseInt(this.formattedPropertyValue(dt, 'day'))
   }
 
@@ -217,27 +214,27 @@ export class Calendar {
   daysInMonth({
     isoYear,
     isoMonth,
-  }: Part<PlainDateType, 'isoYear' | 'isoMonth'>): number {
+  }: Part<PlainDate, 'isoYear' | 'isoMonth'>): number {
     return asDate({ isoYear, isoMonth: isoMonth + 1 }).getUTCDate()
   }
-  daysInYear({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
+  daysInYear({ isoYear }: Part<PlainDate, 'isoYear'>): number {
     return asDate({ isoYear: isoYear + 1 }).getUTCDate()
   }
-  monthsInYear({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
+  monthsInYear({ isoYear }: Part<PlainDate, 'isoYear'>): number {
     return asDate({ isoYear: isoYear + 1, isoDay: 0 }).getUTCMonth() + 1
   }
 
   // OF methods
-  dayOfWeek(dt: PlainDateType): string {
+  dayOfWeek(dt: PlainDate): string {
     return this.formattedPropertyValue(dt, 'weekday')
   }
-  dayOfYear(dt: PlainDateType): number {
+  dayOfYear(dt: PlainDate): number {
     return this.dateUntil(
       { isoYear: dt.isoYear, isoMonth: 0, isoDay: 1 },
       dt
     ).total({ unit: 'days' })
   }
-  weekOfYear(dt: PlainDateType): number {
+  weekOfYear(dt: PlainDate): number {
     return Math.ceil(
       ((dateValue(dt) - dateValue({ isoYear: dt.isoYear, isoMonth: 1 })) /
         toUnitMs('days') +
@@ -247,14 +244,14 @@ export class Calendar {
   }
 
   // Boolean methods
-  inLeapYear({ isoYear }: PlainDateType): boolean {
+  inLeapYear({ isoYear }: PlainDate): boolean {
     return isoYear % 400 === 0 || (isoYear % 4 === 0 && isoYear % 100 !== 0)
   }
 
   dateFromFields(
     fields: Part<CalendarDateType, 'year' | 'month'>,
-    options?: AssignmentOptionsType
-  ): PlainDateType {
+    options?: AssignmentOptions
+  ): PlainDate {
     // FIXME: Overflow does nothing
     const overflow = options?.overflow || 'constrain'
     return {
@@ -266,10 +263,10 @@ export class Calendar {
 
   // Calendar Math
   dateAdd(
-    date: PlainDateType,
+    date: PlainDate,
     duration: Duration,
-    options?: AssignmentOptionsLikeType
-  ): PlainDateType {
+    options?: AssignmentOptionsLike
+  ): PlainDate {
     const { years, months, weeks, days } = duration
     let fields: CalendarDateType = {
       year: this.year(date),
@@ -286,9 +283,9 @@ export class Calendar {
     return { isoYear, isoMonth, isoDay }
   }
   dateUntil(
-    one: PlainDateType,
-    two: PlainDateType,
-    options?: RoundOptionsLikeType
+    one: PlainDate,
+    two: PlainDate,
+    options?: RoundOptionsLike
   ): Duration {
     const { largestUnit } = asRoundOptions(options)
 

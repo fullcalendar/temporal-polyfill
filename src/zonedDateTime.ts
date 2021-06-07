@@ -3,18 +3,13 @@ import { Calendar } from './calendar'
 import { dateFormat } from './format'
 import { dateParse } from './parse'
 import { TimeZone } from './timeZone'
-import {
-  CalendarType,
-  CompareReturnType,
-  LocaleType,
-  TimeZoneType,
-} from './types'
+import { CalendarId, CompareReturn, LocaleId, TimeZoneId } from './types'
 import { asDate } from './utils'
 
 type ZonedDateTimeLikeType = {
   epochMilliseconds?: number
-  timeZone?: TimeZone | TimeZoneType
-  calendar?: Calendar | CalendarType
+  timeZone?: TimeZone | TimeZoneId
+  calendar?: Calendar | CalendarId
 }
 
 export class ZonedDateTime {
@@ -23,8 +18,8 @@ export class ZonedDateTime {
 
   constructor(
     readonly epochMilliseconds: number,
-    timeZone: TimeZone | TimeZoneType = new TimeZone(),
-    calendar: Calendar | CalendarType = new Calendar()
+    timeZone: TimeZone | TimeZoneId = new TimeZone(),
+    calendar: Calendar | CalendarId = new Calendar()
   ) {
     this.timeZone =
       timeZone instanceof TimeZone ? timeZone : new TimeZone(timeZone)
@@ -47,7 +42,7 @@ export class ZonedDateTime {
     throw new Error('Invalid Object')
   }
 
-  static compare(one: ZonedDateTime, two: ZonedDateTime): CompareReturnType {
+  static compare(one: ZonedDateTime, two: ZonedDateTime): CompareReturn {
     if (one.epochMilliseconds < two.epochMilliseconds) {
       return -1
     } else if (one.epochMilliseconds > two.epochMilliseconds) {
@@ -105,10 +100,10 @@ export class ZonedDateTime {
       dateTimeLike.calendar || this.calendar
     )
   }
-  withTimeZone(timeZone: TimeZone | TimeZoneType): ZonedDateTime {
+  withTimeZone(timeZone: TimeZone | TimeZoneId): ZonedDateTime {
     return this.with({ timeZone })
   }
-  withCalendar(calendar: Calendar | CalendarType): ZonedDateTime {
+  withCalendar(calendar: Calendar | CalendarId): ZonedDateTime {
     return this.with({ calendar })
   }
 
@@ -138,7 +133,7 @@ export class ZonedDateTime {
     )
   }
   toLocaleString(
-    locale: LocaleType,
+    locale: LocaleId,
     options?: Intl.DateTimeFormatOptions
   ): string {
     return new Intl.DateTimeFormat(locale, options).format(

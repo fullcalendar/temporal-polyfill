@@ -1,6 +1,6 @@
 import { Calendar } from './calendar'
 
-export type CalendarType =
+export type CalendarId =
   | 'buddhist'
   | 'chinese'
   | 'coptic'
@@ -15,26 +15,26 @@ export type CalendarType =
   | 'persian'
   | 'roc'
 
-export type TimeZoneType = 'utc' | 'local' | string
+export type TimeZoneId = 'utc' | 'local' | string
 
-export type LocaleType = 'en-US'
+export type LocaleId = 'en-US'
 
-export type PlainDateType = {
+export type PlainDate = {
   isoYear: number
   isoMonth: number
   isoDay: number
 }
-export type PlainTimeType = {
+export type PlainTime = {
   isoHour: number
   isoMinute: number
   isoSecond: number
   isoMillisecond: number
 }
-export type PlainDateTimeType = PlainDateType &
-  PlainTimeType & { calendar?: Calendar | CalendarType }
-export type PlainDateTimeLikeType = Partial<PlainDateTimeType>
+export type PlainDateTimeFields = PlainDate &
+  PlainTime & { calendar?: Calendar | CalendarId }
+export type PlainDateTimeLike = Partial<PlainDateTimeFields>
 
-export type DurationType = {
+export type DurationFields = {
   years: number
   months: number
   weeks: number
@@ -44,22 +44,22 @@ export type DurationType = {
   seconds: number
   milliseconds: number
 }
-export type DurationLikeType = Partial<DurationType>
-export type DurationUnitType = keyof DurationType
+export type DurationLike = Partial<DurationFields>
+export type DurationUnit = keyof DurationFields
 
-export type RoundModeType = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
-export type RoundOptionsType = {
-  smallestUnit: DurationUnitType | 'auto'
-  largestUnit: DurationUnitType | 'auto'
+export type RoundMode = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
+export type RoundOptions = {
+  smallestUnit: DurationUnit | 'auto'
+  largestUnit: DurationUnit | 'auto'
   roundingIncrement: number
-  roundingMode: RoundModeType
+  roundingMode: RoundMode
 }
-export type RoundOptionsLikeType = Partial<RoundOptionsType>
+export type RoundOptionsLike = Partial<RoundOptions>
 
-export type AssignmentOptionsType = { overflow: 'constrain' | 'reject' }
-export type AssignmentOptionsLikeType = Partial<AssignmentOptionsType>
+export type AssignmentOptions = { overflow: 'constrain' | 'reject' }
+export type AssignmentOptionsLike = Partial<AssignmentOptions>
 
-export type CompareReturnType = -1 | 0 | 1
+export type CompareReturn = -1 | 0 | 1
 
 export enum UNIT_INCREMENT {
   MILLISECOND = 1,

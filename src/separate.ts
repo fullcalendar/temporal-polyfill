@@ -1,7 +1,7 @@
 import { mstoIsoDate } from './convert'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { PlainDateType, PlainTimeType } from './types'
+import { PlainDate, PlainTime } from './types'
 import { asDate, toUnitMs } from './utils'
 
 export const extractTimeMs = ({
@@ -9,7 +9,7 @@ export const extractTimeMs = ({
   isoMinute,
   isoSecond,
   isoMillisecond,
-}: PlainTimeType): number => {
+}: PlainTime): number => {
   return (
     isoHour * toUnitMs('hours') +
     isoMinute * toUnitMs('minutes') +
@@ -21,7 +21,7 @@ export const extractTimeMs = ({
 export const extractTimeWithDaysMs = ({
   isoDay,
   ...isoTime
-}: PlainTimeType & Pick<PlainDateType, 'isoDay'>): number => {
+}: PlainTime & Pick<PlainDate, 'isoDay'>): number => {
   return extractTimeMs(isoTime) + isoDay * toUnitMs('days')
 }
 
@@ -47,7 +47,7 @@ export const separateDuration = (
 export const separateDateTime = (
   date: PlainDateTime,
   minTimeMs = 0
-): [isoDate: PlainDateType, timeOfDayMs: number] => {
+): [isoDate: PlainDate, timeOfDayMs: number] => {
   const {
     isoYear,
     isoMonth,

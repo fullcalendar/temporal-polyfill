@@ -1,4 +1,4 @@
-import { PlainDateTimeType } from './types'
+import { PlainDateTimeFields } from './types'
 
 export const dateFormat = (
   {
@@ -9,7 +9,7 @@ export const dateFormat = (
     isoMinute,
     isoSecond,
     isoMillisecond,
-  }: PlainDateTimeType,
+  }: PlainDateTimeFields,
   offset = ''
 ): string => {
   const yearStr = `000${isoYear}`.slice(-4)

@@ -1,11 +1,11 @@
 import { mstoIsoDate } from './convert'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { CalendarType, TimeZoneType, UNIT_INCREMENT } from './types'
+import { CalendarId, TimeZoneId, UNIT_INCREMENT } from './types'
 import { asDate, toUnitMs } from './utils'
 
 export class TimeZone {
-  constructor(readonly id: TimeZoneType = 'local') {}
+  constructor(readonly id: TimeZoneId = 'local') {}
 
   getOffsetMillisecondsFor(epochMilliseconds: number): number {
     if (this.id === 'local') {
@@ -46,7 +46,7 @@ export class TimeZone {
   }
   getPlainDateTimeFor(
     epochMilliseconds: number,
-    calendar: Calendar | CalendarType
+    calendar: Calendar | CalendarId
   ): PlainDateTime {
     const {
       isoYear,

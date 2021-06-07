@@ -6,14 +6,14 @@ import { dateParse } from './parse'
 import { roundMs } from './round'
 import { separateDateTime, separateDuration } from './separate'
 import {
-  CalendarType,
-  CompareReturnType,
-  AssignmentOptionsType,
-  LocaleType,
-  RoundOptionsLikeType,
-  TimeZoneType,
-  PlainDateTimeLikeType,
-  DurationLikeType,
+  CalendarId,
+  CompareReturn,
+  AssignmentOptions,
+  LocaleId,
+  RoundOptionsLike,
+  TimeZoneId,
+  PlainDateTimeLike,
+  DurationLike,
 } from './types'
 import { asDate, dateValue } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
@@ -30,7 +30,7 @@ export class PlainDateTime {
     isoMinute = 0,
     isoSecond = 0,
     isoMillisecond = 0,
-    calendar: Calendar | CalendarType = new Calendar()
+    calendar: Calendar | CalendarId = new Calendar()
   ) {
     this.epochMilliseconds = dateValue({
       isoYear,
@@ -122,7 +122,7 @@ export class PlainDateTime {
     throw new Error('Invalid Object')
   }
 
-  static compare(one: PlainDateTime, two: PlainDateTime): CompareReturnType {
+  static compare(one: PlainDateTime, two: PlainDateTime): CompareReturn {
     if (one.epochMilliseconds < two.epochMilliseconds) {
       return -1
     } else if (one.epochMilliseconds > two.epochMilliseconds) {
@@ -160,7 +160,7 @@ export class PlainDateTime {
     return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
   }
 
-  with(dateTimeLike: PlainDateTimeLikeType | string): PlainDateTime {
+  with(dateTimeLike: PlainDateTimeLike | string): PlainDateTime {
     if (typeof dateTimeLike === 'string') {
       throw new Error('Unimplemented')
     }
@@ -175,7 +175,7 @@ export class PlainDateTime {
       dateTimeLike.calendar || this.calendar
     )
   }
-  withCalendar(calendar: Calendar | CalendarType): PlainDateTime {
+  withCalendar(calendar: Calendar | CalendarId): PlainDateTime {
     const date = asDate(this.epochMilliseconds)
     return new PlainDateTime(
       date.getUTCFullYear(),
@@ -190,8 +190,8 @@ export class PlainDateTime {
   }
 
   add(
-    amount: Duration | DurationLikeType | string,
-    options?: AssignmentOptionsType
+    amount: Duration | DurationLike | string,
+    options?: AssignmentOptions
   ): PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
@@ -220,13 +220,13 @@ export class PlainDateTime {
     )
   }
   subtract(
-    amount: Duration | DurationLikeType | string,
-    options?: AssignmentOptionsType
+    amount: Duration | DurationLike | string,
+    options?: AssignmentOptions
   ): PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     return this.add(duration.negated(), options)
   }
-  since(other: PlainDateTime, options?: RoundOptionsLikeType): Duration {
+  since(other: PlainDateTime, options?: RoundOptionsLike): Duration {
     const positiveSign = this.epochMilliseconds >= other.epochMilliseconds
     const larger = positiveSign ? this : other
     const smaller = positiveSign ? other : this
@@ -248,7 +248,7 @@ export class PlainDateTime {
       })
     return positiveSign ? combined : combined.negated()
   }
-  round(options?: RoundOptionsLikeType): PlainDateTime {
+  round(options?: RoundOptionsLike): PlainDateTime {
     const [date, ms] = separateDateTime(this)
     const {
       deltaDays,
@@ -289,14 +289,14 @@ export class PlainDateTime {
     })
   }
   toLocaleString(
-    locale: LocaleType,
+    locale: LocaleId,
     options?: Intl.DateTimeFormatOptions
   ): string {
     return new Intl.DateTimeFormat(locale, options).format(
       this.epochMilliseconds
     )
   }
-  toZonedDateTime(timeZone: TimeZoneType): ZonedDateTime {
+  toZonedDateTime(timeZone: TimeZoneId): ZonedDateTime {
     return new ZonedDateTime(this.epochMilliseconds, timeZone)
   }
 }

@@ -1,13 +1,15 @@
 import {
-  CompareReturnType,
-  DurationUnitType,
+  CompareReturn,
+  DurationUnit,
   Part,
-  PlainDateTimeType,
-  PlainDateType,
+  PlainDateTimeFields,
+  PlainDate,
   UNIT_INCREMENT,
 } from './types'
 
-export const dateValue = (date: Part<PlainDateTimeType, 'isoYear'>): number => {
+export const dateValue = (
+  date: Part<PlainDateTimeFields, 'isoYear'>
+): number => {
   const utc = Date.UTC(
     date.isoYear,
     date.isoMonth !== undefined ? date.isoMonth - 1 : 0,
@@ -22,12 +24,12 @@ export const dateValue = (date: Part<PlainDateTimeType, 'isoYear'>): number => {
 }
 
 export const asDate = (
-  date: Part<PlainDateTimeType, 'isoYear'> | number
+  date: Part<PlainDateTimeFields, 'isoYear'> | number
 ): Date => {
   return new Date(typeof date === 'number' ? date : dateValue(date))
 }
 
-export const incrementMap: { [Property in DurationUnitType]: number } = {
+export const incrementMap: { [Property in DurationUnit]: number } = {
   /**@deprecated */
   years: UNIT_INCREMENT.YEAR,
   /**@deprecated */
@@ -40,7 +42,7 @@ export const incrementMap: { [Property in DurationUnitType]: number } = {
   milliseconds: UNIT_INCREMENT.MILLISECOND,
 }
 
-export const priorities: Array<DurationUnitType> = [
+export const priorities: Array<DurationUnit> = [
   'years',
   'months',
   'weeks',
@@ -56,16 +58,16 @@ export const priorities: Array<DurationUnitType> = [
  * @param unit days, hours, minutes, seconds, milliseconds
  * @returns milliseconds
  */
-export const toUnitMs = (unit: DurationUnitType): number => {
+export const toUnitMs = (unit: DurationUnit): number => {
   return priorities.reduce((acc, val, index) => {
     return index >= priorities.indexOf(unit) ? acc * incrementMap[val] : acc
   }, 1)
 }
 
 export const comparePlainDate = (
-  one: PlainDateType,
-  two: PlainDateType
-): CompareReturnType => {
+  one: PlainDate,
+  two: PlainDate
+): CompareReturn => {
   const diff =
     one.isoYear - two.isoYear ||
     one.isoMonth - two.isoMonth ||

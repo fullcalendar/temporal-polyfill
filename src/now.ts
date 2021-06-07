@@ -2,7 +2,7 @@ import { mstoIsoDate } from './convert'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZone } from './timeZone'
-import { CalendarType, TimeZoneType } from './types'
+import { CalendarId, TimeZoneId } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Now {
@@ -15,11 +15,11 @@ export class Now {
 
   static timeZone(): TimeZone {
     return new TimeZone(
-      Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneType
+      Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneId
     )
   }
 
-  static zonedDateTime(calendar?: CalendarType | Calendar): ZonedDateTime {
+  static zonedDateTime(calendar?: CalendarId | Calendar): ZonedDateTime {
     return new ZonedDateTime(this.instant(), undefined, calendar)
   }
 
@@ -27,7 +27,7 @@ export class Now {
     return this.zonedDateTime()
   }
 
-  static plainDateTime(calendar?: CalendarType | Calendar): PlainDateTime {
+  static plainDateTime(calendar?: CalendarId | Calendar): PlainDateTime {
     const {
       isoYear,
       isoMonth,

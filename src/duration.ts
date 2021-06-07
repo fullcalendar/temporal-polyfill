@@ -3,22 +3,22 @@ import { PlainDateTime } from './plainDateTime'
 import { roundMs } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
 import {
-  CompareReturnType,
-  DurationLikeType,
-  DurationUnitType,
-  LocaleType,
-  PlainDateTimeLikeType,
-  RoundOptionsLikeType,
+  CompareReturn,
+  DurationLike,
+  DurationUnit,
+  LocaleId,
+  PlainDateTimeLike,
+  RoundOptionsLike,
   UNIT_INCREMENT,
 } from './types'
 import { toUnitMs } from './utils'
 
 type UnitOptionsType = {
-  unit: DurationUnitType
+  unit: DurationUnit
 }
 
 type RelativeOptionsType = {
-  relativeTo?: PlainDateTime | PlainDateTimeLikeType | string
+  relativeTo?: PlainDateTime | PlainDateTimeLike | string
 }
 
 export class Duration {
@@ -91,7 +91,7 @@ export class Duration {
     {
       relativeTo = new PlainDateTime(1970, 1, 1),
     }: { relativeTo: PlainDateTime } // FIXME: It would be better to use ZonedDateTime here but it doesn't have an add method for now
-  ): CompareReturnType {
+  ): CompareReturn {
     return PlainDateTime.compare(relativeTo.add(one), relativeTo.add(two))
   }
 
@@ -104,7 +104,7 @@ export class Duration {
     minutes,
     seconds,
     milliseconds,
-  }: DurationLikeType): Duration {
+  }: DurationLike): Duration {
     return new Duration(
       years || this.years,
       months || this.months,
@@ -118,7 +118,7 @@ export class Duration {
   }
 
   add(
-    amount: Duration | DurationLikeType | string,
+    amount: Duration | DurationLike | string,
     options?: RelativeOptionsType
   ): Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
@@ -166,7 +166,7 @@ export class Duration {
     )
   }
   subtract(
-    amount: Duration | DurationLikeType | string,
+    amount: Duration | DurationLike | string,
     options?: RelativeOptionsType
   ): Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
@@ -187,7 +187,7 @@ export class Duration {
       toUnitMs(unit)
     )
   }
-  round(options?: RoundOptionsLikeType & RelativeOptionsType): Duration {
+  round(options?: RoundOptionsLike & RelativeOptionsType): Duration {
     if (options?.relativeTo) {
       const relative =
         options.relativeTo instanceof PlainDateTime
@@ -286,7 +286,7 @@ export class Duration {
     return result === 'P' ? 'P0D' : `${P}${result}`
   }
   toLocaleString(
-    locale: LocaleType,
+    locale: LocaleId,
     options?: Intl.RelativeTimeFormatOptions
   ): string {
     // TODO: This needs a proper implementation
