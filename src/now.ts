@@ -1,8 +1,7 @@
 import { mstoIsoDate } from './convert'
-import { Calendar } from './calendar'
+import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { TimeZone } from './timeZone'
-import { CalendarId, TimeZoneId } from './types'
+import { TimeZone, TimeZoneId } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Now {

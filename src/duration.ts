@@ -1,17 +1,27 @@
 import { toIsoTime } from './convert'
-import { PlainDateTime } from './plainDateTime'
+import { PlainDateTime, PlainDateTimeLike } from './plainDateTime'
 import { roundMs } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
 import {
   CompareReturn,
-  DurationLike,
-  DurationUnit,
   LocaleId,
-  PlainDateTimeLike,
   RoundOptionsLike,
   UNIT_INCREMENT,
 } from './types'
 import { toUnitMs } from './utils'
+
+export type DurationFields = {
+  years: number
+  months: number
+  weeks: number
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+  milliseconds: number
+}
+export type DurationLike = Partial<DurationFields>
+export type DurationUnit = keyof DurationFields
 
 type UnitOptionsType = {
   unit: DurationUnit

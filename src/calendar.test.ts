@@ -1,14 +1,14 @@
 import { mstoIsoDate } from './convert'
-import { Calendar } from './calendar'
+import { Calendar, CalendarId } from './calendar'
 import { Duration } from './duration'
-import { CalendarType, PlainDateType } from './types'
+import { PlainDate } from './plainDateTime'
 
 test('can instantiate', () => {
   const calendar = new Calendar()
   expect(calendar).toBeDefined()
 })
 
-test.each<[CalendarType]>([['iso8601'], ['gregory']])('can return %s', (id) => {
+test.each<[CalendarId]>([['iso8601'], ['gregory']])('can return %s', (id) => {
   const calendar = new Calendar(id)
   expect(calendar.id).toBe(id)
 })
@@ -22,7 +22,7 @@ test.each([
   expect(calendar.weekOfYear(mstoIsoDate(epochMilliseconds))).toBe(expected)
 })
 
-test.each<[PlainDateType, Duration, PlainDateType]>([
+test.each<[PlainDate, Duration, PlainDate]>([
   [
     { isoYear: 1970, isoMonth: 12, isoDay: 1 },
     new Duration(1, 1),
@@ -46,7 +46,7 @@ test.each<[PlainDateType, Duration, PlainDateType]>([
   expect(calendar.dateAdd(date, dur)).toEqual(expected)
 })
 
-test.each<[PlainDateType, PlainDateType, Duration]>([
+test.each<[PlainDate, PlainDate, Duration]>([
   [
     { isoYear: 1970, isoMonth: 1, isoDay: 1 },
     { isoYear: 1972, isoMonth: 3, isoDay: 5 },

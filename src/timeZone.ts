@@ -1,8 +1,10 @@
 import { mstoIsoDate } from './convert'
-import { Calendar } from './calendar'
+import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { CalendarId, TimeZoneId, UNIT_INCREMENT } from './types'
+import { UNIT_INCREMENT } from './types'
 import { asDate, toUnitMs } from './utils'
+
+export type TimeZoneId = 'utc' | 'local' | string
 
 export class TimeZone {
   constructor(readonly id: TimeZoneId = 'local') {}

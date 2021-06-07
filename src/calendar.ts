@@ -1,17 +1,31 @@
 import { mstoIsoDate } from './convert'
 import { Duration } from './duration'
+import { PlainDate } from './plainDateTime'
 import { asRoundOptions } from './round'
 import {
-  CalendarId,
   AssignmentOptionsLike,
   AssignmentOptions,
-  PlainDate,
   RoundOptionsLike,
   UNIT_INCREMENT,
   Part,
   CompareReturn,
 } from './types'
 import { asDate, comparePlainDate, dateValue, toUnitMs } from './utils'
+
+export type CalendarId =
+  | 'buddhist'
+  | 'chinese'
+  | 'coptic'
+  | 'ethiopia'
+  | 'ethiopic'
+  | 'gregory'
+  | 'hebrew'
+  | 'indian'
+  | 'islamic'
+  | 'iso8601'
+  | 'japanese'
+  | 'persian'
+  | 'roc'
 
 type CalendarDateType = {
   year: number

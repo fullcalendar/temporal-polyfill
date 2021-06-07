@@ -1,51 +1,6 @@
-import { Calendar } from './calendar'
-
-export type CalendarId =
-  | 'buddhist'
-  | 'chinese'
-  | 'coptic'
-  | 'ethiopia'
-  | 'ethiopic'
-  | 'gregory'
-  | 'hebrew'
-  | 'indian'
-  | 'islamic'
-  | 'iso8601'
-  | 'japanese'
-  | 'persian'
-  | 'roc'
-
-export type TimeZoneId = 'utc' | 'local' | string
+import { DurationUnit } from './duration'
 
 export type LocaleId = 'en-US'
-
-export type PlainDate = {
-  isoYear: number
-  isoMonth: number
-  isoDay: number
-}
-export type PlainTime = {
-  isoHour: number
-  isoMinute: number
-  isoSecond: number
-  isoMillisecond: number
-}
-export type PlainDateTimeFields = PlainDate &
-  PlainTime & { calendar?: Calendar | CalendarId }
-export type PlainDateTimeLike = Partial<PlainDateTimeFields>
-
-export type DurationFields = {
-  years: number
-  months: number
-  weeks: number
-  days: number
-  hours: number
-  minutes: number
-  seconds: number
-  milliseconds: number
-}
-export type DurationLike = Partial<DurationFields>
-export type DurationUnit = keyof DurationFields
 
 export type RoundMode = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
 export type RoundOptions = {

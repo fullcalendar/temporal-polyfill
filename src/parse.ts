@@ -1,4 +1,4 @@
-import { CalendarId } from './types'
+import { CalendarId } from './calendar'
 import { dateValue, toUnitMs } from './utils'
 
 export const dateParse = (

@@ -1,22 +1,34 @@
 import { mstoIsoDate, toIsoTime } from './convert'
-import { Calendar } from './calendar'
-import { Duration } from './duration'
+import { Calendar, CalendarId } from './calendar'
+import { Duration, DurationLike } from './duration'
 import { dateFormat } from './format'
 import { dateParse } from './parse'
 import { roundMs } from './round'
 import { separateDateTime, separateDuration } from './separate'
 import {
-  CalendarId,
   CompareReturn,
   AssignmentOptions,
   LocaleId,
   RoundOptionsLike,
-  TimeZoneId,
-  PlainDateTimeLike,
-  DurationLike,
 } from './types'
 import { asDate, dateValue } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
+import { TimeZoneId } from './timeZone'
+
+export type PlainDate = {
+  isoYear: number
+  isoMonth: number
+  isoDay: number
+}
+export type PlainTime = {
+  isoHour: number
+  isoMinute: number
+  isoSecond: number
+  isoMillisecond: number
+}
+export type PlainDateTimeFields = PlainDate &
+  PlainTime & { calendar?: Calendar | CalendarId }
+export type PlainDateTimeLike = Partial<PlainDateTimeFields>
 
 export class PlainDateTime {
   readonly epochMilliseconds

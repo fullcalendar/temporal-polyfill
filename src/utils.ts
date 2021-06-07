@@ -1,11 +1,6 @@
-import {
-  CompareReturn,
-  DurationUnit,
-  Part,
-  PlainDateTimeFields,
-  PlainDate,
-  UNIT_INCREMENT,
-} from './types'
+import { DurationUnit } from './duration'
+import { PlainDate, PlainDateTimeFields } from './plainDateTime'
+import { CompareReturn, Part, UNIT_INCREMENT } from './types'
 
 export const dateValue = (
   date: Part<PlainDateTimeFields, 'isoYear'>

@@ -1,10 +1,6 @@
+import { PlainDateTimeFields, PlainTime } from './plainDateTime'
 import { asRoundOptions } from './round'
-import {
-  PlainTime,
-  UNIT_INCREMENT,
-  PlainDateTimeFields,
-  RoundOptionsLike,
-} from './types'
+import { UNIT_INCREMENT, RoundOptionsLike } from './types'
 import { asDate, priorities } from './utils'
 
 export const toIsoTime = (

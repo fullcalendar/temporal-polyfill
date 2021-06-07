@@ -1,4 +1,4 @@
-import { PlainDateTimeFields } from './types'
+import { PlainDateTimeFields } from './plainDateTime'
 
 export const dateFormat = (
   {

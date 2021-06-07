@@ -1,6 +1,6 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { RoundOptionsLikeType } from './types'
+import { RoundOptionsLike } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
@@ -114,7 +114,7 @@ test.each([
   expect(date.since(other, { largestUnit: 'years' })).toEqual(expected)
 })
 
-test.each<[PlainDateTime, PlainDateTime, RoundOptionsLikeType]>([
+test.each<[PlainDateTime, PlainDateTime, RoundOptionsLike]>([
   [
     new PlainDateTime(1970, 1, 1, 0, 55),
     new PlainDateTime(1970, 1, 1, 1),
