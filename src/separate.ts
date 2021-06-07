@@ -1,4 +1,4 @@
-import { balanceFromMs } from './balance'
+import { mstoIsoDate } from './convert'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
 import { PlainDateType, PlainTimeType } from './types'
@@ -52,7 +52,7 @@ export const separateDateTime = (
     isoMinute,
     isoSecond,
     isoMillisecond,
-  } = balanceFromMs(date.epochMilliseconds)
+  } = mstoIsoDate(date.epochMilliseconds)
   const jsDate = asDate({ isoYear, isoMonth, isoDay })
   let ms = extractTimeMs({ isoHour, isoMinute, isoSecond, isoMillisecond })
   if (ms < minTimeMs) {

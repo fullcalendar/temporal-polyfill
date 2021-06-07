@@ -1,4 +1,4 @@
-import { balanceFromMs } from './balance'
+import { mstoIsoDate } from './convert'
 import { Duration } from './duration'
 import { asRoundOptions } from './round'
 import {
@@ -83,7 +83,7 @@ const addMonths = (
   return { year: date.year, month: date.month + months, day: date.day || 1 }
 }
 const addDays = (date: PlainDateType, days: number): PlainDateType => {
-  return balanceFromMs(dateValue(date) + days * toUnitMs('days'))
+  return mstoIsoDate(dateValue(date) + days * toUnitMs('days'))
 }
 
 // Conversion Utils

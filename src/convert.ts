@@ -7,7 +7,7 @@ import {
 } from './types'
 import { asDate, priorities } from './utils'
 
-export const balanceTime = (
+export const toIsoTime = (
   time: Partial<PlainTimeType> | number,
   options?: RoundOptionsLikeType
 ): PlainTimeType & { deltaDays: number } => {
@@ -54,7 +54,7 @@ export const balanceTime = (
   return { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond }
 }
 
-export const balanceFromMs = (ms: number): PlainDateTimeType => {
+export const mstoIsoDate = (ms: number): PlainDateTimeType => {
   const date = asDate(ms)
   return {
     isoYear: date.getUTCFullYear(),

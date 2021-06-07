@@ -1,4 +1,4 @@
-import { balanceFromMs } from './balance'
+import { mstoIsoDate } from './convert'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZone } from './timeZone'
@@ -36,7 +36,7 @@ export class Now {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = balanceFromMs(this.instant())
+    } = mstoIsoDate(this.instant())
     return new PlainDateTime(
       isoYear,
       isoMonth + 1,

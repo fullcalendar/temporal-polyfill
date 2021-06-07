@@ -1,4 +1,4 @@
-import { balanceFromMs } from './balance'
+import { mstoIsoDate } from './convert'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { CalendarType, TimeZoneType, UNIT_INCREMENT } from './types'
@@ -56,7 +56,7 @@ export class TimeZone {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = balanceFromMs(
+    } = mstoIsoDate(
       epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds)
     )
     return new PlainDateTime(

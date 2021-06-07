@@ -1,4 +1,4 @@
-import { balanceFromMs } from './balance'
+import { mstoIsoDate } from './convert'
 import { Calendar } from './calendar'
 import { dateFormat } from './format'
 import { dateParse } from './parse'
@@ -54,13 +54,13 @@ export class ZonedDateTime {
   }
 
   get year() {
-    return this.calendar.year(balanceFromMs(this.epochMilliseconds))
+    return this.calendar.year(mstoIsoDate(this.epochMilliseconds))
   }
   get month() {
-    return this.calendar.month(balanceFromMs(this.epochMilliseconds))
+    return this.calendar.month(mstoIsoDate(this.epochMilliseconds))
   }
   get day() {
-    return this.calendar.day(balanceFromMs(this.epochMilliseconds))
+    return this.calendar.day(mstoIsoDate(this.epochMilliseconds))
   }
   get hour() {
     // FIXME: Needs to be reworked for arbitrary timezones
@@ -85,10 +85,10 @@ export class ZonedDateTime {
       : date.getMilliseconds()
   }
   get dayOfWeek() {
-    return this.calendar.dayOfWeek(balanceFromMs(this.epochMilliseconds))
+    return this.calendar.dayOfWeek(mstoIsoDate(this.epochMilliseconds))
   }
   get weekOfYear() {
-    return this.calendar.weekOfYear(balanceFromMs(this.epochMilliseconds))
+    return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
   }
 
   with(dateTimeLike: ZonedDateTimeLikeType | string) {

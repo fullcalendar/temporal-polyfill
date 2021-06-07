@@ -1,4 +1,4 @@
-import { balanceTime } from './balance'
+import { toIsoTime } from './convert'
 import { PlainDateTime } from './plainDateTime'
 import { roundMs } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
@@ -141,7 +141,7 @@ export class Duration {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = balanceTime(
+    } = toIsoTime(
       extractTimeMs({
         isoHour: this.hours + other.hours,
         isoMinute: this.minutes + other.minutes,
@@ -198,7 +198,7 @@ export class Duration {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = balanceTime(
+    } = toIsoTime(
       roundMs(
         extractTimeWithDaysMs({
           isoDay: this.days,
