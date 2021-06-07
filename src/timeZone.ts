@@ -10,15 +10,15 @@ export class TimeZone {
   getOffsetMillisecondsFor(epochMilliseconds: number) {
     if (this.id === 'local') {
       const utcDate = asDate(epochMilliseconds)
-      const localDate = new Date(
-        utcDate.getUTCFullYear(),
-        utcDate.getUTCMonth(),
-        utcDate.getUTCDate(),
-        utcDate.getUTCHours(),
-        utcDate.getUTCMinutes(),
-        utcDate.getUTCSeconds(),
-        utcDate.getUTCMilliseconds()
-      )
+      const localDate = asDate({
+        isoYear: utcDate.getUTCFullYear(),
+        isoMonth: utcDate.getUTCMonth(),
+        isoDay: utcDate.getUTCDate(),
+        isoHour: utcDate.getUTCHours(),
+        isoMinute: utcDate.getUTCMinutes(),
+        isoSecond: utcDate.getUTCSeconds(),
+        isoMillisecond: utcDate.getUTCMilliseconds(),
+      })
       // Native date returns value with flipped sign :(
       return (
         -localDate.getTimezoneOffset() *

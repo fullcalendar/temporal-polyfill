@@ -1,4 +1,4 @@
-import { TimeZone } from './timezone'
+import { TimeZone } from './timeZone'
 
 test('can create with variable', () => {
   const timezone = 'local'

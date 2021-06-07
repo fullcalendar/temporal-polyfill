@@ -1,22 +1,21 @@
 import { balanceFromMs, balanceTime } from './balance'
 import { Calendar } from './calendar'
 import { Duration } from './duration'
-import { asRoundOptions, roundModeMap, roundMs } from './round'
+import { dateFormat } from './format'
+import { dateParse } from './parse'
+import { roundMs } from './round'
 import { separateDateTime, separateDuration } from './separate'
 import {
   CalendarType,
   CompareReturnType,
   AssignmentOptionsType,
-  DurationUnitType,
   LocaleType,
   RoundOptionsLikeType,
-  RoundOptionsType,
   TimeZoneType,
-  UNIT_INCREMENT,
   PlainDateTimeLikeType,
   DurationLikeType,
 } from './types'
-import { asDate, dateValue, priorities } from './utils'
+import { asDate, dateValue } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class PlainDateTime {
@@ -49,62 +48,63 @@ export class PlainDateTime {
 
   static from(thing: any): PlainDateTime {
     if (typeof thing === 'string') {
-      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:\[u-ca=(\w+)\])?$/
-      const matches = thing.match(regex)
-      if (matches) {
-        const [
-          year,
-          month,
-          day,
-          hour,
-          minute,
-          second,
-          millisecond,
-          calendar,
-        ] = matches.slice(1).reduce(
-          (acc, val, index) => {
-            if (index === 7) {
-              acc[index] = val
-            } else {
-              acc[index] = Number(val)
-            }
-            return acc
-          },
-          [0, 0, 0, 0, 0, 0, 0, '']
-        )
-        return new PlainDateTime(
-          year,
-          month,
-          day,
-          hour,
-          minute,
-          second,
-          millisecond,
-          calendar as CalendarType
-        )
-      }
-      throw new Error('Invalid String')
-    } else if (typeof thing === 'number') {
-      const date = asDate(thing)
+      const { epochMilliseconds, calendar } = dateParse(thing)
+      const {
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
+      } = balanceFromMs(epochMilliseconds)
       return new PlainDateTime(
-        date.getUTCFullYear(),
-        date.getUTCMonth() + 1,
-        date.getUTCDate(),
-        date.getUTCHours(),
-        date.getUTCMinutes(),
-        date.getUTCSeconds(),
-        date.getUTCMilliseconds()
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
+        calendar
+      )
+    } else if (typeof thing === 'number') {
+      const {
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
+      } = balanceFromMs(thing)
+      return new PlainDateTime(
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond
       )
     } else if (thing.epochMilliseconds) {
-      const date = asDate(thing.epochMilliseconds)
+      const {
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
+      } = balanceFromMs(thing)
       return new PlainDateTime(
-        date.getUTCFullYear(),
-        date.getUTCMonth() + 1,
-        date.getUTCDate(),
-        date.getUTCHours(),
-        date.getUTCMinutes(),
-        date.getUTCSeconds(),
-        date.getUTCMilliseconds(),
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
         thing.calendar
       )
     } else if (thing.isoYear && thing.isoMonth && thing.isoDay)
@@ -262,15 +262,24 @@ export class PlainDateTime {
   }
 
   toString(): string {
-    const { year, month, day, hour, minute, second, millisecond } = this
-    const yearStr = `000${year}`.slice(-4)
-    const monthStr = `0${month}`.slice(-2)
-    const dayStr = `0${day}`.slice(-2)
-    const hourStr = `0${hour}`.slice(-2)
-    const minStr = `0${minute}`.slice(-2)
-    const secStr = `0${second}`.slice(-2)
-    const msStr = `00${millisecond}`.slice(-3)
-    return `${yearStr}-${monthStr}-${dayStr}T${hourStr}:${minStr}:${secStr}.${msStr}`
+    const {
+      year: isoYear,
+      month: isoMonth,
+      day: isoDay,
+      hour: isoHour,
+      minute: isoMinute,
+      second: isoSecond,
+      millisecond: isoMillisecond,
+    } = this
+    return dateFormat({
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    })
   }
   toLocaleString(
     locale: LocaleType,

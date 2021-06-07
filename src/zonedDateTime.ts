@@ -1,13 +1,15 @@
 import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
-import { TimeZone } from './timezone'
+import { dateFormat } from './format'
+import { dateParse } from './parse'
+import { TimeZone } from './timeZone'
 import {
   CalendarType,
   CompareReturnType,
   LocaleType,
   TimeZoneType,
 } from './types'
-import { asDate, dateValue, toUnitMs } from './utils'
+import { asDate } from './utils'
 
 type ZonedDateTimeLikeType = {
   epochMilliseconds?: number
@@ -33,61 +35,8 @@ export class ZonedDateTime {
 
   static from(thing: any) {
     if (typeof thing === 'string') {
-      const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:(Z|[+-][01]\d:[0-5]\d))?(?:\[(\w+\/\w+)\])?(?:\[u-ca=(\w+)\])?$/
-      const matches = thing.match(regex)
-      if (matches) {
-        const [
-          isoYear,
-          isoMonth,
-          isoDay,
-          isoHour,
-          isoMinute,
-          isoSecond,
-          isoMillisecond,
-          offset,
-          timezone,
-          calendar,
-        ] = matches.slice(1).reduce(
-          (acc, val, index) => {
-            if (index === 7) {
-              // TimeZone Offset
-              const offsetRegex = /([+-])(\d{2}):(\d{2})/
-              const offsetMatches = val.match(offsetRegex)
-              if (offsetMatches) {
-                const [plusminus, hrs, mins] = offsetMatches.slice(1)
-                acc[index] =
-                  (plusminus ? 1 : -1) *
-                  (Number(hrs) * toUnitMs('hours') +
-                    Number(mins) * toUnitMs('minutes'))
-              }
-              acc[index] = 0
-            } else if (index === 8 || index === 9) {
-              // Timezone and Calendar
-              acc[index] = val
-            } else {
-              acc[index] = Number(val)
-            }
-            return acc
-          },
-          [0, 0, 0, 0, 0, 0, 0, 0, '', '']
-        )
-        const epochMilliseconds =
-          dateValue({
-            isoYear,
-            isoMonth,
-            isoDay,
-            isoHour,
-            isoMinute,
-            isoSecond,
-            isoMillisecond,
-          }) + offset
-        return new ZonedDateTime(
-          epochMilliseconds,
-          timezone,
-          calendar as CalendarType
-        )
-      }
-      throw new Error('Invalid String')
+      const { epochMilliseconds, timeZone, calendar } = dateParse(thing)
+      return new ZonedDateTime(epochMilliseconds, timeZone, calendar)
     } else if (thing.epochMilliseconds) {
       return new ZonedDateTime(
         thing.epochMilliseconds,
@@ -159,26 +108,28 @@ export class ZonedDateTime {
 
   toString() {
     const {
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      timeZone,
+      year: isoYear,
+      month: isoMonth,
+      day: isoDay,
+      hour: isoHour,
+      minute: isoMinute,
+      second: isoSecond,
+      millisecond: isoMillisecond,
       epochMilliseconds,
+      timeZone,
     } = this
-    const yearStr = `000${year}`.slice(-4)
-    const monthStr = `0${month}`.slice(-2)
-    const dayStr = `0${day}`.slice(-2)
-    const hourStr = `0${hour}`.slice(-2)
-    const minStr = `0${minute}`.slice(-2)
-    const secStr = `0${second}`.slice(-2)
-    const msStr = `00${millisecond}`.slice(-3)
-    return `${yearStr}-${monthStr}-${dayStr}T${hourStr}:${minStr}:${secStr}.${msStr}${timeZone.getOffsetStringFor(
-      epochMilliseconds
-    )}`
+    return dateFormat(
+      {
+        isoYear,
+        isoMonth,
+        isoDay,
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
+      },
+      timeZone.getOffsetStringFor(epochMilliseconds)
+    )
   }
   toLocaleString(locale: LocaleType, options?: Intl.DateTimeFormatOptions) {
     return new Intl.DateTimeFormat(locale, options).format(

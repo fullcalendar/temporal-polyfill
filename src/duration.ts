@@ -141,14 +141,14 @@ export class Duration {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = balanceTime({
-      isoMillisecond: extractTimeMs({
+    } = balanceTime(
+      extractTimeMs({
         isoHour: this.hours + other.hours,
         isoMinute: this.minutes + other.minutes,
         isoSecond: this.seconds + other.seconds,
         isoMillisecond: this.milliseconds + other.milliseconds,
-      }),
-    })
+      })
+    )
     return new Duration(
       0,
       0,

@@ -52,16 +52,42 @@ test('can compare two dates', () => {
   expect(ZonedDateTime.compare(b, c)).toBe(0)
 })
 
-test.skip('can create dates from string', () => {
-  const str = '2020-08-05T20:06:13+09:00[Asia/Tokyo][u-ca=japanese]'
-  const zdt = ZonedDateTime.from(str)
-  expect(zdt.year).toBe(2020)
-  expect(zdt.month).toBe(8)
-  expect(zdt.day).toBe(6)
-  expect(zdt.hour).toBe(16)
-  expect(zdt.minute).toBe(6)
-  expect(zdt.second).toBe(13)
-  expect(zdt.millisecond).toBe(0)
-  expect(zdt.timeZone.id).toBe('Asia/Tokyo')
-  expect(zdt.calendar.id).toBe('japanese')
-})
+test.each([
+  [
+    '2020-08-05T20:06:13+09:00[Asia/Tokyo][u-ca=japanese]',
+    2,
+    8,
+    6,
+    1,
+    6,
+    13,
+    0,
+    'Asia/Tokyo',
+    'japanese',
+  ],
+])(
+  'can create dates from string',
+  (
+    str,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
+    millisecond,
+    timeZone,
+    calendar
+  ) => {
+    const zdt = ZonedDateTime.from(str)
+    expect(zdt.year).toBe(year)
+    expect(zdt.month).toBe(month)
+    expect(zdt.day).toBe(day)
+    expect(zdt.hour).toBe(hour)
+    expect(zdt.minute).toBe(minute)
+    expect(zdt.second).toBe(second)
+    expect(zdt.millisecond).toBe(millisecond)
+    expect(zdt.timeZone.id).toBe(timeZone)
+    expect(zdt.calendar.id).toBe(calendar)
+  }
+)

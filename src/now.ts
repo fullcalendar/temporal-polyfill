@@ -1,7 +1,7 @@
 import { balanceFromMs } from './balance'
 import { Calendar } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { TimeZone } from './timezone'
+import { TimeZone } from './timeZone'
 import { CalendarType, TimeZoneType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
