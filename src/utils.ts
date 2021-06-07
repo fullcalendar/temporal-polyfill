@@ -75,3 +75,18 @@ export const comparePlainDate = (
   }
   return 0
 }
+
+export const reduceFormat = (
+  dt: PlainDate | number,
+  formatter: Intl.DateTimeFormat
+): Record<string, string | number> => {
+  return formatter
+    .formatToParts(asDate(dt))
+    .reduce((acc: Record<string, string | number>, { type, value }) => {
+      const valNum = parseInt(value)
+      return {
+        ...acc,
+        [type]: valNum !== NaN ? valNum : value,
+      }
+    }, {})
+}

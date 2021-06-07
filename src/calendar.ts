@@ -10,7 +10,13 @@ import {
   Part,
   CompareReturn,
 } from './types'
-import { asDate, comparePlainDate, dateValue, toUnitMs } from './utils'
+import {
+  asDate,
+  comparePlainDate,
+  dateValue,
+  reduceFormat,
+  toUnitMs,
+} from './utils'
 
 export type CalendarId =
   | 'buddhist'
@@ -27,7 +33,7 @@ export type CalendarId =
   | 'persian'
   | 'roc'
 
-type CalendarDateType = {
+type CalendarDate = {
   year: number
   month: number
   day: number
@@ -35,11 +41,11 @@ type CalendarDateType = {
 
 // Diff Utils
 const diffYears = (
-  one: Part<CalendarDateType, 'year'>,
-  two: Part<CalendarDateType, 'year'>,
+  one: Part<CalendarDate, 'year'>,
+  two: Part<CalendarDate, 'year'>,
   calendar: Calendar,
   rejectOverflow: boolean
-): [number, CalendarDateType] => {
+): [number, CalendarDate] => {
   let current = { month: 1, day: 1, ...one }
   const end = { month: 1, day: 1, ...two }
 
@@ -54,11 +60,11 @@ const diffYears = (
 }
 
 const diffMonths = (
-  one: Part<CalendarDateType, 'year' | 'month'>,
-  two: Part<CalendarDateType, 'year' | 'month'>,
+  one: Part<CalendarDate, 'year' | 'month'>,
+  two: Part<CalendarDate, 'year' | 'month'>,
   calendar: Calendar,
   rejectOverflow: boolean
-): [number, CalendarDateType] => {
+): [number, CalendarDate] => {
   let current = { day: 1, ...one }
   const end = { day: 1, ...two }
 
@@ -91,12 +97,12 @@ const diffDays = (one: PlainDate, two: PlainDate): number => {
 
 // Add Utils
 const addYears = (
-  date: Part<CalendarDateType, 'year'>,
+  date: Part<CalendarDate, 'year'>,
   years: number,
   calendar: Calendar,
   rejectOverflow = false
-): CalendarDateType => {
-  const fullDate: CalendarDateType = {
+): CalendarDate => {
+  const fullDate: CalendarDate = {
     year: date.year + years,
     month: date.month || 1,
     day: date.day || 1,
@@ -108,12 +114,12 @@ const addYears = (
 }
 
 const addMonths = (
-  date: CalendarDateType,
+  date: CalendarDate,
   months: number,
   calendar: Calendar,
   rejectOverflow = false
-): CalendarDateType => {
-  const fullDate: CalendarDateType = {
+): CalendarDate => {
+  const fullDate: CalendarDate = {
     year: date.year,
     month: date.month + months,
     day: date.day || 1,
@@ -129,7 +135,7 @@ const addDays = (date: PlainDate, days: number): PlainDate => {
 }
 
 // Conversion Utils
-const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDateType => {
+const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDate => {
   return {
     year: calendar.year(date),
     month: calendar.month(date),
@@ -138,8 +144,8 @@ const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDateType => {
 }
 
 const compareCalendarDates = (
-  one: CalendarDateType,
-  two: CalendarDateType,
+  one: CalendarDate,
+  two: CalendarDate,
   calendar: Calendar
 ): CompareReturn => {
   return comparePlainDate(
@@ -151,7 +157,7 @@ const compareCalendarDates = (
 // Overflow Utils
 const handleMonthOverflow = (
   calendar: Calendar,
-  fields: CalendarDateType,
+  fields: CalendarDate,
   rejectOverflow: boolean
 ): number => {
   const { isoYear, isoMonth } =
@@ -166,7 +172,7 @@ const handleMonthOverflow = (
 
 const handleDayOverflow = (
   calendar: Calendar,
-  fields: CalendarDateType,
+  fields: CalendarDate,
   rejectOverflow: boolean
 ): number => {
   const { isoYear, isoMonth, isoDay } =
@@ -193,32 +199,21 @@ export class Calendar {
     })
   }
 
-  private formattedPropertyValue(dt: PlainDate, property: string): string {
-    return this.formatter
-      .formatToParts(asDate(dt))
-      .reduce((acc: { [type: string]: string }, { type, value }) => {
-        return {
-          ...acc,
-          [type]: value,
-        }
-      }, {})[property]
-  }
-
   year({ isoYear }: Part<PlainDate, 'isoYear'>): number {
-    return parseInt(
-      this.formattedPropertyValue({ isoYear, isoMonth: 1, isoDay: 1 }, 'year')
-    )
+    return reduceFormat({ isoYear, isoMonth: 1, isoDay: 1 }, this.formatter)[
+      'year'
+    ] as number
   }
   month({
     isoYear,
     isoMonth,
   }: Part<PlainDate, 'isoYear' | 'isoMonth'>): number {
-    return parseInt(
-      this.formattedPropertyValue({ isoYear, isoMonth, isoDay: 1 }, 'month')
-    )
+    return reduceFormat({ isoYear, isoMonth, isoDay: 1 }, this.formatter)[
+      'month'
+    ] as number
   }
   day(dt: PlainDate): number {
-    return parseInt(this.formattedPropertyValue(dt, 'day'))
+    return reduceFormat(dt, this.formatter)['day'] as number
   }
 
   // IN methods
@@ -240,7 +235,7 @@ export class Calendar {
 
   // OF methods
   dayOfWeek(dt: PlainDate): string {
-    return this.formattedPropertyValue(dt, 'weekday')
+    return reduceFormat(dt, this.formatter)['weekday'] as string
   }
   dayOfYear(dt: PlainDate): number {
     return this.dateUntil(
@@ -263,7 +258,7 @@ export class Calendar {
   }
 
   dateFromFields(
-    fields: Part<CalendarDateType, 'year' | 'month'>,
+    fields: Part<CalendarDate, 'year' | 'month'>,
     options?: AssignmentOptions
   ): PlainDate {
     // FIXME: Overflow does nothing
@@ -282,7 +277,7 @@ export class Calendar {
     options?: AssignmentOptionsLike
   ): PlainDate {
     const { years, months, weeks, days } = duration
-    let fields: CalendarDateType = {
+    let fields: CalendarDate = {
       year: this.year(date),
       month: this.month(date),
       day: this.day(date),

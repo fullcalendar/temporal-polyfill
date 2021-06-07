@@ -23,11 +23,11 @@ export type DurationFields = {
 export type DurationLike = Partial<DurationFields>
 export type DurationUnit = keyof DurationFields
 
-type UnitOptionsType = {
+type UnitOptions = {
   unit: DurationUnit
 }
 
-type RelativeOptionsType = {
+type RelativeOptions = {
   relativeTo?: PlainDateTime | PlainDateTimeLike | string
 }
 
@@ -129,7 +129,7 @@ export class Duration {
 
   add(
     amount: Duration | DurationLike | string,
-    options?: RelativeOptionsType
+    options?: RelativeOptions
   ): Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
 
@@ -177,27 +177,37 @@ export class Duration {
   }
   subtract(
     amount: Duration | DurationLike | string,
-    options?: RelativeOptionsType
+    options?: RelativeOptions
   ): Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
     return this.add(other.negated(), options)
   }
-  total({
-    unit,
-    relativeTo = new PlainDateTime(1970, 1, 1),
-  }: UnitOptionsType & RelativeOptionsType): number {
-    const relative =
-      relativeTo instanceof PlainDateTime
-        ? relativeTo
-        : PlainDateTime.from(relativeTo)
+  total({ unit, relativeTo }: UnitOptions & RelativeOptions): number {
+    if (relativeTo) {
+      const relative =
+        relativeTo instanceof PlainDateTime
+          ? relativeTo
+          : PlainDateTime.from(relativeTo)
 
-    // FIXME: This doesn't properly account for weeks/months/years
+      // FIXME: This doesn't properly account for weeks/months/years
+      return (
+        (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /
+        toUnitMs(unit)
+      )
+    } else if (this.years || this.months || this.weeks) {
+      throw new Error('relativeTo is required for date units')
+    }
     return (
-      (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /
-      toUnitMs(unit)
+      extractTimeWithDaysMs({
+        isoDay: this.days,
+        isoHour: this.hours,
+        isoMinute: this.minutes,
+        isoSecond: this.seconds,
+        isoMillisecond: this.milliseconds,
+      }) / toUnitMs(unit)
     )
   }
-  round(options?: RoundOptionsLike & RelativeOptionsType): Duration {
+  round(options?: RoundOptionsLike & RelativeOptions): Duration {
     if (options?.relativeTo) {
       const relative =
         options.relativeTo instanceof PlainDateTime

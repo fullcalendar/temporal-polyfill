@@ -6,7 +6,7 @@ import { TimeZone, TimeZoneId } from './timeZone'
 import { CompareReturn, LocaleId } from './types'
 import { asDate } from './utils'
 
-type ZonedDateTimeLikeType = {
+type ZonedDateTimeLike = {
   epochMilliseconds?: number
   timeZone?: TimeZone | TimeZoneId
   calendar?: Calendar | CalendarId
@@ -90,7 +90,7 @@ export class ZonedDateTime {
     return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
   }
 
-  with(dateTimeLike: ZonedDateTimeLikeType | string): ZonedDateTime {
+  with(dateTimeLike: ZonedDateTimeLike | string): ZonedDateTime {
     if (typeof dateTimeLike === 'string') {
       throw new Error('Unimplemented')
     }

@@ -2,12 +2,26 @@ import { mstoIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { UNIT_INCREMENT } from './types'
-import { asDate, toUnitMs } from './utils'
+import { asDate, reduceFormat, toUnitMs } from './utils'
 
 export type TimeZoneId = 'utc' | 'local' | string
 
 export class TimeZone {
-  constructor(readonly id: TimeZoneId = 'local') {}
+  private formatter: Intl.DateTimeFormat
+
+  constructor(readonly id: TimeZoneId = 'local') {
+    this.formatter = new Intl.DateTimeFormat('en-us', {
+      hour12: false,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZone: this.id === 'local' ? undefined : this.id,
+      timeZoneName: 'short',
+    })
+  }
 
   getOffsetMillisecondsFor(epochMilliseconds: number): number {
     if (this.id === 'local') {
@@ -30,7 +44,10 @@ export class TimeZone {
     } else if (this.id === 'utc') {
       return 0
     }
-    throw new Error('Unimplemented')
+    // Arbitrary timezone
+    const formatResult = reduceFormat(epochMilliseconds, this.formatter)
+
+    return 0
   }
   getOffsetStringFor(epochMilliseconds: number): string {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)

@@ -1,4 +1,5 @@
 import { Duration, DurationUnit } from './duration'
+import { PlainDateTime } from './plainDateTime'
 import { RoundOptionsLike } from './types'
 
 test('can instantiate duration', () => {
@@ -55,12 +56,22 @@ test.each([
   expect(one.add(two)).toEqual(expected)
 })
 
-test.each<[Duration, { unit: DurationUnit }, number]>([
+test.each<
+  [Duration, { unit: DurationUnit; relativeTo?: PlainDateTime }, number]
+>([
   [new Duration(0, 0, 0, 1), { unit: 'hours' }, 24],
-  [new Duration(1, 0, 0, 1), { unit: 'months' }, 12.032871437645396],
+  [
+    new Duration(1, 0, 0, 1),
+    { unit: 'months', relativeTo: new PlainDateTime(2000, 1, 1) },
+    12.065748135562458,
+  ],
   [new Duration(0, 0, 0, 1), { unit: 'minutes' }, 1440],
   [new Duration(0, 0, 0, 1), { unit: 'weeks' }, 1 / 7],
-  [new Duration(0, 0, 1, 1), { unit: 'weeks' }, 8 / 7],
+  [
+    new Duration(0, 0, 1, 1),
+    { unit: 'weeks', relativeTo: new PlainDateTime(2000, 1, 1) },
+    8 / 7,
+  ],
   [new Duration(0, 0, 0, 0, 12, 32, 30), { unit: 'minutes' }, 752.5],
   [new Duration(0, 0, 0, 0, 130, 20), { unit: 'seconds' }, 469200],
 ])('can find total of %s', (dur, options, expected) => {
