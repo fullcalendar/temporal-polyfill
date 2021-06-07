@@ -56,12 +56,11 @@ export const priorities: Array<DurationUnitType> = [
  * @param unit days, hours, minutes, seconds, milliseconds
  * @returns milliseconds
  */
-export const toUnitMs = (unit: DurationUnitType): number =>
-  priorities.reduce(
-    (acc, val, index) =>
-      index >= priorities.indexOf(unit) ? acc * incrementMap[val] : acc,
-    1
-  )
+export const toUnitMs = (unit: DurationUnitType): number => {
+  return priorities.reduce((acc, val, index) => {
+    return index >= priorities.indexOf(unit) ? acc * incrementMap[val] : acc
+  }, 1)
+}
 
 export const comparePlainDate = (
   one: PlainDateType,
@@ -71,7 +70,11 @@ export const comparePlainDate = (
     one.isoYear - two.isoYear ||
     one.isoMonth - two.isoMonth ||
     one.isoDay - two.isoDay
-  if (diff < 0) return -1
-  else if (diff > 0) return 1
+
+  if (diff < 0) {
+    return -1
+  } else if (diff > 0) {
+    return 1
+  }
   return 0
 }

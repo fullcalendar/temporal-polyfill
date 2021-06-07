@@ -34,11 +34,13 @@ export const toIsoTime = (
     isoSecond += Math.trunc(isoMillisecond / UNIT_INCREMENT.SECOND) || 0
     isoMillisecond = Math.trunc(isoMillisecond % UNIT_INCREMENT.SECOND) || 0
   }
+
   //SECS
   if (priorities.indexOf('minutes') >= largestIndex) {
     isoMinute += Math.trunc(isoSecond / UNIT_INCREMENT.MINUTE) || 0
     isoSecond = Math.trunc(isoSecond % UNIT_INCREMENT.MINUTE) || 0
   }
+
   //MINS
   if (priorities.indexOf('hours') >= largestIndex) {
     isoHour += Math.trunc(isoMinute / UNIT_INCREMENT.HOUR) || 0
@@ -46,6 +48,7 @@ export const toIsoTime = (
   }
   //HOURS
   let deltaDays = 0
+
   if (priorities.indexOf('days') >= largestIndex) {
     deltaDays = Math.trunc(isoHour / UNIT_INCREMENT.DAY) || 0
     isoHour = Math.trunc(isoHour % UNIT_INCREMENT.DAY) || 0

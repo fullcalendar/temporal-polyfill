@@ -7,7 +7,7 @@ import { asDate, toUnitMs } from './utils'
 export class TimeZone {
   constructor(readonly id: TimeZoneType = 'local') {}
 
-  getOffsetMillisecondsFor(epochMilliseconds: number) {
+  getOffsetMillisecondsFor(epochMilliseconds: number): number {
     if (this.id === 'local') {
       const utcDate = asDate(epochMilliseconds)
       const localDate = asDate({
@@ -30,7 +30,7 @@ export class TimeZone {
     }
     throw new Error('Unimplemented')
   }
-  getOffsetStringFor(epochMilliseconds: number) {
+  getOffsetStringFor(epochMilliseconds: number): string {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
 
     const sign = offset < 0 ? '-' : '+'
@@ -47,7 +47,7 @@ export class TimeZone {
   getPlainDateTimeFor(
     epochMilliseconds: number,
     calendar: Calendar | CalendarType
-  ) {
+  ): PlainDateTime {
     const {
       isoYear,
       isoMonth,

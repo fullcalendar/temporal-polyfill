@@ -23,39 +23,46 @@ type CalendarDateType = {
 const diffYears = (
   one: Part<CalendarDateType, 'year'>,
   two: Part<CalendarDateType, 'year'>,
-  calendar: Calendar
+  calendar: Calendar,
+  rejectOverflow: boolean
 ): [number, CalendarDateType] => {
   let current = { month: 1, day: 1, ...one }
   const end = { month: 1, day: 1, ...two }
 
   let years = end.year - current.year
-  current = addYears(current, years)
+  current = addYears(current, years, calendar, rejectOverflow)
+
   if (compareCalendarDates(current, end, calendar) > 0) {
     current.year--
     years--
   }
   return [years, current]
 }
+
 const diffMonths = (
   one: Part<CalendarDateType, 'year' | 'month'>,
   two: Part<CalendarDateType, 'year' | 'month'>,
-  calendar: Calendar
+  calendar: Calendar,
+  rejectOverflow: boolean
 ): [number, CalendarDateType] => {
   let current = { day: 1, ...one }
   const end = { day: 1, ...two }
 
   let months = 0
+
   while (current.year < end.year) {
     current.year++
     months += calendar.monthsInYear(calendar.dateFromFields(current))
   }
+
   if (compareCalendarDates(current, end, calendar) > 0) {
     current.year--
     months--
   }
   months += end.month - current.month
 
-  current = addMonths(current, months)
+  current = addMonths(current, months, calendar, rejectOverflow)
+
   if (compareCalendarDates(current, end, calendar) > 0) {
     current.month--
     months--
@@ -63,6 +70,7 @@ const diffMonths = (
 
   return [months, current]
 }
+
 const diffDays = (one: PlainDateType, two: PlainDateType): number => {
   return Math.trunc((dateValue(two) - dateValue(one)) / toUnitMs('days'))
 }
@@ -71,17 +79,37 @@ const diffDays = (one: PlainDateType, two: PlainDateType): number => {
 const addYears = (
   date: Part<CalendarDateType, 'year'>,
   years: number,
-  rejectOverflow: boolean = false
+  calendar: Calendar,
+  rejectOverflow = false
 ): CalendarDateType => {
-  return { year: date.year + years, month: date.month || 1, day: date.day || 1 }
+  const fullDate: CalendarDateType = {
+    year: date.year + years,
+    month: date.month || 1,
+    day: date.day || 1,
+  }
+  return {
+    ...fullDate,
+    month: handleMonthOverflow(calendar, fullDate, rejectOverflow),
+  }
 }
+
 const addMonths = (
   date: CalendarDateType,
   months: number,
-  rejectOverflow: boolean = false
+  calendar: Calendar,
+  rejectOverflow = false
 ): CalendarDateType => {
-  return { year: date.year, month: date.month + months, day: date.day || 1 }
+  const fullDate: CalendarDateType = {
+    year: date.year,
+    month: date.month + months,
+    day: date.day || 1,
+  }
+  return {
+    ...fullDate,
+    day: handleDayOverflow(calendar, fullDate, rejectOverflow),
+  }
 }
+
 const addDays = (date: PlainDateType, days: number): PlainDateType => {
   return mstoIsoDate(dateValue(date) + days * toUnitMs('days'))
 }
@@ -97,39 +125,47 @@ const isoToCal = (
     day: calendar.day(date),
   }
 }
+
 const compareCalendarDates = (
   one: CalendarDateType,
   two: CalendarDateType,
   calendar: Calendar
-): CompareReturnType =>
-  comparePlainDate(calendar.dateFromFields(one), calendar.dateFromFields(two))
+): CompareReturnType => {
+  return comparePlainDate(
+    calendar.dateFromFields(one),
+    calendar.dateFromFields(two)
+  )
+}
 
 // Overflow Utils
-// TODO: Use this
 const handleMonthOverflow = (
   calendar: Calendar,
-  fields: CalendarDateType | PlainDateType,
+  fields: CalendarDateType,
   rejectOverflow: boolean
-): [number, number] => {
+): number => {
   const { isoYear, isoMonth } =
     'year' in fields ? calendar.dateFromFields(fields) : fields
   const totalMonths = calendar.monthsInYear({ isoYear }) + 1
-  if (rejectOverflow && isoMonth > totalMonths)
+
+  if (rejectOverflow && isoMonth > totalMonths) {
     throw new Error('Month overflow is disabled')
-  return [isoMonth % totalMonths, Math.trunc(isoMonth / totalMonths)]
+  }
+  return isoMonth % totalMonths
 }
-// TODO: Use this
+
 const handleDayOverflow = (
   calendar: Calendar,
-  fields: CalendarDateType | PlainDateType,
+  fields: CalendarDateType,
   rejectOverflow: boolean
-): [number, number] => {
+): number => {
   const { isoYear, isoMonth, isoDay } =
     'year' in fields ? calendar.dateFromFields(fields) : fields
   const totalDays = calendar.daysInMonth({ isoYear, isoMonth }) + 1
-  if (rejectOverflow && isoDay > totalDays)
+
+  if (rejectOverflow && isoDay > totalDays) {
     throw new Error('Day overflow is disabled')
-  return [isoDay % totalDays, Math.trunc(isoDay / totalDays)]
+  }
+  return isoDay % totalDays
 }
 
 export class Calendar {
@@ -147,13 +183,14 @@ export class Calendar {
   }
 
   private formattedPropertyValue(dt: PlainDateType, property: string): string {
-    return this.formatter.formatToParts(asDate(dt)).reduce(
-      (acc: { [type: string]: string }, { type, value }) => ({
-        ...acc,
-        [type]: value,
-      }),
-      {}
-    )[property]
+    return this.formatter
+      .formatToParts(asDate(dt))
+      .reduce((acc: { [type: string]: string }, { type, value }) => {
+        return {
+          ...acc,
+          [type]: value,
+        }
+      }, {})[property]
   }
 
   year({ isoYear }: Part<PlainDateType, 'isoYear'>): number {
@@ -233,15 +270,15 @@ export class Calendar {
     duration: Duration,
     options?: AssignmentOptionsLikeType
   ): PlainDateType {
-    let { years, months, weeks, days } = duration
+    const { years, months, weeks, days } = duration
     let fields: CalendarDateType = {
       year: this.year(date),
       month: this.month(date),
       day: this.day(date),
     }
     const rejectOverflow = options?.overflow === 'reject'
-    fields = addYears(fields, years, rejectOverflow)
-    fields = addMonths(fields, months, rejectOverflow)
+    fields = addYears(fields, years, this, rejectOverflow)
+    fields = addMonths(fields, months, this, rejectOverflow)
     const { isoYear, isoMonth, isoDay } = addDays(
       this.dateFromFields(fields),
       days + weeks * UNIT_INCREMENT.WEEK
@@ -266,9 +303,9 @@ export class Calendar {
 
     switch (largestUnit) {
       case 'years':
-        ;[years, current] = diffYears(current, end, this)
+        ;[years, current] = diffYears(current, end, this, false)
       case 'months':
-        ;[months, current] = diffMonths(current, end, this)
+        ;[months, current] = diffMonths(current, end, this, false)
       case 'weeks':
       case 'days':
       default:

@@ -37,6 +37,7 @@ export class Duration {
     if (typeof thing === 'string') {
       const regex = /^(-|\+)?P(?:([-+]?[\d,.]*)Y)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)W)?(?:([-+]?[\d,.]*)D)?(?:T(?:([-+]?[\d,.]*)H)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)S)?)?$/
       const matches = thing.match(regex)
+
       if (matches) {
         const [
           years,
@@ -46,7 +47,9 @@ export class Duration {
           hours,
           minutes,
           seconds,
-        ] = matches.slice(2).map((value) => Number(value || 0))
+        ] = matches.slice(2).map((value) => {
+          return Number(value || 0)
+        })
         return new Duration(
           years,
           months,
@@ -68,7 +71,7 @@ export class Duration {
       thing.minutes ||
       thing.seconds ||
       thing.milliseconds
-    )
+    ) {
       return new Duration(
         thing.years,
         thing.months,
@@ -79,6 +82,7 @@ export class Duration {
         thing.seconds,
         thing.milliseconds
       )
+    }
     throw new Error('Invalid Object')
   }
   static compare(
@@ -100,7 +104,7 @@ export class Duration {
     minutes,
     seconds,
     milliseconds,
-  }: DurationLikeType) {
+  }: DurationLikeType): Duration {
     return new Duration(
       years || this.years,
       months || this.months,
@@ -132,8 +136,9 @@ export class Duration {
       other.years ||
       other.months ||
       other.weeks
-    )
+    ) {
       throw new Error('relativeTo is required for date units')
+    }
 
     const {
       deltaDays,
@@ -189,8 +194,9 @@ export class Duration {
           ? options.relativeTo
           : PlainDateTime.from(options.relativeTo)
       return relative.add(this).since(relative, options)
-    } else if (this.years || this.months || this.weeks)
+    } else if (this.years || this.months || this.weeks) {
       throw new Error('relativeTo is required for date units')
+    }
 
     const {
       deltaDays,
@@ -257,10 +263,12 @@ export class Duration {
       [this.hours, 'H'],
       [this.minutes, 'M'],
       [this.seconds + this.milliseconds / UNIT_INCREMENT.SECOND, 'S'],
-    ].map(([number, unit]) => ({
-      negative: number < 0,
-      format: number ? `${Math.abs(number as number)}${unit}` : '',
-    }))
+    ].map(([number, unit]) => {
+      return {
+        negative: number < 0,
+        format: number ? `${Math.abs(number as number)}${unit}` : '',
+      }
+    })
 
     const T = hour.format || minute.format || second.format ? 'T' : ''
     const P =

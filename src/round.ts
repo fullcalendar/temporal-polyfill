@@ -7,7 +7,10 @@ const roundDefaults: RoundOptionsType = {
   roundingIncrement: 1,
   roundingMode: 'trunc',
 }
-export const asRoundOptions = (options?: RoundOptionsLikeType) => {
+
+export const asRoundOptions = (
+  options?: RoundOptionsLikeType
+): RoundOptionsType => {
   const combined = {
     ...roundDefaults,
     ...options,
@@ -20,8 +23,10 @@ export const asRoundOptions = (options?: RoundOptionsLikeType) => {
     combined.largestUnit !== 'auto'
       ? priorities.indexOf(combined.largestUnit)
       : 0
-  if (smallestIndex < largestIndex)
+
+  if (smallestIndex < largestIndex) {
     throw new RangeError('largestUnit cannot be smaller than smallestUnit')
+  }
   return combined
 }
 

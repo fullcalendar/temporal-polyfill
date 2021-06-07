@@ -10,7 +10,7 @@ export const dateFormat = (
     isoSecond,
     isoMillisecond,
   }: PlainDateTimeType,
-  offset: string = ''
+  offset = ''
 ): string => {
   const yearStr = `000${isoYear}`.slice(-4)
   const monthStr = `0${isoMonth}`.slice(-2)

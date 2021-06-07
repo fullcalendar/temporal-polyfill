@@ -13,7 +13,24 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "prettier"
   ],
-  "rules": {}
+  "plugins": ["prettier"],
+  "noInlineConfig": true,
+  "rules": {
+    "prettier/prettier": "error",
+    "arrow-body-style": ["warn", "always"],
+    "prefer-arrow-callback": "off",
+    "no-fallthrough": "off",
+    "prefer-const": "warn",
+    "curly": ["warn", "all"],
+    "padding-line-between-statements": [
+      "warn",
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": ["function", "block-like", "class"]
+      }
+    ]
+  }
 }

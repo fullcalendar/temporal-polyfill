@@ -33,7 +33,7 @@ export class ZonedDateTime {
       calendar instanceof Calendar ? calendar : new Calendar(calendar)
   }
 
-  static from(thing: any) {
+  static from(thing: any): ZonedDateTime {
     if (typeof thing === 'string') {
       const { epochMilliseconds, timeZone, calendar } = dateParse(thing)
       return new ZonedDateTime(epochMilliseconds, timeZone, calendar)
@@ -48,65 +48,71 @@ export class ZonedDateTime {
   }
 
   static compare(one: ZonedDateTime, two: ZonedDateTime): CompareReturnType {
-    if (one.epochMilliseconds < two.epochMilliseconds) return -1
-    else if (one.epochMilliseconds > two.epochMilliseconds) return 1
-    else return 0
+    if (one.epochMilliseconds < two.epochMilliseconds) {
+      return -1
+    } else if (one.epochMilliseconds > two.epochMilliseconds) {
+      return 1
+    } else {
+      return 0
+    }
   }
 
-  get year() {
+  get year(): number {
     return this.calendar.year(mstoIsoDate(this.epochMilliseconds))
   }
-  get month() {
+  get month(): number {
     return this.calendar.month(mstoIsoDate(this.epochMilliseconds))
   }
-  get day() {
+  get day(): number {
     return this.calendar.day(mstoIsoDate(this.epochMilliseconds))
   }
-  get hour() {
+  get hour(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
   }
-  get minute() {
+  get minute(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
   }
-  get second() {
+  get second(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
   }
-  get millisecond() {
+  get millisecond(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = asDate(this.epochMilliseconds)
     return this.timeZone.id === 'utc'
       ? date.getUTCMilliseconds()
       : date.getMilliseconds()
   }
-  get dayOfWeek() {
+  get dayOfWeek(): string {
     return this.calendar.dayOfWeek(mstoIsoDate(this.epochMilliseconds))
   }
-  get weekOfYear() {
+  get weekOfYear(): number {
     return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
   }
 
-  with(dateTimeLike: ZonedDateTimeLikeType | string) {
-    if (typeof dateTimeLike === 'string') throw new Error('Unimplemented')
+  with(dateTimeLike: ZonedDateTimeLikeType | string): ZonedDateTime {
+    if (typeof dateTimeLike === 'string') {
+      throw new Error('Unimplemented')
+    }
     return new ZonedDateTime(
       dateTimeLike.epochMilliseconds || this.epochMilliseconds,
       dateTimeLike.timeZone || this.timeZone,
       dateTimeLike.calendar || this.calendar
     )
   }
-  withTimeZone(timeZone: TimeZone | TimeZoneType) {
+  withTimeZone(timeZone: TimeZone | TimeZoneType): ZonedDateTime {
     return this.with({ timeZone })
   }
-  withCalendar(calendar: Calendar | CalendarType) {
+  withCalendar(calendar: Calendar | CalendarType): ZonedDateTime {
     return this.with({ calendar })
   }
 
-  toString() {
+  toString(): string {
     const {
       year: isoYear,
       month: isoMonth,
@@ -131,7 +137,10 @@ export class ZonedDateTime {
       timeZone.getOffsetStringFor(epochMilliseconds)
     )
   }
-  toLocaleString(locale: LocaleType, options?: Intl.DateTimeFormatOptions) {
+  toLocaleString(
+    locale: LocaleType,
+    options?: Intl.DateTimeFormatOptions
+  ): string {
     return new Intl.DateTimeFormat(locale, options).format(
       this.epochMilliseconds
     )

@@ -9,17 +9,21 @@ export const extractTimeMs = ({
   isoMinute,
   isoSecond,
   isoMillisecond,
-}: PlainTimeType): number =>
-  isoHour * toUnitMs('hours') +
-  isoMinute * toUnitMs('minutes') +
-  isoSecond * toUnitMs('seconds') +
-  isoMillisecond * toUnitMs('milliseconds')
+}: PlainTimeType): number => {
+  return (
+    isoHour * toUnitMs('hours') +
+    isoMinute * toUnitMs('minutes') +
+    isoSecond * toUnitMs('seconds') +
+    isoMillisecond * toUnitMs('milliseconds')
+  )
+}
 
 export const extractTimeWithDaysMs = ({
   isoDay,
   ...isoTime
-}: PlainTimeType & Pick<PlainDateType, 'isoDay'>): number =>
-  extractTimeMs(isoTime) + isoDay * toUnitMs('days')
+}: PlainTimeType & Pick<PlainDateType, 'isoDay'>): number => {
+  return extractTimeMs(isoTime) + isoDay * toUnitMs('days')
+}
 
 export const separateDuration = (
   duration: Duration
@@ -42,7 +46,7 @@ export const separateDuration = (
 
 export const separateDateTime = (
   date: PlainDateTime,
-  minTimeMs: number = 0
+  minTimeMs = 0
 ): [isoDate: PlainDateType, timeOfDayMs: number] => {
   const {
     isoYear,
@@ -55,6 +59,7 @@ export const separateDateTime = (
   } = mstoIsoDate(date.epochMilliseconds)
   const jsDate = asDate({ isoYear, isoMonth, isoDay })
   let ms = extractTimeMs({ isoHour, isoMinute, isoSecond, isoMillisecond })
+
   if (ms < minTimeMs) {
     jsDate.setUTCDate(jsDate.getUTCDate() - 1)
     ms += toUnitMs('days')

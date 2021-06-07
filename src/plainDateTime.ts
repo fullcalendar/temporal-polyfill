@@ -26,10 +26,10 @@ export class PlainDateTime {
     isoYear: number,
     isoMonth: number,
     isoDay: number,
-    isoHour: number = 0,
-    isoMinute: number = 0,
-    isoSecond: number = 0,
-    isoMillisecond: number = 0,
+    isoHour = 0,
+    isoMinute = 0,
+    isoSecond = 0,
+    isoMillisecond = 0,
     calendar: Calendar | CalendarType = new Calendar()
   ) {
     this.epochMilliseconds = dateValue({
@@ -107,7 +107,7 @@ export class PlainDateTime {
         isoMillisecond,
         thing.calendar
       )
-    } else if (thing.isoYear && thing.isoMonth && thing.isoDay)
+    } else if (thing.isoYear && thing.isoMonth && thing.isoDay) {
       return new PlainDateTime(
         thing.isoYear,
         thing.isoMonth,
@@ -118,45 +118,52 @@ export class PlainDateTime {
         thing.isoMillisecond,
         thing.calendar
       )
+    }
     throw new Error('Invalid Object')
   }
 
   static compare(one: PlainDateTime, two: PlainDateTime): CompareReturnType {
-    if (one.epochMilliseconds < two.epochMilliseconds) return -1
-    else if (one.epochMilliseconds > two.epochMilliseconds) return 1
-    else return 0
+    if (one.epochMilliseconds < two.epochMilliseconds) {
+      return -1
+    } else if (one.epochMilliseconds > two.epochMilliseconds) {
+      return 1
+    } else {
+      return 0
+    }
   }
 
-  get year() {
+  get year(): number {
     return this.calendar.year(mstoIsoDate(this.epochMilliseconds))
   }
-  get month() {
+  get month(): number {
     return this.calendar.month(mstoIsoDate(this.epochMilliseconds))
   }
-  get day() {
+  get day(): number {
     return this.calendar.day(mstoIsoDate(this.epochMilliseconds))
   }
-  get hour() {
+  get hour(): number {
     return mstoIsoDate(this.epochMilliseconds).isoHour
   }
-  get minute() {
+  get minute(): number {
     return mstoIsoDate(this.epochMilliseconds).isoMinute
   }
-  get second() {
+  get second(): number {
     return mstoIsoDate(this.epochMilliseconds).isoSecond
   }
-  get millisecond() {
+  get millisecond(): number {
     return mstoIsoDate(this.epochMilliseconds).isoMillisecond
   }
-  get dayOfWeek() {
+  get dayOfWeek(): string {
     return this.calendar.dayOfWeek(mstoIsoDate(this.epochMilliseconds))
   }
-  get weekOfYear() {
+  get weekOfYear(): number {
     return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
   }
 
   with(dateTimeLike: PlainDateTimeLikeType | string): PlainDateTime {
-    if (typeof dateTimeLike === 'string') throw new Error('Unimplemented')
+    if (typeof dateTimeLike === 'string') {
+      throw new Error('Unimplemented')
+    }
     return new PlainDateTime(
       dateTimeLike.isoYear || this.year,
       dateTimeLike.isoMonth || this.month,

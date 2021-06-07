@@ -6,6 +6,7 @@ export const dateParse = (
 ): { epochMilliseconds: number; timeZone: string; calendar: CalendarType } => {
   const regex = /^([1-9]\d{3})-(0[1-9]|1[0-2])-([0-2]\d)(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:[.:](\d{3}))?)?(?:(Z|[+-][01]\d:[0-5]\d))?(?:\[(\w+\/\w+)\])?(?:\[u-ca=(\w+)\])?$/
   const matches = str.match(regex)
+
   if (matches) {
     const sliced = matches.slice(1)
     const [
@@ -27,6 +28,7 @@ export const dateParse = (
     let offset = 0
     const offsetRegex = /([+-])(\d{2}):(\d{2})/
     const offsetMatches = sliced[7].match(offsetRegex)
+
     if (offsetMatches) {
       const [plusminus, hrs, mins] = offsetMatches.slice(1)
       offset =

@@ -6,28 +6,28 @@ import { CalendarType, TimeZoneType } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class Now {
-  static instant() {
+  static instant(): number {
     return Date.now()
   }
-  static epochMilliseconds() {
+  static epochMilliseconds(): number {
     return this.instant()
   }
 
-  static timeZone() {
+  static timeZone(): TimeZone {
     return new TimeZone(
       Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneType
     )
   }
 
-  static zonedDateTime(calendar?: CalendarType | Calendar) {
+  static zonedDateTime(calendar?: CalendarType | Calendar): ZonedDateTime {
     return new ZonedDateTime(this.instant(), undefined, calendar)
   }
 
-  static zonedDateTimeISO() {
+  static zonedDateTimeISO(): ZonedDateTime {
     return this.zonedDateTime()
   }
 
-  static plainDateTime(calendar?: CalendarType | Calendar) {
+  static plainDateTime(calendar?: CalendarType | Calendar): PlainDateTime {
     const {
       isoYear,
       isoMonth,
@@ -49,7 +49,7 @@ export class Now {
     )
   }
 
-  static plainDateTimeISO() {
+  static plainDateTimeISO(): PlainDateTime {
     return this.plainDateTime()
   }
 }
