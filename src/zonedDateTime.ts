@@ -54,27 +54,33 @@ export class ZonedDateTime {
   get year(): number {
     return this.calendar.year(msToIsoDate(this.epochMilliseconds))
   }
+
   get month(): number {
     return this.calendar.month(msToIsoDate(this.epochMilliseconds))
   }
+
   get day(): number {
     return this.calendar.day(msToIsoDate(this.epochMilliseconds))
   }
+
   get hour(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
   }
+
   get minute(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
   }
+
   get second(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
   }
+
   get millisecond(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
     const date = new Date(this.epochMilliseconds)
@@ -82,9 +88,11 @@ export class ZonedDateTime {
       ? date.getUTCMilliseconds()
       : date.getMilliseconds()
   }
+
   get dayOfWeek(): string {
     return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
   }
+
   get weekOfYear(): number {
     return this.calendar.weekOfYear(msToIsoDate(this.epochMilliseconds))
   }
@@ -99,9 +107,11 @@ export class ZonedDateTime {
       dateTimeLike.calendar || this.calendar
     )
   }
+
   withTimeZone(timeZone: TimeZone | TimeZoneId): ZonedDateTime {
     return this.with({ timeZone })
   }
+
   withCalendar(calendar: Calendar | CalendarId): ZonedDateTime {
     return this.with({ calendar })
   }
@@ -131,6 +141,7 @@ export class ZonedDateTime {
       timeZone.getOffsetStringFor(epochMilliseconds)
     )
   }
+
   toLocaleString(
     locale: LocaleId,
     options?: Intl.DateTimeFormatOptions

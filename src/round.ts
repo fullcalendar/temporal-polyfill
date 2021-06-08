@@ -2,6 +2,7 @@ import { DurationUnit } from './duration'
 import { priorities, toUnitMs } from './utils'
 
 export type RoundMode = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
+
 export type RoundOptions = {
   smallestUnit: DurationUnit | 'auto'
   largestUnit: DurationUnit | 'auto'

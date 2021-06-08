@@ -141,27 +141,35 @@ export class PlainDateTime {
   get year(): number {
     return this.calendar.year(msToIsoDate(this.epochMilliseconds))
   }
+
   get month(): number {
     return this.calendar.month(msToIsoDate(this.epochMilliseconds))
   }
+
   get day(): number {
     return this.calendar.day(msToIsoDate(this.epochMilliseconds))
   }
+
   get hour(): number {
     return msToIsoDate(this.epochMilliseconds).isoHour
   }
+
   get minute(): number {
     return msToIsoDate(this.epochMilliseconds).isoMinute
   }
+
   get second(): number {
     return msToIsoDate(this.epochMilliseconds).isoSecond
   }
+
   get millisecond(): number {
     return msToIsoDate(this.epochMilliseconds).isoMillisecond
   }
+
   get dayOfWeek(): string {
     return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
   }
+
   get weekOfYear(): number {
     return this.calendar.weekOfYear(msToIsoDate(this.epochMilliseconds))
   }
@@ -181,6 +189,7 @@ export class PlainDateTime {
       dateTimeLike.calendar || this.calendar
     )
   }
+
   withCalendar(calendar: Calendar | CalendarId): PlainDateTime {
     const {
       isoYear,
@@ -233,6 +242,7 @@ export class PlainDateTime {
       this.calendar
     )
   }
+
   subtract(
     amount: Duration | DurationLike | string,
     options?: AssignmentOptions
@@ -240,6 +250,7 @@ export class PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     return this.add(duration.negated(), options)
   }
+
   since(other: PlainDateTime, options?: RoundOptionsLike): Duration {
     const positiveSign = this.epochMilliseconds >= other.epochMilliseconds
     const larger = positiveSign ? this : other
@@ -262,6 +273,7 @@ export class PlainDateTime {
       })
     return positiveSign ? combined : combined.negated()
   }
+
   round(options?: RoundOptionsLike): PlainDateTime {
     const [date, ms] = separateDateTime(this)
     const {
@@ -302,6 +314,7 @@ export class PlainDateTime {
       isoMillisecond,
     })
   }
+
   toLocaleString(
     locale: LocaleId,
     options?: Intl.DateTimeFormatOptions
@@ -310,6 +323,7 @@ export class PlainDateTime {
       this.epochMilliseconds
     )
   }
+
   toZonedDateTime(timeZone: TimeZoneId): ZonedDateTime {
     return new ZonedDateTime(this.epochMilliseconds, timeZone)
   }

@@ -8,6 +8,7 @@ export class Now {
   static instant(): number {
     return Date.now()
   }
+
   static epochMilliseconds(): number {
     return this.instant()
   }

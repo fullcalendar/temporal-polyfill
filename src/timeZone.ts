@@ -56,6 +56,7 @@ export class TimeZone {
     })
     return adjusted - epochMilliseconds
   }
+
   getOffsetStringFor(epochMilliseconds: number): string {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
 
@@ -70,6 +71,7 @@ export class TimeZone {
 
     return `${sign}${hourStr}:${minStr}`
   }
+
   getPlainDateTimeFor(
     epochMilliseconds: number,
     calendar?: Calendar | CalendarId

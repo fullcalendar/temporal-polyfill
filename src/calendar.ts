@@ -200,12 +200,14 @@ export class Calendar {
       this.formatter
     )['year'] as number
   }
+
   month({ isoYear, isoMonth }: PlainDate): number {
     return reduceFormat(
       dateValue({ isoYear, isoMonth, isoDay: 1 }),
       this.formatter
     )['month'] as number
   }
+
   day(dt: PlainDate): number {
     return reduceFormat(dateValue(dt), this.formatter)['day'] as number
   }
@@ -214,14 +216,17 @@ export class Calendar {
   daysInWeek(): number {
     return UNIT_INCREMENT.WEEK
   }
+
   daysInMonth({ isoYear, isoMonth }: PlainDate): number {
     return new Date(dateValue({ isoYear, isoMonth: isoMonth + 1 })).getUTCDate()
   }
+
   daysInYear({ isoYear }: PlainDate): number {
     const start = dateValue({ isoYear }).valueOf()
     const end = dateValue({ isoYear: isoYear + 1 }).valueOf()
     return (end - start) / toUnitMs('days')
   }
+
   monthsInYear({ isoYear }: PlainDate): number {
     return (
       new Date(dateValue({ isoYear: isoYear + 1, isoDay: 0 })).getUTCMonth() + 1
@@ -232,12 +237,14 @@ export class Calendar {
   dayOfWeek(dt: PlainDate): string {
     return reduceFormat(dateValue(dt), this.formatter)['weekday'] as string
   }
+
   dayOfYear(dt: PlainDate): number {
     return this.dateUntil(
       { isoYear: dt.isoYear, isoMonth: 0, isoDay: 1 },
       dt
     ).total({ unit: 'days' })
   }
+
   weekOfYear(dt: PlainDate): number {
     return Math.ceil(
       ((dateValue(dt) - dateValue({ isoYear: dt.isoYear, isoMonth: 1 })) /
@@ -283,6 +290,7 @@ export class Calendar {
     )
     return { isoYear, isoMonth, isoDay }
   }
+
   dateUntil(
     one: PlainDate,
     two: PlainDate,

@@ -14,7 +14,9 @@ export type DurationFields = {
   seconds: number
   milliseconds: number
 }
+
 export type DurationLike = Partial<DurationFields>
+
 export type DurationUnit = keyof DurationFields
 
 type UnitOptions = {
@@ -89,6 +91,7 @@ export class Duration {
     }
     throw new Error('Invalid Object')
   }
+
   static compare(
     one: Duration,
     two: Duration,
@@ -169,6 +172,7 @@ export class Duration {
       isoMillisecond
     )
   }
+
   subtract(
     amount: Duration | DurationLike | string,
     options?: RelativeOptions
@@ -176,6 +180,7 @@ export class Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
     return this.add(other.negated(), options)
   }
+
   total({ unit, relativeTo }: UnitOptions & RelativeOptions): number {
     if (relativeTo) {
       const relative =
@@ -201,6 +206,7 @@ export class Duration {
       }) / toUnitMs(unit)
     )
   }
+
   round(options?: RoundOptionsLike & RelativeOptions): Duration {
     if (options?.relativeTo) {
       const relative =
@@ -255,6 +261,7 @@ export class Duration {
       -this.milliseconds || 0
     )
   }
+
   abs(): Duration {
     return new Duration(
       Math.abs(this.years),
@@ -299,6 +306,7 @@ export class Duration {
     const result = `P${year.format}${month.format}${week.format}${day.format}${T}${hour.format}${minute.format}${second.format}`
     return result === 'P' ? 'P0D' : `${P}${result}`
   }
+
   toLocaleString(
     locale: LocaleId,
     options?: Intl.RelativeTimeFormatOptions
