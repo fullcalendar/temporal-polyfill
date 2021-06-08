@@ -1,4 +1,4 @@
-import { mstoIsoDate } from './convert'
+import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDateTime'
@@ -19,7 +19,7 @@ test.each([
   [1608876000000, 52], // Christmas 2020
 ])('can get weekOfYear for %d as %d', (epochMilliseconds, expected) => {
   const calendar = new Calendar()
-  expect(calendar.weekOfYear(mstoIsoDate(epochMilliseconds))).toBe(expected)
+  expect(calendar.weekOfYear(msToIsoDate(epochMilliseconds))).toBe(expected)
 })
 
 test.each<[PlainDate, Duration, PlainDate]>([

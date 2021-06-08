@@ -1,10 +1,9 @@
-import { mstoIsoDate } from './convert'
+import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { dateFormat } from './format'
 import { dateParse } from './parse'
 import { TimeZone, TimeZoneId } from './timeZone'
-import { CompareReturn, LocaleId } from './types'
-import { asDate } from './utils'
+import { CompareReturn, LocaleId } from './utils'
 
 type ZonedDateTimeLike = {
   epochMilliseconds?: number
@@ -53,41 +52,41 @@ export class ZonedDateTime {
   }
 
   get year(): number {
-    return this.calendar.year(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.year(msToIsoDate(this.epochMilliseconds))
   }
   get month(): number {
-    return this.calendar.month(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.month(msToIsoDate(this.epochMilliseconds))
   }
   get day(): number {
-    return this.calendar.day(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.day(msToIsoDate(this.epochMilliseconds))
   }
   get hour(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
-    const date = asDate(this.epochMilliseconds)
+    const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
   }
   get minute(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
-    const date = asDate(this.epochMilliseconds)
+    const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
   }
   get second(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
-    const date = asDate(this.epochMilliseconds)
+    const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
   }
   get millisecond(): number {
     // FIXME: Needs to be reworked for arbitrary timezones
-    const date = asDate(this.epochMilliseconds)
+    const date = new Date(this.epochMilliseconds)
     return this.timeZone.id === 'utc'
       ? date.getUTCMilliseconds()
       : date.getMilliseconds()
   }
   get dayOfWeek(): string {
-    return this.calendar.dayOfWeek(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
   }
   get weekOfYear(): number {
-    return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.weekOfYear(msToIsoDate(this.epochMilliseconds))
   }
 
   with(dateTimeLike: ZonedDateTimeLike | string): ZonedDateTime {

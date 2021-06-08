@@ -1,4 +1,4 @@
-import { mstoIsoDate } from './convert'
+import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZone, TimeZoneId } from './timeZone'
@@ -35,10 +35,10 @@ export class Now {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = mstoIsoDate(this.instant())
+    } = msToIsoDate(this.instant())
     return new PlainDateTime(
       isoYear,
-      isoMonth + 1,
+      isoMonth,
       isoDay,
       isoHour,
       isoMinute,

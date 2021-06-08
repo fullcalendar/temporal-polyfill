@@ -1,29 +1,18 @@
 import { PlainDateTimeFields, PlainTime } from './plainDateTime'
-import { asRoundOptions } from './round'
-import { UNIT_INCREMENT, RoundOptionsLike } from './types'
-import { asDate, priorities } from './utils'
+import { asRoundOptions, RoundOptionsLike } from './round'
+import { priorities, UNIT_INCREMENT } from './utils'
 
-export const toIsoTime = (
-  time: Partial<PlainTime> | number,
+export const msToIsoTime = (
+  ms: number,
   options?: RoundOptionsLike
 ): PlainTime & { deltaDays: number } => {
   const { largestUnit } = asRoundOptions(options)
   const largestIndex =
     largestUnit === 'auto' ? 0 : priorities.indexOf(largestUnit)
-  let { isoHour, isoMinute, isoSecond, isoMillisecond } =
-    typeof time === 'number'
-      ? {
-          isoHour: 0,
-          isoMinute: 0,
-          isoSecond: 0,
-          isoMillisecond: time,
-        }
-      : {
-          isoHour: time.isoHour || 0,
-          isoMinute: time.isoMinute || 0,
-          isoSecond: time.isoSecond || 0,
-          isoMillisecond: time.isoMillisecond || 0,
-        }
+  let isoHour = 0,
+    isoMinute = 0,
+    isoSecond = 0,
+    isoMillisecond = ms
 
   //MS
   if (priorities.indexOf('seconds') >= largestIndex) {
@@ -53,8 +42,8 @@ export const toIsoTime = (
   return { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond }
 }
 
-export const mstoIsoDate = (ms: number): PlainDateTimeFields => {
-  const date = asDate(ms)
+export const msToIsoDate = (ms: number): PlainDateTimeFields => {
+  const date = new Date(ms)
   return {
     isoYear: date.getUTCFullYear(),
     isoMonth: date.getUTCMonth() + 1,

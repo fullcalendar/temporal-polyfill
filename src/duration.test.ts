@@ -1,6 +1,6 @@
 import { Duration, DurationUnit } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { RoundOptionsLike } from './types'
+import { RoundOptionsLike } from './round'
 
 test('can instantiate duration', () => {
   const duration = new Duration(1, 1, 1)

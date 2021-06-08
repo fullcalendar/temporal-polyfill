@@ -1,6 +1,6 @@
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { RoundOptionsLike } from './types'
+import { RoundOptionsLike } from './round'
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {

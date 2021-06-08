@@ -1,17 +1,11 @@
-import { mstoIsoDate, toIsoTime } from './convert'
+import { msToIsoDate, msToIsoTime } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { Duration, DurationLike } from './duration'
 import { dateFormat } from './format'
 import { dateParse } from './parse'
-import { roundMs } from './round'
+import { roundMs, RoundOptionsLike } from './round'
 import { separateDateTime, separateDuration } from './separate'
-import {
-  CompareReturn,
-  AssignmentOptions,
-  LocaleId,
-  RoundOptionsLike,
-} from './types'
-import { asDate, dateValue } from './utils'
+import { AssignmentOptions, CompareReturn, dateValue, LocaleId } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 import { TimeZoneId } from './timeZone'
 
@@ -69,7 +63,7 @@ export class PlainDateTime {
         isoMinute,
         isoSecond,
         isoMillisecond,
-      } = mstoIsoDate(epochMilliseconds)
+      } = msToIsoDate(epochMilliseconds)
       return new PlainDateTime(
         isoYear,
         isoMonth,
@@ -89,7 +83,7 @@ export class PlainDateTime {
         isoMinute,
         isoSecond,
         isoMillisecond,
-      } = mstoIsoDate(thing)
+      } = msToIsoDate(thing)
       return new PlainDateTime(
         isoYear,
         isoMonth,
@@ -108,7 +102,7 @@ export class PlainDateTime {
         isoMinute,
         isoSecond,
         isoMillisecond,
-      } = mstoIsoDate(thing)
+      } = msToIsoDate(thing)
       return new PlainDateTime(
         isoYear,
         isoMonth,
@@ -145,31 +139,31 @@ export class PlainDateTime {
   }
 
   get year(): number {
-    return this.calendar.year(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.year(msToIsoDate(this.epochMilliseconds))
   }
   get month(): number {
-    return this.calendar.month(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.month(msToIsoDate(this.epochMilliseconds))
   }
   get day(): number {
-    return this.calendar.day(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.day(msToIsoDate(this.epochMilliseconds))
   }
   get hour(): number {
-    return mstoIsoDate(this.epochMilliseconds).isoHour
+    return msToIsoDate(this.epochMilliseconds).isoHour
   }
   get minute(): number {
-    return mstoIsoDate(this.epochMilliseconds).isoMinute
+    return msToIsoDate(this.epochMilliseconds).isoMinute
   }
   get second(): number {
-    return mstoIsoDate(this.epochMilliseconds).isoSecond
+    return msToIsoDate(this.epochMilliseconds).isoSecond
   }
   get millisecond(): number {
-    return mstoIsoDate(this.epochMilliseconds).isoMillisecond
+    return msToIsoDate(this.epochMilliseconds).isoMillisecond
   }
   get dayOfWeek(): string {
-    return this.calendar.dayOfWeek(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
   }
   get weekOfYear(): number {
-    return this.calendar.weekOfYear(mstoIsoDate(this.epochMilliseconds))
+    return this.calendar.weekOfYear(msToIsoDate(this.epochMilliseconds))
   }
 
   with(dateTimeLike: PlainDateTimeLike | string): PlainDateTime {
@@ -188,15 +182,23 @@ export class PlainDateTime {
     )
   }
   withCalendar(calendar: Calendar | CalendarId): PlainDateTime {
-    const date = asDate(this.epochMilliseconds)
+    const {
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+    } = msToIsoDate(this.epochMilliseconds)
     return new PlainDateTime(
-      date.getUTCFullYear(),
-      date.getUTCMonth() + 1,
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-      date.getUTCMilliseconds(),
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
       calendar
     )
   }
@@ -208,7 +210,7 @@ export class PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
 
-    const constrained = mstoIsoDate(this.epochMilliseconds + ms)
+    const constrained = msToIsoDate(this.epochMilliseconds + ms)
 
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
       {
@@ -246,7 +248,7 @@ export class PlainDateTime {
     const [smallerDate, smallerMs] = separateDateTime(smaller)
     const [largerDate, largerMs] = separateDateTime(larger, smallerMs)
 
-    const { isoHour, isoMinute, isoSecond, isoMillisecond } = toIsoTime(
+    const { isoHour, isoMinute, isoSecond, isoMillisecond } = msToIsoTime(
       roundMs(largerMs - smallerMs, options),
       options
     )
@@ -268,7 +270,7 @@ export class PlainDateTime {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = toIsoTime(roundMs(ms, options), options)
+    } = msToIsoTime(roundMs(ms, options), options)
     return new PlainDateTime(
       date.isoYear,
       date.isoMonth,

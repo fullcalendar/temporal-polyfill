@@ -1,14 +1,8 @@
-import { toIsoTime } from './convert'
+import { msToIsoTime } from './convert'
 import { PlainDateTime, PlainDateTimeLike } from './plainDateTime'
-import { roundMs } from './round'
+import { roundMs, RoundOptionsLike } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
-import {
-  CompareReturn,
-  LocaleId,
-  RoundOptionsLike,
-  UNIT_INCREMENT,
-} from './types'
-import { toUnitMs } from './utils'
+import { CompareReturn, LocaleId, toUnitMs, UNIT_INCREMENT } from './utils'
 
 export type DurationFields = {
   years: number
@@ -156,7 +150,7 @@ export class Duration {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = toIsoTime(
+    } = msToIsoTime(
       extractTimeMs({
         isoHour: this.hours + other.hours,
         isoMinute: this.minutes + other.minutes,
@@ -224,7 +218,7 @@ export class Duration {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = toIsoTime(
+    } = msToIsoTime(
       roundMs(
         extractTimeWithDaysMs({
           isoDay: this.days,

@@ -1,8 +1,7 @@
-import { mstoIsoDate } from './convert'
+import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { UNIT_INCREMENT } from './types'
-import { asDate, reduceFormat, toUnitMs } from './utils'
+import { dateValue, reduceFormat, toUnitMs, UNIT_INCREMENT } from './utils'
 
 export type TimeZoneId = 'utc' | 'local' | string
 
@@ -25,29 +24,37 @@ export class TimeZone {
 
   getOffsetMillisecondsFor(epochMilliseconds: number): number {
     if (this.id === 'local') {
-      const utcDate = asDate(epochMilliseconds)
-      const localDate = asDate({
-        isoYear: utcDate.getUTCFullYear(),
-        isoMonth: utcDate.getUTCMonth(),
-        isoDay: utcDate.getUTCDate(),
-        isoHour: utcDate.getUTCHours(),
-        isoMinute: utcDate.getUTCMinutes(),
-        isoSecond: utcDate.getUTCSeconds(),
-        isoMillisecond: utcDate.getUTCMilliseconds(),
-      })
-      // Native date returns value with flipped sign :(
-      return (
-        -localDate.getTimezoneOffset() *
-        UNIT_INCREMENT.MINUTE *
-        UNIT_INCREMENT.SECOND
+      const utcDate = new Date(epochMilliseconds)
+      const localDate = new Date(
+        dateValue({
+          isoYear: utcDate.getUTCFullYear(),
+          isoMonth: utcDate.getUTCMonth(),
+          isoDay: utcDate.getUTCDate(),
+          isoHour: utcDate.getUTCHours(),
+          isoMinute: utcDate.getUTCMinutes(),
+          isoSecond: utcDate.getUTCSeconds(),
+          isoMillisecond: utcDate.getUTCMilliseconds(),
+        })
       )
+      // Native date returns value with flipped sign :(
+      return -localDate.getTimezoneOffset() * toUnitMs('minutes')
     } else if (this.id === 'utc') {
       return 0
     }
     // Arbitrary timezone
-    const formatResult = reduceFormat(epochMilliseconds, this.formatter)
-
-    return 0
+    const formatResult = reduceFormat(
+      epochMilliseconds,
+      this.formatter
+    ) as Record<string, number>
+    const adjusted = dateValue({
+      isoYear: formatResult.year,
+      isoMonth: formatResult.month,
+      isoDay: formatResult.day,
+      isoHour: formatResult.hour,
+      isoMinute: formatResult.minute,
+      isoSecond: formatResult.second,
+    })
+    return adjusted - epochMilliseconds
   }
   getOffsetStringFor(epochMilliseconds: number): string {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
@@ -65,7 +72,7 @@ export class TimeZone {
   }
   getPlainDateTimeFor(
     epochMilliseconds: number,
-    calendar: Calendar | CalendarId
+    calendar?: Calendar | CalendarId
   ): PlainDateTime {
     const {
       isoYear,
@@ -75,12 +82,12 @@ export class TimeZone {
       isoMinute,
       isoSecond,
       isoMillisecond,
-    } = mstoIsoDate(
+    } = msToIsoDate(
       epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds)
     )
     return new PlainDateTime(
       isoYear,
-      isoMonth + 1,
+      isoMonth,
       isoDay,
       isoHour,
       isoMinute,

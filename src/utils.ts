@@ -1,11 +1,33 @@
 import { DurationUnit } from './duration'
 import { PlainDate, PlainDateTimeFields } from './plainDateTime'
-import { CompareReturn, Part, UNIT_INCREMENT } from './types'
+
+export type LocaleId = 'en-us' | string
+
+export type AssignmentOptions = { overflow: 'constrain' | 'reject' }
+export type AssignmentOptionsLike = Partial<AssignmentOptions>
+
+export type CompareReturn = -1 | 0 | 1
+
+export enum UNIT_INCREMENT {
+  MILLISECOND = 1,
+  SECOND = 1000,
+  MINUTE = 60,
+  HOUR = 60,
+  DAY = 24,
+  WEEK = 7,
+  /** @deprecated This increment should not be used, it should instead defer to a calendar */
+  MONTH = 4.34524,
+  /** @deprecated This increment should not be used, it should instead defer to a calendar */
+  YEAR = 12,
+}
+
+/** Constructs a type with specified properties set to required and the rest as optional */
+export type Part<A, B extends keyof A> = Required<Pick<A, B>> & Partial<A>
 
 export const dateValue = (
   date: Part<PlainDateTimeFields, 'isoYear'>
 ): number => {
-  const utc = Date.UTC(
+  return Date.UTC(
     date.isoYear,
     date.isoMonth !== undefined ? date.isoMonth - 1 : 0,
     date.isoDay !== undefined ? date.isoDay : 1,
@@ -14,20 +36,12 @@ export const dateValue = (
     date.isoSecond !== undefined ? date.isoSecond : 0,
     date.isoMillisecond !== undefined ? date.isoMillisecond : 0
   )
-
-  return utc
-}
-
-export const asDate = (
-  date: Part<PlainDateTimeFields, 'isoYear'> | number
-): Date => {
-  return new Date(typeof date === 'number' ? date : dateValue(date))
 }
 
 export const incrementMap: { [Property in DurationUnit]: number } = {
-  /**@deprecated */
+  /**@deprecated This increment should not be used, it should instead defer to a calendar */
   years: UNIT_INCREMENT.YEAR,
-  /**@deprecated */
+  /**@deprecated This increment should not be used, it should instead defer to a calendar */
   months: UNIT_INCREMENT.MONTH,
   weeks: UNIT_INCREMENT.WEEK,
   days: UNIT_INCREMENT.DAY,
@@ -77,16 +91,16 @@ export const comparePlainDate = (
 }
 
 export const reduceFormat = (
-  dt: PlainDate | number,
+  ms: number,
   formatter: Intl.DateTimeFormat
 ): Record<string, string | number> => {
   return formatter
-    .formatToParts(asDate(dt))
+    .formatToParts(new Date(ms))
     .reduce((acc: Record<string, string | number>, { type, value }) => {
       const valNum = parseInt(value)
       return {
         ...acc,
-        [type]: valNum !== NaN ? valNum : value,
+        [type]: isNaN(valNum) ? value : valNum,
       }
     }, {})
 }
