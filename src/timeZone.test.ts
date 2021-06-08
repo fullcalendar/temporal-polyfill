@@ -30,13 +30,13 @@ describe('can get timezone offset milliseconds', () => {
   })
 
   test.each([
-    ['Asia/Tokyo', 0, 3.24e7],
-    ['America/New_York', 100000, -1.8e7],
-    ['America/Chicago', 1623128400000, -1.8e7],
-    ['Asia/Shanghai', 1623128400000, 2.88e7],
-  ])('in an arbitrary timezone(%s)', (timeZone, time, offset) => {
+    ['Asia/Tokyo', new PlainDateTime(1970, 1, 1), 3.24e7],
+    ['America/New_York', new PlainDateTime(2000, 1, 1), -1.8e7],
+    ['America/Chicago', new PlainDateTime(2021, 6, 8), -1.8e7],
+    ['Asia/Shanghai', new PlainDateTime(2021, 6, 8), 2.88e7],
+  ])('in an arbitrary timezone(%s)', (timeZone, pdt, offset) => {
     const tz = new TimeZone(timeZone)
-    expect(tz.getOffsetMillisecondsFor(time)).toBe(offset)
+    expect(tz.getOffsetMillisecondsFor(pdt.epochMilliseconds)).toBe(offset)
   })
 })
 

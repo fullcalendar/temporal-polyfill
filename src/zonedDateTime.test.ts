@@ -10,35 +10,34 @@ describe.each([
   [45030500, 1970, 1, 1, 12, 30, 30, 500],
   [1608854400000, 2020, 12, 25, 0, 0, 0, 0],
 ])(
-  'can get values for %d which is %d-%d-%dT%d:%d:%d.%d',
+  'can get values for %d (%d-%d-%dT%d:%d:%d.%d)',
   (epochMilliseconds, year, month, day, hour, minute, second, millisecond) => {
-    const date = new ZonedDateTime(epochMilliseconds, 'utc')
-
-    test('of year', () => {
+    test('in UTC', () => {
+      const date = new ZonedDateTime(epochMilliseconds, 'utc')
       expect(date.year).toBe(year)
-    })
-    test('of month', () => {
       expect(date.month).toBe(month)
-    })
-    test('of day', () => {
       expect(date.day).toBe(day)
-    })
-    test('of hour', () => {
       expect(date.hour).toBe(hour)
-    })
-    test('of minute', () => {
       expect(date.minute).toBe(minute)
-    })
-    test('of second', () => {
       expect(date.second).toBe(second)
-    })
-    test('of millisecond', () => {
       expect(date.millisecond).toBe(millisecond)
+      // expect(date.toString()).toBe(
+      //   `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}+00:00`
+      // )
     })
-    test.skip('of string', () => {
-      expect(date.toString()).toBe(
-        `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}+00:00`
-      )
+
+    test('in Asia/Tokyo', () => {
+      const date = new ZonedDateTime(epochMilliseconds, 'Asia/Tokyo')
+      expect(date.year).toBe(year)
+      expect(date.month).toBe(month)
+      expect(date.day).toBe(day)
+      expect(date.hour).toBe(hour + 9)
+      expect(date.minute).toBe(minute)
+      expect(date.second).toBe(second)
+      expect(date.millisecond).toBe(millisecond)
+      // expect(date.toString()).toBe(
+      //   `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}+00:00`
+      // )
     })
   }
 )
@@ -58,7 +57,7 @@ test.each([
     2,
     8,
     6,
-    1,
+    14,
     6,
     13,
     0,

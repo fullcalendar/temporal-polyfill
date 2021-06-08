@@ -52,49 +52,76 @@ export class ZonedDateTime {
   }
 
   get year(): number {
-    return this.calendar.year(msToIsoDate(this.epochMilliseconds))
+    return this.calendar.year(
+      msToIsoDate(
+        this.epochMilliseconds +
+          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+      )
+    )
   }
 
   get month(): number {
-    return this.calendar.month(msToIsoDate(this.epochMilliseconds))
+    return this.calendar.month(
+      msToIsoDate(
+        this.epochMilliseconds +
+          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+      )
+    )
   }
 
   get day(): number {
-    return this.calendar.day(msToIsoDate(this.epochMilliseconds))
+    return this.calendar.day(
+      msToIsoDate(
+        this.epochMilliseconds +
+          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+      )
+    )
   }
 
   get hour(): number {
-    // FIXME: Needs to be reworked for arbitrary timezones
-    const date = new Date(this.epochMilliseconds)
-    return this.timeZone.id === 'utc' ? date.getUTCHours() : date.getHours()
+    return msToIsoDate(
+      this.epochMilliseconds +
+        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+    ).isoHour
   }
 
   get minute(): number {
-    // FIXME: Needs to be reworked for arbitrary timezones
-    const date = new Date(this.epochMilliseconds)
-    return this.timeZone.id === 'utc' ? date.getUTCMinutes() : date.getMinutes()
+    return msToIsoDate(
+      this.epochMilliseconds +
+        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+    ).isoMinute
   }
 
   get second(): number {
-    // FIXME: Needs to be reworked for arbitrary timezones
-    const date = new Date(this.epochMilliseconds)
-    return this.timeZone.id === 'utc' ? date.getUTCSeconds() : date.getSeconds()
+    return msToIsoDate(
+      this.epochMilliseconds +
+        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+    ).isoSecond
   }
 
   get millisecond(): number {
-    // FIXME: Needs to be reworked for arbitrary timezones
-    const date = new Date(this.epochMilliseconds)
-    return this.timeZone.id === 'utc'
-      ? date.getUTCMilliseconds()
-      : date.getMilliseconds()
+    return msToIsoDate(
+      this.epochMilliseconds +
+        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+    ).isoMillisecond
   }
 
   get dayOfWeek(): string {
-    return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
+    return this.calendar.dayOfWeek(
+      msToIsoDate(
+        this.epochMilliseconds +
+          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+      )
+    )
   }
 
   get weekOfYear(): number {
-    return this.calendar.weekOfYear(msToIsoDate(this.epochMilliseconds))
+    return this.calendar.weekOfYear(
+      msToIsoDate(
+        this.epochMilliseconds +
+          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
+      )
+    )
   }
 
   with(dateTimeLike: ZonedDateTimeLike | string): ZonedDateTime {
