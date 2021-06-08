@@ -1,4 +1,5 @@
-import { msToIsoDate } from './convert'
+import { addDays, addMonths, addYears } from './add'
+import { diffDays, diffMonths, diffYears } from './diff'
 import { Duration } from './duration'
 import { PlainDate } from './plainDateTime'
 import { asRoundOptions, RoundOptionsLike } from './round'
@@ -28,108 +29,12 @@ export type CalendarId =
   | 'persian'
   | 'roc'
 
-type CalendarDate = {
+export type CalendarDate = {
   year: number
   month: number
   day: number
 }
 
-// Diff Utils
-const diffYears = (
-  one: CalendarDate,
-  two: CalendarDate,
-  calendar: Calendar,
-  rejectOverflow: boolean
-): [number, CalendarDate] => {
-  let current = { ...one }
-  const end = { ...two }
-
-  let years = end.year - current.year
-  current = addYears(current, years, calendar, rejectOverflow)
-
-  if (compareCalendarDates(current, end, calendar) > 0) {
-    current.year--
-    years--
-  }
-  return [years, current]
-}
-
-const diffMonths = (
-  one: CalendarDate,
-  two: CalendarDate,
-  calendar: Calendar,
-  rejectOverflow: boolean
-): [number, CalendarDate] => {
-  let current = { ...one }
-  const end = { ...two }
-
-  let months = 0
-
-  while (current.year < end.year) {
-    current.year++
-    months += calendar.monthsInYear(calendar.dateFromFields(current))
-  }
-
-  if (compareCalendarDates(current, end, calendar) > 0) {
-    current.year--
-    months--
-  }
-  months += end.month - current.month
-
-  current = addMonths(current, months, calendar, rejectOverflow)
-
-  if (compareCalendarDates(current, end, calendar) > 0) {
-    current.month--
-    months--
-  }
-
-  return [months, current]
-}
-
-const diffDays = (one: PlainDate, two: PlainDate): number => {
-  return Math.trunc((dateValue(two) - dateValue(one)) / toUnitMs('days'))
-}
-
-// Add Utils
-const addYears = (
-  date: CalendarDate,
-  years: number,
-  calendar: Calendar,
-  rejectOverflow = false
-): CalendarDate => {
-  const fullDate: CalendarDate = {
-    year: date.year + years,
-    month: date.month || 1,
-    day: date.day || 1,
-  }
-  return {
-    ...fullDate,
-    month: handleMonthOverflow(calendar, fullDate, rejectOverflow),
-  }
-}
-
-const addMonths = (
-  date: CalendarDate,
-  months: number,
-  calendar: Calendar,
-  rejectOverflow = false
-): CalendarDate => {
-  const fullDate: CalendarDate = {
-    year: date.year,
-    month: date.month + months,
-    day: date.day || 1,
-  }
-  return {
-    ...fullDate,
-    day: handleDayOverflow(calendar, fullDate, rejectOverflow),
-  }
-}
-
-const addDays = (date: PlainDate, days: number): PlainDate => {
-  return msToIsoDate(dateValue(date) + days * toUnitMs('days'))
-}
-
-// Conversion Utils
 const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDate => {
   return {
     year: calendar.year(date),
@@ -138,7 +43,7 @@ const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDate => {
   }
 }
 
-const compareCalendarDates = (
+export const compareCalendarDates = (
   one: CalendarDate,
   two: CalendarDate,
   calendar: Calendar
@@ -147,37 +52,6 @@ const compareCalendarDates = (
     calendar.dateFromFields(one),
     calendar.dateFromFields(two)
   )
-}
-
-// Overflow Utils
-const handleMonthOverflow = (
-  calendar: Calendar,
-  fields: CalendarDate,
-  rejectOverflow: boolean
-): number => {
-  const { isoYear, isoMonth, isoDay } =
-    'year' in fields ? calendar.dateFromFields(fields) : fields
-  const totalMonths = calendar.monthsInYear({ isoYear, isoMonth, isoDay }) + 1
-
-  if (rejectOverflow && isoMonth > totalMonths) {
-    throw new Error('Month overflow is disabled')
-  }
-  return isoMonth % totalMonths
-}
-
-const handleDayOverflow = (
-  calendar: Calendar,
-  fields: CalendarDate,
-  rejectOverflow: boolean
-): number => {
-  const { isoYear, isoMonth, isoDay } =
-    'year' in fields ? calendar.dateFromFields(fields) : fields
-  const totalDays = calendar.daysInMonth({ isoYear, isoMonth, isoDay }) + 1
-
-  if (rejectOverflow && isoDay > totalDays) {
-    throw new Error('Day overflow is disabled')
-  }
-  return isoDay % totalDays
 }
 
 export class Calendar {
