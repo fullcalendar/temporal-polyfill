@@ -16,7 +16,6 @@
     "prettier"
   ],
   "plugins": ["prettier"],
-  "noInlineConfig": true,
   "rules": {
     "prettier/prettier": "error",
     "arrow-body-style": ["warn", "always"],

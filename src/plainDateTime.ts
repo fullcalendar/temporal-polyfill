@@ -52,6 +52,7 @@ export class PlainDateTime {
       typeof calendar === 'string' ? new Calendar(calendar) : calendar
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   static from(thing: any): PlainDateTime {
     if (typeof thing === 'string') {
       const { epochMilliseconds, calendar } = dateParse(thing)

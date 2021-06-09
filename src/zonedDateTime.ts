@@ -27,6 +27,7 @@ export class ZonedDateTime {
       calendar instanceof Calendar ? calendar : new Calendar(calendar)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   static from(thing: any): ZonedDateTime {
     if (typeof thing === 'string') {
       const { epochMilliseconds, timeZone, calendar } = dateParse(thing)
@@ -51,77 +52,47 @@ export class ZonedDateTime {
     }
   }
 
-  get year(): number {
-    return this.calendar.year(
-      msToIsoDate(
-        this.epochMilliseconds +
-          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-      )
+  private offsetIso() {
+    return msToIsoDate(
+      this.epochMilliseconds +
+        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
     )
+  }
+
+  get year(): number {
+    return this.calendar.year(this.offsetIso())
   }
 
   get month(): number {
-    return this.calendar.month(
-      msToIsoDate(
-        this.epochMilliseconds +
-          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-      )
-    )
+    return this.calendar.month(this.offsetIso())
   }
 
   get day(): number {
-    return this.calendar.day(
-      msToIsoDate(
-        this.epochMilliseconds +
-          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-      )
-    )
+    return this.calendar.day(this.offsetIso())
   }
 
   get hour(): number {
-    return msToIsoDate(
-      this.epochMilliseconds +
-        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-    ).isoHour
+    return this.offsetIso().isoHour
   }
 
   get minute(): number {
-    return msToIsoDate(
-      this.epochMilliseconds +
-        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-    ).isoMinute
+    return this.offsetIso().isoMinute
   }
 
   get second(): number {
-    return msToIsoDate(
-      this.epochMilliseconds +
-        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-    ).isoSecond
+    return this.offsetIso().isoSecond
   }
 
   get millisecond(): number {
-    return msToIsoDate(
-      this.epochMilliseconds +
-        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-    ).isoMillisecond
+    return this.offsetIso().isoMillisecond
   }
 
   get dayOfWeek(): string {
-    return this.calendar.dayOfWeek(
-      msToIsoDate(
-        this.epochMilliseconds +
-          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-      )
-    )
+    return this.calendar.dayOfWeek(this.offsetIso())
   }
 
   get weekOfYear(): number {
-    return this.calendar.weekOfYear(
-      msToIsoDate(
-        this.epochMilliseconds +
-          this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-      )
-    )
+    return this.calendar.weekOfYear(this.offsetIso())
   }
 
   with(dateTimeLike: ZonedDateTimeLike | string): ZonedDateTime {
