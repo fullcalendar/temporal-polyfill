@@ -1,9 +1,14 @@
 import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
-import { PlainDateTime } from './plainDateTime'
+import { PlainDate, PlainDateTime } from './plainDateTime'
 import { dateValue, reduceFormat, toUnitMs, UNIT_INCREMENT } from './utils'
+import { padZeros } from './format'
 
 export type TimeZoneId = 'utc' | 'local' | string
+
+const removeOffset = (ms: number): number => {
+  return ms - new Date(ms).getTimezoneOffset()
+}
 
 export class TimeZone {
   private formatter: Intl.DateTimeFormat
@@ -66,8 +71,8 @@ export class TimeZone {
     )
     const hours = Math.abs(offset / toUnitMs('hours'))
 
-    const minStr = `0${mins}`.slice(-2)
-    const hourStr = `0${hours}`.slice(-2)
+    const minStr = padZeros(mins, 2)
+    const hourStr = padZeros(hours, 2)
 
     return `${sign}${hourStr}:${minStr}`
   }
@@ -97,5 +102,17 @@ export class TimeZone {
       isoMillisecond,
       calendar
     )
+  }
+
+  getInstantFor(
+    date: PlainDate,
+    options?: {
+      disambiguation: 'compatible' | 'earlier' | 'later' | 'reject'
+    }
+  ): number {
+    const { disambiguation } = { disambiguation: 'compatible', ...options }
+    const utcMs = removeOffset(dateValue(date))
+    const timeZoneOffset = this.getOffsetMillisecondsFor(utcMs)
+    return utcMs + timeZoneOffset
   }
 }

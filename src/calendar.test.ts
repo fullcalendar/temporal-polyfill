@@ -1,4 +1,3 @@
-import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDateTime'
@@ -13,13 +12,23 @@ test.each<[CalendarId]>([['iso8601'], ['gregory']])('can return %s', (id) => {
   expect(calendar.id).toBe(id)
 })
 
-test.each([
-  [0, 1], // Unix Epoch
-  [626400000, 2], // 1st week since Epoch
-  [1608876000000, 52], // Christmas 2020
-])('can get weekOfYear for %d as %d', (epochMilliseconds, expected) => {
+describe.each([
+  [{ isoYear: 1970, isoMonth: 1, isoDay: 1 }, 12, 365, 1], // Unix Epoch
+  [{ isoYear: 1970, isoMonth: 1, isoDay: 8 }, 12, 365, 2], // 1st week since Epoch
+  [{ isoYear: 2020, isoMonth: 12, isoDay: 25 }, 12, 366, 52], // Christmas 2020
+])('for %s', (date, monthsInYear, daysInYear, weekOfYear) => {
   const calendar = new Calendar()
-  expect(calendar.weekOfYear(msToIsoDate(epochMilliseconds))).toBe(expected)
+  test('can get monthsInYear', () => {
+    expect(calendar.monthsInYear(date)).toBe(monthsInYear)
+  })
+
+  test('can get daysInYear', () => {
+    expect(calendar.daysInYear(date)).toBe(daysInYear)
+  })
+
+  test('can get weekOfYear', () => {
+    expect(calendar.weekOfYear(date)).toBe(weekOfYear)
+  })
 })
 
 test.each<[PlainDate, Duration, PlainDate]>([

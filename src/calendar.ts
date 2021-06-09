@@ -96,12 +96,14 @@ export class Calendar {
   }
 
   daysInYear({ isoYear }: PlainDate): number {
-    const start = dateValue({ isoYear }).valueOf()
-    const end = dateValue({ isoYear: isoYear + 1 }).valueOf()
-    return (end - start) / toUnitMs('days')
+    return diffDays(
+      { isoYear, isoMonth: 1, isoDay: 1 },
+      { isoYear: isoYear + 1, isoMonth: 1, isoDay: 1 }
+    )
   }
 
   monthsInYear({ isoYear }: PlainDate): number {
+    // NOTE: `isoDay: 0` is used to move back 1 day since isoDay is 1-based
     return (
       new Date(dateValue({ isoYear: isoYear + 1, isoDay: 0 })).getUTCMonth() + 1
     )
@@ -139,7 +141,7 @@ export class Calendar {
     return {
       isoYear: fields.year,
       isoMonth: fields.month,
-      isoDay: fields.day || 1,
+      isoDay: fields.day,
     }
   }
 

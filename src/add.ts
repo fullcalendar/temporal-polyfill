@@ -9,15 +9,9 @@ export const addYears = (
   calendar: Calendar,
   rejectOverflow = false
 ): CalendarDate => {
-  const fullDate: CalendarDate = {
-    year: date.year + years,
-    month: date.month || 1,
-    day: date.day || 1,
-  }
-  return {
-    ...fullDate,
-    month: handleMonthOverflow(calendar, fullDate, rejectOverflow),
-  }
+  date.year += years
+  date.month = handleMonthOverflow(calendar, date, rejectOverflow)
+  return date
 }
 
 export const addMonths = (
@@ -26,15 +20,33 @@ export const addMonths = (
   calendar: Calendar,
   rejectOverflow = false
 ): CalendarDate => {
-  const fullDate: CalendarDate = {
-    year: date.year,
-    month: date.month + months,
-    day: date.day || 1,
+  while (months > 0) {
+    const monthsLeft =
+      calendar.monthsInYear(calendar.dateFromFields(date)) - date.month + 1
+
+    if (months <= monthsLeft) {
+      date.month += months
+      break
+    } else {
+      date.year++
+      date.month = 1
+      months -= monthsLeft
+    }
   }
-  return {
-    ...fullDate,
-    day: handleDayOverflow(calendar, fullDate, rejectOverflow),
+
+  while (months < 0) {
+    if (date.month + months >= 1) {
+      date.month += months
+      break
+    } else {
+      date.year--
+      date.month = calendar.monthsInYear(calendar.dateFromFields(date))
+      months += date.month + 1
+    }
   }
+
+  date.day = handleDayOverflow(calendar, date, rejectOverflow)
+  return date
 }
 
 export const addDays = (date: PlainDate, days: number): PlainDate => {
