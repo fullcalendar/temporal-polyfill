@@ -1,4 +1,4 @@
-import { DurationUnit } from './duration'
+import { DurationFields, DurationUnit } from './duration'
 import { PlainDate, PlainDateTimeFields } from './plainDateTime'
 
 export type LocaleId = 'en-us' | string
@@ -8,17 +8,46 @@ export type AssignmentOptionsLike = Partial<AssignmentOptions>
 
 export type CompareReturn = -1 | 0 | 1
 
-export enum UNIT_INCREMENT {
-  MILLISECOND = 1,
-  SECOND = 1000,
-  MINUTE = 60,
-  HOUR = 60,
-  DAY = 24,
-  WEEK = 7,
-  /** @deprecated This increment should not be used, it should instead defer to a calendar */
-  MONTH = 4.34524,
-  /** @deprecated This increment should not be used, it should instead defer to a calendar */
-  YEAR = 12,
+export const unitIncrement: {
+  [Property in keyof Omit<DurationFields, 'years' | 'months'>]: number
+} = {
+  milliseconds: 1,
+  seconds: 1000,
+  minutes: 60,
+  hours: 60,
+  days: 24,
+  weeks: 7,
+}
+
+enum MS_FOR {
+  MILLISECOND = unitIncrement.milliseconds,
+  SECOND = unitIncrement.seconds * MILLISECOND,
+  MINUTE = unitIncrement.minutes * SECOND,
+  HOUR = unitIncrement.hours * MINUTE,
+  DAY = unitIncrement.days * HOUR,
+  WEEK = unitIncrement.weeks * DAY,
+}
+
+export const msFor: {
+  [Property in keyof Omit<DurationFields, 'years' | 'months'>]: number
+} = {
+  milliseconds: MS_FOR.MILLISECOND,
+  seconds: MS_FOR.SECOND,
+  minutes: MS_FOR.MINUTE,
+  hours: MS_FOR.HOUR,
+  days: MS_FOR.DAY,
+  weeks: MS_FOR.WEEK,
+}
+
+export const priorities: { [Property in DurationUnit]: number } = {
+  years: 0,
+  months: 1,
+  weeks: 2,
+  days: 3,
+  hours: 4,
+  minutes: 5,
+  seconds: 6,
+  milliseconds: 7,
 }
 
 /** Constructs a type with specified properties set to required and the rest as optional */
@@ -36,41 +65,6 @@ export const dateValue = (
     date.isoSecond !== undefined ? date.isoSecond : 0,
     date.isoMillisecond !== undefined ? date.isoMillisecond : 0
   )
-}
-
-export const incrementMap: { [Property in DurationUnit]: number } = {
-  /**@deprecated This increment should not be used, it should instead defer to a calendar */
-  years: UNIT_INCREMENT.YEAR,
-  /**@deprecated This increment should not be used, it should instead defer to a calendar */
-  months: UNIT_INCREMENT.MONTH,
-  weeks: UNIT_INCREMENT.WEEK,
-  days: UNIT_INCREMENT.DAY,
-  hours: UNIT_INCREMENT.HOUR,
-  minutes: UNIT_INCREMENT.MINUTE,
-  seconds: UNIT_INCREMENT.SECOND,
-  milliseconds: UNIT_INCREMENT.MILLISECOND,
-}
-
-export const priorities: Array<DurationUnit> = [
-  'years',
-  'months',
-  'weeks',
-  'days',
-  'hours',
-  'minutes',
-  'seconds',
-  'milliseconds',
-]
-
-/**
- * Calculates milliseconds for a given unit
- * @param unit days, hours, minutes, seconds, milliseconds
- * @returns milliseconds
- */
-export const toUnitMs = (unit: DurationUnit): number => {
-  return priorities.reduce((acc, val, index) => {
-    return index >= priorities.indexOf(unit) ? acc * incrementMap[val] : acc
-  }, 1)
 }
 
 export const comparePlainDate = (

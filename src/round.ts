@@ -1,5 +1,5 @@
-import { DurationUnit } from './duration'
-import { priorities, toUnitMs } from './utils'
+import { DurationUnit, DurationUnitNoDate } from './duration'
+import { msFor, priorities } from './utils'
 
 export type RoundMode = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
 
@@ -25,12 +25,12 @@ export const asRoundOptions = (options?: RoundOptionsLike): RoundOptions => {
   }
   const smallestIndex =
     combined.smallestUnit !== 'auto'
-      ? priorities.indexOf(combined.smallestUnit)
-      : priorities.length - 1
+      ? priorities[combined.smallestUnit]
+      : priorities.milliseconds
   const largestIndex =
     combined.largestUnit !== 'auto'
-      ? priorities.indexOf(combined.largestUnit)
-      : 0
+      ? priorities[combined.largestUnit]
+      : priorities.years
 
   if (smallestIndex < largestIndex) {
     throw new RangeError('largestUnit cannot be smaller than smallestUnit')
@@ -52,7 +52,10 @@ export const roundMs = (ms: number, options?: RoundOptionsLike): number => {
     options
   )
   const msInSmallest =
-    toUnitMs(smallestUnit === 'auto' ? 'milliseconds' : smallestUnit) *
-    roundingIncrement
+    msFor[
+      smallestUnit === 'auto'
+        ? 'milliseconds'
+        : (smallestUnit as DurationUnitNoDate)
+    ] * roundingIncrement
   return roundModeMap[roundingMode](ms / msInSmallest) * msInSmallest
 }

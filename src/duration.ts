@@ -2,7 +2,7 @@ import { msToIsoTime } from './convert'
 import { PlainDateTime, PlainDateTimeLike } from './plainDateTime'
 import { roundMs, RoundOptionsLike } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
-import { CompareReturn, LocaleId, toUnitMs, UNIT_INCREMENT } from './utils'
+import { CompareReturn, LocaleId, msFor, unitIncrement } from './utils'
 
 export type DurationFields = {
   years: number
@@ -18,6 +18,8 @@ export type DurationFields = {
 export type DurationLike = Partial<DurationFields>
 
 export type DurationUnit = keyof DurationFields
+
+export type DurationUnitNoDate = keyof Omit<DurationFields, 'years' | 'months'>
 
 type UnitOptions = {
   unit: DurationUnit
@@ -64,7 +66,7 @@ export class Duration {
           hours,
           minutes,
           Math.floor(seconds),
-          Math.floor((seconds % 1) * UNIT_INCREMENT.SECOND)
+          Math.floor((seconds % 1) * unitIncrement.seconds)
         )
       }
       throw new Error('Invalid String')
@@ -188,10 +190,10 @@ export class Duration {
           ? relativeTo
           : PlainDateTime.from(relativeTo)
 
-      // FIXME: This doesn't properly account for weeks/months/years
+      // FIXME: This doesn't properly account for weeks/months/years, msFor will error for those units
       return (
         (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /
-        toUnitMs(unit)
+        msFor[unit as DurationUnitNoDate]
       )
     } else if (this.years || this.months || this.weeks) {
       throw new Error('relativeTo is required for date units')
@@ -203,7 +205,7 @@ export class Duration {
         isoMinute: this.minutes,
         isoSecond: this.seconds,
         isoMillisecond: this.milliseconds,
-      }) / toUnitMs(unit)
+      }) / msFor[unit as DurationUnitNoDate]
     )
   }
 
@@ -283,7 +285,7 @@ export class Duration {
       [this.days, 'D'],
       [this.hours, 'H'],
       [this.minutes, 'M'],
-      [this.seconds + this.milliseconds / UNIT_INCREMENT.SECOND, 'S'],
+      [this.seconds + this.milliseconds / unitIncrement.seconds, 'S'],
     ].map(([number, unit]) => {
       return {
         negative: number < 0,

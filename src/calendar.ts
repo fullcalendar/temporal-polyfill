@@ -9,9 +9,9 @@ import {
   comparePlainDate,
   CompareReturn,
   dateValue,
+  msFor,
   reduceFormat,
-  toUnitMs,
-  UNIT_INCREMENT,
+  unitIncrement,
 } from './utils'
 
 export type CalendarId =
@@ -88,7 +88,7 @@ export class Calendar {
 
   // IN methods
   daysInWeek(): number {
-    return UNIT_INCREMENT.WEEK
+    return unitIncrement.weeks
   }
 
   daysInMonth({ isoYear, isoMonth }: PlainDate): number {
@@ -124,9 +124,9 @@ export class Calendar {
   weekOfYear(dt: PlainDate): number {
     return Math.ceil(
       ((dateValue(dt) - dateValue({ isoYear: dt.isoYear, isoMonth: 1 })) /
-        toUnitMs('days') +
+        msFor.days +
         1) /
-        UNIT_INCREMENT.WEEK
+        this.daysInWeek()
     )
   }
 
@@ -162,7 +162,7 @@ export class Calendar {
     fields = addMonths(fields, months, this, rejectOverflow)
     const { isoYear, isoMonth, isoDay } = addDays(
       this.dateFromFields(fields),
-      days + weeks * UNIT_INCREMENT.WEEK
+      days + weeks * unitIncrement.weeks
     )
     return { isoYear, isoMonth, isoDay }
   }
@@ -195,8 +195,8 @@ export class Calendar {
     }
 
     if (largestUnit === 'weeks') {
-      weeks = Math.trunc(days / UNIT_INCREMENT.WEEK)
-      days = days % UNIT_INCREMENT.WEEK
+      weeks = Math.trunc(days / unitIncrement.weeks)
+      days = days % unitIncrement.weeks
     }
 
     const dur = new Duration(years, months, weeks, days)

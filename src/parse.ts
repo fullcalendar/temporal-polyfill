@@ -1,5 +1,5 @@
 import { CalendarId } from './calendar'
-import { dateValue, toUnitMs } from './utils'
+import { dateValue, msFor } from './utils'
 
 export const dateParse = (
   str: string
@@ -33,7 +33,7 @@ export const dateParse = (
       const [plusminus, hrs, mins] = offsetMatches.slice(1)
       offset =
         (plusminus ? 1 : -1) *
-        (Number(hrs) * toUnitMs('hours') + Number(mins) * toUnitMs('minutes'))
+        (Number(hrs) * msFor.hours + Number(mins) * msFor.minutes)
     }
 
     const timeZone = sliced[8]
