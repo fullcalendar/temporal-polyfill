@@ -5398,7 +5398,7 @@ fsevents@^2.1.2:
     jest-date-mock: ^1.0.8
     prettier: ^2.2.1
     ts-jest: ^26.5.5
-    typescript: ^4.2.4
+    typescript: ^4.3.2
   languageName: unknown
   linkType: soft
 
@@ -5626,7 +5626,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-typescript@^4.2.4:
+"typescript@^4.2.4, typescript@^4.3.2":
   version: 4.3.2
   resolution: "typescript@npm:4.3.2"
   bin:
@@ -5636,7 +5636,7 @@ typescript@^4.2.4:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.2.4#builtin<compat/typescript>":
+"typescript@patch:typescript@^4.2.4#builtin<compat/typescript>, typescript@patch:typescript@^4.3.2#builtin<compat/typescript>":
   version: 4.3.2
   resolution: "typescript@patch:typescript@npm%3A4.3.2#builtin<compat/typescript>::version=4.3.2&hash=ddfc1b"
   bin:

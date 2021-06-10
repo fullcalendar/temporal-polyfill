@@ -62,8 +62,7 @@ const handleMonthOverflow = (
   fields: CalendarDate,
   rejectOverflow: boolean
 ): number => {
-  const { isoYear, isoMonth, isoDay } =
-    'year' in fields ? calendar.dateFromFields(fields) : fields
+  const { isoYear, isoMonth, isoDay } = calendar.dateFromFields(fields)
   const totalMonths = calendar.monthsInYear({ isoYear, isoMonth, isoDay }) + 1
 
   if (rejectOverflow && isoMonth > totalMonths) {
@@ -77,8 +76,7 @@ const handleDayOverflow = (
   fields: CalendarDate,
   rejectOverflow: boolean
 ): number => {
-  const { isoYear, isoMonth, isoDay } =
-    'year' in fields ? calendar.dateFromFields(fields) : fields
+  const { isoYear, isoMonth, isoDay } = calendar.dateFromFields(fields)
   const totalDays = calendar.daysInMonth({ isoYear, isoMonth, isoDay }) + 1
 
   if (rejectOverflow && isoDay > totalDays) {
