@@ -1,5 +1,5 @@
 {
-  "name": "temporal-lite",
+  "name": "temporal-ponyfill",
   "version": "0.0.0",
   "title": "Temporal Lite",
   "description": "A new JavaScript date library",
@@ -15,21 +15,6 @@
     }
   ],
   "copyright": "2021 Adam Shaw",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "/dist/**/*"
-  ],
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "tsc",
-    "test": "jest --coverage",
-    "dev": "jest --watch",
-    "lint": "eslint packages/**/*.ts --fix"
-  },
   "devDependencies": {
     "@tsconfig/node14": "^1.0.0",
     "@types/jest": "^26.0.23",
