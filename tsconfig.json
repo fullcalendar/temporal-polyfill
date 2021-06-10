@@ -1,15 +1,7 @@
 {
-  "extends": "@tsconfig/node14/tsconfig.json",
-  "compilerOptions": {
-    "module": "ES2020",
-    "moduleResolution": "Node",
-    "outDir": "dist",
-    "baseUrl": ".",
-    "inlineSourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "declaration": true
-  },
-  "include": ["packages/**/*"],
-  "exclude": ["dist", "packages/**/*.test.ts"]
+  "files": [],
+  "references": [
+    { "path": "packages/temporal-ponyfill" }
+    // { "path": "packages/temporal-format" }
+  ]
 }

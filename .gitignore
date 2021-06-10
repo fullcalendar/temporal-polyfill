@@ -2,6 +2,8 @@ node_modules
 dist
 coverage
 
+tsconfig.tsbuildinfo
+
 .yarn/*
 !.yarn/patches
 !.yarn/releases
