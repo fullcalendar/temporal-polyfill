@@ -1,8 +1,7 @@
-process.env.TZ = 'America/New_York'
+import base from './jest.config.base.js'
 
 export default {
-  preset: 'ts-jest',
-  // timers: 'modern',
-  setupFiles: ['jest-date-mock'],
-  verbose: true,
+  ...base,
+  roots: ['<rootDir>'],
+  projects: ['<rootDir>/packages/temporal-ponyfill'],
 }

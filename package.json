@@ -16,11 +16,6 @@
   ],
   "copyright": "2021 Adam Shaw",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "/dist/**/*"
-  ],
   "workspaces": [
     "packages/*"
   ],

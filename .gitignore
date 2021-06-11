@@ -11,3 +11,4 @@ tsconfig.tsbuildinfo
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+*.code-workspace
