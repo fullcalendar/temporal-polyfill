@@ -44,21 +44,16 @@ export class Duration {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   static from(thing: any): Duration {
     if (typeof thing === 'string') {
-      const regex = /^(-|\+)?P(?:([-+]?[\d,.]*)Y)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)W)?(?:([-+]?[\d,.]*)D)?(?:T(?:([-+]?[\d,.]*)H)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)S)?)?$/
+      const regex =
+        /^(-|\+)?P(?:([-+]?[\d,.]*)Y)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)W)?(?:([-+]?[\d,.]*)D)?(?:T(?:([-+]?[\d,.]*)H)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)S)?)?$/
       const matches = thing.match(regex)
 
       if (matches) {
-        const [
-          years,
-          months,
-          weeks,
-          days,
-          hours,
-          minutes,
-          seconds,
-        ] = matches.slice(2).map((value) => {
-          return Number(value || 0)
-        })
+        const [years, months, weeks, days, hours, minutes, seconds] = matches
+          .slice(2)
+          .map((value) => {
+            return Number(value || 0)
+          })
         return new Duration(
           years,
           months,
@@ -150,20 +145,15 @@ export class Duration {
       throw new Error('relativeTo is required for date units')
     }
 
-    const {
-      deltaDays,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = msToIsoTime(
-      extractTimeMs({
-        isoHour: this.hours + other.hours,
-        isoMinute: this.minutes + other.minutes,
-        isoSecond: this.seconds + other.seconds,
-        isoMillisecond: this.milliseconds + other.milliseconds,
-      })
-    )
+    const { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond } =
+      msToIsoTime(
+        extractTimeMs({
+          isoHour: this.hours + other.hours,
+          isoMinute: this.minutes + other.minutes,
+          isoSecond: this.seconds + other.seconds,
+          isoMillisecond: this.milliseconds + other.milliseconds,
+        })
+      )
     return new Duration(
       0,
       0,
@@ -221,25 +211,20 @@ export class Duration {
       throw new Error('relativeTo is required for date units')
     }
 
-    const {
-      deltaDays,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = msToIsoTime(
-      roundMs(
-        extractTimeWithDaysMs({
-          isoDay: this.days,
-          isoHour: this.hours,
-          isoMinute: this.minutes,
-          isoSecond: this.seconds,
-          isoMillisecond: this.milliseconds,
-        }),
+    const { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond } =
+      msToIsoTime(
+        roundMs(
+          extractTimeWithDaysMs({
+            isoDay: this.days,
+            isoHour: this.hours,
+            isoMinute: this.minutes,
+            isoSecond: this.seconds,
+            isoMillisecond: this.milliseconds,
+          }),
+          options
+        ),
         options
-      ),
-      options
-    )
+      )
     return new Duration(
       0,
       0,

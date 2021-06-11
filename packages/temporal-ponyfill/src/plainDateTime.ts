@@ -277,13 +277,8 @@ export class PlainDateTime {
 
   round(options?: RoundOptionsLike): PlainDateTime {
     const [date, ms] = separateDateTime(this)
-    const {
-      deltaDays,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = msToIsoTime(roundMs(ms, options), options)
+    const { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond } =
+      msToIsoTime(roundMs(ms, options), options)
     return new PlainDateTime(
       date.isoYear,
       date.isoMonth,

@@ -185,9 +185,9 @@ export class Calendar {
 
     switch (largestUnit) {
       case 'years':
-        ;[years, current] = diffYears(current, end, this, false)
+        [years, current] = diffYears(current, end, this, false)
       case 'months':
-        ;[months, current] = diffMonths(current, end, this, false)
+        [months, current] = diffMonths(current, end, this, false)
       case 'weeks':
       case 'days':
       default:

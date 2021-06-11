@@ -13,8 +13,8 @@
   "settings": {},
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
   ],
   "plugins": ["prettier"],
   "rules": {

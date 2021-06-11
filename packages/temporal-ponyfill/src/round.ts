@@ -48,9 +48,8 @@ export const roundModeMap: {
 }
 
 export const roundMs = (ms: number, options?: RoundOptionsLike): number => {
-  const { smallestUnit, roundingIncrement, roundingMode } = asRoundOptions(
-    options
-  )
+  const { smallestUnit, roundingIncrement, roundingMode } =
+    asRoundOptions(options)
   const msInSmallest =
     msFor[
       smallestUnit === 'auto'
