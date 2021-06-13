@@ -22,6 +22,7 @@
     "/dist/**/*"
   ],
   "scripts": {
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "tsc",
     "test": "jest"
   },
