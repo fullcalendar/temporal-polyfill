@@ -13,4 +13,3 @@ tsconfig.tsbuildinfo
 .pnp.*
 
 *.code-workspace
-.vscode/
