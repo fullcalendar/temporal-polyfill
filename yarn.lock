@@ -4456,6 +4456,7 @@ resolve@^1.20.0:
   version: 0.0.0-use.local
   resolution: "temporal-ponyfill@workspace:packages/temporal-ponyfill"
   dependencies:
+    "@types/jest": ^26.0.23
     jest-date-mock: ^1.0.8
     ts-jest: ^27.0.3
   languageName: unknown
