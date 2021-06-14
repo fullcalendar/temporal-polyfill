@@ -1,7 +1,7 @@
 import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDate, PlainDateTime } from './plainDateTime'
-import { dateValue, msFor, reduceFormat, unitIncrement } from './utils'
+import { dateValue, MS_FOR, reduceFormat, unitIncrement } from './utils'
 import { padZeros } from './format'
 
 export type TimeZoneId = 'utc' | 'local' | string
@@ -42,7 +42,7 @@ export class TimeZone {
         })
       )
       // Native date returns value with flipped sign :(
-      return -localDate.getTimezoneOffset() * msFor.minutes
+      return -localDate.getTimezoneOffset() * MS_FOR.MINUTE
     } else if (this.id === 'utc') {
       return 0
     }
@@ -66,8 +66,8 @@ export class TimeZone {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
 
     const sign = offset < 0 ? '-' : '+'
-    const mins = Math.abs((offset / msFor.minutes) % unitIncrement.minutes)
-    const hours = Math.abs(offset / msFor.hours)
+    const mins = Math.abs((offset / MS_FOR.MINUTE) % unitIncrement.minutes)
+    const hours = Math.abs(offset / MS_FOR.HOUR)
 
     const minStr = padZeros(mins, 2)
     const hourStr = padZeros(hours, 2)

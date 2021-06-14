@@ -1,7 +1,7 @@
 import { msToIsoDate } from './convert'
 import { Duration } from './duration'
 import { PlainDate, PlainDateTime, PlainTime } from './plainDateTime'
-import { dateValue, msFor } from './utils'
+import { dateValue, MS_FOR } from './utils'
 
 export const extractTimeMs = ({
   isoHour,
@@ -10,10 +10,10 @@ export const extractTimeMs = ({
   isoMillisecond,
 }: PlainTime): number => {
   return (
-    isoHour * msFor.hours +
-    isoMinute * msFor.minutes +
-    isoSecond * msFor.seconds +
-    isoMillisecond * msFor.milliseconds
+    isoHour * MS_FOR.HOUR +
+    isoMinute * MS_FOR.MINUTE +
+    isoSecond * MS_FOR.SECOND +
+    isoMillisecond * MS_FOR.MILLISECOND
   )
 }
 
@@ -21,7 +21,7 @@ export const extractTimeWithDaysMs = ({
   isoDay,
   ...isoTime
 }: PlainTime & Pick<PlainDate, 'isoDay'>): number => {
-  return extractTimeMs(isoTime) + isoDay * msFor.days
+  return extractTimeMs(isoTime) + isoDay * MS_FOR.DAY
 }
 
 export const separateDuration = (
@@ -61,7 +61,7 @@ export const separateDateTime = (
 
   if (ms < minTimeMs) {
     jsDate.setUTCDate(jsDate.getUTCDate() - 1)
-    ms += msFor.days
+    ms += MS_FOR.DAY
   }
   return [
     {

@@ -1,7 +1,7 @@
 import { Calendar, CalendarDate } from './calendar'
 import { msToIsoDate } from './convert'
 import { PlainDate } from './plainDateTime'
-import { dateValue, msFor } from './utils'
+import { dateValue, MS_FOR } from './utils'
 
 export const addYears = (
   date: CalendarDate,
@@ -53,7 +53,7 @@ export const addMonths = (
 }
 
 export const addDays = (date: PlainDate, days: number): PlainDate => {
-  return msToIsoDate(dateValue(date) + days * msFor.days)
+  return msToIsoDate(dateValue(date) + days * MS_FOR.DAY)
 }
 
 // Overflow Utils

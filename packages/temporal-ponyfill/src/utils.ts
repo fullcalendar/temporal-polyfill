@@ -1,4 +1,4 @@
-import { DurationFields, DurationUnit } from './duration'
+import { DurationFields, DurationUnit, DurationUnitNoDate } from './duration'
 import { PlainDate, PlainDateTimeFields } from './plainDateTime'
 
 export type LocaleId = 'en-us' | string
@@ -19,7 +19,7 @@ export const unitIncrement: {
   weeks: 7,
 }
 
-enum MS_FOR {
+export enum MS_FOR {
   MILLISECOND = unitIncrement.milliseconds,
   SECOND = unitIncrement.seconds * MILLISECOND,
   MINUTE = unitIncrement.minutes * SECOND,
@@ -29,7 +29,7 @@ enum MS_FOR {
 }
 
 export const msFor: {
-  [Property in keyof Omit<DurationFields, 'years' | 'months'>]: number
+  [Property in DurationUnitNoDate]: number
 } = {
   milliseconds: MS_FOR.MILLISECOND,
   seconds: MS_FOR.SECOND,

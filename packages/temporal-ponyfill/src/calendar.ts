@@ -9,7 +9,7 @@ import {
   comparePlainDate,
   CompareReturn,
   dateValue,
-  msFor,
+  MS_FOR,
   reduceFormat,
   unitIncrement,
 } from './utils'
@@ -124,7 +124,7 @@ export class Calendar {
   weekOfYear(dt: PlainDate): number {
     return Math.ceil(
       ((dateValue(dt) - dateValue({ isoYear: dt.isoYear, isoMonth: 1 })) /
-        msFor.days +
+        MS_FOR.DAY +
         1) /
         this.daysInWeek()
     )
@@ -185,9 +185,11 @@ export class Calendar {
 
     switch (largestUnit) {
       case 'years':
-        [years, current] = diffYears(current, end, this, false)
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[years, current] = diffYears(current, end, this, false)
       case 'months':
-        [months, current] = diffMonths(current, end, this, false)
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[months, current] = diffMonths(current, end, this, false)
       case 'weeks':
       case 'days':
       default:
