@@ -220,6 +220,7 @@ export class PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
     const [macro, ms] = separateDuration(duration)
 
+    // Add time increment into epochMilliseconds and format back into ISO Date
     const constrained = msToIsoDate(this.epochMilliseconds + ms)
 
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
@@ -282,6 +283,7 @@ export class PlainDateTime {
     return new PlainDateTime(
       date.isoYear,
       date.isoMonth,
+      // Might cause overflow, but that overflow is dealt with by PlainDateTime's constructor
       date.isoDay + deltaDays,
       isoHour,
       isoMinute,
