@@ -1,5 +1,5 @@
 import { DurationFields, DurationUnit, DurationUnitNoDate } from './duration'
-import { PlainDate, PlainDateTimeFields } from './plainDateTime'
+import { PlainDateTimeFields } from './plainDateTime'
 
 export type LocaleId = 'en-us' | string
 
@@ -65,23 +65,6 @@ export const dateValue = (
     date.isoSecond !== undefined ? date.isoSecond : 0,
     date.isoMillisecond !== undefined ? date.isoMillisecond : 0
   )
-}
-
-export const comparePlainDate = (
-  one: PlainDate,
-  two: PlainDate
-): CompareReturn => {
-  const diff =
-    one.isoYear - two.isoYear ||
-    one.isoMonth - two.isoMonth ||
-    one.isoDay - two.isoDay
-
-  if (diff < 0) {
-    return -1
-  } else if (diff > 0) {
-    return 1
-  }
-  return 0
 }
 
 export const reduceFormat = (

@@ -1,4 +1,5 @@
-import { PlainDateTimeFields, PlainTime } from './plainDateTime'
+import { PlainDateTimeFields } from './plainDateTime'
+import { PlainTime } from './plainTime'
 import { asRoundOptions, RoundOptionsLike } from './round'
 import { priorities, unitIncrement } from './utils'
 

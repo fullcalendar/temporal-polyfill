@@ -8,18 +8,9 @@ import { separateDateTime, separateDuration } from './separate'
 import { AssignmentOptions, CompareReturn, dateValue, LocaleId } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 import { TimeZoneId } from './timeZone'
+import { PlainDate } from './plainDate'
+import { PlainTime } from './plainTime'
 
-export type PlainDate = {
-  isoYear: number
-  isoMonth: number
-  isoDay: number
-}
-export type PlainTime = {
-  isoHour: number
-  isoMinute: number
-  isoSecond: number
-  isoMillisecond: number
-}
 export type PlainDateTimeFields = PlainDate &
   PlainTime & { calendar?: Calendar | CalendarId }
 export type PlainDateTimeLike = Partial<PlainDateTimeFields>

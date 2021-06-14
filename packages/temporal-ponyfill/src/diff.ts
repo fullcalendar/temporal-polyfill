@@ -1,6 +1,6 @@
 import { addMonths, addYears } from './add'
 import { Calendar, CalendarDate, compareCalendarDates } from './calendar'
-import { PlainDate } from './plainDateTime'
+import { PlainDate } from './plainDate'
 import { dateValue, MS_FOR } from './utils'
 
 export const diffYears = (

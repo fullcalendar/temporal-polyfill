@@ -1,6 +1,6 @@
 import { Calendar, CalendarId } from './calendar'
 import { Duration } from './duration'
-import { PlainDate } from './plainDateTime'
+import { PlainDate } from './plainDate'
 
 test('can instantiate', () => {
   const calendar = new Calendar()

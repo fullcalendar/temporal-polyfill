@@ -1,12 +1,11 @@
 import { addDays, addMonths, addYears } from './add'
 import { diffDays, diffMonths, diffYears } from './diff'
 import { Duration } from './duration'
-import { PlainDate } from './plainDateTime'
+import { comparePlainDate, PlainDate } from './plainDate'
 import { asRoundOptions, RoundOptionsLike } from './round'
 import {
   AssignmentOptions,
   AssignmentOptionsLike,
-  comparePlainDate,
   CompareReturn,
   dateValue,
   MS_FOR,

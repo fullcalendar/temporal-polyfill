@@ -1,6 +1,6 @@
 import { Calendar, CalendarDate } from './calendar'
 import { msToIsoDate } from './convert'
-import { PlainDate } from './plainDateTime'
+import { PlainDate } from './plainDate'
 import { dateValue, MS_FOR } from './utils'
 
 export const addYears = (
