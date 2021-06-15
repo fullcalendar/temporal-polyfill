@@ -299,7 +299,7 @@ export class Duration {
     locale: LocaleId,
     options?: Intl.RelativeTimeFormatOptions
   ): string {
-    // TODO: This needs a proper implementation
+    // TODO This needs a proper implementation
     return new Intl.RelativeTimeFormat(locale, options).format(
       this.total({ unit: 'seconds' }),
       'seconds'
