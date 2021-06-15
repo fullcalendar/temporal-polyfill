@@ -3,12 +3,11 @@ import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { dateValue, MS_FOR, reduceFormat, unitIncrement } from './utils'
 import { padZeros } from './format'
-import { PlainDate } from './plainDate'
 
 export type TimeZoneId = 'utc' | 'local' | string
 
-const removeOffset = (ms: number): number => {
-  return ms - new Date(ms).getTimezoneOffset()
+const localOffset = () => {
+  return -new Date().getTimezoneOffset() * MS_FOR.MINUTE
 }
 
 export class TimeZone {
@@ -60,7 +59,9 @@ export class TimeZone {
       isoMinute: formatResult.minute,
       isoSecond: formatResult.second,
     })
-    return adjusted - epochMilliseconds
+    // Accounts for overflow milliseconds
+    const over = epochMilliseconds % MS_FOR.SECOND
+    return adjusted - epochMilliseconds + over
   }
 
   getOffsetStringFor(epochMilliseconds: number): string {
@@ -104,14 +105,29 @@ export class TimeZone {
   }
 
   getInstantFor(
-    date: PlainDate,
+    date: PlainDateTime,
     options?: {
       disambiguation: 'compatible' | 'earlier' | 'later' | 'reject'
     }
   ): number {
     const { disambiguation } = { disambiguation: 'compatible', ...options }
-    const utcMs = removeOffset(dateValue(date))
-    const timeZoneOffset = this.getOffsetMillisecondsFor(utcMs)
-    return utcMs + timeZoneOffset
+
+    const lOffset = localOffset()
+    let utcMs = date.epochMilliseconds - lOffset
+
+    const tzOffset = this.getOffsetMillisecondsFor(utcMs)
+
+    if (lOffset === tzOffset) {
+      return date.epochMilliseconds
+    }
+
+    utcMs -= tzOffset - lOffset
+    const tzOffset2 = this.getOffsetMillisecondsFor(utcMs)
+
+    if (tzOffset === tzOffset2) {
+      return utcMs + tzOffset
+    }
+
+    return date.epochMilliseconds + Math.min(tzOffset, tzOffset2)
   }
 }
