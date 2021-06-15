@@ -8,16 +8,16 @@ import { separateDateTime, separateDuration } from './separate'
 import { AssignmentOptions, CompareReturn, dateValue, LocaleId } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 import { TimeZoneId } from './timeZone'
-import { PlainDate } from './plainDate'
-import { PlainTime } from './plainTime'
+import { PlainDateFields } from './plainDate'
+import { PlainTimeFields } from './plainTime'
 
-export type PlainDateTimeFields = PlainDate &
-  PlainTime & { calendar?: Calendar | CalendarId }
+export type PlainDateTimeFields = PlainDateFields &
+  PlainTimeFields & { calendar?: Calendar | CalendarId }
 export type PlainDateTimeLike = Partial<PlainDateTimeFields>
 
 export class PlainDateTime {
-  readonly epochMilliseconds
-  readonly calendar
+  readonly epochMilliseconds: number
+  readonly calendar: Calendar
 
   constructor(
     isoYear: number,

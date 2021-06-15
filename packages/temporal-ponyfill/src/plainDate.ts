@@ -1,24 +1,24 @@
 import { CompareReturn } from './utils'
 
-export type PlainDate = {
+export type PlainDateFields = {
   isoYear: number
   isoMonth: number
   isoDay: number
 }
 
-export const comparePlainDate = (
-  one: PlainDate,
-  two: PlainDate
-): CompareReturn => {
-  const diff =
-    one.isoYear - two.isoYear ||
-    one.isoMonth - two.isoMonth ||
-    one.isoDay - two.isoDay
+export class PlainDate {
+  constructor(
+    readonly isoYear: number,
+    readonly isoMonth: number,
+    readonly isoDay: number
+  ) {}
 
-  if (diff < 0) {
-    return -1
-  } else if (diff > 0) {
-    return 1
+  static compare(one: PlainDate, two: PlainDate): CompareReturn {
+    const diff =
+      one.isoYear - two.isoYear ||
+      one.isoMonth - two.isoMonth ||
+      one.isoDay - two.isoDay
+
+    return diff !== 0 ? (diff < 0 ? -1 : 1) : 0
   }
-  return 0
 }

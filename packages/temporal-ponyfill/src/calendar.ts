@@ -1,7 +1,7 @@
 import { addDays, addMonths, addYears } from './add'
 import { diffDays, diffMonths, diffYears } from './diff'
 import { Duration } from './duration'
-import { comparePlainDate, PlainDate } from './plainDate'
+import { PlainDate } from './plainDate'
 import { asRoundOptions, RoundOptionsLike } from './round'
 import {
   AssignmentOptions,
@@ -47,7 +47,7 @@ export const compareCalendarDates = (
   two: CalendarDate,
   calendar: Calendar
 ): CompareReturn => {
-  return comparePlainDate(
+  return PlainDate.compare(
     calendar.dateFromFields(one),
     calendar.dateFromFields(two)
   )

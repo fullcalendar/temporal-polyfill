@@ -1,12 +1,12 @@
 import { PlainDateTimeFields } from './plainDateTime'
-import { PlainTime } from './plainTime'
+import { PlainTimeFields } from './plainTime'
 import { asRoundOptions, RoundOptionsLike } from './round'
 import { priorities, unitIncrement } from './utils'
 
 export const msToIsoTime = (
   ms: number,
   options?: RoundOptionsLike
-): PlainTime & { deltaDays: number } => {
+): PlainTimeFields & { deltaDays: number } => {
   const { largestUnit } = asRoundOptions(options)
   const largestIndex =
     largestUnit === 'auto' ? priorities.years : priorities[largestUnit]

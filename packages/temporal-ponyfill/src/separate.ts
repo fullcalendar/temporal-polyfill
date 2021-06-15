@@ -1,8 +1,8 @@
 import { msToIsoDate } from './convert'
 import { Duration } from './duration'
-import { PlainDate } from './plainDate'
+import { PlainDate, PlainDateFields } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
-import { PlainTime } from './plainTime'
+import { PlainTimeFields } from './plainTime'
 import { dateValue, MS_FOR } from './utils'
 
 export const extractTimeMs = ({
@@ -10,7 +10,7 @@ export const extractTimeMs = ({
   isoMinute,
   isoSecond,
   isoMillisecond,
-}: PlainTime): number => {
+}: PlainTimeFields): number => {
   return (
     isoHour * MS_FOR.HOUR +
     isoMinute * MS_FOR.MINUTE +
@@ -22,7 +22,7 @@ export const extractTimeMs = ({
 export const extractTimeWithDaysMs = ({
   isoDay,
   ...isoTime
-}: PlainTime & Pick<PlainDate, 'isoDay'>): number => {
+}: PlainTimeFields & Pick<PlainDateFields, 'isoDay'>): number => {
   return extractTimeMs(isoTime) + isoDay * MS_FOR.DAY
 }
 
