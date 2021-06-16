@@ -60,8 +60,7 @@ describe('can get PlainDateTime', () => {
 describe('can get Instant', () => {
   test('for America/New_York', () => {
     const tz = new TimeZone('America/New_York')
-    // This date is expected to be already offset
-    const date = new PlainDateTime(1970, 1, 1, -5)
+    const date = new PlainDateTime(1970, 1, 1)
     expect(tz.getInstantFor(date)).toBe(-1.8e7)
   })
 })

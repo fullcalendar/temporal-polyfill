@@ -2,6 +2,7 @@ import { DurationFields, DurationUnit, DurationUnitNoDate } from './duration'
 import { PlainDateTimeFields } from './plainDateTime'
 
 export type LocaleId = 'en-us' | string
+export type Instant = number
 
 export type AssignmentOptions = { overflow: 'constrain' | 'reject' }
 export type AssignmentOptionsLike = Partial<AssignmentOptions>

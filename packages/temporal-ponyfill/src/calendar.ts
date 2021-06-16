@@ -102,7 +102,7 @@ export class Calendar {
   }
 
   monthsInYear({ isoYear }: PlainDate): number {
-    // NOTE: `isoDay: 0` is used to move back 1 day since isoDay is 1-based
+    // `isoDay: 0` is used to move back 1 day since isoDay is 1-based
     return (
       new Date(dateValue({ isoYear: isoYear + 1, isoDay: 0 })).getUTCMonth() + 1
     )
@@ -157,6 +157,8 @@ export class Calendar {
       day: this.day(date),
     }
     const rejectOverflow = options?.overflow === 'reject'
+
+    // Simply defer to add functions, which return a mutated fields object
     fields = addYears(fields, years, this, rejectOverflow)
     fields = addMonths(fields, months, this, rejectOverflow)
     const { isoYear, isoMonth, isoDay } = addDays(

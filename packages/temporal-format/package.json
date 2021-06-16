@@ -14,5 +14,15 @@
       "url": "http://arshaw.com/"
     }
   ],
-  "copyright": "2021 Adam Shaw"
+  "copyright": "2021 Adam Shaw",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "tsc"
+  }
 }

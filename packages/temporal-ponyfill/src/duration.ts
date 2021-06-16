@@ -145,6 +145,7 @@ export class Duration {
       throw new Error('relativeTo is required for date units')
     }
 
+    // TODO We can probably also handle weeks here
     const { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond } =
       msToIsoTime(
         extractTimeMs({
@@ -171,6 +172,7 @@ export class Duration {
     options?: RelativeOptions
   ): Duration {
     const other = amount instanceof Duration ? amount : Duration.from(amount)
+    // Defer to add function with Duration negated
     return this.add(other.negated(), options)
   }
 
@@ -184,7 +186,7 @@ export class Duration {
       // FIXME: This doesn't properly account for weeks/months/years, msFor will error for those units
       return (
         (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /
-        msFor[unit as DurationUnitNoDate]
+        msFor[unit as DurationUnitNoDate] // It is possible for unit to have date here, counter to what DurationUnitNoDate implies
       )
     } else if (this.years || this.months || this.weeks) {
       throw new Error('relativeTo is required for date units')

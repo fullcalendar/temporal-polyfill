@@ -3,13 +3,14 @@ import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZone, TimeZoneId } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
+import { Instant } from './utils'
 
 export class Now {
-  static instant(): number {
+  static instant(): Instant {
     return Date.now()
   }
 
-  static epochMilliseconds(): number {
+  static epochMilliseconds(): Instant {
     return this.instant()
   }
 

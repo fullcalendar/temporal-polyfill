@@ -29,6 +29,7 @@ export class PlainDateTime {
     isoMillisecond = 0,
     calendar: Calendar | CalendarId = new Calendar()
   ) {
+    // TODO Move overflow to from method, only accept valid values in constructor
     this.epochMilliseconds = dateValue({
       isoYear,
       isoMonth,
@@ -85,7 +86,7 @@ export class PlainDateTime {
         isoSecond,
         isoMillisecond
       )
-    } else if (thing.epochMilliseconds) {
+    } else if (thing.epochMilliseconds || thing.epochMilliseconds === 0) {
       const {
         isoYear,
         isoMonth,
@@ -94,7 +95,7 @@ export class PlainDateTime {
         isoMinute,
         isoSecond,
         isoMillisecond,
-      } = msToIsoDate(thing)
+      } = msToIsoDate(thing.epochMilliseconds)
       return new PlainDateTime(
         isoYear,
         isoMonth,
@@ -121,13 +122,8 @@ export class PlainDateTime {
   }
 
   static compare(one: PlainDateTime, two: PlainDateTime): CompareReturn {
-    if (one.epochMilliseconds < two.epochMilliseconds) {
-      return -1
-    } else if (one.epochMilliseconds > two.epochMilliseconds) {
-      return 1
-    } else {
-      return 0
-    }
+    const diff = one.epochMilliseconds - two.epochMilliseconds
+    return diff !== 0 ? (diff < 0 ? -1 : 1) : 0
   }
 
   get year(): number {
@@ -168,6 +164,7 @@ export class PlainDateTime {
 
   with(dateTimeLike: PlainDateTimeLike | string): PlainDateTime {
     if (typeof dateTimeLike === 'string') {
+      // TODO Implement this
       throw new Error('Unimplemented')
     }
     return new PlainDateTime(
@@ -241,6 +238,7 @@ export class PlainDateTime {
     options?: AssignmentOptions
   ): PlainDateTime {
     const duration = amount instanceof Duration ? amount : Duration.from(amount)
+    // Defer to add function with a negative duration
     return this.add(duration.negated(), options)
   }
 
@@ -249,13 +247,17 @@ export class PlainDateTime {
     const larger = positiveSign ? this : other
     const smaller = positiveSign ? other : this
 
+    // Separate into [date, time]
     const [smallerDate, smallerMs] = separateDateTime(smaller)
     const [largerDate, largerMs] = separateDateTime(larger, smallerMs)
 
+    // Round time portion and convert to ISO with overflow accounted for
     const { isoHour, isoMinute, isoSecond, isoMillisecond } = msToIsoTime(
       roundMs(largerMs - smallerMs, options),
       options
     )
+
+    // Calculate date using Calendar function, attach time afterwards
     const combined = this.calendar
       .dateUntil(smallerDate, largerDate, options)
       .with({

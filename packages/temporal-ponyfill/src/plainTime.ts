@@ -1,4 +1,3 @@
-import { Calendar } from './calendar'
 import { AssignmentOptions, CompareReturn } from './utils'
 
 export type PlainTimeFields = {

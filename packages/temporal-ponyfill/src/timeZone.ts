@@ -1,19 +1,27 @@
 import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { dateValue, MS_FOR, reduceFormat, unitIncrement } from './utils'
+import {
+  dateValue,
+  Instant,
+  MS_FOR,
+  reduceFormat,
+  unitIncrement,
+} from './utils'
 import { padZeros } from './format'
 
 export type TimeZoneId = 'utc' | 'local' | string
 
-const localOffset = () => {
-  return -new Date().getTimezoneOffset() * MS_FOR.MINUTE
+const localOffset = (ms?: number): number => {
+  // Native date returns value with flipped sign :(
+  return -new Date(ms).getTimezoneOffset() * MS_FOR.MINUTE
 }
 
 export class TimeZone {
   private formatter: Intl.DateTimeFormat
 
   constructor(readonly id: TimeZoneId = 'local') {
+    // Creating formatter in constructor is same as caching it for our purposes
     this.formatter = new Intl.DateTimeFormat('en-us', {
       hour12: false,
       year: 'numeric',
@@ -30,7 +38,7 @@ export class TimeZone {
   getOffsetMillisecondsFor(epochMilliseconds: number): number {
     if (this.id === 'local') {
       const utcDate = new Date(epochMilliseconds)
-      const localDate = new Date(
+      return localOffset(
         dateValue({
           isoYear: utcDate.getUTCFullYear(),
           isoMonth: utcDate.getUTCMonth(),
@@ -41,16 +49,16 @@ export class TimeZone {
           isoMillisecond: utcDate.getUTCMilliseconds(),
         })
       )
-      // Native date returns value with flipped sign :(
-      return -localDate.getTimezoneOffset() * MS_FOR.MINUTE
     } else if (this.id === 'utc') {
       return 0
     }
-    // Arbitrary timezone
+    // Arbitrary timezone using Intl API
     const formatResult = reduceFormat(
       epochMilliseconds,
       this.formatter
     ) as Record<string, number>
+
+    // Convert to epochMs
     const adjusted = dateValue({
       isoYear: formatResult.year,
       isoMonth: formatResult.month,
@@ -59,7 +67,8 @@ export class TimeZone {
       isoMinute: formatResult.minute,
       isoSecond: formatResult.second,
     })
-    // Accounts for overflow milliseconds
+
+    // Account for overflow milliseconds
     const over = epochMilliseconds % MS_FOR.SECOND
     return adjusted - epochMilliseconds + over
   }
@@ -81,27 +90,12 @@ export class TimeZone {
     epochMilliseconds: number,
     calendar?: Calendar | CalendarId
   ): PlainDateTime {
-    const {
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = msToIsoDate(
-      epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds)
-    )
-    return new PlainDateTime(
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-      calendar
-    )
+    // Leverage overflow handling in from function
+    return PlainDateTime.from({
+      epochMilliseconds:
+        epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds),
+      calendar,
+    })
   }
 
   getInstantFor(
@@ -109,25 +103,28 @@ export class TimeZone {
     options?: {
       disambiguation: 'compatible' | 'earlier' | 'later' | 'reject'
     }
-  ): number {
+  ): Instant {
     const { disambiguation } = { disambiguation: 'compatible', ...options }
 
-    const lOffset = localOffset()
-    let utcMs = date.epochMilliseconds - lOffset
-
+    let utcMs = date.epochMilliseconds
+    // Get offset of timezone
     const tzOffset = this.getOffsetMillisecondsFor(utcMs)
 
-    if (lOffset === tzOffset) {
+    // Check if we can just return UTC
+    if (tzOffset === 0) {
       return date.epochMilliseconds
     }
 
-    utcMs -= tzOffset - lOffset
+    // Move epochMs by timeZone offset and check if offset is different at that point in time (e.g DST)
+    utcMs -= tzOffset
     const tzOffset2 = this.getOffsetMillisecondsFor(utcMs)
 
+    // If the offset is same we guessed correctly
     if (tzOffset === tzOffset2) {
       return utcMs + tzOffset
     }
 
+    // Otherwise we are in a hole time
     return date.epochMilliseconds + Math.min(tzOffset, tzOffset2)
   }
 }
