@@ -1,7 +1,7 @@
 import { addMonths, addYears } from './add'
 import { Calendar, CalendarDate, compareCalendarDates } from './calendar'
+import { isoDateToMs, MS_FOR } from './convert'
 import { PlainDate } from './plainDate'
-import { dateValue, MS_FOR } from './utils'
 
 export const diffYears = (
   one: CalendarDate,
@@ -55,5 +55,5 @@ export const diffMonths = (
 }
 
 export const diffDays = (one: PlainDate, two: PlainDate): number => {
-  return Math.trunc((dateValue(two) - dateValue(one)) / MS_FOR.DAY)
+  return Math.trunc((isoDateToMs(two) - isoDateToMs(one)) / MS_FOR.DAY)
 }

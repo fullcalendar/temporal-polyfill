@@ -1,4 +1,5 @@
 import { addDays, addMonths, addYears } from './add'
+import { isoDateToMs, MS_FOR, reduceFormat, UNIT_INCREMENT } from './convert'
 import { diffDays, diffMonths, diffYears } from './diff'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -7,10 +8,6 @@ import {
   AssignmentOptions,
   AssignmentOptionsLike,
   CompareReturn,
-  dateValue,
-  MS_FOR,
-  reduceFormat,
-  unitIncrement,
 } from './utils'
 
 export type CalendarId =
@@ -69,29 +66,31 @@ export class Calendar {
 
   year({ isoYear }: PlainDate): number {
     return reduceFormat(
-      dateValue({ isoYear, isoMonth: 1, isoDay: 1 }),
+      isoDateToMs({ isoYear, isoMonth: 1, isoDay: 1 }),
       this.formatter
     )['year'] as number
   }
 
   month({ isoYear, isoMonth }: PlainDate): number {
     return reduceFormat(
-      dateValue({ isoYear, isoMonth, isoDay: 1 }),
+      isoDateToMs({ isoYear, isoMonth, isoDay: 1 }),
       this.formatter
     )['month'] as number
   }
 
   day(dt: PlainDate): number {
-    return reduceFormat(dateValue(dt), this.formatter)['day'] as number
+    return reduceFormat(isoDateToMs(dt), this.formatter)['day'] as number
   }
 
   // IN methods
   daysInWeek(): number {
-    return unitIncrement.weeks
+    return UNIT_INCREMENT.WEEK
   }
 
   daysInMonth({ isoYear, isoMonth }: PlainDate): number {
-    return new Date(dateValue({ isoYear, isoMonth: isoMonth + 1 })).getUTCDate()
+    return new Date(
+      isoDateToMs({ isoYear, isoMonth: isoMonth + 1 })
+    ).getUTCDate()
   }
 
   daysInYear({ isoYear }: PlainDate): number {
@@ -104,13 +103,14 @@ export class Calendar {
   monthsInYear({ isoYear }: PlainDate): number {
     // `isoDay: 0` is used to move back 1 day since isoDay is 1-based
     return (
-      new Date(dateValue({ isoYear: isoYear + 1, isoDay: 0 })).getUTCMonth() + 1
+      new Date(isoDateToMs({ isoYear: isoYear + 1, isoDay: 0 })).getUTCMonth() +
+      1
     )
   }
 
   // OF methods
   dayOfWeek(dt: PlainDate): string {
-    return reduceFormat(dateValue(dt), this.formatter)['weekday'] as string
+    return reduceFormat(isoDateToMs(dt), this.formatter)['weekday'] as string
   }
 
   dayOfYear(dt: PlainDate): number {
@@ -122,7 +122,7 @@ export class Calendar {
 
   weekOfYear(dt: PlainDate): number {
     return Math.ceil(
-      ((dateValue(dt) - dateValue({ isoYear: dt.isoYear, isoMonth: 1 })) /
+      ((isoDateToMs(dt) - isoDateToMs({ isoYear: dt.isoYear, isoMonth: 1 })) /
         MS_FOR.DAY +
         1) /
         this.daysInWeek()
@@ -163,7 +163,7 @@ export class Calendar {
     fields = addMonths(fields, months, this, rejectOverflow)
     const { isoYear, isoMonth, isoDay } = addDays(
       this.dateFromFields(fields),
-      days + weeks * unitIncrement.weeks
+      days + weeks * UNIT_INCREMENT.WEEK
     )
     return { isoYear, isoMonth, isoDay }
   }
@@ -175,10 +175,12 @@ export class Calendar {
   ): Duration {
     const { largestUnit } = asRoundOptions(options)
 
-    const negative =
-      compareCalendarDates(isoToCal(one, this), isoToCal(two, this), this) > 0
-    let current = isoToCal(negative ? two : one, this)
-    const end = isoToCal(negative ? one : two, this)
+    const oneCal = isoToCal(one, this)
+    const twoCal = isoToCal(two, this)
+
+    const negative = compareCalendarDates(oneCal, twoCal, this) > 0
+    let current = negative ? twoCal : oneCal
+    const end = negative ? oneCal : twoCal
     let years = 0,
       months = 0,
       weeks = 0,
@@ -198,8 +200,8 @@ export class Calendar {
     }
 
     if (largestUnit === 'weeks') {
-      weeks = Math.trunc(days / unitIncrement.weeks)
-      days = days % unitIncrement.weeks
+      weeks = Math.trunc(days / UNIT_INCREMENT.WEEK)
+      days = days % UNIT_INCREMENT.WEEK
     }
 
     const dur = new Duration(years, months, weeks, days)

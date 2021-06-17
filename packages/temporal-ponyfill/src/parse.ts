@@ -1,7 +1,9 @@
 import { CalendarId } from './calendar'
-import { dateValue, MS_FOR } from './utils'
+import { isoDateToMs, MS_FOR, UNIT_INCREMENT } from './convert'
+import { Duration } from './duration'
 
-export const dateParse = (
+/** Parse an ISO format date string into milliseconds, timezone, and calendar */
+export const parseDate = (
   str: string
 ): { epochMilliseconds: number; timeZone: string; calendar: CalendarId } => {
   const regex =
@@ -41,7 +43,7 @@ export const dateParse = (
     const calendar = sliced[9]
 
     const epochMilliseconds =
-      dateValue({
+      isoDateToMs({
         isoYear,
         isoMonth,
         isoDay,
@@ -56,6 +58,34 @@ export const dateParse = (
       timeZone,
       calendar: calendar as CalendarId,
     }
+  }
+  throw new Error('Invalid String')
+}
+
+/** Parse a Duration string into a Duration object */
+export const parseDuration = (str: string): Duration => {
+  const regex =
+    /^(-|\+)?P(?:([-+]?[\d,.]*)Y)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)W)?(?:([-+]?[\d,.]*)D)?(?:T(?:([-+]?[\d,.]*)H)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)S)?)?$/
+  const matches = str.match(regex)
+
+  if (matches) {
+    const [years, months, weeks, days, hours, minutes, seconds] = matches
+      .slice(2)
+      .map((value) => {
+        return Number(value || 0)
+      })
+    return new Duration(
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      // Remove milliseconds part from seconds
+      Math.floor(seconds),
+      // Milliseconds need to be converted out of .xxx format
+      Math.floor((seconds % 1) * UNIT_INCREMENT.SECOND)
+    )
   }
   throw new Error('Invalid String')
 }

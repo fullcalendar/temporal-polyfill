@@ -24,5 +24,12 @@
   "scripts": {
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "tsc"
+  },
+  "dependencies": {
+    "temporal-ponyfill": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "ts-jest": "^27.0.3"
   }
 }

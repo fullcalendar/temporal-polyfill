@@ -1,9 +1,8 @@
-import { msToIsoDate } from './convert'
+import { isoDateToMs, msToIsoDate, MS_FOR } from './convert'
 import { Duration } from './duration'
 import { PlainDate, PlainDateFields } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainTimeFields } from './plainTime'
-import { dateValue, MS_FOR } from './utils'
 
 export const extractTimeMs = ({
   isoHour,
@@ -58,7 +57,7 @@ export const separateDateTime = (
     isoSecond,
     isoMillisecond,
   } = msToIsoDate(date.epochMilliseconds)
-  const jsDate = new Date(dateValue({ isoYear, isoMonth, isoDay }))
+  const jsDate = new Date(isoDateToMs({ isoYear, isoMonth, isoDay }))
   let ms = extractTimeMs({ isoHour, isoMinute, isoSecond, isoMillisecond })
 
   if (ms < minTimeMs) {

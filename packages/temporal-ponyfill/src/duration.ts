@@ -1,8 +1,9 @@
-import { msToIsoTime } from './convert'
+import { msFor, msToIsoTime, UNIT_INCREMENT } from './convert'
+import { parseDuration } from './parse'
 import { PlainDateTime, PlainDateTimeLike } from './plainDateTime'
 import { roundMs, RoundOptionsLike } from './round'
 import { extractTimeMs, extractTimeWithDaysMs } from './separate'
-import { CompareReturn, LocaleId, msFor, unitIncrement } from './utils'
+import { CompareReturn, LocaleId } from './utils'
 
 export type DurationFields = {
   years: number
@@ -44,28 +45,7 @@ export class Duration {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   static from(thing: any): Duration {
     if (typeof thing === 'string') {
-      const regex =
-        /^(-|\+)?P(?:([-+]?[\d,.]*)Y)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)W)?(?:([-+]?[\d,.]*)D)?(?:T(?:([-+]?[\d,.]*)H)?(?:([-+]?[\d,.]*)M)?(?:([-+]?[\d,.]*)S)?)?$/
-      const matches = thing.match(regex)
-
-      if (matches) {
-        const [years, months, weeks, days, hours, minutes, seconds] = matches
-          .slice(2)
-          .map((value) => {
-            return Number(value || 0)
-          })
-        return new Duration(
-          years,
-          months,
-          weeks,
-          days,
-          hours,
-          minutes,
-          Math.floor(seconds),
-          Math.floor((seconds % 1) * unitIncrement.seconds)
-        )
-      }
-      throw new Error('Invalid String')
+      return parseDuration(thing)
     } else if (
       thing.years ||
       thing.months ||
@@ -273,7 +253,7 @@ export class Duration {
       [this.days, 'D'],
       [this.hours, 'H'],
       [this.minutes, 'M'],
-      [this.seconds + this.milliseconds / unitIncrement.seconds, 'S'],
+      [this.seconds + this.milliseconds / UNIT_INCREMENT.SECOND, 'S'],
     ].map(([number, unit]) => {
       return {
         negative: number < 0,

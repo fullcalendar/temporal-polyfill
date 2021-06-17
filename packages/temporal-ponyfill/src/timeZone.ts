@@ -1,14 +1,8 @@
-import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import {
-  dateValue,
-  Instant,
-  MS_FOR,
-  reduceFormat,
-  unitIncrement,
-} from './utils'
+import { Instant } from './utils'
 import { padZeros } from './format'
+import { isoDateToMs, MS_FOR, reduceFormat, UNIT_INCREMENT } from './convert'
 
 export type TimeZoneId = 'utc' | 'local' | string
 
@@ -39,7 +33,7 @@ export class TimeZone {
     if (this.id === 'local') {
       const utcDate = new Date(epochMilliseconds)
       return localOffset(
-        dateValue({
+        isoDateToMs({
           isoYear: utcDate.getUTCFullYear(),
           isoMonth: utcDate.getUTCMonth(),
           isoDay: utcDate.getUTCDate(),
@@ -59,7 +53,7 @@ export class TimeZone {
     ) as Record<string, number>
 
     // Convert to epochMs
-    const adjusted = dateValue({
+    const adjusted = isoDateToMs({
       isoYear: formatResult.year,
       isoMonth: formatResult.month,
       isoDay: formatResult.day,
@@ -77,7 +71,7 @@ export class TimeZone {
     const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
 
     const sign = offset < 0 ? '-' : '+'
-    const mins = Math.abs((offset / MS_FOR.MINUTE) % unitIncrement.minutes)
+    const mins = Math.abs((offset / MS_FOR.MINUTE) % UNIT_INCREMENT.MINUTE)
     const hours = Math.abs(offset / MS_FOR.HOUR)
 
     const minStr = padZeros(mins, 2)

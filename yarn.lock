@@ -4433,6 +4433,10 @@ resolve@^1.20.0:
 "temporal-format@workspace:packages/temporal-format":
   version: 0.0.0-use.local
   resolution: "temporal-format@workspace:packages/temporal-format"
+  dependencies:
+    "@types/jest": ^26.0.23
+    temporal-ponyfill: "workspace:*"
+    ts-jest: ^27.0.3
   languageName: unknown
   linkType: soft
 
@@ -4452,7 +4456,7 @@ resolve@^1.20.0:
   languageName: unknown
   linkType: soft
 
-"temporal-ponyfill@workspace:packages/temporal-ponyfill":
+"temporal-ponyfill@workspace:*, temporal-ponyfill@workspace:packages/temporal-ponyfill":
   version: 0.0.0-use.local
   resolution: "temporal-ponyfill@workspace:packages/temporal-ponyfill"
   dependencies:

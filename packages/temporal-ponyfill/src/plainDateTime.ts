@@ -1,11 +1,11 @@
-import { msToIsoDate, msToIsoTime } from './convert'
+import { isoDateToMs, msToIsoDate, msToIsoTime } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { Duration, DurationLike } from './duration'
 import { dateFormat } from './format'
-import { dateParse } from './parse'
+import { parseDate } from './parse'
 import { roundMs, RoundOptionsLike } from './round'
 import { separateDateTime, separateDuration } from './separate'
-import { AssignmentOptions, CompareReturn, dateValue, LocaleId } from './utils'
+import { AssignmentOptions, CompareReturn, LocaleId } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 import { TimeZoneId } from './timeZone'
 import { PlainDateFields } from './plainDate'
@@ -30,7 +30,7 @@ export class PlainDateTime {
     calendar: Calendar | CalendarId = new Calendar()
   ) {
     // TODO Move overflow to from method, only accept valid values in constructor
-    this.epochMilliseconds = dateValue({
+    this.epochMilliseconds = isoDateToMs({
       isoYear,
       isoMonth,
       isoDay,
@@ -47,7 +47,7 @@ export class PlainDateTime {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   static from(thing: any): PlainDateTime {
     if (typeof thing === 'string') {
-      const { epochMilliseconds, calendar } = dateParse(thing)
+      const { epochMilliseconds, calendar } = parseDate(thing)
       const {
         isoYear,
         isoMonth,

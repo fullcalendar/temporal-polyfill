@@ -1,7 +1,7 @@
 import { msToIsoDate } from './convert'
 import { Calendar, CalendarId } from './calendar'
 import { dateFormat } from './format'
-import { dateParse } from './parse'
+import { parseDate } from './parse'
 import { TimeZone, TimeZoneId } from './timeZone'
 import { CompareReturn, LocaleId } from './utils'
 
@@ -30,7 +30,7 @@ export class ZonedDateTime {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   static from(thing: any): ZonedDateTime {
     if (typeof thing === 'string') {
-      const { epochMilliseconds, timeZone, calendar } = dateParse(thing)
+      const { epochMilliseconds, timeZone, calendar } = parseDate(thing)
       return new ZonedDateTime(epochMilliseconds, timeZone, calendar)
     } else if (thing.epochMilliseconds) {
       return new ZonedDateTime(
