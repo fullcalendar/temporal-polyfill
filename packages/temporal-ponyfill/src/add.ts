@@ -22,6 +22,10 @@ export const addMonths = (
 ): CalendarDate => {
   const temp = { ...date }
 
+  if (months === 0) {
+    return date
+  }
+
   while (months > 0) {
     const monthsLeft =
       calendar.monthsInYear(calendar.dateFromFields(temp)) - temp.month + 1

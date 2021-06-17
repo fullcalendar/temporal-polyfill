@@ -88,8 +88,9 @@ export class Calendar {
   }
 
   daysInMonth({ isoYear, isoMonth }: PlainDate): number {
+    // `isoDay: 0` is used to move back 1 day since isoDay is 1-based
     return new Date(
-      isoDateToMs({ isoYear, isoMonth: isoMonth + 1 })
+      isoDateToMs({ isoYear, isoMonth: isoMonth + 1, isoDay: 0 })
     ).getUTCDate()
   }
 

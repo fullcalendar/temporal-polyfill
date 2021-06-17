@@ -163,17 +163,19 @@ export class Duration {
           ? relativeTo
           : PlainDateTime.from(relativeTo)
 
+      const relativeWithDuration = relative.add(this)
+
       // FIXME: This doesn't properly account for weeks/months/years, msFor will error for those units
       return (
-        (relative.add(this).epochMilliseconds - relative.epochMilliseconds) /
+        (relativeWithDuration.epochMilliseconds - relative.epochMilliseconds) /
         msFor[unit as DurationUnitNoDate] // It is possible for unit to have date here, counter to what DurationUnitNoDate implies
       )
-    } else if (this.years || this.months || this.weeks) {
+    } else if (this.years || this.months) {
       throw new Error('relativeTo is required for date units')
     }
     return (
       extractTimeWithDaysMs({
-        isoDay: this.days,
+        isoDay: this.days + this.weeks * UNIT_INCREMENT.WEEK,
         isoHour: this.hours,
         isoMinute: this.minutes,
         isoSecond: this.seconds,

@@ -63,7 +63,7 @@ test.each<
   [
     new Duration(1, 0, 0, 1),
     { unit: 'months', relativeTo: new PlainDateTime(2000, 1, 1) },
-    12.065748135562458,
+    12 + 1 / 31,
   ],
   [new Duration(0, 0, 0, 1), { unit: 'minutes' }, 1440],
   [new Duration(0, 0, 0, 1), { unit: 'weeks' }, 1 / 7],

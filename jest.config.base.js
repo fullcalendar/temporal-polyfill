@@ -1,6 +1,4 @@
-/*
-only contains simple config that does not reference third-party packages
-*/
+// Only contains simple config that does not reference third-party packages
 
 process.env.TZ = 'America/New_York'
 
