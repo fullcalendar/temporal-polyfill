@@ -6,12 +6,12 @@
     "moduleResolution": "Node",
     "composite": true,
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "esModuleInterop": true,
+    "importHelpers": true,
     "resolveJsonModule": true,
     "declaration": true,
     "inlineSourceMap": true
   },
-  "exclude": [
-    "**/*.test.ts"
-  ]
+  "exclude": ["**/*.test.ts"]
 }

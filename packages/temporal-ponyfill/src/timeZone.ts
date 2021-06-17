@@ -15,6 +15,10 @@ export class TimeZone {
   private formatter: Intl.DateTimeFormat
 
   constructor(readonly id: TimeZoneId = 'local') {
+    if (this.id === 'local') {
+      this.id = Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
+
     // Creating formatter in constructor is same as caching it for our purposes
     this.formatter = new Intl.DateTimeFormat('en-us', {
       hour12: false,
@@ -24,7 +28,7 @@ export class TimeZone {
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
-      timeZone: this.id === 'local' ? undefined : this.id,
+      timeZone: this.id,
       timeZoneName: 'short',
     })
   }

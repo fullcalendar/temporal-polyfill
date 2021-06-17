@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/temporal-ponyfill" }
-    // { "path": "packages/temporal-format" }
+    { "path": "packages/temporal-ponyfill" },
+    { "path": "packages/temporal-format" }
   ]
 }
