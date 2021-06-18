@@ -71,13 +71,13 @@ export const isoDateToMs = (
   )
 }
 
-export const UNIT_INCREMENT = {
-  MILLISECOND: 1,
-  SECOND: 1000,
-  MINUTE: 60,
-  HOUR: 60,
-  DAY: 24,
-  WEEK: 7,
+export enum UNIT_INCREMENT {
+  MILLISECOND = 1,
+  SECOND = 1000,
+  MINUTE = 60,
+  HOUR = 60,
+  DAY = 24,
+  WEEK = 7,
 }
 
 export enum MS_FOR {

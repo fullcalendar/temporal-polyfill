@@ -86,7 +86,7 @@ export class PlainDateTime {
         isoSecond,
         isoMillisecond
       )
-    } else if (thing.epochMilliseconds || thing.epochMilliseconds === 0) {
+    } else if (typeof thing.epochMilliseconds === 'number') {
       const {
         isoYear,
         isoMonth,
@@ -154,7 +154,7 @@ export class PlainDateTime {
     return msToIsoDate(this.epochMilliseconds).isoMillisecond
   }
 
-  get dayOfWeek(): string {
+  get dayOfWeek(): number {
     return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
   }
 

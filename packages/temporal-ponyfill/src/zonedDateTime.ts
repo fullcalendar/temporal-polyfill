@@ -87,7 +87,7 @@ export class ZonedDateTime {
     return this.offsetIso().isoMillisecond
   }
 
-  get dayOfWeek(): string {
+  get dayOfWeek(): number {
     return this.calendar.dayOfWeek(this.offsetIso())
   }
 

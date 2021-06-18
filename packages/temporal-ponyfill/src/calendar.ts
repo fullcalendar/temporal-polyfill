@@ -110,8 +110,8 @@ export class Calendar {
   }
 
   // OF methods
-  dayOfWeek(dt: PlainDate): string {
-    return reduceFormat(isoDateToMs(dt), this.formatter)['weekday'] as string
+  dayOfWeek(dt: PlainDate): number {
+    return new Date(isoDateToMs(dt)).getUTCDay()
   }
 
   dayOfYear(dt: PlainDate): number {
