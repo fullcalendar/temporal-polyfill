@@ -97,3 +97,10 @@ test.each<[Duration, RoundOptionsLike, Duration]>([
 ])('can round %s', (dur, options, expected) => {
   expect(dur.round(options)).toEqual(expected)
 })
+
+test('can zero out values using with', () => {
+  const dur = new Duration(10, 10, 10, 10, 10, 10, 10, 10)
+  expect(dur.with({ years: 0, months: 0, weeks: 0 })).toEqual(
+    new Duration(0, 0, 0, 10, 10, 10, 10, 10)
+  )
+})

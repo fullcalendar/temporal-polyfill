@@ -122,11 +122,24 @@ export class Calendar {
   }
 
   weekOfYear(dt: PlainDate): number {
-    return Math.ceil(
-      ((isoDateToMs(dt) - isoDateToMs({ isoYear: dt.isoYear, isoMonth: 1 })) /
-        MS_FOR.DAY +
-        1) /
-        this.daysInWeek()
+    const date = {
+      isoYear: dt.isoYear,
+      isoMonth: dt.isoMonth,
+      // Set to a thursday
+      isoDay: dt.isoDay + 3 - ((this.dayOfWeek(dt) + 6) % UNIT_INCREMENT.WEEK),
+    }
+    // Week 1 is always January 4th
+    const week1 = { isoYear: dt.isoYear, isoMonth: 1, isoDay: 4 }
+
+    // Adjusts week1 to a Thursday and calculates the week difference
+    return (
+      1 +
+      Math.round(
+        ((isoDateToMs(date) - isoDateToMs(week1)) / MS_FOR.DAY -
+          3 +
+          ((this.dayOfWeek(week1) + 6) % 7)) /
+          7
+      )
     )
   }
 

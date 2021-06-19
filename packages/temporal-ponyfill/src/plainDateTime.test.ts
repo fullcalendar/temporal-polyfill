@@ -133,3 +133,10 @@ test.each<[PlainDateTime, PlainDateTime, RoundOptionsLike]>([
 ])('can round %s', (date, expected, options) => {
   expect(date.round(options)).toEqual(expected)
 })
+
+test('can zero out values using with', () => {
+  const date = new PlainDateTime(1970, 1, 1, 10, 10, 10, 10)
+  expect(
+    date.with({ isoHour: 0, isoMinute: 0, isoSecond: 0, isoMillisecond: 0 })
+  ).toEqual(new PlainDateTime(1970, 1, 1, 0, 0, 0, 0))
+})

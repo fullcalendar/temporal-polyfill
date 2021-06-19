@@ -91,14 +91,14 @@ export class Duration {
     milliseconds,
   }: DurationLike): Duration {
     return new Duration(
-      years || this.years,
-      months || this.months,
-      weeks || this.weeks,
-      days || this.days,
-      hours || this.hours,
-      minutes || this.minutes,
-      seconds || this.seconds,
-      milliseconds || this.milliseconds
+      typeof years === 'number' ? years : this.years,
+      typeof months === 'number' ? months : this.months,
+      typeof weeks === 'number' ? weeks : this.weeks,
+      typeof days === 'number' ? days : this.days,
+      typeof hours === 'number' ? hours : this.hours,
+      typeof minutes === 'number' ? minutes : this.minutes,
+      typeof seconds === 'number' ? seconds : this.seconds,
+      typeof milliseconds === 'number' ? milliseconds : this.milliseconds
     )
   }
 

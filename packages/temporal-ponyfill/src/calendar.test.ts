@@ -13,9 +13,9 @@ test.each<[CalendarId]>([['iso8601'], ['gregory']])('can return %s', (id) => {
 })
 
 describe.each([
-  [{ isoYear: 1970, isoMonth: 1, isoDay: 1 }, 12, 365, 1], // Unix Epoch
-  [{ isoYear: 1970, isoMonth: 1, isoDay: 8 }, 12, 365, 2], // 1st week since Epoch
-  [{ isoYear: 2020, isoMonth: 12, isoDay: 25 }, 12, 366, 52], // Christmas 2020
+  [new PlainDate(1970, 1, 1), 12, 365, 1], // Unix Epoch
+  [new PlainDate(1970, 1, 8), 12, 365, 2], // 1st week since Epoch
+  [new PlainDate(2020, 12, 25), 12, 366, 52], // Christmas 2020
 ])('for %s', (date, monthsInYear, daysInYear, weekOfYear) => {
   const calendar = new Calendar()
   test('can get monthsInYear', () => {
@@ -32,23 +32,11 @@ describe.each([
 })
 
 test.each<[PlainDate, Duration, PlainDate]>([
+  [new PlainDate(1970, 12, 1), new Duration(1, 1), new PlainDate(1972, 1, 1)],
   [
-    { isoYear: 1970, isoMonth: 12, isoDay: 1 },
-    new Duration(1, 1),
-    {
-      isoYear: 1972,
-      isoMonth: 1,
-      isoDay: 1,
-    },
-  ],
-  [
-    { isoYear: 1970, isoMonth: 1, isoDay: 25 },
+    new PlainDate(1970, 1, 25),
     new Duration(0, 0, 1),
-    {
-      isoYear: 1970,
-      isoMonth: 2,
-      isoDay: 1,
-    },
+    new PlainDate(1970, 2, 1),
   ],
 ])('can dateAdd %s + %s = %s', (date, dur, expected) => {
   const calendar = new Calendar()
@@ -57,26 +45,34 @@ test.each<[PlainDate, Duration, PlainDate]>([
 
 test.each<[PlainDate, PlainDate, Duration]>([
   [
-    { isoYear: 1970, isoMonth: 1, isoDay: 1 },
-    { isoYear: 1972, isoMonth: 3, isoDay: 5 },
+    new PlainDate(1970, 1, 1),
+    new PlainDate(1972, 3, 5),
     new Duration(2, 2, 0, 4),
   ],
   [
-    { isoYear: 1970, isoMonth: 5, isoDay: 30 },
-    { isoYear: 1972, isoMonth: 1, isoDay: 1 },
+    new PlainDate(1970, 5, 30),
+    new PlainDate(1972, 1, 1),
     new Duration(1, 7, 0, 2),
   ],
   [
-    { isoYear: 2021, isoMonth: 5, isoDay: 24 },
-    { isoYear: 2021, isoMonth: 5, isoDay: 28 },
+    new PlainDate(2021, 5, 24),
+    new PlainDate(2021, 5, 28),
     new Duration(0, 0, 0, 4),
   ],
   [
-    { isoYear: 2022, isoMonth: 6, isoDay: 3 },
-    { isoYear: 2021, isoMonth: 5, isoDay: 1 },
+    new PlainDate(2022, 6, 3),
+    new PlainDate(2021, 5, 1),
     new Duration(-1, -1, 0, -2),
   ],
 ])('can do dateUntil from %s to %s', (one, two, expected) => {
   const received = new Calendar().dateUntil(one, two, { largestUnit: 'years' })
   expect(received).toEqual(expected)
 })
+
+test.each([[new PlainDate(2021, 1, 4), 1]])(
+  'can calculate weekOfYear for %s',
+  (dt, expected) => {
+    const calendar = new Calendar()
+    expect(calendar.weekOfYear(dt)).toBe(expected)
+  }
+)

@@ -167,15 +167,25 @@ export class PlainDateTime {
       // TODO Implement this
       throw new Error('Unimplemented')
     }
+    const {
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      calendar,
+    } = dateTimeLike
     return new PlainDateTime(
-      dateTimeLike.isoYear || this.year,
-      dateTimeLike.isoMonth || this.month,
-      dateTimeLike.isoDay || this.day,
-      dateTimeLike.isoHour || this.hour,
-      dateTimeLike.isoMinute || this.minute,
-      dateTimeLike.isoSecond || this.second,
-      dateTimeLike.isoMillisecond || this.millisecond,
-      dateTimeLike.calendar || this.calendar
+      typeof isoYear === 'number' ? isoYear : this.year,
+      typeof isoMonth === 'number' ? isoMonth : this.month,
+      typeof isoDay === 'number' ? isoDay : this.day,
+      typeof isoHour === 'number' ? isoHour : this.hour,
+      typeof isoMinute === 'number' ? isoMinute : this.minute,
+      typeof isoSecond === 'number' ? isoSecond : this.second,
+      typeof isoMillisecond === 'number' ? isoMillisecond : this.millisecond,
+      calendar || this.calendar
     )
   }
 
