@@ -53,7 +53,8 @@ test.each([
     new PlainDateTime(2021, 8, 13),
     '2021YYYY-08MM-13DD',
   ],
-])('escaped literals work', (tokenStr, date, expected) => {
+  ['word YYYY-MM-DD', new PlainDateTime(2021, 8, 13), 'word 2021-08-13'],
+])('escaped literals work for `%s`', (tokenStr, date, expected) => {
   const formatter = new TokenDateTimeFormat(tokenStr)
   expect(formatter.format(date)).toBe(expected)
 })

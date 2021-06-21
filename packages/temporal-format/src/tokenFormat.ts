@@ -7,7 +7,7 @@ const REGEX_FORMAT =
   /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W/g
 
 // Object containing a options to append to formatter, property to use from parts | transform function that creates an output from parts
-const tokenTupleMap: {
+const tokenMap: {
   [key: string]: {
     options: Intl.DateTimeFormatOptions
     property: string
@@ -75,12 +75,12 @@ export class TokenDateTimeFormat {
     readonly locale: LocaleId = 'en-us',
     options?: Intl.DateTimeFormatOptions
   ) {
-    const tokenOptions = Object.keys(tokenTupleMap).reduce(
+    const tokenOptions = Object.keys(tokenMap).reduce(
       (accum: Intl.DateTimeFormatOptions, val) => {
         // Match parts of tokenTupleMap from string
         // If there's a match, append its formatter options
         return this.tokenStr.includes(val)
-          ? { timeZone: 'UTC', ...accum, ...tokenTupleMap[val].options }
+          ? { timeZone: 'UTC', ...accum, ...tokenMap[val].options }
           : accum
       },
       {}
@@ -118,13 +118,13 @@ export class TokenDateTimeFormat {
         return $1
       }
 
-      // If there's a transform function, use that instead
-      else if (!$1 && tokenTupleMap[match].transform) {
-        return tokenTupleMap[match].transform(parts, dt)
+      if (tokenMap[match]) {
+        return tokenMap[match].transform
+          ? tokenMap[match].transform(parts, dt)
+          : parts[tokenMap[match].property]
       }
 
-      // Replace with proper value from Intl API
-      return parts[tokenTupleMap[match].property]
+      return match
     })
   }
 
