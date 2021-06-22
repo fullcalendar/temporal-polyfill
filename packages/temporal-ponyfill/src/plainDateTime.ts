@@ -178,14 +178,14 @@ export class PlainDateTime {
       calendar,
     } = dateTimeLike
     return new PlainDateTime(
-      typeof isoYear === 'number' ? isoYear : this.year,
-      typeof isoMonth === 'number' ? isoMonth : this.month,
-      typeof isoDay === 'number' ? isoDay : this.day,
-      typeof isoHour === 'number' ? isoHour : this.hour,
-      typeof isoMinute === 'number' ? isoMinute : this.minute,
-      typeof isoSecond === 'number' ? isoSecond : this.second,
-      typeof isoMillisecond === 'number' ? isoMillisecond : this.millisecond,
-      calendar || this.calendar
+      isoYear ?? this.year,
+      isoMonth ?? this.month,
+      isoDay ?? this.day,
+      isoHour ?? this.hour,
+      isoMinute ?? this.minute,
+      isoSecond ?? this.second,
+      isoMillisecond ?? this.millisecond,
+      calendar ?? this.calendar
     )
   }
 

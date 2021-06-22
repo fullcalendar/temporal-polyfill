@@ -47,14 +47,14 @@ export class Duration {
     if (typeof thing === 'string') {
       return parseDuration(thing)
     } else if (
-      thing.years ||
-      thing.months ||
-      thing.weeks ||
-      thing.days ||
-      thing.hours ||
-      thing.minutes ||
-      thing.seconds ||
-      thing.milliseconds
+      typeof thing.years === 'number' ||
+      typeof thing.months === 'number' ||
+      typeof thing.weeks === 'number' ||
+      typeof thing.days === 'number' ||
+      typeof thing.hours === 'number' ||
+      typeof thing.minutes === 'number' ||
+      typeof thing.seconds === 'number' ||
+      typeof thing.milliseconds === 'number'
     ) {
       return new Duration(
         thing.years,
@@ -91,14 +91,14 @@ export class Duration {
     milliseconds,
   }: DurationLike): Duration {
     return new Duration(
-      typeof years === 'number' ? years : this.years,
-      typeof months === 'number' ? months : this.months,
-      typeof weeks === 'number' ? weeks : this.weeks,
-      typeof days === 'number' ? days : this.days,
-      typeof hours === 'number' ? hours : this.hours,
-      typeof minutes === 'number' ? minutes : this.minutes,
-      typeof seconds === 'number' ? seconds : this.seconds,
-      typeof milliseconds === 'number' ? milliseconds : this.milliseconds
+      years ?? this.years,
+      months ?? this.months,
+      weeks ?? this.weeks,
+      days ?? this.days,
+      hours ?? this.hours,
+      minutes ?? this.minutes,
+      seconds ?? this.seconds,
+      milliseconds ?? this.milliseconds
     )
   }
 

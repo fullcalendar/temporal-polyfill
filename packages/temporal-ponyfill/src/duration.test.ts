@@ -7,7 +7,7 @@ test('can instantiate duration', () => {
   expect(duration).toBeDefined()
 })
 
-describe('duration strings', () => {
+describe('duration from', () => {
   test.each([
     ['P1Y1M1DT1H1M1.1S', 1, 1, 1, 1, 1, 1, 100],
     ['P40D', 0, 0, 40, 0, 0, 0, 0],
@@ -19,8 +19,9 @@ describe('duration strings', () => {
     ['PT0.002S', 0, 0, 0, 0, 0, 0, 2],
     ['PT0S', 0, 0, 0, 0, 0, 0, 0],
     ['P0D', 0, 0, 0, 0, 0, 0, 0],
-  ])('can be parsed from %s', (str, year, month, day, hour, min, sec, ms) => {
-    const duration = Duration.from(str)
+    [{ years: 0, months: 0 }, 0, 0, 0, 0, 0, 0, 0],
+  ])('can be parsed from %s', (thing, year, month, day, hour, min, sec, ms) => {
+    const duration = Duration.from(thing)
     expect(duration).toBeInstanceOf(Duration)
     expect(duration.years).toBe(year)
     expect(duration.months).toBe(month)
@@ -60,11 +61,6 @@ test.each<
   [Duration, { unit: DurationUnit; relativeTo?: PlainDateTime }, number]
 >([
   [new Duration(0, 0, 0, 1), { unit: 'hours' }, 24],
-  [
-    new Duration(1, 0, 0, 1),
-    { unit: 'months', relativeTo: new PlainDateTime(2000, 1, 1) },
-    12 + 1 / 31,
-  ],
   [new Duration(0, 0, 0, 1), { unit: 'minutes' }, 1440],
   [new Duration(0, 0, 0, 1), { unit: 'weeks' }, 1 / 7],
   [
