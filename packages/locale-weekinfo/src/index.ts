@@ -1,0 +1,1 @@
+export { getLocaleWeekInfo } from './localeWeekInfo'
