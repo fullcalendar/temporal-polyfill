@@ -1,0 +1,6 @@
+[submodule "scripts/data/moment"]
+	path = scripts/data/moment
+	url = https://github.com/moment/moment.git
+[submodule "scripts/data/fullcalendar"]
+	path = scripts/data/fullcalendar
+	url = https://github.com/fullcalendar/fullcalendar.git
