@@ -8,45 +8,13 @@ const fullcalendarLocaleRoot = resolve(
   '..',
   'data/fullcalendar/packages/core/src/locales'
 )
-const outputRoot = resolve(process.argv[1], '../../locales')
-
-const parseValues = (str, add) => {
-  let direction = null
-  let firstDay = null
-  let minimalDays = null
-
-  // Early short circuit if no content
-  if (!str) {
-    return { text: { direction }, week: { firstDay, minimalDays } }
-  }
-
-  // Direction
-  const directionMatch = str.match(/direction: (ltr|rtl)/)
-
-  if (directionMatch) {
-    direction = directionMatch[1]
-  } else {
-    direction = 'ltr'
-  }
-
-  // First Day
-  const firstDayMatch = str.match(/dow: (\d)/)
-
-  if (firstDayMatch) {
-    firstDay = parseInt(firstDayMatch[1]) + (add?.firstDay ?? 0)
-  }
-
-  // Minimal Days
-  const minimalDaysMatch = str.match(/doy: (\d)/)
-
-  if (minimalDaysMatch) {
-    minimalDays = parseInt(minimalDaysMatch[1]) + (add?.minimalDays ?? 0)
-  }
-
-  return { text: { direction }, week: { firstDay, minimalDays } }
-}
 
 const writeLocale = async (localeStr) => {
+  const localeData = {
+    text: { direction: null },
+    week: { firstDay: null, minimalDays: null },
+  }
+
   // Get File Content for Moment
   const momentContent = await readFile(
     resolve(momentLocaleRoot, `${localeStr}.js`),
@@ -55,8 +23,16 @@ const writeLocale = async (localeStr) => {
     console.error(`'${localeStr}' does not exist in Moment`)
   })
 
-  let localeData = parseValues(momentContent, { firstDay: 1 }) // Moment is 0-based, need to convert to 1-based
-  console.log(localeData)
+  if (momentContent) {
+    // First Day and Minimal Days
+    const matches = momentContent.match(/dow: (\d).*\s*doy: (\d)/)
+
+    if (matches) {
+      // Moment is 0-based, need to convert to 1-based
+      localeData.week.firstDay = parseInt(matches[1]) + 1
+      localeData.week.minimalDays = parseInt(matches[2]) + 1
+    }
+  }
 
   // Get File Content for FullCalendar
   const fullcalendarContent = await readFile(
@@ -64,38 +40,37 @@ const writeLocale = async (localeStr) => {
     { encoding: 'utf8' }
   ).catch(() => {
     console.error(`'${localeStr}' does not exist in FullCalendar`)
-    // If there's no FullCalendar file, make direction null so we know to fix it
-    localeData.text.direction = null
   })
 
-  // FullCalendar files will overwrite
-  localeData = parseValues(fullcalendarContent)
-  console.log(localeData)
+  // FullCalendar file overwrite
+  if (fullcalendarContent) {
+    // Direction
+    const directionMatch = fullcalendarContent.match(/direction: '(ltr|rtl)'/)
+
+    if (directionMatch) {
+      localeData.text.direction = directionMatch[1]
+    } else {
+      localeData.text.direction = 'ltr'
+    }
+  }
 
   // Write to file
   await writeFile(
-    resolve(outputRoot, `${localeStr}.json`),
-    JSON.stringify(localeData),
+    resolve(process.argv[1], '../../locales', `${localeStr}.json`),
+    JSON.stringify(localeData, null, 2),
     { encoding: 'utf8', flag: 'w' }
   )
-  console.log(`Wrote Locale '${localeStr}'`)
-  console.log()
+  console.log(`Wrote Locale '${localeStr}'.`)
 }
 
 // Read in arguments
-const locales =
+let locales =
   process.argv[2] && process.argv[2] !== 'all'
     ? process.argv[2]?.split(',')
     : undefined
 
-// Case of arguments
-if (locales) {
-  for (const localeStr of locales) {
-    writeLocale(localeStr)
-  }
-}
 // Case of All
-else {
+if (!locales) {
   const momentLocaleArr = readdirSync(momentLocaleRoot).map((val) => {
     return val.replace('.js', '')
   })
@@ -106,15 +81,16 @@ else {
   )
 
   // Remove duplicates
-  const combinedArr = [...new Set(momentLocaleArr, fullcalendarLocaleArr)]
+  locales = [...new Set(momentLocaleArr, fullcalendarLocaleArr)]
 
   // If the array is empty, it means submodules weren't checked out
-  if (combinedArr.length === 0) {
+  if (locales.length === 0) {
     console.error('Please check out Git Submodules')
     process.exit()
   }
+}
 
-  for (const localeStr of combinedArr) {
-    writeLocale(localeStr)
-  }
+// Iterate through array
+for (const localeStr of locales) {
+  writeLocale(localeStr)
 }

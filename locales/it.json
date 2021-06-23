@@ -1,1 +1,9 @@
-{"text":{"direction":"ltr"},"week":{"firstDay":1,"minimalDays":4}}
+{
+  "text": {
+    "direction": "ltr"
+  },
+  "week": {
+    "firstDay": 2,
+    "minimalDays": 5
+  }
+}

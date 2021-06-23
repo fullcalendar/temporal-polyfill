@@ -1,0 +1,1 @@
+export { getLocaleTextInfo } from './localeTextInfo'

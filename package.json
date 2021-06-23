@@ -25,7 +25,8 @@
     "test": "jest --coverage",
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
-    "write-locales": "node ./scripts/write-locales.mjs"
+    "write-locales": "node ./scripts/write-locales.mjs",
+    "write-directions": "yarn workspace locale-textinfo write-directions"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

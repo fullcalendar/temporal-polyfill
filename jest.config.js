@@ -6,5 +6,6 @@ export default {
     '<rootDir>/packages/temporal-ponyfill',
     '<rootDir>/packages/temporal-format',
     '<rootDir>/packages/locale-weekinfo',
+    '<rootDir>/packages/locale-textinfo',
   ],
 }
