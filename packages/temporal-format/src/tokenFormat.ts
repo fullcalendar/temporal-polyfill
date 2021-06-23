@@ -105,10 +105,10 @@ export class TokenDateTimeFormat {
 
     const parts = this.formatter
       .formatToParts(dt.epochMilliseconds)
-      .reduce((acc: Record<string, string>, { type, value }) => {
+      .reduce((accum: Record<string, string>, { type, value }) => {
         // Convert from an array of objects to an object with keys for year/month/day/etc.
         return {
-          ...acc,
+          ...accum,
           [type]: value,
         }
       }, {})
