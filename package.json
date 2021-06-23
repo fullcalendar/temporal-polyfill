@@ -24,7 +24,8 @@
     "build": "yarn workspaces foreach run build",
     "test": "jest --coverage",
     "dev": "jest --watch",
-    "lint": "eslint packages/*/src/**/*.ts --fix"
+    "lint": "eslint packages/*/src/**/*.ts --fix",
+    "write-locales": "node ./scripts/write-locales.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

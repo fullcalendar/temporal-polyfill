@@ -4296,6 +4296,17 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"locale-weekinfo@workspace:packages/locale-weekinfo":
+  version: 0.0.0-use.local
+  resolution: "locale-weekinfo@workspace:packages/locale-weekinfo"
+  dependencies:
+    "@types/jest": ^26.0.23
+    jest: ^27.0.4
+    ts-jest: ^27.0.3
+    typescript: ^4.3.4
+  languageName: unknown
+  linkType: soft
+
 "locate-path@npm:^5.0.0":
   version: 5.0.0
   resolution: "locate-path@npm:5.0.0"
