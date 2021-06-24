@@ -10,10 +10,7 @@ const fullcalendarLocaleRoot = resolve(
 )
 
 const writeLocale = async (localeStr) => {
-  let localeData = {
-    text: { direction: null },
-    week: { firstDay: null, minimalDays: null },
-  }
+  let localeData = {}
 
   // Get File Content for Moment
   const momentContent = await readFile(
@@ -37,12 +34,18 @@ const writeLocale = async (localeStr) => {
 
     if (matchfirstDay) {
       // Moment is 0-based, need to convert to 1-based
-      localeData.week.firstDay = parseInt(matchfirstDay[1]) + 1
+      localeData.week = {
+        ...localeData.week,
+        firstDay: parseInt(matchfirstDay[1]) + 1,
+      }
     }
 
     if (matchMinimalDays) {
       // Moment is 0-based, need to convert to 1-based
-      localeData.week.minimalDays = parseInt(matchMinimalDays[1]) + 1
+      localeData.week = {
+        ...localeData.week,
+        minimalDays: parseInt(matchMinimalDays[1]) + 1,
+      }
     }
   }
 
@@ -63,10 +66,9 @@ const writeLocale = async (localeStr) => {
       /direction:\s*['"](ltr|rtl)['"]/
     )
 
-    if (directionMatch) {
-      localeData.text.direction = directionMatch[1]
-    } else {
-      localeData.text.direction = 'ltr'
+    localeData.text = {
+      ...localeData.text,
+      direction: directionMatch ? directionMatch[1] : 'ltr',
     }
   }
 
@@ -80,7 +82,21 @@ const writeLocale = async (localeStr) => {
 
   // Merge data together
   if (temporalLiteContent) {
-    localeData = { ...temporalLiteContent, ...localeData }
+    localeData = {
+      ...temporalLiteContent,
+      ...localeData,
+      text: {
+        direction: null,
+        ...temporalLiteContent.text,
+        ...localeData.text,
+      },
+      week: {
+        firstDay: null,
+        minimalDays: null,
+        ...temporalLiteContent.week,
+        ...localeData.week,
+      },
+    }
   }
 
   // Write to file
