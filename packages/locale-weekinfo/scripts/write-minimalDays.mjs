@@ -8,7 +8,7 @@ localesReduceAsync((accum, locale, json) => {
   return typeof minimalDays !== 'number'
     ? accum
     : { ...accum, [locale]: minimalDays }
-}).then((minimalDaysLocales) => {
+}, {}).then((minimalDaysLocales) => {
   const code = `export const getMinimalDays = (locale: string): number => {
   return ${JSON.stringify(minimalDaysLocales, null, 2)}[locale]
 }

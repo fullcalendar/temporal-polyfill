@@ -6,9 +6,9 @@ localesReduceAsync((accum, locale, json) => {
   const firstDay = json.week.firstDay
 
   return typeof firstDay !== 'number' ? accum : { ...accum, [locale]: firstDay }
-}).then((firstDayLocales) => {
+}, {}).then((firstDayLocales) => {
   const code = `export const getFirstDay = (locale: string): number => {
-return ${JSON.stringify(firstDayLocales, null, 2)}[locale]
+  return ${JSON.stringify(firstDayLocales, null, 2)}[locale]
 }
 `
 

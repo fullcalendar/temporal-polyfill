@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 
+// Get localeRoot relative to this file
 const localeRoot = resolve(fileURLToPath(import.meta.url), '../../locales')
 
 export const listLocales = () => {
@@ -19,7 +20,12 @@ export const listLocales = () => {
   return localeList
 }
 
-export const localesReduceAsync = (transform) => {
+export const localesReduceAsync = (
+  transform = (accum, locale, json) => {
+    return { ...accum, [locale]: json }
+  },
+  initial = ''
+) => {
   // Read files and reduce to locale comparison string asynchronously
   return listLocales(localeRoot).reduce(async (accumPromise, val) => {
     const json = JSON.parse(
@@ -28,10 +34,10 @@ export const localesReduceAsync = (transform) => {
       })
     )
 
-    // Get current state of accum
+    // Get current state of accum, this will cause the async to become synchronous
     const accum = await accumPromise
 
     // Format using given transform function
     return transform(accum, val.replace('.json', ''), json)
-  }, Promise.resolve(''))
+  }, Promise.resolve(initial))
 }
