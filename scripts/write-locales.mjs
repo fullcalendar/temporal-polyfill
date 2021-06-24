@@ -10,7 +10,7 @@ const fullcalendarLocaleRoot = resolve(
 )
 
 const writeLocale = async (localeStr) => {
-  const localeData = {
+  let localeData = {
     text: { direction: null },
     week: { firstDay: null, minimalDays: null },
   }
@@ -25,12 +25,24 @@ const writeLocale = async (localeStr) => {
 
   if (momentContent) {
     // First Day and Minimal Days
-    const matches = momentContent.match(/dow: (\d).*\s*doy: (\d)/)
+    const matchfirstDay = momentContent.match(/dow:\s*(\d)/)
+    const matchMinimalDays = momentContent.match(/doy:\s*(\d)/)
 
-    if (matches) {
+    if (!matchfirstDay && !matchMinimalDays) {
+      console.error(
+        `Could not find moment values for '${localeStr}'. Skipping this locale.`
+      )
+      return
+    }
+
+    if (matchfirstDay) {
       // Moment is 0-based, need to convert to 1-based
-      localeData.week.firstDay = parseInt(matches[1]) + 1
-      localeData.week.minimalDays = parseInt(matches[2]) + 1
+      localeData.week.firstDay = parseInt(matchfirstDay[1]) + 1
+    }
+
+    if (matchMinimalDays) {
+      // Moment is 0-based, need to convert to 1-based
+      localeData.week.minimalDays = parseInt(matchMinimalDays[1]) + 1
     }
   }
 
@@ -39,19 +51,36 @@ const writeLocale = async (localeStr) => {
     resolve(fullcalendarLocaleRoot, `${localeStr}.ts`),
     { encoding: 'utf8' }
   ).catch(() => {
-    console.error(`'${localeStr}' does not exist in FullCalendar`)
+    console.error(
+      `'${localeStr}' does not exist in FullCalendar, direction value will be 'null'`
+    )
   })
 
   // FullCalendar file overwrite
   if (fullcalendarContent) {
     // Direction
-    const directionMatch = fullcalendarContent.match(/direction: '(ltr|rtl)'/)
+    const directionMatch = fullcalendarContent.match(
+      /direction:\s*['"](ltr|rtl)['"]/
+    )
 
     if (directionMatch) {
       localeData.text.direction = directionMatch[1]
     } else {
       localeData.text.direction = 'ltr'
     }
+  }
+
+  // Read existing file
+  const temporalLiteContent = JSON.parse(
+    await readFile(
+      resolve(process.argv[1], '../../locales', `${localeStr}.json`),
+      { encoding: 'utf8' }
+    )
+  )
+
+  // Merge data together
+  if (temporalLiteContent) {
+    localeData = { ...temporalLiteContent, ...localeData }
   }
 
   // Write to file
