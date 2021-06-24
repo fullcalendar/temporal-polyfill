@@ -3,7 +3,6 @@ import { readFile } from 'fs/promises'
 import { resolve } from 'path'
 
 const localeRoot = resolve('../../locales')
-const outputPath = resolve('src/direction.ts')
 
 const localeList = readdirSync(localeRoot)
 
@@ -47,7 +46,9 @@ localeList
 }
 `
 
-    // Generate direction.ts
-    writeFileSync(outputPath, code, { encoding: 'utf8', flag: 'w' })
+    writeFileSync(resolve('src/direction.ts'), code, {
+      encoding: 'utf8',
+      flag: 'w',
+    })
     console.log('Wrote direction.ts')
   })
