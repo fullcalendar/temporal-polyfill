@@ -24,7 +24,10 @@
   "scripts": {
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "write:firstDays": "node ./scripts/write-firstDays.mjs",
+    "write:minimalDays": "node ./scripts/write-minimalDays.mjs",
+    "write": "yarn write:firstDays && yarn write:minimalDays"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

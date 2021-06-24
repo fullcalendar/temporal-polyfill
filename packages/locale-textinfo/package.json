@@ -25,7 +25,8 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "tsc",
     "test": "jest",
-    "write-directions": "node ./scripts/write-directions.mjs"
+    "write:directions": "node --experimental-json-modules ./scripts/write-directions.mjs",
+    "write": "yarn write:directions"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
