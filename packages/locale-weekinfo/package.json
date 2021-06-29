@@ -23,7 +23,10 @@
   ],
   "scripts": {
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "build": "tsc",
+    "gzip:size": "gzip -c -r dist/ | wc -c | numfmt --to=iec-i --suffix=B",
+    "build": "tsc && yarn esbuild && yarn esbuild:mini",
+    "esbuild": "esbuild src/index.ts --bundle --outfile=dist/index.js",
+    "esbuild:mini": "esbuild src/index.ts --bundle --minify --outfile=dist/index.min.js",
     "test": "jest",
     "write:firstDays": "node ./scripts/write-firstDays.mjs",
     "write:minimalDays": "node ./scripts/write-minimalDays.mjs",

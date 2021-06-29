@@ -21,12 +21,13 @@
   ],
   "scripts": {
     "clean": "yarn workspaces foreach run clean",
-    "build": "yarn workspaces foreach run build",
+    "build": "yarn workspaces foreach -v -t run build",
+    "gzip:size": "yarn workspaces foreach -v run gzip:size",
     "test": "jest --coverage",
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
     "write:locales": "node ./scripts/write-locales.mjs",
-    "write": "yarn run write:locales && yarn workspaces foreach run write"
+    "write": "yarn run write:locales && yarn workspaces foreach -v run write"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

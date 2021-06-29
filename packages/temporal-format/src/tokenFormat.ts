@@ -1,5 +1,4 @@
 import { PlainDateTime, ZonedDateTime } from 'temporal-ponyfill'
-import { LocaleId } from 'temporal-ponyfill'
 
 // Regex to replace token string with actual values
 // https://github.com/iamkun/dayjs/blob/dev/src/constant.js
@@ -67,6 +66,7 @@ const tokenMap: {
   },
 }
 
+type LocaleId = 'en-us' | string
 export class TokenDateTimeFormat {
   private formatter: Intl.DateTimeFormat
 
@@ -128,10 +128,10 @@ export class TokenDateTimeFormat {
     })
   }
 
-  formatRange(
-    dt0: PlainDateTime | ZonedDateTime,
-    dt1: PlainDateTime | ZonedDateTime
-  ): string {
-    return ''
-  }
+  // formatRange(
+  //   dt0: PlainDateTime | ZonedDateTime,
+  //   dt1: PlainDateTime | ZonedDateTime
+  // ): string {
+  //   return ''
+  // }
 }
