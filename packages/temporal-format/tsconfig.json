@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base",
   "compilerOptions": {
     "rootDir": "src",
-    "outFile": "dist/index.js"
+    "outDir": "dist"
   },
   "include": ["src/**/*"]
 }

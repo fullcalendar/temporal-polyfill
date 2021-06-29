@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "clean": "yarn workspaces foreach run clean",
-    "build": "yarn workspaces foreach -v -t run build",
+    "build": "yarn clean && yarn workspaces foreach -v -t run build",
     "gzip:size": "yarn workspaces foreach -v run gzip:size",
     "test": "jest --coverage",
     "dev": "jest --watch",
@@ -35,6 +35,7 @@
     "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
+    "@yarnpkg/esbuild-plugin-pnp": "^1.0.0-rc.6",
     "esbuild": "^0.12.9",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",

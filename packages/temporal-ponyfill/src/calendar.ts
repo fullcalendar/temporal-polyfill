@@ -135,10 +135,10 @@ export class Calendar {
     return (
       1 +
       Math.round(
-        ((isoDateToMs(date) - isoDateToMs(week1)) / MS_FOR.DAY -
+        ((isoDateToMs(date) - isoDateToMs(week1)) / MS_FOR.DAY - // Days passed in current year
           3 +
           ((this.dayOfWeek(week1) + 6) % UNIT_INCREMENT.WEEK)) /
-          7
+          UNIT_INCREMENT.WEEK
       )
     )
   }
