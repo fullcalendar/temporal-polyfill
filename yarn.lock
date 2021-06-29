@@ -2729,6 +2729,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esbuild@npm:^0.12.9":
+  version: 0.12.9
+  resolution: "esbuild@npm:0.12.9"
+  bin:
+    esbuild: bin/esbuild
+  checksum: e88720c29ec272c24640db25acdec841ad266bb42d8bb8930270141c82834314a05184f90ac68a74139721741c52ba343776ba4f69b2cf41a7a31c343e6fc867
+  languageName: node
+  linkType: hard
+
 "escalade@npm:^3.1.1":
   version: 3.1.1
   resolution: "escalade@npm:3.1.1"
@@ -5534,6 +5543,7 @@ fsevents@^2.3.2:
   resolution: "temporal-format@workspace:packages/temporal-format"
   dependencies:
     "@types/jest": ^26.0.23
+    esbuild: ^0.12.9
     jest: ^27.0.4
     temporal-ponyfill: "workspace:*"
     ts-jest: ^27.0.3
@@ -5550,6 +5560,7 @@ fsevents@^2.3.2:
     "@types/jest": ^26.0.23
     "@typescript-eslint/eslint-plugin": ^4.22.1
     "@typescript-eslint/parser": ^4.22.1
+    esbuild: ^0.12.9
     eslint: ^7.25.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^3.4.0
@@ -5564,6 +5575,7 @@ fsevents@^2.3.2:
   resolution: "temporal-ponyfill@workspace:packages/temporal-ponyfill"
   dependencies:
     "@types/jest": ^26.0.23
+    esbuild: ^0.12.9
     jest: ^27.0.4
     jest-date-mock: ^1.0.8
     ts-jest: ^27.0.3

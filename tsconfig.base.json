@@ -7,6 +7,7 @@
     "composite": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
+    "emitDeclarationOnly": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "resolveJsonModule": true,

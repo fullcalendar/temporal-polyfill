@@ -1,5 +1,5 @@
 import { PlainDateTime, ZonedDateTime } from 'temporal-ponyfill'
-import { LocaleId } from 'temporal-ponyfill/dist/utils'
+import { LocaleId } from 'temporal-ponyfill'
 
 // Regex to replace token string with actual values
 // https://github.com/iamkun/dayjs/blob/dev/src/constant.js

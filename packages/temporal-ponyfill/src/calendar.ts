@@ -137,7 +137,7 @@ export class Calendar {
       Math.round(
         ((isoDateToMs(date) - isoDateToMs(week1)) / MS_FOR.DAY -
           3 +
-          ((this.dayOfWeek(week1) + 6) % 7)) /
+          ((this.dayOfWeek(week1) + 6) % UNIT_INCREMENT.WEEK)) /
           7
       )
     )
