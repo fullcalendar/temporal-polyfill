@@ -2742,15 +2742,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.12.12":
-  version: 0.12.12
-  resolution: "esbuild@npm:0.12.12"
-  bin:
-    esbuild: bin/esbuild
-  checksum: a5b0f1cd1493de2194be73829900904d9d415295db54a4a8c0b368a776ccc1a43d8ae369d086c4e2aa94f25d2fa2a7d51940ba35c91b4682768bb229900489b1
-  languageName: node
-  linkType: hard
-
 "esbuild@npm:^0.12.9":
   version: 0.12.9
   resolution: "esbuild@npm:0.12.9"
@@ -4332,7 +4323,6 @@ fsevents@^2.3.2:
   resolution: "locale-textinfo@workspace:packages/locale-textinfo"
   dependencies:
     "@types/jest": ^26.0.23
-    esbuild: ^0.12.12
     jest: ^27.0.4
     ts-jest: ^27.0.3
     typescript: ^4.3.4
