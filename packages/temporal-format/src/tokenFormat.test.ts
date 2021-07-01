@@ -8,7 +8,7 @@ test.each([
   ['hh A', new PlainDateTime(2000, 5, 5, 8, 32), '08 AM'],
   ['HH a', new PlainDateTime(2000, 5, 5, 8, 32), '08 am'],
   ['E', new PlainDateTime(2021, 6, 1), '2'],
-  ['W', new PlainDateTime(2021, 1, 30), '5'],
+  ['W', new PlainDateTime(2021, 1, 30), '4'],
 ])(
   'token string formatting(%s) for PlainDateTime',
   (tokenStr, date, expected) => {
@@ -53,8 +53,9 @@ test.each([
     new PlainDateTime(2021, 8, 13),
     '2021YYYY-08MM-13DD',
   ],
-  ['word YYYY-MM-DD', new PlainDateTime(2021, 8, 13), 'word 2021-08-13'],
-])('escaped literals work for `%s`', (tokenStr, date, expected) => {
+  ['[word] YYYY-MM-DD', new PlainDateTime(2021, 8, 13), 'word 2021-08-13'],
+  ['MM [a literal MMMM]', new PlainDateTime(2021, 8, 13), '08 a literal MMMM'],
+])('escaped literals work for "%s"', (tokenStr, date, expected) => {
   const formatter = new TokenDateTimeFormat(tokenStr)
   expect(formatter.format(date)).toBe(expected)
 })

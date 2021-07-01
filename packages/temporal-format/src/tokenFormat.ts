@@ -3,7 +3,7 @@ import { PlainDateTime, ZonedDateTime } from 'temporal-ponyfill'
 // Regex to replace token string with actual values
 // https://github.com/iamkun/dayjs/blob/dev/src/constant.js
 const REGEX_FORMAT =
-  /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W/g
+  /(\[[^\]]+]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W)/g
 
 // Object containing a options to append to formatter, property to use from parts | transform function that creates an output from parts
 const tokenMap: {
@@ -75,19 +75,17 @@ export class TokenDateTimeFormat {
     readonly locale: LocaleId = 'en-us',
     options?: Intl.DateTimeFormatOptions
   ) {
-    const tokenOptions = Object.keys(tokenMap).reduce(
-      (accum: Intl.DateTimeFormatOptions, val) => {
-        // Match parts of tokenTupleMap from string
-        // If there's a match, append its formatter options
-        return this.tokenStr.includes(val)
-          ? { timeZone: 'UTC', ...accum, ...tokenMap[val].options }
-          : accum
-      },
-      {}
-    )
+    // Create options from matches in tokenStr
+    const tokenOptions: Intl.DateTimeFormatOptions = tokenStr
+      .match(REGEX_FORMAT)
+      .reduce((accum: Intl.DateTimeFormatOptions, val) => {
+        // Append token options into existing options
+        // Will simply ignore if not in tokenMap - O(1) time
+        return { ...accum, ...tokenMap[val]?.options }
+      }, {})
 
     // Create a format by merging user's options with token string's options
-    const internalOptions = { ...tokenOptions, ...options }
+    const internalOptions = { timeZone: 'UTC', ...tokenOptions, ...options }
     this.formatter = new Intl.DateTimeFormat(locale, internalOptions)
   }
 
@@ -113,19 +111,31 @@ export class TokenDateTimeFormat {
         }
       }, {})
 
-    return this.tokenStr.replace(REGEX_FORMAT, (match, $1) => {
-      if ($1) {
-        return $1
+    // Use split to differentiate parts that are part of formatting
+    return this.tokenStr.split(REGEX_FORMAT).reduce((accum, val) => {
+      // Undefined values
+      if (!val) {
+        return accum
       }
 
-      if (tokenMap[match]) {
-        return tokenMap[match].transform
-          ? tokenMap[match].transform(parts, dt)
-          : parts[tokenMap[match].property]
+      // Escaped literals
+      if (val.charAt(0) === '[' && val.charAt(val.length - 1) === ']') {
+        return accum + val.substring(1, val.length - 1)
       }
 
-      return match
-    })
+      // Formatted
+      if (tokenMap[val]) {
+        return (
+          accum +
+          (tokenMap[val].transform
+            ? tokenMap[val].transform(parts, dt)
+            : parts[tokenMap[val].property])
+        )
+      }
+
+      // Plain Strings
+      return accum + val
+    }, '')
   }
 
   // formatRange(
