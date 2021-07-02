@@ -3,7 +3,7 @@ import { PlainDateTime, ZonedDateTime } from 'temporal-ponyfill'
 // Regex to replace token string with actual values
 // https://github.com/iamkun/dayjs/blob/dev/src/constant.js
 const REGEX_FORMAT =
-  /(\[[^\]]+]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W)/g
+  /(\[[^\]]+]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W|Do|Wo)/g
 
 // Object containing a options to append to formatter, property to use from parts | transform function that creates an output from parts
 const tokenMap: {
@@ -64,7 +64,52 @@ const tokenMap: {
       return date.weekOfYear + ''
     },
   },
+  Do: {
+    options: { day: 'numeric' },
+    property: 'day',
+    transform: (parts) => {
+      return parts['day'] + 'nd' // TODO Make this function
+    },
+  },
+  Wo: {
+    options: {},
+    property: 'weekday',
+    transform: (_parts, date) => {
+      return date.weekOfYear + 'nd' // TODO Make this function
+    },
+  },
 }
+
+/////////////////
+// Temporary Variables for ordinal data
+const localeOrdinals = {
+  'et|fi': '.',
+  'es|pt|pt-br': 'º',
+  en: {
+    // leverages PluralRules
+    one: 'st',
+    two: 'nd',
+    few: 'rd',
+    other: 'th',
+  },
+  fr: {
+    // custom data handled in specialCases
+    m: 'er', // masculine
+    f: 're', // feminine
+  },
+}
+const specialCases: {
+  [key: string]: (
+    ordinalData: unknown,
+    unit: string | number,
+    pluralRule: unknown
+  ) => string
+} = {
+  fr: (ordinalData, unit) => {
+    return unit === 1 ? 'e' : ordinalData[unit === 'day' ? 'm' : 'f']
+  },
+}
+/////////////////
 
 type LocaleId = 'en-us' | string
 export class TokenDateTimeFormat {

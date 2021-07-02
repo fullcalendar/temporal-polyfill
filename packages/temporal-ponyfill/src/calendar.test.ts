@@ -1,4 +1,4 @@
-import { Calendar, CalendarId } from './calendar'
+import { Calendar, CalendarId, weekOfYear } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 
@@ -74,5 +74,31 @@ test.each([[new PlainDate(2021, 1, 4), 1]])(
   (dt, expected) => {
     const calendar = new Calendar()
     expect(calendar.weekOfYear(dt)).toBe(expected)
+  }
+)
+
+test.each([
+  [new PlainDate(1970, 1, 1), 1],
+  [new PlainDate(2021, 1, 29), 29],
+  [new PlainDate(2020, 12, 31), 366],
+  [new PlainDate(2021, 12, 31), 365],
+])('can get proper dayOfYear for %s', (date, expected) => {
+  const calendar = new Calendar()
+  expect(calendar.dayOfYear(date)).toBe(expected)
+})
+
+test.each([
+  [new PlainDate(1970, 1, 1), 0, 4, 1],
+  [new PlainDate(1970, 1, 8), 0, 4, 2],
+  [new PlainDate(2021, 1, 1), 0, 4, 53],
+  [new PlainDate(2020, 12, 29), 0, 4, 53],
+  [new PlainDate(2021, 1, 7), 0, 4, 1],
+  [new PlainDate(2021, 1, 7), 0, 3, 1],
+  [new PlainDate(2021, 1, 7), 2, 3, 1],
+])(
+  'computeWeekOfYear works for %s with dow: %s and doy: %s',
+  (date, dow, doy, expected) => {
+    const calendar = new Calendar()
+    expect(weekOfYear(date, calendar, dow, doy)).toBe(expected)
   }
 )

@@ -1,4 +1,4 @@
-export { Calendar } from './calendar'
+export { Calendar, weeksInYear, weekOfYear } from './calendar'
 export { TimeZone } from './timeZone'
 export { Duration } from './duration'
 export { PlainDateTime } from './plainDateTime'
