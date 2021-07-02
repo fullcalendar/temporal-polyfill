@@ -32,6 +32,5 @@
         "next": ["function", "block-like", "class"]
       }
     ]
-  },
-  "ignorePatterns": "*/dist/*/**"
+  }
 }
