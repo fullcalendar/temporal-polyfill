@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
-    "esbuild": "^0.12.9",
     "jest": "^27.0.4",
     "jest-date-mock": "^1.0.8",
     "ts-jest": "^27.0.3",
