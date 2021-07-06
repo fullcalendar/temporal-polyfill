@@ -47,6 +47,19 @@ const writeLocale = async (localeStr) => {
         minimalDays: parseInt(matchMinimalDays[1]) + 1,
       }
     }
+
+    // Ordinals
+    const matchOrdinal = momentContent.match(
+      /ordinal: (?:(function)|'%d(\S*)',)\s/
+    )
+
+    if (matchOrdinal) {
+      if (matchOrdinal[1] === 'function') {
+        console.log(`Ordinals for ${localeStr} are not handled by Moment`)
+      } else {
+        localeData.ordinal = matchOrdinal[2]
+      }
+    }
   }
 
   // Get File Content for FullCalendar

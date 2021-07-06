@@ -8,7 +8,9 @@ test.each([
   ['hh A', new PlainDateTime(2000, 5, 5, 8, 32), '08 AM'],
   ['HH a', new PlainDateTime(2000, 5, 5, 8, 32), '08 am'],
   ['E', new PlainDateTime(2021, 6, 1), '2'],
-  ['W', new PlainDateTime(2021, 1, 30), '4'],
+  ['W [weeks]', new PlainDateTime(2021, 1, 30), '4 weeks'],
+  ['Do [day]', new PlainDateTime(2021, 1, 30), '30th day'],
+  ['Wo [week]', new PlainDateTime(2021, 1, 8), '1st week'],
 ])(
   'token string formatting(%s) for PlainDateTime',
   (tokenStr, date, expected) => {
