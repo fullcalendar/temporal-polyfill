@@ -3,26 +3,8 @@ import { DurationLike } from 'temporal-ponyfill/dist/duration'
 import { LocaleId } from 'temporal-ponyfill/dist/utils'
 
 const largestCommonString = (a: string, b: string): string => {
-  // FIXME: There has to be a better way
-  let largest = ''
-
-  for (let i = 0; i <= a.length; i++) {
-    const aSub = a.substring(0, i)
-    const bSub = b.substring(0, i)
-
-    if (aSub === bSub && aSub.length > largest.length) {
-      largest = aSub
-    }
-
-    const aBackSub = a.substring(a.length - 1 - i, a.length)
-    const bBackSub = b.substring(b.length - 1 - i, b.length)
-
-    if (aBackSub === bBackSub && aBackSub.length > largest.length) {
-      largest = aBackSub
-    }
-  }
-
-  return largest
+  const [short, long] = a.length < b.length ? [a, b] : [b, a]
+  return long.includes(short) ? short : ''
 }
 
 type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
@@ -56,47 +38,52 @@ export class DurationFormat {
       return arr[index].type === 'literal' ? arr[index].value : ''
     }
 
-    return Object.keys(duration).reduce(
-      (
-        accum: Array<Intl.RelativeTimeFormatPart>,
-        key: Intl.RelativeTimeFormatUnit
-      ) => {
-        const val = duration[key]
+    // Storage array
+    const arr = []
 
-        if (val !== 0) {
-          const forwardUnit = this.formatter.formatToParts(val, key)
-          const backwardUnit = this.formatter.formatToParts(-val, key)
+    for (const key in duration) {
+      const val = duration[key]
 
-          // Extract common string from formatted parts
-          const before = largestCommonString(
-            getLiteralValue(forwardUnit, 0),
-            getLiteralValue(backwardUnit, 0)
-          )
-          const after = largestCommonString(
-            getLiteralValue(forwardUnit, forwardUnit.length - 1),
-            getLiteralValue(backwardUnit, backwardUnit.length - 1)
-          )
+      if (val !== 0) {
+        const forwardParts = this.formatter.formatToParts(
+          val,
+          key as Intl.RelativeTimeFormatUnit
+        )
+        const backwardParts = this.formatter.formatToParts(
+          -val,
+          key as Intl.RelativeTimeFormatUnit
+        )
 
-          // Append pretext into accumulator
-          if (before !== '' || accum.length > 0) {
-            accum.push({
-              type: 'literal',
-              value: accum.length > 0 ? ' ' : '' + before,
-            })
-          }
+        // Extract common string from formatted parts
+        const before = largestCommonString(
+          getLiteralValue(forwardParts, 0),
+          getLiteralValue(backwardParts, 0)
+        )
+        const after = largestCommonString(
+          getLiteralValue(forwardParts, forwardParts.length - 1),
+          getLiteralValue(backwardParts, backwardParts.length - 1)
+        )
 
-          // Account for before part not being present
-          accum.push(forwardUnit[forwardUnit[0].type === 'literal' ? 1 : 0])
-
-          // Append posttext into accumulator
-          if (after !== '') {
-            accum.push({ type: 'literal', value: after })
-          }
+        // Append pretext into accumulator
+        if (before !== '' || arr.length > 0) {
+          arr.push({
+            type: 'literal',
+            // Add a space if this isn't the first value
+            value: `${arr.length > 0 ? ' ' : ''}${before}`,
+          })
         }
-        return accum
-      },
-      []
-    )
+
+        // Account for before part not being present
+        arr.push(forwardParts[forwardParts[0].type === 'literal' ? 1 : 0])
+
+        // Append posttext into accumulator
+        if (after !== '') {
+          arr.push({ type: 'literal', value: after })
+        }
+      }
+    }
+
+    return arr
   }
 
   format(durationLike: Duration | DurationLike): string {

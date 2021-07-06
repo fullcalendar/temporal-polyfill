@@ -17,6 +17,34 @@ test.each([
     ],
   ],
   [
+    new Duration(3),
+    [
+      {
+        type: 'integer',
+        value: '3',
+        unit: 'year',
+      },
+      {
+        type: 'literal',
+        value: ' years',
+      },
+    ],
+  ],
+  [
+    new Duration(0, 0, 0, 0, 0, 52),
+    [
+      {
+        type: 'integer',
+        value: '52',
+        unit: 'minute',
+      },
+      {
+        type: 'literal',
+        value: ' minutes',
+      },
+    ],
+  ],
+  [
     new Duration(0, 1, 0, 1),
     [
       {
@@ -51,6 +79,7 @@ test.each([
 test.each([
   [new Duration(1), '1 year'],
   [new Duration(0, 1, 0, 1), '1 month 1 day'],
+  [new Duration(0, 0, 1, 5), '1 week 5 days'],
 ])('can formatToParts %s', (dur, expected) => {
   const formatter = new DurationFormat()
   expect(formatter.format(dur)).toEqual(expected)
