@@ -8,12 +8,16 @@ const firstWeekOffset = (
   firstDay: number,
   minimalDays: number
 ): number => {
+  // Which january is always in the first week (4 for iso, 1 for other)
   const firstWeekDay = UNIT_INCREMENT.WEEK + firstDay - minimalDays
+
+  // Which local weekday is first week day
   const localWeek =
     (UNIT_INCREMENT.WEEK +
       calendar.dayOfWeek(new PlainDate(year, 1, firstWeekDay)) -
       firstDay) %
     UNIT_INCREMENT.WEEK
+
   return -localWeek + firstWeekDay - 1
 }
 
