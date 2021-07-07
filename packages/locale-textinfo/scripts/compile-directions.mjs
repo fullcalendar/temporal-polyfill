@@ -3,27 +3,30 @@ import { resolve } from 'path'
 import { localesReduceAsync } from '../../../scripts/lib/locales-list.mjs'
 
 localesReduceAsync().then((locales) => {
-  const rtlLocales = Object.keys(locales).reduce((accum, val) => {
-    const direction = locales[val].text.direction
+  const rtlArr = []
+
+  for (const locale in locales) {
+    const direction = locales[locale].text.direction
 
     if (direction === 'rtl') {
-      const prefix = val.split('-')[0]
-      const differentFromPrefix =
-        val === prefix || locales[prefix].text.direction !== direction
+      const prefix = locale.split('-')[0]
 
-      return differentFromPrefix
-        ? `${accum !== '' ? `${accum}|` : ''}${val}`
-        : accum
+      // Checks if either value is a prefix or if the values direction is 'rtl' as compared to the prefix's 'ltr'
+      if (locale === prefix || locales[prefix].text.direction !== direction) {
+        rtlArr.push(locale)
+      }
     }
+  }
 
-    return accum
-  }, '')
-  const code = `export const getDirection = (locale: string): 'ltr' | 'rtl' => {
-  return locale.match(/^((?:${rtlLocales})-?\\w*)$/)
+  const code = `/* eslint-disable */
+
+export const getDirection = (locale: string): 'ltr' | 'rtl' => {
+  return locale.match(/^((?:${rtlArr.join('|')})(?:-\\w{2})?)$/)
     ? 'rtl'
     : 'ltr'
 }
 `
+
   writeFileSync(resolve('src/direction.ts'), code, {
     encoding: 'utf8',
     flag: 'w',

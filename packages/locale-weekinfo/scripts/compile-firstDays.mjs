@@ -3,12 +3,40 @@ import { resolve } from 'path'
 import { localesReduceAsync } from '../../../scripts/lib/locales-list.mjs'
 
 localesReduceAsync((accum, locale, json) => {
-  const firstDay = json.week.firstDay
+  const fd = json.week.firstDay
 
-  return typeof firstDay !== 'number' ? accum : { ...accum, [locale]: firstDay }
+  return {
+    ...accum,
+    [fd]: accum[fd] ? [...accum[fd], locale] : [locale],
+  }
 }, {}).then((firstDayLocales) => {
-  const code = `export const getFirstDay = (locale: string): number => {
-  return ${JSON.stringify(firstDayLocales, null, 2)}[locale]
+  const fdArr = []
+
+  for (const day in firstDayLocales) {
+    // Optimization short circuit for default return
+    if (day === '1') {
+      continue
+    }
+
+    // TODO: Apply prefix processing, try to avoid making this O(n^2)
+    const locales = firstDayLocales[day]
+
+    // Code for if regex matches
+    const conditional = `if (locale.match(/^((?:${locales.join(
+      '|'
+    )})(?:-\\w{2})?)$/)) {
+    return ${day}
+`
+
+    fdArr.push(conditional)
+  }
+
+  const code = `/* eslint-disable */
+
+export const getFirstDay = (locale: string): number => {
+  ${fdArr.join('  } else ')}  }
+
+  return 1
 }
 `
 
