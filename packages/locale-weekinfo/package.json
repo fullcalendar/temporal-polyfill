@@ -23,9 +23,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "locales:firstDays": "node ./scripts/write-firstDays.mjs",
-    "locales:minimalDays": "node ./scripts/write-minimalDays.mjs",
-    "compile": "yarn locales:firstDays && yarn locales:minimalDays"
+    "compile:firstDays": "node ./scripts/compile-firstDays.mjs",
+    "compile:minimalDays": "node ./scripts/compile-minimalDays.mjs",
+    "locales:compile": "yarn compile:firstDays && yarn compile:minimalDays"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
