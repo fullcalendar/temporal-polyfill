@@ -4,7 +4,7 @@
   },
   "week": {
     "firstDay": 2,
-    "minimalDays": 8
+    "minimalDays": 7
   },
   "ordinal": "."
 }

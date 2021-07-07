@@ -4,6 +4,6 @@
   },
   "week": {
     "firstDay": 1,
-    "minimalDays": 4
+    "minimalDays": 3
   }
 }

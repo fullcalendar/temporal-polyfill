@@ -1,5 +1,5 @@
 export const getFirstDay = (locale: string): number => {
-return {
+  return {
   "af": 2,
   "ar-dz": 1,
   "ar-kw": 1,
