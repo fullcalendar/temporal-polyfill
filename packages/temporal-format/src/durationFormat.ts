@@ -1,6 +1,6 @@
-import { Duration } from 'temporal-ponyfill'
-import { DurationLike } from 'temporal-ponyfill/dist/duration'
-import { LocaleId } from 'temporal-ponyfill/dist/utils'
+import { Duration } from 'temporal-polyfill'
+import { DurationLike } from 'temporal-polyfill/dist/duration'
+import { LocaleId } from 'temporal-polyfill/dist/utils'
 
 const largestCommonString = (a: string, b: string): string => {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]

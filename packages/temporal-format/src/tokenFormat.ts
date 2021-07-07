@@ -1,5 +1,5 @@
-import { PlainDateTime, ZonedDateTime } from 'temporal-ponyfill'
-import { LocaleId } from 'temporal-ponyfill/dist/utils'
+import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
+import { LocaleId } from 'temporal-polyfill/dist/utils'
 import { getOrdinalForValue } from './ordinals'
 
 // Regex to replace token string with actual values

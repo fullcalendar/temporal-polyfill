@@ -1,5 +1,5 @@
 {
-  "name": "temporal-ponyfill",
+  "name": "temporal-polyfill",
   "version": "0.0.0",
   "title": "Temporal Lite",
   "description": "A new JavaScript date library",

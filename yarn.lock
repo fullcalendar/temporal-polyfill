@@ -5544,7 +5544,7 @@ fsevents@^2.3.2:
   dependencies:
     "@types/jest": ^26.0.23
     jest: ^27.0.4
-    temporal-ponyfill: "workspace:*"
+    temporal-polyfill: "workspace:*"
     ts-jest: ^27.0.3
     typescript: ^4.3.4
   languageName: unknown
@@ -5569,9 +5569,9 @@ fsevents@^2.3.2:
   languageName: unknown
   linkType: soft
 
-"temporal-ponyfill@workspace:*, temporal-ponyfill@workspace:packages/temporal-ponyfill":
+"temporal-polyfill@workspace:*, temporal-polyfill@workspace:packages/temporal-polyfill":
   version: 0.0.0-use.local
-  resolution: "temporal-ponyfill@workspace:packages/temporal-ponyfill"
+  resolution: "temporal-polyfill@workspace:packages/temporal-polyfill"
   dependencies:
     "@types/jest": ^26.0.23
     jest: ^27.0.4

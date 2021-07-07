@@ -1,4 +1,4 @@
-import { PlainDateTime, ZonedDateTime } from 'temporal-ponyfill'
+import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
 import { TokenDateTimeFormat } from './tokenFormat'
 
 test.each([

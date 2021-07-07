@@ -32,7 +32,7 @@
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
     "locales:scrape": "node ./scripts/locales-scrape.mjs",
-    "locales:compile": "yarn run locales:scrape && yarn workspaces foreach --exclude 'temporal-lite' -ptvi run locales:compile"
+    "locales:compile": "yarn run locales:scrape && yarn workspaces foreach --include 'locale-*' -ptvi run locales:compile"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

@@ -1,4 +1,4 @@
-import { Duration } from 'temporal-ponyfill'
+import { Duration } from 'temporal-polyfill'
 import { DurationFormat } from './durationFormat'
 
 test.each([

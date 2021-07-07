@@ -25,7 +25,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "temporal-ponyfill": "workspace:*"
+    "temporal-polyfill": "workspace:*"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

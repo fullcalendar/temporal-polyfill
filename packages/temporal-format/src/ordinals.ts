@@ -1,4 +1,4 @@
-import { LocaleId } from 'temporal-ponyfill/dist/utils'
+import { LocaleId } from 'temporal-polyfill/dist/utils'
 import { localeOrdinals } from './localeOrdinals'
 import { localOrdinalsSpecial } from './localeOrdinalsSpecial'
 
