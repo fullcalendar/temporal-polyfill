@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { localesReduceAsync } from '../../../scripts/list-locales.mjs'
+import { localesReduceAsync } from '../../../scripts/lib/list-locales.mjs'
 
 localesReduceAsync((accum, locale, json) => {
   const minimalDays = json.week.minimalDays

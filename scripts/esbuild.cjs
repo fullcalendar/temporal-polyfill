@@ -1,21 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const { resolve } = require('path')
+const { resolve, relative } = require('path')
 const rootPath = resolve('.')
+const packageJson = require(relative(
+  __dirname,
+  resolve(rootPath, './package.json')
+))
 
 const { build } = require('esbuild')
 
 // Yarn PnP support for esbuild
 // const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp')
 
-// Support external arguments
-const external = [
-  process.argv
-    .find((val) => {
-      return val.match(/exclude=(.*)/)
-    })
-    ?.split('=')[1],
-]
+// No external dependencies bundled
+const external = Object.keys(packageJson.dependencies ?? {})
 
 build({
   entryPoints: [resolve(rootPath, './src/index.ts')],

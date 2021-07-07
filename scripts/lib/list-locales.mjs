@@ -6,7 +6,7 @@ import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 
 // Get localeRoot relative to this file
-const localeRoot = resolve(fileURLToPath(import.meta.url), '../../locales')
+const localeRoot = resolve(fileURLToPath(import.meta.url), '../../../locales')
 
 export const listLocales = () => {
   const localeList = readdirSync(localeRoot)

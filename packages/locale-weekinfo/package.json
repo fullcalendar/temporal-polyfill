@@ -22,13 +22,10 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "gzip:size": "gzip -c -r dist/ | wc -c | numfmt --to=iec-i --suffix=B",
-    "esbuild": "node ../../scripts/esbuild.cjs",
     "test": "jest",
-    "write:firstDays": "node ./scripts/write-firstDays.mjs",
-    "write:minimalDays": "node ./scripts/write-minimalDays.mjs",
-    "write": "yarn write:firstDays && yarn write:minimalDays"
+    "locales:firstDays": "node ./scripts/write-firstDays.mjs",
+    "locales:minimalDays": "node ./scripts/write-minimalDays.mjs",
+    "compile": "yarn locales:firstDays && yarn locales:minimalDays"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

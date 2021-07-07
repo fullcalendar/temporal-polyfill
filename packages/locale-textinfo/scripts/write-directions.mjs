@@ -1,25 +1,6 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { localesReduceAsync } from '../../../scripts/list-locales.mjs'
-
-// localesReduceAsync((accum, locale, json) => {
-//   return json.text.direction !== 'rtl'
-//     ? accum // Leave as is if ltr or null
-//     : `${accum !== '' ? `${accum}|` : ''}${locale}` // Format into string
-// }).then((rtlLocales) => {
-//   const code = `export const getDirection = (locale: string): 'ltr' | 'rtl' => {
-//   return locale.match(/^(${rtlLocales})$/)
-//     ? 'rtl'
-//     : 'ltr'
-// }
-// `
-
-//   writeFileSync(resolve('src/direction.ts'), code, {
-//     encoding: 'utf8',
-//     flag: 'w',
-//   })
-//   console.log('Wrote direction.ts')
-// })
+import { localesReduceAsync } from '../../../scripts/lib/list-locales.mjs'
 
 localesReduceAsync().then((locales) => {
   const rtlLocales = Object.keys(locales).reduce((accum, val) => {
@@ -37,7 +18,6 @@ localesReduceAsync().then((locales) => {
 
     return accum
   }, '')
-  console.log(rtlLocales)
   const code = `export const getDirection = (locale: string): 'ltr' | 'rtl' => {
   return locale.match(/^((?:${rtlLocales})-?\\w*)$/)
     ? 'rtl'
@@ -48,4 +28,6 @@ localesReduceAsync().then((locales) => {
     encoding: 'utf8',
     flag: 'w',
   })
+
+  console.log('Wrote direction.ts')
 })

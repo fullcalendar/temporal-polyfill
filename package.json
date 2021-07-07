@@ -20,16 +20,19 @@
     "packages/*"
   ],
   "scripts": {
-    "clean": "yarn workspaces foreach run clean",
+    "global:clean": "cd $INIT_CWD && rm -rf dist tsconfig.tsbuildinfo",
+    "global:esbuild": "cd $INIT_CWD && node ../../scripts/esbuild.cjs",
+    "global:gzipsize": "cd $INIT_CWD && gzip -c -r dist/index.min.js | wc -c | numfmt --to=iec-i --suffix=B",
+    "clean": "yarn workspaces foreach run global:clean",
     "tsc": "tsc -b",
-    "esbuild": "yarn workspaces foreach -ptvi run esbuild",
+    "esbuild": "yarn workspaces foreach --exclude 'temporal-lite' -ptvi run global:esbuild",
     "build": "yarn clean && yarn tsc && yarn esbuild",
-    "gzip:size": "yarn workspaces foreach -vi run gzip:size",
+    "gzip:size": "yarn workspaces foreach --exclude 'temporal-lite' -vi run global:gzipsize",
     "test": "jest --coverage",
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
-    "write:locales": "node ./scripts/write-locales.mjs",
-    "write": "yarn run write:locales && yarn workspaces foreach -vi run write"
+    "locales:scrape": "node ./scripts/write-locales.mjs",
+    "compile": "yarn run locales:scrape && yarn workspaces foreach --exclude 'temporal-lite' -ptvi run compile"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

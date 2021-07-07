@@ -22,9 +22,6 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "gzip:size": "gzip -c -r dist/ | wc -c | numfmt --to=iec-i --suffix=B",
-    "esbuild": "node ../../scripts/esbuild.cjs",
     "test": "jest"
   },
   "devDependencies": {
