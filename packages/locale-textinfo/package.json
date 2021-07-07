@@ -24,7 +24,7 @@
   "scripts": {
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "gzip:size": "gzip -c -r dist/ | wc -c | numfmt --to=iec-i --suffix=B",
-    "build": "tsc && node ../../scripts/esbuild.cjs",
+    "esbuild": "node ../../scripts/esbuild.cjs",
     "test": "jest",
     "write:directions": "node --experimental-json-modules ./scripts/write-directions.mjs",
     "write": "yarn write:directions"

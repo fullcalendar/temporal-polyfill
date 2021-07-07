@@ -21,8 +21,10 @@
   ],
   "scripts": {
     "clean": "yarn workspaces foreach run clean",
-    "build": "yarn clean && yarn workspaces foreach -v -t run build",
-    "gzip:size": "yarn workspaces foreach -v run gzip:size",
+    "tsc": "tsc -b",
+    "esbuild": "yarn workspaces foreach -ptvi run esbuild",
+    "build": "yarn clean && yarn tsc && yarn esbuild",
+    "gzip:size": "yarn workspaces foreach -vi run gzip:size",
     "test": "jest --coverage",
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
