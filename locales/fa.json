@@ -5,5 +5,6 @@
   "week": {
     "firstDay": 7,
     "minimalDays": 2
-  }
+  },
+  "ordinal": "م"
 }
