@@ -1,4 +1,4 @@
-import { getLocaleTextInfo } from './localeTextInfo'
+import { getLocaleTextInfo } from './index'
 
 test.each([
   ['af', 'ltr'],

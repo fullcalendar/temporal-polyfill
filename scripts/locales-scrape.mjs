@@ -28,19 +28,11 @@ const writeLocale = async (localeStr) => {
     const matchfirstDay = momentContent.match(/dow:\s*(\d)/)
     const matchMinimalDays = momentContent.match(/doy:\s*(\d)/)
 
-    if (!matchfirstDay && !matchMinimalDays) {
-      verbose &&
-        console.error(
-          `Could not find moment values for '${localeStr}'. Skipping this locale.`
-        )
-      return
-    }
-
     localeData = merge(localeData, {
       week: {
         // Moment has 0-based firstDays, need to convert to 1-based
         firstDay: matchfirstDay ? parseInt(matchfirstDay[1]) + 1 : 1,
-        minimalDays: matchMinimalDays ? parseInt(matchMinimalDays[1]) : 4,
+        minimalDays: matchMinimalDays ? parseInt(matchMinimalDays[1]) : 6,
       },
     })
 

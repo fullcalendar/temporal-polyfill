@@ -3,7 +3,7 @@
     "direction": "ltr"
   },
   "week": {
-    "firstDay": null,
-    "minimalDays": null
+    "firstDay": 1,
+    "minimalDays": 6
   }
 }
