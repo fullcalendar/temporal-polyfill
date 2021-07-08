@@ -13,6 +13,10 @@ const fullcalendarLocaleRoot = resolve(
 const verbose = process.argv.includes('-v')
 
 const writeLocale = async (localeStr) => {
+  // Used for specific parsing nuances, intlStr represents the locale with the suffix capitalized
+  const [prefix, suffix] = localeStr.split('-')
+  const intlStr = suffix ? `${prefix}-${suffix.toUpperCase()}` : prefix
+
   let localeData = {}
 
   // Get File Content for Moment
@@ -20,7 +24,9 @@ const writeLocale = async (localeStr) => {
     resolve(momentLocaleRoot, `${localeStr}.js`),
     { encoding: 'utf8' }
   ).catch(() => {
-    verbose && console.error(`'${localeStr}' does not exist in Moment`)
+    if (verbose) {
+      console.error(`'${intlStr}' does not exist in Moment`)
+    }
   })
 
   if (momentContent) {
@@ -43,8 +49,9 @@ const writeLocale = async (localeStr) => {
 
     if (matchOrdinal) {
       if (matchOrdinal[1] === 'function') {
-        verbose &&
-          console.error(`Ordinals for '${localeStr}' are not handled by Moment`)
+        if (verbose) {
+          console.error(`Ordinals for '${intlStr}' are not handled by Moment`)
+        }
       } else {
         localeData.ordinal = matchOrdinal[2]
       }
@@ -56,10 +63,11 @@ const writeLocale = async (localeStr) => {
     resolve(fullcalendarLocaleRoot, `${localeStr}.ts`),
     { encoding: 'utf8' }
   ).catch(() => {
-    verbose &&
+    if (verbose) {
       console.error(
-        `'${localeStr}' does not exist in FullCalendar, direction value will be 'null'`
+        `'${intlStr}' does not exist in FullCalendar, direction value will be 'null'`
       )
+    }
   })
 
   // FullCalendar file overwrite
@@ -79,7 +87,7 @@ const writeLocale = async (localeStr) => {
   const temporalLiteLocalePath = resolve(
     process.argv[1],
     '../../locales',
-    `${localeStr}.json`
+    `${intlStr}.json`
   )
 
   // Read existing file if it exists
@@ -106,16 +114,21 @@ const writeLocale = async (localeStr) => {
 
   // Write to file
   await writeFile(
-    resolve(process.argv[1], '../../locales', `${localeStr}.json`),
+    resolve(process.argv[1], '../../locales', `${intlStr}.json`),
     JSON.stringify(localeData, null, 2),
     { encoding: 'utf8', flag: 'w' }
   )
-  verbose && console.log(`Wrote Locale '${localeStr}'.`)
+
+  if (verbose) {
+    console.log(`Wrote Locale '${intlStr}'.`)
+  }
 }
 
 // Read in arguments
 let locales =
-  process.argv[2] && process.argv[2] !== 'all'
+  process.argv[process.argv.length - 1] &&
+  process.argv[process.argv.length - 1] !== 'all' &&
+  process.argv[process.argv.length - 1] !== '-v'
     ? process.argv[2]?.split(',')
     : undefined
 
