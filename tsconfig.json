@@ -2,8 +2,9 @@
   "files": [],
   "references": [
     { "path": "packages/temporal-polyfill" },
-    { "path": "packages/temporal-format" },
     { "path": "packages/locale-weekinfo" },
-    { "path": "packages/locale-textinfo" }
+    { "path": "packages/locale-textinfo" },
+    { "path": "packages/datetimeformat-tokens" },
+    { "path": "packages/durationformat-polyfill" }
   ]
 }

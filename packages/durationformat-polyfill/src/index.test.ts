@@ -1,5 +1,5 @@
 import { Duration } from 'temporal-polyfill'
-import { DurationFormat } from './durationFormat'
+import { DurationFormat } from './index'
 
 test.each([
   [

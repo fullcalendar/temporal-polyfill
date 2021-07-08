@@ -1,5 +1,5 @@
 import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
-import { TokenDateTimeFormat } from './tokenFormat'
+import { TokenDateTimeFormat } from './index'
 
 test.each([
   ['YYYY-MM-DD', new PlainDateTime(1970, 1, 1), '1970-01-01'],
