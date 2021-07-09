@@ -1,5 +1,4 @@
 import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
-import { LocaleId } from 'temporal-polyfill/dist/utils'
 import { getOrdinalForValue } from './ordinals'
 
 // Regex to replace token string with actual values
@@ -15,7 +14,7 @@ const tokenMap: {
     transform?: (
       parts: { [x: string]: string },
       date: PlainDateTime | ZonedDateTime,
-      locale: LocaleId
+      locale: string
     ) => string
   }
 } = {
@@ -90,7 +89,7 @@ export class TokenDateTimeFormat {
 
   constructor(
     readonly tokenStr: string,
-    readonly locale: LocaleId = 'en-us',
+    readonly locale: string = 'en-us',
     options?: Intl.DateTimeFormatOptions
   ) {
     // Create options from matches in tokenStr

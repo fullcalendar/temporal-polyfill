@@ -21,18 +21,21 @@
   ],
   "scripts": {
     "global:clean": "cd $INIT_CWD && rm -rf dist tsconfig.tsbuildinfo",
+    "global:dts-bundle": "cd $INIT_CWD && rollup -c ../../rollup.config.js && yarn run global:dts-prune",
+    "global:dts-prune": "cd $INIT_CWD && echo 'Removing extra declarations...' && rm -f dist/?(!(index)).d.ts || true",
     "global:esbuild": "cd $INIT_CWD && node ../../scripts/esbuild.cjs",
     "global:gzipsize": "cd $INIT_CWD && gzip -c -r dist/index.min.js | wc -c | numfmt --to=iec-i --suffix=B",
     "clean": "yarn workspaces foreach run global:clean",
     "tsc": "tsc -b",
-    "esbuild": "yarn workspaces foreach --exclude 'temporal-lite' -ptvi run global:esbuild",
-    "build": "yarn tsc && yarn esbuild",
-    "gzip:size": "yarn workspaces foreach --exclude 'temporal-lite' -vi run global:gzipsize",
+    "dts:bundle": "yarn tsc && yarn workspaces foreach --exclude 'temporal-lite' -tv run global:dts-bundle",
+    "esbuild": "yarn workspaces foreach --exclude 'temporal-lite' -ptv run global:esbuild",
+    "build": "yarn dts:bundle && yarn esbuild",
+    "gzip:size": "yarn workspaces foreach --exclude 'temporal-lite' -v run global:gzipsize",
     "test": "jest --coverage",
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
     "locales:scrape": "node ./scripts/locales-scrape.mjs",
-    "locales:compile": "yarn run locales:scrape && yarn workspaces foreach --include 'locale-*' -ptvi run locales:compile"
+    "locales:compile": "yarn run locales:scrape && yarn workspaces foreach --include 'locale-*' -ptv run locales:compile"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -46,6 +49,8 @@
     "eslint-plugin-prettier": "^3.4.0",
     "jest": "^27.0.4",
     "prettier": "^2.2.1",
+    "rollup": "^2.53.0",
+    "rollup-plugin-dts": "^3.0.2",
     "typescript": "^4.3.2"
   }
 }

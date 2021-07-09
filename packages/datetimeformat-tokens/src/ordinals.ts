@@ -1,4 +1,3 @@
-import { LocaleId } from 'temporal-polyfill/dist/utils'
 import { localeOrdinals } from './localeOrdinals'
 import { localOrdinalsSpecial } from './localeOrdinalsSpecial'
 
@@ -47,7 +46,7 @@ export const isSpecialOrdinals = (
 export const getOrdinalForValue = (
   num: number,
   unit: string,
-  locale: LocaleId
+  locale: string
 ): string => {
   // Use prefix as backup if specific locale cannot be found
   const prefix = locale.split('-')[0]

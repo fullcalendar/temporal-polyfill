@@ -1,6 +1,4 @@
 import { Duration } from 'temporal-polyfill'
-import { DurationLike } from 'temporal-polyfill/dist/duration'
-import { LocaleId } from 'temporal-polyfill/dist/utils'
 
 const largestCommonString = (a: string, b: string): string => {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]
@@ -9,11 +7,13 @@ const largestCommonString = (a: string, b: string): string => {
 
 type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 
+type DurationLike = Partial<Duration>
+
 export class DurationFormat {
   private formatter: Intl.RelativeTimeFormat
 
   constructor(
-    readonly locale: LocaleId = 'en-us',
+    readonly locale: string = 'en-us',
     { style }: DurationFormatOptions = { style: 'long' }
   ) {
     this.formatter = new Intl.RelativeTimeFormat(locale, {

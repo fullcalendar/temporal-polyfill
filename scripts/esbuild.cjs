@@ -49,5 +49,3 @@ build({
     console.warn(err)
     process.exit(1)
   })
-
-// "tsc && node ./esbuild.config.cjs",

@@ -3158,7 +3158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-fsevents@^2.3.2:
+"fsevents@^2.3.2, fsevents@~2.3.2":
   version: 2.3.2
   resolution: "fsevents@npm:2.3.2"
   dependencies:
@@ -3167,7 +3167,7 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"fsevents@patch:fsevents@^2.3.2#builtin<compat/fsevents>":
+"fsevents@patch:fsevents@^2.3.2#builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.2#builtin<compat/fsevents>":
   version: 2.3.2
   resolution: "fsevents@patch:fsevents@npm%3A2.3.2#builtin<compat/fsevents>::version=2.3.2&hash=11e9ea"
   dependencies:
@@ -4404,6 +4404,15 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"magic-string@npm:^0.25.7":
+  version: 0.25.7
+  resolution: "magic-string@npm:0.25.7"
+  dependencies:
+    sourcemap-codec: ^1.4.4
+  checksum: 4b70c13eb21c6f1c54bf7fb029748dc44d6bfcd3c59e5deeda060eecc38df6144b91d10fb7a3cf6156fadab1a68f83d69a189df20ca5f6bd088bf0196ea8f039
+  languageName: node
+  linkType: hard
+
 "make-dir@npm:^3.0.0":
   version: 3.1.0
   resolution: "make-dir@npm:3.1.0"
@@ -5191,6 +5200,36 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"rollup-plugin-dts@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "rollup-plugin-dts@npm:3.0.2"
+  dependencies:
+    "@babel/code-frame": ^7.12.13
+    magic-string: ^0.25.7
+  peerDependencies:
+    rollup: ^2.48.0
+    typescript: ^4.2.4
+  dependenciesMeta:
+    "@babel/code-frame":
+      optional: true
+  checksum: 11e32d247652210bbf052ef8d09551a031f774ee7dfd4f3c7d11e3fd6ee60f1856ebebdbd041104ea049f86ab1e413c3f8db6c1bab015895fe82707b9f1ce251
+  languageName: node
+  linkType: hard
+
+"rollup@npm:^2.53.0":
+  version: 2.53.0
+  resolution: "rollup@npm:2.53.0"
+  dependencies:
+    fsevents: ~2.3.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    rollup: dist/bin/rollup
+  checksum: f0b2ae6c2a4a3d3ff67fd7b4f81cd1b8a8c227a87c993b75d4c0d37986284b5e3f27257b3a8c182347067e775dc3e8c1ac36592e4805f3e2253ba128976216ac
+  languageName: node
+  linkType: hard
+
 "run-parallel@npm:^1.1.9":
   version: 1.2.0
   resolution: "run-parallel@npm:1.2.0"
@@ -5363,6 +5402,13 @@ fsevents@^2.3.2:
   version: 0.7.3
   resolution: "source-map@npm:0.7.3"
   checksum: 351ce26ffa1ebf203660c0d70d7566c81e65d2d994d1c2d94da140808e02da34961673ce12ecea9b40797b96fbeb8c70bf71a4ad9f779f1a4fdbba75530bb386
+  languageName: node
+  linkType: hard
+
+"sourcemap-codec@npm:^1.4.4":
+  version: 1.4.8
+  resolution: "sourcemap-codec@npm:1.4.8"
+  checksum: 4d56d1232a45af813606d1755f11e7ae6b3542c615a7e3f904382f0134a9412ba8d090e83749254d78449eafdfcc62d5158b8f35e6241480b51b74b5c46b99f9
   languageName: node
   linkType: hard
 
@@ -5577,6 +5623,8 @@ fsevents@^2.3.2:
     eslint-plugin-prettier: ^3.4.0
     jest: ^27.0.4
     prettier: ^2.2.1
+    rollup: ^2.53.0
+    rollup-plugin-dts: ^3.0.2
     typescript: ^4.3.2
   languageName: unknown
   linkType: soft
