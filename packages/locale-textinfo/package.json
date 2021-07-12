@@ -23,8 +23,8 @@
   ],
   "scripts": {
     "test": "jest",
-    "compile:directions": "node --experimental-json-modules ./scripts/compile-directions.mjs",
-    "locales:compile": "yarn compile:directions"
+    "compile-directions": "node --experimental-json-modules ./scripts/compile-directions.mjs",
+    "locales-compile": "yarn compile-directions"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

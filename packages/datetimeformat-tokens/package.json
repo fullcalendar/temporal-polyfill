@@ -22,7 +22,9 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "compile-localeOrdinals": "node --experimental-json-modules ./scripts/compile-localeOrdinals.mjs",
+    "locales-compile": "yarn compile-localeOrdinals"
   },
   "dependencies": {
     "temporal-polyfill": "workspace:*"
