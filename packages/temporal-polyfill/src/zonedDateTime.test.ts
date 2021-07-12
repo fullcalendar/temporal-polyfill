@@ -5,13 +5,23 @@ test('can instantiate', () => {
   expect(date).toBeDefined()
 })
 
-describe.each([
-  [0, 1970, 1, 1, 0, 0, 0, 0],
-  [45030500, 1970, 1, 1, 12, 30, 30, 500],
-  [1608854400000, 2020, 12, 25, 0, 0, 0, 0],
-])(
+describe.each`
+  epochMilliseconds | year    | month | day   | hour  | minute | second | millisecond
+  ${0}              | ${1970} | ${1}  | ${1}  | ${0}  | ${0}   | ${0}   | ${0}
+  ${45030500}       | ${1970} | ${1}  | ${1}  | ${12} | ${30}  | ${30}  | ${500}
+  ${1608854400000}  | ${2020} | ${12} | ${25} | ${0}  | ${0}   | ${0}   | ${0}
+`(
   'can get values for %d (%d-%d-%dT%d:%d:%d.%d)',
-  (epochMilliseconds, year, month, day, hour, minute, second, millisecond) => {
+  ({
+    epochMilliseconds,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
+    millisecond,
+  }) => {
     test('in UTC', () => {
       const date = new ZonedDateTime(epochMilliseconds, 'utc')
       expect(date.year).toBe(year)
@@ -51,22 +61,12 @@ test('can compare two dates', () => {
   expect(ZonedDateTime.compare(b, c)).toBe(0)
 })
 
-test.each([
-  [
-    '2020-08-05T20:06:13+09:00[Asia/Tokyo][u-ca=japanese]',
-    2,
-    8,
-    6,
-    14,
-    6,
-    13,
-    0,
-    'Asia/Tokyo',
-    'japanese',
-  ],
-])(
-  'can create dates from string',
-  (
+test.each`
+  str                                                       | year | month | day  | hour  | minute | second | millisecond | timeZone        | calendar
+  ${'2020-08-05T20:06:13+09:00[Asia/Tokyo][u-ca=japanese]'} | ${2} | ${8}  | ${6} | ${14} | ${6}   | ${13}  | ${0}        | ${'Asia/Tokyo'} | ${'japanese'}
+`(
+  'can create date from $str',
+  ({
     str,
     year,
     month,
@@ -76,8 +76,8 @@ test.each([
     second,
     millisecond,
     timeZone,
-    calendar
-  ) => {
+    calendar,
+  }) => {
     const zdt = ZonedDateTime.from(str)
     expect(zdt.year).toBe(year)
     expect(zdt.month).toBe(month)
