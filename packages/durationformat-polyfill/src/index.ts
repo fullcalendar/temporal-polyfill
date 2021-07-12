@@ -9,6 +9,36 @@ type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 
 type DurationLike = Partial<Duration>
 
+const combinePartsArrays = (
+  arr: Array<Array<Intl.RelativeTimeFormatPart>>
+): Array<Intl.RelativeTimeFormatPart> => {
+  const newArr = []
+
+  // Flatten 2D array into 1D
+  arr.forEach((innerArr, index) => {
+    const [before, value, after] = innerArr
+
+    // Add a space before if this isn't the first element
+    if (index > 0) {
+      newArr.push({ ...before, value: ` ${before.value}` })
+    }
+    // Case for first element having content
+    else if (before.value !== '') {
+      newArr.push(before)
+    }
+
+    // Push actual value
+    newArr.push(value)
+
+    // Push after only if it has content
+    if (after.value !== '') {
+      newArr.push(after)
+    }
+  })
+
+  return newArr
+}
+
 export class DurationFormat {
   private formatter: Intl.RelativeTimeFormat
 
@@ -39,7 +69,7 @@ export class DurationFormat {
     }
 
     // Storage array
-    const arr = []
+    const arr: Array<Array<Intl.RelativeTimeFormatPart>> = []
 
     for (const key in duration) {
       const val = duration[key]
@@ -54,7 +84,7 @@ export class DurationFormat {
           key as Intl.RelativeTimeFormatUnit
         )
 
-        // Extract common string from formatted parts
+        // Extract largest common string from formatted parts
         const before = largestCommonString(
           getLiteralValue(forwardParts, 0),
           getLiteralValue(backwardParts, 0)
@@ -64,26 +94,21 @@ export class DurationFormat {
           getLiteralValue(backwardParts, backwardParts.length - 1)
         )
 
-        // Append pretext into accumulator
-        if (before !== '' || arr.length > 0) {
-          arr.push({
+        arr.push([
+          // Append pretext into accumulator
+          {
             type: 'literal',
-            // Add a space if this isn't the first value
-            value: `${arr.length > 0 ? ' ' : ''}${before}`,
-          })
-        }
-
-        // Account for before part not being present
-        arr.push(forwardParts[forwardParts[0].type === 'literal' ? 1 : 0])
-
-        // Append posttext into accumulator
-        if (after !== '') {
-          arr.push({ type: 'literal', value: after })
-        }
+            value: before,
+          },
+          // Append actual value into accumulator
+          forwardParts[forwardParts[0].type === 'literal' ? 1 : 0],
+          // Append posttext into accumulator
+          { type: 'literal', value: after },
+        ])
       }
     }
 
-    return arr
+    return combinePartsArrays(arr)
   }
 
   format(durationLike: Duration | DurationLike): string {
