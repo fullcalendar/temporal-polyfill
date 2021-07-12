@@ -86,20 +86,24 @@ const tokenMap: {
 
 export class TokenDateTimeFormat {
   private formatter: Intl.DateTimeFormat
+  private tokenSplit: Array<string>
 
   constructor(
-    readonly tokenStr: string,
-    readonly locale: string = 'en-us',
+    tokenStr: string,
+    private locale: string = 'en-us',
     options?: Intl.DateTimeFormatOptions
   ) {
+    this.tokenSplit = tokenStr.split(REGEX_FORMAT)
+
     // Create options from matches in tokenStr
-    const tokenOptions: Intl.DateTimeFormatOptions = tokenStr
-      .match(REGEX_FORMAT)
-      .reduce((accum: Intl.DateTimeFormatOptions, val) => {
+    const tokenOptions: Intl.DateTimeFormatOptions = this.tokenSplit.reduce(
+      (accum: Intl.DateTimeFormatOptions, val) => {
         // Append token options into existing options
         // Will simply ignore if not in tokenMap - O(1) time
         return { ...accum, ...tokenMap[val]?.options }
-      }, {})
+      },
+      {}
+    )
 
     // Create a format by merging user's options with token string's options
     const internalOptions = { timeZone: 'UTC', ...tokenOptions, ...options }
@@ -128,7 +132,7 @@ export class TokenDateTimeFormat {
       }, {})
 
     // Use split to differentiate parts that are part of formatting
-    return this.tokenStr.split(REGEX_FORMAT).reduce((accum, val) => {
+    return this.tokenSplit.reduce((accum, val) => {
       // Undefined values
       if (!val) {
         return accum
@@ -153,11 +157,4 @@ export class TokenDateTimeFormat {
       return accum + val
     }, '')
   }
-
-  // formatRange(
-  //   dt0: PlainDateTime | ZonedDateTime,
-  //   dt1: PlainDateTime | ZonedDateTime
-  // ): string {
-  //   return ''
-  // }
 }
