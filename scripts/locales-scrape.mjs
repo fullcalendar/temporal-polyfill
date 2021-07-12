@@ -109,6 +109,7 @@ const writeLocale = async (localeStr) => {
       firstDay: null,
       minimalDays: null,
     },
+    ordinal: null,
   }
   localeData = merge(emptyData, localeData)
 

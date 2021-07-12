@@ -3,11 +3,13 @@
     "direction": "ltr"
   },
   "week": {
-    "firstDay": 2,
+    "firstDay": 1,
     "minimalDays": 4
   },
   "ordinal": {
-    "m": "er",
-    "f": "re"
+    "one": "st",
+    "two": "nd",
+    "few": "rd",
+    "other": "th"
   }
 }
