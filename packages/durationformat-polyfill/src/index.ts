@@ -1,5 +1,6 @@
 import { Duration } from 'temporal-polyfill'
 
+// TODO: This needs to be more fleshed out
 const largestCommonString = (a: string, b: string): string => {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]
   return long.includes(short) ? short : ''
@@ -9,31 +10,29 @@ type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 
 type DurationLike = Partial<Duration>
 
+const getLiteralPartsValue = (
+  arr: Array<Intl.RelativeTimeFormatPart>,
+  index: number
+): string => {
+  return arr[index].type === 'literal' ? arr[index].value : ''
+}
+
 const combinePartsArrays = (
   arr: Array<Array<Intl.RelativeTimeFormatPart>>
 ): Array<Intl.RelativeTimeFormatPart> => {
-  const newArr = []
+  let newArr = []
 
   // Flatten 2D array into 1D
   arr.forEach((innerArr, index) => {
     const [before, value, after] = innerArr
 
-    // Add a space before if this isn't the first element
-    if (index > 0) {
-      newArr.push({ ...before, value: ` ${before.value}` })
-    }
-    // Case for first element having content
-    else if (before.value !== '') {
-      newArr.push(before)
-    }
-
-    // Push actual value
-    newArr.push(value)
-
-    // Push after only if it has content
-    if (after.value !== '') {
-      newArr.push(after)
-    }
+    newArr = [
+      ...newArr,
+      // Add a space before if this isn't the first element
+      index > 0 ? { ...before, value: ` ${before.value}` } : before,
+      value,
+      after,
+    ]
   })
 
   return newArr
@@ -60,14 +59,6 @@ export class DurationFormat {
         ? durationLike
         : Duration.from(durationLike)
 
-    // I just don't want to write this statement 4 times
-    const getLiteralValue = (
-      arr: Array<Intl.RelativeTimeFormatPart>,
-      index: number
-    ): string => {
-      return arr[index].type === 'literal' ? arr[index].value : ''
-    }
-
     // Storage array
     const arr: Array<Array<Intl.RelativeTimeFormatPart>> = []
 
@@ -86,12 +77,12 @@ export class DurationFormat {
 
         // Extract largest common string from formatted parts
         const before = largestCommonString(
-          getLiteralValue(forwardParts, 0),
-          getLiteralValue(backwardParts, 0)
+          getLiteralPartsValue(forwardParts, 0),
+          getLiteralPartsValue(backwardParts, 0)
         )
         const after = largestCommonString(
-          getLiteralValue(forwardParts, forwardParts.length - 1),
-          getLiteralValue(backwardParts, backwardParts.length - 1)
+          getLiteralPartsValue(forwardParts, forwardParts.length - 1),
+          getLiteralPartsValue(backwardParts, backwardParts.length - 1)
         )
 
         arr.push([
@@ -108,7 +99,13 @@ export class DurationFormat {
       }
     }
 
-    return combinePartsArrays(arr)
+    // Flatten 2D array into 1D
+    const flatArr = combinePartsArrays(arr)
+
+    // Remove empty items
+    return flatArr.filter(({ type, value }) => {
+      return type !== 'literal' || value !== ''
+    })
   }
 
   format(durationLike: Duration | DurationLike): string {
