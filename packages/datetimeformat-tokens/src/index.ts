@@ -2,9 +2,13 @@ import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
 import { getOrdinalForValue } from './ordinals'
 
 // Regex to replace token string with actual values
-// https://github.com/iamkun/dayjs/blob/dev/src/constant.js
-const REGEX_FORMAT =
-  /(\[[^\]]+]|Y{1,4}|M{1,4}|Do|Wo|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W)/g
+const REGEX_MATCHES =
+  /Y{1,4}|M{1,4}|Do|Wo|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS|E|W/g
+const REGEX_ESCAPED_LITERALS = /\[[^\]]+]/g
+const REGEX_FORMAT = new RegExp(
+  `(${REGEX_ESCAPED_LITERALS.source}|${REGEX_MATCHES.source})`,
+  'g'
+)
 
 // Object containing a options to append to formatter, property to use from parts | transform function that creates an output from parts
 const tokenMap: {
@@ -26,7 +30,13 @@ const tokenMap: {
   MMMM: { options: { month: 'long' }, property: 'month' },
   D: { options: { day: 'numeric' }, property: 'day' },
   DD: { options: { day: '2-digit' }, property: 'day' },
-  // d: Numeric day of week,
+  d: {
+    options: {},
+    property: 'day',
+    transform: (_parts, date) => {
+      return date.dayOfWeek.toString()
+    },
+  },
   dd: { options: { weekday: 'narrow' }, property: 'weekday' },
   ddd: { options: { weekday: 'short' }, property: 'weekday' },
   dddd: { options: { weekday: 'long' }, property: 'weekday' },
@@ -86,21 +96,30 @@ const tokenMap: {
 
 export class TokenDateTimeFormat {
   private formatter: Intl.DateTimeFormat
-  private tokenSplit: Array<string>
+  private tokenSplit: Array<{ token: string } | string>
 
   constructor(
     tokenStr: string,
     private locale: string = 'en-us',
     options?: Intl.DateTimeFormatOptions
   ) {
-    this.tokenSplit = tokenStr.split(REGEX_FORMAT)
+    // Map into either a string literal or an object with a token property
+    this.tokenSplit = tokenStr.split(REGEX_FORMAT).map((val) => {
+      if (val.match(REGEX_ESCAPED_LITERALS)) {
+        return val.substring(1, val.length - 1)
+      } else if (val.match(REGEX_MATCHES)) {
+        return { token: val }
+      }
+      return val
+    })
 
     // Create options from matches in tokenStr
     const tokenOptions: Intl.DateTimeFormatOptions = this.tokenSplit.reduce(
       (accum: Intl.DateTimeFormatOptions, val) => {
         // Append token options into existing options
-        // Will simply ignore if not in tokenMap - O(1) time
-        return { ...accum, ...tokenMap[val]?.options }
+        return typeof val === 'object'
+          ? { ...accum, ...tokenMap[val.token]?.options }
+          : accum
       },
       {}
     )
@@ -114,6 +133,7 @@ export class TokenDateTimeFormat {
     const timeZone = dt instanceof ZonedDateTime ? dt.timeZone.id : 'UTC'
     const resolvedOptions = this.formatter.resolvedOptions()
 
+    // Adjust formatter only if timeZone is different
     if (resolvedOptions.timeZone !== timeZone) {
       this.formatter = new Intl.DateTimeFormat(this.locale, {
         ...resolvedOptions,
@@ -131,30 +151,16 @@ export class TokenDateTimeFormat {
         }
       }, {})
 
-    // Use split to differentiate parts that are part of formatting
-    return this.tokenSplit.reduce((accum, val) => {
-      // Undefined values
-      if (!val) {
-        return accum
-      }
-
-      // Escaped literals
-      if (val.charAt(0) === '[' && val.charAt(val.length - 1) === ']') {
-        return accum + val.substring(1, val.length - 1)
-      }
-
-      // Formatted
-      if (tokenMap[val]) {
-        return (
-          accum +
-          (tokenMap[val].transform
-            ? tokenMap[val].transform(parts, dt, this.locale)
-            : parts[tokenMap[val].property])
-        )
-      }
-
-      // Plain Strings
-      return accum + val
-    }, '')
+    // Map parts that are tokens into values
+    return this.tokenSplit
+      .map((val) => {
+        if (typeof val === 'object') {
+          return tokenMap[val.token].transform
+            ? tokenMap[val.token].transform(parts, dt, this.locale)
+            : parts[tokenMap[val.token].property]
+        }
+        return val
+      })
+      .join('')
   }
 }

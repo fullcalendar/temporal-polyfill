@@ -1,4 +1,4 @@
-export const localOrdinalsSpecial: {
+export const localeOrdinalsSpecial: {
   [key: string]: (
     ordinalData: unknown,
     unit: string | number, // TODO: What should this actually associate with?

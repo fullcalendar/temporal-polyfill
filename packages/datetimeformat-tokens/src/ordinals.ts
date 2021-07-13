@@ -1,5 +1,5 @@
 import { localeOrdinals } from './localeOrdinals'
-import { localOrdinalsSpecial } from './localeOrdinalsSpecial'
+import { localeOrdinalsSpecial } from './localeOrdinalsSpecial'
 
 export type SymbolOrdinals = string
 
@@ -17,30 +17,27 @@ export type SpecialOrdinals = {
 export type Ordinals = SymbolOrdinals | NumberOrdinals | SpecialOrdinals
 
 export const isSymbolOrdinals = (
+  _locale: string,
   ordinals: Ordinals
 ): ordinals is SymbolOrdinals => {
   return typeof ordinals === 'string'
 }
 
 export const isNumberOrdinals = (
+  locale: string,
   ordinals: Ordinals
 ): ordinals is NumberOrdinals => {
-  if (typeof ordinals === 'string') {
-    return false
-  }
-  const fakeNumberOrdinals = ordinals as NumberOrdinals
-  return (
-    typeof fakeNumberOrdinals.one === 'string' &&
-    typeof fakeNumberOrdinals.two === 'string' &&
-    typeof fakeNumberOrdinals.few === 'string' &&
-    typeof fakeNumberOrdinals.other === 'string'
-  )
+  return typeof ordinals === 'object' && !isSpecialOrdinals(locale, ordinals)
 }
 
 export const isSpecialOrdinals = (
+  locale: string,
   ordinals: Ordinals
 ): ordinals is SpecialOrdinals => {
-  return typeof ordinals === 'object' && !isNumberOrdinals(ordinals)
+  // Use prefix as backup if specific locale cannot be found
+  const specialsFunction =
+    localeOrdinalsSpecial[locale] ?? localeOrdinalsSpecial[locale.split('-')[0]]
+  return typeof ordinals === 'object' && specialsFunction !== undefined
 }
 
 export const getOrdinalForValue = (
@@ -53,19 +50,19 @@ export const getOrdinalForValue = (
   const ordinals: Ordinals = localeOrdinals[locale] ?? localeOrdinals[prefix]
 
   // Short circuit to avoid PluralRules call in case of string
-  if (isSymbolOrdinals(ordinals)) {
+  if (isSymbolOrdinals(locale, ordinals)) {
     return ordinals
   }
 
   // Gets one of 'one', 'two', 'few', 'many', 'other'
   const count = new Intl.PluralRules(locale, { type: 'ordinal' }).select(num)
 
-  if (isSpecialOrdinals(ordinals)) {
+  if (isSpecialOrdinals(locale, ordinals)) {
     // In this case ordinals refers only to the data part
     // Use prefix as backup if specific locale cannot be found
     return (
-      localOrdinalsSpecial[locale](ordinals, unit, count) ??
-      localOrdinalsSpecial[prefix](ordinals, unit, count)
+      localeOrdinalsSpecial[locale](ordinals, unit, count) ??
+      localeOrdinalsSpecial[prefix](ordinals, unit, count)
     )
   }
 

@@ -5,25 +5,7 @@ import { localesReduceAsync } from '../../../scripts/lib/locales-list.mjs'
 const templateCode = (obj) => {
   return `/* eslint-disable */
 
-import { Ordinals } from './ordinals'
-
-const ordinals = ${JSON.stringify(obj, null, 2)}
-
-const expandOrdinals = (): { [key: string]: Ordinals } => {
-  const obj = {}
-
-  for (const key in ordinals) {
-    const val = ordinals[key]
-
-    for (const locale of key.split('|')) {
-      obj[locale] = val
-    }
-  }
-
-  return obj
-}
-
-export const localeOrdinals = expandOrdinals()
+export const localeOrdinalsData = ${JSON.stringify(obj, null, 2)}
 `
 }
 
@@ -47,10 +29,10 @@ localesReduceAsync().then((locales) => {
     }
   }
 
-  writeFileSync(resolve('src/localeOrdinals.ts'), templateCode(ordinals), {
+  writeFileSync(resolve('src/localeOrdinalsData.ts'), templateCode(ordinals), {
     encoding: 'utf8',
     flag: 'w',
   })
 
-  console.log('Wrote localeOrdinals.ts')
+  console.log('Wrote localeOrdinalsData.ts')
 })
