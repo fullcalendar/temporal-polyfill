@@ -23,14 +23,13 @@ export const getOrdinalForValue = (
 
   // Gets one of 'one', 'two', 'few', 'many', 'other'
   const count = new Intl.PluralRules(locale, { type: 'ordinal' }).select(num)
+  const specialFunc =
+    localeOrdinalsSpecial[locale] ?? localeOrdinalsSpecial[prefix]
 
-  if (localeOrdinalsSpecial[locale] || localeOrdinalsSpecial[prefix]) {
+  if (specialFunc) {
     // In this case ordinals refers only to the data part
     // Use prefix as backup if specific locale cannot be found
-    return (
-      localeOrdinalsSpecial[locale](ordinals, unit, count) ??
-      localeOrdinalsSpecial[prefix](ordinals, unit, count)
-    )
+    return specialFunc(ordinals, unit, count)
   }
 
   // Default to using PluralRules
