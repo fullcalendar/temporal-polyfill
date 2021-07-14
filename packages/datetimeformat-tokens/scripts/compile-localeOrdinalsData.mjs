@@ -12,9 +12,7 @@ export const localeOrdinalsData = ${JSON.stringify(obj, null, 2)}
 localesReduceAsync().then((locales) => {
   const ordinals = {}
 
-  for (const locale in locales) {
-    const ordinal = locales[locale].ordinal
-
+  for (const [locale, { ordinal }] of Object.entries(locales)) {
     if (ordinal) {
       const existingKey = Object.keys(ordinals).find((key) => {
         return ordinals[key] === ordinal

@@ -2,6 +2,17 @@ import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { localesReduceAsync } from '../../../scripts/lib/locales-list.mjs'
 
+const templateCode = (arr) => {
+  return `/* eslint-disable */
+
+export const getDirection = (locale: string): 'ltr' | 'rtl' => {
+  return locale.match(/^((?:${arr.join('|')})(?:-\\w{2})?)$/)
+    ? 'rtl'
+    : 'ltr'
+}
+`
+}
+
 localesReduceAsync().then((locales) => {
   const rtlArr = []
 
@@ -18,16 +29,7 @@ localesReduceAsync().then((locales) => {
     }
   }
 
-  const code = `/* eslint-disable */
-
-export const getDirection = (locale: string): 'ltr' | 'rtl' => {
-  return locale.match(/^((?:${rtlArr.join('|')})(?:-\\w{2})?)$/)
-    ? 'rtl'
-    : 'ltr'
-}
-`
-
-  writeFileSync(resolve('src/direction.ts'), code, {
+  writeFileSync(resolve('src/direction.ts'), templateCode(rtlArr), {
     encoding: 'utf8',
     flag: 'w',
   })

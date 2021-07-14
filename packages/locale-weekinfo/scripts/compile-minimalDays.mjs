@@ -2,45 +2,52 @@ import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { localesReduceAsync } from '../../../scripts/lib/locales-list.mjs'
 
+const templateCode = (conditionals, largest) => {
+  return `/* eslint-disable */
+
+export const getMinimalDays = (locale: string): number => {
+  ${conditionals.join('  } else ')}  }
+
+  return ${largest}
+}
+`
+}
+
+const templateConditional = (day, locales) => {
+  return `if (locale.match(/^((?:${locales.join('|')})(?:-\\w{2})?)$/)) {
+    return ${day}
+`
+}
+
 localesReduceAsync((accum, locale, json) => {
   const md = json.week.minimalDays
-
   return {
     ...accum,
     [md]: accum[md] ? [...accum[md], locale] : [locale],
   }
-}, {}).then((minimalDaysLocales) => {
-  const mdArr = []
+}, {}).then((mdObj) => {
+  const sortedMinimalDays = Object.entries(mdObj).sort(([, a], [, b]) => {
+    return b.length - a.length
+  })
+  const largest = sortedMinimalDays[0][0]
+  const condArr = []
 
-  for (const day in minimalDaysLocales) {
-    // Optimization short circuit for default return
-    if (day === '6') {
+  for (const [day, locales] of sortedMinimalDays) {
+    // Short circuit for largest minimalDay
+    if (day === largest) {
       continue
     }
 
-    // TODO: Apply prefix processing, try to avoid making this O(n^2)
-    const locales = minimalDaysLocales[day]
+    // Filter out locales that are the same as prefix
+    const noRepeatLocales = locales.filter((val) => {
+      const prefix = val.split('-')[0]
+      return val === prefix || !locales.includes(prefix)
+    })
 
-    // Code for if regex matches
-    const conditional = `if (locale.match(/^((?:${locales.join(
-      '|'
-    )})(?:-\\w{2})?)$/)) {
-    return ${day}
-`
-
-    mdArr.push(conditional)
+    condArr.push(templateConditional(day, noRepeatLocales))
   }
 
-  const code = `/* eslint-disable */
-
-export const getMinimalDays = (locale: string): number => {
-  ${mdArr.join('  } else ')}  }
-
-  return 6
-}
-`
-
-  writeFileSync(resolve('src/minimalDays.ts'), code, {
+  writeFileSync(resolve('src/minimalDays.ts'), templateCode(condArr, largest), {
     encoding: 'utf8',
     flag: 'w',
   })
