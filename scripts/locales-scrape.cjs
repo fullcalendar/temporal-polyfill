@@ -1,16 +1,23 @@
-import { existsSync, readdirSync } from 'fs'
-import { readFile, writeFile } from 'fs/promises'
-import { resolve } from 'path'
-import { merge } from './lib/deepmerge.mjs'
+/* eslint-disable @typescript-eslint/no-var-requires */
 
-const momentLocaleRoot = resolve(process.argv[1], '..', 'data/moment/locale')
+const { existsSync, readdirSync } = require('fs')
+const { readFile, writeFile } = require('fs/promises')
+const { resolve } = require('path')
+const merge = require('deepmerge')
+
+require('colors')
+
+const yargs = require('yargs')
+const { hideBin } = require('yargs/helpers')
+
+const args = yargs(hideBin(process.argv)).boolean('v').argv
+
+const momentLocaleRoot = resolve(args.$0, '..', 'data/moment/locale')
 const fullcalendarLocaleRoot = resolve(
-  process.argv[1],
+  args.$0,
   '..',
   'data/fullcalendar/packages/core/src/locales'
 )
-
-const verbose = process.argv.includes('-v')
 
 const writeLocale = async (localeStr) => {
   // Used for specific parsing nuances, intlStr represents the locale with the suffix capitalized
@@ -21,11 +28,11 @@ const writeLocale = async (localeStr) => {
 
   // Get File Content for Moment
   const momentContent = await readFile(
-    resolve(momentLocaleRoot, `${localeStr}.js`),
+    resolve(momentLocaleRoot, `${localeStr.toLowerCase()}.js`),
     { encoding: 'utf8' }
   ).catch(() => {
-    if (verbose) {
-      console.error(`'${intlStr}' does not exist in Moment`)
+    if (args.v) {
+      console.error(`'${intlStr}' does not exist in ${'Moment'.bold}`.red)
     }
   })
 
@@ -44,13 +51,15 @@ const writeLocale = async (localeStr) => {
 
     // Ordinals
     const matchOrdinal = momentContent.match(
-      /ordinal: (?:(function)|'%d(\S*)',)\s/
+      /ordinal:\s*(?:(function)|['"]%d(\S*)['"],)\s/
     )
 
     if (matchOrdinal) {
       if (matchOrdinal[1] === 'function') {
-        if (verbose) {
-          console.error(`Ordinals for '${intlStr}' are not handled by Moment`)
+        if (args.v) {
+          console.error(
+            `'${intlStr}' ordinals are not handled by ${'Moment'.bold}`.red
+          )
         }
       } else {
         localeData.ordinal = matchOrdinal[2]
@@ -60,13 +69,11 @@ const writeLocale = async (localeStr) => {
 
   // Get File Content for FullCalendar
   const fullcalendarContent = await readFile(
-    resolve(fullcalendarLocaleRoot, `${localeStr}.ts`),
+    resolve(fullcalendarLocaleRoot, `${localeStr.toLowerCase()}.ts`),
     { encoding: 'utf8' }
   ).catch(() => {
-    if (verbose) {
-      console.error(
-        `'${intlStr}' does not exist in FullCalendar, direction value will be 'null'`
-      )
+    if (args.v) {
+      console.error(`'${intlStr}' does not exist in ${'FullCalendar'.bold}`.red)
     }
   })
 
@@ -85,7 +92,7 @@ const writeLocale = async (localeStr) => {
   }
 
   const workspaceLocalePath = resolve(
-    process.argv[1],
+    args.$0,
     '../../locales',
     `${intlStr}.json`
   )
@@ -115,23 +122,18 @@ const writeLocale = async (localeStr) => {
 
   // Write to file
   await writeFile(
-    resolve(process.argv[1], '../../locales', `${intlStr}.json`),
+    resolve(args.$0, '../../locales', `${intlStr}.json`),
     JSON.stringify(localeData, null, 2),
     { encoding: 'utf8', flag: 'w' }
   )
 
-  if (verbose) {
-    console.log(`Wrote Locale '${intlStr}'.`)
+  if (args.v) {
+    console.log(`${'Wrote Locale:'.bgGreen} '${intlStr}'`.blue)
   }
 }
 
 // Read in arguments
-let locales =
-  process.argv[process.argv.length - 1] &&
-  process.argv[process.argv.length - 1] !== 'all' &&
-  process.argv[process.argv.length - 1] !== '-v'
-    ? process.argv[2]?.split(',')
-    : undefined
+let locales = args._[0] !== 'all' ? args._[0]?.split(',') : undefined
 
 // Case of All
 if (!locales) {
@@ -149,7 +151,7 @@ if (!locales) {
 
   // If the array is empty, it means submodules weren't checked out
   if (locales.length === 0) {
-    console.error('Please check out Git Submodules')
+    console.error('Please check out Git Submodules'.red)
     process.exit()
   }
 }
@@ -162,5 +164,9 @@ for (const localeStr of locales) {
 }
 
 Promise.allSettled(promiseArr).then(() => {
-  console.log('Completed scraping of Moment and Fullcalendar Locale files.')
+  console.log(
+    `Completed scraping of ${'Moment'.bold} and ${
+      'Fullcalendar'.bold
+    } Locale files.`.green
+  )
 })

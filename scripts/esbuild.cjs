@@ -7,6 +7,8 @@ const packageJson = require(relative(
   resolve(rootPath, './package.json')
 ))
 
+require('colors')
+
 const { build } = require('esbuild')
 
 // Yarn PnP support for esbuild
@@ -24,10 +26,10 @@ build({
   // plugins: [pnpPlugin()],
 })
   .then(() => {
-    console.log('Main file built')
+    console.log('Main file built'.green)
   })
   .catch((err) => {
-    console.warn('Building main file failed')
+    console.warn('Building main file failed'.red)
     console.warn(err)
     process.exit(1)
   })
@@ -42,10 +44,10 @@ build({
   // plugins: [pnpPlugin()],
 })
   .then(() => {
-    console.log('Minified file built')
+    console.log('Minified file built'.green)
   })
   .catch((err) => {
-    console.warn('Building minified file failed')
+    console.warn('Building minified file failed'.red)
     console.warn(err)
     process.exit(1)
   })
