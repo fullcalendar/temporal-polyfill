@@ -5608,9 +5608,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"temporal-lite@workspace:.":
+"temporal-polyfill@workspace:*, temporal-polyfill@workspace:packages/temporal-polyfill":
   version: 0.0.0-use.local
-  resolution: "temporal-lite@workspace:."
+  resolution: "temporal-polyfill@workspace:packages/temporal-polyfill"
+  dependencies:
+    "@types/jest": ^26.0.23
+    jest: ^27.0.4
+    jest-date-mock: ^1.0.8
+    ts-jest: ^27.0.3
+    typescript: ^4.3.4
+  languageName: unknown
+  linkType: soft
+
+"temporal-workspace@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "temporal-workspace@workspace:."
   dependencies:
     "@babel/core": ^7.14.6
     "@babel/preset-env": ^7.14.5
@@ -5626,18 +5638,6 @@ __metadata:
     rollup: ^2.53.0
     rollup-plugin-dts: ^3.0.2
     typescript: ^4.3.2
-  languageName: unknown
-  linkType: soft
-
-"temporal-polyfill@workspace:*, temporal-polyfill@workspace:packages/temporal-polyfill":
-  version: 0.0.0-use.local
-  resolution: "temporal-polyfill@workspace:packages/temporal-polyfill"
-  dependencies:
-    "@types/jest": ^26.0.23
-    jest: ^27.0.4
-    jest-date-mock: ^1.0.8
-    ts-jest: ^27.0.3
-    typescript: ^4.3.4
   languageName: unknown
   linkType: soft
 

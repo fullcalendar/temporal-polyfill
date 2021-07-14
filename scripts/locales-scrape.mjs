@@ -84,20 +84,20 @@ const writeLocale = async (localeStr) => {
     })
   }
 
-  const temporalLiteLocalePath = resolve(
+  const workspaceLocalePath = resolve(
     process.argv[1],
     '../../locales',
     `${intlStr}.json`
   )
 
   // Read existing file if it exists
-  if (existsSync(temporalLiteLocalePath)) {
-    const temporalLiteContent = JSON.parse(
-      await readFile(temporalLiteLocalePath, { encoding: 'utf8' })
+  if (existsSync(workspaceLocalePath)) {
+    const workspaceContent = JSON.parse(
+      await readFile(workspaceLocalePath, { encoding: 'utf8' })
     )
 
     // Merge into localeData
-    localeData = merge(temporalLiteContent, localeData)
+    localeData = merge(workspaceContent, localeData)
   }
 
   // Ensure properties exist (Lowest fallback layer)
