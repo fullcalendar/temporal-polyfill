@@ -1,9 +1,19 @@
 import { Duration } from 'temporal-polyfill'
 
-// TODO: This needs to be more fleshed out
 const largestCommonString = (a: string, b: string): string => {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]
-  return long.includes(short) ? short : ''
+
+  // Iterates from full short string by removing last character each iteration
+  for (let i = short.length; i >= 0; i--) {
+    const sub = short.substring(0, i)
+
+    // If condition holds, its isn't possible for there to be a larger string in the loop
+    if (long.includes(sub)) {
+      return sub
+    }
+  }
+
+  return ''
 }
 
 type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
@@ -29,7 +39,9 @@ const combinePartsArrays = (
     newArr = [
       ...newArr,
       // Add a space before if this isn't the first element
-      index > 0 ? { ...before, value: ` ${before.value}` } : before,
+      index > 0 && before.value.charAt(0) !== ' '
+        ? { ...before, value: ` ${before.value}` }
+        : before,
       value,
       after,
     ]
