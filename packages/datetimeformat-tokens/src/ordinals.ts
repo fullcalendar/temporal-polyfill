@@ -29,7 +29,7 @@ export const getOrdinalForValue = (
   if (specialFunc) {
     // In this case ordinals refers only to the data part
     // Use prefix as backup if specific locale cannot be found
-    return specialFunc(ordinals, unit, count)
+    return specialFunc(ordinals, num, unit, count)
   }
 
   // Default to using PluralRules

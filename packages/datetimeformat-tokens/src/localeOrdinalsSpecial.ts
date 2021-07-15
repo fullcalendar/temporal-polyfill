@@ -1,7 +1,8 @@
 export const localeOrdinalsSpecial: {
   [key: string]: (
     ordinalData: unknown,
-    unit: string | number, // TODO: What should this actually associate with?
+    num: number,
+    unit: string,
     pluralRule: Intl.LDMLPluralRule
   ) => string
 } = {
@@ -10,8 +11,9 @@ export const localeOrdinalsSpecial: {
       m: string
       f: string
     },
+    num,
     unit
   ) => {
-    return unit === 1 ? 'e' : ordinalData[unit === 'day' ? 'm' : 'f']
+    return num === 1 ? 'e' : ordinalData[unit === 'day' ? 'm' : 'f']
   },
 }
