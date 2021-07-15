@@ -1,5 +1,29 @@
 import { Duration } from 'temporal-polyfill'
 
+// Unfortunately neccesary as typescript does not include typings for ecma drafts
+// TODO: Remove when ListFormat becomes part of the official spec
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Intl {
+    interface ListFormatOptions {
+      localeMatcher?: 'best fit' | 'lookup'
+      type?: 'conjunction' | 'disjunction' | 'unit'
+      style?: 'long' | 'short' | 'narrow'
+    }
+
+    interface ListFormatPart<T = string> {
+      type: 'literal' | 'element'
+      value: T
+    }
+
+    class ListFormat {
+      constructor(locales?: string | string[], options?: Intl.ListFormatOptions)
+      public formatToParts: (elements: string[]) => Intl.ListFormatPart[]
+      public format: (items: [string?]) => string
+    }
+  }
+}
+
 const largestCommonString = (a: string, b: string): string => {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]
 
@@ -28,38 +52,57 @@ const getLiteralPartsValue = (
 }
 
 const combinePartsArrays = (
-  arr: Array<Array<Intl.RelativeTimeFormatPart>>
+  arr: Array<Array<Intl.RelativeTimeFormatPart>>,
+  listFormatter: Intl.ListFormat
 ): Array<Intl.RelativeTimeFormatPart> => {
-  let newArr = []
+  let partsArr: Array<Intl.RelativeTimeFormatPart> = []
+
+  // Used to make ListFormat easier to work with
+  let combinedArr: Array<string> = []
 
   // Flatten 2D array into 1D
-  arr.forEach((innerArr, index) => {
+  arr.forEach((innerArr) => {
     const [before, value, after] = innerArr
-
-    newArr = [
-      ...newArr,
-      // Add a space before if this isn't the first element
-      index > 0 && before.value.charAt(0) !== ' '
-        ? { ...before, value: ` ${before.value}` }
-        : before,
-      value,
-      after,
+    partsArr = [...partsArr, before, value, after]
+    combinedArr = [
+      ...combinedArr,
+      `${before.value}${value.value}${after.value}`,
     ]
   })
 
-  return newArr
+  // Append literal seperators into before part of the next element using ListFormat
+  let arrCounter = 0
+  listFormatter.formatToParts(combinedArr).forEach(({ type, value }) => {
+    // Increment which unit to look at every time we encounter an element
+    if (type === 'element') {
+      arrCounter++
+      return
+    } else {
+      // the '*3' is to account for each unit being three elements(before/value/after)
+      const temp = partsArr[arrCounter * 3]
+      partsArr[arrCounter * 3] = { ...temp, value: `${value}${temp.value}` }
+    }
+  })
+
+  return partsArr
 }
 
 export class DurationFormat {
-  private formatter: Intl.RelativeTimeFormat
+  private timeFormatter: Intl.RelativeTimeFormat
+  private listFormatter: Intl.ListFormat
 
   constructor(
     readonly locale: string = 'en-us',
     { style }: DurationFormatOptions = { style: 'long' }
   ) {
-    this.formatter = new Intl.RelativeTimeFormat(locale, {
+    this.timeFormatter = new Intl.RelativeTimeFormat(locale, {
       numeric: 'always',
       style,
+    })
+
+    this.listFormatter = new Intl.ListFormat(locale, {
+      style,
+      type: style !== 'long' ? 'unit' : 'conjunction',
     })
   }
 
@@ -77,12 +120,12 @@ export class DurationFormat {
     for (const key in duration) {
       const val = duration[key]
 
-      if (val !== 0) {
-        const forwardParts = this.formatter.formatToParts(
+      if (val !== 0 && key !== 'milliseconds') {
+        const forwardParts = this.timeFormatter.formatToParts(
           val,
           key as Intl.RelativeTimeFormatUnit
         )
-        const backwardParts = this.formatter.formatToParts(
+        const backwardParts = this.timeFormatter.formatToParts(
           -val,
           key as Intl.RelativeTimeFormatUnit
         )
@@ -112,7 +155,7 @@ export class DurationFormat {
     }
 
     // Flatten 2D array into 1D
-    const flatArr = combinePartsArrays(arr)
+    const flatArr = combinePartsArrays(arr, this.listFormatter)
 
     // Remove empty items
     return flatArr.filter(({ type, value }) => {
