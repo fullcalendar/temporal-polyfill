@@ -5,58 +5,61 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import Demitasse from '@pipobscure/demitasse';
-const { describe, it, report } = Demitasse;
+import Demitasse from '@pipobscure/demitasse'
+const { describe, it, report } = Demitasse
 
-import Pretty from '@pipobscure/demitasse-pretty';
-const { reporter } = Pretty;
+import Pretty from '@pipobscure/demitasse-pretty'
+const { reporter } = Pretty
 
-import { strict as assert } from 'assert';
-const { equal } = assert;
+import { strict as assert } from 'assert'
+const { equal } = assert
 
-import * as Temporal from 'proposal-temporal';
+import * as Temporal from 'temporal-polyfill'
 
 describe('Exports', () => {
-  const named = Object.keys(Temporal);
+  const named = Object.keys(Temporal)
   it('should be 11 things', () => {
-    equal(named.length, 11);
-  });
+    equal(named.length, 11)
+  })
   it('should contain `Instant`', () => {
-    assert(named.includes('Instant'));
-  });
+    assert(named.includes('Instant'))
+  })
   it('should contain `TimeZone`', () => {
-    assert(named.includes('TimeZone'));
-  });
+    assert(named.includes('TimeZone'))
+  })
   it('should contain `PlainDate`', () => {
-    assert(named.includes('PlainDate'));
-  });
+    assert(named.includes('PlainDate'))
+  })
   it('should contain `PlainTime`', () => {
-    assert(named.includes('PlainTime'));
-  });
+    assert(named.includes('PlainTime'))
+  })
   it('should contain `PlainDateTime`', () => {
-    assert(named.includes('PlainDateTime'));
-  });
+    assert(named.includes('PlainDateTime'))
+  })
   it('should contain `ZonedDateTime`', () => {
-    assert(named.includes('ZonedDateTime'));
-  });
+    assert(named.includes('ZonedDateTime'))
+  })
   it('should contain `PlainYearMonth`', () => {
-    assert(named.includes('PlainYearMonth'));
-  });
+    assert(named.includes('PlainYearMonth'))
+  })
   it('should contain `PlainMonthDay`', () => {
-    assert(named.includes('PlainMonthDay'));
-  });
+    assert(named.includes('PlainMonthDay'))
+  })
   it('should contain `Duration`', () => {
-    assert(named.includes('Duration'));
-  });
+    assert(named.includes('Duration'))
+  })
   it('should contain `Calendar`', () => {
-    assert(named.includes('Calendar'));
-  });
+    assert(named.includes('Calendar'))
+  })
   it('should contain `Now`', () => {
-    assert(named.includes('Now'));
-  });
-});
+    assert(named.includes('Now'))
+  })
+})
 
-import { normalize } from 'path';
+import { normalize } from 'path'
+
 if (normalize(import.meta.url.slice(8)) === normalize(process.argv[1])) {
-  report(reporter).then((failed) => process.exit(failed ? 1 : 0));
+  report(reporter).then((failed) => {
+    return process.exit(failed ? 1 : 0)
+  })
 }

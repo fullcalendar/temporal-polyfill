@@ -5,8 +5,8 @@ module.exports = function (test) {
       pass: true,
       stdout: '',
       stderr: '',
-      error: null
-    };
+      error: null,
+    }
   }
-  return test;
-};
+  return test
+}

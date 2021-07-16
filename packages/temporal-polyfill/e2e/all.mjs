@@ -5,41 +5,43 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import Demitasse from '@pipobscure/demitasse';
-import Pretty from '@pipobscure/demitasse-pretty';
+import Demitasse from '@pipobscure/demitasse'
+import Pretty from '@pipobscure/demitasse-pretty'
 
 // tests with long tedious output
-import './datemath.mjs';
-import './regex.mjs';
+import './datemath.mjs'
+import './regex.mjs'
 
 // tests of internals
-import './ecmascript.mjs';
+import './ecmascript.mjs'
 
 // tests of public API
-import './exports.mjs';
-import './now.mjs';
-import './timezone.mjs';
-import './instant.mjs';
-import './zoneddatetime.mjs';
-import './plaindate.mjs';
-import './plaintime.mjs';
-import './plaindatetime.mjs';
-import './duration.mjs';
-import './plainyearmonth.mjs';
-import './plainmonthday.mjs';
-import './intl.mjs';
-import './calendar.mjs';
+import './exports.mjs'
+import './now.mjs'
+import './timezone.mjs'
+import './instant.mjs'
+import './zoneddatetime.mjs'
+import './plaindate.mjs'
+import './plaintime.mjs'
+import './plaindatetime.mjs'
+import './duration.mjs'
+import './plainyearmonth.mjs'
+import './plainmonthday.mjs'
+import './intl.mjs'
+import './calendar.mjs'
 
 // tests of userland objects
-import './usertimezone.mjs';
-import './usercalendar.mjs';
+import './usertimezone.mjs'
+import './usercalendar.mjs'
 
 Promise.resolve()
   .then(() => {
-    return Demitasse.report(Pretty.reporter);
+    return Demitasse.report(Pretty.reporter)
   })
-  .then((failed) => process.exit(failed ? 1 : 0))
+  .then((failed) => {
+    return process.exit(failed ? 1 : 0)
+  })
   .catch((e) => {
-    console.error(e);
-    process.exit(-1);
-  });
+    console.error(e)
+    process.exit(-1)
+  })
