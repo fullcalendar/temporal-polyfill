@@ -55,34 +55,44 @@ const combinePartsArrays = (
   arr: Array<Array<Intl.RelativeTimeFormatPart>>,
   listFormatter: Intl.ListFormat
 ): Array<Intl.RelativeTimeFormatPart> => {
-  let partsArr: Array<Intl.RelativeTimeFormatPart> = []
+  const partsArr: Array<Intl.RelativeTimeFormatPart> = []
 
   // Used to make ListFormat easier to work with
-  let combinedArr: Array<string> = []
+  // Without using this, ListFormat would result in something like '1, month, 1, day' instead of '1 month, 1 day'
+  const combinedArr: Array<string> = []
 
   // Flatten 2D array into 1D
-  arr.forEach((innerArr) => {
-    const [before, value, after] = innerArr
-    partsArr = [...partsArr, before, value, after]
-    combinedArr = [
-      ...combinedArr,
-      `${before.value}${value.value}${after.value}`,
-    ]
-  })
+  for (const [before, value, after] of arr) {
+    partsArr.push(before, value, after)
+    combinedArr.push(`${before.value}${value.value}${after.value}`)
+  }
 
   // Append literal seperators into before part of the next element using ListFormat
   let arrCounter = 0
-  listFormatter.formatToParts(combinedArr).forEach(({ type, value }) => {
+
+  // Note that formatToParts is being used on the combinedArr in order to place seperator values properly
+  for (const { type, value } of listFormatter.formatToParts(combinedArr)) {
     // Increment which unit to look at every time we encounter an element
     if (type === 'element') {
-      arrCounter++
-      return
-    } else {
-      // the '*3' is to account for each unit being three elements(before/value/after)
-      const temp = partsArr[arrCounter * 3]
-      partsArr[arrCounter * 3] = { ...temp, value: `${value}${temp.value}` }
+      // the '+3' is to account for each unit being three elements(before/value/after)
+      arrCounter += 3
+    } else if (partsArr[arrCounter - 1]) {
+      const currBefore = partsArr[arrCounter].value
+      const prevAfter = partsArr[arrCounter - 1].value
+
+      // Convert one literal into `after of previous + seperator + before of current`
+      partsArr[arrCounter] = {
+        type: 'literal',
+        value: `${prevAfter}${value}${currBefore}`,
+      }
+
+      // Make after of previous value empty so there's no repeats
+      partsArr[arrCounter - 1] = {
+        type: 'literal',
+        value: '',
+      }
     }
-  })
+  }
 
   return partsArr
 }

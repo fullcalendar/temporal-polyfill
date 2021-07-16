@@ -33,10 +33,7 @@ test.each`
     unit: 'month',
   }, {
     type: 'literal',
-    value: ' month',
-  }, {
-    type: 'literal',
-    value: ' and ',
+    value: ' month and ',
   }, {
     type: 'integer',
     value: '1',
