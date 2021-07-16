@@ -157,10 +157,10 @@ if (!locales) {
 }
 
 // Iterate through array, setting off async functions
-let promiseArr = []
+const promiseArr = []
 
 for (const localeStr of locales) {
-  promiseArr = [...promiseArr, writeLocale(localeStr)]
+  promiseArr.push(writeLocale(localeStr))
 }
 
 Promise.allSettled(promiseArr).then(() => {

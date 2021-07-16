@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { readdirSync } from 'fs'
-import { readFile } from 'fs/promises'
+import { readdirSync, readFileSync } from 'fs'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -20,24 +19,42 @@ export const listLocales = () => {
   return localeList
 }
 
-export const localesReduceAsync = (
-  transform = (accum, locale, json) => {
-    return { ...accum, [locale]: json }
-  },
-  initial = ''
-) => {
-  // Read files and reduce to locale comparison string asynchronously
-  return listLocales(localeRoot).reduce(async (accumPromise, val) => {
+export const getAllLocalesData = () => {
+  const obj = {}
+
+  for (const fileName of listLocales()) {
     const json = JSON.parse(
-      await readFile(resolve(localeRoot, val), {
+      readFileSync(resolve(localeRoot, fileName), {
         encoding: 'utf8',
       })
     )
 
-    // Get current state of accum, this will cause the async to become synchronous
-    const accum = await accumPromise
+    obj[fileName.replace('.json', '')] = json
+  }
 
-    // Format using given transform function
-    return transform(accum, val.replace('.json', ''), json)
-  }, Promise.resolve(initial))
+  return obj
+}
+
+/**
+ * Creates a map of locales with a property as keys
+ * @param getProp {(locale: string, json: unknown) => string} Function to fetch property from json
+ */
+export const mapLocaleProperty = (
+  getProp = (locale) => {
+    return locale
+  }
+) => {
+  const obj = {}
+
+  for (const [locale, json] of Object.entries(getAllLocalesData())) {
+    const prop = getProp(locale, json)
+
+    if (obj[prop]) {
+      obj[prop].push(locale)
+    } else {
+      obj[prop] = [locale]
+    }
+  }
+
+  return obj
 }

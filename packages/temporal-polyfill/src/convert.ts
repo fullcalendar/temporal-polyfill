@@ -117,11 +117,9 @@ export const reduceFormat = (
 ): Record<string, string | number> => {
   return formatter
     .formatToParts(new Date(ms))
-    .reduce((acc: Record<string, string | number>, { type, value }) => {
+    .reduce((accum: Record<string, string | number>, { type, value }) => {
       const valNum = parseInt(value)
-      return {
-        ...acc,
-        [type]: isNaN(valNum) ? value : valNum,
-      }
+      accum[type] = isNaN(valNum) ? value : valNum
+      return accum
     }, {})
 }

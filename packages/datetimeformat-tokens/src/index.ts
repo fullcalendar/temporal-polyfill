@@ -145,10 +145,8 @@ export class TokenDateTimeFormat {
       .formatToParts(dt.epochMilliseconds)
       .reduce((accum: Record<string, string>, { type, value }) => {
         // Convert from an array of objects to an object with keys for year/month/day/etc.
-        return {
-          ...accum,
-          [type]: value,
-        }
+        accum[type] = value
+        return accum
       }, {})
 
     // Map parts that are tokens into values
