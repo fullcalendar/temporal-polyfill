@@ -5,8 +5,7 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import Demitasse from '@pipobscure/demitasse'
-import Pretty from '@pipobscure/demitasse-pretty'
+import { report } from 'mocha'
 
 // tests with long tedious output
 import './datemath.mjs'
@@ -36,7 +35,7 @@ import './usercalendar.mjs'
 
 Promise.resolve()
   .then(() => {
-    return Demitasse.report(Pretty.reporter)
+    return report()
   })
   .then((failed) => {
     return process.exit(failed ? 1 : 0)

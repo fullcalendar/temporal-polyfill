@@ -1,8 +1,6 @@
-import Demitasse from '@pipobscure/demitasse'
-const { after, before, describe, it, report } = Demitasse
+/* eslint-disable @typescript-eslint/no-extra-semi */
 
-import Pretty from '@pipobscure/demitasse-pretty'
-const { reporter } = Pretty
+import { after, before, describe, it, report } from 'mocha'
 
 import { strict as assert } from 'assert'
 const { equal, throws } = assert
@@ -964,7 +962,7 @@ describe('fromString regex', () => {
 import { normalize } from 'path'
 
 if (normalize(import.meta.url.slice(8)) === normalize(process.argv[1])) {
-  report(reporter).then((failed) => {
+  report().then((failed) => {
     return process.exit(failed ? 1 : 0)
   })
 }

@@ -1,8 +1,7 @@
-import Demitasse from '@pipobscure/demitasse'
-const { describe, it, report } = Demitasse
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-extra-semi */
 
-import Pretty from '@pipobscure/demitasse-pretty'
-const { reporter } = Pretty
+import { describe, it, report } from 'mocha'
 
 import { strict as assert } from 'assert'
 const { throws, equal, notEqual } = assert
@@ -570,7 +569,7 @@ describe('MonthDay', () => {
 import { normalize } from 'path'
 
 if (normalize(import.meta.url.slice(8)) === normalize(process.argv[1])) {
-  report(reporter).then((failed) => {
+  report().then((failed) => {
     return process.exit(failed ? 1 : 0)
   })
 }
