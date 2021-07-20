@@ -5,7 +5,8 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { report } from 'mocha'
+import mocha from 'mocha'
+const { report } = mocha
 
 // tests with long tedious output
 import './datemath.mjs'

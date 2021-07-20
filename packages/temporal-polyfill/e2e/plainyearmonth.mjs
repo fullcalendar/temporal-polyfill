@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-extra-semi */
 
-import { describe, it, report } from 'mocha'
+import mocha from 'mocha'
+const { describe, it, report } = mocha
 
 import { strict as assert } from 'assert'
 const { throws, equal, notEqual } = assert

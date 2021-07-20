@@ -1,12 +1,12 @@
+/* global globalThis */
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { describe, it, report } from 'mocha'
+import mocha from 'mocha'
+const { describe, it, report } = mocha
 
 import { strict as assert } from 'assert'
 const { deepEqual, equal, throws } = assert
 
-import { DateTimeFormat } from '../lib/intl.mjs'
-Intl.DateTimeFormat = DateTimeFormat
 import * as Temporal from 'temporal-polyfill'
 
 describe('Intl', () => {

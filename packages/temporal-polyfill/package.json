@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "test": "jest",
-    "e2e": "node --no-warnings --experimental-modules --icu-data-dir node_modules/full-icu --loader ./e2e/resolve.source.mjs ./e2e/all.mjs"
+    "e2e": "mocha"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

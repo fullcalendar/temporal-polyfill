@@ -3,7 +3,8 @@
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import { describe, it, report } from 'mocha'
+import mocha from 'mocha'
+const { describe, it, report } = mocha
 
 import { strict as assert } from 'assert'
 const { equal, throws } = assert

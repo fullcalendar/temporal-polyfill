@@ -6,7 +6,6 @@
 //    ./node_modules/full-icu/ test/validStrings.mjs
 
 import assert from 'assert'
-import { ES } from '../lib/ecmascript.mjs'
 import timezoneData from 'timezones.json'
 
 const timezoneNames = new Set(
@@ -554,7 +553,7 @@ for (let count = 0; count < 1000; count++) {
       if (prop !== 'ianaName' && prop !== 'offset' && prop !== 'calendar') {
         expected = expected || 0
       }
-      assert.equal(parsed[prop], expected)
+      assert.strictEqual(parsed[prop], expected)
     }
     console.log(`${fuzzed} => ok`)
   } catch (e) {

@@ -5,7 +5,8 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { describe, it, report } from 'mocha'
+import mocha from 'mocha'
+const { describe, it, report } = mocha
 
 import { strict as assert } from 'assert'
 const { equal } = assert

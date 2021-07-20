@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-extra-semi */
+
 const { stdin, stdout, exit } = process
 const fs = require('fs')
 
