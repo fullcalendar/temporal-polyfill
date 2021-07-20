@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import mocha from 'mocha'
-const { describe, it, report } = mocha
+const { describe, it } = mocha
 
 import { strict as assert } from 'assert'
 const { deepEqual, equal, throws } = assert
@@ -2833,11 +2833,3 @@ describe('Intl', () => {
     })
   })
 })
-
-import { normalize } from 'path'
-
-if (normalize(import.meta.url.slice(8)) === normalize(process.argv[1])) {
-  report().then((failed) => {
-    return process.exit(failed ? 1 : 0)
-  })
-}

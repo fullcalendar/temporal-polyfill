@@ -4,6 +4,7 @@ import { dateFormat } from './format'
 import { parseDate } from './parse'
 import { TimeZone, TimeZoneId } from './timeZone'
 import { CompareReturn, LocaleId } from './utils'
+import { PlainDate } from './plainDate'
 
 type ZonedDateTimeLike = {
   epochMilliseconds?: number
@@ -60,15 +61,18 @@ export class ZonedDateTime {
   }
 
   get year(): number {
-    return this.calendar.year(this.offsetIso())
+    const { isoYear, isoMonth, isoDay } = this.offsetIso()
+    return this.calendar.year(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get month(): number {
-    return this.calendar.month(this.offsetIso())
+    const { isoYear, isoMonth, isoDay } = this.offsetIso()
+    return this.calendar.month(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get day(): number {
-    return this.calendar.day(this.offsetIso())
+    const { isoYear, isoMonth, isoDay } = this.offsetIso()
+    return this.calendar.day(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get hour(): number {
@@ -88,11 +92,13 @@ export class ZonedDateTime {
   }
 
   get dayOfWeek(): number {
-    return this.calendar.dayOfWeek(this.offsetIso())
+    const { isoYear, isoMonth, isoDay } = this.offsetIso()
+    return this.calendar.dayOfWeek(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get weekOfYear(): number {
-    return this.calendar.weekOfYear(this.offsetIso())
+    const { isoYear, isoMonth, isoDay } = this.offsetIso()
+    return this.calendar.weekOfYear(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   with(dateTimeLike: ZonedDateTimeLike | string): ZonedDateTime {
@@ -100,9 +106,9 @@ export class ZonedDateTime {
       throw new Error('Unimplemented')
     }
     return new ZonedDateTime(
-      dateTimeLike.epochMilliseconds || this.epochMilliseconds,
-      dateTimeLike.timeZone || this.timeZone,
-      dateTimeLike.calendar || this.calendar
+      dateTimeLike.epochMilliseconds ?? this.epochMilliseconds,
+      dateTimeLike.timeZone ?? this.timeZone,
+      dateTimeLike.calendar ?? this.calendar
     )
   }
 

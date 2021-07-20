@@ -6,7 +6,7 @@
 // This code is governed by the BSD license found in the LICENSE file.
 
 import mocha from 'mocha'
-const { after, before, describe, it, report } = mocha
+const { after, before, describe, it } = mocha
 
 import { strict as assert } from 'assert'
 const { equal, throws } = assert
@@ -795,11 +795,3 @@ describe('Userland calendar', () => {
     })
   })
 })
-
-import { normalize } from 'path'
-
-if (normalize(import.meta.url.slice(8)) === normalize(process.argv[1])) {
-  report().then((failed) => {
-    return process.exit(failed ? 1 : 0)
-  })
-}

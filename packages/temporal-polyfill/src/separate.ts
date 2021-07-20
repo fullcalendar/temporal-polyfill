@@ -65,11 +65,11 @@ export const separateDateTime = (
     ms += MS_FOR.DAY
   }
   return [
-    {
-      isoYear: jsDate.getUTCFullYear(),
-      isoMonth: jsDate.getUTCMonth() + 1,
-      isoDay: jsDate.getUTCDate(),
-    },
+    new PlainDate(
+      jsDate.getUTCFullYear(),
+      jsDate.getUTCMonth() + 1,
+      jsDate.getUTCDate()
+    ),
     ms,
   ]
 }

@@ -65,6 +65,11 @@ export class Calendar {
     })
   }
 
+  // TODO: Make this function
+  static from(thing: unknown): Calendar {
+    return new Calendar()
+  }
+
   year({ isoYear }: PlainDate): number {
     return reduceFormat(
       isoDateToMs({ isoYear, isoMonth: 1, isoDay: 1 }),
@@ -97,8 +102,8 @@ export class Calendar {
 
   daysInYear({ isoYear }: PlainDate): number {
     return diffDays(
-      { isoYear, isoMonth: 1, isoDay: 1 },
-      { isoYear: isoYear + 1, isoMonth: 1, isoDay: 1 }
+      new PlainDate(isoYear, 1, 1),
+      new PlainDate(isoYear + 1, 1, 1)
     )
   }
 
@@ -117,9 +122,9 @@ export class Calendar {
 
   dayOfYear(dt: PlainDate): number {
     return (
-      this.dateUntil({ isoYear: dt.isoYear, isoMonth: 1, isoDay: 1 }, dt).total(
-        { unit: 'days' }
-      ) + 1
+      this.dateUntil(new PlainDate(dt.isoYear, 1, 1), dt).total({
+        unit: 'days',
+      }) + 1
     )
   }
 
@@ -135,11 +140,7 @@ export class Calendar {
   dateFromFields(fields: CalendarDate, options?: AssignmentOptions): PlainDate {
     // FIXME: Overflow does nothing
     const overflow = options?.overflow || 'constrain'
-    return {
-      isoYear: fields.year,
-      isoMonth: fields.month,
-      isoDay: fields.day,
-    }
+    return new PlainDate(fields.year, fields.month, fields.day)
   }
 
   // Calendar Math
@@ -163,7 +164,7 @@ export class Calendar {
       this.dateFromFields(fields),
       days + weeks * UNIT_INCREMENT.WEEK
     )
-    return { isoYear, isoMonth, isoDay }
+    return new PlainDate(isoYear, isoMonth, isoDay)
   }
 
   dateUntil(

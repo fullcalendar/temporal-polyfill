@@ -9,7 +9,7 @@
  */
 
 import mocha from 'mocha'
-const { describe, it, report } = mocha
+const { describe, it } = mocha
 
 import { strict as assert } from 'assert'
 const { equal, notEqual, throws } = assert

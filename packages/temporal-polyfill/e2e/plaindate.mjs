@@ -9,7 +9,7 @@
  */
 
 import mocha from 'mocha'
-const { describe, it, report } = mocha
+const { describe, it } = mocha
 
 import { strict as assert } from 'assert'
 const { equal, notEqual, throws } = assert
@@ -979,11 +979,3 @@ describe('Date', () => {
     })
   })
 })
-
-import { normalize } from 'path'
-
-if (normalize(import.meta.url.slice(8)) === normalize(process.argv[1])) {
-  report().then((failed) => {
-    return process.exit(failed ? 1 : 0)
-  })
-}

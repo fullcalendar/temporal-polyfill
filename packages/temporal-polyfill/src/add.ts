@@ -56,7 +56,10 @@ export const addMonths = (
 }
 
 export const addDays = (date: PlainDate, days: number): PlainDate => {
-  return msToIsoDate(isoDateToMs(date) + days * MS_FOR.DAY)
+  const { isoYear, isoMonth, isoDay } = msToIsoDate(
+    isoDateToMs(date) + days * MS_FOR.DAY
+  )
+  return new PlainDate(isoYear, isoMonth, isoDay)
 }
 
 // Overflow Utils
@@ -66,7 +69,8 @@ const handleMonthOverflow = (
   rejectOverflow: boolean
 ): number => {
   const { isoYear, isoMonth, isoDay } = calendar.dateFromFields(fields)
-  const totalMonths = calendar.monthsInYear({ isoYear, isoMonth, isoDay }) + 1
+  const totalMonths =
+    calendar.monthsInYear(new PlainDate(isoYear, isoMonth, isoDay)) + 1
 
   if (rejectOverflow && isoMonth > totalMonths) {
     throw new Error('Month overflow is disabled')
@@ -80,7 +84,8 @@ const handleDayOverflow = (
   rejectOverflow: boolean
 ): number => {
   const { isoYear, isoMonth, isoDay } = calendar.dateFromFields(fields)
-  const totalDays = calendar.daysInMonth({ isoYear, isoMonth, isoDay }) + 1
+  const totalDays =
+    calendar.daysInMonth(new PlainDate(isoYear, isoMonth, isoDay)) + 1
 
   if (rejectOverflow && isoDay > totalDays) {
     throw new Error('Day overflow is disabled')

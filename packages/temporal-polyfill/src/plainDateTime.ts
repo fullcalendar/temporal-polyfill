@@ -8,7 +8,7 @@ import { separateDateTime, separateDuration } from './separate'
 import { AssignmentOptions, CompareReturn, LocaleId } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 import { TimeZoneId } from './timeZone'
-import { PlainDateFields } from './plainDate'
+import { PlainDate, PlainDateFields } from './plainDate'
 import { PlainTimeFields } from './plainTime'
 
 export type PlainDateTimeFields = PlainDateFields &
@@ -127,15 +127,18 @@ export class PlainDateTime {
   }
 
   get year(): number {
-    return this.calendar.year(msToIsoDate(this.epochMilliseconds))
+    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
+    return this.calendar.year(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get month(): number {
-    return this.calendar.month(msToIsoDate(this.epochMilliseconds))
+    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
+    return this.calendar.month(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get day(): number {
-    return this.calendar.day(msToIsoDate(this.epochMilliseconds))
+    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
+    return this.calendar.day(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get hour(): number {
@@ -155,11 +158,13 @@ export class PlainDateTime {
   }
 
   get dayOfWeek(): number {
-    return this.calendar.dayOfWeek(msToIsoDate(this.epochMilliseconds))
+    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
+    return this.calendar.dayOfWeek(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   get weekOfYear(): number {
-    return this.calendar.weekOfYear(msToIsoDate(this.epochMilliseconds))
+    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
+    return this.calendar.weekOfYear(new PlainDate(isoYear, isoMonth, isoDay))
   }
 
   with(dateTimeLike: PlainDateTimeLike | string): PlainDateTime {
@@ -222,11 +227,11 @@ export class PlainDateTime {
     const constrained = msToIsoDate(this.epochMilliseconds + ms)
 
     const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
-      {
-        isoYear: constrained.isoYear,
-        isoMonth: constrained.isoMonth,
-        isoDay: constrained.isoDay,
-      },
+      new PlainDate(
+        constrained.isoYear,
+        constrained.isoMonth,
+        constrained.isoDay
+      ),
       macro,
       options
     )

@@ -6,12 +6,19 @@ export type PlainDateFields = {
   isoDay: number
 }
 
+export type PlainDateLike = Partial<PlainDateFields>
+
 export class PlainDate {
   constructor(
     readonly isoYear: number,
     readonly isoMonth: number,
     readonly isoDay: number
   ) {}
+
+  // TODO: Make this function
+  static from(thing: unknown): PlainDate {
+    return new PlainDate(1970, 1, 1)
+  }
 
   static compare(one: PlainDate, two: PlainDate): CompareReturn {
     const diff =
@@ -20,5 +27,16 @@ export class PlainDate {
       one.isoDay - two.isoDay
 
     return diff !== 0 ? (diff < 0 ? -1 : 1) : 0
+  }
+
+  with(dateLike: PlainDateLike | string): PlainDate {
+    if (typeof dateLike === 'string') {
+      throw new Error('Unimplemented')
+    }
+    return new PlainDate(
+      dateLike.isoYear ?? this.isoYear,
+      dateLike.isoMonth ?? this.isoMonth,
+      dateLike.isoDay ?? this.isoDay
+    )
   }
 }
