@@ -1702,13 +1702,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mocha@npm:^8.2.3":
-  version: 8.2.3
-  resolution: "@types/mocha@npm:8.2.3"
-  checksum: 5cba26124eb9d6b9b2fab66111488a54e6254162bac855282cb46f1467c5c4debe78ddeba15ab2264d5e4669fbfd403e433b6363106d2dfbe122d660c1e298e2
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:*":
   version: 15.12.2
   resolution: "@types/node@npm:15.12.2"
@@ -6106,7 +6099,6 @@ __metadata:
   resolution: "temporal-polyfill@workspace:packages/temporal-polyfill"
   dependencies:
     "@types/jest": ^26.0.23
-    "@types/mocha": ^8.2.3
     assert: ^2.0.0
     jest: ^27.0.4
     jest-date-mock: ^1.0.8

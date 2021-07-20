@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
-    "@types/mocha": "^8.2.3",
     "assert": "^2.0.0",
     "jest": "^27.0.4",
     "jest-date-mock": "^1.0.8",
