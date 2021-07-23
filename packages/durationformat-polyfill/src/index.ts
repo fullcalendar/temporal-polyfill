@@ -45,10 +45,10 @@ type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 type DurationLike = Partial<Duration>
 
 const getLiteralPartsValue = (
-  arr: Array<Intl.RelativeTimeFormatPart>,
+  partsArr: Intl.RelativeTimeFormatPart[],
   index: number
 ): string => {
-  return arr[index].type === 'literal' ? arr[index].value : ''
+  return partsArr[index].type === 'literal' ? partsArr[index].value : ''
 }
 
 // Combines adjacent literal parts and removes blank literal parts
@@ -125,14 +125,14 @@ export class DurationFormat {
 
   formatToParts(
     durationLike: Duration | DurationLike
-  ): Array<Intl.RelativeTimeFormatPart> {
+  ): Intl.RelativeTimeFormatPart[] {
     const duration =
       durationLike instanceof Duration
         ? durationLike
         : Duration.from(durationLike)
 
     // Storage array
-    const arr: Array<Array<Intl.RelativeTimeFormatPart>> = []
+    const durationPartArrays: Intl.RelativeTimeFormatPart[][] = []
 
     for (const key in duration) {
       const val = duration[key]
@@ -157,7 +157,7 @@ export class DurationFormat {
           getLiteralPartsValue(backwardParts, backwardParts.length - 1)
         )
 
-        arr.push([
+        durationPartArrays.push([
           // Append pretext into accumulator
           {
             type: 'literal',
@@ -172,7 +172,7 @@ export class DurationFormat {
     }
 
     // Flatten 2D array into 1D
-    return combinePartsArrays(arr, this.listFormatter)
+    return combinePartsArrays(durationPartArrays, this.listFormatter)
   }
 
   format(durationLike: Duration | DurationLike): string {
