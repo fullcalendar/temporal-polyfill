@@ -45,56 +45,63 @@ type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 type DurationLike = Partial<Duration>
 
 const getLiteralPartsValue = (
-  arr: Array<Intl.RelativeTimeFormatPart>,
+  partsArr: Intl.RelativeTimeFormatPart[],
   index: number
 ): string => {
-  return arr[index].type === 'literal' ? arr[index].value : ''
+  return partsArr[index].type === 'literal' ? partsArr[index].value : ''
 }
 
-const combinePartsArrays = (
-  arr: Array<Array<Intl.RelativeTimeFormatPart>>,
-  listFormatter: Intl.ListFormat
-): Array<Intl.RelativeTimeFormatPart> => {
-  const partsArr: Array<Intl.RelativeTimeFormatPart> = []
+// Combines adjacent literal parts and removes blank literal parts
+const collapseLiteralParts = (
+  parts: Intl.RelativeTimeFormatPart[]
+): Intl.RelativeTimeFormatPart[] => {
+  const finalParts: Intl.RelativeTimeFormatPart[] = []
 
-  // Used to make ListFormat easier to work with
-  // Without using this, ListFormat would result in something like '1, month, 1, day' instead of '1 month, 1 day'
-  const combinedArr: Array<string> = []
+  // As we iterate the parts, will be a reference to the previous part, only if it was a literal.
+  let prevLiteralPart: Intl.RelativeTimeFormatPart | null = null
 
-  // Flatten 2D array into 1D
-  for (const [before, value, after] of arr) {
-    partsArr.push(before, value, after)
-    combinedArr.push(`${before.value}${value.value}${after.value}`)
-  }
-
-  // Append literal seperators into before part of the next element using ListFormat
-  let arrCounter = 0
-
-  // Note that formatToParts is being used on the combinedArr in order to place seperator values properly
-  for (const { type, value } of listFormatter.formatToParts(combinedArr)) {
-    // Increment which unit to look at every time we encounter an element
-    if (type === 'element') {
-      // the '+3' is to account for each unit being three elements(before/value/after)
-      arrCounter += 3
-    } else if (partsArr[arrCounter - 1]) {
-      const currBefore = partsArr[arrCounter].value
-      const prevAfter = partsArr[arrCounter - 1].value
-
-      // Convert one literal into `after of previous + seperator + before of current`
-      partsArr[arrCounter] = {
-        type: 'literal',
-        value: `${prevAfter}${value}${currBefore}`,
+  for (const part of parts) {
+    if (part.type === 'literal') {
+      // Don't consider literals that are blank
+      if (part.value) {
+        if (prevLiteralPart) {
+          prevLiteralPart.value += part.value
+        } else {
+          prevLiteralPart = { ...part } // Copy in case we concat the value later (necessary?)
+          finalParts.push(prevLiteralPart)
+        }
       }
-
-      // Make after of previous value empty so there's no repeats
-      partsArr[arrCounter - 1] = {
-        type: 'literal',
-        value: '',
-      }
+    } else {
+      prevLiteralPart = null
+      finalParts.push(part)
     }
   }
 
-  return partsArr
+  return finalParts
+}
+
+const combinePartsArrays = (
+  durationPartArrays: Intl.RelativeTimeFormatPart[][],
+  listFormatter: Intl.ListFormat
+): Intl.RelativeTimeFormatPart[] => {
+  // Produce an array of strings like ['0', '1', '2']
+  const indexStrings = durationPartArrays.map((_part, index) => {
+    return String(index)
+  })
+  const listParts = listFormatter.formatToParts(indexStrings)
+  const combinedParts: Intl.RelativeTimeFormatPart[] = []
+
+  for (const listPart of listParts) {
+    if (listPart.type === 'element') {
+      // When an element is encountered (a string like '1'), inject parts from corresponding duration
+      combinedParts.push(...durationPartArrays[parseInt(listPart.value)])
+    } else {
+      // Otherwise, inject a literal
+      combinedParts.push(listPart)
+    }
+  }
+
+  return collapseLiteralParts(combinedParts)
 }
 
 export class DurationFormat {
@@ -118,14 +125,14 @@ export class DurationFormat {
 
   formatToParts(
     durationLike: Duration | DurationLike
-  ): Array<Intl.RelativeTimeFormatPart> {
+  ): Intl.RelativeTimeFormatPart[] {
     const duration =
       durationLike instanceof Duration
         ? durationLike
         : Duration.from(durationLike)
 
     // Storage array
-    const arr: Array<Array<Intl.RelativeTimeFormatPart>> = []
+    const durationPartArrays: Intl.RelativeTimeFormatPart[][] = []
 
     for (const key in duration) {
       const val = duration[key]
@@ -150,7 +157,7 @@ export class DurationFormat {
           getLiteralPartsValue(backwardParts, backwardParts.length - 1)
         )
 
-        arr.push([
+        durationPartArrays.push([
           // Append pretext into accumulator
           {
             type: 'literal',
@@ -165,12 +172,7 @@ export class DurationFormat {
     }
 
     // Flatten 2D array into 1D
-    const flatArr = combinePartsArrays(arr, this.listFormatter)
-
-    // Remove empty items
-    return flatArr.filter(({ type, value }) => {
-      return type !== 'literal' || value !== ''
-    })
+    return combinePartsArrays(durationPartArrays, this.listFormatter)
   }
 
   format(durationLike: Duration | DurationLike): string {

@@ -31,7 +31,7 @@
     "dts-bundle": "yarn tsc && yarn workspaces foreach --no-private -tv run dts-bundle:pkg",
     "esbuild": "yarn workspaces foreach --no-private -ptv run esbuild:pkg",
     "build": "yarn dts-bundle && yarn esbuild",
-    "gzip-size": "yarn workspaces foreach --no-private -v run gzipsize:pkg",
+    "gzip-size": "yarn workspaces foreach --no-private -v run gzip-size:pkg",
     "test": "jest --coverage",
     "dev": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts --fix",
