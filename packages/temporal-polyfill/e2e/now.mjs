@@ -5,15 +5,12 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
-describe('Temporal.Now', () => {
+describe.skip('Temporal.Now', () => {
   describe('Structure', () => {
     it('Temporal.Now is an object', () => {
       return equal(typeof Temporal.Now, 'object')

@@ -1,15 +1,9 @@
-/* global globalThis */
-/* eslint-disable @typescript-eslint/no-empty-function */
-
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { deepEqual, equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
-describe('Intl', () => {
+describe.skip('Intl', () => {
   // TODO: move these to their respective test files.
 
   function maybeGetWeekdayOnlyFormat() {

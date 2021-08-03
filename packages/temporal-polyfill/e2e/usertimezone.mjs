@@ -3,15 +3,12 @@
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
-describe('Userland time zone', () => {
+describe.skip('Userland time zone', () => {
   describe('Trivial subclass', () => {
     class CustomUTCSubclass extends Temporal.TimeZone {
       constructor() {

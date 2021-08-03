@@ -1,20 +1,15 @@
 #! /usr/bin/env -S node --experimental-modules
 
-/* eslint-disable @typescript-eslint/no-extra-semi */
-
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 const { Calendar } = Temporal
 
-describe('Calendar', () => {
+describe.skip('Calendar', () => {
   describe('Structure', () => {
     it('Calendar is a Function', () => {
       equal(typeof Calendar, 'function')

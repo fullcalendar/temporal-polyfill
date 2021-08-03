@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-extra-semi */
-
-import mocha from 'mocha'
-const { after, before, describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
-describe('fromString regex', () => {
+describe.skip('fromString regex', () => {
   describe('instant', () => {
     function test(isoString, components) {
       it(isoString, () => {

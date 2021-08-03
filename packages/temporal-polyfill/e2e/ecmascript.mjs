@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-extra-semi */
-
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { deepEqual, throws } = assert
 
 import { TimeZone } from 'temporal-polyfill'
 
-describe('ECMAScript', () => {
+describe.skip('ECMAScript', () => {
   describe('GetIANATimeZoneDateTimeParts', () => {
     describe('epoch', () => {
       test(0n, TimeZone.from('America/Los_Angeles').id, {

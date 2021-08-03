@@ -1,16 +1,10 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/no-extra-semi */
-
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { throws, equal, notEqual } = assert
 
 import * as Temporal from 'temporal-polyfill'
 const { PlainYearMonth } = Temporal
 
-describe('YearMonth', () => {
+describe.skip('YearMonth', () => {
   describe('Structure', () => {
     it('YearMonth is a Function', () => {
       equal(typeof PlainYearMonth, 'function')

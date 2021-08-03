@@ -5,7 +5,7 @@
 // node --experimental-modules --no-warnings --icu-data-dir \
 //    ./node_modules/full-icu/ test/validStrings.mjs
 
-import assert from 'assert'
+import { assert } from '@esm-bundle/chai'
 import timezoneData from 'timezones.json'
 
 const timezoneNames = new Set(

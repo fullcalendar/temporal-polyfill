@@ -1,19 +1,14 @@
 #! /usr/bin/env -S node --experimental-modules
 
-/* eslint-disable prefer-const */
-
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import mocha from 'mocha'
-const { after, before, describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
-describe('Userland calendar', () => {
+describe.skip('Userland calendar', () => {
   describe('Trivial subclass', () => {
     // For the purposes of testing, a nonsensical calendar that uses 2-based
     // month numbers, instead of 1-based

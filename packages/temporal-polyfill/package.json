@@ -26,14 +26,15 @@
     "e2e": "wtr"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^20.0.0",
-    "@types/jest": "^26.0.23",
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@types/jest": "^26.0.24",
+    "@web/dev-server-esbuild": "^0.2.12",
     "@web/test-runner": "^0.13.15",
-    "assert": "^2.0.0",
-    "jest": "^27.0.4",
+    "jest": "^27.0.6",
     "jest-date-mock": "^1.0.8",
-    "mocha": "^9.0.2",
-    "ts-jest": "^27.0.3",
-    "typescript": "^4.3.4"
+    "mocha": "^9.0.3",
+    "rollup": "^2.55.1",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.3.5"
   }
 }

@@ -1,17 +1,11 @@
 #! /usr/bin/env -S node --experimental-modules
 
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/no-extra-semi */
-
 /*
  ** Copyright (C) 2018-2019 Bloomberg LP. All rights reserved.
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import mocha from 'mocha'
-const { describe, it } = mocha
-
-import { strict as assert } from 'assert'
+import { assert } from '@esm-bundle/chai'
 const { equal, notEqual, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'

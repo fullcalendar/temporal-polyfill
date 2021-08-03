@@ -1,13 +1,21 @@
-import commonjs from '@rollup/plugin-commonjs'
+import { defaultReporter } from '@web/test-runner'
 
 export default {
   files: './e2e/*.mjs',
   nodeResolve: true,
   preserveSymlinks: true,
-  esbuildTarger: 'auto',
-  plugins: [commonjs()],
+  esbuildTarget: 'auto',
+  plugins: [],
+  testFramework: {
+    config: {
+      ui: 'bdd',
+    },
+  },
+  reporters: [
+    defaultReporter({ reportTestResults: true, reportTestProgress: true }),
+  ],
 
-  watch: true,
+  watch: false,
   // If you need to manually test
   // manual: true,
   // open: true,
