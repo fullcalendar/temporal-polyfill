@@ -8108,6 +8108,7 @@ __metadata:
     jest-date-mock: ^1.0.8
     mocha: ^9.0.3
     rollup: ^2.55.1
+    timezones.json: ^1.5.3
     ts-jest: ^27.0.4
     typescript: ^4.3.5
   languageName: unknown
@@ -8176,6 +8177,13 @@ __metadata:
   version: 2.3.8
   resolution: "through@npm:2.3.8"
   checksum: 918d9151680b5355990011eb8c4b02e8cb8cf6e9fb6ea3d3e5a1faa688343789e261634ae35de4ea9167ab029d1e7bac6af2fe61b843931768d405fdc3e8897c
+  languageName: node
+  linkType: hard
+
+"timezones.json@npm:^1.5.3":
+  version: 1.5.3
+  resolution: "timezones.json@npm:1.5.3"
+  checksum: 271103c51905af10bfd605b96e07f0386f2ab5b33fbc3a5487a80482294822fb5cefccfd99a0be21ea5142be5393b8600ada84bf627c269ec7653ea64b7f91f5
   languageName: node
   linkType: hard
 

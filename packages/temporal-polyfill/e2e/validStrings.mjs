@@ -1,12 +1,8 @@
 // Generates 1000 valid ISO 8601 strings according to the EBNF grammar and
 // tries to parse them
 
-// Run with:
-// node --experimental-modules --no-warnings --icu-data-dir \
-//    ./node_modules/full-icu/ test/validStrings.mjs
-
 import { assert } from '@esm-bundle/chai'
-import timezoneData from 'timezones.json'
+import timezoneData from 'timezones.json' // an actual package
 
 const timezoneNames = new Set(
   timezoneData.reduce((list, entry) => {
