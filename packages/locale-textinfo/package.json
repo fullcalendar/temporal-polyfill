@@ -1,8 +1,7 @@
 {
   "name": "locale-textinfo",
   "version": "0.0.0",
-  "title": "Temporal Lite",
-  "description": "A new JavaScript date library",
+  "title": "Locale textInfo",
   "author": {
     "name": "Ishaan Bharal",
     "email": "ishbharal@gmail.com"

@@ -1,8 +1,7 @@
 {
   "name": "temporal-polyfill",
   "version": "0.0.0",
-  "title": "Temporal Lite",
-  "description": "A new JavaScript date library",
+  "title": "Temporal Polyfill",
   "author": {
     "name": "Ishaan Bharal",
     "email": "ishbharal@gmail.com"
