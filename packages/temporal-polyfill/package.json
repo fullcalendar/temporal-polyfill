@@ -23,7 +23,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "e2e": "wtr"
+    "e2e": "wtr",
+    "e2e-manual": "wtr --manual",
+    "e2e-watch": "wtr --watch"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
