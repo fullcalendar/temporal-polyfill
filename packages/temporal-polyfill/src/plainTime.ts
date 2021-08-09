@@ -1,4 +1,4 @@
-import { AssignmentOptions, CompareReturn } from './utils'
+import { AssignmentOptions, CompareReturn } from './utils/types'
 
 export type PlainTimeFields = {
   isoHour: number

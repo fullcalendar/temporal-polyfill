@@ -1,8 +1,8 @@
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
-import { Instant } from './utils'
-import { padZeros } from './format'
-import { isoDateToMs, MS_FOR, reduceFormat, UNIT_INCREMENT } from './convert'
+import { Instant } from './utils/types'
+import { padZeros } from './utils/format'
+import { isoDateToMs, MS_FOR, reduceFormat, UNIT_INCREMENT } from './utils/convert'
 
 export type TimeZoneId = 'utc' | 'local' | string
 

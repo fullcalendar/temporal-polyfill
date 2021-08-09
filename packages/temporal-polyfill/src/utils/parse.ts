@@ -1,6 +1,6 @@
-import { CalendarId } from './calendar'
+import { CalendarId } from '../calendar'
 import { isoDateToMs, MS_FOR, UNIT_INCREMENT } from './convert'
-import { Duration } from './duration'
+import { Duration } from '../duration'
 
 /** Parse an ISO format date string into milliseconds, timezone, and calendar */
 export const parseDate = (

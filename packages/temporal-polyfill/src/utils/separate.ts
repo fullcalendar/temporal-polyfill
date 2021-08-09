@@ -1,8 +1,8 @@
 import { isoDateToMs, msToIsoDate, MS_FOR } from './convert'
-import { Duration } from './duration'
-import { PlainDate, PlainDateFields } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { PlainTimeFields } from './plainTime'
+import { Duration } from '../duration'
+import { PlainDate, PlainDateFields } from '../plainDate'
+import { PlainDateTime } from '../plainDateTime'
+import { PlainTimeFields } from '../plainTime'
 
 export const extractTimeMs = ({
   isoHour,

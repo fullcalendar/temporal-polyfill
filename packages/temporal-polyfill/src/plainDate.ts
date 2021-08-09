@@ -1,4 +1,4 @@
-import { CompareReturn } from './utils'
+import { CompareReturn } from './utils/types'
 
 export type PlainDateFields = {
   isoYear: number

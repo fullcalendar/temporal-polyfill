@@ -1,9 +1,9 @@
-import { msFor, msToIsoTime, UNIT_INCREMENT } from './convert'
-import { parseDuration } from './parse'
+import { msFor, msToIsoTime, UNIT_INCREMENT } from './utils/convert'
+import { parseDuration } from './utils/parse'
 import { PlainDateTime, PlainDateTimeLike } from './plainDateTime'
-import { roundMs, RoundOptionsLike } from './round'
-import { extractTimeMs, extractTimeWithDaysMs } from './separate'
-import { CompareReturn, LocaleId } from './utils'
+import { roundMs, RoundOptionsLike } from './utils/round'
+import { extractTimeMs, extractTimeWithDaysMs } from './utils/separate'
+import { CompareReturn, LocaleId } from './utils/types'
 
 export type DurationFields = {
   years: number

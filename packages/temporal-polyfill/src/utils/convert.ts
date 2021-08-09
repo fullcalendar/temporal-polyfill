@@ -1,8 +1,8 @@
-import { DurationUnit, DurationUnitNoDate } from './duration'
-import { PlainDateTimeFields } from './plainDateTime'
-import { PlainTimeFields } from './plainTime'
+import { DurationUnit, DurationUnitNoDate } from '../duration'
+import { PlainDateTimeFields } from '../plainDateTime'
+import { PlainTimeFields } from '../plainTime'
 import { asRoundOptions, RoundOptionsLike } from './round'
-import { Part } from './utils'
+import { Part } from './types'
 
 export const msToIsoTime = (
   ms: number,

@@ -1,7 +1,7 @@
 import { addMonths, addYears } from './add'
-import { Calendar, CalendarDate, compareCalendarDates } from './calendar'
+import { Calendar, CalendarDate, compareCalendarDates } from '../calendar'
 import { isoDateToMs, MS_FOR } from './convert'
-import { PlainDate } from './plainDate'
+import { PlainDate } from '../plainDate'
 
 export const diffYears = (
   one: CalendarDate,

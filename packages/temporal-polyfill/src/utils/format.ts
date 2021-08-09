@@ -1,4 +1,4 @@
-import { PlainDateTimeFields } from './plainDateTime'
+import { PlainDateTimeFields } from '../plainDateTime'
 
 export const padZeros = (num: number, length: number): string => {
   return `${num}`.padStart(length, '0')

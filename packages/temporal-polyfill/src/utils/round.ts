@@ -1,5 +1,5 @@
 import { msFor, priorities } from './convert'
-import { DurationUnit, DurationUnitNoDate } from './duration'
+import { DurationUnit, DurationUnitNoDate } from '../duration'
 
 export type RoundMode = 'halfExpand' | 'ceil' | 'trunc' | 'floor'
 

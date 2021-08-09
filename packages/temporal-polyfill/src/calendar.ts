@@ -1,15 +1,15 @@
-import { addDays, addMonths, addYears } from './add'
-import { weekOfYear } from './calendarWeeks'
-import { isoDateToMs, reduceFormat, UNIT_INCREMENT } from './convert'
-import { diffDays, diffMonths, diffYears } from './diff'
+import { addDays, addMonths, addYears } from './utils/add'
+import { weekOfYear } from './utils/calendarWeeks'
+import { isoDateToMs, reduceFormat, UNIT_INCREMENT } from './utils/convert'
+import { diffDays, diffMonths, diffYears } from './utils/diff'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
-import { asRoundOptions, RoundOptionsLike } from './round'
+import { asRoundOptions, RoundOptionsLike } from './utils/round'
 import {
   AssignmentOptions,
   AssignmentOptionsLike,
   CompareReturn,
-} from './utils'
+} from './utils/types'
 
 export type CalendarId =
   | 'buddhist'

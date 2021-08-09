@@ -1,9 +1,9 @@
-import { msToIsoDate } from './convert'
+import { msToIsoDate } from './utils/convert'
 import { Calendar, CalendarId } from './calendar'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZone, TimeZoneId } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
-import { Instant } from './utils'
+import { Instant } from './utils/types'
 
 export class Now {
   static instant(): Instant {

@@ -1,6 +1,6 @@
-import { Calendar } from './calendar'
+import { Calendar } from '../calendar'
 import { weekOfYear } from './calendarWeeks'
-import { PlainDate } from './plainDate'
+import { PlainDate } from '../plainDate'
 
 test.each`
   date                           | dow  | doy  | expected
