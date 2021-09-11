@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
 import { ZonedDateTime } from './zonedDateTime'
@@ -7,10 +8,10 @@ test('can instantiate', () => {
   expect(date).toBeDefined()
 })
 
-test('is equivalent to utc ZonedDateTime', () => {
+test('is equivalent to UTC ZonedDateTime', () => {
   const pdt = new PlainDateTime(1970, 1, 1, 0, 0, 0, 1)
-  const zdt = new ZonedDateTime(1, 'utc')
-  expect(pdt.toZonedDateTime('utc')).toEqual(zdt)
+  const zdt = new ZonedDateTime(1n, 'UTC')
+  expect(pdt.toZonedDateTime('UTC')).toEqual(zdt)
   expect(pdt.year).toBe(zdt.year)
   expect(pdt.month).toBe(zdt.month)
   expect(pdt.day).toBe(zdt.day)
@@ -35,7 +36,7 @@ test.each`
       hour,
       minute,
       second,
-      millisecond
+      millisecond,
     )
     expect(date.year).toBe(year)
     expect(date.month).toBe(month)
@@ -47,7 +48,7 @@ test.each`
     // expect(date.toString()).toBe(
     //   `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}`
     // )
-  }
+  },
 )
 
 test.each`
@@ -84,6 +85,6 @@ test.each`
 test('can zero out values using with', () => {
   const date = new PlainDateTime(1970, 1, 1, 10, 10, 10, 10)
   expect(
-    date.with({ isoHour: 0, isoMinute: 0, isoSecond: 0, isoMillisecond: 0 })
+    date.with({ hour: 0, minute: 0, second: 0, millisecond: 0 }),
   ).toEqual(new PlainDateTime(1970, 1, 1, 0, 0, 0, 0))
 })

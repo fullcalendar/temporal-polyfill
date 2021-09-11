@@ -1,19 +1,20 @@
+/* eslint-disable max-len */
 import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
-  const date = new ZonedDateTime(0)
+  const date = new ZonedDateTime(0n, 'UTC')
   expect(date).toBeDefined()
 })
 
 describe.each`
-  epochMilliseconds | year    | month | day   | hour  | minute | second | millisecond
-  ${0}              | ${1970} | ${1}  | ${1}  | ${0}  | ${0}   | ${0}   | ${0}
-  ${45030500}       | ${1970} | ${1}  | ${1}  | ${12} | ${30}  | ${30}  | ${500}
-  ${1608854400000}  | ${2020} | ${12} | ${25} | ${0}  | ${0}   | ${0}   | ${0}
+  epochNanoseconds        | year    | month | day   | hour  | minute | second | millisecond
+  ${0n}                   | ${1970} | ${1}  | ${1}  | ${0}  | ${0}   | ${0}   | ${0}
+  ${45030500000000n}      | ${1970} | ${1}  | ${1}  | ${12} | ${30}  | ${30}  | ${500}
+  ${1608854400000000000n} | ${2020} | ${12} | ${25} | ${0}  | ${0}   | ${0}   | ${0}
 `(
   'can get values for %d (%d-%d-%dT%d:%d:%d.%d)',
   ({
-    epochMilliseconds,
+    epochNanoseconds,
     year,
     month,
     day,
@@ -23,7 +24,7 @@ describe.each`
     millisecond,
   }) => {
     test('in UTC', () => {
-      const date = new ZonedDateTime(epochMilliseconds, 'utc')
+      const date = new ZonedDateTime(epochNanoseconds, 'UTC')
       expect(date.year).toBe(year)
       expect(date.month).toBe(month)
       expect(date.day).toBe(day)
@@ -37,7 +38,7 @@ describe.each`
     })
 
     test('in Asia/Tokyo', () => {
-      const date = new ZonedDateTime(epochMilliseconds, 'Asia/Tokyo')
+      const date = new ZonedDateTime(epochNanoseconds, 'Asia/Tokyo')
       expect(date.year).toBe(year)
       expect(date.month).toBe(month)
       expect(date.day).toBe(day)
@@ -49,13 +50,13 @@ describe.each`
       //   `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}+00:00`
       // )
     })
-  }
+  },
 )
 
 test('can compare two dates', () => {
-  const a = new ZonedDateTime(0)
-  const b = new ZonedDateTime(1000)
-  const c = new ZonedDateTime(1000)
+  const a = new ZonedDateTime(0n, 'UTC')
+  const b = new ZonedDateTime(1000000000n, 'UTC')
+  const c = new ZonedDateTime(1000000000n, 'UTC')
   expect(ZonedDateTime.compare(a, b)).toBe(-1)
   expect(ZonedDateTime.compare(b, a)).toBe(1)
   expect(ZonedDateTime.compare(b, c)).toBe(0)
@@ -88,5 +89,5 @@ test.each`
     expect(zdt.millisecond).toBe(millisecond)
     expect(zdt.timeZone.id).toBe(timeZone)
     expect(zdt.calendar.id).toBe(calendar)
-  }
+  },
 )

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
 
@@ -32,7 +33,7 @@ describe('duration from', () => {
       expect(duration.minutes).toBe(min)
       expect(duration.seconds).toBe(sec)
       expect(duration.milliseconds).toBe(ms)
-    }
+    },
   )
 
   test.each`
@@ -63,10 +64,10 @@ test.each`
   ${new Duration(0, 0, 0, 0, 12, 32, 30)} | ${{ unit: 'minutes' }}                                          | ${752.5}
   ${new Duration(0, 0, 0, 0, 130, 20)}    | ${{ unit: 'seconds' }}                                          | ${469200}
 `(
-  `can find total of $dur with unit '$options.unit' to be $expected`,
+  'can find total of $dur with unit \'$options.unit\' to be $expected',
   ({ dur, options, expected }) => {
     expect(dur.total(options)).toBe(expected)
-  }
+  },
 )
 
 test.each`
@@ -81,6 +82,6 @@ test.each`
 test('can zero out values using with', () => {
   const dur = new Duration(10, 10, 10, 10, 10, 10, 10, 10)
   expect(dur.with({ years: 0, months: 0, weeks: 0 })).toEqual(
-    new Duration(0, 0, 0, 10, 10, 10, 10, 10)
+    new Duration(0, 0, 0, 10, 10, 10, 10, 10),
   )
 })
