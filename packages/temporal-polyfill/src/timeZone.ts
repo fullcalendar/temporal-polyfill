@@ -1,128 +1,173 @@
-import { Calendar, CalendarId } from './calendar'
+import { isoCalendar } from './argParse/calendar'
+import {
+  DISAMBIG_EARLIER,
+  DISAMBIG_LATER,
+  DISAMBIG_REJECT,
+  parseDisambig,
+} from './argParse/disambig'
+import { AbstractObj, ensureObj } from './dateUtils/abstract'
+import { createDateTime } from './dateUtils/dateTime'
+import { formatOffsetISO } from './dateUtils/isoFormat'
+import { epochNanoToISOFields, isoFieldsToEpochMins } from './dateUtils/isoMath'
+import { parseOffsetNano } from './dateUtils/parse'
+import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from './dateUtils/units'
+import { FixedTimeZoneImpl } from './timeZoneImpl/fixedTimeZoneImpl'
+import { IntlTimeZoneImpl } from './timeZoneImpl/intlTimeZoneImpl'
+import { TimeZoneImpl } from './timeZoneImpl/timeZoneImpl'
+import { createWeakMap } from './utils/obj'
+import {
+  CalendarArg,
+  DateTimeArg,
+  DateTimeISOFields,
+  Disambiguation,
+  InstantArg,
+  TimeZoneArg,
+} from './args'
+import { Calendar } from './calendar'
+import { Instant } from './instant'
 import { PlainDateTime } from './plainDateTime'
-import { Instant } from './utils/types'
-import { padZeros } from './utils/format'
-import { isoDateToMs, MS_FOR, reduceFormat, UNIT_INCREMENT } from './utils/convert'
 
-export type TimeZoneId = 'utc' | 'local' | string
-
-const localOffset = (ms?: number): number => {
-  // Native date returns value with flipped sign :(
-  return -new Date(ms).getTimezoneOffset() * MS_FOR.MINUTE
+const [getID, setID] = createWeakMap<TimeZone, string>()
+const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
+const implCache: { [zoneName: string]: TimeZoneImpl } = {
+  UTC: new FixedTimeZoneImpl(0),
 }
 
-export class TimeZone {
-  private formatter: Intl.DateTimeFormat
+export class TimeZone extends AbstractObj {
+  constructor(id: string) {
+    super()
 
-  constructor(readonly id: TimeZoneId = 'local') {
-    if (this.id === 'local') {
-      this.id = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (!id) {
+      throw new Error('Invalid timezone ID')
     }
 
-    // Creating formatter in constructor is same as caching it for our purposes
-    this.formatter = new Intl.DateTimeFormat('en-us', {
-      hour12: false,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      timeZone: this.id,
-      timeZoneName: 'short',
-    })
-  }
+    let impl: TimeZoneImpl
 
-  getOffsetMillisecondsFor(epochMilliseconds: number): number {
-    if (this.id === 'local') {
-      const utcDate = new Date(epochMilliseconds)
-      return localOffset(
-        isoDateToMs({
-          isoYear: utcDate.getUTCFullYear(),
-          isoMonth: utcDate.getUTCMonth(),
-          isoDay: utcDate.getUTCDate(),
-          isoHour: utcDate.getUTCHours(),
-          isoMinute: utcDate.getUTCMinutes(),
-          isoSecond: utcDate.getUTCSeconds(),
-          isoMillisecond: utcDate.getUTCMilliseconds(),
-        })
-      )
-    } else if (this.id === 'utc') {
-      return 0
+    // uppercase matches keys in implCache
+    id = id.toLocaleUpperCase()
+
+    if (implCache[id]) {
+      impl = implCache[id]
+    } else {
+      const offsetNano = parseOffsetNano(id) // and convert to ms
+      if (offsetNano !== null) {
+        impl = new FixedTimeZoneImpl( // don't store fixed-offset zones in cache
+          Math.trunc(offsetNano / nanoInMinute), // convert to minutes
+        )
+      } else {
+        impl = implCache[id] = new IntlTimeZoneImpl(id)
+      }
     }
-    // Arbitrary timezone using Intl API
-    const formatResult = reduceFormat(
-      epochMilliseconds,
-      this.formatter
-    ) as Record<string, number>
 
-    // Convert to epochMs
-    const adjusted = isoDateToMs({
-      isoYear: formatResult.year,
-      isoMonth: formatResult.month,
-      isoDay: formatResult.day,
-      isoHour: formatResult.hour,
-      isoMinute: formatResult.minute,
-      isoSecond: formatResult.second,
-    })
+    setImpl(this, impl)
 
-    // Account for overflow milliseconds
-    const over = epochMilliseconds % MS_FOR.SECOND
-    return adjusted - epochMilliseconds + over
+    // use Intl-normalized ID if possible
+    setID(this, (impl as IntlTimeZoneImpl).id || id)
   }
 
-  getOffsetStringFor(epochMilliseconds: number): string {
-    const offset = this.getOffsetMillisecondsFor(epochMilliseconds)
+  static from(input: TimeZoneArg): TimeZone {
+    return new TimeZone(
+      input instanceof TimeZone
+        ? input.id
+        : input, // an ID itself
+    )
+  }
 
-    const sign = offset < 0 ? '-' : '+'
-    const mins = Math.abs((offset / MS_FOR.MINUTE) % UNIT_INCREMENT.MINUTE)
-    const hours = Math.abs(offset / MS_FOR.HOUR)
+  get id(): string { return getID(this) }
 
-    const minStr = padZeros(mins, 2)
-    const hourStr = padZeros(hours, 2)
+  getOffsetStringFor(instantArg: InstantArg): string {
+    return formatOffsetISO(this.getOffsetNanosecondsFor(instantArg))
+  }
 
-    return `${sign}${hourStr}:${minStr}`
+  getOffsetNanosecondsFor(instantArg: InstantArg): number {
+    const instant = ensureObj(Instant, instantArg)
+    return getImpl(this).getOffset(instant.epochMilliseconds) * nanoInMinute
   }
 
   getPlainDateTimeFor(
-    epochMilliseconds: number,
-    calendar?: Calendar | CalendarId
+    instantArg: InstantArg,
+    calendarArg: CalendarArg = isoCalendar,
   ): PlainDateTime {
-    // Leverage overflow handling in from function
-    return PlainDateTime.from({
-      epochMilliseconds:
-        epochMilliseconds - this.getOffsetMillisecondsFor(epochMilliseconds),
-      calendar,
+    const instant = ensureObj(Instant, instantArg)
+    const isoFields = epochNanoToISOFields(
+      instant.epochNanoseconds - BigInt(this.getOffsetNanosecondsFor(instant)),
+    )
+    return createDateTime({
+      ...isoFields,
+      calendar: ensureObj(Calendar, calendarArg),
     })
   }
 
-  getInstantFor(
-    date: PlainDateTime,
-    options?: {
-      disambiguation: 'compatible' | 'earlier' | 'later' | 'reject'
-    }
-  ): Instant {
-    const { disambiguation } = { disambiguation: 'compatible', ...options }
+  getInstantFor(dateTimeArg: DateTimeArg, options?: { disambiguation?: Disambiguation }): Instant {
+    const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
+    const zoneMins = isoFieldsToEpochMins(isoFields)
+    let [offsetMins, offsetMinsDiff] = getImpl(this).getPossibleOffsets(zoneMins)
 
-    let utcMs = date.epochMilliseconds
-    // Get offset of timezone
-    const tzOffset = this.getOffsetMillisecondsFor(utcMs)
-
-    // Check if we can just return UTC
-    if (tzOffset === 0) {
-      return date.epochMilliseconds
-    }
-
-    // Move epochMs by timeZone offset and check if offset is different at that point in time (e.g DST)
-    utcMs -= tzOffset
-    const tzOffset2 = this.getOffsetMillisecondsFor(utcMs)
-
-    // If the offset is same we guessed correctly
-    if (tzOffset === tzOffset2) {
-      return utcMs + tzOffset
+    if (offsetMinsDiff) {
+      const disambig = parseDisambig(options?.disambiguation)
+      if (disambig === DISAMBIG_REJECT) {
+        throw new Error('Ambiguous offset')
+      }
+      if (disambig === DISAMBIG_EARLIER) {
+        offsetMins += (offsetMinsDiff < 0 ? offsetMinsDiff : 0)
+      } else if (disambig === DISAMBIG_LATER) {
+        offsetMins += (offsetMinsDiff > 0 ? offsetMinsDiff : 0)
+      }
+      // Otherwise, 'compatible', which boils down to not using diff
     }
 
-    // Otherwise we are in a hole time
-    return date.epochMilliseconds + Math.min(tzOffset, tzOffset2)
+    return epochMinsToInstant(zoneMins + offsetMins, isoFields)
   }
+
+  getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[] {
+    const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
+    const zoneMins = isoFieldsToEpochMins(isoFields)
+    const [offsetMinsBase, offsetMinsDiff] = getImpl(this).getPossibleOffsets(zoneMins)
+    const instants: Instant[] = []
+
+    // Since a negative diff means "forward" transition ("lost" an hour),
+    // yield no results, because plainDateTime is stuck in this lost hour
+    if (offsetMinsDiff >= 0) {
+      instants.push(epochMinsToInstant(zoneMins + offsetMinsBase, isoFields))
+      if (offsetMinsDiff > 0) {
+        instants.push(epochMinsToInstant(zoneMins + offsetMinsBase + offsetMinsDiff, isoFields))
+      }
+    }
+
+    return instants
+  }
+
+  getPreviousTransition(instantArg: InstantArg): Instant | null {
+    const instant = ensureObj(Instant, instantArg)
+    const rawTransition = getImpl(this).getTransition(Math.floor(instant.epochSeconds / 60), -1)
+    if (rawTransition) {
+      return epochMinsToInstant(rawTransition[0])
+    }
+    return null
+  }
+
+  getNextTransition(instantArg: InstantArg): Instant | null {
+    const instant = ensureObj(Instant, instantArg)
+    const rawTransition = getImpl(this).getTransition(Math.floor(instant.epochSeconds / 60), 1)
+    if (rawTransition) {
+      return epochMinsToInstant(rawTransition[0])
+    }
+    return null
+  }
+
+  toString(): string { return this.id }
+}
+
+function epochMinsToInstant(epochMinutes: number, otherISOFields?: DateTimeISOFields): Instant {
+  return new Instant(
+    BigInt(epochMinutes) * BigInt(nanoInMinute) +
+    BigInt(
+      otherISOFields
+        ? otherISOFields.isoSecond * nanoInSecond +
+          otherISOFields.isoMillisecond * nanoInMilli +
+          otherISOFields.isoMicrosecond * nanoInMicro +
+          otherISOFields.isoNanosecond
+        : 0,
+    ),
+  )
 }

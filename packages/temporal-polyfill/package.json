@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "title": "Temporal Polyfill",
   "author": {
-    "name": "Ishaan Bharal",
-    "email": "ishbharal@gmail.com"
+    "name": "Adam Shaw",
+    "email": "arshaw@users.noreply.github.com",
+    "url": "http://arshaw.com/"
   },
   "contributors": [
     {
-      "name": "Adam Shaw",
-      "email": "arshaw@users.noreply.github.com",
-      "url": "http://arshaw.com/"
+      "name": "Ishaan Bharal",
+      "email": "ishbharal@gmail.com"
     }
   ],
   "copyright": "2021 Adam Shaw",

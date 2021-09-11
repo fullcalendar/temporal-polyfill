@@ -1,56 +1,58 @@
-import { msToIsoDate } from './utils/convert'
-import { Calendar, CalendarId } from './calendar'
+import { CalendarArg, TimeZoneArg } from './args'
+import { Instant } from './instant'
+import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
-import { TimeZone, TimeZoneId } from './timeZone'
+import { PlainTime } from './plainTime'
+import { TimeZone } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
-import { Instant } from './utils/types'
 
-export class Now {
-  static instant(): Instant {
-    return Date.now()
-  }
+function getZonedDateTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): ZonedDateTime {
+  return getInstant().toZonedDateTimeISO(timeZoneArg)
+}
 
-  static epochMilliseconds(): Instant {
-    return this.instant()
-  }
+function getZonedDateTime(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): ZonedDateTime {
+  return getInstant().toZonedDateTime({
+    calendar: calendarArg,
+    timeZone: timeZoneArg ?? getTimeZone(),
+  })
+}
 
-  static timeZone(): TimeZone {
-    return new TimeZone(
-      Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneId
-    )
-  }
+function getPlainDateTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainDateTime {
+  return getZonedDateTimeISO(timeZoneArg).toPlainDateTime()
+}
 
-  static zonedDateTime(calendar?: CalendarId | Calendar): ZonedDateTime {
-    return new ZonedDateTime(this.instant(), undefined, calendar)
-  }
+function getPlainDateTime(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): PlainDateTime {
+  return getZonedDateTime(calendarArg, timeZoneArg).toPlainDateTime()
+}
 
-  static zonedDateTimeISO(): ZonedDateTime {
-    return this.zonedDateTime()
-  }
+function getPlainDateISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainDate {
+  return getPlainDateTimeISO(timeZoneArg).toPlainDate()
+}
 
-  static plainDateTime(calendar?: CalendarId | Calendar): PlainDateTime {
-    const {
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = msToIsoDate(this.instant())
-    return new PlainDateTime(
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-      calendar
-    )
-  }
+function getPlainDate(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): PlainDate {
+  return getPlainDateTime(calendarArg, timeZoneArg).toPlainDate()
+}
 
-  static plainDateTimeISO(): PlainDateTime {
-    return this.plainDateTime()
-  }
+function getPlainTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainTime {
+  return getInstant().toZonedDateTimeISO(timeZoneArg).toPlainTime()
+}
+
+function getInstant(): Instant {
+  return new Instant(BigInt(Date.now()) * 1000000n)
+}
+
+function getTimeZone(): TimeZone {
+  return new TimeZone(new Intl.DateTimeFormat().resolvedOptions().timeZone)
+}
+
+export const Now = {
+  zonedDateTimeISO: getZonedDateTimeISO,
+  zonedDateTime: getZonedDateTime,
+  plainDateTimeISO: getPlainDateTimeISO,
+  plainDateTime: getPlainDateTime,
+  plainDateISO: getPlainDateISO,
+  plainDate: getPlainDate,
+  plainTimeISO: getPlainTimeISO,
+  instant: getInstant,
+  timeZone: getTimeZone,
 }

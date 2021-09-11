@@ -1,42 +1,157 @@
-import { CompareReturn } from './utils/types'
+import { extractCalendar, isoCalendar } from './argParse/calendar'
+import { parseCalendarDisplay } from './argParse/calendarDisplay'
+import { OVERFLOW_REJECT } from './argParse/overflowHandling'
+import { refineFields } from './argParse/refine'
+import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
+import {
+  compareDates,
+  constrainDateISO,
+  createDate,
+  dateFieldMap,
+  diffDates,
+  overrideDateFields,
+} from './dateUtils/date'
+import { createDateTime } from './dateUtils/dateTime'
+import { formatCalendarID, formatDateISO } from './dateUtils/isoFormat'
+import { isoFieldsToEpochMilli } from './dateUtils/isoMath'
+import {
+  DateCalendarFields,
+  dateCalendarFields,
+  mixinCalendarFields,
+  mixinISOFields,
+} from './dateUtils/mixins'
+import { createMonthDay } from './dateUtils/monthDay'
+import { parseDateTimeISO } from './dateUtils/parse'
+import { createYearMonth } from './dateUtils/yearMonth'
+import {
+  CalendarArg,
+  CompareResult,
+  DateArg,
+  DateDiffOptions,
+  DateISOFields,
+  DateLikeFields,
+  DateOverrides,
+  DateToStringOptions,
+  DurationArg,
+  LocalesArg,
+  OverflowOptions,
+  TimeArg,
+  TimeZoneArg,
+} from './args'
+import { Calendar } from './calendar'
+import { Duration } from './duration'
+import { PlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
+import { ZonedDateTime } from './zonedDateTime'
 
-export type PlainDateFields = {
-  isoYear: number
-  isoMonth: number
-  isoDay: number
-}
-
-export type PlainDateLike = Partial<PlainDateFields>
-
-export class PlainDate {
+export class PlainDate extends AbstractISOObj<DateISOFields> {
   constructor(
-    readonly isoYear: number,
-    readonly isoMonth: number,
-    readonly isoDay: number
-  ) {}
-
-  // TODO: Make this function
-  static from(thing: unknown): PlainDate {
-    return new PlainDate(1970, 1, 1)
+    isoYear: number,
+    isoMonth: number,
+    isoDay: number,
+    calendarArg: CalendarArg = isoCalendar,
+  ) {
+    super({
+      ...constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT),
+      calendar: ensureObj(Calendar, calendarArg),
+    })
   }
 
-  static compare(one: PlainDate, two: PlainDate): CompareReturn {
-    const diff =
-      one.isoYear - two.isoYear ||
-      one.isoMonth - two.isoMonth ||
-      one.isoDay - two.isoDay
-
-    return diff !== 0 ? (diff < 0 ? -1 : 1) : 0
-  }
-
-  with(dateLike: PlainDateLike | string): PlainDate {
-    if (typeof dateLike === 'string') {
-      throw new Error('Unimplemented')
+  static from(arg: DateArg, options?: OverflowOptions): PlainDate {
+    if (arg instanceof PlainDate) {
+      return createDate(arg.getISOFields()) // optimization
     }
-    return new PlainDate(
-      dateLike.isoYear ?? this.isoYear,
-      dateLike.isoMonth ?? this.isoMonth,
-      dateLike.isoDay ?? this.isoDay
+    if (typeof arg === 'object') {
+      const refinedFields = refineFields(arg, dateFieldMap) as DateLikeFields
+      return extractCalendar(arg).dateFromFields(refinedFields, options)
+    }
+    return createDate(parseDateTimeISO(String(arg)))
+  }
+
+  static compare(a: DateArg, b: DateArg): CompareResult {
+    return compareDates(
+      ensureObj(PlainDate, a),
+      ensureObj(PlainDate, b),
     )
   }
+
+  with(fields: DateOverrides, options?: OverflowOptions): PlainDate {
+    const refinedFields = refineFields(fields, dateFieldMap, ['calendar'])
+    const mergedFields = overrideDateFields(refinedFields, this)
+    return this.calendar.dateFromFields(mergedFields, options)
+  }
+
+  withCalendar(calendarArg: CalendarArg): PlainDate {
+    const isoFields = this.getISOFields()
+    return new PlainDate(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+      calendarArg,
+    )
+  }
+
+  add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+    return this.calendar.dateAdd(this, durationArg, options)
+  }
+
+  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+    return this.calendar.dateAdd(this, ensureObj(Duration, durationArg).negated(), options)
+  }
+
+  until(other: DateArg, options?: DateDiffOptions): Duration {
+    return diffDates(this, ensureObj(PlainDate, other), options)
+  }
+
+  since(other: DateArg, options?: DateDiffOptions): Duration {
+    return diffDates(ensureObj(PlainDate, other), this, options)
+  }
+
+  equals(other: DateArg): boolean {
+    return compareDates(this, ensureObj(PlainDate, other)) === 0
+  }
+
+  toString(options?: DateToStringOptions): string {
+    const calendarDisplay = parseCalendarDisplay(options?.calendarName)
+    const fields = this.getISOFields()
+
+    return formatDateISO(fields) +
+      formatCalendarID(fields.calendar.id, calendarDisplay)
+  }
+
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const fields = this.getISOFields()
+
+    return new Intl.DateTimeFormat(locales, {
+      calendar: fields.calendar.id,
+      ...options,
+      timeZone: 'UTC', // options can't override
+    }).format(
+      isoFieldsToEpochMilli(fields),
+    )
+  }
+
+  toZonedDateTime(options: { plainTime?: TimeArg, timeZone: TimeZoneArg }): ZonedDateTime {
+    return this.toPlainDateTime(options.plainTime).toZonedDateTime(options.timeZone)
+  }
+
+  toPlainDateTime(timeArg?: TimeArg): PlainDateTime {
+    return createDateTime({
+      ...this.getISOFields(),
+      ...ensureObj(
+        PlainTime,
+        timeArg ?? { hour: 0 }, // needs at least one time arg
+      ).getISOFields(),
+    })
+  }
+
+  toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
+  toPlainMonthDay(): PlainMonthDay { return createMonthDay(this.getISOFields()) }
 }
+
+// mixin
+export interface PlainDate extends DateCalendarFields { calendar: Calendar }
+mixinISOFields(PlainDate, ['calendar'])
+mixinCalendarFields(PlainDate, dateCalendarFields)

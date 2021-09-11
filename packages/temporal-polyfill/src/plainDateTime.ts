@@ -1,24 +1,62 @@
-import { isoDateToMs, msToIsoDate, msToIsoTime } from './utils/convert'
-import { Calendar, CalendarId } from './calendar'
-import { Duration, DurationLike } from './duration'
-import { dateFormat } from './utils/format'
-import { parseDate } from './utils/parse'
-import { roundMs, RoundOptionsLike } from './utils/round'
-import { separateDateTime, separateDuration } from './utils/separate'
-import { AssignmentOptions, CompareReturn, LocaleId } from './utils/types'
+import { extractCalendar, isoCalendar } from './argParse/calendar'
+import { parseCalendarDisplay } from './argParse/calendarDisplay'
+import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
+import { OVERFLOW_REJECT } from './argParse/overflowHandling'
+import { refineFields } from './argParse/refine'
+import { timeUnitNames } from './argParse/units'
+import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
+import { createDate } from './dateUtils/date'
+import {
+  addToDateTime,
+  compareDateTimes,
+  constrainDateTimeISO,
+  createDateTime,
+  dateTimeFieldMap,
+  dateTimeFieldsToISO,
+  diffDateTimes,
+  overrideDateTimeFields,
+  roundDateTime,
+} from './dateUtils/dateTime'
+import { formatCalendarID, formatDateTimeISO } from './dateUtils/isoFormat'
+import { isoFieldsToEpochMilli } from './dateUtils/isoMath'
+import {
+  DateCalendarFields,
+  dateCalendarFields,
+  mixinCalendarFields,
+  mixinISOFields,
+} from './dateUtils/mixins'
+import { createMonthDay } from './dateUtils/monthDay'
+import { parseDateTimeISO } from './dateUtils/parse'
+import { TimeFields, createTime } from './dateUtils/time'
+import { createYearMonth } from './dateUtils/yearMonth'
+import {
+  CalendarArg,
+  CompareResult,
+  DateArg,
+  DateTimeArg,
+  DateTimeISOFields,
+  DateTimeLikeFields,
+  DateTimeOverrides,
+  DateTimeRoundOptions,
+  DateTimeToStringOptions,
+  DiffOptions,
+  Disambiguation,
+  DurationArg,
+  LocalesArg,
+  OverflowOptions,
+  TimeArg,
+  TimeZoneArg,
+} from './args'
+import { Calendar } from './calendar'
+import { Duration } from './duration'
+import { PlainDate } from './plainDate'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
+import { TimeZone } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
-import { TimeZoneId } from './timeZone'
-import { PlainDate, PlainDateFields } from './plainDate'
-import { PlainTimeFields } from './plainTime'
 
-export type PlainDateTimeFields = PlainDateFields &
-  PlainTimeFields & { calendar?: Calendar | CalendarId }
-export type PlainDateTimeLike = Partial<PlainDateTimeFields>
-
-export class PlainDateTime {
-  readonly epochMilliseconds: number
-  readonly calendar: Calendar
-
+export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -27,28 +65,12 @@ export class PlainDateTime {
     isoMinute = 0,
     isoSecond = 0,
     isoMillisecond = 0,
-    calendar: Calendar | CalendarId = new Calendar()
+    isoMicrosecond = 0,
+    isoNanosecond = 0,
+    calendarArg: CalendarArg = isoCalendar,
   ) {
-    // TODO Move overflow to from method, only accept valid values in constructor
-    this.epochMilliseconds = isoDateToMs({
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    })
-
-    this.calendar =
-      typeof calendar === 'string' ? new Calendar(calendar) : calendar
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  static from(thing: any): PlainDateTime {
-    if (typeof thing === 'string') {
-      const { epochMilliseconds, calendar } = parseDate(thing)
-      const {
+    super({
+      ...constrainDateTimeISO({
         isoYear,
         isoMonth,
         isoDay,
@@ -56,281 +78,130 @@ export class PlainDateTime {
         isoMinute,
         isoSecond,
         isoMillisecond,
-      } = msToIsoDate(epochMilliseconds)
-      return new PlainDateTime(
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-        calendar
-      )
-    } else if (typeof thing === 'number') {
-      const {
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-      } = msToIsoDate(thing)
-      return new PlainDateTime(
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond
-      )
-    } else if (typeof thing.epochMilliseconds === 'number') {
-      const {
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-      } = msToIsoDate(thing.epochMilliseconds)
-      return new PlainDateTime(
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-        thing.calendar
-      )
-    } else if (thing.isoYear && thing.isoMonth && thing.isoDay) {
-      return new PlainDateTime(
-        thing.isoYear,
-        thing.isoMonth,
-        thing.isoDay,
-        thing.isoHour,
-        thing.isoMinute,
-        thing.isoSecond,
-        thing.isoMillisecond,
-        thing.calendar
-      )
-    }
-    throw new Error('Invalid Object')
-  }
-
-  static compare(one: PlainDateTime, two: PlainDateTime): CompareReturn {
-    const diff = one.epochMilliseconds - two.epochMilliseconds
-    return diff !== 0 ? (diff < 0 ? -1 : 1) : 0
-  }
-
-  get year(): number {
-    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
-    return this.calendar.year(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get month(): number {
-    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
-    return this.calendar.month(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get day(): number {
-    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
-    return this.calendar.day(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get hour(): number {
-    return msToIsoDate(this.epochMilliseconds).isoHour
-  }
-
-  get minute(): number {
-    return msToIsoDate(this.epochMilliseconds).isoMinute
-  }
-
-  get second(): number {
-    return msToIsoDate(this.epochMilliseconds).isoSecond
-  }
-
-  get millisecond(): number {
-    return msToIsoDate(this.epochMilliseconds).isoMillisecond
-  }
-
-  get dayOfWeek(): number {
-    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
-    return this.calendar.dayOfWeek(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get weekOfYear(): number {
-    const { isoYear, isoMonth, isoDay } = msToIsoDate(this.epochMilliseconds)
-    return this.calendar.weekOfYear(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  with(dateTimeLike: PlainDateTimeLike | string): PlainDateTime {
-    if (typeof dateTimeLike === 'string') {
-      // TODO Implement this
-      throw new Error('Unimplemented')
-    }
-    const {
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-      calendar,
-    } = dateTimeLike
-    return new PlainDateTime(
-      isoYear ?? this.year,
-      isoMonth ?? this.month,
-      isoDay ?? this.day,
-      isoHour ?? this.hour,
-      isoMinute ?? this.minute,
-      isoSecond ?? this.second,
-      isoMillisecond ?? this.millisecond,
-      calendar ?? this.calendar
-    )
-  }
-
-  withCalendar(calendar: Calendar | CalendarId): PlainDateTime {
-    const {
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-    } = msToIsoDate(this.epochMilliseconds)
-    return new PlainDateTime(
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
-      calendar
-    )
-  }
-
-  add(
-    amount: Duration | DurationLike | string,
-    options?: AssignmentOptions
-  ): PlainDateTime {
-    const duration = amount instanceof Duration ? amount : Duration.from(amount)
-    const [macro, ms] = separateDuration(duration)
-
-    // Add time increment into epochMilliseconds and format back into ISO Date
-    const constrained = msToIsoDate(this.epochMilliseconds + ms)
-
-    const { isoYear, isoMonth, isoDay } = this.calendar.dateAdd(
-      new PlainDate(
-        constrained.isoYear,
-        constrained.isoMonth,
-        constrained.isoDay
-      ),
-      macro,
-      options
-    )
-
-    return new PlainDateTime(
-      isoYear,
-      isoMonth,
-      isoDay,
-      constrained.isoHour,
-      constrained.isoMinute,
-      constrained.isoSecond,
-      constrained.isoMillisecond,
-      this.calendar
-    )
-  }
-
-  subtract(
-    amount: Duration | DurationLike | string,
-    options?: AssignmentOptions
-  ): PlainDateTime {
-    const duration = amount instanceof Duration ? amount : Duration.from(amount)
-    // Defer to add function with a negative duration
-    return this.add(duration.negated(), options)
-  }
-
-  since(other: PlainDateTime, options?: RoundOptionsLike): Duration {
-    const positiveSign = this.epochMilliseconds >= other.epochMilliseconds
-    const larger = positiveSign ? this : other
-    const smaller = positiveSign ? other : this
-
-    // Separate into [date, time]
-    const [smallerDate, smallerMs] = separateDateTime(smaller)
-    const [largerDate, largerMs] = separateDateTime(larger, smallerMs)
-
-    // Round time portion and convert to ISO with overflow accounted for
-    const { isoHour, isoMinute, isoSecond, isoMillisecond } = msToIsoTime(
-      roundMs(largerMs - smallerMs, options),
-      options
-    )
-
-    // Calculate date using Calendar function, attach time afterwards
-    const combined = this.calendar
-      .dateUntil(smallerDate, largerDate, options)
-      .with({
-        hours: isoHour,
-        minutes: isoMinute,
-        seconds: isoSecond,
-        milliseconds: isoMillisecond,
-      })
-    return positiveSign ? combined : combined.negated()
-  }
-
-  round(options?: RoundOptionsLike): PlainDateTime {
-    const [date, ms] = separateDateTime(this)
-    const { deltaDays, isoHour, isoMinute, isoSecond, isoMillisecond } =
-      msToIsoTime(roundMs(ms, options), options)
-    return new PlainDateTime(
-      date.isoYear,
-      date.isoMonth,
-      // Might cause overflow, but that overflow is dealt with by PlainDateTime's constructor
-      date.isoDay + deltaDays,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond
-    )
-  }
-
-  toString(): string {
-    const {
-      year: isoYear,
-      month: isoMonth,
-      day: isoDay,
-      hour: isoHour,
-      minute: isoMinute,
-      second: isoSecond,
-      millisecond: isoMillisecond,
-    } = this
-    return dateFormat({
-      isoYear,
-      isoMonth,
-      isoDay,
-      isoHour,
-      isoMinute,
-      isoSecond,
-      isoMillisecond,
+        isoMicrosecond,
+        isoNanosecond,
+      }, OVERFLOW_REJECT),
+      calendar: ensureObj(Calendar, calendarArg),
     })
   }
 
-  toLocaleString(
-    locale: LocaleId,
-    options?: Intl.DateTimeFormatOptions
-  ): string {
-    return new Intl.DateTimeFormat(locale, options).format(
-      this.epochMilliseconds
+  static from(arg: DateTimeArg, options?: OverflowOptions): PlainDateTime {
+    return createDateTime(
+      arg instanceof PlainDateTime
+        ? arg.getISOFields() // optimization
+        : typeof arg === 'object'
+          ? dateTimeFieldsToISO(
+            refineFields(arg, dateTimeFieldMap) as DateTimeLikeFields,
+            options,
+            extractCalendar(arg),
+          )
+          : parseDateTimeISO(String(arg)),
     )
   }
 
-  toZonedDateTime(timeZone: TimeZoneId): ZonedDateTime {
-    return new ZonedDateTime(this.epochMilliseconds, timeZone)
+  static compare(a: DateTimeArg, b: DateTimeArg): CompareResult {
+    return compareDateTimes(
+      ensureObj(PlainDateTime, a),
+      ensureObj(PlainDateTime, b),
+    )
   }
+
+  with(fields: DateTimeOverrides, options?: OverflowOptions): PlainDateTime {
+    const refinedFields = refineFields(fields, dateTimeFieldMap, ['calendar'])
+    const mergedFields = overrideDateTimeFields(refinedFields, this)
+    return createDateTime(dateTimeFieldsToISO(mergedFields, options, this.calendar))
+  }
+
+  withPlainDate(dateArg: DateArg): PlainDateTime {
+    return createDateTime({
+      ...this.getISOFields(), // provides time fields
+      ...ensureObj(PlainDate, dateArg).getISOFields(),
+    })
+  }
+
+  withPlainTime(timeArg: TimeArg): PlainDateTime {
+    return createDateTime({
+      ...this.getISOFields(), // provides date fields
+      ...ensureObj(PlainTime, timeArg).getISOFields(),
+    })
+  }
+
+  withCalendar(calendarArg: CalendarArg): PlainDateTime {
+    return createDateTime({
+      ...this.getISOFields(),
+      calendar: ensureObj(Calendar, calendarArg),
+    })
+  }
+
+  add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+    return addToDateTime(this, ensureObj(Duration, durationArg), options)
+  }
+
+  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+    return addToDateTime(this, ensureObj(Duration, durationArg).negated(), options)
+  }
+
+  until(other: DateTimeArg, options?: DiffOptions): Duration {
+    return diffDateTimes(this, ensureObj(PlainDateTime, other), options)
+  }
+
+  since(other: DateTimeArg, options?: DiffOptions): Duration {
+    return diffDateTimes(ensureObj(PlainDateTime, other), this, options)
+  }
+
+  round(options: DateTimeRoundOptions): PlainDateTime {
+    return roundDateTime(this, options)
+  }
+
+  equals(other: DateTimeArg): boolean {
+    return compareDateTimes(this, ensureObj(PlainDateTime, other)) === 0
+  }
+
+  toString(options?: DateTimeToStringOptions): string {
+    const formatConfig = parseTimeToStringOptions(options)
+    const calendarDisplay = parseCalendarDisplay(options?.calendarName)
+    const fields = this.getISOFields()
+
+    return formatDateTimeISO(fields, formatConfig) +
+      formatCalendarID(fields.calendar.id, calendarDisplay)
+  }
+
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const fields = this.getISOFields()
+
+    return new Intl.DateTimeFormat(locales, {
+      calendar: fields.calendar.id,
+      ...options,
+      timeZone: 'UTC', // options can't override
+      // TODO: inject more options to ensure time is displayed by default
+    }).format(
+      isoFieldsToEpochMilli(fields),
+    )
+  }
+
+  // workhorse for converting to ZonedDateTime for other objects
+  toZonedDateTime(
+    timeZoneArg: TimeZoneArg,
+    options?: { disambiguation?: Disambiguation },
+  ): ZonedDateTime {
+    const timeZone = ensureObj(TimeZone, timeZoneArg)
+    const instant = timeZone.getInstantFor(this, options)
+
+    return new ZonedDateTime(
+      instant.epochNanoseconds,
+      timeZone,
+      this.calendar,
+    )
+  }
+
+  toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
+  toPlainMonthDay(): PlainMonthDay { return createMonthDay(this.getISOFields()) }
+  toPlainDate(): PlainDate { return createDate(this.getISOFields()) }
+  toPlainTime(): PlainTime { return createTime(this.getISOFields()) }
 }
+
+// mixin
+export interface PlainDateTime extends DateCalendarFields { calendar: Calendar }
+export interface PlainDateTime extends TimeFields {}
+mixinISOFields(PlainDateTime, ['calendar', ...timeUnitNames])
+mixinCalendarFields(PlainDateTime, dateCalendarFields)

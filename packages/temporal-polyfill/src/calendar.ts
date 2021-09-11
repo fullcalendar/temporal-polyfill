@@ -1,209 +1,230 @@
-import { addDays, addMonths, addYears } from './utils/add'
-import { weekOfYear } from './utils/calendarWeeks'
-import { isoDateToMs, reduceFormat, UNIT_INCREMENT } from './utils/convert'
-import { diffDays, diffMonths, diffYears } from './utils/diff'
+import { ensureCalendarsEqual, getCommonCalendar } from './argParse/calendar'
+import { parseOverflowHandling } from './argParse/overflowHandling'
+import { parseUnit } from './argParse/units'
+import { CalendarImpl } from './calendarImpl/calendarImpl'
+import { calendarImplClasses } from './calendarImpl/config'
+import { AbstractObj, ensureObj } from './dateUtils/abstract'
+import { addToDateFields } from './dateUtils/add'
+import {
+  computeDayOfYear,
+  computeDaysInYear,
+  getExistingDateISOFields,
+  isoCalendarID,
+  isoCalendarImpl,
+  queryDateFields,
+  queryDateISOFields,
+} from './dateUtils/calendar'
+import { diffDateFields } from './dateUtils/diff'
+import { computeISODayOfWeek } from './dateUtils/isoMath'
+import { MonthDayFields } from './dateUtils/monthDay'
+import { DAY, DateUnitInt, YEAR } from './dateUtils/units'
+import { computeWeekOfISOYear } from './dateUtils/week'
+import { createWeakMap, throwNew } from './utils/obj'
+import {
+  CalendarArg,
+  DateArg,
+  DateLikeFields,
+  DateUnit, DurationArg, MonthDayLikeFields, OverflowOptions, YearMonthLikeFields,
+} from './args'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
-import { asRoundOptions, RoundOptionsLike } from './utils/round'
-import {
-  AssignmentOptions,
-  AssignmentOptionsLike,
-  CompareReturn,
-} from './utils/types'
+import { PlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainYearMonth } from './plainYearMonth'
+import { ZonedDateTime } from './zonedDateTime'
 
-export type CalendarId =
-  | 'buddhist'
-  | 'chinese'
-  | 'coptic'
-  | 'ethiopia'
-  | 'ethiopic'
-  | 'gregory'
-  | 'hebrew'
-  | 'indian'
-  | 'islamic'
-  | 'iso8601'
-  | 'japanese'
-  | 'persian'
-  | 'roc'
-
-export type CalendarDate = {
-  year: number
-  month: number
-  day: number
+const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
+const [getID, setID] = createWeakMap<Calendar, string>()
+const implCache: { [calendarID: string]: CalendarImpl } = {
+  [isoCalendarID]: isoCalendarImpl,
 }
 
-const isoToCal = (date: PlainDate, calendar: Calendar): CalendarDate => {
-  return {
-    year: calendar.year(date),
-    month: calendar.month(date),
-    day: calendar.day(date),
-  }
-}
+export class Calendar extends AbstractObj {
+  constructor(id: string) {
+    super()
 
-export const compareCalendarDates = (
-  one: CalendarDate,
-  two: CalendarDate,
-  calendar: Calendar
-): CompareReturn => {
-  return PlainDate.compare(
-    calendar.dateFromFields(one),
-    calendar.dateFromFields(two)
-  )
-}
+    // lowercase matches keys in calendarImplClasses
+    id = id.toLocaleLowerCase()
 
-export class Calendar {
-  private formatter: Intl.DateTimeFormat
+    const impl = implCache[id] ||
+      (implCache[id] = new calendarImplClasses[id](id))
 
-  constructor(readonly id: CalendarId = 'iso8601') {
-    this.formatter = Intl.DateTimeFormat('en-us', {
-      calendar: this.id,
-      weekday: 'long',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      timeZone: 'UTC',
-    })
+    setImpl(this, impl)
+    setID(this, impl.id) // record the normalized ID
   }
 
-  // TODO: Make this function
-  static from(thing: unknown): Calendar {
-    return new Calendar()
-  }
-
-  year({ isoYear }: PlainDate): number {
-    return reduceFormat(
-      isoDateToMs({ isoYear, isoMonth: 1, isoDay: 1 }),
-      this.formatter
-    )['year'] as number
-  }
-
-  month({ isoYear, isoMonth }: PlainDate): number {
-    return reduceFormat(
-      isoDateToMs({ isoYear, isoMonth, isoDay: 1 }),
-      this.formatter
-    )['month'] as number
-  }
-
-  day(dt: PlainDate): number {
-    return reduceFormat(isoDateToMs(dt), this.formatter)['day'] as number
-  }
-
-  // IN methods
-  daysInWeek(): number {
-    return UNIT_INCREMENT.WEEK
-  }
-
-  daysInMonth({ isoYear, isoMonth }: PlainDate): number {
-    // `isoDay: 0` is used to move back 1 day since isoDay is 1-based
-    return new Date(
-      isoDateToMs({ isoYear, isoMonth: isoMonth + 1, isoDay: 0 })
-    ).getUTCDate()
-  }
-
-  daysInYear({ isoYear }: PlainDate): number {
-    return diffDays(
-      new PlainDate(isoYear, 1, 1),
-      new PlainDate(isoYear + 1, 1, 1)
+  static from(arg: CalendarArg): Calendar {
+    return new Calendar(
+      arg instanceof Calendar
+        ? arg.id
+        : arg, // an ID itself
     )
   }
 
-  monthsInYear({ isoYear }: PlainDate): number {
-    // `isoDay: 0` is used to move back 1 day since isoDay is 1-based
-    return (
-      new Date(isoDateToMs({ isoYear: isoYear + 1, isoDay: 0 })).getUTCMonth() +
-      1
+  get id(): string { return getID(this) }
+
+  era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined {
+    const isoFields = getExistingDateISOFields(arg)
+    return getImpl(this).era(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
     )
   }
 
-  // OF methods
-  dayOfWeek(dt: PlainDate): number {
-    return new Date(isoDateToMs(dt)).getUTCDay()
-  }
-
-  dayOfYear(dt: PlainDate): number {
-    return (
-      this.dateUntil(new PlainDate(dt.isoYear, 1, 1), dt).total({
-        unit: 'days',
-      }) + 1
+  eraYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number | undefined {
+    const isoFields = getExistingDateISOFields(arg)
+    return getImpl(this).eraYear(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
     )
   }
 
-  weekOfYear(dt: PlainDate): number {
-    return weekOfYear(dt, this, 1, 4)
-  }
-
-  // Boolean methods
-  inLeapYear({ isoYear }: PlainDate): boolean {
-    return isoYear % 400 === 0 || (isoYear % 4 === 0 && isoYear % 100 !== 0)
-  }
-
-  dateFromFields(fields: CalendarDate, options?: AssignmentOptions): PlainDate {
-    // FIXME: Overflow does nothing
-    const overflow = options?.overflow || 'constrain'
-    return new PlainDate(fields.year, fields.month, fields.day)
-  }
-
-  // Calendar Math
-  dateAdd(
-    date: PlainDate,
-    duration: Duration,
-    options?: AssignmentOptionsLike
-  ): PlainDate {
-    const { years, months, weeks, days } = duration
-    let fields: CalendarDate = {
-      year: this.year(date),
-      month: this.month(date),
-      day: this.day(date),
-    }
-    const rejectOverflow = options?.overflow === 'reject'
-
-    // Simply defer to add functions, which return a mutated fields object
-    fields = addYears(fields, years, this, rejectOverflow)
-    fields = addMonths(fields, months, this, rejectOverflow)
-    const { isoYear, isoMonth, isoDay } = addDays(
-      this.dateFromFields(fields),
-      days + weeks * UNIT_INCREMENT.WEEK
+  year(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+    const isoFields = getExistingDateISOFields(arg)
+    return getImpl(this).year(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
     )
-    return new PlainDate(isoYear, isoMonth, isoDay)
   }
 
-  dateUntil(
-    one: PlainDate,
-    two: PlainDate,
-    options?: RoundOptionsLike
-  ): Duration {
-    const { largestUnit } = asRoundOptions(options)
+  month(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+    const isoFields = getExistingDateISOFields(arg)
+    return getImpl(this).month(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+    )
+  }
 
-    const oneCal = isoToCal(one, this)
-    const twoCal = isoToCal(two, this)
+  monthCode(arg: PlainYearMonth | PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): string {
+    const fields = queryDateFields(arg, this)
+    return getImpl(this).monthCode(fields.month, fields.year)
+  }
 
-    const negative = compareCalendarDates(oneCal, twoCal, this) > 0
-    let current = negative ? twoCal : oneCal
-    const end = negative ? oneCal : twoCal
-    let years = 0,
-      months = 0,
-      weeks = 0,
-      days = 0
+  day(arg: PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): number {
+    const isoFields = getExistingDateISOFields(arg)
+    return getImpl(this).day(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+    )
+  }
 
-    switch (largestUnit) {
-      case 'years':
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[years, current] = diffYears(current, end, this, false)
-      case 'months':
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[months, current] = diffMonths(current, end, this, false)
-      case 'weeks':
-      case 'days':
-      default:
-        days = diffDays(this.dateFromFields(current), negative ? one : two)
+  dayOfWeek(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+    const isoFields = getExistingDateISOFields(arg)
+    return computeISODayOfWeek(isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay)
+  }
+
+  dayOfYear(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+    const fields = queryDateFields(arg, this)
+    return computeDayOfYear(getImpl(this), fields.year, fields.month, fields.day)
+  }
+
+  weekOfYear(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+    const isoFields = getExistingDateISOFields(arg)
+    return computeWeekOfISOYear(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+      1, // TODO: document what this means
+      4, // "
+    )
+  }
+
+  daysInWeek(_arg: DateArg | PlainDateTime | ZonedDateTime): number {
+    // All calendars seem to have 7-day weeks
+    return 7
+  }
+
+  daysInMonth(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+    const fields = queryDateFields(arg, this)
+    return getImpl(this).daysInMonth(fields.year, fields.month)
+  }
+
+  daysInYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+    const fields = queryDateFields(arg, this)
+    return computeDaysInYear(getImpl(this), fields.year)
+  }
+
+  monthsInYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+    const calFields = queryDateFields(arg, this)
+    return getImpl(this).monthsInYear(calFields.year)
+  }
+
+  inLeapYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): boolean {
+    return getImpl(this).inLeapYear(this.year(arg))
+  }
+
+  dateFromFields(arg: DateLikeFields, options?: OverflowOptions): PlainDate {
+    const isoFields = queryDateISOFields(arg, getImpl(this), options)
+    return new PlainDate(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+      this,
+    )
+  }
+
+  yearMonthFromFields(arg: YearMonthLikeFields, options?: OverflowOptions): PlainYearMonth {
+    const isoFields = queryDateISOFields({ ...arg, day: 1 }, getImpl(this), options)
+    return new PlainYearMonth(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      this,
+      isoFields.isoDay,
+    )
+  }
+
+  monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay {
+    const impl = getImpl(this)
+    const dateLikeFields: DateLikeFields = {
+      ...fields,
+      year: (fields as MonthDayFields).year ??
+        ((fields as MonthDayFields).monthCode != null
+          ? impl.monthYear((fields as MonthDayFields).monthCode, fields.day)
+          : throwNew(
+            Error,
+            'Must specify either a year or a monthCode. Not a only a month number',
+          ) as number
+        ),
     }
 
-    if (largestUnit === 'weeks') {
-      weeks = Math.trunc(days / UNIT_INCREMENT.WEEK)
-      days = days % UNIT_INCREMENT.WEEK
-    }
-
-    const dur = new Duration(years, months, weeks, days)
-    return negative ? dur.negated() : dur
+    const isoFields = queryDateISOFields(dateLikeFields, impl, options)
+    return new PlainMonthDay(
+      isoFields.isoMonth,
+      isoFields.isoDay,
+      this,
+      isoFields.isoYear,
+    )
   }
+
+  dateAdd(dateArg: DateArg, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+    const impl = getImpl(this)
+    const date = ensureObj(PlainDate, dateArg, options)
+    const duration = ensureObj(Duration, durationArg)
+    const overflowHandling = parseOverflowHandling(options?.overflow)
+    const isoFields = addToDateFields(date, duration, impl, overflowHandling)
+
+    return new PlainDate(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+      this,
+    )
+  }
+
+  dateUntil(dateArg0: DateArg, dateArg1: DateArg, options?: { largestUnit?: DateUnit }): Duration {
+    const impl = getImpl(this)
+    const d0 = ensureObj(PlainDate, dateArg0)
+    const d1 = ensureObj(PlainDate, dateArg1)
+    const largestUnit = parseUnit<DateUnitInt>(options?.largestUnit, DAY, DAY, YEAR)
+
+    ensureCalendarsEqual(getCommonCalendar(d0, d1), this)
+    return diffDateFields(d0, d1, impl, largestUnit)
+  }
+
+  toString(): string { return this.id }
 }

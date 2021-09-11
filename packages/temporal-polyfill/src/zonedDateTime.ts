@@ -1,157 +1,246 @@
-import { msToIsoDate } from './utils/convert'
-import { Calendar, CalendarId } from './calendar'
-import { dateFormat } from './utils/format'
-import { parseDate } from './utils/parse'
-import { TimeZone, TimeZoneId } from './timeZone'
-import { CompareReturn, LocaleId } from './utils/types'
+import { extractCalendar, isoCalendar } from './argParse/calendar'
+import { parseCalendarDisplay } from './argParse/calendarDisplay'
+import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
+import { OFFSET_DISPLAY_AUTO, parseOffsetDisplay } from './argParse/offsetDisplay'
+import { OFFSET_PREFER, OFFSET_REJECT } from './argParse/offsetHandling'
+import { refineFields } from './argParse/refine'
+import { parseTimeZoneDisplay } from './argParse/timeZoneDisplay'
+import { timeUnitNames } from './argParse/units'
+import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
+import { createDate } from './dateUtils/date'
+import { createDateTime } from './dateUtils/dateTime'
+import { formatCalendarID, formatDateTimeISO, formatTimeZoneID } from './dateUtils/isoFormat'
+import { epochNanoToISOFields } from './dateUtils/isoMath'
+import {
+  ComputedEpochFields,
+  DateCalendarFields,
+  dateCalendarFields,
+  mixinCalendarFields,
+  mixinEpochFields,
+  mixinISOFields,
+} from './dateUtils/mixins'
+import { createMonthDay } from './dateUtils/monthDay'
+import { parseDateTimeISO } from './dateUtils/parse'
+import { TimeFields, createTime } from './dateUtils/time'
+import { createYearMonth } from './dateUtils/yearMonth'
+import {
+  ZonedDateTimeISOEssentials,
+  addToZonedDateTime,
+  compareZonedDateTimes,
+  createZonedDateTime,
+  diffZonedDateTimes,
+  overrideZonedDateTimeFields,
+  roundZonedDateTime,
+  zonedDateTimeFieldMap,
+  zonedDateTimeFieldsToISO,
+} from './dateUtils/zonedDateTime'
+import { createWeakMap } from './utils/obj'
+import {
+  CalendarArg,
+  CompareResult,
+  DateArg,
+  DateTimeRoundOptions,
+  DiffOptions,
+  DurationArg,
+  LocalesArg,
+  OverflowOptions,
+  TimeArg,
+  TimeZoneArg,
+  ZonedDateTimeArg,
+  ZonedDateTimeISOFields,
+  ZonedDateTimeLikeFields,
+  ZonedDateTimeOptions,
+  ZonedDateTimeOverrides,
+  ZonedDateTimeToStringOptions,
+} from './args'
+import { Calendar } from './calendar'
+import { Duration } from './duration'
+import { Instant } from './instant'
 import { PlainDate } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
+import { TimeZone } from './timeZone'
 
-type ZonedDateTimeLike = {
-  epochMilliseconds?: number
-  timeZone?: TimeZone | TimeZoneId
-  calendar?: Calendar | CalendarId
+interface ZonedDateTimePrivateFields {
+  offsetNanoseconds: number
+  epochNanoseconds: bigint
 }
 
-export class ZonedDateTime {
-  readonly timeZone: TimeZone
-  readonly calendar: Calendar
+const [getPrivateFields, setPrivateFields] =
+  createWeakMap<ZonedDateTime, ZonedDateTimePrivateFields>()
 
+export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   constructor(
-    readonly epochMilliseconds: number,
-    timeZone: TimeZone | TimeZoneId = new TimeZone(),
-    calendar: Calendar | CalendarId = new Calendar()
+    epochNanoseconds: bigint,
+    timeZoneArg: TimeZoneArg,
+    calendarArg: CalendarArg = isoCalendar,
   ) {
-    this.timeZone =
-      timeZone instanceof TimeZone ? timeZone : new TimeZone(timeZone)
+    const timeZone = ensureObj(TimeZone, timeZoneArg)
+    const calendar = ensureObj(Calendar, calendarArg)
+    const instant = new Instant(epochNanoseconds)
+    const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(instant)
 
-    this.calendar =
-      calendar instanceof Calendar ? calendar : new Calendar(calendar)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  static from(thing: any): ZonedDateTime {
-    if (typeof thing === 'string') {
-      const { epochMilliseconds, timeZone, calendar } = parseDate(thing)
-      return new ZonedDateTime(epochMilliseconds, timeZone, calendar)
-    } else if (thing.epochMilliseconds) {
-      return new ZonedDateTime(
-        thing.epochMilliseconds,
-        thing.timeZone,
-        thing.calendar
-      )
-    }
-    throw new Error('Invalid Object')
-  }
-
-  static compare(one: ZonedDateTime, two: ZonedDateTime): CompareReturn {
-    if (one.epochMilliseconds < two.epochMilliseconds) {
-      return -1
-    } else if (one.epochMilliseconds > two.epochMilliseconds) {
-      return 1
-    } else {
-      return 0
-    }
-  }
-
-  private offsetIso() {
-    return msToIsoDate(
-      this.epochMilliseconds +
-        this.timeZone.getOffsetMillisecondsFor(this.epochMilliseconds)
-    )
-  }
-
-  get year(): number {
-    const { isoYear, isoMonth, isoDay } = this.offsetIso()
-    return this.calendar.year(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get month(): number {
-    const { isoYear, isoMonth, isoDay } = this.offsetIso()
-    return this.calendar.month(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get day(): number {
-    const { isoYear, isoMonth, isoDay } = this.offsetIso()
-    return this.calendar.day(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get hour(): number {
-    return this.offsetIso().isoHour
-  }
-
-  get minute(): number {
-    return this.offsetIso().isoMinute
-  }
-
-  get second(): number {
-    return this.offsetIso().isoSecond
-  }
-
-  get millisecond(): number {
-    return this.offsetIso().isoMillisecond
-  }
-
-  get dayOfWeek(): number {
-    const { isoYear, isoMonth, isoDay } = this.offsetIso()
-    return this.calendar.dayOfWeek(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  get weekOfYear(): number {
-    const { isoYear, isoMonth, isoDay } = this.offsetIso()
-    return this.calendar.weekOfYear(new PlainDate(isoYear, isoMonth, isoDay))
-  }
-
-  with(dateTimeLike: ZonedDateTimeLike | string): ZonedDateTime {
-    if (typeof dateTimeLike === 'string') {
-      throw new Error('Unimplemented')
-    }
-    return new ZonedDateTime(
-      dateTimeLike.epochMilliseconds ?? this.epochMilliseconds,
-      dateTimeLike.timeZone ?? this.timeZone,
-      dateTimeLike.calendar ?? this.calendar
-    )
-  }
-
-  withTimeZone(timeZone: TimeZone | TimeZoneId): ZonedDateTime {
-    return this.with({ timeZone })
-  }
-
-  withCalendar(calendar: Calendar | CalendarId): ZonedDateTime {
-    return this.with({ calendar })
-  }
-
-  toString(): string {
-    const {
-      year: isoYear,
-      month: isoMonth,
-      day: isoDay,
-      hour: isoHour,
-      minute: isoMinute,
-      second: isoSecond,
-      millisecond: isoMillisecond,
-      epochMilliseconds,
+    super({
+      ...epochNanoToISOFields(epochNanoseconds - BigInt(offsetNanoseconds)),
+      calendar,
       timeZone,
-    } = this
-    return dateFormat(
-      {
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-      },
-      timeZone.getOffsetStringFor(epochMilliseconds)
+      offset: timeZone.getOffsetStringFor(instant),
+    })
+
+    setPrivateFields(this, {
+      epochNanoseconds,
+      offsetNanoseconds,
+    })
+  }
+
+  static from(arg: ZonedDateTimeArg, options?: ZonedDateTimeOptions): ZonedDateTime {
+    return createZonedDateTime(
+      arg instanceof ZonedDateTime
+        ? arg.getISOFields() // optimization
+        : typeof arg === 'object'
+          ? zonedDateTimeFieldsToISO(
+            refineFields(arg, zonedDateTimeFieldMap) as ZonedDateTimeLikeFields,
+            options,
+            extractCalendar(arg),
+            extractTimeZone(arg),
+          )
+          // if parsing doesn't return a timeZone, createZonedDateTime will throw error
+          : parseDateTimeISO(String(arg)) as ZonedDateTimeISOEssentials,
+      options,
+      OFFSET_REJECT,
     )
   }
 
-  toLocaleString(
-    locale: LocaleId,
-    options?: Intl.DateTimeFormatOptions
-  ): string {
-    return new Intl.DateTimeFormat(locale, options).format(
-      this.epochMilliseconds
+  static compare(a: ZonedDateTimeArg, b: ZonedDateTimeArg): CompareResult {
+    return compareZonedDateTimes(
+      ensureObj(ZonedDateTime, a),
+      ensureObj(ZonedDateTime, b),
     )
   }
+
+  get timeZone(): TimeZone { return this.getISOFields().timeZone }
+  get epochNanoseconds(): bigint { return getPrivateFields(this).epochNanoseconds }
+  get offsetNanoseconds(): number { return getPrivateFields(this).offsetNanoseconds }
+  get offset(): string { return this.getISOFields().offset }
+
+  with(fields: ZonedDateTimeOverrides, options?: ZonedDateTimeOptions): ZonedDateTime {
+    const refinedFields = refineFields(fields, zonedDateTimeFieldMap, ['calendar', 'timeZone'])
+    const mergedFields = overrideZonedDateTimeFields(refinedFields, this)
+    return createZonedDateTime(
+      zonedDateTimeFieldsToISO(
+        mergedFields,
+        options,
+        this.calendar,
+        this.timeZone,
+      ),
+      options,
+      OFFSET_PREFER,
+    )
+  }
+
+  withPlainDate(dateArg: DateArg): ZonedDateTime {
+    return ensureObj(PlainDate, dateArg).toZonedDateTime({
+      plainTime: this.toPlainTime(),
+      timeZone: this.timeZone,
+    })
+  }
+
+  withPlainTime(timeArg: TimeArg): ZonedDateTime {
+    return this.toPlainDate().toZonedDateTime({
+      plainTime: timeArg,
+      timeZone: this.timeZone,
+    })
+  }
+
+  withCalendar(calendarArg: CalendarArg): ZonedDateTime {
+    return new ZonedDateTime(
+      this.epochNanoseconds,
+      this.timeZone,
+      calendarArg,
+    )
+  }
+
+  withTimeZone(timeZoneArg: TimeZoneArg): ZonedDateTime {
+    return new ZonedDateTime(
+      this.epochNanoseconds,
+      timeZoneArg,
+      this.calendar,
+    )
+  }
+
+  add(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
+    return addToZonedDateTime(this, ensureObj(Duration, durationArg), options)
+  }
+
+  subtract(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
+    return addToZonedDateTime(this, ensureObj(Duration, durationArg).negated(), options)
+  }
+
+  until(other: ZonedDateTimeArg, options?: DiffOptions): Duration {
+    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options)
+  }
+
+  since(other: ZonedDateTimeArg, options?: DiffOptions): Duration {
+    return diffZonedDateTimes(ensureObj(ZonedDateTime, other), this, options)
+  }
+
+  round(options?: DateTimeRoundOptions): ZonedDateTime {
+    return roundZonedDateTime(this, options)
+  }
+
+  equals(other: ZonedDateTimeArg): boolean {
+    return compareZonedDateTimes(this, ensureObj(ZonedDateTime, other)) === 0
+  }
+
+  toString(options?: ZonedDateTimeToStringOptions): string {
+    const formatConfig = parseTimeToStringOptions(options)
+    const offsetDisplay = parseOffsetDisplay(options?.offset)
+    const timeZoneDisplay = parseTimeZoneDisplay(options?.timeZoneName)
+    const calendarDisplay = parseCalendarDisplay(options?.calendarName)
+    const fields = this.getISOFields()
+
+    return formatDateTimeISO(fields, formatConfig) +
+      (offsetDisplay === OFFSET_DISPLAY_AUTO ? fields.offset : '') + // already formatted
+      formatTimeZoneID(fields.timeZone.id, timeZoneDisplay) +
+      formatCalendarID(fields.calendar.id, calendarDisplay)
+  }
+
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const fields = this.getISOFields()
+
+    return new Intl.DateTimeFormat(locales, {
+      calendar: fields.calendar.id,
+      timeZone: fields.timeZone.id,
+      ...options,
+      // TODO: inject more options to ensure time is displayed by default
+    }).format(
+      this.epochMilliseconds,
+    )
+  }
+
+  toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
+  toPlainMonthDay(): PlainMonthDay { return createMonthDay(this.getISOFields()) }
+  toPlainDateTime(): PlainDateTime { return createDateTime(this.getISOFields()) }
+  toPlainDate(): PlainDate { return createDate(this.getISOFields()) }
+  toPlainTime(): PlainTime { return createTime(this.getISOFields()) }
+  toInstant(): Instant { return new Instant(this.epochNanoseconds) }
+}
+
+// mixins
+export interface ZonedDateTime extends DateCalendarFields { calendar: Calendar }
+export interface ZonedDateTime extends TimeFields {}
+export interface ZonedDateTime extends ComputedEpochFields {}
+mixinISOFields(ZonedDateTime, ['calendar', ...timeUnitNames])
+mixinCalendarFields(ZonedDateTime, dateCalendarFields)
+mixinEpochFields(ZonedDateTime)
+
+// utils
+
+function extractTimeZone(input: { timeZone: TimeZoneArg }): TimeZone {
+  if (input.timeZone == null) {
+    throw new Error('Must specify timeZone')
+  }
+  return ensureObj(TimeZone, input.timeZone)
 }
