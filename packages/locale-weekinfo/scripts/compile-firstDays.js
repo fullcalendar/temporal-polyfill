@@ -2,23 +2,6 @@ import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { mapLocaleProperty } from '../../../scripts/lib/locales-list.mjs'
 
-const templateCode = (conditionals, largest) => {
-  return `/* eslint-disable */
-
-export const getFirstDay = (locale: string): number => {
-  ${conditionals.join('  } else ')}  }
-
-  return ${largest}
-}
-`
-}
-
-const templateConditional = (day, locales) => {
-  return `if (locale.match(/^((?:${locales.join('|')})(?:-\\w{2})?)$/)) {
-    return ${day}
-`
-}
-
 const fdObj = mapLocaleProperty((_locale, json) => {
   return json.week.firstDay
 })
@@ -49,3 +32,20 @@ writeFileSync(resolve('src/firstDay.ts'), templateCode(condArr, largest), {
   flag: 'w',
 })
 console.log('Wrote firstDay.ts')
+
+function templateCode(conditionals, largest) {
+  return `/* eslint-disable */
+
+export const getFirstDay = (locale: string): number => {
+  ${conditionals.join('  } else ')}  }
+
+  return ${largest}
+}
+`
+}
+
+function templateConditional(day, locales) {
+  return `if (locale.match(/^((?:${locales.join('|')})(?:-\\w{2})?)$/)) {
+    return ${day}
+`
+}

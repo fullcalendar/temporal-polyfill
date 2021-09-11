@@ -2,13 +2,6 @@ import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { getAllLocalesData } from '../../../scripts/lib/locales-list.js'
 
-const templateCode = (obj) => {
-  return `/* eslint-disable */
-
-export const localeOrdinalsData = ${JSON.stringify(obj, null, 2)}
-`
-}
-
 const ordinals = {}
 
 for (const [locale, { ordinal }] of Object.entries(getAllLocalesData())) {
@@ -32,3 +25,10 @@ writeFileSync(resolve('src/localeOrdinalsData.ts'), templateCode(ordinals), {
 })
 
 console.log('Wrote localeOrdinalsData.ts')
+
+function templateCode(obj) {
+  return `/* eslint-disable */
+
+export const localeOrdinalsData = ${JSON.stringify(obj, null, 2)}
+`
+}

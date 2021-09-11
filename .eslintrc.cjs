@@ -68,6 +68,12 @@ module.exports = {
     // https://github.com/typescript-eslint/typescript-eslint/issues/1824
   },
   overrides: [{
+    files: '*.js',
+    rules: {
+      // Prevent normal JS files from needing types for functions (?)
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
+  }, {
     files: '*.cjs',
     rules: {
       // Allow require() statements in CJS modules

@@ -2,23 +2,6 @@ import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { mapLocaleProperty } from '../../../scripts/lib/locales-list.mjs'
 
-const templateCode = (conditionals, largest) => {
-  return `/* eslint-disable */
-
-export const getMinimalDays = (locale: string): number => {
-  ${conditionals.join('  } else ')}  }
-
-  return ${largest}
-}
-`
-}
-
-const templateConditional = (day, locales) => {
-  return `if (locale.match(/^((?:${locales.join('|')})(?:-\\w{2})?)$/)) {
-    return ${day}
-`
-}
-
 const mdObj = mapLocaleProperty((_locale, json) => {
   return json.week.minimalDays
 })
@@ -48,4 +31,22 @@ writeFileSync(resolve('src/minimalDays.ts'), templateCode(condArr, largest), {
   encoding: 'utf8',
   flag: 'w',
 })
+
 console.log('Wrote minimalDays.ts')
+
+function templateCode(conditionals, largest) {
+  return `/* eslint-disable */
+
+export const getMinimalDays = (locale: string): number => {
+  ${conditionals.join('  } else ')}  }
+
+  return ${largest}
+}
+`
+}
+
+function templateConditional(day, locales) {
+  return `if (locale.match(/^((?:${locales.join('|')})(?:-\\w{2})?)$/)) {
+    return ${day}
+`
+}

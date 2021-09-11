@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 // Get localeRoot relative to this file
 const localeRoot = resolve(fileURLToPath(import.meta.url), '../../../locales')
 
-export const listLocales = () => {
+export function listLocales() {
   const localeList = readdirSync(localeRoot)
 
   // Error out if no locales
@@ -17,7 +17,7 @@ export const listLocales = () => {
   return localeList
 }
 
-export const getAllLocalesData = () => {
+export function getAllLocalesData() {
   const obj = {}
 
   for (const fileName of listLocales()) {
@@ -37,11 +37,11 @@ export const getAllLocalesData = () => {
  * Creates a map of locales with a property as keys
  * @param getProp {(locale: string, json: unknown) => string} Function to fetch property from json
  */
-export const mapLocaleProperty = (
+export function mapLocaleProperty(
   getProp = (locale) => {
     return locale
   },
-) => {
+) {
   const obj = {}
 
   for (const [locale, json] of Object.entries(getAllLocalesData())) {
