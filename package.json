@@ -35,7 +35,7 @@
     "dev": "jest --watch",
     "lint": "eslint .",
     "locales-scrape": "node ./scripts/locales-scrape.cjs",
-    "locales-compile": "yarn run locales-scrape && yarn workspaces foreach -ptv run locales-compile"
+    "locales-compile": "yarn workspaces foreach -ptv run locales-compile"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

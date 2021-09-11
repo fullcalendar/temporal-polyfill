@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { mapLocaleProperty } from '../../../scripts/lib/locales-list.mjs'
+import { mapLocaleProperty } from '../../../scripts/lib/locales-list.js'
 
 const fdObj = mapLocaleProperty((_locale, json) => {
   return json.week.firstDay
