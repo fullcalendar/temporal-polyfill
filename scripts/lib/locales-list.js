@@ -38,9 +38,7 @@ export function getAllLocalesData() {
  * @param getProp {(locale: string, json: unknown) => string} Function to fetch property from json
  */
 export function mapLocaleProperty(
-  getProp = (locale) => {
-    return locale
-  },
+  getProp = (locale) => locale,
 ) {
   const obj = {}
 
