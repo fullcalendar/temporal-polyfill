@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "test": "jest",
-    "compile-directions": "node --experimental-json-modules ./scripts/compile-directions.mjs",
+    "compile-directions": "node ./scripts/compile-directions.js",
     "locales-compile": "yarn compile-directions"
   },
   "devDependencies": {

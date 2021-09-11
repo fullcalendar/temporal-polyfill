@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "test": "jest",
-    "compile-localeOrdinalsData": "node --experimental-json-modules ./scripts/compile-localeOrdinalsData.mjs",
+    "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.js",
     "locales-compile": "yarn compile-localeOrdinalsData"
   },
   "dependencies": {

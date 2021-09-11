@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { getAllLocalesData } from '../../../scripts/lib/locales-list.mjs'
+import { getAllLocalesData } from '../../../scripts/lib/locales-list.js'
 
 const templateCode = (arr) => {
   return `/* eslint-disable */

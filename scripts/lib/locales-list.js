@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
-import { readdirSync, readFileSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -26,7 +24,7 @@ export const getAllLocalesData = () => {
     const json = JSON.parse(
       readFileSync(resolve(localeRoot, fileName), {
         encoding: 'utf8',
-      })
+      }),
     )
 
     obj[fileName.replace('.json', '')] = json
@@ -42,7 +40,7 @@ export const getAllLocalesData = () => {
 export const mapLocaleProperty = (
   getProp = (locale) => {
     return locale
-  }
+  },
 ) => {
   const obj = {}
 
