@@ -43,18 +43,18 @@ export function queryDateFields(
   arg: DateISOInstance | DateArg,
   calendar: Calendar,
 ): DateFields {
-  let plainDate: PlainDate
+  let date: PlainDate
 
   if (arg instanceof PlainDate) {
-    plainDate = arg
+    date = arg
   } else if (isDateISOInstance(arg)) {
-    plainDate = createDate(arg.getISOFields())
+    date = createDate(arg.getISOFields())
   } else {
-    plainDate = PlainDate.from(arg)
+    date = PlainDate.from(arg)
   }
 
-  ensureCalendarsEqual(plainDate.calendar, calendar)
-  return plainDate
+  ensureCalendarsEqual(date.calendar, calendar)
+  return date
 }
 
 // ISO Field Querying

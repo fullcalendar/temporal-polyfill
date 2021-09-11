@@ -144,13 +144,13 @@ export function addToZonedDateTime(
 
   // add larger fields using the calendar
   // Calendar::dateAdd will ignore time parts
-  const plainDate = zonedDateTime.calendar.dateAdd(
+  const date = zonedDateTime.calendar.dateAdd(
     createDate(isoFields),
     duration,
     options,
   )
 
-  return plainDate.toZonedDateTime({
+  return date.toZonedDateTime({
     plainTime: zonedDateTime,
     timeZone: zonedDateTime.timeZone,
   })
