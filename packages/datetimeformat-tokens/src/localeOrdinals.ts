@@ -1,11 +1,11 @@
 import { localeOrdinalsData } from './localeOrdinalsData'
 import { Ordinals } from './ordinals'
 
-const expandOrdinals = (): { [key: string]: Ordinals } => {
-  const obj = {}
+function expandOrdinals(): { [key: string]: Ordinals } {
+  const obj = {} as { [key: string]: Ordinals }
 
-  for (const key in localeOrdinalsData) {
-    const val = localeOrdinalsData[key]
+  for (const key of Object.keys(localeOrdinalsData)) { // guarantees own properties
+    const val = localeOrdinalsData[key as keyof typeof localeOrdinalsData]
 
     for (const locale of key.split('|')) {
       obj[locale] = val

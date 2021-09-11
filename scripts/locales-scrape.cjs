@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 const { existsSync, readdirSync } = require('fs')
 const { readFile, writeFile } = require('fs/promises')
 const { resolve } = require('path')
@@ -16,10 +14,10 @@ const momentLocaleRoot = resolve(args.$0, '..', 'data/moment/locale')
 const fullcalendarLocaleRoot = resolve(
   args.$0,
   '..',
-  'data/fullcalendar/packages/core/src/locales'
+  'data/fullcalendar/packages/core/src/locales',
 )
 
-const writeLocale = async (localeStr) => {
+async function writeLocale(localeStr) {
   // Used for specific parsing nuances, intlStr represents the locale with the suffix capitalized
   const [prefix, suffix] = localeStr.split('-')
   const intlStr = suffix ? `${prefix}-${suffix.toUpperCase()}` : prefix
@@ -29,7 +27,7 @@ const writeLocale = async (localeStr) => {
   // Get File Content for Moment
   const momentContent = await readFile(
     resolve(momentLocaleRoot, `${localeStr.toLowerCase()}.js`),
-    { encoding: 'utf8' }
+    { encoding: 'utf8' },
   ).catch(() => {
     if (args.v) {
       console.error(`'${intlStr}' does not exist in ${'Moment'.bold}`.red)
@@ -51,14 +49,14 @@ const writeLocale = async (localeStr) => {
 
     // Ordinals
     const matchOrdinal = momentContent.match(
-      /ordinal:\s*(?:(function)|['"]%d(\S*)['"],)\s/
+      /ordinal:\s*(?:(function)|['"]%d(\S*)['"],)\s/,
     )
 
     if (matchOrdinal) {
       if (matchOrdinal[1] === 'function') {
         if (args.v) {
           console.error(
-            `'${intlStr}' ordinals are not handled by ${'Moment'.bold}`.red
+            `'${intlStr}' ordinals are not handled by ${'Moment'.bold}`.red,
           )
         }
       } else {
@@ -70,7 +68,7 @@ const writeLocale = async (localeStr) => {
   // Get File Content for FullCalendar
   const fullcalendarContent = await readFile(
     resolve(fullcalendarLocaleRoot, `${localeStr.toLowerCase()}.ts`),
-    { encoding: 'utf8' }
+    { encoding: 'utf8' },
   ).catch(() => {
     if (args.v) {
       console.error(`'${intlStr}' does not exist in ${'FullCalendar'.bold}`.red)
@@ -81,7 +79,7 @@ const writeLocale = async (localeStr) => {
   if (fullcalendarContent) {
     // Direction
     const directionMatch = fullcalendarContent.match(
-      /direction:\s*['"](ltr|rtl)['"]/
+      /direction:\s*['"](ltr|rtl)['"]/,
     )
 
     localeData = merge(localeData, {
@@ -94,13 +92,13 @@ const writeLocale = async (localeStr) => {
   const workspaceLocalePath = resolve(
     args.$0,
     '../../locales',
-    `${intlStr}.json`
+    `${intlStr}.json`,
   )
 
   // Read existing file if it exists
   if (existsSync(workspaceLocalePath)) {
     const workspaceContent = JSON.parse(
-      await readFile(workspaceLocalePath, { encoding: 'utf8' })
+      await readFile(workspaceLocalePath, { encoding: 'utf8' }),
     )
 
     // Merge into localeData
@@ -124,7 +122,7 @@ const writeLocale = async (localeStr) => {
   await writeFile(
     resolve(args.$0, '../../locales', `${intlStr}.json`),
     JSON.stringify(localeData, null, 2),
-    { encoding: 'utf8', flag: 'w' }
+    { encoding: 'utf8', flag: 'w' },
   )
 
   if (args.v) {
@@ -143,7 +141,7 @@ if (!locales) {
   const fullcalendarLocaleArr = readdirSync(fullcalendarLocaleRoot).map(
     (val) => {
       return val.replace('.ts', '')
-    }
+    },
   )
 
   // Remove duplicates
@@ -167,6 +165,6 @@ Promise.allSettled(promiseArr).then(() => {
   console.log(
     `Completed scraping of ${'Moment'.bold} and ${
       'Fullcalendar'.bold
-    } Locale files.`.green
+    } Locale files.`.green,
   )
 })

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Duration } from 'temporal-polyfill'
 import { DurationFormat } from './index'
 
@@ -62,7 +63,7 @@ test.each`
   ${new Duration(1, 1, 1)}           | ${'fr'} | ${'1 an, 1 mois et 1 semaine'}
   ${new Duration(0, 0, 0, 0, 1, 10)} | ${'es'} | ${'1 hora y 10 minutos'}
   ${new Duration(0, 2, 0, 5)}        | ${'ja'} | ${'2 か月、5 日'}
-`(`can format $dur using '$locale'`, ({ dur, locale, expected }) => {
+`('can format $dur using \'$locale\'', ({ dur, locale, expected }) => {
   const formatter = new DurationFormat(locale)
   expect(formatter.format(dur)).toEqual(expected)
 })

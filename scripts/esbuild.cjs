@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 const { resolve, relative } = require('path')
 const rootPath = resolve('.')
 const packageJson = require(relative(
   __dirname,
-  resolve(rootPath, './package.json')
+  resolve(rootPath, './package.json'),
 ))
 
 require('colors')

@@ -1,4 +1,4 @@
-import { Duration } from 'temporal-polyfill'
+import { Duration, DurationLike } from 'temporal-polyfill'
 
 // Unfortunately neccesary as typescript does not include typings for ecma drafts
 // TODO: Remove when ListFormat becomes part of the official spec
@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-const largestCommonString = (a: string, b: string): string => {
+function largestCommonString(a: string, b: string): string {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]
 
   // Iterates from full short string by removing last character each iteration
@@ -42,23 +42,34 @@ const largestCommonString = (a: string, b: string): string => {
 
 type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 
-type DurationLike = Partial<Duration>
+const durationFields: (keyof DurationLike)[] = [ // TODO: get this from temporal?
+  'years',
+  'months',
+  'weeks',
+  'days',
+  'hours',
+  'minutes',
+  'seconds',
+  'milliseconds',
+  'microseconds',
+  'nanoseconds',
+]
 
-const getLiteralPartsValue = (
+function getLiteralPartsValue(
   partsArr: Intl.RelativeTimeFormatPart[],
-  index: number
-): string => {
+  index: number,
+): string {
   return partsArr[index].type === 'literal' ? partsArr[index].value : ''
 }
 
 // Combines adjacent literal parts and removes blank literal parts
-const collapseLiteralParts = (
-  parts: Intl.RelativeTimeFormatPart[]
-): Intl.RelativeTimeFormatPart[] => {
+function collapseLiteralParts(
+  parts: Intl.RelativeTimeFormatPart[],
+): Intl.RelativeTimeFormatPart[] {
   const finalParts: Intl.RelativeTimeFormatPart[] = []
 
   // As we iterate the parts, will be a reference to the previous part, only if it was a literal.
-  let prevLiteralPart: Intl.RelativeTimeFormatPart | null = null
+  let prevLiteralPart: Intl.RelativeTimeFormatPart | undefined
 
   for (const part of parts) {
     if (part.type === 'literal') {
@@ -72,7 +83,7 @@ const collapseLiteralParts = (
         }
       }
     } else {
-      prevLiteralPart = null
+      prevLiteralPart = undefined
       finalParts.push(part)
     }
   }
@@ -80,10 +91,10 @@ const collapseLiteralParts = (
   return finalParts
 }
 
-const combinePartsArrays = (
+function combinePartsArrays(
   durationPartArrays: Intl.RelativeTimeFormatPart[][],
-  listFormatter: Intl.ListFormat
-): Intl.RelativeTimeFormatPart[] => {
+  listFormatter: Intl.ListFormat,
+): Intl.RelativeTimeFormatPart[] {
   // Produce an array of strings like ['0', '1', '2']
   const indexStrings = durationPartArrays.map((_part, index) => {
     return String(index)
@@ -93,7 +104,8 @@ const combinePartsArrays = (
 
   for (const listPart of listParts) {
     if (listPart.type === 'element') {
-      // When an element is encountered (a string like '1'), inject parts from corresponding duration
+      // When an element is encountered (a string like '1'),
+      // inject parts from corresponding duration
       combinedParts.push(...durationPartArrays[parseInt(listPart.value)])
     } else {
       // Otherwise, inject a literal
@@ -110,7 +122,7 @@ export class DurationFormat {
 
   constructor(
     readonly locale: string = 'en-us',
-    { style }: DurationFormatOptions = { style: 'long' }
+    { style }: DurationFormatOptions = { style: 'long' },
   ) {
     this.timeFormatter = new Intl.RelativeTimeFormat(locale, {
       numeric: 'always',
@@ -124,7 +136,7 @@ export class DurationFormat {
   }
 
   formatToParts(
-    durationLike: Duration | DurationLike
+    durationLike: Duration | DurationLike,
   ): Intl.RelativeTimeFormatPart[] {
     const duration =
       durationLike instanceof Duration
@@ -134,27 +146,27 @@ export class DurationFormat {
     // Storage array
     const durationPartArrays: Intl.RelativeTimeFormatPart[][] = []
 
-    for (const key in duration) {
+    for (const key of durationFields) {
       const val = duration[key]
 
       if (val !== 0 && key !== 'milliseconds') {
         const forwardParts = this.timeFormatter.formatToParts(
           val,
-          key as Intl.RelativeTimeFormatUnit
+          key as Intl.RelativeTimeFormatUnit,
         )
         const backwardParts = this.timeFormatter.formatToParts(
           -val,
-          key as Intl.RelativeTimeFormatUnit
+          key as Intl.RelativeTimeFormatUnit,
         )
 
         // Extract largest common string from formatted parts
         const before = largestCommonString(
           getLiteralPartsValue(forwardParts, 0),
-          getLiteralPartsValue(backwardParts, 0)
+          getLiteralPartsValue(backwardParts, 0),
         )
         const after = largestCommonString(
           getLiteralPartsValue(forwardParts, forwardParts.length - 1),
-          getLiteralPartsValue(backwardParts, backwardParts.length - 1)
+          getLiteralPartsValue(backwardParts, backwardParts.length - 1),
         )
 
         durationPartArrays.push([

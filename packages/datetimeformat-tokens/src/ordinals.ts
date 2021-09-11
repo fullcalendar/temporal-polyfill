@@ -1,17 +1,13 @@
 import { localeOrdinals } from './localeOrdinals'
 import { localeOrdinalsSpecial } from './localeOrdinalsSpecial'
 
-export type Ordinals =
-  | string
-  | {
-      [key: string]: string
-    }
+export type Ordinals = string | { [key: string]: string }
 
-export const getOrdinalForValue = (
+export function getOrdinalForValue(
   num: number,
   unit: string,
-  locale: string
-): string => {
+  locale: string,
+): string {
   // Use prefix as backup if specific locale cannot be found
   const prefix = locale.split('-')[0]
   const ordinals: Ordinals = localeOrdinals[locale] ?? localeOrdinals[prefix]

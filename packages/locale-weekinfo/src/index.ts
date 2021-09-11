@@ -6,6 +6,6 @@ type LocaleWeekInfo = {
   minimalDays: number
 }
 
-export const getLocaleWeekInfo = (locale: string): LocaleWeekInfo => {
+export function getLocaleWeekInfo(locale: string): LocaleWeekInfo {
   return { firstDay: getFirstDay(locale), minimalDays: getMinimalDays(locale) }
 }

@@ -10,8 +10,8 @@ test.each`
   ${'fr'}    | ${1} | ${'day'} | ${'e'}
   ${'fr'}    | ${2} | ${'day'} | ${'er'}
 `(
-  `can get ordinal for '$locale' to be '$expected'`,
+  'can get ordinal for \'$locale\' to be \'$expected\'',
   ({ locale, num, unit, expected }) => {
     expect(getOrdinalForValue(num, unit, locale)).toBe(expected)
-  }
+  },
 )

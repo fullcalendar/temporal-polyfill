@@ -7,10 +7,11 @@ const REGEX_MATCHES =
 const REGEX_ESCAPED_LITERALS = /\[[^\]]+]/g
 const REGEX_FORMAT = new RegExp(
   `(${REGEX_ESCAPED_LITERALS.source}|${REGEX_MATCHES.source})`,
-  'g'
+  'g',
 )
 
-// Object containing a options to append to formatter, property to use from parts | transform function that creates an output from parts
+// Object containing a options to append to formatter, property to use from parts
+// transform function that creates an output from parts
 const tokenMap: {
   [key: string]: {
     options: Intl.DateTimeFormatOptions
@@ -101,7 +102,7 @@ export class TokenDateTimeFormat {
   constructor(
     tokenStr: string,
     private locale: string = 'en-us',
-    options?: Intl.DateTimeFormatOptions
+    options?: Intl.DateTimeFormatOptions,
   ) {
     // Map into either a string literal or an object with a token property
     this.tokenSplit = tokenStr.split(REGEX_FORMAT).map((val) => {
@@ -121,7 +122,7 @@ export class TokenDateTimeFormat {
           ? { ...accum, ...tokenMap[val.token]?.options }
           : accum
       },
-      {}
+      {},
     )
 
     // Create a format by merging user's options with token string's options
@@ -141,8 +142,9 @@ export class TokenDateTimeFormat {
       } as Intl.DateTimeFormatOptions)
     }
 
+    const zdt = dt instanceof ZonedDateTime ? dt : dt.toZonedDateTime('UTC')
     const parts = this.formatter
-      .formatToParts(dt.epochMilliseconds)
+      .formatToParts(zdt.epochMilliseconds)
       .reduce((accum: Record<string, string>, { type, value }) => {
         // Convert from an array of objects to an object with keys for year/month/day/etc.
         accum[type] = value
@@ -154,7 +156,7 @@ export class TokenDateTimeFormat {
       .map((val) => {
         if (typeof val === 'object') {
           return tokenMap[val.token].transform
-            ? tokenMap[val.token].transform(parts, dt, this.locale)
+            ? tokenMap[val.token].transform!(parts, dt, this.locale)
             : parts[tokenMap[val.token].property]
         }
         return val

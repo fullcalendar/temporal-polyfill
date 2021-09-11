@@ -27,7 +27,7 @@ test.each`
   ({ tokenStr, date, expected }) => {
     const formatter = new TokenDateTimeFormat(tokenStr)
     expect(formatter.format(date)).toBe(expected)
-  }
+  },
 )
 
 const zonedDates = [
@@ -46,7 +46,7 @@ test.each`
   ({ tokenStr, date, expected }) => {
     const formatter = new TokenDateTimeFormat(tokenStr)
     expect(formatter.format(date)).toBe(expected)
-  }
+  },
 )
 
 test.each`
