@@ -35,9 +35,8 @@ writeFileSync(resolve('src/minimalDays.ts'), templateCode(condArr, largest), {
 console.log('Wrote minimalDays.ts')
 
 function templateCode(conditionals, largest) {
-  return `/* eslint-disable */
-
-export const getMinimalDays = (locale: string): number => {
+  return `
+export function getMinimalDays(locale: string): number {
   ${conditionals.join('  } else ')}  }
 
   return ${largest}

@@ -34,9 +34,8 @@ writeFileSync(resolve('src/firstDay.ts'), templateCode(condArr, largest), {
 console.log('Wrote firstDay.ts')
 
 function templateCode(conditionals, largest) {
-  return `/* eslint-disable */
-
-export const getFirstDay = (locale: string): number => {
+  return `
+export function getFirstDay(locale: string): number {
   ${conditionals.join('  } else ')}  }
 
   return ${largest}

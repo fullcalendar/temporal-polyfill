@@ -27,9 +27,8 @@ writeFileSync(resolve('src/direction.ts'), templateCode(rtlArr), {
 console.log('Wrote direction.ts')
 
 function templateCode(arr) {
-  return `/* eslint-disable */
-
-export const getDirection = (locale: string): 'ltr' | 'rtl' => {
+  return `
+export function getDirection(locale: string): 'ltr' | 'rtl' {
   return locale.match(/^((?:${arr.join('|')})(?:-\\w{2})?)$/)
     ? 'rtl'
     : 'ltr'

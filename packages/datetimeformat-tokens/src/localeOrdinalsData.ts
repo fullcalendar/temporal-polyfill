@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 export const localeOrdinalsData = {
   "cv": "-мӗш",
   "el": "η",
