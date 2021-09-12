@@ -24,7 +24,8 @@
     "test": "jest",
     "e2e": "wtr",
     "e2e-manual": "wtr --manual",
-    "e2e-watch": "wtr --watch"
+    "e2e-watch": "wtr --watch",
+    "e2e-check": "tsc -p ./e2e"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",

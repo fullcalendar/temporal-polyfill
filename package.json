@@ -20,7 +20,7 @@
   ],
   "private": true,
   "scripts": {
-    "clean:pkg": "cd $INIT_CWD && rm -rf dist tsconfig.tsbuildinfo",
+    "clean:pkg": "cd $INIT_CWD && rm -rf dist tsconfig.tsbuildinfo e2e/tsconfig.tsbuildinfo",
     "dts-bundle:pkg": "cd $INIT_CWD && rollup -c ../../rollup.config.js && yarn run dts-prune:pkg",
     "dts-prune:pkg": "cd $INIT_CWD && echo 'Removing extra declarations...' && rm -f dist/?(!(index)).d.ts || true",
     "esbuild:pkg": "cd $INIT_CWD && node ../../scripts/esbuild.cjs",
