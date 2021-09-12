@@ -14,7 +14,7 @@
     "importHelpers": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "inlineSourceMap": true,
+    "declarationMap": true,
     "skipLibCheck": true
   },
   "exclude": ["**/*.test.ts"]
