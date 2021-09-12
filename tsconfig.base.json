@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "skipLibCheck": true
-  },
-  "exclude": ["**/*.test.ts"]
+    "skipLibCheck": true,
+    "checkJs": true
+  }
 }

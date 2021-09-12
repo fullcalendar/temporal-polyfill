@@ -31,9 +31,9 @@ test.each`
 )
 
 const zonedDates = [
-  new ZonedDateTime(0, 'UTC'),
-  new ZonedDateTime(Date.UTC(2020, 0, 1), 'America/New_York'),
-  new ZonedDateTime(Date.UTC(1970, 0, 1, 2, 46, 40), 'America/New_York'),
+  new ZonedDateTime(0n, 'UTC'),
+  new ZonedDateTime(BigInt(Date.UTC(2020, 0, 1)) * 1000000n, 'America/New_York'),
+  new ZonedDateTime(BigInt(Date.UTC(1970, 0, 1, 2, 46, 40)) * 1000000n, 'America/New_York'),
 ]
 
 test.each`
