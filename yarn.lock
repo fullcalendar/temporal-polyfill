@@ -1942,10 +1942,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mdn/browser-compat-data@npm:^3.0.1":
-  version: 3.3.13
-  resolution: "@mdn/browser-compat-data@npm:3.3.13"
-  checksum: 054dae1478d6927e24512b03cee2fe217b83f067b5ae1d8c2c79da6d8ff22ea6b225687cacadb6ee575a79d2066c56d05db5f775f071c5d93fcc19417d452b9b
+"@mdn/browser-compat-data@npm:^4.0.0":
+  version: 4.0.3
+  resolution: "@mdn/browser-compat-data@npm:4.0.3"
+  checksum: 9c3d9867061d8aff754c1b1767cafbbd4eba58eb97ff03cf40a8ef0ba8a206efd13e1ec14a40286529b11680eadce8497c706e88b1d25b2d428c6455748cde42
   languageName: node
   linkType: hard
 
@@ -2593,16 +2593,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web/dev-server-esbuild@npm:^0.2.12":
-  version: 0.2.12
-  resolution: "@web/dev-server-esbuild@npm:0.2.12"
+"@web/dev-server-esbuild@npm:^0.2.14":
+  version: 0.2.14
+  resolution: "@web/dev-server-esbuild@npm:0.2.14"
   dependencies:
-    "@mdn/browser-compat-data": ^3.0.1
+    "@mdn/browser-compat-data": ^4.0.0
     "@web/dev-server-core": ^0.3.10
-    esbuild: ^0.11.0
+    esbuild: ^0.12.21
     parse5: ^6.0.1
     ua-parser-js: ^0.7.23
-  checksum: 0da677f8d73669866fa978d579918bc4bb8d6d8eaa0e70ea8c4e746148300a24c67d35fd3e1f8c3875c839daf0702550ac97b908b6d21d17ee07027aef58a4d6
+  checksum: 8cba4af9c1c8cea9959226edeb14d975426273af63ed1236d3fe3ea81b29ccffc0a296913f3721355ce86c6417799ae3b75ec46e3639bf907cbc735f4f8aca2a
   languageName: node
   linkType: hard
 
@@ -4171,12 +4171,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.11.0":
-  version: 0.11.23
-  resolution: "esbuild@npm:0.11.23"
+"esbuild@npm:^0.12.21":
+  version: 0.12.27
+  resolution: "esbuild@npm:0.12.27"
   bin:
     esbuild: bin/esbuild
-  checksum: 9226fc3d74f7555c96778c5d9204312c578e9c11b472deebfbab52c4ac58b9efc3a40be529368f6ccbe257d0059c6b8fd142c179824a3227d055d912c7b5a94a
+  checksum: 977501d2cdc0a54b68f40170c88609b8d69cabd78cf8eab3914dfcd931d686316e8ade3f1a9be5133abde5827c92cb97d8ed1218fa2e6fc80d88534cb783fd05
   languageName: node
   linkType: hard
 
@@ -8791,7 +8791,7 @@ __metadata:
     "@esm-bundle/chai": ^4.3.4-fix.0
     "@types/jest": ^26.0.24
     "@types/mocha": ^9.0.0
-    "@web/dev-server-esbuild": ^0.2.12
+    "@web/dev-server-esbuild": ^0.2.14
     "@web/test-runner": ^0.13.15
     jest: ^27.0.6
     jest-date-mock: ^1.0.8
