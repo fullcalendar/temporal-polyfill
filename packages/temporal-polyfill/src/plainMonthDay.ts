@@ -22,6 +22,7 @@ import {
 import { parseDateTimeISO } from './dateUtils/parse'
 import { throwNew } from './utils/obj'
 import {
+  CalendarProtocol,
   DateISOFields,
   DateToStringOptions,
   LocalesArg,
@@ -37,7 +38,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   constructor(
     isoMonth: number,
     isoDay: number,
-    calendar: Calendar = isoCalendar,
+    calendar: CalendarProtocol = isoCalendar,
     referenceISOYear?: number,
   ) {
     const isoYear: number = referenceISOYear ??

@@ -1,8 +1,15 @@
-import { ensureCalendarsEqual, getCommonCalendar } from './argParse/calendar'
+import {
+  CalendarArgBag,
+  ensureCalendarsEqual,
+  extractCalendar,
+  getCommonCalendar,
+  isCalendarArgBag,
+} from './argParse/calendar'
 import { parseOverflowHandling } from './argParse/overflowHandling'
 import { parseUnit } from './argParse/units'
 import { CalendarImpl } from './calendarImpl/calendarImpl'
 import { calendarImplClasses } from './calendarImpl/config'
+import { IntlCalendarImpl } from './calendarImpl/intlCalendarImpl'
 import { AbstractObj, ensureObj } from './dateUtils/abstract'
 import { addToDateFields } from './dateUtils/add'
 import {
@@ -22,6 +29,7 @@ import { computeWeekOfISOYear } from './dateUtils/week'
 import { createWeakMap, throwNew } from './utils/obj'
 import {
   CalendarArg,
+  CalendarProtocol,
   DateArg,
   DateLikeFields,
   DateUnit,
@@ -43,26 +51,29 @@ const implCache: { [calendarID: string]: CalendarImpl } = {
   [isoCalendarID]: isoCalendarImpl,
 }
 
-export class Calendar extends AbstractObj {
+export class Calendar extends AbstractObj implements CalendarProtocol {
   constructor(id: string) {
     super()
 
     // lowercase matches keys in calendarImplClasses
-    id = id.toLocaleLowerCase()
+    id = String(id).toLocaleLowerCase()
 
     const impl = implCache[id] ||
-      (implCache[id] = new calendarImplClasses[id](id))
+      (implCache[id] = new (calendarImplClasses[id] || IntlCalendarImpl)(id))
 
     setImpl(this, impl)
     setID(this, impl.id) // record the normalized ID
   }
 
-  static from(arg: CalendarArg): Calendar {
-    return new Calendar(
-      arg instanceof Calendar
-        ? arg.id
-        : arg, // an ID itself
-    )
+  static from(arg: CalendarArg): CalendarProtocol {
+    if (typeof arg === 'object') {
+      if (isCalendarArgBag(arg)) {
+        return extractCalendar(arg)
+      } else {
+        return arg
+      }
+    }
+    return new Calendar(arg)
   }
 
   get id(): string { return getID(this) }

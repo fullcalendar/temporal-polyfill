@@ -65,10 +65,15 @@ export function formatOffsetISO(offsetNanoseconds: number): string {
     padZeros(mins, 2)
 }
 
-export function formatCalendarID(calendarID: string, display: CalendarDisplayInt): string {
+export function formatCalendarID(
+  calendarID: string | undefined,
+  display: CalendarDisplayInt,
+): string {
   if (
-    display === CALENDAR_DISPLAY_ALWAYS ||
-    (display !== CALENDAR_DISPLAY_NEVER && calendarID !== isoCalendarID)
+    calendarID && ( // might be blank if custom calendar implementation
+      display === CALENDAR_DISPLAY_ALWAYS ||
+      (display !== CALENDAR_DISPLAY_NEVER && calendarID !== isoCalendarID)
+    )
   ) {
     return `[u-ca=${calendarID}]`
   }

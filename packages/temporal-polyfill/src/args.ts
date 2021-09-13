@@ -1,3 +1,4 @@
+import { CalendarArgBag, CalendarArgSimple } from './argParse/calendar'
 import { CalendarDisplayMap } from './argParse/calendarDisplay'
 import { DisambigMap } from './argParse/disambig'
 import { OffsetDisplayMap } from './argParse/offsetDisplay'
@@ -8,9 +9,14 @@ import { TimeZoneDisplayMap } from './argParse/timeZoneDisplay'
 import { DateFields, DateISOEssentials } from './dateUtils/date'
 import { DurationFields } from './dateUtils/duration'
 import { TimeFields, TimeISOMilli } from './dateUtils/time'
-import { Calendar } from './calendar'
+import { Duration } from './duration'
 import { Instant } from './instant'
+import { PlainDate } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
+import { ZonedDateTime } from './zonedDateTime'
 
 // math
 export type CompareResult = -1 | 0 | 1
@@ -67,7 +73,7 @@ export type ZonedDateTimeToStringOptions = DateTimeToStringOptions & {
 }
 
 // iso-fields
-export type DateISOFields = DateISOEssentials & { calendar: Calendar }
+export type DateISOFields = DateISOEssentials & { calendar: CalendarProtocol }
 export type TimeISOFields = TimeISOMilli & { isoMicrosecond: number, isoNanosecond: number }
 export type DateTimeISOFields = DateISOFields & TimeISOFields
 export type ZonedDateTimeISOFields = DateTimeISOFields & { timeZone: TimeZone, offset: string }
@@ -101,7 +107,7 @@ export type DateTimeArg = DateTimeLike | string
 export type ZonedDateTimeArg = ZonedDateTimeLike | string
 export type DurationArg = DurationLike | string
 export type TimeZoneArg = TimeZone | string
-export type CalendarArg = Calendar | string
+export type CalendarArg = CalendarArgSimple | CalendarArgBag
 export type InstantArg = Instant | string
 export type LocalesArg = string | string[]
 
@@ -124,4 +130,31 @@ export type ZonedDateTimeOptions = {
   overflow?: OverflowHandling
   disambiguation?: Disambiguation
   offset?: OffsetHandling
+}
+
+// calendar protocol
+export interface CalendarProtocol {
+  id?: string
+  calendar?: never
+  era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined
+  eraYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number | undefined
+  year(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
+  month(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
+  monthCode(arg: PlainYearMonth | PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): string
+  day(arg: PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): number
+  dayOfWeek?(arg: DateArg | PlainDateTime | ZonedDateTime): number
+  dayOfYear?(arg: DateArg | PlainDateTime | ZonedDateTime): number
+  weekOfYear?(arg: DateArg | PlainDateTime | ZonedDateTime): number
+  daysInWeek?(arg: DateArg | PlainDateTime | ZonedDateTime): number
+  daysInMonth?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
+  daysInYear?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
+  monthsInYear?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
+  inLeapYear?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): boolean
+  dateFromFields(arg: DateLikeFields, options?: OverflowOptions): PlainDate
+  yearMonthFromFields(arg: YearMonthLikeFields, options?: OverflowOptions): PlainYearMonth
+  monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay
+  dateAdd?(dateArg: DateArg, durationArg: DurationArg, options?: OverflowOptions): PlainDate
+  dateUntil?(dateArg0: DateArg, dateArg1: DateArg, options?: { largestUnit?: DateUnit }): Duration
+  // TODO: fields/mergeFields
+  toString(): string
 }

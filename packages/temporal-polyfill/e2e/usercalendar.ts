@@ -6,6 +6,9 @@ const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
+type WeirdArg = any
+type ExtendedObj = any
+
 describe('Userland calendar', () => {
   describe('Trivial subclass', () => {
     // For the purposes of testing, a nonsensical calendar that uses 2-based
@@ -155,21 +158,21 @@ describe('Userland calendar', () => {
         const { overflow = 'constrain' } = options ? options : {};
         let { month, monthCode } = fields;
         if (month === undefined) month = +monthCode.slice(1);
-        const isoDate = decimalToISO(fields.year, month, fields.day, 0, 0, 0, overflow);
+        const isoDate = decimalToISO(fields.year, month, fields.day, overflow); // **fixed method call**
         return new Temporal.PlainDate(isoDate.year, isoDate.month, isoDate.day, this);
       },
       yearMonthFromFields(fields, options) {
         const { overflow = 'constrain' } = options ? options : {};
         let { month, monthCode } = fields;
         if (month === undefined) month = +monthCode.slice(1);
-        const isoDate = decimalToISO(fields.year, month, 1, 0, 0, 0, overflow);
+        const isoDate = decimalToISO(fields.year, month, 1, overflow); // **fixed method call**
         return new Temporal.PlainYearMonth(isoDate.year, isoDate.month, this, isoDate.day);
       },
       monthDayFromFields(fields, options) {
         const { overflow = 'constrain' } = options ? options : {};
         let { month, monthCode } = fields;
         if (month === undefined) month = +monthCode.slice(1);
-        const isoDate = decimalToISO(0, month, fields.day, 0, 0, 0, overflow);
+        const isoDate = decimalToISO(0, month, fields.day, overflow); // **fixed method call**
         return new Temporal.PlainMonthDay(isoDate.month, isoDate.day, this, isoDate.year);
       },
       year(date) {
@@ -185,7 +188,10 @@ describe('Userland calendar', () => {
       day(date) {
         const { days } = isoToDecimal(date);
         return (days % 10) + 1;
-      }
+      },
+      // **these methods are required for CalendarProtocol**
+      era() { return undefined },
+      eraYear() { return undefined },
     };
 
     const date = Temporal.PlainDate.from({ year: 184, month: 2, day: 9, calendar: obj });
@@ -255,15 +261,15 @@ describe('Userland calendar', () => {
       const tz = Temporal.TimeZone.from('UTC');
       const inst = Temporal.Instant.fromEpochSeconds(0);
       const dt = tz.getPlainDateTimeFor(inst, obj);
-      equal(dt.calendar.id, obj.id);
+      equal(dt.calendar.id, (obj as WeirdArg).id); // **both will be undefined, right?**
     });
     it('Temporal.Now.plainDateTime()', () => {
       const nowDateTime = Temporal.Now.plainDateTime(obj, 'UTC');
-      equal(nowDateTime.calendar.id, obj.id);
+      equal(nowDateTime.calendar.id, (obj as WeirdArg).id); // **both will be undefined, right?**
     });
     it('Temporal.Now.plainDate()', () => {
       const nowDate = Temporal.Now.plainDate(obj, 'UTC');
-      equal(nowDate.calendar.id, obj.id);
+      equal(nowDate.calendar.id, (obj as WeirdArg).id); // **both will be undefined, right?**
     });
   });
   describe('calendar with extra fields', () => {
@@ -333,49 +339,49 @@ describe('Userland calendar', () => {
       Object.defineProperty(Temporal.ZonedDateTime.prototype, 'season', propDesc);
     });
     it('property getter works', () => {
-      equal(datetime.season, 3);
+      equal((datetime as ExtendedObj).season, 3);
       equal(datetime.month, 3);
       equal(datetime.monthCode, 'M03');
-      equal(date.season, 3);
+      equal((date as ExtendedObj).season, 3);
       equal(date.month, 3);
       equal(date.monthCode, 'M03');
-      equal(yearmonth.season, 3);
+      equal((yearmonth as ExtendedObj).season, 3);
       equal(yearmonth.month, 3);
       equal(yearmonth.monthCode, 'M03');
-      equal(monthday.season, 3);
+      equal((monthday as ExtendedObj).season, 3);
       equal(monthday.monthCode, 'M03');
-      equal(zoned.season, 3);
+      equal((zoned as ExtendedObj).season, 3);
       equal(zoned.month, 3);
       equal(zoned.monthCode, 'M03');
     });
     it('accepts season in from()', () => {
       equal(
-        `${Temporal.PlainDateTime.from({ year: 2019, season: 3, month: 3, day: 15, calendar })}`,
+        `${Temporal.PlainDateTime.from({ year: 2019, season: 3, month: 3, day: 15, calendar } as ExtendedObj)}`,
         '2019-09-15T00:00:00[u-ca=season]'
       );
       equal(
-        `${Temporal.PlainDate.from({ year: 2019, season: 3, month: 3, day: 15, calendar })}`,
+        `${Temporal.PlainDate.from({ year: 2019, season: 3, month: 3, day: 15, calendar } as ExtendedObj)}`,
         '2019-09-15[u-ca=season]'
       );
       equal(
-        `${Temporal.PlainYearMonth.from({ year: 2019, season: 3, month: 3, calendar })}`,
+        `${Temporal.PlainYearMonth.from({ year: 2019, season: 3, month: 3, calendar } as ExtendedObj)}`,
         '2019-09-01[u-ca=season]'
       );
       equal(
-        `${Temporal.PlainMonthDay.from({ season: 3, monthCode: 'M03', day: 15, calendar })}`,
+        `${Temporal.PlainMonthDay.from({ season: 3, monthCode: 'M03', day: 15, calendar } as ExtendedObj)}`,
         '1972-09-15[u-ca=season]'
       );
       equal(
-        `${Temporal.ZonedDateTime.from({ year: 2019, season: 3, month: 3, day: 15, timeZone: 'UTC', calendar })}`,
+        `${Temporal.ZonedDateTime.from({ year: 2019, season: 3, month: 3, day: 15, timeZone: 'UTC', calendar } as ExtendedObj)}`,
         '2019-09-15T00:00:00+00:00[UTC][u-ca=season]'
       );
     });
     it('accepts season in with()', () => {
-      equal(`${datetime.with({ season: 2 })}`, '2019-06-15T00:00:00[u-ca=season]');
-      equal(`${date.with({ season: 2 })}`, '2019-06-15[u-ca=season]');
-      equal(`${yearmonth.with({ season: 2 })}`, '2019-06-01[u-ca=season]');
-      equal(`${monthday.with({ season: 2 })}`, '1972-06-15[u-ca=season]');
-      equal(`${zoned.with({ season: 2 })}`, '2019-06-15T00:00:00+00:00[UTC][u-ca=season]');
+      equal(`${datetime.with({ season: 2 } as ExtendedObj)}`, '2019-06-15T00:00:00[u-ca=season]');
+      equal(`${date.with({ season: 2 } as ExtendedObj)}`, '2019-06-15[u-ca=season]');
+      equal(`${yearmonth.with({ season: 2 } as ExtendedObj)}`, '2019-06-01[u-ca=season]');
+      equal(`${monthday.with({ season: 2 } as ExtendedObj)}`, '1972-06-15[u-ca=season]');
+      equal(`${zoned.with({ season: 2 } as ExtendedObj)}`, '2019-06-15T00:00:00+00:00[UTC][u-ca=season]');
     });
     it('translates month correctly in with()', () => {
       equal(`${datetime.with({ month: 2 })}`, '2019-08-15T00:00:00[u-ca=season]');
@@ -385,11 +391,11 @@ describe('Userland calendar', () => {
       equal(`${zoned.with({ month: 2 })}`, '2019-08-15T00:00:00+00:00[UTC][u-ca=season]');
     });
     after(() => {
-      delete Temporal.PlainDateTime.prototype.season;
-      delete Temporal.PlainDate.prototype.season;
-      delete Temporal.PlainYearMonth.prototype.season;
-      delete Temporal.PlainMonthDay.prototype.season;
-      delete Temporal.ZonedDateTime.prototype.season;
+      delete (Temporal.PlainDateTime.prototype as ExtendedObj).season;
+      delete (Temporal.PlainDate.prototype as ExtendedObj).season;
+      delete (Temporal.PlainYearMonth.prototype as ExtendedObj).season;
+      delete (Temporal.PlainMonthDay.prototype as ExtendedObj).season;
+      delete (Temporal.ZonedDateTime.prototype as ExtendedObj).season;
     });
   });
 
@@ -482,26 +488,26 @@ describe('Userland calendar', () => {
       Object.defineProperties(Temporal.ZonedDateTime.prototype, propDesc);
     });
     it('property getters work', () => {
-      equal(datetime.century, 21);
-      equal(datetime.centuryYear, 19);
-      equal(date.century, 21);
-      equal(date.centuryYear, 19);
-      equal(yearmonth.century, 21);
-      equal(yearmonth.centuryYear, 19);
-      equal(zoned.century, 21);
-      equal(zoned.centuryYear, 19);
+      equal((datetime as ExtendedObj).century, 21);
+      equal((datetime as ExtendedObj).centuryYear, 19);
+      equal((date as ExtendedObj).century, 21);
+      equal((date as ExtendedObj).centuryYear, 19);
+      equal((yearmonth as ExtendedObj).century, 21);
+      equal((yearmonth as ExtendedObj).centuryYear, 19);
+      equal((zoned as ExtendedObj).century, 21);
+      equal((zoned as ExtendedObj).centuryYear, 19);
     });
     it('correctly resolves century in with()', () => {
-      equal(`${datetime.with({ century: 20 })}`, '1919-09-15T00:00:00[u-ca=century]');
-      equal(`${date.with({ century: 20 })}`, '1919-09-15[u-ca=century]');
-      equal(`${yearmonth.with({ century: 20 })}`, '1919-09-01[u-ca=century]');
-      equal(`${zoned.with({ century: 20 })}`, '1919-09-15T00:00:00+00:00[UTC][u-ca=century]');
+      equal(`${datetime.with({ century: 20 } as ExtendedObj)}`, '1919-09-15T00:00:00[u-ca=century]');
+      equal(`${date.with({ century: 20 } as ExtendedObj)}`, '1919-09-15[u-ca=century]');
+      equal(`${yearmonth.with({ century: 20 } as ExtendedObj)}`, '1919-09-01[u-ca=century]');
+      equal(`${zoned.with({ century: 20 } as ExtendedObj)}`, '1919-09-15T00:00:00+00:00[UTC][u-ca=century]');
     });
     it('correctly resolves centuryYear in with()', () => {
-      equal(`${datetime.with({ centuryYear: 5 })}`, '2005-09-15T00:00:00[u-ca=century]');
-      equal(`${date.with({ centuryYear: 5 })}`, '2005-09-15[u-ca=century]');
-      equal(`${yearmonth.with({ centuryYear: 5 })}`, '2005-09-01[u-ca=century]');
-      equal(`${zoned.with({ centuryYear: 5 })}`, '2005-09-15T00:00:00+00:00[UTC][u-ca=century]');
+      equal(`${datetime.with({ centuryYear: 5 } as ExtendedObj)}`, '2005-09-15T00:00:00[u-ca=century]');
+      equal(`${date.with({ centuryYear: 5 } as ExtendedObj)}`, '2005-09-15[u-ca=century]');
+      equal(`${yearmonth.with({ centuryYear: 5 } as ExtendedObj)}`, '2005-09-01[u-ca=century]');
+      equal(`${zoned.with({ centuryYear: 5 } as ExtendedObj)}`, '2005-09-15T00:00:00+00:00[UTC][u-ca=century]');
     });
     it('correctly resolves year in with()', () => {
       equal(`${datetime.with({ year: 1974 })}`, '1974-09-15T00:00:00[u-ca=century]');
@@ -510,14 +516,14 @@ describe('Userland calendar', () => {
       equal(`${zoned.with({ year: 1974 })}`, '1974-09-15T00:00:00+00:00[UTC][u-ca=century]');
     });
     after(() => {
-      delete Temporal.PlainDateTime.prototype.century;
-      delete Temporal.PlainDateTime.prototype.centuryYear;
-      delete Temporal.PlainDate.prototype.century;
-      delete Temporal.PlainDate.prototype.centuryYear;
-      delete Temporal.PlainYearMonth.prototype.century;
-      delete Temporal.PlainYearMonth.prototype.centuryYear;
-      delete Temporal.ZonedDateTime.prototype.century;
-      delete Temporal.ZonedDateTime.prototype.centuryYear;
+      delete (Temporal.PlainDateTime.prototype as ExtendedObj).century;
+      delete (Temporal.PlainDateTime.prototype as ExtendedObj).centuryYear;
+      delete (Temporal.PlainDate.prototype as ExtendedObj).century;
+      delete (Temporal.PlainDate.prototype as ExtendedObj).centuryYear;
+      delete (Temporal.PlainYearMonth.prototype as ExtendedObj).century;
+      delete (Temporal.PlainYearMonth.prototype as ExtendedObj).centuryYear;
+      delete (Temporal.ZonedDateTime.prototype as ExtendedObj).century;
+      delete (Temporal.ZonedDateTime.prototype as ExtendedObj).centuryYear;
     });
   });
 });

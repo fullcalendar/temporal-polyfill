@@ -1,7 +1,14 @@
-import { CalendarArg } from '../args'
+import { CalendarArg, CalendarProtocol } from '../args'
 import { Calendar } from '../calendar'
 import { ensureObj } from '../dateUtils/abstract'
 import { isoCalendarID } from '../dateUtils/calendar'
+
+export type CalendarArgSimple = CalendarProtocol | string
+export type CalendarArgBag = { calendar: CalendarArgSimple }
+
+export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
+  return arg.calendar
+}
 
 export const isoCalendar = new Calendar(isoCalendarID)
 
@@ -9,7 +16,8 @@ export function extractCalendar(input: { calendar?: CalendarArg; }): Calendar {
   if (input.calendar == null) {
     return isoCalendar
   }
-  return ensureObj(Calendar, input.calendar)
+  // treat a CalendarProtocol as a Calendar internally
+  return ensureObj(Calendar, input.calendar) as Calendar
 }
 
 export function getCommonCalendar(

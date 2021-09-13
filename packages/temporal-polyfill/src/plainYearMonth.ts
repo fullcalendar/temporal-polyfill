@@ -85,7 +85,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     const calendarDisplay = parseCalendarDisplay(options?.calendarName)
 
     return formatYearMonthISO(fields) +
-      formatCalendarID(fields.calendar.id, calendarDisplay)
+      formatCalendarID((fields.calendar as Calendar).id, calendarDisplay)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
