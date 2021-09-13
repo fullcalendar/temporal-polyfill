@@ -33,7 +33,7 @@
     "gzip-size": "yarn workspaces foreach --no-private -v run gzip-size:pkg",
     "test": "jest --coverage",
     "dev": "jest --watch",
-    "lint": "eslint .",
+    "lint": "eslint --ignore-path .gitignore .",
     "locales-scrape": "node ./scripts/locales-scrape.cjs",
     "locales-compile": "yarn workspaces foreach -ptv run locales-compile"
   },

@@ -3,6 +3,60 @@ const standardConfig = require('eslint-config-standard/eslintrc.json')
 // Based on "Standard" (https://standardjs.com/), but with TypeScript support
 // Why not use the "standard-with-typescript" project? See note about parserServices below
 // Deps must be installed manually: https://github.com/standard/eslint-config-standard#install
+
+const baseRules = {
+  // Max line length, with some exceptions
+  // TODO: ADD ruler to vscode settings
+  'max-len': ['error', { code: 100, ignoreRegExpLiterals: true, ignoreUrls: true }],
+
+  // Cosmetic differences from Standard
+  'comma-dangle': ['error', 'always-multiline'],
+  'space-before-function-paren': ['error', 'never'],
+
+  // Import verification doesn't work with advanced Yarn dependency protocols like "workspace:"
+  // TypeScript does this anyway
+  'import/no-unresolved': 'off',
+
+  // Multiple same-name exports are useful for declaration merging. Shortcoming:
+  // https://github.com/import-js/eslint-plugin-import/issues/1964
+  'import/export': 'off',
+
+  // Order of import statements
+  'import/order': ['error', {
+    alphabetize: { order: 'asc' },
+    // Put same-directory imports last, as if they were './'
+    pathGroups: [{ pattern: './*', group: 'index' }],
+  }],
+
+  // Order of members WITHIN import statements
+  'sort-imports': ['error', {
+    ignoreDeclarationSort: true, // Disable. let previous rule do this
+  }],
+
+  // Prefer `function` over `const` with arrow-function
+  'func-style': ['error', 'declaration'],
+}
+
+const tsRules = {
+  // Allow explicit `any`. However, you should prefer `unknown`
+  '@typescript-eslint/no-explicit-any': 'off',
+
+  // Allow using ! postfix operator for force non-emptiness
+  '@typescript-eslint/no-non-null-assertion': 'off',
+
+  // Allow explicit `any` in function param list
+  // Also, lack of function return type becomes 'error' instead of 'warning'
+  '@typescript-eslint/explicit-module-boundary-types': ['error', {
+    allowArgumentsExplicitlyTypedAsAny: true,
+  }],
+
+  // Allow empty interfaces that use `extends`. Useful for declaration merging
+  '@typescript-eslint/no-empty-interface': ['error', { allowSingleExtends: true }],
+
+  // There are problems with indenting TypeScript generics:
+  // https://github.com/typescript-eslint/typescript-eslint/issues/1824
+}
+
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -11,77 +65,24 @@ module.exports = {
   ],
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
     'standard',
+    'plugin:import/recommended',
   ],
-  rules: {
-    ...buildTsRules(),
-
-    // Max line length, with some exceptions
-    'max-len': ['error', { code: 100, ignoreRegExpLiterals: true, ignoreUrls: true }],
-
-    // Cosmetic differences from Standard
-    'comma-dangle': ['error', 'always-multiline'],
-    '@typescript-eslint/space-before-function-paren': ['error', 'never'],
-
-    // Import verification doesn't work with advanced Yarn dependency protocols like "workspace:"
-    // TypeScript does this anyway
-    'import/no-unresolved': 'off',
-
-    // Multiple same-name exports are useful for declaration merging. Shortcoming:
-    // https://github.com/import-js/eslint-plugin-import/issues/1964
-    'import/export': 'off',
-
-    // Order of import statements
-    'import/order': ['error', {
-      alphabetize: { order: 'asc' },
-      // Put same-directory imports last, as if they were './'
-      pathGroups: [{ pattern: './*', group: 'index' }],
-    }],
-
-    // Order of members WITHIN import statements
-    'sort-imports': ['error', {
-      ignoreDeclarationSort: true, // Disable. let previous rule do this
-    }],
-
-    // Prefer `function` over `const` with arrow-function
-    'func-style': ['error', 'declaration'],
-
-    // Allow explicit `any`. However, you should prefer `unknown`
-    '@typescript-eslint/no-explicit-any': 'off',
-
-    // Allow using ! postfix operator for force non-emptiness
-    '@typescript-eslint/no-non-null-assertion': 'off',
-
-    // Allow explicit `any` in function param list
-    // Also, lack of function return type becomes 'error' instead of 'warning'
-    '@typescript-eslint/explicit-module-boundary-types': ['error', {
-      allowArgumentsExplicitlyTypedAsAny: true,
-    }],
-
-    // Allow empty interfaces that use `extends`. Useful for declaration merging
-    '@typescript-eslint/no-empty-interface': ['error', { allowSingleExtends: true }],
-
-    // There are problems with indenting TypeScript generics:
-    // https://github.com/typescript-eslint/typescript-eslint/issues/1824
-  },
+  rules: baseRules,
   overrides: [{
-    files: '*.js',
+    files: '*.ts',
+    extends: [
+      'plugin:@typescript-eslint/recommended',
+      'plugin:import/typescript',
+    ],
     rules: {
-      // Prevent normal JS files from needing types for functions (?)
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-    },
-  }, {
-    files: '*.cjs',
-    rules: {
-      // Allow require() statements in CJS modules
-      '@typescript-eslint/no-var-requires': 'off',
+      ...buildEquivalentTsRules(),
+      ...tsRules,
     },
   }],
   ignorePatterns: [
-    'dist',
+    // Patterns in .gitignore are already ignored
+    // Additional ignore patterns go here (.eslintignore files won't work with --ignore-path):
     '/scripts/data',
     '/packages/temporal-polyfill/e2e',
   ],
@@ -89,7 +90,7 @@ module.exports = {
 
 // Derived from the `standard-with-typescript` project:
 // https://github.com/standard/eslint-config-standard-with-typescript/blob/master/src/index.ts
-function buildTsRules() {
+function buildEquivalentTsRules() {
   const rules = {
     'no-undef': 'off', // TypeScript has this functionality by default
     'no-use-before-define': 'off',
@@ -117,7 +118,7 @@ function buildTsRules() {
   ]
   for (const ruleName of equivalents) {
     rules[ruleName] = 'off'
-    rules[`@typescript-eslint/${ruleName}`] = standardConfig.rules[ruleName]
+    rules[`@typescript-eslint/${ruleName}`] = baseRules[ruleName] || standardConfig.rules[ruleName]
   }
   return rules
 }
