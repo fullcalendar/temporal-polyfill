@@ -1,5 +1,4 @@
 import { unitNames } from '../argParse/units'
-import { DayTimeUnit } from '../args'
 import { TimeFields, timeFieldsToNano } from './time'
 import { DayTimeUnitInt, NANOSECOND, nanoIn, nanoInDay } from './units'
 
@@ -16,7 +15,7 @@ export function nanoToDayTimeFields(nano: number, largestUnit: DayTimeUnitInt): 
     const unitNano = nanoIn[unit]
     const whole = Math.trunc(nano / unitNano)
     nano -= whole * unitNano
-    fields[unitNames[unit] as DayTimeUnit] = whole
+    fields[unitNames[unit] as keyof DayTimeFields] = whole
   }
 
   return fields

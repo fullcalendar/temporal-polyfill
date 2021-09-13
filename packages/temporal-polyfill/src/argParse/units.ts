@@ -1,6 +1,11 @@
 import { DateUnit, TimeUnit, Unit } from '../args'
+import { DateFields } from '../dateUtils/date'
+import { TimeFields } from '../dateUtils/time'
 import { UnitInt } from '../dateUtils/units'
 import { strArrayToHash } from '../utils/obj'
+
+export type DateUnitProper = keyof DateFields | 'week'
+export type TimeUnitProper = keyof TimeFields
 
 // These names must match the indexes of the Unit integers
 export const timeUnitNames: TimeUnit[] = [
@@ -36,10 +41,13 @@ export function parseUnit<UnitType extends UnitInt>(
       throw new Error('Unit is required') // TOOD: better error message with setting name
     }
     num = defaultUnit
-  } else if ((num = unitMap[input] as UnitType) == null ||
-    num < minUnit ||
-    num > maxUnit) {
-    throw new Error('Invalid unit ' + input) // TOOD: better error message with setting name
+  } else {
+    num = (unitMap[input] | unitMap[input + 's']) as UnitType // query plural as well
+
+    if (num == null || num < minUnit || num > maxUnit) {
+      throw new Error('Invalid unit ' + input) // TOOD: better error message with setting name
+    }
   }
+
   return num
 }

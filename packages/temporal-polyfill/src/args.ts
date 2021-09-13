@@ -6,7 +6,8 @@ import { OffsetHandlingMap } from './argParse/offsetHandling'
 import { OverflowHandlingMap } from './argParse/overflowHandling'
 import { RoundingModeMap } from './argParse/roundingMode'
 import { TimeZoneDisplayMap } from './argParse/timeZoneDisplay'
-import { DateFields, DateISOEssentials } from './dateUtils/date'
+import { DateUnitProper, TimeUnitProper } from './argParse/units'
+import { DateISOEssentials } from './dateUtils/date'
 import { DurationFields } from './dateUtils/duration'
 import { TimeFields, TimeISOMilli } from './dateUtils/time'
 import { Duration } from './duration'
@@ -22,8 +23,18 @@ import { ZonedDateTime } from './zonedDateTime'
 export type CompareResult = -1 | 0 | 1
 
 // units
-export type TimeUnit = keyof TimeFields
-export type DateUnit = keyof DateFields | 'week'
+export type TimeUnit = TimeUnitProper
+| /** @deprecated */ 'hours'
+| /** @deprecated */ 'minutes'
+| /** @deprecated */ 'seconds'
+| /** @deprecated */ 'milliseconds'
+| /** @deprecated */ 'microseconds'
+| /** @deprecated */ 'nanoseconds'
+export type DateUnit = DateUnitProper
+| /** @deprecated */ 'years'
+| /** @deprecated */ 'months'
+| /** @deprecated */ 'weeks'
+| /** @deprecated */ 'days'
 export type Unit = TimeUnit | DateUnit
 export type DayTimeUnit = TimeUnit | 'day'
 
@@ -36,7 +47,7 @@ export type RoundOptions<UnitType extends Unit = Unit> = {
 }
 export type TimeRoundOptions = RoundOptions<TimeUnit>
 export type DateTimeRoundOptions = RoundOptions<DayTimeUnit>
-export type DurationRoundOptions = DiffOptions & { relativeTo?: DateTimeArg } // like diffing
+export type DurationRoundOptions = DiffOptions & { relativeTo?: DateTimeArg } // similar to diffing
 
 // total
 export type DurationTotalOptions = { unit: Unit, relativeTo?: DateTimeArg }
