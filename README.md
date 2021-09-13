@@ -17,3 +17,6 @@ git submodule update --init
 
 TODO: have TSC check .ts test files that are NOT part of the tsconfig projects
 TODO: have TSC checkJs (for temporal e2e tests)
+
+Singular unit names, allow plural, but deprecate in typescript types
+https://github.com/tc39/proposal-temporal/issues/325#issuecomment-820606460

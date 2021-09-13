@@ -4,6 +4,9 @@ const standardConfig = require('eslint-config-standard/eslintrc.json')
 // Why not use the "standard-with-typescript" project? See note about parserServices below
 // Deps must be installed manually: https://github.com/standard/eslint-config-standard#install
 
+// Workaround for Yarn Pnp: explicitly install eslint-import-resolver-node
+// https://github.com/import-js/eslint-plugin-import/issues/1434#issuecomment-521189117
+
 const baseRules = {
   // Max line length, with some exceptions
   // TODO: ADD ruler to vscode settings

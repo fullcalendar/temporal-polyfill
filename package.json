@@ -49,6 +49,7 @@
     "esbuild": "^0.12.9",
     "eslint": "^7.25.0",
     "eslint-config-standard": "^16.0.3",
+    "eslint-import-resolver-node": "^0.3.6",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",

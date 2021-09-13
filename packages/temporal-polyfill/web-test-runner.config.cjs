@@ -1,7 +1,11 @@
-import { esbuildPlugin } from '@web/dev-server-esbuild'
-import { defaultReporter } from '@web/test-runner'
+// NOTE: until Yarn PnP supports ESM (https://github.com/yarnpkg/berry/issues/638),
+// this config file must be written in CJS and wtr's --config option must explicitly point
+// to this file
 
-export default {
+const { esbuildPlugin } = require('@web/dev-server-esbuild')
+const { defaultReporter } = require('@web/test-runner')
+
+module.exports = {
   files: [
     './e2e/*.ts',
   ],
