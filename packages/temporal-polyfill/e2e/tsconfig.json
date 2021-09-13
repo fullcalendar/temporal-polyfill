@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": false,
     "emitDeclarationOnly": false,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["mocha"]
   }
 }
