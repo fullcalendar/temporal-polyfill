@@ -1,3 +1,4 @@
+// For Jest. Individual packages extend this config
 
 module.exports = {
   presets: [
