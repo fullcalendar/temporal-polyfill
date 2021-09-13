@@ -1,6 +1,4 @@
-import { Instant } from './instant'
-import { PlainDateTime } from './plainDateTime'
-import { TimeZone } from './timeZone'
+import { Instant, PlainDateTime, TimeZone } from '../dist/index'
 
 test('can create with variable', () => {
   const tz = 'local'

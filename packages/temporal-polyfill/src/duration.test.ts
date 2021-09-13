@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { Duration } from './duration'
-import { PlainDateTime } from './plainDateTime'
+
+import { Duration, PlainDateTime } from '../dist/index'
 
 test('can instantiate duration', () => {
   const duration = new Duration(1, 1, 1)

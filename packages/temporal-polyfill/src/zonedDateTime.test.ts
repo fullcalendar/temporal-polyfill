@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import { ZonedDateTime } from './zonedDateTime'
+
+import { ZonedDateTime } from '../dist/index'
 
 test('can instantiate', () => {
   const date = new ZonedDateTime(0n, 'UTC')
