@@ -1,4 +1,6 @@
-import { Calendar, Duration, PlainDate } from '../dist/index'
+import { Calendar } from './calendar'
+import { Duration } from './duration'
+import { PlainDate } from './plainDate'
 
 test('can instantiate', () => {
   const calendar = new Calendar('iso8601')

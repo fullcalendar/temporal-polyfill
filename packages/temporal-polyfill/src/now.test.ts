@@ -1,5 +1,6 @@
 import { advanceTo } from 'jest-date-mock'
-import { Now, PlainDateTime } from '../dist/index'
+import { Now } from './now'
+import { PlainDateTime } from './plainDateTime'
 
 test('can get epoch ms', () => {
   advanceTo(0)

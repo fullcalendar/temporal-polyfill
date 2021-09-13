@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
-
-import { Duration, PlainDateTime, ZonedDateTime } from '../dist/index'
+import { Duration } from './duration'
+import { PlainDateTime } from './plainDateTime'
+import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
   const date = new PlainDateTime(1970, 1, 1)
