@@ -6,6 +6,7 @@ import {
   SignedDurationFields,
   addDurations,
   balanceAndRoundDuration,
+  compareDurations,
   createDuration,
   durationFieldMap,
   refineDurationFields,
@@ -17,6 +18,7 @@ import { NANOSECOND, SECOND, UnitInt, YEAR } from './dateUtils/units'
 import { createWeakMap, mapHash } from './utils/obj'
 import {
   CompareResult,
+  DateTimeArg,
   DurationArg,
   DurationLike,
   DurationRoundOptions,
@@ -24,8 +26,8 @@ import {
   DurationToStringUnit,
   DurationTotalOptions,
   LocalesArg,
+  ZonedDateTimeArg,
 } from './args'
-import { PlainDateTime } from './plainDateTime'
 
 const [getFields, setFields] = createWeakMap<Duration, SignedDurationFields>()
 
@@ -63,6 +65,14 @@ export class Duration extends AbstractNoValueObj {
         ? refineFields(arg, durationFieldMap)
         : parseDurationISO(arg),
     )
+  }
+
+  static compare(
+    a: DurationArg,
+    b: DurationArg,
+    options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg },
+  ): CompareResult {
+    return compareDurations(a, b, options?.relativeTo)
   }
 
   get years(): number { return getFields(this).years }
@@ -103,12 +113,12 @@ export class Duration extends AbstractNoValueObj {
     )
   }
 
-  add(other: DurationArg): Duration {
-    return addDurations(this, ensureObj(Duration, other))
+  add(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
+    return addDurations(this, ensureObj(Duration, other), options?.relativeTo)
   }
 
-  subtract(other: DurationArg): Duration {
-    return this.add(ensureObj(Duration, other).negated())
+  subtract(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
+    return addDurations(this, ensureObj(Duration, other).negated(), options?.relativeTo)
   }
 
   round(options: DurationRoundOptions): Duration {
@@ -119,15 +129,14 @@ export class Duration extends AbstractNoValueObj {
     return computeTotalUnits(
       this,
       parseUnit<UnitInt>(options?.unit, undefined, NANOSECOND, YEAR),
-      options.relativeTo ? ensureObj(PlainDateTime, options.relativeTo) : undefined,
+      options.relativeTo,
     )
   }
 
   toString(options?: DurationToStringOptions): string {
-    const formatConfig = parseTimeToStringOptions<
-    DurationToStringUnit,
-    DurationToStringUnitInt
-    >(options, SECOND)
+    const formatConfig = parseTimeToStringOptions<DurationToStringUnit, DurationToStringUnitInt>(
+      options, SECOND,
+    )
     return formatDurationISO(getFields(this), formatConfig)
   }
 

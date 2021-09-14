@@ -47,7 +47,8 @@ export type RoundOptions<UnitType extends Unit = Unit> = {
 }
 export type TimeRoundOptions = RoundOptions<TimeUnit>
 export type DateTimeRoundOptions = RoundOptions<DayTimeUnit>
-export type DurationRoundOptions = DiffOptions & { relativeTo?: DateTimeArg } // similar to diffing
+// similar to diffing
+export type DurationRoundOptions = DiffOptions & { relativeTo?: ZonedDateTimeArg | DateTimeArg }
 
 // total
 export type DurationTotalOptions = { unit: Unit, relativeTo?: DateTimeArg }

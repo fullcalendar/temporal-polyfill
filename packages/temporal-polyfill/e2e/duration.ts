@@ -6,6 +6,7 @@ import * as Temporal from 'temporal-polyfill'
 const { Duration } = Temporal
 
 type InvalidArg = any
+type ValidArg = any
 
 describe('Duration', () => {
   describe('Structure', () => {
@@ -651,9 +652,9 @@ describe('Duration', () => {
       equal(`${oneDay.add(hours24, { relativeTo: { year: 2019, month: 11, day: 2 } })}`, 'P2D');
     });
     it('at least the required properties must be present in relativeTo', () => {
-      throws(() => oneDay.add(hours24, { relativeTo: { month: 11, day: 3 } }), TypeError);
-      throws(() => oneDay.add(hours24, { relativeTo: { year: 2019, month: 11 } }), TypeError);
-      throws(() => oneDay.add(hours24, { relativeTo: { year: 2019, day: 3 } }), TypeError);
+      throws(() => oneDay.add(hours24, { relativeTo: { month: 11, day: 3 } as InvalidArg }), TypeError);
+      throws(() => oneDay.add(hours24, { relativeTo: { year: 2019, month: 11 } as InvalidArg }), TypeError);
+      throws(() => oneDay.add(hours24, { relativeTo: { year: 2019, day: 3 } as InvalidArg }), TypeError);
     });
   });
   describe('Duration.subtract()', () => {
@@ -739,7 +740,7 @@ describe('Duration', () => {
       equal(`${dw.subtract(d, { relativeTo })}`, 'P1W');
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => duration.subtract({ hours: 1 }, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(duration.subtract({ hours: 1 }, options).hours, 0));
@@ -837,9 +838,9 @@ describe('Duration', () => {
       equal(`${oneDay.subtract(hours24, { relativeTo: { year: 2019, month: 11, day: 2 } })}`, 'PT0S');
     });
     it('at least the required properties must be present in relativeTo', () => {
-      throws(() => oneDay.subtract(hours24, { relativeTo: { month: 11, day: 3 } }), TypeError);
-      throws(() => oneDay.subtract(hours24, { relativeTo: { year: 2019, month: 11 } }), TypeError);
-      throws(() => oneDay.subtract(hours24, { relativeTo: { year: 2019, day: 3 } }), TypeError);
+      throws(() => oneDay.subtract(hours24, { relativeTo: { month: 11, day: 3 } as InvalidArg }), TypeError);
+      throws(() => oneDay.subtract(hours24, { relativeTo: { year: 2019, month: 11 } as InvalidArg }), TypeError);
+      throws(() => oneDay.subtract(hours24, { relativeTo: { year: 2019, day: 3 } as InvalidArg }), TypeError);
     });
   });
   describe("Comparison operators don't work", () => {
@@ -1085,38 +1086,38 @@ describe('Duration', () => {
       equal(`${hours25.round({ largestUnit: 'days', relativeTo: { year: 2019, month: 11, day: 2 } })}`, 'P1DT1H');
     });
     it('accepts datetime string equivalents or fields for relativeTo', () => {
-      ['2020-01-01', '2020-01-01T00:00:00.000000000', 20200101, 20200101n, { year: 2020, month: 1, day: 1 }].forEach(
+      ['2020-01-01', '2020-01-01T00:00:00.000000000', 20200101 as ValidArg, 20200101n as ValidArg, { year: 2020, month: 1, day: 1 }].forEach(
         (relativeTo) => {
           equal(`${d.round({ smallestUnit: 'seconds', relativeTo })}`, 'P5Y5M5W5DT5H5M5S');
         }
       );
     });
     it("throws on relativeTo that can't be converted to datetime string", () => {
-      throws(() => d.round({ smallestUnit: 'seconds', relativeTo: Symbol('foo') }), TypeError);
+      throws(() => d.round({ smallestUnit: 'seconds', relativeTo: Symbol('foo') as InvalidArg }), TypeError);
     });
     it('throws on relativeTo that converts to an invalid datetime string', () => {
       [3.14, true, null, 'hello', 1n].forEach((relativeTo) => {
-        throws(() => d.round({ smallestUnit: 'seconds', relativeTo }), RangeError);
+        throws(() => d.round({ smallestUnit: 'seconds', relativeTo: relativeTo as InvalidArg }), RangeError);
       });
     });
     it('relativeTo object must contain at least the required correctly-spelled properties', () => {
-      throws(() => hours25.round({ largestUnit: 'days', relativeTo: { month: 11, day: 3 } }), TypeError);
-      throws(() => hours25.round({ largestUnit: 'days', relativeTo: { year: 2019, month: 11 } }), TypeError);
-      throws(() => hours25.round({ largestUnit: 'days', relativeTo: { year: 2019, day: 3 } }), TypeError);
+      throws(() => hours25.round({ largestUnit: 'days', relativeTo: { month: 11, day: 3 } as InvalidArg }), TypeError);
+      throws(() => hours25.round({ largestUnit: 'days', relativeTo: { year: 2019, month: 11 } as InvalidArg }), TypeError);
+      throws(() => hours25.round({ largestUnit: 'days', relativeTo: { year: 2019, day: 3 } as InvalidArg }), TypeError);
     });
     it('incorrectly-spelled properties are ignored in relativeTo', () => {
       const oneMonth = Duration.from({ months: 1 });
       equal(
-        `${oneMonth.round({ largestUnit: 'days', relativeTo: { year: 2020, month: 1, day: 1, months: 2 } })}`,
+        `${oneMonth.round({ largestUnit: 'days', relativeTo: { year: 2020, month: 1, day: 1, months: 2 } as ValidArg })}`,
         'P31D'
       );
     });
     it('throws on invalid roundingMode', () => {
-      throws(() => d2.round({ smallestUnit: 'nanoseconds', roundingMode: 'cile' }), RangeError);
+      throws(() => d2.round({ smallestUnit: 'nanoseconds', roundingMode: 'cile' as InvalidArg }), RangeError);
     });
     it('throws if neither one of largestUnit or smallestUnit is given', () => {
       const hoursOnly = new Duration(0, 0, 0, 0, 1);
-      [{}, () => {}, { roundingMode: 'ceil' }].forEach((options) => {
+      [{}, () => {}, { roundingMode: 'ceil' }].forEach((options: InvalidArg) => {
         throws(() => d.round(options), RangeError);
         throws(() => hoursOnly.round(options), RangeError);
       });
@@ -1427,7 +1428,7 @@ describe('Duration', () => {
     });
     it('accepts datetime string equivalents or fields for relativeTo', () => {
       ['2020-01-01', '2020-01-01T00:00:00.000000000', 20200101, 20200101n, { year: 2020, month: 1, day: 1 }].forEach(
-        (relativeTo) => {
+        (relativeTo: ValidArg) => {
           const daysPastJuly1 = 5 * 7 + 5 - 30; // 5 weeks + 5 days - 30 days in June
           const partialDayNanos =
             d.hours * 3.6e12 +
@@ -1445,15 +1446,15 @@ describe('Duration', () => {
       );
     });
     it("throws on relativeTo that can't be converted to datetime string", () => {
-      throws(() => d.total({ unit: 'months', relativeTo: Symbol('foo') }), TypeError);
+      throws(() => d.total({ unit: 'months', relativeTo: Symbol('foo') as InvalidArg }), TypeError);
     });
     it('throws on relativeTo that converts to an invalid datetime string', () => {
-      [3.14, true, null, 'hello', 1n].forEach((relativeTo) => {
+      [3.14, true, null, 'hello', 1n].forEach((relativeTo: InvalidArg) => {
         throws(() => d.total({ unit: 'months', relativeTo }), RangeError);
       });
     });
     it('relativeTo object must contain at least the required correctly-spelled properties', () => {
-      throws(() => d.total({ unit: 'months', relativeTo: {} }), TypeError);
+      throws(() => d.total({ unit: 'months', relativeTo: {} as InvalidArg }), TypeError);
       throws(() => d.total({ unit: 'months', relativeTo: { years: 2020, month: 1, day: 1 } as InvalidArg }), TypeError);
     });
     it('incorrectly-spelled properties are ignored in relativeTo', () => {
@@ -1518,7 +1519,7 @@ describe('Duration', () => {
     });
 
     const endpoint = relativeTo.add(d);
-    const options = (unit) => ({ largestUnit: unit, smallestUnit: unit, roundingMode: 'trunc' });
+    const options = (unit) => ({ largestUnit: unit, smallestUnit: unit, roundingMode: 'trunc' as RoundingMode });
     const fullYears = 5;
     const fullDays = endpoint.since(relativeTo, options('days')).days;
     const fullMilliseconds = endpoint.since(relativeTo, options('milliseconds')).milliseconds;
@@ -1717,7 +1718,7 @@ describe('Duration', () => {
       const d1 = new Duration(5, 5, 5, 5, 5, 5, 5, 5, 5, 5);
       const d2 = new Duration(5, 5, 5, 5, 5, 4, 5, 5, 5, 5);
       const relativeTo = Temporal.PlainDateTime.from('2017-01-01');
-      it('relativeTo is required', () => throws(() => Duration.compare(d1, d2)), RangeError);
+      it('relativeTo is required', () => throws(() => Duration.compare(d1, d2), RangeError)); // **this line was corrected**
       it('equal', () => equal(Duration.compare(d1, d1, { relativeTo }), 0));
       it('smaller/larger', () => equal(Duration.compare(d2, d1, { relativeTo }), -1));
       it('larger/smaller', () => equal(Duration.compare(d1, d2, { relativeTo }), 1));
@@ -1738,11 +1739,11 @@ describe('Duration', () => {
       equal(Duration.compare(new Duration(), 'PT12H'), -1);
     });
     it('object must contain at least one correctly-spelled property', () => {
-      throws(() => Duration.compare({ hour: 12 }, new Duration()), TypeError);
-      throws(() => Duration.compare(new Duration(), { hour: 12 }), TypeError);
+      throws(() => Duration.compare({ hour: 12 } as InvalidArg, new Duration()), TypeError);
+      throws(() => Duration.compare(new Duration(), { hour: 12 } as InvalidArg), TypeError);
     });
     it('ignores incorrect properties', () => {
-      equal(Duration.compare({ hours: 12, minute: 5 }, { hours: 12, day: 5 }), 0);
+      equal(Duration.compare({ hours: 12, minute: 5 } as ValidArg, { hours: 12, day: 5 } as ValidArg), 0);
     });
     it('relativeTo affects year length', () => {
       const oneYear = new Duration(1);
@@ -1788,9 +1789,9 @@ describe('Duration', () => {
       equal(Duration.compare(oneDay, hours24, { relativeTo: { year: 2019, month: 11, day: 3 } }), 0);
     });
     it('at least the required properties must be present in relativeTo', () => {
-      throws(() => Duration.compare(oneDay, hours24, { relativeTo: { month: 11, day: 3 } }), TypeError);
-      throws(() => Duration.compare(oneDay, hours24, { relativeTo: { year: 2019, month: 11 } }), TypeError);
-      throws(() => Duration.compare(oneDay, hours24, { relativeTo: { year: 2019, day: 3 } }), TypeError);
+      throws(() => Duration.compare(oneDay, hours24, { relativeTo: { month: 11, day: 3 } as InvalidArg }), TypeError);
+      throws(() => Duration.compare(oneDay, hours24, { relativeTo: { year: 2019, month: 11 } as InvalidArg }), TypeError);
+      throws(() => Duration.compare(oneDay, hours24, { relativeTo: { year: 2019, day: 3 } as InvalidArg }), TypeError);
     });
     it('does not lose precision when totaling everything down to nanoseconds', () => {
       notEqual(Duration.compare({ days: 200 }, { days: 200, nanoseconds: 1 }), 0);

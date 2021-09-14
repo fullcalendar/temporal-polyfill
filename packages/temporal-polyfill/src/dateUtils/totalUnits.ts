@@ -1,29 +1,35 @@
-import { DurationLike } from '../args'
+import { DateTimeArg, DurationLike } from '../args'
 import { Duration } from '../duration'
 import { DateLikeInstance } from './calendar'
 import { dayTimeFieldsToNano } from './dayTime'
-import { balanceComplexDuration, durationToDayTimeFields, durationUnitNames } from './duration'
+import {
+  balanceComplexDuration,
+  durationToDayTimeFields,
+  durationUnitNames,
+  getPlainRelativeTo,
+} from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { UnitInt, YEAR, isDayTimeUnit, nanoIn } from './units'
 
 export function computeTotalUnits(
   duration: Duration,
   unit: UnitInt,
-  relativeTo: DateLikeInstance | undefined,
+  relativeToArg: DateTimeArg | undefined,
 ): number {
   const fields = durationToDayTimeFields(duration)
-  if (fields && isDayTimeUnit(unit) && !relativeTo) {
+  if (fields && isDayTimeUnit(unit) && relativeToArg == null) {
     return dayTimeFieldsToNano(fields) / nanoIn[unit]
   }
+  const relativeTo = getPlainRelativeTo(relativeToArg)
   const [balancedDuration, translatedDate] = balanceComplexDuration(
     duration,
     unit,
-    relativeTo, // error will be thrown if null
+    relativeTo,
   )
   const durationLike = computeExactDuration(
     balancedDuration,
     unit,
-    relativeTo!, // guaranteed non-null (or else error would have been thrown above)
+    relativeTo,
     translatedDate,
   )
   return durationLike[durationUnitNames[unit]]! // computeExactDuration guarantees this

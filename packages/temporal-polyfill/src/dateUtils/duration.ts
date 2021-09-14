@@ -1,14 +1,27 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundConfig } from '../argParse/roundOptions'
 import { unitNames } from '../argParse/units'
-import { CompareResult, DateUnit, DurationLike, DurationRoundOptions, Unit } from '../args'
+import {
+  CompareResult,
+  DateTimeArg,
+  DateUnit,
+  DurationArg,
+  DurationLike,
+  DurationRoundOptions,
+  Unit,
+  ZonedDateTimeArg,
+  ZonedDateTimeLike,
+} from '../args'
 import { Duration } from '../duration'
 import { PlainDateTime } from '../plainDateTime'
-import { numSign } from '../utils/math'
+import { compareValues, numSign } from '../utils/math'
 import { ZonedDateTime } from '../zonedDateTime'
 import { ensureObj } from './abstract'
 import { DateLikeInstance } from './calendar'
-import { DayTimeFields, nanoToDayTimeFields } from './dayTime'
+import { createDateTime } from './dateTime'
+import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
+import { parseDateTimeISO } from './parse'
 import { roundBalancedDuration, roundDayTimeFields } from './round'
 import { TimeFields } from './time'
 import {
@@ -26,6 +39,7 @@ import {
   YEAR,
   isDayTimeUnit,
 } from './units'
+import { ZonedDateTimeISOEssentials, createZonedDateTime } from './zonedDateTime'
 
 export interface DurationFields {
   years: number
@@ -89,7 +103,34 @@ export function createDuration(fields: DurationLike): Duration {
   )
 }
 
-export function addDurations(d0: Duration, d1: Duration): Duration {
+export function addDurations(
+  d0: Duration,
+  d1: Duration,
+  relativeToArg: ZonedDateTimeArg | DateTimeArg | undefined,
+): Duration {
+  const dayTimeFields0 = durationToDayTimeFields(d0)
+  const dayTimeFields1 = durationToDayTimeFields(d1)
+  const largestUnit = Math.max(
+    computeLargestDurationUnit(d0),
+    computeLargestDurationUnit(d1),
+  ) as DayTimeUnitInt
+
+  if (relativeToArg == null && dayTimeFields0 && dayTimeFields1) {
+    return nanoToDuration(
+      dayTimeFieldsToNano(dayTimeFields0) +
+      dayTimeFieldsToNano(dayTimeFields1),
+      largestUnit,
+    )
+  }
+
+  return balanceComplexDuration(
+    dumbAddDurations(d0, d1),
+    largestUnit,
+    getMaybeZonedRelativeTo(relativeToArg),
+  )[0]
+}
+
+export function dumbAddDurations(d0: Duration, d1: Duration): Duration { // no balancing
   return new Duration(
     d0.years + d1.years,
     d0.months + d1.months,
@@ -106,7 +147,7 @@ export function addDurations(d0: Duration, d1: Duration): Duration {
 
 export function addDaysToDuration(d: Duration, days: number): Duration {
   if (days) {
-    d = addDurations(d, new Duration(0, 0, 0, days))
+    d = dumbAddDurations(d, new Duration(0, 0, 0, days))
   }
   return d
 }
@@ -114,15 +155,12 @@ export function addDaysToDuration(d: Duration, days: number): Duration {
 export function balanceComplexDuration(
   duration: Duration,
   largestUnit: UnitInt,
-  relativeTo: DateLikeInstance | undefined,
+  relativeTo: DateLikeInstance,
 ): [Duration, DateLikeInstance] { // returns the SAME type of DateLikeInstance
-  if (!relativeTo) {
-    throw new Error('Need relativeTo')
-  }
-  const translatedDate = relativeTo.add(duration)
+  const translatedDate = (relativeTo as DateLikeInstance).add(duration) // yuck
 
   // HACK casting to ZonedDateTime. translatedDate is same type as relativeTo, all that matters
-  const balancedDuration = relativeTo.until(translatedDate as ZonedDateTime, {
+  const balancedDuration = (relativeTo as DateLikeInstance).until(translatedDate as ZonedDateTime, {
     largestUnit: unitNames[largestUnit] as DateUnit,
   })
 
@@ -138,9 +176,6 @@ export function balanceAndRoundDuration(
   } else if (options.largestUnit == null && options.smallestUnit == null) {
     throw new Error('Must specify either largestUnit or smallestUnit')
   }
-
-  const relativeToArg = options?.relativeTo
-  const relativeTo = relativeToArg ? ensureObj(PlainDateTime, relativeToArg) : undefined
 
   const defaultLargestUnit = computeLargestDurationUnit(duration)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(
@@ -159,15 +194,16 @@ export function balanceAndRoundDuration(
     )
   }
 
+  const relativeTo = getPlainRelativeTo(options?.relativeTo)
   const [balancedDuration, translatedDate] = balanceComplexDuration(
     duration,
     largestUnit,
-    relativeTo, // error will be thrown if null
+    relativeTo,
   )
   return roundBalancedDuration(
     balancedDuration,
     diffConfig,
-    relativeTo!, // guaranteed non-null (or else error would have been thrown above)
+    relativeTo,
     translatedDate,
   )
 }
@@ -184,6 +220,33 @@ export function computeLargestDurationUnit(dur: Duration): UnitInt {
     dur.milliseconds ? MILLISECOND :
     dur.microseconds ? MICROSECOND : NANOSECOND
   /* eslint-enable */
+}
+
+export function compareDurations(
+  arg0: DurationArg,
+  arg1: DurationArg,
+  relativeToArg: ZonedDateTimeArg | DateTimeArg | undefined,
+): CompareResult {
+  const duration0 = ensureObj(Duration, arg0) // TODO: do this in the caller?
+  const duration1 = ensureObj(Duration, arg1)
+  const dayTimeFields0 = durationToDayTimeFields(duration0)
+  const dayTimeFields1 = durationToDayTimeFields(duration1)
+
+  if (dayTimeFields0 && dayTimeFields1) {
+    return compareValues(
+      dayTimeFieldsToNano(dayTimeFields0),
+      dayTimeFieldsToNano(dayTimeFields1),
+    )
+  }
+
+  const relativeTo = getMaybeZonedRelativeTo(relativeToArg)
+  const date0 = relativeTo.add(duration0)
+  const date1 = relativeTo.add(duration1)
+
+  if (relativeTo instanceof ZonedDateTime) {
+    return ZonedDateTime.compare(date0 as ZonedDateTime, date1 as ZonedDateTime)
+  }
+  return PlainDateTime.compare(date0, date1)
 }
 
 export function nanoToDuration(nano: number, largestUnit: DayTimeUnitInt): Duration {
@@ -222,4 +285,36 @@ export function durationToTimeFields(duration: Duration): TimeFields {
     microsecond: duration.microseconds,
     nanosecond: duration.nanoseconds,
   }
+}
+
+function getMaybeZonedRelativeTo(
+  arg: ZonedDateTimeArg | DateTimeArg | undefined,
+): ZonedDateTime | PlainDateTime {
+  if (arg == null) {
+    throw new Error('Need relativeTo') // TODO: reusable (how to mark function as "throwing"?)
+  } else if (typeof arg === 'object') {
+    if ((arg as ZonedDateTimeLike).timeZone != null) {
+      return ZonedDateTime.from(arg as ZonedDateTimeLike)
+    } else {
+      return PlainDateTime.from(arg)
+    }
+  } else {
+    const isoFields = parseDateTimeISO(String(arg))
+    if (isoFields.timeZone != null) {
+      return createZonedDateTime(
+        isoFields as ZonedDateTimeISOEssentials,
+        undefined,
+        OFFSET_PREFER,
+      )
+    } else {
+      return createDateTime(isoFields)
+    }
+  }
+}
+
+export function getPlainRelativeTo(arg: DateTimeArg | undefined): PlainDateTime {
+  if (arg == null) {
+    throw new Error('Need relativeTo') // TODO: reusable
+  }
+  return ensureObj(PlainDateTime, arg)
 }
