@@ -147,7 +147,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     })
   }
 
-  withPlainTime(timeArg: TimeArg): ZonedDateTime {
+  withPlainTime(timeArg?: TimeArg): ZonedDateTime {
     return this.toPlainDate().toZonedDateTime({
       plainTime: timeArg,
       timeZone: this.timeZone,
@@ -232,7 +232,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 export interface ZonedDateTime extends DateCalendarFields { calendar: Calendar }
 export interface ZonedDateTime extends TimeFields {}
 export interface ZonedDateTime extends ComputedEpochFields {}
-mixinISOFields(ZonedDateTime, ['calendar', ...timeUnitNames])
+mixinISOFields(ZonedDateTime, timeUnitNames)
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
 mixinEpochFields(ZonedDateTime)
 

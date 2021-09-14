@@ -3,7 +3,7 @@ import { parseCalendarDisplay } from './argParse/calendarDisplay'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
 import { refineFields } from './argParse/refine'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
-import { constrainDateISO, createDate } from './dateUtils/date'
+import { constrainDateISO } from './dateUtils/date'
 import { formatCalendarID, formatYearMonthISO } from './dateUtils/isoFormat'
 import { isoFieldsToEpochMilli } from './dateUtils/isoMath'
 import {
@@ -101,10 +101,16 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     )
   }
 
-  toPlainDate(): PlainDate { return createDate(this.getISOFields()) }
+  toPlainDate(fields: { day: number }): PlainDate {
+    return this.calendar.dateFromFields({
+      year: this.year,
+      month: this.month,
+      day: fields.day,
+    })
+  }
 }
 
 // mixin
 export interface PlainYearMonth extends YearMonthCalendarFields { calendar: Calendar }
-mixinISOFields(PlainYearMonth, ['calendar'])
+mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)

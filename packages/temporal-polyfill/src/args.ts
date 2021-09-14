@@ -9,7 +9,7 @@ import { TimeZoneDisplayMap } from './argParse/timeZoneDisplay'
 import { DateUnitProper, TimeUnitProper } from './argParse/units'
 import { DateISOEssentials } from './dateUtils/date'
 import { DurationFields } from './dateUtils/duration'
-import { TimeFields, TimeISOMilli } from './dateUtils/time'
+import { TimeFields, TimeISOEssentials } from './dateUtils/time'
 import { Duration } from './duration'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
@@ -37,6 +37,7 @@ export type DateUnit = DateUnitProper
 | /** @deprecated */ 'days'
 export type Unit = TimeUnit | DateUnit
 export type DayTimeUnit = TimeUnit | 'day'
+| /** @deprecated */ 'days'
 
 // rounding
 export type RoundingMode = keyof RoundingModeMap
@@ -91,8 +92,8 @@ export type ZonedDateTimeToStringOptions = DateTimeToStringOptions & {
 
 // iso-fields
 export type DateISOFields = DateISOEssentials & { calendar: CalendarProtocol }
-export type TimeISOFields = TimeISOMilli & { isoMicrosecond: number, isoNanosecond: number }
-export type DateTimeISOFields = DateISOFields & TimeISOFields
+export type TimeISOFields = TimeISOEssentials & { calendar: CalendarProtocol }
+export type DateTimeISOFields = DateISOFields & TimeISOEssentials
 export type ZonedDateTimeISOFields = DateTimeISOFields & { timeZone: TimeZone, offset: string }
 
 // like-fields (for Calendar::dateFromFields, etc) (does NOT have calendar/timezone)

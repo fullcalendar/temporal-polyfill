@@ -8,6 +8,8 @@ const { equal, throws } = assert
 
 import * as Temporal from 'temporal-polyfill'
 
+type InvalidArg = any
+
 describe('Temporal.Now', () => {
   describe('Structure', () => {
     it('Temporal.Now is an object', () => equal(typeof Temporal.Now, 'object'));
@@ -38,7 +40,7 @@ describe('Temporal.Now', () => {
       assert(dt instanceof Temporal.PlainDateTime);
       equal(dt.calendar.id, 'gregory');
     });
-    it('requires a calendar', () => throws(() => Temporal.Now.plainDateTime(), RangeError));
+    it('requires a calendar', () => throws(() => (Temporal.Now as InvalidArg).plainDateTime(), RangeError));
   });
   describe('Temporal.Now.zonedDateTimeISO()', () => {
     it('returns a ZonedDateTime in the correct calendar and system time zone', () => {
@@ -77,7 +79,7 @@ describe('Temporal.Now', () => {
       assert(zdt.timeZone instanceof Temporal.TimeZone);
       equal(zdt.timeZone.id, 'America/Los_Angeles');
     });
-    it('requires a calendar', () => throws(() => Temporal.Now.zonedDateTime(), RangeError));
+    it('requires a calendar', () => throws(() => (Temporal.Now as InvalidArg).zonedDateTime(), RangeError));
   });
   describe('Temporal.Now.plainDateISO()', () => {
     it('returns a Date in the ISO calendar', () => {
@@ -92,7 +94,7 @@ describe('Temporal.Now', () => {
       assert(d instanceof Temporal.PlainDate);
       equal(d.calendar.id, 'gregory');
     });
-    it('requires a calendar', () => throws(() => Temporal.Now.plainDate(), RangeError));
+    it('requires a calendar', () => throws(() => (Temporal.Now as InvalidArg).plainDate(), RangeError));
   });
   describe('Temporal.Now.plainTimeISO()', () => {
     it('Temporal.Now.plainTimeISO() returns a Time', () => {

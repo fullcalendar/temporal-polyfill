@@ -5,8 +5,8 @@ import { parseRoundOptions } from '../argParse/roundOptions'
 import {
   CompareResult,
   OverflowOptions,
+  TimeArg,
   TimeDiffOptions,
-  TimeISOFields,
   TimeLike,
   TimeRoundOptions,
   TimeUnit,
@@ -14,6 +14,7 @@ import {
 import { Duration } from '../duration'
 import { PlainTime } from '../plainTime'
 import { mapHash } from '../utils/obj'
+import { ensureObj } from './abstract'
 import { DayTimeFields, nanoToDayTimeFields } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
 import { roundNano, roundTimeOfDay } from './round'
@@ -37,6 +38,11 @@ export interface TimeISOMilli {
   isoMillisecond: number
 }
 
+export interface TimeISOEssentials extends TimeISOMilli {
+  isoMicrosecond: number
+  isoNanosecond: number
+}
+
 export interface TimeFields {
   hour: number
   minute: number
@@ -55,7 +61,7 @@ export const timeFieldMap = {
   nanosecond: Number,
 }
 
-export function createTime(isoFields: TimeISOFields): PlainTime {
+export function createTime(isoFields: TimeISOEssentials): PlainTime {
   return new PlainTime(
     isoFields.isoHour,
     isoFields.isoMinute,
@@ -67,9 +73,12 @@ export function createTime(isoFields: TimeISOFields): PlainTime {
 }
 
 export function constrainTimeISO( // also converts to number
-  { isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond }: TimeISOFields,
+  {
+    isoHour, isoMinute, isoSecond,
+    isoMillisecond, isoMicrosecond, isoNanosecond,
+  }: TimeISOEssentials,
   overflow: OverflowHandlingInt,
-): TimeISOFields {
+): TimeISOEssentials {
   isoHour = constrainValue(isoHour, 0, 23, overflow)
   isoMinute = constrainValue(isoMinute, 0, 59, overflow)
   isoSecond = constrainValue(isoSecond, 0, 59, overflow)
@@ -119,7 +128,7 @@ export function roundPlainTime(plainTime: PlainTime, options: TimeRoundOptions):
   return createTime(timeLikeToISO(fields))
 }
 
-export function timeLikeToISO(fields: TimeLike): TimeISOFields {
+export function timeLikeToISO(fields: TimeLike): TimeISOEssentials {
   return {
     isoNanosecond: fields.nanosecond ?? 0,
     isoMicrosecond: fields.microsecond ?? 0,
@@ -133,7 +142,7 @@ export function timeLikeToISO(fields: TimeLike): TimeISOFields {
 export function timeFieldsToConstrainedISO(
   fields: TimeLike,
   options: OverflowOptions | undefined,
-): TimeISOFields {
+): TimeISOEssentials {
   return constrainTimeISO(
     timeLikeToISO(fields),
     parseOverflowHandling(options?.overflow),
@@ -194,4 +203,10 @@ export function nanoToTimeFields(
 
 export function partialSecondsToTimeFields(seconds: number): TimeFields {
   return nanoToTimeFields(Math.trunc(seconds * nanoInSecond), 1)[0]
+}
+
+// Normally ensureObj and ::from would fail when undefined is specified
+// Fallback to 00:00 time
+export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
+  return ensureObj(PlainTime, arg ?? { hour: 0 })
 }

@@ -5,8 +5,8 @@ import {
 } from '../argParse/calendarDisplay'
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
-import { DateISOFields, DateTimeISOFields, TimeISOFields } from '../args'
-import { nanoToTimeFields } from '../dateUtils/time'
+import { DateISOFields, DateTimeISOFields } from '../args'
+import { TimeISOEssentials, nanoToTimeFields } from '../dateUtils/time'
 import { padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { isoCalendarID } from './calendar'
@@ -36,7 +36,7 @@ export function formatMonthDayISO(fields: DateISOFields): string {
 }
 
 export function formatTimeISO(
-  fields: TimeISOFields,
+  fields: TimeISOEssentials,
   formatConfig: TimeToStringConfig,
 ): [string, number] {
   const nano = roundNano(

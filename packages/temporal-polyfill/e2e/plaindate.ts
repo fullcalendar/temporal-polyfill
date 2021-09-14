@@ -6,8 +6,12 @@
 import { assert } from '@esm-bundle/chai'
 const { equal, notEqual, throws } = assert
 
+import { DateUnit, OverflowHandling } from 'temporal-polyfill';
 import * as Temporal from 'temporal-polyfill'
 const { PlainDate } = Temporal
+
+type InvalidArg = any
+type ValidArg = any
 
 describe('Date', () => {
   describe('date.until() works', () => {
@@ -60,8 +64,8 @@ describe('Date', () => {
     incrementOneNearest.forEach(([smallestUnit, expected]) => {
       const roundingMode = 'halfExpand';
       it(`rounds to nearest ${smallestUnit}`, () => {
-        equal(`${earlier.until(later, { smallestUnit, roundingMode })}`, expected);
-        equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, `-${expected}`);
+        equal(`${earlier.until(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expected);
+        equal(`${later.until(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, `-${expected}`);
       });
     });
     const incrementOneCeil = [
@@ -73,8 +77,8 @@ describe('Date', () => {
     incrementOneCeil.forEach(([smallestUnit, expectedPositive, expectedNegative]) => {
       const roundingMode = 'ceil';
       it(`rounds up to ${smallestUnit}`, () => {
-        equal(`${earlier.until(later, { smallestUnit, roundingMode })}`, expectedPositive);
-        equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, expectedNegative);
+        equal(`${earlier.until(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedPositive);
+        equal(`${later.until(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedNegative);
       });
     });
     const incrementOneFloor = [
@@ -86,8 +90,8 @@ describe('Date', () => {
     incrementOneFloor.forEach(([smallestUnit, expectedPositive, expectedNegative]) => {
       const roundingMode = 'floor';
       it(`rounds down to ${smallestUnit}`, () => {
-        equal(`${earlier.until(later, { smallestUnit, roundingMode })}`, expectedPositive);
-        equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, expectedNegative);
+        equal(`${earlier.until(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedPositive);
+        equal(`${later.until(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedNegative);
       });
     });
     const incrementOneTrunc = [
@@ -99,8 +103,8 @@ describe('Date', () => {
     incrementOneTrunc.forEach(([smallestUnit, expected]) => {
       const roundingMode = 'trunc';
       it(`truncates to ${smallestUnit}`, () => {
-        equal(`${earlier.until(later, { smallestUnit, roundingMode })}`, expected);
-        equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, `-${expected}`);
+        equal(`${earlier.until(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expected);
+        equal(`${later.until(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, `-${expected}`);
       });
     });
     it('trunc is the default', () => {
@@ -206,8 +210,8 @@ describe('Date', () => {
     incrementOneNearest.forEach(([smallestUnit, expected]) => {
       const roundingMode = 'halfExpand';
       it(`rounds to nearest ${smallestUnit}`, () => {
-        equal(`${later.since(earlier, { smallestUnit, roundingMode })}`, expected);
-        equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, `-${expected}`);
+        equal(`${later.since(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expected);
+        equal(`${earlier.since(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, `-${expected}`);
       });
     });
     const incrementOneCeil = [
@@ -219,8 +223,8 @@ describe('Date', () => {
     incrementOneCeil.forEach(([smallestUnit, expectedPositive, expectedNegative]) => {
       const roundingMode = 'ceil';
       it(`rounds up to ${smallestUnit}`, () => {
-        equal(`${later.since(earlier, { smallestUnit, roundingMode })}`, expectedPositive);
-        equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, expectedNegative);
+        equal(`${later.since(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedPositive);
+        equal(`${earlier.since(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedNegative);
       });
     });
     const incrementOneFloor = [
@@ -232,8 +236,8 @@ describe('Date', () => {
     incrementOneFloor.forEach(([smallestUnit, expectedPositive, expectedNegative]) => {
       const roundingMode = 'floor';
       it(`rounds down to ${smallestUnit}`, () => {
-        equal(`${later.since(earlier, { smallestUnit, roundingMode })}`, expectedPositive);
-        equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, expectedNegative);
+        equal(`${later.since(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedPositive);
+        equal(`${earlier.since(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expectedNegative);
       });
     });
     const incrementOneTrunc = [
@@ -245,8 +249,8 @@ describe('Date', () => {
     incrementOneTrunc.forEach(([smallestUnit, expected]) => {
       const roundingMode = 'trunc';
       it(`truncates to ${smallestUnit}`, () => {
-        equal(`${later.since(earlier, { smallestUnit, roundingMode })}`, expected);
-        equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, `-${expected}`);
+        equal(`${later.since(earlier, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, expected);
+        equal(`${earlier.since(later, { smallestUnit: smallestUnit as DateUnit, roundingMode })}`, `-${expected}`);
       });
     });
     it('trunc is the default', () => {
@@ -338,12 +342,12 @@ describe('Date', () => {
       equal(`${date.add({ nanoseconds: 86400_000_000_000 })}`, '1976-11-19');
     });
     it('invalid overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
         throws(() => date.add({ months: 1 }, { overflow }), RangeError)
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow) =>
+      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
         throws(() => date.add({ months: 1, days: -30 }, { overflow }), RangeError)
       );
     });
@@ -352,10 +356,10 @@ describe('Date', () => {
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => date.add({}), TypeError);
-      throws(() => date.add({ month: 12 }), TypeError);
+      throws(() => date.add({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${date.add({ month: 1, days: 1 })}`, '1976-11-19');
+      equal(`${date.add({ month: 1, days: 1 } as ValidArg)}`, '1976-11-19');
     });
   });
   describe('date.subtract() works', () => {
@@ -412,12 +416,12 @@ describe('Date', () => {
       equal(`${date.subtract({ nanoseconds: 86400_000_000_000 })}`, '2019-11-17');
     });
     it('invalid overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
         throws(() => date.subtract({ months: 1 }, { overflow }), RangeError)
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow) =>
+      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
         throws(() => date.subtract({ months: 1, days: -30 }, { overflow }), RangeError)
       );
     });
@@ -426,10 +430,10 @@ describe('Date', () => {
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => date.subtract({}), TypeError);
-      throws(() => date.subtract({ month: 12 }), TypeError);
+      throws(() => date.subtract({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${date.subtract({ month: 1, days: 1 })}`, '2019-11-17');
+      equal(`${date.subtract({ month: 1, days: 1 } as ValidArg)}`, '2019-11-17');
     });
   });
   describe('date.toString() works', () => {
@@ -506,18 +510,18 @@ describe('Date', () => {
     it('month and monthCode must agree', () =>
       throws(() => PlainDate.from({ year: 1976, month: 11, monthCode: 'M12', day: 18 }), RangeError));
     it('Date.from({ year: 2019, day: 15 }) throws', () =>
-      throws(() => PlainDate.from({ year: 2019, day: 15 }), TypeError));
-    it('Date.from({ month: 12 }) throws', () => throws(() => PlainDate.from({ month: 12 }), TypeError));
+      throws(() => PlainDate.from({ year: 2019, day: 15 } as InvalidArg), TypeError));
+    it('Date.from({ month: 12 }) throws', () => throws(() => PlainDate.from({ month: 12 } as InvalidArg), TypeError));
     it('object must contain at least the required correctly-spelled properties', () => {
-      throws(() => PlainDate.from({}), TypeError);
-      throws(() => PlainDate.from({ year: 1976, months: 11, day: 18 }), TypeError);
+      throws(() => PlainDate.from({} as InvalidArg), TypeError);
+      throws(() => PlainDate.from({ year: 1976, months: 11, day: 18 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${PlainDate.from({ year: 1976, month: 11, day: 18, days: 15 })}`, '1976-11-18');
+      equal(`${PlainDate.from({ year: 1976, month: 11, day: 18, days: 15 } as ValidArg)}`, '1976-11-18');
     });
     it('Date.from(required prop undefined) throws', () =>
       throws(() => PlainDate.from({ year: undefined, month: 11, day: 18 }), TypeError));
-    it('Date.from(number) is converted to string', () => PlainDate.from(19761118).equals(PlainDate.from('19761118')));
+    it('Date.from(number) is converted to string', () => PlainDate.from(19761118 as ValidArg).equals(PlainDate.from('19761118')));
     it('basic format', () => {
       equal(`${PlainDate.from('19761118')}`, '1976-11-18');
       equal(`${PlainDate.from('+0019761118')}`, '1976-11-18');
@@ -555,7 +559,7 @@ describe('Date', () => {
       });
       it('throw when bad overflow', () => {
         [new PlainDate(1976, 11, 18), { year: 2019, month: 1, day: 1 }, '2019-01-31'].forEach((input) => {
-          ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+          ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
             throws(() => PlainDate.from(input, { overflow }), RangeError)
           );
         });
@@ -580,8 +584,8 @@ describe('Date', () => {
       equal(PlainDate.compare(d1, '2019-06-30'), -1);
     });
     it('object must contain at least the required properties', () => {
-      throws(() => PlainDate.compare({ year: 1976 }, d2), TypeError);
-      throws(() => PlainDate.compare(d1, { year: 2019 }), TypeError);
+      throws(() => PlainDate.compare({ year: 1976 } as InvalidArg, d2), TypeError);
+      throws(() => PlainDate.compare(d1, { year: 2019 } as InvalidArg), TypeError);
     });
   });
   describe('Date.equal works', () => {
@@ -594,7 +598,7 @@ describe('Date', () => {
       assert(!d2.equals('1976-11-18'));
     });
     it('object must contain at least the required properties', () => {
-      throws(() => d2.equals({ year: 1976 }), TypeError);
+      throws(() => d2.equals({ year: 1976 } as InvalidArg), TypeError);
     });
   });
   describe('Min/max range', () => {
@@ -607,7 +611,7 @@ describe('Date', () => {
     it('constructing from property bag', () => {
       const tooEarly = { year: -271821, month: 4, day: 18 };
       const tooLate = { year: 275760, month: 9, day: 14 };
-      ['reject', 'constrain'].forEach((overflow) => {
+      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
         [tooEarly, tooLate].forEach((props) => {
           throws(() => PlainDate.from(props, { overflow }), RangeError);
         });
@@ -616,7 +620,7 @@ describe('Date', () => {
       equal(`${PlainDate.from({ year: 275760, month: 9, day: 13 })}`, '+275760-09-13');
     });
     it('constructing from ISO string', () => {
-      ['reject', 'constrain'].forEach((overflow) => {
+      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
         ['-271821-04-18', '+275760-09-14'].forEach((str) => {
           throws(() => PlainDate.from(str, { overflow }), RangeError);
         });
@@ -651,7 +655,7 @@ describe('Date', () => {
     it('adding and subtracting beyond limit', () => {
       const min = PlainDate.from('-271821-04-19');
       const max = PlainDate.from('+275760-09-13');
-      ['reject', 'constrain'].forEach((overflow) => {
+      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
         throws(() => min.subtract({ days: 1 }, { overflow }), RangeError);
         throws(() => max.add({ days: 1 }, { overflow }), RangeError);
       });

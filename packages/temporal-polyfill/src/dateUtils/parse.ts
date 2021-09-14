@@ -1,9 +1,8 @@
 import { isoCalendar } from '../argParse/calendar'
-import { TimeISOFields } from '../args'
 import { Calendar } from '../calendar'
 import { TimeZone } from '../timeZone'
 import { DurationFields } from './duration'
-import { partialSecondsToTimeFields } from './time'
+import { TimeISOEssentials, partialSecondsToTimeFields } from './time'
 import { nanoInMinute } from './units'
 import { ZonedDateTimeISOMaybe } from './zonedDateTime'
 
@@ -21,7 +20,7 @@ export function parseDateTimeISO(str: string): ZonedDateTimeISOMaybe {
   return tryParseDateTimeISO(str) || throwNoParse(str)
 }
 
-export function parseTimeISO(str: string): TimeISOFields {
+export function parseTimeISO(str: string): TimeISOEssentials {
   return tryParseTimeISO(str) ||
     tryParseDateTimeISO(str) || // fallback to parsing a datetime
     throwNoParse(str)
@@ -54,7 +53,7 @@ function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
   }
 }
 
-function tryParseTimeISO(str: string): TimeISOFields | void {
+function tryParseTimeISO(str: string): TimeISOEssentials | void {
   const match = timeRegExp.exec(str)
   if (match) {
     const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(

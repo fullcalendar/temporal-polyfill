@@ -1,3 +1,4 @@
+import { isoCalendar } from './argParse/calendar'
 import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
 import { refineFields } from './argParse/refine'
@@ -33,6 +34,7 @@ import {
   TimeToStringOptions,
   TimeZoneArg,
 } from './args'
+import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
@@ -48,14 +50,17 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     isoNanosecond = 0,
   ) {
     super(
-      constrainTimeISO({
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-        isoMicrosecond,
-        isoNanosecond,
-      }, OVERFLOW_REJECT),
+      {
+        ...constrainTimeISO({
+          isoHour,
+          isoMinute,
+          isoSecond,
+          isoMillisecond,
+          isoMicrosecond,
+          isoNanosecond,
+        }, OVERFLOW_REJECT),
+        calendar: isoCalendar,
+      },
     )
   }
 
@@ -127,5 +132,5 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 }
 
 // mixin
-export interface PlainTime extends TimeFields {}
+export interface PlainTime extends TimeFields { calendar: Calendar }
 mixinISOFields(PlainTime, timeUnitNames)

@@ -13,7 +13,6 @@ import {
   DayTimeUnit,
   DiffOptions,
   OverflowOptions,
-  TimeISOFields,
   Unit,
 } from '../args'
 import { Calendar } from '../calendar'
@@ -42,6 +41,7 @@ import { isoFieldsToEpochNano } from './isoMath'
 import { roundBalancedDuration, roundNano, roundTimeOfDay } from './round'
 import {
   TimeFields,
+  TimeISOEssentials,
   TimeISOMilli,
   addTimeFields,
   constrainTimeISO,
@@ -54,7 +54,7 @@ import {
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
 export type DateTimeISOMilli = DateISOEssentials & TimeISOMilli
-export type DateTimeISOEssentials = DateISOEssentials & TimeISOFields
+export type DateTimeISOEssentials = DateISOEssentials & TimeISOEssentials
 export type DateTimeFields = DateFields & TimeFields
 
 export const dateTimeFieldMap = {

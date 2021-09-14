@@ -32,8 +32,6 @@ export function mixinEpochFields<Obj extends { epochNanoseconds: bigint }>(
 
 // ISO Fields
 
-type ComputedISOField = Unit | 'calendar'
-
 const isoFieldMap: { [Key: string]: string } = {
   calendar: 'calendar',
 }
@@ -41,15 +39,19 @@ for (const unitName of unitNames) {
   isoFieldMap[unitName] = 'iso' + capitalizeFirstLetter(unitName)
 }
 
+// always mixes in `calendar`
 export function mixinISOFields<Obj extends { getISOFields(): any }>(
   ObjClass: { prototype: Obj },
-  propNames: ComputedISOField[],
+  unitNames: Unit[] = [],
 ): void {
   attachGetters(
     ObjClass,
-    strArrayToHash(propNames, (propName) => function(this: Obj) {
-      return this.getISOFields()[isoFieldMap[propName]]
-    }),
+    strArrayToHash(
+      (unitNames as string[]).concat('calendar'),
+      (propName) => function(this: Obj) {
+        return this.getISOFields()[isoFieldMap[propName]]
+      },
+    ),
   )
 }
 

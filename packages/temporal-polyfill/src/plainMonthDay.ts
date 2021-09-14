@@ -106,5 +106,5 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
 
 // mixin
 export interface PlainMonthDay extends MonthDayCalendarFields { calendar: Calendar }
-mixinISOFields(PlainMonthDay, ['calendar'])
+mixinISOFields(PlainMonthDay)
 mixinCalendarFields(PlainMonthDay, monthDayCalendarFields)
