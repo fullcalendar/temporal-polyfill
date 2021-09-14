@@ -1,7 +1,7 @@
-import { assert } from '@esm-bundle/chai'
-const { equal, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill'
+import * as Temporal from 'temporal-polyfill';
 
 describe('fromString regex', () => {
   describe('instant', () => {
@@ -520,7 +520,7 @@ describe('fromString regex', () => {
       });
     }
 
-    const day = [
+    const day: [string, object][] = [
       ['', {}],
       ['1Y', { y: 1 }],
       ['2M', { mon: 2 }],
@@ -533,13 +533,13 @@ describe('fromString regex', () => {
       ['1Y2M3D', { y: 1, mon: 2, d: 3 }],
       ['1Y2M4W3D', { y: 1, mon: 2, w: 4, d: 3 }]
     ];
-    const times = [
+    const times: [string, object][] = [
       ['', {}],
       ['4H', { h: 4 }],
       ['5M', { min: 5 }],
       ['4H5M', { h: 4, min: 5 }]
     ];
-    const sec = [
+    const sec: [string, object][] = [
       ['', {}],
       ['6S', { s: 6 }],
       ['7.1S', { s: 7, ms: 100 }],

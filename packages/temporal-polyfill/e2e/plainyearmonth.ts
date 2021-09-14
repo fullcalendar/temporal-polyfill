@@ -1,8 +1,12 @@
-import { assert } from '@esm-bundle/chai'
-const { throws, equal, notEqual } = assert
+import { assert } from '@esm-bundle/chai';
+const { throws, equal, notEqual } = assert;
 
-import * as Temporal from 'temporal-polyfill'
-const { PlainYearMonth } = Temporal
+import * as Temporal from 'temporal-polyfill';
+import { OverflowHandling } from 'temporal-polyfill';
+const { PlainYearMonth } = Temporal;
+
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('YearMonth', () => {
   describe('Construction', () => {
@@ -31,23 +35,23 @@ describe('YearMonth', () => {
       it('month and monthCode must agree', () =>
         throws(() => PlainYearMonth.from({ year: 2019, month: 11, monthCode: 'M12' }), RangeError));
       it('ignores day when determining the ISO reference day from year/month', () => {
-        const one = PlainYearMonth.from({ year: 2019, month: 11, day: 1 });
-        const two = PlainYearMonth.from({ year: 2019, month: 11, day: 2 });
+        const one = PlainYearMonth.from({ year: 2019, month: 11, day: 1 } as ValidArg);
+        const two = PlainYearMonth.from({ year: 2019, month: 11, day: 2 } as ValidArg);
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay);
       });
       it('ignores day when determining the ISO reference day from year/monthCode', () => {
-        const one = PlainYearMonth.from({ year: 2019, monthCode: 'M11', day: 1 });
-        const two = PlainYearMonth.from({ year: 2019, monthCode: 'M11', day: 2 });
+        const one = PlainYearMonth.from({ year: 2019, monthCode: 'M11', day: 1 } as ValidArg);
+        const two = PlainYearMonth.from({ year: 2019, monthCode: 'M11', day: 2 } as ValidArg);
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay);
       });
       it('ignores day when determining the ISO reference day from era/eraYear/month', () => {
-        const one = PlainYearMonth.from({ era: 'ce', eraYear: 2019, month: 11, day: 1, calendar: 'gregory' });
-        const two = PlainYearMonth.from({ era: 'ce', eraYear: 2019, month: 11, day: 2, calendar: 'gregory' });
+        const one = PlainYearMonth.from({ era: 'ce', eraYear: 2019, month: 11, day: 1, calendar: 'gregory' } as ValidArg);
+        const two = PlainYearMonth.from({ era: 'ce', eraYear: 2019, month: 11, day: 2, calendar: 'gregory' } as ValidArg);
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay);
       });
       it('ignores day when determining the ISO reference day from era/eraYear/monthCode', () => {
-        const one = PlainYearMonth.from({ era: 'ce', eraYear: 2019, monthCode: 'M11', day: 1, calendar: 'gregory' });
-        const two = PlainYearMonth.from({ era: 'ce', eraYear: 2019, monthCode: 'M11', day: 2, calendar: 'gregory' });
+        const one = PlainYearMonth.from({ era: 'ce', eraYear: 2019, monthCode: 'M11', day: 1, calendar: 'gregory' } as ValidArg);
+        const two = PlainYearMonth.from({ era: 'ce', eraYear: 2019, monthCode: 'M11', day: 2, calendar: 'gregory' } as ValidArg);
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay);
       });
       it('YearMonth.from(2019-11) is not the same object', () => {
@@ -62,15 +66,15 @@ describe('YearMonth', () => {
         const two = PlainYearMonth.from(plainDate2);
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay);
       });
-      it('YearMonth.from({ year: 2019 }) throws', () => throws(() => PlainYearMonth.from({ year: 2019 }), TypeError));
-      it('YearMonth.from({ month: 6 }) throws', () => throws(() => PlainYearMonth.from({ month: 6 }), TypeError));
+      it('YearMonth.from({ year: 2019 }) throws', () => throws(() => PlainYearMonth.from({ year: 2019 } as InvalidArg), TypeError));
+      it('YearMonth.from({ month: 6 }) throws', () => throws(() => PlainYearMonth.from({ month: 6 } as InvalidArg), TypeError));
       it('YearMonth.from({ monthCode: "M06" }) throws', () =>
-        throws(() => PlainYearMonth.from({ monthCode: 'M06' }), TypeError));
-      it('YearMonth.from({}) throws', () => throws(() => PlainYearMonth.from({}), TypeError));
+        throws(() => PlainYearMonth.from({ monthCode: 'M06' } as InvalidArg), TypeError));
+      it('YearMonth.from({}) throws', () => throws(() => PlainYearMonth.from({} as InvalidArg), TypeError));
       it('YearMonth.from(required prop undefined) throws', () =>
         throws(() => PlainYearMonth.from({ year: undefined, month: 6 }), TypeError));
       it('YearMonth.from(number) is converted to string', () =>
-        assert(PlainYearMonth.from(201906).equals(PlainYearMonth.from('201906'))));
+        assert(PlainYearMonth.from(201906 as ValidArg).equals(PlainYearMonth.from('201906'))));
       it('basic format', () => {
         equal(`${PlainYearMonth.from('197611')}`, '1976-11');
         equal(`${PlainYearMonth.from('+00197611')}`, '1976-11');
@@ -107,7 +111,7 @@ describe('YearMonth', () => {
       });
       it('no junk at end of string', () => throws(() => PlainYearMonth.from('1976-11junk'), RangeError));
       it('options may only be an object or undefined', () => {
-        [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+        [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
           throws(() => PlainYearMonth.from({ year: 1976, month: 11 }, badOptions), TypeError)
         );
         [{}, () => {}, undefined].forEach((options) =>
@@ -123,7 +127,7 @@ describe('YearMonth', () => {
         });
         it('throw on bad overflow', () => {
           [new PlainYearMonth(2019, 1), { year: 2019, month: 1 }, '2019-01'].forEach((input) => {
-            ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+            ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
               throws(() => PlainYearMonth.from(input, { overflow }), RangeError)
             );
           });
@@ -133,11 +137,11 @@ describe('YearMonth', () => {
         });
       });
       it('object must contain at least the required correctly-spelled properties', () => {
-        throws(() => PlainYearMonth.from({}), TypeError);
-        throws(() => PlainYearMonth.from({ year: 1976, months: 11 }), TypeError);
+        throws(() => PlainYearMonth.from({} as InvalidArg), TypeError);
+        throws(() => PlainYearMonth.from({ year: 1976, months: 11 } as InvalidArg), TypeError);
       });
       it('incorrectly-spelled properties are ignored', () => {
-        equal(`${PlainYearMonth.from({ year: 1976, month: 11, months: 12 })}`, '1976-11');
+        equal(`${PlainYearMonth.from({ year: 1976, month: 11, months: 12 } as ValidArg)}`, '1976-11');
       });
     });
     describe('.with()', () => {
@@ -151,26 +155,26 @@ describe('YearMonth', () => {
   describe('YearMonth.with() works', () => {
     const ym = PlainYearMonth.from('2019-10');
     it('throws with calendar property', () => {
-      throws(() => ym.with({ year: 2021, calendar: 'iso8601' }), TypeError);
+      throws(() => ym.with({ year: 2021, calendar: 'iso8601' } as InvalidArg), TypeError);
     });
     it('throws with timeZone property', () => {
-      throws(() => ym.with({ year: 2021, timeZone: 'UTC' }), TypeError);
+      throws(() => ym.with({ year: 2021, timeZone: 'UTC' } as InvalidArg), TypeError);
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => ym.with({ year: 2020 }, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(`${ym.with({ year: 2020 }, options)}`, '2020-10'));
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => ym.with({}), TypeError);
-      throws(() => ym.with({ months: 12 }), TypeError);
+      throws(() => ym.with({ months: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${ym.with({ month: 1, years: 2020 })}`, '2019-01');
+      equal(`${ym.with({ month: 1, years: 2020 } as ValidArg)}`, '2019-01');
     });
     it('day is ignored when determining ISO reference day', () => {
-      equal(ym.with({ year: ym.year, day: 31 }).getISOFields().isoDay, ym.getISOFields().isoDay);
+      equal(ym.with({ year: ym.year, day: 31 } as ValidArg).getISOFields().isoDay, ym.getISOFields().isoDay);
     });
   });
   describe('YearMonth.compare() works', () => {
@@ -188,8 +192,8 @@ describe('YearMonth', () => {
       equal(PlainYearMonth.compare(nov94, '2013-06'), -1);
     });
     it('object must contain at least the required properties', () => {
-      throws(() => PlainYearMonth.compare({ year: 1994 }, jun13), TypeError);
-      throws(() => PlainYearMonth.compare(nov94, { year: 2013 }), TypeError);
+      throws(() => PlainYearMonth.compare({ year: 1994 } as InvalidArg, jun13), TypeError);
+      throws(() => PlainYearMonth.compare(nov94, { year: 2013 } as InvalidArg), TypeError);
     });
     it('takes [[ISODay]] into account', () => {
       const iso = Temporal.Calendar.from('iso8601');
@@ -208,7 +212,7 @@ describe('YearMonth', () => {
       assert(nov94.equals('1994-11'));
     });
     it('object must contain at least the required properties', () => {
-      throws(() => nov94.equals({ year: 1994 }), TypeError);
+      throws(() => nov94.equals({ year: 1994 } as InvalidArg), TypeError);
     });
     it('takes [[ISODay]] into account', () => {
       const iso = Temporal.Calendar.from('iso8601');
@@ -673,7 +677,7 @@ describe('YearMonth', () => {
     it('constructing from property bag', () => {
       const tooEarly = { year: -271821, month: 3 };
       const tooLate = { year: 275760, month: 10 };
-      ['reject', 'constrain'].forEach((overflow) => {
+      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
         [tooEarly, tooLate].forEach((props) => {
           throws(() => PlainYearMonth.from(props, { overflow }), RangeError);
         });
@@ -682,7 +686,7 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from({ year: 275760, month: 9 })}`, '+275760-09');
     });
     it('constructing from ISO string', () => {
-      ['reject', 'constrain'].forEach((overflow) => {
+      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
         ['-271821-03', '+275760-10'].forEach((str) => {
           throws(() => PlainYearMonth.from(str, { overflow }), RangeError);
         });
@@ -707,7 +711,7 @@ describe('YearMonth', () => {
   });
   describe('YearMonth.with()', () => {
     it('throws on bad overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
         throws(() => PlainYearMonth.from({ year: 2019, month: 1 }).with({ month: 2 }, { overflow }), RangeError)
       );
     });
@@ -715,7 +719,7 @@ describe('YearMonth', () => {
   describe('YearMonth.toPlainDate()', () => {
     const ym = PlainYearMonth.from('2002-01');
     it("doesn't take a primitive argument", () => {
-      [22, '22', false, 22n, Symbol('22'), null].forEach((bad) => {
+      [22, '22', false, 22n, Symbol('22'), null].forEach((bad: InvalidArg) => {
         throws(() => ym.toPlainDate(bad), TypeError);
       });
     });
@@ -723,7 +727,7 @@ describe('YearMonth', () => {
       equal(`${ym.toPlainDate({ day: 22 })}`, '2002-01-22');
     });
     it('needs at least a day property on the object in the ISO calendar', () => {
-      throws(() => ym.toPlainDate({ something: 'nothing' }), TypeError);
+      throws(() => ym.toPlainDate({ something: 'nothing' } as InvalidArg), TypeError);
     });
   });
   describe('YearMonth.toString()', () => {
@@ -745,7 +749,7 @@ describe('YearMonth', () => {
       equal(ym2.toString(), '1976-11-01[u-ca=gregory]');
     });
     it('throws on invalid calendar', () => {
-      ['ALWAYS', 'sometimes', false, 3, null].forEach((calendarName) => {
+      ['ALWAYS', 'sometimes', false, 3, null].forEach((calendarName: InvalidArg) => {
         throws(() => ym1.toString({ calendarName }), RangeError);
       });
     });

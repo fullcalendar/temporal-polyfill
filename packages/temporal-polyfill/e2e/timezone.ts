@@ -3,10 +3,14 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai'
-const { deepEqual, equal, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { deepEqual, equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill'
+import * as Temporal from 'temporal-polyfill';
+import { Disambiguation } from 'temporal-polyfill';
+
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('TimeZone', () => {
   describe('Structure', () => {
@@ -306,7 +310,7 @@ describe('TimeZone', () => {
     it('options may only be an object or undefined', () => {
       const dt = Temporal.PlainDateTime.from('2019-10-29T10:46:38.271986102');
       const tz = Temporal.TimeZone.from('America/Sao_Paulo');
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => tz.getInstantFor(dt, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) =>
@@ -323,14 +327,14 @@ describe('TimeZone', () => {
     });
     it('object must contain at least the required properties', () => {
       const tz = Temporal.TimeZone.from('Europe/Amsterdam');
-      throws(() => tz.getInstantFor({ year: 2019 }), TypeError);
+      throws(() => tz.getInstantFor({ year: 2019 } as InvalidArg), TypeError);
     });
   });
   describe('getInstantFor disambiguation', () => {
     const dtm = new Temporal.PlainDateTime(2019, 2, 16, 23, 45);
     it('with constant offset', () => {
       const zone = Temporal.TimeZone.from('+03:30');
-      for (const disambiguation of [undefined, 'compatible', 'earlier', 'later', 'reject']) {
+      for (const disambiguation of [undefined, 'compatible', 'earlier', 'later', 'reject'] as Disambiguation[]) {
         assert(zone.getInstantFor(dtm, { disambiguation }) instanceof Temporal.Instant);
       }
     });
@@ -353,7 +357,7 @@ describe('TimeZone', () => {
     });
     it('throws on bad disambiguation', () => {
       const zone = Temporal.TimeZone.from('+03:30');
-      ['', 'EARLIER', 'test', 3, null].forEach((disambiguation) =>
+      ['', 'EARLIER', 'test', 3, null].forEach((disambiguation: Disambiguation) =>
         throws(() => zone.getInstantFor(dtm, { disambiguation }), RangeError)
       );
     });
@@ -404,7 +408,7 @@ describe('TimeZone', () => {
     });
     it('object must contain at least the required properties', () => {
       const tz = Temporal.TimeZone.from('Europe/Amsterdam');
-      throws(() => tz.getPossibleInstantsFor({ year: 2019 }), TypeError);
+      throws(() => tz.getPossibleInstantsFor({ year: 2019 } as InvalidArg), TypeError);
     });
   });
   describe('getNextTransition works', () => {

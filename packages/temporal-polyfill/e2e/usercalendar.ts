@@ -1,13 +1,13 @@
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import { assert } from '@esm-bundle/chai'
-const { equal, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill'
+import * as Temporal from 'temporal-polyfill';
 
-type WeirdArg = any
-type ExtendedObj = any
+type ValidArg = any;
+type ExtendedObj = any;
 
 describe('Userland calendar', () => {
   describe('Trivial subclass', () => {
@@ -261,15 +261,15 @@ describe('Userland calendar', () => {
       const tz = Temporal.TimeZone.from('UTC');
       const inst = Temporal.Instant.fromEpochSeconds(0);
       const dt = tz.getPlainDateTimeFor(inst, obj);
-      equal(dt.calendar.id, (obj as WeirdArg).id); // **both will be undefined, right?**
+      equal(dt.calendar.id, (obj as ValidArg).id); // **both will be undefined, right?**
     });
     it('Temporal.Now.plainDateTime()', () => {
       const nowDateTime = Temporal.Now.plainDateTime(obj, 'UTC');
-      equal(nowDateTime.calendar.id, (obj as WeirdArg).id); // **both will be undefined, right?**
+      equal(nowDateTime.calendar.id, (obj as ValidArg).id); // **both will be undefined, right?**
     });
     it('Temporal.Now.plainDate()', () => {
       const nowDate = Temporal.Now.plainDate(obj, 'UTC');
-      equal(nowDate.calendar.id, (obj as WeirdArg).id); // **both will be undefined, right?**
+      equal(nowDate.calendar.id, (obj as ValidArg).id); // **both will be undefined, right?**
     });
   });
   describe('calendar with extra fields', () => {
