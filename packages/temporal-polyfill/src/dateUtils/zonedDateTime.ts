@@ -7,7 +7,7 @@ import {
   OffsetHandlingInt,
   parseOffsetHandling,
 } from '../argParse/offsetHandling'
-import { RoundConfig, parseRoundConfig } from '../argParse/roundOptions'
+import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
 import { unitNames } from '../argParse/units'
 import {
   CompareResult,
@@ -212,7 +212,7 @@ export function roundZonedDateTime(
   zonedDateTime: ZonedDateTime,
   options: DateTimeRoundOptions | undefined,
 ): ZonedDateTime {
-  const roundConfig = parseRoundConfig<DayTimeUnit, DayTimeUnitInt>(
+  const roundConfig = parseRoundOptions<DayTimeUnit, DayTimeUnitInt>(
     options,
     undefined, // no default. will error-out if unset
     NANOSECOND, // minUnit

@@ -1,6 +1,6 @@
 import { DiffOptions, Unit } from '../args'
 import { UnitInt } from '../dateUtils/units'
-import { RoundConfig, parseRoundConfig } from './roundOptions'
+import { RoundConfig, parseRoundOptions } from './roundOptions'
 import { parseUnit } from './units'
 
 export interface DiffConfig<
@@ -19,7 +19,7 @@ export function parseDiffOptions<
   minUnit: UnitIntType,
   maxUnit: UnitIntType,
 ): DiffConfig<UnitIntType> {
-  const roundingConfig = parseRoundConfig<UnitArg, UnitIntType>(
+  const roundingConfig = parseRoundOptions<UnitArg, UnitIntType>(
     options,
     smallestUnitDefault,
     minUnit,

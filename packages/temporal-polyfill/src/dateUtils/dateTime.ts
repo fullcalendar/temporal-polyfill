@@ -1,7 +1,7 @@
 import { getCommonCalendar } from '../argParse/calendar'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { RoundConfig, parseRoundConfig } from '../argParse/roundOptions'
+import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
 import { unitNames } from '../argParse/units'
 import {
   CompareResult,
@@ -178,7 +178,7 @@ export function roundDateTime(
   dateTime: PlainDateTime,
   options: DateTimeRoundOptions,
 ): PlainDateTime {
-  const roundConfig = parseRoundConfig<DayTimeUnit, DayTimeUnitInt>(
+  const roundConfig = parseRoundOptions<DayTimeUnit, DayTimeUnitInt>(
     options,
     undefined, // no default. required
     NANOSECOND, // minUnit

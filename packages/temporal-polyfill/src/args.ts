@@ -125,7 +125,8 @@ export type ZonedDateTimeArg = ZonedDateTimeLike | string
 export type DurationArg = DurationLike | string
 export type TimeZoneArg = TimeZone | string
 export type CalendarArg = CalendarArgSimple | CalendarArgBag
-export type InstantArg = Instant | string
+// can pass-in nearly any date-like object to Instant, because parses toString()
+export type InstantArg = Instant | string | { toString(): string }
 export type LocalesArg = string | string[]
 
 // override-fields

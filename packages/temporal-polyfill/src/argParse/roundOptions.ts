@@ -10,7 +10,7 @@ export interface RoundConfig<UnitType extends UnitInt = UnitInt> {
   roundingIncrement: number
 }
 
-export function parseRoundConfig<
+export function parseRoundOptions<
   UnitArgType extends Unit,
   UnitType extends UnitInt
 >(

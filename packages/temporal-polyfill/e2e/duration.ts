@@ -1666,7 +1666,7 @@ describe('Duration', () => {
     it('casts relativeTo to ZonedDateTime if possible', () => {
       equal(oneDay.total({ unit: 'hours', relativeTo: '2019-11-03T00:00[America/Vancouver]' }), 25);
       equal(
-        oneDay.total({ unit: 'hours', relativeTo: { year: 2019, month: 11, day: 3, timeZone: 'America/Vancouver' } }),
+        oneDay.total({ unit: 'hours', relativeTo: { year: 2019, month: 11, day: 3, timeZone: 'America/Vancouver' } as ValidArg }),
         25
       );
     });

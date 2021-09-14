@@ -1,7 +1,7 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt, parseOverflowHandling } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
-import { parseRoundConfig } from '../argParse/roundOptions'
+import { parseRoundOptions } from '../argParse/roundOptions'
 import {
   CompareResult,
   OverflowOptions,
@@ -109,7 +109,7 @@ export function diffPlainTimes(
 }
 
 export function roundPlainTime(plainTime: PlainTime, options: TimeRoundOptions): PlainTime {
-  const roundConfig = parseRoundConfig<TimeUnit, TimeUnitInt>(
+  const roundConfig = parseRoundOptions<TimeUnit, TimeUnitInt>(
     options,
     undefined, // no default. required
     NANOSECOND, // minUnit

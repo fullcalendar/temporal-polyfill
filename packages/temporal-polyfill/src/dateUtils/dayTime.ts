@@ -20,3 +20,15 @@ export function nanoToDayTimeFields(nano: number, largestUnit: DayTimeUnitInt): 
 
   return fields
 }
+
+export function splitEpochNano(epochNano: bigint): [
+  bigint, number, // [dayNano, timeNano]
+] {
+  const dayNano = epochNano / BigInt(nanoInDay) * BigInt(nanoInDay)
+  const timeNano = Number(epochNano - dayNano)
+  return [dayNano, timeNano]
+}
+
+export function joinEpochNano(dayNano: bigint, timeNano: number): bigint {
+  return dayNano * BigInt(nanoInDay) + BigInt(timeNano)
+}

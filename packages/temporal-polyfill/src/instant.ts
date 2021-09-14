@@ -1,18 +1,22 @@
 import { AbstractNoValueObj, ensureObj } from './dateUtils/abstract'
+import { addToInstant, compareInstants, diffInstants, roundInstant } from './dateUtils/instant'
 import { isoFieldsToEpochNano } from './dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from './dateUtils/mixins'
 import { parseDateTimeISO, parseOffsetNano } from './dateUtils/parse'
 import { nanoInMicro, nanoInMilli, nanoInSecond } from './dateUtils/units'
-import { compareValues } from './utils/math'
 import { createWeakMap } from './utils/obj'
 import {
   CalendarArg,
   CompareResult,
+  DurationArg,
   InstantArg,
   InstantToStringOptions,
   LocalesArg,
+  TimeDiffOptions,
+  TimeRoundOptions,
   TimeZoneArg,
 } from './args'
+import { Duration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'
 
 const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
@@ -61,6 +65,26 @@ export class Instant extends AbstractNoValueObj {
 
   get epochNanoseconds(): bigint { return getEpochNano(this) }
 
+  add(durationArg: DurationArg): Instant {
+    return addToInstant(this, ensureObj(Duration, durationArg))
+  }
+
+  subtract(durationArg: DurationArg): Instant {
+    return addToInstant(this, ensureObj(Duration, durationArg).negated())
+  }
+
+  until(other: InstantArg, options?: TimeDiffOptions): Duration {
+    return diffInstants(this, ensureObj(Instant, other), options)
+  }
+
+  since(other: InstantArg, options?: TimeDiffOptions): Duration {
+    return diffInstants(ensureObj(Instant, other), this, options)
+  }
+
+  round(options: TimeRoundOptions): Instant {
+    return roundInstant(this, options)
+  }
+
   equals(other: InstantArg): boolean {
     return compareInstants(this, ensureObj(Instant, other)) === 0
   }
@@ -90,8 +114,3 @@ export class Instant extends AbstractNoValueObj {
 // mixins
 export interface Instant extends ComputedEpochFields {}
 mixinEpochFields(Instant)
-
-// utils
-function compareInstants(a: Instant, b: Instant): CompareResult {
-  return compareValues(a.epochNanoseconds, b.epochNanoseconds)
-}
