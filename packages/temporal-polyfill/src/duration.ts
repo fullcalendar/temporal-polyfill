@@ -1,5 +1,5 @@
 import { DurationToStringUnitInt, parseTimeToStringOptions } from './argParse/isoFormatOptions'
-import { refineFields } from './argParse/refine'
+import { refineFields, refineOverrideFields } from './argParse/refine'
 import { parseUnit } from './argParse/units'
 import { AbstractNoValueObj, ensureObj } from './dateUtils/abstract'
 import {
@@ -91,7 +91,7 @@ export class Duration extends AbstractNoValueObj {
   with(fields: DurationLike): Duration {
     return createDuration({
       ...getFields(this),
-      ...refineFields(fields, durationFieldMap),
+      ...refineOverrideFields(fields, durationFieldMap),
     })
   }
 

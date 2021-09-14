@@ -28,7 +28,7 @@ export abstract class CalendarImpl {
   abstract daysInMonth(year: number, month: number): number
   abstract monthsInYear(year: number): number
   abstract inLeapYear(year: number): boolean
-  abstract monthYear(monthCode: string, day: number): number
+  abstract monthYear(monthCode: string | undefined, day: number | undefined): number
 
   // month -> monthCode
   monthCode(month: number, _year: number): string {

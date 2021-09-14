@@ -1,7 +1,7 @@
 import { extractCalendar, isoCalendar } from './argParse/calendar'
 import { parseCalendarDisplay } from './argParse/calendarDisplay'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
-import { refineFields } from './argParse/refine'
+import { refineFields, refineOverrideFields } from './argParse/refine'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
 import { isoCalendarID } from './dateUtils/calendar'
 import { constrainDateISO } from './dateUtils/date'
@@ -14,6 +14,7 @@ import {
   monthDayCalendarFields,
 } from './dateUtils/mixins'
 import {
+  MonthDayFields,
   createMonthDay,
   monthDayFieldMap,
   monthDaysEqual,
@@ -58,14 +59,17 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
       return createMonthDay(arg.getISOFields()) // optimization
     }
     if (typeof arg === 'object') {
-      const refinedFields = refineFields(arg, monthDayFieldMap) as MonthDayLikeFields
-      return extractCalendar(arg).monthDayFromFields(refinedFields, options)
+      const refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
+      if (refinedFields.year == null && refinedFields.monthCode == null && arg.calendar != null) {
+        throw new Error('If omitting year/monthCode, cant specify calendar')
+      }
+      return extractCalendar(arg).monthDayFromFields(refinedFields as MonthDayLikeFields, options)
     }
     return createMonthDay(parseDateTimeISO(String(arg)))
   }
 
   with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {
-    const refinedFields = refineFields(fields, monthDayFieldMap, ['calendar'])
+    const refinedFields = refineOverrideFields(fields, monthDayFieldMap)
     const mergedFields = overrideMonthDayFields(refinedFields, this)
     return this.calendar.monthDayFromFields(mergedFields, options)
   }
@@ -95,12 +99,12 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     )
   }
 
-  toPlainDate(fields: { year: number }): PlainDate {
+  toPlainDate(fields: { year: number }, options?: OverflowOptions): PlainDate {
     return this.calendar.dateFromFields({
       year: fields.year,
       monthCode: this.monthCode,
       day: this.day,
-    })
+    }, options)
   }
 }
 

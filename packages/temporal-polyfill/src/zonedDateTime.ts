@@ -3,7 +3,7 @@ import { parseCalendarDisplay } from './argParse/calendarDisplay'
 import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplay } from './argParse/offsetDisplay'
 import { OFFSET_PREFER, OFFSET_REJECT } from './argParse/offsetHandling'
-import { refineFields } from './argParse/refine'
+import { refineFields, refineOverrideFields } from './argParse/refine'
 import { parseTimeZoneDisplay } from './argParse/timeZoneDisplay'
 import { timeUnitNames } from './argParse/units'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
@@ -126,7 +126,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   get offset(): string { return this.getISOFields().offset }
 
   with(fields: ZonedDateTimeOverrides, options?: ZonedDateTimeOptions): ZonedDateTime {
-    const refinedFields = refineFields(fields, zonedDateTimeFieldMap, ['calendar', 'timeZone'])
+    const refinedFields = refineOverrideFields(fields, zonedDateTimeFieldMap)
     const mergedFields = overrideZonedDateTimeFields(refinedFields, this)
     return createZonedDateTime(
       zonedDateTimeFieldsToISO(

@@ -2,7 +2,7 @@ import { extractCalendar, isoCalendar } from './argParse/calendar'
 import { parseCalendarDisplay } from './argParse/calendarDisplay'
 import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
-import { refineFields } from './argParse/refine'
+import { refineFields, refineOverrideFields } from './argParse/refine'
 import { timeUnitNames } from './argParse/units'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
 import { createDate } from './dateUtils/date'
@@ -107,7 +107,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   with(fields: DateTimeOverrides, options?: OverflowOptions): PlainDateTime {
-    const refinedFields = refineFields(fields, dateTimeFieldMap, ['calendar'])
+    const refinedFields = refineOverrideFields(fields, dateTimeFieldMap)
     const mergedFields = overrideDateTimeFields(refinedFields, this)
     return createDateTime(dateTimeFieldsToISO(mergedFields, options, this.calendar))
   }

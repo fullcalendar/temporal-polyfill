@@ -1,7 +1,7 @@
 import { isoCalendar } from './argParse/calendar'
 import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
-import { refineFields } from './argParse/refine'
+import { refineFields, refineOverrideFields } from './argParse/refine'
 import { timeUnitNames } from './argParse/units'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
 import { formatTimeISO } from './dateUtils/isoFormat'
@@ -82,7 +82,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   with(fields: TimeLike, options?: OverflowOptions): PlainTime {
-    const refinedFields = refineFields(fields, timeFieldMap)
+    const refinedFields = refineOverrideFields(fields, timeFieldMap)
     const mergedFields = overrideTimeFields(refinedFields, this)
     return createTime(timeFieldsToConstrainedISO(mergedFields, options))
   }

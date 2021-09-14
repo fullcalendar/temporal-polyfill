@@ -39,7 +39,6 @@ export function constrainValue( // will also cast to number
 export function refineFields<Map extends { [fieldName: string]: (input: unknown) => any }>(
   input: { [FieldName in keyof Map]?: unknown },
   refinerMap: Map,
-  fieldBlacklist: string[] = [],
 ): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
   const res: { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } = {}
   let cnt = 0
@@ -55,11 +54,20 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
     throw new Error('Invalid object, no keys')
   }
 
-  for (const fieldName of fieldBlacklist) {
+  return res
+}
+
+const invalidOverrideFields = ['calendar', 'timeZone']
+
+export function refineOverrideFields<Map extends { [fieldName: string]: (input: unknown) => any }>(
+  input: { [FieldName in keyof Map]?: unknown },
+  refinerMap: Map,
+): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
+  for (const fieldName of invalidOverrideFields) {
     if (input[fieldName] != null) {
       throw new Error(`Disallowed field ${fieldName}`)
     }
   }
 
-  return res
+  return refineFields(input, refinerMap)
 }

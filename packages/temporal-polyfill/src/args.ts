@@ -109,7 +109,11 @@ export type ZonedDateTimeLikeFields = DateTimeLikeFields & { offset?: string }
 
 // like (has calendar/timezone)
 export type YearMonthLike = YearMonthLikeFields & { calendar?: CalendarArg }
-export type MonthDayLike = MonthDayLikeFields & { calendar?: CalendarArg }
+export type MonthDayLike =
+  { monthCode: string, calendar?: CalendarArg } |
+  { year: number, month: number, calendar?: CalendarArg } |
+  { era: string, eraYear: number, month: number, calendar: CalendarArg } |
+  { month: number, day: number, calendar?: never } // lack of a calendar implies ISO
 export type DateLike = YearMonthLike & { day: number }
 export type TimeLike = Partial<TimeFields>
 export type DateTimeLike = DateLike & TimeLike

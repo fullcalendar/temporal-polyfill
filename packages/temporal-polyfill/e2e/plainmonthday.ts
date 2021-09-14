@@ -2,7 +2,11 @@ import { assert } from '@esm-bundle/chai'
 const { throws, equal, notEqual } = assert
 
 import * as Temporal from 'temporal-polyfill'
+import { OverflowHandling } from 'temporal-polyfill'
 const { PlainMonthDay } = Temporal
+
+type InvalidArg = any
+type ValidArg = any
 
 describe('MonthDay', () => {
   describe('Construction', () => {
@@ -21,18 +25,18 @@ describe('MonthDay', () => {
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear);
       });
       it('ignores era/eraYear when determining the ISO reference year from month/day', () => {
-        const one = PlainMonthDay.from({ era: 'ce', eraYear: 2019, month: 11, day: 18, calendar: 'gregory' });
-        const two = PlainMonthDay.from({ era: 'ce', eraYear: 1979, month: 11, day: 18, calendar: 'gregory' });
+        const one = PlainMonthDay.from({ era: 'ce', eraYear: 2019, month: 11, day: 18, calendar: 'gregory' } as ValidArg);
+        const two = PlainMonthDay.from({ era: 'ce', eraYear: 1979, month: 11, day: 18, calendar: 'gregory' } as ValidArg);
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear);
       });
       it('ignores year when determining the ISO reference year from monthCode/day', () => {
-        const one = PlainMonthDay.from({ year: 2019, monthCode: 'M11', day: 18 });
-        const two = PlainMonthDay.from({ year: 1979, monthCode: 'M11', day: 18 });
+        const one = PlainMonthDay.from({ year: 2019, monthCode: 'M11', day: 18 } as ValidArg);
+        const two = PlainMonthDay.from({ year: 1979, monthCode: 'M11', day: 18 } as ValidArg);
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear);
       });
       it('ignores era/eraYear when determining the ISO reference year from monthCode/day', () => {
-        const one = PlainMonthDay.from({ era: 'ce', eraYear: 2019, monthCode: 'M11', day: 18, calendar: 'gregory' });
-        const two = PlainMonthDay.from({ era: 'ce', eraYear: 1979, monthCode: 'M11', day: 18, calendar: 'gregory' });
+        const one = PlainMonthDay.from({ era: 'ce', eraYear: 2019, monthCode: 'M11', day: 18, calendar: 'gregory' } as ValidArg);
+        const two = PlainMonthDay.from({ era: 'ce', eraYear: 1979, monthCode: 'M11', day: 18, calendar: 'gregory' } as ValidArg);
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear);
       });
       it('MonthDay.from(11-18) is not the same object', () => {
@@ -50,9 +54,9 @@ describe('MonthDay', () => {
       it('MonthDay.from({month, day}) allowed if calendar absent', () =>
         equal(`${PlainMonthDay.from({ month: 11, day: 18 })}`, '11-18'));
       it('MonthDay.from({month, day}) not allowed in explicit ISO calendar', () =>
-        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'iso8601' }), TypeError));
+        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'iso8601' } as InvalidArg), TypeError));
       it('MonthDay.from({month, day}) not allowed in other calendar', () =>
-        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'gregory' }), TypeError));
+        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'gregory' } as InvalidArg), TypeError));
       it('MonthDay.from({year, month, day}) allowed in other calendar', () => {
         equal(
           `${PlainMonthDay.from({ year: 1970, month: 11, day: 18, calendar: 'gregory' })}`,
@@ -65,14 +69,14 @@ describe('MonthDay', () => {
           '1972-11-18[u-ca=gregory]'
         );
       });
-      it('MonthDay.from({ day: 15 }) throws', () => throws(() => PlainMonthDay.from({ day: 15 }), TypeError));
+      it('MonthDay.from({ day: 15 }) throws', () => throws(() => PlainMonthDay.from({ day: 15 } as InvalidArg), TypeError));
       it('MonthDay.from({ monthCode: "M12" }) throws', () =>
-        throws(() => PlainMonthDay.from({ monthCode: 'M12' }), TypeError));
-      it('MonthDay.from({}) throws', () => throws(() => PlainMonthDay.from({}), TypeError));
+        throws(() => PlainMonthDay.from({ monthCode: 'M12' } as InvalidArg), TypeError));
+      it('MonthDay.from({}) throws', () => throws(() => PlainMonthDay.from({} as InvalidArg), TypeError));
       it('MonthDay.from(required prop undefined) throws', () =>
         throws(() => PlainMonthDay.from({ monthCode: undefined, day: 15 }), TypeError));
       it('MonthDay.from(number) is converted to string', () =>
-        assert(PlainMonthDay.from(1201).equals(PlainMonthDay.from('12-01'))));
+        assert(PlainMonthDay.from(1201 as ValidArg).equals(PlainMonthDay.from('12-01'))));
       it('basic format', () => {
         equal(`${PlainMonthDay.from('1118')}`, '11-18');
       });
@@ -108,7 +112,7 @@ describe('MonthDay', () => {
       });
       it('no junk at end of string', () => throws(() => PlainMonthDay.from('11-18junk'), RangeError));
       it('options may only be an object or undefined', () => {
-        [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+        [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
           throws(() => PlainMonthDay.from({ month: 11, day: 18 }, badOptions), TypeError)
         );
         [{}, () => {}, undefined].forEach((options) =>
@@ -124,7 +128,7 @@ describe('MonthDay', () => {
         });
         it('throw on bad overflow', () => {
           [new PlainMonthDay(11, 18), { month: 1, day: 1 }, '01-31'].forEach((input) => {
-            ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+            ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
               throws(() => PlainMonthDay.from(input, { overflow }), RangeError)
             );
           });
@@ -134,7 +138,7 @@ describe('MonthDay', () => {
         });
       });
       describe('Leap day', () => {
-        ['reject', 'constrain'].forEach((overflow) =>
+        ['reject', 'constrain'].forEach((overflow: OverflowHandling) =>
           it(overflow, () => equal(`${PlainMonthDay.from({ month: 2, day: 29 }, { overflow })}`, '02-29'))
         );
         it("rejects when year isn't a leap year", () =>
@@ -145,7 +149,7 @@ describe('MonthDay', () => {
       describe('Leap day with calendar', () => {
         it('requires year with calendar', () =>
           throws(
-            () => PlainMonthDay.from({ month: 2, day: 29, calendar: 'iso8601' }, { overflow: 'reject' }),
+            () => PlainMonthDay.from({ month: 2, day: 29, calendar: 'iso8601' } as InvalidArg, { overflow: 'reject' }),
             TypeError
           ));
         it('rejects leap day with non-leap year', () =>
@@ -165,11 +169,11 @@ describe('MonthDay', () => {
           ));
       });
       it('object must contain at least the required correctly-spelled properties', () => {
-        throws(() => PlainMonthDay.from({}), TypeError);
-        throws(() => PlainMonthDay.from({ months: 12, day: 31 }), TypeError);
+        throws(() => PlainMonthDay.from({} as InvalidArg), TypeError);
+        throws(() => PlainMonthDay.from({ months: 12, day: 31 } as InvalidArg), TypeError);
       });
       it('incorrectly-spelled properties are ignored', () => {
-        equal(`${PlainMonthDay.from({ month: 12, day: 1, days: 31 })}`, '12-01');
+        equal(`${PlainMonthDay.from({ month: 12, day: 1, days: 31 } as ValidArg)}`, '12-01');
       });
     });
     describe('getters', () => {
@@ -180,7 +184,7 @@ describe('MonthDay', () => {
       it("(1-15).day === '15'", () => {
         equal(`${md.day}`, '15');
       });
-      it('month is undefined', () => equal(md.month, undefined));
+      it('month is undefined', () => equal((md as InvalidArg).month, undefined));
     });
     describe('.with()', () => {
       const md = PlainMonthDay.from('01-22');
@@ -200,28 +204,28 @@ describe('MonthDay', () => {
     });
     it('with({year, month}) accepted', () => equal(`${md.with({ year: 2000, month: 12 })}`, '12-15'));
     it('throws on bad overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
         throws(() => md.with({ day: 1 }, { overflow }), RangeError)
       );
     });
     it('throws with calendar property', () => {
-      throws(() => md.with({ day: 1, calendar: 'iso8601' }), TypeError);
+      throws(() => md.with({ day: 1, calendar: 'iso8601' } as InvalidArg), TypeError);
     });
     it('throws with timeZone property', () => {
-      throws(() => md.with({ day: 1, timeZone: 'UTC' }), TypeError);
+      throws(() => md.with({ day: 1, timeZone: 'UTC' } as InvalidArg), TypeError);
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => md.with({ day: 1 }, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(`${md.with({ day: 1 }, options)}`, '01-01'));
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => md.with({}), TypeError);
-      throws(() => md.with({ months: 12 }), TypeError);
+      throws(() => md.with({ months: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${md.with({ monthCode: 'M12', days: 1 })}`, '12-15');
+      equal(`${md.with({ monthCode: 'M12', days: 1 } as ValidArg)}`, '12-15');
     });
     it('year is ignored when determining ISO reference year', () => {
       equal(md.with({ year: 1900 }).getISOFields().isoYear, md.getISOFields().isoYear);
@@ -237,7 +241,7 @@ describe('MonthDay', () => {
       assert(md1.equals({ month: 1, day: 22 }));
     });
     it('object must contain at least the required properties', () => {
-      throws(() => md1.equals({ month: 1 }), TypeError);
+      throws(() => md1.equals({ month: 1 } as InvalidArg), TypeError);
     });
     it('takes [[ISOYear]] into account', () => {
       const iso = Temporal.Calendar.from('iso8601');
@@ -260,7 +264,7 @@ describe('MonthDay', () => {
   describe('MonthDay.toPlainDate()', () => {
     const md = PlainMonthDay.from('01-22');
     it("doesn't take a primitive argument", () => {
-      [2002, '2002', false, 2002n, Symbol('2002'), null].forEach((bad) => {
+      [2002, '2002', false, 2002n, Symbol('2002'), null].forEach((bad: InvalidArg) => {
         throws(() => md.toPlainDate(bad), TypeError);
       });
     });
@@ -268,7 +272,7 @@ describe('MonthDay', () => {
       equal(`${md.toPlainDate({ year: 2002 })}`, '2002-01-22');
     });
     it('needs at least a year property on the object in the ISO calendar', () => {
-      throws(() => md.toPlainDate({ something: 'nothing' }), TypeError);
+      throws(() => md.toPlainDate({ something: 'nothing' } as InvalidArg), TypeError);
     });
     it("constrains if the MonthDay doesn't exist in the year", () => {
       const leapDay = PlainMonthDay.from('02-29');
@@ -295,7 +299,7 @@ describe('MonthDay', () => {
       equal(md2.toString(), '1972-11-18[u-ca=gregory]');
     });
     it('throws on invalid calendar', () => {
-      ['ALWAYS', 'sometimes', false, 3, null].forEach((calendarName) => {
+      ['ALWAYS', 'sometimes', false, 3, null].forEach((calendarName: InvalidArg) => {
         throws(() => md1.toString({ calendarName }), RangeError);
       });
     });

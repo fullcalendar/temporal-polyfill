@@ -25,7 +25,7 @@ import { computeISODayOfWeek } from './dateUtils/isoMath'
 import { MonthDayFields } from './dateUtils/monthDay'
 import { DAY, DateUnitInt, YEAR } from './dateUtils/units'
 import { computeWeekOfISOYear } from './dateUtils/week'
-import { createWeakMap, throwNew } from './utils/obj'
+import { createWeakMap } from './utils/obj'
 import {
   CalendarArg,
   CalendarProtocol,
@@ -194,19 +194,17 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
   monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay {
     const impl = getImpl(this)
-    const dateLikeFields: DateLikeFields = {
-      ...fields,
-      year: (fields as MonthDayFields).year ??
-        ((fields as MonthDayFields).monthCode != null
-          ? impl.monthYear((fields as MonthDayFields).monthCode, fields.day)
-          : throwNew(
-            Error,
-            'Must specify either a year or a monthCode. Not a only a month number',
-          ) as number
-        ),
+    let { year, monthCode, day } = fields as Partial<MonthDayFields>
+
+    if (year == null || monthCode != null) { // if monthCode specified, recalc the referenceYear
+      year = impl.monthYear(monthCode, day)
     }
 
-    const isoFields = queryDateISOFields(dateLikeFields, impl, options)
+    const isoFields = queryDateISOFields(
+      { ...fields, year },
+      impl,
+      options,
+    )
     return new PlainMonthDay(
       isoFields.isoMonth,
       isoFields.isoDay,

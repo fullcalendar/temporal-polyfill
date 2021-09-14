@@ -1,7 +1,7 @@
 import { extractCalendar, isoCalendar } from './argParse/calendar'
 import { parseCalendarDisplay } from './argParse/calendarDisplay'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
-import { refineFields } from './argParse/refine'
+import { refineFields, refineOverrideFields } from './argParse/refine'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
 import { constrainDateISO } from './dateUtils/date'
 import { formatCalendarID, formatYearMonthISO } from './dateUtils/isoFormat'
@@ -69,7 +69,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   with(fields: YearMonthOverrides, options?: OverflowOptions): PlainYearMonth {
-    const refinedFields = refineFields(fields, yearMonthFieldMap, ['calendar'])
+    const refinedFields = refineOverrideFields(fields, yearMonthFieldMap)
     return this.calendar.yearMonthFromFields(
       overrideYearMonthFields(refinedFields, this),
       options,

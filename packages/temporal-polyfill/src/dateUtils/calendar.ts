@@ -1,6 +1,6 @@
 import { ensureCalendarsEqual } from '../argParse/calendar'
 import { parseOverflowHandling } from '../argParse/overflowHandling'
-import { DateArg, DateLike, OverflowOptions } from '../args'
+import { DateArg, DateLikeFields, OverflowOptions } from '../args'
 import { Calendar } from '../calendar'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { ISOCalendarImpl } from '../calendarImpl/isoCalendarImpl'
@@ -60,7 +60,7 @@ export function queryDateFields(
 // ISO Field Querying
 
 export function queryDateISOFields(
-  dateLike: DateISOInstance | DateLike,
+  dateLike: DateISOInstance | DateLikeFields,
   calendarImpl: CalendarImpl,
   options: OverflowOptions | undefined,
 ): DateISOEssentials {
@@ -68,7 +68,7 @@ export function queryDateISOFields(
     return dateLike.getISOFields() // hard work has already been done
   }
 
-  let { era, eraYear, year, month, monthCode, day } = dateLike as DateFields
+  let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<DateFields>
 
   if (year == null) {
     if (eraYear != null || era != null) {
