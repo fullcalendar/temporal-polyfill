@@ -35,7 +35,7 @@ import {
   overrideDateTimeFields,
 } from './dateTime'
 import { dayTimeFieldsToNano } from './dayTime'
-import { dumbAddDurations, durationToTimeFields, nanoToDuration } from './duration'
+import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { parseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './round'
@@ -204,7 +204,7 @@ export function diffZonedDateTimes(
     DAY, // overflow to day just in case of weird DST issue
   )
 
-  const balancedDuration = dumbAddDurations(largeDuration, timeDuration)
+  const balancedDuration = addDurations(largeDuration, timeDuration)
   return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1)
 }
 

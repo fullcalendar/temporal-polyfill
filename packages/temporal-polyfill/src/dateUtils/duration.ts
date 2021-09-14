@@ -103,7 +103,7 @@ export function createDuration(fields: DurationLike): Duration {
   )
 }
 
-export function addDurations(
+export function addAndBalanceDurations(
   d0: Duration,
   d1: Duration,
   relativeToArg: ZonedDateTimeArg | DateTimeArg | undefined,
@@ -124,13 +124,13 @@ export function addDurations(
   }
 
   return balanceComplexDuration(
-    dumbAddDurations(d0, d1),
+    addDurations(d0, d1),
     largestUnit,
     getMaybeZonedRelativeTo(relativeToArg),
   )[0]
 }
 
-export function dumbAddDurations(d0: Duration, d1: Duration): Duration { // no balancing
+export function addDurations(d0: Duration, d1: Duration): Duration { // no balancing
   return new Duration(
     d0.years + d1.years,
     d0.months + d1.months,
@@ -147,7 +147,7 @@ export function dumbAddDurations(d0: Duration, d1: Duration): Duration { // no b
 
 export function addDaysToDuration(d: Duration, days: number): Duration {
   if (days) {
-    d = dumbAddDurations(d, new Duration(0, 0, 0, days))
+    d = addDurations(d, new Duration(0, 0, 0, days))
   }
   return d
 }
@@ -167,7 +167,7 @@ export function balanceComplexDuration(
   return [balancedDuration, translatedDate]
 }
 
-export function balanceAndRoundDuration(
+export function roundAndBalanceDuration(
   duration: Duration,
   options: DurationRoundOptions,
 ): Duration {

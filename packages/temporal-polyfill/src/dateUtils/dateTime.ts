@@ -33,8 +33,8 @@ import {
 } from './date'
 import {
   addDaysToDuration,
+  addDurations,
   dayTimeFieldsToDuration,
-  dumbAddDurations,
   durationToTimeFields,
   nanoToDuration,
 } from './duration'
@@ -170,7 +170,7 @@ export function diffDateTimes(
     { largestUnit: unitNames[largestUnit] as DateUnit },
   )
 
-  const balancedDuration = dumbAddDurations(largeDuration, dayTimeFieldsToDuration(timeFields))
+  const balancedDuration = addDurations(largeDuration, dayTimeFieldsToDuration(timeFields))
   return roundBalancedDuration(balancedDuration, diffConfig, t0, t1)
 }
 

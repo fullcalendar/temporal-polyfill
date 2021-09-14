@@ -1,5 +1,4 @@
 import {
-  CalendarArgBag,
   ensureCalendarsEqual,
   extractCalendar,
   getCommonCalendar,

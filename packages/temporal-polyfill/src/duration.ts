@@ -4,12 +4,12 @@ import { parseUnit } from './argParse/units'
 import { AbstractNoValueObj, ensureObj } from './dateUtils/abstract'
 import {
   SignedDurationFields,
-  addDurations,
-  balanceAndRoundDuration,
+  addAndBalanceDurations,
   compareDurations,
   createDuration,
   durationFieldMap,
   refineDurationFields,
+  roundAndBalanceDuration,
 } from './dateUtils/duration'
 import { formatDurationISO } from './dateUtils/isoFormat'
 import { parseDurationISO } from './dateUtils/parse'
@@ -114,15 +114,15 @@ export class Duration extends AbstractNoValueObj {
   }
 
   add(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
-    return addDurations(this, ensureObj(Duration, other), options?.relativeTo)
+    return addAndBalanceDurations(this, ensureObj(Duration, other), options?.relativeTo)
   }
 
   subtract(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
-    return addDurations(this, ensureObj(Duration, other).negated(), options?.relativeTo)
+    return addAndBalanceDurations(this, ensureObj(Duration, other).negated(), options?.relativeTo)
   }
 
   round(options: DurationRoundOptions): Duration {
-    return balanceAndRoundDuration(this, options)
+    return roundAndBalanceDuration(this, options)
   }
 
   total(options: DurationTotalOptions): number {

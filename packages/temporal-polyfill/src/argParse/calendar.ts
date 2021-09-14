@@ -7,7 +7,7 @@ export type CalendarArgSimple = CalendarProtocol | string
 export type CalendarArgBag = { calendar: CalendarArgSimple }
 
 export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
-  return arg.calendar
+  return arg.calendar // boolean-ish
 }
 
 export const isoCalendar = new Calendar(isoCalendarID)
