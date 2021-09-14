@@ -1,8 +1,11 @@
 import { assert } from '@esm-bundle/chai'
 const { throws, equal, notEqual } = assert
 
+import { DurationToStringUnit, FractionalSecondDigits, RoundingMode, Unit } from 'temporal-polyfill'
 import * as Temporal from 'temporal-polyfill'
 const { Duration } = Temporal
+
+type InvalidArg = any
 
 describe('Duration', () => {
   describe('Structure', () => {
@@ -207,10 +210,10 @@ describe('Duration', () => {
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => Duration.from({}), TypeError);
-      throws(() => Duration.from({ month: 12 }), TypeError);
+      throws(() => Duration.from({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${Duration.from({ month: 1, days: 1 })}`, 'P1D');
+      equal(`${Duration.from({ month: 1, days: 1 } as InvalidArg)}`, 'P1D');
     });
   });
   describe('toString()', () => {
@@ -255,7 +258,7 @@ describe('Duration', () => {
       equal(d3.toString({ smallestUnit: 'nanoseconds' }), d3.toString({ fractionalSecondDigits: 9 }));
     });
     it('throws on invalid or disallowed smallestUnit', () => {
-      ['eras', 'years', 'months', 'weeks', 'days', 'hours', 'minutes', 'nonsense'].forEach((smallestUnit) =>
+      ['eras', 'years', 'months', 'weeks', 'days', 'hours', 'minutes', 'nonsense'].forEach((smallestUnit: DurationToStringUnit) =>
         throws(() => d1.toString({ smallestUnit }), RangeError)
       );
     });
@@ -266,13 +269,13 @@ describe('Duration', () => {
       equal(d3.toString({ smallestUnit: 'nanosecond' }), d3.toString({ smallestUnit: 'nanoseconds' }));
     });
     it('truncates or pads to 2 places', () => {
-      const options = { fractionalSecondDigits: 2 };
+      const options = { fractionalSecondDigits: 2 as FractionalSecondDigits };
       equal(d1.toString(options), 'PT15H23M0.00S');
       equal(d2.toString(options), 'PT15H23M30.00S');
       equal(d3.toString(options), 'PT15H23M30.54S');
     });
     it('pads to 7 places', () => {
-      const options = { fractionalSecondDigits: 7 };
+      const options = { fractionalSecondDigits: 7 as FractionalSecondDigits };
       equal(d1.toString(options), 'PT15H23M0.0000000S');
       equal(d2.toString(options), 'PT15H23M30.0000000S');
       equal(d3.toString(options), 'PT15H23M30.5432000S');
@@ -281,18 +284,18 @@ describe('Duration', () => {
       [d1, d2, d3].forEach((d) => equal(d.toString({ fractionalSecondDigits: 'auto' }), d.toString()));
     });
     it('throws on out of range or invalid fractionalSecondDigits', () => {
-      [-1, 10, Infinity, NaN, 'not-auto'].forEach((fractionalSecondDigits) =>
+      [-1, 10, Infinity, NaN, 'not-auto'].forEach((fractionalSecondDigits: FractionalSecondDigits) =>
         throws(() => d1.toString({ fractionalSecondDigits }), RangeError)
       );
     });
     it('accepts and truncates fractional fractionalSecondDigits', () => {
-      equal(d3.toString({ fractionalSecondDigits: 5.5 }), 'PT15H23M30.54320S');
+      equal(d3.toString({ fractionalSecondDigits: 5.5 as FractionalSecondDigits }), 'PT15H23M30.54320S');
     });
     it('smallestUnit overrides fractionalSecondDigits', () => {
       equal(d3.toString({ smallestUnit: 'seconds', fractionalSecondDigits: 9 }), 'PT15H23M30S');
     });
     it('throws on invalid roundingMode', () => {
-      throws(() => d1.toString({ roundingMode: 'cile' }), RangeError);
+      throws(() => d1.toString({ roundingMode: 'cile' as InvalidArg }), RangeError);
     });
     it('rounds to nearest', () => {
       equal(d3.toString({ smallestUnit: 'seconds', roundingMode: 'halfExpand' }), 'PT15H23M31S');
@@ -315,7 +318,7 @@ describe('Duration', () => {
       equal(d4.toString({ fractionalSecondDigits: 8, roundingMode: 'halfExpand' }), 'P1Y1M1W1DT23H59M60.00000000S');
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => d1.toString(badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(d1.toString(options), 'PT15H23M'));
@@ -458,14 +461,14 @@ describe('Duration', () => {
       throws(() => d.with({ months: -5, minutes: 0 }), RangeError);
     });
     it('sign cannot be manipulated independently', () => {
-      throws(() => duration.with({ sign: -1 }), TypeError);
+      throws(() => duration.with({ sign: -1 } as InvalidArg), TypeError);
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => duration.with({}), TypeError);
-      throws(() => duration.with({ month: 12 }), TypeError);
+      throws(() => duration.with({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${duration.with({ month: 1, days: 1 })}`, 'P5Y5M5W1DT5H5M5.005005005S');
+      equal(`${duration.with({ month: 1, days: 1 } as InvalidArg)}`, 'P5Y5M5W1DT5H5M5.005005005S');
     });
   });
   describe('Duration.add()', () => {
@@ -524,17 +527,17 @@ describe('Duration', () => {
       equal(`${dw.add(d, { relativeTo })}`, 'P1WT1H');
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => duration.add({ hours: 1 }, badOptions), TypeError)
       );
-      [{}, () => {}, undefined].forEach((options) => equal(duration.add({ hours: 1 }, options).hours, 1));
+      [{}, () => {}, undefined].forEach((options: InvalidArg) => equal(duration.add({ hours: 1 }, options).hours, 1));
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => duration.add({}), TypeError);
-      throws(() => duration.add({ month: 12 }), TypeError);
+      throws(() => duration.add({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${duration.add({ month: 1, days: 1 })}`, 'P2DT5M');
+      equal(`${duration.add({ month: 1, days: 1 } as InvalidArg)}`, 'P2DT5M');
     });
     it('casts argument', () => {
       equal(`${duration.add(Temporal.Duration.from('P2DT5M'))}`, 'P3DT10M');
@@ -743,10 +746,10 @@ describe('Duration', () => {
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => duration.subtract({}), TypeError);
-      throws(() => duration.subtract({ month: 12 }), TypeError);
+      throws(() => duration.subtract({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${duration.subtract({ month: 1, days: 1 })}`, 'P2DT1H10M');
+      equal(`${duration.subtract({ month: 1, days: 1 } as InvalidArg)}`, 'P2DT1H10M');
     });
     it('casts argument', () => {
       equal(`${duration.subtract(Temporal.Duration.from('P1DT5M'))}`, 'P2DT1H5M');
@@ -930,10 +933,10 @@ describe('Duration', () => {
     const d2 = new Duration(0, 0, 0, 5, 5, 5, 5, 5, 5, 5);
     const relativeTo = Temporal.PlainDateTime.from('2020-01-01T00:00');
     it('options may only be an object', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) => throws(() => d.round(badOptions), TypeError));
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) => throws(() => d.round(badOptions), TypeError));
     });
     it('throws without parameter', () => {
-      throws(() => d.round(), TypeError);
+      throws(() => (d as InvalidArg).round(), TypeError);
     });
     it('throws with empty object', () => {
       throws(() => d.round({}), RangeError);
@@ -942,7 +945,7 @@ describe('Duration', () => {
       equal(`${Duration.from({ hours: 25 }).round({ largestUnit: 'auto' })}`, 'PT25H');
     });
     it('throws on disallowed or invalid smallestUnit', () => {
-      ['era', 'nonsense'].forEach((smallestUnit) => {
+      ['era', 'nonsense'].forEach((smallestUnit: InvalidArg) => {
         throws(() => d.round({ smallestUnit }), RangeError);
       });
     });
@@ -961,8 +964,8 @@ describe('Duration', () => {
       ];
       for (let largestIdx = 1; largestIdx < units.length; largestIdx++) {
         for (let smallestIdx = 0; smallestIdx < largestIdx; smallestIdx++) {
-          const largestUnit = units[largestIdx];
-          const smallestUnit = units[smallestIdx];
+          const largestUnit = units[largestIdx] as Unit;
+          const smallestUnit = units[smallestIdx] as Unit;
           throws(() => d.round({ largestUnit, smallestUnit, relativeTo }), RangeError);
         }
       }
@@ -1223,7 +1226,7 @@ describe('Duration', () => {
     for (const [largestUnit, entry] of Object.entries(roundAndBalanceResults)) {
       for (const [smallestUnit, expected] of Object.entries(entry)) {
         it(`round(${largestUnit}, ${smallestUnit}) = ${expected}`, () => {
-          equal(`${d.round({ largestUnit, smallestUnit, relativeTo })}`, expected);
+          equal(`${d.round({ largestUnit: largestUnit as Unit, smallestUnit: smallestUnit as Unit, relativeTo })}`, expected);
         });
       }
     }
@@ -1235,7 +1238,7 @@ describe('Duration', () => {
     for (const [largestUnit, entry] of Object.entries(balanceLosePrecisionResults)) {
       for (const smallestUnit of entry) {
         it(`round(${largestUnit}, ${smallestUnit}) may lose precision below ms`, () => {
-          assert(`${d.round({ largestUnit, smallestUnit, relativeTo })}`.startsWith('PT174373505.005'));
+          assert(`${d.round({ largestUnit: largestUnit as Unit, smallestUnit: smallestUnit as Unit, relativeTo })}`.startsWith('PT174373505.005'));
         });
       }
     }
@@ -1247,8 +1250,8 @@ describe('Duration', () => {
     };
     for (const [roundingMode, [posResult, negResult]] of Object.entries(roundingModeResults)) {
       it(`rounds correctly in ${roundingMode} mode`, () => {
-        equal(`${d.round({ smallestUnit: 'years', relativeTo, roundingMode })}`, posResult);
-        equal(`${d.negated().round({ smallestUnit: 'years', relativeTo, roundingMode })}`, negResult);
+        equal(`${d.round({ smallestUnit: 'years', relativeTo, roundingMode: roundingMode as RoundingMode })}`, posResult);
+        equal(`${d.negated().round({ smallestUnit: 'years', relativeTo, roundingMode: roundingMode as RoundingMode })}`, negResult);
       });
     }
     it('halfExpand is the default', () => {
@@ -1313,11 +1316,11 @@ describe('Duration', () => {
     });
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
-        const options = { smallestUnit: 'hours', roundingIncrement, relativeTo };
+        const options = { smallestUnit: 'hours' as Unit, roundingIncrement, relativeTo };
         assert(d.round(options) instanceof Temporal.Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: Unit) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement, relativeTo };
@@ -1325,7 +1328,7 @@ describe('Duration', () => {
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: Unit) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement, relativeTo };
@@ -1411,10 +1414,10 @@ describe('Duration', () => {
     const d2 = new Duration(0, 0, 0, 5, 5, 5, 5, 5, 5, 5);
     const relativeTo = Temporal.PlainDateTime.from('2020-01-01T00:00');
     it('options may only be an object', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) => throws(() => d.total(badOptions), TypeError));
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) => throws(() => d.total(badOptions), TypeError));
     });
     it('throws on disallowed or invalid smallestUnit', () => {
-      ['era', 'nonsense'].forEach((unit) => {
+      ['era', 'nonsense'].forEach((unit: InvalidArg) => {
         throws(() => d.total({ unit }), RangeError);
       });
     });
@@ -1451,14 +1454,14 @@ describe('Duration', () => {
     });
     it('relativeTo object must contain at least the required correctly-spelled properties', () => {
       throws(() => d.total({ unit: 'months', relativeTo: {} }), TypeError);
-      throws(() => d.total({ unit: 'months', relativeTo: { years: 2020, month: 1, day: 1 } }), TypeError);
+      throws(() => d.total({ unit: 'months', relativeTo: { years: 2020, month: 1, day: 1 } as InvalidArg }), TypeError);
     });
     it('incorrectly-spelled properties are ignored in relativeTo', () => {
       const oneMonth = Duration.from({ months: 1 });
-      equal(oneMonth.total({ unit: 'months', relativeTo: { year: 2020, month: 1, day: 1, months: 2 } }), 1);
+      equal(oneMonth.total({ unit: 'months', relativeTo: { year: 2020, month: 1, day: 1, months: 2 } as InvalidArg }), 1);
     });
     it('throws RangeError if unit property is missing', () => {
-      [{}, () => {}, { roundingMode: 'ceil' }].forEach((options) => throws(() => d.total(options), RangeError));
+      [{}, () => {}, { roundingMode: 'ceil' }].forEach((options) => throws(() => d.total(options as InvalidArg), RangeError));
     });
     it('relativeTo is required for rounding calendar units even in durations without calendar units', () => {
       throws(() => d2.total({ unit: 'years' }), RangeError);
@@ -1541,12 +1544,12 @@ describe('Duration', () => {
       it(`total(${unit}) = ${expected}`, () => {
         // Computed values above are approximate due to accumulated floating point
         // rounding errors, so just comparing the first 15 digits is good enough.
-        equal(d.total({ unit, relativeTo }).toPrecision(15), expected.toPrecision(15));
+        equal(d.total({ unit: unit as Unit, relativeTo }).toPrecision(15), expected.toPrecision(15));
       });
     }
     for (const unit of ['microseconds', 'nanoseconds']) {
       it(`total(${unit}) may lose precision below ms`, () => {
-        assert(d.total({ unit, relativeTo }).toString().startsWith('174373505005'));
+        assert(d.total({ unit: unit as Unit, relativeTo }).toString().startsWith('174373505005'));
       });
     }
     it('balances differently depending on relativeTo', () => {

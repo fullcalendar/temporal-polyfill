@@ -103,11 +103,11 @@ export class Duration extends AbstractNoValueObj {
     )
   }
 
-  add(other: DurationLike): Duration {
+  add(other: DurationArg): Duration {
     return addDurations(this, ensureObj(Duration, other))
   }
 
-  subtract(other: DurationLike): Duration {
+  subtract(other: DurationArg): Duration {
     return this.add(ensureObj(Duration, other).negated())
   }
 

@@ -68,7 +68,12 @@ export type TimeZoneDisplay = keyof TimeZoneDisplayMap
 export type OffsetDisplay = keyof OffsetDisplayMap
 export type FractionalSecondDigits = 'auto' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 export type DurationToStringUnit = 'second' | 'millisecond' | 'microsecond' | 'nanosecond'
+| /** @deprecated */ 'seconds'
+| /** @deprecated */ 'milliseconds'
+| /** @deprecated */ 'microseconds'
+| /** @deprecated */ 'nanoseconds'
 export type TimeToStringUnit = 'minute' | DurationToStringUnit
+| /** @deprecated */ 'minutes'
 export type DateToStringOptions = { calendarName?: CalendarDisplay }
 export type TimeToStringOptions<UnitType extends TimeUnit = TimeToStringUnit> = {
   fractionalSecondDigits?: FractionalSecondDigits
