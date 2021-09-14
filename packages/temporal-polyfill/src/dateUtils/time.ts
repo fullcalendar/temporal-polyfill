@@ -13,6 +13,7 @@ import {
 } from '../args'
 import { Duration } from '../duration'
 import { PlainTime } from '../plainTime'
+import { compareValues } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { DayTimeFields, nanoToDayTimeFields } from './dayTime'
@@ -171,6 +172,10 @@ export function diffTimeFields(
     timeFieldsToNano(t1) - timeFieldsToNano(t0),
     overflowDirection,
   )
+}
+
+export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
+  return compareValues(timeFieldsToNano(t0), timeFieldsToNano(t1))
 }
 
 export function timeFieldsToNano(timeFields: TimeFields): number {

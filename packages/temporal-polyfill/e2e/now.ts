@@ -3,12 +3,12 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai'
-const { equal, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill'
+import * as Temporal from 'temporal-polyfill';
 
-type InvalidArg = any
+type InvalidArg = any;
 
 describe('Temporal.Now', () => {
   describe('Structure', () => {

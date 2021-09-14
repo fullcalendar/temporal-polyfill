@@ -3,10 +3,10 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai'
-const { equal } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal } = assert;
 
-import * as Temporal from 'temporal-polyfill'
+import * as Temporal from 'temporal-polyfill';
 
 describe('Date.since(simple, simple)', () => {
   build('Before Leap Day', '2020-01-03', '2020-02-15');

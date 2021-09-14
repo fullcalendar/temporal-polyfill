@@ -1,12 +1,12 @@
-import { assert } from '@esm-bundle/chai'
-const { throws, equal, notEqual } = assert
+import { assert } from '@esm-bundle/chai';
+const { throws, equal, notEqual } = assert;
 
-import { DurationToStringUnit, FractionalSecondDigits, RoundingMode, Unit } from 'temporal-polyfill'
-import * as Temporal from 'temporal-polyfill'
-const { Duration } = Temporal
+import * as Temporal from 'temporal-polyfill';
+const { Duration } = Temporal;
 
-type InvalidArg = any
-type ValidArg = any
+import { DurationToStringUnit, FractionalSecondDigits, RoundingMode, Unit } from 'temporal-polyfill';
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('Duration', () => {
   describe('Structure', () => {

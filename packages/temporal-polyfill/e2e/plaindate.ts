@@ -3,15 +3,15 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai'
-const { equal, notEqual, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, notEqual, throws } = assert;
+
+import * as Temporal from 'temporal-polyfill';
+const { PlainDate } = Temporal;
 
 import { DateUnit, OverflowHandling } from 'temporal-polyfill';
-import * as Temporal from 'temporal-polyfill'
-const { PlainDate } = Temporal
-
-type InvalidArg = any
-type ValidArg = any
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('Date', () => {
   describe('date.until() works', () => {

@@ -3,15 +3,15 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai'
-const { equal, notEqual, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, notEqual, throws } = assert;
 
-import { FractionalSecondDigits, RoundingMode, TimeUnit } from 'temporal-polyfill'
-import * as Temporal from 'temporal-polyfill'
-const { Instant } = Temporal
+import * as Temporal from 'temporal-polyfill';
+const { Instant } = Temporal;
 
-type InvalidArg = any
-type ValidArg = any
+import { FractionalSecondDigits, RoundingMode, TimeUnit } from 'temporal-polyfill';
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('Instant', () => {
   describe('Structure', () => {

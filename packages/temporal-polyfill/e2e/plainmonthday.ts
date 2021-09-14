@@ -1,12 +1,12 @@
-import { assert } from '@esm-bundle/chai'
-const { throws, equal, notEqual } = assert
+import { assert } from '@esm-bundle/chai';
+const { throws, equal, notEqual } = assert;
 
-import * as Temporal from 'temporal-polyfill'
-import { OverflowHandling } from 'temporal-polyfill'
-const { PlainMonthDay } = Temporal
+import * as Temporal from 'temporal-polyfill';
+const { PlainMonthDay } = Temporal;
 
-type InvalidArg = any
-type ValidArg = any
+import { OverflowHandling } from 'temporal-polyfill';
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('MonthDay', () => {
   describe('Construction', () => {

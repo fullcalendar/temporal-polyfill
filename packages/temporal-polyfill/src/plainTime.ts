@@ -10,6 +10,7 @@ import { parseTimeISO } from './dateUtils/parse'
 import {
   TimeFields,
   addToPlainTime,
+  compareTimes,
   constrainTimeISO,
   createTime,
   diffPlainTimes,
@@ -19,7 +20,6 @@ import {
   timeFieldsToConstrainedISO,
   timeFieldsToNano,
 } from './dateUtils/time'
-import { compareValues } from './utils/math'
 import {
   CompareResult,
   DateArg,
@@ -75,10 +75,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   static compare(a: TimeArg, b: TimeArg): CompareResult {
-    return compareValues(
-      timeFieldsToNano(ensureObj(PlainTime, a)),
-      timeFieldsToNano(ensureObj(PlainTime, b)),
-    )
+    return compareTimes(ensureObj(PlainTime, a), ensureObj(PlainTime, b))
   }
 
   with(fields: TimeLike, options?: OverflowOptions): PlainTime {
@@ -105,6 +102,10 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 
   round(options: TimeRoundOptions): PlainTime {
     return roundPlainTime(this, options)
+  }
+
+  equals(other: TimeArg): boolean {
+    return compareTimes(this, ensureObj(PlainTime, other)) === 0
   }
 
   toString(options?: TimeToStringOptions): string {

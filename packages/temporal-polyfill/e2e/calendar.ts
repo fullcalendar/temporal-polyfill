@@ -1,14 +1,14 @@
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import { assert } from '@esm-bundle/chai'
-const { equal, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill'
-const { Calendar } = Temporal
+import * as Temporal from 'temporal-polyfill';
+const { Calendar } = Temporal;
 
-type InvalidArg = any
-type WeirdArg = any
+type InvalidArg = any;
+type WeirdArg = any;
 
 describe('Calendar', () => {
   describe('Structure', () => {

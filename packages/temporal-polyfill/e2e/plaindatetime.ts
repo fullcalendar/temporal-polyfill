@@ -3,15 +3,15 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai'
-const { equal, notEqual, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { equal, notEqual, throws } = assert;
 
-import { DayTimeUnit, FractionalSecondDigits, OverflowHandling, RoundingMode, TimeUnit, Unit } from 'temporal-polyfill'
-import * as Temporal from 'temporal-polyfill'
-const { PlainDateTime } = Temporal
+import * as Temporal from 'temporal-polyfill';
+const { PlainDateTime } = Temporal;
 
-type InvalidArg = any
-type ValidArg = any
+import { DayTimeUnit, FractionalSecondDigits, OverflowHandling, RoundingMode, TimeUnit, Unit } from 'temporal-polyfill';
+type InvalidArg = any;
+type ValidArg = any;
 
 describe('DateTime', () => {
   describe('Construction', () => {
