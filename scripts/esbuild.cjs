@@ -4,6 +4,10 @@ const path = require('path')
 const esbuild = require('esbuild')
 require('colors')
 
+const { hideBin } = require('yargs/helpers')
+const yargs = require('yargs/yargs')
+const argv = yargs(hideBin(process.argv)).argv
+
 const packageJson = require(path.resolve('./package.json'))
 
 // No external dependencies bundled
@@ -16,7 +20,7 @@ buildFile({
   bundle: true,
   format: 'esm',
   external,
-}, false) // watch?
+}, argv.watch)
 
 function buildFile(esbuildSettings, watch) {
   const { outfile } = esbuildSettings
