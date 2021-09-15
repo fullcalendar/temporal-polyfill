@@ -1,4 +1,5 @@
-// meant to be run within a package directory
+#!/usr/bin/env node
+// execute this script in a package's directory
 
 const path = require('path')
 const esbuild = require('esbuild')
