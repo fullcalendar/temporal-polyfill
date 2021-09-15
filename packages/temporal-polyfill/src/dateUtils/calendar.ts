@@ -71,10 +71,10 @@ export function queryDateISOFields(
   let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<DateFields>
 
   if (year == null) {
-    if (eraYear != null || era != null) {
-      year = calendarImpl.convertEraYear(eraYear!, era!)
-    } else {
+    if (eraYear == null || era == null) {
       throw new Error('Must specify either a year or an era & eraYear')
+    } else {
+      year = calendarImpl.convertEraYear(eraYear, era)
     }
   }
 

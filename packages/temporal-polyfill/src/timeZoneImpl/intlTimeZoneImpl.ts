@@ -36,6 +36,7 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
     this.id = this.format.resolvedOptions().timeZone
   }
 
+  // `zoneMinutes` is like epochMinutes, but to zone's pseudo-epoch
   getPossibleOffsets(zoneMinutes: number): PossibleOffsetInfo {
     const prevTransition = this.getTransition(zoneMinutes, -1)
     const nextTransition = this.getTransition(zoneMinutes, 1)
@@ -47,6 +48,7 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
     const zoneLean = anyTransition ? numSign(anyTransition[1] + anyTransition[2]) : 0
 
     const relevantTransition = zoneLean > 0 ? nextTransition : prevTransition
+    // If transition in the relevant direction, use the offset of the future/past year
     if (!relevantTransition) {
       const utcYear = epochMinsToISOYear(zoneMinutes) + zoneLean
       return [this.getYearEndOffset(utcYear), 0]

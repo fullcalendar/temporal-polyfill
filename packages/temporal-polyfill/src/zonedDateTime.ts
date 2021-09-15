@@ -23,6 +23,7 @@ import {
 import { createMonthDay } from './dateUtils/monthDay'
 import { parseDateTimeISO } from './dateUtils/parse'
 import { TimeFields, createTime } from './dateUtils/time'
+import { milliInDay } from './dateUtils/units'
 import { createYearMonth } from './dateUtils/yearMonth'
 import {
   ZonedDateTimeISOEssentials,
@@ -193,6 +194,21 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 
   equals(other: ZonedDateTimeArg): boolean {
     return compareZonedDateTimes(this, ensureObj(ZonedDateTime, other)) === 0
+  }
+
+  startOfDay(): ZonedDateTime {
+    const dateTime = this.toPlainDateTime()
+    const instant = this.timeZone.getInstantFor(dateTime, { disambiguation: 'earlier' })
+    return new ZonedDateTime(instant.epochNanoseconds, this.timeZone, this.calendar)
+  }
+
+  // TODO: turn into a lazy-getter, like what mixinCalendarFields does
+  get hoursInDay(): number {
+    const dateTime0 = this.toPlainDateTime()
+    const dateTime1 = dateTime0.add({ days: 1 })
+    const instant0 = this.timeZone.getInstantFor(dateTime0, { disambiguation: 'earlier' })
+    const instant1 = this.timeZone.getInstantFor(dateTime1, { disambiguation: 'earlier' })
+    return Math.floor((instant1.epochMilliseconds - instant0.epochMilliseconds) / milliInDay)
   }
 
   toString(options?: ZonedDateTimeToStringOptions): string {
