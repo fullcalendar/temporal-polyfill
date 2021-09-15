@@ -4,6 +4,6 @@
     "strict": false,
     "emitDeclarationOnly": false,
     "noEmit": true,
-    "types": ["mocha"]
+    "types": ["mocha", "node"]
   }
 }

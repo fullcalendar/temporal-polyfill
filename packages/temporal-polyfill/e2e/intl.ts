@@ -1,7 +1,22 @@
-import { assert } from '@esm-bundle/chai'
-const { deepEqual, equal, throws } = assert
+import { assert } from '@esm-bundle/chai';
+const { deepEqual, equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill'
+import * as Temporal from 'temporal-polyfill';
+
+// Intl.DateTimeFormat::formatRange/formatRangeToParts currently not known by TypeScript
+declare global {
+  namespace Intl {
+    interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
+      source: 'startDate' | 'endDate'
+    }
+    interface DateTimeFormat {
+      formatRange(startDate: number | Date, endDate: number | Date): string
+      formatRangeToParts(startDate: number | Date, endDate: number | Date): Intl.DateTimeFormatRangePart[]
+    }
+  }
+}
+import { DateUnit } from 'temporal-polyfill';
+type ValidArg = any;
 
 describe('Intl', () => {
   // TODO: move these to their respective test files.
@@ -214,8 +229,8 @@ describe('Intl', () => {
       timeZone: 'UTC'
     });
     const hasOutdatedChineseIcuData = !testChineseData.endsWith('2001');
-    const itOrSkip = (id) => ((id === 'chinese' || id === 'dangi') && hasOutdatedChineseIcuData ? it.skip : it);
-    const nodeVersion = process.versions.node.split('.')[0];
+    const itOrSkip: any = (id) => ((id === 'chinese' || id === 'dangi') && hasOutdatedChineseIcuData ? it.skip : it);
+    const nodeVersion = (process?.versions?.node || '16').split('.')[0]; // **assume node 16 when running in browser**
 
     it('verify that Intl.DateTimeFormat.formatToParts output matches snapshot data', () => {
       // This test isn't testing Temporal. Instead, it's verifying that the
@@ -719,7 +734,7 @@ describe('Intl', () => {
           equal(`add ${unit} ${id} monthCode: ${end.monthCode}`, `add ${unit} ${id} monthCode: ${values.monthCode}`);
           const calculatedStart = end.subtract(duration);
           equal(`start ${calculatedStart.toString()}`, `start ${start.toString()}`);
-          const diff = start.until(end, { largestUnit: unit });
+          const diff = start.until(end, { largestUnit: unit as DateUnit });
           equal(`diff ${unit} ${id}: ${diff}`, `diff ${unit} ${id}: ${duration}`);
 
           if (unit === 'months') {
@@ -960,7 +975,7 @@ describe('Intl', () => {
       const id = test.calendar;
       itOrSkip(`monthDay works for ${id} - ${++i}: ${test.monthCode || test.month}/${test.day}`, () => {
         const errorExpected =
-          test === RangeError || ((nodeVersion === '14' || nodeVersion === '12') && test.nodeBefore15 === RangeError);
+          (test as ValidArg) === RangeError || ((nodeVersion === '14' || nodeVersion === '12') && test.nodeBefore15 === RangeError);
         if (errorExpected) {
           throws(() => Temporal.PlainMonthDay.from({ year, month, day, calendar }));
           return;
@@ -1139,7 +1154,7 @@ describe('Intl', () => {
 
   describe('DateTimeFormat', () => {
     describe('supportedLocalesOf', () => {
-      it('should return an Array', () => assert(Array.isArray(Intl.DateTimeFormat.supportedLocalesOf())));
+      it('should return an Array', () => assert(Array.isArray((Intl.DateTimeFormat as ValidArg).supportedLocalesOf())));
     });
 
     // Verify that inputs to DateTimeFormat constructor are immune to mutation.
@@ -1170,15 +1185,15 @@ describe('Intl', () => {
     };
     const localesAT = ['de-AT'];
     const us = new Intl.DateTimeFormat('en-US', optionsUS);
-    const at = new Intl.DateTimeFormat(localesAT, optionsAT);
-    optionsAT.timeZone = {
+    const at = new Intl.DateTimeFormat(localesAT, optionsAT); // **should accept a TimeZone object argument; will just query toString**
+    (optionsAT as ValidArg).timeZone = {
       toString: () => 'Bogus/Time-Zone',
       toJSON: () => 'Bogus/Time-Zone'
     };
     optionsUS.timeZone = 'Bogus/Time-Zone';
     const us2 = new Intl.DateTimeFormat('en-US');
     const at2 = new Intl.DateTimeFormat(localesAT);
-    localesAT[0] = ['invalid locale'];
+    (localesAT as ValidArg)[0] = ['invalid locale'];
     const usCalendar = us.resolvedOptions().calendar;
     const atCalendar = at.resolvedOptions().calendar;
     const t1 = '1976-11-18T14:23:30+00:00[UTC]';
