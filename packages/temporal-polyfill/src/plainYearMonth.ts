@@ -1,9 +1,10 @@
 import { extractCalendar, isoCalendar } from './argParse/calendar'
 import { parseCalendarDisplay } from './argParse/calendarDisplay'
+import { parseDiffOptions } from './argParse/diffOptions'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from './argParse/refine'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
-import { constrainDateISO } from './dateUtils/date'
+import { constrainDateISO, diffDates } from './dateUtils/date'
 import { formatCalendarID, formatYearMonthISO } from './dateUtils/isoFormat'
 import { isoFieldsToEpochMilli } from './dateUtils/isoMath'
 import {
@@ -13,6 +14,7 @@ import {
   yearMonthCalendarFields,
 } from './dateUtils/mixins'
 import { parseDateTimeISO } from './dateUtils/parse'
+import { MONTH, YEAR, YearMonthUnitInt } from './dateUtils/units'
 import {
   comparePlainYearMonths,
   createYearMonth,
@@ -24,14 +26,20 @@ import {
   CompareResult,
   DateISOFields,
   DateToStringOptions,
+  DurationArg,
   LocalesArg,
   OverflowOptions,
   YearMonthArg,
+  YearMonthDiffOptions,
   YearMonthLikeFields,
   YearMonthOverrides,
+  YearMonthUnit,
 } from './args'
 import { Calendar } from './calendar'
+import { Duration } from './duration'
 import { PlainDate } from './plainDate'
+
+const day1 = { day: 1 }
 
 export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   constructor(
@@ -73,6 +81,30 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     return this.calendar.yearMonthFromFields(
       overrideYearMonthFields(refinedFields, this),
       options,
+    )
+  }
+
+  add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
+    return this.toPlainDate(day1).add(durationArg, options).toPlainYearMonth()
+  }
+
+  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
+    return this.toPlainDate(day1).add(durationArg, options).toPlainYearMonth()
+  }
+
+  until(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
+    return diffDates(
+      this.toPlainDate(day1),
+      ensureObj(PlainYearMonth, other).toPlainDate(day1),
+      parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
+    )
+  }
+
+  since(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
+    return diffDates(
+      ensureObj(PlainYearMonth, other).toPlainDate(day1),
+      this.toPlainDate(day1),
+      parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
     )
   }
 

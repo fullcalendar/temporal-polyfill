@@ -1185,7 +1185,7 @@ describe('Intl', () => {
     };
     const localesAT = ['de-AT'];
     const us = new Intl.DateTimeFormat('en-US', optionsUS);
-    const at = new Intl.DateTimeFormat(localesAT, optionsAT); // **should accept a TimeZone object argument; will just query toString**
+    const at = new Intl.DateTimeFormat(localesAT, optionsAT as ValidArg); // **should implicily call toString**
     (optionsAT as ValidArg).timeZone = {
       toString: () => 'Bogus/Time-Zone',
       toJSON: () => 'Bogus/Time-Zone'

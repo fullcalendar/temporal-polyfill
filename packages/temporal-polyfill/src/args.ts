@@ -7,7 +7,7 @@ import { OverflowHandlingMap } from './argParse/overflowHandling'
 import { RoundingModeMap } from './argParse/roundingMode'
 import { TimeZoneArgBag, TimeZoneArgSimple } from './argParse/timeZone'
 import { TimeZoneDisplayMap } from './argParse/timeZoneDisplay'
-import { DateUnitProper, TimeUnitProper } from './argParse/units'
+import { DateUnitProper, TimeUnitProper, YearMonthUnitProper } from './argParse/units'
 import { DateISOEssentials } from './dateUtils/date'
 import { DurationFields } from './dateUtils/duration'
 import { TimeFields, TimeISOEssentials } from './dateUtils/time'
@@ -16,6 +16,7 @@ import { Instant } from './instant'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
@@ -24,6 +25,7 @@ import { ZonedDateTime } from './zonedDateTime'
 export type CompareResult = -1 | 0 | 1
 
 // units
+// TODO: more DRY way to define deprecated units
 export type TimeUnit = TimeUnitProper
 | /** @deprecated */ 'hours'
 | /** @deprecated */ 'minutes'
@@ -31,6 +33,9 @@ export type TimeUnit = TimeUnitProper
 | /** @deprecated */ 'milliseconds'
 | /** @deprecated */ 'microseconds'
 | /** @deprecated */ 'nanoseconds'
+export type YearMonthUnit = YearMonthUnitProper
+| /** @deprecated */ 'years'
+| /** @deprecated */ 'months'
 export type DateUnit = DateUnitProper
 | /** @deprecated */ 'years'
 | /** @deprecated */ 'months'
@@ -62,6 +67,7 @@ export type DiffOptions<UnitType extends Unit = Unit> = {
   roundingMode?: RoundingMode
   roundingIncrement?: number
 }
+export type YearMonthDiffOptions = DiffOptions<YearMonthUnit>
 export type DateDiffOptions = DiffOptions<DateUnit>
 export type TimeDiffOptions = DiffOptions<TimeUnit>
 
@@ -194,4 +200,41 @@ export interface TimeZoneProtocol {
   getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[]
   toString(): string
   toJSON?(): string
+}
+
+// Intl polyfills
+// TODO: better place for this
+export type FormattingSubject =
+  number |
+  Date |
+  Instant |
+  ZonedDateTime |
+  PlainDateTime |
+  PlainDate |
+  PlainYearMonth |
+  PlainMonthDay |
+  PlainTime
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Intl {
+    // un-polyfilled Intl has lack of typings for formatRange/formatRangeToParts
+    interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
+      source: 'startDate' | 'endDate'
+    }
+
+    interface DateTimeFormat {
+      format(date: FormattingSubject | undefined): string
+      formatToParts(date: FormattingSubject | undefined): Intl.DateTimeFormatPart[]
+
+      // un-polyfilled Intl has lack of typings for formatRange/formatRangeToParts
+      formatRange(
+        startDate: FormattingSubject,
+        endDate: FormattingSubject,
+      ): string
+      formatRangeToParts(
+        startDate: FormattingSubject,
+        endDate: FormattingSubject,
+      ): Intl.DateTimeFormatRangePart[]
+    }
+  }
 }

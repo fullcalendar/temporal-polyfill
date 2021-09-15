@@ -1,6 +1,7 @@
 
 export type TimeUnitInt = 0 | 1 | 2 | 3 | 4 | 5
-export type DateUnitInt = 6 | 7 | 8 | 9
+export type YearMonthUnitInt = 8 | 9
+export type DateUnitInt = 6 | 7 | YearMonthUnitInt
 export type UnitInt = TimeUnitInt | DateUnitInt
 export type DayTimeUnitInt = 6 | TimeUnitInt
 

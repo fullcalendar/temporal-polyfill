@@ -2,8 +2,10 @@ import { DateUnit, TimeUnit, Unit } from '../args'
 import { DateFields } from '../dateUtils/date'
 import { TimeFields } from '../dateUtils/time'
 import { UnitInt } from '../dateUtils/units'
+import { YearMonthFields } from '../dateUtils/yearMonth'
 import { strArrayToHash } from '../utils/obj'
 
+export type YearMonthUnitProper = keyof YearMonthFields
 export type DateUnitProper = keyof DateFields | 'week'
 export type TimeUnitProper = keyof TimeFields
 

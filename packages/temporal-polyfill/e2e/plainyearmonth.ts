@@ -2,9 +2,9 @@ import { assert } from '@esm-bundle/chai';
 const { throws, equal, notEqual } = assert;
 
 import * as Temporal from 'temporal-polyfill';
-import { OverflowHandling } from 'temporal-polyfill';
 const { PlainYearMonth } = Temporal;
 
+import { OverflowHandling, YearMonthUnit } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
@@ -246,7 +246,7 @@ describe('YearMonth', () => {
       equal(`${nov94.until('2013-06')}`, `${diff}`);
     });
     it('object must contain at least the required properties', () => {
-      throws(() => nov94.until({ year: 2013 }), TypeError);
+      throws(() => nov94.until({ year: 2013 } as InvalidArg), TypeError);
     });
     const feb20 = PlainYearMonth.from('2020-02');
     const feb21 = PlainYearMonth.from('2021-02');
@@ -259,14 +259,14 @@ describe('YearMonth', () => {
       equal(`${feb20.until(feb21, { largestUnit: 'months' })}`, 'P12M');
     });
     it('cannot return lower units', () => {
-      throws(() => feb20.until(feb21, { largestUnit: 'weeks' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'days' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'hours' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'minutes' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'seconds' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'milliseconds' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'microseconds' }), RangeError);
-      throws(() => feb20.until(feb21, { largestUnit: 'nanoseconds' }), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'weeks' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'days' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'hours' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'minutes' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'seconds' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'milliseconds' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'microseconds' } as InvalidArg), RangeError);
+      throws(() => feb20.until(feb21, { largestUnit: 'nanoseconds' } as InvalidArg), RangeError);
     });
     it('no two different calendars', () => {
       const ym1 = new PlainYearMonth(2000, 1);
@@ -274,7 +274,7 @@ describe('YearMonth', () => {
       throws(() => ym1.until(ym2), RangeError);
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => feb20.until(feb21, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(`${feb20.until(feb21, options)}`, 'P1Y'));
@@ -293,7 +293,7 @@ describe('YearMonth', () => {
         'microseconds',
         'nanoseconds',
         'nonsense'
-      ].forEach((smallestUnit) => {
+      ].forEach((smallestUnit: InvalidArg) => {
         throws(() => earlier.until(later, { smallestUnit }), RangeError);
       });
     });
@@ -301,9 +301,9 @@ describe('YearMonth', () => {
       throws(() => earlier.until(later, { largestUnit: 'months', smallestUnit: 'years' }), RangeError);
     });
     it('throws on invalid roundingMode', () => {
-      throws(() => earlier.until(later, { roundingMode: 'cile' }), RangeError);
+      throws(() => earlier.until(later, { roundingMode: 'cile' as InvalidArg }), RangeError);
     });
-    const incrementOneNearest = [
+    const incrementOneNearest: [YearMonthUnit, string][] = [
       ['years', 'P3Y'],
       ['months', 'P2Y8M']
     ];
@@ -314,7 +314,7 @@ describe('YearMonth', () => {
         equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, `-${expected}`);
       });
     });
-    const incrementOneCeil = [
+    const incrementOneCeil: [YearMonthUnit, string, string][] = [
       ['years', 'P3Y', '-P2Y'],
       ['months', 'P2Y8M', '-P2Y8M']
     ];
@@ -325,7 +325,7 @@ describe('YearMonth', () => {
         equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, expectedNegative);
       });
     });
-    const incrementOneFloor = [
+    const incrementOneFloor: [YearMonthUnit, string, string][] = [
       ['years', 'P2Y', '-P3Y'],
       ['months', 'P2Y8M', '-P2Y8M']
     ];
@@ -336,7 +336,7 @@ describe('YearMonth', () => {
         equal(`${later.until(earlier, { smallestUnit, roundingMode })}`, expectedNegative);
       });
     });
-    const incrementOneTrunc = [
+    const incrementOneTrunc: [YearMonthUnit, string][] = [
       ['years', 'P2Y'],
       ['months', 'P2Y8M']
     ];
@@ -388,7 +388,7 @@ describe('YearMonth', () => {
       equal(`${jun13.since('1994-11')}`, `${diff}`);
     });
     it('object must contain at least the required properties', () => {
-      throws(() => jun13.since({ year: 1994 }), TypeError);
+      throws(() => jun13.since({ year: 1994 } as InvalidArg), TypeError);
     });
     const feb20 = PlainYearMonth.from('2020-02');
     const feb21 = PlainYearMonth.from('2021-02');
@@ -401,14 +401,14 @@ describe('YearMonth', () => {
       equal(`${feb21.since(feb20, { largestUnit: 'months' })}`, 'P12M');
     });
     it('cannot return lower units', () => {
-      throws(() => feb21.since(feb20, { largestUnit: 'weeks' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'days' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'hours' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'minutes' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'seconds' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'milliseconds' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'microseconds' }), RangeError);
-      throws(() => feb21.since(feb20, { largestUnit: 'nanoseconds' }), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'weeks' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'days' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'hours' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'minutes' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'seconds' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'milliseconds' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'microseconds' } as InvalidArg), RangeError);
+      throws(() => feb21.since(feb20, { largestUnit: 'nanoseconds' } as InvalidArg), RangeError);
     });
     it('no two different calendars', () => {
       const ym1 = new PlainYearMonth(2000, 1);
@@ -416,7 +416,7 @@ describe('YearMonth', () => {
       throws(() => ym1.since(ym2), RangeError);
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => feb21.since(feb20, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(`${feb21.since(feb20, options)}`, 'P1Y'));
@@ -435,7 +435,7 @@ describe('YearMonth', () => {
         'microseconds',
         'nanoseconds',
         'nonsense'
-      ].forEach((smallestUnit) => {
+      ].forEach((smallestUnit: InvalidArg) => {
         throws(() => later.since(earlier, { smallestUnit }), RangeError);
       });
     });
@@ -443,9 +443,9 @@ describe('YearMonth', () => {
       throws(() => later.since(earlier, { largestUnit: 'months', smallestUnit: 'years' }), RangeError);
     });
     it('throws on invalid roundingMode', () => {
-      throws(() => later.since(earlier, { roundingMode: 'cile' }), RangeError);
+      throws(() => later.since(earlier, { roundingMode: 'cile' as InvalidArg }), RangeError);
     });
-    const incrementOneNearest = [
+    const incrementOneNearest: [YearMonthUnit, string][] = [
       ['years', 'P3Y'],
       ['months', 'P2Y8M']
     ];
@@ -456,7 +456,7 @@ describe('YearMonth', () => {
         equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, `-${expected}`);
       });
     });
-    const incrementOneCeil = [
+    const incrementOneCeil: [YearMonthUnit, string, string][] = [
       ['years', 'P3Y', '-P2Y'],
       ['months', 'P2Y8M', '-P2Y8M']
     ];
@@ -467,7 +467,7 @@ describe('YearMonth', () => {
         equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, expectedNegative);
       });
     });
-    const incrementOneFloor = [
+    const incrementOneFloor: [YearMonthUnit, string, string][] = [
       ['years', 'P2Y', '-P3Y'],
       ['months', 'P2Y8M', '-P2Y8M']
     ];
@@ -478,7 +478,7 @@ describe('YearMonth', () => {
         equal(`${earlier.since(later, { smallestUnit, roundingMode })}`, expectedNegative);
       });
     });
-    const incrementOneTrunc = [
+    const incrementOneTrunc: [YearMonthUnit, string][] = [
       ['years', 'P2Y'],
       ['months', 'P2Y8M']
     ];
@@ -569,27 +569,27 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from('2020-01').add({ days: 31 })}`, '2020-02');
     });
     it('invalid overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
         throws(() => ym.add({ months: 1 }, { overflow }), RangeError)
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow) =>
+      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
         throws(() => ym.add({ years: 1, months: -6 }, { overflow }), RangeError)
       );
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => ym.add({ months: 1 }, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(`${ym.add({ months: 1 }, options)}`, '2019-12'));
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => ym.add({}), TypeError);
-      throws(() => ym.add({ month: 12 }), TypeError);
+      throws(() => ym.add({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${ym.add({ month: 1, years: 1 })}`, '2020-11');
+      equal(`${ym.add({ month: 1, years: 1 } as ValidArg)}`, '2020-11');
     });
   });
   describe('YearMonth.subtract() works', () => {
@@ -644,27 +644,27 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from('2020-01').subtract({ days: 31 })}`, '2019-12');
     });
     it('invalid overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: OverflowHandling) =>
         throws(() => ym.subtract({ months: 1 }, { overflow }), RangeError)
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow) =>
+      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
         throws(() => ym.subtract({ years: 1, months: -6 }, { overflow }), RangeError)
       );
     });
     it('options may only be an object or undefined', () => {
-      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
+      [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => ym.subtract({ months: 1 }, badOptions), TypeError)
       );
       [{}, () => {}, undefined].forEach((options) => equal(`${ym.subtract({ months: 1 }, options)}`, '2019-10'));
     });
     it('object must contain at least one correctly-spelled property', () => {
       throws(() => ym.subtract({}), TypeError);
-      throws(() => ym.subtract({ month: 12 }), TypeError);
+      throws(() => ym.subtract({ month: 12 } as InvalidArg), TypeError);
     });
     it('incorrectly-spelled properties are ignored', () => {
-      equal(`${ym.subtract({ month: 1, years: 1 })}`, '2018-11');
+      equal(`${ym.subtract({ month: 1, years: 1 } as ValidArg)}`, '2018-11');
     });
   });
   describe('Min/max range', () => {
@@ -703,7 +703,7 @@ describe('YearMonth', () => {
     it('adding and subtracting beyond limit', () => {
       const min = PlainYearMonth.from('-271821-04');
       const max = PlainYearMonth.from('+275760-09');
-      ['reject', 'constrain'].forEach((overflow) => {
+      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
         throws(() => min.subtract({ months: 1 }, { overflow }), RangeError);
         throws(() => max.add({ months: 1 }, { overflow }), RangeError);
       });

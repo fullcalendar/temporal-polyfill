@@ -1,9 +1,9 @@
 import { getCommonCalendar } from '../argParse/calendar'
-import { parseDiffOptions } from '../argParse/diffOptions'
+import { DiffConfig } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
 import { unitNames } from '../argParse/units'
-import { CompareResult, DateDiffOptions, DateISOFields, DateLikeFields, DateUnit } from '../args'
+import { CompareResult, DateISOFields, DateLikeFields, DateUnit } from '../args'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Duration } from '../duration'
 import { PlainDate } from '../plainDate'
@@ -13,7 +13,6 @@ import { isoCalendarImpl } from './calendar'
 import { isoFieldsToEpochNano } from './isoMath'
 import { compareMonthDayFields } from './monthDay'
 import { roundBalancedDuration } from './round'
-import { DAY, DateUnitInt, YEAR } from './units'
 import {
   YearMonthEssentials,
   YearMonthFields,
@@ -100,9 +99,8 @@ export function addDaysToDate(date: PlainDate, days: number): PlainDate {
 export function diffDates(
   d0: PlainDate,
   d1: PlainDate,
-  options: DateDiffOptions | undefined,
+  diffConfig: DiffConfig,
 ): Duration {
-  const diffConfig = parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR)
   const calendar = getCommonCalendar(d0, d1)
   const balancedDuration = calendar.dateUntil(d0, d1, {
     largestUnit: unitNames[diffConfig.largestUnit] as DateUnit,

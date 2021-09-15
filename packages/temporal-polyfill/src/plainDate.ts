@@ -1,5 +1,6 @@
 import { extractCalendar, isoCalendar } from './argParse/calendar'
 import { parseCalendarDisplay } from './argParse/calendarDisplay'
+import { parseDiffOptions } from './argParse/diffOptions'
 import { OVERFLOW_REJECT } from './argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from './argParse/refine'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
@@ -23,6 +24,7 @@ import {
 import { createMonthDay } from './dateUtils/monthDay'
 import { parseDateTimeISO } from './dateUtils/parse'
 import { ensureLooseTime } from './dateUtils/time'
+import { DAY, DateUnitInt, YEAR } from './dateUtils/units'
 import { createYearMonth } from './dateUtils/yearMonth'
 import {
   CalendarArg,
@@ -33,6 +35,7 @@ import {
   DateLikeFields,
   DateOverrides,
   DateToStringOptions,
+  DateUnit,
   DurationArg,
   LocalesArg,
   OverflowOptions,
@@ -102,11 +105,19 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   until(other: DateArg, options?: DateDiffOptions): Duration {
-    return diffDates(this, ensureObj(PlainDate, other), options)
+    return diffDates(
+      this,
+      ensureObj(PlainDate, other),
+      parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
+    )
   }
 
   since(other: DateArg, options?: DateDiffOptions): Duration {
-    return diffDates(ensureObj(PlainDate, other), this, options)
+    return diffDates(
+      ensureObj(PlainDate, other),
+      this,
+      parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
+    )
   }
 
   equals(other: DateArg): boolean {
