@@ -5,6 +5,7 @@ import {
   DISAMBIG_REJECT,
   parseDisambig,
 } from './argParse/disambig'
+import { extractTimeZone, isTimeZoneArgBag } from './argParse/timeZone'
 import { AbstractObj, ensureObj } from './dateUtils/abstract'
 import { createDateTime } from './dateUtils/dateTime'
 import { formatOffsetISO } from './dateUtils/isoFormat'
@@ -22,6 +23,7 @@ import {
   Disambiguation,
   InstantArg,
   TimeZoneArg,
+  TimeZoneProtocol,
 } from './args'
 import { Calendar } from './calendar'
 import { Instant } from './instant'
@@ -33,7 +35,7 @@ const implCache: { [zoneName: string]: TimeZoneImpl } = {
   UTC: new FixedTimeZoneImpl(0),
 }
 
-export class TimeZone extends AbstractObj {
+export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   constructor(id: string) {
     super()
 
@@ -44,7 +46,7 @@ export class TimeZone extends AbstractObj {
     let impl: TimeZoneImpl
 
     // uppercase matches keys in implCache
-    id = id.toLocaleUpperCase()
+    id = String(id).toLocaleUpperCase()
 
     if (implCache[id]) {
       impl = implCache[id]
@@ -65,12 +67,15 @@ export class TimeZone extends AbstractObj {
     setID(this, (impl as IntlTimeZoneImpl).id || id)
   }
 
-  static from(input: TimeZoneArg): TimeZone {
-    return new TimeZone(
-      input instanceof TimeZone
-        ? input.id
-        : input, // an ID itself
-    )
+  static from(arg: TimeZoneArg): TimeZone {
+    if (typeof arg === 'object') {
+      if (isTimeZoneArgBag(arg)) {
+        return extractTimeZone(arg)
+      } else {
+        return arg as TimeZone // treat TimeZoneProtocols as TimeZones internally
+      }
+    }
+    return new TimeZone(arg) // arg is a string
   }
 
   get id(): string { return getID(this) }

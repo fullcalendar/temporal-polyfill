@@ -5,6 +5,7 @@ import { OffsetDisplayMap } from './argParse/offsetDisplay'
 import { OffsetHandlingMap } from './argParse/offsetHandling'
 import { OverflowHandlingMap } from './argParse/overflowHandling'
 import { RoundingModeMap } from './argParse/roundingMode'
+import { TimeZoneArgBag, TimeZoneArgSimple } from './argParse/timeZone'
 import { TimeZoneDisplayMap } from './argParse/timeZoneDisplay'
 import { DateUnitProper, TimeUnitProper } from './argParse/units'
 import { DateISOEssentials } from './dateUtils/date'
@@ -108,16 +109,16 @@ export type DateTimeLikeFields = DateLikeFields & Partial<TimeFields>
 export type ZonedDateTimeLikeFields = DateTimeLikeFields & { offset?: string }
 
 // like (has calendar/timezone)
-export type YearMonthLike = YearMonthLikeFields & { calendar?: CalendarArg }
+export type YearMonthLike = YearMonthLikeFields & { calendar?: CalendarArgSimple }
 export type MonthDayLike =
-  { monthCode: string, calendar?: CalendarArg } |
-  { year: number, month: number, calendar?: CalendarArg } |
-  { era: string, eraYear: number, month: number, calendar: CalendarArg } |
+  { monthCode: string, calendar?: CalendarArgSimple } |
+  { year: number, month: number, calendar?: CalendarArgSimple } |
+  { era: string, eraYear: number, month: number, calendar: CalendarArgSimple } |
   { month: number, day: number, calendar?: never } // lack of a calendar implies ISO
 export type DateLike = YearMonthLike & { day: number }
 export type TimeLike = Partial<TimeFields>
 export type DateTimeLike = DateLike & TimeLike
-export type ZonedDateTimeLike = DateTimeLike & { timeZone: TimeZoneArg, offset?: string }
+export type ZonedDateTimeLike = DateTimeLike & { timeZone: TimeZoneArgSimple, offset?: string }
 export type DurationLike = Partial<DurationFields>
 
 // arg for object instantiation (can be string)
@@ -128,7 +129,7 @@ export type TimeArg = TimeLike | string
 export type DateTimeArg = DateTimeLike | string
 export type ZonedDateTimeArg = ZonedDateTimeLike | string
 export type DurationArg = DurationLike | string
-export type TimeZoneArg = TimeZone | string
+export type TimeZoneArg = TimeZoneArgSimple | TimeZoneArgBag
 export type CalendarArg = CalendarArgSimple | CalendarArgBag
 // can pass-in nearly any date-like object to Instant, because parses toString()
 export type InstantArg = Instant | string | { toString(): string }
@@ -155,7 +156,7 @@ export type ZonedDateTimeOptions = {
   offset?: OffsetHandling
 }
 
-// calendar protocol
+// object protocols
 export interface CalendarProtocol {
   id?: string
   calendar?: never
@@ -180,4 +181,17 @@ export interface CalendarProtocol {
   dateUntil?(dateArg0: DateArg, dateArg1: DateArg, options?: { largestUnit?: DateUnit }): Duration
   // TODO: fields/mergeFields
   toString(): string
+}
+export interface TimeZoneProtocol {
+  id?: string
+  timeZone?: never
+  getOffsetNanosecondsFor(instantArg: InstantArg): number
+  getOffsetStringFor?(instantArg: InstantArg): string
+  getPlainDateTimeFor?(instantArg: InstantArg, calendarArg?: CalendarArg): PlainDateTime
+  getInstantFor?(dateTimeArg: DateTimeArg, options?: { disambiguation?: Disambiguation }): Instant
+  getNextTransition?(instantArg: InstantArg): Instant | null
+  getPreviousTransition?(instantArg: InstantArg): Instant | null
+  getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[]
+  toString(): string
+  toJSON?(): string
 }

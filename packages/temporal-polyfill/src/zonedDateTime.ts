@@ -4,6 +4,7 @@ import { parseTimeToStringOptions } from './argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplay } from './argParse/offsetDisplay'
 import { OFFSET_PREFER, OFFSET_REJECT } from './argParse/offsetHandling'
 import { refineFields, refineOverrideFields } from './argParse/refine'
+import { extractTimeZone } from './argParse/timeZone'
 import { parseTimeZoneDisplay } from './argParse/timeZoneDisplay'
 import { timeUnitNames } from './argParse/units'
 import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
@@ -235,12 +236,3 @@ export interface ZonedDateTime extends ComputedEpochFields {}
 mixinISOFields(ZonedDateTime, timeUnitNames)
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
 mixinEpochFields(ZonedDateTime)
-
-// utils
-
-function extractTimeZone(input: { timeZone: TimeZoneArg }): TimeZone {
-  if (input.timeZone == null) {
-    throw new Error('Must specify timeZone')
-  }
-  return ensureObj(TimeZone, input.timeZone)
-}

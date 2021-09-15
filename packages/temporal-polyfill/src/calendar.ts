@@ -64,15 +64,15 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     setID(this, impl.id) // record the normalized ID
   }
 
-  static from(arg: CalendarArg): CalendarProtocol {
+  static from(arg: CalendarArg): Calendar {
     if (typeof arg === 'object') {
       if (isCalendarArgBag(arg)) {
         return extractCalendar(arg)
       } else {
-        return arg
+        return arg as Calendar // treat CalendarProtocols as Calendars internally
       }
     }
-    return new Calendar(arg)
+    return new Calendar(arg) // arg is a string
   }
 
   get id(): string { return getID(this) }

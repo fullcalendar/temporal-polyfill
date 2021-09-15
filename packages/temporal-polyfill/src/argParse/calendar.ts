@@ -16,8 +16,7 @@ export function extractCalendar(input: { calendar?: CalendarArg; }): Calendar {
   if (input.calendar == null) {
     return isoCalendar
   }
-  // treat a CalendarProtocol as a Calendar internally
-  return ensureObj(Calendar, input.calendar) as Calendar
+  return ensureObj(Calendar, input.calendar)
 }
 
 export function getCommonCalendar(
