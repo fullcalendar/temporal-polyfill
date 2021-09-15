@@ -158,21 +158,21 @@ describe('Userland calendar', () => {
         const { overflow = 'constrain' } = options ? options : {};
         let { month, monthCode } = fields;
         if (month === undefined) month = +monthCode.slice(1);
-        const isoDate = decimalToISO(fields.year, month, fields.day, overflow); // **fixed method call**
+        const isoDate = decimalToISO(fields.year, month, fields.day, overflow); // **corrected method call**
         return new Temporal.PlainDate(isoDate.year, isoDate.month, isoDate.day, this);
       },
       yearMonthFromFields(fields, options) {
         const { overflow = 'constrain' } = options ? options : {};
         let { month, monthCode } = fields;
         if (month === undefined) month = +monthCode.slice(1);
-        const isoDate = decimalToISO(fields.year, month, 1, overflow); // **fixed method call**
+        const isoDate = decimalToISO(fields.year, month, 1, overflow); // **corrected method call**
         return new Temporal.PlainYearMonth(isoDate.year, isoDate.month, this, isoDate.day);
       },
       monthDayFromFields(fields, options) {
         const { overflow = 'constrain' } = options ? options : {};
         let { month, monthCode } = fields;
         if (month === undefined) month = +monthCode.slice(1);
-        const isoDate = decimalToISO(0, month, fields.day, overflow); // **fixed method call**
+        const isoDate = decimalToISO(0, month, fields.day, overflow); // **corrected method call**
         return new Temporal.PlainMonthDay(isoDate.month, isoDate.day, this, isoDate.year);
       },
       year(date) {

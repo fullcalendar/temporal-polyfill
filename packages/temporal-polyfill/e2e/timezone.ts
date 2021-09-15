@@ -126,7 +126,7 @@ describe('TimeZone', () => {
       equal(tzFrom.id, 'Africa/Cairo');
     });
     it('property bag with custom time zone is accepted', () => {
-      const custom = { id: 'Etc/Custom' };
+      const custom = { id: 'Etc/Custom' } as ValidArg;
       const tzFrom = Temporal.TimeZone.from({ timeZone: custom });
       equal(tzFrom, custom);
     });
@@ -137,7 +137,7 @@ describe('TimeZone', () => {
     });
     it('throws with bad value in property bag', () => {
       throws(() => Temporal.TimeZone.from({ timeZone: 'local' }), RangeError);
-      throws(() => Temporal.TimeZone.from({ timeZone: { timeZone: 'Africa/Cairo' } }), RangeError);
+      throws(() => Temporal.TimeZone.from({ timeZone: { timeZone: 'Africa/Cairo' } as InvalidArg }), RangeError);
     });
   });
   describe('TimeZone.from(ISO string)', () => {

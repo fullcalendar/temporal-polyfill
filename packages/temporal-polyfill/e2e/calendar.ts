@@ -8,7 +8,7 @@ import * as Temporal from 'temporal-polyfill';
 const { Calendar } = Temporal;
 
 type InvalidArg = any;
-type WeirdArg = any;
+type ValidArg = any;
 
 describe('Calendar', () => {
   describe('Structure', () => {
@@ -121,8 +121,8 @@ describe('Calendar', () => {
       });
       it('property bag with custom calendar is accepted', () => {
         const custom = { id: 'custom-calendar' }; // **doesn't implement all CalendarProtocol methods**
-        const calFrom = Calendar.from({ calendar: custom as WeirdArg });
-        equal(calFrom, custom as WeirdArg);
+        const calFrom = Calendar.from({ calendar: custom as ValidArg });
+        equal(calFrom, custom as ValidArg);
       });
       it('throws with bad identifier', () => {
         throws(() => Calendar.from('local'), RangeError);
