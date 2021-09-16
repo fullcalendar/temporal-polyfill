@@ -7,7 +7,7 @@ const standardConfig = require('eslint-config-standard/eslintrc.json')
 // Workaround for Yarn Pnp: explicitly install eslint-import-resolver-node
 // https://github.com/import-js/eslint-plugin-import/issues/1434#issuecomment-521189117
 
-const baseRules = {
+const esRules = {
   // Max line length, with some exceptions
   // TODO: ADD ruler to vscode settings
   'max-len': ['error', { code: 100, ignoreRegExpLiterals: true, ignoreUrls: true }],
@@ -16,6 +16,11 @@ const baseRules = {
   'comma-dangle': ['error', 'always-multiline'],
   'space-before-function-paren': ['error', 'never'],
 
+  // Prefer `function` over `const` with arrow-function
+  'func-style': ['error', 'declaration'],
+}
+
+const esmRules = {
   // Import verification doesn't work with advanced Yarn dependency protocols like "workspace:"
   // TypeScript does this anyway
   'import/no-unresolved': 'off',
@@ -35,12 +40,11 @@ const baseRules = {
   'sort-imports': ['error', {
     ignoreDeclarationSort: true, // Disable. let previous rule do this
   }],
-
-  // Prefer `function` over `const` with arrow-function
-  'func-style': ['error', 'declaration'],
 }
 
 const tsRules = {
+  // TODO: prevent no-space between var name and type like `something:TheType`
+
   // Allow explicit `any`. However, you should prefer `unknown`
   '@typescript-eslint/no-explicit-any': 'off',
 
@@ -69,23 +73,31 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'standard',
-    'plugin:import/recommended',
   ],
-  rules: baseRules,
-  overrides: [{
-    files: '*.ts',
-    extends: [
-      'plugin:@typescript-eslint/recommended',
-      'plugin:import/typescript',
-    ],
-    rules: {
-      ...buildEquivalentTsRules(),
-      ...tsRules,
+  rules: esRules,
+  overrides: [
+    {
+      files: ['*.js', '*.jsx', '*.ts', '*.tsx'],
+      extends: [
+        'plugin:import/recommended',
+      ],
+      rules: esmRules,
     },
-  }],
+    {
+      files: ['*.ts', '*.tsx'],
+      extends: [
+        'plugin:@typescript-eslint/recommended',
+        'plugin:import/typescript',
+      ],
+      rules: {
+        ...buildEquivalentTsRules({ ...esRules, ...esmRules }),
+        ...tsRules,
+      },
+    },
+  ],
   ignorePatterns: [
-    // Patterns in .gitignore are already ignored
-    // Additional ignore patterns go here (.eslintignore files won't work with --ignore-path):
+    // TODO: derive from .gitignore/.gitsubmodules while working with vscode?
+    'dist',
     '/scripts/data',
     '/packages/temporal-polyfill/e2e',
   ],
@@ -93,7 +105,7 @@ module.exports = {
 
 // Derived from the `standard-with-typescript` project:
 // https://github.com/standard/eslint-config-standard-with-typescript/blob/master/src/index.ts
-function buildEquivalentTsRules() {
+function buildEquivalentTsRules(baseRules) {
   const rules = {
     'no-undef': 'off', // TypeScript has this functionality by default
     'no-use-before-define': 'off',

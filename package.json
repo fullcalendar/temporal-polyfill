@@ -34,7 +34,7 @@
     "pkg:size": "cd $INIT_CWD && node $PROJECT_CWD/scripts/pkg-size.cjs",
     "test": "jest --coverage",
     "dev": "jest --watch",
-    "lint": "eslint --ignore-path .gitignore .",
+    "lint": "eslint .",
     "locales-scrape": "./scripts/locales-scrape.cjs",
     "locales-compile": "yarn workspaces foreach -pv run locales-compile"
   },
