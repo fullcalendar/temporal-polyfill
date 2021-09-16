@@ -26,27 +26,25 @@ function betterExec(cmd, options = {}, callback) {
     childProcess = spawn(cmdPath || cmdStr, cmdArgs, {
       shell: !cmdArgs,
       stdio: 'inherit',
-      ...options
+      ...options,
     })
     childProcess.on('close', function(code) {
       callbackWrap(
         code === 0 ? null : new Error('shell command failed'),
-        { success: code === 0 }
+        { success: code === 0 },
       )
     })
-
   } else if (cmdArgs) { // array of tokens
     childProcess = execFile(cmdPath, cmdArgs, {
       encoding: 'utf8',
-      ...options
+      ...options,
     }, function(error, stdout, stderr) {
       callbackWrap(error, { stdout, stderr, success: !error })
     })
-
   } else { // exec in a shell
     childProcess = exec(cmdStr, {
       encoding: 'utf8',
-      ...options
+      ...options,
     }, function(error, stdout, stderr) {
       callbackWrap(error, { stdout, stderr, success: !error })
     })
@@ -65,11 +63,11 @@ function betterExecSync(cmd, options = {}) {
     cmdStr = cmd
   }
 
-  let res = spawnSync(cmdPath || cmdStr, cmdArgs, {
+  const res = spawnSync(cmdPath || cmdStr, cmdArgs, {
     encoding: 'utf8',
     shell: !cmdArgs,
     stdio: options.live ? 'inherit' : 'pipe',
-    ...options
+    ...options,
   })
 
   if (res.status !== 0 && options.exitOnError) {
@@ -80,7 +78,7 @@ function betterExecSync(cmd, options = {}) {
 }
 
 function withOptions(baseOptions = {}) {
-  let origFunc = this
+  const origFunc = this
   return (cmd, options) => {
     return origFunc(cmd, { ...baseOptions, ...options })
   }

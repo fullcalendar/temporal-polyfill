@@ -13,7 +13,7 @@ if (argv.watch) {
 } else { // bundle for release
   Promise.all([
     bundlePkgJs(false),
-    bundlePkgTypes()
+    bundlePkgTypes(),
   ])
 }
 
