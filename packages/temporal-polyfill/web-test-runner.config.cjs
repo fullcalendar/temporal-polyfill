@@ -1,4 +1,4 @@
-// NOTE: until Yarn PnP supports ESM (https://github.com/yarnpkg/berry/issues/638),
+// NOTE: until Yarn PnP supports ESM imports (https://github.com/yarnpkg/berry/issues/638),
 // this config file must be written in CJS and wtr's --config option must explicitly point
 // to this file
 
