@@ -3,19 +3,8 @@ const { deepEqual, equal, throws } = assert;
 
 import * as Temporal from 'temporal-polyfill';
 
-// Intl.DateTimeFormat::formatRange/formatRangeToParts currently not known by TypeScript
-declare global {
-  namespace Intl {
-    interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
-      source: 'startDate' | 'endDate'
-    }
-    interface DateTimeFormat {
-      formatRange(startDate: number | Date, endDate: number | Date): string
-      formatRangeToParts(startDate: number | Date, endDate: number | Date): Intl.DateTimeFormatRangePart[]
-    }
-  }
-}
 import { DateUnit } from 'temporal-polyfill';
+import 'temporal-polyfill/dist/global'; // for Intl.DateTimeFormat polyfill types
 type ValidArg = any;
 
 describe('Intl', () => {

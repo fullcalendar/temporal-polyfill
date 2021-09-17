@@ -43,6 +43,7 @@ const esmRules = {
 }
 
 const tsRules = {
+  // TODO: turn off '@typescript-eslint/no-unused-vars' ... tsc already checks for this!?
   // TODO: prevent no-space between var name and type like `something:TheType`
 
   // Allow explicit `any`. However, you should prefer `unknown`
