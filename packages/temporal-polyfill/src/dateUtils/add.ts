@@ -1,8 +1,8 @@
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
-import { DateISOFields } from '../args'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { Duration } from '../duration'
+import { DateISOFields } from '../public/args'
+import { Duration } from '../public/duration'
 import { DateEssentials, DateISOEssentials } from './date'
 import { addDaysMilli, epochMilliToISOFields, isoFieldsToEpochMilli } from './isoMath'
 

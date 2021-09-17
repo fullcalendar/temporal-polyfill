@@ -1,5 +1,5 @@
-import { DateTimeArg, DurationLike } from '../args'
-import { Duration } from '../duration'
+import { DateTimeArg, DurationLike } from '../public/args'
+import { Duration } from '../public/duration'
 import { DateLikeInstance } from './calendar'
 import { dayTimeFieldsToNano } from './dayTime'
 import {

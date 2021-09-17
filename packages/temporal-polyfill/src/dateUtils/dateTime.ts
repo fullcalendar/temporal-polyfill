@@ -14,10 +14,10 @@ import {
   DiffOptions,
   OverflowOptions,
   Unit,
-} from '../args'
-import { Calendar } from '../calendar'
-import { Duration } from '../duration'
-import { PlainDateTime } from '../plainDateTime'
+} from '../public/args'
+import { Calendar } from '../public/calendar'
+import { Duration } from '../public/duration'
+import { PlainDateTime } from '../public/plainDateTime'
 import { compareValues } from '../utils/math'
 import { addWholeDays } from './add'
 import {

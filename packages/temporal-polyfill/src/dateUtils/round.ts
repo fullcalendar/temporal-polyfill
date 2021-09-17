@@ -1,5 +1,5 @@
 import { RoundConfig } from '../argParse/roundOptions'
-import { Duration } from '../duration'
+import { Duration } from '../public/duration'
 import { RoundingFunc, roundToIncrement } from '../utils/math'
 import { DateLikeInstance } from './calendar'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'

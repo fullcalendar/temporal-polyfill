@@ -3,14 +3,14 @@ import {
   extractCalendar,
   getCommonCalendar,
   isCalendarArgBag,
-} from './argParse/calendar'
-import { parseOverflowHandling } from './argParse/overflowHandling'
-import { parseUnit } from './argParse/units'
-import { CalendarImpl } from './calendarImpl/calendarImpl'
-import { calendarImplClasses } from './calendarImpl/config'
-import { IntlCalendarImpl } from './calendarImpl/intlCalendarImpl'
-import { AbstractObj, ensureObj } from './dateUtils/abstract'
-import { addToDateFields } from './dateUtils/add'
+} from '../argParse/calendar'
+import { parseOverflowHandling } from '../argParse/overflowHandling'
+import { parseUnit } from '../argParse/units'
+import { CalendarImpl } from '../calendarImpl/calendarImpl'
+import { calendarImplClasses } from '../calendarImpl/config'
+import { IntlCalendarImpl } from '../calendarImpl/intlCalendarImpl'
+import { AbstractObj, ensureObj } from '../dateUtils/abstract'
+import { addToDateFields } from '../dateUtils/add'
 import {
   computeDayOfYear,
   computeDaysInYear,
@@ -19,13 +19,13 @@ import {
   isoCalendarImpl,
   queryDateFields,
   queryDateISOFields,
-} from './dateUtils/calendar'
-import { diffDateFields } from './dateUtils/diff'
-import { computeISODayOfWeek } from './dateUtils/isoMath'
-import { MonthDayFields } from './dateUtils/monthDay'
-import { DAY, DateUnitInt, YEAR } from './dateUtils/units'
-import { computeWeekOfISOYear } from './dateUtils/week'
-import { createWeakMap } from './utils/obj'
+} from '../dateUtils/calendar'
+import { diffDateFields } from '../dateUtils/diff'
+import { computeISODayOfWeek } from '../dateUtils/isoMath'
+import { MonthDayFields } from '../dateUtils/monthDay'
+import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
+import { computeWeekOfISOYear } from '../dateUtils/week'
+import { createWeakMap } from '../utils/obj'
 import {
   CalendarArg,
   CalendarProtocol,

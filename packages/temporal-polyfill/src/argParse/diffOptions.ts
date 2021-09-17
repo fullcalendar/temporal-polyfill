@@ -1,5 +1,5 @@
-import { DiffOptions, Unit } from '../args'
 import { UnitInt } from '../dateUtils/units'
+import { DiffOptions, Unit } from '../public/args'
 import { RoundConfig, parseRoundOptions } from './roundOptions'
 import { parseUnit } from './units'
 

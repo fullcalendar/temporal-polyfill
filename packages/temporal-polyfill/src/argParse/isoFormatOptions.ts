@@ -1,4 +1,3 @@
-import { TimeToStringOptions, TimeToStringUnit } from '../args'
 import {
   MICROSECOND,
   MILLISECOND,
@@ -7,6 +6,7 @@ import {
   SECOND,
   unitDigitMap,
 } from '../dateUtils/units'
+import { TimeToStringOptions, TimeToStringUnit } from '../public/args'
 import { RoundingFunc } from '../utils/math'
 import { parseRoundingMode } from './roundingMode'
 import { parseUnit } from './units'

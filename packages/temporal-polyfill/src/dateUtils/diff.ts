@@ -1,6 +1,6 @@
 import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { Duration } from '../duration'
+import { Duration } from '../public/duration'
 import { compareValues } from '../utils/math'
 import { addWholeMonths, addWholeYears } from './add'
 import { DateEssentials, compareDateFields } from './date'

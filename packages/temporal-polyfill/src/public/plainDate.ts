@@ -1,9 +1,9 @@
-import { extractCalendar, isoCalendar } from './argParse/calendar'
-import { parseCalendarDisplay } from './argParse/calendarDisplay'
-import { parseDiffOptions } from './argParse/diffOptions'
-import { OVERFLOW_REJECT } from './argParse/overflowHandling'
-import { refineFields, refineOverrideFields } from './argParse/refine'
-import { AbstractISOObj, ensureObj } from './dateUtils/abstract'
+import { extractCalendar, isoCalendar } from '../argParse/calendar'
+import { parseCalendarDisplay } from '../argParse/calendarDisplay'
+import { parseDiffOptions } from '../argParse/diffOptions'
+import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
+import { refineFields, refineOverrideFields } from '../argParse/refine'
+import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import {
   compareDates,
   constrainDateISO,
@@ -11,21 +11,21 @@ import {
   dateFieldMap,
   diffDates,
   overrideDateFields,
-} from './dateUtils/date'
-import { createDateTime } from './dateUtils/dateTime'
-import { formatCalendarID, formatDateISO } from './dateUtils/isoFormat'
-import { isoFieldsToEpochMilli } from './dateUtils/isoMath'
+} from '../dateUtils/date'
+import { createDateTime } from '../dateUtils/dateTime'
+import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
+import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
   mixinCalendarFields,
   mixinISOFields,
-} from './dateUtils/mixins'
-import { createMonthDay } from './dateUtils/monthDay'
-import { parseDateTimeISO } from './dateUtils/parse'
-import { ensureLooseTime } from './dateUtils/time'
-import { DAY, DateUnitInt, YEAR } from './dateUtils/units'
-import { createYearMonth } from './dateUtils/yearMonth'
+} from '../dateUtils/mixins'
+import { createMonthDay } from '../dateUtils/monthDay'
+import { parseDateTimeISO } from '../dateUtils/parse'
+import { ensureLooseTime } from '../dateUtils/time'
+import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
+import { createYearMonth } from '../dateUtils/yearMonth'
 import {
   CalendarArg,
   CompareResult,

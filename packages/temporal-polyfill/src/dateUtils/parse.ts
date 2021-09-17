@@ -1,6 +1,6 @@
 import { isoCalendar } from '../argParse/calendar'
-import { Calendar } from '../calendar'
-import { TimeZone } from '../timeZone'
+import { Calendar } from '../public/calendar'
+import { TimeZone } from '../public/timeZone'
 import { DurationFields } from './duration'
 import { TimeISOEssentials, partialSecondsToTimeFields } from './time'
 import { nanoInMinute } from './units'

@@ -1,6 +1,6 @@
 import { unitNames } from '../argParse/units'
-import { DateLike, Unit } from '../args'
-import { Calendar } from '../calendar'
+import { DateLike, Unit } from '../public/args'
+import { Calendar } from '../public/calendar'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'

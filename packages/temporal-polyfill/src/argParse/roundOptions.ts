@@ -1,5 +1,5 @@
-import { RoundOptions, Unit } from '../args'
 import { UnitInt } from '../dateUtils/units'
+import { RoundOptions, Unit } from '../public/args'
 import { RoundingFunc } from '../utils/math'
 import { parseRoundingMode } from './roundingMode'
 import { parseUnit } from './units'

@@ -1,7 +1,7 @@
-import { DurationToStringUnitInt, parseTimeToStringOptions } from './argParse/isoFormatOptions'
-import { refineFields, refineOverrideFields } from './argParse/refine'
-import { parseUnit } from './argParse/units'
-import { AbstractNoValueObj, ensureObj } from './dateUtils/abstract'
+import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
+import { refineFields, refineOverrideFields } from '../argParse/refine'
+import { parseUnit } from '../argParse/units'
+import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import {
   SignedDurationFields,
   addAndBalanceDurations,
@@ -10,12 +10,12 @@ import {
   durationFieldMap,
   refineDurationFields,
   roundAndBalanceDuration,
-} from './dateUtils/duration'
-import { formatDurationISO } from './dateUtils/isoFormat'
-import { parseDurationISO } from './dateUtils/parse'
-import { computeTotalUnits } from './dateUtils/totalUnits'
-import { NANOSECOND, SECOND, UnitInt, YEAR } from './dateUtils/units'
-import { createWeakMap, mapHash } from './utils/obj'
+} from '../dateUtils/duration'
+import { formatDurationISO } from '../dateUtils/isoFormat'
+import { parseDurationISO } from '../dateUtils/parse'
+import { computeTotalUnits } from '../dateUtils/totalUnits'
+import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
+import { createWeakMap, mapHash } from '../utils/obj'
 import {
   CompareResult,
   DateTimeArg,

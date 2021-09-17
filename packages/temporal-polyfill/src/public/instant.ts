@@ -1,10 +1,10 @@
-import { AbstractNoValueObj, ensureObj } from './dateUtils/abstract'
-import { addToInstant, compareInstants, diffInstants, roundInstant } from './dateUtils/instant'
-import { isoFieldsToEpochNano } from './dateUtils/isoMath'
-import { ComputedEpochFields, mixinEpochFields } from './dateUtils/mixins'
-import { parseDateTimeISO, parseOffsetNano } from './dateUtils/parse'
-import { nanoInMicro, nanoInMilli, nanoInSecond } from './dateUtils/units'
-import { createWeakMap } from './utils/obj'
+import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
+import { addToInstant, compareInstants, diffInstants, roundInstant } from '../dateUtils/instant'
+import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
+import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
+import { parseDateTimeISO, parseOffsetNano } from '../dateUtils/parse'
+import { nanoInMicro, nanoInMilli, nanoInSecond } from '../dateUtils/units'
+import { createWeakMap } from '../utils/obj'
 import {
   CalendarArg,
   CompareResult,
