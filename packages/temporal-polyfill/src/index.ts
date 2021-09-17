@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-//
+
 // SPECIAL NOTE:
 // Imports from non-top-level files are not allowed
-//
 import * as TemporalImpl from './impl'
 import { DateTimeFormatArg, DateTimeFormatWithTemporal, DateWithTemporal } from './impl'
 
@@ -11,7 +10,7 @@ function getBest<T>(name: string, fallback: T): T {
   return TemporalNative ? (TemporalNative as any)[name] : fallback
 }
 
-// Export types. Can't use ./public/args, need to use other top-level files
+// Export types. Need to use ./impl because it's top-level, can't use ./public/args
 export * from './impl'
 
 export const PlainMonthDay = getBest('PlainMonthDay', TemporalImpl.PlainMonthDay)

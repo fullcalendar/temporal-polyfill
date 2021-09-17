@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-namespace */
-//
+
 // SPECIAL NOTE:
 // Imports from non-top-level files are not allowed
-//
 import * as TemporalImpl from './impl'
 import { DateTemporalMethods, DateTimeFormatArg, DateTimeFormatRangePart } from './impl'
 import shimTemporal from './shim'

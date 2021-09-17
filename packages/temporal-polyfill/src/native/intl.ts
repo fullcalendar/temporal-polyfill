@@ -8,6 +8,7 @@ import { PlainYearMonth } from '../public/plainYearMonth'
 import { ZonedDateTime } from '../public/zonedDateTime'
 
 // standard built-in functionality
+// TODO: move to separate package
 
 export interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
   source: 'startDate' | 'endDate'
