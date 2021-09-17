@@ -6,7 +6,7 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { TimeISOEssentials, nanoToTimeFields } from '../dateUtils/time'
-import { DateISOFields, DateTimeISOFields } from '../public/args'
+import { DateISOFields, DateTimeISOFields } from '../public/types'
 import { padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { isoCalendarID } from './calendar'

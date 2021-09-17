@@ -1,4 +1,4 @@
-import { CompareResult } from '../public/args'
+import { CompareResult } from '../public/types'
 
 export type RoundingFunc = (n: number) => number
 

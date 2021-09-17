@@ -1,5 +1,5 @@
 import { DateTimeISOEssentials, DateTimeISOMilli } from '../dateUtils/dateTime'
-import { DateTimeISOFields } from '../public/args'
+import { DateTimeISOFields } from '../public/types'
 import { milliInDay, milliInMin } from './units'
 
 export const isoEpochOriginYear = 1970

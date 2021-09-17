@@ -22,6 +22,8 @@ import {
 } from '../dateUtils/monthDay'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { throwNew } from '../utils/obj'
+import { Calendar } from './calendar'
+import { PlainDate } from './plainDate'
 import {
   CalendarProtocol,
   DateISOFields,
@@ -31,9 +33,7 @@ import {
   MonthDayLikeFields,
   MonthDayOverrides,
   OverflowOptions,
-} from './args'
-import { Calendar } from './calendar'
-import { PlainDate } from './plainDate'
+} from './types'
 
 export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   constructor(

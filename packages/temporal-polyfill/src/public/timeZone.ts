@@ -16,6 +16,9 @@ import { FixedTimeZoneImpl } from '../timeZoneImpl/fixedTimeZoneImpl'
 import { IntlTimeZoneImpl } from '../timeZoneImpl/intlTimeZoneImpl'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { createWeakMap } from '../utils/obj'
+import { Calendar } from './calendar'
+import { Instant } from './instant'
+import { PlainDateTime } from './plainDateTime'
 import {
   CalendarArg,
   DateTimeArg,
@@ -24,10 +27,7 @@ import {
   InstantArg,
   TimeZoneArg,
   TimeZoneProtocol,
-} from './args'
-import { Calendar } from './calendar'
-import { Instant } from './instant'
-import { PlainDateTime } from './plainDateTime'
+} from './types'
 
 const [getID, setID] = createWeakMap<TimeZone, string>()
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()

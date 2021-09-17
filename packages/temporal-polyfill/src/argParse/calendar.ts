@@ -1,7 +1,7 @@
 import { ensureObj } from '../dateUtils/abstract'
 import { isoCalendarID } from '../dateUtils/calendar'
-import { CalendarArg, CalendarProtocol } from '../public/args'
 import { Calendar } from '../public/calendar'
+import { CalendarArg, CalendarProtocol } from '../public/types'
 
 export type CalendarArgSimple = CalendarProtocol | string
 export type CalendarArgBag = { calendar: CalendarArgSimple }

@@ -20,6 +20,10 @@ import {
   timeFieldsToConstrainedISO,
   timeFieldsToNano,
 } from '../dateUtils/time'
+import { Calendar } from './calendar'
+import { Duration } from './duration'
+import { PlainDate } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
 import {
   CompareResult,
   DateArg,
@@ -33,11 +37,7 @@ import {
   TimeRoundOptions,
   TimeToStringOptions,
   TimeZoneArg,
-} from './args'
-import { Calendar } from './calendar'
-import { Duration } from './duration'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
+} from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 export class PlainTime extends AbstractISOObj<TimeISOFields> {

@@ -27,7 +27,7 @@ import {
   DurationTotalOptions,
   LocalesArg,
   ZonedDateTimeArg,
-} from './args'
+} from './types'
 
 const [getFields, setFields] = createWeakMap<Duration, SignedDurationFields>()
 

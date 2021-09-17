@@ -2,6 +2,8 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundConfig } from '../argParse/roundOptions'
 import { unitNames } from '../argParse/units'
+import { Duration } from '../public/duration'
+import { PlainDateTime } from '../public/plainDateTime'
 import {
   CompareResult,
   DateTimeArg,
@@ -12,9 +14,7 @@ import {
   Unit,
   ZonedDateTimeArg,
   ZonedDateTimeLike,
-} from '../public/args'
-import { Duration } from '../public/duration'
-import { PlainDateTime } from '../public/plainDateTime'
+} from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { compareValues, numSign } from '../utils/math'
 import { ensureObj } from './abstract'

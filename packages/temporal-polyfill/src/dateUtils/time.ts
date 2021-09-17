@@ -2,6 +2,8 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt, parseOverflowHandling } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
 import { parseRoundOptions } from '../argParse/roundOptions'
+import { Duration } from '../public/duration'
+import { PlainTime } from '../public/plainTime'
 import {
   CompareResult,
   OverflowOptions,
@@ -10,9 +12,7 @@ import {
   TimeLike,
   TimeRoundOptions,
   TimeUnit,
-} from '../public/args'
-import { Duration } from '../public/duration'
-import { PlainTime } from '../public/plainTime'
+} from '../public/types'
 import { compareValues } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'

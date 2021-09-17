@@ -1,5 +1,5 @@
-import { CompareResult, DateISOFields, YearMonthLike } from '../public/args'
 import { PlainYearMonth } from '../public/plainYearMonth'
+import { CompareResult, DateISOFields, YearMonthLike } from '../public/types'
 import { compareValues } from '../utils/math'
 import { isoFieldsToEpochNano } from './isoMath'
 

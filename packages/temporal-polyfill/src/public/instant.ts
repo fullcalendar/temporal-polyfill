@@ -5,6 +5,7 @@ import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO, parseOffsetNano } from '../dateUtils/parse'
 import { nanoInMicro, nanoInMilli, nanoInSecond } from '../dateUtils/units'
 import { createWeakMap } from '../utils/obj'
+import { Duration } from './duration'
 import {
   CalendarArg,
   CompareResult,
@@ -15,8 +16,7 @@ import {
   TimeDiffOptions,
   TimeRoundOptions,
   TimeZoneArg,
-} from './args'
-import { Duration } from './duration'
+} from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()

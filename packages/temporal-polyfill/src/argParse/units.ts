@@ -2,7 +2,7 @@ import { DateFields } from '../dateUtils/date'
 import { TimeFields } from '../dateUtils/time'
 import { UnitInt } from '../dateUtils/units'
 import { YearMonthFields } from '../dateUtils/yearMonth'
-import { DateUnit, TimeUnit, Unit } from '../public/args'
+import { DateUnit, TimeUnit, Unit } from '../public/types'
 import { strArrayToHash } from '../utils/obj'
 
 export type YearMonthUnitProper = keyof YearMonthFields

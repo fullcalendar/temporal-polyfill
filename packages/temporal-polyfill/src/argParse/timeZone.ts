@@ -1,6 +1,6 @@
 import { ensureObj } from '../dateUtils/abstract'
-import { TimeZoneProtocol } from '../public/args'
 import { TimeZone } from '../public/timeZone'
+import { TimeZoneProtocol } from '../public/types'
 
 export type TimeZoneArgSimple = TimeZoneProtocol | string
 export type TimeZoneArgBag = { timeZone: TimeZoneArgSimple }

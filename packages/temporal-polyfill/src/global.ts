@@ -38,7 +38,7 @@ declare global {
     export import Now = TemporalImpl.Now
 
     // SPECIAL NOTE:
-    // Must keep in sync with ./public/args.ts
+    // Must keep in sync with ./public/types.ts
     export import CompareResult = TemporalImpl.CompareResult
     export import TimeUnit = TemporalImpl.TimeUnit
     export import YearMonthUnit = TemporalImpl.YearMonthUnit
