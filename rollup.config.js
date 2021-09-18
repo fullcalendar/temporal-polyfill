@@ -4,8 +4,8 @@ import dts from 'rollup-plugin-dts'
 // Only execute this inside of a specific workspace in order to generate a bundled declaration file
 
 export const rollupConfig = {
-  input: 'dist/index.d.ts',
-  output: { file: 'dist/index.d.ts', format: 'es' },
+  input: 'dist/impl.d.ts',
+  output: { file: 'dist/impl.d.ts', format: 'es' },
   plugins: [dts()],
 }
 

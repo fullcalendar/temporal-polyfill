@@ -1,4 +1,9 @@
-// This is the only top-level file that's allow to import nested files
+/*
+This is the only top-level file that's allow to import nested files
+
+SPECIAL NOTE:
+Must keep in sync with ./performant.ts
+*/
 
 export * from './public/types'
 export * from './native/date'

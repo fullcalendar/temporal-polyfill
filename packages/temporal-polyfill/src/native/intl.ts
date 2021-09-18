@@ -40,10 +40,12 @@ export type DateTimeFormatArg =
   PlainMonthDay |
   PlainTime
 
-// SPECIAL NOTE:
-// Must keep in sync with global.ts
-// Was impossible to extend a global object similar to DateTemporalMethods
-// TODO: file bug with TypeScript
+/*
+SPECIAL NOTE:
+Must keep in sync with global.ts
+Was impossible to extend a global object similar to DateTemporalMethods
+TODO: file bug with TypeScript
+*/
 export interface DateTimeFormatTemporalMethods {
   format(dateArg?: DateTimeFormatArg): string
   formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[]

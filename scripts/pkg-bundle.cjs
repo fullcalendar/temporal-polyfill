@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs')
 const esbuild = require('esbuild')
 const { hideBin } = require('yargs/helpers')
 const yargs = require('yargs/yargs')
@@ -21,13 +22,38 @@ function bundlePkgJs(watch) {
   const packageConfig = require(path.resolve('./package.json'))
   const external = Object.keys(packageConfig.dependencies ?? {})
 
-  return buildJsFile(watch, {
-    entryPoints: ['./src/index.ts'], // relative to cwd
-    outfile: './dist/index.js', // relative to cwd
-    bundle: true,
-    format: 'esm',
-    external,
-  })
+  // HACK
+  if (!fs.existsSync('./src/impl.ts')) {
+    return Promise.resolve()
+  }
+
+  return Promise.all([
+    buildJsFile(watch, {
+      entryPoints: ['./src/impl.ts'],
+      outfile: './dist/impl.js',
+      bundle: true,
+      format: 'esm',
+      external,
+    }),
+    buildJsFile(watch, { // use 'performant' as 'index'
+      entryPoints: ['./src/performant.ts'],
+      outfile: './dist/index.js',
+      bundle: false,
+      format: 'esm',
+    }),
+    buildJsFile(watch, {
+      entryPoints: ['./src/shim.ts'],
+      outfile: './dist/shim.js',
+      bundle: false,
+      format: 'esm',
+    }),
+    buildJsFile(watch, {
+      entryPoints: ['./src/global.ts'],
+      outfile: './dist/global.js',
+      bundle: false,
+      format: 'esm',
+    }),
+  ])
 }
 
 function buildJsFile(watch, esbuildConfig) {
@@ -67,12 +93,23 @@ function buildJsFile(watch, esbuildConfig) {
 }
 
 function minifyJsFile(file) {
-  console.log('TODO: terser on ' + file)
+  // TODO: terser
   return Promise.resolve()
 }
 
 async function bundlePkgTypes() {
+  // HACK
+  if (!fs.existsSync('./src/impl.ts')) {
+    return Promise.resolve() // relative to cwd
+  }
+
   await exec(['rollup', '-c', rollupConfigPath])
-  await exec(['echo', 'TODO: cleanup extra type files!'])
-  // rm -f dist/?(!(index)).d.ts || true
+
+  // clear out extra definitions in ./dist
+  // 1. remove tsbuild cached data because it will be invalidated
+  await exec('rm ./tsconfig.tsbuildinfo')
+  // 2. remove all directories
+  await exec('find ./dist -mindepth 1 -type d -prune -exec rm -rf {} \\;')
+  // 3. remove the 'performant' files (they became the 'index')
+  await exec('find ./dist -mindepth 1 -type f -name \'performant.*\' -exec rm -rf {} \\;')
 }

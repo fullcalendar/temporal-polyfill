@@ -20,8 +20,10 @@ import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
 
-// SPECIAL NOTE:
-// Must keep in sync with global.ts
+/*
+SPECIAL NOTE:
+Must keep in sync with global.ts
+*/
 
 // math
 export type CompareResult = -1 | 0 | 1

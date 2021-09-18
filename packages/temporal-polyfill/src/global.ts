@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-namespace */
+/*
+Defines global types, installs the API globally
 
-// SPECIAL NOTE:
-// Imports from non-top-level files are not allowed
+SPECIAL NOTE:
+Imports from non-top-level files are not allowed
+*/
 import * as TemporalImpl from './impl'
 import { DateTemporalMethods, DateTimeFormatArg, DateTimeFormatRangePart } from './impl'
 import shimTemporal from './shim'
@@ -11,8 +14,10 @@ declare global {
   export interface Date extends DateTemporalMethods {}
 
   export namespace Intl {
-    // SPECIAL NOTE:
-    // Must keep in sync with ./native/intl.ts
+    /*
+    SPECIAL NOTE:
+    Must keep in sync with ./native/intl.ts
+    */
     interface DateTimeFormat {
       formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[]
       formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string
@@ -36,8 +41,10 @@ declare global {
     export import Duration = TemporalImpl.Duration
     export import Now = TemporalImpl.Now
 
-    // SPECIAL NOTE:
-    // Must keep in sync with ./public/types.ts
+    /*
+    SPECIAL NOTE:
+    Must keep in sync with ./public/types.ts
+    */
     export import CompareResult = TemporalImpl.CompareResult
     export import TimeUnit = TemporalImpl.TimeUnit
     export import YearMonthUnit = TemporalImpl.YearMonthUnit

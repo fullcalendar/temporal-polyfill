@@ -1,5 +1,10 @@
-// SPECIAL NOTE:
-// Imports from non-top-level files are not allowed
+/*
+Exports a single function that, when called, installs the API globally
+Does NOT export global types
+
+SPECIAL NOTE:
+Imports from non-top-level files are not allowed
+*/
 import {
   Calendar,
   DateTemporalMethods,
@@ -24,8 +29,10 @@ import {
   intlFormatToParts,
 } from './impl'
 
+const TemporalNative = globalThis.Temporal
+
 export default function(): void {
-  if (!globalThis.Temporal) {
+  if (!TemporalNative) {
     globalThis.Temporal = {
       PlainYearMonth,
       PlainMonthDay,
@@ -86,7 +93,7 @@ function patchDateTimeFormatClass(DateTimeFormatClass: { prototype: Intl.DateTim
 export function extendDateClass<DateObj extends Date>(
   DateClass: { new(...args: any[]): DateObj, prototype: DateObj },
 ): typeof Date & { prototype: (DateObj & DateTemporalMethods) } {
-  if (!globalThis.Temporal) {
+  if (!TemporalNative) {
     class DateExtended extends DateClass {}
     patchDateClass(DateExtended)
     DateClass = DateExtended
@@ -97,7 +104,7 @@ export function extendDateClass<DateObj extends Date>(
 export function extendDateTimeClass<DateTimeFormatObj extends Intl.DateTimeFormat>(
   DateTimeFormatClass: { new(...args: any[]): DateTimeFormatObj, prototype: DateTimeFormatObj },
 ): typeof Intl.DateTimeFormat & { prototype: (DateTimeFormatObj & DateTimeFormatTemporalMethods) } {
-  if (!globalThis.Temporal) {
+  if (!TemporalNative) {
     class DateTimeFormatExtended extends DateTimeFormatClass {}
     patchDateTimeFormatClass(DateTimeFormatExtended)
     DateTimeFormatClass = DateTimeFormatExtended
