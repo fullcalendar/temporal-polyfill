@@ -15,6 +15,7 @@ git submodule update --init
 
 ## TODO
 
+- since `build` command doesn't generate .d.ts files anymore, have a one-time watch script (dev?)
 - convert all script/(lib) to cjs
 - exclude submodules dirs from searches in vscode
 - add ruler in vscode settings

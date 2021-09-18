@@ -129,7 +129,7 @@ async function bundlePkgTypes() {
     return Promise.resolve() // relative to cwd
   }
 
-  await exec(['rollup', '-c', rollupConfigPath])
+  await exec(['rollup', '--config', rollupConfigPath])
 
   // clear out extra definitions in ./dist
   // 1. remove tsbuild cached data because it will be invalidated

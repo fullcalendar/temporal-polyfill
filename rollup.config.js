@@ -5,7 +5,11 @@ import dts from 'rollup-plugin-dts'
 
 export const rollupConfig = {
   input: 'dist/impl.d.ts',
-  output: { file: 'dist/impl.d.ts', format: 'es' },
+  output: {
+    file: 'dist/impl.d.ts',
+    format: 'es',
+    // sourcemap: true, // doesn't support sourcemaps
+  },
   plugins: [dts()],
 }
 
