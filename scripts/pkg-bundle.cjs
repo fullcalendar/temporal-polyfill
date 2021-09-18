@@ -24,7 +24,15 @@ function bundlePkgJs(watch) {
 
   // HACK
   if (!fs.existsSync('./src/impl.ts')) {
-    return Promise.resolve()
+    return buildJsFile(watch, {
+      entryPoints: ['./src/index.ts'],
+      outfile: './dist/index.js',
+      bundle: true,
+      sourcemap: true,
+      sourcesContent: false,
+      format: 'esm',
+      external,
+    })
   }
 
   return Promise.all([
@@ -100,9 +108,19 @@ function buildJsFile(watch, esbuildConfig) {
   return promise
 }
 
-function minifyJsFile(file) {
-  // TODO: terser
-  return Promise.resolve()
+async function minifyJsFile(filePath) {
+  const dirPath = path.dirname(filePath)
+  const filename = path.basename(filePath)
+  await exec([
+    'terser',
+    '--config-file', path.resolve(__dirname, '../terser.config.json'),
+    '--source-map', `content='${filename}.map',url='${filename}.map'`,
+    '--output', filename, // overwrite input!
+    '--',
+    filename,
+  ], {
+    cwd: dirPath,
+  })
 }
 
 async function bundlePkgTypes() {
