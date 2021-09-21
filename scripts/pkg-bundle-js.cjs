@@ -6,17 +6,8 @@ const yargs = require('yargs/yargs')
 const exec = require('./lib/exec.cjs').promise.withOptions({ live: true, exitOnError: true })
 require('colors')
 
-const rollupConfigPath = path.resolve(__dirname, '../rollup.config.js')
-
 const argv = yargs(hideBin(process.argv)).argv
-if (argv.watch) {
-  bundlePkgJs(true)
-} else { // bundle for release
-  Promise.all([
-    bundlePkgJs(false),
-    bundlePkgTypes(),
-  ])
-}
+bundlePkgJs(argv.watch)
 
 function bundlePkgJs(watch) {
   const packageConfig = require(path.resolve('./package.json'))
@@ -103,6 +94,12 @@ function buildJsFile(watch, esbuildConfig) {
     })
 
     promise = promise.then(() => minifyJsFile(outfile))
+  } else {
+    promise = promise.then(result => {
+      process.on('SIGINT', function() {
+        result.stop()
+      })
+    })
   }
 
   return promise
@@ -121,21 +118,4 @@ async function minifyJsFile(filePath) {
   ], {
     cwd: dirPath,
   })
-}
-
-async function bundlePkgTypes() {
-  // HACK
-  if (!fs.existsSync('./src/impl.ts')) {
-    return Promise.resolve() // relative to cwd
-  }
-
-  await exec(['rollup', '--config', rollupConfigPath])
-
-  // clear out extra definitions in ./dist
-  // 1. remove tsbuild cached data because it will be invalidated
-  await exec('rm ./tsconfig.tsbuildinfo')
-  // 2. remove all directories
-  await exec('find ./dist -mindepth 1 -type d -prune -exec rm -rf {} \\;')
-  // 3. remove the 'performant' files (they became the 'index')
-  await exec('find ./dist -mindepth 1 -type f -name \'performant.*\' -exec rm -rf {} \\;')
 }
