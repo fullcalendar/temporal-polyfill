@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 const exec = require('./lib/exec.cjs').promise.withOptions({ live: true, exitOnError: true })
 
-const rollupConfigPath = path.resolve(__dirname, '../rollup.config.js')
+const rollupConfigPath = path.resolve(__dirname, '../rollup.config.cjs')
 
 bundlePkgTypes()
 

@@ -1,16 +1,12 @@
-#!/usr/bin/env node
 const { existsSync, readdirSync } = require('fs')
 const { readFile, writeFile } = require('fs/promises')
 const { resolve } = require('path')
 const merge = require('deepmerge')
-
-require('colors')
-
 const yargs = require('yargs')
 const { hideBin } = require('yargs/helpers')
+require('colors')
 
 const args = yargs(hideBin(process.argv)).boolean('v').argv
-
 const momentLocaleRoot = resolve(args.$0, '..', 'data/moment/locale')
 const fullcalendarLocaleRoot = resolve(
   args.$0,

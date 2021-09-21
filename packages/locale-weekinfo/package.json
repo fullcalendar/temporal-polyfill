@@ -21,9 +21,8 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
-    "compile-firstDays": "node ./scripts/compile-firstDays.js",
-    "compile-minimalDays": "node ./scripts/compile-minimalDays.js",
+    "compile-firstDays": "node ./scripts/compile-firstDays.cjs",
+    "compile-minimalDays": "node ./scripts/compile-minimalDays.cjs",
     "locales-compile": "yarn compile-firstDays && yarn compile-minimalDays"
   },
   "devDependencies": {

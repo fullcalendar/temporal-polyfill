@@ -21,9 +21,8 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
-    "compile-directions": "node ./scripts/compile-directions.js",
-    "locales-compile": "yarn compile-directions"
+    "compile-directions": "node ./scripts/compile-directions.cjs",
+    "locales-compile": "yarn run compile-directions"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

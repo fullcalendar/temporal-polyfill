@@ -1,6 +1,6 @@
-import base from './jest.config.base.js'
+const base = require('./jest.config.base.cjs')
 
-export default {
+module.exports = {
   ...base,
   projects: [
     '<rootDir>/packages/temporal-polyfill',

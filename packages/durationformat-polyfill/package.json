@@ -20,9 +20,6 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "test": "jest"
-  },
   "dependencies": {
     "temporal-polyfill": "workspace:*"
   },

@@ -1,6 +1,6 @@
-import { writeFileSync } from 'fs'
-import { resolve } from 'path'
-import { mapLocaleProperty } from '../../../scripts/lib/locales-list.js'
+const { writeFileSync } = require('fs')
+const { resolve } = require('path')
+const { mapLocaleProperty } = require('../../../scripts/lib/locales-list.cjs')
 
 const fdObj = mapLocaleProperty((_locale, json) => {
   return json.week.firstDay

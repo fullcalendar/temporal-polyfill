@@ -21,7 +21,6 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
     "e2e": "wtr --config web-test-runner.config.cjs",
     "e2e-manual": "wtr --config web-test-runner.config.cjs --manual",
     "e2e-watch": "wtr --config web-test-runner.config.cjs --watch",

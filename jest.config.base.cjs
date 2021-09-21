@@ -2,7 +2,7 @@
 
 process.env.TZ = 'America/New_York'
 
-export default {
+module.exports = {
   // timers: 'modern',
   verbose: true,
 }

@@ -21,9 +21,8 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
-    "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.js",
-    "locales-compile": "yarn compile-localeOrdinalsData"
+    "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.cjs",
+    "locales-compile": "yarn run compile-localeOrdinalsData"
   },
   "dependencies": {
     "temporal-polyfill": "workspace:*"
