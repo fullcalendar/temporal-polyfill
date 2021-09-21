@@ -1,6 +1,5 @@
-// NOTE: until Yarn PnP supports ESM imports (https://github.com/yarnpkg/berry/issues/638),
-// this config file must be written in CJS and wtr's --config option must explicitly point
-// to this file
+// Config for web-test-runner
+// https://modern-web.dev/docs/test-runner/overview/
 
 const { esbuildPlugin } = require('@web/dev-server-esbuild')
 const { defaultReporter } = require('@web/test-runner')

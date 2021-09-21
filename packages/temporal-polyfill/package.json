@@ -21,10 +21,8 @@
     "dist"
   ],
   "scripts": {
-    "e2e": "wtr --config web-test-runner.config.cjs",
-    "e2e-manual": "wtr --config web-test-runner.config.cjs --manual",
-    "e2e-watch": "wtr --config web-test-runner.config.cjs --watch",
-    "e2e-check": "tsc -p ./e2e"
+    "e2e": "wtr --config wtr.config.cjs",
+    "e2e-check": "tsc --project ./e2e"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
