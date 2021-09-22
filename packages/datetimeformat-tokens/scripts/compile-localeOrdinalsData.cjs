@@ -1,6 +1,6 @@
 const { writeFileSync } = require('fs')
 const { resolve } = require('path')
-const { getAllLocalesData } = require('../../../scripts/lib/locales-list.cjs')
+const { getAllLocalesData } = require('../../../scripts/lib/localesList.cjs')
 
 const ordinals = {}
 

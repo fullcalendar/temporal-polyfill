@@ -4,15 +4,15 @@ const { hideBin } = require('yargs/helpers')
 const yargs = require('yargs/yargs')
 const shell = require('shelljs')
 const live = require('shelljs-live/promise')
-const { getPkgConfig, analyzePkgConfig } = require('./lib/pkg-analyze.cjs')
+const { getPkgConfig, analyzePkgConfig } = require('./lib/pkgAnalyze.cjs')
 
 const terserConfigPath = path.resolve(__dirname, './config/terser.json')
 const argv = yargs(hideBin(process.argv)).argv
 shell.config.fatal = true
 require('colors')
-bundlePkgJs(process.cwd(), argv.watch)
+bundlePkgJS(process.cwd(), argv.watch)
 
-function bundlePkgJs(dir, watch) {
+function bundlePkgJS(dir, watch) {
   const pkgConfig = getPkgConfig(dir)
   const { exportSubnames, exportPaths } = analyzePkgConfig(pkgConfig)
   const external = Object.keys(pkgConfig.dependencies ?? {})

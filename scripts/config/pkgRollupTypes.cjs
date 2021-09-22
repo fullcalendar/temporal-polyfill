@@ -1,5 +1,5 @@
 const dts = require('rollup-plugin-dts').default
-const { getPkgConfig, analyzePkgConfig } = require('../lib/pkg-analyze.cjs')
+const { getPkgConfig, analyzePkgConfig } = require('../lib/pkgAnalyze.cjs')
 
 const pkgConfig = getPkgConfig(process.cwd())
 const { exportSubnames } = analyzePkgConfig(pkgConfig)
