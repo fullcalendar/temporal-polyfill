@@ -1,8 +1,9 @@
 const path = require('path')
-const exec = require('./lib/exec.cjs').sync.withOptions({ exitOnError: true })
+const shell = require('shelljs')
+
 require('colors')
 
-const { stdout } = exec('gzip -c -r dist/impl.js | wc -c')
+const { stdout } = shell.exec('gzip -c -r dist/impl.js | wc -c', { silent: true })
 const bytes = parseInt(stdout.trim())
 
 console.log(

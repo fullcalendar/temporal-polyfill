@@ -1,6 +1,9 @@
 const path = require('path')
 const fs = require('fs')
-const exec = require('./lib/exec.cjs').promise.withOptions({ live: true, exitOnError: true })
+const shell = require('shelljs')
+const { live } = require('shelljs-live/promise')
+
+shell.config.fatal = true
 
 const rollupConfigPath = path.resolve(__dirname, '../rollup.config.cjs')
 
@@ -14,13 +17,13 @@ async function bundlePkgTypes() {
 
   // TODO: delete impl.d.ts.map (because rollup doesn't generate it!)
 
-  await exec(['rollup', '--config', rollupConfigPath])
+  await live(['rollup', '--config', rollupConfigPath])
 
   // clear out extra definitions in ./dist
   // 1. remove tsbuild cached data because it will be invalidated
-  await exec('rm ./tsconfig.tsbuildinfo')
+  await live('rm ./tsconfig.tsbuildinfo')
   // 2. remove all directories
-  await exec('find ./dist -mindepth 1 -type d -prune -exec rm -rf {} \\;')
+  await live('find ./dist -mindepth 1 -type d -prune -exec rm -rf {} \\;')
   // 3. remove the 'performant' files (they became the 'index')
-  await exec('find ./dist -mindepth 1 -type f -name \'performant.*\' -exec rm -rf {} \\;')
+  await live('find ./dist -mindepth 1 -type f -name \'performant.*\' -exec rm -rf {} \\;')
 }

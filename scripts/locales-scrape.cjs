@@ -4,9 +4,10 @@ const { resolve } = require('path')
 const merge = require('deepmerge')
 const yargs = require('yargs')
 const { hideBin } = require('yargs/helpers')
-require('colors')
 
+require('colors')
 const args = yargs(hideBin(process.argv)).boolean('v').argv
+
 const momentLocaleRoot = resolve(args.$0, '..', 'data/moment/locale')
 const fullcalendarLocaleRoot = resolve(
   args.$0,

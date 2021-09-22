@@ -3,10 +3,13 @@ const fs = require('fs')
 const esbuild = require('esbuild')
 const { hideBin } = require('yargs/helpers')
 const yargs = require('yargs/yargs')
-const exec = require('./lib/exec.cjs').promise.withOptions({ live: true, exitOnError: true })
-require('colors')
+const shell = require('shelljs')
+const { live } = require('shelljs-live/promise')
 
+require('colors')
+shell.config.fatal = true
 const argv = yargs(hideBin(process.argv)).argv
+
 bundlePkgJs(argv.watch)
 
 function bundlePkgJs(watch) {
@@ -108,7 +111,7 @@ function buildJsFile(watch, esbuildConfig) {
 async function minifyJsFile(filePath) {
   const dirPath = path.dirname(filePath)
   const filename = path.basename(filePath)
-  await exec([
+  await live([
     'terser',
     '--config-file', path.resolve(__dirname, '../terser.config.json'),
     '--source-map', `content='${filename}.map',url='${filename}.map'`,
