@@ -5,15 +5,15 @@ __metadata:
   version: 4
   cacheKey: 8
 
-"@arshaw/yall@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@arshaw/yall@npm:1.2.0"
+"@arshaw/yall@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@arshaw/yall@npm:1.2.1"
   dependencies:
     cross-spawn: ^7.0.3
     picomatch: ^2.2.2
   bin:
     yall: bin/yall.js
-  checksum: 109527b95eb7f4a144aef007edc7a40884fc6f9e55f797bb25c1a72ea862bd2172bdcbef114013ad7ccbe4718c6cb76cfc1efcae8c21ee62a30b2a6e10942e11
+  checksum: 891047949802d0c61864a91979226f13dbc6f709334aa7aece0d182630144d8564cf8070f87982ef6ec08775ae54b8f27d9ffe76ae8fbc7f9cee436d56625682
   languageName: node
   linkType: hard
 
@@ -8295,7 +8295,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root@workspace:."
   dependencies:
-    "@arshaw/yall": ^1.2.0
+    "@arshaw/yall": ^1.2.1
     "@babel/core": ^7.14.6
     "@babel/preset-env": ^7.14.5
     "@babel/preset-typescript": ^7.15.0

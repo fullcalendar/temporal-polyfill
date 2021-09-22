@@ -18,15 +18,15 @@
     "packages/*"
   ],
   "scripts": {
-    "clean": "yarn workspaces foreach -pvi --exclude root run pkg:clean",
+    "clean": "yall -pw pkg:clean",
     "build": "yall -s types bundle-types bundle-js",
     "watch": "yall -p types bundle-js --watch",
     "types": "tsc --build",
-    "bundle-types": "yarn workspaces foreach -pvi --exclude root run pkg:bundle-types",
-    "bundle-js": "yarn workspaces foreach -pvi --exclude root run pkg:bundle-js",
+    "bundle-types": "yall -pw pkg:bundle-types",
+    "bundle-js": "yall -pw pkg:bundle-js",
     "test": "jest",
     "lint": "eslint .",
-    "size": "yarn workspaces foreach -p --exclude root run pkg:size",
+    "size": "yall -pwq pkg:size",
     "pkg:clean": "cd $INIT_CWD && node $PROJECT_CWD/scripts/pkg-clean.cjs",
     "pkg:build": "cd $INIT_CWD && yall -s pkg:types pkg:bundle-types pkg:bundle-js",
     "pkg:watch": "cd $INIT_CWD && yall -p pkg:types pkg:bundle-js --watch",
@@ -37,10 +37,10 @@
     "pkg:lint": "eslint $INIT_CWD",
     "pkg:size": "cd $INIT_CWD && node $PROJECT_CWD/scripts/pkg-size.cjs",
     "locales-scrape": "node ./scripts/locales-scrape.cjs",
-    "locales-compile": "yarn workspaces foreach -pvi run locales-compile"
+    "locales-compile": "yall -pw locales-compile"
   },
   "devDependencies": {
-    "@arshaw/yall": "^1.2.0",
+    "@arshaw/yall": "^1.2.1",
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.5",
     "@babel/preset-typescript": "^7.15.0",
