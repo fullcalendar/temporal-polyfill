@@ -22,7 +22,8 @@
     "require": "./dist/index.cjs"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/src"
   ],
   "dependencies": {
     "temporal-polyfill": "workspace:*"

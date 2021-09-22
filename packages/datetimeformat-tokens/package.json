@@ -22,7 +22,8 @@
     "require": "./dist/index.cjs"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/src"
   ],
   "scripts": {
     "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.cjs",

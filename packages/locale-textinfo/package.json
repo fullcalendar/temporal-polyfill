@@ -22,7 +22,8 @@
     "require": "./dist/index.cjs"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/src"
   ],
   "scripts": {
     "compile-directions": "node ./scripts/compile-directions.cjs",

@@ -36,7 +36,8 @@
     }
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/src"
   ],
   "scripts": {
     "e2e": "wtr --config wtr.config.cjs",
