@@ -4,9 +4,7 @@ const shell = require('shelljs')
 const live = require('shelljs-live/promise')
 
 shell.config.fatal = true
-
 const rollupConfigPath = path.resolve(__dirname, '../rollup.config.cjs')
-
 bundlePkgTypes()
 
 async function bundlePkgTypes() {

@@ -6,10 +6,9 @@ const yargs = require('yargs/yargs')
 const shell = require('shelljs')
 const live = require('shelljs-live/promise')
 
-require('colors')
 shell.config.fatal = true
 const argv = yargs(hideBin(process.argv)).argv
-
+require('colors')
 bundlePkgJs(argv.watch)
 
 function bundlePkgJs(watch) {
