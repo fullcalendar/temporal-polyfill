@@ -42,12 +42,12 @@ function bundlePkgJS(dir, watch) {
         sourcesContent: false,
       }
       if (watch) {
-        return watchJsFile(config)
+        return watchJSFile(config)
       } else {
-        return buildJsFile(config, true) // minify=true
+        return buildJSFile(config, true) // minify=true
       }
     } else if (!watch) { // .cjs
-      return buildJsFile({
+      return buildJSFile({
         entryPoints: [srcPath],
         outfile: exportPath,
         format: 'cjs',
@@ -59,10 +59,10 @@ function bundlePkgJS(dir, watch) {
   }))
 }
 
-function buildJsFile(config, minify) {
+function buildJSFile(config, minify) {
   const { outfile } = config
   return esbuild.build(config).then(() => {
-    return (minify ? minifyJsFile(outfile) : Promise.resolve()).then(() => {
+    return (minify ? minifyJSFile(outfile) : Promise.resolve()).then(() => {
       console.log(`Built ${outfile}`.green)
     })
   }, (error) => {
@@ -70,7 +70,7 @@ function buildJsFile(config, minify) {
   })
 }
 
-function watchJsFile(config) {
+function watchJSFile(config) {
   const { outfile } = config
   console.log(`Watch-building ${outfile}...`.green)
   return esbuild.build({
@@ -91,7 +91,7 @@ function watchJsFile(config) {
   })
 }
 
-async function minifyJsFile(filePath) {
+async function minifyJSFile(filePath) {
   const dirPath = path.dirname(filePath)
   const filename = path.basename(filePath)
   await live([
