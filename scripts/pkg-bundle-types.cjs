@@ -1,27 +1,37 @@
 const path = require('path')
-const fs = require('fs')
 const shell = require('shelljs')
 const live = require('shelljs-live/promise')
+const { getPkgConfig, analyzePkgConfig } = require('./lib/pkg-analyze.cjs')
 
-shell.config.fatal = true
 const rollupConfigPath = path.resolve(__dirname, '../rollup.config.cjs')
-bundlePkgTypes()
+shell.config.fatal = true
+bundlePkgTypes(process.cwd())
 
-async function bundlePkgTypes() {
-  // HACK
-  if (!fs.existsSync('./src/impl.ts')) {
-    return Promise.resolve() // relative to cwd
-  }
-
-  // TODO: delete impl.d.ts.map (because rollup doesn't generate it!)
-
+async function bundlePkgTypes(dir) {
+  const pkgConfig = getPkgConfig(dir)
+  const { exportPaths } = analyzePkgConfig(pkgConfig)
   await live(['rollup', '--config', rollupConfigPath])
 
-  // clear out extra definitions in ./dist
-  // 1. remove tsbuild cached data because it will be invalidated
-  await live('rm ./tsconfig.tsbuildinfo')
-  // 2. remove all directories
-  await live('find ./dist -mindepth 1 -type d -prune -exec rm -rf {} \\;')
-  // 3. remove the 'performant' files (they became the 'index')
-  await live('find ./dist -mindepth 1 -type f -name \'performant.*\' -exec rm -rf {} \\;')
+  shell.rm('tsconfig.tsbuildinfo') // tsbuild cache is invalid now
+  shell.cd('dist')
+  shell.rm('impl.d.ts.map') // rollup can't product a map, old map is useless
+
+  // generate filenames without directory/extension
+  const simpleExportPaths = exportPaths.reduce((accum, exportPath) => {
+    accum[path.basename(exportPath).replace(/\..*/, '')] = true
+    return accum
+  }, {})
+
+  // iterate all top-level files in the 'dist' directory
+  // remove anything that's not related to a package export
+  for (const filename of shell.ls()) {
+    const match = filename.match(/^([^.]*)\./) // everything before first dot
+    if (match) {
+      if (!simpleExportPaths[match[1]]) { // not listed in package exports
+        shell.rm(filename)
+      }
+    } else { // a directory
+      shell.rm('-rf', filename)
+    }
+  }
 }

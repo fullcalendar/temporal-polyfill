@@ -8,6 +8,8 @@ const standardConfig = require('eslint-config-standard/eslintrc.json')
 // https://github.com/import-js/eslint-plugin-import/issues/1434#issuecomment-521189117
 
 const esRules = {
+  // TODO: rule for always using parens with arrow function args
+
   // Max line length, with some exceptions
   // TODO: ADD ruler to vscode settings
   'max-len': ['error', { code: 100, ignoreRegExpLiterals: true, ignoreUrls: true }],
