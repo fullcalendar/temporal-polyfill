@@ -3,7 +3,7 @@ const shell = require('shelljs')
 const live = require('shelljs-live/promise')
 const { getPkgConfig, analyzePkgConfig } = require('./lib/pkg-analyze.cjs')
 
-const rollupConfigPath = path.resolve(__dirname, '../rollup.config.cjs')
+const rollupConfigPath = path.resolve(__dirname, './config/rollup.cjs')
 shell.config.fatal = true
 bundlePkgTypes(process.cwd())
 

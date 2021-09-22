@@ -6,7 +6,7 @@ const shell = require('shelljs')
 const live = require('shelljs-live/promise')
 const { getPkgConfig, analyzePkgConfig } = require('./lib/pkg-analyze.cjs')
 
-const terserConfigPath = path.resolve(__dirname, '../terser.config.json')
+const terserConfigPath = path.resolve(__dirname, './config/terser.json')
 const argv = yargs(hideBin(process.argv)).argv
 shell.config.fatal = true
 require('colors')
