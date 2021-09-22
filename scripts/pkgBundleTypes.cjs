@@ -1,6 +1,7 @@
 const path = require('path')
 const shell = require('shelljs')
 const live = require('shelljs-live/promise')
+const { removeExt } = require('./lib/path.cjs')
 const { getPkgConfig, analyzePkgConfig } = require('./lib/pkgAnalyze.cjs')
 
 const rollupConfigPath = path.resolve(__dirname, './config/pkgRollupTypes.cjs')
@@ -35,8 +36,4 @@ async function bundlePkgTypes(dir) {
       shell.rm(filename)
     }
   }
-}
-
-function removeExt(filename) {
-  return filename.replace(/\.(js|cjs|ts|d\.ts)(\.map)?$/, '')
 }
