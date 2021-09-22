@@ -4,7 +4,7 @@ const esbuild = require('esbuild')
 const { hideBin } = require('yargs/helpers')
 const yargs = require('yargs/yargs')
 const shell = require('shelljs')
-const { live } = require('shelljs-live/promise')
+const live = require('shelljs-live/promise')
 
 require('colors')
 shell.config.fatal = true

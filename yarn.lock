@@ -8315,7 +8315,7 @@ __metadata:
     rollup: ^2.55.1
     rollup-plugin-dts: ^3.0.2
     shelljs: ^0.8.4
-    shelljs-live: ^0.0.1
+    shelljs-live: ^0.0.2
     terser: ^5.8.0
     typescript: ^4.3.5
     yargs: ^17.0.1
@@ -8452,14 +8452,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shelljs-live@npm:^0.0.1":
-  version: 0.0.1
-  resolution: "shelljs-live@npm:0.0.1"
+"shelljs-live@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "shelljs-live@npm:0.0.2"
   dependencies:
     cross-spawn: ^7.0.3
   peerDependencies:
     shelljs: ^0.8.4
-  checksum: 48824acfd51b00068d47de59fe4275df25c0d0aee7b4c7d1b1100f5586ac29aeb535f899c8927e38c9c3e747ff6dab04622e764699e6f450a97ef3543fc6e41f
+  checksum: ad5e6f59a7e8f2e2e5a5e726e4df6bc421a35db9514ad5532902c56704761f651e189bee8d4bf13b74f5a39685ff85ce9fa6268a7e31a556d26e2817e7f05562
   languageName: node
   linkType: hard
 

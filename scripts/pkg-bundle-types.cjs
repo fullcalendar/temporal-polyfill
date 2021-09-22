@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const shell = require('shelljs')
-const { live } = require('shelljs-live/promise')
+const live = require('shelljs-live/promise')
 
 shell.config.fatal = true
 
