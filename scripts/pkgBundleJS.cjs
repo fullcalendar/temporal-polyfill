@@ -43,13 +43,12 @@ function bundlePkgJS(dir, watch) {
       if (watch) {
         return watchJSFile({
           ...configBase,
-          sourcemap: 'inline', // mappings and src/* content will go inline. best for debugging
+          sourcemap: 'inline', // within .js (better for debugging), content included by default
         })
       } else {
         return buildJSFile({
           ...configBase,
-          sourcemap: true, // link to separate .js.map file
-          sourcesContent: false, // src/* content won't be included, will reference original files
+          sourcemap: true, // separate .js.map, content included by default
         }, true) // minify=true
       }
     } else if (!watch) { // .cjs
