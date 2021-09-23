@@ -30,7 +30,7 @@
     "lint": "eslint .",
     "size": "yall -pwq pkg:size",
     "pkg:clean": "cd $INIT_CWD && node $PROJECT_CWD/scripts/pkgClean.cjs",
-    "pkg:build": "cd $INIT_CWD && yall -s pkg:types pkg:bundle-types pkg:bundle-js",
+    "pkg:build": "cd $INIT_CWD && yall -s pkg:types pkg:bundle-types pkg:bundle-js pkg:exports-fix",
     "pkg:watch": "cd $INIT_CWD && yall -p pkg:types pkg:bundle-js --watch",
     "pkg:types": "cd $INIT_CWD && tsc --build",
     "pkg:bundle-types": "cd $INIT_CWD && node $PROJECT_CWD/scripts/pkgBundleTypes.cjs",
