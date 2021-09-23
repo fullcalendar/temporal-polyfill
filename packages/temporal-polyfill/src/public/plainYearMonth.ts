@@ -1,4 +1,4 @@
-import { extractCalendar, isoCalendar } from '../argParse/calendar'
+import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
@@ -21,7 +21,7 @@ import {
   overrideYearMonthFields,
   yearMonthFieldMap,
 } from '../dateUtils/yearMonth'
-import { Calendar } from './calendar'
+import { Calendar, isoCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 import {

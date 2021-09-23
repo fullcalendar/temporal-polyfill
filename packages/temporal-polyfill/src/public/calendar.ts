@@ -7,16 +7,15 @@ import {
 import { parseOverflowHandling } from '../argParse/overflowHandling'
 import { parseUnit } from '../argParse/units'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { calendarImplClasses } from '../calendarImpl/config'
+import { calendarImplClasses } from '../calendarImpl/calendarImplClasses'
 import { IntlCalendarImpl } from '../calendarImpl/intlCalendarImpl'
+import { isoCalendarID, isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { addToDateFields } from '../dateUtils/add'
 import {
   computeDayOfYear,
   computeDaysInYear,
   getExistingDateISOFields,
-  isoCalendarID,
-  isoCalendarImpl,
   queryDateFields,
   queryDateISOFields,
 } from '../dateUtils/calendar'
@@ -240,3 +239,5 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
   toString(): string { return this.id }
 }
+
+export const isoCalendar = new Calendar(isoCalendarID)

@@ -1,7 +1,6 @@
 import { ensureCalendarsEqual } from '../argParse/calendar'
 import { parseOverflowHandling } from '../argParse/overflowHandling'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { ISOCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -11,9 +10,6 @@ import { DateArg, DateLikeFields, OverflowOptions } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { DateFields, DateISOEssentials, constrainDateFields, createDate } from './date'
 import { diffDaysMilli, epochMilliToISOFields } from './isoMath'
-
-export const isoCalendarID = 'iso8601'
-export const isoCalendarImpl = new ISOCalendarImpl(isoCalendarID)
 
 // Date-type Testing (TODO: move this?)
 

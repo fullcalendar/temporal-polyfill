@@ -1,6 +1,5 @@
 import { ensureObj } from '../dateUtils/abstract'
-import { isoCalendarID } from '../dateUtils/calendar'
-import { Calendar } from '../public/calendar'
+import { Calendar, isoCalendar } from '../public/calendar'
 import { CalendarArg, CalendarProtocol } from '../public/types'
 
 export type CalendarArgSimple = CalendarProtocol | string
@@ -9,8 +8,6 @@ export type CalendarArgBag = { calendar: CalendarArgSimple }
 export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
   return arg.calendar // boolean-ish
 }
-
-export const isoCalendar = new Calendar(isoCalendarID)
 
 export function extractCalendar(input: { calendar?: CalendarArg; }): Calendar {
   if (input.calendar == null) {

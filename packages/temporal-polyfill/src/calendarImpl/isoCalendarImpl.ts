@@ -37,3 +37,6 @@ export class ISOCalendarImpl extends CalendarImpl {
     return isoEpochLeapYear
   }
 }
+
+export const isoCalendarID = 'iso8601'
+export const isoCalendarImpl = new ISOCalendarImpl(isoCalendarID)

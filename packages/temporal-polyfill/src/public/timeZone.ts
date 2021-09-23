@@ -1,4 +1,3 @@
-import { isoCalendar } from '../argParse/calendar'
 import {
   DISAMBIG_EARLIER,
   DISAMBIG_LATER,
@@ -16,7 +15,7 @@ import { FixedTimeZoneImpl } from '../timeZoneImpl/fixedTimeZoneImpl'
 import { IntlTimeZoneImpl } from '../timeZoneImpl/intlTimeZoneImpl'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { createWeakMap } from '../utils/obj'
-import { Calendar } from './calendar'
+import { Calendar, isoCalendar } from './calendar'
 import { Instant } from './instant'
 import { PlainDateTime } from './plainDateTime'
 import {

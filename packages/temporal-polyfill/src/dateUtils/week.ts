@@ -1,4 +1,5 @@
-import { computeDayOfYear, computeDaysInYear, isoCalendarImpl } from './calendar'
+import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
+import { computeDayOfYear, computeDaysInYear } from './calendar'
 import { computeISODayOfWeek } from './isoMath'
 
 // TODO: fix lots of 1-index problems!!!

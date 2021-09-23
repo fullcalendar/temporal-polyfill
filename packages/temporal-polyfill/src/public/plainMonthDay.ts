@@ -1,9 +1,9 @@
-import { extractCalendar, isoCalendar } from '../argParse/calendar'
+import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
+import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { isoCalendarID } from '../dateUtils/calendar'
 import { constrainDateISO } from '../dateUtils/date'
 import { formatCalendarID, formatMonthDayISO } from '../dateUtils/isoFormat'
 import { isoEpochLeapYear, isoFieldsToEpochMilli } from '../dateUtils/isoMath'
@@ -22,7 +22,7 @@ import {
 } from '../dateUtils/monthDay'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { throwNew } from '../utils/obj'
-import { Calendar } from './calendar'
+import { Calendar, isoCalendar } from './calendar'
 import { PlainDate } from './plainDate'
 import {
   CalendarProtocol,

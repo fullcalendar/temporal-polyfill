@@ -1,4 +1,4 @@
-import { extractCalendar, isoCalendar } from '../argParse/calendar'
+import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplay } from '../argParse/offsetDisplay'
@@ -37,7 +37,7 @@ import {
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createWeakMap } from '../utils/obj'
-import { Calendar } from './calendar'
+import { Calendar, isoCalendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'

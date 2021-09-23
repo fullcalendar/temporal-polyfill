@@ -1,5 +1,4 @@
-import { isoCalendar } from '../argParse/calendar'
-import { Calendar } from '../public/calendar'
+import { Calendar, isoCalendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
 import { DurationFields } from './duration'
 import { TimeISOEssentials, partialSecondsToTimeFields } from './time'

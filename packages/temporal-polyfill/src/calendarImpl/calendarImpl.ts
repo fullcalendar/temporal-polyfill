@@ -1,6 +1,6 @@
 import { numSign } from '../utils/math'
 import { padZeros } from '../utils/string'
-import { eraOrigins } from './config'
+import { eraOrigins } from './eraOrigins'
 
 export abstract class CalendarImpl {
   constructor(

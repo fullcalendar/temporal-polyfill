@@ -1,4 +1,3 @@
-import { isoCalendar } from '../argParse/calendar'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
@@ -20,7 +19,7 @@ import {
   timeFieldsToConstrainedISO,
   timeFieldsToNano,
 } from '../dateUtils/time'
-import { Calendar } from './calendar'
+import { Calendar, isoCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
