@@ -1,8 +1,10 @@
-node_modules
-dist
-coverage
 
+/coverage
 tsconfig.tsbuildinfo
+dist
+
+# see pkgExportsFix
+/packages/*/*.d.ts
 
 .yarn/*
 !.yarn/patches
@@ -11,5 +13,3 @@ tsconfig.tsbuildinfo
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
-
-*.code-workspace

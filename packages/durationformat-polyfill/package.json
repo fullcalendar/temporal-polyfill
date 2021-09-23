@@ -23,7 +23,8 @@
     "import": "./dist/index.js"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/*.d.ts"
   ],
   "dependencies": {
     "temporal-polyfill": "workspace:*"

@@ -23,7 +23,8 @@
     "import": "./dist/index.js"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/*.d.ts"
   ],
   "scripts": {
     "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.cjs",

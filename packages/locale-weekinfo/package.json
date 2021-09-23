@@ -23,7 +23,8 @@
     "import": "./dist/index.js"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/*.d.ts"
   ],
   "scripts": {
     "compile-firstDays": "node ./scripts/compile-firstDays.cjs",
