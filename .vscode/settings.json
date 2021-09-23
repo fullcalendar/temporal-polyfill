@@ -8,5 +8,10 @@
   },
   "eslint.nodePath": ".yarn/sdks",
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "jestrunner.changeDirectoryToWorkspaceRoot": false, // allows entering sub-workspace, is faster
+  "jestrunner.enableYarnPnpSupport": true,
+  "jestrunner.debugOptions": {
+    "args": ["--no-cache", "--watchAll=false"] // NOTE: keep in sync with launch.json
+  }
 }

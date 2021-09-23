@@ -1,4 +1,15 @@
 {
   "configurations": [
+    {
+      "name": "Debug All Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeExecutable": "yarn",
+      "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false"], // NOTE: keep in sync with settings.json
+      "sourceMaps": true,
+      "disableOptimisticBPs": true
+    }
   ]
 }
