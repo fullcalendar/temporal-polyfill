@@ -3,8 +3,7 @@ import { PlainDateTime } from './plainDateTime'
 import { TimeZone } from './timeZone'
 
 test('can create with variable', () => {
-  const tz = 'local'
-  expect(new TimeZone(tz)).toBeDefined()
+  expect(new TimeZone('UTC')).toBeDefined()
 })
 
 test('timezone for tests is America/New_York', () => {
