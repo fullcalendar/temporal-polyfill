@@ -31,7 +31,7 @@ import {
 
 const TemporalNative = globalThis.Temporal
 
-export default function(): void {
+export function shimTemporal(): void {
   if (!TemporalNative) {
     globalThis.Temporal = {
       PlainYearMonth,
