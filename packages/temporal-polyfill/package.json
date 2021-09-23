@@ -20,20 +20,20 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
     },
     "./impl": {
-      "require": "./dist/impl.js",
-      "import": "./dist/impl.cjs"
+      "require": "./dist/impl.cjs",
+      "import": "./dist/impl.js"
     },
     "./shim": {
-      "require": "./dist/shim.js",
-      "import": "./dist/shim.cjs"
+      "require": "./dist/shim.cjs",
+      "import": "./dist/shim.js"
     },
     "./global": {
-      "require": "./dist/global.js",
-      "import": "./dist/global.cjs"
+      "require": "./dist/global.cjs",
+      "import": "./dist/global.js"
     }
   },
   "files": [
