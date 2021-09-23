@@ -10,16 +10,12 @@ bundlePkgTypes(process.cwd())
 
 async function bundlePkgTypes(dir) {
   const pkgConfig = getPkgConfig(dir)
-  const { exportSubnames, exportPaths } = analyzePkgConfig(pkgConfig)
+  const { exportPaths } = analyzePkgConfig(pkgConfig)
+
   await live(['rollup', '--config', rollupConfigPath])
 
   shell.rm('tsconfig.tsbuildinfo') // tsbuild cache is invalid now
-  shell.cd('dist')
-
-  // rollup can't product a map, old map is useless
-  if (exportSubnames.includes('impl')) {
-    shell.rm('impl.d.ts.map')
-  }
+  shell.cd('dist') // in 'dist' directory from now on!...
 
   // generate filenames without directory/extension
   const exportDistNames = exportPaths.reduce((accum, exportPath) => {
@@ -36,4 +32,9 @@ async function bundlePkgTypes(dir) {
       shell.rm(filename)
     }
   }
+
+  // remove .d.ts sourcemaps and their references
+  // impossible to do with tsc flags
+  shell.rm('*.d.ts.map')
+  shell.sed('-i', /^\/\/#\s*sourceMappingURL=.*/, '', '*.d.ts')
 }
