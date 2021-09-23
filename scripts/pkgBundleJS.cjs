@@ -33,23 +33,18 @@ function bundlePkgJS(dir, watch) {
     const bundle = distName === (isPolyfill ? 'impl' : 'index')
 
     if (ext === 'js') {
-      const configBase = {
+      const config = {
         entryPoints: [srcPath],
         outfile: exportPath,
         format: 'esm',
         bundle,
         external,
+        sourcemap: true, // separate .js.map, content included by default
       }
       if (watch) {
-        return watchJSFile({
-          ...configBase,
-          sourcemap: 'inline', // within .js (better for debugging), content included by default
-        })
+        return watchJSFile(config)
       } else {
-        return buildJSFile({
-          ...configBase,
-          sourcemap: true, // separate .js.map, content included by default
-        }, true) // minify=true
+        return buildJSFile(config, true) // minify=true
       }
     } else if (!watch) { // .cjs
       return buildJSFile({
