@@ -1,4 +1,6 @@
 
+These tests are only meant to run after a build.
+
 How to manually update tests
 
 ```
