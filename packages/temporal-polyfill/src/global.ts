@@ -19,6 +19,7 @@ declare global {
     Must keep in sync with ./native/intl.ts
     */
     interface DateTimeFormat {
+      format(dateArg?: DateTimeFormatArg): string
       formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[]
       formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string
       formatRangeToParts(

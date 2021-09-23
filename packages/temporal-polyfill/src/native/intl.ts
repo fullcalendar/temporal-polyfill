@@ -15,14 +15,8 @@ export interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
 }
 
 export interface DateTimeFormatRangeMethods {
-  formatRange(
-    startDate: number | Date,
-    endDate: number | Date,
-  ): string
-  formatRangeToParts(
-    startDate: number | Date,
-    endDate: number | Date,
-  ): DateTimeFormatRangePart[]
+  formatRange(startDate: number | Date, endDate: number | Date): string
+  formatRangeToParts(startDate: number | Date, endDate: number | Date): DateTimeFormatRangePart[]
 }
 
 export type DateTimeFormatWithRange = Intl.DateTimeFormat & DateTimeFormatRangeMethods
