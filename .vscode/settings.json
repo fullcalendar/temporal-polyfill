@@ -8,7 +8,5 @@
   },
   "eslint.nodePath": ".yarn/sdks",
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "jest.pathToJest": "yarn run jest",
-  "jest.jestCommandLine": "yarn run jest"
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }
