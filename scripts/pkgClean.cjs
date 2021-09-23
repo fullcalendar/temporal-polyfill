@@ -1,8 +1,7 @@
 const shell = require('shelljs')
+const { checkAtPkgRoot } = require('./lib/pkgAnalyze.cjs')
 
-// TODO: ensure this is only ran from a package's root
-// Unfortunately allows executing pkg:clean in subdirectory
-
+checkAtPkgRoot()
 shell.rm('-rf', [
   'dist',
   'tsconfig.tsbuildinfo', // much faster to delete manually than `tsc --build --clean`

@@ -3,6 +3,7 @@ const path = require('path')
 module.exports = {
   getPkgConfig,
   analyzePkgConfig,
+  checkAtPkgRoot,
 }
 
 function getPkgConfig(dir) {
@@ -37,4 +38,8 @@ function analyzePkgConfig(pkgConfig) {
   }
 
   return { exportSubnames, exportPaths }
+}
+
+function checkAtPkgRoot() {
+  getPkgConfig(process.cwd()) // will throw error if doesn't exist
 }
