@@ -4,7 +4,7 @@ const { deepEqual, equal, throws } = assert;
 import * as Temporal from 'temporal-polyfill';
 
 import { DateUnit } from 'temporal-polyfill';
-import 'temporal-polyfill/dist/global'; // for Intl.DateTimeFormat polyfill types. TODO: don't use /dist/ path
+import 'temporal-polyfill/global'; // for Intl.DateTimeFormat polyfill types
 type ValidArg = any;
 
 describe('Intl', () => {
