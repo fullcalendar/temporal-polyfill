@@ -12,7 +12,7 @@ import { padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { SignedDurationFields } from './duration'
 import { roundNano } from './round'
-import { SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
+import { SECOND, nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from './units'
 
 export function formatDateTimeISO(
   fields: DateTimeISOFields,
@@ -99,29 +99,29 @@ export function formatDurationISO(
     : ''
   return (sign < 0 ? '-' : '') + 'P' +
     collapseDurationTuples([
-      ['Y', fields.years],
-      ['M', fields.months],
-      ['W', fields.weeks],
-      ['D', fields.days, !sign], // ensures 'P0D' if empty duration
+      [fields.years, 'Y'],
+      [fields.months, 'M'],
+      [fields.weeks, 'W'],
+      [fields.days, 'D', !sign], // ensures 'P0D' if empty duration
     ]) +
     (hours || minutes || seconds || partialSecondsStr
       ? 'T' +
       collapseDurationTuples([
-        ['H', hours],
-        ['M', minutes],
-        ['S',
+        [hours, 'H'],
+        [minutes, 'M'],
+        [
           smallestUnit <= SECOND ? seconds : 0,
+          partialSecondsStr + 'S',
           partialSecondsStr, // ensures seconds if partialSecondsStr
         ],
-      ]) +
-      partialSecondsStr
+      ])
       : '')
 }
 
-function collapseDurationTuples(tuples: [string, number, unknown?][]): string {
-  return tuples.map(([char, num, forceShow]) => {
+function collapseDurationTuples(tuples: [number, string, unknown?][]): string {
+  return tuples.map(([num, postfix, forceShow]) => {
     if (forceShow || num) {
-      return Math.abs(num) + char
+      return Math.abs(num) + postfix
     }
     return ''
   }).join('')
@@ -131,19 +131,18 @@ function formatPartialSeconds(
   milliseconds: number,
   microseconds: number,
   nanoseconds: number,
-  fractionalSecondDigits: number,
+  fractionalSecondDigits: number | null,
 ): string {
-  const totalNano = nanoseconds +
+  const frac = (
+    nanoseconds +
     microseconds * nanoInMicro +
     milliseconds * nanoInMilli
+  ) / nanoInSecond
 
-  if (totalNano && fractionalSecondDigits) {
-    return '.' + ensureDecimalDigits(totalNano, fractionalSecondDigits)
-  }
+  const str = fractionalSecondDigits == null
+    ? String(frac)
+    : frac.toFixed(fractionalSecondDigits)
 
-  return ''
-}
-
-function ensureDecimalDigits(num: number, length: number): string {
-  return padZeros(num, length).substr(0, length)
+  // removes everything before the decimal, or returns a blank string if no decimal
+  return str.replace(/^(.*?)(\.|$)/, '$2')
 }

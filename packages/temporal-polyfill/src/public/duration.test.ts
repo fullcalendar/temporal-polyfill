@@ -42,7 +42,7 @@ describe('duration from', () => {
     ${new Duration(0, 1, 0, 10)}                  | ${'P1M10D'}
     ${new Duration(0, 0, 0, 0, 12)}               | ${'PT12H'}
     ${new Duration(1, 0, 0, 10, 12, 30, 30, 100)} | ${'P1Y10DT12H30M30.1S'}
-  `('can be created as $expected from $duration', ({ duration, expected }) => {
+  `('can be created as from $duration', ({ duration, expected }) => {
     expect(duration.toString()).toBe(expected)
   })
 })
