@@ -27,7 +27,7 @@ test.each`
   ${1970} | ${1}  | ${1}  | ${12} | ${30}  | ${30}  | ${500}
   ${2020} | ${12} | ${25} | ${0}  | ${0}   | ${0}   | ${0}
 `(
-  'can get values for $year-$month-$dayT$hour:$minute:$second.$millisecond',
+  'can get values for $year-$month-$day T $hour:$minute:$second . $millisecond',
   ({ year, month, day, hour, minute, second, millisecond }) => {
     const date = new PlainDateTime(
       year,
@@ -82,7 +82,7 @@ test.each`
   expect(date.round(options)).toEqual(expected)
 })
 
-test('can zero out values using with', () => {
+test('can zero out values using with()', () => {
   const date = new PlainDateTime(1970, 1, 1, 10, 10, 10, 10)
   expect(
     date.with({ hour: 0, minute: 0, second: 0, millisecond: 0 }),
