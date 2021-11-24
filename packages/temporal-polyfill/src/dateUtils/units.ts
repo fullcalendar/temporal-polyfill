@@ -16,7 +16,9 @@ export const WEEK = 7
 export const MONTH = 8
 export const YEAR = 9
 
-// TODO: make bigint versions of these? useful for division
+export const nanoInMicroBI = 1000n
+export const nanoInMilliBI = 1000000n
+
 export const nanoInMicro = 1000
 export const nanoInMilli = 1000000
 export const nanoInSecond = 1000000000
@@ -32,6 +34,7 @@ export const nanoIn = [
   nanoInHour,
   nanoInDay,
 ]
+
 export const milliInDay = 86400000
 export const milliInMin = 60000
 

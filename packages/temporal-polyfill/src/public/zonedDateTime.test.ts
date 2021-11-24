@@ -8,7 +8,7 @@ test('can instantiate', () => {
 })
 
 test('UTC ZonedDateTime is equivalent to PlainDateTime', () => {
-  const zdt = new ZonedDateTime(1n, 'UTC')
+  const zdt = new ZonedDateTime(1000000n, 'UTC')
   const pdt = new PlainDateTime(1970, 1, 1, 0, 0, 0, 1)
   expect(pdt.toZonedDateTime('UTC')).toEqual(zdt)
   expect(pdt.year).toBe(zdt.year)

@@ -1,3 +1,4 @@
+import { nanoInMicroBI } from '../dateUtils/units'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
@@ -38,7 +39,7 @@ function getPlainTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainTime {
 }
 
 function getInstant(): Instant {
-  return new Instant(BigInt(Date.now()) * 1000000n)
+  return new Instant(BigInt(Date.now()) * nanoInMicroBI)
 }
 
 function getTimeZone(): TimeZone {

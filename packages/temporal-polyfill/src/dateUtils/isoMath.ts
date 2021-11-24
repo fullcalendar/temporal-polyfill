@@ -1,6 +1,6 @@
 import { DateTimeISOEssentials, DateTimeISOMilli } from '../dateUtils/dateTime'
 import { DateTimeISOFields } from '../public/types'
-import { milliInDay, milliInMin } from './units'
+import { milliInDay, milliInMin, nanoInMicro, nanoInMicroBI, nanoInMilliBI } from './units'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochLeapYear = 1972 // first ISO leap year after origin
@@ -70,8 +70,8 @@ export function isoToEpochNano(
       isoSecond,
       isoMillisecond,
     ),
-  ) * 1000000n +
-  BigInt(isoMicrosecond ?? 0) * 1000n +
+  ) * nanoInMilliBI +
+  BigInt(isoMicrosecond ?? 0) * nanoInMicroBI +
   BigInt(isoNanosecond ?? 0)
 }
 
@@ -96,10 +96,10 @@ export function isoToEpochMilli(
 }
 
 export function epochNanoToISOFields(epochNano: bigint): DateTimeISOEssentials {
-  const epochMilli = Math.floor(Number(epochNano / 1000n)) // as bigint
-  let isoNanosecond = Number(epochNano - (BigInt(epochMilli) * 1000n))
-  const isoMicrosecond = Math.floor(isoNanosecond / 1000)
-  isoNanosecond -= isoMicrosecond * 1000
+  const epochMilli = Math.floor(Number(epochNano / nanoInMilliBI))
+  let isoNanosecond = Number(epochNano - (BigInt(epochMilli) * nanoInMilliBI))
+  const isoMicrosecond = Math.floor(isoNanosecond / nanoInMicro)
+  isoNanosecond -= isoMicrosecond * nanoInMicro
   return {
     ...epochMilliToISOFields(epochMilli),
     isoMicrosecond,
