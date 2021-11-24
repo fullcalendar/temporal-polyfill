@@ -31,15 +31,16 @@ export const unitNames: Unit[] = [
   ...dateUnitNames,
 ]
 
-// Duration
+// Duration / Plurals
 
 export const durationUnitNames: (keyof DurationFields)[] = unitNames.map(
-  (unit) => (unit + 's') as keyof DurationFields, // plural
+  (unit) => (unit + 's') as keyof DurationFields,
 )
 
 // Parsing
 
 const unitMap = strArrayToHash(unitNames, (_str, i) => i)
+const pluralUnitMap = strArrayToHash(durationUnitNames, (_str, i) => i)
 
 export function parseUnit<UnitType extends UnitInt>(
   input: Unit | undefined,
@@ -54,7 +55,7 @@ export function parseUnit<UnitType extends UnitInt>(
     }
     num = defaultUnit
   } else {
-    num = (unitMap[input] | unitMap[input + 's']) as UnitType // query plural as well
+    num = (unitMap[input] || pluralUnitMap[input]) as UnitType
 
     if (num == null || num < minUnit || num > maxUnit) {
       throw new Error('Invalid unit ' + input) // TOOD: better error message with setting name
