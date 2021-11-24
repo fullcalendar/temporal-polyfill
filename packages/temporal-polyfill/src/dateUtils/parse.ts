@@ -33,15 +33,15 @@ function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
   const match = dateTimeRegExp.exec(str)
   if (match) {
     const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(
-      parseFloat(match[7]),
+      toFloat(match[7]),
     )
     return {
-      isoYear: parseInt(match[1]),
-      isoMonth: parseInt(match[2]),
-      isoDay: parseInt(match[3]),
-      isoHour: parseInt(match[4]),
-      isoMinute: parseInt(match[5]),
-      isoSecond: parseInt(match[6]),
+      isoYear: toInt(match[1]),
+      isoMonth: toInt(match[2]),
+      isoDay: toInt(match[3]),
+      isoHour: toInt(match[4]),
+      isoMinute: toInt(match[5]),
+      isoSecond: toInt(match[6]),
       isoMillisecond: millisecond,
       isoMicrosecond: microsecond,
       isoNanosecond: nanosecond,
@@ -56,12 +56,12 @@ function tryParseTimeISO(str: string): TimeISOEssentials | void {
   const match = timeRegExp.exec(str)
   if (match) {
     const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(
-      parseFloat(match[4]),
+      toFloat(match[4]),
     )
     return {
-      isoHour: parseInt(match[1]),
-      isoMinute: parseInt(match[2]),
-      isoSecond: parseInt(match[3]),
+      isoHour: toInt(match[1]),
+      isoMinute: toInt(match[2]),
+      isoSecond: toInt(match[3]),
       isoMillisecond: millisecond,
       isoMicrosecond: microsecond,
       isoNanosecond: nanosecond,
@@ -73,16 +73,16 @@ function tryParseDurationISO(str: string): DurationFields | void {
   const match = durationRegExp.exec(str)
   if (match) {
     const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(
-      parseFloat(match[10]),
+      toFloat(match[10]),
     )
     const fields: DurationFields = {
-      years: parseInt(match[2]),
-      months: parseInt(match[3]),
-      weeks: parseInt(match[4]),
-      days: parseInt(match[5]),
-      hours: parseInt(match[7]),
-      minutes: parseInt(match[8]),
-      seconds: parseInt(match[9]), // parseInt will ignore after decimal point
+      years: toInt(match[2]),
+      months: toInt(match[3]),
+      weeks: toInt(match[4]),
+      days: toInt(match[5]),
+      hours: toInt(match[7]),
+      minutes: toInt(match[8]),
+      seconds: toInt(match[9]), // toInt will ignore after decimal point
       milliseconds: millisecond,
       microseconds: microsecond,
       nanoseconds: nanosecond,
@@ -107,8 +107,16 @@ export function parseOffsetNano(str: string): number {
 
 function parseOffsetPartsNano(sign: string, hours: string, minutes: string): number {
   return (sign === '-' ? -1 : 1) * (
-    parseInt(hours) * 60 + parseInt(minutes)
+    toInt(hours) * 60 + toInt(minutes)
   ) * nanoInMinute
+}
+
+function toInt(input: string | undefined): number {
+  return parseInt(input || '0')
+}
+
+function toFloat(input: string | undefined): number {
+  return parseFloat(input || '0')
 }
 
 function throwNoParse(str: string): any {
