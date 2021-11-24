@@ -6,12 +6,11 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { TimeISOEssentials, nanoToTimeFields } from '../dateUtils/time'
+import { TimeISOEssentials, nanoToTimeFields, timeISOToNano } from '../dateUtils/time'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
 import { padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { SignedDurationFields } from './duration'
-import { isoFieldsToEpochNano } from './isoMath'
 import { roundNano } from './round'
 import { SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
 
@@ -39,10 +38,7 @@ export function formatTimeISO(
   fields: TimeISOEssentials,
   formatConfig: TimeToStringConfig,
 ): [string, number] {
-  const nano = roundNano(
-    Number(isoFieldsToEpochNano(fields)), // HACK, because timeFieldsToNano doesn't accept ISO
-    formatConfig,
-  )
+  const nano = roundNano(Number(timeISOToNano(fields)), formatConfig)
   const [roundedFields, dayDelta] = nanoToTimeFields(nano, 1)
   const s = padZeros(roundedFields.hour, 2) + ':' +
     padZeros(roundedFields.minute, 2) + ':' +

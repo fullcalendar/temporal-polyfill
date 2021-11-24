@@ -7,6 +7,10 @@ test('can instantiate', () => {
   expect(date).toBeDefined()
 })
 
+test('can formate time parts correctly', () => {
+  expect(new PlainDateTime(1970, 1, 2).toString()).toBe('1970-01-02T00:00:00')
+})
+
 test.each`
   year    | month | day   | hour  | minute | second | millisecond
   ${1970} | ${1}  | ${1}  | ${0}  | ${0}   | ${0}   | ${0}

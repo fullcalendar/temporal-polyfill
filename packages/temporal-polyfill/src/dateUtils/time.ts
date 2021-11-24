@@ -179,6 +179,15 @@ export function timeFieldsToNano(timeFields: TimeFields): number {
     timeFields.nanosecond
 }
 
+export function timeISOToNano(timeISO: TimeISOEssentials): number {
+  return timeISO.isoHour * nanoInHour +
+    timeISO.isoMinute * nanoInMinute +
+    timeISO.isoSecond * nanoInSecond +
+    timeISO.isoMillisecond * nanoInMilli +
+    timeISO.isoMicrosecond * nanoInMicro +
+    timeISO.isoNanosecond
+}
+
 export function nanoToTimeFields(
   nano: number,
   overflowDirection: CompareResult,
