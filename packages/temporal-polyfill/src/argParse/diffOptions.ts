@@ -1,7 +1,7 @@
 import { UnitInt } from '../dateUtils/units'
 import { DiffOptions, Unit } from '../public/types'
 import { RoundConfig, parseRoundOptions } from './roundOptions'
-import { parseUnit } from './units'
+import { parseUnit } from './unitStr'
 
 export interface DiffConfig<
   UnitType extends UnitInt = UnitInt

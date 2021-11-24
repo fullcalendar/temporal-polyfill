@@ -1,3 +1,4 @@
+import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
 import { DateTimeArg, DurationLike } from '../public/types'
 import { DateLikeInstance } from './calendar'
@@ -5,7 +6,6 @@ import { dayTimeFieldsToNano } from './dayTime'
 import {
   balanceComplexDuration,
   durationToDayTimeFields,
-  durationUnitNames,
   getPlainRelativeTo,
 } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'

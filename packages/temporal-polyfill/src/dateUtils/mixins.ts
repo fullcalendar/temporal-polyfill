@@ -1,4 +1,4 @@
-import { unitNames } from '../argParse/units'
+import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { DateLike, Unit } from '../public/types'
 import { attachGetters, strArrayToHash } from '../utils/obj'

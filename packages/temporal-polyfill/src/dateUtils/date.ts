@@ -2,7 +2,7 @@ import { getCommonCalendar } from '../argParse/calendar'
 import { DiffConfig } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
-import { unitNames } from '../argParse/units'
+import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { Duration } from '../public/duration'
@@ -17,17 +17,11 @@ import {
   YearMonthEssentials,
   YearMonthFields,
   overrideYearMonthFields,
-  yearMonthFieldMap,
 } from './yearMonth'
 
 export type DateISOEssentials = { isoYear: number, isoMonth: number, isoDay: number }
 export type DateEssentials = YearMonthEssentials & { day: number }
 export type DateFields = YearMonthFields & { day: number }
-
-export const dateFieldMap = {
-  ...yearMonthFieldMap,
-  day: Number,
-}
 
 export function createDate(isoFields: DateISOFields): PlainDate {
   return new PlainDate(

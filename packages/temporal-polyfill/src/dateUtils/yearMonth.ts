@@ -16,14 +16,6 @@ export interface YearMonthFields {
   monthCode: string
 }
 
-export const yearMonthFieldMap = {
-  era: String,
-  eraYear: Number,
-  year: Number,
-  month: Number,
-  monthCode: String,
-}
-
 export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
   return new PlainYearMonth(
     isoFields.isoYear,

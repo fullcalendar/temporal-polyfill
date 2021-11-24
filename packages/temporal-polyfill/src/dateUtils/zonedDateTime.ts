@@ -8,7 +8,7 @@ import {
   parseOffsetHandling,
 } from '../argParse/offsetHandling'
 import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
-import { unitNames } from '../argParse/units'
+import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
 import { TimeZone } from '../public/timeZone'
@@ -30,7 +30,6 @@ import { addDaysToDate, compareDateFields, createDate } from './date'
 import {
   DateTimeFields,
   createDateTime,
-  dateTimeFieldMap,
   dateTimeFieldsToISO,
   overrideDateTimeFields,
 } from './dateTime'
@@ -51,11 +50,6 @@ export type ZonedDateTimeISOEssentials = DateTimeISOFields & {
   offset?: string // if not provided, will be computed from timeZone and other fields
 }
 export type ZonedDateTimeFields = DateTimeFields & { offset: string }
-
-export const zonedDateTimeFieldMap = {
-  ...dateTimeFieldMap,
-  offset: String,
-}
 
 export function createZonedDateTime(
   isoFields: ZonedDateTimeISOEssentials,

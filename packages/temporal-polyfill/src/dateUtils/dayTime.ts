@@ -1,4 +1,4 @@
-import { unitNames } from '../argParse/units'
+import { unitNames } from '../argParse/unitStr'
 import { TimeFields, timeFieldsToNano } from './time'
 import { DayTimeUnitInt, NANOSECOND, nanoIn, nanoInDay } from './units'
 

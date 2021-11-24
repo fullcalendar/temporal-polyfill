@@ -1,4 +1,5 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { timeFieldMap } from '../argParse/fieldStr'
 import { OverflowHandlingInt, parseOverflowHandling } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
 import { parseRoundOptions } from '../argParse/roundOptions'
@@ -51,15 +52,6 @@ export interface TimeFields {
   millisecond: number
   microsecond: number
   nanosecond: number
-}
-
-export const timeFieldMap = {
-  hour: Number,
-  minute: Number,
-  second: Number,
-  millisecond: Number,
-  microsecond: Number,
-  nanosecond: Number,
 }
 
 export function createTime(isoFields: TimeISOEssentials): PlainTime {

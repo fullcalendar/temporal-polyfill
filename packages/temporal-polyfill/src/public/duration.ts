@@ -1,13 +1,13 @@
+import { durationFieldMap } from '../argParse/fieldStr'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
-import { parseUnit } from '../argParse/units'
+import { parseUnit } from '../argParse/unitStr'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import {
   SignedDurationFields,
   addAndBalanceDurations,
   compareDurations,
   createDuration,
-  durationFieldMap,
   refineDurationFields,
   roundAndBalanceDuration,
 } from '../dateUtils/duration'

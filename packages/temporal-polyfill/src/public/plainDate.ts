@@ -1,6 +1,7 @@
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { dateFieldMap } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
@@ -8,7 +9,6 @@ import {
   compareDates,
   constrainDateISO,
   createDate,
-  dateFieldMap,
   diffDates,
   overrideDateFields,
 } from '../dateUtils/date'

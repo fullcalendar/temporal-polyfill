@@ -2,7 +2,7 @@ import { getCommonCalendar } from '../argParse/calendar'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
-import { unitNames } from '../argParse/units'
+import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -27,7 +27,6 @@ import {
   compareDateFields,
   constrainDateISO,
   createDate,
-  dateFieldMap,
   overrideDateFields,
 } from './date'
 import {
@@ -47,7 +46,6 @@ import {
   constrainTimeISO,
   diffTimeFields,
   overrideTimeFields,
-  timeFieldMap,
   timeFieldsToConstrainedISO,
   timeLikeToISO,
 } from './time'
@@ -56,11 +54,6 @@ import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './un
 export type DateTimeISOMilli = DateISOEssentials & TimeISOMilli
 export type DateTimeISOEssentials = DateISOEssentials & TimeISOEssentials
 export type DateTimeFields = DateFields & TimeFields
-
-export const dateTimeFieldMap = {
-  ...dateFieldMap,
-  ...timeFieldMap,
-}
 
 export function createDateTime(isoFields: DateTimeISOFields): PlainDateTime {
   return new PlainDateTime(

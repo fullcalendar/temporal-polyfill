@@ -9,7 +9,7 @@ import {
 import { TimeToStringOptions, TimeToStringUnit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
 import { parseRoundingMode } from './roundingMode'
-import { parseUnit } from './units'
+import { parseUnit } from './unitStr'
 
 export type DurationToStringUnitInt =
   typeof SECOND |

@@ -1,7 +1,7 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundConfig } from '../argParse/roundOptions'
-import { unitNames } from '../argParse/units'
+import { durationUnitNames, unitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
 import { PlainDateTime } from '../public/plainDateTime'
 import {
@@ -58,19 +58,11 @@ export interface SignedDurationFields extends DurationFields {
   sign: CompareResult
 }
 
-const durationFieldMap = {} as { [Key in keyof DurationFields]: (input: unknown) => number }
-const durationUnitNames: (keyof DurationFields)[] = unitNames.map((unit) => {
-  const key = (unit + 's') as keyof DurationFields // plural
-  durationFieldMap[key] = Number
-  return key
-})
-export { durationFieldMap, durationUnitNames }
-
 export function refineDurationFields(fields: DurationLike): SignedDurationFields {
   const res = {} as SignedDurationFields
   let sign: CompareResult = 0
 
-  for (const fieldName in Object.keys(durationFieldMap)) { // will iterate own properties
+  for (const fieldName of durationUnitNames) { // will iterate own properties
     const fieldVal = Number(fields[fieldName as keyof DurationFields] || 0)
     const fieldSign = numSign(fields[fieldName as keyof DurationFields]!)
 

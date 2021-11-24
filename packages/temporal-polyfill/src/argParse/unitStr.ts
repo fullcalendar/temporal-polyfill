@@ -1,4 +1,5 @@
 import { DateFields } from '../dateUtils/date'
+import { DurationFields } from '../dateUtils/duration'
 import { TimeFields } from '../dateUtils/time'
 import { UnitInt } from '../dateUtils/units'
 import { YearMonthFields } from '../dateUtils/yearMonth'
@@ -10,6 +11,7 @@ export type DateUnitProper = keyof DateFields | 'week'
 export type TimeUnitProper = keyof TimeFields
 
 // These names must match the indexes of the Unit integers
+
 export const timeUnitNames: TimeUnit[] = [
   'nanosecond',
   'microsecond',
@@ -28,6 +30,14 @@ export const unitNames: Unit[] = [
   ...timeUnitNames,
   ...dateUnitNames,
 ]
+
+// Duration
+
+export const durationUnitNames: (keyof DurationFields)[] = unitNames.map(
+  (unit) => (unit + 's') as keyof DurationFields, // plural
+)
+
+// Parsing
 
 const unitMap = strArrayToHash(unitNames, (_str, i) => i)
 

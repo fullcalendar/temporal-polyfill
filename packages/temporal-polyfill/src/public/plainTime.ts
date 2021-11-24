@@ -1,7 +1,8 @@
+import { timeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
-import { timeUnitNames } from '../argParse/units'
+import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { formatTimeISO } from '../dateUtils/isoFormat'
 import { mixinISOFields } from '../dateUtils/mixins'
@@ -15,7 +16,6 @@ import {
   diffPlainTimes,
   overrideTimeFields,
   roundPlainTime,
-  timeFieldMap,
   timeFieldsToConstrainedISO,
   timeFieldsToNano,
 } from '../dateUtils/time'

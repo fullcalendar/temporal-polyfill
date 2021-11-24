@@ -1,9 +1,10 @@
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
+import { dateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
-import { timeUnitNames } from '../argParse/units'
+import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
 import {
@@ -11,7 +12,6 @@ import {
   compareDateTimes,
   constrainDateTimeISO,
   createDateTime,
-  dateTimeFieldMap,
   dateTimeFieldsToISO,
   diffDateTimes,
   overrideDateTimeFields,

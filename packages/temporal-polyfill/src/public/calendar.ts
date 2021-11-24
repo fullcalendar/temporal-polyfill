@@ -5,7 +5,7 @@ import {
   isCalendarArgBag,
 } from '../argParse/calendar'
 import { parseOverflowHandling } from '../argParse/overflowHandling'
-import { parseUnit } from '../argParse/units'
+import { parseUnit } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { calendarImplClasses } from '../calendarImpl/calendarImplClasses'
 import { IntlCalendarImpl } from '../calendarImpl/intlCalendarImpl'
