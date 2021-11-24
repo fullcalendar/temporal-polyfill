@@ -9,7 +9,7 @@ import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochMins } from '../dateUtils/isoMath'
-import { parseOffsetNano } from '../dateUtils/parse'
+import { tryParseOffsetNano } from '../dateUtils/parse'
 import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUtils/units'
 import { FixedTimeZoneImpl } from '../timeZoneImpl/fixedTimeZoneImpl'
 import { IntlTimeZoneImpl } from '../timeZoneImpl/intlTimeZoneImpl'
@@ -50,8 +50,8 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     if (implCache[id]) {
       impl = implCache[id]
     } else {
-      const offsetNano = parseOffsetNano(id) // and convert to ms
-      if (offsetNano !== null) {
+      const offsetNano = tryParseOffsetNano(id) // parse a literal time zone offset
+      if (offsetNano != null) {
         impl = new FixedTimeZoneImpl( // don't store fixed-offset zones in cache
           Math.trunc(offsetNano / nanoInMinute), // convert to minutes
         )

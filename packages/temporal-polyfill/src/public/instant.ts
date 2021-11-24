@@ -33,11 +33,15 @@ export class Instant extends AbstractNoValueObj {
     }
 
     const fields = parseDateTimeISO(String(arg))
-    if (fields.offset == null) {
+    const offsetStr = fields.offset
+    if (offsetStr == null) {
       throw new Error('Must specify an offset')
     }
-    // TODO: detect if *time* fields are all unspecified. if so, throw error
-    return new Instant(isoFieldsToEpochNano(fields) - BigInt(parseOffsetNano(fields.offset)))
+
+    // strings given to Instant *must* have a literal offset, or error will be thrown
+    const offset = parseOffsetNano(offsetStr)
+
+    return new Instant(isoFieldsToEpochNano(fields) - BigInt(offset))
   }
 
   static fromEpochSeconds(epochSeconds: number): Instant {

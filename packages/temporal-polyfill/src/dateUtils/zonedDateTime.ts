@@ -36,7 +36,7 @@ import {
 import { dayTimeFieldsToNano } from './dayTime'
 import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { parseOffsetNano } from './parse'
+import { tryParseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './round'
 import { diffTimeFields, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
@@ -63,32 +63,33 @@ export function createZonedDateTime(
   const offsetUsage = parseOffsetHandling(options?.offset, defaultOffsetUsage)
   const dateTime = createDateTime(isoFields)
   let zonedDateTime = dateTime.toZonedDateTime(isoFields.timeZone, options)
+  const literalOffset = isoFields.offset != null ? tryParseOffsetNano(isoFields.offset) : null
 
-  if (isoFields.offset != null) {
-    const offsetNano = parseOffsetNano(isoFields.offset)
-    if (offsetNano !== zonedDateTime.offsetNanoseconds) {
-      if (offsetUsage === OFFSET_REJECT) {
-        throw new Error('Mismatching offset/timezone')
-      } else if (offsetUsage !== OFFSET_IGNORE) {
-        const newEpochNano = isoFieldsToEpochNano(isoFields) - BigInt(offsetNano)
-        let useNew = false
+  if (
+    literalOffset != null &&
+    literalOffset !== zonedDateTime.offsetNanoseconds
+  ) {
+    if (offsetUsage === OFFSET_REJECT) {
+      throw new Error('Mismatching offset/timezone')
+    } else if (offsetUsage !== OFFSET_IGNORE) {
+      const newEpochNano = isoFieldsToEpochNano(isoFields) - BigInt(literalOffset)
+      let useNew = false
 
-        if (offsetUsage === OFFSET_USE) {
-          useNew = true
-        } else { // OFFSET_PREFER
-          const instants = isoFields.timeZone.getPossibleInstantsFor(dateTime)
+      if (offsetUsage === OFFSET_USE) {
+        useNew = true
+      } else { // OFFSET_PREFER
+        const instants = isoFields.timeZone.getPossibleInstantsFor(dateTime)
 
-          for (const instant of instants) {
-            if (instant.epochNanoseconds === newEpochNano) {
-              useNew = true
-              break
-            }
+        for (const instant of instants) {
+          if (instant.epochNanoseconds === newEpochNano) {
+            useNew = true
+            break
           }
         }
+      }
 
-        if (useNew) {
-          zonedDateTime = new ZonedDateTime(newEpochNano, isoFields.timeZone, isoFields.calendar)
-        }
+      if (useNew) {
+        zonedDateTime = new ZonedDateTime(newEpochNano, isoFields.timeZone, isoFields.calendar)
       }
     }
   }

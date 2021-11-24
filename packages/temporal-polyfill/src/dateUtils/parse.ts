@@ -98,11 +98,15 @@ function tryParseDurationISO(str: string): DurationFields | void {
 }
 
 export function parseOffsetNano(str: string): number {
+  return tryParseOffsetNano(str) || throwNoParse('time zone' + str)
+  // TODO: proper throwNoParse for bad time zones
+}
+
+export function tryParseOffsetNano(str: string): void | number {
   const match = timeZoneOffsetRegExp.exec(str)
-  if (!match) {
-    throw new Error('Invalid timezone offset')
+  if (match) {
+    return parseOffsetPartsNano(match[1], match[2], match[3])
   }
-  return parseOffsetPartsNano(match[1], match[2], match[3])
 }
 
 function parseOffsetPartsNano(sign: string, hours: string, minutes: string): number {
