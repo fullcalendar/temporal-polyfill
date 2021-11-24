@@ -64,15 +64,15 @@ describe.each`
 test('can compare two dates', () => {
   const a = new ZonedDateTime(0n, 'UTC')
   const b = new ZonedDateTime(1000000000n, 'UTC')
-  const c = new ZonedDateTime(1000000000n, 'UTC')
+  const c = new ZonedDateTime(1000000000n, 'UTC') // identical to b
   expect(ZonedDateTime.compare(a, b)).toBe(-1)
   expect(ZonedDateTime.compare(b, a)).toBe(1)
   expect(ZonedDateTime.compare(b, c)).toBe(0)
 })
 
 test.each`
-  str                                                       | year | month | day  | hour  | minute | second | millisecond | timeZone        | calendar
-  ${'2020-08-05T20:06:13+09:00[Asia/Tokyo][u-ca=japanese]'} | ${2} | ${8}  | ${6} | ${14} | ${6}   | ${13}  | ${0}        | ${'Asia/Tokyo'} | ${'japanese'}
+  str                                                       | year    | month | day  | hour  | minute | second | millisecond | timeZone        | calendar
+  ${'2020-08-05T20:06:13+09:00[Asia/Tokyo][u-ca=japanese]'} | ${2020} | ${8}  | ${6} | ${14} | ${6}   | ${13}  | ${0}        | ${'Asia/Tokyo'} | ${'japanese'}
 `(
   'can create date from $str',
   ({

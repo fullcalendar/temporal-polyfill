@@ -85,7 +85,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(instant)
 
     super({
-      ...epochNanoToISOFields(epochNanoseconds - BigInt(offsetNanoseconds)),
+      ...epochNanoToISOFields(epochNanoseconds + BigInt(offsetNanoseconds)),
       calendar,
       timeZone,
       offset: timeZone.getOffsetStringFor(instant),

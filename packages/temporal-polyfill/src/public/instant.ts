@@ -39,9 +39,9 @@ export class Instant extends AbstractNoValueObj {
     }
 
     // strings given to Instant *must* have a literal offset, or error will be thrown
-    const offset = parseOffsetNano(offsetStr)
+    const offsetNano = parseOffsetNano(offsetStr)
 
-    return new Instant(isoFieldsToEpochNano(fields) - BigInt(offset))
+    return new Instant(isoFieldsToEpochNano(fields) - BigInt(offsetNano))
   }
 
   static fromEpochSeconds(epochSeconds: number): Instant {

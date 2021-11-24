@@ -46,8 +46,8 @@ function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
       isoMicrosecond: microsecond,
       isoNanosecond: nanosecond,
       offset: match[8] || undefined,
-      calendar: match[10] ? new Calendar(match[10]) : isoCalendar,
-      timeZone: match[12] ? new TimeZone(match[12]) : undefined,
+      timeZone: match[10] ? new TimeZone(match[10]) : undefined,
+      calendar: match[12] ? new Calendar(match[12]) : isoCalendar,
     }
   }
 }
