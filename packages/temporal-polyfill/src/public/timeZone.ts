@@ -14,6 +14,7 @@ import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUti
 import { FixedTimeZoneImpl } from '../timeZoneImpl/fixedTimeZoneImpl'
 import { IntlTimeZoneImpl } from '../timeZoneImpl/intlTimeZoneImpl'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
+import { timeZoneImplCache } from '../timeZoneImpl/timeZoneImplCache'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, isoCalendar } from './calendar'
 import { Instant } from './instant'
@@ -30,9 +31,6 @@ import {
 
 const [getID, setID] = createWeakMap<TimeZone, string>()
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
-const implCache: { [zoneName: string]: TimeZoneImpl } = {
-  UTC: new FixedTimeZoneImpl(0),
-}
 
 export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   constructor(id: string) {
@@ -42,13 +40,11 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
       throw new Error('Invalid timezone ID')
     }
 
+    const key = String(id).toLocaleUpperCase() // normalize. timeZoneImplCache uses uppercase
     let impl: TimeZoneImpl
 
-    // uppercase matches keys in implCache
-    id = String(id).toLocaleUpperCase()
-
-    if (implCache[id]) {
-      impl = implCache[id]
+    if (timeZoneImplCache[key]) {
+      impl = timeZoneImplCache[key]
     } else {
       const offsetNano = tryParseOffsetNano(id) // parse a literal time zone offset
       if (offsetNano != null) {
@@ -56,7 +52,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
           Math.trunc(offsetNano / nanoInMinute), // convert to minutes
         )
       } else {
-        impl = implCache[id] = new IntlTimeZoneImpl(id)
+        impl = timeZoneImplCache[key] = new IntlTimeZoneImpl(id)
       }
     }
 
@@ -85,7 +81,9 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
     const instant = ensureObj(Instant, instantArg)
-    return getImpl(this).getOffset(instant.epochMilliseconds) * nanoInMinute
+    return getImpl(this).getOffset(
+      Number(instant.epochNanoseconds / BigInt(nanoInMinute)),
+    ) * nanoInMinute
   }
 
   getPlainDateTimeFor(

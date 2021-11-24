@@ -29,20 +29,22 @@ describe('can get timezone offset milliseconds', () => {
   `(
     'in local epochNanoseconds (America/New_York) for $epochNanoseconds to be $offsetNanoseconds',
     ({ epochNanoseconds, offsetNanoseconds }) => {
-      const tz = new TimeZone('local')
+      const tz = new TimeZone('America/New_York')
       expect(tz.getOffsetNanosecondsFor(new Instant(epochNanoseconds))).toBe(offsetNanoseconds)
     },
   )
 
   test.each`
-    timeZone              | pdt                              | offsetNanoseconds
-    ${'Asia/Tokyo'}       | ${new PlainDateTime(1970, 1, 1)} | ${3.24e13}
-    ${'America/New_York'} | ${new PlainDateTime(2000, 1, 1)} | ${-1.8e13}
-    ${'America/Chicago'}  | ${new PlainDateTime(2021, 6, 8)} | ${-1.8e13}
-    ${'Asia/Shanghai'}    | ${new PlainDateTime(2021, 6, 8)} | ${2.88e13}
-  `('in an arbitrary timezone($timeZone)', ({ timeZone, pdt, offsetNanoseconds }) => {
+    timeZone              | epochMilliseconds       | offsetNanoseconds
+    ${'Asia/Tokyo'}       | ${Date.UTC(1970, 0, 1)} | ${3.24e13}
+    ${'America/New_York'} | ${Date.UTC(2000, 0, 1)} | ${-1.8e13}
+    ${'America/Chicago'}  | ${Date.UTC(2021, 5, 8)} | ${-1.8e13}
+    ${'Asia/Shanghai'}    | ${Date.UTC(2021, 5, 8)} | ${2.88e13}
+  `('in an arbitrary timezone($timeZone)', ({ timeZone, epochMilliseconds, offsetNanoseconds }) => {
     const tz = new TimeZone(timeZone)
-    expect(tz.getOffsetNanosecondsFor(new Instant(pdt.epochNanoseconds))).toBe(offsetNanoseconds)
+    expect(
+      tz.getOffsetNanosecondsFor(new Instant(BigInt(epochMilliseconds) * 1000000n)),
+    ).toBe(offsetNanoseconds)
   })
 })
 

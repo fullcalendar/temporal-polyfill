@@ -24,7 +24,7 @@ const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
 export class Instant extends AbstractNoValueObj {
   constructor(epochNanoseconds: bigint) {
     super()
-    setEpochNano(this, epochNanoseconds)
+    setEpochNano(this, BigInt(epochNanoseconds))
   }
 
   static from(arg: InstantArg): Instant {
