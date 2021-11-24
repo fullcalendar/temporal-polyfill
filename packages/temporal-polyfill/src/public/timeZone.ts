@@ -9,12 +9,10 @@ import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochMins } from '../dateUtils/isoMath'
-import { tryParseOffsetNano } from '../dateUtils/parse'
 import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUtils/units'
-import { FixedTimeZoneImpl } from '../timeZoneImpl/fixedTimeZoneImpl'
 import { IntlTimeZoneImpl } from '../timeZoneImpl/intlTimeZoneImpl'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
-import { timeZoneImplCache } from '../timeZoneImpl/timeZoneImplCache'
+import { getTimeZoneImpl } from '../timeZoneImpl/timeZoneImplCache'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, isoCalendar } from './calendar'
 import { Instant } from './instant'
@@ -29,33 +27,17 @@ import {
   TimeZoneProtocol,
 } from './types'
 
-const [getID, setID] = createWeakMap<TimeZone, string>()
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
+const [getID, setID] = createWeakMap<TimeZone, string>()
 
 export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   constructor(id: string) {
-    super()
-
     if (!id) {
       throw new Error('Invalid timezone ID')
     }
+    super()
 
-    const key = String(id).toLocaleUpperCase() // normalize. timeZoneImplCache uses uppercase
-    let impl: TimeZoneImpl
-
-    if (timeZoneImplCache[key]) {
-      impl = timeZoneImplCache[key]
-    } else {
-      const offsetNano = tryParseOffsetNano(id) // parse a literal time zone offset
-      if (offsetNano != null) {
-        impl = new FixedTimeZoneImpl( // don't store fixed-offset zones in cache
-          Math.trunc(offsetNano / nanoInMinute), // convert to minutes
-        )
-      } else {
-        impl = timeZoneImplCache[key] = new IntlTimeZoneImpl(id)
-      }
-    }
-
+    const impl = getTimeZoneImpl(id)
     setImpl(this, impl)
 
     // use Intl-normalized ID if possible

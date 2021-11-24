@@ -7,9 +7,7 @@ import {
 import { parseOverflowHandling } from '../argParse/overflowHandling'
 import { parseUnit } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { calendarImplCache } from '../calendarImpl/calendarImplCache'
-import { calendarImplClasses } from '../calendarImpl/calendarImplClasses'
-import { IntlCalendarImpl } from '../calendarImpl/intlCalendarImpl'
+import { getCalendarImpl } from '../calendarImpl/calendarImplCache'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { addToDateFields } from '../dateUtils/add'
@@ -45,20 +43,11 @@ import {
 import { ZonedDateTime } from './zonedDateTime'
 
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
-const [getID, setID] = createWeakMap<Calendar, string>()
 
 export class Calendar extends AbstractObj implements CalendarProtocol {
   constructor(id: string) {
     super()
-
-    // lowercase matches keys in calendarImplClasses
-    id = String(id).toLocaleLowerCase()
-
-    const impl = calendarImplCache[id] ||
-      (calendarImplCache[id] = new (calendarImplClasses[id] || IntlCalendarImpl)(id))
-
-    setImpl(this, impl)
-    setID(this, impl.id) // record the normalized ID
+    setImpl(this, getCalendarImpl(id))
   }
 
   static from(arg: CalendarArg): Calendar {
@@ -72,7 +61,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return new Calendar(arg) // arg is a string
   }
 
-  get id(): string { return getID(this) }
+  get id(): string { return getImpl(this).id }
 
   era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined {
     const isoFields = getExistingDateISOFields(arg)
