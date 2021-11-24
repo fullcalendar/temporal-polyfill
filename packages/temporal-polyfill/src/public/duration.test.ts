@@ -51,7 +51,7 @@ test.each`
   one                             | two                             | expected
   ${new Duration(0, 0, 0, 1)}     | ${new Duration(0, 0, 0, 1)}     | ${new Duration(0, 0, 0, 2)}
   ${new Duration(0, 0, 0, 1, 12)} | ${new Duration(0, 0, 0, 1, 12)} | ${new Duration(0, 0, 0, 3)}
-`('can take %s and add %s', ({ one, two, expected }) => {
+`('can take $one and add $two', ({ one, two, expected }) => {
   expect(one.add(two)).toEqual(expected)
 })
 
@@ -75,7 +75,7 @@ test.each`
   ${new Duration(0, 0, 0, 1)}                 | ${{ largestUnit: 'hours' }} | ${new Duration(0, 0, 0, 0, 24)}
   ${new Duration(0, 0, 0, 0, 0, 100)}         | ${{ largestUnit: 'hours' }} | ${new Duration(0, 0, 0, 0, 1, 40)}
   ${new Duration(0, 0, 0, 0, 1, 120, 50, 10)} | ${{ largestUnit: 'hours' }} | ${new Duration(0, 0, 0, 0, 3, 0, 50, 10)}
-`('can round %s', ({ dur, options, expected }) => {
+`('can round $dur', ({ dur, options, expected }) => {
   expect(dur.round(options)).toEqual(expected)
 })
 

@@ -51,7 +51,7 @@ describe('can get offset string', () => {
     epochNanoseconds | str
     ${0n}            | ${'-05:00'}
     ${100000000000n} | ${'-05:00'}
-  `('for epoch at %d to be %s', ({ epochNanoseconds, str }) => {
+  `('for epoch at $epochNanoseconds to be $str', ({ epochNanoseconds, str }) => {
     const tz = new TimeZone('UTC')
     expect(tz.getOffsetStringFor(new Instant(epochNanoseconds))).toBe(str)
   })

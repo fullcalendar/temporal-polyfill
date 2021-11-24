@@ -26,7 +26,7 @@ describe.each`
   ${45030500000000n}      | ${1970} | ${1}  | ${1}  | ${12} | ${30}  | ${30}  | ${500}
   ${1608854400000000000n} | ${2020} | ${12} | ${25} | ${0}  | ${0}   | ${0}   | ${0}
 `(
-  'can get values for %d (%d-%d-%dT%d:%d:%d.%d)',
+  'can get values for $epochNanoseconds',
   ({
     epochNanoseconds,
     year,

@@ -41,7 +41,7 @@ test.each`
   ${{ years: 1 }}                               | ${new PlainDateTime(1970, 1, 1)}  | ${new PlainDateTime(1971, 1, 1)}
   ${{ years: 1, months: 1, days: 1, hours: 1 }} | ${new PlainDateTime(2020, 1, 1)}  | ${new PlainDateTime(2021, 2, 2, 1)}
   ${{ months: 1 }}                              | ${new PlainDateTime(1982, 12, 1)} | ${new PlainDateTime(1983, 1, 1)}
-`('can add %s + %s', ({ add, orig, expected }) => {
+`('can add $orig + $add', ({ add, orig, expected }) => {
   expect(orig.add(add).epochMilliseconds).toBe(expected.epochMilliseconds)
 })
 
@@ -52,7 +52,7 @@ test.each`
   ${new PlainDateTime(1970, 1, 1, 3, 30, 30)} | ${new PlainDateTime(1970, 1, 1, 1)}  | ${new Duration(0, 0, 0, 0, 2, 30, 30)}
   ${new PlainDateTime(2020, 2, 9)}            | ${new PlainDateTime(2010, 1, 1)}     | ${new Duration(10, 1, 0, 8)}
   ${new PlainDateTime(2020, 6, 2, 11)}        | ${new PlainDateTime(2020, 6, 1, 12)} | ${new Duration(0, 0, 0, 0, 23)}
-`('can get duration till %s since %s', ({ date, other, expected }) => {
+`('can get duration from $date since $other', ({ date, other, expected }) => {
   expect(date.since(other, { largestUnit: 'years' })).toEqual(expected)
 })
 
@@ -61,7 +61,7 @@ test.each`
   ${new PlainDateTime(1970, 1, 1, 0, 55)}      | ${new PlainDateTime(1970, 1, 1, 1)}          | ${{ smallestUnit: 'hours', roundingMode: 'halfExpand' }}
   ${new PlainDateTime(1970, 1, 1, 1, 1, 1, 1)} | ${new PlainDateTime(1970, 1, 1, 1, 1, 1, 1)} | ${{ smallestUnit: 'milliseconds' }}
   ${new PlainDateTime(2000, 1, 1, 1)}          | ${new PlainDateTime(2000, 1, 2)}             | ${{ smallestUnit: 'days', roundingMode: 'ceil' }}
-`('can round %s', ({ date, expected, options }) => {
+`('can round $date', ({ date, expected, options }) => {
   expect(date.round(options)).toEqual(expected)
 })
 
