@@ -57,7 +57,7 @@ export function formatOffsetISO(offsetNanoseconds: number): string {
   const hours = Math.trunc(totalMins / 60)
   const mins = totalMins % 60
   return (offsetNanoseconds < 0 ? '-' : '+') +
-    padZeros(hours, 2) +
+    padZeros(hours, 2) + ':' +
     padZeros(mins, 2)
 }
 
