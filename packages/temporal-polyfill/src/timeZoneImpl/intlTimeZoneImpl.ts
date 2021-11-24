@@ -4,9 +4,6 @@ import { milliInMin } from '../dateUtils/units'
 import { compareValues, numSign } from '../utils/math'
 import { PossibleOffsetInfo, RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
-// [epochMins, offsetMinsDiff]
-type YearTransition = [number, number]
-
 const MAX_YEAR_TRAVEL = 5
 const ISLAND_SEARCH_DAYS = [
   182, // 50% through year
@@ -21,7 +18,7 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
   // a cache of minute offsets at the last minute of each year
   private yearEndOffsets: { [year: string]: number } = {}
 
-  private yearTransitions: { [year: string]: YearTransition[] } = {}
+  private transitionsInYear: { [year: string]: RawTransition[] } = {}
 
   constructor(id: string) {
     this.format = new Intl.DateTimeFormat('en-GB', { // gives 24-hour clock
@@ -90,7 +87,7 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
       parseInt(map.day),
       parseInt(map.hour),
       parseInt(map.minute),
-    ) / (1000 * 60)
+    ) / milliInMin
 
     return zoneMinutes - epochMins
   }
@@ -100,20 +97,16 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
 
     for (let yearTravel = 0; yearTravel < MAX_YEAR_TRAVEL; yearTravel++) {
       const year = startYear + yearTravel * direction
-      const transitions = this.getYearTransitions(year)
+      const transitions = this.getTransitionsInYear(year)
       const len = transitions.length
       const startIndex = direction < 0 ? len - 1 : 0
 
       for (let travel = 0; travel < len; travel++) {
-        const [transEpochMins, offsetMinsDiff] = transitions[startIndex + travel * direction]
+        const transition = transitions[startIndex + travel * direction]
 
         // does the current transition overtake epochMins in the direction of travel?
-        if (compareValues(transEpochMins, epochMins) === direction) {
-          return [
-            transEpochMins,
-            this.getYearEndOffset(year - 1),
-            offsetMinsDiff,
-          ]
+        if (compareValues(transition[0], epochMins) === direction) {
+          return transition
         }
       }
     }
@@ -127,13 +120,13 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
       ))
   }
 
-  private getYearTransitions(utcYear: number): YearTransition[] {
-    const { yearTransitions } = this
-    return yearTransitions[utcYear] ||
-      (yearTransitions[utcYear] = this.computeYearTransitions(utcYear))
+  private getTransitionsInYear(utcYear: number): RawTransition[] {
+    const { transitionsInYear } = this
+    return transitionsInYear[utcYear] ||
+      (transitionsInYear[utcYear] = this.computeTransitionsInYear(utcYear))
   }
 
-  private computeYearTransitions(utcYear: number): YearTransition[] {
+  private computeTransitionsInYear(utcYear: number): RawTransition[] {
     const enteringOffset = this.getYearEndOffset(utcYear - 1)
     const exitingOffset = this.getYearEndOffset(utcYear)
     const startMins = isoYearToEpochMins(utcYear - 1)
@@ -161,7 +154,7 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
     endEpochMins: number,
     startOffsetMin: number,
     endOffsetMins: number,
-  ): YearTransition {
+  ): RawTransition {
     // keep doing binary search until start/end are 1 minute apart
     while (endEpochMins - startEpochMins > 1) {
       const middleEpochMins = Math.floor(startEpochMins + (endEpochMins - startEpochMins) / 2)
@@ -172,10 +165,14 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
         startEpochMins = middleEpochMins
       } else {
         // middle is same as end. move end to the middle
-        endEpochMins = middleOffsetMins
+        endEpochMins = middleEpochMins
       }
     }
-    return [endEpochMins, endOffsetMins]
+    return [
+      endEpochMins,
+      startOffsetMin, // caller could have computed this
+      endOffsetMins - startOffsetMin, // same
+    ]
   }
 
   // assumes the offset is the same at startMins and endMins.

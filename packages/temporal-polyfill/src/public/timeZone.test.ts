@@ -54,7 +54,7 @@ describe('can get offset string', () => {
     ${0n}            | ${'-05:00'}
     ${100000000000n} | ${'-05:00'}
   `('for epoch at $epochNanoseconds to be $str', ({ epochNanoseconds, str }) => {
-    const tz = new TimeZone('UTC')
+    const tz = new TimeZone('America/New_York')
     expect(tz.getOffsetStringFor(new Instant(epochNanoseconds))).toBe(str)
   })
 })
@@ -70,6 +70,6 @@ describe('can get Instant', () => {
   test('for America/New_York', () => {
     const tz = new TimeZone('America/New_York')
     const date = new PlainDateTime(1970, 1, 1)
-    expect(tz.getInstantFor(date).epochNanoseconds).toBe(-1.8e13)
+    expect(tz.getInstantFor(date).epochNanoseconds).toBe(-18000000000000n)
   })
 })
