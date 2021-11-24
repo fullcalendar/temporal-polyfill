@@ -22,7 +22,7 @@ export const nanoInMilli = 1000000
 export const nanoInSecond = 1000000000
 export const nanoInMinute = 60000000000
 export const nanoInHour = 3600000000000
-export const nanoInDay = 84600000000000
+export const nanoInDay = 86400000000000
 export const nanoIn = [
   1,
   nanoInMicro,
@@ -32,7 +32,7 @@ export const nanoIn = [
   nanoInHour,
   nanoInDay,
 ]
-export const milliInDay = 84600000
+export const milliInDay = 86400000
 export const milliInMin = 60000
 
 export const unitDigitMap = [ // how many digits after the decimal point for a seconds value
