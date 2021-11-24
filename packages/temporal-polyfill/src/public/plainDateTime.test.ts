@@ -1,24 +1,10 @@
 /* eslint-disable max-len */
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
-import { ZonedDateTime } from './zonedDateTime'
 
 test('can instantiate', () => {
   const date = new PlainDateTime(1970, 1, 1)
   expect(date).toBeDefined()
-})
-
-test('is equivalent to UTC ZonedDateTime', () => {
-  const pdt = new PlainDateTime(1970, 1, 1, 0, 0, 0, 1)
-  const zdt = new ZonedDateTime(1n, 'UTC')
-  expect(pdt.toZonedDateTime('UTC')).toEqual(zdt)
-  expect(pdt.year).toBe(zdt.year)
-  expect(pdt.month).toBe(zdt.month)
-  expect(pdt.day).toBe(zdt.day)
-  expect(pdt.hour).toBe(zdt.hour)
-  expect(pdt.minute).toBe(zdt.minute)
-  expect(pdt.second).toBe(zdt.second)
-  expect(pdt.millisecond).toBe(zdt.millisecond)
 })
 
 test.each`
@@ -45,9 +31,6 @@ test.each`
     expect(date.minute).toBe(minute)
     expect(date.second).toBe(second)
     expect(date.millisecond).toBe(millisecond)
-    // expect(date.toString()).toBe(
-    //   `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}`
-    // )
   },
 )
 
@@ -76,7 +59,7 @@ test.each`
 test.each`
   date                                         | expected                                     | options
   ${new PlainDateTime(1970, 1, 1, 0, 55)}      | ${new PlainDateTime(1970, 1, 1, 1)}          | ${{ smallestUnit: 'hours', roundingMode: 'halfExpand' }}
-  ${new PlainDateTime(1970, 1, 1, 1, 1, 1, 1)} | ${new PlainDateTime(1970, 1, 1, 1, 1, 1, 1)} | ${{}}
+  ${new PlainDateTime(1970, 1, 1, 1, 1, 1, 1)} | ${new PlainDateTime(1970, 1, 1, 1, 1, 1, 1)} | ${{ smallestUnit: 'milliseconds' }}
   ${new PlainDateTime(2000, 1, 1, 1)}          | ${new PlainDateTime(2000, 1, 2)}             | ${{ smallestUnit: 'days', roundingMode: 'ceil' }}
 `('can round %s', ({ date, expected, options }) => {
   expect(date.round(options)).toEqual(expected)
