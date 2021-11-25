@@ -62,7 +62,7 @@ export function computeExactDuration(
   const startNano = isoFieldsToEpochNano(startDateTime.getISOFields())
   const endNano = isoFieldsToEpochNano(endDateTime.getISOFields())
   const middleNano = isoFieldsToEpochNano(d1.getISOFields())
-  const unitFrac = sign * Number((middleNano - startNano) / (endNano - startNano))
+  const unitFrac = Number(middleNano - startNano) / Number(endNano - startNano) * sign
 
   dur[smallestUnitName]! += unitFrac // above loop populated this
   return dur

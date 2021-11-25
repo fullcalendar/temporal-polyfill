@@ -57,14 +57,14 @@ test.each`
 
 test.each`
   dur                                     | options                                                         | expected
-  ${new Duration(0, 0, 0, 1)}             | ${{ unit: 'hours' }}                                            | ${24}
-  ${new Duration(0, 0, 0, 1)}             | ${{ unit: 'minutes' }}                                          | ${1440}
-  ${new Duration(0, 0, 0, 1)}             | ${{ unit: 'weeks' }}                                            | ${1 / 7}
-  ${new Duration(0, 0, 1, 1)}             | ${{ unit: 'weeks', relativeTo: new PlainDateTime(2000, 1, 1) }} | ${8 / 7}
-  ${new Duration(0, 0, 0, 0, 12, 32, 30)} | ${{ unit: 'minutes' }}                                          | ${752.5}
   ${new Duration(0, 0, 0, 0, 130, 20)}    | ${{ unit: 'seconds' }}                                          | ${469200}
+  ${new Duration(0, 0, 0, 0, 12, 32, 30)} | ${{ unit: 'minutes' }}                                          | ${752.5}
+  ${new Duration(0, 0, 0, 1)}             | ${{ unit: 'minutes' }}                                          | ${1440}
+  ${new Duration(0, 0, 0, 1)}             | ${{ unit: 'hours' }}                                            | ${24}
+  ${new Duration(0, 0, 0, 1)}             | ${{ unit: 'weeks', relativeTo: new PlainDateTime(2000, 1, 1) }} | ${1 / 7}
+  ${new Duration(0, 0, 1, 1)}             | ${{ unit: 'weeks', relativeTo: new PlainDateTime(2000, 1, 1) }} | ${8 / 7}
 `(
-  'can find total of $dur with unit \'$options.unit\' to be $expected',
+  'can find total of $dur with $options to be $expected',
   ({ dur, options, expected }) => {
     expect(dur.total(options)).toBe(expected)
   },
