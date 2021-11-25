@@ -74,3 +74,23 @@ test.each`
   const calendar = new Calendar('iso8601')
   expect(calendar.dayOfYear(date)).toBe(expected)
 })
+
+/*
+For more test data, visit:
+https://github.com/jalaali/moment-jalaali
+*/
+describe('persian calendar', () => {
+  test('can convert *to* ISO', () => {
+    const cal = new Calendar('persian')
+    const date = cal.dateFromFields({ year: 1392, month: 6, day: 3 })
+    expect(date.toString()).toBe('2013-08-25[u-ca=persian]')
+  })
+
+  test('can convert *from* ISO', () => {
+    const date = PlainDate.from('2013-08-25[u-ca=persian]')
+    expect(date.calendar.id).toBe('persian')
+    expect(date.year).toBe(1392)
+    expect(date.month).toBe(6)
+    expect(date.day).toBe(3)
+  })
+})

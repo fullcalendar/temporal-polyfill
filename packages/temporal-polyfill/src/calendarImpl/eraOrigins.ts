@@ -1,8 +1,8 @@
 
 // for converting from [era,eraYear] -> year
-// if origin is positive,
+// if origin is >=0,
 //   year = origin + eraYear
-// if origin is negative, consider the era to be 'reverse' direction
+// if origin is <0, consider the era to be 'reverse' direction
 //   year = -origin - eraYear
 //   year = -(origin + eraYear)
 export const eraOrigins: {

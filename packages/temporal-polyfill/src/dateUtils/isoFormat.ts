@@ -12,7 +12,7 @@ import { padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { SignedDurationFields } from './duration'
 import { roundNano } from './round'
-import { SECOND, nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from './units'
+import { SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
 
 export function formatDateTimeISO(
   fields: DateTimeISOFields,

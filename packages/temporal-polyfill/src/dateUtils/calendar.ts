@@ -70,7 +70,7 @@ export function queryDateISOFields(
     if (eraYear == null || era == null) {
       throw new Error('Must specify either a year or an era & eraYear')
     } else {
-      year = calendarImpl.convertEraYear(eraYear, era)
+      year = calendarImpl.convertEraYear(eraYear, era, true) // errorUnknownEra=true
     }
   }
 

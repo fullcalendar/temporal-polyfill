@@ -42,12 +42,18 @@ export abstract class CalendarImpl {
   }
 
   // eraYear -> year
-  convertEraYear(eraYear: number, era: string): number {
-    const origin = eraOrigins[this.id]?.[era]
+  convertEraYear(eraYear: number, era: string, errorUnknownEra?: boolean): number {
+    let origin = eraOrigins[this.id]?.[era]
+
     if (origin == null) {
-      throw new Error('Unkown era ' + era)
+      if (errorUnknownEra) {
+        throw new Error('Unkown era ' + era)
+      } else {
+        origin = 0
+      }
     }
+
     // see the origin format in the config file
-    return (origin + eraYear) * numSign(origin)
+    return (origin + eraYear) * (numSign(origin) || 1)
   }
 }

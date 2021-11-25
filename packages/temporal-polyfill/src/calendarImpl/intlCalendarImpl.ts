@@ -19,7 +19,10 @@ export class IntlCalendarImpl extends CalendarImpl {
 
   constructor(id: string) {
     const format = buildFormat(id)
-    super(format.resolvedOptions().calendar)
+    if (id !== format.resolvedOptions().calendar) {
+      throw new Error('Invalid calendar: ' + id)
+    }
+    super(id)
     this.format = format
     this.yearCorrection = this.computeFields(0).year - isoEpochOriginYear
     this.yearMonthCache = {}
@@ -196,9 +199,16 @@ export function buildFormat(calendarID: string): Intl.DateTimeFormat {
   })
 }
 
+const eraRemap: { [eraIn: string]: string } = {
+  bc: 'bce',
+  ad: 'ce',
+}
+
 export function normalizeEra(formattedEra: string): string {
   // Example 'Before R.O.C.' -> 'before-roc'
-  return formattedEra.toLowerCase()
+  formattedEra = formattedEra.toLowerCase()
     .replace(/[^a-z0-9]g/, '')
     .replace(/ /g, '-')
+
+  return eraRemap[formattedEra] || formattedEra
 }

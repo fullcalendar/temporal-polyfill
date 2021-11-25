@@ -10,7 +10,7 @@ TODO: parse month-day ('06-01') needs own regex!!!
 TODO: parse negative years "-002000-01-01" (has "-00" prefix?)
 TODO: what about positive years like that "+00900" ?
 */
-const dateTimeRegExp = /^(\d{4})-?(\d{2})?-?(\d{2})?T?(\d{2})?:?(\d{2})?:?(\d{2})?\.?(\d+)?([-+]?\d{2}:?\d{2})(\[([^=\]]+)\])?(\[u-ca=([^\]]+)\])?$/
+const dateTimeRegExp = /^(\d{4})-?(\d{2})?-?(\d{2})?T?(\d{2})?:?(\d{2})?:?(\d{2})?\.?(\d+)?([-+]?\d{2}:?\d{2})?(\[([^=\]]+)\])?(\[u-ca=([^\]]+)\])?$/
 const timeRegExp = /^(\d{2}):?(\d{2})?:?(\d{2})?\.?(\d+)$/
 const timeZoneOffsetRegExp = /^([-+])(\d{2}):?(\d{2})?$/
 const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/
