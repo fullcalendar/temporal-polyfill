@@ -11,17 +11,16 @@ const ISLAND_SEARCH_DAYS = [
   273, // 75% through year
 ]
 
-export class IntlTimeZoneImpl implements TimeZoneImpl {
-  public id: string
+export class IntlTimeZoneImpl extends TimeZoneImpl {
   private format: Intl.DateTimeFormat
 
   // a cache of minute offsets at the last minute of each year
-  private yearEndOffsets: { [year: string]: number } = {}
+  private yearEndOffsets: { [year: string]: number }
 
-  private transitionsInYear: { [year: string]: RawTransition[] } = {}
+  private transitionsInYear: { [year: string]: RawTransition[] }
 
   constructor(id: string) {
-    this.format = new Intl.DateTimeFormat('en-GB', { // gives 24-hour clock
+    const format = new Intl.DateTimeFormat('en-GB', { // gives 24-hour clock
       era: 'narrow', // 'B' or 'A'
       year: 'numeric',
       month: 'numeric',
@@ -30,7 +29,10 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
       minute: 'numeric',
       timeZone: id,
     })
-    this.id = this.format.resolvedOptions().timeZone
+    super(format.resolvedOptions().timeZone)
+    this.format = format
+    this.yearEndOffsets = {}
+    this.transitionsInYear = {}
   }
 
   // `zoneMinutes` is like epochMinutes, but to zone's pseudo-epoch

@@ -5,7 +5,7 @@ import { IntlTimeZoneImpl } from './intlTimeZoneImpl'
 import { TimeZoneImpl } from './timeZoneImpl'
 
 const implCache: { [zoneName: string]: TimeZoneImpl } = {
-  UTC: new FixedTimeZoneImpl(0),
+  UTC: new FixedTimeZoneImpl('UTC', 0),
 }
 
 export function getTimeZoneImpl(id: string): TimeZoneImpl {
@@ -15,11 +15,11 @@ export function getTimeZoneImpl(id: string): TimeZoneImpl {
     return implCache[key]
   }
 
-  const offsetNano = tryParseOffsetNano(id) // parse a literal time zone offset
+  // parse a literal time zone offset
+  const offsetNano = tryParseOffsetNano(id)
   if (offsetNano != null) {
-    return new FixedTimeZoneImpl( // don't store fixed-offset zones in cache
-      Math.trunc(offsetNano / nanoInMinute), // convert to minutes
-    )
+    // don't store fixed-offset zones in cache. there could be many
+    return new FixedTimeZoneImpl(id, Math.trunc(offsetNano / nanoInMinute)) // convert to minutes
   }
 
   return (implCache[key] = new IntlTimeZoneImpl(id))

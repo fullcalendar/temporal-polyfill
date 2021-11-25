@@ -1,9 +1,12 @@
 import { PossibleOffsetInfo, RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
-export class FixedTimeZoneImpl implements TimeZoneImpl {
+export class FixedTimeZoneImpl extends TimeZoneImpl {
   constructor(
+    id: string,
     private offsetMins: number,
-  ) {}
+  ) {
+    super(id)
+  }
 
   getPossibleOffsets(): PossibleOffsetInfo {
     return [this.offsetMins, 0]

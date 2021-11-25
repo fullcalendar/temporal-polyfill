@@ -9,8 +9,10 @@ export type PossibleOffsetInfo = [number, number]
 // [epochMins, offsetMinsBase, offsetMinsDiff]
 export type RawTransition = [number, number, number]
 
-export interface TimeZoneImpl {
-  getPossibleOffsets(zoneMinutes: number): PossibleOffsetInfo
-  getOffset(epochMinutes: number): number
-  getTransition(epochMinutes: number, direction: -1 | 1): RawTransition | undefined
+export abstract class TimeZoneImpl {
+  constructor(public id: string) {}
+
+  abstract getPossibleOffsets(zoneMinutes: number): PossibleOffsetInfo
+  abstract getOffset(epochMinutes: number): number
+  abstract getTransition(epochMinutes: number, direction: -1 | 1): RawTransition | undefined
 }

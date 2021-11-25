@@ -10,7 +10,6 @@ import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochMins } from '../dateUtils/isoMath'
 import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUtils/units'
-import { IntlTimeZoneImpl } from '../timeZoneImpl/intlTimeZoneImpl'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { getTimeZoneImpl } from '../timeZoneImpl/timeZoneImplCache'
 import { createWeakMap } from '../utils/obj'
@@ -28,7 +27,6 @@ import {
 } from './types'
 
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
-const [getID, setID] = createWeakMap<TimeZone, string>()
 
 export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   constructor(id: string) {
@@ -36,12 +34,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
       throw new Error('Invalid timezone ID')
     }
     super()
-
-    const impl = getTimeZoneImpl(id)
-    setImpl(this, impl)
-
-    // use Intl-normalized ID if possible
-    setID(this, (impl as IntlTimeZoneImpl).id || id)
+    setImpl(this, getTimeZoneImpl(id))
   }
 
   static from(arg: TimeZoneArg): TimeZone {
@@ -55,7 +48,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     return new TimeZone(arg) // arg is a string
   }
 
-  get id(): string { return getID(this) }
+  get id(): string { return getImpl(this).id }
 
   getOffsetStringFor(instantArg: InstantArg): string {
     return formatOffsetISO(this.getOffsetNanosecondsFor(instantArg))
