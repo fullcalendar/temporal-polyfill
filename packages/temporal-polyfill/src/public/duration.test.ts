@@ -85,3 +85,13 @@ test('can zero out values using with', () => {
     new Duration(0, 0, 0, 10, 10, 10, 10, 10),
   )
 })
+
+test('can format a lone nanosecond correctly', () => {
+  const dur = new Duration(0, 0, 0, 0, 0, 0, 0, 0, 0, 1)
+  expect(dur.toString()).toBe('PT0.000000001S')
+})
+
+test('can format a lone microsecond correctly', () => {
+  const dur = new Duration(0, 0, 0, 0, 0, 0, 0, 0, 1)
+  expect(dur.toString()).toBe('PT0.000001S')
+})

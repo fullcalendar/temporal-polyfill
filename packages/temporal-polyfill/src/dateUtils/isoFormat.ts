@@ -133,16 +133,16 @@ function formatPartialSeconds(
   nanoseconds: number,
   fractionalSecondDigits: number | null,
 ): string {
-  const frac = (
+  const totalNano = (
     nanoseconds +
     microseconds * nanoInMicro +
     milliseconds * nanoInMilli
-  ) / nanoInSecond
+  )
 
-  const str = fractionalSecondDigits == null
-    ? String(frac)
-    : frac.toFixed(fractionalSecondDigits)
+  let afterDecimal = padZeros(totalNano, 9)
+  afterDecimal = fractionalSecondDigits == null
+    ? afterDecimal.replace(/0+$/, '') // strip trailing zeros
+    : afterDecimal.substr(0, fractionalSecondDigits)
 
-  // removes everything before the decimal, or returns a blank string if no decimal
-  return str.replace(/^(.*?)(\.|$)/, '$2')
+  return afterDecimal ? '.' + afterDecimal : ''
 }
