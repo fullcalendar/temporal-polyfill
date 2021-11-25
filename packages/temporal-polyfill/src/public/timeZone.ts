@@ -11,7 +11,7 @@ import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochMins } from '../dateUtils/isoMath'
 import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUtils/units'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
-import { getTimeZoneImpl } from '../timeZoneImpl/timeZoneImplCache'
+import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, isoCalendar } from './calendar'
 import { Instant } from './instant'
@@ -34,7 +34,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
       throw new Error('Invalid timezone ID')
     }
     super()
-    setImpl(this, getTimeZoneImpl(id))
+    setImpl(this, queryTimeZoneImpl(id))
   }
 
   static from(arg: TimeZoneArg): TimeZone {

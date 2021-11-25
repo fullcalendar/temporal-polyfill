@@ -15,7 +15,7 @@ const implCache: { [calendarID: string]: CalendarImpl } = {
   [isoCalendarID]: isoCalendarImpl,
 }
 
-export function getCalendarImpl(id: string): CalendarImpl {
+export function queryCalendarImpl(id: string): CalendarImpl {
   const key = String(id).toLocaleLowerCase() // lowercase matches isoCalendarID
 
   return implCache[key] ||

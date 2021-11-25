@@ -8,7 +8,7 @@ const implCache: { [zoneName: string]: TimeZoneImpl } = {
   UTC: new FixedTimeZoneImpl('UTC', 0),
 }
 
-export function getTimeZoneImpl(id: string): TimeZoneImpl {
+export function queryTimeZoneImpl(id: string): TimeZoneImpl {
   const key = String(id).toLocaleUpperCase() // uppercase is better for 'UTC'
 
   if (implCache[key]) {

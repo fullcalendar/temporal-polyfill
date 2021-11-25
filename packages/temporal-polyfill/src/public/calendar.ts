@@ -7,7 +7,7 @@ import {
 import { parseOverflowHandling } from '../argParse/overflowHandling'
 import { parseUnit } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { getCalendarImpl } from '../calendarImpl/calendarImplCache'
+import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { addToDateFields } from '../dateUtils/add'
@@ -47,7 +47,7 @@ const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 export class Calendar extends AbstractObj implements CalendarProtocol {
   constructor(id: string) {
     super()
-    setImpl(this, getCalendarImpl(id))
+    setImpl(this, queryCalendarImpl(id))
   }
 
   static from(arg: CalendarArg): Calendar {
