@@ -32,7 +32,7 @@ export function roundTimeOfDay(
   roundConfig: RoundConfig<DayTimeUnitInt>,
 ): [TimeFields, number] {
   const nano = roundNano(timeFieldsToNano(timeFields), roundConfig)
-  return nanoToTimeFields(nano, 1) // forward=1
+  return nanoToTimeFields(nano)
 }
 
 export function roundDayTimeFields(

@@ -39,7 +39,7 @@ export function formatTimeISO(
   formatConfig: TimeToStringConfig,
 ): [string, number] {
   const nano = roundNano(Number(timeISOToNano(fields)), formatConfig)
-  const [roundedFields, dayDelta] = nanoToTimeFields(nano, 1)
+  const [roundedFields, dayDelta] = nanoToTimeFields(nano)
   const s = padZeros(roundedFields.hour, 2) + ':' +
     padZeros(roundedFields.minute, 2) + ':' +
     padZeros(roundedFields.second, 2) +

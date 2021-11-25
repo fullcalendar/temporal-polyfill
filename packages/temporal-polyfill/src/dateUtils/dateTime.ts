@@ -24,7 +24,6 @@ import {
   DateFields,
   DateISOEssentials,
   addDaysToDate,
-  compareDateFields,
   constrainDateISO,
   createDate,
   overrideDateFields,
@@ -117,7 +116,6 @@ export function addToDateTime(
   const [timeFields, dayDelta] = addTimeFields(
     dateTime,
     durationToTimeFields(duration),
-    duration.sign,
   )
 
   const date0 = createDate(dateTime.getISOFields())
@@ -156,7 +154,7 @@ export function diffDateTimes(
     )
   }
 
-  const [timeFields, dayDelta] = diffTimeFields(t0, t1, compareDateFields(t0, t1))
+  const [timeFields, dayDelta] = diffTimeFields(t0, t1)
   const largeDuration = calendar.dateUntil(
     createDate(t0.getISOFields()),
     addDaysToDate(createDate(t1.getISOFields()), dayDelta),

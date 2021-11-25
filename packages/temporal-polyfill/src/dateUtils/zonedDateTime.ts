@@ -26,7 +26,7 @@ import {
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { compareValues } from '../utils/math'
-import { addDaysToDate, compareDateFields, createDate } from './date'
+import { addDaysToDate, createDate } from './date'
 import {
   DateTimeFields,
   createDateTime,
@@ -181,7 +181,7 @@ export function diffZonedDateTimes(
     )
   }
 
-  const [, dayDelta] = diffTimeFields(dt0, dt1, compareDateFields(dt0, dt1))
+  const [, dayDelta] = diffTimeFields(dt0, dt1)
 
   const largeDuration = calendar.dateUntil(
     createDate(dt0.getISOFields()),

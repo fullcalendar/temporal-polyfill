@@ -88,7 +88,7 @@ export function overrideTimeFields(overrides: Partial<TimeFields>, base: TimeFie
 }
 
 export function addToPlainTime(time: PlainTime, dur: Duration): PlainTime {
-  const [fields] = addTimeFields(time, durationToTimeFields(dur), 1)
+  const [fields] = addTimeFields(time, durationToTimeFields(dur))
   return createTime(timeLikeToISO(fields))
 }
 
@@ -144,26 +144,12 @@ export function timeFieldsToConstrainedISO(
 
 // Nanosecond Math
 
-export function addTimeFields(
-  t0: TimeFields,
-  t1: TimeFields,
-  overflowDirection: CompareResult, // +1/-1 for time-of-day computations. 0 to ignore
-): [TimeFields, number] {
-  return nanoToTimeFields(
-    timeFieldsToNano(t0) + timeFieldsToNano(t1),
-    overflowDirection,
-  )
+export function addTimeFields(t0: TimeFields, t1: TimeFields): [TimeFields, number] {
+  return nanoToTimeFields(timeFieldsToNano(t0) + timeFieldsToNano(t1))
 }
 
-export function diffTimeFields(
-  t0: TimeFields,
-  t1: TimeFields,
-  overflowDirection: CompareResult, // +1/-1 for time-of-day computations. 0 to ignore
-): [TimeFields, number] {
-  return nanoToTimeFields(
-    timeFieldsToNano(t1) - timeFieldsToNano(t0),
-    overflowDirection,
-  )
+export function diffTimeFields(t0: TimeFields, t1: TimeFields): [TimeFields, number] {
+  return nanoToTimeFields(timeFieldsToNano(t1) - timeFieldsToNano(t0))
 }
 
 export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
@@ -188,19 +174,11 @@ export function timeISOToNano(timeISO: TimeISOEssentials): number {
     timeISO.isoNanosecond
 }
 
-export function nanoToTimeFields(
-  nano: number,
-  overflowDirection: CompareResult,
-): [TimeFields, number] {
-  let dayDelta = 0
-
-  if (overflowDirection) {
-    dayDelta = Math.floor(nano * overflowDirection / nanoInDay) * overflowDirection
-    nano = (nano * overflowDirection % nanoInDay + nanoInDay) % nanoInDay * overflowDirection
-  }
+export function nanoToTimeFields(nano: number): [TimeFields, number] {
+  const dayDelta = Math.floor(nano / nanoInDay)
+  nano = (nano % nanoInDay + nanoInDay) % nanoInDay
 
   const fields = nanoToDayTimeFields(nano, DAY)
-  dayDelta += fields.day // in case no direction specified
 
   // repurpose DayTimeFiels as TimeFields
   delete (fields as Partial<DayTimeFields>).day
@@ -208,7 +186,7 @@ export function nanoToTimeFields(
 }
 
 export function partialSecondsToTimeFields(seconds: number): TimeFields {
-  return nanoToTimeFields(Math.trunc(seconds * nanoInSecond), 1)[0]
+  return nanoToTimeFields(Math.trunc(seconds * nanoInSecond))[0]
 }
 
 // Normally ensureObj and ::from would fail when undefined is specified
