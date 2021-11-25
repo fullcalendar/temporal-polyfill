@@ -248,7 +248,7 @@ export function nanoToDuration(nano: number, largestUnit: DayTimeUnitInt): Durat
 // works for TimeFields too
 export function dayTimeFieldsToDuration(fields: DayTimeFields | TimeFields): Duration {
   return new Duration(
-    0, 0,
+    0, 0, 0,
     (fields as DayTimeFields).day || 0,
     fields.hour,
     fields.minute,
