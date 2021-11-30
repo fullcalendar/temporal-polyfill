@@ -37,7 +37,7 @@ import {
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createWeakMap } from '../utils/obj'
-import { Calendar, isoCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
@@ -77,7 +77,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   constructor(
     epochNanoseconds: bigint,
     timeZoneArg: TimeZoneArg,
-    calendarArg: CalendarArg = isoCalendar,
+    calendarArg: CalendarArg = createDefaultCalendar(),
   ) {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)

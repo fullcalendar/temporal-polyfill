@@ -20,7 +20,7 @@ import {
   timeFieldsToNano,
 } from '../dateUtils/time'
 import { nanoInMilli } from '../dateUtils/units'
-import { Calendar, isoCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
@@ -59,7 +59,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
           isoMicrosecond,
           isoNanosecond,
         }, OVERFLOW_REJECT),
-        calendar: isoCalendar,
+        calendar: createDefaultCalendar(),
       },
     )
   }

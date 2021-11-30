@@ -1,4 +1,4 @@
-import { Calendar, isoCalendar } from '../public/calendar'
+import { Calendar, createDefaultCalendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
 import { DateISOEssentials } from './date'
 import { nanoToDayTimeFields } from './dayTime'
@@ -60,7 +60,7 @@ export function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
       ...parseTimeParts(match.slice(4)),
       offset: parseOffsetParts(match.slice(8)),
       timeZone: match[15] ? new TimeZone(match[15]) : null,
-      calendar: match[17] ? new Calendar(match[17]) : isoCalendar,
+      calendar: match[17] ? new Calendar(match[17]) : createDefaultCalendar(),
     }
   }
 }

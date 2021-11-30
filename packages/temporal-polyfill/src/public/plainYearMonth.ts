@@ -21,7 +21,7 @@ import {
   createYearMonth,
   overrideYearMonthFields,
 } from '../dateUtils/yearMonth'
-import { Calendar, isoCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 import {
@@ -45,7 +45,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   constructor(
     isoYear: number,
     isoMonth: number,
-    calendarArg: CalendarArg = isoCalendar,
+    calendarArg: CalendarArg = createDefaultCalendar(),
     referenceISODay = 1,
   ) {
     super({

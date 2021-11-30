@@ -26,7 +26,7 @@ import { parseDateTimeISO } from '../dateUtils/parse'
 import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
-import { Calendar, isoCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
@@ -54,7 +54,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     isoYear: number,
     isoMonth: number,
     isoDay: number,
-    calendarArg: CalendarArg = isoCalendar,
+    calendarArg: CalendarArg = createDefaultCalendar(),
   ) {
     super({
       ...constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT),

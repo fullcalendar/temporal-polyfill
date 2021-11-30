@@ -13,7 +13,7 @@ import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUti
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
-import { Calendar, isoCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 import { Instant } from './instant'
 import { PlainDateTime } from './plainDateTime'
 import {
@@ -63,7 +63,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
 
   getPlainDateTimeFor(
     instantArg: InstantArg,
-    calendarArg: CalendarArg = isoCalendar,
+    calendarArg: CalendarArg = createDefaultCalendar(),
   ): PlainDateTime {
     const instant = ensureObj(Instant, instantArg)
     const isoFields = epochNanoToISOFields(

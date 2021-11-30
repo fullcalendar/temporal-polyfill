@@ -29,7 +29,7 @@ import { createMonthDay } from '../dateUtils/monthDay'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { TimeFields, createTime, ensureLooseTime } from '../dateUtils/time'
 import { createYearMonth } from '../dateUtils/yearMonth'
-import { Calendar, isoCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
@@ -67,7 +67,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     isoMillisecond = 0,
     isoMicrosecond = 0,
     isoNanosecond = 0,
-    calendarArg: CalendarArg = isoCalendar,
+    calendarArg: CalendarArg = createDefaultCalendar(),
   ) {
     super({
       ...constrainDateTimeISO({

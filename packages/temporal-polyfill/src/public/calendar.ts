@@ -227,4 +227,6 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   toString(): string { return this.id }
 }
 
-export const isoCalendar = new Calendar(isoCalendarID)
+export function createDefaultCalendar(): Calendar {
+  return new Calendar(isoCalendarID)
+}
