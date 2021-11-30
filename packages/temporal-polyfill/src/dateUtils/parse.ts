@@ -13,19 +13,21 @@ TODO: parse negative years "-002000-01-01" (has "-00" prefix?)
 TODO: what about positive years like that "+00900" ?
 */
 const dateRegExpStr = '(\\d{4})-?(\\d{2})?-?(\\d{2})'
-const timeRegExpStr = '(\\d{2}):?(\\d{2})?:?(\\d{2}(\\.\\d+)?)?'
+const timeRegExpStr = '(\\d{2}):?(\\d{2})?:?(\\d{2}([.,]\\d+)?)?'
 const timeRegExp = createRegExp(timeRegExpStr)
-const offsetRegExpStr = `(Z|([-+])${timeRegExpStr})?` // Z:1 - sign:2 - offsetTime:3,4,5,6
-const offsetRegExp = createRegExp(timeRegExpStr)
+const offsetRegExpStr = `([+-\\u2212])${timeRegExpStr}` // sign:1 - offsetTime:2,3,4,5
+// NOTE: \u2212 is the unicode minus sign
+const offsetRegExp = createRegExp(offsetRegExpStr)
 const dateTimeRegExp = createRegExp(
   dateRegExpStr + // date:1,2,3
-  '[Tt ]?' +
+  '[T ]?' +
   timeRegExpStr // time:4,5,6,7
     .replace(':', '?:') + // makes the hour capture group optional
-  offsetRegExpStr + // Z:8 - sign:9 - offsetTime:10,11,12,13
-  '(\\[([^=\\]]+)\\])?(\\[u-ca=([^\\]]+)\\])', // timeZone:15 - calendar:17
+  `(Z|${offsetRegExpStr})?` + // Z:8 - sign:9 - offsetTime:10,11,12,13
+  '(\\[([^=\\]]+)\\])?(\\[u-ca=([^\\]]+)\\])?', // timeZone:15 - calendar:17
 )
 const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/i
+const zuluRegExp = /Z/i
 
 // hard functions (throw error on failure)
 
@@ -58,7 +60,7 @@ export function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
     return {
       ...parseDateParts(match.slice(1)),
       ...parseTimeParts(match.slice(4)),
-      offset: parseOffsetParts(match.slice(8)),
+      offset: zuluRegExp.test(match[8]) ? 0 : parseOffsetParts(match.slice(9)),
       timeZone: match[15] ? new TimeZone(match[15]) : null,
       calendar: match[17] ? new Calendar(match[17]) : createDefaultCalendar(),
     }
@@ -122,12 +124,9 @@ function parseTimeParts(parts: string[]): TimeISOEssentials {
 }
 
 function parseOffsetParts(parts: string[]): number | void {
-  const first = parts[0]
-  if (first != null) {
-    if (first === 'Z') {
-      return 0
-    }
-    return (parts[1] === '-' ? -1 : 1) * timePartsToNano(parts.slice(2))
+  const sign = parts[0]
+  if (sign != null) {
+    return (sign === '+' ? 1 : -1) * timePartsToNano(parts.slice(1))
   }
 }
 
@@ -150,11 +149,11 @@ function toInt(input: string | undefined): number {
 }
 
 function toFloat(input: string | undefined): number {
-  return parseFloat(input || '0')
+  return parseFloat((input || '0').replace(',', '.'))
 }
 
 function createRegExp(meat: string): RegExp {
-  return new RegExp(`^${meat}$`)
+  return new RegExp(`^${meat}$`, 'i')
 }
 
 function throwNoParse(type: string, str: string): any {
