@@ -8,15 +8,12 @@ import { SECOND, nanoInHour, nanoInMinute, nanoInSecond } from './units'
 import { ZonedDateTimeISOMaybe } from './zonedDateTime'
 
 /*
-TODO: parse month-day ('06-01') needs own regex!!!
-TODO: parse negative years "-002000-01-01" (has "-00" prefix?)
-TODO: what about positive years like that "+00900" ?
+TODO: parse month-day ('06-01') needs own regex!
 */
-const dateRegExpStr = '(\\d{4})-?(\\d{2})?-?(\\d{2})'
+const dateRegExpStr = '([+-]\\d{6}|\\d{4})-?(\\d{2})?-?(\\d{2})'
 const timeRegExpStr = '(\\d{2}):?(\\d{2})?:?(\\d{2}([.,]\\d+)?)?'
 const timeRegExp = createRegExp(timeRegExpStr)
-const offsetRegExpStr = `([+-\\u2212])${timeRegExpStr}` // sign:1 - offsetTime:2,3,4,5
-// NOTE: \u2212 is the unicode minus sign
+const offsetRegExpStr = `([+-])${timeRegExpStr}` // sign:1 - offsetTime:2,3,4,5
 const offsetRegExp = createRegExp(offsetRegExpStr)
 const dateTimeRegExp = createRegExp(
   dateRegExpStr + // date:1,2,3
@@ -28,6 +25,7 @@ const dateTimeRegExp = createRegExp(
 )
 const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/i
 const zuluRegExp = /Z/i
+const unicodeDashRegExp = /\u2212/g
 
 // hard functions (throw error on failure)
 
@@ -55,7 +53,7 @@ export function parseDurationISO(str: string): DurationFields {
 // soft functions (return null on failure)
 
 export function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
-  const match = dateTimeRegExp.exec(str)
+  const match = dateTimeRegExp.exec(normalizeDashes(str))
   if (match) {
     return {
       ...parseDateParts(match.slice(1)),
@@ -68,7 +66,7 @@ export function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
 }
 
 export function tryParseOffsetNano(str: string): number | void {
-  return parseOffsetParts((offsetRegExp.exec(str) || []).slice(1))
+  return parseOffsetParts((offsetRegExp.exec(normalizeDashes(str)) || []).slice(1))
 }
 
 function tryParseDurationISO(str: string): DurationFields | void {
@@ -150,6 +148,10 @@ function toInt(input: string | undefined): number {
 
 function toFloat(input: string | undefined): number {
   return parseFloat((input || '0').replace(',', '.'))
+}
+
+function normalizeDashes(str: string): string {
+  return str.replace(unicodeDashRegExp, '-')
 }
 
 function createRegExp(meat: string): RegExp {
