@@ -17,6 +17,7 @@ SPECIAL NOTE:
 Must keep in sync with the class/function exports from ./impl.ts
 */
 
+export const PlainYearMonth = TemporalPerformant.PlainYearMonth
 export const PlainMonthDay = TemporalPerformant.PlainMonthDay
 export const PlainDate = TemporalPerformant.PlainDate
 export const PlainTime = TemporalPerformant.PlainTime

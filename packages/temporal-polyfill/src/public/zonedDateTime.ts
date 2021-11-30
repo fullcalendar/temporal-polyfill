@@ -27,13 +27,13 @@ import { TimeFields, createTime } from '../dateUtils/time'
 import { milliInDay } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
 import {
-  ZonedDateTimeISOEssentials,
   addToZonedDateTime,
   compareZonedDateTimes,
   createZonedDateTime,
   diffZonedDateTimes,
   overrideZonedDateTimeFields,
   roundZonedDateTime,
+  zoneDateTimeParseResult,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createWeakMap } from '../utils/obj'
@@ -100,7 +100,10 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   static from(arg: ZonedDateTimeArg, options?: ZonedDateTimeOptions): ZonedDateTime {
     return createZonedDateTime(
       arg instanceof ZonedDateTime
-        ? arg.getISOFields() // optimization
+        ? { // optimization
+            ...arg.getISOFields(),
+            offset: arg.offsetNanoseconds,
+          }
         : typeof arg === 'object'
           ? zonedDateTimeFieldsToISO(
             refineFields(arg, zonedDateTimeFieldMap) as ZonedDateTimeLikeFields,
@@ -108,8 +111,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
             extractCalendar(arg),
             extractTimeZone(arg),
           )
-          // if parsing doesn't return a timeZone, createZonedDateTime will throw error
-          : parseDateTimeISO(String(arg)) as ZonedDateTimeISOEssentials,
+          : zoneDateTimeParseResult(parseDateTimeISO(String(arg))),
       options,
       OFFSET_REJECT,
     )

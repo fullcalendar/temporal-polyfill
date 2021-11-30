@@ -36,18 +36,14 @@ import {
 import { dayTimeFieldsToNano } from './dayTime'
 import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { tryParseOffsetNano } from './parse'
+import { DateTimeParseResult, parseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './round'
 import { diffTimeFields, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
-export type ZonedDateTimeISOMaybe = DateTimeISOFields & {
-  timeZone?: TimeZone | null | undefined | void
-  offset?: number | null | undefined | void
-}
-export type ZonedDateTimeISOEssentials = DateTimeISOFields & {
+export type ZonedDateTimeISOEssentials = DateTimeISOFields & { // essentials for creation
   timeZone: TimeZone
-  offset?: string // if not provided, will be computed from timeZone and other fields
+  offset?: number | null
 }
 export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 
@@ -56,14 +52,10 @@ export function createZonedDateTime(
   options: ZonedDateTimeOptions | undefined,
   defaultOffsetUsage: OffsetHandlingInt,
 ): ZonedDateTime {
-  if (isoFields.timeZone == null) {
-    throw new RangeError('time zone ID required')
-  }
-
   const offsetUsage = parseOffsetHandling(options?.offset, defaultOffsetUsage)
   const dateTime = createDateTime(isoFields)
   let zonedDateTime = dateTime.toZonedDateTime(isoFields.timeZone, options)
-  const literalOffset = isoFields.offset != null ? tryParseOffsetNano(isoFields.offset) : null
+  const literalOffset = isoFields.offset
 
   if (
     literalOffset != null &&
@@ -106,7 +98,14 @@ export function zonedDateTimeFieldsToISO(
   return {
     ...dateTimeFieldsToISO(fields, options, calendar),
     timeZone,
-    offset: fields.offset,
+    offset: fields.offset ? parseOffsetNano(fields.offset) : null,
+  }
+}
+
+export function zoneDateTimeParseResult(parsed: DateTimeParseResult): ZonedDateTimeISOEssentials {
+  return {
+    ...parsed,
+    timeZone: new TimeZone(parsed.timeZone!), // will throw error if empty timeZone
   }
 }
 

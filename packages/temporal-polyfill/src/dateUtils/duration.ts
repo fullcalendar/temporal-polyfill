@@ -39,7 +39,7 @@ import {
   YEAR,
   isDayTimeUnit,
 } from './units'
-import { ZonedDateTimeISOEssentials, createZonedDateTime } from './zonedDateTime'
+import { createZonedDateTime, zoneDateTimeParseResult } from './zonedDateTime'
 
 export interface DurationFields {
   years: number
@@ -294,7 +294,7 @@ function getMaybeZonedRelativeTo(
     const isoFields = parseDateTimeISO(String(arg))
     if (isoFields.timeZone != null) {
       return createZonedDateTime(
-        isoFields as ZonedDateTimeISOEssentials,
+        zoneDateTimeParseResult(isoFields),
         undefined,
         OFFSET_PREFER,
       )
