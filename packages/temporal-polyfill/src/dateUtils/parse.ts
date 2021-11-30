@@ -15,14 +15,15 @@ TODO: what about positive years like that "+00900" ?
 const dateRegExpStr = '(\\d{4})-?(\\d{2})?-?(\\d{2})'
 const timeRegExpStr = '(\\d{2}):?(\\d{2})?:?(\\d{2}(\\.\\d+)?)?'
 const timeRegExp = createRegExp(timeRegExpStr)
-const offsetRegExpStr = `(Z|([-+])(${timeRegExpStr}))?` // Z:1 - sign:2 - offsetTime:3,4,5,6
+const offsetRegExpStr = `(Z|([-+])${timeRegExpStr})?` // Z:1 - sign:2 - offsetTime:3,4,5,6
 const offsetRegExp = createRegExp(timeRegExpStr)
 const dateTimeRegExp = createRegExp(
   dateRegExpStr + // date:1,2,3
-  '[Tt ]' +
-  timeRegExpStr + // time:4,5,6,7
+  '[Tt ]?' +
+  timeRegExpStr // time:4,5,6,7
+    .replace(':', '?:') + // makes the hour capture group optional
   offsetRegExpStr + // Z:8 - sign:9 - offsetTime:10,11,12,13
-  '(\\[([^=\\]]+)\\])?(\\[u-ca=([^\\]]+)\\])', // timeZone:14 - calendar:15
+  '(\\[([^=\\]]+)\\])?(\\[u-ca=([^\\]]+)\\])', // timeZone:15 - calendar:17
 )
 const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/i
 
@@ -56,10 +57,10 @@ export function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
   if (match) {
     return {
       ...parseDateParts(match.slice(1)),
-      ...parseTimeParts(match.slice(3)),
+      ...parseTimeParts(match.slice(4)),
       offset: parseOffsetParts(match.slice(8)),
-      timeZone: match[12] ? new TimeZone(match[14]) : null,
-      calendar: match[13] ? new Calendar(match[15]) : isoCalendar,
+      timeZone: match[15] ? new TimeZone(match[15]) : null,
+      calendar: match[17] ? new Calendar(match[17]) : isoCalendar,
     }
   }
 }
