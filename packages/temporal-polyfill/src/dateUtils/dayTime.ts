@@ -8,8 +8,11 @@ export function dayTimeFieldsToNano(fields: DayTimeFields): number {
   return fields.day * nanoInDay + timeFieldsToNano(fields)
 }
 
-export function nanoToDayTimeFields(nano: number, largestUnit: DayTimeUnitInt): DayTimeFields {
-  const fields = {} as DayTimeFields
+export function nanoToDayTimeFields(
+  nano: number,
+  largestUnit: DayTimeUnitInt,
+): Partial<DayTimeFields> {
+  const fields: Partial<DayTimeFields> = {}
 
   for (let unit = largestUnit; unit >= NANOSECOND; unit--) {
     const unitNano = nanoIn[unit]

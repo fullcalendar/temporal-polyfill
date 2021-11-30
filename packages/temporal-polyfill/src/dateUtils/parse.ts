@@ -1,8 +1,10 @@
 import { Calendar, isoCalendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
+import { DateISOEssentials } from './date'
+import { nanoToDayTimeFields } from './dayTime'
 import { DurationFields } from './duration'
-import { TimeISOEssentials, partialSecondsToTimeFields } from './time'
-import { nanoInMinute } from './units'
+import { TimeISOEssentials, timeLikeToISO } from './time'
+import { SECOND, nanoInHour, nanoInMinute, nanoInSecond } from './units'
 import { ZonedDateTimeISOMaybe } from './zonedDateTime'
 
 /*
@@ -10,70 +12,68 @@ TODO: parse month-day ('06-01') needs own regex!!!
 TODO: parse negative years "-002000-01-01" (has "-00" prefix?)
 TODO: what about positive years like that "+00900" ?
 */
-const dateTimeRegExp = /^(\d{4})-?(\d{2})?-?(\d{2})?T?(\d{2})?:?(\d{2})?:?(\d{2})?\.?(\d+)?([-+]?\d{2}:?\d{2})?(\[([^=\]]+)\])?(\[u-ca=([^\]]+)\])?$/
-const timeRegExp = /^(\d{2}):?(\d{2})?:?(\d{2})?\.?(\d+)$/
-const timeZoneOffsetRegExp = /^([-+])(\d{2}):?(\d{2})?$/
-const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/
+const dateRegExpStr = '(\\d{4})-?(\\d{2})?-?(\\d{2})'
+const timeRegExpStr = '(\\d{2}):?(\\d{2})?:?(\\d{2}(\\.\\d+)?)?'
+const timeRegExp = createRegExp(timeRegExpStr)
+const offsetRegExpStr = `(Z|([-+])(${timeRegExpStr}))?` // Z:1 - sign:2 - offsetTime:3,4,5,6
+const offsetRegExp = createRegExp(timeRegExpStr)
+const dateTimeRegExp = createRegExp(
+  dateRegExpStr + // date:1,2,3
+  '[Tt ]' +
+  timeRegExpStr + // time:4,5,6,7
+  offsetRegExpStr + // Z:8 - sign:9 - offsetTime:10,11,12,13
+  '(\\[([^=\\]]+)\\])?(\\[u-ca=([^\\]]+)\\])', // timeZone:14 - calendar:15
+)
+const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/i
+
+// hard functions (throw error on failure)
 
 export function parseDateTimeISO(str: string): ZonedDateTimeISOMaybe {
-  return tryParseDateTimeISO(str) || throwNoParse(str)
+  return tryParseDateTimeISO(str) || throwNoParse('dateTime', str)
+}
+
+export function parseOffsetNano(str: string): number {
+  return tryParseOffsetNano(str) ?? throwNoParse('timeZone', str)
 }
 
 export function parseTimeISO(str: string): TimeISOEssentials {
-  return tryParseTimeISO(str) ||
-    tryParseDateTimeISO(str) || // fallback to parsing a datetime
-    throwNoParse(str)
+  const match = timeRegExp.exec(str)
+  if (match) {
+    return parseTimeParts(match)
+  }
+  return tryParseDateTimeISO(str) || // fallback to parsing a datetime
+    throwNoParse('time', str)
 }
 
 export function parseDurationISO(str: string): DurationFields {
-  return tryParseDurationISO(str) || throwNoParse(str)
+  return tryParseDurationISO(str) || throwNoParse('duration', str)
 }
 
-function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
+// soft functions (return null on failure)
+
+export function tryParseDateTimeISO(str: string): ZonedDateTimeISOMaybe | void {
   const match = dateTimeRegExp.exec(str)
   if (match) {
-    const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(
-      toFloat(match[7]),
-    )
     return {
-      isoYear: toInt(match[1]),
-      isoMonth: toInt(match[2]),
-      isoDay: toInt(match[3]),
-      isoHour: toInt(match[4]),
-      isoMinute: toInt(match[5]),
-      isoSecond: toInt(match[6]),
-      isoMillisecond: millisecond,
-      isoMicrosecond: microsecond,
-      isoNanosecond: nanosecond,
-      offset: match[8] || undefined,
-      timeZone: match[10] ? new TimeZone(match[10]) : undefined,
-      calendar: match[12] ? new Calendar(match[12]) : isoCalendar,
+      ...parseDateParts(match.slice(1)),
+      ...parseTimeParts(match.slice(3)),
+      offset: parseOffsetParts(match.slice(8)),
+      timeZone: match[12] ? new TimeZone(match[14]) : null,
+      calendar: match[13] ? new Calendar(match[15]) : isoCalendar,
     }
   }
 }
 
-function tryParseTimeISO(str: string): TimeISOEssentials | void {
-  const match = timeRegExp.exec(str)
-  if (match) {
-    const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(
-      toFloat(match[4]),
-    )
-    return {
-      isoHour: toInt(match[1]),
-      isoMinute: toInt(match[2]),
-      isoSecond: toInt(match[3]),
-      isoMillisecond: millisecond,
-      isoMicrosecond: microsecond,
-      isoNanosecond: nanosecond,
-    }
-  }
+export function tryParseOffsetNano(str: string): number | void {
+  return parseOffsetParts((offsetRegExp.exec(str) || []).slice(1))
 }
 
 function tryParseDurationISO(str: string): DurationFields | void {
   const match = durationRegExp.exec(str)
   if (match) {
-    const { millisecond, microsecond, nanosecond } = partialSecondsToTimeFields(
-      toFloat(match[10]),
+    const smallFields = nanoToDayTimeFields(
+      floatSecondsToNano(toFloat(match[9])),
+      SECOND,
     )
     const fields: DurationFields = {
       years: toInt(match[2]),
@@ -82,10 +82,10 @@ function tryParseDurationISO(str: string): DurationFields | void {
       days: toInt(match[5]),
       hours: toInt(match[7]),
       minutes: toInt(match[8]),
-      seconds: toInt(match[9]), // toInt will ignore after decimal point
-      milliseconds: millisecond,
-      microseconds: microsecond,
-      nanoseconds: nanosecond,
+      seconds: smallFields.second!,
+      milliseconds: smallFields.millisecond!,
+      microseconds: smallFields.microsecond!,
+      nanoseconds: smallFields.nanosecond!,
     }
     if (match[1] === '-') {
       // flip the signs
@@ -97,23 +97,52 @@ function tryParseDurationISO(str: string): DurationFields | void {
   }
 }
 
-export function parseOffsetNano(str: string): number {
-  return tryParseOffsetNano(str) || throwNoParse('time zone' + str)
-  // TODO: proper throwNoParse for bad time zones
-}
+// parsing of string parts
 
-export function tryParseOffsetNano(str: string): void | number {
-  const match = timeZoneOffsetRegExp.exec(str)
-  if (match) {
-    return parseOffsetPartsNano(match[1], match[2], match[3])
+function parseDateParts(parts: string[]): DateISOEssentials {
+  return {
+    isoYear: toInt(parts[0]),
+    isoMonth: toInt(parts[1]),
+    isoDay: toInt(parts[2]),
   }
 }
 
-function parseOffsetPartsNano(sign: string, hours: string, minutes: string): number {
-  return (sign === '-' ? -1 : 1) * (
-    toInt(hours) * 60 + toInt(minutes)
-  ) * nanoInMinute
+function parseTimeParts(parts: string[]): TimeISOEssentials {
+  return {
+    ...timeLikeToISO(
+      nanoToDayTimeFields(
+        floatSecondsToNano(toFloat(parts[2])),
+        SECOND,
+      ),
+    ),
+    isoHour: toInt(parts[0]),
+    isoMinute: toInt(parts[1]),
+  }
 }
+
+function parseOffsetParts(parts: string[]): number | void {
+  const first = parts[0]
+  if (first != null) {
+    if (first === 'Z') {
+      return 0
+    }
+    return (parts[1] === '-' ? -1 : 1) * timePartsToNano(parts.slice(2))
+  }
+}
+
+// time-field utils
+
+function timePartsToNano(parts: string[]): number {
+  return toInt(parts[0]) * nanoInHour +
+    toInt(parts[1]) * nanoInMinute +
+    floatSecondsToNano(toFloat(parts[2]))
+}
+
+function floatSecondsToNano(floatSeconds: number): number {
+  return Math.trunc(floatSeconds * nanoInSecond)
+}
+
+// general utils
 
 function toInt(input: string | undefined): number {
   return parseInt(input || '0')
@@ -123,6 +152,10 @@ function toFloat(input: string | undefined): number {
   return parseFloat(input || '0')
 }
 
-function throwNoParse(str: string): any {
-  throw new RangeError('Cannot parse ' + str)
+function createRegExp(meat: string): RegExp {
+  return new RegExp(`^${meat}$`)
+}
+
+function throwNoParse(type: string, str: string): any {
+  throw new RangeError(`Cannot parse ${type} '${str}'`)
 }

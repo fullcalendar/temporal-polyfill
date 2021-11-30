@@ -6,7 +6,7 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { TimeISOEssentials, nanoToTimeFields, timeISOToNano } from '../dateUtils/time'
+import { TimeISOEssentials, nanoToWrappedTimeFields, timeISOToNano } from '../dateUtils/time'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
 import { padZeros } from '../utils/string'
 import { addWholeDays } from './add'
@@ -39,7 +39,7 @@ export function formatTimeISO(
   formatConfig: TimeToStringConfig,
 ): [string, number] {
   const nano = roundNano(Number(timeISOToNano(fields)), formatConfig)
-  const [roundedFields, dayDelta] = nanoToTimeFields(nano)
+  const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano)
   const s = padZeros(roundedFields.hour, 2) + ':' +
     padZeros(roundedFields.minute, 2) + ':' +
     padZeros(roundedFields.second, 2) +

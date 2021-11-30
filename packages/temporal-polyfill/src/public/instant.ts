@@ -2,7 +2,7 @@ import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import { addToInstant, compareInstants, diffInstants, roundInstant } from '../dateUtils/instant'
 import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
-import { parseDateTimeISO, parseOffsetNano } from '../dateUtils/parse'
+import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicro, nanoInMilli, nanoInSecond } from '../dateUtils/units'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
@@ -33,13 +33,10 @@ export class Instant extends AbstractNoValueObj {
     }
 
     const fields = parseDateTimeISO(String(arg))
-    const offsetStr = fields.offset
-    if (offsetStr == null) {
+    const offsetNano = fields.offset
+    if (offsetNano == null) {
       throw new Error('Must specify an offset')
     }
-
-    // strings given to Instant *must* have a literal offset, or error will be thrown
-    const offsetNano = parseOffsetNano(offsetStr)
 
     return new Instant(isoFieldsToEpochNano(fields) - BigInt(offsetNano))
   }

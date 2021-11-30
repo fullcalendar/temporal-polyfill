@@ -17,7 +17,7 @@ import {
 import { compareValues } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
-import { DayTimeFields, nanoToDayTimeFields } from './dayTime'
+import { nanoToDayTimeFields } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
 import { roundNano, roundTimeOfDay } from './round'
 import {
@@ -121,17 +121,6 @@ export function roundPlainTime(plainTime: PlainTime, options: TimeRoundOptions):
   return createTime(timeLikeToISO(fields))
 }
 
-export function timeLikeToISO(fields: TimeLike): TimeISOEssentials {
-  return {
-    isoNanosecond: fields.nanosecond ?? 0,
-    isoMicrosecond: fields.microsecond ?? 0,
-    isoMillisecond: fields.millisecond ?? 0,
-    isoSecond: fields.second ?? 0,
-    isoMinute: fields.minute ?? 0,
-    isoHour: fields.hour ?? 0,
-  }
-}
-
 export function timeFieldsToConstrainedISO(
   fields: TimeLike,
   options: OverflowOptions | undefined,
@@ -142,19 +131,27 @@ export function timeFieldsToConstrainedISO(
   )
 }
 
+// Normally ensureObj and ::from would fail when undefined is specified
+// Fallback to 00:00 time
+export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
+  return ensureObj(PlainTime, arg ?? { hour: 0 })
+}
+
 // Nanosecond Math
 
 export function addTimeFields(t0: TimeFields, t1: TimeFields): [TimeFields, number] {
-  return nanoToTimeFields(timeFieldsToNano(t0) + timeFieldsToNano(t1))
+  return nanoToWrappedTimeFields(timeFieldsToNano(t0) + timeFieldsToNano(t1))
 }
 
 export function diffTimeFields(t0: TimeFields, t1: TimeFields): [TimeFields, number] {
-  return nanoToTimeFields(timeFieldsToNano(t1) - timeFieldsToNano(t0))
+  return nanoToWrappedTimeFields(timeFieldsToNano(t1) - timeFieldsToNano(t0))
 }
 
 export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
   return compareValues(timeFieldsToNano(t0), timeFieldsToNano(t1))
 }
+
+// Object -> Nanoseconds
 
 export function timeFieldsToNano(timeFields: TimeFields): number {
   return timeFields.hour * nanoInHour +
@@ -174,23 +171,28 @@ export function timeISOToNano(timeISO: TimeISOEssentials): number {
     timeISO.isoNanosecond
 }
 
-export function nanoToTimeFields(nano: number): [TimeFields, number] {
+// Nanoseconds -> Object
+
+export function nanoToWrappedTimeFields(nano: number): [TimeFields, number] {
   const dayDelta = Math.floor(nano / nanoInDay)
   nano = (nano % nanoInDay + nanoInDay) % nanoInDay
 
   const fields = nanoToDayTimeFields(nano, DAY)
 
   // repurpose DayTimeFiels as TimeFields
-  delete (fields as Partial<DayTimeFields>).day
+  delete fields.day
   return [fields as TimeFields, dayDelta]
 }
 
-export function partialSecondsToTimeFields(seconds: number): TimeFields {
-  return nanoToTimeFields(Math.trunc(seconds * nanoInSecond))[0]
-}
+// Object -> Object
 
-// Normally ensureObj and ::from would fail when undefined is specified
-// Fallback to 00:00 time
-export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
-  return ensureObj(PlainTime, arg ?? { hour: 0 })
+export function timeLikeToISO(fields: TimeLike): TimeISOEssentials {
+  return {
+    isoNanosecond: fields.nanosecond ?? 0,
+    isoMicrosecond: fields.microsecond ?? 0,
+    isoMillisecond: fields.millisecond ?? 0,
+    isoSecond: fields.second ?? 0,
+    isoMinute: fields.minute ?? 0,
+    isoHour: fields.hour ?? 0,
+  }
 }

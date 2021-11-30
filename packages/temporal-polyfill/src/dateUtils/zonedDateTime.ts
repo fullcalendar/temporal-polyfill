@@ -42,8 +42,8 @@ import { diffTimeFields, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
 export type ZonedDateTimeISOMaybe = DateTimeISOFields & {
-  timeZone?: TimeZone
-  offset?: string
+  timeZone?: TimeZone | null | undefined | void
+  offset?: number | null | undefined | void
 }
 export type ZonedDateTimeISOEssentials = DateTimeISOFields & {
   timeZone: TimeZone

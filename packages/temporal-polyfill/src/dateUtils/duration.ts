@@ -22,7 +22,7 @@ import { DateLikeInstance } from './calendar'
 import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
 import { parseDateTimeISO } from './parse'
-import { roundBalancedDuration, roundDayTimeFields } from './round'
+import { roundBalancedDuration, roundNano } from './round'
 import { TimeFields } from './time'
 import {
   DAY,
@@ -181,9 +181,9 @@ export function roundAndBalanceDuration(
 
   const fields = durationToDayTimeFields(duration)
   if (fields && isDayTimeUnit(largestUnit) && isDayTimeUnit(smallestUnit)) {
-    return dayTimeFieldsToDuration(
-      roundDayTimeFields(fields, diffConfig as RoundConfig<DayTimeUnitInt>, largestUnit),
-    )
+    const nano = roundNano(dayTimeFieldsToNano(fields), diffConfig as RoundConfig<DayTimeUnitInt>)
+    const roundedFields = nanoToDayTimeFields(nano, largestUnit)
+    return dayTimeFieldsToDuration(roundedFields)
   }
 
   const relativeTo = getPlainRelativeTo(options?.relativeTo)
@@ -246,10 +246,10 @@ export function nanoToDuration(nano: number, largestUnit: DayTimeUnitInt): Durat
 }
 
 // works for TimeFields too
-export function dayTimeFieldsToDuration(fields: DayTimeFields | TimeFields): Duration {
+export function dayTimeFieldsToDuration(fields: Partial<DayTimeFields>): Duration {
   return new Duration(
     0, 0, 0,
-    (fields as DayTimeFields).day || 0,
+    fields.day,
     fields.hour,
     fields.minute,
     fields.second,
