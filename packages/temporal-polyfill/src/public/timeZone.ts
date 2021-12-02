@@ -48,8 +48,10 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     }
     const dateTimeParse = tryParseDateTimeISO(String(arg))
     return new TimeZone(
-      (dateTimeParse && dateTimeParse.timeZone) || // try parsing a datetime string
-        arg, // consider arg the literal time zone ID string
+      (dateTimeParse && (
+        dateTimeParse.timeZone ||
+        (dateTimeParse.offset != null && formatOffsetISO(dateTimeParse.offset))
+      )) || arg, // consider arg the literal time zone ID string
     )
   }
 

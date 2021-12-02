@@ -1,3 +1,4 @@
+import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { tryParseOffsetNano } from '../dateUtils/parse'
 import { nanoInMinute } from '../dateUtils/units'
 import { FixedTimeZoneImpl } from './fixedTimeZoneImpl'
@@ -20,7 +21,10 @@ export function queryTimeZoneImpl(id: string): TimeZoneImpl {
   const offsetNano = tryParseOffsetNano(id)
   if (offsetNano != null) {
     // don't store fixed-offset zones in cache. there could be many
-    return new FixedTimeZoneImpl(id, Math.trunc(offsetNano / nanoInMinute)) // convert to minutes
+    return new FixedTimeZoneImpl(
+      formatOffsetISO(offsetNano),
+      Math.trunc(offsetNano / nanoInMinute), // convert to minutes
+    )
   }
 
   return (implCache[key] = new IntlTimeZoneImpl(id))

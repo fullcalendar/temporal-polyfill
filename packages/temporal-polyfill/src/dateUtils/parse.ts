@@ -14,8 +14,8 @@ export type DateTimeParseResult = DateTimeISOFields & {
 
 const dateRegExpStr = '([+-]\\d{6}|\\d{4})-?(\\d{2})?-?(\\d{2})?'
 const monthDayRegExpStr = '(--)?(\\d{2})-?(\\d{2})?'
-const timeRegExpStr = '(\\d{2}):?(\\d{2})?:?(\\d{2}([.,]\\d+)?)?'
-const offsetRegExpStr = `([+-])${timeRegExpStr}`
+const timeRegExpStr = '(\\d{2})?:?(\\d{2})?:?(\\d{2}([.,]\\d+)?)?' // all parts optional
+const offsetRegExpStr = `([+-])${timeRegExpStr}` // hour onwards is optional
 const endingRegExpStr =
   `(Z|${offsetRegExpStr})?` +
   '(\\[([^=\\]]+)\\])?(\\[u-ca=([^\\]]+)\\])?'
@@ -97,7 +97,10 @@ function tryParseTimeISO(str: string): TimeISOEssentials | undefined {
 }
 
 export function tryParseOffsetNano(str: string): number | undefined {
-  return parseOffsetParts((offsetRegExp.exec(normalizeDashes(str)) || []).slice(1))
+  const match = offsetRegExp.exec(normalizeDashes(str))
+  if (match) {
+    return parseOffsetParts(match.slice(1))
+  }
 }
 
 function tryParseDurationISO(str: string): DurationFields | undefined {
@@ -162,7 +165,10 @@ function parseTimeParts(parts: string[]): TimeISOEssentials {
 
 function parseOffsetParts(parts: string[]): number | undefined {
   const sign = parts[0]
-  if (sign != null) {
+  if (
+    sign != null &&
+    parts[1] // has hour at least
+  ) {
     return (sign === '+' ? 1 : -1) * timePartsToNano(parts.slice(1))
   }
 }
