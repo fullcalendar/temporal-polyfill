@@ -66,26 +66,26 @@ export function queryDateISOFields(
 
   let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<DateFields>
 
-  if (year == null) {
-    if (eraYear == null || era == null) {
-      throw new Error('Must specify either a year or an era & eraYear')
+  if (year === undefined) {
+    if (eraYear === undefined || era === undefined) {
+      throw new RangeError('Must specify either a year or an era & eraYear')
     } else {
       year = calendarImpl.convertEraYear(eraYear, era, true) // errorUnknownEra=true
     }
   }
 
-  if (monthCode != null) {
+  if (monthCode !== undefined) {
     const m = calendarImpl.convertMonthCode(monthCode, year)
     if (month != null && month !== m) {
-      throw new Error('Month doesnt match with monthCode')
+      throw new RangeError('Month doesnt match with monthCode')
     }
     month = m
-  } else if (month == null) {
-    throw new Error('Must specify either a month or monthCode')
+  } else if (month === undefined) {
+    throw new RangeError('Must specify either a month or monthCode')
   }
 
-  if (day == null) {
-    throw new Error('Must specify day')
+  if (day === undefined) {
+    throw new RangeError('Must specify day')
   }
 
   [year, month, day] = constrainDateFields(

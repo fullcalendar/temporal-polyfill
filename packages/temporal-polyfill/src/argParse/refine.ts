@@ -6,15 +6,15 @@ export function createParser<Map>(nameForError: string, map: Map, defaultVal?: V
   runtimeDefaultVal?: ValueOf<Map>
 ) => ValueOf<Map> {
   return (input: keyof Map | undefined, runtimeDefaultVal?: ValueOf<Map>): ValueOf<Map> => {
-    if (input == null) {
+    if (input === undefined) {
       const d = runtimeDefaultVal ?? defaultVal
       if (d == null) {
-        throw new Error(`Must specify a ${nameForError}`)
+        throw new RangeError(`Must specify a ${nameForError}`)
       }
       return d
     }
     if (map[input] == null) {
-      throw new Error(`Invalid ${nameForError}: ${input}`) // TODO: RangeError?
+      throw new RangeError(`Invalid ${nameForError}: ${input}`)
     }
     return map[input]
   }
@@ -26,12 +26,12 @@ export function constrainValue( // will also cast to number
   max: number, // inclusive
   overflowHandling: OverflowHandlingInt,
 ): number {
-  if (val == null) {
+  if (val === undefined) {
     return min
   }
   const newVal = Math.min(Math.max(val, min), max) // will cast to number
   if (newVal !== val && overflowHandling === OVERFLOW_REJECT) {
-    throw new Error('Invalid overflowed value ' + val)
+    throw new RangeError('Invalid overflowed value ' + val)
   }
   return newVal
 }
@@ -44,14 +44,14 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   let cnt = 0
 
   for (const fieldName in refinerMap) {
-    if (input[fieldName] != null) {
+    if (input[fieldName] !== undefined) {
       res[fieldName] = refinerMap[fieldName](input[fieldName])
       cnt++
     }
   }
 
   if (!cnt) {
-    throw new Error('Invalid object, no keys')
+    throw new RangeError('Invalid object, no keys')
   }
 
   return res
@@ -64,8 +64,8 @@ export function refineOverrideFields<Map extends { [fieldName: string]: (input: 
   refinerMap: Map,
 ): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
   for (const fieldName of invalidOverrideFields) {
-    if (input[fieldName] != null) {
-      throw new Error(`Disallowed field ${fieldName}`)
+    if (input[fieldName] !== undefined) {
+      throw new RangeError(`Disallowed field ${fieldName}`)
     }
   }
 

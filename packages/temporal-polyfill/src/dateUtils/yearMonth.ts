@@ -30,21 +30,31 @@ export function overrideYearMonthFields(
   base: YearMonthFields,
 ): YearMonthLike {
   const merged = {} as YearMonthFields
+  let anyYear = false
+  let anyMonth = false
 
   if (overrides.era != null || overrides.eraYear != null) {
     merged.era = overrides.era
     merged.eraYear = overrides.eraYear
-  } else if (overrides.year != null) {
+    anyYear = true
+  }
+  if (overrides.year != null) {
     merged.year = overrides.year
-  } else {
+    anyYear = true
+  }
+  if (!anyYear) {
     merged.year = base.year
   }
 
   if (overrides.month != null) {
     merged.month = overrides.month
-  } else if (overrides.monthCode != null) {
+    anyMonth = true
+  }
+  if (overrides.monthCode != null) {
     merged.monthCode = overrides.monthCode
-  } else {
+    anyMonth = true
+  }
+  if (!anyMonth) {
     merged.month = base.month
   }
 
