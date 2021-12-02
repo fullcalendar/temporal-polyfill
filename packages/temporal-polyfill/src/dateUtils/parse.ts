@@ -65,14 +65,15 @@ export function parseDurationISO(str: string): DurationFields {
 
 // soft functions (return null on failure)
 
-function tryParseDateTimeISO(str: string): DateTimeParseResult | undefined {
+export function tryParseDateTimeISO(str: string): DateTimeParseResult | undefined {
   const match = dateTimeRegExp.exec(normalizeDashes(str))
   if (match) {
+    const isZulu = zuluRegExp.test(match[9])
     return {
       ...parseDateParts(match.slice(1)),
       ...parseTimeParts(match.slice(5)),
-      offset: zuluRegExp.test(match[9]) ? 0 : parseOffsetParts(match.slice(10)),
-      timeZone: match[16], // don't parse yet. some objects don't need it, don't throw errors
+      offset: isZulu ? 0 : parseOffsetParts(match.slice(10)),
+      timeZone: isZulu ? 'UTC' : match[16], // a string. don't parse yet, might be unnecessary
       calendar: match[18] ? new Calendar(match[18]) : createDefaultCalendar(),
     }
   }
