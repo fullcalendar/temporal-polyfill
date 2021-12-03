@@ -4,7 +4,9 @@ import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Duration } from '../public/duration'
 import { DateISOFields } from '../public/types'
 import { DateEssentials, DateISOEssentials } from './date'
+import { durationToTimeFields } from './duration'
 import { addDaysMilli, epochMilliToISOFields, isoFieldsToEpochMilli } from './isoMath'
+import { nanoToWrappedTimeFields, timeFieldsToNano } from './time'
 
 export function addToDateFields(
   dateFields: DateEssentials,
@@ -16,7 +18,14 @@ export function addToDateFields(
   dateFields = addWholeMonths(dateFields, duration.months, calendarImpl, overflowHandling)
 
   let epochMilli = calendarImpl.epochMilliseconds(dateFields.year, dateFields.month, dateFields.day)
-  epochMilli = addDaysMilli(epochMilli, duration.days + duration.weeks * 7)
+  epochMilli = addDaysMilli(
+    epochMilli,
+    duration.weeks * 7 +
+      duration.days +
+      // convert time fields to whole days
+      nanoToWrappedTimeFields(timeFieldsToNano(durationToTimeFields(duration)))[1],
+  )
+
   return epochMilliToISOFields(epochMilli)
 }
 
