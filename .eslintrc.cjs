@@ -102,7 +102,6 @@ module.exports = {
     // TODO: derive from .gitignore/.gitsubmodules while working with vscode?
     'dist',
     '/scripts/data',
-    '/packages/temporal-polyfill/src/specs',
   ],
 }
 
