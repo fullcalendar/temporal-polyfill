@@ -114,10 +114,10 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
 
   since(other: DateArg, options?: DateDiffOptions): Duration {
     return diffDates(
-      ensureObj(PlainDate, other),
       this,
+      ensureObj(PlainDate, other),
       parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
-    )
+    ).negated()
   }
 
   equals(other: DateArg): boolean {

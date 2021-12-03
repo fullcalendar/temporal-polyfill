@@ -102,10 +102,10 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 
   since(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
     return diffDates(
-      ensureObj(PlainYearMonth, other).toPlainDate(day1),
       this.toPlainDate(day1),
+      ensureObj(PlainYearMonth, other).toPlainDate(day1),
       parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
-    )
+    ).negated()
   }
 
   equals(other: YearMonthArg): boolean {
