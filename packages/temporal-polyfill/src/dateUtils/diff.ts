@@ -67,7 +67,7 @@ function wholeMonthsUntil(
     monthsToAdd += d1.month - d0.month
 
     // correct when we overshoot the day-of-month
-    if (compareValues(d1.day, d0.day) !== sign) {
+    if (compareValues(d1.day, d0.day) === -sign) {
       monthsToAdd -= sign
     }
   }
