@@ -51,7 +51,7 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   }
 
   if (!cnt) {
-    throw new RangeError('Invalid object, no keys')
+    throw new TypeError('Invalid object, no keys')
   }
 
   return res
