@@ -1,13 +1,26 @@
 {
   "configurations": [
     {
-      "name": "Debug All Jest Tests",
+      "name": "Jest: Debug All",
       "type": "node",
       "request": "launch",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "runtimeExecutable": "yarn",
-      "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false"], // NOTE: keep in sync with settings.json
+      // NOTE: keep args in sync with settings.json
+      "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false"],
+      "sourceMaps": true,
+      "disableOptimisticBPs": true
+    },
+    {
+      "name": "Jest: Debug File",
+      "type": "node",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeExecutable": "yarn",
+      // NOTE: keep args in sync with settings.json
+      "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false", "${file}"],
       "sourceMaps": true,
       "disableOptimisticBPs": true
     }
