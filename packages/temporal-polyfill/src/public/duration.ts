@@ -8,6 +8,7 @@ import {
   addAndBalanceDurations,
   compareDurations,
   createDuration,
+  negateFields,
   refineDurationFields,
   roundAndBalanceDuration,
 } from '../dateUtils/duration'
@@ -97,10 +98,7 @@ export class Duration extends AbstractNoValueObj {
 
   negated(): Duration {
     return createDuration(
-      mapHash(
-        getFields(this),
-        (num: number) => -num || 0, // avoids -0 (negative zeros)
-      ),
+      negateFields(getFields(this) as Partial<SignedDurationFields>), // TODO: fix types
     )
   }
 

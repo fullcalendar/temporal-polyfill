@@ -146,7 +146,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   since(other: DateTimeArg, options?: DiffOptions): Duration {
-    return diffDateTimes(this, ensureObj(PlainDateTime, other), options).negated()
+    return diffDateTimes(this, ensureObj(PlainDateTime, other), options, true)
   }
 
   round(options: DateTimeRoundOptions): PlainDateTime {

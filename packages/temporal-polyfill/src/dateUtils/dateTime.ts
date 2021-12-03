@@ -135,6 +135,7 @@ export function diffDateTimes(
   t0: PlainDateTime,
   t1: PlainDateTime,
   options: DiffOptions | undefined,
+  flip?: boolean,
 ): Duration {
   const calendar = getCommonCalendar(t0, t1)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(options, DAY, NANOSECOND, NANOSECOND, YEAR)
@@ -162,7 +163,7 @@ export function diffDateTimes(
   )
 
   const balancedDuration = addDurations(largeDuration, dayTimeFieldsToDuration(timeFields))
-  return roundBalancedDuration(balancedDuration, diffConfig, t0, t1)
+  return roundBalancedDuration(balancedDuration, diffConfig, t0, t1, flip)
 }
 
 export function roundDateTime(

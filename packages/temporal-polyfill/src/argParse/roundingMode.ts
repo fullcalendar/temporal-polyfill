@@ -15,6 +15,8 @@ const roundingModeMap: RoundingModeMap = {
   floor: Math.floor,
 }
 
+// TODO: start using ENUM-like types. It's bad to have caller code referencing Math.* functions
+
 export const parseRoundingMode = createParser(
   'roundingMode',
   roundingModeMap,

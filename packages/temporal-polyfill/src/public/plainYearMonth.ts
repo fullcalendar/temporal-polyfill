@@ -105,7 +105,8 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
       this.toPlainDate(day1),
       ensureObj(PlainYearMonth, other).toPlainDate(day1),
       parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
-    ).negated()
+      true,
+    )
   }
 
   equals(other: YearMonthArg): boolean {

@@ -94,10 +94,11 @@ export function diffDates(
   d0: PlainDate,
   d1: PlainDate,
   diffConfig: DiffConfig,
+  flip?: boolean,
 ): Duration {
   const calendar = getCommonCalendar(d0, d1)
   const balancedDuration = calendar.dateUntil(d0, d1, {
     largestUnit: unitNames[diffConfig.largestUnit] as DateUnit,
   })
-  return roundBalancedDuration(balancedDuration, diffConfig, d0, d1)
+  return roundBalancedDuration(balancedDuration, diffConfig, d0, d1, flip)
 }

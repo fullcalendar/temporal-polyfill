@@ -3,7 +3,7 @@ import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
 import { RoundingFunc, roundToIncrement } from '../utils/math'
 import { DateLikeInstance } from './calendar'
-import { createDuration } from './duration'
+import { createDuration, negateFields } from './duration'
 import { TimeFields, nanoToWrappedTimeFields, timeFieldsToNano } from './time'
 import { computeExactDuration } from './totalUnits'
 import { DayTimeUnitInt, nanoIn } from './units'
@@ -15,14 +15,31 @@ export function roundBalancedDuration(
   { smallestUnit, roundingIncrement, roundingMode }: RoundConfig,
   d0: DateLikeInstance,
   d1: DateLikeInstance,
+  flip?: boolean,
 ): Duration {
-  const durationLike = computeExactDuration(balancedDuration, smallestUnit, d0, d1)
+  let durationLike = computeExactDuration(balancedDuration, smallestUnit, d0, d1)
   const unitName = durationUnitNames[smallestUnit]
-  durationLike[unitName] = roundToIncrement(
-    durationLike[unitName]!, // computeExactDuration guarantees value
-    roundingIncrement,
-    roundingMode,
-  )
+
+  function doRound() {
+    durationLike[unitName] = roundToIncrement(
+      durationLike[unitName]!, // computeExactDuration guarantees value
+      roundingIncrement,
+      roundingMode,
+    )
+  }
+
+  if (roundingMode === Math.round) {
+    // 'halfExpand' cares about point-to-point translation
+    doRound()
+  }
+  if (flip) {
+    durationLike = negateFields(durationLike)
+  }
+  if (roundingMode !== Math.round) {
+    // other rounding techniques operate on final number
+    doRound()
+  }
+
   return createDuration(durationLike)
 }
 

@@ -17,6 +17,7 @@ import {
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { compareValues, numSign } from '../utils/math'
+import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { DateLikeInstance } from './calendar'
 import { createDateTime } from './dateTime'
@@ -309,4 +310,13 @@ export function getPlainRelativeTo(arg: DateTimeArg | undefined): PlainDateTime 
     throw new Error('Need relativeTo') // TODO: reusable
   }
   return ensureObj(PlainDateTime, arg)
+}
+
+type NumberHash = { [fieldName: string]: number }
+
+export function negateFields(fields: NumberHash): NumberHash {
+  return mapHash(
+    fields,
+    (num: number) => -num || 0, // avoids -0 (negative zeros)
+  )
 }

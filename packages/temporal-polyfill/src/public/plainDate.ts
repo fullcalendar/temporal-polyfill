@@ -117,7 +117,8 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
       this,
       ensureObj(PlainDate, other),
       parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
-    ).negated()
+      true,
+    )
   }
 
   equals(other: DateArg): boolean {
