@@ -69,7 +69,7 @@ export function refineDurationFields(fields: DurationLike): SignedDurationFields
 
     if (fieldSign) {
       if (sign && sign !== fieldSign) {
-        throw new Error('All fields must be same sign')
+        throw new RangeError('All fields must be same sign')
       }
       sign = fieldSign
     }
