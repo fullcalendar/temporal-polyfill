@@ -45,12 +45,13 @@
     "e2e-check": "tsc --project ./e2e"
   },
   "devDependencies": {
-    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@types/chai": "^4.2.22",
     "@types/jest": "^26.0.24",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.9.1",
     "@web/dev-server-esbuild": "^0.2.16",
     "@web/test-runner": "^0.13.22",
+    "chai": "^4.3.4",
     "jest": "^27.0.6",
     "jest-date-mock": "^1.0.8",
     "mocha": "^9.0.3",

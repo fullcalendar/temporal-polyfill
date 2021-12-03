@@ -1,7 +1,7 @@
 // Copyright (C) 2020 Igalia, S.L. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
-import { assert } from '@esm-bundle/chai';
+import { assert } from 'chai';
 const { equal, throws } = assert;
 
 import * as Temporal from 'temporal-polyfill';

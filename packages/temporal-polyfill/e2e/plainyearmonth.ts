@@ -1,4 +1,4 @@
-import { assert } from '@esm-bundle/chai';
+import { assert } from 'chai';
 const { throws, equal, notEqual } = assert;
 
 import * as Temporal from 'temporal-polyfill';

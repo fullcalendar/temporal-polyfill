@@ -3,7 +3,7 @@
  ** This code is governed by the license found in the LICENSE file.
  */
 
-import { assert } from '@esm-bundle/chai';
+import { assert } from 'chai';
 const { deepEqual, equal, throws } = assert;
 
 import * as Temporal from 'temporal-polyfill';
