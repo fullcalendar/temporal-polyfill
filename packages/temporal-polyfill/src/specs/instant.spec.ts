@@ -6,10 +6,9 @@
 import { assert } from 'chai';
 const { equal, notEqual, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { Instant } = Temporal;
+declare const Temporal: never; // don't use global
+import { Duration, PlainDateTime, TimeZone , Instant, FractionalSecondDigits, TimeUnit } from '../impl';
 
-import { FractionalSecondDigits, RoundingMode, TimeUnit } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
@@ -76,17 +75,17 @@ describe('Instant', () => {
     });
     it('optional time zone parameter UTC', () => {
       const inst = Instant.from('1976-11-18T14:23:30.123456789Z');
-      const timeZone = Temporal.TimeZone.from('UTC');
+      const timeZone = TimeZone.from('UTC');
       equal(inst.toString({ timeZone }), '1976-11-18T14:23:30.123456789+00:00');
     });
     it('optional time zone parameter non-UTC', () => {
       const inst = Instant.from('1976-11-18T14:23:30.123456789Z');
-      const timeZone = Temporal.TimeZone.from('America/New_York');
+      const timeZone = TimeZone.from('America/New_York');
       equal(inst.toString({ timeZone }), '1976-11-18T09:23:30.123456789-05:00');
     });
     it('sub-minute offset', () => {
       const inst = Instant.from('1900-01-01T12:00Z');
-      const timeZone = Temporal.TimeZone.from('Europe/Amsterdam');
+      const timeZone = TimeZone.from('Europe/Amsterdam');
       equal(inst.toString({ timeZone }), '1900-01-01T12:19:32+00:19:32');
     });
     const i1 = Instant.from('1976-11-18T15:23Z');
@@ -156,7 +155,7 @@ describe('Instant', () => {
       equal(i3.toString({ fractionalSecondDigits: 3, roundingMode: 'ceil' }), '1976-11-18T15:23:30.124Z');
     });
     it('rounds down', () => {
-      ['floor', 'trunc'].forEach((roundingMode: RoundingMode) => {
+      ['floor', 'trunc'].forEach((roundingMode: any) => {
         equal(i2.toString({ smallestUnit: 'minute', roundingMode }), '1976-11-18T15:23Z');
         equal(i3.toString({ fractionalSecondDigits: 3, roundingMode }), '1976-11-18T15:23:30.123Z');
       });
@@ -448,7 +447,7 @@ describe('Instant', () => {
       it(`(${one}).add({ hours: 480, nanoseconds: 1600 }) = ${two}`, () => assert(four.equals(two)));
     });
     it('inst.add(durationObj)', () => {
-      const later = inst.add(Temporal.Duration.from('PT240H0.000000800S'));
+      const later = inst.add(Duration.from('PT240H0.000000800S'));
       equal(`${later}`, '1970-01-04T12:23:45.678902034Z');
     });
     it('casts argument', () => {
@@ -474,7 +473,7 @@ describe('Instant', () => {
   describe('Instant.subtract works', () => {
     const inst = Instant.from('1969-12-25T12:23:45.678901234Z');
     it('inst.subtract(durationObj)', () => {
-      const earlier = inst.subtract(Temporal.Duration.from('PT240H0.000000800S'));
+      const earlier = inst.subtract(Duration.from('PT240H0.000000800S'));
       equal(`${earlier}`, '1969-12-15T12:23:45.678900434Z');
     });
     it('casts argument', () => {
@@ -757,22 +756,22 @@ describe('Instant', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { largestUnit, smallestUnit: 'hours' as TimeUnit, roundingIncrement };
-        assert(later.since(earlier, options) instanceof Temporal.Duration);
+        assert(later.since(earlier, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: TimeUnit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { largestUnit, smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: TimeUnit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { largestUnit, smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
@@ -1076,22 +1075,22 @@ describe('Instant', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { largestUnit, smallestUnit: 'hours' as TimeUnit, roundingIncrement };
-        assert(earlier.until(later, options) instanceof Temporal.Duration);
+        assert(earlier.until(later, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: TimeUnit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { largestUnit, smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: TimeUnit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { largestUnit, smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
@@ -1315,9 +1314,9 @@ describe('Instant', () => {
       equal(`${Instant.from('+275760-09-13T00:00Z')}`, '+275760-09-13T00:00:00Z');
     });
     it('converting from DateTime', () => {
-      const min = Temporal.PlainDateTime.from('-271821-04-19T00:00:00.000000001');
-      const max = Temporal.PlainDateTime.from('+275760-09-13T23:59:59.999999999');
-      const utc = Temporal.TimeZone.from('UTC');
+      const min = PlainDateTime.from('-271821-04-19T00:00:00.000000001');
+      const max = PlainDateTime.from('+275760-09-13T23:59:59.999999999');
+      const utc = TimeZone.from('UTC');
       throws(() => utc.getInstantFor(min), RangeError);
       throws(() => utc.getInstantFor(max), RangeError);
     });
@@ -1334,13 +1333,13 @@ describe('Instant', () => {
       throws(() => (inst as InvalidArg).toZonedDateTimeISO(), RangeError);
     });
     it('time zone parameter UTC', () => {
-      const tz = Temporal.TimeZone.from('UTC');
+      const tz = TimeZone.from('UTC');
       const zdt = inst.toZonedDateTimeISO(tz);
       equal(inst.epochNanoseconds, zdt.epochNanoseconds);
       equal(`${zdt}`, '1976-11-18T14:23:30.123456789+00:00[UTC]');
     });
     it('time zone parameter non-UTC', () => {
-      const tz = Temporal.TimeZone.from('America/New_York');
+      const tz = TimeZone.from('America/New_York');
       const zdt = inst.toZonedDateTimeISO(tz);
       equal(inst.epochNanoseconds, zdt.epochNanoseconds);
       equal(`${zdt}`, '1976-11-18T09:23:30.123456789-05:00[America/New_York]');
@@ -1355,13 +1354,13 @@ describe('Instant', () => {
       throws(() => inst.toZonedDateTime('Asia/Singapore' as InvalidArg), TypeError);
     });
     it('time zone parameter UTC', () => {
-      const timeZone = Temporal.TimeZone.from('UTC');
+      const timeZone = TimeZone.from('UTC');
       const zdt = inst.toZonedDateTime({ timeZone, calendar: 'gregory' });
       equal(inst.epochNanoseconds, zdt.epochNanoseconds);
       equal(`${zdt}`, '1976-11-18T14:23:30.123456789+00:00[UTC][u-ca=gregory]');
     });
     it('time zone parameter non-UTC', () => {
-      const timeZone = Temporal.TimeZone.from('America/New_York');
+      const timeZone = TimeZone.from('America/New_York');
       const zdt = inst.toZonedDateTime({ timeZone, calendar: 'gregory' });
       equal(inst.epochNanoseconds, zdt.epochNanoseconds);
       equal(`${zdt}`, '1976-11-18T09:23:30.123456789-05:00[America/New_York][u-ca=gregory]');

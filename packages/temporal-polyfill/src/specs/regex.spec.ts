@@ -1,15 +1,16 @@
 import { assert } from 'chai';
 const { equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
+declare const Temporal: never; // don't use global
+import { Calendar, Duration, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth, TimeZone, ZonedDateTime } from '../impl';
 
 describe('fromString regex', () => {
   describe('instant', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any[]) {
       it(isoString, () => {
         const [y, mon, d, h = 0, min = 0, s = 0, ms = 0, µs = 0, ns = 0] = components;
-        const instant = Temporal.Instant.from(isoString);
-        const utc = Temporal.TimeZone.from('UTC');
+        const instant = Instant.from(isoString);
+        const utc = TimeZone.from('UTC');
         const datetime = utc.getPlainDateTimeFor(instant);
         equal(datetime.year, y);
         equal(datetime.month, mon);
@@ -22,7 +23,7 @@ describe('fromString regex', () => {
         equal(datetime.nanosecond, ns);
       });
     }
-    function generateTest(dateTimeString, zoneString, components) {
+    function generateTest(dateTimeString: string, zoneString: string, components: any[]) {
       test(`${dateTimeString}${zoneString}`, components.slice(0, 5));
       test(`${dateTimeString}:30${zoneString}`, components.slice(0, 6));
       test(`${dateTimeString}:30.123456789${zoneString}`, components);
@@ -71,10 +72,10 @@ describe('fromString regex', () => {
   });
 
   describe('datetime', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any[]) {
       it(isoString, () => {
         const [y, mon, d, h = 0, min = 0, s = 0, ms = 0, µs = 0, ns = 0, cid = 'iso8601'] = components;
-        const datetime = Temporal.PlainDateTime.from(isoString);
+        const datetime = PlainDateTime.from(isoString);
         equal(datetime.year, y);
         equal(datetime.month, mon);
         equal(datetime.day, d);
@@ -87,7 +88,7 @@ describe('fromString regex', () => {
         equal(datetime.calendar.id, cid);
       });
     }
-    function generateTest(dateTimeString, zoneString) {
+    function generateTest(dateTimeString: string, zoneString: string) {
       const components = [1976, 11, 18, 15, 23, 30, 123, 456, 789];
       test(`${dateTimeString}${zoneString}`, components.slice(0, 5));
       test(`${dateTimeString}:30${zoneString}`, components.slice(0, 6));
@@ -141,17 +142,17 @@ describe('fromString regex', () => {
   });
 
   describe('date', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any[]) {
       it(isoString, () => {
         const [y, m, d, cid = 'iso8601'] = components;
-        const date = Temporal.PlainDate.from(isoString);
+        const date = PlainDate.from(isoString);
         equal(date.year, y);
         equal(date.month, m);
         equal(date.day, d);
         equal(date.calendar.id, cid);
       });
     }
-    function generateTest(dateTimeString, zoneString) {
+    function generateTest(dateTimeString: string, zoneString: string) {
       const components = [1976, 11, 18];
       test(`${dateTimeString}${zoneString}`, components);
       test(`${dateTimeString}:30${zoneString}`, components);
@@ -205,10 +206,10 @@ describe('fromString regex', () => {
   });
 
   describe('time', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any[]) {
       it(isoString, () => {
         const [h = 0, m = 0, s = 0, ms = 0, µs = 0, ns = 0] = components;
-        const time = Temporal.PlainTime.from(isoString);
+        const time = PlainTime.from(isoString);
         equal(time.hour, h);
         equal(time.minute, m);
         equal(time.second, s);
@@ -217,7 +218,7 @@ describe('fromString regex', () => {
         equal(time.nanosecond, ns);
       });
     }
-    function generateTest(dateTimeString, zoneString) {
+    function generateTest(dateTimeString: string, zoneString: string) {
       const components = [15, 23, 30, 123, 456, 789];
       test(`${dateTimeString}${zoneString}`, components.slice(0, 2));
       test(`${dateTimeString}:30${zoneString}`, components.slice(0, 3));
@@ -269,16 +270,16 @@ describe('fromString regex', () => {
   });
 
   describe('yearmonth', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any[]) {
       it(isoString, () => {
         const [y, m, cid = 'iso8601'] = components;
-        const yearMonth = Temporal.PlainYearMonth.from(isoString);
+        const yearMonth = PlainYearMonth.from(isoString);
         equal(yearMonth.year, y);
         equal(yearMonth.month, m);
         equal(yearMonth.calendar.id, cid);
       });
     }
-    function generateTest(dateTimeString, zoneString) {
+    function generateTest(dateTimeString: string, zoneString: string) {
       const components = [1976, 11];
       test(`${dateTimeString}${zoneString}`, components);
       test(`${dateTimeString}:30${zoneString}`, components);
@@ -342,16 +343,16 @@ describe('fromString regex', () => {
   });
 
   describe('monthday', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any[]) {
       it(isoString, () => {
         const [m, d, cid = 'iso8601'] = components;
-        const monthDay = Temporal.PlainMonthDay.from(isoString);
+        const monthDay = PlainMonthDay.from(isoString);
         equal(monthDay.monthCode, `M${m.toString().padStart(2, '0')}`);
         equal(monthDay.day, d);
         equal(monthDay.calendar.id, cid);
       });
     }
-    function generateTest(dateTimeString, zoneString) {
+    function generateTest(dateTimeString: string, zoneString: string) {
       const components = [11, 18];
       test(`${dateTimeString}${zoneString}`, components);
       test(`${dateTimeString}:30${zoneString}`, components);
@@ -418,13 +419,13 @@ describe('fromString regex', () => {
   });
 
   describe('timezone', () => {
-    function test(offsetString, expectedName) {
+    function test(offsetString: string, expectedName: string) {
       it(offsetString, () => {
-        const timeZone = Temporal.TimeZone.from(offsetString);
+        const timeZone = TimeZone.from(offsetString);
         equal(timeZone.id, expectedName);
       });
     }
-    function generateTest(dateTimeString, zoneString, expectedName) {
+    function generateTest(dateTimeString: string, zoneString: string, expectedName: string) {
       test(`${dateTimeString}${zoneString}`, expectedName);
       test(`${dateTimeString}:30${zoneString}`, expectedName);
       test(`${dateTimeString}:30.123456789${zoneString}`, expectedName);
@@ -503,10 +504,10 @@ describe('fromString regex', () => {
   });
 
   describe('duration', () => {
-    function test(isoString, components) {
+    function test(isoString: string, components: any) {
       it(isoString, () => {
         const { y = 0, mon = 0, w = 0, d = 0, h = 0, min = 0, s = 0, ms = 0, µs = 0, ns = 0 } = components;
-        const duration = Temporal.Duration.from(isoString);
+        const duration = Duration.from(isoString);
         equal(duration.years, y);
         equal(duration.months, mon);
         equal(duration.weeks, w);
@@ -559,7 +560,12 @@ describe('fromString regex', () => {
       ['0,123456789S', { ms: 123, µs: 456, ns: 789 }]
     ];
     const tim = sec
-      .reduce((arr, [s, add]) => arr.concat(times.map(([p, expect]) => [`${p}${s}`, { ...expect, ...add }])), [])
+      .reduce(
+        (arr, [s, add]) => arr.concat(
+          times.map(([p, expect]) => [`${p}${s}`, { ...expect, ...add }])
+        ),
+        [] as any[],
+      )
       .slice(1);
 
     day.slice(1).forEach(([p, expect]) => {
@@ -584,16 +590,16 @@ describe('fromString regex', () => {
 
   // These can be tested again once the resolver options are accepted.
   describe.skip('time zone ID', () => {
-    let oldTemporalTimeZoneFrom = Temporal.TimeZone.from;
-    let fromCalledWith;
-    before(() => {
-      Temporal.TimeZone.from = function (item) {
+    let oldTemporalTimeZoneFrom = TimeZone.from;
+    let fromCalledWith: any;
+    beforeEach(() => {
+      TimeZone.from = function (item) {
         fromCalledWith = item;
-        return new Temporal.TimeZone('UTC');
+        return new TimeZone('UTC');
       };
     });
-    function testTimeZoneID(id) {
-      return Temporal.ZonedDateTime.from(`1970-01-01T00:00[${id}]`);
+    function testTimeZoneID(id: string) {
+      return ZonedDateTime.from(`1970-01-01T00:00[${id}]`);
     }
     describe('valid', () => {
       [
@@ -650,23 +656,23 @@ describe('fromString regex', () => {
         });
       });
     });
-    after(() => {
-      Temporal.TimeZone.from = oldTemporalTimeZoneFrom;
+    afterEach(() => {
+      TimeZone.from = oldTemporalTimeZoneFrom;
     });
   });
 
   // These can be tested again once the resolver options are accepted.
   describe.skip('calendar ID', () => {
-    let oldTemporalCalendarFrom = Temporal.Calendar.from;
-    let fromCalledWith;
-    before(() => {
-      Temporal.Calendar.from = function (item) {
+    let oldTemporalCalendarFrom = Calendar.from;
+    let fromCalledWith: any;
+    beforeEach(() => {
+      Calendar.from = function (item) {
         fromCalledWith = item;
-        return new Temporal.Calendar('iso8601');
+        return new Calendar('iso8601');
       };
     });
-    function testCalendarID(id) {
-      return Temporal.PlainDateTime.from(`1970-01-01T00:00+00:00[UTC][u-ca=${id}]`);
+    function testCalendarID(id: string) {
+      return PlainDateTime.from(`1970-01-01T00:00+00:00[UTC][u-ca=${id}]`);
     }
     describe('valid', () => {
       ['aaa', 'aaa-aaa', 'eightZZZ', 'eightZZZ-eightZZZ'].forEach((id) => {
@@ -683,8 +689,8 @@ describe('fromString regex', () => {
         });
       });
     });
-    after(() => {
-      Temporal.Calendar.from = oldTemporalCalendarFrom;
+    afterEach(() => {
+      Calendar.from = oldTemporalCalendarFrom;
     });
   });
 });

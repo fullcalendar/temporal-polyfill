@@ -6,15 +6,30 @@
 import { assert } from 'chai';
 const { equal, notEqual, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { ZonedDateTime } = Temporal;
+declare const Temporal: never; // don't use global
+import {
+  Calendar,
+  Instant,
+  PlainDate,
+  PlainDateTime,
+  PlainMonthDay,
+  PlainTime,
+  PlainYearMonth,
+  TimeZone,
+  ZonedDateTime,
+  Duration,
+  DayTimeUnit,
+  FractionalSecondDigits,
+  OverflowHandling,
+  TimeUnit,
+  Unit,
+} from '../impl';
 
-import { DayTimeUnit, FractionalSecondDigits, OverflowHandling, RoundingMode, TimeUnit, Unit } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
 describe('ZonedDateTime', () => {
-  const tz = new Temporal.TimeZone('America/Los_Angeles');
+  const tz = new TimeZone('America/Los_Angeles');
 
   describe('Structure', () => {
     it('ZonedDateTime is a Function', () => {
@@ -185,13 +200,13 @@ describe('ZonedDateTime', () => {
       equal(zdt.toInstant().epochSeconds, Math.floor(Date.UTC(1976, 10, 18, 15, 23, 30, 123) / 1e3), 'epochSeconds');
       equal(zdt.toInstant().epochMilliseconds, Date.UTC(1976, 10, 18, 15, 23, 30, 123), 'epochMilliseconds');
     });
-    it('Temporal.ZonedDateTime.from(zonedDateTime) is not the same object)', () => {
+    it('ZonedDateTime.from(zonedDateTime) is not the same object)', () => {
       const zdt = new ZonedDateTime(epochNanos, tz);
       notEqual(ZonedDateTime.from(zdt), zdt);
     });
 
     describe('ZonedDateTime for (1976, 11, 18, 15, 23, 30, 123, 456, 789)', () => {
-      const zdt = new ZonedDateTime(epochNanos, new Temporal.TimeZone('UTC'));
+      const zdt = new ZonedDateTime(epochNanos, new TimeZone('UTC'));
       it('can be constructed', () => {
         assert(zdt);
         equal(typeof zdt, 'object');
@@ -226,8 +241,8 @@ describe('ZonedDateTime', () => {
     describe('ZonedDateTime with non-UTC time zone and non-ISO calendar', () => {
       const zdt = new ZonedDateTime(
         epochNanos,
-        Temporal.TimeZone.from('Europe/Vienna'),
-        Temporal.Calendar.from('gregory')
+        TimeZone.from('Europe/Vienna'),
+        Calendar.from('gregory')
       );
       it('can be constructed', () => {
         assert(zdt);
@@ -265,19 +280,19 @@ describe('ZonedDateTime', () => {
     it('casts time zone', () => {
       const zdt = new ZonedDateTime(epochNanos, 'Asia/Seoul');
       equal(typeof zdt.timeZone, 'object');
-      assert(zdt.timeZone instanceof Temporal.TimeZone);
+      assert(zdt.timeZone instanceof TimeZone);
       equal(zdt.timeZone.id, 'Asia/Seoul');
     });
     it('defaults to ISO calendar', () => {
       const zdt = new ZonedDateTime(epochNanos, tz);
       equal(typeof zdt.calendar, 'object');
-      assert(zdt.calendar instanceof Temporal.Calendar);
+      assert(zdt.calendar instanceof Calendar);
       equal(zdt.calendar.id, 'iso8601');
     });
     it('casts calendar', () => {
-      const zdt = new ZonedDateTime(epochNanos, Temporal.TimeZone.from('Asia/Tokyo'), 'japanese');
+      const zdt = new ZonedDateTime(epochNanos, TimeZone.from('Asia/Tokyo'), 'japanese');
       equal(typeof zdt.calendar, 'object');
-      assert(zdt.calendar instanceof Temporal.Calendar);
+      assert(zdt.calendar instanceof Calendar);
       equal(zdt.calendar.id, 'japanese');
     });
   });
@@ -520,7 +535,7 @@ describe('ZonedDateTime', () => {
     });
   });
   describe('property bags', () => {
-    const lagos = Temporal.TimeZone.from('Africa/Lagos');
+    const lagos = TimeZone.from('Africa/Lagos');
     it('can be constructed with monthCode and without month', () => {
       equal(
         `${ZonedDateTime.from({ year: 1976, monthCode: 'M11', day: 18, timeZone: lagos })}`,
@@ -542,7 +557,7 @@ describe('ZonedDateTime', () => {
     it('ZonedDateTime.from({}) throws', () => throws(() => ZonedDateTime.from({} as InvalidArg), TypeError));
     it('ZonedDateTime.from(required prop undefined) throws', () =>
       throws(
-        () => ZonedDateTime.from({ year: 1976, month: undefined, monthCode: undefined, day: 18, timeZone: lagos }),
+        () => ZonedDateTime.from({ year: 1976, month: undefined, monthCode: undefined as InvalidArg, day: 18, timeZone: lagos }),
         TypeError
       ));
     it('options may only be an object or undefined', () => {
@@ -581,7 +596,7 @@ describe('ZonedDateTime', () => {
         month: 11,
         day: 18,
         offset: -1030 as ValidArg,
-        timeZone: Temporal.TimeZone.from('-10:30')
+        timeZone: TimeZone.from('-10:30')
       });
       equal(`${zdt}`, '1976-11-18T00:00:00-10:30[-10:30]');
     });
@@ -613,7 +628,7 @@ describe('ZonedDateTime', () => {
         throws(() => ZonedDateTime.from(obj), RangeError);
         throws(() => ZonedDateTime.from(obj, { offset: 'reject' }), RangeError);
       });
-      const cali = Temporal.TimeZone.from('America/Los_Angeles');
+      const cali = TimeZone.from('America/Los_Angeles');
       const date = { year: 2020, month: 11, day: 1, timeZone: cali };
       it("{ offset: 'prefer' } if offset matches time zone (first 1:30 when DST ends)", () => {
         const obj = { ...date, hour: 1, minute: 30, offset: '-07:00' };
@@ -643,7 +658,7 @@ describe('ZonedDateTime', () => {
     });
     describe('Disambiguation option', () => {
       it('plain datetime with multiple instants - Fall DST in Brazil', () => {
-        const brazil = Temporal.TimeZone.from('America/Sao_Paulo');
+        const brazil = TimeZone.from('America/Sao_Paulo');
         const obj = { year: 2019, month: 2, day: 16, hour: 23, minute: 45, timeZone: brazil };
         equal(`${ZonedDateTime.from(obj)}`, '2019-02-16T23:45:00-02:00[America/Sao_Paulo]');
         equal(
@@ -661,7 +676,7 @@ describe('ZonedDateTime', () => {
         throws(() => ZonedDateTime.from(obj, { disambiguation: 'reject' }), RangeError);
       });
       it('plain datetime with multiple instants - Spring DST in Los Angeles', () => {
-        const cali = Temporal.TimeZone.from('America/Los_Angeles');
+        const cali = TimeZone.from('America/Los_Angeles');
         const obj = { year: 2020, month: 3, day: 8, hour: 2, minute: 30, timeZone: cali };
         equal(`${ZonedDateTime.from(obj)}`, '2020-03-08T03:30:00-07:00[America/Los_Angeles]');
         equal(
@@ -679,7 +694,7 @@ describe('ZonedDateTime', () => {
         throws(() => ZonedDateTime.from(obj, { disambiguation: 'reject' }), RangeError);
       });
       it('uses disambiguation if offset is ignored', () => {
-        const cali = Temporal.TimeZone.from('America/Los_Angeles');
+        const cali = TimeZone.from('America/Los_Angeles');
         const obj = { year: 2020, month: 3, day: 8, hour: 2, minute: 30, timeZone: cali };
         const offset = 'ignore';
         equal(`${ZonedDateTime.from(obj, { offset })}`, '2020-03-08T03:30:00-07:00[America/Los_Angeles]');
@@ -698,7 +713,7 @@ describe('ZonedDateTime', () => {
         throws(() => ZonedDateTime.from(obj, { disambiguation: 'reject' }), RangeError);
       });
       it('uses disambiguation if offset is wrong and option is prefer', () => {
-        const cali = Temporal.TimeZone.from('America/Los_Angeles');
+        const cali = TimeZone.from('America/Los_Angeles');
         const obj = { year: 2020, month: 3, day: 8, hour: 2, minute: 30, offset: '-23:59', timeZone: cali };
         const offset = 'prefer';
         equal(`${ZonedDateTime.from(obj, { offset })}`, '2020-03-08T03:30:00-07:00[America/Los_Angeles]');
@@ -725,7 +740,7 @@ describe('ZonedDateTime', () => {
   });
 
   describe('ZonedDateTime.with()', () => {
-    const zdt = new Temporal.PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789).toZonedDateTime('UTC');
+    const zdt = new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789).toZonedDateTime('UTC');
     it('zdt.with({ year: 2019 } works', () => {
       equal(`${zdt.with({ year: 2019 })}`, '2019-11-18T15:23:30.123456789+00:00[UTC]');
     });
@@ -853,7 +868,7 @@ describe('ZonedDateTime', () => {
       it('use, with bogus offset, changes to the exact time with the offset', () => {
         const preserveExact = dstStartDay.with(bogus, { offset: 'use' });
         equal(`${preserveExact}`, '2019-03-08T23:01:01-03:30[America/St_Johns]');
-        equal(preserveExact.epochNanoseconds, Temporal.Instant.from('2019-03-10T02:30:01+23:59').epochNanoseconds);
+        equal(preserveExact.epochNanoseconds, Instant.from('2019-03-10T02:30:01+23:59').epochNanoseconds);
       });
       it('ignore, with bogus offset, defers to disambiguation option', () => {
         const offset = 'ignore';
@@ -884,7 +899,7 @@ describe('ZonedDateTime', () => {
       it('use changes to the exact time with the offset', () => {
         const preserveExact = doubleTime.with({ offset: '-02:30' }, { offset: 'use' });
         equal(preserveExact.offset, '-02:30');
-        equal(preserveExact.epochNanoseconds, Temporal.Instant.from('2019-11-03T01:30:01-02:30').epochNanoseconds);
+        equal(preserveExact.epochNanoseconds, Instant.from('2019-11-03T01:30:01-02:30').epochNanoseconds);
       });
       it('ignore defers to disambiguation option', () => {
         const offset = 'ignore';
@@ -945,11 +960,11 @@ describe('ZonedDateTime', () => {
       throws(() => zdt.with({ month: 2, calendar: 'japanese' } as InvalidArg), TypeError);
     });
     it('throws if given a Temporal object with a calendar', () => {
-      throws(() => zdt.with(Temporal.PlainDateTime.from('1976-11-18T12:00')), TypeError);
-      throws(() => zdt.with(Temporal.PlainDate.from('1976-11-18')), TypeError);
-      throws(() => zdt.with(Temporal.PlainTime.from('12:00')), TypeError);
-      throws(() => zdt.with(Temporal.PlainYearMonth.from('1976-11')), TypeError);
-      throws(() => zdt.with(Temporal.PlainMonthDay.from('11-18')), TypeError);
+      throws(() => zdt.with(PlainDateTime.from('1976-11-18T12:00')), TypeError);
+      throws(() => zdt.with(PlainDate.from('1976-11-18')), TypeError);
+      throws(() => zdt.with(PlainTime.from('12:00')), TypeError);
+      throws(() => zdt.with(PlainYearMonth.from('1976-11')), TypeError);
+      throws(() => zdt.with(PlainMonthDay.from('11-18')), TypeError);
     });
     it('throws if given a string', () => {
       throws(() => zdt.with('1976-11-18T12:00+00:00[UTC]' as InvalidArg), TypeError);
@@ -960,12 +975,12 @@ describe('ZonedDateTime', () => {
   });
 
   describe('.withPlainTime manipulation', () => {
-    const zdt = Temporal.ZonedDateTime.from('2015-12-07T03:24:30.000003500[America/Los_Angeles]');
+    const zdt = ZonedDateTime.from('2015-12-07T03:24:30.000003500[America/Los_Angeles]');
     it('withPlainTime({ hour: 10 }) works', () => {
       equal(`${zdt.withPlainTime({ hour: 10 })}`, '2015-12-07T10:00:00-08:00[America/Los_Angeles]');
     });
     it('withPlainTime(time) works', () => {
-      const time = Temporal.PlainTime.from('11:22');
+      const time = PlainTime.from('11:22');
       equal(`${zdt.withPlainTime(time)}`, '2015-12-07T11:22:00-08:00[America/Los_Angeles]');
     });
     it("withPlainTime('12:34') works", () => {
@@ -983,12 +998,12 @@ describe('ZonedDateTime', () => {
     });
   });
   describe('.withPlainDate manipulation', () => {
-    const zdt = Temporal.ZonedDateTime.from('1995-12-07T03:24:30[America/Los_Angeles]');
+    const zdt = ZonedDateTime.from('1995-12-07T03:24:30[America/Los_Angeles]');
     it('withPlainDate({ year: 2000, month: 6, day: 1 }) works', () => {
       equal(`${zdt.withPlainDate({ year: 2000, month: 6, day: 1 })}`, '2000-06-01T03:24:30-07:00[America/Los_Angeles]');
     });
     it('withPlainDate(plainDate) works', () => {
-      const date = Temporal.PlainDate.from('2020-01-23');
+      const date = PlainDate.from('2020-01-23');
       equal(`${zdt.withPlainDate(date)}`, '2020-01-23T03:24:30-08:00[America/Los_Angeles]');
     });
     it("withPlainDate('2018-09-15') works", () => {
@@ -1025,7 +1040,7 @@ describe('ZonedDateTime', () => {
   });
 
   describe('ZonedDateTime.withTimeZone()', () => {
-    const instant = Temporal.Instant.from('2019-11-18T15:23:30.123456789-08:00[America/Los_Angeles]');
+    const instant = Instant.from('2019-11-18T15:23:30.123456789-08:00[America/Los_Angeles]');
     const zdt = instant.toZonedDateTimeISO('UTC');
     it('zonedDateTime.withTimeZone(America/Los_Angeles) works', () => {
       equal(`${zdt.withTimeZone(tz)}`, '2019-11-18T15:23:30.123456789-08:00[America/Los_Angeles]');
@@ -1045,7 +1060,7 @@ describe('ZonedDateTime', () => {
   describe('ZonedDateTime.withCalendar()', () => {
     const zdt = ZonedDateTime.from('2019-11-18T15:23:30.123456789-08:00[America/Los_Angeles]');
     it('zonedDateTime.withCalendar(japanese) works', () => {
-      const cal = Temporal.Calendar.from('japanese');
+      const cal = Calendar.from('japanese');
       equal(`${zdt.withCalendar(cal)}`, '2019-11-18T15:23:30.123456789-08:00[America/Los_Angeles][u-ca=japanese]');
     });
     it('casts its argument', () => {
@@ -1067,7 +1082,7 @@ describe('ZonedDateTime', () => {
     const earlier = ZonedDateTime.from('1976-11-18T15:23:30.123456789-03:00[America/Santiago]');
     const later = ZonedDateTime.from('2019-10-29T10:46:38.271986102-03:00[America/Santiago]');
     // The interchangeability of since() and until() holds for time units only
-    ['hours', 'minutes', 'seconds'].forEach((largestUnit: TimeUnit) => {
+    ['hours', 'minutes', 'seconds'].forEach((largestUnit: any) => {
       const diff = later.since(earlier, { largestUnit });
       it(`earlier.since(later, ${largestUnit}) == later.since(earlier, ${largestUnit}).negated()`, () =>
         equal(`${earlier.since(later, { largestUnit })}`, `${diff.negated()}`));
@@ -1079,7 +1094,7 @@ describe('ZonedDateTime', () => {
       });
     });
     // For all units, add() undoes until() and subtract() undoes since()
-    ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'].forEach((largestUnit: Unit) => {
+    ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'].forEach((largestUnit: any) => {
       const diff1 = earlier.until(later, { largestUnit });
       const diff2 = later.since(earlier, { largestUnit });
       it(`earlier.add(${diff1}) == later`, () => assert(earlier.add(diff1).equals(later)));
@@ -1123,7 +1138,7 @@ describe('ZonedDateTime', () => {
       it(`(${one}).add({ hours: 480, nanoseconds: 1600 }) = ${two}`, () => assert(four.equals(two)));
     });
     it('zdt.add(durationObj)', () => {
-      const later = zdt.add(Temporal.Duration.from('PT240H0.000000800S'));
+      const later = zdt.add(Duration.from('PT240H0.000000800S'));
       equal(`${later}`, '1970-01-04T12:23:45.678902034+00:00[UTC]');
     });
     it('casts argument', () => {
@@ -1170,7 +1185,7 @@ describe('ZonedDateTime', () => {
   describe('ZonedDateTime.subtract()', () => {
     const zdt = ZonedDateTime.from('1969-12-25T12:23:45.678901234+00:00[UTC]');
     it('inst.subtract(durationObj)', () => {
-      const earlier = zdt.subtract(Temporal.Duration.from('PT240H0.000000800S'));
+      const earlier = zdt.subtract(Duration.from('PT240H0.000000800S'));
       equal(`${earlier}`, '1969-12-15T12:23:45.678900434+00:00[UTC]');
     });
     it('casts argument', () => {
@@ -1197,7 +1212,7 @@ describe('ZonedDateTime', () => {
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => zdt.add({ hours: 1, minutes: -30 }, { overflow }), RangeError)
       );
     });
@@ -1290,7 +1305,7 @@ describe('ZonedDateTime', () => {
     });
     it('no two different calendars', () => {
       const zdt1 = new ZonedDateTime(0n, 'UTC');
-      const zdt2 = new ZonedDateTime(0n, 'UTC', Temporal.Calendar.from('japanese'));
+      const zdt2 = new ZonedDateTime(0n, 'UTC', Calendar.from('japanese'));
       throws(() => zdt1.until(zdt2), RangeError);
     });
     it('options may only be an object or undefined', () => {
@@ -1455,22 +1470,22 @@ describe('ZonedDateTime', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { smallestUnit: 'hours' as Unit, roundingIncrement };
-        assert(earlier.until(later, options) instanceof Temporal.Duration);
+        assert(earlier.until(later, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: Unit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: Unit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
@@ -1622,7 +1637,7 @@ describe('ZonedDateTime', () => {
     });
     it('no two different calendars', () => {
       const zdt1 = new ZonedDateTime(0n, 'UTC');
-      const zdt2 = new ZonedDateTime(0n, 'UTC', Temporal.Calendar.from('japanese'));
+      const zdt2 = new ZonedDateTime(0n, 'UTC', Calendar.from('japanese'));
       throws(() => zdt1.since(zdt2), RangeError);
     });
     it('options may only be an object or undefined', () => {
@@ -1786,22 +1801,22 @@ describe('ZonedDateTime', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { smallestUnit: 'hours' as Unit, roundingIncrement };
-        assert(later.since(earlier, options) instanceof Temporal.Duration);
+        assert(later.since(earlier, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: Unit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: Unit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
@@ -2001,14 +2016,14 @@ describe('ZonedDateTime', () => {
         assert(zdt.round({ smallestUnit, roundingIncrement }) instanceof ZonedDateTime);
       });
     });
-    ['minute', 'second'].forEach((smallestUnit: TimeUnit) => {
+    ['minute', 'second'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           assert(zdt.round({ smallestUnit, roundingIncrement }) instanceof ZonedDateTime);
         });
       });
     });
-    ['millisecond', 'microsecond', 'nanosecond'].forEach((smallestUnit: TimeUnit) => {
+    ['millisecond', 'microsecond', 'nanosecond'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           assert(zdt.round({ smallestUnit, roundingIncrement }) instanceof ZonedDateTime);
@@ -2033,7 +2048,7 @@ describe('ZonedDateTime', () => {
       throws(() => zdt.round({ smallestUnit: 'nanosecond', roundingIncrement: 1000 }), RangeError);
     });
     const bal = ZonedDateTime.from('1976-11-18T23:59:59.999999999+01:00[Europe/Vienna]');
-    ['day', 'hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: DayTimeUnit) => {
+    ['day', 'hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: any) => {
       it(`balances to next ${smallestUnit}`, () => {
         equal(`${bal.round({ smallestUnit })}`, '1976-11-19T00:00:00+01:00[Europe/Vienna]');
       });
@@ -2069,8 +2084,8 @@ describe('ZonedDateTime', () => {
   });
 
   describe('ZonedDateTime.equals()', () => {
-    const tz = Temporal.TimeZone.from('America/New_York');
-    const cal = Temporal.Calendar.from('gregory');
+    const tz = TimeZone.from('America/New_York');
+    const cal = Calendar.from('gregory');
     const zdt = new ZonedDateTime(0n, tz, cal);
     it('constructed from equivalent parameters are equal', () => {
       const zdt2 = ZonedDateTime.from('1969-12-31T19:00-05:00[America/New_York][u-ca=gregory]');
@@ -2240,7 +2255,7 @@ describe('ZonedDateTime', () => {
       );
     });
     it('rounds down', () => {
-      ['floor', 'trunc'].forEach((roundingMode: RoundingMode) => {
+      ['floor', 'trunc'].forEach((roundingMode: any) => {
         equal(zdt2.toString({ smallestUnit: 'minute', roundingMode }), '1976-11-18T15:23+01:00[Europe/Vienna]');
         equal(
           zdt3.toString({ fractionalSecondDigits: 3, roundingMode }),
@@ -2319,11 +2334,11 @@ describe('ZonedDateTime', () => {
   });
   describe('ZonedDateTime.toPlainDate()', () => {
     it('works', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
       equal(`${zdt.toPlainDate()}`, '2019-10-29');
     });
     it('preserves the calendar', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTime({
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTime({
         timeZone: tz,
         calendar: 'gregory'
       });
@@ -2332,17 +2347,17 @@ describe('ZonedDateTime', () => {
   });
   describe('ZonedDateTime.toPlainTime()', () => {
     it('works', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
       equal(`${zdt.toPlainTime()}`, '02:46:38.271986102');
     });
   });
   describe('ZonedDateTime.toPlainYearMonth()', () => {
     it('works', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
       equal(`${zdt.toPlainYearMonth()}`, '2019-10');
     });
     it('preserves the calendar', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTime({
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTime({
         timeZone: tz,
         calendar: 'gregory'
       });
@@ -2351,11 +2366,11 @@ describe('ZonedDateTime', () => {
   });
   describe('ZonedDateTime.toPlainMonthDay()', () => {
     it('works', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTimeISO(tz);
       equal(`${zdt.toPlainMonthDay()}`, '10-29');
     });
     it('preserves the calendar', () => {
-      const zdt = Temporal.Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTime({
+      const zdt = Instant.from('2019-10-29T09:46:38.271986102Z').toZonedDateTime({
         timeZone: tz,
         calendar: 'gregory'
       });
@@ -2397,8 +2412,8 @@ describe('ZonedDateTime', () => {
     });
   });
 
-  const hourBeforeDstStart = new Temporal.PlainDateTime(2020, 3, 8, 1).toZonedDateTime(tz);
-  const dayBeforeDstStart = new Temporal.PlainDateTime(2020, 3, 7, 2, 30).toZonedDateTime(tz);
+  const hourBeforeDstStart = new PlainDateTime(2020, 3, 8, 1).toZonedDateTime(tz);
+  const dayBeforeDstStart = new PlainDateTime(2020, 3, 7, 2, 30).toZonedDateTime(tz);
   describe('properties around DST', () => {
     it('hoursInDay works with DST start', () => {
       equal(hourBeforeDstStart.hoursInDay, 23);
@@ -2481,8 +2496,8 @@ describe('ZonedDateTime', () => {
     });
 
     it('Samoa date line change (add): 10:00PM 29 Dec 2011 -> 11:00PM 31 Dec 2011', () => {
-      const timeZone = Temporal.TimeZone.from('Pacific/Apia');
-      const dayBeforeSamoaDateLineChangeAbs = timeZone.getInstantFor(new Temporal.PlainDateTime(2011, 12, 29, 22));
+      const timeZone = TimeZone.from('Pacific/Apia');
+      const dayBeforeSamoaDateLineChangeAbs = timeZone.getInstantFor(new PlainDateTime(2011, 12, 29, 22));
       const start = dayBeforeSamoaDateLineChangeAbs.toZonedDateTimeISO(timeZone);
       const added = start.add({ days: 1, hours: 1 });
       equal(added.day, 31);
@@ -2495,8 +2510,8 @@ describe('ZonedDateTime', () => {
     });
 
     it('Samoa date line change (subtract): 11:00PM 31 Dec 2011 -> 10:00PM 29 Dec 2011', () => {
-      const timeZone = Temporal.TimeZone.from('Pacific/Apia');
-      const dayAfterSamoaDateLineChangeAbs = timeZone.getInstantFor(new Temporal.PlainDateTime(2011, 12, 31, 23));
+      const timeZone = TimeZone.from('Pacific/Apia');
+      const dayAfterSamoaDateLineChangeAbs = timeZone.getInstantFor(new PlainDateTime(2011, 12, 31, 23));
       const start = dayAfterSamoaDateLineChangeAbs.toZonedDateTimeISO(timeZone);
       const skipped = start.subtract({ days: 1, hours: 1 });
       equal(skipped.day, 31);
@@ -2709,8 +2724,8 @@ describe('ZonedDateTime', () => {
   });
 
   describe('math order of operations and options', () => {
-    const breakoutUnits = (op, zdt, d, options) =>
-      zdt[op]({ years: d.years }, options)
+    const breakoutUnits = (op: string, zdt: ZonedDateTime, d: Duration, options: any) =>
+      (zdt as any)[op]({ years: d.years }, options)
         [op]({ months: d.months }, options)
         [op]({ weeks: d.weeks }, options)
         [op]({ days: d.days }, options)
@@ -2729,7 +2744,7 @@ describe('ZonedDateTime', () => {
 
     it('order of operations: add / none', () => {
       const zdt = ZonedDateTime.from('2020-01-31T00:00-08:00[America/Los_Angeles]');
-      const d = Temporal.Duration.from({ months: 1, days: 1 });
+      const d = Duration.from({ months: 1, days: 1 });
       const options = undefined;
       const result = zdt.add(d, options);
       equal(result.toString(), '2020-03-01T00:00:00-08:00[America/Los_Angeles]');
@@ -2737,7 +2752,7 @@ describe('ZonedDateTime', () => {
     });
     it('order of operations: add / constrain', () => {
       const zdt = ZonedDateTime.from('2020-01-31T00:00-08:00[America/Los_Angeles]');
-      const d = Temporal.Duration.from({ months: 1, days: 1 });
+      const d = Duration.from({ months: 1, days: 1 });
       const options = { overflow: 'constrain' as OverflowHandling };
       const result = zdt.add(d, options);
       equal(result.toString(), '2020-03-01T00:00:00-08:00[America/Los_Angeles]');
@@ -2745,13 +2760,13 @@ describe('ZonedDateTime', () => {
     });
     it('order of operations: add / reject', () => {
       const zdt = ZonedDateTime.from('2020-01-31T00:00-08:00[America/Los_Angeles]');
-      const d = Temporal.Duration.from({ months: 1, days: 1 });
+      const d = Duration.from({ months: 1, days: 1 });
       const options = { overflow: 'reject' as OverflowHandling };
       throws(() => zdt.add(d, options), RangeError);
     });
     it('order of operations: subtract / none', () => {
       const zdt = ZonedDateTime.from('2020-03-31T00:00-07:00[America/Los_Angeles]');
-      const d = Temporal.Duration.from({ months: 1, days: 1 });
+      const d = Duration.from({ months: 1, days: 1 });
       const options = undefined;
       const result = zdt.subtract(d, options);
       equal(result.toString(), '2020-02-28T00:00:00-08:00[America/Los_Angeles]');
@@ -2759,7 +2774,7 @@ describe('ZonedDateTime', () => {
     });
     it('order of operations: subtract / constrain', () => {
       const zdt = ZonedDateTime.from('2020-03-31T00:00-07:00[America/Los_Angeles]');
-      const d = Temporal.Duration.from({ months: 1, days: 1 });
+      const d = Duration.from({ months: 1, days: 1 });
       const options = { overflow: 'constrain' as OverflowHandling };
       const result = zdt.subtract(d, options);
       equal(result.toString(), '2020-02-28T00:00:00-08:00[America/Los_Angeles]');
@@ -2767,7 +2782,7 @@ describe('ZonedDateTime', () => {
     });
     it('order of operations: subtract / reject', () => {
       const zdt = ZonedDateTime.from('2020-03-31T00:00-07:00[America/Los_Angeles]');
-      const d = Temporal.Duration.from({ months: 1, days: 1 });
+      const d = Duration.from({ months: 1, days: 1 });
       const options = { overflow: 'reject' as OverflowHandling };
       throws(() => zdt.subtract(d, options), RangeError);
     });
@@ -2817,7 +2832,7 @@ describe('ZonedDateTime', () => {
       const clockBefore = ZonedDateTime.from('1999-12-31T23:30-08:00[America/Vancouver]');
       const clockAfter = ZonedDateTime.from('2000-01-01T01:30-04:00[America/Halifax]');
       equal(ZonedDateTime.compare(clockBefore, clockAfter), 1);
-      equal(Temporal.PlainDateTime.compare(clockBefore.toPlainDateTime(), clockAfter.toPlainDateTime()), -1);
+      equal(PlainDateTime.compare(clockBefore.toPlainDateTime(), clockAfter.toPlainDateTime()), -1);
     });
   });
 });

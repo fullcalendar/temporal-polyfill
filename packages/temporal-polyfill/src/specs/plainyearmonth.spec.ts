@@ -1,27 +1,28 @@
 import { assert } from 'chai';
 const { throws, equal, notEqual } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { PlainYearMonth } = Temporal;
+declare const Temporal: never; // don't use global
+import { Calendar, Duration, PlainDate, PlainYearMonth, YearMonthUnit } from '../impl';
 
-import { OverflowHandling, YearMonthUnit } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
 describe('YearMonth', () => {
   describe('Construction', () => {
-    let ym;
+    function getYearMonth() {
+      return new PlainYearMonth(1976, 11);
+    }
     it('YearMonth can be constructed', () => {
-      ym = new PlainYearMonth(1976, 11);
+      const ym = getYearMonth()
       assert(ym);
       equal(typeof ym, 'object');
     });
-    it('ym.year is 1976', () => equal(ym.year, 1976));
-    it('ym.month is 11', () => equal(ym.month, 11));
-    it('ym.monthCode is "M11"', () => equal(ym.monthCode, 'M11'));
-    it('ym.daysInMonth is 30', () => equal(ym.daysInMonth, 30));
-    it('ym.daysInYear is 366', () => equal(ym.daysInYear, 366));
-    it('ym.monthsInYear is 12', () => equal(ym.monthsInYear, 12));
+    it('ym.year is 1976', () => equal(getYearMonth().year, 1976));
+    it('ym.month is 11', () => equal(getYearMonth().month, 11));
+    it('ym.monthCode is "M11"', () => equal(getYearMonth().monthCode, 'M11'));
+    it('ym.daysInMonth is 30', () => equal(getYearMonth().daysInMonth, 30));
+    it('ym.daysInYear is 366', () => equal(getYearMonth().daysInYear, 366));
+    it('ym.monthsInYear is 12', () => equal(getYearMonth().monthsInYear, 12));
     describe('.from()', () => {
       it('YearMonth.from(2019-10) == 2019-10', () => equal(`${PlainYearMonth.from('2019-10')}`, '2019-10'));
       it('YearMonth.from(2019-10-01T09:00:00Z) == 2019-10', () =>
@@ -60,8 +61,8 @@ describe('YearMonth', () => {
         notEqual(actu, orig);
       });
       it('ignores day when determining the ISO reference day from other Temporal object', () => {
-        const plainDate1 = Temporal.PlainDate.from('1976-11-01');
-        const plainDate2 = Temporal.PlainDate.from('1976-11-18');
+        const plainDate1 = PlainDate.from('1976-11-01');
+        const plainDate2 = PlainDate.from('1976-11-18');
         const one = PlainYearMonth.from(plainDate1);
         const two = PlainYearMonth.from(plainDate2);
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay);
@@ -72,7 +73,7 @@ describe('YearMonth', () => {
         throws(() => PlainYearMonth.from({ monthCode: 'M06' } as InvalidArg), TypeError));
       it('YearMonth.from({}) throws', () => throws(() => PlainYearMonth.from({} as InvalidArg), TypeError));
       it('YearMonth.from(required prop undefined) throws', () =>
-        throws(() => PlainYearMonth.from({ year: undefined, month: 6 }), TypeError));
+        throws(() => PlainYearMonth.from({ year: undefined as InvalidArg, month: 6 }), TypeError));
       it('YearMonth.from(number) is converted to string', () =>
         assert(PlainYearMonth.from(201906 as ValidArg).equals(PlainYearMonth.from('201906'))));
       it('basic format', () => {
@@ -196,7 +197,7 @@ describe('YearMonth', () => {
       throws(() => PlainYearMonth.compare(nov94, { year: 2013 } as InvalidArg), TypeError);
     });
     it('takes [[ISODay]] into account', () => {
-      const iso = Temporal.Calendar.from('iso8601');
+      const iso = Calendar.from('iso8601');
       const ym1 = new PlainYearMonth(2000, 1, iso, 1);
       const ym2 = new PlainYearMonth(2000, 1, iso, 2);
       equal(PlainYearMonth.compare(ym1, ym2), -1);
@@ -215,7 +216,7 @@ describe('YearMonth', () => {
       throws(() => nov94.equals({ year: 1994 } as InvalidArg), TypeError);
     });
     it('takes [[ISODay]] into account', () => {
-      const iso = Temporal.Calendar.from('iso8601');
+      const iso = Calendar.from('iso8601');
       const ym1 = new PlainYearMonth(2000, 1, iso, 1);
       const ym2 = new PlainYearMonth(2000, 1, iso, 2);
       assert(!ym1.equals(ym2));
@@ -270,7 +271,7 @@ describe('YearMonth', () => {
     });
     it('no two different calendars', () => {
       const ym1 = new PlainYearMonth(2000, 1);
-      const ym2 = new PlainYearMonth(2000, 1, Temporal.Calendar.from('japanese'));
+      const ym2 = new PlainYearMonth(2000, 1, Calendar.from('japanese'));
       throws(() => ym1.until(ym2), RangeError);
     });
     it('options may only be an object or undefined', () => {
@@ -412,7 +413,7 @@ describe('YearMonth', () => {
     });
     it('no two different calendars', () => {
       const ym1 = new PlainYearMonth(2000, 1);
-      const ym2 = new PlainYearMonth(2000, 1, Temporal.Calendar.from('japanese'));
+      const ym2 = new PlainYearMonth(2000, 1, Calendar.from('japanese'));
       throws(() => ym1.since(ym2), RangeError);
     });
     it('options may only be an object or undefined', () => {
@@ -533,7 +534,7 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from('2020-11').add({ years: -1 })}`, '2019-11');
     });
     it('yearMonth.add(durationObj)', () => {
-      equal(`${ym.add(Temporal.Duration.from('P2M'))}`, '2020-01');
+      equal(`${ym.add(Duration.from('P2M'))}`, '2020-01');
     });
     it('casts argument', () => equal(`${ym.add('P2M')}`, '2020-01'));
     it("ignores lower units that don't balance up to the length of the month", () => {
@@ -574,7 +575,7 @@ describe('YearMonth', () => {
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => ym.add({ years: 1, months: -6 }, { overflow }), RangeError)
       );
     });
@@ -609,7 +610,7 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from('2007-11').subtract({ years: -12 })}`, '2019-11');
     });
     it('yearMonth.subtract(durationObj)', () => {
-      equal(`${ym.subtract(Temporal.Duration.from('P11M'))}`, '2018-12');
+      equal(`${ym.subtract(Duration.from('P11M'))}`, '2018-12');
     });
     it('casts argument', () => equal(`${ym.subtract('P11M')}`, '2018-12'));
     it("ignores lower units that don't balance up to the length of the month", () => {
@@ -644,12 +645,12 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from('2020-01').subtract({ days: 31 })}`, '2019-12');
     });
     it('invalid overflow', () => {
-      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: OverflowHandling) =>
+      ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: any) =>
         throws(() => ym.subtract({ months: 1 }, { overflow }), RangeError)
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => ym.subtract({ years: 1, months: -6 }, { overflow }), RangeError)
       );
     });
@@ -677,7 +678,7 @@ describe('YearMonth', () => {
     it('constructing from property bag', () => {
       const tooEarly = { year: -271821, month: 3 };
       const tooLate = { year: 275760, month: 10 };
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         [tooEarly, tooLate].forEach((props) => {
           throws(() => PlainYearMonth.from(props, { overflow }), RangeError);
         });
@@ -686,7 +687,7 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from({ year: 275760, month: 9 })}`, '+275760-09');
     });
     it('constructing from ISO string', () => {
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         ['-271821-03', '+275760-10'].forEach((str) => {
           throws(() => PlainYearMonth.from(str, { overflow }), RangeError);
         });
@@ -695,15 +696,15 @@ describe('YearMonth', () => {
       equal(`${PlainYearMonth.from('+275760-09')}`, '+275760-09');
     });
     it('converting from Date', () => {
-      const min = Temporal.PlainDate.from('-271821-04-19');
-      const max = Temporal.PlainDate.from('+275760-09-13');
+      const min = PlainDate.from('-271821-04-19');
+      const max = PlainDate.from('+275760-09-13');
       equal(`${min.toPlainYearMonth()}`, '-271821-04');
       equal(`${max.toPlainYearMonth()}`, '+275760-09');
     });
     it('adding and subtracting beyond limit', () => {
       const min = PlainYearMonth.from('-271821-04');
       const max = PlainYearMonth.from('+275760-09');
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         throws(() => min.subtract({ months: 1 }, { overflow }), RangeError);
         throws(() => max.add({ months: 1 }, { overflow }), RangeError);
       });

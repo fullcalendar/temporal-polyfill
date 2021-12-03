@@ -4,11 +4,12 @@
 import { assert } from 'chai';
 const { equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
+declare const Temporal: never; // don't use global
+import { Instant, Now, PlainDate, PlainDateTime, PlainTime, TimeZone, ZonedDateTime } from '../impl'
 
 describe('Userland time zone', () => {
   describe('Trivial subclass', () => {
-    class CustomUTCSubclass extends Temporal.TimeZone {
+    class CustomUTCSubclass extends TimeZone {
       constructor() {
         super('UTC');
       }
@@ -18,12 +19,12 @@ describe('Userland time zone', () => {
       getOffsetNanosecondsFor(/* instant */) {
         return 0;
       }
-      getPossibleInstantsFor(dateTime) {
+      getPossibleInstantsFor(dateTime: PlainDateTime) {
         const { year, month, day, hour, minute, second, millisecond, microsecond, nanosecond } = dateTime;
         const dayNum = MakeDay(year, month, day);
         const time = MakeTime(hour, minute, second, millisecond, microsecond, nanosecond);
         const epochNs = MakeDate(dayNum, time);
-        return [new Temporal.Instant(epochNs)];
+        return [new Instant(epochNs)];
       }
       getNextTransition(/* instant */) {
         return null;
@@ -34,15 +35,15 @@ describe('Userland time zone', () => {
     }
 
     const obj = new CustomUTCSubclass();
-    const inst = Temporal.Instant.fromEpochNanoseconds(0n);
-    const dt = new Temporal.PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789);
+    const inst = Instant.fromEpochNanoseconds(0n);
+    const dt = new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789);
 
     it('is a time zone', () => equal(typeof obj, 'object'));
     it('.id property', () => equal(obj.id, 'Etc/Custom/UTC_Subclass'));
-    // FIXME: what should happen in Temporal.TimeZone.from(obj)?
+    // FIXME: what should happen in TimeZone.from(obj)?
     it('.id is not available in from()', () => {
-      throws(() => Temporal.TimeZone.from('Etc/Custom/UTC_Subclass'), RangeError);
-      throws(() => Temporal.TimeZone.from('2020-05-26T16:02:46.251163036+00:00[Etc/Custom/UTC_Subclass]'), RangeError);
+      throws(() => TimeZone.from('Etc/Custom/UTC_Subclass'), RangeError);
+      throws(() => TimeZone.from('2020-05-26T16:02:46.251163036+00:00[Etc/Custom/UTC_Subclass]'), RangeError);
     });
     it('has offset string +00:00', () => equal(obj.getOffsetStringFor(inst), '+00:00'));
     it('converts to DateTime', () => {
@@ -55,17 +56,17 @@ describe('Userland time zone', () => {
     it('converts to string', () => equal(`${obj}`, obj.id));
     it('offset prints in instant.toString', () => equal(inst.toString({ timeZone: obj }), '1970-01-01T00:00:00+00:00'));
     it('prints in zdt.toString', () => {
-      const zdt = new Temporal.ZonedDateTime(0n, obj);
+      const zdt = new ZonedDateTime(0n, obj);
       equal(zdt.toString(), '1970-01-01T00:00:00+00:00[Etc/Custom/UTC_Subclass]');
     });
     it('has no next transitions', () => assert.equal(obj.getNextTransition(), null));
     it('has no previous transitions', () => assert.equal(obj.getPreviousTransition(), null));
-    it('works in Temporal.Now', () => {
-      assert(Temporal.Now.plainDateTimeISO(obj) instanceof Temporal.PlainDateTime);
-      assert(Temporal.Now.plainDateTime('gregory', obj) instanceof Temporal.PlainDateTime);
-      assert(Temporal.Now.plainDateISO(obj) instanceof Temporal.PlainDate);
-      assert(Temporal.Now.plainDate('gregory', obj) instanceof Temporal.PlainDate);
-      assert(Temporal.Now.plainTimeISO(obj) instanceof Temporal.PlainTime);
+    it('works in Now', () => {
+      assert(Now.plainDateTimeISO(obj) instanceof PlainDateTime);
+      assert(Now.plainDateTime('gregory', obj) instanceof PlainDateTime);
+      assert(Now.plainDateISO(obj) instanceof PlainDate);
+      assert(Now.plainDate('gregory', obj) instanceof PlainDate);
+      assert(Now.plainTimeISO(obj) instanceof PlainTime);
     });
   });
   describe('Trivial protocol implementation', () => {
@@ -73,42 +74,42 @@ describe('Userland time zone', () => {
       getOffsetNanosecondsFor(/* instant */) {
         return 0;
       },
-      getPossibleInstantsFor(dateTime) {
+      getPossibleInstantsFor(dateTime: PlainDateTime) {
         const { year, month, day, hour, minute, second, millisecond, microsecond, nanosecond } = dateTime;
         const dayNum = MakeDay(year, month, day);
         const time = MakeTime(hour, minute, second, millisecond, microsecond, nanosecond);
         const epochNs = MakeDate(dayNum, time);
-        return [new Temporal.Instant(epochNs)];
+        return [new Instant(epochNs)];
       },
       toString() {
         return 'Etc/Custom/UTC_Protocol';
       }
     };
 
-    const inst = Temporal.Instant.fromEpochNanoseconds(0n);
+    const inst = Instant.fromEpochNanoseconds(0n);
 
     it('converts to DateTime', () => {
-      equal(`${Temporal.TimeZone.prototype.getPlainDateTimeFor.call(obj, inst)}`, '1970-01-01T00:00:00');
+      equal(`${TimeZone.prototype.getPlainDateTimeFor.call(obj, inst)}`, '1970-01-01T00:00:00');
       equal(
-        `${Temporal.TimeZone.prototype.getPlainDateTimeFor.call(obj, inst, 'gregory')}`,
+        `${TimeZone.prototype.getPlainDateTimeFor.call(obj, inst, 'gregory')}`,
         '1970-01-01T00:00:00[u-ca=gregory]'
       );
     });
     it('offset prints in instant.toString', () => equal(inst.toString({ timeZone: obj }), '1970-01-01T00:00:00+00:00'));
     it('prints in zdt.toString', () => {
-      const zdt = new Temporal.ZonedDateTime(0n, obj);
+      const zdt = new ZonedDateTime(0n, obj);
       equal(zdt.toString(), '1970-01-01T00:00:00+00:00[Etc/Custom/UTC_Protocol]');
     });
-    it('works in Temporal.Now', () => {
-      assert(Temporal.Now.plainDateTimeISO(obj) instanceof Temporal.PlainDateTime);
-      assert(Temporal.Now.plainDateTime('gregory', obj) instanceof Temporal.PlainDateTime);
-      assert(Temporal.Now.plainDateISO(obj) instanceof Temporal.PlainDate);
-      assert(Temporal.Now.plainDate('gregory', obj) instanceof Temporal.PlainDate);
-      assert(Temporal.Now.plainTimeISO(obj) instanceof Temporal.PlainTime);
+    it('works in Now', () => {
+      assert(Now.plainDateTimeISO(obj) instanceof PlainDateTime);
+      assert(Now.plainDateTime('gregory', obj) instanceof PlainDateTime);
+      assert(Now.plainDateISO(obj) instanceof PlainDate);
+      assert(Now.plainDate('gregory', obj) instanceof PlainDate);
+      assert(Now.plainTimeISO(obj) instanceof PlainTime);
     });
   });
   describe('sub-minute offset', () => {
-    class SubminuteTimeZone extends Temporal.TimeZone {
+    class SubminuteTimeZone extends TimeZone {
       constructor() {
         super('-00:00:01.111111111');
       }
@@ -118,8 +119,8 @@ describe('Userland time zone', () => {
       getOffsetNanosecondsFor() {
         return -1111111111;
       }
-      getPossibleInstantsFor(dateTime) {
-        const utc = Temporal.TimeZone.from('UTC');
+      getPossibleInstantsFor(dateTime: PlainDateTime) {
+        const utc = TimeZone.from('UTC');
         const instant = utc.getInstantFor(dateTime);
         return [instant.add({ nanoseconds: 1111111111 })];
       }
@@ -132,15 +133,15 @@ describe('Userland time zone', () => {
     }
 
     const obj = new SubminuteTimeZone();
-    const inst = Temporal.Instant.fromEpochNanoseconds(0n);
-    const dt = new Temporal.PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789);
+    const inst = Instant.fromEpochNanoseconds(0n);
+    const dt = new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789);
 
     it('is a time zone', () => equal(typeof obj, 'object'));
     it('.id property', () => equal(obj.id, 'Custom/Subminute'));
     it('.id is not available in from()', () => {
-      throws(() => Temporal.TimeZone.from('Custom/Subminute'), RangeError);
+      throws(() => TimeZone.from('Custom/Subminute'), RangeError);
       throws(
-        () => Temporal.TimeZone.from('2020-05-26T16:02:46.251163036-00:00:01.111111111[Custom/Subminute]'),
+        () => TimeZone.from('2020-05-26T16:02:46.251163036-00:00:01.111111111[Custom/Subminute]'),
         RangeError
       );
     });
@@ -156,17 +157,17 @@ describe('Userland time zone', () => {
     it('offset prints in instant.toString', () =>
       equal(inst.toString({ timeZone: obj }), '1969-12-31T23:59:58.888888889-00:00:01.111111111'));
     it('prints in zdt.toString', () => {
-      const zdt = new Temporal.ZonedDateTime(0n, obj);
+      const zdt = new ZonedDateTime(0n, obj);
       equal(zdt.toString(), '1969-12-31T23:59:58.888888889-00:00:01.111111111[Custom/Subminute]');
     });
     it('has no next transitions', () => assert.equal(obj.getNextTransition(), null));
     it('has no previous transitions', () => assert.equal(obj.getPreviousTransition(), null));
-    it('works in Temporal.Now', () => {
-      assert(Temporal.Now.plainDateTimeISO(obj) instanceof Temporal.PlainDateTime);
-      assert(Temporal.Now.plainDateTime('gregory', obj) instanceof Temporal.PlainDateTime);
-      assert(Temporal.Now.plainDateISO(obj) instanceof Temporal.PlainDate);
-      assert(Temporal.Now.plainDate('gregory', obj) instanceof Temporal.PlainDate);
-      assert(Temporal.Now.plainTimeISO(obj) instanceof Temporal.PlainTime);
+    it('works in Now', () => {
+      assert(Now.plainDateTimeISO(obj) instanceof PlainDateTime);
+      assert(Now.plainDateTime('gregory', obj) instanceof PlainDateTime);
+      assert(Now.plainDateISO(obj) instanceof PlainDate);
+      assert(Now.plainDate('gregory', obj) instanceof PlainDate);
+      assert(Now.plainTimeISO(obj) instanceof PlainTime);
     });
   });
 });
@@ -174,15 +175,15 @@ describe('Userland time zone', () => {
 const nsPerDay = 86400_000_000_000n;
 const nsPerMillisecond = 1_000_000n;
 
-function Day(t) {
+function Day(t: bigint) {
   return t / nsPerDay;
 }
 
-function MakeDate(day, time) {
+function MakeDate(day: bigint, time: bigint) {
   return day * nsPerDay + time;
 }
 
-function MakeDay(year, month, day) {
+function MakeDay(year: number, month: number, day: number) {
   const m = month - 1;
   const ym = year + Math.floor(m / 12);
   const mn = m % 12;
@@ -190,7 +191,7 @@ function MakeDay(year, month, day) {
   return Day(t) + BigInt(day) - 1n;
 }
 
-function MakeTime(h, min, s, ms, µs, ns) {
+function MakeTime(h: number, min: number, s: number, ms: number, µs: number, ns: number) {
   const MinutesPerHour = 60n;
   const SecondsPerMinute = 60n;
   const nsPerSecond = 1_000_000_000n;

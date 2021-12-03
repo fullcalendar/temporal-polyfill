@@ -6,10 +6,9 @@
 import { assert } from 'chai';
 const { equal, notEqual, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { PlainDate } = Temporal;
+declare const Temporal: never; // don't use global
+import { PlainDate, Duration, PlainDateTime, PlainMonthDay, PlainYearMonth, DateUnit } from '../impl';
 
-import { DateUnit, OverflowHandling } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
@@ -136,8 +135,8 @@ describe('Date', () => {
       );
     });
     it('rounds relative to the receiver', () => {
-      const date1 = Temporal.PlainDate.from('2019-01-01');
-      const date2 = Temporal.PlainDate.from('2019-02-15');
+      const date1 = PlainDate.from('2019-01-01');
+      const date2 = PlainDate.from('2019-02-15');
       equal(`${date1.until(date2, { smallestUnit: 'months', roundingMode: 'halfExpand' })}`, 'P2M');
       equal(`${date2.until(date1, { smallestUnit: 'months', roundingMode: 'halfExpand' })}`, '-P1M');
     });
@@ -303,7 +302,7 @@ describe('Date', () => {
       equal(`${new PlainDate(2019, 1, 31).add({ months: 1 })}`, '2019-02-28');
     });
     it('date.add(durationObj)', () => {
-      equal(`${date.add(Temporal.Duration.from('P43Y'))}`, '2019-11-18');
+      equal(`${date.add(Duration.from('P43Y'))}`, '2019-11-18');
     });
     it('casts argument', () => {
       equal(`${date.add('P43Y')}`, '2019-11-18');
@@ -347,7 +346,7 @@ describe('Date', () => {
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => date.add({ months: 1, days: -30 }, { overflow }), RangeError)
       );
     });
@@ -377,7 +376,7 @@ describe('Date', () => {
       equal(`${PlainDate.from('2019-02-28').subtract({ months: 1 })}`, '2019-01-28');
     });
     it('Date.subtract(durationObj)', () => {
-      equal(`${date.subtract(Temporal.Duration.from('P43Y'))}`, '1976-11-18');
+      equal(`${date.subtract(Duration.from('P43Y'))}`, '1976-11-18');
     });
     it('casts argument', () => {
       equal(`${date.subtract('P43Y')}`, '1976-11-18');
@@ -421,7 +420,7 @@ describe('Date', () => {
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => date.subtract({ months: 1, days: -30 }, { overflow }), RangeError)
       );
     });
@@ -520,7 +519,7 @@ describe('Date', () => {
       equal(`${PlainDate.from({ year: 1976, month: 11, day: 18, days: 15 } as ValidArg)}`, '1976-11-18');
     });
     it('Date.from(required prop undefined) throws', () =>
-      throws(() => PlainDate.from({ year: undefined, month: 11, day: 18 }), TypeError));
+      throws(() => PlainDate.from({ year: undefined as InvalidArg, month: 11, day: 18 }), TypeError));
     it('Date.from(number) is converted to string', () => PlainDate.from(19761118 as ValidArg).equals(PlainDate.from('19761118')));
     it('basic format', () => {
       equal(`${PlainDate.from('19761118')}`, '1976-11-18');
@@ -611,7 +610,7 @@ describe('Date', () => {
     it('constructing from property bag', () => {
       const tooEarly = { year: -271821, month: 4, day: 18 };
       const tooLate = { year: 275760, month: 9, day: 14 };
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         [tooEarly, tooLate].forEach((props) => {
           throws(() => PlainDate.from(props, { overflow }), RangeError);
         });
@@ -620,7 +619,7 @@ describe('Date', () => {
       equal(`${PlainDate.from({ year: 275760, month: 9, day: 13 })}`, '+275760-09-13');
     });
     it('constructing from ISO string', () => {
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         ['-271821-04-18', '+275760-09-14'].forEach((str) => {
           throws(() => PlainDate.from(str, { overflow }), RangeError);
         });
@@ -629,22 +628,22 @@ describe('Date', () => {
       equal(`${PlainDate.from('+275760-09-13')}`, '+275760-09-13');
     });
     it('converting from DateTime', () => {
-      const min = Temporal.PlainDateTime.from('-271821-04-19T00:00:00.000000001');
-      const max = Temporal.PlainDateTime.from('+275760-09-13T23:59:59.999999999');
+      const min = PlainDateTime.from('-271821-04-19T00:00:00.000000001');
+      const max = PlainDateTime.from('+275760-09-13T23:59:59.999999999');
       equal(`${min.toPlainDate()}`, '-271821-04-19');
       equal(`${max.toPlainDate()}`, '+275760-09-13');
     });
     it('converting from YearMonth', () => {
-      const min = Temporal.PlainYearMonth.from('-271821-04');
-      const max = Temporal.PlainYearMonth.from('+275760-09');
+      const min = PlainYearMonth.from('-271821-04');
+      const max = PlainYearMonth.from('+275760-09');
       throws(() => min.toPlainDate({ day: 1 }), RangeError);
       throws(() => max.toPlainDate({ day: 30 }), RangeError);
       equal(`${min.toPlainDate({ day: 19 })}`, '-271821-04-19');
       equal(`${max.toPlainDate({ day: 13 })}`, '+275760-09-13');
     });
     it('converting from MonthDay', () => {
-      const jan1 = Temporal.PlainMonthDay.from('01-01');
-      const dec31 = Temporal.PlainMonthDay.from('12-31');
+      const jan1 = PlainMonthDay.from('01-01');
+      const dec31 = PlainMonthDay.from('12-31');
       const minYear = -271821;
       const maxYear = 275760;
       throws(() => jan1.toPlainDate({ year: minYear }), RangeError);
@@ -655,7 +654,7 @@ describe('Date', () => {
     it('adding and subtracting beyond limit', () => {
       const min = PlainDate.from('-271821-04-19');
       const max = PlainDate.from('+275760-09-13');
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         throws(() => min.subtract({ days: 1 }, { overflow }), RangeError);
         throws(() => max.add({ days: 1 }, { overflow }), RangeError);
       });

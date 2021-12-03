@@ -6,136 +6,144 @@
 import { assert } from 'chai';
 const { equal, notEqual, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { PlainDateTime } = Temporal;
+declare const Temporal: never; // don't use global
+import { Calendar, Duration, Instant, PlainDate, PlainTime, TimeZone, PlainDateTime, DayTimeUnit, FractionalSecondDigits, Unit } from '../impl';
 
-import { DayTimeUnit, FractionalSecondDigits, OverflowHandling, RoundingMode, TimeUnit, Unit } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
 describe('DateTime', () => {
   describe('Construction', () => {
     describe('new DateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789, calendar)', () => {
-      let datetime;
-      const calendar = Temporal.Calendar.from('iso8601');
+      const calendar = Calendar.from('iso8601');
+      function getDateTime() {
+        return new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789, calendar);
+      }
       it('datetime can be constructed', () => {
-        datetime = new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456, 789, calendar);
+        const datetime = getDateTime();
         assert(datetime);
         equal(typeof datetime, 'object');
       });
-      it('datetime.year is 1976', () => equal(datetime.year, 1976));
-      it('datetime.month is 11', () => equal(datetime.month, 11));
-      it('datetime.monthCode is "M11"', () => equal(datetime.monthCode, 'M11'));
-      it('datetime.day is 18', () => equal(datetime.day, 18));
-      it('datetime.hour is 15', () => equal(datetime.hour, 15));
-      it('datetime.minute is 23', () => equal(datetime.minute, 23));
-      it('datetime.second is 30', () => equal(datetime.second, 30));
-      it('datetime.millisecond is 123', () => equal(datetime.millisecond, 123));
-      it('datetime.microsecond is 456', () => equal(datetime.microsecond, 456));
-      it('datetime.nanosecond is 789', () => equal(datetime.nanosecond, 789));
-      it('datetime.calendar is the object', () => equal(datetime.calendar, calendar));
-      it('datetime.dayOfWeek is 4', () => equal(datetime.dayOfWeek, 4));
-      it('datetime.dayOfYear is 323', () => equal(datetime.dayOfYear, 323));
-      it('datetime.weekOfYear is 47', () => equal(datetime.weekOfYear, 47));
-      it('datetime.daysInWeek is 7', () => equal(datetime.daysInWeek, 7));
-      it('datetime.monthsInYear is 12', () => equal(datetime.monthsInYear, 12));
-      it('`${datetime}` is 1976-11-18T15:23:30.123456789', () => equal(`${datetime}`, '1976-11-18T15:23:30.123456789'));
+      it('datetime.year is 1976', () => equal(getDateTime().year, 1976));
+      it('datetime.month is 11', () => equal(getDateTime().month, 11));
+      it('datetime.monthCode is "M11"', () => equal(getDateTime().monthCode, 'M11'));
+      it('datetime.day is 18', () => equal(getDateTime().day, 18));
+      it('datetime.hour is 15', () => equal(getDateTime().hour, 15));
+      it('datetime.minute is 23', () => equal(getDateTime().minute, 23));
+      it('datetime.second is 30', () => equal(getDateTime().second, 30));
+      it('datetime.millisecond is 123', () => equal(getDateTime().millisecond, 123));
+      it('datetime.microsecond is 456', () => equal(getDateTime().microsecond, 456));
+      it('datetime.nanosecond is 789', () => equal(getDateTime().nanosecond, 789));
+      it('datetime.calendar is the object', () => equal(getDateTime().calendar, calendar));
+      it('datetime.dayOfWeek is 4', () => equal(getDateTime().dayOfWeek, 4));
+      it('datetime.dayOfYear is 323', () => equal(getDateTime().dayOfYear, 323));
+      it('datetime.weekOfYear is 47', () => equal(getDateTime().weekOfYear, 47));
+      it('datetime.daysInWeek is 7', () => equal(getDateTime().daysInWeek, 7));
+      it('datetime.monthsInYear is 12', () => equal(getDateTime().monthsInYear, 12));
+      it('`${datetime}` is 1976-11-18T15:23:30.123456789', () => equal(`${getDateTime()}`, '1976-11-18T15:23:30.123456789'));
     });
     describe('new DateTime(1976, 11, 18, 15, 23, 30, 123, 456)', () => {
-      let datetime;
+      function getDateTime() {
+        return new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456);
+      }
       it('datetime can be constructed', () => {
-        datetime = new PlainDateTime(1976, 11, 18, 15, 23, 30, 123, 456);
-        assert(datetime);
+        const datetime = getDateTime()
         equal(typeof datetime, 'object');
       });
-      it('datetime.year is 1976', () => equal(datetime.year, 1976));
-      it('datetime.month is 11', () => equal(datetime.month, 11));
-      it('datetime.monthCode is "M11"', () => equal(datetime.monthCode, 'M11'));
-      it('datetime.day is 18', () => equal(datetime.day, 18));
-      it('datetime.hour is 15', () => equal(datetime.hour, 15));
-      it('datetime.minute is 23', () => equal(datetime.minute, 23));
-      it('datetime.second is 30', () => equal(datetime.second, 30));
-      it('datetime.millisecond is 123', () => equal(datetime.millisecond, 123));
-      it('datetime.microsecond is 456', () => equal(datetime.microsecond, 456));
-      it('datetime.nanosecond is 0', () => equal(datetime.nanosecond, 0));
-      it('datetime.dayOfWeek is 4', () => equal(datetime.dayOfWeek, 4));
-      it('datetime.dayOfYear is 323', () => equal(datetime.dayOfYear, 323));
-      it('datetime.weekOfYear is 47', () => equal(datetime.weekOfYear, 47));
-      it('datetime.daysInWeek is 7', () => equal(datetime.daysInWeek, 7));
-      it('datetime.monthsInYear is 12', () => equal(datetime.monthsInYear, 12));
-      it('`${datetime}` is 1976-11-18T15:23:30.123456', () => equal(`${datetime}`, '1976-11-18T15:23:30.123456'));
+      it('datetime.year is 1976', () => equal(getDateTime().year, 1976));
+      it('datetime.month is 11', () => equal(getDateTime().month, 11));
+      it('datetime.monthCode is "M11"', () => equal(getDateTime().monthCode, 'M11'));
+      it('datetime.day is 18', () => equal(getDateTime().day, 18));
+      it('datetime.hour is 15', () => equal(getDateTime().hour, 15));
+      it('datetime.minute is 23', () => equal(getDateTime().minute, 23));
+      it('datetime.second is 30', () => equal(getDateTime().second, 30));
+      it('datetime.millisecond is 123', () => equal(getDateTime().millisecond, 123));
+      it('datetime.microsecond is 456', () => equal(getDateTime().microsecond, 456));
+      it('datetime.nanosecond is 0', () => equal(getDateTime().nanosecond, 0));
+      it('datetime.dayOfWeek is 4', () => equal(getDateTime().dayOfWeek, 4));
+      it('datetime.dayOfYear is 323', () => equal(getDateTime().dayOfYear, 323));
+      it('datetime.weekOfYear is 47', () => equal(getDateTime().weekOfYear, 47));
+      it('datetime.daysInWeek is 7', () => equal(getDateTime().daysInWeek, 7));
+      it('datetime.monthsInYear is 12', () => equal(getDateTime().monthsInYear, 12));
+      it('`${datetime}` is 1976-11-18T15:23:30.123456', () => equal(`${getDateTime()}`, '1976-11-18T15:23:30.123456'));
     });
     describe('new DateTime(1976, 11, 18, 15, 23, 30, 123)', () => {
-      let datetime;
+      function getDateTime() {
+        return new PlainDateTime(1976, 11, 18, 15, 23, 30, 123);
+      }
       it('datetime can be constructed', () => {
-        datetime = new PlainDateTime(1976, 11, 18, 15, 23, 30, 123);
+        const datetime = getDateTime()
         assert(datetime);
         equal(typeof datetime, 'object');
       });
-      it('datetime.year is 1976', () => equal(datetime.year, 1976));
-      it('datetime.month is 11', () => equal(datetime.month, 11));
-      it('datetime.monthCode is "M11"', () => equal(datetime.monthCode, 'M11'));
-      it('datetime.day is 18', () => equal(datetime.day, 18));
-      it('datetime.hour is 15', () => equal(datetime.hour, 15));
-      it('datetime.minute is 23', () => equal(datetime.minute, 23));
-      it('datetime.second is 30', () => equal(datetime.second, 30));
-      it('datetime.millisecond is 123', () => equal(datetime.millisecond, 123));
-      it('datetime.microsecond is 0', () => equal(datetime.microsecond, 0));
-      it('datetime.nanosecond is 0', () => equal(datetime.nanosecond, 0));
-      it('datetime.dayOfWeek is 4', () => equal(datetime.dayOfWeek, 4));
-      it('datetime.dayOfYear is 323', () => equal(datetime.dayOfYear, 323));
-      it('datetime.weekOfYear is 47', () => equal(datetime.weekOfYear, 47));
-      it('datetime.daysInWeek is 7', () => equal(datetime.daysInWeek, 7));
-      it('datetime.monthsInYear is 12', () => equal(datetime.monthsInYear, 12));
-      it('`${datetime}` is 1976-11-18T15:23:30.123', () => equal(`${datetime}`, '1976-11-18T15:23:30.123'));
+      it('datetime.year is 1976', () => equal(getDateTime().year, 1976));
+      it('datetime.month is 11', () => equal(getDateTime().month, 11));
+      it('datetime.monthCode is "M11"', () => equal(getDateTime().monthCode, 'M11'));
+      it('datetime.day is 18', () => equal(getDateTime().day, 18));
+      it('datetime.hour is 15', () => equal(getDateTime().hour, 15));
+      it('datetime.minute is 23', () => equal(getDateTime().minute, 23));
+      it('datetime.second is 30', () => equal(getDateTime().second, 30));
+      it('datetime.millisecond is 123', () => equal(getDateTime().millisecond, 123));
+      it('datetime.microsecond is 0', () => equal(getDateTime().microsecond, 0));
+      it('datetime.nanosecond is 0', () => equal(getDateTime().nanosecond, 0));
+      it('datetime.dayOfWeek is 4', () => equal(getDateTime().dayOfWeek, 4));
+      it('datetime.dayOfYear is 323', () => equal(getDateTime().dayOfYear, 323));
+      it('datetime.weekOfYear is 47', () => equal(getDateTime().weekOfYear, 47));
+      it('datetime.daysInWeek is 7', () => equal(getDateTime().daysInWeek, 7));
+      it('datetime.monthsInYear is 12', () => equal(getDateTime().monthsInYear, 12));
+      it('`${datetime}` is 1976-11-18T15:23:30.123', () => equal(`${getDateTime()}`, '1976-11-18T15:23:30.123'));
     });
     describe('new DateTime(1976, 11, 18, 15, 23, 30)', () => {
-      let datetime;
+      function getDateTime() {
+        return new PlainDateTime(1976, 11, 18, 15, 23, 30);
+      }
       it('datetime can be constructed', () => {
-        datetime = new PlainDateTime(1976, 11, 18, 15, 23, 30);
+        const datetime = getDateTime()
         assert(datetime);
         equal(typeof datetime, 'object');
       });
-      it('datetime.year is 1976', () => equal(datetime.year, 1976));
-      it('datetime.month is 11', () => equal(datetime.month, 11));
-      it('datetime.monthCode is "M11"', () => equal(datetime.monthCode, 'M11'));
-      it('datetime.day is 18', () => equal(datetime.day, 18));
-      it('datetime.hour is 15', () => equal(datetime.hour, 15));
-      it('datetime.minute is 23', () => equal(datetime.minute, 23));
-      it('datetime.second is 30', () => equal(datetime.second, 30));
-      it('datetime.millisecond is 0', () => equal(datetime.millisecond, 0));
-      it('datetime.microsecond is 0', () => equal(datetime.microsecond, 0));
-      it('datetime.nanosecond is 0', () => equal(datetime.nanosecond, 0));
-      it('datetime.dayOfWeek is 4', () => equal(datetime.dayOfWeek, 4));
-      it('datetime.dayOfYear is 323', () => equal(datetime.dayOfYear, 323));
-      it('datetime.weekOfYear is 47', () => equal(datetime.weekOfYear, 47));
-      it('datetime.daysInWeek is 7', () => equal(datetime.daysInWeek, 7));
-      it('datetime.monthsInYear is 12', () => equal(datetime.monthsInYear, 12));
-      it('`${datetime}` is 1976-11-18T15:23:30', () => equal(`${datetime}`, '1976-11-18T15:23:30'));
+      it('datetime.year is 1976', () => equal(getDateTime().year, 1976));
+      it('datetime.month is 11', () => equal(getDateTime().month, 11));
+      it('datetime.monthCode is "M11"', () => equal(getDateTime().monthCode, 'M11'));
+      it('datetime.day is 18', () => equal(getDateTime().day, 18));
+      it('datetime.hour is 15', () => equal(getDateTime().hour, 15));
+      it('datetime.minute is 23', () => equal(getDateTime().minute, 23));
+      it('datetime.second is 30', () => equal(getDateTime().second, 30));
+      it('datetime.millisecond is 0', () => equal(getDateTime().millisecond, 0));
+      it('datetime.microsecond is 0', () => equal(getDateTime().microsecond, 0));
+      it('datetime.nanosecond is 0', () => equal(getDateTime().nanosecond, 0));
+      it('datetime.dayOfWeek is 4', () => equal(getDateTime().dayOfWeek, 4));
+      it('datetime.dayOfYear is 323', () => equal(getDateTime().dayOfYear, 323));
+      it('datetime.weekOfYear is 47', () => equal(getDateTime().weekOfYear, 47));
+      it('datetime.daysInWeek is 7', () => equal(getDateTime().daysInWeek, 7));
+      it('datetime.monthsInYear is 12', () => equal(getDateTime().monthsInYear, 12));
+      it('`${datetime}` is 1976-11-18T15:23:30', () => equal(`${getDateTime()}`, '1976-11-18T15:23:30'));
     });
     describe('new DateTime(1976, 11, 18, 15, 23)', () => {
-      let datetime;
+      function getDateTime() {
+        return new PlainDateTime(1976, 11, 18, 15, 23);
+      }
       it('datetime can be constructed', () => {
-        datetime = new PlainDateTime(1976, 11, 18, 15, 23);
+        const datetime = getDateTime()
         assert(datetime);
         equal(typeof datetime, 'object');
       });
-      it('datetime.year is 1976', () => equal(datetime.year, 1976));
-      it('datetime.month is 11', () => equal(datetime.month, 11));
-      it('datetime.monthCode is "M11"', () => equal(datetime.monthCode, 'M11'));
-      it('datetime.day is 18', () => equal(datetime.day, 18));
-      it('datetime.hour is 15', () => equal(datetime.hour, 15));
-      it('datetime.minute is 23', () => equal(datetime.minute, 23));
-      it('datetime.second is 0', () => equal(datetime.second, 0));
-      it('datetime.millisecond is 0', () => equal(datetime.millisecond, 0));
-      it('datetime.microsecond is 0', () => equal(datetime.microsecond, 0));
-      it('datetime.nanosecond is 0', () => equal(datetime.nanosecond, 0));
-      it('datetime.dayOfWeek is 4', () => equal(datetime.dayOfWeek, 4));
-      it('datetime.dayOfYear is 323', () => equal(datetime.dayOfYear, 323));
-      it('datetime.weekOfYear is 47', () => equal(datetime.weekOfYear, 47));
-      it('datetime.daysInWeek is 7', () => equal(datetime.daysInWeek, 7));
-      it('datetime.monthsInYear is 12', () => equal(datetime.monthsInYear, 12));
-      it('`${datetime}` is 1976-11-18T15:23:00', () => equal(`${datetime}`, '1976-11-18T15:23:00'));
+      it('datetime.year is 1976', () => equal(getDateTime().year, 1976));
+      it('datetime.month is 11', () => equal(getDateTime().month, 11));
+      it('datetime.monthCode is "M11"', () => equal(getDateTime().monthCode, 'M11'));
+      it('datetime.day is 18', () => equal(getDateTime().day, 18));
+      it('datetime.hour is 15', () => equal(getDateTime().hour, 15));
+      it('datetime.minute is 23', () => equal(getDateTime().minute, 23));
+      it('datetime.second is 0', () => equal(getDateTime().second, 0));
+      it('datetime.millisecond is 0', () => equal(getDateTime().millisecond, 0));
+      it('datetime.microsecond is 0', () => equal(getDateTime().microsecond, 0));
+      it('datetime.nanosecond is 0', () => equal(getDateTime().nanosecond, 0));
+      it('datetime.dayOfWeek is 4', () => equal(getDateTime().dayOfWeek, 4));
+      it('datetime.dayOfYear is 323', () => equal(getDateTime().dayOfYear, 323));
+      it('datetime.weekOfYear is 47', () => equal(getDateTime().weekOfYear, 47));
+      it('datetime.daysInWeek is 7', () => equal(getDateTime().daysInWeek, 7));
+      it('datetime.monthsInYear is 12', () => equal(getDateTime().monthsInYear, 12));
+      it('`${datetime}` is 1976-11-18T15:23:00', () => equal(`${getDateTime()}`, '1976-11-18T15:23:00'));
     });
     describe('new DateTime(1976, 11, 18, 15)', () => {
       const datetime = new PlainDateTime(1976, 11, 18, 15);
@@ -230,12 +238,12 @@ describe('DateTime', () => {
     });
   });
   describe('.withPlainTime manipulation', () => {
-    const dt = Temporal.PlainDateTime.from('2015-12-07T03:24:30.000003500');
+    const dt = PlainDateTime.from('2015-12-07T03:24:30.000003500');
     it('datetime.withPlainTime({ hour: 10 }) works', () => {
       equal(`${dt.withPlainTime({ hour: 10 })}`, '2015-12-07T10:00:00');
     });
     it('datetime.withPlainTime(time) works', () => {
-      const time = Temporal.PlainTime.from('11:22');
+      const time = PlainTime.from('11:22');
       equal(`${dt.withPlainTime(time)}`, '2015-12-07T11:22:00');
     });
     it("datetime.withPlainTime('12:34') works", () => {
@@ -253,12 +261,12 @@ describe('DateTime', () => {
     });
   });
   describe('.withPlainDate manipulation', () => {
-    const dt = Temporal.PlainDateTime.from('1995-12-07T03:24:30');
+    const dt = PlainDateTime.from('1995-12-07T03:24:30');
     it('datetime.withPlainDate({ year: 2000, month: 6, day: 1 }) works', () => {
       equal(`${dt.withPlainDate({ year: 2000, month: 6, day: 1 })}`, '2000-06-01T03:24:30');
     });
     it('datetime.withPlainDate(plainDate) works', () => {
-      const date = Temporal.PlainDate.from('2020-01-23');
+      const date = PlainDate.from('2020-01-23');
       equal(`${dt.withPlainDate(date)}`, '2020-01-23T03:24:30');
     });
     it("datetime.withPlainDate('2018-09-15') works", () => {
@@ -327,7 +335,7 @@ describe('DateTime', () => {
   describe('date/time maths', () => {
     const earlier = PlainDateTime.from('1976-11-18T15:23:30.123456789');
     const later = PlainDateTime.from('2019-10-29T10:46:38.271986102');
-    ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'].forEach((largestUnit: TimeUnit) => {
+    ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'].forEach((largestUnit: any) => {
       const diff = later.since(earlier, { largestUnit });
       it(`(${earlier}).since(${later}) == (${later}).since(${earlier}).negated()`, () =>
         equal(`${earlier.since(later, { largestUnit })}`, `${diff.negated()}`));
@@ -402,7 +410,7 @@ describe('DateTime', () => {
       equal(`${jan31.add({ month: 1, days: 1 } as ValidArg)}`, '2020-02-01T15:00:00');
     });
     it('casts argument', () => {
-      equal(`${jan31.add(Temporal.Duration.from('P1MT1S'))}`, '2020-02-29T15:00:01');
+      equal(`${jan31.add(Duration.from('P1MT1S'))}`, '2020-02-29T15:00:01');
       equal(`${jan31.add('P1MT1S')}`, '2020-02-29T15:00:01');
     });
   });
@@ -425,7 +433,7 @@ describe('DateTime', () => {
       );
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => mar31.add({ hours: 1, minutes: -30 }, { overflow }), RangeError)
       );
     });
@@ -445,7 +453,7 @@ describe('DateTime', () => {
       equal(`${mar31.subtract({ month: 1, days: 1 } as ValidArg)}`, '2020-03-30T15:00:00');
     });
     it('casts argument', () => {
-      equal(`${mar31.subtract(Temporal.Duration.from('P1MT1S'))}`, '2020-02-29T14:59:59');
+      equal(`${mar31.subtract(Duration.from('P1MT1S'))}`, '2020-02-29T14:59:59');
       equal(`${mar31.subtract('P1MT1S')}`, '2020-02-29T14:59:59');
     });
   });
@@ -511,7 +519,7 @@ describe('DateTime', () => {
     });
     it('no two different calendars', () => {
       const dt1 = new PlainDateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0);
-      const dt2 = new PlainDateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, Temporal.Calendar.from('japanese'));
+      const dt2 = new PlainDateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, Calendar.from('japanese'));
       throws(() => dt1.until(dt2), RangeError);
     });
     it('options may only be an object or undefined', () => {
@@ -675,22 +683,22 @@ describe('DateTime', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { smallestUnit: 'hours' as Unit, roundingIncrement };
-        assert(earlier.until(later, options) instanceof Temporal.Duration);
+        assert(earlier.until(later, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: Unit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: Unit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
@@ -832,7 +840,7 @@ describe('DateTime', () => {
     });
     it('no two different calendars', () => {
       const dt1 = new PlainDateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0);
-      const dt2 = new PlainDateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, Temporal.Calendar.from('japanese'));
+      const dt2 = new PlainDateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, Calendar.from('japanese'));
       throws(() => dt1.since(dt2), RangeError);
     });
     it('options may only be an object or undefined', () => {
@@ -996,22 +1004,22 @@ describe('DateTime', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { smallestUnit: 'hours' as Unit, roundingIncrement };
-        assert(later.since(earlier, options) instanceof Temporal.Duration);
+        assert(later.since(earlier, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: Unit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: Unit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
@@ -1186,14 +1194,14 @@ describe('DateTime', () => {
         assert(dt.round({ smallestUnit, roundingIncrement }) instanceof PlainDateTime);
       });
     });
-    ['minute', 'second'].forEach((smallestUnit: TimeUnit) => {
+    ['minute', 'second'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           assert(dt.round({ smallestUnit, roundingIncrement }) instanceof PlainDateTime);
         });
       });
     });
-    ['millisecond', 'microsecond', 'nanosecond'].forEach((smallestUnit: TimeUnit) => {
+    ['millisecond', 'microsecond', 'nanosecond'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           assert(dt.round({ smallestUnit, roundingIncrement }) instanceof PlainDateTime);
@@ -1218,7 +1226,7 @@ describe('DateTime', () => {
       throws(() => dt.round({ smallestUnit: 'nanosecond', roundingIncrement: 1000 }), RangeError);
     });
     const bal = PlainDateTime.from('1976-11-18T23:59:59.999999999');
-    ['day', 'hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: DayTimeUnit) => {
+    ['day', 'hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: any) => {
       it(`balances to next ${smallestUnit}`, () => {
         equal(`${bal.round({ smallestUnit })}`, '1976-11-19T00:00:00');
       });
@@ -1264,7 +1272,7 @@ describe('DateTime', () => {
       ));
     it('DateTime.from({}) throws', () => throws(() => PlainDateTime.from({} as InvalidArg), TypeError));
     it('DateTime.from(required prop undefined) throws', () =>
-      throws(() => PlainDateTime.from({ year: 1976, month: undefined, monthCode: undefined, day: 18 }), TypeError));
+      throws(() => PlainDateTime.from({ year: 1976, month: undefined, monthCode: undefined as InvalidArg, day: 18 }), TypeError));
     it('DateTime.from(ISO string leap second) is constrained', () => {
       equal(`${PlainDateTime.from('2016-12-31T23:59:60')}`, '2016-12-31T23:59:59');
     });
@@ -1358,12 +1366,12 @@ describe('DateTime', () => {
   });
   describe('DateTime.toZonedDateTime()', () => {
     it('works', () => {
-      const dt = Temporal.PlainDateTime.from('2020-01-01T00:00');
+      const dt = PlainDateTime.from('2020-01-01T00:00');
       const zdt = dt.toZonedDateTime('America/Los_Angeles');
       equal(zdt.toString(), '2020-01-01T00:00:00-08:00[America/Los_Angeles]');
     });
     it('works with disambiguation option', () => {
-      const dt = Temporal.PlainDateTime.from('2020-03-08T02:00');
+      const dt = PlainDateTime.from('2020-03-08T02:00');
       const zdt = dt.toZonedDateTime('America/Los_Angeles', { disambiguation: 'earlier' });
       equal(zdt.toString(), '2020-03-08T01:00:00-08:00[America/Los_Angeles]');
     });
@@ -1402,7 +1410,7 @@ describe('DateTime', () => {
       throws(() => dt.toZonedDateTime('America/Los_Angeles', { disambiguation: 'reject' }), RangeError);
     });
     it('outside of Instant range', () => {
-      const max = Temporal.PlainDateTime.from('+275760-09-13T23:59:59.999999999');
+      const max = PlainDateTime.from('+275760-09-13T23:59:59.999999999');
       throws(() => max.toZonedDateTime('America/Godthab'), RangeError);
     });
     it('throws on bad disambiguation', () => {
@@ -1433,7 +1441,7 @@ describe('DateTime', () => {
     it('constructing from property bag', () => {
       const tooEarly = { year: -271821, month: 4, day: 19 };
       const tooLate = { year: 275760, month: 9, day: 14 };
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         [tooEarly, tooLate].forEach((props) => {
           throws(() => PlainDateTime.from(props, { overflow }), RangeError);
         });
@@ -1458,7 +1466,7 @@ describe('DateTime', () => {
       );
     });
     it('constructing from ISO string', () => {
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         ['-271821-04-19T00:00', '+275760-09-14T00:00'].forEach((str) => {
           throws(() => PlainDateTime.from(str, { overflow }), RangeError);
         });
@@ -1467,19 +1475,19 @@ describe('DateTime', () => {
       equal(`${PlainDateTime.from('+275760-09-13T23:59:59.999999999')}`, '+275760-09-13T23:59:59.999999999');
     });
     it('converting from Instant', () => {
-      const min = Temporal.Instant.from('-271821-04-20T00:00Z');
-      const offsetMin = Temporal.TimeZone.from('-23:59');
+      const min = Instant.from('-271821-04-20T00:00Z');
+      const offsetMin = TimeZone.from('-23:59');
       equal(`${offsetMin.getPlainDateTimeFor(min, 'iso8601')}`, '-271821-04-19T00:01:00');
-      const max = Temporal.Instant.from('+275760-09-13T00:00Z');
-      const offsetMax = Temporal.TimeZone.from('+23:59');
+      const max = Instant.from('+275760-09-13T00:00Z');
+      const offsetMax = TimeZone.from('+23:59');
       equal(`${offsetMax.getPlainDateTimeFor(max, 'iso8601')}`, '+275760-09-13T23:59:00');
     });
     it('converting from Date and Time', () => {
-      const midnight = Temporal.PlainTime.from('00:00');
-      const firstNs = Temporal.PlainTime.from('00:00:00.000000001');
-      const lastNs = Temporal.PlainTime.from('23:59:59.999999999');
-      const min = Temporal.PlainDate.from('-271821-04-19');
-      const max = Temporal.PlainDate.from('+275760-09-13');
+      const midnight = PlainTime.from('00:00');
+      const firstNs = PlainTime.from('00:00:00.000000001');
+      const lastNs = PlainTime.from('23:59:59.999999999');
+      const min = PlainDate.from('-271821-04-19');
+      const max = PlainDate.from('+275760-09-13');
       throws(() => min.toPlainDateTime(midnight), RangeError);
       throws(() => midnight.toPlainDateTime(min), RangeError);
       equal(`${min.toPlainDateTime(firstNs)}`, '-271821-04-19T00:00:00.000000001');
@@ -1490,7 +1498,7 @@ describe('DateTime', () => {
     it('adding and subtracting beyond limit', () => {
       const min = PlainDateTime.from('-271821-04-19T00:00:00.000000001');
       const max = PlainDateTime.from('+275760-09-13T23:59:59.999999999');
-      ['reject', 'constrain'].forEach((overflow: OverflowHandling) => {
+      ['reject', 'constrain'].forEach((overflow: any) => {
         throws(() => min.subtract({ nanoseconds: 1 }, { overflow }), RangeError);
         throws(() => max.add({ nanoseconds: 1 }, { overflow }), RangeError);
       });
@@ -1498,7 +1506,7 @@ describe('DateTime', () => {
     it('rounding beyond limit', () => {
       const min = PlainDateTime.from('-271821-04-19T00:00:00.000000001');
       const max = PlainDateTime.from('+275760-09-13T23:59:59.999999999');
-      ['day', 'hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: DayTimeUnit) => {
+      ['day', 'hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: any) => {
         throws(() => min.round({ smallestUnit, roundingMode: 'floor' }), RangeError);
         throws(() => max.round({ smallestUnit, roundingMode: 'ceil' }), RangeError);
       });
@@ -1551,7 +1559,7 @@ describe('DateTime', () => {
   describe('dateTime.withCalendar()', () => {
     const dt1 = PlainDateTime.from('1976-11-18T15:23:30.123456789');
     it('works', () => {
-      const calendar = Temporal.Calendar.from('iso8601');
+      const calendar = Calendar.from('iso8601');
       equal(`${dt1.withCalendar(calendar)}`, '1976-11-18T15:23:30.123456789');
     });
     it('casts its argument', () => {
@@ -1645,7 +1653,7 @@ describe('DateTime', () => {
       equal(dt3.toString({ fractionalSecondDigits: 3, roundingMode: 'ceil' }), '1976-11-18T15:23:30.124');
     });
     it('rounds down', () => {
-      ['floor', 'trunc'].forEach((roundingMode: RoundingMode) => {
+      ['floor', 'trunc'].forEach((roundingMode: any) => {
         equal(dt2.toString({ smallestUnit: 'minute', roundingMode }), '1976-11-18T15:23');
         equal(dt3.toString({ fractionalSecondDigits: 3, roundingMode }), '1976-11-18T15:23:30.123');
       });

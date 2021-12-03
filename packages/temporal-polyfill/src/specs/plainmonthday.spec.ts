@@ -1,10 +1,9 @@
 import { assert } from 'chai';
 const { throws, equal, notEqual } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { PlainMonthDay } = Temporal;
+declare const Temporal: never; // don't use global
+import { Calendar, PlainDate, PlainMonthDay } from '../impl';
 
-import { OverflowHandling } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
@@ -45,8 +44,8 @@ describe('MonthDay', () => {
         notEqual(actu, orig);
       });
       it('ignores year when determining the ISO reference year from other Temporal object', () => {
-        const plainDate1 = Temporal.PlainDate.from('2019-11-18');
-        const plainDate2 = Temporal.PlainDate.from('1976-11-18');
+        const plainDate1 = PlainDate.from('2019-11-18');
+        const plainDate2 = PlainDate.from('1976-11-18');
         const one = PlainMonthDay.from(plainDate1);
         const two = PlainMonthDay.from(plainDate2);
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear);
@@ -74,7 +73,7 @@ describe('MonthDay', () => {
         throws(() => PlainMonthDay.from({ monthCode: 'M12' } as InvalidArg), TypeError));
       it('MonthDay.from({}) throws', () => throws(() => PlainMonthDay.from({} as InvalidArg), TypeError));
       it('MonthDay.from(required prop undefined) throws', () =>
-        throws(() => PlainMonthDay.from({ monthCode: undefined, day: 15 }), TypeError));
+        throws(() => PlainMonthDay.from({ monthCode: undefined, day: 15 } as InvalidArg), TypeError));
       it('MonthDay.from(number) is converted to string', () =>
         assert(PlainMonthDay.from(1201 as ValidArg).equals(PlainMonthDay.from('12-01'))));
       it('basic format', () => {
@@ -138,7 +137,7 @@ describe('MonthDay', () => {
         });
       });
       describe('Leap day', () => {
-        ['reject', 'constrain'].forEach((overflow: OverflowHandling) =>
+        ['reject', 'constrain'].forEach((overflow: any) =>
           it(overflow, () => equal(`${PlainMonthDay.from({ month: 2, day: 29 }, { overflow })}`, '02-29'))
         );
         it("rejects when year isn't a leap year", () =>
@@ -244,7 +243,7 @@ describe('MonthDay', () => {
       throws(() => md1.equals({ month: 1 } as InvalidArg), TypeError);
     });
     it('takes [[ISOYear]] into account', () => {
-      const iso = Temporal.Calendar.from('iso8601');
+      const iso = Calendar.from('iso8601');
       const md1 = new PlainMonthDay(1, 1, iso, 1972);
       const md2 = new PlainMonthDay(1, 1, iso, 2000);
       assert(!md1.equals(md2));

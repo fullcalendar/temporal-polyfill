@@ -1,11 +1,10 @@
 import { assert } from 'chai';
 const { deepEqual, equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
+import '../global'; // for Intl.DateTimeFormat polyfill types
 
-import { DateUnit } from 'temporal-polyfill';
-import 'temporal-polyfill/global'; // for Intl.DateTimeFormat polyfill types
 type ValidArg = any;
+const nativePerformanceLib = (globalThis as any).performance
 
 describe('Intl', () => {
   // TODO: move these to their respective test files.
@@ -218,7 +217,7 @@ describe('Intl', () => {
       timeZone: 'UTC'
     });
     const hasOutdatedChineseIcuData = !testChineseData.endsWith('2001');
-    const itOrSkip: any = (id) => ((id === 'chinese' || id === 'dangi') && hasOutdatedChineseIcuData ? it.skip : it);
+    const itOrSkip: any = (id: string) => ((id === 'chinese' || id === 'dangi') && hasOutdatedChineseIcuData ? it.skip : it);
     const nodeVersion = (process?.versions?.node || '16').split('.')[0]; // **assume node 16 when running in browser**
 
     it('verify that Intl.DateTimeFormat.formatToParts output matches snapshot data', () => {
@@ -228,7 +227,7 @@ describe('Intl', () => {
       // that, when fixed, will break other tests. So this test is a signal that
       // other tests are broken because the comparison data needs to be updated,
       // not necessarily because Temporal is broken.
-      const getLocalizedDates = (isoString) => {
+      const getLocalizedDates = (isoString: string | number | Date) => {
         const calendars = [
           'iso8601',
           'buddhist',
@@ -260,7 +259,7 @@ describe('Intl', () => {
       const year1Content = getLocalizedDates('0001-01-01T00:00Z');
       // to generate snapshot: `          '${year1Content.replaceAll('\n', "\\n' +\n          '")}',\n`
 
-      const year2000Snapshots = {
+      const year2000Snapshots: { [nodeVersionName: string]: string } = {
         node12:
           'iso8601: 1/1/2000\n' +
           'buddhist: 1/1/2543\n' +
@@ -324,7 +323,7 @@ describe('Intl', () => {
       };
       equal(year2000Content, year2000Snapshots[`node${nodeVersion}`]);
 
-      const year1Snapshots = {
+      const year1Snapshots: { [nodeVersionName: string]: string } = {
         node12:
           'iso8601: 1/1/1\n' +
           'buddhist: 1/3/544\n' +
@@ -389,7 +388,7 @@ describe('Intl', () => {
       equal(year1Content, year1Snapshots[`node${nodeVersion}`]);
     });
 
-    const fromWithCases = {
+    const fromWithCases: { [calendarName: string]: any } = {
       iso8601: { year2000: { year: 2000, month: 1, day: 1 }, year1: { year: 1, month: 1, day: 1 } },
       buddhist: {
         year2000: { year: 2543, month: 1, day: 1, era: 'be' },
@@ -493,7 +492,7 @@ describe('Intl', () => {
         year1: Temporal.PlainDate.from('0001-01-01')
       };
       for (const [name, date] of Object.entries(dates)) {
-        const getValues = (type) => {
+        const getValues = (type: string) => {
           let val = tests[name];
           if (val[type]) val = val[type];
           return val;
@@ -502,7 +501,7 @@ describe('Intl', () => {
         const fromErrorExpected =
           fromValues === RangeError || (nodeVersion === '12' && fromValues.node12 === RangeError);
         itOrSkip(id)(`from: ${id} ${name} ${fromErrorExpected ? ' (throws)' : ''}`, () => {
-          const now = globalThis.performance ? globalThis.performance.now() : Date.now();
+          const now = nativePerformanceLib ? nativePerformanceLib.now() : Date.now();
           const values = fromValues;
           if (fromErrorExpected) {
             // Some calendars will fail due to Chromium bugs noted in the test definitions
@@ -588,7 +587,7 @@ describe('Intl', () => {
               }),
             RangeError
           );
-          const ms = (globalThis.performance ? globalThis.performance.now() : Date.now()) - now;
+          const ms = (nativePerformanceLib ? nativePerformanceLib.now() : Date.now()) - now;
           totalNow += ms;
           // eslint-disable-next-line no-console
           if (logPerf) console.log(`from: ${id} ${name}: ${ms.toFixed(2)}ms, total: ${totalNow.toFixed(2)}ms`);
@@ -597,7 +596,7 @@ describe('Intl', () => {
         const withErrorExpected =
           withValues === RangeError || (nodeVersion === '12' && withValues.node12 === RangeError);
         itOrSkip(id)(`with: ${id} ${name} ${withErrorExpected ? ' (throws)' : ''}`, () => {
-          const now = globalThis.performance ? globalThis.performance.now() : Date.now();
+          const now = nativePerformanceLib ? nativePerformanceLib.now() : Date.now();
           const inCal = date.withCalendar(id);
           if (withErrorExpected) {
             // Some calendars will fail due to Chromium bugs noted in the test definitions
@@ -621,7 +620,7 @@ describe('Intl', () => {
           equal(`${t} year: ${afterWithYear.year}`, `${t} year: 2220`);
           equal(`${t} month: ${afterWithYear.month}`, `${t} month: 1`);
           equal(`${t} day: ${afterWithYear.day}`, `${t} day: 1`);
-          const ms = (globalThis.performance ? globalThis.performance.now() : Date.now()) - now;
+          const ms = (nativePerformanceLib ? nativePerformanceLib.now() : Date.now()) - now;
           totalNow += ms;
           // eslint-disable-next-line no-console
           if (logPerf) console.log(`with: ${id} ${name}: ${ms.toFixed(2)}ms, total: ${totalNow.toFixed(2)}ms`);
@@ -641,7 +640,7 @@ describe('Intl', () => {
                 }', eraYear: ${eraYear}, era: ${era ? `'${era}'` : undefined} }`;
       }).join(',\n');
     */
-    const addDaysWeeksCases = {
+    const addDaysWeeksCases: { [calendarName: string]: any } = {
       iso8601: { year: 2000, month: 10, day: 7, monthCode: 'M10', eraYear: undefined, era: undefined },
       // See https://bugs.chromium.org/p/chromium/issues/detail?id=1173158
       buddhist: RangeError, // { year: 2000, month: 10, day: 8, monthCode: 'M10', eraYear: 2000, era: 'be' },
@@ -663,7 +662,7 @@ describe('Intl', () => {
       persian: { year: 2000, month: 10, day: 5, monthCode: 'M10', eraYear: 2000, era: 'ap' },
       roc: { year: 2000, month: 10, day: 8, monthCode: 'M10', eraYear: 2000, era: 'minguo' }
     };
-    const addMonthsCases = {
+    const addMonthsCases: { [calendarName: string]: any } = {
       iso8601: { year: 2001, month: 6, day: 1, monthCode: 'M06', eraYear: undefined, era: undefined },
       // See https://bugs.chromium.org/p/chromium/issues/detail?id=1173158
       buddhist: RangeError, // { year: 2001, month: 6, day: 1, monthCode: 'M06', eraYear: 2001, era: 'be' },
@@ -688,7 +687,7 @@ describe('Intl', () => {
     const addYearsMonthsDaysCases = Object.entries(addMonthsCases).reduce((obj, entry) => {
       obj[entry[0]] = entry[1] === RangeError ? RangeError : { ...entry[1], day: 18 };
       return obj;
-    }, {});
+    }, {} as any);
     const tests = {
       days: { duration: { days: 280 }, results: addDaysWeeksCases, startDate: { year: 2000, month: 1, day: 1 } },
       weeks: { duration: { weeks: 40 }, results: addDaysWeeksCases, startDate: { year: 2000, month: 1, day: 1 } },
@@ -708,7 +707,7 @@ describe('Intl', () => {
         const values = results[id];
         duration = Temporal.Duration.from(duration);
         itOrSkip(id)(`${id} add ${duration}`, () => {
-          const now = globalThis.performance ? globalThis.performance.now() : Date.now();
+          const now = nativePerformanceLib ? nativePerformanceLib.now() : Date.now();
           if (values === RangeError) {
             throws(() => Temporal.PlainDate.from({ ...startDate, calendar: id }));
             return;
@@ -723,7 +722,7 @@ describe('Intl', () => {
           equal(`add ${unit} ${id} monthCode: ${end.monthCode}`, `add ${unit} ${id} monthCode: ${values.monthCode}`);
           const calculatedStart = end.subtract(duration);
           equal(`start ${calculatedStart.toString()}`, `start ${start.toString()}`);
-          const diff = start.until(end, { largestUnit: unit as DateUnit });
+          const diff = start.until(end, { largestUnit: unit as any });
           equal(`diff ${unit} ${id}: ${diff}`, `diff ${unit} ${id}: ${duration}`);
 
           if (unit === 'months') {
@@ -818,7 +817,7 @@ describe('Intl', () => {
             );
           }
 
-          const ms = (globalThis.performance ? globalThis.performance.now() : Date.now()) - now;
+          const ms = (nativePerformanceLib ? nativePerformanceLib.now() : Date.now()) - now;
           totalNow += ms;
           // eslint-disable-next-line no-console
           if (logPerf) console.log(`${id} add ${duration}: ${ms.toFixed(2)}ms, total: ${totalNow.toFixed(2)}ms`);
@@ -844,7 +843,7 @@ describe('Intl', () => {
         return `${quotedId}: { year: ${year}, leap: ${leap}, days: [${daysInMonthArray.join(', ')}] }`;
       }).join(',\n');
     */
-    const daysInMonthCases = {
+    const daysInMonthCases: { [calendarName: string]: any } = {
       iso8601: { year: 2001, leap: false, days: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] },
       // Buddhist uses 4001 to avoid https://bugs.chromium.org/p/chromium/issues/detail?id=1173158
       buddhist: { year: 4001, leap: false, days: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] },
@@ -875,28 +874,34 @@ describe('Intl', () => {
           : Temporal.PlainDate.from({ year, month: 1, day: 1, calendar: id });
       itOrSkip(id)(`${id} leap year check for year ${year}`, () => {
         if (typeof leap === 'boolean') {
-          equal(date.inLeapYear, leap);
+          equal(date!.inLeapYear, leap);
         } else {
-          equal(date.inLeapYear, true);
-          const leapMonth = date.with({ monthCode: leap });
+          equal(date!.inLeapYear, true);
+          const leapMonth = date!.with({ monthCode: leap });
           equal(leapMonth.monthCode, leap);
         }
       });
       itOrSkip(id)(`${id} months check for year ${year}`, () => {
-        const now = globalThis.performance ? globalThis.performance.now() : Date.now();
-        const { monthsInYear } = date;
+        const now = nativePerformanceLib ? nativePerformanceLib.now() : Date.now();
+        const { monthsInYear } = date!;
         equal(monthsInYear, days.length);
         // This loop counts backwards so we'll have the right test for the month
         // before a leap month in lunisolar calendars.
-        for (let i = monthsInYear, leapMonthIndex = undefined, monthStart = undefined; i >= 1; i--) {
-          monthStart = monthStart ? monthStart.add({ months: -1 }) : date.add({ months: monthsInYear - 1 });
+        for (
+          let i = monthsInYear,
+            leapMonthIndex = undefined,
+            monthStart: Temporal.PlainDate | undefined = undefined;
+          i >= 1;
+          i--
+        ) {
+          monthStart = monthStart ? monthStart.add({ months: -1 }) : date!.add({ months: monthsInYear - 1 });
           const { month, monthCode, daysInMonth } = monthStart;
           equal(
             `${id} month ${i} (code ${monthCode}) days: ${daysInMonth}`,
             `${id} month ${i} (code ${monthCode}) days: ${days[i - 1]}`
           );
           if (monthCode.endsWith('L')) {
-            equal(date.with({ monthCode }).monthCode, monthCode);
+            equal(date!.with({ monthCode }).monthCode, monthCode);
             leapMonthIndex = i;
           } else {
             if (leapMonthIndex && i === leapMonthIndex - 1) {
@@ -904,12 +909,12 @@ describe('Intl', () => {
               equal(inLeapMonth.monthCode, `${monthCode}L`);
             } else {
               throws(
-                () => monthStart.with({ monthCode: `M${month.toString().padStart(2, '0')}L` }, { overflow: 'reject' }),
+                () => monthStart!.with({ monthCode: `M${month.toString().padStart(2, '0')}L` }, { overflow: 'reject' }),
                 RangeError
               );
               if (['chinese', 'dangi'].includes(id)) {
                 if (i === 1 || i === 12 || i === 13) {
-                  throws(() => monthStart.with({ monthCode: `M${month.toString().padStart(2, '0')}L` }), RangeError);
+                  throws(() => monthStart!.with({ monthCode: `M${month.toString().padStart(2, '0')}L` }), RangeError);
                 } else {
                   // verify that non-leap "L" months are constrained down to last day of previous month
                   const fakeL = monthStart.with({ monthCode: `M${month.toString().padStart(2, '0')}L`, day: 5 });
@@ -920,20 +925,20 @@ describe('Intl', () => {
             }
             if (!['chinese', 'dangi', 'hebrew'].includes(id)) {
               // leap months should only be allowed for lunisolar calendars
-              throws(() => monthStart.with({ monthCode: `M${month.toString().padStart(2, '0')}L` }), RangeError);
+              throws(() => monthStart!.with({ monthCode: `M${month.toString().padStart(2, '0')}L` }), RangeError);
             }
           }
-          throws(() => monthStart.with({ day: daysInMonth + 1 }, { overflow: 'reject' }), RangeError);
+          throws(() => monthStart!.with({ day: daysInMonth + 1 }, { overflow: 'reject' }), RangeError);
           const oneDayPastMonthEnd = monthStart.with({ day: daysInMonth + 1 });
           equal(oneDayPastMonthEnd.day, daysInMonth);
         }
-        const ms = (globalThis.performance ? globalThis.performance.now() : Date.now()) - now;
+        const ms = (nativePerformanceLib ? nativePerformanceLib.now() : Date.now()) - now;
         totalNow += ms;
         // eslint-disable-next-line no-console
         if (logPerf) console.log(`${id} months check ${id}: ${ms.toFixed(2)}ms, total: ${totalNow.toFixed(2)}ms`);
       });
     }
-    const monthDayCases = [
+    const monthDayCases: any[] = [
       { calendar: 'iso8601', isoReferenceYear: 1972, year: 2004, month: 2, day: 29 },
       // Buddhist calendar suffers pre-node15 https://bugs.chromium.org/p/chromium/issues/detail?id=1173158
       { calendar: 'buddhist', nodeBefore15: RangeError, isoReferenceYear: 1972, year: 2004, month: 2, day: 29 },
@@ -1148,7 +1153,7 @@ describe('Intl', () => {
 
     // Verify that inputs to DateTimeFormat constructor are immune to mutation.
     // Also verify that options properties are only read once.
-    const onlyOnce = (value) => {
+    const onlyOnce = (value: any) => {
       const obj = {
         calls: 0,
         toString() {

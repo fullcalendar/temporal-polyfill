@@ -6,7 +6,8 @@
 import { assert } from 'chai';
 const { equal } = assert;
 
-import * as Temporal from 'temporal-polyfill';
+declare const Temporal: never; // don't use global
+import { PlainDate } from '../impl';
 
 describe('Date.since(simple, simple)', () => {
   build('Before Leap Day', '2020-01-03', '2020-02-15');
@@ -49,15 +50,15 @@ describe('Date.since(normal, leap)', () => {
   build('Month>2 & Month<2', '2019-04-20', '2020-01-05');
 });
 
-function build(name, sone, stwo) {
+function build(name: string, sone: string, stwo: string) {
   const calendars = ['iso8601', 'gregory'];
   describe(name, () => {
     const largestUnits = ['years', 'months', 'weeks', 'days'];
     for (const calendar of calendars) {
       const [one, two] = [
-        Temporal.PlainDate.from(sone).withCalendar(calendar),
-        Temporal.PlainDate.from(stwo).withCalendar(calendar)
-      ].sort(Temporal.PlainDate.compare);
+        PlainDate.from(sone).withCalendar(calendar),
+        PlainDate.from(stwo).withCalendar(calendar)
+      ].sort(PlainDate.compare);
       buildSub(one, two, largestUnits);
       buildSub(one.with({ day: 25 }), two.with({ day: 5 }), largestUnits);
       buildSub(one.with({ day: 30 }), two.with({ day: 29 }), largestUnits);
@@ -65,7 +66,7 @@ function build(name, sone, stwo) {
     }
   });
 }
-function buildSub(one, two, largestUnits) {
+function buildSub(one: PlainDate, two: PlainDate, largestUnits: any[]) {
   largestUnits.forEach((largestUnit) => {
     describe(`< ${one} : ${two} (${largestUnit})>`, () => {
       const dif = two.since(one, { largestUnit });

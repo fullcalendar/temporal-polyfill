@@ -6,10 +6,9 @@
 import { assert } from 'chai';
 const { equal, notEqual, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill';
-const { PlainTime, PlainDateTime } = Temporal;
+declare const Temporal: never; // don't use global
+import { Duration, PlainTime, PlainDateTime, FractionalSecondDigits, TimeUnit } from '../impl';
 
-import { FractionalSecondDigits, OverflowHandling, RoundingMode, TimeUnit } from 'temporal-polyfill';
 type InvalidArg = any;
 type ValidArg = any;
 
@@ -202,22 +201,22 @@ describe('Time', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { smallestUnit: 'hours' as TimeUnit, roundingIncrement };
-        assert(earlier.until(later, options) instanceof Temporal.Duration);
+        assert(earlier.until(later, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: TimeUnit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: TimeUnit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(earlier.until(later, options) instanceof Temporal.Duration);
+          assert(earlier.until(later, options) instanceof Duration);
         });
       });
     });
@@ -470,22 +469,22 @@ describe('Time', () => {
     it('valid hour increments divide into 24', () => {
       [1, 2, 3, 4, 6, 8, 12].forEach((roundingIncrement) => {
         const options = { smallestUnit: 'hours' as TimeUnit, roundingIncrement };
-        assert(later.since(earlier, options) instanceof Temporal.Duration);
+        assert(later.since(earlier, options) instanceof Duration);
       });
     });
-    ['minutes', 'seconds'].forEach((smallestUnit: TimeUnit) => {
+    ['minutes', 'seconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
-    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: TimeUnit) => {
+    ['milliseconds', 'microseconds', 'nanoseconds'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           const options = { smallestUnit, roundingIncrement };
-          assert(later.since(earlier, options) instanceof Temporal.Duration);
+          assert(later.since(earlier, options) instanceof Duration);
         });
       });
     });
@@ -635,14 +634,14 @@ describe('Time', () => {
         assert(time.round({ smallestUnit, roundingIncrement }) instanceof PlainTime);
       });
     });
-    ['minute', 'second'].forEach((smallestUnit: TimeUnit) => {
+    ['minute', 'second'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 60`, () => {
         [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].forEach((roundingIncrement) => {
           assert(time.round({ smallestUnit, roundingIncrement }) instanceof PlainTime);
         });
       });
     });
-    ['millisecond', 'microsecond', 'nanosecond'].forEach((smallestUnit: TimeUnit) => {
+    ['millisecond', 'microsecond', 'nanosecond'].forEach((smallestUnit: any) => {
       it(`valid ${smallestUnit} increments divide into 1000`, () => {
         [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500].forEach((roundingIncrement) => {
           assert(time.round({ smallestUnit, roundingIncrement }) instanceof PlainTime);
@@ -666,7 +665,7 @@ describe('Time', () => {
       throws(() => time.round({ smallestUnit: 'nanosecond', roundingIncrement: 1000 }), RangeError);
     });
     const bal = PlainTime.from('23:59:59.999999999');
-    ['hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: TimeUnit) => {
+    ['hour', 'minute', 'second', 'millisecond', 'microsecond'].forEach((smallestUnit: any) => {
       it(`balances to next ${smallestUnit}`, () => {
         equal(`${bal.round({ smallestUnit })}`, '00:00:00');
       });
@@ -740,7 +739,7 @@ describe('Time', () => {
       equal(`${PlainTime.from('15:23:30.123457089').add({ nanoseconds: -300 })}`, '15:23:30.123456789');
     });
     it('time.add(durationObj)', () => {
-      equal(`${time.add(Temporal.Duration.from('PT16H'))}`, '07:23:30.123456789');
+      equal(`${time.add(Duration.from('PT16H'))}`, '07:23:30.123456789');
     });
     it('casts argument', () => equal(`${time.add('PT16H')}`, '07:23:30.123456789'));
     it('ignores higher units', () => {
@@ -749,7 +748,7 @@ describe('Time', () => {
       equal(`${time.add({ years: 1 })}`, '15:23:30.123456789');
     });
     it('mixed positive and negative values always throw', () => {
-      ['constrain', 'reject'].forEach((overflow: OverflowHandling) =>
+      ['constrain', 'reject'].forEach((overflow: any) =>
         throws(() => (time as ValidArg).add({ hours: 1, minutes: -30 }, { overflow }), RangeError) // **options are ignored**
       );
     });
@@ -789,7 +788,7 @@ describe('Time', () => {
       equal(`${PlainTime.from('15:23:30.123455989').subtract({ nanoseconds: -800 })}`, '15:23:30.123456789');
     });
     it('time.subtract(durationObj)', () => {
-      equal(`${time.subtract(Temporal.Duration.from('PT16H'))}`, '23:23:30.123456789');
+      equal(`${time.subtract(Duration.from('PT16H'))}`, '23:23:30.123456789');
     });
     it('casts argument', () => equal(`${time.subtract('PT16H')}`, '23:23:30.123456789'));
     it('ignores higher units', () => {
@@ -901,7 +900,7 @@ describe('Time', () => {
       equal(t3.toString({ fractionalSecondDigits: 3, roundingMode: 'ceil' }), '15:23:30.124');
     });
     it('rounds down', () => {
-      ['floor', 'trunc'].forEach((roundingMode: RoundingMode) => {
+      ['floor', 'trunc'].forEach((roundingMode: any) => {
         equal(t2.toString({ smallestUnit: 'minute', roundingMode }), '15:23');
         equal(t3.toString({ fractionalSecondDigits: 3, roundingMode }), '15:23:30.123');
       });
