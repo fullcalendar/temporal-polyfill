@@ -24,7 +24,7 @@ export function parseRoundOptions<
   }
   return {
     smallestUnit: parseUnit(options?.smallestUnit, smallestUnitDefault, minUnit, maxUnit),
-    roundingMode: parseRoundingMode(options?.roundingMode, Math.round),
+    roundingMode: parseRoundingMode(options?.roundingMode, Math.trunc),
     roundingIncrement: options?.roundingIncrement ?? 1,
   }
 }

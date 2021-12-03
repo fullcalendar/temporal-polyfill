@@ -18,4 +18,5 @@ const roundingModeMap: RoundingModeMap = {
 export const parseRoundingMode = createParser(
   'roundingMode',
   roundingModeMap,
+  // TODO: always default to Math.trunc?
 )
