@@ -72,11 +72,12 @@ export function createDateTime(isoFields: DateTimeISOFields): PlainDateTime {
 export function dateTimeFieldsToISO(
   fields: DateTimeLikeFields,
   options: OverflowOptions | undefined,
+  overflowHandling: OverflowHandlingInt,
   calendar: Calendar,
 ): DateTimeISOFields {
   return {
     ...calendar.dateFromFields(fields, options).getISOFields(),
-    ...timeFieldsToConstrainedISO(fields, options),
+    ...timeFieldsToConstrainedISO(fields, overflowHandling),
   }
 }
 

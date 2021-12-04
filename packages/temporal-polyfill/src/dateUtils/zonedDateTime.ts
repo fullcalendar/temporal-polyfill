@@ -5,8 +5,8 @@ import {
   OFFSET_REJECT,
   OFFSET_USE,
   OffsetHandlingInt,
-  parseOffsetHandling,
 } from '../argParse/offsetHandling'
+import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
@@ -50,9 +50,8 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 export function createZonedDateTime(
   isoFields: ZonedDateTimeISOEssentials,
   options: ZonedDateTimeOptions | undefined,
-  defaultOffsetUsage: OffsetHandlingInt,
+  offsetHandling: OffsetHandlingInt,
 ): ZonedDateTime {
-  const offsetUsage = parseOffsetHandling(options?.offset, defaultOffsetUsage)
   const dateTime = createDateTime(isoFields)
   let zonedDateTime = dateTime.toZonedDateTime(isoFields.timeZone, options)
   const literalOffset = isoFields.offset
@@ -61,13 +60,13 @@ export function createZonedDateTime(
     literalOffset != null &&
     literalOffset !== zonedDateTime.offsetNanoseconds
   ) {
-    if (offsetUsage === OFFSET_REJECT) {
+    if (offsetHandling === OFFSET_REJECT) {
       throw new Error('Mismatching offset/timezone')
-    } else if (offsetUsage !== OFFSET_IGNORE) {
+    } else if (offsetHandling !== OFFSET_IGNORE) {
       const newEpochNano = isoFieldsToEpochNano(isoFields) - BigInt(literalOffset)
       let useNew = false
 
-      if (offsetUsage === OFFSET_USE) {
+      if (offsetHandling === OFFSET_USE) {
         useNew = true
       } else { // OFFSET_PREFER
         const instants = isoFields.timeZone.getPossibleInstantsFor(dateTime)
@@ -92,11 +91,12 @@ export function createZonedDateTime(
 export function zonedDateTimeFieldsToISO(
   fields: ZonedDateTimeLikeFields,
   options: ZonedDateTimeOptions | undefined,
+  overflowHandling: OverflowHandlingInt,
   calendar: Calendar,
   timeZone: TimeZone,
 ): ZonedDateTimeISOEssentials {
   return {
-    ...dateTimeFieldsToISO(fields, options, calendar),
+    ...dateTimeFieldsToISO(fields, options, overflowHandling, calendar),
     timeZone,
     offset: fields.offset ? parseOffsetNano(fields.offset) : null,
   }

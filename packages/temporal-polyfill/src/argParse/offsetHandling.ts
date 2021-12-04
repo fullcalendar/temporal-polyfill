@@ -1,3 +1,4 @@
+import { OffsetHandling } from '../public/types'
 import { createParser } from './refine'
 
 export const OFFSET_PREFER = 0
@@ -19,7 +20,14 @@ export const offsetHandlingMap: OffsetHandlingMap = {
   reject: 3,
 }
 
-export const parseOffsetHandling = createParser(
+const parseOffsetHandling = createParser(
   'offsetConflict',
   offsetHandlingMap,
 )
+
+export function parseOffsetOptions(
+  options: { offset?: OffsetHandling } | undefined,
+  defaultOffsetHandling: OffsetHandlingInt,
+): OffsetHandlingInt {
+  return parseOffsetHandling(options?.offset, defaultOffsetHandling)
+}

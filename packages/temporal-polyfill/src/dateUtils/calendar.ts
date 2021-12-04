@@ -1,5 +1,5 @@
 import { ensureCalendarsEqual } from '../argParse/calendar'
-import { parseOverflowHandling } from '../argParse/overflowHandling'
+import { parseOverflowOptions } from '../argParse/overflowHandling'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
@@ -91,7 +91,7 @@ export function queryDateISOFields(
   [year, month, day] = constrainDateFields(
     year, month, day,
     calendarImpl,
-    parseOverflowHandling(options?.overflow),
+    parseOverflowOptions(options),
   )
 
   return epochMilliToISOFields(calendarImpl.epochMilliseconds(year, month, day))

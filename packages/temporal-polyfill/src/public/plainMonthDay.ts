@@ -1,6 +1,6 @@
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
-import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOptions } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
@@ -55,9 +55,12 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   }
 
   static from(arg: MonthDayArg, options?: OverflowOptions): PlainMonthDay {
+    parseOverflowOptions(options) // unused, but need to validate, regardless of input type
+
     if (arg instanceof PlainMonthDay) {
       return createMonthDay(arg.getISOFields()) // optimization
     }
+
     if (typeof arg === 'object') {
       const refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
       if (refinedFields.year == null && refinedFields.monthCode == null && arg.calendar != null) {
@@ -65,6 +68,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
       }
       return extractCalendar(arg).monthDayFromFields(refinedFields as MonthDayLikeFields, options)
     }
+
     return createMonthDay(parseMonthDayISO(String(arg)))
   }
 

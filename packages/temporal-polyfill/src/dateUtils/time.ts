@@ -1,13 +1,12 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { timeFieldMap } from '../argParse/fieldStr'
-import { OverflowHandlingInt, parseOverflowHandling } from '../argParse/overflowHandling'
+import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
 import { parseRoundOptions } from '../argParse/roundOptions'
 import { Duration } from '../public/duration'
 import { PlainTime } from '../public/plainTime'
 import {
   CompareResult,
-  OverflowOptions,
   TimeArg,
   TimeDiffOptions,
   TimeLike,
@@ -123,11 +122,11 @@ export function roundPlainTime(plainTime: PlainTime, options: TimeRoundOptions):
 
 export function timeFieldsToConstrainedISO(
   fields: TimeLike,
-  options: OverflowOptions | undefined,
+  overflowHandling: OverflowHandlingInt,
 ): TimeISOEssentials {
   return constrainTimeISO(
     timeLikeToISO(fields),
-    parseOverflowHandling(options?.overflow),
+    overflowHandling,
   )
 }
 

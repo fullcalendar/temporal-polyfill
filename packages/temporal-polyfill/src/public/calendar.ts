@@ -4,7 +4,7 @@ import {
   getCommonCalendar,
   isCalendarArgBag,
 } from '../argParse/calendar'
-import { parseOverflowHandling } from '../argParse/overflowHandling'
+import { parseOverflowOptions } from '../argParse/overflowHandling'
 import { parseUnit } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
@@ -203,7 +203,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     const impl = getImpl(this)
     const date = ensureObj(PlainDate, dateArg, options)
     const duration = ensureObj(Duration, durationArg)
-    const overflowHandling = parseOverflowHandling(options?.overflow)
+    const overflowHandling = parseOverflowOptions(options)
     const isoFields = addToDateFields(date, duration, impl, overflowHandling)
 
     return new PlainDate(

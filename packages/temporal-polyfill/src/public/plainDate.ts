@@ -2,7 +2,7 @@ import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { dateFieldMap } from '../argParse/fieldStr'
-import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOptions } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import {
@@ -63,13 +63,17 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   static from(arg: DateArg, options?: OverflowOptions): PlainDate {
+    parseOverflowOptions(options) // unused, but need to validate, regardless of input type
+
     if (arg instanceof PlainDate) {
       return createDate(arg.getISOFields()) // optimization
     }
+
     if (typeof arg === 'object') {
       const refinedFields = refineFields(arg, dateFieldMap) as DateLikeFields
       return extractCalendar(arg).dateFromFields(refinedFields, options)
     }
+
     return createDate(parseDateTimeISO(String(arg)))
   }
 

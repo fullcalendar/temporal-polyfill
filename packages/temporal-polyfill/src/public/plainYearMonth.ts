@@ -2,7 +2,7 @@ import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { yearMonthFieldMap } from '../argParse/fieldStr'
-import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOptions } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO, diffDates } from '../dateUtils/date'
@@ -59,13 +59,17 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   static from(arg: YearMonthArg, options?: OverflowOptions): PlainYearMonth {
+    parseOverflowOptions(options) // unused, but need to validate, regardless of input type
+
     if (arg instanceof PlainYearMonth) {
       return createYearMonth(arg.getISOFields()) // optimization
     }
+
     if (typeof arg === 'object') {
       const refinedFields = refineFields(arg, yearMonthFieldMap) as YearMonthLikeFields
       return extractCalendar(arg).yearMonthFromFields(refinedFields, options)
     }
+
     return createYearMonth(parseDateTimeISO(String(arg)))
   }
 

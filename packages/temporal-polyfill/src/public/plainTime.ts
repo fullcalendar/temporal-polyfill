@@ -1,6 +1,6 @@
 import { timeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
-import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOptions } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
@@ -65,11 +65,13 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   static from(arg: TimeArg, options?: OverflowOptions): PlainTime {
+    const overflowHandling = parseOverflowOptions(options)
+
     return createTime(
       arg instanceof PlainTime
         ? arg.getISOFields() // optimization
         : typeof arg === 'object'
-          ? timeFieldsToConstrainedISO(refineFields(arg, timeFieldMap), options)
+          ? timeFieldsToConstrainedISO(refineFields(arg, timeFieldMap), overflowHandling)
           : parseTimeISO(String(arg)),
     )
   }
@@ -81,7 +83,9 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   with(fields: TimeLike, options?: OverflowOptions): PlainTime {
     const refinedFields = refineOverrideFields(fields, timeFieldMap)
     const mergedFields = overrideTimeFields(refinedFields, this)
-    return createTime(timeFieldsToConstrainedISO(mergedFields, options))
+    return createTime(
+      timeFieldsToConstrainedISO(mergedFields, parseOverflowOptions(options)),
+    )
   }
 
   add(durationArg: DurationArg): PlainTime {
