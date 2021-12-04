@@ -8,7 +8,7 @@ import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZon
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { TimeISOEssentials, nanoToWrappedTimeFields, timeISOToNano } from '../dateUtils/time'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
-import { padZeros } from '../utils/string'
+import { getSignStr, padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { SignedDurationFields } from './duration'
 import { roundNano } from './round'
@@ -27,7 +27,12 @@ export function formatDateISO(fields: DateISOFields): string {
 }
 
 export function formatYearMonthISO(fields: DateISOFields): string {
-  return padZeros(fields.isoYear, 4) + '-' + padZeros(fields.isoMonth, 2)
+  const { isoYear } = fields
+  return (
+    (isoYear < 1000 || isoYear > 9999)
+      ? getSignStr(isoYear) + padZeros(Math.abs(isoYear), 6)
+      : padZeros(isoYear, 4)
+  ) + '-' + padZeros(fields.isoMonth, 2)
 }
 
 export function formatMonthDayISO(fields: DateISOFields): string {
@@ -56,7 +61,7 @@ export function formatOffsetISO(offsetNanoseconds: number): string {
   const totalMins = Math.abs(Math.trunc(offsetNanoseconds / nanoInMinute))
   const hours = Math.trunc(totalMins / 60)
   const mins = totalMins % 60
-  return (offsetNanoseconds < 0 ? '-' : '+') +
+  return getSignStr(offsetNanoseconds) +
     padZeros(hours, 2) + ':' +
     padZeros(mins, 2)
 }
@@ -97,7 +102,7 @@ export function formatDurationISO(
       fractionalSecondDigits,
     )
     : ''
-  return (sign < 0 ? '-' : '') + 'P' +
+  return getSignStr(sign) + 'P' +
     collapseDurationTuples([
       [fields.years, 'Y'],
       [fields.months, 'M'],
