@@ -575,7 +575,9 @@ describe('Date', () => {
     })
     describe('Overflow', () => {
       const bad = { year: 2019, month: 1, day: 32 }
-      it('reject', () => throws(() => PlainDate.from(bad, { overflow: 'reject' }), RangeError))
+      it('reject', () => {
+        throws(() => PlainDate.from(bad, { overflow: 'reject' }), RangeError)
+      })
       it('constrain', () => {
         equal(`${PlainDate.from(bad)}`, '2019-01-31')
         equal(`${PlainDate.from(bad, { overflow: 'constrain' })}`, '2019-01-31')
