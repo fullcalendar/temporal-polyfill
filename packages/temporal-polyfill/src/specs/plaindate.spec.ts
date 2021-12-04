@@ -511,17 +511,24 @@ describe('Date', () => {
       const actual = PlainDate.from(orig)
       notEqual(actual, orig)
     })
-    it('Date.from({ year: 1976, month: 11, day: 18 }) == 1976-11-18', () =>
-      equal(`${PlainDate.from({ year: 1976, month: 11, day: 18 })}`, '1976-11-18'))
-    it('can be constructed with month and without monthCode', () =>
-      equal(`${PlainDate.from({ year: 1976, month: 11, day: 18 })}`, '1976-11-18'))
-    it('can be constructed with monthCode and without month', () =>
-      equal(`${PlainDate.from({ year: 1976, monthCode: 'M11', day: 18 })}`, '1976-11-18'))
-    it('month and monthCode must agree', () =>
-      throws(() => PlainDate.from({ year: 1976, month: 11, monthCode: 'M12', day: 18 }), RangeError))
-    it('Date.from({ year: 2019, day: 15 }) throws', () =>
-      throws(() => PlainDate.from({ year: 2019, day: 15 } as InvalidArg), TypeError))
-    it('Date.from({ month: 12 }) throws', () => throws(() => PlainDate.from({ month: 12 } as InvalidArg), TypeError))
+    it('Date.from({ year: 1976, month: 11, day: 18 }) == 1976-11-18', () => {
+      equal(`${PlainDate.from({ year: 1976, month: 11, day: 18 })}`, '1976-11-18')
+    })
+    it('can be constructed with month and without monthCode', () => {
+      equal(`${PlainDate.from({ year: 1976, month: 11, day: 18 })}`, '1976-11-18')
+    })
+    it('can be constructed with monthCode and without month', () => {
+      equal(`${PlainDate.from({ year: 1976, monthCode: 'M11', day: 18 })}`, '1976-11-18')
+    })
+    it('month and monthCode must agree', () => {
+      throws(() => PlainDate.from({ year: 1976, month: 11, monthCode: 'M12', day: 18 }), RangeError)
+    })
+    it('Date.from({ year: 2019, day: 15 }) throws', () => {
+      throws(() => PlainDate.from({ year: 2019, day: 15 } as InvalidArg), TypeError)
+    })
+    it('Date.from({ month: 12 }) throws', () => {
+      throws(() => PlainDate.from({ month: 12 } as InvalidArg), TypeError)
+    })
     it('object must contain at least the required correctly-spelled properties', () => {
       throws(() => PlainDate.from({} as InvalidArg), TypeError)
       throws(() => PlainDate.from({ year: 1976, months: 11, day: 18 } as InvalidArg), TypeError)
@@ -529,9 +536,12 @@ describe('Date', () => {
     it('incorrectly-spelled properties are ignored', () => {
       equal(`${PlainDate.from({ year: 1976, month: 11, day: 18, days: 15 } as ValidArg)}`, '1976-11-18')
     })
-    it('Date.from(required prop undefined) throws', () =>
-      throws(() => PlainDate.from({ year: undefined as InvalidArg, month: 11, day: 18 }), TypeError))
-    it('Date.from(number) is converted to string', () => PlainDate.from(19761118 as ValidArg).equals(PlainDate.from('19761118')))
+    it('Date.from(required prop undefined) throws', () => {
+      throws(() => PlainDate.from({ year: undefined as InvalidArg, month: 11, day: 18 }), TypeError)
+    })
+    it('Date.from(number) is converted to string', () => {
+      PlainDate.from(19761118 as ValidArg).equals(PlainDate.from('19761118'))
+    })
     it('basic format', () => {
       equal(`${PlainDate.from('19761118')}`, '1976-11-18')
       equal(`${PlainDate.from('+0019761118')}`, '1976-11-18')
@@ -552,9 +562,12 @@ describe('Date', () => {
       equal(`${PlainDate.from('+0019761118T152330.1+00:00')}`, '1976-11-18')
       equal(`${PlainDate.from('+0019761118T152330.1+0000')}`, '1976-11-18')
     })
-    it('no junk at end of string', () => throws(() => PlainDate.from('1976-11-18junk'), RangeError))
-    it('ignores if a timezone is specified', () =>
-      equal(`${PlainDate.from('2020-01-01[Asia/Kolkata]')}`, '2020-01-01'))
+    it('no junk at end of string', () => {
+      throws(() => PlainDate.from('1976-11-18junk'), RangeError)
+    })
+    it('ignores if a timezone is specified', () => {
+      equal(`${PlainDate.from('2020-01-01[Asia/Kolkata]')}`, '2020-01-01')
+    })
     it('options may only be an object or undefined', () => {
       [{}, () => {}, undefined].forEach((options) =>
         equal(`${PlainDate.from({ year: 1976, month: 11, day: 18 }, options)}`, '1976-11-18'),
