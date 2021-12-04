@@ -1,4 +1,4 @@
-import { diffDaysMilli, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
+import { isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
 import { CalendarImpl } from './calendarImpl'
 
 export class ISOCalendarImpl extends CalendarImpl {
@@ -18,11 +18,15 @@ export class ISOCalendarImpl extends CalendarImpl {
     return isoToEpochMilli(year, month, day)
   }
 
+  // will work for any year, not just years within valid Date range
   daysInMonth(year: number, month: number): number {
-    return diffDaysMilli(
-      isoToEpochMilli(year, month),
-      isoToEpochMilli(year, month + 1),
-    )
+    if (month === 2) {
+      return this.inLeapYear(year) ? 29 : 28
+    }
+    if (month === 4 || month === 6 || month === 9 || month === 11) {
+      return 30
+    }
+    return 31
   }
 
   monthsInYear(): number {

@@ -1,5 +1,6 @@
 import { DateTimeISOEssentials, DateTimeISOMilli } from '../dateUtils/dateTime'
 import { DateTimeISOFields } from '../public/types'
+import { numSign } from '../utils/math'
 import {
   milliInDay,
   milliInMin,
@@ -91,15 +92,36 @@ export function isoToEpochMilli(
   isoSecond?: number,
   isoMillisecond?: number,
 ): number {
-  return Date.UTC(
-    isoYear ?? isoEpochOriginYear,
-    (isoMonth ?? 1) - 1,
-    isoDay ?? 1,
+  const year = isoYear ?? isoEpochOriginYear
+  const month = (isoMonth ?? 1) - 1
+  const day = isoDay ?? 1
+  const smallUnits = [
     isoHour ?? 0,
     isoMinute ?? 0,
     isoSecond ?? 0,
     isoMillisecond ?? 0,
+  ]
+  let milli = Date.UTC(
+    year,
+    month,
+    day,
+    ...smallUnits,
   )
+  if (isNaN(milli)) {
+    const sign = numSign(year)
+    const milliShifted = Date.UTC(
+      year,
+      month,
+      day + sign * -1,
+      ...smallUnits,
+    )
+    if (isNaN(milliShifted)) {
+      // Reject any DateTime 24 hours or more outside the Instant range
+      throw new RangeError('DateTime outside of supported range')
+    }
+    milli = milliShifted + sign * milliInDay
+  }
+  return milli
 }
 
 export function epochNanoToISOFields(epochNano: bigint): DateTimeISOEssentials {

@@ -10,7 +10,7 @@ import { PlainDate } from '../public/plainDate'
 import { CompareResult, DateISOFields, DateLikeFields, DateUnit } from '../public/types'
 import { compareValues } from '../utils/math'
 import { addWholeDays } from './add'
-import { isoFieldsToEpochNano } from './isoMath'
+import { isoFieldsToEpochNano, isoToEpochMilli } from './isoMath'
 import { compareMonthDayFields } from './monthDay'
 import { roundBalancedDuration } from './round'
 import {
@@ -49,9 +49,13 @@ export function constrainDateFields( // also ensures numbers
   calendarImpl: CalendarImpl,
   overflow: OverflowHandlingInt,
 ): [number, number, number] {
-  year = Number(year)
+  year = Number(year) // not using constrainValue, which converts to a number
   month = constrainValue(month, 1, calendarImpl.monthsInYear(year), overflow)
   day = constrainValue(day, 1, calendarImpl.daysInMonth(year, month), overflow)
+
+  // will throw error if out of bounds
+  isoToEpochMilli(year, month, day)
+
   return [year, month, day]
 }
 
