@@ -68,7 +68,7 @@ export function queryDateISOFields(
 
   if (year === undefined) {
     if (eraYear === undefined || era === undefined) {
-      throw new RangeError('Must specify either a year or an era & eraYear')
+      throw new TypeError('Must specify either a year or an era & eraYear')
     } else {
       year = calendarImpl.convertEraYear(eraYear, era, true) // errorUnknownEra=true
     }
@@ -81,11 +81,11 @@ export function queryDateISOFields(
     }
     month = m
   } else if (month === undefined) {
-    throw new RangeError('Must specify either a month or monthCode')
+    throw new TypeError('Must specify either a month or monthCode')
   }
 
   if (day === undefined) {
-    throw new RangeError('Must specify day')
+    throw new TypeError('Must specify day')
   }
 
   [year, month, day] = constrainDateFields(
