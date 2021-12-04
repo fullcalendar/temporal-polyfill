@@ -407,7 +407,7 @@ describe('Date', () => {
       equal(`${PlainDate.from('2019-10-29').subtract({ days: -20 })}`, '2019-11-18')
       equal(`${PlainDate.from('2019-01-28').subtract({ months: -1 })}`, '2019-02-28')
     })
-    it("ignores lower units that don't balance up to a day", () => {
+    it('ignores lower units that dont balance up to a day', () => {
       equal(`${date.subtract({ hours: 1 })}`, '2019-11-18')
       equal(`${date.subtract({ minutes: 1 })}`, '2019-11-18')
       equal(`${date.subtract({ seconds: 1 })}`, '2019-11-18')
