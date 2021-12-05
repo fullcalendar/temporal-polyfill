@@ -1,4 +1,4 @@
-import { createParser } from './refine'
+import { createOptionParser } from './refine'
 
 export const OFFSET_DISPLAY_AUTO = 0
 export const OFFSET_DISPLAY_NEVER = 1
@@ -13,7 +13,7 @@ export const offsetDisplayMap: OffsetDisplayMap = {
   never: 1,
 }
 
-export const parseOffsetDisplay = createParser(
+export const parseOffsetDisplayOption = createOptionParser(
   'offset',
   offsetDisplayMap,
   OFFSET_DISPLAY_AUTO,

@@ -1,4 +1,4 @@
-import { createParser } from './refine'
+import { createOptionParser } from './refine'
 
 export const CALENDAR_DISPLAY_AUTO = 0
 export const CALENDAR_DISPLAY_NEVER = 1
@@ -16,7 +16,7 @@ export const calendarDisplayMap: CalendarDisplayMap = {
   always: 2,
 }
 
-export const parseCalendarDisplay = createParser(
+export const parseCalendarDisplayOption = createOptionParser(
   'calendarName',
   calendarDisplayMap,
   CALENDAR_DISPLAY_AUTO,

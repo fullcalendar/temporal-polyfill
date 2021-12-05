@@ -165,8 +165,8 @@ export function roundAndBalanceDuration(
   options: DurationRoundOptions,
 ): Duration {
   if (!options) {
-    throw new Error('Must specify options')
-  } else if (options.largestUnit == null && options.smallestUnit == null) {
+    throw new Error('Must specify options') // best place for this?
+  } else if (options.largestUnit === null && options.smallestUnit === null) {
     throw new Error('Must specify either largestUnit or smallestUnit')
   }
 
@@ -190,7 +190,7 @@ export function roundAndBalanceDuration(
     return dayTimeFieldsToDuration(roundedFields)
   }
 
-  const relativeTo = getPlainRelativeTo(options?.relativeTo)
+  const relativeTo = getPlainRelativeTo(options.relativeTo)
   const [balancedDuration, translatedDate] = balanceComplexDuration(
     duration,
     largestUnit,

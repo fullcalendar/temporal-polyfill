@@ -1,8 +1,8 @@
 import { extractCalendar } from '../argParse/calendar'
-import { parseCalendarDisplay } from '../argParse/calendarDisplay'
+import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { dateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
-import { OVERFLOW_REJECT, parseOverflowOptions } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
@@ -88,7 +88,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   static from(arg: DateTimeArg, options?: OverflowOptions): PlainDateTime {
-    const overflowHandling = parseOverflowOptions(options)
+    const overflowHandling = parseOverflowOption(options)
 
     return createDateTime(
       arg instanceof PlainDateTime
@@ -118,7 +118,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
       dateTimeFieldsToISO(
         mergedFields,
         options,
-        parseOverflowOptions(options),
+        parseOverflowOption(options),
         this.calendar,
       ),
     )
@@ -171,7 +171,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
 
   toString(options?: DateTimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
-    const calendarDisplay = parseCalendarDisplay(options?.calendarName)
+    const calendarDisplay = parseCalendarDisplayOption(options)
     const fields = this.getISOFields()
 
     return formatDateTimeISO(fields, formatConfig) +

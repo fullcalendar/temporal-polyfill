@@ -4,7 +4,8 @@ import {
   getCommonCalendar,
   isCalendarArgBag,
 } from '../argParse/calendar'
-import { parseOverflowOptions } from '../argParse/overflowHandling'
+import { parseOverflowOption } from '../argParse/overflowHandling'
+import { ensureOptionsObj } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
@@ -203,7 +204,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     const impl = getImpl(this)
     const date = ensureObj(PlainDate, dateArg, options)
     const duration = ensureObj(Duration, durationArg)
-    const overflowHandling = parseOverflowOptions(options)
+    const overflowHandling = parseOverflowOption(options)
     const isoFields = addToDateFields(date, duration, impl, overflowHandling)
 
     return new PlainDate(
@@ -218,7 +219,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     const impl = getImpl(this)
     const d0 = ensureObj(PlainDate, dateArg0)
     const d1 = ensureObj(PlainDate, dateArg1)
-    const largestUnit = parseUnit<DateUnitInt>(options?.largestUnit, DAY, DAY, YEAR)
+    const largestUnit = parseUnit<DateUnitInt>(
+      ensureOptionsObj(options).largestUnit, DAY, DAY, YEAR,
+    )
 
     ensureCalendarsEqual(getCommonCalendar(d0, d1), this)
     return diffDateFields(d0, d1, impl, largestUnit)

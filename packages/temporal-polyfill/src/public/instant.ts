@@ -1,3 +1,4 @@
+import { ensureOptionsObj } from '../argParse/refine'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import { addToInstant, compareInstants, diffInstants, roundInstant } from '../dateUtils/instant'
 import { isoFieldsToEpochNano, validateInstant } from '../dateUtils/isoMath'
@@ -93,7 +94,7 @@ export class Instant extends AbstractNoValueObj {
   }
 
   toString(options?: InstantToStringOptions): string {
-    const timeZone = options?.timeZone
+    const timeZone = ensureOptionsObj(options).timeZone
     const zonedDateTime = this.toZonedDateTimeISO(timeZone ?? 'UTC')
     return zonedDateTime.toString({
       offset: timeZone == null ? 'never' : 'auto',

@@ -1,6 +1,6 @@
 import { durationFieldMap } from '../argParse/fieldStr'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
-import { refineFields, refineOverrideFields } from '../argParse/refine'
+import { ensureOptionsObj, refineFields, refineOverrideFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import {
@@ -73,7 +73,7 @@ export class Duration extends AbstractNoValueObj {
     b: DurationArg,
     options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg },
   ): CompareResult {
-    return compareDurations(a, b, options?.relativeTo)
+    return compareDurations(a, b, ensureOptionsObj(options).relativeTo)
   }
 
   get years(): number { return getFields(this).years }
@@ -112,11 +112,19 @@ export class Duration extends AbstractNoValueObj {
   }
 
   add(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
-    return addAndBalanceDurations(this, ensureObj(Duration, other), options?.relativeTo)
+    return addAndBalanceDurations(
+      this,
+      ensureObj(Duration, other),
+      ensureOptionsObj(options).relativeTo,
+    )
   }
 
   subtract(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
-    return addAndBalanceDurations(this, ensureObj(Duration, other).negated(), options?.relativeTo)
+    return addAndBalanceDurations(
+      this,
+      ensureObj(Duration, other).negated(),
+      ensureOptionsObj(options).relativeTo,
+    )
   }
 
   round(options: DurationRoundOptions): Duration {
@@ -126,7 +134,7 @@ export class Duration extends AbstractNoValueObj {
   total(options: DurationTotalOptions): number {
     return computeTotalUnits(
       this,
-      parseUnit<UnitInt>(options?.unit, undefined, NANOSECOND, YEAR),
+      parseUnit<UnitInt>(ensureOptionsObj(options).unit, undefined, NANOSECOND, YEAR),
       options.relativeTo,
     )
   }

@@ -1,5 +1,4 @@
-import { OverflowOptions } from '../public/types'
-import { createParser } from './refine'
+import { createOptionParser } from './refine'
 
 export const OVERFLOW_CONSTRAIN = 0
 export const OVERFLOW_REJECT = 1
@@ -14,12 +13,8 @@ export const overflowHandlingMap: OverflowHandlingMap = {
   reject: 1,
 }
 
-const parseOverflowHandling = createParser(
+export const parseOverflowOption = createOptionParser(
   'overflow',
   overflowHandlingMap,
   OVERFLOW_CONSTRAIN,
 )
-
-export function parseOverflowOptions(options: OverflowOptions | undefined): OverflowHandlingInt {
-  return parseOverflowHandling(options?.overflow)
-}

@@ -2,7 +2,7 @@ import {
   DISAMBIG_EARLIER,
   DISAMBIG_LATER,
   DISAMBIG_REJECT,
-  parseDisambig,
+  parseDisambigOption,
 } from '../argParse/disambig'
 import { extractTimeZone, isTimeZoneArgBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
@@ -88,7 +88,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     let [offsetMins, offsetMinsDiff] = getImpl(this).getPossibleOffsets(zoneMins)
 
     if (offsetMinsDiff) {
-      const disambig = parseDisambig(options?.disambiguation)
+      const disambig = parseDisambigOption(options)
       if (disambig === DISAMBIG_REJECT) {
         throw new Error('Ambiguous offset')
       }

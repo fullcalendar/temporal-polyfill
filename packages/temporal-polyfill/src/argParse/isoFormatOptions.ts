@@ -8,7 +8,8 @@ import {
 } from '../dateUtils/units'
 import { TimeToStringOptions, TimeToStringUnit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
-import { parseRoundingMode } from './roundingMode'
+import { ensureOptionsObj } from './refine'
+import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
 export type DurationToStringUnitInt =
@@ -34,8 +35,9 @@ export function parseTimeToStringOptions<
   options: TimeToStringOptions<UnitArgType> | undefined,
   largestUnit: UnitType = MINUTE as UnitType,
 ): TimeToStringConfig<UnitType> {
-  const smallestUnitArg = options?.smallestUnit
-  const digitsArg = options?.fractionalSecondDigits
+  const ensuredOptions = ensureOptionsObj(options)
+  const smallestUnitArg = ensuredOptions.smallestUnit
+  const digitsArg = ensuredOptions.fractionalSecondDigits
   let smallestUnit: UnitType
   let digits: number | null
 
@@ -55,6 +57,6 @@ export function parseTimeToStringOptions<
   return {
     smallestUnit,
     fractionalSecondDigits: digits,
-    roundingMode: parseRoundingMode(options?.roundingMode, Math.trunc),
+    roundingMode: parseRoundingModeOption(options, Math.trunc),
   }
 }

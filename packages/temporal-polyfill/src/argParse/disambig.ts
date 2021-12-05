@@ -1,4 +1,4 @@
-import { createParser } from './refine'
+import { createOptionParser } from './refine'
 
 export const DISAMBIG_COMPATIBLE = 0
 export const DISAMBIG_EARLIER = 1
@@ -19,7 +19,7 @@ export const disambigMap: DisambigMap = {
   reject: 3,
 }
 
-export const parseDisambig = createParser(
+export const parseDisambigOption = createOptionParser(
   'disambiguation',
   disambigMap,
   DISAMBIG_COMPATIBLE,

@@ -1,19 +1,36 @@
 import { ValueOf } from '../utils/obj'
 import { OVERFLOW_REJECT, OverflowHandlingInt } from './overflowHandling'
 
+export function createOptionParser<Map>(propName: string, map: Map, defaultVal?: ValueOf<Map>): (
+  options: Record<string, unknown> | undefined, // TODO: better type
+  runtimeDefaultVal?: ValueOf<Map>,
+) => ValueOf<Map> {
+  const valueParser = createParser(propName, map, defaultVal)
+  return (
+    options: Record<string, unknown> | undefined,
+    runtimeDefaultVal?: ValueOf<Map>,
+  ) => {
+    const ensured = ensureOptionsObj(options)
+    return valueParser(ensured[propName] as any, runtimeDefaultVal)
+  }
+}
+
 export function createParser<Map>(nameForError: string, map: Map, defaultVal?: ValueOf<Map>): (
   arg: keyof Map | undefined,
   runtimeDefaultVal?: ValueOf<Map>
 ) => ValueOf<Map> {
-  return (input: keyof Map | undefined, runtimeDefaultVal?: ValueOf<Map>): ValueOf<Map> => {
+  return (
+    input: keyof Map | undefined,
+    runtimeDefaultVal?: ValueOf<Map>,
+  ): ValueOf<Map> => {
     if (input === undefined) {
       const d = runtimeDefaultVal ?? defaultVal
-      if (d == null) {
+      if (d === undefined) {
         throw new RangeError(`Must specify a ${nameForError}`)
       }
       return d
     }
-    if (map[input] == null) {
+    if (map[input] === undefined) {
       throw new RangeError(`Invalid ${nameForError}: ${input}`)
     }
     return map[input]
@@ -55,6 +72,18 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   }
 
   return res
+}
+
+export function ensureOptionsObj<OptionsType>(
+  options: Partial<OptionsType> | undefined,
+): Partial<OptionsType> {
+  if (options === undefined) {
+    return {}
+  }
+  if (typeof options !== 'object') {
+    throw TypeError('options must be an object or undefined')
+  }
+  return options
 }
 
 const invalidOverrideFields = ['calendar', 'timeZone']

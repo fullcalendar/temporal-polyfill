@@ -1,5 +1,5 @@
 import { extractCalendar } from '../argParse/calendar'
-import { parseCalendarDisplay } from '../argParse/calendarDisplay'
+import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { yearMonthFieldMap } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
@@ -119,7 +119,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 
   toString(options?: DateToStringOptions): string {
     const fields = this.getISOFields()
-    const calendarDisplay = parseCalendarDisplay(options?.calendarName)
+    const calendarDisplay = parseCalendarDisplayOption(options)
 
     return formatYearMonthISO(fields) +
       formatCalendarID((fields.calendar as Calendar).id, calendarDisplay)

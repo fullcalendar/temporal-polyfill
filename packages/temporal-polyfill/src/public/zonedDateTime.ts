@@ -1,13 +1,13 @@
 import { extractCalendar } from '../argParse/calendar'
-import { parseCalendarDisplay } from '../argParse/calendarDisplay'
+import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { zonedDateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
-import { OFFSET_DISPLAY_AUTO, parseOffsetDisplay } from '../argParse/offsetDisplay'
-import { OFFSET_PREFER, OFFSET_REJECT, parseOffsetOptions } from '../argParse/offsetHandling'
-import { parseOverflowOptions } from '../argParse/overflowHandling'
+import { OFFSET_DISPLAY_AUTO, parseOffsetDisplayOption } from '../argParse/offsetDisplay'
+import { OFFSET_PREFER, OFFSET_REJECT, parseOffsetHandlingOption } from '../argParse/offsetHandling'
+import { parseOverflowOption } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { extractTimeZone } from '../argParse/timeZone'
-import { parseTimeZoneDisplay } from '../argParse/timeZoneDisplay'
+import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
@@ -99,8 +99,8 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   static from(arg: ZonedDateTimeArg, options?: ZonedDateTimeOptions): ZonedDateTime {
-    const offsetHandling = parseOffsetOptions(options, OFFSET_REJECT)
-    const overflowHandling = parseOverflowOptions(options)
+    const offsetHandling = parseOffsetHandlingOption(options, OFFSET_REJECT)
+    const overflowHandling = parseOverflowOption(options)
 
     return createZonedDateTime(
       arg instanceof ZonedDateTime
@@ -137,8 +137,8 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   with(fields: ZonedDateTimeOverrides, options?: ZonedDateTimeOptions): ZonedDateTime {
     const refinedFields = refineOverrideFields(fields, zonedDateTimeFieldMap)
     const mergedFields = overrideZonedDateTimeFields(refinedFields, this)
-    const offsetHandling = parseOffsetOptions(options, OFFSET_PREFER)
-    const overflowHandling = parseOverflowOptions(options)
+    const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
+    const overflowHandling = parseOverflowOption(options)
 
     return createZonedDateTime(
       zonedDateTimeFieldsToISO(
@@ -224,9 +224,9 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 
   toString(options?: ZonedDateTimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
-    const offsetDisplay = parseOffsetDisplay(options?.offset)
-    const timeZoneDisplay = parseTimeZoneDisplay(options?.timeZoneName)
-    const calendarDisplay = parseCalendarDisplay(options?.calendarName)
+    const offsetDisplay = parseOffsetDisplayOption(options)
+    const timeZoneDisplay = parseTimeZoneDisplayOption(options)
+    const calendarDisplay = parseCalendarDisplayOption(options)
     const fields = this.getISOFields()
 
     return formatDateTimeISO(fields, formatConfig) +

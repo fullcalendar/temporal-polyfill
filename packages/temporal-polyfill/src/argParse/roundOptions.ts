@@ -1,7 +1,8 @@
 import { UnitInt } from '../dateUtils/units'
 import { RoundOptions, Unit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
-import { parseRoundingMode } from './roundingMode'
+import { ensureOptionsObj } from './refine'
+import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
 export interface RoundConfig<UnitType extends UnitInt = UnitInt> {
@@ -19,12 +20,15 @@ export function parseRoundOptions<
   minUnit: UnitType,
   maxUnit: UnitType,
 ): RoundConfig<UnitType> {
-  if (smallestUnitDefault === null && options?.smallestUnit == null) {
+  const ensuredOptions = ensureOptionsObj(options)
+
+  if (smallestUnitDefault === undefined && ensuredOptions.smallestUnit === undefined) {
     throw new Error('Need smallestUnit')
   }
+
   return {
-    smallestUnit: parseUnit(options?.smallestUnit, smallestUnitDefault, minUnit, maxUnit),
-    roundingMode: parseRoundingMode(options?.roundingMode, Math.trunc),
-    roundingIncrement: options?.roundingIncrement ?? 1,
+    smallestUnit: parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit),
+    roundingMode: parseRoundingModeOption(options, Math.trunc),
+    roundingIncrement: ensuredOptions.roundingIncrement ?? 1,
   }
 }

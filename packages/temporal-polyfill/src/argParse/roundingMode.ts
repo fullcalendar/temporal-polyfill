@@ -1,5 +1,5 @@
 import { RoundingFunc } from '../utils/math'
-import { createParser } from './refine'
+import { createOptionParser } from './refine'
 
 export interface RoundingModeMap {
   halfExpand: RoundingFunc
@@ -17,7 +17,7 @@ const roundingModeMap: RoundingModeMap = {
 
 // TODO: start using ENUM-like types. It's bad to have caller code referencing Math.* functions
 
-export const parseRoundingMode = createParser(
+export const parseRoundingModeOption = createOptionParser(
   'roundingMode',
   roundingModeMap,
   // TODO: always default to Math.trunc?

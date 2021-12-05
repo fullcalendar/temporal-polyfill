@@ -49,15 +49,15 @@ export function parseUnit<UnitType extends UnitInt>(
   maxUnit: UnitType,
 ): UnitType {
   let num: UnitType
-  if (input == null) {
-    if (defaultUnit == null) {
+  if (input === undefined) {
+    if (defaultUnit === undefined) {
       throw new Error('Unit is required') // TOOD: better error message with setting name
     }
     num = defaultUnit
   } else {
     num = (unitMap[input] || pluralUnitMap[input]) as UnitType
 
-    if (num == null || num < minUnit || num > maxUnit) {
+    if (num === undefined || num < minUnit || num > maxUnit) {
       throw new Error('Invalid unit ' + input) // TOOD: better error message with setting name
     }
   }

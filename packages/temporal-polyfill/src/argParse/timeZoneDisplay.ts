@@ -1,4 +1,4 @@
-import { createParser } from './refine'
+import { createOptionParser } from './refine'
 
 export const TIME_ZONE_DISPLAY_AUTO = 0
 export const TIME_ZONE_DISPLAY_NEVER = 1
@@ -13,7 +13,7 @@ export const timeZoneDisplayMap: TimeZoneDisplayMap = {
   never: 1,
 }
 
-export const parseTimeZoneDisplay = createParser(
+export const parseTimeZoneDisplayOption = createOptionParser(
   'timeZoneName',
   timeZoneDisplayMap,
   TIME_ZONE_DISPLAY_AUTO,
