@@ -37,9 +37,9 @@ export function overrideMonthDayFields(
 ): MonthDayLikeFields {
   const merged = { day: overrides.day ?? base.day } as MonthDayFields
 
-  if (overrides.monthCode != null) {
+  if (overrides.monthCode !== undefined) {
     merged.monthCode = overrides.monthCode
-  } else if (overrides.month != null) {
+  } else if (overrides.month !== undefined) {
     merged.month = overrides.month
     merged.year = overrides.year! // will cause a planned runtime error if not defined
   } else {

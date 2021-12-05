@@ -10,7 +10,7 @@ export function isTimeZoneArgBag(arg: any): arg is TimeZoneArgBag {
 }
 
 export function extractTimeZone(input: TimeZoneArgBag): TimeZone {
-  if (input.timeZone == null) {
+  if (input.timeZone === undefined) {
     throw new Error('Must specify timeZone')
   }
   return ensureObj(TimeZone, input.timeZone)

@@ -63,7 +63,11 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
 
     if (typeof arg === 'object') {
       const refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
-      if (refinedFields.year == null && refinedFields.monthCode == null && arg.calendar != null) {
+      if (
+        refinedFields.year === undefined &&
+        refinedFields.monthCode === undefined &&
+        arg.calendar !== undefined
+      ) {
         throw new Error('If omitting year/monthCode, cant specify calendar')
       }
       return extractCalendar(arg).monthDayFromFields(refinedFields as MonthDayLikeFields, options)

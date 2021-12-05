@@ -10,7 +10,7 @@ export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
 }
 
 export function extractCalendar(input: { calendar?: CalendarArg; }): Calendar {
-  if (input.calendar == null) {
+  if (input.calendar === undefined) {
     return createDefaultCalendar()
   }
   return ensureObj(Calendar, input.calendar)

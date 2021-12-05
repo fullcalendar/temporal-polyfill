@@ -17,7 +17,7 @@ export function computeTotalUnits(
   relativeToArg: DateTimeArg | undefined,
 ): number {
   const fields = durationToDayTimeFields(duration)
-  if (fields && isDayTimeUnit(unit) && relativeToArg == null) {
+  if (fields && isDayTimeUnit(unit) && relativeToArg === undefined) {
     return Number(dayTimeFieldsToNano(fields) / BigInt(nanoIn[unit]))
   }
   const relativeTo = getPlainRelativeTo(relativeToArg)

@@ -43,7 +43,7 @@ import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './un
 
 export type ZonedDateTimeISOEssentials = DateTimeISOFields & { // essentials for creation
   timeZone: TimeZone
-  offset?: number | null
+  offset?: number | undefined
 }
 export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 
@@ -57,7 +57,7 @@ export function createZonedDateTime(
   const literalOffset = isoFields.offset
 
   if (
-    literalOffset != null &&
+    literalOffset !== undefined &&
     literalOffset !== zonedDateTime.offsetNanoseconds
   ) {
     if (offsetHandling === OFFSET_REJECT) {
@@ -98,7 +98,7 @@ export function zonedDateTimeFieldsToISO(
   return {
     ...dateTimeFieldsToISO(fields, options, overflowHandling, calendar),
     timeZone,
-    offset: fields.offset ? parseOffsetNano(fields.offset) : null,
+    offset: fields.offset ? parseOffsetNano(fields.offset) : undefined,
   }
 }
 

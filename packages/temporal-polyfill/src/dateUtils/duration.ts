@@ -108,7 +108,7 @@ export function addAndBalanceDurations(
     computeLargestDurationUnit(d1),
   ) as DayTimeUnitInt
 
-  if (relativeToArg == null && dayTimeFields0 && dayTimeFields1) {
+  if (relativeToArg === undefined && dayTimeFields0 && dayTimeFields1) {
     return nanoToDuration(
       dayTimeFieldsToNano(dayTimeFields0) +
       dayTimeFieldsToNano(dayTimeFields1),
@@ -166,7 +166,7 @@ export function roundAndBalanceDuration(
 ): Duration {
   if (!options) {
     throw new Error('Must specify options') // best place for this?
-  } else if (options.largestUnit === null && options.smallestUnit === null) {
+  } else if (options.largestUnit === undefined && options.smallestUnit === undefined) {
     throw new Error('Must specify either largestUnit or smallestUnit')
   }
 
@@ -286,17 +286,17 @@ export function durationToTimeFields(duration: Duration): TimeFields {
 function getMaybeZonedRelativeTo(
   arg: ZonedDateTimeArg | DateTimeArg | undefined,
 ): ZonedDateTime | PlainDateTime {
-  if (arg == null) {
+  if (arg === undefined) {
     throw new Error('Need relativeTo') // TODO: reusable (how to mark function as "throwing"?)
   } else if (typeof arg === 'object') {
-    if ((arg as ZonedDateTimeLike).timeZone != null) {
+    if ((arg as ZonedDateTimeLike).timeZone !== undefined) {
       return ZonedDateTime.from(arg as ZonedDateTimeLike)
     } else {
       return PlainDateTime.from(arg)
     }
   } else {
     const isoFields = parseDateTimeISO(String(arg))
-    if (isoFields.timeZone != null) {
+    if (isoFields.timeZone !== undefined) {
       return createZonedDateTime(
         zoneDateTimeParseResult(isoFields),
         undefined,
@@ -309,7 +309,7 @@ function getMaybeZonedRelativeTo(
 }
 
 export function getPlainRelativeTo(arg: DateTimeArg | undefined): PlainDateTime {
-  if (arg == null) {
+  if (arg === undefined) {
     throw new Error('Need relativeTo') // TODO: reusable
   }
   return ensureObj(PlainDateTime, arg)

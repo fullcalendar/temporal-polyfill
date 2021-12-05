@@ -33,12 +33,12 @@ export function overrideYearMonthFields(
   let anyYear = false
   let anyMonth = false
 
-  if (overrides.era != null || overrides.eraYear != null) {
+  if (overrides.era !== undefined || overrides.eraYear !== undefined) {
     merged.era = overrides.era
     merged.eraYear = overrides.eraYear
     anyYear = true
   }
-  if (overrides.year != null) {
+  if (overrides.year !== undefined) {
     merged.year = overrides.year
     anyYear = true
   }
@@ -46,11 +46,11 @@ export function overrideYearMonthFields(
     merged.year = base.year
   }
 
-  if (overrides.month != null) {
+  if (overrides.month !== undefined) {
     merged.month = overrides.month
     anyMonth = true
   }
-  if (overrides.monthCode != null) {
+  if (overrides.monthCode !== undefined) {
     merged.monthCode = overrides.monthCode
     anyMonth = true
   }

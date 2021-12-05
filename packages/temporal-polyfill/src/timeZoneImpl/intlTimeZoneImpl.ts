@@ -139,7 +139,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     }
 
     const island = this.searchIsland(enteringOffset, startMins)
-    if (island != null) {
+    if (island !== undefined) {
       return [
         this.searchTransition(startMins, island[0], enteringOffset, island[1]),
         this.searchTransition(island[0], endMins, island[1], exitingOffset),

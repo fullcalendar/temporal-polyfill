@@ -50,7 +50,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     return new TimeZone(
       (dateTimeParse && (
         dateTimeParse.timeZone ||
-        (dateTimeParse.offset != null && formatOffsetISO(dateTimeParse.offset))
+        (dateTimeParse.offset !== undefined && formatOffsetISO(dateTimeParse.offset))
       )) || arg, // consider arg the literal time zone ID string
     )
   }

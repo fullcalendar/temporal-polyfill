@@ -183,7 +183,8 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     const impl = getImpl(this)
     let { year, monthCode, day } = fields as Partial<MonthDayFields>
 
-    if (year == null || monthCode != null) { // if monthCode specified, recalc the referenceYear
+    // if monthCode specified, recalc the referenceYear
+    if (year === undefined || monthCode !== undefined) {
       year = impl.monthYear(monthCode, day)
     }
 

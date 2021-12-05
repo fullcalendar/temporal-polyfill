@@ -21,7 +21,7 @@ export type DurationToStringUnitInt =
 export type TimeToStringUnitInt = typeof MINUTE | DurationToStringUnitInt
 
 export interface TimeToStringConfig<UnitType extends TimeToStringUnitInt = TimeToStringUnitInt> {
-  fractionalSecondDigits: number | null
+  fractionalSecondDigits: number | undefined
   smallestUnit: UnitType
   roundingMode: RoundingFunc
 }
@@ -39,9 +39,9 @@ export function parseTimeToStringOptions<
   const smallestUnitArg = ensuredOptions.smallestUnit
   const digitsArg = ensuredOptions.fractionalSecondDigits
   let smallestUnit: UnitType
-  let digits: number | null
+  let digits: number | undefined
 
-  if (smallestUnitArg != null) {
+  if (smallestUnitArg !== undefined) {
     smallestUnit = parseUnit<UnitType>(
       smallestUnitArg,
       undefined, // no default. a required field
@@ -51,7 +51,7 @@ export function parseTimeToStringOptions<
     digits = unitDigitMap[smallestUnit] || 0 // for bigger than milliseconds, don't do any digits
   } else {
     smallestUnit = NANOSECOND as UnitType
-    digits = digitsArg == null || digitsArg === 'auto' ? null : digitsArg
+    digits = digitsArg === undefined || digitsArg === 'auto' ? undefined : digitsArg
   }
 
   return {

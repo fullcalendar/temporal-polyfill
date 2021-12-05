@@ -76,7 +76,7 @@ export function queryDateISOFields(
 
   if (monthCode !== undefined) {
     const m = calendarImpl.convertMonthCode(monthCode, year)
-    if (month != null && month !== m) {
+    if (month !== undefined && month !== m) {
       throw new RangeError('Month doesnt match with monthCode')
     }
     month = m

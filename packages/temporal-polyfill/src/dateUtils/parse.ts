@@ -63,7 +63,7 @@ export function parseDurationISO(str: string): DurationFields {
   return tryParseDurationISO(str) || throwNoParse('duration', str)
 }
 
-// soft functions (return null on failure)
+// soft functions (return undefined on failure)
 
 export function tryParseDateTimeISO(str: string): DateTimeParseResult | undefined {
   const match = dateTimeRegExp.exec(normalizeDashes(str))
@@ -167,7 +167,7 @@ function parseTimeParts(parts: string[]): TimeISOEssentials {
 function parseOffsetParts(parts: string[]): number | undefined {
   const sign = parts[0]
   if (
-    sign != null &&
+    sign !== undefined &&
     parts[1] // has hour at least
   ) {
     return (sign === '+' ? 1 : -1) * timePartsToNano(parts.slice(1))

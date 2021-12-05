@@ -93,7 +93,7 @@ export function intlFormatRangeToParts(
 function normalizeIntlOptionalDateArg(
   dateArg: DateTimeFormatArg | undefined,
 ): undefined | number | Date {
-  return dateArg == null ? dateArg : normalizeIntlDateArg(dateArg)
+  return dateArg === undefined ? dateArg : normalizeIntlDateArg(dateArg)
 }
 
 function normalizeIntlDateArg(dateArg: DateTimeFormatArg): number | Date {

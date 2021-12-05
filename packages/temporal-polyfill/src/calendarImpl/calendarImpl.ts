@@ -45,7 +45,7 @@ export abstract class CalendarImpl {
   convertEraYear(eraYear: number, era: string, errorUnknownEra?: boolean): number {
     let origin = eraOrigins[this.id]?.[era]
 
-    if (origin == null) {
+    if (origin === undefined) {
       if (errorUnknownEra) {
         throw new Error('Unkown era ' + era)
       } else {

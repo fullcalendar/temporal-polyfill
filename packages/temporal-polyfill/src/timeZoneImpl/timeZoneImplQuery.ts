@@ -19,7 +19,7 @@ export function queryTimeZoneImpl(id: string): TimeZoneImpl {
 
   // parse a literal time zone offset
   const offsetNano = tryParseOffsetNano(id)
-  if (offsetNano != null) {
+  if (offsetNano !== undefined) {
     // don't store fixed-offset zones in cache. there could be many
     return new FixedTimeZoneImpl(
       formatOffsetISO(offsetNano),

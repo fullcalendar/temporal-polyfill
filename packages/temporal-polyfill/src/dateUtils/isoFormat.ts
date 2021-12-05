@@ -136,7 +136,7 @@ function formatPartialSeconds(
   milliseconds: number,
   microseconds: number,
   nanoseconds: number,
-  fractionalSecondDigits: number | null,
+  fractionalSecondDigits: number | undefined,
 ): string {
   const totalNano = (
     nanoseconds +
@@ -145,7 +145,7 @@ function formatPartialSeconds(
   )
 
   let afterDecimal = padZeros(totalNano, 9)
-  afterDecimal = fractionalSecondDigits == null
+  afterDecimal = fractionalSecondDigits === undefined
     ? afterDecimal.replace(/0+$/, '') // strip trailing zeros
     : afterDecimal.substr(0, fractionalSecondDigits)
 

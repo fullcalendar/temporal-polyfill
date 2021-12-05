@@ -96,7 +96,7 @@ export class IntlCalendarImpl extends CalendarImpl {
   }
 
   monthYear(monthCode: string | undefined, day: number | undefined): number {
-    if (monthCode == null || day == null) {
+    if (monthCode === undefined || day === undefined) {
       throw new Error('To guess reference year, must specify monthCode and day')
     }
 
