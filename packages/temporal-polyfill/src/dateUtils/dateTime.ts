@@ -1,7 +1,7 @@
 import { getCommonCalendar } from '../argParse/calendar'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
+import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
@@ -11,7 +11,7 @@ import {
   DateTimeISOFields,
   DateTimeLikeFields,
   DateTimeOverrides,
-  DateTimeRoundOptions,
+  DateTimeRoundingOptions,
   DateUnit,
   DayTimeUnit,
   DiffOptions,
@@ -147,7 +147,7 @@ export function diffDateTimes(
     return nanoToDuration(
       roundNano(
         isoFieldsToEpochNano(t1.getISOFields()) - isoFieldsToEpochNano(t0.getISOFields()),
-        diffConfig as RoundConfig<DayTimeUnitInt>,
+        diffConfig as RoundingConfig<DayTimeUnitInt>,
       ),
       largestUnit,
     )
@@ -166,9 +166,9 @@ export function diffDateTimes(
 
 export function roundDateTime(
   dateTime: PlainDateTime,
-  options: DateTimeRoundOptions,
+  options: DateTimeRoundingOptions,
 ): PlainDateTime {
-  const roundConfig = parseRoundOptions<DayTimeUnit, DayTimeUnitInt>(
+  const roundConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
     options,
     undefined, // no default. required
     NANOSECOND, // minUnit

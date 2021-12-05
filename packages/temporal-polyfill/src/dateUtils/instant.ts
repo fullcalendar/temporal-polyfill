@@ -1,8 +1,8 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
-import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
+import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { Duration } from '../public/duration'
 import { Instant } from '../public/instant'
-import { CompareResult, TimeDiffOptions, TimeRoundOptions } from '../public/types'
+import { CompareResult, TimeDiffOptions, TimeRoundingOptions } from '../public/types'
 import { compareValues } from '../utils/math'
 import { joinEpochNano, splitEpochNano } from './dayTime'
 import { computeLargestDurationUnit, durationToTimeFields, nanoToDuration } from './duration'
@@ -34,20 +34,20 @@ export function diffInstants(a: Instant, b: Instant, options?: TimeDiffOptions):
   return nanoToDuration(
     roundNano(
       b.epochNanoseconds - a.epochNanoseconds,
-      diffConfig as RoundConfig<TimeUnitInt>,
+      diffConfig as RoundingConfig<TimeUnitInt>,
     ),
     diffConfig.largestUnit,
   )
 }
 
-export function roundInstant(instant: Instant, options: TimeRoundOptions): Instant {
-  const roundConfig = parseRoundOptions(options, undefined, NANOSECOND, HOUR)
+export function roundInstant(instant: Instant, options: TimeRoundingOptions): Instant {
+  const roundConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR)
   const [dayNano, timeNano] = splitEpochNano(instant.epochNanoseconds)
 
   return new Instant(
     joinEpochNano(
       dayNano,
-      roundNano(timeNano, roundConfig as RoundConfig<TimeUnitInt>),
+      roundNano(timeNano, roundConfig as RoundingConfig<TimeUnitInt>),
     ),
   )
 }

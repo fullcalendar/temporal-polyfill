@@ -7,7 +7,7 @@ import {
   OffsetHandlingInt,
 } from '../argParse/offsetHandling'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { RoundConfig, parseRoundOptions } from '../argParse/roundOptions'
+import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
@@ -15,7 +15,7 @@ import { TimeZone } from '../public/timeZone'
 import {
   CompareResult,
   DateTimeISOFields,
-  DateTimeRoundOptions,
+  DateTimeRoundingOptions,
   DateUnit,
   DayTimeUnit,
   DiffOptions,
@@ -174,7 +174,7 @@ export function diffZonedDateTimes(
     return nanoToDuration(
       roundNano(
         dt1.epochNanoseconds - dt0.epochNanoseconds,
-        diffConfig as RoundConfig<DayTimeUnitInt>,
+        diffConfig as RoundingConfig<DayTimeUnitInt>,
       ),
       largestUnit,
     )
@@ -201,9 +201,9 @@ export function diffZonedDateTimes(
 
 export function roundZonedDateTime(
   zonedDateTime: ZonedDateTime,
-  options: DateTimeRoundOptions | undefined,
+  options: DateTimeRoundingOptions | undefined,
 ): ZonedDateTime {
-  const roundConfig = parseRoundOptions<DayTimeUnit, DayTimeUnitInt>(
+  const roundConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
     options,
     undefined, // no default. will error-out if unset
     NANOSECOND, // minUnit

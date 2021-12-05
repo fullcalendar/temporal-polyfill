@@ -2,7 +2,7 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { timeFieldMap } from '../argParse/fieldStr'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainValue } from '../argParse/refine'
-import { parseRoundOptions } from '../argParse/roundOptions'
+import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { Duration } from '../public/duration'
 import { PlainTime } from '../public/plainTime'
 import {
@@ -10,7 +10,7 @@ import {
   TimeArg,
   TimeDiffOptions,
   TimeLike,
-  TimeRoundOptions,
+  TimeRoundingOptions,
   TimeUnit,
 } from '../public/types'
 import { compareValues } from '../utils/math'
@@ -109,8 +109,8 @@ export function diffPlainTimes(
   )
 }
 
-export function roundPlainTime(plainTime: PlainTime, options: TimeRoundOptions): PlainTime {
-  const roundConfig = parseRoundOptions<TimeUnit, TimeUnitInt>(
+export function roundPlainTime(plainTime: PlainTime, options: TimeRoundingOptions): PlainTime {
+  const roundConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
     options,
     undefined, // no default. required
     NANOSECOND, // minUnit

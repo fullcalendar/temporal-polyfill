@@ -1,6 +1,6 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OFFSET_PREFER } from '../argParse/offsetHandling'
-import { RoundConfig } from '../argParse/roundOptions'
+import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames, unitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -10,7 +10,7 @@ import {
   DateUnit,
   DurationArg,
   DurationLike,
-  DurationRoundOptions,
+  DurationRoundingOptions,
   Unit,
   ZonedDateTimeArg,
   ZonedDateTimeLike,
@@ -162,7 +162,7 @@ export function balanceComplexDuration(
 
 export function roundAndBalanceDuration(
   duration: Duration,
-  options: DurationRoundOptions,
+  options: DurationRoundingOptions,
 ): Duration {
   if (!options) {
     throw new Error('Must specify options') // best place for this?
@@ -184,7 +184,7 @@ export function roundAndBalanceDuration(
   if (fields && isDayTimeUnit(largestUnit) && isDayTimeUnit(smallestUnit)) {
     const nano = roundNano(
       dayTimeFieldsToNano(fields),
-      diffConfig as RoundConfig<DayTimeUnitInt>,
+      diffConfig as RoundingConfig<DayTimeUnitInt>,
     )
     const roundedFields = nanoToDayTimeFields(nano, largestUnit)
     return dayTimeFieldsToDuration(roundedFields)

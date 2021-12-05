@@ -51,15 +51,15 @@ export type DayTimeUnit = TimeUnit | 'day'
 
 // rounding
 export type RoundingMode = keyof RoundingModeMap
-export type RoundOptions<UnitType extends Unit = Unit> = {
+export type RoundingOptions<UnitType extends Unit = Unit> = {
   smallestUnit: UnitType // required
   roundingMode?: RoundingMode
   roundingIncrement?: number
 }
-export type TimeRoundOptions = RoundOptions<TimeUnit>
-export type DateTimeRoundOptions = RoundOptions<DayTimeUnit>
+export type TimeRoundingOptions = RoundingOptions<TimeUnit>
+export type DateTimeRoundingOptions = RoundingOptions<DayTimeUnit>
 // similar to diffing
-export type DurationRoundOptions = DiffOptions & { relativeTo?: ZonedDateTimeArg | DateTimeArg }
+export type DurationRoundingOptions = DiffOptions & { relativeTo?: ZonedDateTimeArg | DateTimeArg }
 
 // total
 export type DurationTotalOptions = { unit: Unit, relativeTo?: DateTimeArg }

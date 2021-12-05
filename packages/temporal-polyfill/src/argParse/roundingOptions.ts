@@ -1,25 +1,25 @@
 import { UnitInt } from '../dateUtils/units'
-import { RoundOptions, Unit } from '../public/types'
+import { RoundingOptions, Unit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
-export interface RoundConfig<UnitType extends UnitInt = UnitInt> {
+export interface RoundingConfig<UnitType extends UnitInt = UnitInt> {
   smallestUnit: UnitType
   roundingMode: RoundingFunc
   roundingIncrement: number
 }
 
-export function parseRoundOptions<
+export function parseRoundingOptions<
   UnitArgType extends Unit,
   UnitType extends UnitInt
 >(
-  options: Partial<RoundOptions<UnitArgType>> | undefined,
+  options: Partial<RoundingOptions<UnitArgType>> | undefined,
   smallestUnitDefault: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
-): RoundConfig<UnitType> {
+): RoundingConfig<UnitType> {
   const ensuredOptions = ensureOptionsObj(options)
 
   if (smallestUnitDefault === undefined && ensuredOptions.smallestUnit === undefined) {

@@ -1,4 +1,4 @@
-import { RoundConfig } from '../argParse/roundOptions'
+import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
 import { RoundingFunc, roundToIncrement } from '../utils/math'
@@ -12,7 +12,7 @@ import { DayTimeUnitInt, nanoIn } from './units'
 // PRECONDITION: dates have same calendar
 export function roundBalancedDuration(
   balancedDuration: Duration,
-  { smallestUnit, roundingIncrement, roundingMode }: RoundConfig,
+  { smallestUnit, roundingIncrement, roundingMode }: RoundingConfig,
   d0: DateLikeInstance,
   d1: DateLikeInstance,
   flip?: boolean,
@@ -46,7 +46,7 @@ export function roundBalancedDuration(
 
 export function roundTimeOfDay(
   timeFields: TimeFields,
-  roundConfig: RoundConfig<DayTimeUnitInt>,
+  roundConfig: RoundingConfig<DayTimeUnitInt>,
 ): [TimeFields, number] {
   const nano = roundNano(timeFieldsToNano(timeFields), roundConfig)
   return nanoToWrappedTimeFields(nano)

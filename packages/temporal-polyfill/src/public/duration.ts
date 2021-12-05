@@ -22,7 +22,7 @@ import {
   DateTimeArg,
   DurationArg,
   DurationLike,
-  DurationRoundOptions,
+  DurationRoundingOptions,
   DurationToStringOptions,
   DurationToStringUnit,
   DurationTotalOptions,
@@ -127,7 +127,7 @@ export class Duration extends AbstractNoValueObj {
     )
   }
 
-  round(options: DurationRoundOptions): Duration {
+  round(options: DurationRoundingOptions): Duration {
     return roundAndBalanceDuration(this, options)
   }
 

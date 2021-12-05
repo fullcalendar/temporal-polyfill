@@ -15,7 +15,7 @@ import {
   InstantToStringOptions,
   LocalesArg,
   TimeDiffOptions,
-  TimeRoundOptions,
+  TimeRoundingOptions,
   TimeZoneArg,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
@@ -85,7 +85,7 @@ export class Instant extends AbstractNoValueObj {
     return diffInstants(ensureObj(Instant, other), this, options)
   }
 
-  round(options: TimeRoundOptions): Instant {
+  round(options: TimeRoundingOptions): Instant {
     return roundInstant(this, options)
   }
 

@@ -1,12 +1,12 @@
 import { UnitInt } from '../dateUtils/units'
 import { DiffOptions, Unit } from '../public/types'
 import { ensureOptionsObj } from './refine'
-import { RoundConfig, parseRoundOptions } from './roundOptions'
+import { RoundingConfig, parseRoundingOptions } from './roundingOptions'
 import { parseUnit } from './unitStr'
 
 export interface DiffConfig<
   UnitType extends UnitInt = UnitInt
-> extends RoundConfig<UnitType> {
+> extends RoundingConfig<UnitType> {
   largestUnit: UnitType
 }
 
@@ -20,7 +20,7 @@ export function parseDiffOptions<
   minUnit: UnitIntType,
   maxUnit: UnitIntType,
 ): DiffConfig<UnitIntType> {
-  const roundingConfig = parseRoundOptions<UnitArg, UnitIntType>(
+  const roundingConfig = parseRoundingOptions<UnitArg, UnitIntType>(
     options,
     smallestUnitDefault,
     minUnit,

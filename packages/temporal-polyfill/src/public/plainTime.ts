@@ -34,7 +34,7 @@ import {
   TimeDiffOptions,
   TimeISOFields,
   TimeLike,
-  TimeRoundOptions,
+  TimeRoundingOptions,
   TimeToStringOptions,
   TimeZoneArg,
 } from './types'
@@ -104,7 +104,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     return diffPlainTimes(ensureObj(PlainTime, other), this, options)
   }
 
-  round(options: TimeRoundOptions): PlainTime {
+  round(options: TimeRoundingOptions): PlainTime {
     return roundPlainTime(this, options)
   }
 

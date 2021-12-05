@@ -51,7 +51,7 @@ import {
   CalendarArg,
   CompareResult,
   DateArg,
-  DateTimeRoundOptions,
+  DateTimeRoundingOptions,
   DiffOptions,
   DurationArg,
   LocalesArg,
@@ -199,7 +199,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options).negated()
   }
 
-  round(options?: DateTimeRoundOptions): ZonedDateTime {
+  round(options?: DateTimeRoundingOptions): ZonedDateTime {
     return roundZonedDateTime(this, options)
   }
 

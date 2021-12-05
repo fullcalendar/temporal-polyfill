@@ -53,10 +53,10 @@ declare global {
     export import Unit = TemporalImpl.Unit
     export import DayTimeUnit = TemporalImpl.DayTimeUnit
     export import RoundingMode = TemporalImpl.RoundingMode
-    export import RoundOptions = TemporalImpl.RoundOptions
-    export import TimeRoundOptions = TemporalImpl.TimeRoundOptions
-    export import DateTimeRoundOptions = TemporalImpl.DateTimeRoundOptions
-    export import DurationRoundOptions = TemporalImpl.DurationRoundOptions
+    export import RoundOptions = TemporalImpl.RoundingOptions
+    export import TimeRoundOptions = TemporalImpl.TimeRoundingOptions
+    export import DateTimeRoundOptions = TemporalImpl.DateTimeRoundingOptions
+    export import DurationRoundOptions = TemporalImpl.DurationRoundingOptions
     export import DurationTotalOptions = TemporalImpl.DurationTotalOptions
     export import DiffOptions = TemporalImpl.DiffOptions
     export import YearMonthDiffOptions = TemporalImpl.YearMonthDiffOptions
