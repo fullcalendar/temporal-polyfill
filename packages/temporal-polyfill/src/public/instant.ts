@@ -93,7 +93,12 @@ export class Instant extends AbstractNoValueObj {
   }
 
   toString(options?: InstantToStringOptions): string {
-    return this.toZonedDateTimeISO(options?.timeZone ?? 'UTC').toString(options)
+    const timeZone = options?.timeZone
+    const zonedDateTime = this.toZonedDateTimeISO(timeZone ?? 'UTC')
+    return zonedDateTime.toString({
+      offset: timeZone == null ? 'never' : 'auto',
+      timeZoneName: 'never',
+    }) + (timeZone == null ? 'Z' : '')
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
