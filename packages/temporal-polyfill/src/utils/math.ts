@@ -16,6 +16,14 @@ export function numSign(num: number): CompareResult {
 }
 
 export function roundToIncrement(
+  num: number,
+  inc: number,
+  roundingFunc: RoundingFunc,
+): number {
+  return roundingFunc(num / inc) * inc
+}
+
+export function roundToIncrementBI(
   num: bigint,
   inc: number,
   roundingFunc: RoundingFunc,

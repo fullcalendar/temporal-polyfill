@@ -1,7 +1,7 @@
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
-import { RoundingFunc, roundToIncrement } from '../utils/math'
+import { RoundingFunc, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { DateLikeInstance } from './calendar'
 import { createDuration, negateFields } from './duration'
 import { TimeFields, nanoToWrappedTimeFields, timeFieldsToNano } from './time'
@@ -22,11 +22,11 @@ export function roundBalancedDuration(
 
   function doRound() {
     const orig = durationLike[unitName]! // computeExactDuration guarantees value
-    durationLike[unitName] = Number(roundToIncrement(
-      BigInt(orig),
+    durationLike[unitName] = roundToIncrement(
+      orig,
       roundingIncrement,
       roundingMode,
-    ))
+    )
   }
 
   if (roundingMode === Math.round) {
@@ -62,7 +62,7 @@ export function roundNano(
   nano: bigint,
   { smallestUnit, roundingIncrement, roundingMode }: RoundNanoConfig,
 ): bigint {
-  return roundToIncrement(
+  return roundToIncrementBI(
     nano,
     nanoIn[smallestUnit] * (roundingIncrement || 1),
     roundingMode,
