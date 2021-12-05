@@ -74,13 +74,15 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   return res
 }
 
+const objectLikeTypeRE = /object|function/
+
 export function ensureOptionsObj<OptionsType>(
   options: Partial<OptionsType> | undefined,
 ): Partial<OptionsType> {
   if (options === undefined) {
     return {}
   }
-  if (typeof options !== 'object') {
+  if (!objectLikeTypeRE.test(typeof options)) {
     throw TypeError('options must be an object or undefined')
   }
   return options
@@ -94,7 +96,7 @@ export function refineOverrideFields<Map extends { [fieldName: string]: (input: 
 ): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
   for (const fieldName of invalidOverrideFields) {
     if (input[fieldName] !== undefined) {
-      throw new RangeError(`Disallowed field ${fieldName}`)
+      throw new TypeError(`Disallowed field ${fieldName}`)
     }
   }
 
