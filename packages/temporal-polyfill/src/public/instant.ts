@@ -97,6 +97,7 @@ export class Instant extends AbstractNoValueObj {
     const timeZone = ensureOptionsObj(options).timeZone
     const zonedDateTime = this.toZonedDateTimeISO(timeZone ?? 'UTC')
     return zonedDateTime.toString({
+      ...options,
       offset: timeZone === undefined ? 'never' : 'auto',
       timeZoneName: 'never',
     }) + (timeZone === undefined ? 'Z' : '')

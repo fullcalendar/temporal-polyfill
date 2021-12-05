@@ -12,7 +12,7 @@ import { getSignStr, padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { SignedDurationFields } from './duration'
 import { roundNano } from './round'
-import { SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
+import { MINUTE, SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
 
 export function formatDateTimeISO(
   fields: DateTimeISOFields,
@@ -45,16 +45,25 @@ export function formatTimeISO(
 ): [string, number] {
   const nano = roundNano(timeISOToNano(fields), formatConfig)
   const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano)
-  const s = padZeros(roundedFields.hour, 2) + ':' +
-    padZeros(roundedFields.minute, 2) + ':' +
-    padZeros(roundedFields.second, 2) +
-    formatPartialSeconds(
-      roundedFields.millisecond,
-      roundedFields.microsecond,
-      roundedFields.nanosecond,
-      formatConfig.fractionalSecondDigits,
-    )
-  return [s, dayDelta]
+  const parts: string[] = [padZeros(roundedFields.hour, 2)]
+
+  if (formatConfig.smallestUnit <= MINUTE) {
+    parts.push(padZeros(roundedFields.minute, 2))
+
+    if (formatConfig.smallestUnit <= SECOND) {
+      parts.push(
+        padZeros(roundedFields.second, 2) +
+          formatPartialSeconds(
+            roundedFields.millisecond,
+            roundedFields.microsecond,
+            roundedFields.nanosecond,
+            formatConfig.fractionalSecondDigits,
+          ),
+      )
+    }
+  }
+
+  return [parts.join(':'), dayDelta]
 }
 
 export function formatOffsetISO(offsetNanoseconds: number): string {
