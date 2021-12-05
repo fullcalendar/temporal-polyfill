@@ -55,7 +55,7 @@ export function parseUnit<UnitType extends UnitInt>(
     }
     num = defaultUnit
   } else {
-    num = (unitMap[input] || pluralUnitMap[input]) as UnitType
+    num = (unitMap[input] ?? pluralUnitMap[input]) as UnitType
 
     if (num === undefined || num < minUnit || num > maxUnit) {
       throw new Error('Invalid unit ' + input) // TOOD: better error message with setting name
