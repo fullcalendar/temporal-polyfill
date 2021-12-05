@@ -1,4 +1,4 @@
-import { extractCalendar } from '../argParse/calendar'
+import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { dateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
@@ -125,15 +125,17 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   withPlainDate(dateArg: DateArg): PlainDateTime {
+    const date = ensureObj(PlainDate, dateArg)
     return createDateTime({
       ...this.getISOFields(), // provides time fields
-      ...ensureObj(PlainDate, dateArg).getISOFields(),
+      ...date.getISOFields(),
+      calendar: getStrangerCalendar(this, date),
     })
   }
 
   withPlainTime(timeArg?: TimeArg): PlainDateTime {
     return createDateTime({
-      ...this.getISOFields(), // provides date fields
+      ...this.getISOFields(), // provides date & calendar fields
       ...ensureLooseTime(timeArg).getISOFields(),
     })
   }

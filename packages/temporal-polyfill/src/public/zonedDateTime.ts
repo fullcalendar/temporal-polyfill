@@ -1,4 +1,4 @@
-import { extractCalendar } from '../argParse/calendar'
+import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { zonedDateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
@@ -154,10 +154,15 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   withPlainDate(dateArg: DateArg): ZonedDateTime {
-    return ensureObj(PlainDate, dateArg).toZonedDateTime({
-      plainTime: this.toPlainTime(),
-      timeZone: this.timeZone,
-    })
+    const date = ensureObj(PlainDate, dateArg)
+    const { timeZone } = this
+    const instant = timeZone.getInstantFor(date)
+
+    return new ZonedDateTime(
+      instant.epochNanoseconds,
+      timeZone,
+      getStrangerCalendar(this, date),
+    )
   }
 
   withPlainTime(timeArg?: TimeArg): ZonedDateTime {
