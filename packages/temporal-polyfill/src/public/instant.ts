@@ -1,6 +1,6 @@
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import { addToInstant, compareInstants, diffInstants, roundInstant } from '../dateUtils/instant'
-import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
+import { isoFieldsToEpochNano, validateInstant } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicro, nanoInMilli, nanoInSecond } from '../dateUtils/units'
@@ -24,7 +24,9 @@ const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
 export class Instant extends AbstractNoValueObj {
   constructor(epochNanoseconds: bigint) {
     super()
-    setEpochNano(this, BigInt(epochNanoseconds))
+    epochNanoseconds = BigInt(epochNanoseconds)
+    validateInstant(epochNanoseconds)
+    setEpochNano(this, epochNanoseconds)
   }
 
   static from(arg: InstantArg): Instant {

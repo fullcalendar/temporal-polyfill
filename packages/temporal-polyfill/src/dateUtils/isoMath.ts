@@ -1,9 +1,11 @@
 import { DateTimeISOEssentials, DateTimeISOMilli } from '../dateUtils/dateTime'
 import { DateTimeISOFields } from '../public/types'
-import { numSign } from '../utils/math'
+import { numSign, positiveModulo } from '../utils/math'
+import { DateISOEssentials } from './date'
 import {
   milliInDay,
   milliInMin,
+  nanoInDay,
   nanoInMicro,
   nanoInMicroBI,
   nanoInMilli,
@@ -18,7 +20,7 @@ GENERAL ROUNDING TIPS:
 - use trunc on timeZoneOffsets and durations (directionally outward from 0 origin)
   - for this, trunc and % go well together
 - use floor on epoch-times, time-of-days, week numbers (directionally forward only)
-  - for this, floor and %+% go well together. use a util for this?
+  - for this, floor and positiveModulo go well together
 */
 
 // ISO Field <-> Epoch Math
@@ -93,34 +95,18 @@ export function isoToEpochMilli(
   isoMillisecond?: number,
 ): number {
   const year = isoYear ?? isoEpochOriginYear
-  const month = (isoMonth ?? 1) - 1
-  const day = isoDay ?? 1
-  const smallUnits = [
+  const sign = numSign(year)
+  const milli = Date.UTC(
+    year,
+    (isoMonth ?? 1) - 1,
+    (isoDay ?? 1) - sign, // ensures within 1 day of Date.UTC's min/max
     isoHour ?? 0,
     isoMinute ?? 0,
     isoSecond ?? 0,
     isoMillisecond ?? 0,
-  ]
-  let milli = Date.UTC(
-    year,
-    month,
-    day,
-    ...smallUnits,
-  )
-  if (isNaN(milli)) {
-    const sign = numSign(year)
-    const milliShifted = Date.UTC(
-      year,
-      month,
-      day + sign * -1,
-      ...smallUnits,
-    )
-    if (isNaN(milliShifted)) {
-      // Reject any DateTime 24 hours or more outside the Instant range
-      throw new RangeError('DateTime outside of supported range')
-    }
-    milli = milliShifted + sign * milliInDay
-  }
+  ) + (sign * milliInDay) // push back out of Date.UTC's min/max
+
+  validateValue(milli)
   return milli
 }
 
@@ -137,11 +123,11 @@ export function epochNanoToISOFields(epochNano: bigint): DateTimeISOEssentials {
 }
 
 export function epochMilliToISOFields(epochMilli: number): DateTimeISOMilli {
-  const legacy = new Date(epochMilli)
+  const [legacy, shiftDays] = nudgeToLegacyDate(epochMilli)
   return {
     isoYear: legacy.getUTCFullYear(),
     isoMonth: legacy.getUTCMonth() + 1,
-    isoDay: legacy.getUTCDate(),
+    isoDay: legacy.getUTCDate() + shiftDays, // pray there's no overflow to higher/lower units
     isoHour: legacy.getUTCHours(),
     isoMinute: legacy.getUTCMinutes(),
     isoSecond: legacy.getUTCSeconds(),
@@ -152,7 +138,7 @@ export function epochMilliToISOFields(epochMilli: number): DateTimeISOMilli {
 // Year <-> Epoch Minutes
 
 export function epochMinsToISOYear(mins: number): number {
-  return new Date(mins * milliInMin).getUTCFullYear()
+  return nudgeToLegacyDate(mins * milliInMin)[0].getUTCFullYear()
 }
 
 export function isoYearToEpochMins(isoYear: number): number {
@@ -172,6 +158,73 @@ export function addDaysMilli(milli: number, days: number): number {
 // Day-of-Week
 
 export function computeISODayOfWeek(isoYear: number, isoMonth: number, isoDay: number): number {
-  // 1=Monday ... 7=Sunday
-  return new Date(isoToEpochMilli(isoYear, isoMonth, isoDay)).getUTCDay() || 7
+  const [legacy, shiftDays] = nudgeToLegacyDate(isoToEpochMilli(isoYear, isoMonth, isoDay))
+  return positiveModulo(
+    legacy.getUTCDay() + shiftDays,
+    7,
+  ) || 7 // convert Sun...Mon to Mon...Sun
+}
+
+// Validation
+
+export function validateYearMonth(isoFields: DateISOEssentials): void {
+  validateDateTime(
+    isoFields.isoYear < 0
+      // last nanosecond in month
+      ? { ...isoFields, isoMonth: isoFields.isoMonth + 1, isoNanosecond: -1 }
+      : isoFields,
+  )
+}
+
+export function validateDate(isoFields: DateISOEssentials): void {
+  validateDateTime(
+    isoFields.isoYear < 0
+      // last nanosecond in day
+      ? { ...isoFields, isoDay: isoFields.isoDay + 1, isoNanosecond: -1 }
+      : isoFields,
+  )
+}
+
+export function validateDateTime(
+  isoFields: Partial<DateTimeISOEssentials> & { isoYear: number },
+): void {
+  validateInstant(
+    // within 23:59:59.999999999 of valid instant range?
+    isoFieldsToEpochNano(isoFields) - BigInt((nanoInDay - 1) * numSign(isoFields.isoYear)),
+  )
+}
+
+export function validateInstant(epochNano: bigint): void {
+  const epochMilli = Number(epochNano / nanoInMilliBI)
+  const leftoverNano = Number(epochNano - BigInt(epochMilli) * nanoInMilliBI)
+  const fakeEpochMilli = epochMilli + numSign(leftoverNano)
+  validateValue(new Date(fakeEpochMilli))
+}
+
+function nudgeToLegacyDate(epochMilli: number): [Date, number] {
+  let legacy = new Date(epochMilli)
+  let shiftDays = 0 // additional days that must be added to `legacy` to get legit result
+
+  // if out of range, try shifting one day in
+  if (isInvalid(legacy)) {
+    shiftDays = numSign(epochMilli)
+    legacy = new Date(epochMilli + milliInDay * shiftDays * -1)
+    validateValue(legacy)
+  }
+
+  return [legacy, shiftDays]
+}
+
+function validateValue(n: { valueOf(): number }) {
+  if (isInvalid(n)) {
+    throwOutOfRange()
+  }
+}
+
+function isInvalid(n: { valueOf(): number }): boolean {
+  return isNaN(n.valueOf())
+}
+
+function throwOutOfRange() {
+  throw new RangeError('Date outside of supported range')
 }

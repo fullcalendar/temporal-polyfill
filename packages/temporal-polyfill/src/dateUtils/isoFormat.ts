@@ -102,7 +102,7 @@ export function formatDurationISO(
       fractionalSecondDigits,
     )
     : ''
-  return getSignStr(sign) + 'P' +
+  return (sign < 0 ? '-' : '') + 'P' +
     collapseDurationTuples([
       [fields.years, 'Y'],
       [fields.months, 'M'],

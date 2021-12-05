@@ -13,7 +13,7 @@ import {
   TimeRoundOptions,
   TimeUnit,
 } from '../public/types'
-import { compareValues } from '../utils/math'
+import { compareValues, positiveModulo } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { nanoToDayTimeFields } from './dayTime'
@@ -174,7 +174,7 @@ export function timeISOToNano(timeISO: TimeISOEssentials): number {
 
 export function nanoToWrappedTimeFields(nano: number): [TimeFields, number] {
   const dayDelta = Math.floor(nano / nanoInDay)
-  nano = (nano % nanoInDay + nanoInDay) % nanoInDay
+  nano = positiveModulo(nano, nanoInDay)
 
   const fields = nanoToDayTimeFields(nano, DAY)
 

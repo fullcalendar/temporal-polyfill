@@ -1,4 +1,5 @@
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
+import { positiveModulo } from '../utils/math'
 import { computeDayOfYear, computeDaysInYear } from './calendar'
 import { computeISODayOfWeek } from './isoMath'
 
@@ -47,9 +48,10 @@ function computeFirstWeekOffset(
   const firstWeekDay = 7 + firstDay - minimalDays
 
   // Which local weekday is first week day
-  const localWeek =
-    (computeISODayOfWeek(isoYear, 1, firstWeekDay) -
-      firstDay + 7) % 7
+  const localWeek = positiveModulo(
+    computeISODayOfWeek(isoYear, 1, firstWeekDay) - firstDay,
+    7,
+  )
 
   return -localWeek + firstWeekDay - 1
 }

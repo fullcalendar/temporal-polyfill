@@ -14,7 +14,7 @@ import {
 } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
-import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
+import { isoFieldsToEpochMilli, validateDate } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
@@ -56,8 +56,10 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     isoDay: number,
     calendarArg: CalendarArg = createDefaultCalendar(),
   ) {
+    const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
+    validateDate(constrained)
     super({
-      ...constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT),
+      ...constrained,
       calendar: ensureObj(Calendar, calendarArg),
     })
   }

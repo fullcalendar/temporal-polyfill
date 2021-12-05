@@ -22,3 +22,8 @@ export function roundToIncrement(
 ): number {
   return roundingFunc(num / inc) * inc
 }
+
+// wraps `n` to 0...max (not including max)
+export function positiveModulo(n: number, max: number): number {
+  return (n % max + max) % max
+}

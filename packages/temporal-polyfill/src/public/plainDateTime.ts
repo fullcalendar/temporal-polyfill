@@ -18,7 +18,7 @@ import {
   roundDateTime,
 } from '../dateUtils/dateTime'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
-import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
+import { isoFieldsToEpochMilli, validateDateTime } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
@@ -69,18 +69,20 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     isoNanosecond = 0,
     calendarArg: CalendarArg = createDefaultCalendar(),
   ) {
+    const constrained = constrainDateTimeISO({
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      isoMicrosecond,
+      isoNanosecond,
+    }, OVERFLOW_REJECT)
+    validateDateTime(constrained)
     super({
-      ...constrainDateTimeISO({
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-        isoMicrosecond,
-        isoNanosecond,
-      }, OVERFLOW_REJECT),
+      ...constrained,
       calendar: ensureObj(Calendar, calendarArg),
     })
   }

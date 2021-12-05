@@ -2,12 +2,12 @@ import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplay } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { yearMonthFieldMap } from '../argParse/fieldStr'
-import { OVERFLOW_REJECT, parseOverflowOptions } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO, diffDates } from '../dateUtils/date'
 import { formatCalendarID, formatYearMonthISO } from '../dateUtils/isoFormat'
-import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
+import { isoFieldsToEpochMilli, validateYearMonth } from '../dateUtils/isoMath'
 import {
   YearMonthCalendarFields,
   mixinCalendarFields,
@@ -48,19 +48,19 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     calendarArg: CalendarArg = createDefaultCalendar(),
     referenceISODay = 1,
   ) {
+    const constrained = constrainDateISO({
+      isoYear,
+      isoMonth,
+      isoDay: referenceISODay,
+    }, OVERFLOW_REJECT)
+    validateYearMonth(constrained)
     super({
-      ...constrainDateISO({
-        isoYear,
-        isoMonth,
-        isoDay: referenceISODay,
-      }, OVERFLOW_REJECT),
+      ...constrained,
       calendar: ensureObj(Calendar, calendarArg),
     })
   }
 
   static from(arg: YearMonthArg, options?: OverflowOptions): PlainYearMonth {
-    parseOverflowOptions(options) // unused, but need to validate, regardless of input type
-
     if (arg instanceof PlainYearMonth) {
       return createYearMonth(arg.getISOFields()) // optimization
     }
