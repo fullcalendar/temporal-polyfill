@@ -173,7 +173,7 @@ export function diffZonedDateTimes(
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
-        Number(dt1.epochNanoseconds - dt0.epochNanoseconds),
+        dt1.epochNanoseconds - dt0.epochNanoseconds,
         diffConfig as RoundConfig<DayTimeUnitInt>,
       ),
       largestUnit,
@@ -191,10 +191,7 @@ export function diffZonedDateTimes(
   // advance dt0 to within a day of dt1 and compute the time different
   // guaranteed to be less than 24 hours
   const timeDuration = nanoToDuration(
-    Number(
-      dt1.epochNanoseconds -
-      dt0.add(largeDuration).epochNanoseconds,
-    ),
+    dt1.epochNanoseconds - dt0.add(largeDuration).epochNanoseconds,
     DAY, // overflow to day just in case of weird DST issue
   )
 

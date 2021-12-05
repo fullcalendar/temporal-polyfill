@@ -16,11 +16,15 @@ export function numSign(num: number): CompareResult {
 }
 
 export function roundToIncrement(
-  num: number,
+  num: bigint,
   inc: number,
   roundingFunc: RoundingFunc,
-): number {
-  return roundingFunc(num / inc) * inc
+): bigint {
+  const incBI = BigInt(inc)
+  const wholeUnits = num / incBI
+  const wholeNum = wholeUnits * incBI
+  const leftover = Number(num - wholeNum)
+  return wholeNum + BigInt(roundingFunc(leftover / inc)) * incBI
 }
 
 // wraps `n` to 0...max (not including max)

@@ -33,7 +33,7 @@ export function diffInstants(a: Instant, b: Instant, options?: TimeDiffOptions):
 
   return nanoToDuration(
     roundNano(
-      Number(b.epochNanoseconds - a.epochNanoseconds),
+      b.epochNanoseconds - a.epochNanoseconds,
       diffConfig as RoundConfig<TimeUnitInt>,
     ),
     diffConfig.largestUnit,

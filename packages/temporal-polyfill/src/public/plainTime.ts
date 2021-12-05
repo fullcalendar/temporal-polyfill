@@ -19,7 +19,7 @@ import {
   timeFieldsToConstrainedISO,
   timeFieldsToNano,
 } from '../dateUtils/time'
-import { nanoInMilli } from '../dateUtils/units'
+import { nanoInMilliBI } from '../dateUtils/units'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -123,7 +123,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
       timeZone: 'UTC', // options can't override
       // TODO: inject more options to ensure only time is displayed by default
     }).format(
-      Math.floor(timeFieldsToNano(this) / nanoInMilli),
+      Number(timeFieldsToNano(this) / nanoInMilliBI),
     )
   }
 

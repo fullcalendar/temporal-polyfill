@@ -182,7 +182,10 @@ export function roundAndBalanceDuration(
 
   const fields = durationToDayTimeFields(duration)
   if (fields && isDayTimeUnit(largestUnit) && isDayTimeUnit(smallestUnit)) {
-    const nano = roundNano(dayTimeFieldsToNano(fields), diffConfig as RoundConfig<DayTimeUnitInt>)
+    const nano = roundNano(
+      dayTimeFieldsToNano(fields),
+      diffConfig as RoundConfig<DayTimeUnitInt>,
+    )
     const roundedFields = nanoToDayTimeFields(nano, largestUnit)
     return dayTimeFieldsToDuration(roundedFields)
   }
@@ -242,7 +245,7 @@ export function compareDurations(
   return PlainDateTime.compare(date0, date1)
 }
 
-export function nanoToDuration(nano: number, largestUnit: DayTimeUnitInt): Duration {
+export function nanoToDuration(nano: bigint, largestUnit: DayTimeUnitInt): Duration {
   return dayTimeFieldsToDuration(nanoToDayTimeFields(nano, largestUnit))
 }
 

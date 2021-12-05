@@ -146,10 +146,7 @@ export function diffDateTimes(
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
-        Number(
-          isoFieldsToEpochNano(t1.getISOFields()) -
-          isoFieldsToEpochNano(t0.getISOFields()),
-        ),
+        isoFieldsToEpochNano(t1.getISOFields()) - isoFieldsToEpochNano(t0.getISOFields()),
         diffConfig as RoundConfig<DayTimeUnitInt>,
       ),
       largestUnit,

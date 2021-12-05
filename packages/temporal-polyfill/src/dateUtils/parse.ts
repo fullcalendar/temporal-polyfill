@@ -107,7 +107,7 @@ function tryParseDurationISO(str: string): DurationFields | undefined {
   const match = durationRegExp.exec(str)
   if (match) {
     const subSecondFields = nanoToDayTimeFields(
-      subSecondStrToNano(match[12]),
+      BigInt(subSecondStrToNano(match[12])),
       MILLISECOND,
     )
     const fields: DurationFields = {
@@ -154,7 +154,7 @@ function parseTimeParts(parts: string[]): TimeISOEssentials {
   return {
     ...timeLikeToISO( // properties like isoMillisecond/isoMicrosecond
       nanoToDayTimeFields( // properties like millisecond/microsecond
-        subSecondStrToNano(parts[4]),
+        BigInt(subSecondStrToNano(parts[4])),
         MILLISECOND,
       ),
     ),

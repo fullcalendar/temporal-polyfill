@@ -5,7 +5,7 @@ import { DateISOEssentials } from './date'
 import {
   milliInDay,
   milliInMin,
-  nanoInDay,
+  nanoInDayBI,
   nanoInMicro,
   nanoInMicroBI,
   nanoInMilli,
@@ -190,7 +190,7 @@ export function validateDateTime(
 ): void {
   validateInstant(
     // within 23:59:59.999999999 of valid instant range?
-    isoFieldsToEpochNano(isoFields) - BigInt((nanoInDay - 1) * numSign(isoFields.isoYear)),
+    isoFieldsToEpochNano(isoFields) - (nanoInDayBI - 1n) * BigInt(numSign(isoFields.isoYear)),
   )
 }
 

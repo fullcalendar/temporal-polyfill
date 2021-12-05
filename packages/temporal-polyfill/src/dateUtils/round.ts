@@ -21,11 +21,12 @@ export function roundBalancedDuration(
   const unitName = durationUnitNames[smallestUnit]
 
   function doRound() {
-    durationLike[unitName] = roundToIncrement(
-      durationLike[unitName]!, // computeExactDuration guarantees value
+    const orig = durationLike[unitName]! // computeExactDuration guarantees value
+    durationLike[unitName] = Number(roundToIncrement(
+      BigInt(orig),
       roundingIncrement,
       roundingMode,
-    )
+    ))
   }
 
   if (roundingMode === Math.round) {
@@ -58,9 +59,9 @@ interface RoundNanoConfig {
 }
 
 export function roundNano(
-  nano: number,
+  nano: bigint,
   { smallestUnit, roundingIncrement, roundingMode }: RoundNanoConfig,
-): number {
+): bigint {
   return roundToIncrement(
     nano,
     nanoIn[smallestUnit] * (roundingIncrement || 1),

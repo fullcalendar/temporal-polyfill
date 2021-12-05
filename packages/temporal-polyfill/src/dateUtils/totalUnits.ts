@@ -18,7 +18,7 @@ export function computeTotalUnits(
 ): number {
   const fields = durationToDayTimeFields(duration)
   if (fields && isDayTimeUnit(unit) && relativeToArg == null) {
-    return dayTimeFieldsToNano(fields) / nanoIn[unit]
+    return Number(dayTimeFieldsToNano(fields) / BigInt(nanoIn[unit]))
   }
   const relativeTo = getPlainRelativeTo(relativeToArg)
   const [balancedDuration, translatedDate] = balanceComplexDuration(

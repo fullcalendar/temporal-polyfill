@@ -13,7 +13,7 @@ import {
   TimeRoundOptions,
   TimeUnit,
 } from '../public/types'
-import { compareValues, positiveModulo } from '../utils/math'
+import { compareValues } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { nanoToDayTimeFields } from './dayTime'
@@ -24,7 +24,7 @@ import {
   HOUR,
   NANOSECOND,
   TimeUnitInt,
-  nanoInDay,
+  nanoInDayBI,
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
@@ -152,35 +152,39 @@ export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
 
 // Object -> Nanoseconds
 
-export function timeFieldsToNano(timeFields: TimeFields): number {
-  return timeFields.hour * nanoInHour +
+export function timeFieldsToNano(timeFields: TimeFields): bigint {
+  return BigInt(
+    timeFields.hour * nanoInHour +
     timeFields.minute * nanoInMinute +
     timeFields.second * nanoInSecond +
     timeFields.millisecond * nanoInMilli +
     timeFields.microsecond * nanoInMicro +
-    timeFields.nanosecond
+    timeFields.nanosecond,
+  )
 }
 
-export function timeISOToNano(timeISO: TimeISOEssentials): number {
-  return timeISO.isoHour * nanoInHour +
+export function timeISOToNano(timeISO: TimeISOEssentials): bigint {
+  return BigInt(
+    timeISO.isoHour * nanoInHour +
     timeISO.isoMinute * nanoInMinute +
     timeISO.isoSecond * nanoInSecond +
     timeISO.isoMillisecond * nanoInMilli +
     timeISO.isoMicrosecond * nanoInMicro +
-    timeISO.isoNanosecond
+    timeISO.isoNanosecond,
+  )
 }
 
 // Nanoseconds -> Object
 
-export function nanoToWrappedTimeFields(nano: number): [TimeFields, number] {
-  const dayDelta = Math.floor(nano / nanoInDay)
-  nano = positiveModulo(nano, nanoInDay)
+export function nanoToWrappedTimeFields(nano: bigint): [TimeFields, number] {
+  const dayDelta = nano / nanoInDayBI
+  nano -= dayDelta * nanoInDayBI
 
   const fields = nanoToDayTimeFields(nano, DAY)
 
   // repurpose DayTimeFiels as TimeFields
   delete fields.day
-  return [fields as TimeFields, dayDelta]
+  return [fields as TimeFields, Number(dayDelta)]
 }
 
 // Object -> Object

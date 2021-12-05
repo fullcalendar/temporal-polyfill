@@ -3,7 +3,6 @@ import { constrainValue } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Duration } from '../public/duration'
 import { DateISOFields } from '../public/types'
-import { numSign } from '../utils/math'
 import { DateEssentials, DateISOEssentials } from './date'
 import { durationToTimeFields } from './duration'
 import { addDaysMilli, epochMilliToISOFields, isoFieldsToEpochMilli } from './isoMath'
@@ -23,7 +22,8 @@ export function addToDateFields(
   // convert time-fields to a number of days, rounding towards zero
   // ALTERNATIVE SOLUTION: have nanoToWrappedTimeFields accept a rounding function
   const timeNano = timeFieldsToNano(durationToTimeFields(duration))
-  const dayDelta = nanoToWrappedTimeFields(Math.abs(timeNano))[1] * numSign(timeNano)
+  const timeNanoSign = timeNano < 0 ? -1 : 1 // custom solution because of bigint
+  const dayDelta = nanoToWrappedTimeFields(timeNano * BigInt(timeNanoSign))[1] * timeNanoSign
 
   epochMilli = addDaysMilli(
     epochMilli,

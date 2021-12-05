@@ -18,6 +18,7 @@ export const YEAR = 9
 
 export const nanoInMicroBI = 1000n
 export const nanoInMilliBI = 1000000n
+export const nanoInDayBI = 86400000000000n
 
 export const nanoInMicro = 1000
 export const nanoInMilli = 1000000
