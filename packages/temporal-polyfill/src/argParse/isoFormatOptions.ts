@@ -4,7 +4,7 @@ import {
   MINUTE,
   NANOSECOND,
   SECOND,
-  unitDigitMap,
+  nanoIn,
 } from '../dateUtils/units'
 import { TimeToStringOptions, TimeToStringUnit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
@@ -25,6 +25,7 @@ export interface TimeToStringConfig<UnitType extends TimeToStringUnitInt = TimeT
   fractionalSecondDigits: number | undefined
   smallestUnit: UnitType
   roundingMode: RoundingFunc
+  roundingIncrement: number // number of nanoseconds (rename? but good for gzip)
 }
 
 export type DurationToStringConfig = TimeToStringConfig<DurationToStringUnitInt>
@@ -39,7 +40,8 @@ export function parseTimeToStringOptions<
   const ensuredOptions = ensureOptionsObj(options)
   const smallestUnitArg = ensuredOptions.smallestUnit
   const digitsArg = ensuredOptions.fractionalSecondDigits
-  let smallestUnit: UnitType
+  let smallestUnit = NANOSECOND as UnitType
+  let roundingIncrement = 1
   let digits: number | undefined
 
   if (smallestUnitArg !== undefined) {
@@ -49,17 +51,16 @@ export function parseTimeToStringOptions<
       NANOSECOND as UnitType, // minUnit
       largestUnit, // maxUnit
     )
-    digits = unitDigitMap[smallestUnit] || 0 // for bigger than milliseconds, don't do any digits
-  } else {
-    smallestUnit = NANOSECOND as UnitType
-    digits = (digitsArg === undefined || digitsArg === 'auto')
-      ? undefined
-      : constrainInt(digitsArg, 0, 9, OVERFLOW_REJECT)
+    roundingIncrement = nanoIn[smallestUnit]
+  } else if (digitsArg !== undefined && digitsArg !== 'auto') {
+    digits = constrainInt(digitsArg, 0, 9, OVERFLOW_REJECT)
+    roundingIncrement = Math.pow(10, 9 - digits)
   }
 
   return {
     smallestUnit,
     fractionalSecondDigits: digits,
     roundingMode: parseRoundingModeOption(options, Math.trunc),
+    roundingIncrement,
   }
 }

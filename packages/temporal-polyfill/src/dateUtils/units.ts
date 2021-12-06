@@ -43,12 +43,6 @@ export const nanoIn = [
 export const milliInDay = 86400000
 export const milliInMin = 60000
 
-export const unitDigitMap = [ // how many digits after the decimal point for a seconds value
-  9, // nanoseconds
-  6, // microseconds
-  3, // milliseconds
-]
-
 export function isDayTimeUnit(unit: UnitInt): unit is DayTimeUnitInt {
   return unit <= DAY
 }

@@ -43,31 +43,26 @@ export function formatTimeISO(
   fields: TimeISOEssentials,
   formatConfig: TimeToStringConfig,
 ): [string, number] {
-  const { fractionalSecondDigits, smallestUnit } = formatConfig
-  let nano = timeISOToNano(fields)
-
-  if (fractionalSecondDigits !== undefined) {
-    nano = roundToIncrementBI(
-      nano,
-      Math.pow(10, 9 - fractionalSecondDigits),
-      formatConfig.roundingMode,
-    )
-  }
+  const nano = roundToIncrementBI(
+    timeISOToNano(fields),
+    formatConfig.roundingIncrement,
+    formatConfig.roundingMode,
+  )
 
   const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano)
   const parts: string[] = [padZeros(roundedFields.hour, 2)]
 
-  if (smallestUnit <= MINUTE) {
+  if (formatConfig.smallestUnit <= MINUTE) {
     parts.push(padZeros(roundedFields.minute, 2))
 
-    if (smallestUnit <= SECOND) {
+    if (formatConfig.smallestUnit <= SECOND) {
       parts.push(
         padZeros(roundedFields.second, 2) +
           formatPartialSeconds(
             roundedFields.millisecond,
             roundedFields.microsecond,
             roundedFields.nanosecond,
-            fractionalSecondDigits,
+            formatConfig.fractionalSecondDigits,
           ),
       )
     }
