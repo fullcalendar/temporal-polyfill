@@ -45,6 +45,12 @@ export const milliInDay = 86400000
 export const milliInSecond = 1000
 export const secondsInDay = 24 * 60 * 60
 
+export const unitDigitMap = [ // how many digits after the decimal point for a seconds value
+  9, // nanoseconds
+  6, // microseconds
+  3, // milliseconds
+]
+
 export function isDayTimeUnit(unit: UnitInt): unit is DayTimeUnitInt {
   return unit <= DAY
 }
