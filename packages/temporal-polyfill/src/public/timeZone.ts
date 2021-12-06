@@ -10,7 +10,13 @@ import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochMins } from '../dateUtils/isoMath'
 import { tryParseDateTimeISO } from '../dateUtils/parse'
-import { nanoInMicro, nanoInMilli, nanoInMinute, nanoInSecond } from '../dateUtils/units'
+import {
+  nanoInMicroBI,
+  nanoInMilliBI,
+  nanoInMinute,
+  nanoInMinuteBI,
+  nanoInSecondBI,
+} from '../dateUtils/units'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
@@ -64,7 +70,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
     const instant = ensureObj(Instant, instantArg)
     return getImpl(this).getOffset(
-      Number(instant.epochNanoseconds / BigInt(nanoInMinute)),
+      Number(instant.epochNanoseconds / nanoInMinuteBI),
     ) * nanoInMinute
   }
 
@@ -144,14 +150,14 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
 
 function epochMinsToInstant(epochMinutes: number, otherISOFields?: DateTimeISOFields): Instant {
   return new Instant(
-    BigInt(epochMinutes) * BigInt(nanoInMinute) +
-    BigInt(
+    BigInt(epochMinutes) * nanoInMinuteBI + (
       otherISOFields
-        ? otherISOFields.isoSecond * nanoInSecond +
-          otherISOFields.isoMillisecond * nanoInMilli +
-          otherISOFields.isoMicrosecond * nanoInMicro +
-          otherISOFields.isoNanosecond
-        : 0,
+        // TODO: use a common util for this?
+        ? BigInt(otherISOFields.isoSecond) * nanoInSecondBI +
+          BigInt(otherISOFields.isoMillisecond) * nanoInMilliBI +
+          BigInt(otherISOFields.isoMicrosecond) * nanoInMicroBI +
+          BigInt(otherISOFields.isoNanosecond)
+        : 0n
     ),
   )
 }

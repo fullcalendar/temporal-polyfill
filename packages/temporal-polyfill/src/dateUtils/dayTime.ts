@@ -1,6 +1,6 @@
 import { unitNames } from '../argParse/unitStr'
 import { TimeFields, timeFieldsToNano } from './time'
-import { DayTimeUnitInt, NANOSECOND, nanoIn, nanoInDayBI, nanoInMilliBI } from './units'
+import { DayTimeUnitInt, NANOSECOND, nanoIn, nanoInDayBI } from './units'
 
 export type DayTimeFields = TimeFields & { day: number }
 
@@ -27,11 +27,7 @@ export function nanoToDayTimeFields(
 export function splitEpochNano(epochNano: bigint): [
   bigint, bigint, // [dayNano, timeNano]
 ] {
-  const dayNano = epochNano / nanoInMilliBI * nanoInMilliBI
+  const dayNano = epochNano / nanoInDayBI * nanoInDayBI
   const timeNano = epochNano - dayNano
   return [dayNano, timeNano]
-}
-
-export function joinEpochNano(dayNano: bigint, timeNano: bigint): bigint {
-  return dayNano * nanoInDayBI + timeNano
 }

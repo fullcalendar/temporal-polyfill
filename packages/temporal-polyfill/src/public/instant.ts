@@ -6,7 +6,7 @@ import { isoFieldsToEpochNano, validateInstant } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { constrainTimeISO } from '../dateUtils/time'
-import { nanoInMicro, nanoInMilli, nanoInSecond } from '../dateUtils/units'
+import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
 import {
@@ -27,7 +27,7 @@ const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
 export class Instant extends AbstractNoValueObj {
   constructor(epochNanoseconds: bigint) {
     super()
-    epochNanoseconds = BigInt(epochNanoseconds)
+    epochNanoseconds = BigInt(epochNanoseconds) // cast
     validateInstant(epochNanoseconds)
     setEpochNano(this, epochNanoseconds)
   }
@@ -53,15 +53,15 @@ export class Instant extends AbstractNoValueObj {
   }
 
   static fromEpochSeconds(epochSeconds: number): Instant {
-    return new Instant(BigInt(epochSeconds) * BigInt(nanoInSecond))
+    return new Instant(BigInt(epochSeconds) * nanoInSecondBI)
   }
 
   static fromEpochMilliseconds(epochMilliseconds: number): Instant {
-    return new Instant(BigInt(epochMilliseconds) * BigInt(nanoInMilli))
+    return new Instant(BigInt(epochMilliseconds) * nanoInMilliBI)
   }
 
   static fromEpochMicroseconds(epochMicroseconds: bigint): Instant {
-    return new Instant(epochMicroseconds * BigInt(nanoInMicro))
+    return new Instant(epochMicroseconds * nanoInMicroBI)
   }
 
   static fromEpochNanoseconds(epochNanoseconds: bigint): Instant {

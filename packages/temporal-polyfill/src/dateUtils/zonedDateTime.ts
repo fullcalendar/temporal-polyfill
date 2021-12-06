@@ -132,7 +132,7 @@ export function addToZonedDateTime(
 ): ZonedDateTime {
   // add time fields first
   const timeNano = timeFieldsToNano(durationToTimeFields(duration))
-  const epochNano = zonedDateTime.epochNanoseconds + BigInt(timeNano)
+  const epochNano = zonedDateTime.epochNanoseconds + timeNano
   const isoFields = new ZonedDateTime(epochNano, zonedDateTime.timeZone, zonedDateTime.calendar)
     .getISOFields()
 
@@ -213,7 +213,7 @@ export function roundZonedDateTime(
   const roundedNano = roundNano(origNano, roundingConfig)
   const diffNano = roundedNano - origNano
   return new ZonedDateTime(
-    zonedDateTime.epochNanoseconds + BigInt(diffNano),
+    zonedDateTime.epochNanoseconds + diffNano,
     zonedDateTime.timeZone,
     zonedDateTime.calendar,
   )

@@ -18,8 +18,12 @@ export const YEAR = 9
 
 export const nanoInMicroBI = 1000n
 export const nanoInMilliBI = 1000000n
+export const nanoInSecondBI = 1000000000n
+export const nanoInMinuteBI = 60000000000n
+export const nanoInHourBI = 3600000000000n
 export const nanoInDayBI = 86400000000000n
 
+// TODO: audit use of these. Use bigint exclusively?
 export const nanoInMicro = 1000
 export const nanoInMilli = 1000000
 export const nanoInSecond = 1000000000

@@ -4,7 +4,7 @@ import { Duration } from '../public/duration'
 import { Instant } from '../public/instant'
 import { CompareResult, TimeDiffOptions, TimeRoundingOptions } from '../public/types'
 import { compareValues } from '../utils/math'
-import { joinEpochNano, splitEpochNano } from './dayTime'
+import { splitEpochNano } from './dayTime'
 import { computeLargestDurationUnit, durationToTimeFields, nanoToDuration } from './duration'
 import { roundNano } from './round'
 import { timeFieldsToNano } from './time'
@@ -18,13 +18,11 @@ export function addToInstant(instant: Instant, duration: Duration): Instant {
   const largestUnit = computeLargestDurationUnit(duration)
 
   if (largestUnit >= DAY) {
-    throw new Error('Duration cant have units larger than days')
+    throw new RangeError('Duration cant have units larger than days')
   }
 
   return new Instant(
-    instant.epochNanoseconds + BigInt(
-      timeFieldsToNano(durationToTimeFields(duration)),
-    ),
+    instant.epochNanoseconds + timeFieldsToNano(durationToTimeFields(duration)),
   )
 }
 
@@ -44,10 +42,5 @@ export function roundInstant(instant: Instant, options: TimeRoundingOptions): In
   const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR)
   const [dayNano, timeNano] = splitEpochNano(instant.epochNanoseconds)
 
-  return new Instant(
-    joinEpochNano(
-      dayNano,
-      roundNano(timeNano, roundingConfig),
-    ),
-  )
+  return new Instant(dayNano + roundNano(timeNano, roundingConfig))
 }

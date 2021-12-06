@@ -25,11 +25,11 @@ import {
   NANOSECOND,
   TimeUnitInt,
   nanoInDayBI,
-  nanoInHour,
-  nanoInMicro,
-  nanoInMilli,
-  nanoInMinute,
-  nanoInSecond,
+  nanoInHourBI,
+  nanoInMicroBI,
+  nanoInMilliBI,
+  nanoInMinuteBI,
+  nanoInSecondBI,
 } from './units'
 
 export interface TimeISOMilli {
@@ -154,20 +154,20 @@ export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
 // TODO: do ordere-arg-based methods?
 
 export function timeFieldsToNano(timeFields: TimeFields): bigint {
-  return BigInt(timeFields.hour) * BigInt(nanoInHour) +
-    BigInt(timeFields.minute) * BigInt(nanoInMinute) +
-    BigInt(timeFields.second) * BigInt(nanoInSecond) +
-    BigInt(timeFields.millisecond) * BigInt(nanoInMilli) +
-    BigInt(timeFields.microsecond) * BigInt(nanoInMicro) +
+  return BigInt(timeFields.hour) * nanoInHourBI +
+    BigInt(timeFields.minute) * nanoInMinuteBI +
+    BigInt(timeFields.second) * nanoInSecondBI +
+    BigInt(timeFields.millisecond) * nanoInMilliBI +
+    BigInt(timeFields.microsecond) * nanoInMicroBI +
     BigInt(timeFields.nanosecond)
 }
 
 export function timeISOToNano(timeISO: TimeISOEssentials): bigint {
-  return BigInt(timeISO.isoHour) * BigInt(nanoInHour) +
-    BigInt(timeISO.isoMinute) * BigInt(nanoInMinute) +
-    BigInt(timeISO.isoSecond) * BigInt(nanoInSecond) +
-    BigInt(timeISO.isoMillisecond) * BigInt(nanoInMilli) +
-    BigInt(timeISO.isoMicrosecond) * BigInt(nanoInMicro) +
+  return BigInt(timeISO.isoHour) * nanoInHourBI +
+    BigInt(timeISO.isoMinute) * nanoInMinuteBI +
+    BigInt(timeISO.isoSecond) * nanoInSecondBI +
+    BigInt(timeISO.isoMillisecond) * nanoInMilliBI +
+    BigInt(timeISO.isoMicrosecond) * nanoInMicroBI +
     BigInt(timeISO.isoNanosecond)
 }
 

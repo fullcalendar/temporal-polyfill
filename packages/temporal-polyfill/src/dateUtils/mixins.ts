@@ -4,7 +4,7 @@ import { DateLike, Unit } from '../public/types'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'
-import { nanoInMicro, nanoInMilli, nanoInSecond } from './units'
+import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from './units'
 
 // Epoch Fields
 
@@ -19,13 +19,13 @@ export function mixinEpochFields<Obj extends { epochNanoseconds: bigint }>(
 ): void {
   attachGetters(ObjClass, {
     epochMicroseconds(): bigint {
-      return this.epochNanoseconds / BigInt(nanoInMicro)
+      return this.epochNanoseconds / nanoInMicroBI
     },
     epochMilliseconds(): number {
-      return Number(this.epochNanoseconds / BigInt(nanoInMilli))
+      return Number(this.epochNanoseconds / nanoInMilliBI)
     },
     epochSeconds(): number {
-      return Number(this.epochNanoseconds / BigInt(nanoInSecond))
+      return Number(this.epochNanoseconds / nanoInSecondBI)
     },
   })
 }
