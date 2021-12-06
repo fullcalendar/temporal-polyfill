@@ -203,14 +203,14 @@ export function roundZonedDateTime(
   zonedDateTime: ZonedDateTime,
   options: DateTimeRoundingOptions | undefined,
 ): ZonedDateTime {
-  const roundConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
+  const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
     options,
     undefined, // no default. will error-out if unset
     NANOSECOND, // minUnit
     DAY, // maxUnit
   )
   const origNano = dayTimeFieldsToNano(zonedDateTime)
-  const roundedNano = roundNano(origNano, roundConfig)
+  const roundedNano = roundNano(origNano, roundingConfig)
   const diffNano = roundedNano - origNano
   return new ZonedDateTime(
     zonedDateTime.epochNanoseconds + BigInt(diffNano),

@@ -168,13 +168,13 @@ export function roundDateTime(
   dateTime: PlainDateTime,
   options: DateTimeRoundingOptions,
 ): PlainDateTime {
-  const roundConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
+  const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
     options,
     undefined, // no default. required
     NANOSECOND, // minUnit
     DAY, // maxUnit
   )
-  const [timeFields, dayDelta] = roundTimeOfDay(dateTime, roundConfig)
+  const [timeFields, dayDelta] = roundTimeOfDay(dateTime, roundingConfig)
   const dateISOFields = addWholeDays(dateTime.getISOFields(), dayDelta) // preserves `calendar`
 
   return createDateTime({

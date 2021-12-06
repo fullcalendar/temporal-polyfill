@@ -110,13 +110,13 @@ export function diffPlainTimes(
 }
 
 export function roundPlainTime(plainTime: PlainTime, options: TimeRoundingOptions): PlainTime {
-  const roundConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
+  const roundingConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
     options,
     undefined, // no default. required
     NANOSECOND, // minUnit
     HOUR, // maxUnit
   )
-  const [fields] = roundTimeOfDay(plainTime, roundConfig)
+  const [fields] = roundTimeOfDay(plainTime, roundingConfig)
   return createTime(timeLikeToISO(fields))
 }
 

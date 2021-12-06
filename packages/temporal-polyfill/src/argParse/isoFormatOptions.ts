@@ -8,7 +8,8 @@ import {
 } from '../dateUtils/units'
 import { TimeToStringOptions, TimeToStringUnit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
-import { ensureOptionsObj } from './refine'
+import { OVERFLOW_REJECT } from './overflowHandling'
+import { constrainValue, ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
@@ -51,7 +52,9 @@ export function parseTimeToStringOptions<
     digits = unitDigitMap[smallestUnit] || 0 // for bigger than milliseconds, don't do any digits
   } else {
     smallestUnit = NANOSECOND as UnitType
-    digits = digitsArg === undefined || digitsArg === 'auto' ? undefined : digitsArg
+    digits = (digitsArg === undefined || digitsArg === 'auto')
+      ? undefined
+      : constrainValue(digitsArg, 0, 9, OVERFLOW_REJECT)
   }
 
   return {

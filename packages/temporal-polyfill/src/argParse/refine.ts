@@ -46,10 +46,19 @@ export function constrainValue( // will also cast to number
   if (val === undefined) {
     return min
   }
-  const newVal = Math.min(Math.max(val, min), max) // will cast to number
+
+  if (!Number.isFinite(val)) {
+    throw new RangeError('Number must be finite')
+  }
+
+  // convert floating-point to integer
+  val = Math.trunc(val)
+
+  const newVal = Math.min(Math.max(val, min), max)
   if (newVal !== val && overflowHandling === OVERFLOW_REJECT) {
     throw new RangeError('Invalid overflowed value ' + val)
   }
+
   return newVal
 }
 

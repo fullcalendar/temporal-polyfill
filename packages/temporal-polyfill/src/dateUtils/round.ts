@@ -46,9 +46,9 @@ export function roundBalancedDuration(
 
 export function roundTimeOfDay(
   timeFields: TimeFields,
-  roundConfig: RoundingConfig<DayTimeUnitInt>,
+  roundingConfig: RoundingConfig<DayTimeUnitInt>,
 ): [TimeFields, number] {
-  const nano = roundNano(timeFieldsToNano(timeFields), roundConfig)
+  const nano = roundNano(timeFieldsToNano(timeFields), roundingConfig)
   return nanoToWrappedTimeFields(nano)
 }
 

@@ -43,7 +43,7 @@ export function formatTimeISO(
   fields: TimeISOEssentials,
   formatConfig: TimeToStringConfig,
 ): [string, number] {
-  const nano = roundNano(timeISOToNano(fields), formatConfig)
+  const nano = roundNano(timeISOToNano(fields), formatConfig) // roundNano uses smallestUnit, NOT fractionalSecondDigits
   const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano)
   const parts: string[] = [padZeros(roundedFields.hour, 2)]
 
