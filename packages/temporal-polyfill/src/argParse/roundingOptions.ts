@@ -1,4 +1,4 @@
-import { UnitInt } from '../dateUtils/units'
+import { DAY, UnitInt, nanoIn } from '../dateUtils/units'
 import { RoundingOptions, Unit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj, isObjectLike } from './refine'
@@ -25,9 +25,24 @@ export function parseRoundingOptions<
   }
 
   const ensuredOptions = ensureOptionsObj(options)
+  const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
+  const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
+
+  if (smallestUnit < DAY) {
+    const higherNano = nanoIn[smallestUnit + 1]
+
+    if (higherNano % roundingIncrement) {
+      throw new RangeError('roundingIncrement does not divide evenly into next highest unit')
+    }
+
+    if (roundingIncrement * nanoIn[smallestUnit] >= higherNano) {
+      throw new RangeError('roundingIncrement must be less than next highest unit')
+    }
+  }
+
   return {
-    smallestUnit: parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit),
+    smallestUnit,
     roundingMode: parseRoundingModeOption(options, Math.trunc),
-    roundingIncrement: ensuredOptions.roundingIncrement ?? 1,
+    roundingIncrement,
   }
 }
