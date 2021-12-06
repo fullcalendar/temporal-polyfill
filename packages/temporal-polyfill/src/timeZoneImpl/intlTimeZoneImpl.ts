@@ -1,4 +1,4 @@
-import { hashIntlFormatParts } from '../dateUtils/intlFormat'
+import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { epochMinsToISOYear, isoToEpochMilli, isoYearToEpochMins } from '../dateUtils/isoMath'
 import { milliInMin } from '../dateUtils/units'
 import { compareValues, numSign } from '../utils/math'
@@ -21,7 +21,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
   constructor(id: string) {
     const format = new Intl.DateTimeFormat('en-GB', { // gives 24-hour clock
-      era: 'narrow', // 'B' or 'A'
+      era: 'short',
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
@@ -79,7 +79,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     const map = hashIntlFormatParts(this.format, epochMins * milliInMin)
     let year = parseInt(map.year)
 
-    if (map.era === 'B') {
+    if (normalizeShortEra(map.era) === 'bce') {
       year = -(year - 1)
     }
 

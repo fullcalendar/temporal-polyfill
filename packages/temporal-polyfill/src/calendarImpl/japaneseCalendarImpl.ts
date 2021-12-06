@@ -1,7 +1,7 @@
-import { hashIntlFormatParts } from '../dateUtils/intlFormat'
+import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { isoToEpochMilli } from '../dateUtils/isoMath'
 import { GregoryCalendarImpl } from './gregoryCalendarImpl'
-import { buildFormat, normalizeEra } from './intlCalendarImpl'
+import { buildFormat } from './intlCalendarImpl'
 
 const primaryEraMilli = isoToEpochMilli(1868, 9, 8)
 
@@ -17,6 +17,6 @@ export class JapaneseCalendarImpl extends GregoryCalendarImpl {
     const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
     return epochMilli < primaryEraMilli
       ? super.era(isoYear, isoMonth, isoDay)
-      : normalizeEra(hashIntlFormatParts(this.format, epochMilli).era)
+      : normalizeShortEra(hashIntlFormatParts(this.format, epochMilli).era)
   }
 }

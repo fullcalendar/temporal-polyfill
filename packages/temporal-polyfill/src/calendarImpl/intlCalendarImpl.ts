@@ -1,5 +1,5 @@
 import { computeDaysInYear } from '../dateUtils/calendar'
-import { hashIntlFormatParts } from '../dateUtils/intlFormat'
+import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import {
   addDaysMilli,
   diffDaysMilli,
@@ -167,7 +167,7 @@ export class IntlCalendarImpl extends CalendarImpl {
     let year = parseInt(partHash.year)
 
     if (partHash.era) {
-      era = normalizeEra(partHash.era)
+      era = normalizeShortEra(partHash.era)
       eraYear = year
       year = this.convertEraYear(eraYear, era)
     }
@@ -197,18 +197,4 @@ export function buildFormat(calendarID: string): Intl.DateTimeFormat {
     day: 'numeric',
     timeZone: 'UTC',
   })
-}
-
-const eraRemap: { [eraIn: string]: string } = {
-  bc: 'bce',
-  ad: 'ce',
-}
-
-export function normalizeEra(formattedEra: string): string {
-  // Example 'Before R.O.C.' -> 'before-roc'
-  formattedEra = formattedEra.toLowerCase()
-    .replace(/[^a-z0-9]g/, '')
-    .replace(/ /g, '-')
-
-  return eraRemap[formattedEra] || formattedEra
 }
