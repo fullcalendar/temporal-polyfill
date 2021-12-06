@@ -61,7 +61,7 @@ export function refineZonedDateTimeParse(parsed: DateTimeParseResult): ZonedDate
 
 // hard functions (throw error on failure)
 
-export function parseMonthDayISO(str: string): DateISOFields {
+export function parseMonthDayISO(str: string): DateTimeParseResult {
   return tryParseMonthDayISO(str) ||
     tryParseDateTimeISO(str) || // fallback to parsing a datetime
     throwNoParse('monthDay', str)

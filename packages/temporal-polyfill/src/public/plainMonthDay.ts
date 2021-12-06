@@ -20,7 +20,7 @@ import {
   monthDaysEqual,
   overrideMonthDayFields,
 } from '../dateUtils/monthDay'
-import { parseMonthDayISO } from '../dateUtils/parse'
+import { parseMonthDayISO, refineDateTimeParse } from '../dateUtils/parse'
 import { throwNew } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { PlainDate } from './plainDate'
@@ -73,7 +73,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
       return extractCalendar(arg).monthDayFromFields(refinedFields as MonthDayLikeFields, options)
     }
 
-    return createMonthDay(parseMonthDayISO(String(arg)))
+    return createMonthDay(refineDateTimeParse(parseMonthDayISO(String(arg))))
   }
 
   with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {
