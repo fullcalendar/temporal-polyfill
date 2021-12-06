@@ -1,7 +1,7 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { timeFieldMap } from '../argParse/fieldStr'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { constrainValue } from '../argParse/refine'
+import { constrainInt } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { Duration } from '../public/duration'
 import { PlainTime } from '../public/plainTime'
@@ -71,12 +71,12 @@ export function constrainTimeISO( // also converts to number
   }: TimeISOEssentials,
   overflow: OverflowHandlingInt,
 ): TimeISOEssentials {
-  isoHour = constrainValue(isoHour, 0, 23, overflow)
-  isoMinute = constrainValue(isoMinute, 0, 59, overflow)
-  isoSecond = constrainValue(isoSecond, 0, 59, overflow)
-  isoMillisecond = constrainValue(isoMillisecond, 0, 999, overflow)
-  isoMicrosecond = constrainValue(isoMicrosecond, 0, 999, overflow)
-  isoNanosecond = constrainValue(isoNanosecond, 0, 999, overflow)
+  isoHour = constrainInt(isoHour, 0, 23, overflow)
+  isoMinute = constrainInt(isoMinute, 0, 59, overflow)
+  isoSecond = constrainInt(isoSecond, 0, 59, overflow)
+  isoMillisecond = constrainInt(isoMillisecond, 0, 999, overflow)
+  isoMicrosecond = constrainInt(isoMicrosecond, 0, 999, overflow)
+  isoNanosecond = constrainInt(isoNanosecond, 0, 999, overflow)
   return { isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond }
 }
 

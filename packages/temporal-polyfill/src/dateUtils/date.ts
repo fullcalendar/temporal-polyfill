@@ -1,7 +1,7 @@
 import { getCommonCalendar } from '../argParse/calendar'
 import { DiffConfig } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { constrainValue } from '../argParse/refine'
+import { constrainInt } from '../argParse/refine'
 import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
@@ -50,8 +50,8 @@ export function constrainDateFields( // also ensures numbers
   overflow: OverflowHandlingInt,
 ): [number, number, number] {
   year = Number(year) // not using constrainValue, which converts to a number
-  month = constrainValue(month, 1, calendarImpl.monthsInYear(year), overflow)
-  day = constrainValue(day, 1, calendarImpl.daysInMonth(year, month), overflow)
+  month = constrainInt(month, 1, calendarImpl.monthsInYear(year), overflow)
+  day = constrainInt(day, 1, calendarImpl.daysInMonth(year, month), overflow)
 
   return [year, month, day]
 }

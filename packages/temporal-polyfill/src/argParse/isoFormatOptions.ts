@@ -9,7 +9,7 @@ import {
 import { TimeToStringOptions, TimeToStringUnit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
 import { OVERFLOW_REJECT } from './overflowHandling'
-import { constrainValue, ensureOptionsObj } from './refine'
+import { constrainInt, ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
@@ -54,7 +54,7 @@ export function parseTimeToStringOptions<
     smallestUnit = NANOSECOND as UnitType
     digits = (digitsArg === undefined || digitsArg === 'auto')
       ? undefined
-      : constrainValue(digitsArg, 0, 9, OVERFLOW_REJECT)
+      : constrainInt(digitsArg, 0, 9, OVERFLOW_REJECT)
   }
 
   return {

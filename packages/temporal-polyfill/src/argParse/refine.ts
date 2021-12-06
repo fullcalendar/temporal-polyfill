@@ -37,7 +37,7 @@ export function createParser<Map>(nameForError: string, map: Map, defaultVal?: V
   }
 }
 
-export function constrainValue( // will also cast to number
+export function constrainInt(
   val: number | undefined,
   min: number, // inclusive. serves as default
   max: number, // inclusive

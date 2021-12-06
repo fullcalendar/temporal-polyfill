@@ -1,5 +1,5 @@
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { constrainValue } from '../argParse/refine'
+import { constrainInt } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Duration } from '../public/duration'
 import { DateISOFields } from '../public/types'
@@ -42,7 +42,7 @@ export function addWholeYears(
   overflowHandling: OverflowHandlingInt,
 ): DateEssentials {
   year += yearsToAdd
-  const newMonth = constrainValue(month, 1, calendarImpl.monthsInYear(year), overflowHandling)
+  const newMonth = constrainInt(month, 1, calendarImpl.monthsInYear(year), overflowHandling)
   const newDay = month === newMonth ? day : 1 // month was constrained? reset day
   return { year, month: newMonth, day: newDay }
 }
@@ -68,7 +68,7 @@ export function addWholeMonths(
       }
     }
 
-    day = constrainValue(day, 1, calendarImpl.daysInMonth(year, month), overflowHandling)
+    day = constrainInt(day, 1, calendarImpl.daysInMonth(year, month), overflowHandling)
   }
   return { year, month, day }
 }
