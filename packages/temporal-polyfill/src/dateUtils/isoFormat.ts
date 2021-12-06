@@ -11,8 +11,9 @@ import { DateISOFields, DateTimeISOFields } from '../public/types'
 import { roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { addWholeDays } from './add'
+import { nanoToDayTimeFields } from './dayTime'
 import { SignedDurationFields } from './duration'
-import { MINUTE, SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
+import { HOUR, MINUTE, SECOND, nanoInMicro, nanoInMilli } from './units'
 
 export function formatDateTimeISO(
   fields: DateTimeISOFields,
@@ -71,13 +72,14 @@ export function formatTimeISO(
   return [parts.join(':'), dayDelta]
 }
 
-export function formatOffsetISO(offsetNanoseconds: number): string {
-  const totalMins = Math.abs(Math.trunc(offsetNanoseconds / nanoInMinute))
-  const hours = Math.trunc(totalMins / 60)
-  const mins = totalMins % 60
-  return getSignStr(offsetNanoseconds) +
-    padZeros(hours, 2) + ':' +
-    padZeros(mins, 2)
+export function formatOffsetISO(offsetNano: number): string {
+  const fields = nanoToDayTimeFields(BigInt(Math.abs(offsetNano)), HOUR) // TODO: cleaner util
+  return getSignStr(offsetNano) +
+    padZeros(fields.hour!, 2) + ':' +
+    padZeros(fields.minute!, 2) +
+    (fields.second
+      ? ':' + padZeros(fields.second, 2)
+      : '')
 }
 
 export function formatCalendarID(

@@ -1,6 +1,6 @@
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { tryParseOffsetNano } from '../dateUtils/parse'
-import { nanoInMinute } from '../dateUtils/units'
+import { nanoInSecond } from '../dateUtils/units'
 import { FixedTimeZoneImpl } from './fixedTimeZoneImpl'
 import { IntlTimeZoneImpl } from './intlTimeZoneImpl'
 import { TimeZoneImpl } from './timeZoneImpl'
@@ -23,7 +23,7 @@ export function queryTimeZoneImpl(id: string): TimeZoneImpl {
     // don't store fixed-offset zones in cache. there could be many
     return new FixedTimeZoneImpl(
       formatOffsetISO(offsetNano),
-      Math.trunc(offsetNano / nanoInMinute), // convert to minutes
+      Math.trunc(offsetNano / nanoInSecond), // convert to seconds
     )
   }
 

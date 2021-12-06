@@ -4,7 +4,7 @@ import { numSign, positiveModulo } from '../utils/math'
 import { DateISOEssentials } from './date'
 import {
   milliInDay,
-  milliInMin,
+  milliInSecond,
   nanoInDayBI,
   nanoInMicro,
   nanoInMicroBI,
@@ -41,8 +41,8 @@ export function isoFieldsToEpochNano(
   )
 }
 
-export function isoFieldsToEpochMins(isoFields: Partial<DateTimeISOFields>): number {
-  return Math.floor(isoFieldsToEpochMilli(isoFields) / milliInMin)
+export function isoFieldsToEpochSecs(isoFields: Partial<DateTimeISOFields>): number {
+  return Math.floor(isoFieldsToEpochMilli(isoFields) / milliInSecond)
 }
 
 export function isoFieldsToEpochMilli(
@@ -137,12 +137,12 @@ export function epochMilliToISOFields(epochMilli: number): DateTimeISOMilli {
 
 // Year <-> Epoch Minutes
 
-export function epochMinsToISOYear(mins: number): number {
-  return nudgeToLegacyDate(mins * milliInMin)[0].getUTCFullYear()
+export function epochSecondsToISOYear(epochSeconds: number): number {
+  return nudgeToLegacyDate(epochSeconds * milliInSecond)[0].getUTCFullYear()
 }
 
-export function isoYearToEpochMins(isoYear: number): number {
-  return Math.floor(isoToEpochMilli(isoYear) / milliInMin)
+export function isoYearToEpochSeconds(isoYear: number): number {
+  return Math.floor(isoToEpochMilli(isoYear) / milliInSecond)
 }
 
 // Epoch-Millisecond Math

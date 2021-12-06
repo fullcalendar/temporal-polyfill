@@ -1,6 +1,6 @@
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
-import { epochMinsToISOYear, isoToEpochMilli, isoYearToEpochMins } from '../dateUtils/isoMath'
-import { milliInMin } from '../dateUtils/units'
+import { epochSecondsToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
+import { milliInSecond, secondsInDay } from '../dateUtils/units'
 import { compareValues, numSign } from '../utils/math'
 import { PossibleOffsetInfo, RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
@@ -14,7 +14,7 @@ const ISLAND_SEARCH_DAYS = [
 export class IntlTimeZoneImpl extends TimeZoneImpl {
   private format: Intl.DateTimeFormat
 
-  // a cache of minute offsets at the last minute of each year
+  // a cache of second offsets at the last second of each year
   private yearEndOffsets: { [year: string]: number }
 
   private transitionsInYear: { [year: string]: RawTransition[] }
@@ -27,6 +27,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
+      second: 'numeric',
       timeZone: id,
     })
     super(format.resolvedOptions().timeZone)
@@ -35,10 +36,10 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     this.transitionsInYear = {}
   }
 
-  // `zoneMinutes` is like epochMinutes, but to zone's pseudo-epoch
-  getPossibleOffsets(zoneMinutes: number): PossibleOffsetInfo {
-    const prevTransition = this.getTransition(zoneMinutes, -1)
-    const nextTransition = this.getTransition(zoneMinutes, 1)
+  // `zoneSecs` is like epochSecs, but to zone's pseudo-epoch
+  getPossibleOffsets(zoneSecs: number): PossibleOffsetInfo {
+    const prevTransition = this.getTransition(zoneSecs, -1)
+    const nextTransition = this.getTransition(zoneSecs, 1)
     const anyTransition = prevTransition || nextTransition
 
     // determine if overall named timezone has a positive or negative leaning.
@@ -49,53 +50,55 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     const relevantTransition = zoneLean > 0 ? nextTransition : prevTransition
     // If transition in the relevant direction, use the offset of the future/past year
     if (!relevantTransition) {
-      const utcYear = epochMinsToISOYear(zoneMinutes) + zoneLean
+      const utcYear = epochSecondsToISOYear(zoneSecs) + zoneLean
       return [this.getYearEndOffset(utcYear), 0]
     }
 
     // try the two different hypotheses for the offset
-    const [transitionEpochMins, offsetMinsBefore, offsetMinsDiff] = relevantTransition
-    const offsetMinsAfter = offsetMinsBefore + offsetMinsDiff
-    const epochSecs0 = zoneMinutes + offsetMinsBefore
-    const epochSecs1 = zoneMinutes + offsetMinsAfter
+    const [transitionEpochSecs, offsetSecsBefore, offsetSecsDiff] = relevantTransition
+    const offsetSecsAfter = offsetSecsBefore + offsetSecsDiff
+    const epochSecs0 = zoneSecs + offsetSecsBefore
+    const epochSecs1 = zoneSecs + offsetSecsAfter
 
     // both are before the transition, use the offset before
-    if (epochSecs0 < transitionEpochMins && epochSecs1 < transitionEpochMins) {
-      return [offsetMinsBefore, 0]
+    if (epochSecs0 < transitionEpochSecs && epochSecs1 < transitionEpochSecs) {
+      return [offsetSecsBefore, 0]
     }
     // both are after the transition, use the offset after
-    if (epochSecs0 >= transitionEpochMins && epochSecs1 >= transitionEpochMins) {
-      return [offsetMinsAfter, 0]
+    if (epochSecs0 >= transitionEpochSecs && epochSecs1 >= transitionEpochSecs) {
+      return [offsetSecsAfter, 0]
     }
     // otherwise, we're stuck within a transition
-    return [offsetMinsBefore, offsetMinsDiff]
+    return [offsetSecsBefore, offsetSecsDiff]
   }
 
   /*
   NOTE: if Intl.DateTimeFormat's timeZoneName:'shortOffset' option were available,
   we could parse that.
   */
-  getOffset(epochMins: number): number {
-    const map = hashIntlFormatParts(this.format, epochMins * milliInMin)
+  getOffset(epochSecs: number): number {
+    const map = hashIntlFormatParts(this.format, epochSecs * milliInSecond)
     let year = parseInt(map.year)
 
     if (normalizeShortEra(map.era) === 'bce') {
       year = -(year - 1)
     }
 
-    const zoneMinutes = isoToEpochMilli(
+    const zoneMilli = isoToEpochMilli(
       year,
       parseInt(map.month),
       parseInt(map.day),
       parseInt(map.hour),
       parseInt(map.minute),
-    ) / milliInMin
+      parseInt(map.second),
+    )
+    const zoneSecs = Math.floor(zoneMilli / milliInSecond)
 
-    return zoneMinutes - epochMins
+    return zoneSecs - epochSecs
   }
 
-  getTransition(epochMins: number, direction: -1 | 1): RawTransition | undefined {
-    const startYear = epochMinsToISOYear(epochMins)
+  getTransition(epochSecs: number, direction: -1 | 1): RawTransition | undefined {
+    const startYear = epochSecondsToISOYear(epochSecs)
 
     for (let yearTravel = 0; yearTravel < MAX_YEAR_TRAVEL; yearTravel++) {
       const year = startYear + yearTravel * direction
@@ -106,8 +109,8 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
       for (let travel = 0; travel < len; travel++) {
         const transition = transitions[startIndex + travel * direction]
 
-        // does the current transition overtake epochMins in the direction of travel?
-        if (compareValues(transition[0], epochMins) === direction) {
+        // does the current transition overtake epochSecs in the direction of travel?
+        if (compareValues(transition[0], epochSecs) === direction) {
           return transition
         }
       }
@@ -118,7 +121,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     const { yearEndOffsets } = this
     return yearEndOffsets[utcYear] ||
       (yearEndOffsets[utcYear] = this.getOffset(
-        isoYearToEpochMins(utcYear + 1) - 1,
+        isoYearToEpochSeconds(utcYear + 1) - 1,
       ))
   }
 
@@ -131,63 +134,63 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   private computeTransitionsInYear(utcYear: number): RawTransition[] {
     const enteringOffset = this.getYearEndOffset(utcYear - 1)
     const exitingOffset = this.getYearEndOffset(utcYear)
-    const startMins = isoYearToEpochMins(utcYear - 1)
-    const endMins = isoYearToEpochMins(utcYear)
+    const startSecs = isoYearToEpochSeconds(utcYear - 1)
+    const endSecs = isoYearToEpochSeconds(utcYear)
 
     if (enteringOffset !== exitingOffset) {
-      return [this.searchTransition(startMins, endMins, enteringOffset, exitingOffset)]
+      return [this.searchTransition(startSecs, endSecs, enteringOffset, exitingOffset)]
     }
 
-    const island = this.searchIsland(enteringOffset, startMins)
+    const island = this.searchIsland(enteringOffset, startSecs)
     if (island !== undefined) {
       return [
-        this.searchTransition(startMins, island[0], enteringOffset, island[1]),
-        this.searchTransition(island[0], endMins, island[1], exitingOffset),
+        this.searchTransition(startSecs, island[0], enteringOffset, island[1]),
+        this.searchTransition(island[0], endSecs, island[1], exitingOffset),
       ]
     }
 
     return []
   }
 
-  // assumes the offset changes at some point between startMins -> endMins.
+  // assumes the offset changes at some point between startSecs -> endSecs.
   // finds the point where it switches over to the new offset.
   private searchTransition(
-    startEpochMins: number,
-    endEpochMins: number,
-    startOffsetMin: number,
-    endOffsetMins: number,
+    startEpochSecs: number,
+    endEpochSecs: number,
+    startOffsetSecs: number,
+    endOffsetSecs: number,
   ): RawTransition {
-    // keep doing binary search until start/end are 1 minute apart
-    while (endEpochMins - startEpochMins > 1) {
-      const middleEpochMins = Math.floor(startEpochMins + (endEpochMins - startEpochMins) / 2)
-      const middleOffsetMins = this.getOffset(middleEpochMins)
+    // keep doing binary search until start/end are 1 second apart
+    while (endEpochSecs - startEpochSecs > 1) {
+      const middleEpochSecs = Math.floor(startEpochSecs + (endEpochSecs - startEpochSecs) / 2)
+      const middleOffsetSecs = this.getOffset(middleEpochSecs)
 
-      if (middleOffsetMins === startOffsetMin) {
+      if (middleOffsetSecs === startOffsetSecs) {
         // middle is same as start. move start to the middle
-        startEpochMins = middleEpochMins
+        startEpochSecs = middleEpochSecs
       } else {
         // middle is same as end. move end to the middle
-        endEpochMins = middleEpochMins
+        endEpochSecs = middleEpochSecs
       }
     }
     return [
-      endEpochMins,
-      startOffsetMin, // caller could have computed this
-      endOffsetMins - startOffsetMin, // same
+      endEpochSecs,
+      startOffsetSecs, // caller could have computed this
+      endOffsetSecs - startOffsetSecs, // same
     ]
   }
 
-  // assumes the offset is the same at startMins and endMins.
+  // assumes the offset is the same at startSecs and endSecs.
   // pokes around the time in-between to see if there's a temporary switchover.
   private searchIsland(
-    outerOffsetMins: number,
-    startEpochMins: number,
-  ): [number, number] | undefined { // [epochMins, offsetMins]
+    outerOffsetSecs: number,
+    startEpochSecs: number,
+  ): [number, number] | undefined { // [epochSecs, offsetSecs]
     for (const days of ISLAND_SEARCH_DAYS) {
-      const epochMins = startEpochMins + days * 24 * 60
-      const offsetMins = this.getOffset(epochMins)
-      if (offsetMins !== outerOffsetMins) {
-        return [epochMins, offsetMins]
+      const epochSecs = startEpochSecs + days * secondsInDay
+      const offsetSecs = this.getOffset(epochSecs)
+      if (offsetSecs !== outerOffsetSecs) {
+        return [epochSecs, offsetSecs]
       }
     }
   }

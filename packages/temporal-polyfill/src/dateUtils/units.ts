@@ -1,3 +1,4 @@
+// TODO: rename everything to 'sec'/'min'?
 
 export type TimeUnitInt = 0 | 1 | 2 | 3 | 4 | 5
 export type YearMonthUnitInt = 8 | 9
@@ -41,7 +42,8 @@ export const nanoIn = [
 ]
 
 export const milliInDay = 86400000
-export const milliInMin = 60000
+export const milliInSecond = 1000
+export const secondsInDay = 24 * 60 * 60
 
 export function isDayTimeUnit(unit: UnitInt): unit is DayTimeUnitInt {
   return unit <= DAY
