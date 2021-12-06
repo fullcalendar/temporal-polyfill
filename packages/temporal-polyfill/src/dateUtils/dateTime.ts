@@ -36,7 +36,7 @@ import {
   nanoToDuration,
 } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { roundBalancedDuration, roundNano, roundTimeOfDay } from './round'
+import { roundBalancedDuration, roundNano, roundTimeOfDay } from './rounding'
 import {
   TimeFields,
   TimeISOEssentials,

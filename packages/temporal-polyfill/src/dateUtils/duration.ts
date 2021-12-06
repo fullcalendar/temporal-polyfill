@@ -23,7 +23,7 @@ import { DateLikeInstance } from './calendar'
 import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
 import { parseDateTimeISO } from './parse'
-import { roundBalancedDuration, roundNano } from './round'
+import { roundBalancedDuration, roundNano } from './rounding'
 import { TimeFields } from './time'
 import {
   DAY,

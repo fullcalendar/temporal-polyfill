@@ -18,7 +18,7 @@ import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { nanoToDayTimeFields } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
-import { roundNano, roundTimeOfDay } from './round'
+import { roundNano, roundTimeOfDay } from './rounding'
 import {
   DAY,
   HOUR,

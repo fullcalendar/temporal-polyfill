@@ -37,7 +37,7 @@ import { dayTimeFieldsToNano } from './dayTime'
 import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { DateTimeParseResult, parseOffsetNano } from './parse'
-import { roundBalancedDuration, roundNano } from './round'
+import { roundBalancedDuration, roundNano } from './rounding'
 import { diffTimeFields, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 

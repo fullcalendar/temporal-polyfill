@@ -6,7 +6,7 @@ import { CompareResult, TimeDiffOptions, TimeRoundingOptions } from '../public/t
 import { compareValues } from '../utils/math'
 import { splitEpochNano } from './dayTime'
 import { computeLargestDurationUnit, durationToTimeFields, nanoToDuration } from './duration'
-import { roundNano } from './round'
+import { roundNano } from './rounding'
 import { timeFieldsToNano } from './time'
 import { DAY, HOUR, NANOSECOND, SECOND } from './units'
 

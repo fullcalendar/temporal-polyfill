@@ -12,7 +12,7 @@ import { compareValues } from '../utils/math'
 import { addWholeDays } from './add'
 import { isoFieldsToEpochNano } from './isoMath'
 import { compareMonthDayFields } from './monthDay'
-import { roundBalancedDuration } from './round'
+import { roundBalancedDuration } from './rounding'
 import {
   YearMonthEssentials,
   YearMonthFields,
