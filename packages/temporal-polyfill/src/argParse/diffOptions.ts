@@ -34,7 +34,7 @@ export function parseDiffOptions<
     : parseUnit(largestUnitArg, largestUnitDefault, minUnit, maxUnit)
 
   if (roundingConfig.smallestUnit > largestUnit) {
-    throw new Error('Bad smallestUnit/largestUnit') // need to throw this right?
+    throw new RangeError('Bad smallestUnit/largestUnit')
   }
 
   return {

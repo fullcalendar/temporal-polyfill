@@ -1,13 +1,17 @@
 import { Calendar, createDefaultCalendar } from '../public/calendar'
+import { TimeZone } from '../public/timeZone'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
 import { DateISOEssentials } from './date'
+import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { DurationFields } from './duration'
 import { isoEpochLeapYear } from './isoMath'
 import { TimeISOEssentials, timeLikeToISO } from './time'
 import { MILLISECOND, nanoInHour, nanoInMinute, nanoInSecond } from './units'
+import { ZonedDateTimeISOEssentials } from './zonedDateTime'
 
-export type DateTimeParseResult = DateTimeISOFields & {
+export type DateTimeParseResult = DateTimeISOEssentials & {
+  calendar: string | undefined
   timeZone: string | undefined
   offset: number | undefined
 }
@@ -36,6 +40,24 @@ const monthDayRegExp = createRegExp(
 const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?((\d+)([.,](\d+))?S)?)?$/i
 const zuluRegExp = /Z/i
 const unicodeDashRegExp = /\u2212/g
+
+// refines DateTimeParseResult for high-level objects. TODO: rename/relocate?
+
+export function refineDateTimeParse(parsed: DateTimeParseResult): DateTimeISOFields {
+  return {
+    ...parsed,
+    calendar: parsed.calendar === undefined
+      ? createDefaultCalendar()
+      : new Calendar(parsed.calendar),
+  }
+}
+
+export function refineZonedDateTimeParse(parsed: DateTimeParseResult): ZonedDateTimeISOEssentials {
+  return {
+    ...refineDateTimeParse(parsed),
+    timeZone: new TimeZone(parsed.timeZone!), // will throw error if empty timeZone
+  }
+}
 
 // hard functions (throw error on failure)
 
@@ -74,7 +96,7 @@ export function tryParseDateTimeISO(str: string): DateTimeParseResult | undefine
       ...parseTimeParts(match.slice(5)),
       offset: isZulu ? 0 : parseOffsetParts(match.slice(11)),
       timeZone: isZulu ? 'UTC' : match[18], // a string. don't parse yet, might be unnecessary
-      calendar: match[20] ? new Calendar(match[20]) : createDefaultCalendar(),
+      calendar: match[20], // a string. don't parse yet, might be unnecessary
     }
   }
 }

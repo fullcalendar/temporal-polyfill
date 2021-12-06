@@ -36,7 +36,7 @@ import {
 import { dayTimeFieldsToNano } from './dayTime'
 import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { DateTimeParseResult, parseOffsetNano } from './parse'
+import { parseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
 import { diffTimeFields, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
@@ -99,13 +99,6 @@ export function zonedDateTimeFieldsToISO(
     ...dateTimeFieldsToISO(fields, options, overflowHandling, calendar),
     timeZone,
     offset: fields.offset ? parseOffsetNano(fields.offset) : undefined,
-  }
-}
-
-export function zoneDateTimeParseResult(parsed: DateTimeParseResult): ZonedDateTimeISOEssentials {
-  return {
-    ...parsed,
-    timeZone: new TimeZone(parsed.timeZone!), // will throw error if empty timeZone
   }
 }
 

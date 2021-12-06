@@ -23,7 +23,7 @@ import {
   mixinISOFields,
 } from '../dateUtils/mixins'
 import { createMonthDay } from '../dateUtils/monthDay'
-import { parseDateTimeISO } from '../dateUtils/parse'
+import { parseDateTimeISO, refineZonedDateTimeParse } from '../dateUtils/parse'
 import { TimeFields, createTime } from '../dateUtils/time'
 import { milliInDay } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
@@ -34,7 +34,6 @@ import {
   diffZonedDateTimes,
   overrideZonedDateTimeFields,
   roundZonedDateTime,
-  zoneDateTimeParseResult,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createWeakMap } from '../utils/obj'
@@ -116,7 +115,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
             extractCalendar(arg),
             extractTimeZone(arg),
           )
-          : zoneDateTimeParseResult(parseDateTimeISO(String(arg))),
+          : refineZonedDateTimeParse(parseDateTimeISO(String(arg))),
       options,
       offsetHandling,
     )

@@ -22,7 +22,7 @@ import { ensureObj } from './abstract'
 import { DateLikeInstance } from './calendar'
 import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
-import { parseDateTimeISO } from './parse'
+import { parseDateTimeISO, refineDateTimeParse, refineZonedDateTimeParse } from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
 import { TimeFields } from './time'
 import {
@@ -40,7 +40,7 @@ import {
   YEAR,
   isDayTimeUnit,
 } from './units'
-import { createZonedDateTime, zoneDateTimeParseResult } from './zonedDateTime'
+import { createZonedDateTime } from './zonedDateTime'
 
 export interface DurationFields {
   years: number
@@ -298,12 +298,12 @@ function getMaybeZonedRelativeTo(
     const isoFields = parseDateTimeISO(String(arg))
     if (isoFields.timeZone !== undefined) {
       return createZonedDateTime(
-        zoneDateTimeParseResult(isoFields),
+        refineZonedDateTimeParse(isoFields),
         undefined,
         OFFSET_PREFER,
       )
     } else {
-      return createDateTime(isoFields)
+      return createDateTime(refineDateTimeParse(isoFields))
     }
   }
 }

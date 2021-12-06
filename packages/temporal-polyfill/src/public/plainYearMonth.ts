@@ -14,7 +14,7 @@ import {
   mixinISOFields,
   yearMonthCalendarFields,
 } from '../dateUtils/mixins'
-import { parseDateTimeISO } from '../dateUtils/parse'
+import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { MONTH, YEAR, YearMonthUnitInt } from '../dateUtils/units'
 import {
   comparePlainYearMonths,
@@ -70,7 +70,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
       return extractCalendar(arg).yearMonthFromFields(refinedFields, options)
     }
 
-    return createYearMonth(parseDateTimeISO(String(arg)))
+    return createYearMonth(refineDateTimeParse(parseDateTimeISO(String(arg))))
   }
 
   static compare(a: YearMonthArg, b: YearMonthArg): CompareResult {

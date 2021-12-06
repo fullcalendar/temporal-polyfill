@@ -26,7 +26,7 @@ GENERAL ROUNDING TIPS:
 // ISO Field <-> Epoch Math
 
 export function isoFieldsToEpochNano(
-  isoFields: Partial<DateTimeISOFields>,
+  isoFields: Partial<DateTimeISOEssentials>,
 ): bigint {
   return isoToEpochNano(
     isoFields.isoYear,

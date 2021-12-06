@@ -40,12 +40,12 @@ export class Instant extends AbstractNoValueObj {
     let fields = parseDateTimeISO(String(arg))
     const offsetNano = fields.offset
     if (offsetNano === undefined) {
-      throw new Error('Must specify an offset')
+      throw new RangeError('Must specify an offset')
     }
 
-    // constrain time portion because :60 leap-second allowed
     fields = {
       ...fields,
+      // constrain time portion because :60 leap-second allowed
       ...constrainTimeISO(fields, OVERFLOW_CONSTRAIN),
     }
 
