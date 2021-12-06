@@ -19,6 +19,7 @@ export function parseRoundingOptions<
   smallestUnitDefault: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
+  defaultRoundingMode: RoundingFunc = Math.round,
 ): RoundingConfig<UnitType> {
   if (smallestUnitDefault === undefined && !isObjectLike(options)) {
     throw new TypeError('Need rounding options')
@@ -42,7 +43,7 @@ export function parseRoundingOptions<
 
   return {
     smallestUnit,
-    roundingMode: parseRoundingModeOption(options, Math.trunc),
+    roundingMode: parseRoundingModeOption(options, defaultRoundingMode),
     roundingIncrement,
   }
 }
