@@ -108,7 +108,9 @@ describe('Instant', () => {
       equal(i3.toString(), '1976-11-18T15:23:30.1234Z')
     })
     it('truncates to minute', () => {
-      [i1, i2, i3].forEach((i) => equal(i.toString({ smallestUnit: 'minute' }), '1976-11-18T15:23Z'))
+      [i1, i2, i3].forEach((i) => {
+        equal(i.toString({ smallestUnit: 'minute' }), '1976-11-18T15:23Z')
+      })
     })
     it('other smallestUnits are aliases for fractional digits', () => {
       equal(i3.toString({ smallestUnit: 'second' }), i3.toString({ fractionalSecondDigits: 0 }))
@@ -383,11 +385,21 @@ describe('Instant', () => {
       }
       equal(`${Instant.from(obj)}`, '2020-02-12T10:42:00Z')
     })
-    it('Instant.from(1) throws', () => throws(() => Instant.from(1), RangeError))
-    it('Instant.from(-1) throws', () => throws(() => Instant.from(-1), RangeError))
-    it('Instant.from(1n) throws', () => throws(() => Instant.from(1n), RangeError))
-    it('Instant.from(-1n) throws', () => throws(() => Instant.from(-1n), RangeError))
-    it('Instant.from({}) throws', () => throws(() => Instant.from({}), RangeError))
+    it('Instant.from(1) throws', () => {
+      throws(() => Instant.from(1), RangeError)
+    })
+    it('Instant.from(-1) throws', () => {
+      throws(() => Instant.from(-1), RangeError)
+    })
+    it('Instant.from(1n) throws', () => {
+      throws(() => Instant.from(1n), RangeError)
+    })
+    it('Instant.from(-1n) throws', () => {
+      throws(() => Instant.from(-1n), RangeError)
+    })
+    it('Instant.from({}) throws', () => {
+      throws(() => Instant.from({}), RangeError)
+    })
     it('Instant.from(instant) is not the same object', () => {
       const inst = Instant.from('2020-02-12T11:42+01:00[Europe/Amsterdam]')
       notEqual(Instant.from(inst), inst)
@@ -439,9 +451,12 @@ describe('Instant', () => {
       equal(`${Instant.from('1976-11-18T15:23:30+00')}`, '1976-11-18T15:23:30Z')
       equal(`${Instant.from('1976-11-18T15Z')}`, '1976-11-18T15:00:00Z')
     })
-    it('ignores any specified calendar', () =>
-      equal(`${Instant.from('1976-11-18T15:23:30.123456789Z[u-ca=discord]')}`, '1976-11-18T15:23:30.123456789Z'))
-    it('no junk at end of string', () => throws(() => Instant.from('1976-11-18T15:23:30.123456789Zjunk'), RangeError))
+    it('ignores any specified calendar', () => {
+      equal(`${Instant.from('1976-11-18T15:23:30.123456789Z[u-ca=discord]')}`, '1976-11-18T15:23:30.123456789Z')
+    })
+    it('no junk at end of string', () => {
+      throws(() => Instant.from('1976-11-18T15:23:30.123456789Zjunk'), RangeError)
+    })
   })
   describe('Instant.add works', () => {
     const inst = Instant.from('1969-12-25T12:23:45.678901234Z')
@@ -450,12 +465,18 @@ describe('Instant', () => {
       const two = inst.add({ hours: 240, nanoseconds: 800 })
       const three = two.subtract({ hours: 480, nanoseconds: 1600 })
       const four = one.add({ hours: 480, nanoseconds: 1600 })
-      it(`(${inst}).subtract({ hours: 240, nanoseconds: 800 }) = ${one}`, () =>
-        equal(`${one}`, '1969-12-15T12:23:45.678900434Z'))
-      it(`(${inst}).add({ hours: 240, nanoseconds: 800 }) = ${two}`, () =>
-        equal(`${two}`, '1970-01-04T12:23:45.678902034Z'))
-      it(`(${two}).subtract({ hours: 480, nanoseconds: 1600 }) = ${one}`, () => assert(three.equals(one)))
-      it(`(${one}).add({ hours: 480, nanoseconds: 1600 }) = ${two}`, () => assert(four.equals(two)))
+      it(`(${inst}).subtract({ hours: 240, nanoseconds: 800 }) = ${one}`, () => {
+        equal(`${one}`, '1969-12-15T12:23:45.678900434Z')
+      })
+      it(`(${inst}).add({ hours: 240, nanoseconds: 800 }) = ${two}`, () => {
+        equal(`${two}`, '1970-01-04T12:23:45.678902034Z')
+      })
+      it(`(${two}).subtract({ hours: 480, nanoseconds: 1600 }) = ${one}`, () => {
+        assert(three.equals(one))
+      })
+      it(`(${one}).add({ hours: 480, nanoseconds: 1600 }) = ${two}`, () => {
+        assert(four.equals(two))
+      })
     })
     it('inst.add(durationObj)', () => {
       const later = inst.add(Duration.from('PT240H0.000000800S'))
@@ -511,14 +532,30 @@ describe('Instant', () => {
     const i1 = Instant.from('1963-02-13T09:36:29.123456789Z')
     const i2 = Instant.from('1976-11-18T15:23:30.123456789Z')
     const i3 = Instant.from('1981-12-15T14:34:31.987654321Z')
-    it('pre epoch equal', () => equal(Instant.compare(i1, Instant.from(i1)), 0))
-    it('epoch equal', () => equal(Instant.compare(i2, Instant.from(i2)), 0))
-    it('cross epoch smaller/larger', () => equal(Instant.compare(i1, i2), -1))
-    it('cross epoch larger/smaller', () => equal(Instant.compare(i2, i1), 1))
-    it('epoch smaller/larger', () => equal(Instant.compare(i2, i3), -1))
-    it('epoch larger/smaller', () => equal(Instant.compare(i3, i2), 1))
-    it('casts first argument', () => equal(Instant.compare(i1, i1.toString()), 0))
-    it('casts second argument', () => equal(Instant.compare(i2.toString(), i2), 0))
+    it('pre epoch equal', () => {
+      equal(Instant.compare(i1, Instant.from(i1)), 0)
+    })
+    it('epoch equal', () => {
+      equal(Instant.compare(i2, Instant.from(i2)), 0)
+    })
+    it('cross epoch smaller/larger', () => {
+      equal(Instant.compare(i1, i2), -1)
+    })
+    it('cross epoch larger/smaller', () => {
+      equal(Instant.compare(i2, i1), 1)
+    })
+    it('epoch smaller/larger', () => {
+      equal(Instant.compare(i2, i3), -1)
+    })
+    it('epoch larger/smaller', () => {
+      equal(Instant.compare(i3, i2), 1)
+    })
+    it('casts first argument', () => {
+      equal(Instant.compare(i1, i1.toString()), 0)
+    })
+    it('casts second argument', () => {
+      equal(Instant.compare(i2.toString(), i2), 0)
+    })
     it('only casts from a string', () => {
       throws(() => Instant.compare(i2.epochNanoseconds, i2), RangeError)
       throws(() => Instant.compare({}, i2), RangeError)
@@ -528,11 +565,21 @@ describe('Instant', () => {
     const i1 = Instant.from('1963-02-13T09:36:29.123456789Z')
     const i2 = Instant.from('1976-11-18T15:23:30.123456789Z')
     const i3 = Instant.from('1981-12-15T14:34:31.987654321Z')
-    it('pre epoch equal', () => assert(i1.equals(i1)))
-    it('epoch equal', () => assert(i2.equals(i2)))
-    it('cross epoch unequal', () => assert(!i1.equals(i2)))
-    it('epoch unequal', () => assert(!i2.equals(i3)))
-    it('casts argument', () => assert(i1.equals('1963-02-13T09:36:29.123456789Z')))
+    it('pre epoch equal', () => {
+      assert(i1.equals(i1))
+    })
+    it('epoch equal', () => {
+      assert(i2.equals(i2))
+    })
+    it('cross epoch unequal', () => {
+      assert(!i1.equals(i2))
+    })
+    it('epoch unequal', () => {
+      assert(!i2.equals(i3))
+    })
+    it('casts argument', () => {
+      assert(i1.equals('1963-02-13T09:36:29.123456789Z'))
+    })
     it('casts only from string', () => {
       throws(() => i1.equals(i1.epochNanoseconds), RangeError)
       throws(() => i1.equals({}), RangeError)
@@ -542,23 +589,41 @@ describe('Instant', () => {
     const i1 = Instant.from('1963-02-13T09:36:29.123456789Z')
     const i1again = Instant.from('1963-02-13T09:36:29.123456789Z')
     const i2 = Instant.from('1976-11-18T15:23:30.123456789Z')
-    it('=== is object equality', () => equal(i1, i1))
-    it('!== is object equality', () => notEqual(i1, i1again))
-    it('<', () => throws(() => i1 < i2))
-    it('>', () => throws(() => i1 > i2))
-    it('<=', () => throws(() => i1 <= i2))
-    it('>=', () => throws(() => i1 >= i2))
+    it('=== is object equality', () => {
+      equal(i1, i1)
+    })
+    it('!== is object equality', () => {
+      notEqual(i1, i1again)
+    })
+    it('<', () => {
+      throws(() => i1 < i2)
+    })
+    it('>', () => {
+      throws(() => i1 > i2)
+    })
+    it('<=', () => {
+      throws(() => i1 <= i2)
+    })
+    it('>=', () => {
+      throws(() => i1 >= i2)
+    })
   })
   describe('Instant.since() works', () => {
     const earlier = Instant.from('1976-11-18T15:23:30.123456789Z')
     const later = Instant.from('2019-10-29T10:46:38.271986102Z')
     const diff = later.since(earlier)
-    it(`(${earlier}).since(${later}) == (${later}).since(${earlier}).negated()`, () =>
-      equal(`${earlier.since(later)}`, `${diff.negated()}`))
-    it(`(${later}).since(${earlier}) == (${earlier}).until(${later})`, () =>
-      equal(`${earlier.until(later)}`, `${diff}`))
-    it(`(${earlier}).add(${diff}) == (${later})`, () => assert(earlier.add(diff).equals(later)))
-    it(`(${later}).subtract(${diff}) == (${earlier})`, () => assert(later.subtract(diff).equals(earlier)))
+    it(`(${earlier}).since(${later}) == (${later}).since(${earlier}).negated()`, () => {
+      equal(`${earlier.since(later)}`, `${diff.negated()}`)
+    })
+    it(`(${later}).since(${earlier}) == (${earlier}).until(${later})`, () => {
+      equal(`${earlier.until(later)}`, `${diff}`)
+    })
+    it(`(${earlier}).add(${diff}) == (${later})`, () => {
+      assert(earlier.add(diff).equals(later))
+    })
+    it(`(${later}).subtract(${diff}) == (${earlier})`, () => {
+      assert(later.subtract(diff).equals(earlier))
+    })
     it('casts argument from string', () => {
       equal(`${later.since(earlier.toString())}`, `${diff}`)
     })
@@ -872,12 +937,18 @@ describe('Instant', () => {
     const earlier = Instant.from('1969-07-24T16:50:35.123456789Z')
     const later = Instant.from('2019-10-29T10:46:38.271986102Z')
     const diff = earlier.until(later)
-    it(`(${later}).until(${earlier}) == (${earlier}).until(${later}).negated()`, () =>
-      equal(`${later.until(earlier)}`, `${diff.negated()}`))
-    it(`(${earlier}).until(${later}) == (${later}).since(${earlier})`, () =>
-      equal(`${later.since(earlier)}`, `${diff}`))
-    it(`(${earlier}).add(${diff}) == (${later})`, () => assert(earlier.add(diff).equals(later)))
-    it(`(${later}).subtract(${diff}) == (${earlier})`, () => assert(later.subtract(diff).equals(earlier)))
+    it(`(${later}).until(${earlier}) == (${earlier}).until(${later}).negated()`, () => {
+      equal(`${later.until(earlier)}`, `${diff.negated()}`)
+    })
+    it(`(${earlier}).until(${later}) == (${later}).since(${earlier})`, () => {
+      equal(`${later.since(earlier)}`, `${diff}`)
+    })
+    it(`(${earlier}).add(${diff}) == (${later})`, () => {
+      assert(earlier.add(diff).equals(later))
+    })
+    it(`(${later}).subtract(${diff}) == (${earlier})`, () => {
+      assert(later.subtract(diff).equals(earlier))
+    })
     it('casts argument from string', () => {
       equal(`${earlier.until(later.toString())}`, `${diff}`)
     })
@@ -1215,8 +1286,9 @@ describe('Instant', () => {
       ['nanosecond', '1976-11-18T14:23:30.123456789Z'],
     ]
     incrementOneNearest.forEach(([smallestUnit, expected]) => {
-      it(`rounds to nearest ${smallestUnit}`, () =>
-        equal(`${inst.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'halfExpand' })}`, expected))
+      it(`rounds to nearest ${smallestUnit}`, () => {
+        equal(`${inst.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'halfExpand' })}`, expected)
+      })
     })
     const incrementOneCeil = [
       ['hour', '1976-11-18T15:00:00Z'],
