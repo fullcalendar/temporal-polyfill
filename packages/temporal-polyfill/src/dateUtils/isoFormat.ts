@@ -8,10 +8,10 @@ import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZon
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { TimeISOEssentials, nanoToWrappedTimeFields, timeISOToNano } from '../dateUtils/time'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
+import { roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { addWholeDays } from './add'
 import { SignedDurationFields } from './duration'
-import { roundNano } from './round'
 import { MINUTE, SECOND, nanoInMicro, nanoInMilli, nanoInMinute } from './units'
 
 export function formatDateTimeISO(
@@ -43,21 +43,31 @@ export function formatTimeISO(
   fields: TimeISOEssentials,
   formatConfig: TimeToStringConfig,
 ): [string, number] {
-  const nano = roundNano(timeISOToNano(fields), formatConfig) // roundNano uses smallestUnit, NOT fractionalSecondDigits
+  const { fractionalSecondDigits, smallestUnit } = formatConfig
+  let nano = timeISOToNano(fields)
+
+  if (fractionalSecondDigits !== undefined) {
+    nano = roundToIncrementBI(
+      nano,
+      Math.pow(10, 9 - fractionalSecondDigits),
+      formatConfig.roundingMode,
+    )
+  }
+
   const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano)
   const parts: string[] = [padZeros(roundedFields.hour, 2)]
 
-  if (formatConfig.smallestUnit <= MINUTE) {
+  if (smallestUnit <= MINUTE) {
     parts.push(padZeros(roundedFields.minute, 2))
 
-    if (formatConfig.smallestUnit <= SECOND) {
+    if (smallestUnit <= SECOND) {
       parts.push(
         padZeros(roundedFields.second, 2) +
           formatPartialSeconds(
             roundedFields.millisecond,
             roundedFields.microsecond,
             roundedFields.nanosecond,
-            formatConfig.fractionalSecondDigits,
+            fractionalSecondDigits,
           ),
       )
     }

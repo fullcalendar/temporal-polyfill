@@ -1,7 +1,7 @@
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
-import { RoundingFunc, roundToIncrement, roundToIncrementBI } from '../utils/math'
+import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { DateLikeInstance } from './calendar'
 import { createDuration, negateFields } from './duration'
 import { TimeFields, nanoToWrappedTimeFields, timeFieldsToNano } from './time'
@@ -52,19 +52,13 @@ export function roundTimeOfDay(
   return nanoToWrappedTimeFields(nano)
 }
 
-interface RoundNanoConfig {
-  smallestUnit: DayTimeUnitInt
-  roundingIncrement?: number
-  roundingMode: RoundingFunc
-}
-
 export function roundNano(
   nano: bigint,
-  { smallestUnit, roundingIncrement, roundingMode }: RoundNanoConfig,
+  { smallestUnit, roundingIncrement, roundingMode }: RoundingConfig,
 ): bigint {
   return roundToIncrementBI(
     nano,
-    nanoIn[smallestUnit] * (roundingIncrement || 1),
+    nanoIn[smallestUnit] * roundingIncrement,
     roundingMode,
   )
 }
