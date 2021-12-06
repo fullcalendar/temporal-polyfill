@@ -83,18 +83,22 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   return res
 }
 
-const objectLikeTypeRE = /object|function/
-
 export function ensureOptionsObj<OptionsType>(
   options: Partial<OptionsType> | undefined,
 ): Partial<OptionsType> {
   if (options === undefined) {
     return {}
   }
-  if (!objectLikeTypeRE.test(typeof options)) {
+  if (!isObjectLike(options)) {
     throw TypeError('options must be an object or undefined')
   }
   return options
+}
+
+const objectLikeTypeRE = /object|function/
+
+export function isObjectLike(v: any): v is Record<string, unknown> {
+  return objectLikeTypeRE.test(typeof v)
 }
 
 const invalidOverrideFields = ['calendar', 'timeZone']

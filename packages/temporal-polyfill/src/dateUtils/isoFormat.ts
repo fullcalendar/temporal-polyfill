@@ -147,10 +147,10 @@ function formatPartialSeconds(
   nanoseconds: number,
   fractionalSecondDigits: number | undefined,
 ): string {
-  const totalNano = (
+  const totalNano = Math.abs( // abs() in case of negative duration fields
     nanoseconds +
     microseconds * nanoInMicro +
-    milliseconds * nanoInMilli
+    milliseconds * nanoInMilli,
   )
 
   let afterDecimal = padZeros(totalNano, 9)

@@ -1,7 +1,7 @@
 import { UnitInt } from '../dateUtils/units'
 import { RoundingOptions, Unit } from '../public/types'
 import { RoundingFunc } from '../utils/math'
-import { ensureOptionsObj } from './refine'
+import { ensureOptionsObj, isObjectLike } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
@@ -20,12 +20,11 @@ export function parseRoundingOptions<
   minUnit: UnitType,
   maxUnit: UnitType,
 ): RoundingConfig<UnitType> {
-  const ensuredOptions = ensureOptionsObj(options)
-
-  if (smallestUnitDefault === undefined && ensuredOptions.smallestUnit === undefined) {
-    throw new Error('Need smallestUnit')
+  if (smallestUnitDefault === undefined && !isObjectLike(options)) {
+    throw new TypeError('Need rounding options')
   }
 
+  const ensuredOptions = ensureOptionsObj(options)
   return {
     smallestUnit: parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit),
     roundingMode: parseRoundingModeOption(options, Math.trunc),

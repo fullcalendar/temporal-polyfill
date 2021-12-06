@@ -51,7 +51,7 @@ export function parseUnit<UnitType extends UnitInt>(
   let num: UnitType
   if (input === undefined) {
     if (defaultUnit === undefined) {
-      throw new Error('Unit is required') // TOOD: better error message with setting name
+      throw new RangeError('Unit is required') // TOOD: better error message with setting name
     }
     num = defaultUnit
   } else {

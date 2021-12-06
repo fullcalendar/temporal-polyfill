@@ -151,27 +151,24 @@ export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
 }
 
 // Object -> Nanoseconds
+// TODO: do ordere-arg-based methods?
 
 export function timeFieldsToNano(timeFields: TimeFields): bigint {
-  return BigInt(
-    timeFields.hour * nanoInHour +
-    timeFields.minute * nanoInMinute +
-    timeFields.second * nanoInSecond +
-    timeFields.millisecond * nanoInMilli +
-    timeFields.microsecond * nanoInMicro +
-    timeFields.nanosecond,
-  )
+  return BigInt(timeFields.hour) * BigInt(nanoInHour) +
+    BigInt(timeFields.minute) * BigInt(nanoInMinute) +
+    BigInt(timeFields.second) * BigInt(nanoInSecond) +
+    BigInt(timeFields.millisecond) * BigInt(nanoInMilli) +
+    BigInt(timeFields.microsecond) * BigInt(nanoInMicro) +
+    BigInt(timeFields.nanosecond)
 }
 
 export function timeISOToNano(timeISO: TimeISOEssentials): bigint {
-  return BigInt(
-    timeISO.isoHour * nanoInHour +
-    timeISO.isoMinute * nanoInMinute +
-    timeISO.isoSecond * nanoInSecond +
-    timeISO.isoMillisecond * nanoInMilli +
-    timeISO.isoMicrosecond * nanoInMicro +
-    timeISO.isoNanosecond,
-  )
+  return BigInt(timeISO.isoHour) * BigInt(nanoInHour) +
+    BigInt(timeISO.isoMinute) * BigInt(nanoInMinute) +
+    BigInt(timeISO.isoSecond) * BigInt(nanoInSecond) +
+    BigInt(timeISO.isoMillisecond) * BigInt(nanoInMilli) +
+    BigInt(timeISO.isoMicrosecond) * BigInt(nanoInMicro) +
+    BigInt(timeISO.isoNanosecond)
 }
 
 // Nanoseconds -> Object
