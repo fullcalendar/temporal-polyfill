@@ -19,7 +19,7 @@ export function parseRoundingOptions<
   smallestUnitDefault: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
-  defaultRoundingMode: RoundingFunc = Math.round,
+  forDiffing?: boolean,
 ): RoundingConfig<UnitType> {
   if (smallestUnitDefault === undefined && !isObjectLike(options)) {
     throw new TypeError('Need rounding options')
@@ -29,7 +29,7 @@ export function parseRoundingOptions<
   const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
   const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
 
-  if (smallestUnit < DAY) {
+  if (forDiffing && smallestUnit < DAY) {
     const higherNano = nanoIn[smallestUnit + 1]
 
     if (higherNano % roundingIncrement) {
@@ -43,7 +43,7 @@ export function parseRoundingOptions<
 
   return {
     smallestUnit,
-    roundingMode: parseRoundingModeOption(options, defaultRoundingMode),
+    roundingMode: parseRoundingModeOption(options, forDiffing ? Math.trunc : Math.round),
     roundingIncrement,
   }
 }

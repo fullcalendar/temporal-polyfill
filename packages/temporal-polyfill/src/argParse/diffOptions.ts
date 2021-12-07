@@ -25,7 +25,7 @@ export function parseDiffOptions<
     smallestUnitDefault,
     minUnit,
     maxUnit,
-    Math.trunc,
+    true,
   )
 
   largestUnitDefault = Math.max(largestUnitDefault, roundingConfig.smallestUnit) as UnitIntType
