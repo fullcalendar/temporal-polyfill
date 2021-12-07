@@ -87,7 +87,7 @@ export function overrideTimeFields(overrides: Partial<TimeFields>, base: TimeFie
 }
 
 export function addToPlainTime(time: PlainTime, dur: Duration): PlainTime {
-  const [fields] = addTimeFields(time, durationToTimeFields(dur))
+  const [fields] = translateTimeOfDay(time, durationToTimeFields(dur))
   return createTime(timeLikeToISO(fields))
 }
 
@@ -138,12 +138,15 @@ export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
 
 // Nanosecond Math
 
-export function addTimeFields(t0: TimeFields, t1: TimeFields): [TimeFields, number] {
-  return nanoToWrappedTimeFields(timeFieldsToNano(t0) + timeFieldsToNano(t1))
+export function translateTimeOfDay(timeOfDay: TimeFields, delta: TimeFields): [TimeFields, number] {
+  return nanoToWrappedTimeFields(timeFieldsToNano(timeOfDay) + timeFieldsToNano(delta))
 }
 
-export function diffTimeFields(t0: TimeFields, t1: TimeFields): [TimeFields, number] {
-  return nanoToWrappedTimeFields(timeFieldsToNano(t1) - timeFieldsToNano(t0))
+export function diffTimeOfDays(
+  timeOfDay0: TimeFields,
+  timeOfDay1: TimeFields,
+): [TimeFields, number] {
+  return nanoToWrappedTimeFields(timeFieldsToNano(timeOfDay1) - timeFieldsToNano(timeOfDay0))
 }
 
 export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {

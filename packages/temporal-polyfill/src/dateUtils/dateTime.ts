@@ -41,12 +41,12 @@ import {
   TimeFields,
   TimeISOEssentials,
   TimeISOMilli,
-  addTimeFields,
   constrainTimeISO,
-  diffTimeFields,
+  diffTimeOfDays,
   overrideTimeFields,
   timeFieldsToConstrainedISO,
   timeLikeToISO,
+  translateTimeOfDay,
 } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
@@ -114,9 +114,9 @@ export function addToDateTime(
   options: OverflowOptions | undefined, // Calendar needs raw options
 ): PlainDateTime {
   // add time first
-  const [timeFields, dayDelta] = addTimeFields(
-    dateTime,
-    durationToTimeFields(duration),
+  const [timeFields, dayDelta] = translateTimeOfDay(
+    dateTime, // used as time-of-day
+    durationToTimeFields(duration), // could be much larger than a time-of-day
   )
 
   const date0 = createDate(dateTime.getISOFields())
@@ -133,12 +133,12 @@ export function addToDateTime(
 }
 
 export function diffDateTimes(
-  t0: PlainDateTime,
-  t1: PlainDateTime,
+  dt0: PlainDateTime,
+  dt1: PlainDateTime,
   options: DiffOptions | undefined,
   flip?: boolean,
 ): Duration {
-  const calendar = getCommonCalendar(t0, t1)
+  const calendar = getCommonCalendar(dt0, dt1)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(options, DAY, NANOSECOND, NANOSECOND, YEAR)
   const { largestUnit } = diffConfig
 
@@ -146,22 +146,22 @@ export function diffDateTimes(
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
-        isoFieldsToEpochNano(t1.getISOFields()) - isoFieldsToEpochNano(t0.getISOFields()),
+        isoFieldsToEpochNano(dt1.getISOFields()) - isoFieldsToEpochNano(dt0.getISOFields()),
         diffConfig as RoundingConfig<DayTimeUnitInt>,
       ),
       largestUnit,
     )
   }
 
-  const [timeFields, dayDelta] = diffTimeFields(t0, t1)
+  const [timeFields, dayDelta] = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
   const largeDuration = calendar.dateUntil(
-    createDate(t0.getISOFields()),
-    addDaysToDate(createDate(t1.getISOFields()), dayDelta),
+    createDate(dt0.getISOFields()),
+    addDaysToDate(createDate(dt1.getISOFields()), dayDelta),
     { largestUnit: unitNames[largestUnit] as DateUnit },
   )
 
   const balancedDuration = addDurations(largeDuration, dayTimeFieldsToDuration(timeFields))
-  return roundBalancedDuration(balancedDuration, diffConfig, t0, t1, flip)
+  return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
 }
 
 export function roundDateTime(

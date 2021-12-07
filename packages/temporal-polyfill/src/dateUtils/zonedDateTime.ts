@@ -38,7 +38,7 @@ import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { parseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
-import { diffTimeFields, timeFieldsToNano } from './time'
+import { diffTimeOfDays, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
 export type ZonedDateTimeISOEssentials = DateTimeISOFields & { // essentials for creation
@@ -173,7 +173,7 @@ export function diffZonedDateTimes(
     )
   }
 
-  const [, dayDelta] = diffTimeFields(dt0, dt1)
+  const [, dayDelta] = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
 
   const largeDuration = calendar.dateUntil(
     createDate(dt0.getISOFields()),

@@ -50,7 +50,7 @@ export function formatTimeISO(
     formatConfig.roundingMode,
   )
 
-  const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano)
+  const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano) // nano is always time-of-day
   const parts: string[] = [padZeros(roundedFields.hour, 2)]
 
   if (formatConfig.smallestUnit <= MINUTE) {

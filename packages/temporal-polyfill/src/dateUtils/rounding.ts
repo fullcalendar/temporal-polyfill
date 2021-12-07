@@ -49,7 +49,7 @@ export function roundTimeOfDay(
   roundingConfig: RoundingConfig<DayTimeUnitInt>,
 ): [TimeFields, number] {
   const nano = roundNano(timeFieldsToNano(timeFields), roundingConfig)
-  return nanoToWrappedTimeFields(nano)
+  return nanoToWrappedTimeFields(nano) // nano is always time-of-day
 }
 
 export function roundNano(
