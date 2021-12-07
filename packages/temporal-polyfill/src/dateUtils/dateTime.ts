@@ -31,9 +31,9 @@ import {
 import {
   addDaysToDuration,
   addDurations,
-  dayTimeFieldsToDuration,
-  durationToTimeFields,
+  extractDurationTimeFields,
   nanoToDuration,
+  timeFieldsToDuration,
 } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { roundBalancedDuration, roundNano, roundTimeOfDay } from './rounding'
@@ -108,27 +108,26 @@ export function compareDateTimes(a: PlainDateTime, b: PlainDateTime): CompareRes
   ) || compareValues(a.calendar.id, b.calendar.id)
 }
 
-export function addToDateTime(
+export function addToDateTime( // why not in add.ts?
   dateTime: PlainDateTime,
   duration: Duration,
   options: OverflowOptions | undefined, // Calendar needs raw options
 ): PlainDateTime {
+  const [timeFields, bigDuration] = extractDurationTimeFields(duration)
+
   // add time first
-  const [timeFields, dayDelta] = translateTimeOfDay(
-    dateTime, // used as time-of-day
-    durationToTimeFields(duration), // could be much larger than a time-of-day
-  )
+  const dayTimeFields = translateTimeOfDay(dateTime, timeFields)
 
   const date0 = createDate(dateTime.getISOFields())
   const date1 = date0.calendar.dateAdd(
     date0,
-    addDaysToDuration(duration, dayDelta),
+    addDaysToDuration(bigDuration, dayTimeFields.day),
     options,
   )
 
   return createDateTime({
     ...date1.getISOFields(), // supplies day fields & calendar
-    ...timeLikeToISO(timeFields),
+    ...timeLikeToISO(dayTimeFields),
   })
 }
 
@@ -153,14 +152,15 @@ export function diffDateTimes(
     )
   }
 
-  const [timeFields, dayDelta] = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
+  const dayTimeDiff = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
+
   const largeDuration = calendar.dateUntil(
     createDate(dt0.getISOFields()),
-    addDaysToDate(createDate(dt1.getISOFields()), dayDelta),
+    addDaysToDate(createDate(dt1.getISOFields()), dayTimeDiff.day),
     { largestUnit: unitNames[largestUnit] as DateUnit },
   )
 
-  const balancedDuration = addDurations(largeDuration, dayTimeFieldsToDuration(timeFields))
+  const balancedDuration = addDurations(largeDuration, timeFieldsToDuration(dayTimeDiff))
   return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
 }
 
@@ -174,11 +174,12 @@ export function roundDateTime(
     NANOSECOND, // minUnit
     DAY, // maxUnit
   )
-  const [timeFields, dayDelta] = roundTimeOfDay(dateTime, roundingConfig)
-  const dateISOFields = addWholeDays(dateTime.getISOFields(), dayDelta) // preserves `calendar`
+  const dayTimeFields = roundTimeOfDay(dateTime, roundingConfig)
+  const dateISOFields = addWholeDays(dateTime.getISOFields(), dayTimeFields.day)
+  // ^preserves `calendar`
 
   return createDateTime({
     ...dateISOFields,
-    ...timeLikeToISO(timeFields),
+    ...timeLikeToISO(dayTimeFields),
   })
 }

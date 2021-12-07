@@ -6,7 +6,7 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { TimeISOEssentials, nanoToWrappedTimeFields, timeISOToNano } from '../dateUtils/time'
+import { TimeISOEssentials, timeISOToNano, wrapTimeOfDayNano } from '../dateUtils/time'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
 import { roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
@@ -50,26 +50,26 @@ export function formatTimeISO(
     formatConfig.roundingMode,
   )
 
-  const [roundedFields, dayDelta] = nanoToWrappedTimeFields(nano) // nano is always time-of-day
-  const parts: string[] = [padZeros(roundedFields.hour, 2)]
+  const dayTimeFields = wrapTimeOfDayNano(nano)
+  const parts: string[] = [padZeros(dayTimeFields.hour, 2)]
 
   if (formatConfig.smallestUnit <= MINUTE) {
-    parts.push(padZeros(roundedFields.minute, 2))
+    parts.push(padZeros(dayTimeFields.minute, 2))
 
     if (formatConfig.smallestUnit <= SECOND) {
       parts.push(
-        padZeros(roundedFields.second, 2) +
+        padZeros(dayTimeFields.second, 2) +
           formatPartialSeconds(
-            roundedFields.millisecond,
-            roundedFields.microsecond,
-            roundedFields.nanosecond,
+            dayTimeFields.millisecond,
+            dayTimeFields.microsecond,
+            dayTimeFields.nanosecond,
             formatConfig.fractionalSecondDigits,
           ),
       )
     }
   }
 
-  return [parts.join(':'), dayDelta]
+  return [parts.join(':'), dayTimeFields.day]
 }
 
 export function formatOffsetISO(offsetNano: number): string {

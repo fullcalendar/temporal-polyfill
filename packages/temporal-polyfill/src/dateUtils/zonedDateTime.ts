@@ -34,7 +34,7 @@ import {
   overrideDateTimeFields,
 } from './dateTime'
 import { dayTimeFieldsToNano } from './dayTime'
-import { addDurations, durationToTimeFields, nanoToDuration } from './duration'
+import { addDurations, extractDurationTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { parseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
@@ -123,8 +123,10 @@ export function addToZonedDateTime(
   duration: Duration,
   options: OverflowOptions | undefined, // Calendar needs these options to be raw
 ): ZonedDateTime {
+  const [timeFields, bigDuration] = extractDurationTimeFields(duration)
+
   // add time fields first
-  const timeNano = timeFieldsToNano(durationToTimeFields(duration))
+  const timeNano = timeFieldsToNano(timeFields)
   const epochNano = zonedDateTime.epochNanoseconds + timeNano
   const isoFields = new ZonedDateTime(epochNano, zonedDateTime.timeZone, zonedDateTime.calendar)
     .getISOFields()
@@ -133,7 +135,7 @@ export function addToZonedDateTime(
   // Calendar::dateAdd will ignore time parts
   const date = zonedDateTime.calendar.dateAdd(
     createDate(isoFields),
-    duration,
+    bigDuration, // only units >= DAY
     options,
   )
 
@@ -173,11 +175,11 @@ export function diffZonedDateTimes(
     )
   }
 
-  const [, dayDelta] = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
+  const dayTimeFields = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
 
   const largeDuration = calendar.dateUntil(
     createDate(dt0.getISOFields()),
-    addDaysToDate(createDate(dt1.getISOFields()), dayDelta),
+    addDaysToDate(createDate(dt1.getISOFields()), dayTimeFields.day),
     { largestUnit: unitNames[largestUnit] as DateUnit },
   )
 

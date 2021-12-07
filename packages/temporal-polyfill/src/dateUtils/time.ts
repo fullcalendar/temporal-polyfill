@@ -16,11 +16,10 @@ import {
 import { compareValues } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
-import { nanoToDayTimeFields } from './dayTime'
+import { DayTimeFields, nanoToDayTimeFields, splitEpochNano } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
 import { roundNano, roundTimeOfDay } from './rounding'
 import {
-  DAY,
   HOUR,
   NANOSECOND,
   TimeUnitInt,
@@ -87,8 +86,8 @@ export function overrideTimeFields(overrides: Partial<TimeFields>, base: TimeFie
 }
 
 export function addToPlainTime(time: PlainTime, dur: Duration): PlainTime {
-  const [fields] = translateTimeOfDay(time, durationToTimeFields(dur))
-  return createTime(timeLikeToISO(fields))
+  const dayTimeFields = translateTimeOfDay(time, durationToTimeFields(dur))
+  return createTime(timeLikeToISO(dayTimeFields))
 }
 
 export function diffPlainTimes(
@@ -116,8 +115,8 @@ export function roundPlainTime(plainTime: PlainTime, options: TimeRoundingOption
     NANOSECOND, // minUnit
     HOUR, // maxUnit
   )
-  const [fields] = roundTimeOfDay(plainTime, roundingConfig)
-  return createTime(timeLikeToISO(fields))
+  const dayTimeFields = roundTimeOfDay(plainTime, roundingConfig)
+  return createTime(timeLikeToISO(dayTimeFields))
 }
 
 export function timeFieldsToConstrainedISO(
@@ -138,15 +137,12 @@ export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
 
 // Nanosecond Math
 
-export function translateTimeOfDay(timeOfDay: TimeFields, delta: TimeFields): [TimeFields, number] {
-  return nanoToWrappedTimeFields(timeFieldsToNano(timeOfDay) + timeFieldsToNano(delta))
+export function translateTimeOfDay(timeOfDay: TimeFields, delta: TimeFields): DayTimeFields {
+  return wrapTimeOfDayNano(timeFieldsToNano(timeOfDay) + timeFieldsToNano(delta))
 }
 
-export function diffTimeOfDays(
-  timeOfDay0: TimeFields,
-  timeOfDay1: TimeFields,
-): [TimeFields, number] {
-  return nanoToWrappedTimeFields(timeFieldsToNano(timeOfDay1) - timeFieldsToNano(timeOfDay0))
+export function diffTimeOfDays(timeOfDay0: TimeFields, timeOfDay1: TimeFields): DayTimeFields {
+  return wrapTimeOfDayNano(timeFieldsToNano(timeOfDay1) - timeFieldsToNano(timeOfDay0))
 }
 
 export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {
@@ -176,15 +172,15 @@ export function timeISOToNano(timeISO: TimeISOEssentials): bigint {
 
 // Nanoseconds -> Object
 
-export function nanoToWrappedTimeFields(nano: bigint): [TimeFields, number] {
-  const dayDelta = nano / nanoInDayBI
-  nano -= dayDelta * nanoInDayBI
-
-  const fields = nanoToDayTimeFields(nano, DAY)
-
-  // repurpose DayTimeFiels as TimeFields
-  delete fields.day
-  return [fields as TimeFields, Number(dayDelta)]
+// TODO: move to dayTime.ts?
+// if nano is positive, will wrap once reaching 24h, giving a positive day value
+// if nano is negative, will go into previous days, giving a negative day value
+export function wrapTimeOfDayNano(nano: bigint): DayTimeFields {
+  const [dayNano, timeNano] = splitEpochNano(nano)
+  return {
+    ...(nanoToDayTimeFields(timeNano, HOUR) as TimeFields),
+    day: Number(dayNano / nanoInDayBI), // always an int: dayNano is evenly divisible by nanoInDayBI
+  }
 }
 
 // Object -> Object

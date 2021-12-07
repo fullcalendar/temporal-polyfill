@@ -24,7 +24,7 @@ import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
 import { parseDateTimeISO, refineDateTimeParse, refineZonedDateTimeParse } from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
-import { TimeFields } from './time'
+import { TimeFields, timeFieldsToNano } from './time'
 import {
   DAY,
   DayTimeUnitInt,
@@ -39,6 +39,7 @@ import {
   WEEK,
   YEAR,
   isDayTimeUnit,
+  nanoInDayBI,
 } from './units'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -263,6 +264,19 @@ export function dayTimeFieldsToDuration(fields: Partial<DayTimeFields>): Duratio
   )
 }
 
+// HACK
+export function timeFieldsToDuration(fields: TimeFields): Duration {
+  return new Duration(
+    0, 0, 0, 0,
+    fields.hour,
+    fields.minute,
+    fields.second,
+    fields.millisecond,
+    fields.microsecond,
+    fields.nanosecond,
+  )
+}
+
 export function durationToDayTimeFields(duration: Duration): DayTimeFields | undefined {
   if (!duration.years && !duration.months) {
     return {
@@ -272,6 +286,27 @@ export function durationToDayTimeFields(duration: Duration): DayTimeFields | und
   }
 }
 
+/*
+Separates TimeFields from the duration, but first ensures that an excess of 24h of time overflows
+into the days fields of the resulting Duration
+*/
+export function extractDurationTimeFields(duration: Duration): [TimeFields, Duration] {
+  const timeNano = timeFieldsToNano(durationToTimeFields(duration))
+  const days = timeNano / nanoInDayBI
+  const leftoverTimeNano = timeNano - (days * nanoInDayBI)
+
+  return [ // TODO: switch arg order?
+    nanoToDayTimeFields(leftoverTimeNano, HOUR) as TimeFields, // TODO: easier to return nano?
+    new Duration(
+      duration.hours,
+      duration.months,
+      duration.weeks,
+      duration.days + Number(days),
+    ),
+  ]
+}
+
+// internal util for converting between formats
 export function durationToTimeFields(duration: Duration): TimeFields {
   return {
     hour: duration.hours,

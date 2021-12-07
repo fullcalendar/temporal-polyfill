@@ -24,7 +24,10 @@ export function nanoToDayTimeFields(
   return fields
 }
 
-export function splitEpochNano(epochNano: bigint): [ bigint, bigint] { // [dayNano, timeNano]
+// returns [dayNano, timeNano]
+// dayNano is guaranteed to be evenly divisible by nanoInDayBI
+// TODO: should timeNano be a normal number?
+export function splitEpochNano(epochNano: bigint): [bigint, bigint] {
   let dayNano = epochNano / nanoInDayBI * nanoInDayBI
   let timeNano = epochNano - dayNano
 
