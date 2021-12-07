@@ -24,10 +24,15 @@ export function nanoToDayTimeFields(
   return fields
 }
 
-export function splitEpochNano(epochNano: bigint): [
-  bigint, bigint, // [dayNano, timeNano]
-] {
-  const dayNano = epochNano / nanoInDayBI * nanoInDayBI
-  const timeNano = epochNano - dayNano
+export function splitEpochNano(epochNano: bigint): [ bigint, bigint] { // [dayNano, timeNano]
+  let dayNano = epochNano / nanoInDayBI * nanoInDayBI
+  let timeNano = epochNano - dayNano
+
+  // HACK for bigint division and doing floor() for negative numbers
+  if (timeNano < 0) {
+    timeNano += nanoInDayBI
+    dayNano -= nanoInDayBI
+  }
+
   return [dayNano, timeNano]
 }
