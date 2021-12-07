@@ -1,5 +1,5 @@
 import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
-import { ensureOptionsObj } from '../argParse/refine'
+import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import { addToInstant, compareInstants, diffInstants, roundInstant } from '../dateUtils/instant'
 import { isoFieldsToEpochNano, validateInstant } from '../dateUtils/isoMath'
@@ -121,6 +121,15 @@ export class Instant extends AbstractNoValueObj {
   }
 
   toZonedDateTime(options: { calendar: CalendarArg, timeZone: TimeZoneArg }): ZonedDateTime {
+    // TODO: more official options-processing utils for this
+    if (!isObjectLike(options)) {
+      throw new TypeError('Must specify options')
+    } else if (options.calendar === undefined) {
+      throw new TypeError('Must specify a calendar')
+    } else if (options.timeZone === undefined) {
+      throw new TypeError('Must specify a timeZone')
+    }
+
     return new ZonedDateTime(
       this.epochNanoseconds,
       options.timeZone,

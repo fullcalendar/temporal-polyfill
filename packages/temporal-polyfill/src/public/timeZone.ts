@@ -36,7 +36,7 @@ const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
 export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   constructor(id: string) {
     if (!id) {
-      throw new Error('Invalid timezone ID')
+      throw new RangeError('Invalid timezone ID')
     }
     super()
     setImpl(this, queryTimeZoneImpl(id))
