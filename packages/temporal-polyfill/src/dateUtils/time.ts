@@ -7,6 +7,7 @@ import { Duration } from '../public/duration'
 import { PlainTime } from '../public/plainTime'
 import {
   CompareResult,
+  DateTimeISOFields,
   TimeArg,
   TimeDiffOptions,
   TimeLike,
@@ -18,6 +19,7 @@ import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { DayTimeFields, nanoToDayTimeFields, splitEpochNano } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
+import { isoFieldsToEpochNano } from './isoMath'
 import { roundNano, roundTimeOfDay } from './rounding'
 import {
   HOUR,
@@ -141,8 +143,29 @@ export function translateTimeOfDay(timeOfDay: TimeFields, delta: TimeFields): Da
   return wrapTimeOfDayNano(timeFieldsToNano(timeOfDay) + timeFieldsToNano(delta))
 }
 
-export function diffTimeOfDays(timeOfDay0: TimeFields, timeOfDay1: TimeFields): DayTimeFields {
-  return wrapTimeOfDayNano(timeFieldsToNano(timeOfDay1) - timeFieldsToNano(timeOfDay0))
+/*
+Operates on the time-of-day of *datetimes*
+The returned TimeFields guaranteed to be same sign as from isoFields0->isoFields1
+The returned `day` property should be added to isoFields1 before doing Calendar::dateUntil
+*/
+export function diffTimeOfDays(
+  isoFields0: DateTimeISOFields,
+  isoFields1: DateTimeISOFields,
+): DayTimeFields {
+  const sign = isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0) < 0 ? -1 : 1
+  let timeDiff = timeISOToNano(isoFields1) - timeISOToNano(isoFields0)
+  const timeDiffSign = timeDiff < 0 ? -1 : 1 // TODO: numSign-ish util for bigints
+  let day = 0
+
+  if (timeDiffSign !== sign) {
+    day -= sign
+    timeDiff += nanoInDayBI * BigInt(sign)
+  }
+
+  return {
+    ...(nanoToDayTimeFields(timeDiff, HOUR) as TimeFields),
+    day,
+  }
 }
 
 export function compareTimes(t0: PlainTime, t1: PlainTime): CompareResult {

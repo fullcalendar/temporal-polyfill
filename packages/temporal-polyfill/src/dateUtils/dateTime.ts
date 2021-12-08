@@ -29,7 +29,6 @@ import {
   overrideDateFields,
 } from './date'
 import {
-  addDaysToDuration,
   addDurations,
   extractDurationTimeFields,
   nanoToDuration,
@@ -120,8 +119,8 @@ export function addToDateTime( // why not in add.ts?
 
   const date0 = createDate(dateTime.getISOFields())
   const date1 = date0.calendar.dateAdd(
-    date0,
-    addDaysToDuration(bigDuration, dayTimeFields.day),
+    addDaysToDate(date0, dayTimeFields.day),
+    bigDuration,
     options,
   )
 
@@ -131,7 +130,7 @@ export function addToDateTime( // why not in add.ts?
   })
 }
 
-export function diffDateTimes(
+export function diffDateTimes( // why not in diff.ts?
   dt0: PlainDateTime,
   dt1: PlainDateTime,
   options: DiffOptions | undefined,
@@ -141,22 +140,24 @@ export function diffDateTimes(
   const diffConfig = parseDiffOptions<Unit, UnitInt>(options, DAY, NANOSECOND, NANOSECOND, YEAR)
   const { largestUnit } = diffConfig
 
+  const isoFields0 = dt0.getISOFields()
+  const isoFields1 = dt1.getISOFields()
+
   // some sort of time unit?
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
-        isoFieldsToEpochNano(dt1.getISOFields()) - isoFieldsToEpochNano(dt0.getISOFields()),
+        isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0),
         diffConfig as RoundingConfig<DayTimeUnitInt>,
       ),
       largestUnit,
     )
   }
 
-  const dayTimeDiff = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
-
+  const dayTimeDiff = diffTimeOfDays(isoFields0, isoFields1)
   const largeDuration = calendar.dateUntil(
-    createDate(dt0.getISOFields()),
-    addDaysToDate(createDate(dt1.getISOFields()), dayTimeDiff.day),
+    createDate(isoFields0),
+    addDaysToDate(createDate(isoFields1), dayTimeDiff.day),
     { largestUnit: unitNames[largestUnit] as DateUnit },
   )
 

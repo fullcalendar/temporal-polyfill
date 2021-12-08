@@ -1,5 +1,6 @@
 import { unitNames } from '../argParse/unitStr'
-import { TimeFields, timeFieldsToNano } from './time'
+import { epochNanoToISOFields, isoToEpochNano } from './isoMath'
+import { TimeFields, timeFieldsToNano, timeISOToNano } from './time'
 import { DayTimeUnitInt, NANOSECOND, nanoIn, nanoInDayBI } from './units'
 
 export type DayTimeFields = TimeFields & { day: number }
@@ -28,14 +29,9 @@ export function nanoToDayTimeFields(
 // dayNano is guaranteed to be evenly divisible by nanoInDayBI
 // TODO: should timeNano be a normal number?
 export function splitEpochNano(epochNano: bigint): [bigint, bigint] {
-  let dayNano = epochNano / nanoInDayBI * nanoInDayBI
-  let timeNano = epochNano - dayNano
-
-  // HACK for bigint division and doing floor() for negative numbers
-  if (timeNano < 0) {
-    timeNano += nanoInDayBI
-    dayNano -= nanoInDayBI
-  }
-
-  return [dayNano, timeNano]
+  const isoFields = epochNanoToISOFields(epochNano)
+  return [
+    isoToEpochNano(isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay),
+    timeISOToNano(isoFields),
+  ]
 }

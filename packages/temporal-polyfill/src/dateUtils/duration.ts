@@ -298,7 +298,7 @@ export function extractDurationTimeFields(duration: Duration): [TimeFields, Dura
   return [ // TODO: switch arg order?
     nanoToDayTimeFields(leftoverTimeNano, HOUR) as TimeFields, // TODO: easier to return nano?
     new Duration(
-      duration.hours,
+      duration.years,
       duration.months,
       duration.weeks,
       duration.days + Number(days),

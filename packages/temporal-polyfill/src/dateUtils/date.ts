@@ -91,7 +91,7 @@ export function addDaysToDate(date: PlainDate, days: number): PlainDate {
   return date
 }
 
-export function diffDates(
+export function diffDates( // why not in diff.ts?
   d0: PlainDate,
   d1: PlainDate,
   diffConfig: DiffConfig,

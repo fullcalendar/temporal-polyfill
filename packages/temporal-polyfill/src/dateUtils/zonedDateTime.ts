@@ -128,13 +128,12 @@ export function addToZonedDateTime(
   // add time fields first
   const timeNano = timeFieldsToNano(timeFields)
   const epochNano = zonedDateTime.epochNanoseconds + timeNano
-  const isoFields = new ZonedDateTime(epochNano, zonedDateTime.timeZone, zonedDateTime.calendar)
-    .getISOFields()
+  zonedDateTime = new ZonedDateTime(epochNano, zonedDateTime.timeZone, zonedDateTime.calendar)
 
   // add larger fields using the calendar
   // Calendar::dateAdd will ignore time parts
   const date = zonedDateTime.calendar.dateAdd(
-    createDate(isoFields),
+    zonedDateTime.toPlainDate(),
     bigDuration, // only units >= DAY
     options,
   )
@@ -145,7 +144,7 @@ export function addToZonedDateTime(
   })
 }
 
-export function diffZonedDateTimes(
+export function diffZonedDateTimes( // why not in diff.ts?
   dt0: ZonedDateTime,
   dt1: ZonedDateTime,
   options: DiffOptions | undefined,
@@ -164,7 +163,7 @@ export function diffZonedDateTimes(
     throw new Error('Must be same timeZone')
   }
 
-  // some sort of time unit
+  // some sort of time unit?
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
@@ -175,15 +174,17 @@ export function diffZonedDateTimes(
     )
   }
 
-  const dayTimeFields = diffTimeOfDays(dt0, dt1) // arguments used as time-of-day
+  const isoFields0 = dt0.getISOFields()
+  const isoFields1 = dt1.getISOFields()
 
+  const dayTimeFields = diffTimeOfDays(isoFields0, isoFields1)
   const largeDuration = calendar.dateUntil(
-    createDate(dt0.getISOFields()),
-    addDaysToDate(createDate(dt1.getISOFields()), dayTimeFields.day),
+    createDate(isoFields0),
+    addDaysToDate(createDate(isoFields1), dayTimeFields.day),
     { largestUnit: unitNames[largestUnit] as DateUnit },
   )
 
-  // advance dt0 to within a day of dt1 and compute the time different
+  // advance dt0 to within a day of dt1 and compute the time difference
   // guaranteed to be less than 24 hours
   const timeDuration = nanoToDuration(
     dt1.epochNanoseconds - dt0.add(largeDuration).epochNanoseconds,
