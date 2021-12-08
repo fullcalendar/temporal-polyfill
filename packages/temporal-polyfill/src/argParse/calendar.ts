@@ -51,6 +51,6 @@ export function ensureCalendarsEqual(
   calendar1: Calendar,
 ): void {
   if (calendar0.id !== calendar1.id) {
-    throw new Error('Calendars must match')
+    throw new RangeError('Calendars must match')
   }
 }

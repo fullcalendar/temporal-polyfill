@@ -148,6 +148,7 @@ export function diffZonedDateTimes( // why not in diff.ts?
   dt0: ZonedDateTime,
   dt1: ZonedDateTime,
   options: DiffOptions | undefined,
+  flip?: boolean,
 ): Duration {
   const calendar = getCommonCalendar(dt0, dt1)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(
@@ -167,7 +168,7 @@ export function diffZonedDateTimes( // why not in diff.ts?
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
-        dt1.epochNanoseconds - dt0.epochNanoseconds,
+        (dt1.epochNanoseconds - dt0.epochNanoseconds) * (flip ? -1n : 1n),
         diffConfig as RoundingConfig<DayTimeUnitInt>,
       ),
       largestUnit,
@@ -192,7 +193,7 @@ export function diffZonedDateTimes( // why not in diff.ts?
   )
 
   const balancedDuration = addDurations(largeDuration, timeDuration)
-  return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1)
+  return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
 }
 
 export function roundZonedDateTime(

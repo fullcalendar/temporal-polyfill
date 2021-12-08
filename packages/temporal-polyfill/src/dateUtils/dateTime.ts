@@ -147,7 +147,7 @@ export function diffDateTimes( // why not in diff.ts?
   if (!isDateUnit(largestUnit)) {
     return nanoToDuration(
       roundNano(
-        isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0),
+        (isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0)) * (flip ? -1n : 1n),
         diffConfig as RoundingConfig<DayTimeUnitInt>,
       ),
       largestUnit,

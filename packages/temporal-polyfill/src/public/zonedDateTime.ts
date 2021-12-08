@@ -200,7 +200,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   since(other: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options).negated()
+    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options, true)
   }
 
   round(options?: DateTimeRoundingOptions): ZonedDateTime {

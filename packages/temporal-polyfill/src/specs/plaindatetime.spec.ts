@@ -341,24 +341,42 @@ describe('DateTime', () => {
     const dt1 = PlainDateTime.from('1963-02-13T09:36:29.123456789')
     const dt1again = PlainDateTime.from('1963-02-13T09:36:29.123456789')
     const dt2 = PlainDateTime.from('1976-11-18T15:23:30.123456789')
-    it('=== is object equality', () => equal(dt1, dt1))
-    it('!== is object equality', () => notEqual(dt1, dt1again))
-    it('<', () => throws(() => dt1 < dt2))
-    it('>', () => throws(() => dt1 > dt2))
-    it('<=', () => throws(() => dt1 <= dt2))
-    it('>=', () => throws(() => dt1 >= dt2))
+    it('=== is object equality', () => {
+      equal(dt1, dt1)
+    })
+    it('!== is object equality', () => {
+      notEqual(dt1, dt1again)
+    })
+    it('<', () => {
+      throws(() => dt1 < dt2)
+    })
+    it('>', () => {
+      throws(() => dt1 > dt2)
+    })
+    it('<=', () => {
+      throws(() => dt1 <= dt2)
+    })
+    it('>=', () => {
+      throws(() => dt1 >= dt2)
+    })
   })
   describe('date/time maths', () => {
     const earlier = PlainDateTime.from('1976-11-18T15:23:30.123456789')
     const later = PlainDateTime.from('2019-10-29T10:46:38.271986102');
     ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'].forEach((largestUnit: any) => {
       const diff = later.since(earlier, { largestUnit })
-      it(`(${earlier}).since(${later}) == (${later}).since(${earlier}).negated()`, () =>
-        equal(`${earlier.since(later, { largestUnit })}`, `${diff.negated()}`))
-      it(`(${earlier}).until(${later}) == (${later}).since(${earlier})`, () =>
-        equal(`${earlier.until(later, { largestUnit })}`, `${diff}`))
-      it(`(${earlier}).add(${diff}) == (${later})`, () => assert(earlier.add(diff).equals(later)))
-      it(`(${later}).subtract(${diff}) == (${earlier})`, () => assert(later.subtract(diff).equals(earlier)))
+      it(`(${earlier}).since(${later}) == (${later}).since(${earlier}).negated()`, () => {
+        equal(`${earlier.since(later, { largestUnit })}`, `${diff.negated()}`)
+      })
+      it(`(${earlier}).until(${later}) == (${later}).since(${earlier})`, () => {
+        equal(`${earlier.until(later, { largestUnit })}`, `${diff}`)
+      })
+      it(`(${earlier}).add(${diff}) == (${later})`, () => {
+        assert(earlier.add(diff).equals(later))
+      })
+      it(`(${later}).subtract(${diff}) == (${earlier})`, () => {
+        assert(later.subtract(diff).equals(earlier))
+      })
       it('symmetrical with regard to negative durations', () => {
         assert(earlier.subtract(diff.negated()).equals(later))
         assert(later.add(diff.negated()).equals(earlier))
