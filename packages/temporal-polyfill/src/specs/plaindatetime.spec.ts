@@ -1276,45 +1276,61 @@ describe('DateTime', () => {
     })
   })
   describe('DateTime.from() works', () => {
-    it('DateTime.from("1976-11-18 15:23:30")', () =>
-      equal(`${PlainDateTime.from('1976-11-18 15:23:30')}`, '1976-11-18T15:23:30'))
-    it('DateTime.from("1976-11-18 15:23:30.001")', () =>
-      equal(`${PlainDateTime.from('1976-11-18 15:23:30.001')}`, '1976-11-18T15:23:30.001'))
-    it('DateTime.from("1976-11-18 15:23:30.001123")', () =>
-      equal(`${PlainDateTime.from('1976-11-18 15:23:30.001123')}`, '1976-11-18T15:23:30.001123'))
-    it('DateTime.from("1976-11-18 15:23:30.001123456")', () =>
-      equal(`${PlainDateTime.from('1976-11-18 15:23:30.001123456')}`, '1976-11-18T15:23:30.001123456'))
+    it('DateTime.from("1976-11-18 15:23:30")', () => {
+      equal(`${PlainDateTime.from('1976-11-18 15:23:30')}`, '1976-11-18T15:23:30')
+    })
+    it('DateTime.from("1976-11-18 15:23:30.001")', () => {
+      equal(`${PlainDateTime.from('1976-11-18 15:23:30.001')}`, '1976-11-18T15:23:30.001')
+    })
+    it('DateTime.from("1976-11-18 15:23:30.001123")', () => {
+      equal(`${PlainDateTime.from('1976-11-18 15:23:30.001123')}`, '1976-11-18T15:23:30.001123')
+    })
+    it('DateTime.from("1976-11-18 15:23:30.001123456")', () => {
+      equal(`${PlainDateTime.from('1976-11-18 15:23:30.001123456')}`, '1976-11-18T15:23:30.001123456')
+    })
     it('DateTime.from(1976-11-18) is not the same object', () => {
       const orig = new PlainDateTime(1976, 11, 18, 15, 23, 20, 123, 456, 789)
       const actual = PlainDateTime.from(orig)
       notEqual(actual, orig)
     })
-    it('DateTime.from({ year: 1976, month: 11, day: 18 }) == 1976-11-18T00:00:00', () =>
-      equal(`${PlainDateTime.from({ year: 1976, month: 11, monthCode: 'M11', day: 18 })}`, '1976-11-18T00:00:00'))
-    it('can be constructed with month and without monthCode', () =>
-      equal(`${PlainDateTime.from({ year: 1976, month: 11, day: 18 })}`, '1976-11-18T00:00:00'))
-    it('can be constructed with monthCode and without month', () =>
-      equal(`${PlainDateTime.from({ year: 1976, monthCode: 'M11', day: 18 })}`, '1976-11-18T00:00:00'))
-    it('month and monthCode must agree', () =>
-      throws(() => PlainDateTime.from({ year: 1976, month: 11, monthCode: 'M12', day: 18 }), RangeError))
-    it('DateTime.from({ year: 1976, month: 11, day: 18, millisecond: 123 }) == 1976-11-18T00:00:00.123', () =>
-      equal(`${PlainDateTime.from({ year: 1976, month: 11, day: 18, millisecond: 123 })}`, '1976-11-18T00:00:00.123'))
-    it('DateTime.from({ year: 1976, day: 18, hour: 15, minute: 23, second: 30, millisecond: 123 }) throws', () =>
+    it('DateTime.from({ year: 1976, month: 11, day: 18 }) == 1976-11-18T00:00:00', () => {
+      equal(`${PlainDateTime.from({ year: 1976, month: 11, monthCode: 'M11', day: 18 })}`, '1976-11-18T00:00:00')
+    })
+    it('can be constructed with month and without monthCode', () => {
+      equal(`${PlainDateTime.from({ year: 1976, month: 11, day: 18 })}`, '1976-11-18T00:00:00')
+    })
+    it('can be constructed with monthCode and without month', () => {
+      equal(`${PlainDateTime.from({ year: 1976, monthCode: 'M11', day: 18 })}`, '1976-11-18T00:00:00')
+    })
+    it('month and monthCode must agree', () => {
+      throws(() => PlainDateTime.from({ year: 1976, month: 11, monthCode: 'M12', day: 18 }), RangeError)
+    })
+    it('DateTime.from({ year: 1976, month: 11, day: 18, millisecond: 123 }) == 1976-11-18T00:00:00.123', () => {
+      equal(`${PlainDateTime.from({ year: 1976, month: 11, day: 18, millisecond: 123 })}`, '1976-11-18T00:00:00.123')
+    })
+    it('DateTime.from({ year: 1976, day: 18, hour: 15, minute: 23, second: 30, millisecond: 123 }) throws', () => {
       throws(
         () => PlainDateTime.from({ year: 1976, day: 18, hour: 15, minute: 23, second: 30, millisecond: 123 } as InvalidArg),
         TypeError,
-      ))
-    it('DateTime.from({}) throws', () => throws(() => PlainDateTime.from({} as InvalidArg), TypeError))
-    it('DateTime.from(required prop undefined) throws', () =>
-      throws(() => PlainDateTime.from({ year: 1976, month: undefined, monthCode: undefined as InvalidArg, day: 18 }), TypeError))
+      )
+    })
+    it('DateTime.from({}) throws', () => {
+      throws(() => PlainDateTime.from({} as InvalidArg), TypeError)
+    })
+    it('DateTime.from(required prop undefined) throws', () => {
+      throws(() => PlainDateTime.from({ year: 1976, month: undefined, monthCode: undefined as InvalidArg, day: 18 }), TypeError)
+    })
     it('DateTime.from(ISO string leap second) is constrained', () => {
       equal(`${PlainDateTime.from('2016-12-31T23:59:60')}`, '2016-12-31T23:59:59')
     })
-    it('DateTime.from(number) is converted to string', () =>
-      assert(PlainDateTime.from(19761118 as ValidArg).equals(PlainDateTime.from('19761118'))))
+    it('DateTime.from(number) is converted to string', () => {
+      assert(PlainDateTime.from(19761118 as ValidArg).equals(PlainDateTime.from('19761118')))
+    })
     describe('Overflow', () => {
       const bad = { year: 2019, month: 1, day: 32 }
-      it('reject', () => throws(() => PlainDateTime.from(bad, { overflow: 'reject' }), RangeError))
+      it('reject', () => {
+        throws(() => PlainDateTime.from(bad, { overflow: 'reject' }), RangeError)
+      })
       it('constrain', () => {
         equal(`${PlainDateTime.from(bad)}`, '2019-01-31T00:00:00')
         equal(`${PlainDateTime.from(bad, { overflow: 'constrain' })}`, '2019-01-31T00:00:00')
@@ -1329,8 +1345,12 @@ describe('DateTime', () => {
         )
       })
       const leap = { year: 2016, month: 12, day: 31, hour: 23, minute: 59, second: 60 }
-      it('reject leap second', () => throws(() => PlainDateTime.from(leap, { overflow: 'reject' }), RangeError))
-      it('constrain leap second', () => equal(`${PlainDateTime.from(leap)}`, '2016-12-31T23:59:59'))
+      it('reject leap second', () => {
+        throws(() => PlainDateTime.from(leap, { overflow: 'reject' }), RangeError)
+      })
+      it('constrain leap second', () => {
+        equal(`${PlainDateTime.from(leap)}`, '2016-12-31T23:59:59')
+      })
       it('constrain has no effect on invalid ISO string', () => {
         throws(() => PlainDateTime.from('2020-13-34T24:60', { overflow: 'constrain' }), RangeError)
       })
@@ -1378,10 +1398,12 @@ describe('DateTime', () => {
       equal(`${PlainDateTime.from('1976-11-18T15')}`, '1976-11-18T15:00:00')
       equal(`${PlainDateTime.from('1976-11-18')}`, '1976-11-18T00:00:00')
     })
-    it('no junk at end of string', () =>
-      throws(() => PlainDateTime.from('1976-11-18T15:23:30.123456789junk'), RangeError))
-    it('ignores if a timezone is specified', () =>
-      equal(`${PlainDateTime.from('2020-01-01T01:23:45[Asia/Kolkata]')}`, '2020-01-01T01:23:45'))
+    it('no junk at end of string', () => {
+      throws(() => PlainDateTime.from('1976-11-18T15:23:30.123456789junk'), RangeError)
+    })
+    it('ignores if a timezone is specified', () => {
+      equal(`${PlainDateTime.from('2020-01-01T01:23:45[Asia/Kolkata]')}`, '2020-01-01T01:23:45')
+    })
     it('options may only be an object or undefined', () => {
       [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions) =>
         throws(() => PlainDateTime.from({ year: 1976, month: 11, day: 18 }, badOptions as InvalidArg), TypeError),

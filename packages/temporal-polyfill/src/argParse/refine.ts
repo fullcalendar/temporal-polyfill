@@ -37,6 +37,7 @@ export function createParser<Map>(nameForError: string, map: Map, defaultVal?: V
   }
 }
 
+// TODO: better error messages for invalid properties
 export function constrainInt(
   val: number | undefined,
   min: number, // inclusive. serves as default

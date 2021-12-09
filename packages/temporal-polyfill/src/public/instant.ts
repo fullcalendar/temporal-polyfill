@@ -1,11 +1,11 @@
-import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
+import { constrainDateTimeISO } from '../dateUtils/dateTime'
 import { addToInstant, compareInstants, diffInstants, roundInstant } from '../dateUtils/instant'
 import { isoFieldsToEpochNano, validateInstant } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
-import { constrainTimeISO } from '../dateUtils/time'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
@@ -37,19 +37,16 @@ export class Instant extends AbstractNoValueObj {
       return new Instant(arg.epochNanoseconds)
     }
 
-    let fields = parseDateTimeISO(String(arg))
+    const fields = parseDateTimeISO(String(arg))
     const offsetNano = fields.offset
     if (offsetNano === undefined) {
       throw new RangeError('Must specify an offset')
     }
 
-    fields = {
-      ...fields,
-      // constrain time portion because :60 leap-second allowed
-      ...constrainTimeISO(fields, OVERFLOW_CONSTRAIN),
-    }
-
-    return new Instant(isoFieldsToEpochNano(fields) - BigInt(offsetNano))
+    return new Instant(
+      isoFieldsToEpochNano(constrainDateTimeISO(fields, OVERFLOW_REJECT)) -
+      BigInt(offsetNano),
+    )
   }
 
   static fromEpochSeconds(epochSeconds: number): Instant {

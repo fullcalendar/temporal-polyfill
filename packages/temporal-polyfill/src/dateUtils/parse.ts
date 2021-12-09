@@ -173,6 +173,7 @@ function parseMonthDayParts(parts: string[]): DateISOEssentials {
 }
 
 function parseTimeParts(parts: string[]): TimeISOEssentials {
+  const isoSecond = toInt0(parts[2])
   return {
     ...timeLikeToISO( // properties like isoMillisecond/isoMicrosecond
       nanoToDayTimeFields( // properties like millisecond/microsecond
@@ -182,7 +183,7 @@ function parseTimeParts(parts: string[]): TimeISOEssentials {
     ),
     isoHour: toInt0(parts[0]),
     isoMinute: toInt0(parts[1]),
-    isoSecond: toInt0(parts[2]),
+    isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage lead-second
   }
 }
 
