@@ -92,17 +92,17 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     if (offsetSecsDiff) {
       const disambig = parseDisambigOption(options)
       if (disambig === DISAMBIG_REJECT) {
-        throw new Error('Ambiguous offset')
+        throw new RangeError('Ambiguous offset')
       }
       if (disambig === DISAMBIG_EARLIER) {
-        offsetSecs += (offsetSecsDiff < 0 ? offsetSecsDiff : 0)
-      } else if (disambig === DISAMBIG_LATER) {
         offsetSecs += (offsetSecsDiff > 0 ? offsetSecsDiff : 0)
+      } else if (disambig === DISAMBIG_LATER) {
+        offsetSecs += (offsetSecsDiff < 0 ? offsetSecsDiff : 0)
       }
       // Otherwise, 'compatible', which boils down to not using diff
     }
 
-    return epochSecsToInstant(zoneSecs + offsetSecs, isoFields)
+    return epochSecsToInstant(zoneSecs - offsetSecs, isoFields)
   }
 
   getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[] {

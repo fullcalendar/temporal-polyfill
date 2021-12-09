@@ -1,7 +1,7 @@
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { epochSecondsToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
 import { milliInSecond, secondsInDay } from '../dateUtils/units'
-import { compareValues, numSign } from '../utils/math'
+import { compareValues } from '../utils/math'
 import { PossibleOffsetInfo, RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
 const MAX_YEAR_TRAVEL = 5
@@ -38,38 +38,44 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
   // `zoneSecs` is like epochSecs, but to zone's pseudo-epoch
   getPossibleOffsets(zoneSecs: number): PossibleOffsetInfo {
-    const prevTransition = this.getTransition(zoneSecs, -1)
-    const nextTransition = this.getTransition(zoneSecs, 1)
-    const anyTransition = prevTransition || nextTransition
+    const transitions = [
+      this.getTransition(zoneSecs, -1),
+      this.getTransition(zoneSecs, 1),
+    ].filter(Boolean) as RawTransition[]
+    let offsetSecsAfter: number | undefined
 
-    // determine if overall named timezone has a positive or negative leaning.
-    // even with DST, if the offsets are +00:00 and +01:00, will be positive.
-    // if unable to compute, will set to zero.
-    const zoneLean = anyTransition ? numSign(anyTransition[1] + anyTransition[2]) : 0
+    // loop transitions from past to future
+    for (const transition of transitions) {
+      const [transitionEpochSecs, offsetSecsBefore, offsetSecsDiff] = transition
+      offsetSecsAfter = offsetSecsBefore + offsetSecsDiff
+      // FYI, a transition's switchover to offsetSecsAfter happens
+      // *inclusively* as transitionEpochSecs
 
-    const relevantTransition = zoneLean > 0 ? nextTransition : prevTransition
-    // If transition in the relevant direction, use the offset of the future/past year
-    if (!relevantTransition) {
-      const utcYear = epochSecondsToISOYear(zoneSecs) + zoneLean
-      return [this.getYearEndOffset(utcYear), 0]
+      // two possibilities (no guarantee of chronology)
+      const epochSecsA = zoneSecs - offsetSecsBefore
+      const epochSecsB = zoneSecs - offsetSecsAfter
+
+      // is the transition after both possibilities?
+      if (transitionEpochSecs > epochSecsA && transitionEpochSecs > epochSecsB) {
+        return [offsetSecsBefore, 0]
+
+      // is the transition before both possibilities?
+      } else if (transitionEpochSecs <= epochSecsA && transitionEpochSecs <= epochSecsB) {
+        // keep looping...
+
+      // stuck in a transition?
+      } else {
+        return [offsetSecsBefore, offsetSecsDiff]
+      }
     }
 
-    // try the two different hypotheses for the offset
-    const [transitionEpochSecs, offsetSecsBefore, offsetSecsDiff] = relevantTransition
-    const offsetSecsAfter = offsetSecsBefore + offsetSecsDiff
-    const epochSecs0 = zoneSecs + offsetSecsBefore
-    const epochSecs1 = zoneSecs + offsetSecsAfter
-
-    // both are before the transition, use the offset before
-    if (epochSecs0 < transitionEpochSecs && epochSecs1 < transitionEpochSecs) {
-      return [offsetSecsBefore, 0]
-    }
-    // both are after the transition, use the offset after
-    if (epochSecs0 >= transitionEpochSecs && epochSecs1 >= transitionEpochSecs) {
+    // only found transitions before zoneSecs
+    if (offsetSecsAfter !== undefined) {
       return [offsetSecsAfter, 0]
     }
-    // otherwise, we're stuck within a transition
-    return [offsetSecsBefore, offsetSecsDiff]
+
+    // found no transitions?
+    return [this.getYearEndOffset(epochSecondsToISOYear(zoneSecs)), 0]
   }
 
   /*
@@ -132,10 +138,13 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   }
 
   private computeTransitionsInYear(utcYear: number): RawTransition[] {
-    const enteringOffset = this.getYearEndOffset(utcYear - 1)
-    const exitingOffset = this.getYearEndOffset(utcYear)
-    const startSecs = isoYearToEpochSeconds(utcYear - 1)
-    const endSecs = isoYearToEpochSeconds(utcYear)
+    const enteringOffset = this.getYearEndOffset(utcYear - 1) // right before start of year
+    const exitingOffset = this.getYearEndOffset(utcYear) // at end of year
+    // FYI, a transition could be in the first second of the year, thus the exclusiveness
+
+    // TODO: make a isoYearEndEpochSeconds util? use in getYearEndOffset?
+    const startSecs = isoYearToEpochSeconds(utcYear) - 1
+    const endSecs = isoYearToEpochSeconds(utcYear + 1) - 1
 
     if (enteringOffset !== exitingOffset) {
       return [this.searchTransition(startSecs, endSecs, enteringOffset, exitingOffset)]
