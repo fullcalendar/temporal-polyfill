@@ -35,7 +35,8 @@ export function addWholeYears(
 ): DateEssentials {
   year += yearsToAdd
   const newMonth = constrainInt(month, 1, calendarImpl.monthsInYear(year), overflowHandling)
-  const newDay = month === newMonth ? day : 1 // month was constrained? reset day
+  let newDay = month === newMonth ? day : 1 // month was constrained? reset day
+  newDay = constrainInt(newDay, 1, calendarImpl.daysInMonth(year, newMonth), overflowHandling)
   return { year, month: newMonth, day: newDay }
 }
 

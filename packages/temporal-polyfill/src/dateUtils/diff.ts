@@ -3,9 +3,8 @@ import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Duration } from '../public/duration'
 import { compareValues } from '../utils/math'
 import { addWholeMonths, addWholeYears } from './add'
-import { DateEssentials, compareDateFields } from './date'
+import { DateEssentials, compareDateFields, constrainDateFields } from './date'
 import { diffDaysMilli } from './isoMath'
-import { compareMonthDayFields } from './monthDay'
 import { MONTH, UnitInt, WEEK, YEAR } from './units'
 
 export function diffDateFields(
@@ -18,7 +17,7 @@ export function diffDateFields(
 
   switch (largestUnit) {
     case YEAR:
-      years = wholeYearsUntil(d0, d1)
+      years = wholeYearsUntil(d0, d1, calendarImpl)
       d0 = addWholeYears(d0, years, calendarImpl, OVERFLOW_CONSTRAIN)
       // fallthrough
     case MONTH:
@@ -39,13 +38,26 @@ export function diffDateFields(
   return new Duration(years, months, weeks, days)
 }
 
-function wholeYearsUntil(d0: DateEssentials, d1: DateEssentials): number {
-  const sign = compareDateFields(d1, d0) || 1
-  const monthSign = compareMonthDayFields(d1, d0) || 1
+function wholeYearsUntil(
+  d0: DateEssentials,
+  d1: DateEssentials,
+  calendarImpl: CalendarImpl,
+): number {
+  // simulate destination year
+  const [, newMonth, newDay] = constrainDateFields(
+    d1.year,
+    d0.month,
+    d0.day,
+    calendarImpl,
+    OVERFLOW_CONSTRAIN,
+  )
+
+  const generalSign = compareDateFields(d1, d0) || 1
+  const monthSign = compareValues(d1.month, newMonth) || compareValues(d1.day, newDay) || 1
 
   return d1.year - d0.year - (
-    monthSign !== sign
-      ? 1 * sign
+    monthSign !== generalSign
+      ? generalSign
       : 0
   )
 }
@@ -66,14 +78,24 @@ function wholeMonthsUntil(
       year += sign
     }
 
+    // simulate destination year (same as wholeYearsUntil... optimization opportunity?)
+    const [, newMonth, newDay] = constrainDateFields(
+      d1.year,
+      d0.month,
+      d0.day,
+      calendarImpl,
+      OVERFLOW_CONSTRAIN,
+    )
+
     // add remaining months (or subtract overshot months)
-    monthsToAdd += d1.month - d0.month
+    monthsToAdd += d1.month - newMonth
 
     // correct when we overshoot the day-of-month
-    const daySign = compareValues(d1.day, d0.day) || 1
+    const daySign = compareValues(d1.day, newDay) || 1
     if (daySign === -sign) {
       monthsToAdd -= sign
     }
   }
+
   return monthsToAdd
 }
