@@ -40,9 +40,11 @@ export function diffDateFields(
 }
 
 function wholeYearsUntil(d0: DateEssentials, d1: DateEssentials): number {
-  const sign = compareDateFields(d1, d0) // +1 forward, -1 backward
+  const sign = compareDateFields(d1, d0) || 1
+  const monthSign = compareMonthDayFields(d1, d0) || 1
+
   return d1.year - d0.year - (
-    compareMonthDayFields(d1, d0) !== sign
+    monthSign !== sign
       ? 1 * sign
       : 0
   )
@@ -54,7 +56,8 @@ function wholeMonthsUntil(
   calendarImpl: CalendarImpl,
 ): number {
   let monthsToAdd = 0
-  const sign = compareDateFields(d1, d0) // +1 forward, -1 backward
+  const sign = compareDateFields(d1, d0) || 1
+
   if (sign) {
     // move ahead by whole years
     let { year } = d0
@@ -67,7 +70,8 @@ function wholeMonthsUntil(
     monthsToAdd += d1.month - d0.month
 
     // correct when we overshoot the day-of-month
-    if (compareValues(d1.day, d0.day) === -sign) {
+    const daySign = compareValues(d1.day, d0.day) || 1
+    if (daySign === -sign) {
       monthsToAdd -= sign
     }
   }
