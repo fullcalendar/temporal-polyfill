@@ -76,7 +76,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   ): PlainDateTime {
     const instant = ensureObj(Instant, instantArg)
     const isoFields = epochNanoToISOFields(
-      instant.epochNanoseconds - BigInt(this.getOffsetNanosecondsFor(instant)),
+      instant.epochNanoseconds + BigInt(this.getOffsetNanosecondsFor(instant)),
     )
     return createDateTime({
       ...isoFields,
@@ -85,12 +85,12 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   }
 
   getInstantFor(dateTimeArg: DateTimeArg, options?: { disambiguation?: Disambiguation }): Instant {
+    const disambig = parseDisambigOption(options)
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneSecs = isoFieldsToEpochSecs(isoFields)
     let [offsetSecs, offsetSecsDiff] = getImpl(this).getPossibleOffsets(zoneSecs)
 
     if (offsetSecsDiff) {
-      const disambig = parseDisambigOption(options)
       if (disambig === DISAMBIG_REJECT) {
         throw new RangeError('Ambiguous offset')
       }

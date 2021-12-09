@@ -110,15 +110,27 @@ export function isoToEpochMilli(
   return milli
 }
 
+/*
+TODO: audit Math.floors that happen on rounding of bigints
+TODO: audit Number() on bigints
+*/
 export function epochNanoToISOFields(epochNano: bigint): DateTimeISOEssentials {
-  const epochMilli = Math.floor(Number(epochNano) / nanoInMilli)
-  let isoNanosecond = Number(epochNano - (BigInt(epochMilli) * nanoInMilliBI))
-  const isoMicrosecond = Math.floor(isoNanosecond / nanoInMicro)
-  isoNanosecond -= isoMicrosecond * nanoInMicro
+  let epochMilli = epochNano / nanoInMilliBI
+  let leftoverNano = Number(epochNano - (epochMilli * nanoInMilliBI))
+
+  // HACK for flooring bigints
+  if (leftoverNano < 0) {
+    leftoverNano += nanoInMilli
+    epochMilli -= 1n
+  }
+
+  const isoMicrosecond = Math.floor(leftoverNano / nanoInMicro)
+  leftoverNano -= isoMicrosecond * nanoInMicro
+
   return {
-    ...epochMilliToISOFields(epochMilli),
+    ...epochMilliToISOFields(Number(epochMilli)),
     isoMicrosecond,
-    isoNanosecond,
+    isoNanosecond: leftoverNano,
   }
 }
 
