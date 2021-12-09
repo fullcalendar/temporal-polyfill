@@ -52,11 +52,11 @@ function wholeYearsUntil(
     OVERFLOW_CONSTRAIN,
   )
 
-  const generalSign = compareDateFields(d1, d0) || 1
-  const monthSign = compareValues(d1.month, newMonth) || compareValues(d1.day, newDay) || 1
+  const generalSign = compareDateFields(d1, d0)
+  const monthSign = compareValues(d1.month, newMonth) || compareValues(d1.day, newDay)
 
   return d1.year - d0.year - (
-    monthSign !== generalSign
+    (monthSign && generalSign && monthSign !== generalSign)
       ? generalSign
       : 0
   )
@@ -68,7 +68,7 @@ function wholeMonthsUntil(
   calendarImpl: CalendarImpl,
 ): number {
   let monthsToAdd = 0
-  const generalSign = compareDateFields(d1, d0) || 1
+  const generalSign = compareDateFields(d1, d0)
 
   if (generalSign) {
     // move ahead by whole years
@@ -91,8 +91,8 @@ function wholeMonthsUntil(
     monthsToAdd += d1.month - newMonth
 
     // correct when we overshoot the day-of-month
-    const daySign = compareValues(d1.day, newDay) || 1
-    if (daySign === -generalSign) {
+    const daySign = compareValues(d1.day, newDay)
+    if (daySign && generalSign && daySign !== generalSign) {
       monthsToAdd -= generalSign
     }
   }
