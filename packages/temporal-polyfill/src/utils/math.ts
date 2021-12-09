@@ -15,6 +15,11 @@ export function numSign(num: number): CompareResult {
   return compareValues(num, 0)
 }
 
+// HACK
+export function numSignBI(num: bigint): CompareResult {
+  return !num ? 0 : num < 0n ? -1 : 1
+}
+
 export function roundToIncrement(
   num: number,
   inc: number,

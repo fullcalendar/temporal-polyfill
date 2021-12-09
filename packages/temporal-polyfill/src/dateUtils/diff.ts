@@ -68,14 +68,14 @@ function wholeMonthsUntil(
   calendarImpl: CalendarImpl,
 ): number {
   let monthsToAdd = 0
-  const sign = compareDateFields(d1, d0) || 1
+  const generalSign = compareDateFields(d1, d0) || 1
 
-  if (sign) {
+  if (generalSign) {
     // move ahead by whole years
     let { year } = d0
     while (year !== d1.year) {
-      monthsToAdd += calendarImpl.monthsInYear(year) * sign
-      year += sign
+      monthsToAdd += calendarImpl.monthsInYear(year) * generalSign
+      year += generalSign
     }
 
     // simulate destination year (same as wholeYearsUntil... optimization opportunity?)
@@ -92,8 +92,8 @@ function wholeMonthsUntil(
 
     // correct when we overshoot the day-of-month
     const daySign = compareValues(d1.day, newDay) || 1
-    if (daySign === -sign) {
-      monthsToAdd -= sign
+    if (daySign === -generalSign) {
+      monthsToAdd -= generalSign
     }
   }
 

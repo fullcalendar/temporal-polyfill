@@ -14,7 +14,7 @@ import {
   TimeRoundingOptions,
   TimeUnit,
 } from '../public/types'
-import { compareValues } from '../utils/math'
+import { compareValues, numSignBI } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { DayTimeFields, nanoToDayTimeFields, splitEpochNano } from './dayTime'
@@ -152,14 +152,14 @@ export function diffTimeOfDays(
   isoFields0: DateTimeISOFields,
   isoFields1: DateTimeISOFields,
 ): DayTimeFields {
-  const sign = isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0) < 0 ? -1 : 1
+  const generalSign = numSignBI(isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0))
   let timeDiff = timeISOToNano(isoFields1) - timeISOToNano(isoFields0)
-  const timeDiffSign = timeDiff < 0 ? -1 : 1 // TODO: numSign-ish util for bigints
+  const timeDiffSign = numSignBI(timeDiff)
   let day = 0
 
-  if (timeDiffSign !== sign) {
-    day -= sign
-    timeDiff += nanoInDayBI * BigInt(sign)
+  if (generalSign && timeDiffSign && timeDiffSign !== generalSign) {
+    day -= generalSign
+    timeDiff += nanoInDayBI * BigInt(generalSign)
   }
 
   return {
