@@ -27,7 +27,7 @@ export function addToInstant(instant: Instant, duration: Duration): Instant {
 }
 
 export function diffInstants(a: Instant, b: Instant, options?: TimeDiffOptions): Duration {
-  const diffConfig = parseDiffOptions(options, SECOND, NANOSECOND, NANOSECOND, HOUR)
+  const diffConfig = parseDiffOptions(options, SECOND, NANOSECOND, NANOSECOND, HOUR, true)
 
   return nanoToDuration(
     roundNano(
@@ -39,7 +39,7 @@ export function diffInstants(a: Instant, b: Instant, options?: TimeDiffOptions):
 }
 
 export function roundInstant(instant: Instant, options: TimeRoundingOptions): Instant {
-  const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR)
+  const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, false, true)
   const [dayNano, timeNano] = splitEpochNano(instant.epochNanoseconds)
 
   return new Instant(dayNano + roundNano(timeNano, roundingConfig))

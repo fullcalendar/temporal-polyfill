@@ -20,6 +20,7 @@ export function parseRoundingOptions<
   minUnit: UnitType,
   maxUnit: UnitType,
   forDiffing?: boolean,
+  forInstant?: boolean,
 ): RoundingConfig<UnitType> {
   if (smallestUnitDefault === undefined && !isObjectLike(options)) {
     throw new TypeError('Need rounding options')
@@ -29,22 +30,28 @@ export function parseRoundingOptions<
   const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
   const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
 
-  if (smallestUnit < DAY) {
-    const currentNano = nanoIn[smallestUnit]
+  // Instant rounding only cares about solar alignment
+  if (!forDiffing && forInstant) {
+    if (
+      smallestUnit < DAY &&
+      nanoInDay % roundingIncrement * nanoIn[smallestUnit]
+    ) {
+      throw new RangeError('Increment must evenly divide into 24 hours')
+    }
+  } else {
+    if (
+      (smallestUnit < DAY)
+        ? nanoIn[smallestUnit + 1] % roundingIncrement
+        : !forDiffing && roundingIncrement !== 1 // rounding can't have non-1 large units
+    ) {
+      throw new RangeError('roundingIncrement does not divide evenly into next highest unit')
+    }
 
-    if (forDiffing) {
-      const higherNano = nanoIn[smallestUnit + 1]
-
-      if (higherNano % roundingIncrement) {
-        throw new RangeError('roundingIncrement does not divide evenly into next highest unit')
-      }
-      if (higherNano <= roundingIncrement * currentNano) {
-        throw new RangeError('roundingIncrement must be less than next highest unit')
-      }
-    } else {
-      if (nanoInDay % roundingIncrement * currentNano) {
-        throw new RangeError('Increment must evenly divide into 24 hours')
-      }
+    if (
+      smallestUnit < DAY &&
+      roundingIncrement * nanoIn[smallestUnit] >= nanoIn[smallestUnit + 1]
+    ) {
+      throw new RangeError('roundingIncrement must be less than next highest unit')
     }
   }
 

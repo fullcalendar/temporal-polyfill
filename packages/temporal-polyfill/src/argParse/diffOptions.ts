@@ -19,6 +19,7 @@ export function parseDiffOptions<
   smallestUnitDefault: UnitIntType,
   minUnit: UnitIntType,
   maxUnit: UnitIntType,
+  forInstant?: boolean,
 ): DiffConfig<UnitIntType> {
   const roundingConfig = parseRoundingOptions<UnitArg, UnitIntType>(
     options,
@@ -26,6 +27,7 @@ export function parseDiffOptions<
     minUnit,
     maxUnit,
     true,
+    forInstant,
   )
 
   largestUnitDefault = Math.max(largestUnitDefault, roundingConfig.smallestUnit) as UnitIntType
