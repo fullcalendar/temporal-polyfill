@@ -1,4 +1,4 @@
-import { PossibleOffsetInfo, RawTransition, TimeZoneImpl } from './timeZoneImpl'
+import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
 export class FixedTimeZoneImpl extends TimeZoneImpl {
   constructor(
@@ -8,8 +8,8 @@ export class FixedTimeZoneImpl extends TimeZoneImpl {
     super(id)
   }
 
-  getPossibleOffsets(): PossibleOffsetInfo {
-    return [this.offsetSecs, 0]
+  getPossibleOffsets(): number[] {
+    return [this.offsetSecs]
   }
 
   getOffset(): number {

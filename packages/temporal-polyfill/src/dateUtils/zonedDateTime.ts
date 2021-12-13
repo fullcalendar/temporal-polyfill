@@ -11,6 +11,7 @@ import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOption
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
+import { Instant } from '../public/instant'
 import { TimeZone } from '../public/timeZone'
 import {
   CompareResult,
@@ -52,40 +53,41 @@ export function createZonedDateTime(
   options: ZonedDateTimeOptions | undefined,
   offsetHandling: OffsetHandlingInt,
 ): ZonedDateTime {
-  const dateTime = createDateTime(isoFields)
-  let zonedDateTime = dateTime.toZonedDateTime(isoFields.timeZone, options)
-  const literalOffset = isoFields.offset
+  const { calendar, timeZone, offset } = isoFields
+  let epochNano: bigint | undefined
 
-  if (
-    literalOffset !== undefined &&
-    literalOffset !== zonedDateTime.offsetNanoseconds
-  ) {
-    if (offsetHandling === OFFSET_REJECT) {
-      throw new Error('Mismatching offset/timezone')
-    } else if (offsetHandling !== OFFSET_IGNORE) {
-      const newEpochNano = isoFieldsToEpochNano(isoFields) - BigInt(literalOffset)
-      let useNew = false
+  // try using the given offset and see what happens...
+  if (offset !== undefined && offsetHandling !== OFFSET_IGNORE) {
+    epochNano = isoFieldsToEpochNano(isoFields) + BigInt(offset)
 
-      if (offsetHandling === OFFSET_USE) {
-        useNew = true
-      } else { // OFFSET_PREFER
-        const instants = isoFields.timeZone.getPossibleInstantsFor(dateTime)
+    if (offsetHandling !== OFFSET_USE) {
+      const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
 
-        for (const instant of instants) {
-          if (instant.epochNanoseconds === newEpochNano) {
-            useNew = true
-            break
-          }
+      if (!matchesPossibleInstants(epochNano, possibleInstants)) {
+        if (offsetHandling === OFFSET_REJECT) {
+          throw new Error('Mismatching offset/timezone')
+        } else { // OFFSET_PREFER
+          epochNano = undefined // will calculate from timeZone
         }
-      }
-
-      if (useNew) {
-        zonedDateTime = new ZonedDateTime(newEpochNano, isoFields.timeZone, isoFields.calendar)
       }
     }
   }
 
-  return zonedDateTime
+  // calculate from timeZone if necessary
+  if (epochNano === undefined) {
+    epochNano = timeZone.getInstantFor(createDateTime(isoFields), options).epochNanoseconds
+  }
+
+  return new ZonedDateTime(epochNano, timeZone, calendar)
+}
+
+function matchesPossibleInstants(epochNano: bigint, possibleInstants: Instant[]): boolean {
+  for (const instant of possibleInstants) {
+    if (instant.epochNanoseconds === epochNano) {
+      return true
+    }
+  }
+  return false
 }
 
 export function zonedDateTimeFieldsToISO(

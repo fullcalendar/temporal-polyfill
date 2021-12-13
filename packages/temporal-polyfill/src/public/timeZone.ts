@@ -1,6 +1,6 @@
 import {
+  DISAMBIG_COMPATIBLE,
   DISAMBIG_EARLIER,
-  DISAMBIG_LATER,
   DISAMBIG_REJECT,
   parseDisambigOption,
 } from '../argParse/disambig'
@@ -88,18 +88,19 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     const disambig = parseDisambigOption(options)
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneSecs = isoFieldsToEpochSecs(isoFields)
-    let [offsetSecs, offsetSecsDiff] = getImpl(this).getPossibleOffsets(zoneSecs)
+    const possibleOffsetSecs = getImpl(this).getPossibleOffsets(zoneSecs)
+    let offsetSecs: number
 
-    if (offsetSecsDiff) {
-      if (disambig === DISAMBIG_REJECT) {
-        throw new RangeError('Ambiguous offset')
-      }
-      if (disambig === DISAMBIG_EARLIER) {
-        offsetSecs += (offsetSecsDiff > 0 ? offsetSecsDiff : 0)
-      } else if (disambig === DISAMBIG_LATER) {
-        offsetSecs += (offsetSecsDiff < 0 ? offsetSecsDiff : 0)
-      }
-      // Otherwise, 'compatible', which boils down to not using diff
+    if (possibleOffsetSecs.length === 1 || disambig === DISAMBIG_COMPATIBLE) {
+      offsetSecs = possibleOffsetSecs[0]
+    } else if (disambig === DISAMBIG_REJECT) {
+      throw new RangeError('Ambiguous offset')
+    } else {
+      offsetSecs = Math[
+        disambig === DISAMBIG_EARLIER
+          ? 'max' // (results in an earlier epochNano, because offsetSecs is subtracted)
+          : 'min' // DISAMBIG_LATER
+      ](...(possibleOffsetSecs as [number, number]))
     }
 
     return epochSecsToInstant(zoneSecs - offsetSecs, isoFields)
@@ -108,19 +109,20 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[] {
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneSecs = isoFieldsToEpochSecs(isoFields)
-    const [offsetSecsBase, offsetSecsDiff] = getImpl(this).getPossibleOffsets(zoneSecs)
-    const instants: Instant[] = []
+    let possibleOffsetSecs = getImpl(this).getPossibleOffsets(zoneSecs)
 
-    // Since a negative diff means "forward" transition ("lost" an hour),
-    // yield no results, because plainDateTime is stuck in this lost hour
-    if (offsetSecsDiff >= 0) {
-      instants.push(epochSecsToInstant(zoneSecs + offsetSecsBase, isoFields))
-      if (offsetSecsDiff > 0) {
-        instants.push(epochSecsToInstant(zoneSecs + offsetSecsBase + offsetSecsDiff, isoFields))
-      }
+    // A forward transition looses an hour.
+    // dateTimeArg is stuck in this lost hour, so return not results
+    if (
+      possibleOffsetSecs.length === 2 &&
+      possibleOffsetSecs[0] < possibleOffsetSecs[1]
+    ) {
+      possibleOffsetSecs = []
     }
 
-    return instants
+    return possibleOffsetSecs.map((offsetSecs) => (
+      epochSecsToInstant(zoneSecs + offsetSecs, isoFields)
+    ))
   }
 
   getPreviousTransition(instantArg: InstantArg): Instant | null {

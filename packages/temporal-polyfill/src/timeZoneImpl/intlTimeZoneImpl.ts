@@ -2,7 +2,7 @@ import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { epochSecondsToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
 import { milliInSecond, secondsInDay } from '../dateUtils/units'
 import { compareValues } from '../utils/math'
-import { PossibleOffsetInfo, RawTransition, TimeZoneImpl } from './timeZoneImpl'
+import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
 const MAX_YEAR_TRAVEL = 5
 const ISLAND_SEARCH_DAYS = [
@@ -36,18 +36,17 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     this.transitionsInYear = {}
   }
 
-  // `zoneSecs` is like epochSecs, but to zone's pseudo-epoch
-  getPossibleOffsets(zoneSecs: number): PossibleOffsetInfo {
+  // `zoneSecs` is like epochSecs, but from zone's pseudo-epoch
+  getPossibleOffsets(zoneSecs: number): number[] {
     const transitions = [
       this.getTransition(zoneSecs, -1),
       this.getTransition(zoneSecs, 1),
     ].filter(Boolean) as RawTransition[]
-    let offsetSecsAfter: number | undefined
+    let lastOffsetSecs: number | undefined
 
     // loop transitions from past to future
     for (const transition of transitions) {
-      const [transitionEpochSecs, offsetSecsBefore, offsetSecsDiff] = transition
-      offsetSecsAfter = offsetSecsBefore + offsetSecsDiff
+      const [transitionEpochSecs, offsetSecsBefore, offsetSecsAfter] = transition
       // FYI, a transition's switchover to offsetSecsAfter happens
       // *inclusively* as transitionEpochSecs
 
@@ -57,7 +56,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       // is the transition after both possibilities?
       if (transitionEpochSecs > epochSecsA && transitionEpochSecs > epochSecsB) {
-        return [offsetSecsBefore, 0]
+        return [offsetSecsBefore]
 
       // is the transition before both possibilities?
       } else if (transitionEpochSecs <= epochSecsA && transitionEpochSecs <= epochSecsB) {
@@ -65,17 +64,19 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       // stuck in a transition?
       } else {
-        return [offsetSecsBefore, offsetSecsDiff]
+        return [offsetSecsBefore, offsetSecsAfter]
       }
+
+      lastOffsetSecs = offsetSecsAfter
     }
 
     // only found transitions before zoneSecs
-    if (offsetSecsAfter !== undefined) {
-      return [offsetSecsAfter, 0]
+    if (lastOffsetSecs !== undefined) {
+      return [lastOffsetSecs]
     }
 
     // found no transitions?
-    return [this.getYearEndOffset(epochSecondsToISOYear(zoneSecs)), 0]
+    return [this.getYearEndOffset(epochSecondsToISOYear(zoneSecs))]
   }
 
   /*
@@ -138,23 +139,23 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   }
 
   private computeTransitionsInYear(utcYear: number): RawTransition[] {
-    const enteringOffset = this.getYearEndOffset(utcYear - 1) // right before start of year
-    const exitingOffset = this.getYearEndOffset(utcYear) // at end of year
+    const startOffsetSecs = this.getYearEndOffset(utcYear - 1) // right before start of year
+    const endOffsetSecs = this.getYearEndOffset(utcYear) // at end of year
     // FYI, a transition could be in the first second of the year, thus the exclusiveness
 
     // TODO: make a isoYearEndEpochSeconds util? use in getYearEndOffset?
-    const startSecs = isoYearToEpochSeconds(utcYear) - 1
-    const endSecs = isoYearToEpochSeconds(utcYear + 1) - 1
+    const startEpochSecs = isoYearToEpochSeconds(utcYear) - 1
+    const endEpochSecs = isoYearToEpochSeconds(utcYear + 1) - 1
 
-    if (enteringOffset !== exitingOffset) {
-      return [this.searchTransition(startSecs, endSecs, enteringOffset, exitingOffset)]
+    if (startOffsetSecs !== endOffsetSecs) {
+      return [this.searchTransition(startEpochSecs, endEpochSecs, startOffsetSecs, endOffsetSecs)]
     }
 
-    const island = this.searchIsland(enteringOffset, startSecs)
+    const island = this.searchIsland(startOffsetSecs, startEpochSecs)
     if (island !== undefined) {
       return [
-        this.searchTransition(startSecs, island[0], enteringOffset, island[1]),
-        this.searchTransition(island[0], endSecs, island[1], exitingOffset),
+        this.searchTransition(startEpochSecs, island[0], startOffsetSecs, island[1]),
+        this.searchTransition(island[0], endEpochSecs, island[1], endOffsetSecs),
       ]
     }
 
@@ -185,7 +186,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     return [
       endEpochSecs,
       startOffsetSecs, // caller could have computed this
-      endOffsetSecs - startOffsetSecs, // same
+      endOffsetSecs, // same
     ]
   }
 
