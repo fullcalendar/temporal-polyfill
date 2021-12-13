@@ -2,6 +2,7 @@ import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { epochSecondsToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
 import { milliInSecond, secondsInDay } from '../dateUtils/units'
 import { compareValues } from '../utils/math'
+import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
 const MAX_YEAR_TRAVEL = 5
@@ -33,7 +34,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     super(format.resolvedOptions().timeZone)
     this.format = format
     this.yearEndOffsets = {}
-    this.transitionsInYear = {}
+    this.transitionsInYear = specialCases[id] || {}
   }
 
   // `zoneSecs` is like epochSecs, but from zone's pseudo-epoch
