@@ -121,7 +121,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     }
 
     return possibleOffsetSecs.map((offsetSecs) => (
-      epochSecsToInstant(zoneSecs + offsetSecs, isoFields)
+      epochSecsToInstant(zoneSecs - offsetSecs, isoFields)
     ))
   }
 

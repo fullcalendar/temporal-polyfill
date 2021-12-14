@@ -58,14 +58,14 @@ export function createZonedDateTime(
 
   // try using the given offset and see what happens...
   if (offset !== undefined && offsetHandling !== OFFSET_IGNORE) {
-    epochNano = isoFieldsToEpochNano(isoFields) + BigInt(offset)
+    epochNano = isoFieldsToEpochNano(isoFields) - BigInt(offset)
 
     if (offsetHandling !== OFFSET_USE) {
       const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
 
       if (!matchesPossibleInstants(epochNano, possibleInstants)) {
         if (offsetHandling === OFFSET_REJECT) {
-          throw new Error('Mismatching offset/timezone')
+          throw new RangeError('Mismatching offset/timezone')
         } else { // OFFSET_PREFER
           epochNano = undefined // will calculate from timeZone
         }
