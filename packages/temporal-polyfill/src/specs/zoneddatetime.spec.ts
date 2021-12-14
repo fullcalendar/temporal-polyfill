@@ -523,8 +523,9 @@ describe('ZonedDateTime', () => {
       )
       equal(`${ZonedDateTime.from('2020-01-01[Asia/Tokyo]')}`, '2020-01-01T00:00:00+09:00[Asia/Tokyo]')
     })
-    it('no junk at end of string', () =>
-      throws(() => ZonedDateTime.from('1976-11-18T15:23:30.123456789-08:00[America/Los_Angeles]junk'), RangeError))
+    it('no junk at end of string', () => {
+      throws(() => ZonedDateTime.from('1976-11-18T15:23:30.123456789-08:00[America/Los_Angeles]junk'), RangeError)
+    })
     it('constrain has no effect on invalid ISO string', () => {
       throws(() => ZonedDateTime.from('2020-13-34T24:60[America/Los_Angeles]', { overflow: 'constrain' }), RangeError)
     })
@@ -661,12 +662,15 @@ describe('ZonedDateTime', () => {
         RangeError,
       )
     })
-    it('ZonedDateTime.from({}) throws', () => throws(() => ZonedDateTime.from({} as InvalidArg), TypeError))
-    it('ZonedDateTime.from(required prop undefined) throws', () =>
+    it('ZonedDateTime.from({}) throws', () => {
+      throws(() => ZonedDateTime.from({} as InvalidArg), TypeError)
+    })
+    it('ZonedDateTime.from(required prop undefined) throws', () => {
       throws(
         () => ZonedDateTime.from({ year: 1976, month: undefined, monthCode: undefined as InvalidArg, day: 18, timeZone: lagos }),
         TypeError,
-      ))
+      )
+    })
     it('options may only be an object or undefined', () => {
       [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => ZonedDateTime.from({ year: 1976, month: 11, day: 18, timeZone: lagos }, badOptions), TypeError),
@@ -709,7 +713,9 @@ describe('ZonedDateTime', () => {
     })
     describe('Overflow option', () => {
       const bad = { year: 2019, month: 1, day: 32, timeZone: lagos }
-      it('reject', () => throws(() => ZonedDateTime.from(bad, { overflow: 'reject' }), RangeError))
+      it('reject', () => {
+        throws(() => ZonedDateTime.from(bad, { overflow: 'reject' }), RangeError)
+      })
       it('constrain', () => {
         equal(`${ZonedDateTime.from(bad)}`, '2019-01-31T00:00:00+01:00[Africa/Lagos]')
         equal(`${ZonedDateTime.from(bad, { overflow: 'constrain' })}`, '2019-01-31T00:00:00+01:00[Africa/Lagos]')
@@ -720,9 +726,12 @@ describe('ZonedDateTime', () => {
         })
       })
       const leap = { year: 2016, month: 12, day: 31, hour: 23, minute: 59, second: 60, timeZone: lagos }
-      it('reject leap second', () => throws(() => ZonedDateTime.from(leap, { overflow: 'reject' }), RangeError))
-      it('constrain leap second', () =>
-        equal(`${ZonedDateTime.from(leap)}`, '2016-12-31T23:59:59+01:00[Africa/Lagos]'))
+      it('reject leap second', () => {
+        throws(() => ZonedDateTime.from(leap, { overflow: 'reject' }), RangeError)
+      })
+      it('constrain leap second', () => {
+        equal(`${ZonedDateTime.from(leap)}`, '2016-12-31T23:59:59+01:00[Africa/Lagos]')
+      })
     })
     describe('Offset option', () => {
       it("{ offset: 'reject' } throws if offset does not match offset time zone", () => {
