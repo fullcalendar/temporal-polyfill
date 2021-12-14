@@ -1091,10 +1091,12 @@ describe('ZonedDateTime', () => {
     // The interchangeability of since() and until() holds for time units only
     ['hours', 'minutes', 'seconds'].forEach((largestUnit: any) => {
       const diff = later.since(earlier, { largestUnit })
-      it(`earlier.since(later, ${largestUnit}) == later.since(earlier, ${largestUnit}).negated()`, () =>
-        equal(`${earlier.since(later, { largestUnit })}`, `${diff.negated()}`))
-      it(`earlier.until(later, ${largestUnit}) == later.since(earlier, ${largestUnit})`, () =>
-        equal(`${earlier.until(later, { largestUnit })}`, `${diff}`))
+      it(`earlier.since(later, ${largestUnit}) == later.since(earlier, ${largestUnit}).negated()`, () => {
+        equal(`${earlier.since(later, { largestUnit })}`, `${diff.negated()}`)
+      })
+      it(`earlier.until(later, ${largestUnit}) == later.since(earlier, ${largestUnit})`, () => {
+        equal(`${earlier.until(later, { largestUnit })}`, `${diff}`)
+      })
       it(`${largestUnit} difference symmetrical with regard to negative durations`, () => {
         assert(earlier.subtract(diff.negated()).equals(later))
         assert(later.add(diff.negated()).equals(earlier))
@@ -1104,8 +1106,12 @@ describe('ZonedDateTime', () => {
     ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'].forEach((largestUnit: any) => {
       const diff1 = earlier.until(later, { largestUnit })
       const diff2 = later.since(earlier, { largestUnit })
-      it(`earlier.add(${diff1}) == later`, () => assert(earlier.add(diff1).equals(later)))
-      it(`later.subtract(${diff2}) == earlier`, () => assert(later.subtract(diff2).equals(earlier)))
+      it(`earlier.add(${diff1}) == later`, () => {
+        assert(earlier.add(diff1).equals(later))
+      })
+      it(`later.subtract(${diff2}) == earlier`, () => {
+        assert(later.subtract(diff2).equals(earlier))
+      })
     })
   })
   describe('date/time maths: hours overflow', () => {
@@ -1137,12 +1143,18 @@ describe('ZonedDateTime', () => {
       const two = zdt.add({ hours: 240, nanoseconds: 800 })
       const three = two.subtract({ hours: 480, nanoseconds: 1600 })
       const four = one.add({ hours: 480, nanoseconds: 1600 })
-      it(`(${zdt}).subtract({ hours: 240, nanoseconds: 800 }) = ${one}`, () =>
-        equal(`${one}`, '1969-12-15T12:23:45.678900434+00:00[UTC]'))
-      it(`(${zdt}).add({ hours: 240, nanoseconds: 800 }) = ${two}`, () =>
-        equal(`${two}`, '1970-01-04T12:23:45.678902034+00:00[UTC]'))
-      it(`(${two}).subtract({ hours: 480, nanoseconds: 1600 }) = ${one}`, () => assert(three.equals(one)))
-      it(`(${one}).add({ hours: 480, nanoseconds: 1600 }) = ${two}`, () => assert(four.equals(two)))
+      it(`(${zdt}).subtract({ hours: 240, nanoseconds: 800 }) = ${one}`, () => {
+        equal(`${one}`, '1969-12-15T12:23:45.678900434+00:00[UTC]')
+      })
+      it(`(${zdt}).add({ hours: 240, nanoseconds: 800 }) = ${two}`, () => {
+        equal(`${two}`, '1970-01-04T12:23:45.678902034+00:00[UTC]')
+      })
+      it(`(${two}).subtract({ hours: 480, nanoseconds: 1600 }) = ${one}`, () => {
+        assert(three.equals(one))
+      })
+      it(`(${one}).add({ hours: 480, nanoseconds: 1600 }) = ${two}`, () => {
+        assert(four.equals(two))
+      })
     })
     it('zdt.add(durationObj)', () => {
       const later = zdt.add(Duration.from('PT240H0.000000800S'))
@@ -2311,12 +2323,24 @@ describe('ZonedDateTime', () => {
     const zdt1 = ZonedDateTime.from('1963-02-13T09:36:29.123456789+01:00[Europe/Vienna]')
     const zdt1again = ZonedDateTime.from('1963-02-13T09:36:29.123456789+01:00[Europe/Vienna]')
     const zdt2 = ZonedDateTime.from('1976-11-18T15:23:30.123456789+01:00[Europe/Vienna]')
-    it('=== is object equality', () => equal(zdt1, zdt1))
-    it('!== is object equality', () => notEqual(zdt1, zdt1again))
-    it('<', () => throws(() => zdt1 < zdt2))
-    it('>', () => throws(() => zdt1 > zdt2))
-    it('<=', () => throws(() => zdt1 <= zdt2))
-    it('>=', () => throws(() => zdt1 >= zdt2))
+    it('=== is object equality', () => {
+      equal(zdt1, zdt1)
+    })
+    it('!== is object equality', () => {
+      notEqual(zdt1, zdt1again)
+    })
+    it('<', () => {
+      throws(() => zdt1 < zdt2)
+    })
+    it('>', () => {
+      throws(() => zdt1 > zdt2)
+    })
+    it('<=', () => {
+      throws(() => zdt1 <= zdt2)
+    })
+    it('>=', () => {
+      throws(() => zdt1 >= zdt2)
+    })
   })
 
   describe('ZonedDateTime.toInstant()', () => {
