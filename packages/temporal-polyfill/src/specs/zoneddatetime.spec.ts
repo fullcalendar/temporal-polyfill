@@ -218,32 +218,81 @@ describe('ZonedDateTime', () => {
         assert(zdt)
         equal(typeof zdt, 'object')
       })
-      it('zdt.year is 1976', () => equal(zdt.year, 1976))
-      it('zdt.month is 11', () => equal(zdt.month, 11))
-      it('zdt.monthCode is "M11"', () => equal(zdt.monthCode, 'M11'))
-      it('zdt.day is 18', () => equal(zdt.day, 18))
-      it('zdt.hour is 15', () => equal(zdt.hour, 15))
-      it('zdt.minute is 23', () => equal(zdt.minute, 23))
-      it('zdt.second is 30', () => equal(zdt.second, 30))
-      it('zdt.millisecond is 123', () => equal(zdt.millisecond, 123))
-      it('zdt.microsecond is 456', () => equal(zdt.microsecond, 456))
-      it('zdt.nanosecond is 789', () => equal(zdt.nanosecond, 789))
-      it('zdt.epochSeconds is 217178610', () => equal(zdt.epochSeconds, 217178610))
-      it('zdt.epochMilliseconds is 217178610123', () => equal(zdt.epochMilliseconds, 217178610123))
-      it('zdt.epochMicroseconds is 217178610123456n', () => equal(zdt.epochMicroseconds, 217178610123456n))
-      it('zdt.epochNanoseconds is 217178610123456789n', () => equal(zdt.epochNanoseconds, 217178610123456789n))
-      it('zdt.dayOfWeek is 4', () => equal(zdt.dayOfWeek, 4))
-      it('zdt.dayOfYear is 323', () => equal(zdt.dayOfYear, 323))
-      it('zdt.weekOfYear is 47', () => equal(zdt.weekOfYear, 47))
-      it('zdt.daysInWeek is 7', () => equal(zdt.daysInWeek, 7))
-      it('zdt.daysInMonth is 30', () => equal(zdt.daysInMonth, 30))
-      it('zdt.daysInYear is 366', () => equal(zdt.daysInYear, 366))
-      it('zdt.monthsInYear is 12', () => equal(zdt.monthsInYear, 12))
-      it('zdt.inLeapYear is true', () => equal(zdt.inLeapYear, true))
-      it('zdt.offset is +00:00', () => equal(zdt.offset, '+00:00'))
-      it('zdt.offsetNanoseconds is 0', () => equal(zdt.offsetNanoseconds, 0))
-      it('string output is 1976-11-18T15:23:30.123456789+00:00[UTC]', () =>
-        equal(`${zdt}`, '1976-11-18T15:23:30.123456789+00:00[UTC]'))
+      it('zdt.year is 1976', () => {
+        equal(zdt.year, 1976)
+      })
+      it('zdt.month is 11', () => {
+        equal(zdt.month, 11)
+      })
+      it('zdt.monthCode is "M11"', () => {
+        equal(zdt.monthCode, 'M11')
+      })
+      it('zdt.day is 18', () => {
+        equal(zdt.day, 18)
+      })
+      it('zdt.hour is 15', () => {
+        equal(zdt.hour, 15)
+      })
+      it('zdt.minute is 23', () => {
+        equal(zdt.minute, 23)
+      })
+      it('zdt.second is 30', () => {
+        equal(zdt.second, 30)
+      })
+      it('zdt.millisecond is 123', () => {
+        equal(zdt.millisecond, 123)
+      })
+      it('zdt.microsecond is 456', () => {
+        equal(zdt.microsecond, 456)
+      })
+      it('zdt.nanosecond is 789', () => {
+        equal(zdt.nanosecond, 789)
+      })
+      it('zdt.epochSeconds is 217178610', () => {
+        equal(zdt.epochSeconds, 217178610)
+      })
+      it('zdt.epochMilliseconds is 217178610123', () => {
+        equal(zdt.epochMilliseconds, 217178610123)
+      })
+      it('zdt.epochMicroseconds is 217178610123456n', () => {
+        equal(zdt.epochMicroseconds, 217178610123456n)
+      })
+      it('zdt.epochNanoseconds is 217178610123456789n', () => {
+        equal(zdt.epochNanoseconds, 217178610123456789n)
+      })
+      it('zdt.dayOfWeek is 4', () => {
+        equal(zdt.dayOfWeek, 4)
+      })
+      it('zdt.dayOfYear is 323', () => {
+        equal(zdt.dayOfYear, 323)
+      })
+      it('zdt.weekOfYear is 47', () => {
+        equal(zdt.weekOfYear, 47)
+      })
+      it('zdt.daysInWeek is 7', () => {
+        equal(zdt.daysInWeek, 7)
+      })
+      it('zdt.daysInMonth is 30', () => {
+        equal(zdt.daysInMonth, 30)
+      })
+      it('zdt.daysInYear is 366', () => {
+        equal(zdt.daysInYear, 366)
+      })
+      it('zdt.monthsInYear is 12', () => {
+        equal(zdt.monthsInYear, 12)
+      })
+      it('zdt.inLeapYear is true', () => {
+        equal(zdt.inLeapYear, true)
+      })
+      it('zdt.offset is +00:00', () => {
+        equal(zdt.offset, '+00:00')
+      })
+      it('zdt.offsetNanoseconds is 0', () => {
+        equal(zdt.offsetNanoseconds, 0)
+      })
+      it('string output is 1976-11-18T15:23:30.123456789+00:00[UTC]', () => {
+        equal(`${zdt}`, '1976-11-18T15:23:30.123456789+00:00[UTC]')
+      })
     })
     describe('ZonedDateTime with non-UTC time zone and non-ISO calendar', () => {
       const zdt = new ZonedDateTime(
@@ -255,33 +304,84 @@ describe('ZonedDateTime', () => {
         assert(zdt)
         equal(typeof zdt, 'object')
       })
-      it('zdt.era is ce', () => equal(zdt.era, 'ce'))
-      it('zdt.year is 1976', () => equal(zdt.year, 1976))
-      it('zdt.month is 11', () => equal(zdt.month, 11))
-      it('zdt.monthCode is "M11"', () => equal(zdt.monthCode, 'M11'))
-      it('zdt.day is 18', () => equal(zdt.day, 18))
-      it('zdt.hour is 16', () => equal(zdt.hour, 16))
-      it('zdt.minute is 23', () => equal(zdt.minute, 23))
-      it('zdt.second is 30', () => equal(zdt.second, 30))
-      it('zdt.millisecond is 123', () => equal(zdt.millisecond, 123))
-      it('zdt.microsecond is 456', () => equal(zdt.microsecond, 456))
-      it('zdt.nanosecond is 789', () => equal(zdt.nanosecond, 789))
-      it('zdt.epochSeconds is 217178610', () => equal(zdt.epochSeconds, 217178610))
-      it('zdt.epochMilliseconds is 217178610123', () => equal(zdt.epochMilliseconds, 217178610123))
-      it('zdt.epochMicroseconds is 217178610123456n', () => equal(zdt.epochMicroseconds, 217178610123456n))
-      it('zdt.epochNanoseconds is 217178610123456789n', () => equal(zdt.epochNanoseconds, 217178610123456789n))
-      it('zdt.dayOfWeek is 4', () => equal(zdt.dayOfWeek, 4))
-      it('zdt.dayOfYear is 323', () => equal(zdt.dayOfYear, 323))
-      it('zdt.weekOfYear is 47', () => equal(zdt.weekOfYear, 47))
-      it('zdt.daysInWeek is 7', () => equal(zdt.daysInWeek, 7))
-      it('zdt.daysInMonth is 30', () => equal(zdt.daysInMonth, 30))
-      it('zdt.daysInYear is 366', () => equal(zdt.daysInYear, 366))
-      it('zdt.monthsInYear is 12', () => equal(zdt.monthsInYear, 12))
-      it('zdt.inLeapYear is true', () => equal(zdt.inLeapYear, true))
-      it('zdt.offset is +01:00', () => equal(zdt.offset, '+01:00'))
-      it('zdt.offsetNanoseconds is 3600e9', () => equal(zdt.offsetNanoseconds, 3600e9))
-      it('string output is 1976-11-18T16:23:30.123456789+01:00[Europe/Vienna][u-ca=gregory]', () =>
-        equal(`${zdt}`, '1976-11-18T16:23:30.123456789+01:00[Europe/Vienna][u-ca=gregory]'))
+      it('zdt.era is ce', () => {
+        equal(zdt.era, 'ce')
+      })
+      it('zdt.year is 1976', () => {
+        equal(zdt.year, 1976)
+      })
+      it('zdt.month is 11', () => {
+        equal(zdt.month, 11)
+      })
+      it('zdt.monthCode is "M11"', () => {
+        equal(zdt.monthCode, 'M11')
+      })
+      it('zdt.day is 18', () => {
+        equal(zdt.day, 18)
+      })
+      it('zdt.hour is 16', () => {
+        equal(zdt.hour, 16)
+      })
+      it('zdt.minute is 23', () => {
+        equal(zdt.minute, 23)
+      })
+      it('zdt.second is 30', () => {
+        equal(zdt.second, 30)
+      })
+      it('zdt.millisecond is 123', () => {
+        equal(zdt.millisecond, 123)
+      })
+      it('zdt.microsecond is 456', () => {
+        equal(zdt.microsecond, 456)
+      })
+      it('zdt.nanosecond is 789', () => {
+        equal(zdt.nanosecond, 789)
+      })
+      it('zdt.epochSeconds is 217178610', () => {
+        equal(zdt.epochSeconds, 217178610)
+      })
+      it('zdt.epochMilliseconds is 217178610123', () => {
+        equal(zdt.epochMilliseconds, 217178610123)
+      })
+      it('zdt.epochMicroseconds is 217178610123456n', () => {
+        equal(zdt.epochMicroseconds, 217178610123456n)
+      })
+      it('zdt.epochNanoseconds is 217178610123456789n', () => {
+        equal(zdt.epochNanoseconds, 217178610123456789n)
+      })
+      it('zdt.dayOfWeek is 4', () => {
+        equal(zdt.dayOfWeek, 4)
+      })
+      it('zdt.dayOfYear is 323', () => {
+        equal(zdt.dayOfYear, 323)
+      })
+      it('zdt.weekOfYear is 47', () => {
+        equal(zdt.weekOfYear, 47)
+      })
+      it('zdt.daysInWeek is 7', () => {
+        equal(zdt.daysInWeek, 7)
+      })
+      it('zdt.daysInMonth is 30', () => {
+        equal(zdt.daysInMonth, 30)
+      })
+      it('zdt.daysInYear is 366', () => {
+        equal(zdt.daysInYear, 366)
+      })
+      it('zdt.monthsInYear is 12', () => {
+        equal(zdt.monthsInYear, 12)
+      })
+      it('zdt.inLeapYear is true', () => {
+        equal(zdt.inLeapYear, true)
+      })
+      it('zdt.offset is +01:00', () => {
+        equal(zdt.offset, '+01:00')
+      })
+      it('zdt.offsetNanoseconds is 3600e9', () => {
+        equal(zdt.offsetNanoseconds, 3600e9)
+      })
+      it('string output is 1976-11-18T16:23:30.123456789+01:00[Europe/Vienna][u-ca=gregory]', () => {
+        equal(`${zdt}`, '1976-11-18T16:23:30.123456789+01:00[Europe/Vienna][u-ca=gregory]')
+      })
     })
 
     it('casts time zone', () => {
