@@ -14,6 +14,7 @@ export type DateTimeParseResult = DateTimeISOEssentials & {
   calendar: string | undefined
   timeZone: string | undefined
   offset: number | undefined
+  Z?: boolean // whether ISO8601 specified with 'Z' as offset indicator
 }
 
 const dateRegExpStr = '([+-]\\d{6}|\\d{4})-?(\\d{2})?-?(\\d{2})?'
@@ -90,12 +91,13 @@ export function parseDurationISO(str: string): DurationFields {
 export function tryParseDateTimeISO(str: string): DateTimeParseResult | undefined {
   const match = dateTimeRegExp.exec(normalizeDashes(str))
   if (match) {
-    const isZulu = zuluRegExp.test(match[10])
+    const Z = zuluRegExp.test(match[10])
     return {
       ...parseDateParts(match.slice(1)),
       ...parseTimeParts(match.slice(5)),
-      offset: isZulu ? 0 : parseOffsetParts(match.slice(11)),
-      timeZone: isZulu ? 'UTC' : match[18], // a string. don't parse yet, might be unnecessary
+      Z,
+      offset: Z ? 0 : parseOffsetParts(match.slice(11)),
+      timeZone: match[18], // a string. don't parse yet, might be unnecessary
       calendar: match[20], // a string. don't parse yet, might be unnecessary
     }
   }

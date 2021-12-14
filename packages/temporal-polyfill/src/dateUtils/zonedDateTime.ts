@@ -45,6 +45,7 @@ import { DAY, DayTimeUnitInt, HOUR, NANOSECOND, UnitInt, YEAR, isDateUnit } from
 export type ZonedDateTimeISOEssentials = DateTimeISOFields & { // essentials for creation
   timeZone: TimeZone
   offset?: number | undefined
+  Z?: boolean | undefined // whether ISO8601 specified with 'Z' as offset indicator
 }
 export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 
@@ -53,14 +54,14 @@ export function createZonedDateTime(
   options: ZonedDateTimeOptions | undefined,
   offsetHandling: OffsetHandlingInt,
 ): ZonedDateTime {
-  const { calendar, timeZone, offset } = isoFields
+  const { calendar, timeZone, offset, Z } = isoFields
   let epochNano: bigint | undefined
 
   // try using the given offset and see what happens...
   if (offset !== undefined && offsetHandling !== OFFSET_IGNORE) {
     epochNano = isoFieldsToEpochNano(isoFields) - BigInt(offset)
 
-    if (offsetHandling !== OFFSET_USE) {
+    if (offsetHandling !== OFFSET_USE && !Z) { // if time zone is 'Z', always use
       const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
 
       if (!matchesPossibleInstants(epochNano, possibleInstants)) {
