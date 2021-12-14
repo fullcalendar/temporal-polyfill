@@ -1,6 +1,8 @@
 import { RawTransition } from './timeZoneImpl'
 
-export const specialCases: { [timeZoneID: string]: { [year: string]: RawTransition[]}} = {
+export const specialCases: {
+  [timeZoneID: string]: { [year: string]: RawTransition[] }
+} = {
   'Pacific/Apia': {
     2011: [
       [1301752800, -36000, -39600], // start DST
