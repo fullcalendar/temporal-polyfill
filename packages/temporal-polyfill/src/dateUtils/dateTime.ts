@@ -177,7 +177,7 @@ export function roundDateTime(
   )
   const dayTimeFields = roundTimeOfDay(dateTime, roundingConfig)
   const dateISOFields = addWholeDays(dateTime.getISOFields(), dayTimeFields.day)
-  // ^preserves `calendar`
+  // ^transfers `calendar` field
 
   return createDateTime({
     ...dateISOFields,
