@@ -20,6 +20,6 @@ export const offsetHandlingMap: OffsetHandlingMap = {
 }
 
 export const parseOffsetHandlingOption = createOptionParser(
-  'offsetConflict',
+  'offset',
   offsetHandlingMap,
 )

@@ -1,5 +1,6 @@
 import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
+import { parseDisambigOption } from '../argParse/disambig'
 import { zonedDateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplayOption } from '../argParse/offsetDisplay'
@@ -138,6 +139,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     const mergedFields = overrideZonedDateTimeFields(refinedFields, this)
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
     const overflowHandling = parseOverflowOption(options)
+    parseDisambigOption(options) // for validation
 
     return createZonedDateTime(
       zonedDateTimeFieldsToISO(
@@ -154,8 +156,9 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 
   withPlainDate(dateArg: DateArg): ZonedDateTime {
     const date = ensureObj(PlainDate, dateArg)
+    const dateTime = date.toPlainDateTime(this) // timeArg=this
     const { timeZone } = this
-    const instant = timeZone.getInstantFor(date)
+    const instant = timeZone.getInstantFor(dateTime)
 
     return new ZonedDateTime(
       instant.epochNanoseconds,

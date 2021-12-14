@@ -31,10 +31,13 @@ export function parseDiffOptions<
   )
 
   largestUnitDefault = Math.max(largestUnitDefault, roundingConfig.smallestUnit) as UnitIntType
-  const largestUnitArg = ensureOptionsObj(options).largestUnit
-  const largestUnit = largestUnitArg === 'auto'
-    ? largestUnitDefault
-    : parseUnit(largestUnitArg, largestUnitDefault, minUnit, maxUnit)
+
+  let largestUnitArg = ensureOptionsObj(options).largestUnit
+  if (largestUnitArg === 'auto') {
+    largestUnitArg = undefined
+  }
+
+  const largestUnit = parseUnit(largestUnitArg, largestUnitDefault, minUnit, maxUnit)
 
   if (roundingConfig.smallestUnit > largestUnit) {
     throw new RangeError('Bad smallestUnit/largestUnit')

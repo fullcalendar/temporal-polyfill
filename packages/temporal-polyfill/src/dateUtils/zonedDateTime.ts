@@ -40,7 +40,7 @@ import { isoFieldsToEpochNano } from './isoMath'
 import { parseOffsetNano } from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
 import { diffTimeOfDays, timeFieldsToNano } from './time'
-import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
+import { DAY, DayTimeUnitInt, HOUR, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
 export type ZonedDateTimeISOEssentials = DateTimeISOFields & { // essentials for creation
   timeZone: TimeZone
@@ -155,7 +155,7 @@ export function diffZonedDateTimes( // why not in diff.ts?
   const calendar = getCommonCalendar(dt0, dt1)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(
     options,
-    DAY, // largestUnitDefault
+    HOUR, // largestUnitDefault
     NANOSECOND, // smallestUnitDefault
     NANOSECOND, // minUnit
     YEAR, // maxUnit
