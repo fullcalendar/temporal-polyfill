@@ -28,6 +28,7 @@ import {
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { RoundingFunc, compareValues } from '../utils/math'
+import { addWholeDays } from './add'
 import { addDaysToDate, createDate } from './date'
 import {
   DateTimeFields,
@@ -234,7 +235,7 @@ export function roundZonedDateTimeWithOptions(
   )
 }
 
-const zeroTimeISOFields: TimeISOEssentials = { // TODO: reusable?
+export const zeroTimeISOFields: TimeISOEssentials = { // TODO: more reusable?
   isoHour: 0,
   isoMinute: 0,
   isoSecond: 0,
@@ -243,19 +244,24 @@ const zeroTimeISOFields: TimeISOEssentials = { // TODO: reusable?
   isoNanosecond: 0,
 }
 
-function computeNanoInDay(zonedDateTime: ZonedDateTime): number {
+export function computeNanoInDay(zonedDateTime: ZonedDateTime): number {
+  const isoFields = {
+    ...zonedDateTime.getISOFields(),
+    ...zeroTimeISOFields,
+    offset: undefined, // clear explicit offset
+  }
+
   const zdt0 = createZonedDateTime(
-    {
-      ...zonedDateTime.getISOFields(),
-      ...zeroTimeISOFields,
-      offset: undefined, // clear explicit offset
-    },
+    isoFields,
     undefined, // options
     OFFSET_REJECT, // doesn't matter b/c no explicit offset given
   )
 
-  // TODO: reusable util for adding days to ZonedDateTime
-  const zdt1 = addToZonedDateTime(zdt0, new Duration(0, 0, 0, 1), undefined) // +1 day
+  const zdt1 = createZonedDateTime(
+    { ...isoFields, ...addWholeDays(isoFields, 1) },
+    undefined, // options
+    OFFSET_REJECT, // doesn't matter b/c no explicit offset given
+  )
 
   return Number(zdt1.epochNanoseconds - zdt0.epochNanoseconds)
 }

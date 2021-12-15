@@ -26,16 +26,18 @@ import {
 import { createMonthDay } from '../dateUtils/monthDay'
 import { parseDateTimeISO, refineZonedDateTimeParse } from '../dateUtils/parse'
 import { TimeFields, createTime } from '../dateUtils/time'
-import { milliInDay } from '../dateUtils/units'
+import { nanoInHour } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
 import {
   addToZonedDateTime,
   compareZonedDateTimes,
+  computeNanoInDay,
   createZonedDateTime,
   diffZonedDateTimes,
   overrideZonedDateTimeFields,
   roundZonedDateTime,
   roundZonedDateTimeWithOptions,
+  zeroTimeISOFields,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createWeakMap } from '../utils/obj'
@@ -216,18 +218,20 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   startOfDay(): ZonedDateTime {
-    const dateTime = this.toPlainDateTime()
-    const instant = this.timeZone.getInstantFor(dateTime, { disambiguation: 'earlier' })
-    return new ZonedDateTime(instant.epochNanoseconds, this.timeZone, this.calendar)
+    return createZonedDateTime( // TODO: more DRY with computeNanoInDay
+      {
+        ...this.getISOFields(),
+        ...zeroTimeISOFields,
+        offset: undefined,
+      },
+      undefined, // options
+      OFFSET_REJECT, // doesn't matter b/c no explicit offset given
+    )
   }
 
   // TODO: turn into a lazy-getter, like what mixinCalendarFields does
   get hoursInDay(): number {
-    const dateTime0 = this.toPlainDateTime()
-    const dateTime1 = dateTime0.add({ days: 1 })
-    const instant0 = this.timeZone.getInstantFor(dateTime0, { disambiguation: 'earlier' })
-    const instant1 = this.timeZone.getInstantFor(dateTime1, { disambiguation: 'earlier' })
-    return Math.floor((instant1.epochMilliseconds - instant0.epochMilliseconds) / milliInDay)
+    return computeNanoInDay(this) / nanoInHour
   }
 
   toString(options?: ZonedDateTimeToStringOptions): string {
