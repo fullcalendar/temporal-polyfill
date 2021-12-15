@@ -96,8 +96,12 @@ export function isoToEpochMilli(
 ): number {
   const year = isoYear ?? isoEpochOriginYear
   const sign = numSign(year)
-  const milli = Date.UTC(
-    year,
+
+  // https://stackoverflow.com/a/5870822/96342
+  const twoDigitYearBug = year >= 0 && year < 1000
+
+  let milli = Date.UTC(
+    twoDigitYearBug ? year + 1200 : year,
     (isoMonth ?? 1) - 1,
     (isoDay ?? 1) - sign, // ensures within 1 day of Date.UTC's min/max
     isoHour ?? 0,
@@ -105,6 +109,10 @@ export function isoToEpochMilli(
     isoSecond ?? 0,
     isoMillisecond ?? 0,
   ) + (sign * milliInDay) // push back out of Date.UTC's min/max
+
+  if (twoDigitYearBug) {
+    milli = new Date(milli).setUTCFullYear(year)
+  }
 
   validateValue(milli)
   return milli
