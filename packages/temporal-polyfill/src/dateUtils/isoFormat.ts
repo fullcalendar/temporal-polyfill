@@ -6,28 +6,28 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { TimeISOEssentials, timeISOToNano, wrapTimeOfDayNano } from '../dateUtils/time'
-import { DateISOFields, DateTimeISOFields } from '../public/types'
-import { roundToIncrementBI } from '../utils/math'
+import { TimeISOEssentials } from '../dateUtils/time'
+import { DateISOFields } from '../public/types'
 import { getSignStr, padZeros } from '../utils/string'
-import { addWholeDays } from './add'
+import { DateISOEssentials } from './date'
+import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { SignedDurationFields } from './duration'
 import { HOUR, MINUTE, SECOND, nanoInMicro, nanoInMilli } from './units'
 
+// given ISO fields should already be rounded
 export function formatDateTimeISO(
-  fields: DateTimeISOFields,
+  fields: DateTimeISOEssentials,
   formatConfig: TimeToStringConfig,
 ): string {
-  const [timePart, dayDelta] = formatTimeISO(fields, formatConfig)
-  return formatDateISO(addWholeDays(fields, dayDelta)) + 'T' + timePart
+  return formatDateISO(fields) + 'T' + formatTimeISO(fields, formatConfig)
 }
 
-export function formatDateISO(fields: DateISOFields): string {
+export function formatDateISO(fields: DateISOEssentials): string {
   return formatYearMonthISO(fields) + '-' + padZeros(fields.isoDay, 2)
 }
 
-export function formatYearMonthISO(fields: DateISOFields): string {
+export function formatYearMonthISO(fields: DateISOEssentials): string {
   const { isoYear } = fields
   return (
     (isoYear < 1000 || isoYear > 9999)
@@ -40,36 +40,31 @@ export function formatMonthDayISO(fields: DateISOFields): string {
   return padZeros(fields.isoMonth, 2) + '-' + padZeros(fields.isoDay, 2)
 }
 
+// given ISO fields should already be rounded
+// formatConfig is NOT for rounding. only for smallestUnit/fractionalSecondDigits
 export function formatTimeISO(
   fields: TimeISOEssentials,
-  formatConfig: TimeToStringConfig,
-): [string, number] {
-  const nano = roundToIncrementBI(
-    timeISOToNano(fields),
-    formatConfig.roundingIncrement,
-    formatConfig.roundingMode,
-  )
-
-  const dayTimeFields = wrapTimeOfDayNano(nano)
-  const parts: string[] = [padZeros(dayTimeFields.hour, 2)]
+  formatConfig: TimeToStringConfig, // tighten type? remove roundingMode?
+): string {
+  const parts: string[] = [padZeros(fields.isoHour, 2)]
 
   if (formatConfig.smallestUnit <= MINUTE) {
-    parts.push(padZeros(dayTimeFields.minute, 2))
+    parts.push(padZeros(fields.isoMinute, 2))
 
     if (formatConfig.smallestUnit <= SECOND) {
       parts.push(
-        padZeros(dayTimeFields.second, 2) +
+        padZeros(fields.isoSecond, 2) +
           formatPartialSeconds(
-            dayTimeFields.millisecond,
-            dayTimeFields.microsecond,
-            dayTimeFields.nanosecond,
+            fields.isoMillisecond,
+            fields.isoMicrosecond,
+            fields.isoNanosecond,
             formatConfig.fractionalSecondDigits,
           ),
       )
     }
   }
 
-  return [parts.join(':'), dayTimeFields.day]
+  return parts.join(':')
 }
 
 export function formatOffsetISO(offsetNano: number): string {

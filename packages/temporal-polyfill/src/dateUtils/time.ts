@@ -20,7 +20,7 @@ import { ensureObj } from './abstract'
 import { DayTimeFields, nanoToDayTimeFields, splitEpochNano } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { roundNano, roundTimeOfDay } from './rounding'
+import { computeRoundingNanoIncrement, roundNano, roundTime } from './rounding'
 import {
   HOUR,
   NANOSECOND,
@@ -117,7 +117,11 @@ export function roundPlainTime(plainTime: PlainTime, options: TimeRoundingOption
     NANOSECOND, // minUnit
     HOUR, // maxUnit
   )
-  const dayTimeFields = roundTimeOfDay(plainTime, roundingConfig)
+  const dayTimeFields = roundTime(
+    plainTime,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
+  )
   return createTime(timeLikeToISO(dayTimeFields))
 }
 

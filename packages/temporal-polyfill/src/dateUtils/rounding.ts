@@ -1,13 +1,15 @@
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
-import { roundToIncrement, roundToIncrementBI } from '../utils/math'
+import { DateISOFields, DateTimeISOFields } from '../public/types'
+import { RoundingFunc, roundToIncrement, roundToIncrementBI } from '../utils/math'
+import { addWholeDays } from './add'
 import { DateLikeInstance } from './calendar'
 import { DayTimeFields } from './dayTime'
 import { createDuration, negateFields } from './duration'
-import { TimeFields, timeFieldsToNano, wrapTimeOfDayNano } from './time'
+import { TimeFields, timeFieldsToNano, timeLikeToISO, wrapTimeOfDayNano } from './time'
 import { computeExactDuration } from './totalUnits'
-import { DayTimeUnitInt, nanoIn } from './units'
+import { nanoIn } from './units'
 
 // PRECONDITION: dates are balanced i.e. have point-to-point
 // PRECONDITION: dates have same calendar
@@ -45,21 +47,62 @@ export function roundBalancedDuration(
   return createDuration(durationLike)
 }
 
-export function roundTimeOfDay(
+export function roundTimeToSpecialDay(
   timeFields: TimeFields,
-  roundingConfig: RoundingConfig<DayTimeUnitInt>,
+  ourNanoInDay: number,
+  roundingFunc: RoundingFunc,
 ): DayTimeFields {
-  const nano = roundNano(timeFieldsToNano(timeFields), roundingConfig)
-  return wrapTimeOfDayNano(nano) // nano is always time-of-day
+  const nano = timeFieldsToNano(timeFields)
+  return {
+    day: roundingFunc(Number(nano) / ourNanoInDay),
+    hour: 0,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  }
 }
 
+export function roundTime(
+  timeFields: TimeFields,
+  nanoIncrement: number,
+  roundingFunc: RoundingFunc,
+): DayTimeFields {
+  return wrapTimeOfDayNano(
+    roundToIncrementBI(
+      timeFieldsToNano(timeFields),
+      nanoIncrement,
+      roundingFunc,
+    ),
+  )
+}
+
+// convenience func
 export function roundNano(
   nano: bigint,
-  { smallestUnit, roundingIncrement, roundingMode }: RoundingConfig,
+  roundingConfig: RoundingConfig,
 ): bigint {
   return roundToIncrementBI(
     nano,
-    nanoIn[smallestUnit] * roundingIncrement,
-    roundingMode,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
   )
+}
+
+// util
+export function computeRoundingNanoIncrement(roundingConfig: RoundingConfig): number {
+  return nanoIn[roundingConfig.smallestUnit] * roundingConfig.roundingIncrement
+}
+
+// util
+export function combineISOWithDayTimeFields(
+  isoFields: DateISOFields,
+  dayTimeFields: DayTimeFields,
+): DateTimeISOFields {
+  const dateISOFields = addWholeDays(isoFields, dayTimeFields.day) // preserves `calendar`
+  return {
+    ...dateISOFields,
+    ...timeLikeToISO(dayTimeFields),
+  }
 }

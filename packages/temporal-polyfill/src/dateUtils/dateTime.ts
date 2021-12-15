@@ -18,8 +18,7 @@ import {
   OverflowOptions,
   Unit,
 } from '../public/types'
-import { compareValues } from '../utils/math'
-import { addWholeDays } from './add'
+import { RoundingFunc, compareValues } from '../utils/math'
 import {
   DateFields,
   DateISOEssentials,
@@ -35,7 +34,13 @@ import {
   timeFieldsToDuration,
 } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { roundBalancedDuration, roundNano, roundTimeOfDay } from './rounding'
+import {
+  combineISOWithDayTimeFields,
+  computeRoundingNanoIncrement,
+  roundBalancedDuration,
+  roundNano,
+  roundTime,
+} from './rounding'
 import {
   TimeFields,
   TimeISOEssentials,
@@ -165,7 +170,7 @@ export function diffDateTimes( // why not in diff.ts?
   return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
 }
 
-export function roundDateTime(
+export function roundDateTimeWithOptions(
   dateTime: PlainDateTime,
   options: DateTimeRoundingOptions,
 ): PlainDateTime {
@@ -175,12 +180,20 @@ export function roundDateTime(
     NANOSECOND, // minUnit
     DAY, // maxUnit
   )
-  const dayTimeFields = roundTimeOfDay(dateTime, roundingConfig)
-  const dateISOFields = addWholeDays(dateTime.getISOFields(), dayTimeFields.day)
-  // ^transfers `calendar` field
+  return roundDateTime(
+    dateTime,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
+  )
+}
 
-  return createDateTime({
-    ...dateISOFields,
-    ...timeLikeToISO(dayTimeFields),
-  })
+export function roundDateTime(
+  dateTime: PlainDateTime,
+  nanoIncrement: number,
+  roundingFunc: RoundingFunc,
+): PlainDateTime {
+  const dayTimeFields = roundTime(dateTime, nanoIncrement, roundingFunc)
+  return createDateTime(
+    combineISOWithDayTimeFields(dateTime.getISOFields(), dayTimeFields),
+  )
 }

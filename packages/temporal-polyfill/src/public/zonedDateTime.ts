@@ -35,6 +35,7 @@ import {
   diffZonedDateTimes,
   overrideZonedDateTimeFields,
   roundZonedDateTime,
+  roundZonedDateTimeWithOptions,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createWeakMap } from '../utils/obj'
@@ -207,7 +208,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   round(options?: DateTimeRoundingOptions): ZonedDateTime {
-    return roundZonedDateTime(this, options)
+    return roundZonedDateTimeWithOptions(this, options)
   }
 
   equals(other: ZonedDateTimeArg): boolean {
@@ -234,12 +235,16 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     const offsetDisplay = parseOffsetDisplayOption(options)
     const timeZoneDisplay = parseTimeZoneDisplayOption(options)
     const calendarDisplay = parseCalendarDisplayOption(options)
-    const fields = this.getISOFields()
+    const isoFields = roundZonedDateTime(
+      this,
+      formatConfig.roundingIncrement,
+      formatConfig.roundingMode,
+    ).getISOFields()
 
-    return formatDateTimeISO(fields, formatConfig) +
-      (offsetDisplay === OFFSET_DISPLAY_AUTO ? fields.offset : '') + // already formatted
-      formatTimeZoneID(fields.timeZone.id, timeZoneDisplay) +
-      formatCalendarID(fields.calendar.id, calendarDisplay)
+    return formatDateTimeISO(isoFields, formatConfig) +
+      (offsetDisplay === OFFSET_DISPLAY_AUTO ? isoFields.offset : '') + // already formatted
+      formatTimeZoneID(isoFields.timeZone.id, timeZoneDisplay) +
+      formatCalendarID(isoFields.calendar.id, calendarDisplay)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {

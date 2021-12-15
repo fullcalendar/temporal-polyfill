@@ -16,6 +16,7 @@ import {
   diffDateTimes,
   overrideDateTimeFields,
   roundDateTime,
+  roundDateTimeWithOptions,
 } from '../dateUtils/dateTime'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
 import { isoFieldsToEpochMilli, validateDateTime } from '../dateUtils/isoMath'
@@ -164,7 +165,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   round(options: DateTimeRoundingOptions): PlainDateTime {
-    return roundDateTime(this, options)
+    return roundDateTimeWithOptions(this, options)
   }
 
   equals(other: DateTimeArg): boolean {
@@ -174,10 +175,14 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   toString(options?: DateTimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
     const calendarDisplay = parseCalendarDisplayOption(options)
-    const fields = this.getISOFields()
+    const isoFields = roundDateTime(
+      this,
+      formatConfig.roundingIncrement,
+      formatConfig.roundingMode,
+    ).getISOFields()
 
-    return formatDateTimeISO(fields, formatConfig) +
-      formatCalendarID(fields.calendar.id, calendarDisplay)
+    return formatDateTimeISO(isoFields, formatConfig) +
+      formatCalendarID(isoFields.calendar.id, calendarDisplay)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {

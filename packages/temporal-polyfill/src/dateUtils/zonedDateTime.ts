@@ -2,6 +2,7 @@ import { getCommonCalendar } from '../argParse/calendar'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import {
   OFFSET_IGNORE,
+  OFFSET_PREFER,
   OFFSET_REJECT,
   OFFSET_USE,
   OffsetHandlingInt,
@@ -26,18 +27,25 @@ import {
   ZonedDateTimeOptions,
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
-import { compareValues } from '../utils/math'
+import { RoundingFunc, compareValues } from '../utils/math'
 import { addDaysToDate, createDate } from './date'
 import {
   DateTimeFields,
   createDateTime,
   dateTimeFieldsToISO,
   overrideDateTimeFields,
+  roundDateTime,
 } from './dateTime'
 import { addDurations, extractDurationTimeFields, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { parseOffsetNano } from './parse'
-import { roundBalancedDuration, roundNano } from './rounding'
+import {
+  combineISOWithDayTimeFields,
+  computeRoundingNanoIncrement,
+  roundBalancedDuration,
+  roundNano,
+  roundTimeToSpecialDay,
+} from './rounding'
 import { TimeISOEssentials, diffTimeOfDays, timeFieldsToNano } from './time'
 import { DAY, DayTimeUnitInt, HOUR, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
 
@@ -50,7 +58,7 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 
 export function createZonedDateTime(
   isoFields: ZonedDateTimeISOEssentials,
-  options: ZonedDateTimeOptions | undefined,
+  options: ZonedDateTimeOptions | undefined, // given directly to timeZone
   offsetHandling: OffsetHandlingInt,
 ): ZonedDateTime {
   const { calendar, timeZone, offset, Z } = isoFields
@@ -198,16 +206,7 @@ export function diffZonedDateTimes( // why not in diff.ts?
   return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
 }
 
-const zeroTimeISOFields: TimeISOEssentials = { // TODO: reusable?
-  isoHour: 0,
-  isoMinute: 0,
-  isoSecond: 0,
-  isoMillisecond: 0,
-  isoMicrosecond: 0,
-  isoNanosecond: 0,
-}
-
-export function roundZonedDateTime(
+export function roundZonedDateTimeWithOptions(
   zonedDateTime: ZonedDateTime,
   options: DateTimeRoundingOptions | undefined,
 ): ZonedDateTime {
@@ -217,28 +216,67 @@ export function roundZonedDateTime(
     NANOSECOND, // minUnit
     DAY, // maxUnit
   )
-  const origNano = timeFieldsToNano(zonedDateTime)
-
   if (roundingConfig.smallestUnit === DAY) {
-    const zdt0 = createZonedDateTime({
+    const dayTimeFields = roundTimeToSpecialDay(
+      zonedDateTime,
+      computeNanoInDay(zonedDateTime),
+      roundingConfig.roundingMode,
+    )
+    // TODO: more DRY
+    return createDateTime(
+      combineISOWithDayTimeFields(zonedDateTime.getISOFields(), dayTimeFields),
+    ).toZonedDateTime(zonedDateTime.timeZone)
+  }
+  return roundZonedDateTime(
+    zonedDateTime,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
+  )
+}
+
+const zeroTimeISOFields: TimeISOEssentials = { // TODO: reusable?
+  isoHour: 0,
+  isoMinute: 0,
+  isoSecond: 0,
+  isoMillisecond: 0,
+  isoMicrosecond: 0,
+  isoNanosecond: 0,
+}
+
+function computeNanoInDay(zonedDateTime: ZonedDateTime): number {
+  const zdt0 = createZonedDateTime(
+    {
       ...zonedDateTime.getISOFields(),
       ...zeroTimeISOFields,
       offset: undefined, // clear explicit offset
-    }, undefined, OFFSET_REJECT)
-    const zdt1 = addToZonedDateTime(zdt0, new Duration(0, 0, 0, 1), undefined) // +1 day
-    const frac = Number(origNano) / Number(zdt1.epochNanoseconds - zdt0.epochNanoseconds)
+    },
+    undefined, // options
+    OFFSET_REJECT, // doesn't matter b/c no explicit offset given
+  )
 
-    return roundingConfig.roundingMode(frac) // will return 0/1
-      ? zdt1 // start-of next day
-      : zdt0 // start-of current day
-  } else {
-    const roundedNano = roundNano(origNano, roundingConfig)
-    const diffNano = roundedNano - origNano
+  // TODO: reusable util for adding days to ZonedDateTime
+  const zdt1 = addToZonedDateTime(zdt0, new Duration(0, 0, 0, 1), undefined) // +1 day
 
-    return new ZonedDateTime(
-      zonedDateTime.epochNanoseconds + diffNano,
-      zonedDateTime.timeZone,
-      zonedDateTime.calendar,
-    )
-  }
+  return Number(zdt1.epochNanoseconds - zdt0.epochNanoseconds)
+}
+
+export function roundZonedDateTime(
+  zonedDateTime: ZonedDateTime,
+  nanoIncrement: number,
+  roundingFunc: RoundingFunc,
+): ZonedDateTime {
+  const dateTime = roundDateTime(
+    zonedDateTime.toPlainDateTime(), // TODO: way around this conversion?
+    nanoIncrement,
+    roundingFunc,
+  )
+  return createZonedDateTime(
+    {
+      ...dateTime.getISOFields(),
+      timeZone: zonedDateTime.timeZone,
+      offset: zonedDateTime.offsetNanoseconds, // try to keep same offset with OFFSET_PREFER
+    },
+    undefined, // options
+    OFFSET_PREFER,
+  )
 }

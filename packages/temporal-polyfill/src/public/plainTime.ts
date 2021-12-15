@@ -114,7 +114,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 
   toString(options?: TimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
-    return formatTimeISO(this.getISOFields(), formatConfig)[0]
+    return formatTimeISO(this.getISOFields(), formatConfig)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
