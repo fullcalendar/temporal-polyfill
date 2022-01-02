@@ -3,6 +3,7 @@ import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames, unitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
+import { PlainDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
 import {
   CompareResult,
@@ -27,6 +28,7 @@ import { roundBalancedDuration, roundNano } from './rounding'
 import { TimeFields, timeFieldsToNano } from './time'
 import {
   DAY,
+  DateUnitInt,
   DayTimeUnitInt,
   HOUR,
   MICROSECOND,
@@ -41,7 +43,7 @@ import {
   isDayTimeUnit,
   nanoInDayBI,
 } from './units'
-import { createZonedDateTime } from './zonedDateTime'
+import { createZonedDateTime, diffAccurate } from './zonedDateTime'
 
 export interface DurationFields {
   years: number
@@ -124,7 +126,9 @@ export function addAndBalanceDurations(
   )[0]
 }
 
-export function addDurations(d0: Duration, d1: Duration): Duration { // no balancing
+// no balancing
+// TODO: rename to combineDurations or mergeDurations?
+export function addDurations(d0: Duration, d1: Duration): Duration {
   return new Duration(
     d0.years + d1.years,
     d0.months + d1.months,
@@ -146,19 +150,41 @@ export function addDaysToDuration(d: Duration, days: number): Duration {
   return d
 }
 
-export function balanceComplexDuration(
+export function balanceDuration(
   duration: Duration,
   largestUnit: UnitInt,
   relativeTo: DateLikeInstance,
-): [Duration, DateLikeInstance] { // returns the SAME type of DateLikeInstance
-  const translatedDate = (relativeTo as DateLikeInstance).add(duration) // yuck
+): Duration {
+  if (relativeTo instanceof PlainDate) {
+    return balanceSimpleDuration(
+      duration,
+      Math.max(DAY, largestUnit) as DateUnitInt,
+      relativeTo,
+    )[0]
+  } else {
+    return balanceComplexDuration(duration, largestUnit, relativeTo)[0]
+  }
+}
 
-  // HACK casting to ZonedDateTime. translatedDate is same type as relativeTo, all that matters
-  const balancedDuration = (relativeTo as DateLikeInstance).until(translatedDate as ZonedDateTime, {
+export function balanceSimpleDuration(
+  duration: Duration,
+  largestUnit: DateUnitInt,
+  relativeTo: PlainDate,
+): [Duration, PlainDate] {
+  const translated = relativeTo.add(duration)
+  const balanced = relativeTo.calendar.dateUntil(relativeTo, translated, {
     largestUnit: unitNames[largestUnit] as DateUnit,
   })
+  return [balanced, translated]
+}
 
-  return [balancedDuration, translatedDate]
+export function balanceComplexDuration<T extends (ZonedDateTime | PlainDateTime)>(
+  duration: Duration,
+  largestUnit: UnitInt,
+  relativeTo: T,
+): [Duration, T] {
+  const translated = relativeTo.add(duration) as T
+  return [diffAccurate(relativeTo, translated, largestUnit), translated]
 }
 
 export function roundAndBalanceDuration(
@@ -304,6 +330,15 @@ export function extractDurationTimeFields(duration: Duration): [TimeFields, Dura
       duration.days + Number(days),
     ),
   ]
+}
+
+export function extractBigDuration(duration: Duration): Duration {
+  return new Duration(
+    duration.years,
+    duration.months,
+    duration.weeks,
+    duration.days,
+  )
 }
 
 // internal util for converting between formats

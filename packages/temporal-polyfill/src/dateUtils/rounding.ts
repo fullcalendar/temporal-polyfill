@@ -1,25 +1,43 @@
+import { DiffConfig } from '../argParse/diffOptions'
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
+import { PlainDateTime } from '../public/plainDateTime'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
+import { ZonedDateTime } from '../public/zonedDateTime'
 import { RoundingFunc, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { addWholeDays } from './add'
 import { DateLikeInstance } from './calendar'
 import { DayTimeFields } from './dayTime'
-import { createDuration, negateFields } from './duration'
+import { balanceDuration, createDuration, nanoToDuration, negateFields } from './duration'
 import { TimeFields, timeFieldsToNano, timeLikeToISO, wrapTimeOfDayNano } from './time'
 import { computeExactDuration } from './totalUnits'
-import { nanoIn } from './units'
+import { DayTimeUnitInt, NANOSECOND, isDateUnit, nanoIn } from './units'
+import { toNano } from './zonedDateTime'
 
-// PRECONDITION: dates are balanced i.e. have point-to-point
-// PRECONDITION: dates have same calendar
 export function roundBalancedDuration(
   balancedDuration: Duration,
-  { smallestUnit, roundingIncrement, roundingMode }: RoundingConfig,
+  diffConfig: DiffConfig,
   d0: DateLikeInstance,
   d1: DateLikeInstance,
   flip?: boolean,
 ): Duration {
+  const { largestUnit, smallestUnit, roundingIncrement, roundingMode } = diffConfig
+
+  // optimize for time units
+  if (!isDateUnit(largestUnit)) {
+    return nanoToDuration( // TODO: make util like diffTimeScale
+      roundNano(
+        (
+          toNano(d1 as (ZonedDateTime | PlainDateTime)) -
+          toNano(d0 as (ZonedDateTime | PlainDateTime))
+        ) * (flip ? -1n : 1n),
+        diffConfig as RoundingConfig<DayTimeUnitInt>,
+      ),
+      largestUnit,
+    )
+  }
+
   let durationLike = computeExactDuration(balancedDuration, smallestUnit, d0, d1)
   const unitName = durationUnitNames[smallestUnit]
 
@@ -44,7 +62,14 @@ export function roundBalancedDuration(
     doRound()
   }
 
-  return createDuration(durationLike)
+  let resDuration = createDuration(durationLike)
+
+  // rebalance
+  if (smallestUnit > NANOSECOND) {
+    resDuration = balanceDuration(resDuration, largestUnit, d0)
+  }
+
+  return resDuration
 }
 
 export function roundTimeToSpecialDay(

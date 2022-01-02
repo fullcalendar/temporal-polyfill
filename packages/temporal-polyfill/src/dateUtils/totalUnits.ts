@@ -20,7 +20,7 @@ export function computeTotalUnits(
   if (fields && isDayTimeUnit(unit) && relativeToArg === undefined) {
     return Number(dayTimeFieldsToNano(fields) / BigInt(nanoIn[unit]))
   }
-  const relativeTo = getPlainRelativeTo(relativeToArg)
+  const relativeTo = getPlainRelativeTo(relativeToArg) // throws an exception if undefined
   const [balancedDuration, translatedDate] = balanceComplexDuration(
     duration,
     unit,
@@ -35,6 +35,7 @@ export function computeTotalUnits(
   return durationLike[durationUnitNames[unit]]! // computeExactDuration guarantees this
 }
 
+// TODO: rename to computeFracDuration
 // PRECONDITION: dates have same calendar
 // RETURNS: raw duration fields that might have floating-point values
 // Those floating-point values will need to rounded before creating a proper Duration

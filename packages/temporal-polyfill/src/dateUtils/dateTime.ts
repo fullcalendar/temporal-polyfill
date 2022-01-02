@@ -1,8 +1,6 @@
-import { getCommonCalendar } from '../argParse/calendar'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
-import { unitNames } from '../argParse/unitStr'
+import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -12,7 +10,6 @@ import {
   DateTimeLikeFields,
   DateTimeOverrides,
   DateTimeRoundingOptions,
-  DateUnit,
   DayTimeUnit,
   DiffOptions,
   OverflowOptions,
@@ -22,23 +19,19 @@ import { RoundingFunc, compareValues } from '../utils/math'
 import {
   DateFields,
   DateISOEssentials,
-  addDaysToDate,
   constrainDateISO,
   createDate,
   overrideDateFields,
 } from './date'
 import {
-  addDurations,
-  extractDurationTimeFields,
-  nanoToDuration,
-  timeFieldsToDuration,
+  durationToTimeFields,
+  extractBigDuration,
 } from './duration'
-import { isoFieldsToEpochNano } from './isoMath'
+import { epochNanoToISOFields, isoFieldsToEpochNano } from './isoMath'
 import {
   combineISOWithDayTimeFields,
   computeRoundingNanoIncrement,
   roundBalancedDuration,
-  roundNano,
   roundTime,
 } from './rounding'
 import {
@@ -46,13 +39,12 @@ import {
   TimeISOEssentials,
   TimeISOMilli,
   constrainTimeISO,
-  diffTimeOfDays,
   overrideTimeFields,
   timeFieldsToConstrainedISO,
-  timeLikeToISO,
-  translateTimeOfDay,
+  timeFieldsToNano,
 } from './time'
-import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
+import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR } from './units'
+import { diffAccurate } from './zonedDateTime'
 
 export type DateTimeISOMilli = DateISOEssentials & TimeISOMilli
 export type DateTimeISOEssentials = DateISOEssentials & TimeISOEssentials
@@ -117,21 +109,24 @@ export function addToDateTime( // why not in add.ts?
   duration: Duration,
   options: OverflowOptions | undefined, // Calendar needs raw options
 ): PlainDateTime {
-  const [timeFields, bigDuration] = extractDurationTimeFields(duration)
+  const { calendar } = dateTime
+  const bigDuration = extractBigDuration(duration)
+  const durationTimeFields = durationToTimeFields(duration)
 
-  // add time first
-  const dayTimeFields = translateTimeOfDay(dateTime, timeFields)
-
-  const date0 = createDate(dateTime.getISOFields())
-  const date1 = date0.calendar.dateAdd(
-    addDaysToDate(date0, dayTimeFields.day),
+  // add large fields first
+  const date = calendar.dateAdd(
+    createDate(dateTime.getISOFields()),
     bigDuration,
     options,
   )
 
   return createDateTime({
-    ...date1.getISOFields(), // supplies day fields & calendar
-    ...timeLikeToISO(dayTimeFields),
+    ...epochNanoToISOFields(
+      isoFieldsToEpochNano(date.getISOFields()) +
+      timeFieldsToNano(dateTime) + // restore time-of-day
+      timeFieldsToNano(durationTimeFields),
+    ),
+    calendar,
   })
 }
 
@@ -141,33 +136,21 @@ export function diffDateTimes( // why not in diff.ts?
   options: DiffOptions | undefined,
   flip?: boolean,
 ): Duration {
-  const calendar = getCommonCalendar(dt0, dt1)
-  const diffConfig = parseDiffOptions<Unit, UnitInt>(options, DAY, NANOSECOND, NANOSECOND, YEAR)
-  const { largestUnit } = diffConfig
-
-  const isoFields0 = dt0.getISOFields()
-  const isoFields1 = dt1.getISOFields()
-
-  // some sort of time unit?
-  if (!isDateUnit(largestUnit)) {
-    return nanoToDuration(
-      roundNano(
-        (isoFieldsToEpochNano(isoFields1) - isoFieldsToEpochNano(isoFields0)) * (flip ? -1n : 1n),
-        diffConfig as RoundingConfig<DayTimeUnitInt>,
-      ),
-      largestUnit,
-    )
-  }
-
-  const dayTimeDiff = diffTimeOfDays(isoFields0, isoFields1)
-  const largeDuration = calendar.dateUntil(
-    createDate(isoFields0),
-    addDaysToDate(createDate(isoFields1), dayTimeDiff.day),
-    { largestUnit: unitNames[largestUnit] as DateUnit },
+  const diffConfig = parseDiffOptions<Unit, UnitInt>(
+    options,
+    DAY, // largestUnitDefault
+    NANOSECOND, // smallestUnitDefault
+    NANOSECOND, // minUnit
+    YEAR, // maxUnit
   )
 
-  const balancedDuration = addDurations(largeDuration, timeFieldsToDuration(dayTimeDiff))
-  return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
+  return roundBalancedDuration(
+    diffAccurate(dt0, dt1, diffConfig.largestUnit),
+    diffConfig,
+    dt0,
+    dt1,
+    flip,
+  )
 }
 
 export function roundDateTimeWithOptions(

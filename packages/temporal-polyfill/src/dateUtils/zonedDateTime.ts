@@ -8,11 +8,12 @@ import {
   OffsetHandlingInt,
 } from '../argParse/offsetHandling'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
+import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
 import { Instant } from '../public/instant'
+import { PlainDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
 import {
   CompareResult,
@@ -29,7 +30,7 @@ import {
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { RoundingFunc, compareValues } from '../utils/math'
 import { addWholeDays } from './add'
-import { addDaysToDate, createDate } from './date'
+import { createDate } from './date'
 import {
   DateTimeFields,
   createDateTime,
@@ -37,18 +38,26 @@ import {
   overrideDateTimeFields,
   roundDateTime,
 } from './dateTime'
-import { addDurations, extractDurationTimeFields, nanoToDuration } from './duration'
+import { addDurations, durationToTimeFields, extractBigDuration, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { parseOffsetNano } from './parse'
 import {
   combineISOWithDayTimeFields,
   computeRoundingNanoIncrement,
   roundBalancedDuration,
-  roundNano,
   roundTimeToSpecialDay,
 } from './rounding'
-import { TimeISOEssentials, diffTimeOfDays, timeFieldsToNano } from './time'
-import { DAY, DayTimeUnitInt, HOUR, NANOSECOND, UnitInt, YEAR, isDateUnit } from './units'
+import { TimeISOEssentials, timeFieldsToNano } from './time'
+import {
+  DAY,
+  DayTimeUnitInt,
+  HOUR,
+  NANOSECOND,
+  TimeUnitInt,
+  UnitInt,
+  YEAR,
+  isDateUnit,
+} from './units'
 
 export type ZonedDateTimeISOEssentials = DateTimeISOFields & { // essentials for creation
   timeZone: TimeZone
@@ -134,25 +143,24 @@ export function addToZonedDateTime(
   duration: Duration,
   options: OverflowOptions | undefined, // Calendar needs these options to be raw
 ): ZonedDateTime {
-  const [timeFields, bigDuration] = extractDurationTimeFields(duration)
+  const { calendar, timeZone } = zonedDateTime
+  const bigDuration = extractBigDuration(duration)
+  const timeFields = durationToTimeFields(duration)
 
-  // add time fields first
-  const timeNano = timeFieldsToNano(timeFields)
-  const epochNano = zonedDateTime.epochNanoseconds + timeNano
-  zonedDateTime = new ZonedDateTime(epochNano, zonedDateTime.timeZone, zonedDateTime.calendar)
-
-  // add larger fields using the calendar
-  // Calendar::dateAdd will ignore time parts
-  const date = zonedDateTime.calendar.dateAdd(
+  // add large fields first
+  const translated = calendar.dateAdd(
     zonedDateTime.toPlainDate(),
-    bigDuration, // only units >= DAY
+    bigDuration,
     options,
-  )
-
-  return date.toZonedDateTime({
+  ).toZonedDateTime({
     plainTime: zonedDateTime,
-    timeZone: zonedDateTime.timeZone,
+    timeZone,
   })
+
+  // add time fields
+  const timeNano = timeFieldsToNano(timeFields)
+  const epochNano = translated.epochNanoseconds + timeNano
+  return new ZonedDateTime(epochNano, timeZone, calendar)
 }
 
 export function diffZonedDateTimes( // why not in diff.ts?
@@ -161,7 +169,6 @@ export function diffZonedDateTimes( // why not in diff.ts?
   options: DiffOptions | undefined,
   flip?: boolean,
 ): Duration {
-  const calendar = getCommonCalendar(dt0, dt1)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(
     options,
     HOUR, // largestUnitDefault
@@ -175,36 +182,68 @@ export function diffZonedDateTimes( // why not in diff.ts?
     throw new Error('Must be same timeZone')
   }
 
-  // some sort of time unit?
+  return roundBalancedDuration(
+    diffAccurate(dt0, dt1, largestUnit),
+    diffConfig,
+    dt0,
+    dt1,
+    flip,
+  )
+}
+
+// why not in diff.ts?
+export function diffAccurate<T extends (ZonedDateTime | PlainDateTime)>(
+  dt0: T,
+  dt1: T,
+  largestUnit: UnitInt,
+): Duration {
+  const calendar = getCommonCalendar(dt0, dt1)
+
+  // a time unit
   if (!isDateUnit(largestUnit)) {
-    return nanoToDuration(
-      roundNano(
-        (dt1.epochNanoseconds - dt0.epochNanoseconds) * (flip ? -1n : 1n),
-        diffConfig as RoundingConfig<DayTimeUnitInt>,
-      ),
-      largestUnit,
-    )
+    return diffTimeScale(dt0, dt1, largestUnit)
   }
 
-  const isoFields0 = dt0.getISOFields()
-  const isoFields1 = dt1.getISOFields()
+  const dateStart = createDate(dt0.getISOFields()) // TODO: util for this?
+  let dateMiddle = createDate(dt1.getISOFields()) // TODO: util for this?
+  let dateTimeMiddle: T
+  let bigDuration: Duration
+  let timeDuration: Duration
+  let bigSign: CompareResult
+  let timeSign: CompareResult
 
-  const dayTimeFields = diffTimeOfDays(isoFields0, isoFields1)
-  const largeDuration = calendar.dateUntil(
-    createDate(isoFields0),
-    addDaysToDate(createDate(isoFields1), dayTimeFields.day),
-    { largestUnit: unitNames[largestUnit] as DateUnit },
+  do {
+    bigDuration = calendar.dateUntil(
+      dateStart,
+      dateMiddle,
+      { largestUnit: unitNames[largestUnit] as DateUnit },
+    )
+    dateTimeMiddle = dt0.add(bigDuration) as T
+    timeDuration = diffTimeScale(dateTimeMiddle, dt1, HOUR)
+    bigSign = bigDuration.sign
+    timeSign = timeDuration.sign
+  } while (
+    bigSign && timeSign &&
+    bigSign !== timeSign &&
+    (dateMiddle = dateMiddle.add({ days: timeSign })) // move dateMiddle closer to dt0
   )
 
-  // advance dt0 to within a day of dt1 and compute the time difference
-  // guaranteed to be less than 24 hours
-  const timeDuration = nanoToDuration(
-    dt1.epochNanoseconds - dt0.add(largeDuration).epochNanoseconds,
-    DAY, // overflow to day just in case of weird DST issue
-  )
+  return addDurations(bigDuration, timeDuration)
+}
 
-  const balancedDuration = addDurations(largeDuration, timeDuration)
-  return roundBalancedDuration(balancedDuration, diffConfig, dt0, dt1, flip)
+function diffTimeScale<T extends (ZonedDateTime | PlainDateTime)>(
+  dt0: T,
+  dt1: T,
+  largestUnit: TimeUnitInt,
+): Duration {
+  return nanoToDuration(toNano(dt1) - toNano(dt0), largestUnit)
+}
+
+export function toNano(dt: PlainDateTime | ZonedDateTime): bigint {
+  if (dt instanceof PlainDateTime) {
+    return isoFieldsToEpochNano(dt.getISOFields()) // TODO: util for this?
+  }
+  return dt.epochNanoseconds
 }
 
 export function roundZonedDateTimeWithOptions(
