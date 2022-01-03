@@ -41,7 +41,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   getPossibleOffsets(zoneSecs: number): number[] {
     const transitions = [
       this.getTransition(zoneSecs, -1),
-      this.getTransition(zoneSecs, 1),
+      this.getTransition(zoneSecs - 1, 1), // subtract 1 b/c getTransition is always exclusive
     ].filter(Boolean) as RawTransition[]
     let lastOffsetSecs: number | undefined
 
@@ -105,6 +105,9 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     return zoneSecs - epochSecs
   }
 
+  /*
+  Always exclusive. Will never return a transition that starts exactly on epochSecs
+  */
   getTransition(epochSecs: number, direction: -1 | 1): RawTransition | undefined {
     const startYear = epochSecondsToISOYear(epochSecs)
 
