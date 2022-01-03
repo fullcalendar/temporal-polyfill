@@ -30,7 +30,6 @@ import { nanoInHour } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
 import {
   addToZonedDateTime,
-  compareZonedDateTimes,
   computeNanoInDay,
   createZonedDateTime,
   diffZonedDateTimes,
@@ -40,6 +39,7 @@ import {
   zeroTimeISOFields,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
+import { compareValues } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
@@ -126,9 +126,9 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   static compare(a: ZonedDateTimeArg, b: ZonedDateTimeArg): CompareResult {
-    return compareZonedDateTimes(
-      ensureObj(ZonedDateTime, a),
-      ensureObj(ZonedDateTime, b),
+    return compareValues(
+      ensureObj(ZonedDateTime, a).epochNanoseconds,
+      ensureObj(ZonedDateTime, b).epochNanoseconds,
     )
   }
 
@@ -214,7 +214,11 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   equals(other: ZonedDateTimeArg): boolean {
-    return compareZonedDateTimes(this, ensureObj(ZonedDateTime, other)) === 0
+    const otherZdt = ensureObj(ZonedDateTime, other)
+
+    return this.epochNanoseconds === otherZdt.epochNanoseconds &&
+      this.calendar.id === otherZdt.calendar.id &&
+      this.timeZone.id === otherZdt.timeZone.id
   }
 
   startOfDay(): ZonedDateTime {

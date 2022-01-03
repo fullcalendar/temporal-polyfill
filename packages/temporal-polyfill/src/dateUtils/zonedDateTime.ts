@@ -28,7 +28,7 @@ import {
   ZonedDateTimeOptions,
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
-import { RoundingFunc, compareValues } from '../utils/math'
+import { RoundingFunc } from '../utils/math'
 import { addWholeDays } from './add'
 import { createDate } from './date'
 import {
@@ -130,12 +130,6 @@ export function overrideZonedDateTimeFields(
     ...overrideDateTimeFields(overrides, base),
     offset: overrides.offset ?? base.offset,
   }
-}
-
-export function compareZonedDateTimes(a: ZonedDateTime, b: ZonedDateTime): CompareResult {
-  return compareValues(a.epochNanoseconds, b.epochNanoseconds) ||
-    compareValues(a.calendar.id, b.calendar.id) ||
-    compareValues(a.timeZone.id, b.timeZone.id)
 }
 
 export function addToZonedDateTime(
