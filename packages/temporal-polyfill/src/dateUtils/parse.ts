@@ -1,10 +1,11 @@
 import { Calendar, createDefaultCalendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
 import { DateISOFields, DateTimeISOFields } from '../public/types'
+import { excludeUndefined } from '../utils/obj'
 import { DateISOEssentials } from './date'
 import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
-import { DurationFields } from './duration'
+import { DurationFields, negateFields } from './duration'
 import { isoEpochLeapYear } from './isoMath'
 import { TimeISOEssentials, timeLikeToISO } from './time'
 import {
@@ -137,38 +138,41 @@ export function tryParseOffsetNano(str: string): number | undefined {
   }
 }
 
-function tryParseDurationISO(str: string): DurationFields | undefined {
-  const match = durationRegExp.exec(str)
+function tryParseDurationISO(str: string): Partial<DurationFields> | undefined {
+  const match = durationRegExp.exec(normalizeDashes(str))
   if (match) {
-    let hours: number
-    let minutes: number
-    let seconds: number
+    let hours: number | undefined
+    let minutes: number | undefined
+    let seconds: number | undefined
     let leftoverNano: number | undefined
 
     ([hours, leftoverNano] = parseDurationTimeUnit(match[8], match[10], HOUR, undefined));
     ([minutes, leftoverNano] = parseDurationTimeUnit(match[12], match[14], MINUTE, leftoverNano));
     ([seconds, leftoverNano] = parseDurationTimeUnit(match[16], match[18], SECOND, leftoverNano))
-    const small = nanoToDayTimeFields(BigInt(leftoverNano || 0), MILLISECOND)
 
-    const fields: DurationFields = {
-      years: toInt0(match[2]),
-      months: toInt0(match[3]),
-      weeks: toInt0(match[4]),
-      days: toInt0(match[5]),
+    let fields: Partial<DurationFields> = excludeUndefined({
+      years: toIntMaybe(match[2]),
+      months: toIntMaybe(match[3]),
+      weeks: toIntMaybe(match[4]),
+      days: toIntMaybe(match[5]),
       hours,
       minutes,
       seconds,
-      milliseconds: small.millisecond!,
-      microseconds: small.microsecond!,
-      nanoseconds: small.nanosecond!,
+    })
+
+    if (!Object.keys(fields).length) {
+      throw new RangeError('Duration string must have at least one field')
     }
 
+    const small = nanoToDayTimeFields(BigInt(leftoverNano || 0), MILLISECOND)
+    fields.milliseconds = small.millisecond
+    fields.microseconds = small.microsecond
+    fields.nanoseconds = small.nanosecond
+
     if (match[1] === '-') {
-      // flip the signs
-      for (const fieldName of Object.keys(fields)) { // guarantees own properties
-        fields[fieldName as keyof DurationFields] *= -1
-      }
+      fields = negateFields(fields)
     }
+
     return fields
   }
 }
@@ -178,7 +182,7 @@ function parseDurationTimeUnit(
   afterDecimal: string | undefined,
   unit: TimeUnitInt,
   leftoverNano: number | undefined,
-): [number, number | undefined] { // [wholeUnits, leftoverNano]
+): [number | undefined, number | undefined] { // [wholeUnits, leftoverNano]
   if (beforeDecimal !== undefined) {
     if (leftoverNano !== undefined) {
       throw new RangeError('Partial units must be last unit')
@@ -193,7 +197,7 @@ function parseDurationTimeUnit(
     const wholeUnits = Math.trunc(leftoverNano / nanoIn[unit])
     return [wholeUnits, leftoverNano - (wholeUnits * nanoIn[unit])]
   } else {
-    return [0, undefined]
+    return [undefined, undefined]
   }
 }
 
@@ -262,6 +266,10 @@ function toInt0(input: string | undefined): number { // 0-based
 
 function toInt1(input: string | undefined): number { // 1-based
   return parseInt(input || '1')
+}
+
+function toIntMaybe(input: string | undefined): number | undefined {
+  return input === undefined ? undefined : parseInt(input)
 }
 
 function normalizeDashes(str: string): string {

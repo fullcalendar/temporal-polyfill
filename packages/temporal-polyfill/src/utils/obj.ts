@@ -1,5 +1,5 @@
-
 export type ValueOf<T> = T[keyof T]
+type GenericHash = Record<string, unknown>
 
 // The `object` type is literally required for WeakMap
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -34,6 +34,16 @@ export function mapHash<Hash, ResType>(
   const res = {} as { [Key in keyof Hash]: ResType }
   for (const key in hash) {
     res[key] = func(hash[key], key)
+  }
+  return res
+}
+
+export function excludeUndefined(obj: GenericHash): GenericHash {
+  const res: GenericHash = {}
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      res[key] = obj[key]
+    }
   }
   return res
 }

@@ -183,9 +183,13 @@ describe('Duration', () => {
       equal(`${Duration.from('P1DT0,5H')}`, 'P1DT30M')
     })
     it('"P" by itself is not a valid string', () => {
-      ['P', 'PT', '-P', '-PT', '+P', '+PT'].forEach((s) => throws(() => Duration.from(s), RangeError))
+      ['P', 'PT', '-P', '-PT', '+P', '+PT'].forEach((s) => {
+        throws(() => Duration.from(s), RangeError)
+      })
     })
-    it('no junk at end of string', () => throws(() => Duration.from('P1Y1M1W1DT1H1M1.01Sjunk'), RangeError))
+    it('no junk at end of string', () => {
+      throws(() => Duration.from('P1Y1M1W1DT1H1M1.01Sjunk'), RangeError)
+    })
     it('with a + sign', () => {
       const d = Duration.from('+P1D')
       equal(d.days, 1)
