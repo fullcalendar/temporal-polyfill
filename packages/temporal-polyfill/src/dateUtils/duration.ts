@@ -45,17 +45,20 @@ import {
 } from './units'
 import { createZonedDateTime, diffAccurate } from './zonedDateTime'
 
-export interface DurationFields {
-  years: number
-  months: number
-  weeks: number
-  days: number
+export interface DurationTimeFields {
   hours: number
   minutes: number
   seconds: number
   milliseconds: number
   microseconds: number
   nanoseconds: number
+}
+
+export interface DurationFields extends DurationTimeFields {
+  years: number
+  months: number
+  weeks: number
+  days: number
 }
 
 export interface SignedDurationFields extends DurationFields {
@@ -75,6 +78,10 @@ export function refineDurationFields(fields: DurationLike): SignedDurationFields
         throw new RangeError('All fields must be same sign')
       }
       sign = fieldSign
+    }
+
+    if (fieldVal !== Math.trunc(fieldVal)) { // TODO: isInt util?
+      throw new RangeError('Duration fields must be integers')
     }
 
     res[fieldName as keyof DurationFields] = fieldVal

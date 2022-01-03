@@ -7,7 +7,17 @@ import { nanoToDayTimeFields } from './dayTime'
 import { DurationFields } from './duration'
 import { isoEpochLeapYear } from './isoMath'
 import { TimeISOEssentials, timeLikeToISO } from './time'
-import { MILLISECOND, nanoInHour, nanoInMinute, nanoInSecond } from './units'
+import {
+  HOUR,
+  MILLISECOND,
+  MINUTE,
+  SECOND,
+  TimeUnitInt,
+  nanoIn,
+  nanoInHour,
+  nanoInMinute,
+  nanoInSecond,
+} from './units'
 import { ZonedDateTimeISOEssentials } from './zonedDateTime'
 
 export type DateTimeParseResult = DateTimeISOEssentials & {
@@ -19,7 +29,7 @@ export type DateTimeParseResult = DateTimeISOEssentials & {
 
 const dateRegExpStr = '([+-]\\d{6}|\\d{4})-?(\\d{2})?-?(\\d{2})?'
 const monthDayRegExpStr = '(--)?(\\d{2})-?(\\d{2})?'
-const timeRegExpStr = '(\\d{2})?:?(\\d{2})?:?(\\d{2})?([.,](\\d+))?' // all parts optional
+const timeRegExpStr = '(\\d{2})?:?(\\d{2})?:?(\\d{2})?([.,](\\d{1,9}))?' // all parts optional
 const offsetRegExpStr = `([+-])${timeRegExpStr}` // hour onwards is optional
 const endingRegExpStr =
   `(Z|${offsetRegExpStr})?` +
@@ -38,7 +48,7 @@ const monthDayRegExp = createRegExp(
   monthDayRegExpStr +
   endingRegExpStr,
 )
-const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?((\d+)([.,](\d+))?S)?)?$/i
+const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T((\d+)([.,](\d{1,9}))?H)?((\d+)([.,](\d{1,9}))?M)?((\d+)([.,](\d{1,9}))?S)?)?$/i
 const zuluRegExp = /Z/i
 const unicodeDashRegExp = /\u2212/g
 
@@ -130,22 +140,29 @@ export function tryParseOffsetNano(str: string): number | undefined {
 function tryParseDurationISO(str: string): DurationFields | undefined {
   const match = durationRegExp.exec(str)
   if (match) {
-    const subSecondFields = nanoToDayTimeFields(
-      BigInt(subSecondStrToNano(match[12])),
-      MILLISECOND,
-    )
+    let hours: number
+    let minutes: number
+    let seconds: number
+    let leftoverNano: number | undefined
+
+    ([hours, leftoverNano] = parseDurationTimeUnit(match[8], match[10], HOUR, undefined));
+    ([minutes, leftoverNano] = parseDurationTimeUnit(match[12], match[14], MINUTE, leftoverNano));
+    ([seconds, leftoverNano] = parseDurationTimeUnit(match[16], match[18], SECOND, leftoverNano))
+    const small = nanoToDayTimeFields(BigInt(leftoverNano || 0), MILLISECOND)
+
     const fields: DurationFields = {
       years: toInt0(match[2]),
       months: toInt0(match[3]),
       weeks: toInt0(match[4]),
       days: toInt0(match[5]),
-      hours: toInt0(match[7]),
-      minutes: toInt0(match[8]),
-      seconds: toInt0(match[10]),
-      milliseconds: subSecondFields.millisecond!,
-      microseconds: subSecondFields.microsecond!,
-      nanoseconds: subSecondFields.nanosecond!,
+      hours,
+      minutes,
+      seconds,
+      milliseconds: small.millisecond!,
+      microseconds: small.microsecond!,
+      nanoseconds: small.nanosecond!,
     }
+
     if (match[1] === '-') {
       // flip the signs
       for (const fieldName of Object.keys(fields)) { // guarantees own properties
@@ -156,11 +173,35 @@ function tryParseDurationISO(str: string): DurationFields | undefined {
   }
 }
 
+function parseDurationTimeUnit(
+  beforeDecimal: string | undefined,
+  afterDecimal: string | undefined,
+  unit: TimeUnitInt,
+  leftoverNano: number | undefined,
+): [number, number | undefined] { // [wholeUnits, leftoverNano]
+  if (beforeDecimal !== undefined) {
+    if (leftoverNano !== undefined) {
+      throw new RangeError('Partial units must be last unit')
+    }
+    return [
+      parseInt(beforeDecimal),
+      afterDecimal !== undefined
+        ? parseNanoAfterDecimal(afterDecimal) * (nanoIn[unit] / nanoInSecond) // mult by # of secs
+        : undefined,
+    ]
+  } else if (leftoverNano !== undefined) {
+    const wholeUnits = Math.trunc(leftoverNano / nanoIn[unit])
+    return [wholeUnits, leftoverNano - (wholeUnits * nanoIn[unit])]
+  } else {
+    return [0, undefined]
+  }
+}
+
 // parsing of string parts
 
 function parseDateParts(parts: string[]): DateISOEssentials {
   return {
-    isoYear: toInt1(parts[0]),
+    isoYear: toInt1(parts[0]), // TODO: default to epoch year?
     isoMonth: toInt1(parts[1]),
     isoDay: toInt1(parts[2]),
   }
@@ -179,7 +220,7 @@ function parseTimeParts(parts: string[]): TimeISOEssentials {
   return {
     ...timeLikeToISO( // properties like isoMillisecond/isoMicrosecond
       nanoToDayTimeFields( // properties like millisecond/microsecond
-        BigInt(subSecondStrToNano(parts[4])),
+        BigInt(parseNanoAfterDecimal(parts[4] || '')),
         MILLISECOND,
       ),
     ),
@@ -205,11 +246,12 @@ function timePartsToNano(parts: string[]): number {
   return toInt0(parts[0]) * nanoInHour +
     toInt0(parts[1]) * nanoInMinute +
     toInt0(parts[2]) * nanoInSecond +
-    subSecondStrToNano(parts[4])
+    parseNanoAfterDecimal(parts[4] || '') // nanoseconds
 }
 
-function subSecondStrToNano(str: string | undefined): number {
-  return parseInt((str || '').padEnd(9, '0').substr(0, 9))
+// assumes 9 digits
+function parseNanoAfterDecimal(str: string): number {
+  return parseInt(str.padEnd(9, '0'))
 }
 
 // general utils
