@@ -8,13 +8,12 @@ import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZon
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { TimeISOEssentials } from '../dateUtils/time'
 import { DateISOFields } from '../public/types'
-import { numSign } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { DateISOEssentials } from './date'
 import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { SignedDurationFields } from './duration'
-import { HOUR, MINUTE, SECOND, nanoInMicro, nanoInMilli, nanoInSecond } from './units'
+import { HOUR, MINUTE, SECOND, nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from './units'
 
 // given ISO fields should already be rounded
 export function formatDateTimeISO(
@@ -156,20 +155,20 @@ function formatPartialSeconds(
   fractionalSecondDigits: number | undefined,
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
   const totalNano =
-    nanoseconds +
-    microseconds * nanoInMicro +
-    milliseconds * nanoInMilli
-  const totalNanoAbs = Math.abs(totalNano) // in case of negative duration fields
-  const seconds = Math.floor(totalNanoAbs / nanoInSecond)
-  const leftoverNano = totalNanoAbs - (seconds * nanoInSecond)
+    BigInt(nanoseconds) +
+    BigInt(microseconds) * nanoInMicroBI +
+    BigInt(milliseconds) * nanoInMilliBI
+  const totalNanoAbs = totalNano < 0 ? -totalNano : totalNano // TODO: util for abs() for bigints
+  const seconds = totalNanoAbs / nanoInSecondBI
+  const leftoverNano = totalNanoAbs - (seconds * nanoInSecondBI)
 
-  let afterDecimal = padZeros(leftoverNano, 9)
+  let afterDecimal = padZeros(Number(leftoverNano), 9)
   afterDecimal = fractionalSecondDigits === undefined
     ? afterDecimal.replace(/0+$/, '') // strip trailing zeros
     : afterDecimal.substr(0, fractionalSecondDigits)
 
   return [
     afterDecimal ? '.' + afterDecimal : '',
-    seconds * numSign(totalNano), // restore sign
+    Number(seconds) * (totalNano < 0 ? -1 : 1), // restore sign (TODO: sign util for bigints)
   ]
 }
