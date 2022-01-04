@@ -61,6 +61,7 @@ export function roundBalancedDuration(
     // other rounding techniques operate on final number
     doRound()
   }
+  // TODO: instead of this mess, have a halfExpandDirection arg
 
   let resDuration = createDuration(durationLike)
 

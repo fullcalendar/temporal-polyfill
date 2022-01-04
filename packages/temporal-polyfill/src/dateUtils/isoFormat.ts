@@ -8,12 +8,13 @@ import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZon
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { TimeISOEssentials } from '../dateUtils/time'
 import { DateISOFields } from '../public/types'
+import { numSign } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { DateISOEssentials } from './date'
 import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { SignedDurationFields } from './duration'
-import { HOUR, MINUTE, SECOND, nanoInMicro, nanoInMilli } from './units'
+import { HOUR, MINUTE, SECOND, nanoInMicro, nanoInMilli, nanoInSecond } from './units'
 
 // given ISO fields should already be rounded
 export function formatDateTimeISO(
@@ -59,7 +60,7 @@ export function formatTimeISO(
             fields.isoMicrosecond,
             fields.isoNanosecond,
             formatConfig.fractionalSecondDigits,
-          ),
+          )[0],
       )
     }
   }
@@ -104,15 +105,20 @@ export function formatDurationISO(
   formatConfig: DurationToStringConfig,
 ): string {
   const { smallestUnit, fractionalSecondDigits } = formatConfig
-  const { sign, hours, minutes, seconds } = fields
-  const partialSecondsStr = smallestUnit < SECOND
-    ? formatPartialSeconds(
+  let { sign, hours, minutes, seconds } = fields
+  let partialSecondsStr = ''
+
+  if (smallestUnit < SECOND) {
+    const res = formatPartialSeconds(
       fields.milliseconds,
       fields.microseconds,
       fields.nanoseconds,
       fractionalSecondDigits,
     )
-    : ''
+    partialSecondsStr = res[0]
+    seconds += res[1]
+  }
+
   return (sign < 0 ? '-' : '') + 'P' +
     collapseDurationTuples([
       [fields.years, 'Y'],
@@ -148,17 +154,22 @@ function formatPartialSeconds(
   microseconds: number,
   nanoseconds: number,
   fractionalSecondDigits: number | undefined,
-): string {
-  const totalNano = Math.abs( // abs() in case of negative duration fields
+): [string, number] { // [afterDecimalStr, secondsOverflow]
+  const totalNano =
     nanoseconds +
     microseconds * nanoInMicro +
-    milliseconds * nanoInMilli,
-  )
+    milliseconds * nanoInMilli
+  const totalNanoAbs = Math.abs(totalNano) // in case of negative duration fields
+  const seconds = Math.floor(totalNanoAbs / nanoInSecond)
+  const leftoverNano = totalNanoAbs - (seconds * nanoInSecond)
 
-  let afterDecimal = padZeros(totalNano, 9)
+  let afterDecimal = padZeros(leftoverNano, 9)
   afterDecimal = fractionalSecondDigits === undefined
     ? afterDecimal.replace(/0+$/, '') // strip trailing zeros
     : afterDecimal.substr(0, fractionalSecondDigits)
 
-  return afterDecimal ? '.' + afterDecimal : ''
+  return [
+    afterDecimal ? '.' + afterDecimal : '',
+    seconds * numSign(totalNano), // restore sign
+  ]
 }
