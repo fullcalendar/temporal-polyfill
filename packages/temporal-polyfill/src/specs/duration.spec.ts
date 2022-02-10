@@ -863,12 +863,24 @@ describe('Duration', () => {
     const d1 = Duration.from('P3DT1H')
     const d1again = Duration.from('P3DT1H')
     const d2 = Duration.from('PT2H20M30S')
-    it('=== is object equality', () => equal(d1, d1))
-    it('!== is object equality', () => notEqual(d1, d1again))
-    it('<', () => throws(() => d1 < d2))
-    it('>', () => throws(() => d1 > d2))
-    it('<=', () => throws(() => d1 <= d2))
-    it('>=', () => throws(() => d1 >= d2))
+    it('=== is object equality', () => {
+      equal(d1, d1)
+    })
+    it('!== is object equality', () => {
+      notEqual(d1, d1again)
+    })
+    it('<', () => {
+      throws(() => d1 < d2)
+    })
+    it('>', () => {
+      throws(() => d1 > d2)
+    })
+    it('<=', () => {
+      throws(() => d1 <= d2)
+    })
+    it('>=', () => {
+      throws(() => d1 >= d2)
+    })
   })
   describe('Duration.negated()', () => {
     it('makes a positive duration negative', () => {
