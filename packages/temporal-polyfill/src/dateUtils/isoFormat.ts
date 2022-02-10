@@ -8,12 +8,22 @@ import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZon
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { TimeISOEssentials } from '../dateUtils/time'
 import { DateISOFields } from '../public/types'
+import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { DateISOEssentials } from './date'
 import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { SignedDurationFields } from './duration'
-import { HOUR, MINUTE, SECOND, nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from './units'
+import {
+  HOUR,
+  MINUTE,
+  SECOND,
+  nanoInMicroBI,
+  nanoInMilliBI,
+  nanoInSecondBI,
+  nanoIn,
+  TimeUnitInt,
+} from './units'
 
 // given ISO fields should already be rounded
 export function formatDateTimeISO(
@@ -107,12 +117,14 @@ export function formatDurationISO(
   let { sign, hours, minutes, seconds } = fields
   let partialSecondsStr = ''
 
-  if (smallestUnit < SECOND) {
+  if (smallestUnit <= SECOND) { // should be just less-than!!?
     const res = formatPartialSeconds(
       fields.milliseconds,
       fields.microseconds,
       fields.nanoseconds,
       fractionalSecondDigits,
+      formatConfig.roundingMode,
+      formatConfig.smallestUnit,
     )
     partialSecondsStr = res[0]
     seconds += res[1]
@@ -153,11 +165,26 @@ function formatPartialSeconds(
   microseconds: number,
   nanoseconds: number,
   fractionalSecondDigits: number | undefined,
+  roundingFunc?: RoundingFunc, // HACK
+  smallestUnit?: TimeUnitInt, // HACK
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
-  const totalNano =
+  let totalNano =
     BigInt(nanoseconds) +
     BigInt(microseconds) * nanoInMicroBI +
     BigInt(milliseconds) * nanoInMilliBI
+
+  // HACK. sometimes input is pre-rounded, other times not
+  // not DRY. search for Math.pow
+  if (roundingFunc) {
+    totalNano = roundToIncrementBI(
+      totalNano,
+      fractionalSecondDigits === undefined
+        ? nanoIn[smallestUnit!]
+        : Math.pow(10, 9 - fractionalSecondDigits),
+      roundingFunc,
+    )
+  }
+
   const totalNanoAbs = totalNano < 0 ? -totalNano : totalNano // TODO: util for abs() for bigints
   const seconds = totalNanoAbs / nanoInSecondBI
   const leftoverNano = totalNanoAbs - (seconds * nanoInSecondBI)
