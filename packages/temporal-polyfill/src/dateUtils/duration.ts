@@ -80,7 +80,7 @@ export function refineDurationFields(fields: DurationLike): SignedDurationFields
       sign = fieldSign
     }
 
-    if (fieldVal !== Math.trunc(fieldVal)) { // TODO: isInt util?
+    if (!Number.isInteger(fieldVal)) {
       throw new RangeError('Duration fields must be integers')
     }
 
