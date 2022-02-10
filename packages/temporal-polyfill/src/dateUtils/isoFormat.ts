@@ -156,7 +156,8 @@ export function formatDurationISO(
 function collapseDurationTuples(tuples: [number, string, unknown?][]): string {
   return tuples.map(([num, postfix, forceShow]) => {
     if (forceShow || num) {
-      return Math.abs(num) + postfix
+      return BigInt(Math.abs(num)) + // casting to BigInt ensures no scientific notation
+        postfix
     }
     return ''
   }).join('')

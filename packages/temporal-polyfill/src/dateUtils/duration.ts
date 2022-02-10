@@ -107,8 +107,8 @@ export function createDuration(fields: DurationLike): Duration {
 }
 
 export function addAndBalanceDurations(
-  d0: Duration,
-  d1: Duration,
+  d0: Duration, // should be added to relativeToArg FIRST
+  d1: Duration, // should be added to relativeToArg SECOND
   relativeToArg: ZonedDateTimeArg | DateTimeArg | undefined,
 ): Duration {
   const dayTimeFields0 = durationToDayTimeFields(d0)
@@ -126,11 +126,9 @@ export function addAndBalanceDurations(
     )
   }
 
-  return balanceComplexDuration(
-    addDurations(d0, d1),
-    largestUnit,
-    getMaybeZonedRelativeTo(relativeToArg),
-  )[0]
+  let relativeTo = getMaybeZonedRelativeTo(relativeToArg)
+  let translated = relativeTo.add(d0).add(d1)
+  return diffAccurate(relativeTo, translated, largestUnit)
 }
 
 // no balancing
@@ -311,7 +309,7 @@ export function timeFieldsToDuration(fields: TimeFields): Duration {
 }
 
 export function durationToDayTimeFields(duration: Duration): DayTimeFields | undefined {
-  if (!duration.years && !duration.months) {
+  if (!duration.years && !duration.months && !duration.weeks) {
     return {
       day: duration.days,
       ...durationToTimeFields(duration),
@@ -364,7 +362,7 @@ function getMaybeZonedRelativeTo(
   arg: ZonedDateTimeArg | DateTimeArg | undefined,
 ): ZonedDateTime | PlainDateTime {
   if (arg === undefined) {
-    throw new Error('Need relativeTo') // TODO: reusable (how to mark function as "throwing"?)
+    throw new RangeError('Need relativeTo') // TODO: reusable (how to mark function as "throwing"?)
   } else if (typeof arg === 'object') {
     if ((arg as ZonedDateTimeLike).timeZone !== undefined) {
       return ZonedDateTime.from(arg as ZonedDateTimeLike)
@@ -387,7 +385,7 @@ function getMaybeZonedRelativeTo(
 
 export function getPlainRelativeTo(arg: DateTimeArg | undefined): PlainDateTime {
   if (arg === undefined) {
-    throw new Error('Need relativeTo') // TODO: reusable
+    throw new RangeError('Need relativeTo') // TODO: reusable
   }
   return ensureObj(PlainDateTime, arg)
 }
