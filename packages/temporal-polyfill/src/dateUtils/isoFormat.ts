@@ -135,9 +135,9 @@ export function formatDurationISO(
       [fields.years, 'Y'],
       [fields.months, 'M'],
       [fields.weeks, 'W'],
-      [fields.days, 'D', !sign], // ensures 'P0D' if empty duration
+      [fields.days, 'D'],
     ]) +
-    (hours || minutes || seconds || partialSecondsStr
+    (hours || minutes || seconds || partialSecondsStr || !sign // see below for last 2 conditions
       ? 'T' +
       collapseDurationTuples([
         [hours, 'H'],
@@ -145,7 +145,9 @@ export function formatDurationISO(
         [
           smallestUnit <= SECOND ? seconds : 0,
           partialSecondsStr + 'S',
-          partialSecondsStr, // ensures seconds if partialSecondsStr
+          partialSecondsStr || !sign,
+          // ^^^ ensures seconds if partialSecondsStr OR
+          // OR ensures 'PT0S' if completely empty
         ],
       ])
       : '')
