@@ -4,9 +4,10 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { yearMonthFieldMap } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
+import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO, diffDates } from '../dateUtils/date'
-import { formatCalendarID, formatYearMonthISO } from '../dateUtils/isoFormat'
+import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
 import { isoFieldsToEpochMilli, validateYearMonth } from '../dateUtils/isoMath'
 import {
   YearMonthCalendarFields,
@@ -119,10 +120,14 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 
   toString(options?: DateToStringOptions): string {
     const fields = this.getISOFields()
+    const calendarID = fields.calendar.id
     const calendarDisplay = parseCalendarDisplayOption(options)
 
-    return formatYearMonthISO(fields) +
-      formatCalendarID((fields.calendar as Calendar).id, calendarDisplay)
+    return (
+      calendarID === isoCalendarID
+        ? formatYearMonthISO(fields)
+        : formatDateISO(fields)
+    ) + formatCalendarID(calendarID, calendarDisplay)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
