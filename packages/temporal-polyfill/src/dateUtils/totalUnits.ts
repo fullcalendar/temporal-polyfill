@@ -21,7 +21,7 @@ export function computeTotalUnits(
     return Number(dayTimeFieldsToNano(fields) / BigInt(nanoIn[unit]))
   }
   const relativeTo = extractRelativeTo(relativeToArg) // throws an exception if undefined
-  const [balancedDuration, translatedDate] = balanceComplexDuration(
+  const balancedDuration = balanceComplexDuration(
     duration,
     unit,
     relativeTo,
@@ -30,7 +30,7 @@ export function computeTotalUnits(
     balancedDuration,
     unit,
     relativeTo,
-    translatedDate,
+    relativeTo.add(balancedDuration),
   )
   return durationLike[durationUnitNames[unit]]! // computeExactDuration guarantees this
 }

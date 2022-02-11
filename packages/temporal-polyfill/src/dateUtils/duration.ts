@@ -174,7 +174,7 @@ export function balanceDuration(
       relativeTo,
     )[0]
   } else {
-    return balanceComplexDuration(duration, largestUnit, relativeTo)[0]
+    return balanceComplexDuration(duration, largestUnit, relativeTo)
   }
 }
 
@@ -194,10 +194,22 @@ export function balanceComplexDuration<T extends (ZonedDateTime | PlainDateTime)
   duration: Duration,
   largestUnit: UnitInt,
   relativeTo: T,
-): [Duration, T] {
+): Duration {
+  // balancing does not care about weeks
+  const forcedWeeks = largestUnit > WEEK && duration.weeks
+  if (forcedWeeks) {
+    duration = duration.with({ weeks: 0 })
+  }
+
   const translated = relativeTo.add(duration) as T
-  const balancedDuration = diffAccurate(relativeTo, translated, largestUnit)
-  return [balancedDuration, translated]
+  let balancedDuration = diffAccurate(relativeTo, translated, largestUnit)
+
+  // add weeks back in
+  if (forcedWeeks) {
+    balancedDuration = addDurations(balancedDuration, new Duration(0, 0, forcedWeeks))
+  }
+
+  return balancedDuration
 }
 
 export function roundAndBalanceDuration(
@@ -208,12 +220,6 @@ export function roundAndBalanceDuration(
     throw new TypeError('Must specify options') // best place for this?
   } else if (options.largestUnit === undefined && options.smallestUnit === undefined) {
     throw new RangeError('Must specify either largestUnit or smallestUnit')
-  }
-
-  // HACK. don't consider weeks when balancing
-  const { weeks } = duration
-  if (weeks) {
-    duration = duration.with({ weeks: 0 })
   }
 
   const defaultLargestUnit = computeLargestDurationUnit(duration)
@@ -243,25 +249,22 @@ export function roundAndBalanceDuration(
     return dayTimeFieldsToDuration(roundedFields)
   }
 
+  // moral of story:
+  // don't rely on Calendar::dateUntil to do balancing. Have no control over weeks
+
   const relativeTo = extractRelativeTo(options.relativeTo)
-  const [balancedDuration, translatedDate] = balanceComplexDuration(
+  const balancedDuration = balanceComplexDuration(
     duration,
     largestUnit,
     relativeTo,
   )
 
-  let resDuration = roundBalancedDuration(
+  return roundBalancedDuration(
     balancedDuration,
     diffConfig,
     relativeTo,
-    translatedDate,
+    relativeTo.add(balancedDuration),
   )
-
-  if (weeks) {
-    resDuration = addDurations(resDuration, new Duration(0, 0, weeks))
-  }
-
-  return resDuration
 }
 
 export function computeLargestDurationUnit(dur: Duration): UnitInt {
