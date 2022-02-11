@@ -2,6 +2,7 @@ import { PlainMonthDay } from '../public/plainMonthDay'
 import { CompareResult, DateISOFields, MonthDayLikeFields } from '../public/types'
 import { compareValues } from '../utils/math'
 import { DateEssentials } from './date'
+import { isoFieldsToEpochNano } from './isoMath'
 
 export type MonthDayFields = {
   era: string
@@ -61,9 +62,8 @@ export function overrideMonthDayFields(
 }
 
 export function monthDaysEqual(a: PlainMonthDay, b: PlainMonthDay): boolean {
-  return a.monthCode === b.monthCode &&
-    a.day === b.day &&
-    a.calendar.id === b.calendar.id
+  return a.calendar.id === b.calendar.id &&
+    isoFieldsToEpochNano(a.getISOFields()) === isoFieldsToEpochNano(b.getISOFields())
 }
 
 // unlike other utils, operated with *DateEssentials* fields
