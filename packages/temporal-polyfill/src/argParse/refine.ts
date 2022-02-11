@@ -99,7 +99,7 @@ export function ensureOptionsObj<OptionsType>(
 const objectLikeTypeRE = /object|function/
 
 export function isObjectLike(v: any): v is Record<string, unknown> {
-  return objectLikeTypeRE.test(typeof v)
+  return v !== null && objectLikeTypeRE.test(typeof v)
 }
 
 const invalidOverrideFields = ['calendar', 'timeZone']

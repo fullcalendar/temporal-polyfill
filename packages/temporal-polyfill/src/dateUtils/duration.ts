@@ -400,6 +400,11 @@ function getMaybeZonedRelativeTo(
 export function extractRelativeTo(
   arg: ZonedDateTimeArg | DateTimeArg | undefined
 ): ZonedDateTime | PlainDateTime {
+  if (arg === undefined) {
+    // throws a RangeError as opposed to a TypeError because relativeTo is part of a larger obj
+    throw new RangeError('Must specify relativeTo')
+  }
+
   if (isObjectLike(arg)) {
     if (arg instanceof ZonedDateTime || arg instanceof PlainDateTime) {
       return arg
@@ -410,18 +415,26 @@ export function extractRelativeTo(
         : PlainDateTime,
       arg as ZonedDateTimeLike
     )
-  } else if (arg !== undefined) {
-    let parsed = tryParseDateTimeISO(String(arg))
-    if (parsed) {
-      if (parsed.timeZone !== undefined) {
-        return createZonedDateTime(refineZonedDateTimeParse(parsed), undefined, OFFSET_REJECT)
-      } else {
-        return createDateTime(refineDateTimeParse(parsed))
-      }
+  }
+
+  // assume a string...
+
+  // TODO: general toString util for ALL parsing that prevents parsing symbols
+  // https://github.com/ljharb/es-abstract/blob/main/2020/ToString.js
+  if (typeof arg === 'symbol') {
+    throw new TypeError('Incorrect relativeTo type')
+  }
+
+  let parsed = tryParseDateTimeISO(String(arg))
+  if (parsed) {
+    if (parsed.timeZone !== undefined) {
+      return createZonedDateTime(refineZonedDateTimeParse(parsed), undefined, OFFSET_REJECT)
+    } else {
+      return createDateTime(refineDateTimeParse(parsed))
     }
   }
 
-  throw new RangeError('Invalid relativeTo')
+  throw new RangeError('Invalid value of relativeTo')
 }
 
 type NumberHash = { [fieldName: string]: number }
