@@ -86,8 +86,9 @@ describe('MonthDay', () => {
       it('MonthDay.from({ day: 15 }) throws', () => {
         throws(() => PlainMonthDay.from({ day: 15 } as InvalidArg), TypeError)
       })
-      it('MonthDay.from({ monthCode: "M12" }) throws', () =>
-        throws(() => PlainMonthDay.from({ monthCode: 'M12' } as InvalidArg), TypeError))
+      it('MonthDay.from({ monthCode: "M12" }) throws', () => {
+        throws(() => PlainMonthDay.from({ monthCode: 'M12' } as InvalidArg), TypeError)
+      })
       it('MonthDay.from({}) throws', () => {
         throws(() => PlainMonthDay.from({} as InvalidArg), TypeError)
       })
@@ -168,8 +169,9 @@ describe('MonthDay', () => {
         it("rejects when year isn't a leap year", () => {
           throws(() => PlainMonthDay.from({ month: 2, day: 29, year: 2001 }, { overflow: 'reject' }), RangeError)
         })
-        it('constrains non-leap year', () =>
-          equal(`${PlainMonthDay.from({ month: 2, day: 29, year: 2001 }, { overflow: 'constrain' })}`, '02-28'))
+        it('constrains non-leap year', () => {
+          equal(`${PlainMonthDay.from({ month: 2, day: 29, year: 2001 }, { overflow: 'constrain' })}`, '02-28')
+        })
       })
       describe('Leap day with calendar', () => {
         it('requires year with calendar', () => {
