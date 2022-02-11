@@ -4,6 +4,8 @@ import { compareValues } from '../utils/math'
 import { DateEssentials } from './date'
 
 export type MonthDayFields = {
+  era: string
+  eraYear: number
   year: number
   month: number
   monthCode: string
@@ -16,6 +18,8 @@ export type MonthDayEssentials = {
 }
 
 export const monthDayFieldMap = {
+  era: String,
+  eraYear: Number,
   year: Number,
   month: Number,
   monthCode: String,

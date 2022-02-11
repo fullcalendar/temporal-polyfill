@@ -37,7 +37,11 @@ export class ISOCalendarImpl extends CalendarImpl {
     return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
   }
 
-  monthYear(): number {
+  normalizeYearFromMonthCode(): number {
+    return isoEpochLeapYear
+  }
+
+  normalizeYearFromMonth(): number {
     return isoEpochLeapYear
   }
 }

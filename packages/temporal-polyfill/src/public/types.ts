@@ -112,7 +112,7 @@ export type YearMonthLikeFields =
   ({ era: string, eraYear: number } | { year: number }) &
   ({ month: number } | { monthCode: string })
 export type MonthDayLikeFields =
-  ({ monthCode: string } | { year: number, month: number }) &
+  ({ monthCode: string } | (({ year: number } | { era: string, eraYear: number }) & { month: number })) &
   { day: number }
 export type DateLikeFields = YearMonthLikeFields & { day: number }
 export type DateTimeLikeFields = DateLikeFields & Partial<TimeFields>

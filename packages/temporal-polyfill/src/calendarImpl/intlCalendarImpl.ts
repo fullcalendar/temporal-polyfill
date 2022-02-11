@@ -95,10 +95,22 @@ export class IntlCalendarImpl extends CalendarImpl {
       days > computeDaysInYear(this, year + 1)
   }
 
-  monthYear(monthCode: string, day: number): number {
+  normalizeYearFromMonthCode(year: number | undefined, monthCode: string, day: number): number {
+    if (year === undefined) {
+      year = this.guessYearFromMonthCode(monthCode, day)
+    }
+    return year
+  }
+
+  normalizeYearFromMonth(year: number): number {
+    return year
+  }
+
+  private guessYearFromMonthCode(monthCode: string, day: number): number {
     let year = isoEpochOriginYear + this.yearCorrection
-    const endYear = year + 100
-    for (; year < endYear; year++) {
+    const maxYear = year + 100
+
+    for (; year < maxYear; year++) {
       const month = this.convertMonthCode(monthCode, year)
       if (
         month <= this.monthsInYear(year) &&
@@ -108,7 +120,7 @@ export class IntlCalendarImpl extends CalendarImpl {
       }
     }
 
-    throw new Error('Could not guess year')
+    throw new Error('Could not guess year') // TODO: better
   }
 
   private ensureYear(year: number): void {

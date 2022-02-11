@@ -181,18 +181,22 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
   monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay {
     const impl = getImpl(this)
-    let { year, monthCode, day } = fields as Partial<MonthDayFields>
+    let { era, eraYear, year, monthCode, month, day } = fields as Partial<MonthDayFields>
 
     if (day === undefined) {
       throw new TypeError('required property \'day\' missing or undefined')
     }
 
-    if (year === undefined) {
-      if (monthCode !== undefined) {
-        year = impl.monthYear(monthCode, day)
-      } else {
-        throw new TypeError('either year or monthCode required with month')
-      }
+    if (era !== undefined && eraYear !== undefined) {
+      year = impl.convertEraYear(eraYear, era)
+    }
+
+    if (monthCode !== undefined) {
+      year = impl.normalizeYearFromMonthCode(year, monthCode, day)
+    } else if (year !== undefined && month !== undefined) {
+      year = impl.normalizeYearFromMonth(year, month, day)
+    } else {
+      throw new TypeError('either year or monthCode required with month')
     }
 
     const isoFields = queryDateISOFields(
