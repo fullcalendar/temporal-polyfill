@@ -1733,30 +1733,62 @@ describe('Duration', () => {
     describe('time units only', () => {
       const d1 = new Duration(0, 0, 0, 0, 5, 5, 5, 5, 5, 5)
       const d2 = new Duration(0, 0, 0, 0, 5, 4, 5, 5, 5, 5)
-      it('equal', () => equal(Duration.compare(d1, d1), 0))
-      it('smaller/larger', () => equal(Duration.compare(d2, d1), -1))
-      it('larger/smaller', () => equal(Duration.compare(d1, d2), 1))
-      it('negative/negative equal', () => equal(Duration.compare(d1.negated(), d1.negated()), 0))
-      it('negative/negative smaller/larger', () => equal(Duration.compare(d2.negated(), d1.negated()), 1))
-      it('negative/negative larger/smaller', () => equal(Duration.compare(d1.negated(), d2.negated()), -1))
-      it('negative/positive', () => equal(Duration.compare(d1.negated(), d2), -1))
-      it('positive/negative', () => equal(Duration.compare(d1, d2.negated()), 1))
+      it('equal', () => {
+        equal(Duration.compare(d1, d1), 0)
+      })
+      it('smaller/larger', () => {
+        equal(Duration.compare(d2, d1), -1)
+      })
+      it('larger/smaller', () => {
+        equal(Duration.compare(d1, d2), 1)
+      })
+      it('negative/negative equal', () => {
+        equal(Duration.compare(d1.negated(), d1.negated()), 0)
+      })
+      it('negative/negative smaller/larger', () => {
+        equal(Duration.compare(d2.negated(), d1.negated()), 1)
+      })
+      it('negative/negative larger/smaller', () => {
+        equal(Duration.compare(d1.negated(), d2.negated()), -1)
+      })
+      it('negative/positive', () => {
+        equal(Duration.compare(d1.negated(), d2), -1)
+      })
+      it('positive/negative', () => {
+        equal(Duration.compare(d1, d2.negated()), 1)
+      })
     })
     describe('date units', () => {
       const d1 = new Duration(5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
       const d2 = new Duration(5, 5, 5, 5, 5, 4, 5, 5, 5, 5)
       const relativeTo = PlainDateTime.from('2017-01-01')
-      it('relativeTo is required', () => throws(() => Duration.compare(d1, d2), RangeError)) // **this line was corrected**
-      it('equal', () => equal(Duration.compare(d1, d1, { relativeTo }), 0))
-      it('smaller/larger', () => equal(Duration.compare(d2, d1, { relativeTo }), -1))
-      it('larger/smaller', () => equal(Duration.compare(d1, d2, { relativeTo }), 1))
-      it('negative/negative equal', () => equal(Duration.compare(d1.negated(), d1.negated(), { relativeTo }), 0))
-      it('negative/negative smaller/larger', () =>
-        equal(Duration.compare(d2.negated(), d1.negated(), { relativeTo }), 1))
-      it('negative/negative larger/smaller', () =>
-        equal(Duration.compare(d1.negated(), d2.negated(), { relativeTo }), -1))
-      it('negative/positive', () => equal(Duration.compare(d1.negated(), d2, { relativeTo }), -1))
-      it('positive/negative', () => equal(Duration.compare(d1, d2.negated(), { relativeTo }), 1))
+      it('relativeTo is required', () => {
+        throws(() => Duration.compare(d1, d2), RangeError) // **this line was corrected**
+      })
+      it('equal', () => {
+        equal(Duration.compare(d1, d1, { relativeTo }), 0)
+      })
+      it('smaller/larger', () => {
+        equal(Duration.compare(d2, d1, { relativeTo }), -1)
+      })
+      it('larger/smaller', () => {
+        equal(Duration.compare(d1, d2, { relativeTo }), 1)
+      })
+      it('negative/negative equal', () => {
+        equal(Duration.compare(d1.negated(), d1.negated(), { relativeTo }), 0)
+      })
+      it('negative/negative smaller/larger', () => {
+        equal(Duration.compare(d2.negated(), d1.negated(), { relativeTo }), 1)
+      })
+      it('negative/negative larger/smaller', () => {
+        equal(Duration.compare(d1.negated(), d2.negated(), { relativeTo }), -1)
+      })
+      it('negative/positive', () => {
+        equal(Duration.compare(d1.negated(), d2, { relativeTo }), -1)
+      })
+      it('positive/negative', () => {
+        equal(Duration.compare(d1, d2.negated(), { relativeTo }), 1)
+      })
     })
     it('casts first argument', () => {
       equal(Duration.compare({ hours: 12 }, new Duration()), 1)
