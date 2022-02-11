@@ -113,8 +113,11 @@ export function formatDurationISO(
   fields: SignedDurationFields,
   formatConfig: DurationToStringConfig,
 ): string {
-  const { smallestUnit, fractionalSecondDigits } = formatConfig
-  let { sign, hours, minutes, seconds } = fields
+  const { smallestUnit, fractionalSecondDigits, roundingMode } = formatConfig
+  let { sign } = fields
+  let hours = BigInt(fields.hours)
+  let minutes = BigInt(fields.minutes)
+  let seconds = BigInt(fields.seconds)
   let partialSecondsStr = ''
 
   if (smallestUnit <= SECOND) { // should be just less-than!!?
@@ -123,19 +126,19 @@ export function formatDurationISO(
       fields.microseconds,
       fields.nanoseconds,
       fractionalSecondDigits,
-      formatConfig.roundingMode,
-      formatConfig.smallestUnit,
+      roundingMode,
+      smallestUnit,
     )
     partialSecondsStr = res[0]
-    seconds += res[1]
+    seconds += BigInt(res[1])
   }
 
   return (sign < 0 ? '-' : '') + 'P' +
     collapseDurationTuples([
-      [fields.years, 'Y'],
-      [fields.months, 'M'],
-      [fields.weeks, 'W'],
-      [fields.days, 'D'],
+      [BigInt(fields.years), 'Y'],
+      [BigInt(fields.months), 'M'],
+      [BigInt(fields.weeks), 'W'],
+      [BigInt(fields.days), 'D'],
     ]) +
     (hours || minutes || seconds || partialSecondsStr || !sign // see below for last 2 conditions
       ? 'T' +
@@ -143,7 +146,7 @@ export function formatDurationISO(
         [hours, 'H'],
         [minutes, 'M'],
         [
-          smallestUnit <= SECOND ? seconds : 0,
+          smallestUnit <= SECOND ? seconds : BigInt(0), // TODO: BigInt(0) const
           partialSecondsStr + 'S',
           partialSecondsStr || !sign,
           // ^^^ ensures seconds if partialSecondsStr OR
@@ -153,11 +156,12 @@ export function formatDurationISO(
       : '')
 }
 
-function collapseDurationTuples(tuples: [number, string, unknown?][]): string {
+// use BigInts, because less likely to overflow and formatting never does scientific notation
+function collapseDurationTuples(tuples: [BigInt, string, unknown?][]): string {
   return tuples.map(([num, postfix, forceShow]) => {
     if (forceShow || num) {
-      return BigInt(Math.abs(num)) + // casting to BigInt ensures no scientific notation
-        postfix
+      // TODO: make BigInt Math.abs util
+      return (num < BigInt(0) ? -num : num) + postfix
     }
     return ''
   }).join('')
