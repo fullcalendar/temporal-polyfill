@@ -40,17 +40,26 @@ describe('YearMonth', () => {
       equal(getYearMonth().monthsInYear, 12)
     })
     describe('.from()', () => {
-      it('YearMonth.from(2019-10) == 2019-10', () => equal(`${PlainYearMonth.from('2019-10')}`, '2019-10'))
+      it('YearMonth.from(2019-10) == 2019-10', () =>  {
+        equal(`${PlainYearMonth.from('2019-10')}`, '2019-10')
+      })
       it('YearMonth.from(2019-10-01T09:00:00Z) == 2019-10', () =>
         equal(`${PlainYearMonth.from('2019-10-01T09:00:00Z')}`, '2019-10'))
-      it("YearMonth.from('1976-11') == (1976-11)", () => equal(`${PlainYearMonth.from('1976-11')}`, '1976-11'))
-      it("YearMonth.from('1976-11-18') == (1976-11)", () => equal(`${PlainYearMonth.from('1976-11-18')}`, '1976-11'))
-      it('can be constructed with monthCode and without month', () =>
-        equal(`${PlainYearMonth.from({ year: 2019, monthCode: 'M11' })}`, '2019-11'))
-      it('can be constructed with month and without monthCode', () =>
-        equal(`${PlainYearMonth.from({ year: 2019, month: 11 })}`, '2019-11'))
-      it('month and monthCode must agree', () =>
-        throws(() => PlainYearMonth.from({ year: 2019, month: 11, monthCode: 'M12' }), RangeError))
+      it("YearMonth.from('1976-11') == (1976-11)", () =>  {
+        equal(`${PlainYearMonth.from('1976-11')}`, '1976-11')
+      })
+      it("YearMonth.from('1976-11-18') == (1976-11)", () =>  {
+        equal(`${PlainYearMonth.from('1976-11-18')}`, '1976-11')
+      })
+      it('can be constructed with monthCode and without month', () => {
+        equal(`${PlainYearMonth.from({ year: 2019, monthCode: 'M11' })}`, '2019-11')
+      })
+      it('can be constructed with month and without monthCode', () => {
+        equal(`${PlainYearMonth.from({ year: 2019, month: 11 })}`, '2019-11')
+      })
+      it('month and monthCode must agree', () => {
+        throws(() => PlainYearMonth.from({ year: 2019, month: 11, monthCode: 'M12' }), RangeError)
+      })
       it('ignores day when determining the ISO reference day from year/month', () => {
         const one = PlainYearMonth.from({ year: 2019, month: 11, day: 1 } as ValidArg)
         const two = PlainYearMonth.from({ year: 2019, month: 11, day: 2 } as ValidArg)
@@ -83,15 +92,23 @@ describe('YearMonth', () => {
         const two = PlainYearMonth.from(plainDate2)
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay)
       })
-      it('YearMonth.from({ year: 2019 }) throws', () => throws(() => PlainYearMonth.from({ year: 2019 } as InvalidArg), TypeError))
-      it('YearMonth.from({ month: 6 }) throws', () => throws(() => PlainYearMonth.from({ month: 6 } as InvalidArg), TypeError))
+      it('YearMonth.from({ year: 2019 }) throws', () => {
+        throws(() => PlainYearMonth.from({ year: 2019 } as InvalidArg), TypeError)
+      })
+      it('YearMonth.from({ month: 6 }) throws', () => {
+        throws(() => PlainYearMonth.from({ month: 6 } as InvalidArg), TypeError)
+      })
       it('YearMonth.from({ monthCode: "M06" }) throws', () =>
         throws(() => PlainYearMonth.from({ monthCode: 'M06' } as InvalidArg), TypeError))
-      it('YearMonth.from({}) throws', () => throws(() => PlainYearMonth.from({} as InvalidArg), TypeError))
-      it('YearMonth.from(required prop undefined) throws', () =>
-        throws(() => PlainYearMonth.from({ year: undefined as InvalidArg, month: 6 }), TypeError))
-      it('YearMonth.from(number) is converted to string', () =>
-        assert(PlainYearMonth.from(201906 as ValidArg).equals(PlainYearMonth.from('201906'))))
+      it('YearMonth.from({}) throws', () => {
+        throws(() => PlainYearMonth.from({} as InvalidArg), TypeError)
+      })
+      it('YearMonth.from(required prop undefined) throws', () => {
+        throws(() => PlainYearMonth.from({ year: undefined as InvalidArg, month: 6 }), TypeError)
+      })
+      it('YearMonth.from(number) is converted to string', () => {
+        assert(PlainYearMonth.from(201906 as ValidArg).equals(PlainYearMonth.from('201906')))
+      })
       it('basic format', () => {
         equal(`${PlainYearMonth.from('197611')}`, '1976-11')
         equal(`${PlainYearMonth.from('+00197611')}`, '1976-11')
@@ -126,7 +143,9 @@ describe('YearMonth', () => {
         const two = PlainYearMonth.from('1976-11-18')
         equal(one.getISOFields().isoDay, two.getISOFields().isoDay)
       })
-      it('no junk at end of string', () => throws(() => PlainYearMonth.from('1976-11junk'), RangeError))
+      it('no junk at end of string', () => {
+        throws(() => PlainYearMonth.from('1976-11junk'), RangeError)
+      })
       it('options may only be an object or undefined', () => {
         [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
           throws(() => PlainYearMonth.from({ year: 1976, month: 11 }, badOptions), TypeError),
@@ -197,9 +216,15 @@ describe('YearMonth', () => {
   describe('YearMonth.compare() works', () => {
     const nov94 = PlainYearMonth.from('1994-11')
     const jun13 = PlainYearMonth.from('2013-06')
-    it('equal', () => equal(PlainYearMonth.compare(nov94, nov94), 0))
-    it('smaller/larger', () => equal(PlainYearMonth.compare(nov94, jun13), -1))
-    it('larger/smaller', () => equal(PlainYearMonth.compare(jun13, nov94), 1))
+    it('equal', () => {
+      equal(PlainYearMonth.compare(nov94, nov94), 0)
+    })
+    it('smaller/larger', () => {
+      equal(PlainYearMonth.compare(nov94, jun13), -1)
+    })
+    it('larger/smaller', () => {
+      equal(PlainYearMonth.compare(jun13, nov94), 1)
+    })
     it('casts first argument', () => {
       equal(PlainYearMonth.compare({ year: 1994, month: 11 }, jun13), -1)
       equal(PlainYearMonth.compare('1994-11', jun13), -1)
@@ -222,8 +247,12 @@ describe('YearMonth', () => {
   describe('YearMonth.equals() works', () => {
     const nov94 = PlainYearMonth.from('1994-11')
     const jun13 = PlainYearMonth.from('2013-06')
-    it('equal', () => assert(nov94.equals(nov94)))
-    it('unequal', () => assert(!nov94.equals(jun13)))
+    it('equal', () => {
+      assert(nov94.equals(nov94))
+    })
+    it('unequal', () => {
+      assert(!nov94.equals(jun13))
+    })
     it('casts argument', () => {
       assert(nov94.equals({ year: 1994, month: 11 }))
       assert(nov94.equals('1994-11'))
@@ -242,22 +271,41 @@ describe('YearMonth', () => {
     const ym1 = PlainYearMonth.from('1963-02')
     const ym1again = PlainYearMonth.from('1963-02')
     const ym2 = PlainYearMonth.from('1976-11')
-    it('=== is object equality', () => equal(ym1, ym1))
-    it('!== is object equality', () => notEqual(ym1, ym1again))
-    it('<', () => throws(() => ym1 < ym2))
-    it('>', () => throws(() => ym1 > ym2))
-    it('<=', () => throws(() => ym1 <= ym2))
-    it('>=', () => throws(() => ym1 >= ym2))
+    it('=== is object equality', () => {
+      equal(ym1, ym1)
+    })
+    it('!== is object equality', () => {
+      notEqual(ym1, ym1again)
+    })
+    it('<', () => {
+      throws(() => ym1 < ym2)
+    })
+    it('>', () => {
+      throws(() => ym1 > ym2)
+    })
+    it('<=', () => {
+      throws(() => ym1 <= ym2)
+    })
+    it('>=', () => {
+      throws(() => ym1 >= ym2)
+    })
   })
   describe('YearMonth.until() works', () => {
     const nov94 = PlainYearMonth.from('1994-11')
     const jun13 = PlainYearMonth.from('2013-06')
     const diff = nov94.until(jun13)
-    it(`${jun13}.until(${nov94}) == ${nov94}.until(${jun13}).negated()`, () =>
-      equal(`${jun13.until(nov94)}`, `${diff.negated()}`))
-    it(`${nov94}.add(${diff}) == ${jun13}`, () => nov94.add(diff).equals(jun13))
-    it(`${jun13}.subtract(${diff}) == ${nov94}`, () => jun13.subtract(diff).equals(nov94))
-    it(`${nov94}.until(${jun13}) == ${jun13}.since(${nov94})`, () => equal(`${diff}`, `${jun13.since(nov94)}`))
+    it(`${jun13}.until(${nov94}) == ${nov94}.until(${jun13}).negated()`, () => {
+      equal(`${jun13.until(nov94)}`, `${diff.negated()}`)
+    })
+    it(`${nov94}.add(${diff}) == ${jun13}`, () => {
+      nov94.add(diff).equals(jun13)
+    })
+    it(`${jun13}.subtract(${diff}) == ${nov94}`, () => {
+      jun13.subtract(diff).equals(nov94)
+    })
+    it(`${nov94}.until(${jun13}) == ${jun13}.since(${nov94})`, () => {
+      equal(`${diff}`, `${jun13.since(nov94)}`)
+    })
     it('casts argument', () => {
       equal(`${nov94.until({ year: 2013, month: 6 })}`, `${diff}`)
       equal(`${nov94.until('2013-06')}`, `${diff}`)
@@ -395,11 +443,18 @@ describe('YearMonth', () => {
     const nov94 = PlainYearMonth.from('1994-11')
     const jun13 = PlainYearMonth.from('2013-06')
     const diff = jun13.since(nov94)
-    it(`${nov94}.since(${jun13}) == ${jun13}.since(${nov94}).negated()`, () =>
-      equal(`${nov94.since(jun13)}`, `${diff.negated()}`))
-    it(`${nov94}.add(${diff}) == ${jun13}`, () => nov94.add(diff).equals(jun13))
-    it(`${jun13}.subtract(${diff}) == ${nov94}`, () => jun13.subtract(diff).equals(nov94))
-    it(`${jun13}.since(${nov94}) == ${nov94}.until(${jun13})`, () => equal(`${diff}`, `${nov94.until(jun13)}`))
+    it(`${nov94}.since(${jun13}) == ${jun13}.since(${nov94}).negated()`, () => {
+      equal(`${nov94.since(jun13)}`, `${diff.negated()}`)
+    })
+    it(`${nov94}.add(${diff}) == ${jun13}`, () => {
+      nov94.add(diff).equals(jun13)
+    })
+    it(`${jun13}.subtract(${diff}) == ${nov94}`, () => {
+      jun13.subtract(diff).equals(nov94)
+    })
+    it(`${jun13}.since(${nov94}) == ${nov94}.until(${jun13})`, () => {
+      equal(`${diff}`, `${nov94.until(jun13)}`)
+    })
     it('casts argument', () => {
       equal(`${jun13.since({ year: 1994, month: 11 })}`, `${diff}`)
       equal(`${jun13.since('1994-11')}`, `${diff}`)
@@ -628,7 +683,9 @@ describe('YearMonth', () => {
     it('yearMonth.subtract(durationObj)', () => {
       equal(`${ym.subtract(Duration.from('P11M'))}`, '2018-12')
     })
-    it('casts argument', () => equal(`${ym.subtract('P11M')}`, '2018-12'))
+    it('casts argument', () => {
+      equal(`${ym.subtract('P11M')}`, '2018-12')
+    })
     it("ignores lower units that don't balance up to the length of the month", () => {
       equal(`${ym.subtract({ days: 1 })}`, '2019-11')
       equal(`${ym.subtract({ hours: 1 })}`, '2019-11')
