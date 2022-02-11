@@ -65,8 +65,8 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
       const calendar = extractCalendar(arg)
       let refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
 
-      // force ISO year if no calendar specified
-      if (arg.calendar === undefined) {
+      // be nice and guess year if no calendar specified
+      if (refinedFields.year === undefined && arg.calendar === undefined) {
         refinedFields = { ...refinedFields, year: isoEpochLeapYear }
       }
 
@@ -74,10 +74,9 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     }
 
     // a string...
-
     let parsed = parseMonthDayISO(String(arg))
 
-    // force ISO year if no calendar specified
+    // for strings, force ISO year if no calendar specified
     if (parsed.calendar === undefined) {
       parsed.isoYear = isoEpochLeapYear
     }

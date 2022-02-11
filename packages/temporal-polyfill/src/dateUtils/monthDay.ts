@@ -37,7 +37,7 @@ export function createMonthDay(isoFields: DateISOFields): PlainMonthDay {
 
 export function overrideMonthDayFields(
   overrides: Partial<MonthDayFields>,
-  base: MonthDayEssentials, // PlainMonthDay,
+  base: MonthDayEssentials,
 ): MonthDayLikeFields {
   const merged = { day: overrides.day ?? base.day } as MonthDayFields
 
@@ -47,10 +47,6 @@ export function overrideMonthDayFields(
     if (overrides.month !== undefined) {
       merged.month = overrides.month
     }
-
-    // TODO: try to preserve reference year?
-    // merged.year = overrides.year ?? base.getISOFields().isoYear
-
   } else if (overrides.month !== undefined) {
     merged.month = overrides.month
 
