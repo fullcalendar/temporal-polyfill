@@ -196,7 +196,8 @@ export function balanceComplexDuration<T extends (ZonedDateTime | PlainDateTime)
   relativeTo: T,
 ): [Duration, T] {
   const translated = relativeTo.add(duration) as T
-  return [diffAccurate(relativeTo, translated, largestUnit), translated]
+  const balancedDuration = diffAccurate(relativeTo, translated, largestUnit)
+  return [balancedDuration, translated]
 }
 
 export function roundAndBalanceDuration(
@@ -220,16 +221,16 @@ export function roundAndBalanceDuration(
     true, // forRounding
   )
   const { largestUnit, smallestUnit } = diffConfig
-  const fields = durationToDayTimeFields(duration)
+  const dayTimeFields = durationToDayTimeFields(duration)
 
   if (
     options.relativeTo === undefined && // skip this block if relativeTo defined
-    fields &&
-    isDayTimeUnit(largestUnit) && // not a large unit
-    isDayTimeUnit(smallestUnit) // not a large unit
+    dayTimeFields &&
+    isDayTimeUnit(largestUnit) &&
+    isDayTimeUnit(smallestUnit)
   ) {
     const nano = roundNano(
-      dayTimeFieldsToNano(fields),
+      dayTimeFieldsToNano(dayTimeFields),
       diffConfig as RoundingConfig<DayTimeUnitInt>,
     )
     const roundedFields = nanoToDayTimeFields(nano, largestUnit)
