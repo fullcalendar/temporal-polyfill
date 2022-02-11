@@ -210,6 +210,12 @@ export function roundAndBalanceDuration(
     throw new RangeError('Must specify either largestUnit or smallestUnit')
   }
 
+  // HACK. don't consider weeks when balancing
+  const { weeks } = duration
+  if (weeks) {
+    duration = duration.with({ weeks: 0 })
+  }
+
   const defaultLargestUnit = computeLargestDurationUnit(duration)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(
     options,
@@ -243,12 +249,19 @@ export function roundAndBalanceDuration(
     largestUnit,
     relativeTo,
   )
-  return roundBalancedDuration(
+
+  let resDuration = roundBalancedDuration(
     balancedDuration,
     diffConfig,
     relativeTo,
     translatedDate,
   )
+
+  if (weeks) {
+    resDuration = addDurations(resDuration, new Duration(0, 0, weeks))
+  }
+
+  return resDuration
 }
 
 export function computeLargestDurationUnit(dur: Duration): UnitInt {
