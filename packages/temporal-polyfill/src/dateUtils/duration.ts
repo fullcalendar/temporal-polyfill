@@ -172,7 +172,7 @@ export function balanceDuration(
       duration,
       Math.max(DAY, largestUnit) as DateUnitInt,
       relativeTo,
-    )[0]
+    )
   } else {
     return balanceComplexDuration(duration, largestUnit, relativeTo)
   }
@@ -182,12 +182,11 @@ export function balanceSimpleDuration(
   duration: Duration,
   largestUnit: DateUnitInt,
   relativeTo: PlainDate,
-): [Duration, PlainDate] {
+): Duration {
   const translated = relativeTo.add(duration)
-  const balanced = relativeTo.calendar.dateUntil(relativeTo, translated, {
+  return relativeTo.calendar.dateUntil(relativeTo, translated, {
     largestUnit: unitNames[largestUnit] as DateUnit,
   })
-  return [balanced, translated]
 }
 
 export function balanceComplexDuration<T extends (ZonedDateTime | PlainDateTime)>(
@@ -248,9 +247,6 @@ export function roundAndBalanceDuration(
     const roundedFields = nanoToDayTimeFields(nano, largestUnit)
     return dayTimeFieldsToDuration(roundedFields)
   }
-
-  // moral of story:
-  // don't rely on Calendar::dateUntil to do balancing. Have no control over weeks
 
   const relativeTo = extractRelativeTo(options.relativeTo)
   const balancedDuration = balanceComplexDuration(
