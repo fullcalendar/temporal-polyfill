@@ -200,7 +200,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     }
 
     const isoFields = queryDateISOFields(
-      { ...fields, year },
+      { ...fields, year }, // a populated year causes era/eraYear to be ignored
       impl,
       options,
     )
