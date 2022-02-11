@@ -285,12 +285,24 @@ describe('MonthDay', () => {
     const md1 = PlainMonthDay.from('02-13')
     const md1again = PlainMonthDay.from('02-13')
     const md2 = PlainMonthDay.from('11-18')
-    it('=== is object equality', () => equal(md1, md1))
-    it('!== is object equality', () => notEqual(md1, md1again))
-    it('<', () => throws(() => md1 < md2))
-    it('>', () => throws(() => md1 > md2))
-    it('<=', () => throws(() => md1 <= md2))
-    it('>=', () => throws(() => md1 >= md2))
+    it('=== is object equality', () => {
+      equal(md1, md1)
+    })
+    it('!== is object equality', () => {
+      notEqual(md1, md1again)
+    })
+    it('<', () => {
+      throws(() => md1 < md2)
+    })
+    it('>', () => {
+      throws(() => md1 > md2)
+    })
+    it('<=', () => {
+      throws(() => md1 <= md2)
+    })
+    it('>=', () => {
+      throws(() => md1 >= md2)
+    })
   })
   describe('MonthDay.toPlainDate()', () => {
     const md = PlainMonthDay.from('01-22')
