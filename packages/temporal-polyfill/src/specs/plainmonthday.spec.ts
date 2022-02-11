@@ -15,13 +15,21 @@ describe('MonthDay', () => {
   describe('Construction', () => {
     it('Leap day', () => equal(`${new PlainMonthDay(2, 29)}`, '02-29'))
     describe('.from()', () => {
-      it('MonthDay.from(10-01) == 10-01', () => equal(`${PlainMonthDay.from('10-01')}`, '10-01'))
-      it('MonthDay.from(2019-10-01T09:00:00Z) == 10-01', () =>
-        equal(`${PlainMonthDay.from('2019-10-01T09:00:00Z')}`, '10-01'))
-      it("MonthDay.from('11-18') == (11-18)", () => equal(`${PlainMonthDay.from('11-18')}`, '11-18'))
-      it("MonthDay.from('1976-11-18') == (11-18)", () => equal(`${PlainMonthDay.from('1976-11-18')}`, '11-18'))
-      it('MonthDay.from({ monthCode: "M11", day: 18 }) == 11-18', () =>
-        equal(`${PlainMonthDay.from({ monthCode: 'M11', day: 18 })}`, '11-18'))
+      it('MonthDay.from(10-01) == 10-01', () => {
+        equal(`${PlainMonthDay.from('10-01')}`, '10-01')
+      })
+      it('MonthDay.from(2019-10-01T09:00:00Z) == 10-01', () => {
+        equal(`${PlainMonthDay.from('2019-10-01T09:00:00Z')}`, '10-01')
+      })
+      it("MonthDay.from('11-18') == (11-18)", () => {
+        equal(`${PlainMonthDay.from('11-18')}`, '11-18')
+      })
+      it("MonthDay.from('1976-11-18') == (11-18)", () => {
+        equal(`${PlainMonthDay.from('1976-11-18')}`, '11-18')
+      })
+      it('MonthDay.from({ monthCode: "M11", day: 18 }) == 11-18', () => {
+        equal(`${PlainMonthDay.from({ monthCode: 'M11', day: 18 })}`, '11-18')
+      })
       it('ignores year when determining the ISO reference year from month/day', () => {
         const one = PlainMonthDay.from({ year: 2019, month: 11, day: 18 })
         const two = PlainMonthDay.from({ year: 1979, month: 11, day: 18 })
@@ -54,12 +62,15 @@ describe('MonthDay', () => {
         const two = PlainMonthDay.from(plainDate2)
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear)
       })
-      it('MonthDay.from({month, day}) allowed if calendar absent', () =>
-        equal(`${PlainMonthDay.from({ month: 11, day: 18 })}`, '11-18'))
-      it('MonthDay.from({month, day}) not allowed in explicit ISO calendar', () =>
-        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'iso8601' } as InvalidArg), TypeError))
-      it('MonthDay.from({month, day}) not allowed in other calendar', () =>
-        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'gregory' } as InvalidArg), TypeError))
+      it('MonthDay.from({month, day}) allowed if calendar absent', () => {
+        equal(`${PlainMonthDay.from({ month: 11, day: 18 })}`, '11-18')
+      })
+      it('MonthDay.from({month, day}) not allowed in explicit ISO calendar', () => {
+        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'iso8601' } as InvalidArg), TypeError)
+      })
+      it('MonthDay.from({month, day}) not allowed in other calendar', () => {
+        throws(() => PlainMonthDay.from({ month: 11, day: 18, calendar: 'gregory' } as InvalidArg), TypeError)
+      })
       it('MonthDay.from({year, month, day}) allowed in other calendar', () => {
         equal(
           `${PlainMonthDay.from({ year: 1970, month: 11, day: 18, calendar: 'gregory' })}`,
@@ -72,14 +83,20 @@ describe('MonthDay', () => {
           '1972-11-18[u-ca=gregory]',
         )
       })
-      it('MonthDay.from({ day: 15 }) throws', () => throws(() => PlainMonthDay.from({ day: 15 } as InvalidArg), TypeError))
+      it('MonthDay.from({ day: 15 }) throws', () => {
+        throws(() => PlainMonthDay.from({ day: 15 } as InvalidArg), TypeError)
+      })
       it('MonthDay.from({ monthCode: "M12" }) throws', () =>
         throws(() => PlainMonthDay.from({ monthCode: 'M12' } as InvalidArg), TypeError))
-      it('MonthDay.from({}) throws', () => throws(() => PlainMonthDay.from({} as InvalidArg), TypeError))
-      it('MonthDay.from(required prop undefined) throws', () =>
-        throws(() => PlainMonthDay.from({ monthCode: undefined, day: 15 } as InvalidArg), TypeError))
-      it('MonthDay.from(number) is converted to string', () =>
-        assert(PlainMonthDay.from(1201 as ValidArg).equals(PlainMonthDay.from('12-01'))))
+      it('MonthDay.from({}) throws', () => {
+        throws(() => PlainMonthDay.from({} as InvalidArg), TypeError)
+      })
+      it('MonthDay.from(required prop undefined) throws', () => {
+        throws(() => PlainMonthDay.from({ monthCode: undefined, day: 15 } as InvalidArg), TypeError)
+      })
+      it('MonthDay.from(number) is converted to string', () => {
+        assert(PlainMonthDay.from(1201 as ValidArg).equals(PlainMonthDay.from('12-01')))
+      })
       it('basic format', () => {
         equal(`${PlainMonthDay.from('1118')}`, '11-18')
       })
@@ -113,7 +130,9 @@ describe('MonthDay', () => {
         const two = PlainMonthDay.from('1976-11-18')
         equal(one.getISOFields().isoYear, two.getISOFields().isoYear)
       })
-      it('no junk at end of string', () => throws(() => PlainMonthDay.from('11-18junk'), RangeError))
+      it('no junk at end of string', () => {
+        throws(() => PlainMonthDay.from('11-18junk'), RangeError)
+      })
       it('options may only be an object or undefined', () => {
         [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
           throws(() => PlainMonthDay.from({ month: 11, day: 18 }, badOptions), TypeError),
@@ -124,7 +143,9 @@ describe('MonthDay', () => {
       })
       describe('Overflow', () => {
         const bad = { month: 1, day: 32 }
-        it('reject', () => throws(() => PlainMonthDay.from(bad, { overflow: 'reject' }), RangeError))
+        it('reject', () => {
+          throws(() => PlainMonthDay.from(bad, { overflow: 'reject' }), RangeError)
+        })
         it('constrain', () => {
           equal(`${PlainMonthDay.from(bad)}`, '01-31')
           equal(`${PlainMonthDay.from(bad, { overflow: 'constrain' })}`, '01-31')
@@ -144,32 +165,37 @@ describe('MonthDay', () => {
         ['reject', 'constrain'].forEach((overflow: any) =>
           it(overflow, () => equal(`${PlainMonthDay.from({ month: 2, day: 29 }, { overflow })}`, '02-29')),
         )
-        it("rejects when year isn't a leap year", () =>
-          throws(() => PlainMonthDay.from({ month: 2, day: 29, year: 2001 }, { overflow: 'reject' }), RangeError))
+        it("rejects when year isn't a leap year", () => {
+          throws(() => PlainMonthDay.from({ month: 2, day: 29, year: 2001 }, { overflow: 'reject' }), RangeError)
+        })
         it('constrains non-leap year', () =>
           equal(`${PlainMonthDay.from({ month: 2, day: 29, year: 2001 }, { overflow: 'constrain' })}`, '02-28'))
       })
       describe('Leap day with calendar', () => {
-        it('requires year with calendar', () =>
+        it('requires year with calendar', () => {
           throws(
             () => PlainMonthDay.from({ month: 2, day: 29, calendar: 'iso8601' } as InvalidArg, { overflow: 'reject' }),
             TypeError,
-          ))
-        it('rejects leap day with non-leap year', () =>
+          )
+        })
+        it('rejects leap day with non-leap year', () => {
           throws(
             () => PlainMonthDay.from({ month: 2, day: 29, year: 2001, calendar: 'iso8601' }, { overflow: 'reject' }),
             RangeError,
-          ))
-        it('constrains leap day', () =>
+          )
+        })
+        it('constrains leap day', () => {
           equal(
             `${PlainMonthDay.from({ month: 2, day: 29, year: 2001, calendar: 'iso8601' }, { overflow: 'constrain' })}`,
             '02-28',
-          ))
-        it('accepts leap day with monthCode', () =>
+          )
+        })
+        it('accepts leap day with monthCode', () => {
           equal(
             `${PlainMonthDay.from({ monthCode: 'M02', day: 29, calendar: 'iso8601' }, { overflow: 'reject' })}`,
             '02-29',
-          ))
+          )
+        })
       })
       it('object must contain at least the required correctly-spelled properties', () => {
         throws(() => PlainMonthDay.from({} as InvalidArg), TypeError)
