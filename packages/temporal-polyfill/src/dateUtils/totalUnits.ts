@@ -77,7 +77,8 @@ export function computeExactDuration(
   return dur
 }
 
-// ugh
+// TODO: use this everywhere instead of isoFieldsToEpochNano?
+// Make a separate sub-util JUST for PlainDatetime/PlainDate?
 function realisticEpochNano(dt: ZonedDateTime | PlainDateTime | PlainDate): bigint {
   const { epochNanoseconds } = dt as ZonedDateTime
   return epochNanoseconds !== undefined

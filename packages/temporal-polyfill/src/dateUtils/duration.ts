@@ -288,7 +288,11 @@ export function compareDurations(
   const dayTimeFields0 = durationToDayTimeFields(duration0)
   const dayTimeFields1 = durationToDayTimeFields(duration1)
 
-  if (dayTimeFields0 && dayTimeFields1) {
+  if (
+    relativeToArg === undefined &&
+    dayTimeFields0 &&
+    dayTimeFields1
+  ) {
     return compareValues(
       dayTimeFieldsToNano(dayTimeFields0),
       dayTimeFieldsToNano(dayTimeFields1),
@@ -386,6 +390,7 @@ export function durationToTimeFields(duration: Duration): TimeFields {
   }
 }
 
+// TODO: combine with extractRelativeTo?
 function getMaybeZonedRelativeTo(
   arg: ZonedDateTimeArg | DateTimeArg | undefined,
 ): ZonedDateTime | PlainDateTime {
