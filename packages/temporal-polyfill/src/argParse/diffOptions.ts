@@ -19,14 +19,15 @@ export function parseDiffOptions<
   smallestUnitDefault: UnitIntType,
   minUnit: UnitIntType,
   maxUnit: UnitIntType,
-  forInstant?: boolean,
+  forInstant?: boolean, // weird
+  forRounding?: boolean, // weird
 ): DiffConfig<UnitIntType> {
   const roundingConfig = parseRoundingOptions<UnitArg, UnitIntType>(
     options,
     smallestUnitDefault,
     minUnit,
     maxUnit,
-    true,
+    !forRounding,
     forInstant,
   )
 

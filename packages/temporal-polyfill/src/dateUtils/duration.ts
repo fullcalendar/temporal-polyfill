@@ -1,5 +1,6 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
-import { OFFSET_PREFER } from '../argParse/offsetHandling'
+import { OFFSET_PREFER, OFFSET_REJECT } from '../argParse/offsetHandling'
+import { isObjectLike } from '../argParse/refine'
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames, unitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
@@ -15,6 +16,7 @@ import {
   Unit,
   ZonedDateTimeArg,
   ZonedDateTimeLike,
+  DateTimeLike,
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { compareValues, numSign } from '../utils/math'
@@ -23,7 +25,12 @@ import { ensureObj } from './abstract'
 import { DateLikeInstance } from './calendar'
 import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
-import { parseDateTimeISO, refineDateTimeParse, refineZonedDateTimeParse } from './parse'
+import {
+  parseDateTimeISO,
+  refineDateTimeParse,
+  refineZonedDateTimeParse,
+  tryParseDateTimeISO,
+} from './parse'
 import { roundBalancedDuration, roundNano } from './rounding'
 import { TimeFields, timeFieldsToNano } from './time'
 import {
@@ -196,10 +203,10 @@ export function roundAndBalanceDuration(
   duration: Duration,
   options: DurationRoundingOptions,
 ): Duration {
-  if (!options) {
-    throw new Error('Must specify options') // best place for this?
+  if (!isObjectLike(options)) {
+    throw new TypeError('Must specify options') // best place for this?
   } else if (options.largestUnit === undefined && options.smallestUnit === undefined) {
-    throw new Error('Must specify either largestUnit or smallestUnit')
+    throw new RangeError('Must specify either largestUnit or smallestUnit')
   }
 
   const defaultLargestUnit = computeLargestDurationUnit(duration)
@@ -209,11 +216,18 @@ export function roundAndBalanceDuration(
     NANOSECOND, // smallestUnitDefault
     NANOSECOND, // minUnit
     YEAR, // maxUnit
+    false, // forInstant
+    true, // forRounding
   )
   const { largestUnit, smallestUnit } = diffConfig
-
   const fields = durationToDayTimeFields(duration)
-  if (fields && isDayTimeUnit(largestUnit) && isDayTimeUnit(smallestUnit)) {
+
+  if (
+    options.relativeTo === undefined && // skip this block if relativeTo defined
+    fields &&
+    isDayTimeUnit(largestUnit) && // not a large unit
+    isDayTimeUnit(smallestUnit) // not a large unit
+  ) {
     const nano = roundNano(
       dayTimeFieldsToNano(fields),
       diffConfig as RoundingConfig<DayTimeUnitInt>,
@@ -222,7 +236,7 @@ export function roundAndBalanceDuration(
     return dayTimeFieldsToDuration(roundedFields)
   }
 
-  const relativeTo = getPlainRelativeTo(options.relativeTo)
+  const relativeTo = extractRelativeTo(options.relativeTo)
   const [balancedDuration, translatedDate] = balanceComplexDuration(
     duration,
     largestUnit,
@@ -383,11 +397,31 @@ function getMaybeZonedRelativeTo(
   }
 }
 
-export function getPlainRelativeTo(arg: DateTimeArg | undefined): PlainDateTime {
-  if (arg === undefined) {
-    throw new RangeError('Need relativeTo') // TODO: reusable
+export function extractRelativeTo(
+  arg: ZonedDateTimeArg | DateTimeArg | undefined
+): ZonedDateTime | PlainDateTime {
+  if (isObjectLike(arg)) {
+    if (arg instanceof ZonedDateTime || arg instanceof PlainDateTime) {
+      return arg
+    }
+    return ensureObj<ZonedDateTime | PlainDateTime, ZonedDateTimeLike, []>(
+      (arg as ZonedDateTimeLike).timeZone !== undefined
+        ? ZonedDateTime
+        : PlainDateTime,
+      arg as ZonedDateTimeLike
+    )
+  } else if (arg !== undefined) {
+    let parsed = tryParseDateTimeISO(String(arg))
+    if (parsed) {
+      if (parsed.timeZone !== undefined) {
+        return createZonedDateTime(refineZonedDateTimeParse(parsed), undefined, OFFSET_REJECT)
+      } else {
+        return createDateTime(refineDateTimeParse(parsed))
+      }
+    }
   }
-  return ensureObj(PlainDateTime, arg)
+
+  throw new RangeError('Invalid relativeTo')
 }
 
 type NumberHash = { [fieldName: string]: number }

@@ -6,7 +6,7 @@ import { dayTimeFieldsToNano } from './dayTime'
 import {
   balanceComplexDuration,
   durationToDayTimeFields,
-  getPlainRelativeTo,
+  extractRelativeTo,
 } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
 import { UnitInt, YEAR, isDayTimeUnit, nanoIn } from './units'
@@ -20,7 +20,7 @@ export function computeTotalUnits(
   if (fields && isDayTimeUnit(unit) && relativeToArg === undefined) {
     return Number(dayTimeFieldsToNano(fields) / BigInt(nanoIn[unit]))
   }
-  const relativeTo = getPlainRelativeTo(relativeToArg) // throws an exception if undefined
+  const relativeTo = extractRelativeTo(relativeToArg) // throws an exception if undefined
   const [balancedDuration, translatedDate] = balanceComplexDuration(
     duration,
     unit,
