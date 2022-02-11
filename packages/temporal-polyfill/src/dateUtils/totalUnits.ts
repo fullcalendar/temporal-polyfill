@@ -20,8 +20,12 @@ export function computeTotalUnits(
   relativeToArg: DateTimeArg | undefined,
 ): number {
   const fields = durationToDayTimeFields(duration)
-  if (fields && isDayTimeUnit(unit) && relativeToArg === undefined) {
-    return Number(dayTimeFieldsToNano(fields) / BigInt(nanoIn[unit]))
+  if (
+    relativeToArg === undefined &&
+    fields &&
+    isDayTimeUnit(unit)
+  ) {
+    return Number(dayTimeFieldsToNano(fields)) / nanoIn[unit]
   }
   const relativeTo = extractRelativeTo(relativeToArg) // throws an exception if undefined
   const balancedDuration = balanceComplexDuration(
