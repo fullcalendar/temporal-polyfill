@@ -1,5 +1,8 @@
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
+import { PlainDate } from '../public/plainDate'
+import { PlainDateTime } from '../public/plainDateTime'
+import { ZonedDateTime } from '../public/zonedDateTime'
 import { DateTimeArg, DurationLike } from '../public/types'
 import { DateLikeInstance } from './calendar'
 import { dayTimeFieldsToNano } from './dayTime'
@@ -25,6 +28,7 @@ export function computeTotalUnits(
     duration,
     unit,
     relativeTo,
+    true, // dissolveWeeks
   )
   const durationLike = computeExactDuration(
     balancedDuration,
@@ -60,11 +64,19 @@ export function computeExactDuration(
   const startDateTime = d0.add(dur)
   const endDateTime = startDateTime.add(incDur)
 
-  const startNano = isoFieldsToEpochNano(startDateTime.getISOFields())
-  const endNano = isoFieldsToEpochNano(endDateTime.getISOFields())
-  const middleNano = isoFieldsToEpochNano(d1.getISOFields())
+  const startNano = realisticEpochNano(startDateTime)
+  const endNano = realisticEpochNano(endDateTime)
+  const middleNano = realisticEpochNano(d1)
   const unitFrac = Number(middleNano - startNano) / Number(endNano - startNano) * sign
 
   dur[smallestUnitName]! += unitFrac // above loop populated this
   return dur
+}
+
+// ugh
+function realisticEpochNano(dt: ZonedDateTime | PlainDateTime | PlainDate): bigint {
+  const { epochNanoseconds } = dt as ZonedDateTime
+  return epochNanoseconds !== undefined
+    ? epochNanoseconds
+    : isoFieldsToEpochNano(dt.getISOFields())
 }

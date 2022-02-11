@@ -193,9 +193,10 @@ export function balanceComplexDuration<T extends (ZonedDateTime | PlainDateTime)
   duration: Duration,
   largestUnit: UnitInt,
   relativeTo: T,
+  dissolveWeeks?: boolean,
 ): Duration {
   // balancing does not care about weeks
-  const forcedWeeks = largestUnit > WEEK && duration.weeks
+  const forcedWeeks = dissolveWeeks !== true && largestUnit > WEEK && duration.weeks
   if (forcedWeeks) {
     duration = duration.with({ weeks: 0 })
   }
