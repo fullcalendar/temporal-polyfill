@@ -5,7 +5,7 @@ import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO } from '../dateUtils/date'
-import { formatCalendarID, formatMonthDayISO } from '../dateUtils/isoFormat'
+import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
 import { isoEpochLeapYear, isoFieldsToEpochMilli } from '../dateUtils/isoMath'
 import {
   MonthDayCalendarFields,
@@ -62,14 +62,16 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     }
 
     if (typeof arg === 'object') {
-      const refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
+      let refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
+
+      // populate year if year/calendar omitted
       if (
-        refinedFields.year === undefined &&
-        refinedFields.monthCode === undefined &&
-        arg.calendar !== undefined
+        arg.calendar === undefined &&
+        refinedFields.year === undefined
       ) {
-        throw new Error('If omitting year/monthCode, cant specify calendar')
+        refinedFields = { ...refinedFields, year: isoEpochLeapYear }
       }
+
       return extractCalendar(arg).monthDayFromFields(refinedFields as MonthDayLikeFields, options)
     }
 
@@ -89,9 +91,13 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   toString(options?: DateToStringOptions): string {
     const fields = this.getISOFields()
     const calendarDisplay = parseCalendarDisplayOption(options)
+    const calendarID = fields.calendar.id
 
-    return formatMonthDayISO(fields) +
-      formatCalendarID(fields.calendar.id, calendarDisplay)
+    return (
+      calendarID === isoCalendarID
+        ? formatMonthDayISO(fields)
+        : formatDateISO(fields)
+    ) + formatCalendarID(calendarID, calendarDisplay)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {

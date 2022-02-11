@@ -33,15 +33,26 @@ export function createMonthDay(isoFields: DateISOFields): PlainMonthDay {
 
 export function overrideMonthDayFields(
   overrides: Partial<MonthDayFields>,
-  base: MonthDayEssentials,
+  base: MonthDayEssentials, // PlainMonthDay,
 ): MonthDayLikeFields {
   const merged = { day: overrides.day ?? base.day } as MonthDayFields
 
   if (overrides.monthCode !== undefined) {
     merged.monthCode = overrides.monthCode
+
+    if (overrides.month !== undefined) {
+      merged.month = overrides.month
+    }
+
+    // TODO: try to preserve reference year?
+    // merged.year = overrides.year ?? base.getISOFields().isoYear
+
   } else if (overrides.month !== undefined) {
     merged.month = overrides.month
-    merged.year = overrides.year! // will cause a planned runtime error if not defined
+
+    // if not defined, will throw error in Calendar::monthDayFromFields
+    merged.year = overrides.year!
+
   } else {
     merged.monthCode = base.monthCode
   }

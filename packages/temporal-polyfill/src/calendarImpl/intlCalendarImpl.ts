@@ -95,11 +95,7 @@ export class IntlCalendarImpl extends CalendarImpl {
       days > computeDaysInYear(this, year + 1)
   }
 
-  monthYear(monthCode: string | undefined, day: number | undefined): number {
-    if (monthCode === undefined || day === undefined) {
-      throw new Error('To guess reference year, must specify monthCode and day')
-    }
-
+  monthYear(monthCode: string, day: number): number {
     let year = isoEpochOriginYear + this.yearCorrection
     const endYear = year + 100
     for (; year < endYear; year++) {
