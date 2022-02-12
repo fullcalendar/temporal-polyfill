@@ -1,3 +1,4 @@
+import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { DateTimeISOEssentials, DateTimeISOMilli } from '../dateUtils/dateTime'
 import { DateTimeISOFields } from '../public/types'
 import { numSign, positiveModulo } from '../utils/math'
@@ -94,28 +95,54 @@ export function isoToEpochMilli(
   isoSecond?: number,
   isoMillisecond?: number,
 ): number {
-  const year = isoYear ?? isoEpochOriginYear
-  const sign = numSign(year)
+  const isoYearReal = isoYear ?? isoEpochOriginYear
+  const isoMonthReal = isoMonth ?? 1
+  const isoDayReal = isoDay ?? 1
+  const sign = numSign(isoYearReal)
+  let dayShift = 0
+  let isoDayTry: number
+  let milli: number | undefined
 
   // https://stackoverflow.com/a/5870822/96342
-  const twoDigitYearBug = year >= 0 && year < 1000
+  const twoDigitYearBug = isoYearReal >= 0 && isoYearReal < 1000
+  const isoYearTemp = twoDigitYearBug ? isoYearReal + 1200 : isoYearReal
 
-  let milli = Date.UTC(
-    twoDigitYearBug ? year + 1200 : year,
-    (isoMonth ?? 1) - 1,
-    (isoDay ?? 1) - sign, // ensures within 1 day of Date.UTC's min/max
-    isoHour ?? 0,
-    isoMinute ?? 0,
-    isoSecond ?? 0,
-    isoMillisecond ?? 0,
-  ) + (sign * milliInDay) // push back out of Date.UTC's min/max
+  // Temporal must represent year-month-days and year-months that don't have their start-of-unit
+  // in bounds. Keep moving the date towards the origin one day at a time until in-bounds.
+  // We won't need to shift more than a month.
+  for (; dayShift < 31; dayShift++) {
+    isoDayTry = isoDayReal - (sign * dayShift)
 
-  if (twoDigitYearBug) {
-    milli = new Date(milli).setUTCFullYear(year)
+    let milliTry = Date.UTC(
+      isoYearTemp,
+      isoMonthReal - 1,
+      isoDayTry,
+      isoHour ?? 0,
+      isoMinute ?? 0,
+      isoSecond ?? 0,
+      isoMillisecond ?? 0,
+    )
+    // is valid? (TODO: rename isInvalid -> isValid)
+    if (!isInvalid(milliTry)) {
+      milli = milliTry + (sign * dayShift * milliInDay)
+      break
+    }
   }
 
-  validateValue(milli)
-  return milli
+  if (
+    milli === undefined ||
+    // ensure day didn't underflow/overflow to get to an in-bounds date
+    isoDayTry! < 1 ||
+    isoDayTry! > isoCalendarImpl.daysInMonth(isoYearReal, isoMonthReal)
+  ) {
+    throwOutOfRange()
+  }
+
+  if (twoDigitYearBug) {
+    milli = new Date(milli!).setUTCFullYear(isoYearReal)
+  }
+
+  return milli!
 }
 
 /*
@@ -143,11 +170,11 @@ export function epochNanoToISOFields(epochNano: bigint): DateTimeISOEssentials {
 }
 
 export function epochMilliToISOFields(epochMilli: number): DateTimeISOMilli {
-  const [legacy, shiftDays] = nudgeToLegacyDate(epochMilli)
+  const [legacy, dayShift] = nudgeToLegacyDate(epochMilli)
   return {
     isoYear: legacy.getUTCFullYear(),
     isoMonth: legacy.getUTCMonth() + 1,
-    isoDay: legacy.getUTCDate() + shiftDays, // pray there's no overflow to higher/lower units
+    isoDay: legacy.getUTCDate() - dayShift, // safe b/c isoToEpochMilli doesn't shift out of month
     isoHour: legacy.getUTCHours(),
     isoMinute: legacy.getUTCMinutes(),
     isoSecond: legacy.getUTCSeconds(),
@@ -178,9 +205,9 @@ export function addDaysMilli(milli: number, days: number): number {
 // Day-of-Week
 
 export function computeISODayOfWeek(isoYear: number, isoMonth: number, isoDay: number): number {
-  const [legacy, shiftDays] = nudgeToLegacyDate(isoToEpochMilli(isoYear, isoMonth, isoDay))
+  const [legacy, dayShift] = nudgeToLegacyDate(isoToEpochMilli(isoYear, isoMonth, isoDay))
   return positiveModulo(
-    legacy.getUTCDay() + shiftDays,
+    legacy.getUTCDay() - dayShift,
     7,
   ) || 7 // convert Sun...Mon to Mon...Sun
 }
@@ -222,17 +249,26 @@ export function validateInstant(epochNano: bigint): void {
 }
 
 function nudgeToLegacyDate(epochMilli: number): [Date, number] {
-  let legacy = new Date(epochMilli)
-  let shiftDays = 0 // additional days that must be added to `legacy` to get legit result
+  const sign = numSign(epochMilli)
+  let dayShift = 0
+  let date: Date | undefined
 
-  // if out of range, try shifting one day in
-  if (isInvalid(legacy)) {
-    shiftDays = numSign(epochMilli)
-    legacy = new Date(epochMilli + milliInDay * shiftDays * -1)
-    validateValue(legacy)
+  // undo the dayShift done in isoToEpochMilli
+  // won't need to move more than a month
+  for (; dayShift < 31; dayShift++) {
+    let dateTry = new Date(epochMilli - (sign * dayShift * milliInDay))
+
+    if (!isInvalid(dateTry)) {
+      date = dateTry
+      break
+    }
   }
 
-  return [legacy, shiftDays]
+  if (date === undefined) {
+    throwOutOfRange()
+  }
+
+  return [date!, dayShift]
 }
 
 function validateValue(n: { valueOf(): number }) {
