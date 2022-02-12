@@ -74,7 +74,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     }
 
     // a string...
-    let parsed = parseMonthDayISO(String(arg))
+    const parsed = parseMonthDayISO(String(arg))
 
     // for strings, force ISO year if no calendar specified
     if (parsed.calendar === undefined) {
@@ -96,8 +96,8 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
 
   toString(options?: DateToStringOptions): string {
     const fields = this.getISOFields()
-    const calendarDisplay = parseCalendarDisplayOption(options)
     const calendarID = fields.calendar.id
+    const calendarDisplay = parseCalendarDisplayOption(options)
 
     return (
       calendarID === isoCalendarID

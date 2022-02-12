@@ -2,7 +2,7 @@ import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { yearMonthFieldMap } from '../argParse/fieldStr'
-import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
@@ -62,6 +62,8 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   static from(arg: YearMonthArg, options?: OverflowOptions): PlainYearMonth {
+    parseOverflowOption(options) // unused, but need to validate, regardless of input type
+
     if (arg instanceof PlainYearMonth) {
       return createYearMonth(arg.getISOFields()) // optimization
     }
@@ -71,7 +73,15 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
       return extractCalendar(arg).yearMonthFromFields(refinedFields, options)
     }
 
-    return createYearMonth(refineDateTimeParse(parseDateTimeISO(String(arg))))
+    // a string...
+    const parsed = parseDateTimeISO(String(arg))
+
+    // don't allow day-numbers in ISO strings
+    if (parsed.calendar === undefined) {
+      parsed.isoDay = 1
+    }
+
+    return createYearMonth(refineDateTimeParse(parsed))
   }
 
   static compare(a: YearMonthArg, b: YearMonthArg): CompareResult {
@@ -94,7 +104,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-    return this.toPlainDate(day1).add(durationArg, options).toPlainYearMonth()
+    return this.toPlainDate(day1).add(ensureObj(Duration, durationArg).negated(), options).toPlainYearMonth()
   }
 
   until(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
