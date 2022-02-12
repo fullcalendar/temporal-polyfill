@@ -98,8 +98,9 @@ describe('YearMonth', () => {
       it('YearMonth.from({ month: 6 }) throws', () => {
         throws(() => PlainYearMonth.from({ month: 6 } as InvalidArg), TypeError)
       })
-      it('YearMonth.from({ monthCode: "M06" }) throws', () =>
-        throws(() => PlainYearMonth.from({ monthCode: 'M06' } as InvalidArg), TypeError))
+      it('YearMonth.from({ monthCode: "M06" }) throws', () => {
+        throws(() => PlainYearMonth.from({ monthCode: 'M06' } as InvalidArg), TypeError)
+      })
       it('YearMonth.from({}) throws', () => {
         throws(() => PlainYearMonth.from({} as InvalidArg), TypeError)
       })
@@ -156,16 +157,18 @@ describe('YearMonth', () => {
       })
       describe('Overflow', () => {
         const bad = { year: 2019, month: 13 }
-        it('reject', () => throws(() => PlainYearMonth.from(bad, { overflow: 'reject' }), RangeError))
+        it('reject', () => {
+          throws(() => PlainYearMonth.from(bad, { overflow: 'reject' }), RangeError)
+        })
         it('constrain', () => {
           equal(`${PlainYearMonth.from(bad)}`, '2019-12')
           equal(`${PlainYearMonth.from(bad, { overflow: 'constrain' })}`, '2019-12')
         })
         it('throw on bad overflow', () => {
           [new PlainYearMonth(2019, 1), { year: 2019, month: 1 }, '2019-01'].forEach((input) => {
-            ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) =>
-              throws(() => PlainYearMonth.from(input, { overflow }), RangeError),
-            )
+            ['', 'CONSTRAIN', 'balance', 3, null].forEach((overflow: InvalidArg) => {
+              throws(() => PlainYearMonth.from(input, { overflow }), RangeError)
+            })
           })
         })
         it('constrain has no effect on invalid ISO string', () => {
@@ -182,10 +185,18 @@ describe('YearMonth', () => {
     })
     describe('.with()', () => {
       const ym = PlainYearMonth.from('2019-10')
-      it('with(2020)', () => equal(`${ym.with({ year: 2020 })}`, '2020-10'))
-      it('with(09)', () => equal(`${ym.with({ month: 9 })}`, '2019-09'))
-      it('with(monthCode)', () => equal(`${ym.with({ monthCode: 'M09' })}`, '2019-09'))
-      it('month and monthCode must agree', () => throws(() => ym.with({ month: 9, monthCode: 'M10' }), RangeError))
+      it('with(2020)', () => {
+        equal(`${ym.with({ year: 2020 })}`, '2020-10')
+      })
+      it('with(09)', () => {
+        equal(`${ym.with({ month: 9 })}`, '2019-09')
+      })
+      it('with(monthCode)', () => {
+        equal(`${ym.with({ monthCode: 'M09' })}`, '2019-09')
+      })
+      it('month and monthCode must agree', () => {
+        throws(() => ym.with({ month: 9, monthCode: 'M10' }), RangeError)
+      })
     })
   })
   describe('YearMonth.with() works', () => {
