@@ -209,6 +209,24 @@ export function computeISODayOfWeek(isoYear: number, isoMonth: number, isoDay: n
 }
 
 // Validation
+/*
+Extreme valid inputs
+  Legacy Date
+    Date.UTC(-271821, 4 - 1, 20,  0, 0, 0, 0)
+    Date.UTC(275760, 9 - 1, 13,  0, 0, 0, 0)
+  Instant
+    Temporal.Instant.fromEpochMilliseconds(Date.UTC(-271821, 4 - 1, 20,  0, 0, 0, 0))
+    Temporal.Instant.fromEpochMilliseconds(Date.UTC(275760, 9 - 1, 13,  0, 0, 0, 0))
+  PlainDateTime
+    new Temporal.PlainDateTime(-271821, 4, 19,  0, 0, 0, 0, 0, 1).toString()
+    new Temporal.PlainDateTime(275760, 9, 13,  23, 59, 59, 999, 999, 999).toString()
+  PlainDate
+    new Temporal.PlainDate(-271821, 4, 19).toString()
+    new Temporal.PlainDate(275760, 9, 13).toString()
+  PlainYearMonth
+    new Temporal.PlainYearMonth(-271821, 4).toString()
+    new Temporal.PlainYearMonth(275760, 9).toString()
+*/
 
 export function validateYearMonth(isoFields: DateISOEssentials): void {
   // might throw an error
@@ -217,22 +235,35 @@ export function validateYearMonth(isoFields: DateISOEssentials): void {
 }
 
 export function validateDate(isoFields: DateISOEssentials): void {
-  // might throw an error
-  isoFieldsToEpochNano(isoFields)
+  const nano = isoFieldsToEpochNano(isoFields)
+  validatePlain(
+    // if potentially very negative, measure last nanosecond of day
+    // to increase changes it's in-bounds
+    nano + (nano < 0n ? 86399999999999n : 0n)
+  )
 }
 
-export function validateDateTime(
-  isoFields: Partial<DateTimeISOEssentials> & { isoYear: number },
-): void {
-  // might throw an error
-  isoFieldsToEpochNano(isoFields)
+export function validateDateTime(isoFields: DateTimeISOEssentials): void {
+  validatePlain(isoFieldsToEpochNano(isoFields))
 }
 
 export function validateInstant(epochNano: bigint): void {
-  const epochMilli = Number(epochNano / nanoInMilliBI)
-  const leftoverNano = Number(epochNano - BigInt(epochMilli) * nanoInMilliBI)
-  const fakeEpochMilli = epochMilli + numSign(leftoverNano)
-  validateValue(new Date(fakeEpochMilli))
+  if (
+    epochNano < -8640000000000000000000n ||
+    epochNano > 8640000000000000000000n
+  ) {
+    throwOutOfRange()
+  }
+}
+
+export function validatePlain(epochNano: bigint): void {
+  // like validateInstant's bounds, but expanded 24:59:59.999999999
+  if (
+    epochNano < -8640000086399999999999n ||
+    epochNano > 8640000086399999999999n
+  ) {
+    throwOutOfRange()
+  }
 }
 
 function nudgeToLegacyDate(epochMilli: number): [Date, number] {
@@ -256,12 +287,6 @@ function nudgeToLegacyDate(epochMilli: number): [Date, number] {
   }
 
   return [date!, sign * dayShiftAbs]
-}
-
-function validateValue(n: { valueOf(): number }) {
-  if (isInvalid(n)) {
-    throwOutOfRange()
-  }
 }
 
 function isInvalid(n: { valueOf(): number }): boolean {

@@ -627,24 +627,6 @@ describe('Date', () => {
     })
   })
   describe('Min/max range', () => {
-    /*
-    Extreme valid inputs
-      Legacy Date
-        Date.UTC(-271821, 4 - 1, 20,  0, 0, 0, 0)
-        Date.UTC(275760, 9 - 1, 13,  0, 0, 0, 0)
-      Instant
-        Temporal.Instant.fromEpochMilliseconds(Date.UTC(-271821, 4 - 1, 20,  0, 0, 0, 0))
-        Temporal.Instant.fromEpochMilliseconds(Date.UTC(275760, 9 - 1, 13,  0, 0, 0, 0))
-      PlainDateTime
-        new Temporal.PlainDateTime(-271821, 4, 19,  0, 0, 0, 0, 0, 1).toString()
-        new Temporal.PlainDateTime(275760, 9, 13,  23, 59, 59, 999, 999, 999).toString()
-      PlainDate
-        new Temporal.PlainDate(-271821, 4, 19).toString()
-        new Temporal.PlainDate(275760, 9, 13).toString()
-      PlainYearMonth
-        new Temporal.PlainYearMonth(-271821, 4).toString()
-        new Temporal.PlainYearMonth(275760, 9).toString()
-    */
     it('constructing from numbers', () => {
       throws(() => new PlainDate(-271821, 4, 18), RangeError)
       throws(() => new PlainDate(275760, 9, 14), RangeError)
