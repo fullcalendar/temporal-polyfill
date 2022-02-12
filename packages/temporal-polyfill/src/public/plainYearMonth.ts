@@ -100,11 +100,11 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-    return this.toPlainDate(day1).add(durationArg, options).toPlainYearMonth()
+    return addDuration(this, ensureObj(Duration, durationArg), options)
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-    return this.toPlainDate(day1).add(ensureObj(Duration, durationArg).negated(), options).toPlainYearMonth()
+    return addDuration(this, ensureObj(Duration, durationArg).negated(), options)
   }
 
   until(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
@@ -166,3 +166,19 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 export interface PlainYearMonth extends YearMonthCalendarFields { calendar: Calendar }
 mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)
+
+// utils
+
+function addDuration(
+  yearMonth: PlainYearMonth,
+  duration: Duration,
+  options?: OverflowOptions,
+): PlainYearMonth {
+  return yearMonth.toPlainDate({
+    day: duration.sign < 0
+      ? yearMonth.daysInMonth
+      : 1
+  })
+  .add(duration, options)
+  .toPlainYearMonth()
+}
