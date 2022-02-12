@@ -29,8 +29,12 @@ describe('Time', () => {
       const duration = time.until(two)
       equal(`${duration}`, 'PT1H37M')
     })
-    it(`(${two}).until(${time}) => -PT1H37M`, () => equal(`${two.until(time)}`, '-PT1H37M'))
-    it(`(${time}).until(${two}) === (${two}).since(${time})`, () => equal(`${time.until(two)}`, `${two.since(time)}`))
+    it(`(${two}).until(${time}) => -PT1H37M`, () => {
+      equal(`${two.until(time)}`, '-PT1H37M')
+    })
+    it(`(${time}).until(${two}) === (${two}).since(${time})`, () => {
+      equal(`${time.until(two)}`, `${two.since(time)}`)
+    })
     it('casts argument', () => {
       equal(`${time.until({ hour: 16, minute: 34 })}`, 'PT1H10M29.876543211S')
       equal(`${time.until('16:34')}`, 'PT1H10M29.876543211S')
@@ -297,8 +301,12 @@ describe('Time', () => {
       const duration = time.since(two)
       equal(`${duration}`, 'PT1H53M')
     })
-    it(`(${two}).since(${time}) => -PT1H53M`, () => equal(`${two.since(time)}`, '-PT1H53M'))
-    it(`(${two}).since(${time}) === (${time}).until(${two})`, () => equal(`${two.since(time)}`, `${time.until(two)}`))
+    it(`(${two}).since(${time}) => -PT1H53M`, () => {
+      equal(`${two.since(time)}`, '-PT1H53M')
+    })
+    it(`(${two}).since(${time}) === (${time}).until(${two})`, () => {
+      equal(`${two.since(time)}`, `${time.until(two)}`)
+    })
     it('casts argument', () => {
       equal(`${time.since({ hour: 16, minute: 34 })}`, '-PT1H10M29.876543211S')
       equal(`${time.since('16:34')}`, '-PT1H10M29.876543211S')
@@ -581,8 +589,9 @@ describe('Time', () => {
       ['nanosecond', '13:46:23.123456789'],
     ]
     incrementOneNearest.forEach(([smallestUnit, expected]) => {
-      it(`rounds to nearest ${smallestUnit}`, () =>
-        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'halfExpand' })}`, expected))
+      it(`rounds to nearest ${smallestUnit}`, () => {
+        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'halfExpand' })}`, expected)
+      })
     })
     const incrementOneCeil = [
       ['hour', '14:00:00'],
@@ -593,8 +602,9 @@ describe('Time', () => {
       ['nanosecond', '13:46:23.123456789'],
     ]
     incrementOneCeil.forEach(([smallestUnit, expected]) => {
-      it(`rounds up to ${smallestUnit}`, () =>
-        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'ceil' })}`, expected))
+      it(`rounds up to ${smallestUnit}`, () => {
+        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'ceil' })}`, expected)
+      })
     })
     const incrementOneFloor = [
       ['hour', '13:00:00'],
@@ -605,10 +615,12 @@ describe('Time', () => {
       ['nanosecond', '13:46:23.123456789'],
     ]
     incrementOneFloor.forEach(([smallestUnit, expected]) => {
-      it(`rounds down to ${smallestUnit}`, () =>
-        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'floor' })}`, expected))
-      it(`truncates to ${smallestUnit}`, () =>
-        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'trunc' })}`, expected))
+      it(`rounds down to ${smallestUnit}`, () => {
+        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'floor' })}`, expected)
+      })
+      it(`truncates to ${smallestUnit}`, () => {
+        equal(`${time.round({ smallestUnit: smallestUnit as TimeUnit, roundingMode: 'trunc' })}`, expected)
+      })
     })
     it('halfExpand is the default', () => {
       equal(`${time.round({ smallestUnit: 'hour' })}`, '14:00:00')
@@ -686,9 +698,15 @@ describe('Time', () => {
   describe('Time.compare() works', () => {
     const t1 = PlainTime.from('08:44:15.321')
     const t2 = PlainTime.from('14:23:30.123')
-    it('equal', () => equal(PlainTime.compare(t1, t1), 0))
-    it('smaller/larger', () => equal(PlainTime.compare(t1, t2), -1))
-    it('larger/smaller', () => equal(PlainTime.compare(t2, t1), 1))
+    it('equal', () => {
+      equal(PlainTime.compare(t1, t1), 0)
+    })
+    it('smaller/larger', () => {
+      equal(PlainTime.compare(t1, t2), -1)
+    })
+    it('larger/smaller', () => {
+      equal(PlainTime.compare(t2, t1), 1)
+    })
     it('casts first argument', () => {
       equal(PlainTime.compare({ hour: 16, minute: 34 }, t2), 1)
       equal(PlainTime.compare('16:34', t2), 1)
@@ -705,8 +723,12 @@ describe('Time', () => {
   describe('time.equals() works', () => {
     const t1 = PlainTime.from('08:44:15.321')
     const t2 = PlainTime.from('14:23:30.123')
-    it('equal', () => assert(t1.equals(t1)))
-    it('unequal', () => assert(!t1.equals(t2)))
+    it('equal', () => {
+      assert(t1.equals(t1))
+    })
+    it('unequal', () => {
+      assert(!t1.equals(t2))
+    })
     it('casts argument', () => {
       assert(t1.equals('08:44:15.321'))
       assert(t1.equals({ hour: 8, minute: 44, second: 15, millisecond: 321 }))
@@ -719,12 +741,24 @@ describe('Time', () => {
     const t1 = PlainTime.from('09:36:29.123456789')
     const t1again = PlainTime.from('09:36:29.123456789')
     const t2 = PlainTime.from('15:23:30.123456789')
-    it('=== is object equality', () => equal(t1, t1))
-    it('!== is object equality', () => notEqual(t1, t1again))
-    it('<', () => throws(() => t1 < t2))
-    it('>', () => throws(() => t1 > t2))
-    it('<=', () => throws(() => t1 <= t2))
-    it('>=', () => throws(() => t1 >= t2))
+    it('=== is object equality', () => {
+      equal(t1, t1)
+    })
+    it('!== is object equality', () => {
+      notEqual(t1, t1again)
+    })
+    it('<', () => {
+      throws(() => t1 < t2)
+    })
+    it('>', () => {
+      throws(() => t1 > t2)
+    })
+    it('<=', () => {
+      throws(() => t1 <= t2)
+    })
+    it('>=', () => {
+      throws(() => t1 >= t2)
+    })
   })
   describe('time.add() works', () => {
     const time = new PlainTime(15, 23, 30, 123, 456, 789)
@@ -745,7 +779,9 @@ describe('Time', () => {
     it('time.add(durationObj)', () => {
       equal(`${time.add(Duration.from('PT16H'))}`, '07:23:30.123456789')
     })
-    it('casts argument', () => equal(`${time.add('PT16H')}`, '07:23:30.123456789'))
+    it('casts argument', () => {
+      equal(`${time.add('PT16H')}`, '07:23:30.123456789')
+    })
     it('ignores higher units', () => {
       equal(`${time.add({ days: 1 })}`, '15:23:30.123456789')
       equal(`${time.add({ months: 1 })}`, '15:23:30.123456789')
@@ -774,15 +810,24 @@ describe('Time', () => {
   })
   describe('time.subtract() works', () => {
     const time = PlainTime.from('15:23:30.123456789')
-    it(`(${time}).subtract({ hours: 16 })`, () => equal(`${time.subtract({ hours: 16 })}`, '23:23:30.123456789'))
-    it(`(${time}).subtract({ minutes: 45 })`, () => equal(`${time.subtract({ minutes: 45 })}`, '14:38:30.123456789'))
-    it(`(${time}).subtract({ seconds: 45 })`, () => equal(`${time.subtract({ seconds: 45 })}`, '15:22:45.123456789'))
-    it(`(${time}).subtract({ milliseconds: 800 })`, () =>
-      equal(`${time.subtract({ milliseconds: 800 })}`, '15:23:29.323456789'))
-    it(`(${time}).subtract({ microseconds: 800 })`, () =>
-      equal(`${time.subtract({ microseconds: 800 })}`, '15:23:30.122656789'))
-    it(`(${time}).subtract({ nanoseconds: 800 })`, () =>
-      equal(`${time.subtract({ nanoseconds: 800 })}`, '15:23:30.123455989'))
+    it(`(${time}).subtract({ hours: 16 })`, () => {
+      equal(`${time.subtract({ hours: 16 })}`, '23:23:30.123456789')
+    })
+    it(`(${time}).subtract({ minutes: 45 })`, () => {
+      equal(`${time.subtract({ minutes: 45 })}`, '14:38:30.123456789')
+    })
+    it(`(${time}).subtract({ seconds: 45 })`, () => {
+      equal(`${time.subtract({ seconds: 45 })}`, '15:22:45.123456789')
+    })
+    it(`(${time}).subtract({ milliseconds: 800 })`, () => {
+      equal(`${time.subtract({ milliseconds: 800 })}`, '15:23:29.323456789')
+    })
+    it(`(${time}).subtract({ microseconds: 800 })`, () => {
+      equal(`${time.subtract({ microseconds: 800 })}`, '15:23:30.122656789')
+    })
+    it(`(${time}).subtract({ nanoseconds: 800 })`, () => {
+      equal(`${time.subtract({ nanoseconds: 800 })}`, '15:23:30.123455989')
+    })
     it('symmetric with regard to negative durations', () => {
       equal(`${PlainTime.from('23:23:30.123456789').subtract({ hours: -16 })}`, '15:23:30.123456789')
       equal(`${PlainTime.from('14:38:30.123456789').subtract({ minutes: -45 })}`, '15:23:30.123456789')
@@ -794,7 +839,9 @@ describe('Time', () => {
     it('time.subtract(durationObj)', () => {
       equal(`${time.subtract(Duration.from('PT16H'))}`, '23:23:30.123456789')
     })
-    it('casts argument', () => equal(`${time.subtract('PT16H')}`, '23:23:30.123456789'))
+    it('casts argument', () => {
+      equal(`${time.subtract('PT16H')}`, '23:23:30.123456789')
+    })
     it('ignores higher units', () => {
       equal(`${time.subtract({ days: 1 })}`, '15:23:30.123456789')
       equal(`${time.subtract({ months: 1 })}`, '15:23:30.123456789')
@@ -936,14 +983,19 @@ describe('Time', () => {
     it('Time.from("15:23:30.123456789")', () => {
       equal(`${PlainTime.from('15:23:30.123456789')}`, '15:23:30.123456789')
     })
-    it('Time.from({ hour: 15, minute: 23 })', () => equal(`${PlainTime.from({ hour: 15, minute: 23 })}`, '15:23:00'))
-    it('Time.from({ minute: 30, microsecond: 555 })', () =>
-      equal(`${PlainTime.from({ minute: 30, microsecond: 555 })}`, '00:30:00.000555'))
+    it('Time.from({ hour: 15, minute: 23 })', () => {
+      equal(`${PlainTime.from({ hour: 15, minute: 23 })}`, '15:23:00')
+    })
+    it('Time.from({ minute: 30, microsecond: 555 })', () => {
+      equal(`${PlainTime.from({ minute: 30, microsecond: 555 })}`, '00:30:00.000555')
+    })
     it('Time.from(ISO string leap second) is constrained', () => {
       equal(`${PlainTime.from('23:59:60')}`, '23:59:59')
       equal(`${PlainTime.from('23:59:60', { overflow: 'reject' })}`, '23:59:59')
     })
-    it('Time.from(number) is converted to string', () => equal(`${PlainTime.from(1523 as ValidArg)}`, `${PlainTime.from('1523')}`))
+    it('Time.from(number) is converted to string', () => {
+      equal(`${PlainTime.from(1523 as ValidArg)}`, `${PlainTime.from('1523')}`)
+    })
     it('Time.from(time) returns the same properties', () => {
       const t = PlainTime.from('2020-02-12T11:42:00+01:00[Europe/Amsterdam]')
       equal(PlainTime.from(t).toString(), t.toString())
@@ -1000,7 +1052,9 @@ describe('Time', () => {
     it('optional parts', () => {
       equal(`${PlainTime.from('15')}`, '15:00:00')
     })
-    it('no junk at end of string', () => throws(() => PlainTime.from('15:23:30.100junk'), RangeError))
+    it('no junk at end of string', () => {
+      throws(() => PlainTime.from('15:23:30.100junk'), RangeError)
+    })
     it('options may only be an object or undefined', () => {
       [null, 1, 'hello', true, Symbol('foo'), 1n].forEach((badOptions: InvalidArg) =>
         throws(() => PlainTime.from({ hour: 12 }, badOptions), TypeError),
@@ -1009,7 +1063,9 @@ describe('Time', () => {
     })
     describe('Overflow', () => {
       const bad = { nanosecond: 1000 }
-      it('reject', () => throws(() => PlainTime.from(bad, { overflow: 'reject' }), RangeError))
+      it('reject', () => {
+        throws(() => PlainTime.from(bad, { overflow: 'reject' }), RangeError)
+      })
       it('constrain', () => {
         equal(`${PlainTime.from(bad)}`, '00:00:00.000000999')
         equal(`${PlainTime.from(bad, { overflow: 'constrain' })}`, '00:00:00.000000999')
@@ -1022,8 +1078,12 @@ describe('Time', () => {
         })
       })
       const leap = { hour: 23, minute: 59, second: 60 }
-      it('reject leap second', () => throws(() => PlainTime.from(leap, { overflow: 'reject' }), RangeError))
-      it('constrain leap second', () => equal(`${PlainTime.from(leap)}`, '23:59:59'))
+      it('reject leap second', () => {
+        throws(() => PlainTime.from(leap, { overflow: 'reject' }), RangeError)
+      })
+      it('constrain leap second', () => {
+        equal(`${PlainTime.from(leap)}`, '23:59:59')
+      })
       it('constrain has no effect on invalid ISO string', () => {
         throws(() => PlainTime.from('24:60', { overflow: 'constrain' }), RangeError)
       })
@@ -1050,13 +1110,17 @@ describe('Time', () => {
   describe('time operations', () => {
     const datetime = { year: 2019, month: 10, day: 1, hour: 14, minute: 20, second: 36 }
     const fromed = new PlainTime(14, 20, 36)
-    it(`Temporal.PlainTime.from(${JSON.stringify(datetime)}) instanceof Temporal.PlainTime`, () =>
-      assert(PlainTime.from(datetime) instanceof PlainTime))
-    it(`Temporal.PlainTime.from(${JSON.stringify(datetime)}) === ${fromed}`, () =>
-      assert(PlainTime.from(datetime).equals(fromed)))
+    it(`Temporal.PlainTime.from(${JSON.stringify(datetime)}) instanceof Temporal.PlainTime`, () => {
+      assert(PlainTime.from(datetime) instanceof PlainTime)
+    })
+    it(`Temporal.PlainTime.from(${JSON.stringify(datetime)}) === ${fromed}`, () => {
+      assert(PlainTime.from(datetime).equals(fromed))
+    })
 
     const iso = '20:18:32'
-    it(`Temporal.PlainTime.from("${iso}") === (${iso})`, () => equal(`${PlainTime.from(iso)}`, iso))
+    it(`Temporal.PlainTime.from("${iso}") === (${iso})`, () => {
+      equal(`${PlainTime.from(iso)}`, iso)
+    })
   })
   describe('time.getISOFields() works', () => {
     const t1 = PlainTime.from('15:23:30.123456789')
