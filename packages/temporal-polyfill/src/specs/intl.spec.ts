@@ -35,9 +35,11 @@ describe('Intl', () => {
       equal(`${instant.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976, 15:23:30')
     })
     const fmt = maybeGetWeekdayOnlyFormat()
-    if (fmt) it('uses only the options in resolvedOptions', () => {
-      equal(fmt.format(instant), 'Thursday')
-    })
+    if (fmt) {
+      it('uses only the options in resolvedOptions', () => {
+        equal(fmt.format(instant), 'Thursday')
+      })
+    }
     it('outputs timeZoneName if requested', () => {
       const str = instant.toLocaleString('en', { timeZone: 'America/New_York', timeZoneName: 'short' })
       assert(str.includes('EST'))
@@ -52,9 +54,11 @@ describe('Intl', () => {
       equal(zdt.toLocaleString('de'), '18.11.1976, 15:23:30 MEZ')
     })
     const fmt = maybeGetWeekdayOnlyFormat()
-    if (fmt) it('uses only the options in resolvedOptions', () => {
-      equal(fmt.format(zdt), 'Thursday')
-    })
+    if (fmt) {
+      it('uses only the options in resolvedOptions', () => {
+        equal(fmt.format(zdt), 'Thursday')
+      })
+    }
     it('can override the style of the time zone name', () => {
       equal(
         zdt.toLocaleString('en', { timeZoneName: 'long' }),
@@ -91,7 +95,9 @@ describe('Intl', () => {
       equal(`${datetime.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976, 15:23:30')
     })
     const fmt = maybeGetWeekdayOnlyFormat()
-    if (fmt) it('uses only the options in resolvedOptions', () => equal(fmt.format(datetime), 'Thursday'))
+    if (fmt) {
+      it('uses only the options in resolvedOptions', () => equal(fmt.format(datetime), 'Thursday'))
+    }
     it('should ignore units not in the data type', () => {
       equal(datetime.toLocaleString('en', { timeZoneName: 'long' }), '11/18/1976, 3:23:30 PM')
     })
@@ -1507,8 +1513,9 @@ describe('Intl', () => {
         equal(us.formatRange(start, end), '12/29/1922 – 12/25/1991')
         equal(at.formatRange(start, end), '30.12.1922 – 26.12.1991')
       })
-      it('should throw a TypeError when called with dissimilar types', () =>
-        throws(() => us.formatRange(Temporal.Instant.from(t1), Temporal.PlainDateTime.from(t2)), TypeError))
+      it('should throw a TypeError when called with dissimilar types', () => {
+        throws(() => us.formatRange(Temporal.Instant.from(t1), Temporal.PlainDateTime.from(t2)), TypeError)
+      })
       it('should throw a RangeError when called with different calendars', () => {
         throws(
           () =>
@@ -1860,8 +1867,9 @@ describe('Intl', () => {
           { type: 'year', value: '1991', source: 'endRange' },
         ])
       })
-      it('should throw a TypeError when called with dissimilar types', () =>
-        throws(() => at.formatRangeToParts(Temporal.Instant.from(t1), Temporal.PlainDateTime.from(t2)), TypeError))
+      it('should throw a TypeError when called with dissimilar types', () => {
+        throws(() => at.formatRangeToParts(Temporal.Instant.from(t1), Temporal.PlainDateTime.from(t2)), TypeError)
+      })
       it('should throw a RangeError when called with different calendars', () => {
         throws(
           () =>
