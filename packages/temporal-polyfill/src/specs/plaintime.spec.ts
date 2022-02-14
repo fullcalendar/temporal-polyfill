@@ -902,9 +902,9 @@ describe('Time', () => {
       equal(t3.toString({ smallestUnit: 'nanosecond' }), t3.toString({ fractionalSecondDigits: 9 }))
     })
     it('throws on invalid or disallowed smallestUnit', () => {
-      ['era', 'year', 'month', 'day', 'hour', 'nonsense'].forEach((smallestUnit: InvalidArg) =>
-        throws(() => t1.toString({ smallestUnit }), RangeError),
-      )
+      ['era', 'year', 'month', 'day', 'hour', 'nonsense'].forEach((smallestUnit: InvalidArg) => {
+        throws(() => t1.toString({ smallestUnit }), RangeError)
+      })
     })
     it('accepts plural units', () => {
       equal(t3.toString({ smallestUnit: 'minutes' }), t3.toString({ smallestUnit: 'minute' }))
@@ -929,9 +929,9 @@ describe('Time', () => {
       [t1, t2, t3].forEach((dt) => equal(dt.toString({ fractionalSecondDigits: 'auto' }), dt.toString()))
     })
     it('throws on out of range or invalid fractionalSecondDigits', () => {
-      [-1, 10, Infinity, NaN, 'not-auto'].forEach((fractionalSecondDigits: InvalidArg) =>
-        throws(() => t1.toString({ fractionalSecondDigits }), RangeError),
-      )
+      [-1, 10, Infinity, NaN, 'not-auto'].forEach((fractionalSecondDigits: InvalidArg) => {
+        throws(() => t1.toString({ fractionalSecondDigits }), RangeError)
+      })
     })
     it('accepts and truncates fractional fractionalSecondDigits', () => {
       equal(t3.toString({ fractionalSecondDigits: 5.5 as FractionalSecondDigits }), '15:23:30.12340')
