@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { nanoInMicroBI } from '../dateUtils/units'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
@@ -43,7 +44,7 @@ function getInstant(): Instant {
 }
 
 function getTimeZone(): TimeZone {
-  return new TimeZone(new Intl.DateTimeFormat().resolvedOptions().timeZone)
+  return new TimeZone(new OrigDateTimeFormat().resolvedOptions().timeZone)
 }
 
 export const Now = {

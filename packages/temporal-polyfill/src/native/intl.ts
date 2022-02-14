@@ -52,59 +52,17 @@ export interface DateTimeFormatTemporalMethods {
 
 export type DateTimeFormatWithTemporal = Intl.DateTimeFormat & DateTimeFormatTemporalMethods
 
-const origDateTimeFormat = Intl.DateTimeFormat
-// const origFormat = origDateTimeFormat.prototype.format
-const origFormatToParts = origDateTimeFormat.prototype.formatToParts
-const origFormatRange = origDateTimeFormat.prototype.formatRange
-const origFormatRangeToParts = origDateTimeFormat.prototype.formatRangeToParts
+// TODO: unify this as a class/const, to just export DateTimeFormat,
+// and have whole src reference it only, not Intl.DateTimeFormat
+export const OrigDateTimeFormat = Intl.DateTimeFormat
 
-// implementation
-
-export function intlFormat(
-  dtf: Intl.DateTimeFormat,
-  dateArg?: DateTimeFormatArg,
-): string {
-  return dtf.format(normalizeIntlOptionalDateArg(dateArg))
-}
-
-export function intlFormatToParts(
-  dtf: Intl.DateTimeFormat,
-  dateArg?: DateTimeFormatArg,
-): Intl.DateTimeFormatPart[] {
-  return origFormatToParts.call(dtf, normalizeIntlOptionalDateArg(dateArg))
-}
-
-export function intlFormatRange(
-  dtf: Intl.DateTimeFormat,
-  startArg: DateTimeFormatArg,
-  endArg: DateTimeFormatArg,
-): string {
-  return origFormatRange.call(
-    dtf,
-    normalizeIntlDateArg(startArg),
-    normalizeIntlDateArg(endArg),
-  )
-}
-
-export function intlFormatRangeToParts(
-  dtf: Intl.DateTimeFormat,
-  startArg: DateTimeFormatArg,
-  endArg: DateTimeFormatArg,
-): DateTimeFormatRangePart[] {
-  return origFormatRangeToParts.call(
-    dtf,
-    normalizeIntlDateArg(startArg),
-    normalizeIntlDateArg(endArg),
-  )
-}
-
-function normalizeIntlOptionalDateArg(
+export function normalizeIntlOptionalDateArg(
   dateArg: DateTimeFormatArg | undefined,
 ): undefined | number | Date {
   return dateArg === undefined ? dateArg : normalizeIntlDateArg(dateArg)
 }
 
-function normalizeIntlDateArg(dateArg: DateTimeFormatArg): number | Date {
+export function normalizeIntlDateArg(dateArg: DateTimeFormatArg): number | Date {
   return typeof dateArg === 'number'
     ? dateArg
     : dateArg instanceof Date

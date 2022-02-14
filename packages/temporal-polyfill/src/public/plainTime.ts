@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { timeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
@@ -125,7 +126,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return new Intl.DateTimeFormat(locales, {
+    return new OrigDateTimeFormat(locales, {
       ...options,
       timeZone: 'UTC', // options can't override
       // TODO: inject more options to ensure only time is displayed by default

@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
@@ -109,7 +110,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
     const fields = this.getISOFields()
 
-    return new Intl.DateTimeFormat(locales, {
+    return new OrigDateTimeFormat(locales, {
       calendar: fields.calendar.id,
       ...options,
       timeZone: 'UTC', // options can't override

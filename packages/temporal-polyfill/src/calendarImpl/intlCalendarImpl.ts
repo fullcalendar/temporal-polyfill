@@ -6,6 +6,7 @@ import {
   isoEpochOriginYear,
   isoToEpochMilli,
 } from '../dateUtils/isoMath'
+import { OrigDateTimeFormat } from '../native/intl'
 import { CalendarImpl } from './calendarImpl'
 
 export class IntlCalendarImpl extends CalendarImpl {
@@ -192,7 +193,7 @@ export class IntlCalendarImpl extends CalendarImpl {
 // Exposed Internals, for subclasses
 
 export function buildFormat(calendarID: string): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat('en-US', {
+  return new OrigDateTimeFormat('en-US', {
     calendar: calendarID,
     era: 'short', // 'narrow' is too terse for japanese months
     year: 'numeric',

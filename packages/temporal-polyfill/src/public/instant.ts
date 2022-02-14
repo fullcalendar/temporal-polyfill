@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
@@ -109,7 +110,7 @@ export class Instant extends AbstractNoValueObj {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return new Intl.DateTimeFormat(locales, {
+    return new OrigDateTimeFormat(locales, {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',

@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDisambigOption } from '../argParse/disambig'
@@ -258,7 +259,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
     const fields = this.getISOFields()
 
-    return new Intl.DateTimeFormat(locales, {
+    return new OrigDateTimeFormat(locales, {
       calendar: fields.calendar.id,
       timeZone: fields.timeZone.id,
       ...options,

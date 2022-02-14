@@ -7,11 +7,8 @@ Imports from non-top-level files are not allowed
 */
 import {
   Calendar,
-  DateTemporalMethods,
   DateTimeFormatArg,
   DateTimeFormatRangePart,
-  DateTimeFormatTemporalMethods,
-  DateWithTemporal,
   Duration,
   Instant,
   Now,
@@ -23,15 +20,15 @@ import {
   TimeZone,
   ZonedDateTime,
   dateToTemporalInstant,
-  intlFormatRange,
-  intlFormatRangeToParts,
-  intlFormatToParts,
 } from './impl'
-
-const TemporalNative = globalThis.Temporal
+import {
+  OrigDateTimeFormat,
+  normalizeIntlDateArg,
+  normalizeIntlOptionalDateArg,
+} from './native/intl'
 
 export function shimTemporal(): void {
-  if (!TemporalNative) {
+  if (!globalThis.Temporal) {
     globalThis.Temporal = {
       PlainYearMonth,
       PlainMonthDay,
@@ -45,71 +42,36 @@ export function shimTemporal(): void {
       Duration,
       Now,
     }
-    patchDateClass(Date)
-    patchDateTimeFormatClass(Intl.DateTimeFormat)
+
+    globalThis.Date.prototype.toTemporalInstant = function() {
+      return dateToTemporalInstant(this)
+    }
+
+    class ExtendedDateTimeFormat extends OrigDateTimeFormat {
+      format(dateArg?: DateTimeFormatArg): string {
+        return super.format(normalizeIntlOptionalDateArg(dateArg))
+      }
+
+      formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[] {
+        return super.formatToParts(normalizeIntlOptionalDateArg(dateArg))
+      }
+
+      formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string {
+        return super.formatRange(normalizeIntlDateArg(startArg), normalizeIntlDateArg(endArg))
+      }
+
+      formatRangeToParts(
+        startArg: DateTimeFormatArg,
+        endArg: DateTimeFormatArg,
+      ): DateTimeFormatRangePart[] {
+        return super.formatRangeToParts(
+          normalizeIntlDateArg(startArg),
+          normalizeIntlDateArg(endArg),
+        )
+      }
+    }
+
+    // wasn't possible to patch existing methods. must create subclass
+    (globalThis.Intl as any).DateTimeFormat = ExtendedDateTimeFormat // HACK
   }
-}
-
-function patchDateClass(DateClass: { prototype: Date }): void {
-  (DateClass.prototype as DateWithTemporal).toTemporalInstant = function() {
-    return dateToTemporalInstant(this)
-  }
-}
-
-function patchDateTimeFormatClass(DateTimeFormatClass: { prototype: Intl.DateTimeFormat }): void {
-  const proto = DateTimeFormatClass.prototype
-
-  // // simply assigning within Jest causes weird getter exception
-  // Object.defineProperty(proto, 'format', {
-  //   value: function(this: Intl.DateTimeFormat, dateArg?: DateTimeFormatArg): string {
-  //     return intlFormat(this, dateArg)
-  //   }
-  // })
-
-  proto.formatToParts = function(
-    this: Intl.DateTimeFormat,
-    dateArg?: DateTimeFormatArg,
-  ): Intl.DateTimeFormatPart[] {
-    return intlFormatToParts(this, dateArg)
-  }
-
-  proto.formatRange = function(
-    this: Intl.DateTimeFormat,
-    startArg: DateTimeFormatArg,
-    endArg: DateTimeFormatArg,
-  ): string {
-    return intlFormatRange(this, startArg, endArg)
-  }
-
-  proto.formatRangeToParts = function(
-    this: Intl.DateTimeFormat,
-    startArg: DateTimeFormatArg,
-    endArg: DateTimeFormatArg,
-  ): DateTimeFormatRangePart[] {
-    return intlFormatRangeToParts(this, startArg, endArg)
-  }
-}
-
-// additional public API for manually extending classes
-
-export function extendDateClass<DateObj extends Date>(
-  DateClass: { new(...args: any[]): DateObj, prototype: DateObj },
-): typeof Date & { prototype: (DateObj & DateTemporalMethods) } {
-  if (!TemporalNative) {
-    class DateExtended extends DateClass {}
-    patchDateClass(DateExtended)
-    DateClass = DateExtended
-  }
-  return DateClass as any
-}
-
-export function extendDateTimeClass<DateTimeFormatObj extends Intl.DateTimeFormat>(
-  DateTimeFormatClass: { new(...args: any[]): DateTimeFormatObj, prototype: DateTimeFormatObj },
-): typeof Intl.DateTimeFormat & { prototype: (DateTimeFormatObj & DateTimeFormatTemporalMethods) } {
-  if (!TemporalNative) {
-    class DateTimeFormatExtended extends DateTimeFormatClass {}
-    patchDateTimeFormatClass(DateTimeFormatExtended)
-    DateTimeFormatClass = DateTimeFormatExtended
-  }
-  return DateTimeFormatClass as any
 }

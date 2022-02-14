@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { dateTimeFieldMap } from '../argParse/fieldStr'
@@ -188,7 +189,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
     const fields = this.getISOFields()
 
-    return new Intl.DateTimeFormat(locales, {
+    return new OrigDateTimeFormat(locales, {
       calendar: fields.calendar.id,
       ...options,
       timeZone: 'UTC', // options can't override

@@ -1,3 +1,4 @@
+import { OrigDateTimeFormat } from '../native/intl'
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { epochSecondsToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
 import { milliInSecond, secondsInDay } from '../dateUtils/units'
@@ -21,7 +22,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   private transitionsInYear: { [year: string]: RawTransition[] }
 
   constructor(id: string) {
-    const format = new Intl.DateTimeFormat('en-GB', { // gives 24-hour clock
+    const format = new OrigDateTimeFormat('en-GB', { // gives 24-hour clock
       era: 'short',
       year: 'numeric',
       month: 'numeric',
