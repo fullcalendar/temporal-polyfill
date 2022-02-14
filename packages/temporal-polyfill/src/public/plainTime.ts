@@ -7,6 +7,7 @@ import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { formatTimeISO } from '../dateUtils/isoFormat'
 import { mixinISOFields } from '../dateUtils/mixins'
 import { parseTimeISO } from '../dateUtils/parse'
+import { roundTime } from '../dateUtils/rounding'
 import {
   TimeFields,
   addToPlainTime,
@@ -18,6 +19,7 @@ import {
   roundPlainTime,
   timeFieldsToConstrainedISO,
   timeFieldsToNano,
+  timeLikeToISO,
 } from '../dateUtils/time'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -114,7 +116,12 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 
   toString(options?: TimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
-    return formatTimeISO(this.getISOFields(), formatConfig)
+    const roundedISOFields = roundTime(
+      this,
+      formatConfig.roundingIncrement,
+      formatConfig.roundingMode,
+    )
+    return formatTimeISO(timeLikeToISO(roundedISOFields), formatConfig)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {

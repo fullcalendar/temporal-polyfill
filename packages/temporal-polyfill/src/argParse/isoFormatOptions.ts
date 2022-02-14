@@ -53,7 +53,7 @@ export function parseTimeToStringOptions<
       largestUnit, // maxUnit
     )
     roundingIncrement = nanoIn[smallestUnit]
-    digits = unitDigitMap[smallestUnit]
+    digits = unitDigitMap[smallestUnit] || 0
   } else if (digitsArg !== undefined && digitsArg !== 'auto') {
     digits = constrainInt(digitsArg, 0, 9, OVERFLOW_REJECT)
     roundingIncrement = Math.pow(10, 9 - digits)

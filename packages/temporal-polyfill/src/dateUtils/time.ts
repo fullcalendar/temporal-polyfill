@@ -99,8 +99,8 @@ export function diffPlainTimes(
 ): Duration {
   const diffConfig = parseDiffOptions<TimeUnit, TimeUnitInt>(
     options,
-    NANOSECOND, // largestUnitDefault
-    HOUR, // smallestUnitDefault
+    HOUR, // largestUnitDefault
+    NANOSECOND, // smallestUnitDefault
     NANOSECOND, // minUnit
     HOUR, // maxUnit
   )

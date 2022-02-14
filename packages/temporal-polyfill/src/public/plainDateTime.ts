@@ -179,7 +179,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
       this,
       formatConfig.roundingIncrement,
       formatConfig.roundingMode,
-    ).getISOFields()
+    ).getISOFields() // TODO: somehow have ISO fields returned directly
 
     return formatDateTimeISO(isoFields, formatConfig) +
       formatCalendarID(isoFields.calendar.id, calendarDisplay)

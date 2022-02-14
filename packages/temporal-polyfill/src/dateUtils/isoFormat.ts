@@ -172,8 +172,8 @@ function formatPartialSeconds(
   microseconds: number,
   nanoseconds: number,
   fractionalSecondDigits: number | undefined,
-  roundingFunc?: RoundingFunc, // HACK
-  smallestUnit?: TimeUnitInt, // HACK
+  roundingFunc?: RoundingFunc, // HACK for forcing this func to do rounding
+  smallestUnit?: TimeUnitInt, // HACK for forcing this func to do rounding
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
   let totalNano =
     BigInt(nanoseconds) +
@@ -186,7 +186,7 @@ function formatPartialSeconds(
     totalNano = roundToIncrementBI(
       totalNano,
       fractionalSecondDigits === undefined
-        ? nanoIn[smallestUnit!]
+        ? nanoIn[smallestUnit!] // not needed anymore I don't think
         : Math.pow(10, 9 - fractionalSecondDigits),
       roundingFunc,
     )
