@@ -20,7 +20,7 @@ export class IntlCalendarImpl extends CalendarImpl {
   constructor(id: string) {
     const format = buildFormat(id)
     if (id !== format.resolvedOptions().calendar) {
-      throw new Error('Invalid calendar: ' + id)
+      throw new RangeError('Invalid calendar: ' + id)
     }
     super(id)
     this.format = format

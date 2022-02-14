@@ -10,6 +10,17 @@ export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
   return arg.calendar // boolean-ish
 }
 
+export function parseCalendarArgFromBag(arg: CalendarArgSimple): Calendar {
+  if (typeof arg === 'object') {
+    if (typeof arg.id === 'string') {
+      return arg as Calendar // custom implementation
+    } else {
+      throw new RangeError('Invalid calendar')
+    }
+  }
+  return new Calendar(String(arg))
+}
+
 export function extractCalendar(input: { calendar?: CalendarArg; }): Calendar {
   if (input.calendar === undefined) {
     return createDefaultCalendar()

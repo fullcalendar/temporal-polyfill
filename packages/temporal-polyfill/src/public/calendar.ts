@@ -1,8 +1,8 @@
 import {
   ensureCalendarsEqual,
-  extractCalendar,
   getCommonCalendar,
   isCalendarArgBag,
+  parseCalendarArgFromBag,
 } from '../argParse/calendar'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj } from '../argParse/refine'
@@ -22,6 +22,7 @@ import {
 import { diffDateFields } from '../dateUtils/diff'
 import { computeISODayOfWeek } from '../dateUtils/isoMath'
 import { MonthDayFields } from '../dateUtils/monthDay'
+import { tryParseDateTimeISO } from '../dateUtils/parse'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
 import { createWeakMap } from '../utils/obj'
@@ -54,18 +55,23 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   static from(arg: CalendarArg): Calendar {
     if (typeof arg === 'object') {
       if (isCalendarArgBag(arg)) {
-        return extractCalendar(arg)
+        return parseCalendarArgFromBag(arg.calendar)
       } else {
         return arg as Calendar // treat CalendarProtocols as Calendars internally
       }
     }
-    return new Calendar(arg) // arg is a string
+    const parsed = tryParseDateTimeISO(String(arg))
+    return new Calendar(
+      parsed // a date-time string?
+        ? parsed.calendar || isoCalendarID
+        : arg // any other type of string
+    )
   }
 
   get id(): string { return getImpl(this).id }
 
   era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined {
-    const isoFields = getExistingDateISOFields(arg)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return getImpl(this).era(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -74,7 +80,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   }
 
   eraYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number | undefined {
-    const isoFields = getExistingDateISOFields(arg)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return getImpl(this).eraYear(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -83,7 +89,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   }
 
   year(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
-    const isoFields = getExistingDateISOFields(arg)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return getImpl(this).year(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -92,7 +98,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   }
 
   month(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
-    const isoFields = getExistingDateISOFields(arg)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return getImpl(this).month(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -115,17 +121,17 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   }
 
   dayOfWeek(arg: DateArg | PlainDateTime | ZonedDateTime): number {
-    const isoFields = getExistingDateISOFields(arg)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeISODayOfWeek(isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay)
   }
 
   dayOfYear(arg: DateArg | PlainDateTime | ZonedDateTime): number {
-    const fields = queryDateFields(arg, this)
+    const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return computeDayOfYear(getImpl(this), fields.year, fields.month, fields.day)
   }
 
   weekOfYear(arg: DateArg | PlainDateTime | ZonedDateTime): number {
-    const isoFields = getExistingDateISOFields(arg)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeWeekOfISOYear(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -135,23 +141,26 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  daysInWeek(_arg: DateArg | PlainDateTime | ZonedDateTime): number {
+  daysInWeek(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+    // will throw error if invalid type
+    getExistingDateISOFields(arg, true) // disallowMonthDay=true
+
     // All calendars seem to have 7-day weeks
     return 7
   }
 
   daysInMonth(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
-    const fields = queryDateFields(arg, this)
+    const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return getImpl(this).daysInMonth(fields.year, fields.month)
   }
 
   daysInYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
-    const fields = queryDateFields(arg, this)
+    const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return computeDaysInYear(getImpl(this), fields.year)
   }
 
   monthsInYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
-    const calFields = queryDateFields(arg, this)
+    const calFields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return getImpl(this).monthsInYear(calFields.year)
   }
 

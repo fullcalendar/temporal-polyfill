@@ -38,12 +38,16 @@ function isDateISOInstance(arg: unknown): arg is DateISOInstance {
 export function queryDateFields(
   arg: DateISOInstance | DateArg,
   calendar: Calendar,
+  disallowMonthDay?: boolean,
 ): DateFields {
   let date: PlainDate
 
   if (arg instanceof PlainDate) {
     date = arg
   } else if (isDateISOInstance(arg)) {
+    if (disallowMonthDay && arg instanceof PlainMonthDay) {
+      throw new TypeError('PlainMonthDay not allowed')
+    }
     date = createDate(arg.getISOFields())
   } else {
     date = PlainDate.from(arg)
@@ -99,10 +103,16 @@ export function queryDateISOFields(
 
 export function getExistingDateISOFields(
   dateArg: DateISOInstance | DateArg,
+  disallowMonthDay?: boolean,
 ): DateISOEssentials {
-  return (
-    isDateISOInstance(dateArg) ? dateArg : PlainDate.from(dateArg)
-  ).getISOFields()
+  if (isDateISOInstance(dateArg)) {
+    if (disallowMonthDay && dateArg instanceof PlainMonthDay) {
+      throw new TypeError('PlainMonthDay not allowed')
+    }
+    return dateArg.getISOFields()
+  } else {
+    return PlainDate.from(dateArg).getISOFields()
+  }
 }
 
 // Calendar-dependent Math
