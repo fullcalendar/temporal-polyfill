@@ -67,7 +67,12 @@ export function roundBalancedDuration(
 
   // rebalance
   if (smallestUnit > NANOSECOND) {
-    resDuration = balanceDuration(resDuration, largestUnit, d0)
+    if (flip) {
+      // yuck
+      resDuration = balanceDuration(resDuration.negated(), largestUnit, d0).negated()
+    } else {
+      resDuration = balanceDuration(resDuration, largestUnit, d0)
+    }
   }
 
   return resDuration
