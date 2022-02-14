@@ -19,7 +19,11 @@ const namedMonthsToCodes: { [MonthStr: string]: string } = {
 
 export class HebrewCalendarImpl extends IntlCalendarImpl {
   parseMonth(monthStr: string, year: number): number {
-    return this.convertMonthCode(namedMonthsToCodes[monthStr], year)
+    const monthNum = parseInt(monthStr)
+    if (isNaN(monthNum)) { // sometimes a number, sometimes not
+      return this.convertMonthCode(namedMonthsToCodes[monthStr], year)
+    }
+    return monthNum
   }
 
   // month -> monthCode

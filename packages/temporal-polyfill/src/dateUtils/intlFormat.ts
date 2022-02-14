@@ -6,7 +6,7 @@ export function hashIntlFormatParts(
   epochMillisecond: number,
 ): IntlFormatPartsMap {
   const hash: IntlFormatPartsMap = {}
-  const parts = format.formatToParts(epochMillisecond)
+  const parts = format.formatToParts(epochMillisecond) // TODO: use original methods
 
   for (const part of parts) {
     hash[part.type] = part.value

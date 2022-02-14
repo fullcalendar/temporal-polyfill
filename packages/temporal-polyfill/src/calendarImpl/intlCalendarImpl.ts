@@ -19,9 +19,11 @@ export class IntlCalendarImpl extends CalendarImpl {
 
   constructor(id: string) {
     const format = buildFormat(id)
-    if (id !== format.resolvedOptions().calendar) {
+
+    if (!isRelatedCalendar(id, format.resolvedOptions().calendar)) {
       throw new RangeError('Invalid calendar: ' + id)
     }
+
     super(id)
     this.format = format
     this.yearCorrection = this.computeFields(0).year - isoEpochOriginYear
@@ -165,7 +167,7 @@ export class IntlCalendarImpl extends CalendarImpl {
     const partHash = hashIntlFormatParts(this.format, epochMilli)
     let era: string | undefined
     let eraYear: number | undefined
-    let year = parseInt(partHash.year)
+    let year = parseInt(partHash.relatedYear || partHash.year)
 
     if (partHash.era) {
       era = normalizeShortEra(partHash.era)
@@ -198,4 +200,12 @@ export function buildFormat(calendarID: string): Intl.DateTimeFormat {
     day: 'numeric',
     timeZone: 'UTC',
   })
+}
+
+// utils
+
+function isRelatedCalendar(specificCalendarID: string, relatedCalendarID: string): boolean {
+  const parts0 = specificCalendarID.split('-')
+  const parts1 = relatedCalendarID.split('-')
+  return parts0[0] === parts1[0]
 }

@@ -49,6 +49,11 @@ const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 export class Calendar extends AbstractObj implements CalendarProtocol {
   constructor(id: string) {
     super()
+
+    if (id === 'islamicc') { // deprecated
+      id = 'islamic-civil'
+    }
+
     setImpl(this, queryCalendarImpl(id))
   }
 

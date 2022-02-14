@@ -52,20 +52,25 @@ export interface DateTimeFormatTemporalMethods {
 
 export type DateTimeFormatWithTemporal = Intl.DateTimeFormat & DateTimeFormatTemporalMethods
 
+const origFormat = new Intl.DateTimeFormat().format // avoids weird Jest getter error
+const origFormatToParts = Intl.DateTimeFormat.prototype.formatToParts
+const origFormatRange = Intl.DateTimeFormat.prototype.formatRange
+const origFormatRangeToParts = Intl.DateTimeFormat.prototype.formatRangeToParts
+
 // implementation
 
 export function intlFormat(
   dtf: Intl.DateTimeFormat,
   dateArg?: DateTimeFormatArg,
 ): string {
-  return dtf.format(normalizeIntlOptionalDateArg(dateArg))
+  return origFormat.call(dtf, normalizeIntlOptionalDateArg(dateArg))
 }
 
 export function intlFormatToParts(
   dtf: Intl.DateTimeFormat,
   dateArg?: DateTimeFormatArg,
 ): Intl.DateTimeFormatPart[] {
-  return dtf.formatToParts(normalizeIntlOptionalDateArg(dateArg))
+  return origFormatToParts.call(dtf, normalizeIntlOptionalDateArg(dateArg))
 }
 
 export function intlFormatRange(
@@ -73,7 +78,8 @@ export function intlFormatRange(
   startArg: DateTimeFormatArg,
   endArg: DateTimeFormatArg,
 ): string {
-  return (dtf as DateTimeFormatWithRange).formatRange(
+  return origFormatRange.call(
+    dtf,
     normalizeIntlDateArg(startArg),
     normalizeIntlDateArg(endArg),
   )
@@ -84,7 +90,8 @@ export function intlFormatRangeToParts(
   startArg: DateTimeFormatArg,
   endArg: DateTimeFormatArg,
 ): DateTimeFormatRangePart[] {
-  return (dtf as DateTimeFormatWithRange).formatRangeToParts(
+  return origFormatRangeToParts.call(
+    dtf,
     normalizeIntlDateArg(startArg),
     normalizeIntlDateArg(endArg),
   )

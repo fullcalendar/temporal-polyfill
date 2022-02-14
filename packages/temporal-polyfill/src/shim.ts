@@ -58,34 +58,37 @@ function patchDateClass(DateClass: { prototype: Date }): void {
 }
 
 function patchDateTimeFormatClass(DateTimeFormatClass: { prototype: Intl.DateTimeFormat }): void {
-  Object.assign(DateTimeFormatClass.prototype, {
-    format(
-      this: Intl.DateTimeFormat,
-      dateArg?: DateTimeFormatArg,
-    ): string {
+  const proto = DateTimeFormatClass.prototype
+
+  // simply assigning within Jest causes weird getter exception
+  Object.defineProperty(proto, 'format', {
+    value: function(this: Intl.DateTimeFormat, dateArg?: DateTimeFormatArg): string {
       return intlFormat(this, dateArg)
-    },
-    formatToParts(
-      this: Intl.DateTimeFormat,
-      dateArg?: DateTimeFormatArg,
-    ): Intl.DateTimeFormatPart[] {
-      return intlFormatToParts(this, dateArg)
-    },
-    formatRange(
-      this: Intl.DateTimeFormat,
-      startArg: DateTimeFormatArg,
-      endArg: DateTimeFormatArg,
-    ): string {
-      return intlFormatRange(this, startArg, endArg)
-    },
-    formatRangeToParts(
-      this: Intl.DateTimeFormat,
-      startArg: DateTimeFormatArg,
-      endArg: DateTimeFormatArg,
-    ): DateTimeFormatRangePart[] {
-      return intlFormatRangeToParts(this, startArg, endArg)
-    },
-  } as DateTimeFormatTemporalMethods)
+    }
+  })
+
+  proto.formatToParts = function(
+    this: Intl.DateTimeFormat,
+    dateArg?: DateTimeFormatArg,
+  ): Intl.DateTimeFormatPart[] {
+    return intlFormatToParts(this, dateArg)
+  }
+
+  proto.formatRange = function(
+    this: Intl.DateTimeFormat,
+    startArg: DateTimeFormatArg,
+    endArg: DateTimeFormatArg,
+  ): string {
+    return intlFormatRange(this, startArg, endArg)
+  }
+
+  proto.formatRangeToParts = function(
+    this: Intl.DateTimeFormat,
+    startArg: DateTimeFormatArg,
+    endArg: DateTimeFormatArg,
+  ): DateTimeFormatRangePart[] {
+    return intlFormatRangeToParts(this, startArg, endArg)
+  }
 }
 
 // additional public API for manually extending classes
