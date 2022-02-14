@@ -28,12 +28,16 @@ describe('Intl', () => {
 
   describe('instant.toLocaleString()', () => {
     const instant = Temporal.Instant.from('1976-11-18T14:23:30Z')
-    it(`(${instant.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
-      equal(`${instant.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18/1976, 9:23:30 AM'))
-    it(`(${instant.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () =>
-      equal(`${instant.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976, 15:23:30'))
+    it(`(${instant.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () => {
+      equal(`${instant.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18/1976, 9:23:30 AM')
+    })
+    it(`(${instant.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () => {
+      equal(`${instant.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976, 15:23:30')
+    })
     const fmt = maybeGetWeekdayOnlyFormat()
-    if (fmt) it('uses only the options in resolvedOptions', () => equal(fmt.format(instant), 'Thursday'))
+    if (fmt) it('uses only the options in resolvedOptions', () => {
+      equal(fmt.format(instant), 'Thursday')
+    })
     it('outputs timeZoneName if requested', () => {
       const str = instant.toLocaleString('en', { timeZone: 'America/New_York', timeZoneName: 'short' })
       assert(str.includes('EST'))
@@ -41,10 +45,16 @@ describe('Intl', () => {
   })
   describe('zoneddatetime.toLocaleString()', () => {
     const zdt = Temporal.ZonedDateTime.from('1976-11-18T15:23:30+01:00[Europe/Vienna]')
-    it(`(${zdt}).toLocaleString('en-US')`, () => equal(zdt.toLocaleString('en'), '11/18/1976, 3:23:30 PM GMT+1'))
-    it(`(${zdt}).toLocaleString('de-AT')`, () => equal(zdt.toLocaleString('de'), '18.11.1976, 15:23:30 MEZ'))
+    it(`(${zdt}).toLocaleString('en-US')`, () => {
+      equal(zdt.toLocaleString('en'), '11/18/1976, 3:23:30 PM GMT+1')
+    })
+    it(`(${zdt}).toLocaleString('de-AT')`, () => {
+      equal(zdt.toLocaleString('de'), '18.11.1976, 15:23:30 MEZ')
+    })
     const fmt = maybeGetWeekdayOnlyFormat()
-    if (fmt) it('uses only the options in resolvedOptions', () => equal(fmt.format(zdt), 'Thursday'))
+    if (fmt) it('uses only the options in resolvedOptions', () => {
+      equal(fmt.format(zdt), 'Thursday')
+    })
     it('can override the style of the time zone name', () => {
       equal(
         zdt.toLocaleString('en', { timeZoneName: 'long' }),
@@ -74,10 +84,12 @@ describe('Intl', () => {
   })
   describe('datetime.toLocaleString()', () => {
     const datetime = Temporal.PlainDateTime.from('1976-11-18T15:23:30')
-    it(`(${datetime.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
-      equal(`${datetime.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18/1976, 3:23:30 PM'))
-    it(`(${datetime.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () =>
-      equal(`${datetime.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976, 15:23:30'))
+    it(`(${datetime.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () => {
+      equal(`${datetime.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18/1976, 3:23:30 PM')
+    })
+    it(`(${datetime.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () => {
+      equal(`${datetime.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976, 15:23:30')
+    })
     const fmt = maybeGetWeekdayOnlyFormat()
     if (fmt) it('uses only the options in resolvedOptions', () => equal(fmt.format(datetime), 'Thursday'))
     it('should ignore units not in the data type', () => {
@@ -121,10 +133,12 @@ describe('Intl', () => {
   })
   describe('time.toLocaleString()', () => {
     const time = Temporal.PlainTime.from('1976-11-18T15:23:30')
-    it(`(${time.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
-      equal(`${time.toLocaleString('en', { timeZone: 'America/New_York' })}`, '3:23:30 PM'))
-    it(`(${time.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () =>
-      equal(`${time.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '15:23:30'))
+    it(`(${time.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () => {
+      equal(`${time.toLocaleString('en', { timeZone: 'America/New_York' })}`, '3:23:30 PM')
+    })
+    it(`(${time.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () => {
+      equal(`${time.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '15:23:30')
+    })
     it('should ignore units not in the data type', () => {
       equal(time.toLocaleString('en', { timeZoneName: 'long' }), '3:23:30 PM')
       equal(time.toLocaleString('en', { year: 'numeric' }), '3:23:30 PM')
@@ -135,12 +149,18 @@ describe('Intl', () => {
   })
   describe('date.toLocaleString()', () => {
     const date = Temporal.PlainDate.from('1976-11-18T15:23:30')
-    it(`(${date.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
-      equal(`${date.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18/1976'))
-    it(`(${date.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () =>
-      equal(`${date.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976'))
+    it(`(${date.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () => {
+      equal(`${date.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18/1976')
+    })
+    it(`(${date.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () => {
+      equal(`${date.toLocaleString('de', { timeZone: 'Europe/Vienna' })}`, '18.11.1976')
+    })
     const fmt = maybeGetWeekdayOnlyFormat()
-    if (fmt) it('uses only the options in resolvedOptions', () => equal(fmt.format(date), 'Thursday'))
+    if (fmt) {
+      it('uses only the options in resolvedOptions', () => {
+        equal(fmt.format(date), 'Thursday')
+      })
+    }
     it('should ignore units not in the data type', () => {
       equal(date.toLocaleString('en', { timeZoneName: 'long' }), '11/18/1976')
       equal(date.toLocaleString('en', { hour: 'numeric' }), '11/18/1976')
@@ -165,10 +185,12 @@ describe('Intl', () => {
   describe('yearmonth.toLocaleString()', () => {
     const calendar = new Intl.DateTimeFormat('en').resolvedOptions().calendar
     const yearmonth = Temporal.PlainYearMonth.from({ year: 1976, month: 11, calendar })
-    it(`(${yearmonth.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
-      equal(`${yearmonth.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/1976'))
-    it(`(${yearmonth.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () =>
-      equal(`${yearmonth.toLocaleString('de', { timeZone: 'Europe/Vienna', calendar })}`, '11.1976'))
+    it(`(${yearmonth.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () => {
+      equal(`${yearmonth.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/1976')
+    })
+    it(`(${yearmonth.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () => {
+      equal(`${yearmonth.toLocaleString('de', { timeZone: 'Europe/Vienna', calendar })}`, '11.1976')
+    })
     it('should ignore units not in the data type', () => {
       equal(yearmonth.toLocaleString('en', { timeZoneName: 'long' }), '11/1976')
       equal(yearmonth.toLocaleString('en', { day: 'numeric' }), '11/1976')
@@ -190,10 +212,12 @@ describe('Intl', () => {
   describe('monthday.toLocaleString()', () => {
     const calendar = new Intl.DateTimeFormat('en').resolvedOptions().calendar
     const monthday = Temporal.PlainMonthDay.from({ monthCode: 'M11', day: 18, calendar })
-    it(`(${monthday.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
-      equal(`${monthday.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18'))
-    it(`(${monthday.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () =>
-      equal(`${monthday.toLocaleString('de', { timeZone: 'Europe/Vienna', calendar })}`, '18.11.'))
+    it(`(${monthday.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () => {
+      equal(`${monthday.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18')
+    })
+    it(`(${monthday.toString()}).toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })`, () => {
+      equal(`${monthday.toLocaleString('de', { timeZone: 'Europe/Vienna', calendar })}`, '18.11.')
+    })
     it('should ignore units not in the data type', () => {
       equal(monthday.toLocaleString('en', { timeZoneName: 'long' }), '11/18')
       equal(monthday.toLocaleString('en', { year: 'numeric' }), '11/18')
