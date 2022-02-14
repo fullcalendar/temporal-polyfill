@@ -171,9 +171,20 @@ describe('Calendar', () => {
   })
   describe('Calendar.year()', () => {
     const res = 1994
-    it('accepts Date', () => equal(iso.year(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.year(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.year(PlainYearMonth.from('1994-11')), res))
+    it('accepts Date', () => {
+      equal(iso.year(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.year(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.year(PlainYearMonth.from('1994-11')), res)
+    })
+    it('does not accept MonthDay', () => {
+      throws(() => {
+        iso.year(PlainMonthDay.from('11-05') as InvalidArg)
+      }, TypeError)
+    })
     it('casts argument', () => {
       equal(iso.year({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.year('1994-11-05'), res)
@@ -184,10 +195,20 @@ describe('Calendar', () => {
   })
   describe('Calendar.month()', () => {
     const res = 11
-    it('accepts Date', () => equal(iso.month(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.month(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.month(PlainYearMonth.from('1994-11')), res))
-    it('does not accept MonthDay', () => throws(() => iso.month(PlainMonthDay.from('11-05') as InvalidArg), TypeError))
+    it('accepts Date', () => {
+      equal(iso.month(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.month(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.month(PlainYearMonth.from('1994-11')), res)
+    })
+    it('does not accept MonthDay', () => {
+      throws(() => {
+        iso.month(PlainMonthDay.from('11-05') as InvalidArg)
+      }, TypeError)
+    })
     it('casts argument', () => {
       equal(iso.month({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.month('1994-11-05'), res)
@@ -198,10 +219,18 @@ describe('Calendar', () => {
   })
   describe('Calendar.monthCode()', () => {
     const res = 'M11'
-    it('accepts Date', () => equal(iso.monthCode(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.monthCode(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.monthCode(PlainYearMonth.from('1994-11')), res))
-    it('accepts MonthDay', () => equal(iso.monthCode(PlainMonthDay.from('11-05')), res))
+    it('accepts Date', () => {
+      equal(iso.monthCode(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.monthCode(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.monthCode(PlainYearMonth.from('1994-11')), res)
+    })
+    it('accepts MonthDay', () => {
+      equal(iso.monthCode(PlainMonthDay.from('11-05')), res)
+    })
     it('casts argument', () => {
       equal(iso.monthCode({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.monthCode('1994-11-05'), res)
@@ -212,9 +241,15 @@ describe('Calendar', () => {
   })
   describe('Calendar.day()', () => {
     const res = 5
-    it('accepts Date', () => equal(iso.day(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.day(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts MonthDay', () => equal(iso.day(PlainMonthDay.from('11-05')), res))
+    it('accepts Date', () => {
+      equal(iso.day(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.day(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts MonthDay', () => {
+      equal(iso.day(PlainMonthDay.from('11-05')), res)
+    })
     it('casts argument', () => {
       equal(iso.day({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.day('1994-11-05'), res)
@@ -225,8 +260,15 @@ describe('Calendar', () => {
   })
   describe('Calendar.dayOfWeek()', () => {
     const res = 5
-    it('accepts Date', () => equal(iso.dayOfWeek(PlainDate.from('2020-10-23')), res))
-    it('accepts DateTime', () => equal(iso.dayOfWeek(PlainDateTime.from('2020-10-23T08:15:30')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.dayOfWeek(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.dayOfWeek(PlainDate.from('2020-10-23')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.dayOfWeek(PlainDateTime.from('2020-10-23T08:15:30')), res)
+    })
     it('casts argument', () => {
       equal(iso.dayOfWeek({ year: 2020, month: 10, day: 23 }), res)
       equal(iso.dayOfWeek('2020-10-23'), res)
@@ -237,8 +279,15 @@ describe('Calendar', () => {
   })
   describe('Calendar.dayOfYear()', () => {
     const res = 32
-    it('accepts Date', () => equal(iso.dayOfYear(PlainDate.from('1994-02-01')), res))
-    it('accepts DateTime', () => equal(iso.dayOfYear(PlainDateTime.from('1994-02-01T08:15:30')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.dayOfYear(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.dayOfYear(PlainDate.from('1994-02-01')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.dayOfYear(PlainDateTime.from('1994-02-01T08:15:30')), res)
+    })
     it('casts argument', () => {
       equal(iso.dayOfYear({ year: 1994, month: 2, day: 1 }), res)
       equal(iso.dayOfYear('1994-02-01'), res)
@@ -249,8 +298,15 @@ describe('Calendar', () => {
   })
   describe('Calendar.weekOfYear()', () => {
     const res = 44
-    it('accepts Date', () => equal(iso.weekOfYear(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.weekOfYear(PlainDateTime.from('1994-11-05T08:15:30')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.weekOfYear(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.weekOfYear(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.weekOfYear(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
     it('casts argument', () => {
       equal(iso.weekOfYear({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.weekOfYear('1994-11-05'), res)
@@ -265,8 +321,12 @@ describe('Calendar', () => {
   })
   describe('Calendar.daysInWeek()', () => {
     const res = 7
-    it('accepts Date', () => equal(iso.daysInWeek(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.daysInWeek(PlainDateTime.from('1994-11-05T08:15:30')), res))
+    it('accepts Date', () => {
+      equal(iso.daysInWeek(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.daysInWeek(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
     it('casts argument', () => {
       equal(iso.daysInWeek({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.daysInWeek('1994-11-05'), res)
@@ -277,9 +337,18 @@ describe('Calendar', () => {
   })
   describe('Calendar.daysInMonth()', () => {
     const res = 30
-    it('accepts Date', () => equal(iso.daysInMonth(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.daysInMonth(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.daysInMonth(PlainYearMonth.from('1994-11')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.daysInMonth(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.daysInMonth(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.daysInMonth(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.daysInMonth(PlainYearMonth.from('1994-11')), res)
+    })
     it('casts argument', () => {
       equal(iso.daysInMonth({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.daysInMonth('1994-11-05'), res)
@@ -290,9 +359,18 @@ describe('Calendar', () => {
   })
   describe('Calendar.daysInYear()', () => {
     const res = 365
-    it('accepts Date', () => equal(iso.daysInYear(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.daysInYear(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.daysInYear(PlainYearMonth.from('1994-11')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.daysInYear(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.daysInYear(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.daysInYear(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.daysInYear(PlainYearMonth.from('1994-11')), res)
+    })
     it('casts argument', () => {
       equal(iso.daysInYear({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.daysInYear('1994-11-05'), res)
@@ -303,9 +381,18 @@ describe('Calendar', () => {
   })
   describe('Calendar.monthsInYear()', () => {
     const res = 12
-    it('accepts Date', () => equal(iso.monthsInYear(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.monthsInYear(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.monthsInYear(PlainYearMonth.from('1994-11')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.monthsInYear(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.monthsInYear(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.monthsInYear(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.monthsInYear(PlainYearMonth.from('1994-11')), res)
+    })
     it('casts argument', () => {
       equal(iso.monthsInYear({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.monthsInYear('1994-11-05'), res)
@@ -316,9 +403,18 @@ describe('Calendar', () => {
   })
   describe('Calendar.inLeapYear()', () => {
     const res = false
-    it('accepts Date', () => equal(iso.inLeapYear(PlainDate.from('1994-11-05')), res))
-    it('accepts DateTime', () => equal(iso.inLeapYear(PlainDateTime.from('1994-11-05T08:15:30')), res))
-    it('accepts YearMonth', () => equal(iso.inLeapYear(PlainYearMonth.from('1994-11')), res))
+    it('does not accept MonthDay', () => {
+      throws(() => iso.inLeapYear(PlainMonthDay.from('11-05') as InvalidArg), TypeError)
+    })
+    it('accepts Date', () => {
+      equal(iso.inLeapYear(PlainDate.from('1994-11-05')), res)
+    })
+    it('accepts DateTime', () => {
+      equal(iso.inLeapYear(PlainDateTime.from('1994-11-05T08:15:30')), res)
+    })
+    it('accepts YearMonth', () => {
+      equal(iso.inLeapYear(PlainYearMonth.from('1994-11')), res)
+    })
     it('casts argument', () => {
       equal(iso.inLeapYear({ year: 1994, month: 11, day: 5 }), res)
       equal(iso.inLeapYear('1994-11-05'), res)
