@@ -23,7 +23,6 @@ import {
   TimeZone,
   ZonedDateTime,
   dateToTemporalInstant,
-  intlFormat,
   intlFormatRange,
   intlFormatRangeToParts,
   intlFormatToParts,
@@ -60,12 +59,12 @@ function patchDateClass(DateClass: { prototype: Date }): void {
 function patchDateTimeFormatClass(DateTimeFormatClass: { prototype: Intl.DateTimeFormat }): void {
   const proto = DateTimeFormatClass.prototype
 
-  // simply assigning within Jest causes weird getter exception
-  Object.defineProperty(proto, 'format', {
-    value: function(this: Intl.DateTimeFormat, dateArg?: DateTimeFormatArg): string {
-      return intlFormat(this, dateArg)
-    }
-  })
+  // // simply assigning within Jest causes weird getter exception
+  // Object.defineProperty(proto, 'format', {
+  //   value: function(this: Intl.DateTimeFormat, dateArg?: DateTimeFormatArg): string {
+  //     return intlFormat(this, dateArg)
+  //   }
+  // })
 
   proto.formatToParts = function(
     this: Intl.DateTimeFormat,

@@ -109,8 +109,15 @@ export class Instant extends AbstractNoValueObj {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    // TODO: inject more options to ensure time is displayed by default
-    return new Intl.DateTimeFormat(locales, options).format(this.epochMilliseconds)
+    return new Intl.DateTimeFormat(locales, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      ...options,
+    }).format(this.epochMilliseconds)
   }
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
