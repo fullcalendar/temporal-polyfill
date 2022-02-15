@@ -1,6 +1,6 @@
 {
   "name": "temporal-polyfill",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "title": "Temporal Polyfill",
   "author": {
     "name": "Adam Shaw",
@@ -37,6 +37,7 @@
     }
   },
   "files": [
+    "/src",
     "/dist",
     "/*.d.ts"
   ],
