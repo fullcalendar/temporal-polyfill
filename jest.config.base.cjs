@@ -4,5 +4,5 @@ process.env.TZ = 'America/New_York'
 
 module.exports = {
   // timers: 'modern',
-  verbose: true,
+  // verbose: true,
 }

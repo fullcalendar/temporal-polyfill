@@ -4,9 +4,9 @@ module.exports = {
   ...base,
   projects: [
     '<rootDir>/packages/temporal-polyfill',
-    '<rootDir>/packages/locale-weekinfo',
-    '<rootDir>/packages/locale-textinfo',
-    '<rootDir>/packages/datetimeformat-tokens',
-    '<rootDir>/packages/durationformat-polyfill',
+    // '<rootDir>/packages/locale-weekinfo',
+    // '<rootDir>/packages/locale-textinfo',
+    // '<rootDir>/packages/datetimeformat-tokens',
+    // '<rootDir>/packages/durationformat-polyfill',
   ],
 }

@@ -242,7 +242,7 @@ describe('Intl', () => {
     })
   })
 
-  describe('Non-ISO Calendars', () => {
+  describe.skip('Non-ISO Calendars', () => {
     const testChineseData = new Date('2001-02-01T00:00Z').toLocaleString('en-US-u-ca-chinese', {
       day: 'numeric',
       month: 'numeric',
@@ -1076,7 +1076,7 @@ describe('Intl', () => {
     })
   })
 
-  describe('Japanese eras', () => {
+  describe.skip('Japanese eras', () => {
     it('Reiwa (2019-)', () => {
       const date = Temporal.PlainDate.from({ era: 'reiwa', eraYear: 2, month: 1, day: 1, calendar: 'japanese' })
       equal(`${date}`, '2020-01-01[u-ca=japanese]')
@@ -1136,7 +1136,7 @@ describe('Intl', () => {
     })
   })
 
-  describe('Hebrew leap months', () => {
+  describe.skip('Hebrew leap months', () => {
     it('Valid leap month: Adar I 5779', () => {
       let date = Temporal.PlainDate.from({ year: 5779, month: 6, day: 1, calendar: 'hebrew' })
       equal(date.month, 6)
@@ -1180,7 +1180,7 @@ describe('Intl', () => {
     })
   })
 
-  describe('DateTimeFormat', () => {
+  describe.skip('DateTimeFormat', () => {
     describe('supportedLocalesOf', () => {
       it('should return an Array', () => assert(Array.isArray((Intl.DateTimeFormat as ValidArg).supportedLocalesOf())))
     })

@@ -5,4 +5,15 @@ module.exports = {
   roots: [
     '<rootDir>/src',
   ],
+  testMatch: [
+    '<rootDir>/src/specs/*.spec.ts',
+
+    // temporary exclusions
+    '!**/usercalendar.spec.ts',
+    '!**/usertimezone.spec.ts',
+
+    // there are quite a few 'skips' in these files:
+    // - intl.spec.ts
+    // - timezone.spec.ts
+  ],
 }
