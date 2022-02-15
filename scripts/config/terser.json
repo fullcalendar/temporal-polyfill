@@ -1,7 +1,21 @@
 {
   "module": true,
   "compress": {},
-  "mangle": {},
+  "mangle": {
+    "reserved": [
+      "PlainYearMonth",
+      "PlainMonthDay",
+      "PlainDate",
+      "PlainTime",
+      "PlainDateTime",
+      "ZonedDateTime",
+      "Instant",
+      "Calendar",
+      "Calendar2",
+      "TimeZone",
+      "Duration"
+    ]
+  },
   "output": {},
   "parse": {},
   "rename": {}

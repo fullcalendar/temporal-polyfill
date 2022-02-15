@@ -30,7 +30,13 @@ function bundlePkgJS(dir, watch) {
     const srcPath = isPolyfill && distName === 'index'
       ? './src/performant.ts'
       : `./src/${distName}.ts`
-    const bundle = distName === (isPolyfill ? 'impl' : 'index')
+    let bundle
+
+    if (isPolyfill) {
+      bundle = distName === 'impl' || (ext === 'js' && distName === 'global')
+    } else {
+      bundle = distName === 'index'
+    }
 
     if (ext === 'js') {
       const config = {
@@ -92,6 +98,9 @@ function watchJSFile(config) {
   })
 }
 
+/*
+TODO: fix Calendar2 problem
+*/
 async function minifyJSFile(filePath) {
   const dirPath = path.dirname(filePath)
   const filename = path.basename(filePath)
