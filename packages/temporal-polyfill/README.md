@@ -3,6 +3,8 @@
 
 A spec-compliant<super>*</super> [Temporal] JavaScript polyfill in less than 15kb<super>**</super>.
 
+Works in modern browsers<super>***</super>, not Internet Explorer.
+
 
 ## Installation
 
@@ -29,8 +31,8 @@ const zdt = ZonedDateTime.from('2020-08-05T20:06:13[America/Chicago]')
 console.log(zdt.toLocaleString())
 ```
 
-The above techniques will attempt to use the built-in `Temporal` global object and will fall
-back to the polyfill. To guarantee using the polyfill, do this:
+The above techniques try using the built-in `Temporal` object and fall back to the polyfill.
+To guarantee using the polyfill, do this:
 
 ```js
 import { ZonedDateTime } from 'temporal-polyfill/impl'
@@ -46,5 +48,9 @@ console.log(zdt.toLocaleString())
 
 <super>**</super> = the size might shrink further as the codebase is cleaned up
 
+<super>***</super> = targets browsers that support [BigInt], however, more browser-compatibility
+work is needed.
+
 
 [Temporal]: https://github.com/tc39/proposal-temporal
+[BigInt]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
