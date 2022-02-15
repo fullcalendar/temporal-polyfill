@@ -29,7 +29,7 @@ export class HebrewCalendarImpl extends IntlCalendarImpl {
   // month -> monthCode
   monthCode(month: number, year: number): string {
     const downShift = this.inLeapYear(year) && month > 5
-    return super.monthCode(year, month - Number(downShift)) +
+    return super.monthCode(month - Number(downShift), year) +
       (downShift && month === 6 ? 'L' : '')
   }
 

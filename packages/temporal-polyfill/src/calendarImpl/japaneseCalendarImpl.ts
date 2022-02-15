@@ -19,4 +19,6 @@ export class JapaneseCalendarImpl extends GregoryCalendarImpl {
       ? super.era(isoYear, isoMonth, isoDay)
       : normalizeShortEra(hashIntlFormatParts(this.format, epochMilli).era)
   }
+
+  // TODO: implement eraYear as well
 }

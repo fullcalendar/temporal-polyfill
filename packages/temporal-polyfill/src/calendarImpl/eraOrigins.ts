@@ -35,7 +35,7 @@ export const eraOrigins: {
     ce: 0,
     meiji: 1867,
     taisho: 1911,
-    show: 1925,
+    showa: 1925,
     heisei: 1988,
     reiwa: 2018,
   },
