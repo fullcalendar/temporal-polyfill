@@ -52,7 +52,9 @@ describe('Now', () => {
       assert(dt instanceof PlainDateTime)
       equal(dt.calendar.id, 'gregory')
     })
-    it('requires a calendar', () => throws(() => (Now as InvalidArg).plainDateTime(), RangeError))
+    it('requires a calendar', () => {
+      throws(() => (Now as InvalidArg).plainDateTime(), RangeError)
+    })
   })
   describe('Now.zonedDateTimeISO()', () => {
     it('returns a ZonedDateTime in the correct calendar and system time zone', () => {
@@ -91,7 +93,9 @@ describe('Now', () => {
       assert(zdt.timeZone instanceof TimeZone)
       equal(zdt.timeZone.id, 'America/Los_Angeles')
     })
-    it('requires a calendar', () => throws(() => (Now as InvalidArg).zonedDateTime(), RangeError))
+    it('requires a calendar', () => {
+      throws(() => (Now as InvalidArg).zonedDateTime(), RangeError)
+    })
   })
   describe('Now.plainDateISO()', () => {
     it('returns a Date in the ISO calendar', () => {
@@ -106,7 +110,9 @@ describe('Now', () => {
       assert(d instanceof PlainDate)
       equal(d.calendar.id, 'gregory')
     })
-    it('requires a calendar', () => throws(() => (Now as InvalidArg).plainDate(), RangeError))
+    it('requires a calendar', () => {
+      throws(() => (Now as InvalidArg).plainDate(), RangeError)
+    })
   })
   describe('Now.plainTimeISO()', () => {
     it('Now.plainTimeISO() returns a Time', () => {
