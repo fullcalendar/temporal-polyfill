@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
@@ -8,6 +7,7 @@ import { isoFieldsToEpochNano, validateInstant } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
+import { OrigDateTimeFormat } from '../native/intl'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
 import {

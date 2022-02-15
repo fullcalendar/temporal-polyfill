@@ -18,11 +18,11 @@ import {
   HOUR,
   MINUTE,
   SECOND,
+  TimeUnitInt,
+  nanoIn,
   nanoInMicroBI,
   nanoInMilliBI,
   nanoInSecondBI,
-  nanoIn,
-  TimeUnitInt,
 } from './units'
 
 // given ISO fields should already be rounded
@@ -122,9 +122,9 @@ export function formatDurationISO(
   formatConfig: DurationToStringConfig,
 ): string {
   const { smallestUnit, fractionalSecondDigits, roundingMode } = formatConfig
-  let { sign } = fields
-  let hours = BigInt(fields.hours)
-  let minutes = BigInt(fields.minutes)
+  const { sign } = fields
+  const hours = BigInt(fields.hours)
+  const minutes = BigInt(fields.minutes)
   let seconds = BigInt(fields.seconds)
   let partialSecondsStr = ''
 

@@ -4,7 +4,7 @@ import {
   DISAMBIG_REJECT,
   parseDisambigOption,
 } from '../argParse/disambig'
-import { extractTimeZone, isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
+import { isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'

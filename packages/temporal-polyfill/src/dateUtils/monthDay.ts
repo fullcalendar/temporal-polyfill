@@ -53,7 +53,6 @@ export function overrideMonthDayFields(
 
     // if not defined, will throw error in Calendar::monthDayFromFields
     merged.year = overrides.year!
-
   } else {
     merged.monthCode = base.monthCode
   }

@@ -1,16 +1,16 @@
-import { LocalesArg, DateISOFields } from '../public/types'
+import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
+import { createDateTime } from '../dateUtils/dateTime'
 import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
+import { zeroTimeISOFields } from '../dateUtils/zonedDateTime'
 import { Instant } from '../public/instant'
 import { PlainDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainTime } from '../public/plainTime'
 import { PlainYearMonth } from '../public/plainYearMonth'
-import { ZonedDateTime } from '../public/zonedDateTime'
 import { TimeZone } from '../public/timeZone'
-import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { zeroTimeISOFields } from '../dateUtils/zonedDateTime'
-import { createDateTime } from '../dateUtils/dateTime'
+import { DateISOFields, LocalesArg } from '../public/types'
+import { ZonedDateTime } from '../public/zonedDateTime'
 
 // TODO: rethink if everything belongs in this 'native' file
 
@@ -109,8 +109,8 @@ export function formatUnzoned<ISOFields extends DateISOFields>(
   let milli: number
 
   if (timeZone !== undefined) {
-    let timeZoneObj = new TimeZone(timeZone)
-    let plainDateTime = createDateTime({
+    const timeZoneObj = new TimeZone(timeZone)
+    const plainDateTime = createDateTime({
       ...zeroTimeISOFields,
       ...date.getISOFields(),
     })
@@ -152,9 +152,9 @@ function formatGeneric(
 }
 
 function hasUnicodeCalendar(locales: LocalesArg | undefined): boolean {
-  let localesArray = ([] as string[]).concat(locales || [])
+  const localesArray = ([] as string[]).concat(locales || [])
 
-  for (let locale of localesArray) {
+  for (const locale of localesArray) {
     if (locale.indexOf('-u-ca-') !== -1) {
       return true
     }

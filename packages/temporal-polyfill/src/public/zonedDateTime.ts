@@ -39,6 +39,7 @@ import {
   zeroTimeISOFields,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
+import { formatZoned } from '../native/intl'
 import { compareValues } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -68,7 +69,6 @@ import {
   ZonedDateTimeOverrides,
   ZonedDateTimeToStringOptions,
 } from './types'
-import { formatZoned } from '../native/intl'
 
 interface ZonedDateTimePrivateFields {
   offsetNanoseconds: number

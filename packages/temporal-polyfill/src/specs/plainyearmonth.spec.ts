@@ -21,34 +21,34 @@ describe('YearMonth', () => {
       assert(ym)
       equal(typeof ym, 'object')
     })
-    it('ym.year is 1976', () =>  {
+    it('ym.year is 1976', () => {
       equal(getYearMonth().year, 1976)
     })
-    it('ym.month is 11', () =>  {
+    it('ym.month is 11', () => {
       equal(getYearMonth().month, 11)
     })
-    it('ym.monthCode is "M11"', () =>  {
+    it('ym.monthCode is "M11"', () => {
       equal(getYearMonth().monthCode, 'M11')
     })
-    it('ym.daysInMonth is 30', () =>  {
+    it('ym.daysInMonth is 30', () => {
       equal(getYearMonth().daysInMonth, 30)
     })
-    it('ym.daysInYear is 366', () =>  {
+    it('ym.daysInYear is 366', () => {
       equal(getYearMonth().daysInYear, 366)
     })
-    it('ym.monthsInYear is 12', () =>  {
+    it('ym.monthsInYear is 12', () => {
       equal(getYearMonth().monthsInYear, 12)
     })
     describe('.from()', () => {
-      it('YearMonth.from(2019-10) == 2019-10', () =>  {
+      it('YearMonth.from(2019-10) == 2019-10', () => {
         equal(`${PlainYearMonth.from('2019-10')}`, '2019-10')
       })
       it('YearMonth.from(2019-10-01T09:00:00Z) == 2019-10', () =>
         equal(`${PlainYearMonth.from('2019-10-01T09:00:00Z')}`, '2019-10'))
-      it("YearMonth.from('1976-11') == (1976-11)", () =>  {
+      it("YearMonth.from('1976-11') == (1976-11)", () => {
         equal(`${PlainYearMonth.from('1976-11')}`, '1976-11')
       })
-      it("YearMonth.from('1976-11-18') == (1976-11)", () =>  {
+      it("YearMonth.from('1976-11-18') == (1976-11)", () => {
         equal(`${PlainYearMonth.from('1976-11-18')}`, '1976-11')
       })
       it('can be constructed with monthCode and without month', () => {

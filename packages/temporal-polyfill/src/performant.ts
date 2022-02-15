@@ -7,7 +7,7 @@ SPECIAL NOTE:
 Imports from non-top-level files are not allowed
 */
 import * as TemporalImpl from './impl'
-import { DateTimeFormatArg, DateTimeFormatWithTemporal, DateWithTemporal } from './impl'
+import { DateWithTemporal } from './impl'
 
 const TemporalNative = globalThis.Temporal
 const TemporalPerformant = TemporalNative || TemporalImpl
@@ -32,27 +32,3 @@ export const Now = TemporalPerformant.Now
 export const dateToTemporalInstant = TemporalNative
   ? (date: DateWithTemporal) => date.toTemporalInstant()
   : TemporalImpl.dateToTemporalInstant
-
-export const intlFormat = TemporalNative
-  ? (dtf: DateTimeFormatWithTemporal, dateArg?: DateTimeFormatArg) => dtf.format(dateArg)
-  : TemporalImpl.intlFormat
-
-export const intlFormatToParts = TemporalNative
-  ? (dtf: DateTimeFormatWithTemporal, dateArg?: DateTimeFormatArg) => dtf.formatToParts(dateArg)
-  : TemporalImpl.intlFormatToParts
-
-export const intlFormatRange = TemporalNative
-  ? (
-      dtf: DateTimeFormatWithTemporal,
-      startArg: DateTimeFormatArg,
-      endArg: DateTimeFormatArg,
-    ) => dtf.formatRange(startArg, endArg)
-  : TemporalImpl.intlFormatRange
-
-export const intlFormatRangeToParts = TemporalNative
-  ? (
-      dtf: DateTimeFormatWithTemporal,
-      startArg: DateTimeFormatArg,
-      endArg: DateTimeFormatArg,
-    ) => dtf.formatRangeToParts(startArg, endArg)
-  : TemporalImpl.intlFormatRangeToParts

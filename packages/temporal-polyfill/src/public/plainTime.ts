@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { timeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
@@ -23,6 +22,7 @@ import {
   timeLikeToISO,
 } from '../dateUtils/time'
 import { nanoInMilliBI } from '../dateUtils/units'
+import { OrigDateTimeFormat } from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'

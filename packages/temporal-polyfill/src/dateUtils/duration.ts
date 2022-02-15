@@ -16,7 +16,6 @@ import {
   Unit,
   ZonedDateTimeArg,
   ZonedDateTimeLike,
-  DateTimeLike,
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { compareValues, numSign } from '../utils/math'
@@ -133,8 +132,8 @@ export function addAndBalanceDurations(
     )
   }
 
-  let relativeTo = getMaybeZonedRelativeTo(relativeToArg)
-  let translated = relativeTo.add(d0).add(d1)
+  const relativeTo = getMaybeZonedRelativeTo(relativeToArg)
+  const translated = relativeTo.add(d0).add(d1)
   return diffAccurate(relativeTo, translated, largestUnit)
 }
 
@@ -417,7 +416,7 @@ function getMaybeZonedRelativeTo(
 }
 
 export function extractRelativeTo(
-  arg: ZonedDateTimeArg | DateTimeArg | undefined
+  arg: ZonedDateTimeArg | DateTimeArg | undefined,
 ): ZonedDateTime | PlainDateTime {
   if (arg === undefined) {
     // throws a RangeError as opposed to a TypeError because relativeTo is part of a larger obj
@@ -432,7 +431,7 @@ export function extractRelativeTo(
       (arg as ZonedDateTimeLike).timeZone !== undefined
         ? ZonedDateTime
         : PlainDateTime,
-      arg as ZonedDateTimeLike
+      arg as ZonedDateTimeLike,
     )
   }
 
@@ -444,7 +443,7 @@ export function extractRelativeTo(
     throw new TypeError('Incorrect relativeTo type')
   }
 
-  let parsed = tryParseDateTimeISO(String(arg))
+  const parsed = tryParseDateTimeISO(String(arg))
   if (parsed) {
     if (parsed.timeZone !== undefined) {
       return createZonedDateTime(refineZonedDateTimeParse(parsed), undefined, OFFSET_REJECT)

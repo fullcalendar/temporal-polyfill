@@ -69,7 +69,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return new Calendar(
       parsed // a date-time string?
         ? parsed.calendar || isoCalendarID
-        : arg // any other type of string
+        : arg, // any other type of string
     )
   }
 

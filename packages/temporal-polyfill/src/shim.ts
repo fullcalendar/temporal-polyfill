@@ -6,6 +6,11 @@ SPECIAL NOTE:
 Imports from non-top-level files are not allowed
 */
 import {
+  OrigDateTimeFormat,
+  normalizeIntlDateArg,
+  normalizeIntlOptionalDateArg,
+} from './native/intl'
+import {
   Calendar,
   DateTimeFormatArg,
   DateTimeFormatRangePart,
@@ -21,11 +26,6 @@ import {
   ZonedDateTime,
   dateToTemporalInstant,
 } from './impl'
-import {
-  OrigDateTimeFormat,
-  normalizeIntlDateArg,
-  normalizeIntlOptionalDateArg,
-} from './native/intl'
 
 export function shimTemporal(): void {
   if (!globalThis.Temporal) {
@@ -74,6 +74,6 @@ export function shimTemporal(): void {
     }
 
     // wasn't possible to patch existing methods. must create subclass
-    ;(globalThis.Intl as any).DateTimeFormat = ExtendedDateTimeFormat // HACK
+    (globalThis.Intl as any).DateTimeFormat = ExtendedDateTimeFormat // HACK
   }
 }

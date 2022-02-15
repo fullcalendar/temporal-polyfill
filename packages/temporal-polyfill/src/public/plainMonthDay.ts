@@ -21,6 +21,7 @@ import {
   overrideMonthDayFields,
 } from '../dateUtils/monthDay'
 import { parseMonthDayISO, refineDateTimeParse } from '../dateUtils/parse'
+import { formatUnzoned } from '../native/intl'
 import { throwNew } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { PlainDate } from './plainDate'
@@ -34,7 +35,6 @@ import {
   MonthDayOverrides,
   OverflowOptions,
 } from './types'
-import { formatUnzoned } from '../native/intl'
 
 export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   constructor(

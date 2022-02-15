@@ -22,6 +22,7 @@ import {
   createYearMonth,
   overrideYearMonthFields,
 } from '../dateUtils/yearMonth'
+import { formatUnzoned } from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -39,7 +40,6 @@ import {
   YearMonthOverrides,
   YearMonthUnit,
 } from './types'
-import { formatUnzoned } from '../native/intl'
 
 const day1 = { day: 1 }
 
@@ -178,8 +178,8 @@ function addDuration(
   return yearMonth.toPlainDate({
     day: duration.sign < 0
       ? yearMonth.daysInMonth
-      : 1
+      : 1,
   })
-  .add(duration, options)
-  .toPlainYearMonth()
+    .add(duration, options)
+    .toPlainYearMonth()
 }

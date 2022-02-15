@@ -6,7 +6,6 @@ import { DateISOEssentials } from './date'
 import {
   milliInDay,
   milliInSecond,
-  nanoInDayBI,
   nanoInMicro,
   nanoInMicroBI,
   nanoInMilli,
@@ -109,7 +108,7 @@ export function isoToEpochMilli(
   for (; dayShiftAbs < 31; dayShiftAbs++) {
     isoDayTry = isoDayReal - (sign * dayShiftAbs)
 
-    let milliTry = Date.UTC(
+    const milliTry = Date.UTC(
       isoYearTemp,
       isoMonthReal - 1,
       isoDayTry,
@@ -239,7 +238,7 @@ export function validateDate(isoFields: DateISOEssentials): void {
   validatePlain(
     // if potentially very negative, measure last nanosecond of day
     // to increase changes it's in-bounds
-    nano + (nano < 0n ? 86399999999999n : 0n)
+    nano + (nano < 0n ? 86399999999999n : 0n),
   )
 }
 
@@ -274,7 +273,7 @@ function nudgeToLegacyDate(epochMilli: number): [Date, number] {
   // undo the dayShift done in isoToEpochMilli
   // won't need to move more than a month (max month days is 31, so 30)
   for (; dayShiftAbs < 31; dayShiftAbs++) {
-    let dateTry = new Date(epochMilli - (sign * dayShiftAbs * milliInDay))
+    const dateTry = new Date(epochMilli - (sign * dayShiftAbs * milliInDay))
 
     if (!isInvalid(dateTry)) {
       date = dateTry

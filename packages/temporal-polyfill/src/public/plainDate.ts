@@ -26,6 +26,7 @@ import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
+import { formatUnzoned } from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
@@ -48,7 +49,6 @@ import {
   TimeZoneArg,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
-import { formatUnzoned } from '../native/intl'
 
 export class PlainDate extends AbstractISOObj<DateISOFields> {
   constructor(
