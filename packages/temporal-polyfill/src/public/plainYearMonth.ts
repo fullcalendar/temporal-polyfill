@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
@@ -9,7 +8,7 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO, diffDates } from '../dateUtils/date'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
-import { isoFieldsToEpochMilli, validateYearMonth } from '../dateUtils/isoMath'
+import { validateYearMonth } from '../dateUtils/isoMath'
 import {
   YearMonthCalendarFields,
   mixinCalendarFields,
@@ -40,6 +39,7 @@ import {
   YearMonthOverrides,
   YearMonthUnit,
 } from './types'
+import { formatUnzoned } from '../native/intl'
 
 const day1 = { day: 1 }
 
@@ -142,16 +142,16 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const fields = this.getISOFields()
-
-    return new OrigDateTimeFormat(locales, {
-      calendar: fields.calendar.id,
+    return formatUnzoned(this, locales, {
+      year: 'numeric',
+      month: 'numeric',
       ...options,
-      timeZone: 'UTC', // options can't override
-      // TODO: inject more options to ensure only year+month are displayed by default
-    }).format(
-      isoFieldsToEpochMilli(fields),
-    )
+      weekday: undefined,
+      day: undefined,
+      hour: undefined,
+      minute: undefined,
+      second: undefined,
+    }, true) // strictCalendar
   }
 
   toPlainDate(fields: { day: number }): PlainDate {

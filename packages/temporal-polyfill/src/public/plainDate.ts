@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
@@ -15,7 +14,7 @@ import {
 } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
-import { isoFieldsToEpochMilli, validateDate } from '../dateUtils/isoMath'
+import { validateDate } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
@@ -49,6 +48,7 @@ import {
   TimeZoneArg,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
+import { formatUnzoned } from '../native/intl'
 
 export class PlainDate extends AbstractISOObj<DateISOFields> {
   constructor(
@@ -141,15 +141,15 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const fields = this.getISOFields()
-
-    return new OrigDateTimeFormat(locales, {
-      calendar: fields.calendar.id,
+    return formatUnzoned(this, locales, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
       ...options,
-      timeZone: 'UTC', // options can't override
-    }).format(
-      isoFieldsToEpochMilli(fields),
-    )
+      hour: undefined,
+      minute: undefined,
+      second: undefined,
+    })
   }
 
   toZonedDateTime(options: { plainTime?: TimeArg, timeZone: TimeZoneArg }): ZonedDateTime {

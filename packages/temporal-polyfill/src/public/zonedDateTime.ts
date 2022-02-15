@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDisambigOption } from '../argParse/disambig'
@@ -69,6 +68,7 @@ import {
   ZonedDateTimeOverrides,
   ZonedDateTimeToStringOptions,
 } from './types'
+import { formatZoned } from '../native/intl'
 
 interface ZonedDateTimePrivateFields {
   offsetNanoseconds: number
@@ -257,16 +257,15 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const fields = this.getISOFields()
-
-    return new OrigDateTimeFormat(locales, {
-      calendar: fields.calendar.id,
-      timeZone: fields.timeZone.id,
+    return formatZoned(this, locales, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
       ...options,
-      // TODO: inject more options to ensure time is displayed by default
-    }).format(
-      this.epochMilliseconds,
-    )
+    })
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }

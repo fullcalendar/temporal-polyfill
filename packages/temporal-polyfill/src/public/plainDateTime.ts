@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { dateTimeFieldMap } from '../argParse/fieldStr'
@@ -20,7 +19,7 @@ import {
   roundDateTimeWithOptions,
 } from '../dateUtils/dateTime'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
-import { isoFieldsToEpochMilli, validateDateTime } from '../dateUtils/isoMath'
+import { validateDateTime } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
@@ -57,6 +56,7 @@ import {
   TimeZoneArg,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
+import { formatUnzoned } from '../native/intl'
 
 export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   constructor(
@@ -187,16 +187,15 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const fields = this.getISOFields()
-
-    return new OrigDateTimeFormat(locales, {
-      calendar: fields.calendar.id,
+    return formatUnzoned(this, locales, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
       ...options,
-      timeZone: 'UTC', // options can't override
-      // TODO: inject more options to ensure time is displayed by default
-    }).format(
-      isoFieldsToEpochMilli(fields),
-    )
+    })
   }
 
   // workhorse for converting to ZonedDateTime for other objects

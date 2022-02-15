@@ -1,4 +1,3 @@
-import { OrigDateTimeFormat } from '../native/intl'
 import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
@@ -7,7 +6,7 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO } from '../dateUtils/date'
 import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
-import { isoEpochLeapYear, isoFieldsToEpochMilli } from '../dateUtils/isoMath'
+import { isoEpochLeapYear } from '../dateUtils/isoMath'
 import {
   MonthDayCalendarFields,
   mixinCalendarFields,
@@ -35,6 +34,7 @@ import {
   MonthDayOverrides,
   OverflowOptions,
 } from './types'
+import { formatUnzoned } from '../native/intl'
 
 export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   constructor(
@@ -108,16 +108,16 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const fields = this.getISOFields()
-
-    return new OrigDateTimeFormat(locales, {
-      calendar: fields.calendar.id,
+    return formatUnzoned(this, locales, {
+      month: 'numeric',
+      day: 'numeric',
       ...options,
-      timeZone: 'UTC', // options can't override
-      // TODO: inject more options to ensure only month+day are displayed by default
-    }).format(
-      isoFieldsToEpochMilli(fields),
-    )
+      weekday: undefined,
+      year: undefined,
+      hour: undefined,
+      minute: undefined,
+      second: undefined,
+    }, true) // strictCalendar
   }
 
   toPlainDate(fields: { year: number }, options?: OverflowOptions): PlainDate {

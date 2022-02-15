@@ -127,9 +127,16 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
     return new OrigDateTimeFormat(locales, {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
       ...options,
       timeZone: 'UTC', // options can't override
-      // TODO: inject more options to ensure only time is displayed by default
+      timeZoneName: undefined,
+      year: undefined,
+      month: undefined,
+      day: undefined,
+      weekday: undefined,
     }).format(
       Number(timeFieldsToNano(this) / nanoInMilliBI),
     )
