@@ -5,6 +5,8 @@ A spec-compliant<super>*</super> [Temporal] JavaScript polyfill in less than 15k
 
 Works in modern browsers<super>***</super>, not Internet Explorer.
 
+[Codepen](https://codepen.io/arshaw/pen/VwrMQPJ?editors=1111)
+
 
 ## Installation
 
@@ -31,7 +33,7 @@ const zdt = ZonedDateTime.from('2020-08-05T20:06:13[America/Chicago]')
 console.log(zdt.toLocaleString())
 ```
 
-The above techniques try using the built-in `Temporal` object and fall back to the polyfill.
+**C)** The above techniques try using the built-in `Temporal` object and fall back to the polyfill.
 To guarantee using the polyfill, do this:
 
 ```js
