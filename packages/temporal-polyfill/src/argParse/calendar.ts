@@ -10,8 +10,10 @@ export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
   return arg.calendar // boolean-ish
 }
 
+// bag ITEM
+// weird
 export function parseCalendarArgFromBag(arg: CalendarArgSimple): Calendar {
-  if (typeof arg === 'object') {
+  if (typeof arg === 'object' && arg) { // TODO: isObjectLike
     if (typeof arg.id === 'string') {
       return arg as Calendar // custom implementation
     } else {

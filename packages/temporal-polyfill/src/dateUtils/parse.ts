@@ -38,7 +38,7 @@ const endingRegExpStr =
 const offsetRegExp = createRegExp(offsetRegExpStr)
 const timeRegExp = createRegExp(
   timeRegExpStr +
-  endingRegExpStr, // ignored
+  endingRegExpStr, // values are ignored
 )
 const dateTimeRegExp = createRegExp(
   dateRegExpStr +

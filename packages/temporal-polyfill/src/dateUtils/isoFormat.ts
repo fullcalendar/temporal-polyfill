@@ -77,13 +77,21 @@ export function formatTimeISO(
   return parts.join(':')
 }
 
+// TODO: combine with formatTimeISO
 export function formatOffsetISO(offsetNano: number): string {
   const fields = nanoToDayTimeFields(BigInt(Math.abs(offsetNano)), HOUR) // TODO: cleaner util
+  const partialSecondsStr = formatPartialSeconds(
+    fields.millisecond!,
+    fields.microsecond!,
+    fields.nanosecond!,
+    undefined,
+  )[0]
+
   return getSignStr(offsetNano) +
     padZeros(fields.hour!, 2) + ':' +
     padZeros(fields.minute!, 2) +
-    (fields.second
-      ? ':' + padZeros(fields.second, 2)
+    ((fields.second || partialSecondsStr)
+      ? ':' + padZeros(fields.second!, 2) + partialSecondsStr
       : '')
 }
 

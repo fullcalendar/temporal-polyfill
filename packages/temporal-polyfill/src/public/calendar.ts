@@ -58,7 +58,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   }
 
   static from(arg: CalendarArg): Calendar {
-    if (typeof arg === 'object') {
+    if (typeof arg === 'object' && arg) { // TODO: isObjectLike
       if (isCalendarArgBag(arg)) {
         return parseCalendarArgFromBag(arg.calendar)
       } else {

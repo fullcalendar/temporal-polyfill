@@ -4,7 +4,7 @@ import {
   DISAMBIG_REJECT,
   parseDisambigOption,
 } from '../argParse/disambig'
-import { extractTimeZone, isTimeZoneArgBag } from '../argParse/timeZone'
+import { extractTimeZone, isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
@@ -45,7 +45,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   static from(arg: TimeZoneArg): TimeZone {
     if (typeof arg === 'object') {
       if (isTimeZoneArgBag(arg)) {
-        return extractTimeZone(arg)
+        return parseTimeZoneFromBag(arg.timeZone)
       } else {
         return arg as TimeZone // treat TimeZoneProtocols as TimeZones internally
       }
