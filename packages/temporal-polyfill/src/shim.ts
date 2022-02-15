@@ -6,17 +6,13 @@ SPECIAL NOTE:
 Imports from non-top-level files are not allowed
 */
 import {
-  OrigDateTimeFormat,
-  normalizeIntlDateArg,
-  normalizeIntlOptionalDateArg,
-} from './native/intl'
-import {
   Calendar,
   DateTimeFormatArg,
   DateTimeFormatRangePart,
   Duration,
   Instant,
   Now,
+  OrigDateTimeFormat,
   PlainDate,
   PlainDateTime,
   PlainMonthDay,
@@ -25,6 +21,8 @@ import {
   TimeZone,
   ZonedDateTime,
   dateToTemporalInstant,
+  normalizeIntlDateArg,
+  normalizeIntlOptionalDateArg,
 } from './impl'
 
 export function shimTemporal(): void {
