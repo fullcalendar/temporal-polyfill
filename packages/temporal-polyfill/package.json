@@ -13,7 +13,13 @@
       "email": "ishbharal@gmail.com"
     }
   ],
-  "copyright": "2021 Adam Shaw",
+  "license": "MIT",
+  "copyright": "2022 Adam Shaw",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fullcalendar/temporal.git",
+    "directory": "packages/temporal-polyfill"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

@@ -13,7 +13,8 @@
       "url": "http://arshaw.com/"
     }
   ],
-  "copyright": "2021 Adam Shaw",
+  "license": "MIT",
+  "copyright": "2022 Adam Shaw",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

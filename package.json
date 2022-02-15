@@ -12,7 +12,8 @@
       "email": "ishbharal@gmail.com"
     }
   ],
-  "copyright": "2021 Adam Shaw",
+  "license": "MIT",
+  "copyright": "2022 Adam Shaw",
   "type": "module",
   "workspaces": [
     "packages/*"
