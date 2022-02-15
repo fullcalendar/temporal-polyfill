@@ -46,10 +46,10 @@ console.log(zdt.toLocaleString())
 [a few more tests must pass](jest.config.cjs)
 ([see results](https://github.com/fullcalendar/temporal/actions))
 
-<super>**</super> = the size might shrink further as the codebase is cleaned up
+<super>**</super> = the size will shrink as the codebase is cleaned up
 
 <super>***</super> = targets browsers that support [BigInt], however, more browser-compatibility
-work is needed.
+work is needed
 
 
 [Temporal]: https://github.com/tc39/proposal-temporal
