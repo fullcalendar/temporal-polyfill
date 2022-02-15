@@ -5,7 +5,7 @@ const yargs = require('yargs/yargs')
 const shell = require('shelljs')
 const live = require('shelljs-live/promise')
 const { getPkgConfig, analyzePkgConfig } = require('./lib/pkgAnalyze.cjs')
-const cjsPathTransform = require('./lib/cjsPathTransform.cjs')
+const { cjsPathTransform, mjsPathTransform } = require('./lib/pathTransform.cjs')
 
 const terserConfigPath = path.resolve(__dirname, './config/terser.json')
 const argv = yargs(hideBin(process.argv)).argv
@@ -43,9 +43,10 @@ function bundlePkgJS(dir, watch) {
         entryPoints: [srcPath],
         outfile: exportPath,
         format: 'esm',
-        bundle,
+        bundle: true, // mjsPathTransform needs for bundling
         external,
         sourcemap: true, // separate .js.map, content included by default
+        plugins: bundle ? [] : [mjsPathTransform], // plugin will prevent bundling
       }
       if (watch) {
         return watchJSFile(config)
