@@ -13,6 +13,9 @@ function getZonedDateTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): ZonedDat
 }
 
 function getZonedDateTime(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): ZonedDateTime {
+  if (calendarArg === undefined) {
+    throw new RangeError('Must specify calendar') // bad
+  }
   return getInstant().toZonedDateTime({
     calendar: calendarArg,
     timeZone: timeZoneArg ?? getTimeZone(),
