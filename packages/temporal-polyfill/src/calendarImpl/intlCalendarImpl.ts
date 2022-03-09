@@ -7,12 +7,13 @@ import {
   isoToEpochMilli,
 } from '../dateUtils/isoMath'
 import { OrigDateTimeFormat } from '../native/intl'
-import { CalendarImpl } from './calendarImpl'
+import { CalendarImpl, CalendarImplFields, convertEraYear, hasEras } from './calendarImpl'
 
 export class IntlCalendarImpl extends CalendarImpl {
   private format: Intl.DateTimeFormat
 
   // difference between iso year numbers and the calendar's
+  // at 1980. might be useless
   private yearCorrection: number
 
   // epochMilli starting points for each month
@@ -27,50 +28,20 @@ export class IntlCalendarImpl extends CalendarImpl {
 
     super(id)
     this.format = format
-    this.yearCorrection = this.computeFields(0).year - isoEpochOriginYear
     this.yearMonthCache = {}
-  }
-
-  era(isoYear: number, isoMonth: number, isoDay: number): string | undefined {
-    const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
-    return this.computeFields(epochMilli).era
-  }
-
-  eraYear(isoYear: number, isoMonth: number, isoDay: number): number | undefined {
-    const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
-    return this.computeFields(epochMilli).eraYear
-  }
-
-  year(isoYear: number, isoMonth: number, isoDay: number): number {
-    const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
-    return this.computeFields(epochMilli).year
-  }
-
-  month(isoYear: number, isoMonth: number, isoDay: number): number {
-    const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
-    return this.computeFields(epochMilli).month
-  }
-
-  day(isoYear: number, isoMonth: number, isoDay: number): number {
-    const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
-    return this.computeFields(epochMilli).day
+    this.yearCorrection = this.computeFields(0).year - isoEpochOriginYear
   }
 
   epochMilliseconds(year: number, month: number, day: number): number {
-    this.ensureYear(year)
-
-    // will be start-of-month
-    const marker = this.yearMonthCache[year][month - 1]
+    const monthCache = this.queryMonthCache(year)
+    const marker = monthCache[month - 1]
 
     // move to correct day-of-month
     return addDaysMilli(marker, day - 1)
   }
 
   daysInMonth(year: number, month: number): number {
-    const { yearMonthCache } = this
-    this.ensureYear(year)
-
-    const monthCache = yearMonthCache[year]
+    const monthCache = this.queryMonthCache(year)
     const startMarker = monthCache[month - 1]
 
     // The `month` variable, which is 1-based, should now be considered an index for `monthCache`
@@ -82,14 +53,13 @@ export class IntlCalendarImpl extends CalendarImpl {
 
     // In the case month was incremented above,
     // `ensureCacheForYear` guarantees the next year is at least partially populated
-    const endMarker = yearMonthCache[year][month]
+    const endMarker = monthCache[month]
 
     return diffDaysMilli(startMarker, endMarker)
   }
 
   monthsInYear(year: number): number {
-    this.ensureYear(year)
-    return this.yearMonthCache[year].length
+    return this.queryMonthCache(year).length
   }
 
   inLeapYear(year: number): boolean {
@@ -119,14 +89,25 @@ export class IntlCalendarImpl extends CalendarImpl {
     return isoYear
   }
 
+  private queryMonthCache(year: number): number[] {
+    this.ensureYear(year)
+
+    const monthCache = this.yearMonthCache[year]
+    if (monthCache === undefined) {
+      throw new RangeError('Invalid date for calendar') // TODO: make DRY with intlBugs
+    }
+
+    return monthCache
+  }
+
   private ensureYear(year: number): void {
-    const { yearMonthCache, yearCorrection } = this
+    const { yearMonthCache } = this
 
     // since the yearCache is guaranteed to populate an entire year and extra month(s) into the
     // next year, if two consecutive years are filled, the first year is guaranteed to be populated.
     if (!yearMonthCache[year] || !yearMonthCache[year + 1]) {
       // either part-way through the desired year or very slighly before
-      let epochMilli = isoToEpochMilli(year - yearCorrection)
+      let epochMilli = isoToEpochMilli(this.guessISOYear(year))
 
       // ensure marker is in year+1
       epochMilli = addDaysMilli(epochMilli, 400)
@@ -134,6 +115,11 @@ export class IntlCalendarImpl extends CalendarImpl {
       // will populate the downward until (and including) year
       this.ensureDown(epochMilli, year)
     }
+  }
+
+  // subclasses that override should round UP
+  protected guessISOYear(year: number): number {
+    return year - this.yearCorrection
   }
 
   // guarantees cache is populated all the way down (and including) to floorYear
@@ -158,22 +144,16 @@ export class IntlCalendarImpl extends CalendarImpl {
     }
   }
 
-  protected computeFields(epochMilli: number): {
-    era: string | undefined,
-    eraYear: number | undefined,
-    year: number,
-    month: number,
-    day: number
-  } {
+  computeFields(epochMilli: number): CalendarImplFields {
     const partHash = hashIntlFormatParts(this.format, epochMilli)
     let era: string | undefined
     let eraYear: number | undefined
     let year = parseInt(partHash.relatedYear || partHash.year)
 
-    if (partHash.era) {
+    if (partHash.era && hasEras(this.id)) {
       era = normalizeShortEra(partHash.era)
       eraYear = year
-      year = this.convertEraYear(eraYear, era)
+      year = convertEraYear(this.id, eraYear, era, true) // fromDateTimeFormat=true
     }
 
     return {
@@ -206,7 +186,7 @@ export function buildFormat(calendarID: string): Intl.DateTimeFormat {
 // utils
 
 function isRelatedCalendar(specificCalendarID: string, relatedCalendarID: string): boolean {
-  const parts0 = specificCalendarID.split('-')
+  const parts0 = specificCalendarID.split('-') // TODO: more DRY elsewhere
   const parts1 = relatedCalendarID.split('-')
   return parts0[0] === parts1[0]
 }

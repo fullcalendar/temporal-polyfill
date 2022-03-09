@@ -7,7 +7,8 @@ import {
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
-import { CalendarImpl } from '../calendarImpl/calendarImpl'
+import { isEpochMilliBuggy } from '../calendarImpl/bugs'
+import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
@@ -20,7 +21,7 @@ import {
   queryDateISOFields,
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
-import { computeISODayOfWeek } from '../dateUtils/isoMath'
+import { computeISODayOfWeek, isoToEpochMilli } from '../dateUtils/isoMath'
 import { MonthDayFields } from '../dateUtils/monthDay'
 import { tryParseDateTimeISO } from '../dateUtils/parse'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
@@ -50,7 +51,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   constructor(id: string) {
     super()
 
-    if (id === 'islamicc') { // deprecated
+    if (id === 'islamicc') { // deprecated... TODO: use conversion map
       id = 'islamic-civil'
     }
 
@@ -77,38 +78,42 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
   era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
-    return getImpl(this).era(
+    return isoToEpochNanoSafe(
+      getImpl(this),
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,
-    )
+    ).era
   }
 
   eraYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number | undefined {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
-    return getImpl(this).eraYear(
+    return isoToEpochNanoSafe(
+      getImpl(this),
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,
-    )
+    ).eraYear
   }
 
   year(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
-    return getImpl(this).year(
+    return isoToEpochNanoSafe(
+      getImpl(this),
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,
-    )
+    ).year
   }
 
   month(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
-    return getImpl(this).month(
+    return isoToEpochNanoSafe(
+      getImpl(this),
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,
-    )
+    ).month
   }
 
   monthCode(arg: PlainYearMonth | PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): string {
@@ -118,11 +123,12 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
   day(arg: PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): number {
     const isoFields = getExistingDateISOFields(arg)
-    return getImpl(this).day(
+    return isoToEpochNanoSafe(
+      getImpl(this),
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,
-    )
+    ).day
   }
 
   dayOfWeek(arg: DateArg | PlainDateTime | ZonedDateTime): number {
@@ -202,7 +208,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     }
 
     if (era !== undefined && eraYear !== undefined) {
-      year = impl.convertEraYear(eraYear, era) // maybe do errorOnUnknown???
+      year = convertEraYear(impl.id, eraYear, era)
     }
 
     let yearGuaranteed = year
@@ -260,4 +266,21 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
 export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
+}
+
+// utils
+
+function isoToEpochNanoSafe(
+  calendarImpl: CalendarImpl,
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+): CalendarImplFields {
+  const milli = isoToEpochMilli(isoYear, isoMonth, isoDay)
+
+  if (isEpochMilliBuggy(milli, calendarImpl.id)) {
+    throw new RangeError('Invalid timestamp for calendar')
+  }
+
+  return calendarImpl.computeFields(milli)
 }

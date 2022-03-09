@@ -21,10 +21,9 @@ const eraRemap: { [eraIn: string]: string } = {
 }
 
 export function normalizeShortEra(formattedEra: string): string {
-  // Example 'Before R.O.C.' -> 'before-roc'
+  // Example 'Before R.O.C.' -> 'beforeroc'
   formattedEra = formattedEra.toLowerCase()
-    .replace(/[^a-z0-9]g/, '')
-    .replace(/ /g, '-')
+    .replace(/[^a-z0-9]/g, '')
 
   return eraRemap[formattedEra] || formattedEra
 }

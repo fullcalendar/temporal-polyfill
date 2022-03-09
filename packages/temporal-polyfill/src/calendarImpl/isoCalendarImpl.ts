@@ -1,17 +1,16 @@
-import { isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
-import { CalendarImpl } from './calendarImpl'
+import { epochMilliToISOFields, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
+import { CalendarImpl, CalendarImplFields } from './calendarImpl'
 
 export class ISOCalendarImpl extends CalendarImpl {
-  year(isoYear: number): number {
-    return isoYear
-  }
-
-  month(_isoYear: number, isoMonth: number): number {
-    return isoMonth
-  }
-
-  day(_isoYear: number, _isoMonth: number, isoDay: number): number {
-    return isoDay
+  computeFields(epochMilli: number): CalendarImplFields {
+    const fields = epochMilliToISOFields(epochMilli)
+    return {
+      era: undefined,
+      eraYear: undefined,
+      year: fields.isoYear,
+      month: fields.isoMonth,
+      day: fields.isoDay,
+    }
   }
 
   epochMilliseconds(year: number, month: number, day: number): number {

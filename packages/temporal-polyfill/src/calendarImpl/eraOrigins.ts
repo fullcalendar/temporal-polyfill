@@ -24,11 +24,20 @@ export const eraOrigins: {
     era1: 0,
   },
   roc: {
-    'before-roc': -1,
+    beforeroc: -1,
     minguo: 0,
   },
   buddhist: {
     be: 0,
+  },
+  islamic: {
+    ah: 0,
+  },
+  indian: {
+    saka: 0,
+  },
+  persian: {
+    ap: 0,
   },
   japanese: {
     bce: -1,

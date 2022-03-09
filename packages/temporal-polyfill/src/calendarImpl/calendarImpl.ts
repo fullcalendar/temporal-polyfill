@@ -2,24 +2,22 @@ import { numSign } from '../utils/math'
 import { padZeros } from '../utils/string'
 import { eraOrigins } from './eraOrigins'
 
+export interface CalendarImplFields { // like DateFields, but without monthCode
+  era: string | undefined,
+  eraYear: number | undefined,
+  year: number,
+  month: number,
+  day: number
+}
+
 export abstract class CalendarImpl {
   constructor(
     public id: string,
   ) {}
 
-  era(_isoYear: number, _isoMonth: number, _isoDay: number): string | undefined {
-    return undefined
-  }
-
-  eraYear(_isoYear: number, _isoMonth: number, _isoDay: number): number | undefined {
-    return undefined
-  }
-
   // ISO -> Calendar-dependent
 
-  abstract year(isoYear: number, isoMonth: number, isoDay: number): number
-  abstract month(isoYear: number, isoMonth: number, isoDay: number): number
-  abstract day(isoYear: number, isoMonth: number, isoDay: number): number
+  abstract computeFields(epochMilli: number): CalendarImplFields
 
   // Calendar-dependent computation
   // caller is responsible for constraining given values
@@ -41,20 +39,32 @@ export abstract class CalendarImpl {
   convertMonthCode(monthCode: string, _year: number): number {
     return parseInt(monthCode.substr(1)) // chop off 'M'
   }
+}
 
-  // eraYear -> year
-  convertEraYear(eraYear: number, era: string, errorUnknownEra?: boolean): number {
-    let origin = eraOrigins[this.id]?.[era]
+// eraYear -> year
+export function convertEraYear(
+  calendarID: string,
+  eraYear: number,
+  era: string,
+  fromDateTimeFormat?: boolean,
+): number {
+  const idBase = calendarID.split('-')[0]
+  let origin = eraOrigins[idBase]?.[era]
 
-    if (origin === undefined) {
-      if (errorUnknownEra) {
-        throw new Error('Unkown era ' + era)
-      } else {
-        origin = 0
-      }
+  if (origin === undefined) {
+    if (fromDateTimeFormat) {
+      origin = 0
+    } else {
+      throw new Error('Unkown era ' + era)
     }
-
-    // see the origin format in the config file
-    return (origin + eraYear) * (numSign(origin) || 1)
   }
+
+  // see the origin format in the config file
+  return (origin + eraYear) * (numSign(origin) || 1)
+}
+
+// TODO: somehow combine with convertEraYear
+export function hasEras(calendarID: string): boolean {
+  const idBase = calendarID.split('-')[0]
+  return eraOrigins[idBase] !== undefined
 }

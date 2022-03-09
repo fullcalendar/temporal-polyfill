@@ -1,6 +1,6 @@
 import { ensureCalendarsEqual } from '../argParse/calendar'
 import { parseOverflowOption } from '../argParse/overflowHandling'
-import { CalendarImpl } from '../calendarImpl/calendarImpl'
+import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -69,12 +69,21 @@ export function queryDateISOFields(
   }
 
   let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<DateFields>
+  const yearFromEra = (eraYear !== undefined && era !== undefined)
+    ? convertEraYear(calendarImpl.id, eraYear, era)
+    : undefined
 
   if (year === undefined) {
-    if (eraYear === undefined || era === undefined) {
-      throw new TypeError('Must specify either a year or an era & eraYear')
+    if (yearFromEra !== undefined) {
+      year = yearFromEra
     } else {
-      year = calendarImpl.convertEraYear(eraYear, era, true) // errorUnknownEra=true
+      throw new TypeError('Must specify either a year or an era & eraYear')
+    }
+  } else {
+    if (yearFromEra !== undefined) {
+      if (yearFromEra !== year) {
+        throw new RangeError('year and era/eraYear must match')
+      }
     }
   }
 

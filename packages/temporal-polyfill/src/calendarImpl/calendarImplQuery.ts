@@ -2,6 +2,7 @@ import { CalendarImpl } from './calendarImpl'
 import { GregoryCalendarImpl } from './gregoryCalendarImpl'
 import { HebrewCalendarImpl } from './hebrewCalendarImpl'
 import { IntlCalendarImpl } from './intlCalendarImpl'
+import { IslamicCalendarImpl } from './islamicCalendarImpl'
 import { isoCalendarID, isoCalendarImpl } from './isoCalendarImpl'
 import { JapaneseCalendarImpl } from './japaneseCalendarImpl'
 
@@ -9,6 +10,7 @@ const implClasses: { [calendarID: string]: { new(id: string): CalendarImpl } } =
   gregory: GregoryCalendarImpl,
   hebrew: HebrewCalendarImpl,
   japanese: JapaneseCalendarImpl,
+  islamic: IslamicCalendarImpl,
 }
 
 const implCache: { [calendarID: string]: CalendarImpl } = {
@@ -20,5 +22,9 @@ export function queryCalendarImpl(id: string): CalendarImpl {
   const key = id.toLocaleLowerCase() // lowercase matches isoCalendarID
 
   return implCache[key] ||
-    (implCache[key] = new (implClasses[key] || IntlCalendarImpl)(id))
+    (implCache[key] = new (getSpecificImplClass(key) || IntlCalendarImpl)(id))
+}
+
+function getSpecificImplClass(key: string): any {
+  return implClasses[key.split('-')[0]]
 }
