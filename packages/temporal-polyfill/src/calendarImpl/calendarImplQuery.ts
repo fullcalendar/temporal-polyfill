@@ -1,4 +1,4 @@
-import { CalendarImpl } from './calendarImpl'
+import { CalendarImpl, getCalendarIDBase } from './calendarImpl'
 import { GregoryCalendarImpl } from './gregoryCalendarImpl'
 import { HebrewCalendarImpl } from './hebrewCalendarImpl'
 import { IntlCalendarImpl } from './intlCalendarImpl'
@@ -22,9 +22,8 @@ export function queryCalendarImpl(id: string): CalendarImpl {
   const key = id.toLocaleLowerCase() // lowercase matches isoCalendarID
 
   return implCache[key] ||
-    (implCache[key] = new (getSpecificImplClass(key) || IntlCalendarImpl)(id))
-}
-
-function getSpecificImplClass(key: string): any {
-  return implClasses[key.split('-')[0]]
+    (implCache[key] = new (
+      implClasses[getCalendarIDBase(key)] ||
+      IntlCalendarImpl
+    )(id))
 }

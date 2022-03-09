@@ -48,8 +48,7 @@ export function convertEraYear(
   era: string,
   fromDateTimeFormat?: boolean,
 ): number {
-  const idBase = calendarID.split('-')[0]
-  let origin = eraOrigins[idBase]?.[era]
+  let origin = eraOrigins[getCalendarIDBase(calendarID)]?.[era]
 
   if (origin === undefined) {
     if (fromDateTimeFormat) {
@@ -65,6 +64,9 @@ export function convertEraYear(
 
 // TODO: somehow combine with convertEraYear
 export function hasEras(calendarID: string): boolean {
-  const idBase = calendarID.split('-')[0]
-  return eraOrigins[idBase] !== undefined
+  return eraOrigins[getCalendarIDBase(calendarID)] !== undefined
+}
+
+export function getCalendarIDBase(calendarID: string): string {
+  return calendarID.split('-')[0]
 }

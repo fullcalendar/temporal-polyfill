@@ -7,7 +7,13 @@ import {
   isoToEpochMilli,
 } from '../dateUtils/isoMath'
 import { OrigDateTimeFormat } from '../native/intl'
-import { CalendarImpl, CalendarImplFields, convertEraYear, hasEras } from './calendarImpl'
+import {
+  CalendarImpl,
+  CalendarImplFields,
+  convertEraYear,
+  getCalendarIDBase,
+  hasEras,
+} from './calendarImpl'
 
 export class IntlCalendarImpl extends CalendarImpl {
   private format: Intl.DateTimeFormat
@@ -186,7 +192,5 @@ export function buildFormat(calendarID: string): Intl.DateTimeFormat {
 // utils
 
 function isRelatedCalendar(specificCalendarID: string, relatedCalendarID: string): boolean {
-  const parts0 = specificCalendarID.split('-') // TODO: more DRY elsewhere
-  const parts1 = relatedCalendarID.split('-')
-  return parts0[0] === parts1[0]
+  return getCalendarIDBase(specificCalendarID) === getCalendarIDBase(relatedCalendarID)
 }
