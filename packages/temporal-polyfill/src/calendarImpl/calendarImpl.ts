@@ -49,10 +49,15 @@ export abstract class CalendarImpl {
     number, // month
     boolean, // unusedLeap (a valid 'L', but not used in this year)
   ] {
-    return [
-      parseInt(monthCode.substr(1)), // chop off 'M'
-      false,
-    ]
+    // TODO: more DRY
+    const monthCodeIsLeap = /L$/.test(monthCode)
+    const monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M'
+
+    if (monthCodeIsLeap) {
+      throw new RangeError('Calendar system doesnt support leap months') // TODO: more DRY
+    }
+
+    return [monthCodeInt, false]
   }
 }
 

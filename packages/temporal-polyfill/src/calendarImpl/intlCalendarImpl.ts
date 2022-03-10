@@ -22,10 +22,11 @@ type MonthCache = [
   { [monthStr: string]: number }, // monthStrToNum (value is 1-based)
 ]
 
-type LeapMonthInfo = [
-  number, // month
-  number, // totalMonths (in a leap year)
-]
+const calLeapMonths: { [cal: string]: number } = {
+  hebrew: 6, // consistent month
+  chinese: 0, // zero implies variable month
+  dangi: 0, // "
+}
 
 export class IntlCalendarImpl extends CalendarImpl {
   private format: Intl.DateTimeFormat
@@ -35,8 +36,6 @@ export class IntlCalendarImpl extends CalendarImpl {
 
   // epochMilli starting points for each month
   private monthCacheByYear: { [year: string]: MonthCache }
-
-  private leapMonthInfo: LeapMonthInfo | false | undefined
 
   constructor(id: string) {
     const format = buildFormat(id)
@@ -94,31 +93,41 @@ export class IntlCalendarImpl extends CalendarImpl {
   // monthCode -> month
   convertMonthCode(monthCode: string, year: number): [number, boolean] {
     const leapMonth = this.queryLeapMonthByYear(year) // 0 if none
-    const monthCodeIsLeap = /L$/.test(monthCode)
-    let monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M' // TODO: more DRY
 
-    // validate the leap-neww
+    // TODO: more DRY
+    let monthCodeIsLeap = /L$/.test(monthCode)
+    let monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M'
+    let unusedLeap = false
+
+    // validate the leap-month
     if (monthCodeIsLeap) {
-      const leapMonthInfo = this.queryLeapMonthInfo()
-      if (!leapMonthInfo) {
-        throw new RangeError('Calendar system does not have leap months')
+      const presetLeapMonth = calLeapMonths[this.id] // TODO: use base ID?
+
+      if (presetLeapMonth === undefined) {
+        throw new RangeError('Calendar system doesnt support leap months')
       }
 
-      const leapMonthNorm = leapMonthInfo[0]
-      if (monthCodeInt !== leapMonthNorm - 1) {
-        throw new RangeError('Invalid leap-month month code')
+      if (presetLeapMonth) {
+        if (monthCodeInt !== presetLeapMonth - 1) {
+          throw new RangeError('Invalid leap-month month code')
+        }
+      } else { // variable leap months (HACK: hardcoded for chinese/dangi)
+        if (monthCodeInt <= 1 || monthCodeInt >= 12) {
+          throw new RangeError('Invalid leap-month month code')
+        }
       }
     }
 
-    if (monthCodeIsLeap && !leapMonth) {
-      return [monthCodeInt, true] // unusedLeap=true
+    if (monthCodeIsLeap && !(leapMonth && monthCodeInt === leapMonth - 1)) {
+      unusedLeap = true
+      monthCodeIsLeap = false // yuck
     }
 
     if (monthCodeIsLeap || (leapMonth && monthCodeInt >= leapMonth)) {
       monthCodeInt++
     }
 
-    return [monthCodeInt, false]
+    return [monthCodeInt, unusedLeap]
   }
 
   // TODO: look at number of months too?
@@ -183,40 +192,31 @@ export class IntlCalendarImpl extends CalendarImpl {
     }
   }
 
-  // returns 0 if no leap month in year
-  private queryLeapMonthByYear(year: number): number {
-    const leapMonthInfo = this.queryLeapMonthInfo()
-    const monthStrs = this.queryMonthCache(year)[1]
+  // the month number (1-based) that the leap-month falls on
+  // for example, the '3bis' leap month would fall on `4`
+  // TODO: cache somehow?
+  private queryLeapMonthByYear(year: number): number | undefined {
+    const currentCache = this.queryMonthCache(year)
+    const prevCache = this.queryMonthCache(year - 1)
+    const nextCache = this.queryMonthCache(year + 1)
 
-    if (leapMonthInfo && monthStrs.length === leapMonthInfo[1]) {
-      return leapMonthInfo[0]
-    }
+    // in a leap year?
+    // TODO: consolidate with inLeapYear?
+    if (
+      currentCache[0].length > prevCache[0].length &&
+      currentCache[0].length > nextCache[0].length
+    ) {
+      const currentMonthStrs = currentCache[1]
+      const prevMonthStrs = prevCache[1]
 
-    return 0
-  }
-
-  private queryLeapMonthInfo(): LeapMonthInfo | false {
-    return this.leapMonthInfo ?? (this.leapMonthInfo = this.buildLeapMonthInfo())
-  }
-
-  private buildLeapMonthInfo(): LeapMonthInfo | false {
-    for (let year = 2020; year < 2030; year++) {
-      const prevMonthStrs = this.queryMonthCache(year - 1)[1]
-      const currentMonthStrs = this.queryMonthCache(year)[1]
-
-      if (currentMonthStrs.length > prevMonthStrs.length) {
-        for (let i = 0; i < prevMonthStrs.length; i++) {
-          if (prevMonthStrs[i] !== currentMonthStrs[i]) {
-            return [
-              i + 1, // month (1-based)
-              currentMonthStrs.length, // totalMonths (in year)
-            ]
-          }
+      for (let i = 0; i < prevMonthStrs.length; i++) {
+        if (prevMonthStrs[i] !== currentMonthStrs[i]) {
+          return i + 1 // convert to 1-based
         }
       }
     }
 
-    return false
+    return undefined
   }
 
   private queryMonthCache(year: number): MonthCache {
