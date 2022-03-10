@@ -22,7 +22,9 @@ const eraRemap: { [eraIn: string]: string } = {
 
 export function normalizeShortEra(formattedEra: string): string {
   // Example 'Before R.O.C.' -> 'beforeroc'
-  formattedEra = formattedEra.toLowerCase()
+  formattedEra = formattedEra
+    .toLowerCase()
+    .normalize('NFD') // break apart accents, for 'Shōwa' -> 'Showa'
     .replace(/[^a-z0-9]/g, '')
 
   return eraRemap[formattedEra] || formattedEra
