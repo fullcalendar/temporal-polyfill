@@ -242,7 +242,7 @@ describe('Intl', () => {
     })
   })
 
-  describe.skip('Non-ISO Calendars', () => {
+  describe('Non-ISO Calendars', () => {
     const testChineseData = new Date('2001-02-01T00:00Z').toLocaleString('en-US-u-ca-chinese', {
       day: 'numeric',
       month: 'numeric',
@@ -294,130 +294,136 @@ describe('Intl', () => {
       // to generate snapshot: `          '${year1Content.replaceAll('\n', "\\n' +\n          '")}',\n`
 
       const year2000Snapshots: { [nodeVersionName: string]: string } = {
-        node12:
-          'iso8601: 1/1/2000\n' +
-          'buddhist: 1/1/2543\n' +
-          'chinese: 11/25/16\n' +
-          'coptic: 4/22/1716\n' +
-          'dangi: 11/25/16\n' +
-          'ethioaa: 4/22/7492\n' +
-          'ethiopic: 4/22/1992\n' +
-          'gregory: 1/1/2000\n' +
-          'hebrew: 4/23/5760\n' +
-          'indian: 10/11/1921\n' +
-          'islamic: 9/25/1420\n' +
-          'islamic-umalqura: 9/24/1420\n' +
-          'islamic-tbla: 9/25/1420\n' +
-          'islamic-civil: 9/24/1420\n' +
-          'islamic-rgsa: 9/25/1420\n' +
-          'islamicc: 9/24/1420\n' +
-          'japanese: 1/1/12\n' +
-          'persian: 10/11/1378\n' +
+        node12: [
+          'iso8601: 1/1/2000',
+          'buddhist: 1/1/2543',
+          'chinese: 11/25/16',
+          'coptic: 4/22/1716',
+          'dangi: 11/25/16',
+          'ethioaa: 4/22/7492',
+          'ethiopic: 4/22/1992',
+          'gregory: 1/1/2000',
+          'hebrew: 4/23/5760',
+          'indian: 10/11/1921',
+          'islamic: 9/25/1420',
+          'islamic-umalqura: 9/24/1420',
+          'islamic-tbla: 9/25/1420',
+          'islamic-civil: 9/24/1420',
+          'islamic-rgsa: 9/25/1420',
+          'islamicc: 9/24/1420',
+          'japanese: 1/1/12',
+          'persian: 10/11/1378',
           'roc: 1/1/89',
-        node14:
-          'iso8601: 1/1/2000\n' +
-          'buddhist: 1/1/2543 BE\n' +
-          'chinese: 11/25/1999\n' +
-          'coptic: 4/22/1716 ERA1\n' +
-          'dangi: 11/25/1999\n' +
-          'ethioaa: 4/22/7492 ERA0\n' +
-          'ethiopic: 4/22/1992 ERA1\n' +
-          'gregory: 1/1/2000\n' +
-          'hebrew: 23 Tevet 5760\n' +
-          'indian: 10/11/1921 Saka\n' +
-          'islamic: 9/25/1420 AH\n' +
-          'islamic-umalqura: 9/24/1420 AH\n' +
-          'islamic-tbla: 9/25/1420 AH\n' +
-          'islamic-civil: 9/24/1420 AH\n' +
-          'islamic-rgsa: 9/25/1420 AH\n' +
-          'islamicc: 9/24/1420 AH\n' +
-          'japanese: 1/1/12 H\n' +
-          'persian: 10/11/1378 AP\n' +
+        ].join('\n'),
+        node14: [
+          'iso8601: 1/1/2000',
+          'buddhist: 1/1/2543 BE',
+          'chinese: 11/25/1999',
+          'coptic: 4/22/1716 ERA1',
+          'dangi: 11/25/1999',
+          'ethioaa: 4/22/7492 ERA0',
+          'ethiopic: 4/22/1992 ERA1',
+          'gregory: 1/1/2000',
+          'hebrew: 23 Tevet 5760',
+          'indian: 10/11/1921 Saka',
+          'islamic: 9/25/1420 AH',
+          'islamic-umalqura: 9/24/1420 AH',
+          'islamic-tbla: 9/25/1420 AH',
+          'islamic-civil: 9/24/1420 AH',
+          'islamic-rgsa: 9/25/1420 AH',
+          'islamicc: 9/24/1420 AH',
+          'japanese: 1/1/12 H',
+          'persian: 10/11/1378 AP',
           'roc: 1/1/89 Minguo',
-        node16:
-          'iso8601: 1/1/2000\n' +
-          'buddhist: 1/1/2543 BE\n' +
-          'chinese: 11/25/1999\n' +
-          'coptic: 4/22/1716 ERA1\n' +
-          'dangi: 11/25/1999\n' +
-          'ethioaa: 4/22/7492 ERA0\n' +
-          'ethiopic: 4/22/1992 ERA1\n' +
-          'gregory: 1/1/2000\n' +
-          'hebrew: 23 Tevet 5760\n' +
-          'indian: 10/11/1921 Saka\n' +
-          'islamic: 9/25/1420 AH\n' +
-          'islamic-umalqura: 9/24/1420 AH\n' +
-          'islamic-tbla: 9/25/1420 AH\n' +
-          'islamic-civil: 9/24/1420 AH\n' +
-          'islamic-rgsa: 9/25/1420 AH\n' +
-          'islamicc: 9/24/1420 AH\n' +
-          'japanese: 1/1/12 H\n' +
-          'persian: 10/11/1378 AP\n' +
+        ].join('\n'),
+        node16: [
+          'iso8601: 1/1/2000',
+          'buddhist: 1/1/2543 BE',
+          'chinese: 11/25/1999',
+          'coptic: 4/22/1716 ERA1',
+          'dangi: 11/25/1999',
+          'ethioaa: 4/22/7492 ERA0',
+          'ethiopic: 4/22/1992 ERA1',
+          'gregory: 1/1/2000',
+          'hebrew: 23 Tevet 5760',
+          'indian: 10/11/1921 Saka',
+          'islamic: 9/25/1420 AH',
+          'islamic-umalqura: 9/24/1420 AH',
+          'islamic-tbla: 9/25/1420 AH',
+          'islamic-civil: 9/24/1420 AH',
+          'islamic-rgsa: 9/25/1420 AH',
+          'islamicc: 9/24/1420 AH',
+          'japanese: 1/1/12 H',
+          'persian: 10/11/1378 AP',
           'roc: 1/1/89 Minguo',
+        ].join('\n'),
       }
       equal(year2000Content, year2000Snapshots[`node${nodeVersion}`])
 
       const year1Snapshots: { [nodeVersionName: string]: string } = {
-        node12:
-          'iso8601: 1/1/1\n' +
-          'buddhist: 1/3/544\n' +
-          'chinese: 11/21/57\n' +
-          'coptic: 5/8/284\n' +
-          'dangi: 11/21/57\n' +
-          'ethioaa: 5/8/5493\n' +
-          'ethiopic: 5/8/5493\n' +
-          'gregory: 1/1/1\n' +
-          'hebrew: 4/18/3761\n' +
-          'indian: 10/11/-78\n' +
-          'islamic: -7/20/-639\n' +
-          'islamic-umalqura: 5/18/-640\n' +
-          'islamic-tbla: 5/19/-640\n' +
-          'islamic-civil: 5/18/-640\n' +
-          'islamic-rgsa: -7/20/-639\n' +
-          'islamicc: 5/18/-640\n' +
-          'japanese: 1/3/-643\n' +
-          'persian: 10/11/-621\n' +
+        node12: [
+          'iso8601: 1/1/1',
+          'buddhist: 1/3/544',
+          'chinese: 11/21/57',
+          'coptic: 5/8/284',
+          'dangi: 11/21/57',
+          'ethioaa: 5/8/5493',
+          'ethiopic: 5/8/5493',
+          'gregory: 1/1/1',
+          'hebrew: 4/18/3761',
+          'indian: 10/11/-78',
+          'islamic: -7/20/-639',
+          'islamic-umalqura: 5/18/-640',
+          'islamic-tbla: 5/19/-640',
+          'islamic-civil: 5/18/-640',
+          'islamic-rgsa: -7/20/-639',
+          'islamicc: 5/18/-640',
+          'japanese: 1/3/-643',
+          'persian: 10/11/-621',
           'roc: 1/3/1911',
-        node14:
-          'iso8601: 1/1/1\n' +
-          'buddhist: 1/3/544 BE\n' +
-          'chinese: 11/21/0\n' +
-          'coptic: 5/8/284 ERA0\n' +
-          'dangi: 11/21/0\n' +
-          'ethioaa: 5/8/5493 ERA0\n' +
-          'ethiopic: 5/8/5493 ERA0\n' +
-          'gregory: 1/1/1\n' +
-          'hebrew: 18 Tevet 3761\n' +
-          'indian: 10/11/-78 Saka\n' +
-          'islamic: 5/20/-640 AH\n' +
-          'islamic-umalqura: 5/18/-640 AH\n' +
-          'islamic-tbla: 5/19/-640 AH\n' +
-          'islamic-civil: 5/18/-640 AH\n' +
-          'islamic-rgsa: 5/20/-640 AH\n' +
-          'islamicc: 5/18/-640 AH\n' +
-          'japanese: 1/3/-643 Taika (645–650)\n' +
-          'persian: 10/11/-621 AP\n' +
+        ].join('\n'),
+        node14: [
+          'iso8601: 1/1/1',
+          'buddhist: 1/3/544 BE',
+          'chinese: 11/21/0',
+          'coptic: 5/8/284 ERA0',
+          'dangi: 11/21/0',
+          'ethioaa: 5/8/5493 ERA0',
+          'ethiopic: 5/8/5493 ERA0',
+          'gregory: 1/1/1',
+          'hebrew: 18 Tevet 3761',
+          'indian: 10/11/-78 Saka',
+          'islamic: 5/20/-640 AH',
+          'islamic-umalqura: 5/18/-640 AH',
+          'islamic-tbla: 5/19/-640 AH',
+          'islamic-civil: 5/18/-640 AH',
+          'islamic-rgsa: 5/20/-640 AH',
+          'islamicc: 5/18/-640 AH',
+          'japanese: 1/3/-643 Taika (645–650)',
+          'persian: 10/11/-621 AP',
           'roc: 1/3/1911 Before R.O.C.',
-        node16:
-          'iso8601: 1/1/1\n' +
-          'buddhist: 1/3/544 BE\n' +
-          'chinese: 11/21/0\n' +
-          'coptic: 5/8/284 ERA0\n' +
-          'dangi: 11/21/0\n' +
-          'ethioaa: 5/8/5493 ERA0\n' +
-          'ethiopic: 5/8/5493 ERA0\n' +
-          'gregory: 1/1/1\n' +
-          'hebrew: 18 Tevet 3761\n' +
-          'indian: 10/11/-78 Saka\n' +
-          'islamic: 5/20/-640 AH\n' +
-          'islamic-umalqura: 5/18/-640 AH\n' +
-          'islamic-tbla: 5/19/-640 AH\n' +
-          'islamic-civil: 5/18/-640 AH\n' +
-          'islamic-rgsa: 5/20/-640 AH\n' +
-          'islamicc: 5/18/-640 AH\n' +
-          'japanese: 1/3/-643 Taika (645–650)\n' +
-          'persian: 10/11/-621 AP\n' +
+        ].join('\n'),
+        node16: [
+          'iso8601: 1/1/1',
+          'buddhist: 1/3/544 BE',
+          'chinese: 11/21/0',
+          'coptic: 5/8/284 ERA0',
+          'dangi: 11/21/0',
+          'ethioaa: 5/8/5493 ERA0',
+          'ethiopic: 5/8/5493 ERA0',
+          'gregory: 1/1/1',
+          'hebrew: 18 Tevet 3761',
+          'indian: 10/11/-78 Saka',
+          'islamic: 5/20/-640 AH',
+          'islamic-umalqura: 5/18/-640 AH',
+          'islamic-tbla: 5/19/-640 AH',
+          'islamic-civil: 5/18/-640 AH',
+          'islamic-rgsa: 5/20/-640 AH',
+          'islamicc: 5/18/-640 AH',
+          'japanese: 1/3/-643 Taika (645–650)',
+          'persian: 10/11/-621 AP',
           'roc: 1/3/1911 Before R.O.C.',
+        ].join('\n'),
       }
       equal(year1Content, year1Snapshots[`node${nodeVersion}`])
     })
@@ -576,7 +582,7 @@ describe('Intl', () => {
 
             // ensure that mismatches of year vs. era/eraYear are caught
             throws(
-              () =>
+              () => {
                 Temporal.PlainDate.from({
                   calendar: id,
                   eraYear: values.eraYear,
@@ -584,7 +590,8 @@ describe('Intl', () => {
                   day: values.day,
                   monthCode: values.monthCode,
                   year: values.year + 1,
-                }),
+                })
+              },
               RangeError,
             )
           }
