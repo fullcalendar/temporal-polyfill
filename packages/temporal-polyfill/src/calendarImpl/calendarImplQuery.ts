@@ -1,6 +1,5 @@
 import { CalendarImpl, getCalendarIDBase } from './calendarImpl'
 import { GregoryCalendarImpl } from './gregoryCalendarImpl'
-import { HebrewCalendarImpl } from './hebrewCalendarImpl'
 import { IntlCalendarImpl } from './intlCalendarImpl'
 import { IslamicCalendarImpl } from './islamicCalendarImpl'
 import { isoCalendarID, isoCalendarImpl } from './isoCalendarImpl'
@@ -8,7 +7,6 @@ import { JapaneseCalendarImpl } from './japaneseCalendarImpl'
 
 const implClasses: { [calendarID: string]: { new(id: string): CalendarImpl } } = {
   gregory: GregoryCalendarImpl,
-  hebrew: HebrewCalendarImpl,
   japanese: JapaneseCalendarImpl,
   islamic: IslamicCalendarImpl,
 }

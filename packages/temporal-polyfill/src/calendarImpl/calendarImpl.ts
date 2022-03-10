@@ -3,10 +3,18 @@ import { padZeros } from '../utils/string'
 import { eraOrigins } from './eraOrigins'
 
 export interface CalendarImplFields { // like DateFields, but without monthCode
-  era: string | undefined,
-  eraYear: number | undefined,
+  era: string | undefined
+  eraYear: number | undefined
+  year: number
+  month: number
+  day: number
+}
+
+export interface CalendarImplFieldsDumb { // like CalendarImplFields, but with month string
+  era: string | undefined
+  eraYear: number | undefined
   year: number,
-  month: number,
+  month: string,
   day: number
 }
 
@@ -36,6 +44,7 @@ export abstract class CalendarImpl {
 
   // monthCode -> month
   // not responsible for constraining
+  // TODO: throw error when not starting with M?
   convertMonthCode(monthCode: string, _year: number): number {
     return parseInt(monthCode.substr(1)) // chop off 'M'
   }

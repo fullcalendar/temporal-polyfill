@@ -10,20 +10,26 @@ import { OrigDateTimeFormat } from '../native/intl'
 import {
   CalendarImpl,
   CalendarImplFields,
+  CalendarImplFieldsDumb,
   convertEraYear,
   getCalendarIDBase,
   hasEras,
 } from './calendarImpl'
 
+type MonthCache = [
+  number[], // epochMillis
+  string[], // monthStrs
+  { [monthStr: string]: number }, // monthStrToNum (value is 1-based)
+]
+
 export class IntlCalendarImpl extends CalendarImpl {
   private format: Intl.DateTimeFormat
 
-  // difference between iso year numbers and the calendar's
-  // at 1980. might be useless
+  // difference between iso year numbers and the calendar's at 1980
   private yearCorrection: number
 
   // epochMilli starting points for each month
-  private yearMonthCache: { [year: string]: number[] }
+  private monthCacheByYear: { [year: string]: MonthCache }
 
   constructor(id: string) {
     const format = buildFormat(id)
@@ -34,40 +40,71 @@ export class IntlCalendarImpl extends CalendarImpl {
 
     super(id)
     this.format = format
-    this.yearMonthCache = {}
-    this.yearCorrection = this.computeFields(0).year - isoEpochOriginYear
+    this.yearCorrection = this.computeFieldsDumb(0).year - isoEpochOriginYear
+    this.monthCacheByYear = {}
   }
 
   epochMilliseconds(year: number, month: number, day: number): number {
-    const monthCache = this.queryMonthCache(year)
-    const marker = monthCache[month - 1]
+    const epochMillis = this.queryMonthCache(year)[0]
+    const marker = epochMillis[month - 1]
 
     // move to correct day-of-month
     return addDaysMilli(marker, day - 1)
   }
 
   daysInMonth(year: number, month: number): number {
-    const monthCache = this.queryMonthCache(year)
-    const startMarker = monthCache[month - 1]
+    const epochMillis = this.queryMonthCache(year)[0]
+    const startMarker = epochMillis[month - 1]
 
     // The `month` variable, which is 1-based, should now be considered an index for `monthCache`
     // It is +1 from the previous index, used to compute the `endMarker`
-    if (month >= monthCache.length) {
+    if (month >= epochMillis.length) {
       year++
       month = 0
     }
 
-    // In the case month was incremented above,
-    // `ensureCacheForYear` guarantees the next year is at least partially populated
-    const endMarker = monthCache[month]
-
+    const endMarker = this.queryMonthCache(year)[0][month]
     return diffDaysMilli(startMarker, endMarker)
   }
 
   monthsInYear(year: number): number {
-    return this.queryMonthCache(year).length
+    const epochMillis = this.queryMonthCache(year)[0]
+    return epochMillis.length
   }
 
+  // month -> monthCode
+  monthCode(month: number, year: number): string {
+    const leapMonth = this.queryLeapMonthByYear(year)
+
+    if (leapMonth === undefined || month < leapMonth) {
+      return super.monthCode(month, year)
+    }
+
+    return super.monthCode(month - 1, year) +
+      (month === leapMonth ? 'L' : '')
+  }
+
+  // monthCode -> month
+  convertMonthCode(monthCode: string, year: number): number {
+    const leapMonth = this.queryLeapMonthByYear(year)
+    const monthCodeIsLeap = /L$/.test(monthCode)
+    const monthCodeInt = super.convertMonthCode(monthCode, year) // will ignore non-numeric ending
+
+    if (monthCodeIsLeap) {
+      if (leapMonth === undefined || monthCodeInt !== leapMonth - 1) {
+        throw new Error('Invalid month code with leap indicator') // TODO: better error
+      }
+      return leapMonth
+    }
+
+    if (leapMonth !== undefined && monthCodeInt >= leapMonth) {
+      return monthCodeInt + 1
+    }
+
+    return monthCodeInt
+  }
+
+  // TODO: look at number of months too?
   inLeapYear(year: number): boolean {
     const days = computeDaysInYear(this, year)
     return days > computeDaysInYear(this, year - 1) &&
@@ -88,69 +125,25 @@ export class IntlCalendarImpl extends CalendarImpl {
       }
     }
 
-    throw new Error('Could not guess year') // TODO: better
+    throw new Error('Could not guess year') // TODO: better error
   }
 
   normalizeISOYearForMonthDay(isoYear: number): number {
     return isoYear
   }
 
-  private queryMonthCache(year: number): number[] {
-    this.ensureYear(year)
-
-    const monthCache = this.yearMonthCache[year]
-    if (monthCache === undefined) {
-      throw new RangeError('Invalid date for calendar') // TODO: make DRY with intlBugs
-    }
-
-    return monthCache
-  }
-
-  private ensureYear(year: number): void {
-    const { yearMonthCache } = this
-
-    // since the yearCache is guaranteed to populate an entire year and extra month(s) into the
-    // next year, if two consecutive years are filled, the first year is guaranteed to be populated.
-    if (!yearMonthCache[year] || !yearMonthCache[year + 1]) {
-      // either part-way through the desired year or very slighly before
-      let epochMilli = isoToEpochMilli(this.guessISOYear(year))
-
-      // ensure marker is in year+1
-      epochMilli = addDaysMilli(epochMilli, 400)
-
-      // will populate the downward until (and including) year
-      this.ensureDown(epochMilli, year)
-    }
-  }
-
-  // subclasses that override should round UP
-  protected guessISOYear(year: number): number {
-    return year - this.yearCorrection
-  }
-
-  // guarantees cache is populated all the way down (and including) to floorYear
-  private ensureDown(epochMilli: number, floorYear: number) {
-    const { yearMonthCache } = this
-    let fields = this.computeFields(epochMilli)
-
-    for (let y = fields.year; y >= floorYear; y--) {
-      const monthCache = yearMonthCache[y] || (yearMonthCache[y] = [])
-      const floorMonth = monthCache.length + 1
-
-      // as we move down to lower months, don't recompute months we already computed (floorMonth)
-      for (let m = fields.month; m >= floorMonth; m--) {
-        // move to start-of-month
-        epochMilli = addDaysMilli(epochMilli, 1 - fields.day)
-        monthCache[m - 1] = epochMilli
-
-        // move to last day of previous month
-        epochMilli = addDaysMilli(epochMilli, -1)
-        fields = this.computeFields(epochMilli)
-      }
-    }
-  }
-
   computeFields(epochMilli: number): CalendarImplFields {
+    const dumbFields = this.computeFieldsDumb(epochMilli)
+    const monthStrToNum = this.queryMonthCache(dumbFields.year)[2]
+
+    return {
+      ...dumbFields,
+      month: monthStrToNum[dumbFields.month],
+    }
+  }
+
+  // returns a *string* month, not numeric
+  private computeFieldsDumb(epochMilli: number): CalendarImplFieldsDumb {
     const partHash = hashIntlFormatParts(this.format, epochMilli)
     let era: string | undefined
     let eraYear: number | undefined
@@ -166,13 +159,88 @@ export class IntlCalendarImpl extends CalendarImpl {
       era,
       eraYear,
       year,
-      month: this.parseMonth(partHash.month, year),
+      month: partHash.month,
       day: parseInt(partHash.day),
     }
   }
 
-  protected parseMonth(monthStr: string, _year: number): number {
-    return parseInt(monthStr)
+  // the month number (1-based) that the leap-month falls on
+  // for example, the '3bis' leap month would fall on `4`
+  // TODO: cache somehow?
+  private queryLeapMonthByYear(year: number): number | undefined {
+    const currentCache = this.queryMonthCache(year)
+    const prevCache = this.queryMonthCache(year - 1)
+    const nextCache = this.queryMonthCache(year + 1)
+
+    // in a leap year?
+    // TODO: consolidate with inLeapYear?
+    if (
+      currentCache[0].length > prevCache[0].length &&
+      currentCache[0].length > nextCache[0].length
+    ) {
+      const currentMonthStrs = currentCache[1]
+      const prevMonthStrs = prevCache[1]
+
+      for (let i = 0; i < prevMonthStrs.length; i++) {
+        if (prevMonthStrs[i] !== currentMonthStrs[i]) {
+          return i + 1 // convert to 1-based
+        }
+      }
+    }
+
+    return undefined
+  }
+
+  private queryMonthCache(year: number): MonthCache {
+    const { monthCacheByYear } = this
+
+    return monthCacheByYear[year] ||
+      (monthCacheByYear[year] = this.buildMonthCache(year))
+  }
+
+  private buildMonthCache(year: number): MonthCache {
+    const epochMillis: number[] = []
+    const monthStrs: string[] = []
+    const monthStrToNum: { [monthStr: string]: number } = {}
+
+    // either part-way through the desired year or very slightly before
+    let epochMilli = isoToEpochMilli(this.guessISOYear(year))
+
+    // ensure marker is in year+1
+    epochMilli = addDaysMilli(epochMilli, 400)
+
+    // move epochMilli into past through each month
+    while (true) {
+      const fields = this.computeFieldsDumb(epochMilli)
+
+      // stop if month went too far into past
+      if (fields.year < year) {
+        break
+      }
+
+      // move to start-of-month
+      epochMilli = addDaysMilli(epochMilli, 1 - fields.day)
+
+      // only record the epochMilli if NOT in future year
+      if (fields.year === year) {
+        epochMillis.unshift(epochMilli)
+        monthStrs.unshift(fields.month)
+      }
+
+      // move to last day of previous month
+      epochMilli = addDaysMilli(epochMilli, -1)
+    }
+
+    for (let i = 0; i < monthStrs.length; i++) {
+      monthStrToNum[monthStrs[i]] = i + 1
+    }
+
+    return [epochMillis, monthStrs, monthStrToNum]
+  }
+
+  // subclasses that override should round UP
+  protected guessISOYear(year: number): number {
+    return year - this.yearCorrection
   }
 }
 
