@@ -13,8 +13,8 @@ import {
   overrideDateFields,
 } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
+import { validateDate } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
-import { validateDate } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
@@ -58,10 +58,13 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     calendarArg: CalendarArg = createDefaultCalendar(),
   ) {
     const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
-    validateDate(constrained)
+    const calendar = ensureObj(Calendar, calendarArg)
+
+    validateDate(constrained, calendar.id)
+
     super({
       ...constrained,
-      calendar: ensureObj(Calendar, calendarArg),
+      calendar,
     })
   }
 

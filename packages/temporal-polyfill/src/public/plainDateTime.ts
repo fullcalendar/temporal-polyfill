@@ -18,8 +18,8 @@ import {
   roundDateTime,
   roundDateTimeWithOptions,
 } from '../dateUtils/dateTime'
+import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
-import { validateDateTime } from '../dateUtils/isoMath'
 import {
   DateCalendarFields,
   dateCalendarFields,
@@ -82,10 +82,13 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
       isoMicrosecond,
       isoNanosecond,
     }, OVERFLOW_REJECT)
-    validateDateTime(constrained)
+    const calendar = ensureObj(Calendar, calendarArg)
+
+    validateDateTime(constrained, calendar.id)
+
     super({
       ...constrained,
-      calendar: ensureObj(Calendar, calendarArg),
+      calendar,
     })
   }
 

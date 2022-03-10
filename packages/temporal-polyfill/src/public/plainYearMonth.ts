@@ -7,8 +7,8 @@ import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO, diffDates } from '../dateUtils/date'
+import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
-import { validateYearMonth } from '../dateUtils/isoMath'
 import {
   YearMonthCalendarFields,
   mixinCalendarFields,
@@ -55,10 +55,13 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
       isoMonth,
       isoDay: referenceISODay,
     }, OVERFLOW_REJECT)
-    validateYearMonth(constrained)
+    const calendar = ensureObj(Calendar, calendarArg)
+
+    validateYearMonth(constrained, calendar.id)
+
     super({
       ...constrained,
-      calendar: ensureObj(Calendar, calendarArg),
+      calendar,
     })
   }
 

@@ -1,5 +1,5 @@
 import { isoToEpochMilli } from '../dateUtils/isoMath'
-import { milliInDay } from '../dateUtils/units'
+import { milliInDay, nanoInMilliBI } from '../dateUtils/units'
 import { queryCalendarImpl } from './calendarImplQuery'
 import { IntlCalendarImpl } from './intlCalendarImpl'
 
@@ -20,7 +20,17 @@ const goodEpochMillis: { [cal: string]: number } = {
 
 const hasBugByID: { [cal: string]: boolean } = {}
 
-export function isEpochMilliBuggy(epochMilli: number, calendarID: string): boolean {
+export function checkEpochNanoBuggy(epochNano: bigint, calendarID: string): void {
+  return checkEpochMilliBuggy(Number(epochNano / nanoInMilliBI), calendarID)
+}
+
+export function checkEpochMilliBuggy(epochMilli: number, calendarID: string): void {
+  if (isEpochMilliBuggy(epochMilli, calendarID)) {
+    throw new RangeError('Invalid timestamp for calendar')
+  }
+}
+
+function isEpochMilliBuggy(epochMilli: number, calendarID: string): boolean {
   return hasEpochMilliBug(calendarID) && epochMilli < goodEpochMillis[calendarID]
 }
 

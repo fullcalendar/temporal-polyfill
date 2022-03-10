@@ -7,7 +7,7 @@ import {
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
-import { isEpochMilliBuggy } from '../calendarImpl/bugs'
+import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
@@ -270,17 +270,14 @@ export function createDefaultCalendar(): Calendar {
 
 // utils
 
+// TODO: can we eliminate this now that it's checked in public date classes?
 function isoToEpochNanoSafe(
   calendarImpl: CalendarImpl,
   isoYear: number,
   isoMonth: number,
   isoDay: number,
 ): CalendarImplFields {
-  const milli = isoToEpochMilli(isoYear, isoMonth, isoDay)
-
-  if (isEpochMilliBuggy(milli, calendarImpl.id)) {
-    throw new RangeError('Invalid timestamp for calendar')
-  }
-
-  return calendarImpl.computeFields(milli)
+  const epochMilli = isoToEpochMilli(isoYear, isoMonth, isoDay)
+  checkEpochMilliBuggy(epochMilli, calendarImpl.id)
+  return calendarImpl.computeFields(epochMilli)
 }

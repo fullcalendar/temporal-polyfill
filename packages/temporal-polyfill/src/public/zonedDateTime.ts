@@ -13,6 +13,7 @@ import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
+import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateTimeISO, formatTimeZoneID } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields } from '../dateUtils/isoMath'
 import {
@@ -86,11 +87,14 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   ) {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
-    const instant = new Instant(epochNanoseconds)
+    const instant = new Instant(epochNanoseconds) // will do validation
     const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(instant)
+    const isoFields = epochNanoToISOFields(epochNanoseconds + BigInt(offsetNanoseconds))
+
+    validateDateTime(isoFields, calendar.id)
 
     super({
-      ...epochNanoToISOFields(epochNanoseconds + BigInt(offsetNanoseconds)),
+      ...isoFields,
       calendar,
       timeZone,
       offset: timeZone.getOffsetStringFor(instant),
