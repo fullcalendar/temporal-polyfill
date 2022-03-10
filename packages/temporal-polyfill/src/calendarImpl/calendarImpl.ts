@@ -45,8 +45,14 @@ export abstract class CalendarImpl {
   // monthCode -> month
   // not responsible for constraining
   // TODO: throw error when not starting with M?
-  convertMonthCode(monthCode: string, _year: number): number {
-    return parseInt(monthCode.substr(1)) // chop off 'M'
+  convertMonthCode(monthCode: string, _year: number): [
+    number, // month
+    boolean, // unusedLeap (a valid 'L', but not used in this year)
+  ] {
+    return [
+      parseInt(monthCode.substr(1)), // chop off 'M'
+      false,
+    ]
   }
 }
 

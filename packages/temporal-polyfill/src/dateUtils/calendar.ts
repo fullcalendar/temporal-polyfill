@@ -1,5 +1,5 @@
 import { ensureCalendarsEqual } from '../argParse/calendar'
-import { parseOverflowOption } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
@@ -87,24 +87,36 @@ export function queryDateISOFields(
     }
   }
 
-  if (monthCode !== undefined) {
-    const m = calendarImpl.convertMonthCode(monthCode, year)
-    if (month !== undefined && month !== m) {
-      throw new RangeError('Month doesnt match with monthCode')
-    }
-    month = m
-  } else if (month === undefined) {
-    throw new TypeError('Must specify either a month or monthCode')
-  }
-
   if (day === undefined) {
     throw new TypeError('Must specify day')
+  }
+
+  const overflow = parseOverflowOption(options)
+
+  if (monthCode !== undefined) {
+    const [tryMonth, unusedLeap] = calendarImpl.convertMonthCode(monthCode, year)
+
+    if (month !== undefined && month !== tryMonth) {
+      throw new RangeError('Month doesnt match with monthCode')
+    }
+
+    month = tryMonth
+
+    if (unusedLeap) {
+      if (overflow === OVERFLOW_REJECT) {
+        throw new RangeError('Month code out of range')
+      }
+      // constrain to last day of month
+      day = calendarImpl.daysInMonth(year, month)
+    }
+  } else if (month === undefined) {
+    throw new TypeError('Must specify either a month or monthCode')
   }
 
   [year, month, day] = constrainDateFields(
     year, month, day,
     calendarImpl,
-    parseOverflowOption(options),
+    overflow,
   )
 
   return epochMilliToISOFields(calendarImpl.epochMilliseconds(year, month, day))

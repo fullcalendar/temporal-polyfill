@@ -92,44 +92,33 @@ export class IntlCalendarImpl extends CalendarImpl {
   }
 
   // monthCode -> month
-  convertMonthCode(monthCode: string, year: number): number {
-    const leapMonthInfo = this.queryLeapMonthInfo()
+  convertMonthCode(monthCode: string, year: number): [number, boolean] {
+    const leapMonth = this.queryLeapMonthByYear(year) // 0 if none
     const monthCodeIsLeap = /L$/.test(monthCode)
-    const monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M' // TODO: more DRY
+    let monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M' // TODO: more DRY
 
+    // validate the leap-neww
     if (monthCodeIsLeap) {
+      const leapMonthInfo = this.queryLeapMonthInfo()
       if (!leapMonthInfo) {
         throw new RangeError('Calendar system does not have leap months')
       }
 
-      const monthStrs = this.queryMonthCache(year)[1]
-
-      if (monthStrs.length !== leapMonthInfo[1]) {
-        throw new RangeError('Particular year does not have leap month') // TODO: overflow
-      }
-
-      const leapMonth = leapMonthInfo[0]
-
-      if (monthCodeInt !== leapMonth - 1) {
+      const leapMonthNorm = leapMonthInfo[0]
+      if (monthCodeInt !== leapMonthNorm - 1) {
         throw new RangeError('Invalid leap-month month code')
-      }
-
-      if (monthCodeInt >= leapMonth) {
-        return monthCodeInt + 1
       }
     }
 
-    /*
-    TODO:
-    if year is really a leap year, and the #L doesn't match, always throw an error
-    if year is NOT a leap year, and an L is given,
-      if constraing (the default),
-        put at end of previous month (how???)
-      if reject,
-        throw an error
-    */
+    if (monthCodeIsLeap && !leapMonth) {
+      return [monthCodeInt, true] // unusedLeap=true
+    }
 
-    return monthCodeInt
+    if (monthCodeIsLeap || (leapMonth && monthCodeInt >= leapMonth)) {
+      monthCodeInt++
+    }
+
+    return [monthCodeInt, false]
   }
 
   // TODO: look at number of months too?
@@ -144,8 +133,10 @@ export class IntlCalendarImpl extends CalendarImpl {
     const maxYear = year + 100
 
     for (; year < maxYear; year++) {
-      const month = this.convertMonthCode(monthCode, year)
+      const [month, unusedLeap] = this.convertMonthCode(monthCode, year)
+
       if (
+        !unusedLeap &&
         month <= this.monthsInYear(year) &&
         day <= this.daysInMonth(year, month)
       ) {
