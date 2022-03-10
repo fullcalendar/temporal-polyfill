@@ -22,6 +22,11 @@ type MonthCache = [
   { [monthStr: string]: number }, // monthStrToNum (value is 1-based)
 ]
 
+type LeapMonthInfo = [
+  number, // month
+  number, // totalMonths (in a leap year)
+]
+
 export class IntlCalendarImpl extends CalendarImpl {
   private format: Intl.DateTimeFormat
 
@@ -30,6 +35,8 @@ export class IntlCalendarImpl extends CalendarImpl {
 
   // epochMilli starting points for each month
   private monthCacheByYear: { [year: string]: MonthCache }
+
+  private leapMonthInfo: LeapMonthInfo | false | undefined
 
   constructor(id: string) {
     const format = buildFormat(id)
@@ -76,7 +83,7 @@ export class IntlCalendarImpl extends CalendarImpl {
   monthCode(month: number, year: number): string {
     const leapMonth = this.queryLeapMonthByYear(year)
 
-    if (leapMonth === undefined || month < leapMonth) {
+    if (!leapMonth || month < leapMonth) {
       return super.monthCode(month, year)
     }
 
@@ -86,20 +93,41 @@ export class IntlCalendarImpl extends CalendarImpl {
 
   // monthCode -> month
   convertMonthCode(monthCode: string, year: number): number {
-    const leapMonth = this.queryLeapMonthByYear(year)
+    const leapMonthInfo = this.queryLeapMonthInfo()
     const monthCodeIsLeap = /L$/.test(monthCode)
-    const monthCodeInt = super.convertMonthCode(monthCode, year) // will ignore non-numeric ending
+    const monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M' // TODO: more DRY
 
     if (monthCodeIsLeap) {
-      if (leapMonth === undefined || monthCodeInt !== leapMonth - 1) {
-        throw new Error('Invalid month code with leap indicator') // TODO: better error
+      if (!leapMonthInfo) {
+        throw new RangeError('Calendar system does not have leap months')
       }
-      return leapMonth
+
+      const monthStrs = this.queryMonthCache(year)[1]
+
+      if (monthStrs.length !== leapMonthInfo[1]) {
+        throw new RangeError('Particular year does not have leap month') // TODO: overflow
+      }
+
+      const leapMonth = leapMonthInfo[0]
+
+      if (monthCodeInt !== leapMonth - 1) {
+        throw new RangeError('Invalid leap-month month code')
+      }
+
+      if (monthCodeInt >= leapMonth) {
+        return monthCodeInt + 1
+      }
     }
 
-    if (leapMonth !== undefined && monthCodeInt >= leapMonth) {
-      return monthCodeInt + 1
-    }
+    /*
+    TODO:
+    if year is really a leap year, and the #L doesn't match, always throw an error
+    if year is NOT a leap year, and an L is given,
+      if constraing (the default),
+        put at end of previous month (how???)
+      if reject,
+        throw an error
+    */
 
     return monthCodeInt
   }
@@ -164,31 +192,40 @@ export class IntlCalendarImpl extends CalendarImpl {
     }
   }
 
-  // the month number (1-based) that the leap-month falls on
-  // for example, the '3bis' leap month would fall on `4`
-  // TODO: cache somehow?
-  private queryLeapMonthByYear(year: number): number | undefined {
-    const currentCache = this.queryMonthCache(year)
-    const prevCache = this.queryMonthCache(year - 1)
-    const nextCache = this.queryMonthCache(year + 1)
+  // returns 0 if no leap month in year
+  private queryLeapMonthByYear(year: number): number {
+    const leapMonthInfo = this.queryLeapMonthInfo()
+    const monthStrs = this.queryMonthCache(year)[1]
 
-    // in a leap year?
-    // TODO: consolidate with inLeapYear?
-    if (
-      currentCache[0].length > prevCache[0].length &&
-      currentCache[0].length > nextCache[0].length
-    ) {
-      const currentMonthStrs = currentCache[1]
-      const prevMonthStrs = prevCache[1]
+    if (leapMonthInfo && monthStrs.length === leapMonthInfo[1]) {
+      return leapMonthInfo[0]
+    }
 
-      for (let i = 0; i < prevMonthStrs.length; i++) {
-        if (prevMonthStrs[i] !== currentMonthStrs[i]) {
-          return i + 1 // convert to 1-based
+    return 0
+  }
+
+  private queryLeapMonthInfo(): LeapMonthInfo | false {
+    return this.leapMonthInfo ?? (this.leapMonthInfo = this.buildLeapMonthInfo())
+  }
+
+  private buildLeapMonthInfo(): LeapMonthInfo | false {
+    for (let year = 2020; year < 2030; year++) {
+      const prevMonthStrs = this.queryMonthCache(year - 1)[1]
+      const currentMonthStrs = this.queryMonthCache(year)[1]
+
+      if (currentMonthStrs.length > prevMonthStrs.length) {
+        for (let i = 0; i < prevMonthStrs.length; i++) {
+          if (prevMonthStrs[i] !== currentMonthStrs[i]) {
+            return [
+              i + 1, // month (1-based)
+              currentMonthStrs.length, // totalMonths (in year)
+            ]
+          }
         }
       }
     }
 
-    return undefined
+    return false
   }
 
   private queryMonthCache(year: number): MonthCache {
@@ -251,7 +288,7 @@ export function buildFormat(calendarID: string): Intl.DateTimeFormat {
     calendar: calendarID,
     era: 'short', // 'narrow' is too terse for japanese months
     year: 'numeric',
-    month: 'numeric',
+    month: 'short', // easier to identify monthCodes
     day: 'numeric',
     timeZone: 'UTC',
   })
