@@ -45,6 +45,7 @@
   },
   "files": [
     "/src",
+    "!/src/specs",
     "/dist",
     "/*.d.ts"
   ],
