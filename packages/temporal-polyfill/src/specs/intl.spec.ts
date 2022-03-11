@@ -1090,7 +1090,7 @@ describe('Intl', () => {
     })
   })
 
-  describe.skip('Japanese eras', () => {
+  describe('Japanese eras', () => {
     it('Reiwa (2019-)', () => {
       const date = Temporal.PlainDate.from({ era: 'reiwa', eraYear: 2, month: 1, day: 1, calendar: 'japanese' })
       equal(`${date}`, '2020-01-01[u-ca=japanese]')
@@ -1150,7 +1150,7 @@ describe('Intl', () => {
     })
   })
 
-  describe.skip('Hebrew leap months', () => {
+  describe('Hebrew leap months', () => {
     it('Valid leap month: Adar I 5779', () => {
       let date = Temporal.PlainDate.from({ year: 5779, month: 6, day: 1, calendar: 'hebrew' })
       equal(date.month, 6)
