@@ -53,6 +53,7 @@ function hasEpochMilliBug(calendarID: string) {
       const fields = impl.computeFields(badEpochMilli)
       hasBug = badEpochMilli !== impl.epochMilliseconds(fields.year, fields.month, fields.day)
     }
+    hasBugByID[calendarID] = hasBug
   }
   return hasBug
 }
