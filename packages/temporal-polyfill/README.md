@@ -7,6 +7,8 @@ Works in modern browsers<super>***</super>, not Internet Explorer.
 
 [Codepen](https://codepen.io/arshaw/pen/VwrMQPJ?editors=1111)
 
+[CDN link](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.0.3/dist/global.js)
+
 
 ## Installation
 
