@@ -638,12 +638,19 @@ describe('Intl', () => {
           withValues === RangeError || (nodeVersion === '12' && withValues.node12 === RangeError)
         itOrSkip(id)(`with: ${id} ${name} ${withErrorExpected ? ' (throws)' : ''}`, () => {
           const now = nativePerformanceLib ? nativePerformanceLib.now() : Date.now()
-          const inCal = date.withCalendar(id)
           if (withErrorExpected) {
             // Some calendars will fail due to Chromium bugs noted in the test definitions
-            throws(() => inCal.with({ day: 1 }).year, RangeError)
+            throws(() => {
+              /*
+              ADAM modified this line. should fail upon withCalendar!!!
+              */
+              const inCal = date.withCalendar(id)
+              // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+              inCal.with({ day: 1 }).year
+            }, RangeError)
             return
           }
+          const inCal = date.withCalendar(id)
           const afterWithDay = inCal.with({ day: 1 })
           let t = '(after setting day)'
           equal(`${t} year: ${afterWithDay.year}`, `${t} year: ${inCal.year}`)
