@@ -67,13 +67,11 @@ export function normalizeIntlOptionalDateArg(
 }
 
 export function normalizeIntlDateArg(dateArg: DateTimeFormatArg): number | Date {
-  return typeof dateArg === 'number'
+  return (typeof dateArg === 'number' || dateArg instanceof Date)
     ? dateArg
-    : dateArg instanceof Date
-      ? dateArg
-      : (dateArg instanceof Instant || dateArg instanceof ZonedDateTime)
-          ? dateArg.epochMilliseconds
-          : isoFieldsToEpochMilli(dateArg.getISOFields())
+    : (dateArg instanceof Instant || dateArg instanceof ZonedDateTime)
+        ? dateArg.epochMilliseconds
+        : isoFieldsToEpochMilli(dateArg.getISOFields())
 }
 
 export function formatZoned(
@@ -112,7 +110,7 @@ export function formatUnzoned<ISOFields extends DateISOFields>(
     const timeZoneObj = new TimeZone(timeZone)
     const plainDateTime = createDateTime({
       ...zeroTimeISOFields,
-      ...date.getISOFields(),
+      ...fields,
     })
     milli = timeZoneObj.getInstantFor(plainDateTime).epochMilliseconds
   } else {
