@@ -8,7 +8,7 @@ import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
-import { OrigDateTimeFormat } from '../native/intl'
+import { FormatConfig, buildZonedFormatConfig, formatWithConfig } from '../native/intl'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
 import {
@@ -111,15 +111,7 @@ export class Instant extends AbstractNoValueObj {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return new OrigDateTimeFormat(locales, {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      ...options,
-    }).format(this.epochMilliseconds)
+    return formatWithConfig(this, buildInstantFormatConfig(locales, options))
   }
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
@@ -147,3 +139,19 @@ export class Instant extends AbstractNoValueObj {
 // mixins
 export interface Instant extends ComputedEpochFields {}
 mixinEpochFields(Instant)
+
+// toLocaleString
+function buildInstantFormatConfig(
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions | undefined,
+): FormatConfig<Instant> {
+  return buildZonedFormatConfig(locales, {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    ...options,
+  })
+}

@@ -30,7 +30,7 @@ import { createMonthDay } from '../dateUtils/monthDay'
 import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { TimeFields, createTime, ensureLooseTime } from '../dateUtils/time'
 import { createYearMonth } from '../dateUtils/yearMonth'
-import { formatUnzoned } from '../native/intl'
+import { FormatConfig, buildPlainFormatConfig, formatWithConfig } from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -190,15 +190,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatUnzoned(this, locales, {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      ...options,
-    })
+    return formatWithConfig(this, buildPlainDateTimeFormatConfig(locales, options))
   }
 
   // workhorse for converting to ZonedDateTime for other objects
@@ -227,3 +219,19 @@ export interface PlainDateTime extends DateCalendarFields { calendar: Calendar }
 export interface PlainDateTime extends TimeFields {}
 mixinISOFields(PlainDateTime, timeUnitNames)
 mixinCalendarFields(PlainDateTime, dateCalendarFields)
+
+// toLocaleString
+function buildPlainDateTimeFormatConfig(
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions | undefined,
+): FormatConfig<PlainDateTime> {
+  return buildPlainFormatConfig(locales, {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    ...options,
+  })
+}

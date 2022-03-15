@@ -1,6 +1,8 @@
 export type ValueOf<T> = T[keyof T]
 type GenericHash = Record<string, unknown>
 
+// TODO: just use Symbols instead?
+
 // The `object` type is literally required for WeakMap
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function createWeakMap<Subject extends object, Storage>(): [

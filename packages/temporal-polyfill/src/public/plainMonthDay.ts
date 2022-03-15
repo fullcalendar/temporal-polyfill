@@ -21,7 +21,7 @@ import {
   overrideMonthDayFields,
 } from '../dateUtils/monthDay'
 import { parseMonthDayISO, refineDateTimeParse } from '../dateUtils/parse'
-import { formatUnzoned } from '../native/intl'
+import { FormatConfig, buildPlainFormatConfig, formatWithConfig } from '../native/intl'
 import { throwNew } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { PlainDate } from './plainDate'
@@ -108,16 +108,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatUnzoned(this, locales, {
-      month: 'numeric',
-      day: 'numeric',
-      ...options,
-      weekday: undefined,
-      year: undefined,
-      hour: undefined,
-      minute: undefined,
-      second: undefined,
-    }, true) // strictCalendar
+    return formatWithConfig(this, buildPlainMonthDayFormatConfig(locales, options))
   }
 
   toPlainDate(fields: { year: number }, options?: OverflowOptions): PlainDate {
@@ -133,3 +124,20 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
 export interface PlainMonthDay extends MonthDayCalendarFields { calendar: Calendar }
 mixinISOFields(PlainMonthDay)
 mixinCalendarFields(PlainMonthDay, monthDayCalendarFields)
+
+// toLocaleString
+function buildPlainMonthDayFormatConfig(
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions | undefined,
+): FormatConfig<PlainMonthDay> {
+  return buildPlainFormatConfig(locales, {
+    month: 'numeric',
+    day: 'numeric',
+    ...options,
+    weekday: undefined,
+    year: undefined,
+    hour: undefined,
+    minute: undefined,
+    second: undefined,
+  }, true) // strictCalendar
+}

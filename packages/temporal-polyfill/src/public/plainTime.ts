@@ -22,7 +22,7 @@ import {
   timeLikeToISO,
 } from '../dateUtils/time'
 import { nanoInMilliBI } from '../dateUtils/units'
-import { OrigDateTimeFormat } from '../native/intl'
+import { FormatConfig, OrigDateTimeFormat, formatWithConfig } from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -126,20 +126,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return new OrigDateTimeFormat(locales, {
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      ...options,
-      timeZone: 'UTC', // options can't override
-      timeZoneName: undefined,
-      year: undefined,
-      month: undefined,
-      day: undefined,
-      weekday: undefined,
-    }).format(
-      Number(timeFieldsToNano(this) / nanoInMilliBI),
-    )
+    return formatWithConfig(this, buildPlainTimeFormatConfig(locales, options))
   }
 
   toZonedDateTime(options: { plainDate: DateArg, timeZone: TimeZoneArg }): ZonedDateTime {
@@ -154,3 +141,28 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 // mixin
 export interface PlainTime extends TimeFields { calendar: Calendar }
 mixinISOFields(PlainTime, timeUnitNames)
+
+// toLocaleString
+function buildPlainTimeFormatConfig(
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions | undefined,
+): FormatConfig<PlainTime> {
+  return {
+    buildKey: () => ['', ''],
+    buildFormat: () => new OrigDateTimeFormat(locales, {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      ...options,
+      timeZone: 'UTC', // options can't override
+      timeZoneName: undefined,
+      year: undefined,
+      month: undefined,
+      day: undefined,
+      weekday: undefined,
+    }),
+    buildEpochMilli: (plainTime: PlainTime) => (
+      Number(timeFieldsToNano(plainTime) / nanoInMilliBI)
+    ),
+  }
+}

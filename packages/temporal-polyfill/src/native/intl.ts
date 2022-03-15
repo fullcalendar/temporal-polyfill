@@ -2,6 +2,7 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { createDateTime } from '../dateUtils/dateTime'
 import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
 import { zeroTimeISOFields } from '../dateUtils/zonedDateTime'
+import { Calendar } from '../public/calendar'
 import { Instant } from '../public/instant'
 import { PlainDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -12,7 +13,7 @@ import { TimeZone } from '../public/timeZone'
 import { DateISOFields, LocalesArg } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 
-// TODO: rethink if everything belongs in this 'native' file
+// TODO: rethink if everything belongs in this 'native' file???
 
 export interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
   source: 'startDate' | 'endDate'
@@ -74,89 +75,151 @@ export function normalizeIntlDateArg(dateArg: DateTimeFormatArg): number | Date 
         : isoFieldsToEpochMilli(dateArg.getISOFields())
 }
 
-export function formatZoned(
-  zdt: ZonedDateTime,
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions,
+//
+// Format Config Generation
+// TODO: fix naming collision with other formatConfig
+//
+
+export function formatWithConfig<Entity>(
+  entity: Entity,
+  formatConfig: FormatConfig<Entity>,
 ): string {
-  const fields = zdt.getISOFields()
-  const defaultCalendarID = fields.calendar.id!
-  const defaultTimeZoneID = fields.timeZone.id
-  const { timeZone } = options
-
-  if (timeZone !== undefined && timeZone !== defaultTimeZoneID) {
-    throw new RangeError('Given timeZone must agree')
-  }
-
-  return formatGeneric(zdt.epochMilliseconds, defaultCalendarID, locales, {
-    timeZone: defaultTimeZoneID,
-    timeZoneName: 'short',
-    ...options,
-  })
+  const [calendarID, timeZoneID] = formatConfig.buildKey(entity)
+  return formatConfig.buildFormat(calendarID, timeZoneID).format(
+    formatConfig.buildEpochMilli(entity),
+  )
 }
 
-export function formatUnzoned<ISOFields extends DateISOFields>(
-  date: { getISOFields: () => ISOFields },
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions,
-  strictCalendar?: boolean,
-): string {
-  const fields = date.getISOFields()
-  const defaultCalendarID = fields.calendar.id!
-  let { timeZone } = options
-  let milli: number
+interface BaseEntity {
+  calendar?: Calendar
+  timeZone?: TimeZone
+}
 
-  if (timeZone !== undefined) {
-    const timeZoneObj = new TimeZone(timeZone)
-    const plainDateTime = createDateTime({
-      ...zeroTimeISOFields,
-      ...fields,
+interface ZonedEntity extends BaseEntity {
+  epochMilliseconds: number
+}
+
+interface PlainEntity extends BaseEntity {
+  getISOFields: () => DateISOFields // might have time fields too
+}
+
+export interface FormatConfig<Entity> {
+  buildKey: (entity: Entity) => [string, string]
+  buildFormat: (calendarID: string, timeZoneID: string) => Intl.DateTimeFormat
+  buildEpochMilli: (entity: Entity) => number
+}
+
+export function buildZonedFormatConfig<Entity extends ZonedEntity>(
+  localesArg: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions,
+): FormatConfig<Entity> {
+  const buildKey = createKeyBuilder<Entity>(localesArg, options, false)
+
+  function buildFormat(calendarID: string, timeZoneID: string): Intl.DateTimeFormat {
+    return new OrigDateTimeFormat(localesArg, {
+      calendar: calendarID,
+      timeZone: timeZoneID || undefined, // empty string should mean current timezone
+      ...options,
     })
-    milli = timeZoneObj.getInstantFor(plainDateTime).epochMilliseconds
-  } else {
-    milli = isoFieldsToEpochMilli(fields)
-    timeZone = 'UTC'
   }
 
-  return formatGeneric(milli, defaultCalendarID, locales, {
-    ...options,
-    timeZone,
-    timeZoneName: undefined, // never show timeZone name
-  }, strictCalendar)
+  function buildEpochMilli(entity: Entity): number {
+    return entity.epochMilliseconds
+  }
+
+  return {
+    buildKey,
+    buildFormat,
+    buildEpochMilli,
+  }
 }
 
-function formatGeneric(
-  milli: number,
-  defaultCalendarID: string,
-  locales: LocalesArg | undefined,
+export function buildPlainFormatConfig<Entity extends PlainEntity>(
+  localesArg: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   strictCalendar?: boolean,
-) {
-  const dtf = new OrigDateTimeFormat(locales, {
-    calendar: hasUnicodeCalendar(locales)
-      ? undefined // let the locale-specified calendar take effect
-      : defaultCalendarID,
-    ...options,
-  })
+): FormatConfig<Entity> {
+  const buildKey = createKeyBuilder(localesArg, options, strictCalendar)
 
-  if (
-    (strictCalendar || defaultCalendarID !== isoCalendarID) &&
-    defaultCalendarID !== dtf.resolvedOptions().calendar
-  ) {
-    throw new RangeError('Non-iso calendar mismatch')
+  function buildFormat(calendarID: string, timeZoneID: string) {
+    return new OrigDateTimeFormat(localesArg, {
+      calendar: calendarID,
+      ...options,
+      timeZone: timeZoneID, // guaranteed to be defined because of above 'UTC'
+      timeZoneName: undefined, // never show timeZone name
+    })
   }
 
-  return dtf.format(milli)
-}
+  let buildEpochMilli: (entity: Entity) => number
 
-function hasUnicodeCalendar(locales: LocalesArg | undefined): boolean {
-  const localesArray = ([] as string[]).concat(locales || [])
+  if (options.timeZone !== undefined) {
+    const timeZone = new TimeZone(options.timeZone)
 
-  for (const locale of localesArray) {
-    if (locale.indexOf('-u-ca-') !== -1) {
-      return true
+    buildEpochMilli = (entity: Entity) => {
+      const plainDateTime = createDateTime({ // necessary? pass directly into getInstantFor?
+        ...zeroTimeISOFields,
+        ...entity.getISOFields(),
+      })
+      return timeZone.getInstantFor(plainDateTime).epochMilliseconds
+    }
+  } else {
+    buildEpochMilli = (entity: Entity) => {
+      return isoFieldsToEpochMilli(entity.getISOFields())
     }
   }
 
-  return false
+  return {
+    buildKey,
+    buildFormat,
+    buildEpochMilli,
+  }
+}
+
+function createKeyBuilder<Entity extends BaseEntity>(
+  localesArg: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions,
+  strictCalendar: boolean | undefined,
+) {
+  const optionsCalendarID = options.calendar ?? extractUnicodeCalendar(localesArg)
+  const optionsTimeZoneID = options.timeZone
+
+  return function(entity: Entity): [string, string] {
+    const entityCalendarID = entity.calendar?.id
+    const entityTimeZoneID = entity.timeZone?.id
+
+    if (
+      (strictCalendar || entityCalendarID !== isoCalendarID) &&
+      entityCalendarID !== undefined &&
+      optionsCalendarID !== undefined &&
+      optionsCalendarID !== entityCalendarID
+    ) {
+      throw new RangeError('Non-iso calendar mismatch')
+    }
+
+    if (
+      entityTimeZoneID !== undefined &&
+      optionsTimeZoneID !== undefined &&
+      optionsTimeZoneID !== entityTimeZoneID
+    ) {
+      throw new RangeError('Given timeZone must agree')
+    }
+
+    const calendarID = optionsCalendarID || entityCalendarID || isoCalendarID
+    const timeZoneID = optionsTimeZoneID || entityTimeZoneID || 'UTC'
+
+    return [calendarID, timeZoneID]
+  }
+}
+
+function extractUnicodeCalendar(locales: LocalesArg | undefined): string | undefined {
+  const localesArray = ([] as string[]).concat(locales || [])
+
+  for (const locale of localesArray) {
+    const m = locale.match(/-u-ca-(.*)$/)
+    if (m) {
+      return m[1]
+    }
+  }
+
+  return undefined
 }
