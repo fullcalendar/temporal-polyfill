@@ -46,8 +46,6 @@ export function shimTemporal(): void {
     }
 
     class ExtendedDateTimeFormat extends OrigDateTimeFormat {
-      // TODO: methods should have defaults that mirror what objects do for toLocaleString
-
       format(dateArg?: DateTimeFormatArg): string {
         return super.format(normalizeIntlOptionalDateArg(dateArg))
       }

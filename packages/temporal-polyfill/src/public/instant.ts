@@ -8,7 +8,12 @@ import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
-import { FormatConfig, buildZonedFormatConfig, formatWithConfig } from '../native/intl'
+import {
+  FormatConfig,
+  ToLocaleStringMethods,
+  buildZonedFormatConfig,
+  mixinLocaleStringMethods,
+} from '../native/intl'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
 import {
@@ -110,10 +115,6 @@ export class Instant extends AbstractNoValueObj {
     }) + (timeZoneArg === undefined ? 'Z' : '')
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatWithConfig(this, buildInstantFormatConfig(locales, options))
-  }
-
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
     return new ZonedDateTime(this.epochNanoseconds, timeZoneArg)
   }
@@ -138,10 +139,12 @@ export class Instant extends AbstractNoValueObj {
 
 // mixins
 export interface Instant extends ComputedEpochFields {}
+export interface Instant extends ToLocaleStringMethods {}
 mixinEpochFields(Instant)
+mixinLocaleStringMethods(Instant, buildFormatConfig)
 
 // toLocaleString
-function buildInstantFormatConfig(
+function buildFormatConfig(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
 ): FormatConfig<Instant> {

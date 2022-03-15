@@ -1,4 +1,5 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
+import { formatConfigBuilderSymbol } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
 import { zeroTimeISOFields } from '../dateUtils/zonedDateTime'
@@ -80,14 +81,37 @@ export function normalizeIntlDateArg(dateArg: DateTimeFormatArg): number | Date 
 // TODO: fix naming collision with other formatConfig
 //
 
-export function formatWithConfig<Entity>(
-  entity: Entity,
-  formatConfig: FormatConfig<Entity>,
-): string {
-  const [calendarID, timeZoneID] = formatConfig.buildKey(entity)
-  return formatConfig.buildFormat(calendarID, timeZoneID).format(
-    formatConfig.buildEpochMilli(entity),
-  )
+export interface ToLocaleStringMethods {
+  toLocaleString(localesArg?: LocalesArg, options?: Intl.DateTimeFormatOptions): string
+}
+
+export type FormatConfigBuilder<Entity> = (
+  localesArg: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions,
+) => FormatConfig<Entity>
+
+export function mixinLocaleStringMethods<Entity extends ToLocaleStringMethods>(
+  ObjClass: { prototype: Entity },
+  buildFormatConfig: FormatConfigBuilder<Entity>,
+): void {
+  ObjClass.prototype.toLocaleString = function(
+    this: Entity,
+    localesArg: LocalesArg | undefined,
+    options: Intl.DateTimeFormatOptions,
+  ): string {
+    const formatConfig = buildFormatConfig(localesArg, options)
+    const [calendarID, timeZoneID] = formatConfig.buildKey(this)
+
+    return formatConfig.buildFormat(calendarID, timeZoneID).format(
+      formatConfig.buildEpochMilli(this),
+    )
+  }
+
+  ;(ObjClass.prototype as any)[formatConfigBuilderSymbol] = buildFormatConfig
+}
+
+export function getFormatConfigBuilder<Entity>(obj: any): FormatConfigBuilder<Entity> | undefined {
+  return obj[formatConfigBuilderSymbol]
 }
 
 interface BaseEntity {

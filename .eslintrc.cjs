@@ -20,6 +20,9 @@ const esRules = {
 
   // Prefer `function` over `const` with arrow-function
   'func-style': ['error', 'declaration'],
+
+  // Don't need Symbol('description')
+  'symbol-description': 'off',
 }
 
 const esmRules = {

@@ -26,7 +26,12 @@ import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
-import { FormatConfig, buildPlainFormatConfig, formatWithConfig } from '../native/intl'
+import {
+  FormatConfig,
+  ToLocaleStringMethods,
+  buildPlainFormatConfig,
+  mixinLocaleStringMethods,
+} from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
@@ -143,10 +148,6 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
       formatCalendarID(fields.calendar.id, calendarDisplay)
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatWithConfig(this, buildPlainDateFormatConfig(locales, options))
-  }
-
   toZonedDateTime(options: { plainTime?: TimeArg, timeZone: TimeZoneArg }): ZonedDateTime {
     return this.toPlainDateTime(options.plainTime).toZonedDateTime(options.timeZone)
   }
@@ -164,11 +165,13 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
 
 // mixin
 export interface PlainDate extends DateCalendarFields { calendar: Calendar }
+export interface PlainDate extends ToLocaleStringMethods {}
 mixinISOFields(PlainDate)
 mixinCalendarFields(PlainDate, dateCalendarFields)
+mixinLocaleStringMethods(PlainDate, buildFormatConfig)
 
 // toLocaleString
-function buildPlainDateFormatConfig(
+function buildFormatConfig(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
 ): FormatConfig<PlainDate> {

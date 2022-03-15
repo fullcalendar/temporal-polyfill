@@ -22,7 +22,12 @@ import {
   timeLikeToISO,
 } from '../dateUtils/time'
 import { nanoInMilliBI } from '../dateUtils/units'
-import { FormatConfig, OrigDateTimeFormat, formatWithConfig } from '../native/intl'
+import {
+  FormatConfig,
+  OrigDateTimeFormat,
+  ToLocaleStringMethods,
+  mixinLocaleStringMethods,
+} from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -125,10 +130,6 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     return formatTimeISO(timeLikeToISO(roundedISOFields), formatConfig)
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatWithConfig(this, buildPlainTimeFormatConfig(locales, options))
-  }
-
   toZonedDateTime(options: { plainDate: DateArg, timeZone: TimeZoneArg }): ZonedDateTime {
     return this.toPlainDateTime(options.plainDate).toZonedDateTime(options.timeZone)
   }
@@ -140,10 +141,12 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 
 // mixin
 export interface PlainTime extends TimeFields { calendar: Calendar }
+export interface PlainTime extends ToLocaleStringMethods {}
 mixinISOFields(PlainTime, timeUnitNames)
+mixinLocaleStringMethods(PlainTime, buildFormatConfig)
 
 // toLocaleString
-function buildPlainTimeFormatConfig(
+function buildFormatConfig(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
 ): FormatConfig<PlainTime> {

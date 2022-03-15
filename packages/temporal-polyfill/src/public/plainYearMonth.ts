@@ -22,7 +22,12 @@ import {
   createYearMonth,
   overrideYearMonthFields,
 } from '../dateUtils/yearMonth'
-import { FormatConfig, buildPlainFormatConfig, formatWithConfig } from '../native/intl'
+import {
+  FormatConfig,
+  ToLocaleStringMethods,
+  buildPlainFormatConfig,
+  mixinLocaleStringMethods,
+} from '../native/intl'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -144,10 +149,6 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     ) + formatCalendarID(calendarID, calendarDisplay)
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatWithConfig(this, buildPlainYearMonthFormatConfig(locales, options))
-  }
-
   toPlainDate(fields: { day: number }): PlainDate {
     return this.calendar.dateFromFields({
       year: this.year,
@@ -159,11 +160,13 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 
 // mixin
 export interface PlainYearMonth extends YearMonthCalendarFields { calendar: Calendar }
+export interface PlainYearMonth extends ToLocaleStringMethods {}
 mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)
+mixinLocaleStringMethods(PlainYearMonth, buildFormatConfig)
 
 // toLocaleString
-function buildPlainYearMonthFormatConfig(
+function buildFormatConfig(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
 ): FormatConfig<PlainYearMonth> {

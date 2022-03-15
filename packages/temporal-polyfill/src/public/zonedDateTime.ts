@@ -40,7 +40,12 @@ import {
   zeroTimeISOFields,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
-import { FormatConfig, buildZonedFormatConfig, formatWithConfig } from '../native/intl'
+import {
+  FormatConfig,
+  ToLocaleStringMethods,
+  buildZonedFormatConfig,
+  mixinLocaleStringMethods,
+} from '../native/intl'
 import { compareValues } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -260,10 +265,6 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
       formatCalendarID(isoFields.calendar.id, calendarDisplay)
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    return formatWithConfig(this, buildZonedDateTimeFormatConfig(locales, options))
-  }
-
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
   toPlainMonthDay(): PlainMonthDay { return createMonthDay(this.getISOFields()) }
   toPlainDateTime(): PlainDateTime { return createDateTime(this.getISOFields()) }
@@ -276,12 +277,14 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 export interface ZonedDateTime extends DateCalendarFields { calendar: Calendar }
 export interface ZonedDateTime extends TimeFields {}
 export interface ZonedDateTime extends ComputedEpochFields {}
+export interface ZonedDateTime extends ToLocaleStringMethods {}
 mixinISOFields(ZonedDateTime, timeUnitNames)
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
 mixinEpochFields(ZonedDateTime)
+mixinLocaleStringMethods(ZonedDateTime, buildFormatConfig)
 
 // toLocaleString
-function buildZonedDateTimeFormatConfig(
+function buildFormatConfig(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
 ): FormatConfig<ZonedDateTime> {
