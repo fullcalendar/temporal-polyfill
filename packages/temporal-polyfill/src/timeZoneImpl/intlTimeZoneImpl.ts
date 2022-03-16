@@ -6,7 +6,11 @@ import { compareValues } from '../utils/math'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
-const MAX_YEAR_TRAVEL = 5
+// Europe/Amsterdam and America/New_York have long gaps
+// see timezone.spec.ts
+// TODO: this is probably very expensive for timezones WITHOUT transitions
+const MAX_YEAR_TRAVEL = 100
+
 const ISLAND_SEARCH_DAYS = [
   182, // 50% through year
   91, // 25% through year

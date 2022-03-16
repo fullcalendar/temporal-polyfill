@@ -140,7 +140,7 @@ describe('TimeZone', () => {
       const tzFrom = TimeZone.from({ timeZone: custom })
       equal(tzFrom, custom)
     })
-    it.skip('throws with bad identifier', () => {
+    it('throws with bad identifier', () => {
       ['local', 'Z', '-08:00[America/Vancouver]', '+00:01.1', '-01.1'].forEach((bad) => {
         throws(() => TimeZone.from(bad), RangeError)
       })
@@ -228,18 +228,30 @@ describe('TimeZone', () => {
       }
     })
   })
-  describe.skip('sub-minute offset', () => {
+  describe('sub-minute offset', () => {
     const zone = new TimeZone('Europe/Amsterdam')
     const inst = Instant.from('1900-01-01T12:00Z')
     const dtm = PlainDateTime.from('1900-01-01T12:00')
-    it(`${zone} has ID ${zone}`, () => equal(zone.id, `${zone}`))
-    it(`${zone} has offset +00:19:32 in ns`, () => equal(zone.getOffsetNanosecondsFor(inst), 1172000000000))
-    it(`${zone} has offset +00:19:32`, () => equal(zone.getOffsetStringFor(inst), '+00:19:32'))
+    it(`${zone} has ID ${zone}`, () => {
+      equal(zone.id, `${zone}`)
+    })
+    it(`${zone} has offset +00:19:32 in ns`, () => {
+      equal(zone.getOffsetNanosecondsFor(inst), 1172000000000)
+    })
+    it(`${zone} has offset +00:19:32`, () => {
+      equal(zone.getOffsetStringFor(inst), '+00:19:32')
+    })
     it(`(${zone}).getPlainDateTimeFor(${inst})`, () =>
       equal(`${zone.getPlainDateTimeFor(inst)}`, '1900-01-01T12:19:32'))
-    it(`(${zone}).getInstantFor(${dtm})`, () => equal(`${zone.getInstantFor(dtm)}`, '1900-01-01T11:40:28Z'))
-    it(`(${zone}).getNextTransition(${inst})`, () => equal(`${zone.getNextTransition(inst)}`, '1916-04-30T23:40:28Z'))
-    it(`(${zone}).getPreviousTransition(${inst})`, () => equal(zone.getPreviousTransition(inst), null))
+    it(`(${zone}).getInstantFor(${dtm})`, () => {
+      equal(`${zone.getInstantFor(dtm)}`, '1900-01-01T11:40:28Z')
+    })
+    it(`(${zone}).getNextTransition(${inst})`, () => {
+      equal(`${zone.getNextTransition(inst)}`, '1916-04-30T23:40:28Z')
+    })
+    it(`(${zone}).getPreviousTransition(${inst})`, () => {
+      equal(zone.getPreviousTransition(inst), null)
+    })
   })
   describe('with DST change', () => {
     it('clock moving forward', () => {
@@ -423,7 +435,7 @@ describe('TimeZone', () => {
   })
   describe('getNextTransition works', () => {
     const nyc = TimeZone.from('America/New_York')
-    it.skip('should not have bug #510', () => {
+    it('should not have bug #510', () => {
       // See https://github.com/tc39/proposal-temporal/issues/510 for more.
       const a1 = Instant.from('2019-04-16T21:01Z')
       const a2 = Instant.from('1800-01-01T00:00Z')

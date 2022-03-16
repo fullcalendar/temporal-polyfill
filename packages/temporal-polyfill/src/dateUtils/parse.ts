@@ -136,8 +136,8 @@ function parseZonedDateTimeParts(parts: string[]): ZonedDateTimeParseResult {
   let Z = false
 
   if (zOrOffset) {
-    offset = parseOffsetParts(parts.slice(12))
     Z = zOrOffset.toUpperCase() === 'Z'
+    offset = Z ? 0 : parseOffsetParts(parts.slice(12))
   }
 
   return {
