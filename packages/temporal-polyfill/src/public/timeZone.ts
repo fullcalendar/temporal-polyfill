@@ -9,7 +9,7 @@ import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochSecs } from '../dateUtils/isoMath'
-import { tryParseDateTimeISO } from '../dateUtils/parse'
+import { tryParseZonedDateTime } from '../dateUtils/parse'
 import {
   nanoInMicroBI,
   nanoInMilliBI,
@@ -50,7 +50,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
         return arg as TimeZone // treat TimeZoneProtocols as TimeZones internally
       }
     }
-    const dateTimeParse = tryParseDateTimeISO(String(arg))
+    const dateTimeParse = tryParseZonedDateTime(String(arg))
     return new TimeZone(
       (dateTimeParse && (
         dateTimeParse.timeZone ||

@@ -25,11 +25,13 @@ import { DateLikeInstance } from './calendar'
 import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
 import {
-  parseDateTimeISO,
+  parseZonedDateTime,
+  tryParseZonedDateTime,
+} from './parse'
+import {
   refineDateTimeParse,
   refineZonedDateTimeParse,
-  tryParseDateTimeISO,
-} from './parse'
+} from './parseRefine'
 import { roundBalancedDuration, roundNano } from './rounding'
 import { TimeFields, timeFieldsToNano } from './time'
 import {
@@ -402,7 +404,7 @@ function getMaybeZonedRelativeTo(
       return PlainDateTime.from(arg)
     }
   } else {
-    const isoFields = parseDateTimeISO(String(arg))
+    const isoFields = parseZonedDateTime(String(arg))
     if (isoFields.timeZone !== undefined) {
       return createZonedDateTime(
         refineZonedDateTimeParse(isoFields),
@@ -443,7 +445,7 @@ export function extractRelativeTo(
     throw new TypeError('Incorrect relativeTo type')
   }
 
-  const parsed = tryParseDateTimeISO(String(arg))
+  const parsed = tryParseZonedDateTime(String(arg))
   if (parsed) {
     if (parsed.timeZone !== undefined) {
       return createZonedDateTime(refineZonedDateTimeParse(parsed), undefined, OFFSET_REJECT)

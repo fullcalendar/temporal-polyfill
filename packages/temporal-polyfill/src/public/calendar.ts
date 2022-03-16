@@ -23,7 +23,7 @@ import {
 import { diffDateFields } from '../dateUtils/diff'
 import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
 import { MonthDayFields } from '../dateUtils/monthDay'
-import { tryParseDateTimeISO } from '../dateUtils/parse'
+import { tryParseDateTime } from '../dateUtils/parse'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
 import { createWeakMap } from '../utils/obj'
@@ -66,7 +66,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
         return arg as Calendar // treat CalendarProtocols as Calendars internally
       }
     }
-    const parsed = tryParseDateTimeISO(String(arg))
+    const parsed = tryParseDateTime(String(arg))
     return new Calendar(
       parsed // a date-time string?
         ? parsed.calendar || isoCalendarID

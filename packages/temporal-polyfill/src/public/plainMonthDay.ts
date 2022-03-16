@@ -20,7 +20,8 @@ import {
   monthDaysEqual,
   overrideMonthDayFields,
 } from '../dateUtils/monthDay'
-import { parseMonthDayISO, refineDateTimeParse } from '../dateUtils/parse'
+import { parseMonthDay } from '../dateUtils/parse'
+import { refineDateTimeParse } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import {
@@ -77,14 +78,16 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     }
 
     // a string...
-    const parsed = parseMonthDayISO(String(arg))
+    const parsed = parseMonthDay(String(arg))
 
     // for strings, force ISO year if no calendar specified
     if (parsed.calendar === undefined) {
       parsed.isoYear = isoEpochLeapYear
     }
 
-    return createMonthDay(refineDateTimeParse(parsed))
+    return createMonthDay(
+      refineDateTimeParse(parsed as any), // HACK
+    )
   }
 
   with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {

@@ -6,7 +6,7 @@ import { addToInstant, compareInstants, diffInstants, roundInstant } from '../da
 import { validateInstant } from '../dateUtils/isoFieldValidation'
 import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
-import { parseDateTimeISO } from '../dateUtils/parse'
+import { parseZonedDateTime } from '../dateUtils/parse'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
@@ -39,7 +39,7 @@ export class Instant extends AbstractNoValueObj {
       return new Instant(arg.epochNanoseconds)
     }
 
-    const fields = parseDateTimeISO(String(arg))
+    const fields = parseZonedDateTime(String(arg))
     const offsetNano = fields.offset
     if (offsetNano === undefined) {
       throw new RangeError('Must specify an offset')

@@ -13,7 +13,6 @@ module.exports = {
     '!**/usertimezone.spec.ts',
 
     // there are quite a few 'skips' in these files:
-    // - intl.spec.ts
     // - timezone.spec.ts
   ],
 }

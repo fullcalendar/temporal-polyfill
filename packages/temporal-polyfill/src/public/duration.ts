@@ -13,7 +13,7 @@ import {
   roundAndBalanceDuration,
 } from '../dateUtils/duration'
 import { formatDurationISO } from '../dateUtils/isoFormat'
-import { parseDurationISO } from '../dateUtils/parse'
+import { parseDuration } from '../dateUtils/parseDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
 import { createWeakMap, mapHash } from '../utils/obj'
@@ -64,7 +64,7 @@ export class Duration extends AbstractNoValueObj {
     return createDuration(
       typeof arg === 'object'
         ? refineFields(arg, durationFieldMap)
-        : parseDurationISO(arg),
+        : parseDuration(arg),
     )
   }
 

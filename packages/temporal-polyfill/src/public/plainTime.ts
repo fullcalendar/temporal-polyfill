@@ -6,7 +6,7 @@ import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { formatTimeISO } from '../dateUtils/isoFormat'
 import { mixinISOFields } from '../dateUtils/mixins'
-import { parseTimeISO } from '../dateUtils/parse'
+import { parseTime } from '../dateUtils/parse'
 import { roundTime } from '../dateUtils/rounding'
 import {
   TimeFields,
@@ -76,7 +76,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
         ? arg.getISOFields() // optimization
         : typeof arg === 'object'
           ? timeFieldsToConstrainedISO(refineFields(arg, timeFieldMap), overflowHandling)
-          : parseTimeISO(String(arg)),
+          : parseTime(String(arg)),
     )
   }
 
