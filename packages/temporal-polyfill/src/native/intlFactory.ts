@@ -37,28 +37,22 @@ export function createZonedFormatFactoryFactory<Entity extends ZonedEntity>(
   finalOptions: Intl.DateTimeFormatOptions,
 ): FormatFactoryFactory<Entity> {
   return (locales: string[], options: Intl.DateTimeFormatOptions): FormatFactory<Entity> => {
+    const defaults = anyDefaultsOverridden(greedyDefaults, options)
+      ? {}
+      : { ...greedyDefaults, ...nonGreedyDefaults }
+
     function buildFormat(calendarID: string, timeZoneID: string): Intl.DateTimeFormat {
-      let useDefaults = true
-
-      // TODO: more DRY
-      for (const optionName in greedyDefaults) {
-        if ((options as any)[optionName] !== undefined) {
-          useDefaults = false
-          break
-        }
-      }
-
       return new OrigDateTimeFormat(locales, {
         calendar: calendarID,
         timeZone: timeZoneID || undefined, // empty string should mean current timezone
-        ...(useDefaults ? { ...nonGreedyDefaults, ...greedyDefaults } : {}),
+        ...defaults,
         ...options,
         ...finalOptions,
       })
     }
 
     return {
-      buildKey: createKeyFactory<Entity>(locales, options, false),
+      buildKey: createKeyFactory(locales, options, false),
       buildFormat,
       buildEpochMilli: getEpochMilliFromZonedEntity,
     }
@@ -81,20 +75,13 @@ export function createPlainFormatFactoryFactory<Entity extends PlainEntity>(
   strictCalendar?: boolean,
 ): FormatFactoryFactory<Entity> {
   return (locales: string[], options: Intl.DateTimeFormatOptions): FormatFactory<Entity> => {
+    const defaults = anyDefaultsOverridden(greedyDefaults, options) ? {} : greedyDefaults
+
     function buildFormat(calendarID: string, timeZoneID: string) {
-      let useDefaults = true
-
-      // TODO: more DRY
-      for (const optionName in greedyDefaults) {
-        if ((options as any)[optionName] !== undefined) {
-          useDefaults = false
-          break
-        }
-      }
-
       return new OrigDateTimeFormat(locales, {
         calendar: calendarID,
-        ...(useDefaults ? greedyDefaults : options),
+        ...defaults,
+        ...options,
         ...finalOptions,
         timeZone: timeZoneID, // guaranteed to be defined because of above 'UTC'
         timeZoneName: undefined, // never show timeZone name
@@ -185,4 +172,16 @@ function extractUnicodeCalendar(locales: string[]): string | undefined {
   }
 
   return undefined
+}
+
+// general utils
+// TODO: move elsewhere?
+
+function anyDefaultsOverridden(defaults: any, overrides: any): boolean {
+  for (const propName in defaults) {
+    if (overrides[propName] !== undefined) {
+      return true
+    }
+  }
+  return false
 }
