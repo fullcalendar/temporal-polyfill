@@ -6,7 +6,7 @@ import {
   isoEpochOriginYear,
   isoToEpochMilli,
 } from '../dateUtils/isoMath'
-import { OrigDateTimeFormat } from '../native/intl'
+import { OrigDateTimeFormat } from '../native/intlUtils'
 import {
   CalendarImpl,
   CalendarImplFields,

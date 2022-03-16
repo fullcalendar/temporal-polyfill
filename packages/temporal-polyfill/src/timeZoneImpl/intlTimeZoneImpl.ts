@@ -1,7 +1,7 @@
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { epochSecondsToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
 import { milliInSecond, secondsInDay } from '../dateUtils/units'
-import { OrigDateTimeFormat } from '../native/intl'
+import { OrigDateTimeFormat } from '../native/intlUtils'
 import { compareValues } from '../utils/math'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'

@@ -21,7 +21,7 @@ import {
   queryDateISOFields,
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
-import { computeISODayOfWeek, isoToEpochMilli } from '../dateUtils/isoMath'
+import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
 import { MonthDayFields } from '../dateUtils/monthDay'
 import { tryParseDateTimeISO } from '../dateUtils/parse'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'

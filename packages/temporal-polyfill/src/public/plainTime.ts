@@ -22,12 +22,9 @@ import {
   timeLikeToISO,
 } from '../dateUtils/time'
 import { nanoInMilliBI } from '../dateUtils/units'
-import {
-  FormatConfig,
-  OrigDateTimeFormat,
-  ToLocaleStringMethods,
-  mixinLocaleStringMethods,
-} from '../native/intl'
+import { FormatConfig } from '../native/intlFactory'
+import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
+import { OrigDateTimeFormat } from '../native/intlUtils'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -36,7 +33,6 @@ import {
   CompareResult,
   DateArg,
   DurationArg,
-  LocalesArg,
   OverflowOptions,
   TimeArg,
   TimeDiffOptions,
@@ -147,8 +143,8 @@ mixinLocaleStringMethods(PlainTime, buildFormatConfig)
 
 // toLocaleString
 function buildFormatConfig(
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions | undefined,
+  locales: string[],
+  options: Intl.DateTimeFormatOptions,
 ): FormatConfig<PlainTime> {
   return {
     buildKey: () => ['', ''],

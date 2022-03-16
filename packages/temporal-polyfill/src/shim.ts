@@ -7,12 +7,10 @@ Imports from non-top-level files are not allowed
 */
 import {
   Calendar,
-  DateTimeFormatArg,
-  DateTimeFormatRangePart,
   Duration,
+  ExtendedDateTimeFormat,
   Instant,
   Now,
-  OrigDateTimeFormat,
   PlainDate,
   PlainDateTime,
   PlainMonthDay,
@@ -21,8 +19,6 @@ import {
   TimeZone,
   ZonedDateTime,
   dateToTemporalInstant,
-  normalizeIntlDateArg,
-  normalizeIntlOptionalDateArg,
 } from './impl'
 
 export function shimTemporal(): void {
@@ -45,31 +41,7 @@ export function shimTemporal(): void {
       return dateToTemporalInstant(this)
     }
 
-    class ExtendedDateTimeFormat extends OrigDateTimeFormat {
-      format(dateArg?: DateTimeFormatArg): string {
-        return super.format(normalizeIntlOptionalDateArg(dateArg))
-      }
-
-      formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[] {
-        return super.formatToParts(normalizeIntlOptionalDateArg(dateArg))
-      }
-
-      formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string {
-        return super.formatRange(normalizeIntlDateArg(startArg), normalizeIntlDateArg(endArg))
-      }
-
-      formatRangeToParts(
-        startArg: DateTimeFormatArg,
-        endArg: DateTimeFormatArg,
-      ): DateTimeFormatRangePart[] {
-        return super.formatRangeToParts(
-          normalizeIntlDateArg(startArg),
-          normalizeIntlDateArg(endArg),
-        )
-      }
-    }
-
     // wasn't possible to patch existing methods. must create subclass
-    (globalThis.Intl as any).DateTimeFormat = ExtendedDateTimeFormat // HACK
+    ;(globalThis.Intl as any).DateTimeFormat = ExtendedDateTimeFormat
   }
 }

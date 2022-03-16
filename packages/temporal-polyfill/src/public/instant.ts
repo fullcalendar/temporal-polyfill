@@ -8,12 +8,8 @@ import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
-import {
-  FormatConfig,
-  ToLocaleStringMethods,
-  buildZonedFormatConfig,
-  mixinLocaleStringMethods,
-} from '../native/intl'
+import { FormatConfig, buildZonedFormatConfig } from '../native/intlFactory'
+import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
 import {
@@ -22,7 +18,6 @@ import {
   DurationArg,
   InstantArg,
   InstantToStringOptions,
-  LocalesArg,
   TimeDiffOptions,
   TimeRoundingOptions,
   TimeZoneArg,
@@ -145,16 +140,18 @@ mixinLocaleStringMethods(Instant, buildFormatConfig)
 
 // toLocaleString
 function buildFormatConfig(
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions | undefined,
+  locales: string[],
+  options: Intl.DateTimeFormatOptions,
 ): FormatConfig<Instant> {
-  return buildZonedFormatConfig(locales, {
+  return buildZonedFormatConfig(locales, options, {
+    timeZoneName: undefined,
+  }, {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
+    weekday: undefined,
     hour: 'numeric',
     minute: '2-digit',
     second: '2-digit',
-    ...options,
-  })
+  }, {})
 }

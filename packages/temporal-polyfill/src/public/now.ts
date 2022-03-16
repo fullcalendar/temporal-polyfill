@@ -1,5 +1,5 @@
 import { nanoInMilliBI } from '../dateUtils/units'
-import { OrigDateTimeFormat } from '../native/intl'
+import { OrigDateTimeFormat } from '../native/intlUtils'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'

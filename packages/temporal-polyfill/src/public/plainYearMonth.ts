@@ -22,12 +22,8 @@ import {
   createYearMonth,
   overrideYearMonthFields,
 } from '../dateUtils/yearMonth'
-import {
-  FormatConfig,
-  ToLocaleStringMethods,
-  buildPlainFormatConfig,
-  mixinLocaleStringMethods,
-} from '../native/intl'
+import { FormatConfig, buildPlainFormatConfig } from '../native/intlFactory'
+import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDate } from './plainDate'
@@ -37,7 +33,6 @@ import {
   DateISOFields,
   DateToStringOptions,
   DurationArg,
-  LocalesArg,
   OverflowOptions,
   YearMonthArg,
   YearMonthDiffOptions,
@@ -167,13 +162,13 @@ mixinLocaleStringMethods(PlainYearMonth, buildFormatConfig)
 
 // toLocaleString
 function buildFormatConfig(
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions | undefined,
+  locales: string[],
+  options: Intl.DateTimeFormatOptions,
 ): FormatConfig<PlainYearMonth> {
-  return buildPlainFormatConfig(locales, {
+  return buildPlainFormatConfig(locales, options, {
     year: 'numeric',
     month: 'numeric',
-    ...options,
+  }, {
     weekday: undefined,
     day: undefined,
     hour: undefined,

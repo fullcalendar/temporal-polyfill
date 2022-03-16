@@ -26,12 +26,8 @@ import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
-import {
-  FormatConfig,
-  ToLocaleStringMethods,
-  buildPlainFormatConfig,
-  mixinLocaleStringMethods,
-} from '../native/intl'
+import { FormatConfig, buildPlainFormatConfig } from '../native/intlFactory'
+import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { PlainDateTime } from './plainDateTime'
@@ -48,7 +44,6 @@ import {
   DateToStringOptions,
   DateUnit,
   DurationArg,
-  LocalesArg,
   OverflowOptions,
   TimeArg,
   TimeZoneArg,
@@ -172,14 +167,15 @@ mixinLocaleStringMethods(PlainDate, buildFormatConfig)
 
 // toLocaleString
 function buildFormatConfig(
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions | undefined,
+  locales: string[],
+  options: Intl.DateTimeFormatOptions,
 ): FormatConfig<PlainDate> {
-  return buildPlainFormatConfig(locales, {
+  return buildPlainFormatConfig(locales, options, {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
-    ...options,
+    weekday: undefined,
+  }, {
     hour: undefined,
     minute: undefined,
     second: undefined,

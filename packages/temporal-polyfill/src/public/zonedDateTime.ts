@@ -40,12 +40,8 @@ import {
   zeroTimeISOFields,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
-import {
-  FormatConfig,
-  ToLocaleStringMethods,
-  buildZonedFormatConfig,
-  mixinLocaleStringMethods,
-} from '../native/intl'
+import { FormatConfig, buildZonedFormatConfig } from '../native/intlFactory'
+import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { compareValues } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -64,7 +60,6 @@ import {
   DateTimeRoundingOptions,
   DiffOptions,
   DurationArg,
-  LocalesArg,
   OverflowOptions,
   TimeArg,
   TimeZoneArg,
@@ -285,17 +280,18 @@ mixinLocaleStringMethods(ZonedDateTime, buildFormatConfig)
 
 // toLocaleString
 function buildFormatConfig(
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions | undefined,
+  locales: string[],
+  options: Intl.DateTimeFormatOptions,
 ): FormatConfig<ZonedDateTime> {
-  return buildZonedFormatConfig(locales, {
+  return buildZonedFormatConfig(locales, options, {
+    timeZoneName: 'short',
+  }, {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
+    weekday: undefined,
     hour: 'numeric',
     minute: '2-digit',
     second: '2-digit',
-    timeZoneName: 'short',
-    ...options,
-  })
+  }, {})
 }
