@@ -61,10 +61,14 @@ describe('TimeZone', () => {
     test('UTC')
     test('GMT')
     function test(zone: string) {
-      it(`${zone} is a zone`, () => equal(typeof new TimeZone(zone), 'object'))
+      it(`${zone} is a zone`, () => {
+        equal(typeof new TimeZone(zone), 'object')
+      })
     }
     ['+00:01.1', '-01.1'].forEach((id) => {
-      it.skip(`${id} is not a zone`, () => throws(() => new TimeZone(id), RangeError))
+      it(`${id} is not a zone`, () => {
+        throws(() => new TimeZone(id), RangeError)
+      })
     })
   })
   describe('.id property', () => {
