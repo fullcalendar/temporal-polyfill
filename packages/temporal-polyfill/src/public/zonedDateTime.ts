@@ -24,7 +24,6 @@ import {
   mixinEpochFields,
   mixinISOFields,
 } from '../dateUtils/mixins'
-import { createMonthDay } from '../dateUtils/monthDay'
 import { parseDateTimeISO, refineZonedDateTimeParse } from '../dateUtils/parse'
 import { TimeFields, createTime } from '../dateUtils/time'
 import { nanoInHour } from '../dateUtils/units'
@@ -261,7 +260,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
-  toPlainMonthDay(): PlainMonthDay { return createMonthDay(this.getISOFields()) }
+  toPlainMonthDay(): PlainMonthDay { return this.calendar.monthDayFromFields(this) }
   toPlainDateTime(): PlainDateTime { return createDateTime(this.getISOFields()) }
   toPlainDate(): PlainDate { return createDate(this.getISOFields()) }
   toPlainTime(): PlainTime { return createTime(this.getISOFields()) }

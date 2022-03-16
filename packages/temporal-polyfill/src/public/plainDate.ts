@@ -21,7 +21,6 @@ import {
   mixinCalendarFields,
   mixinISOFields,
 } from '../dateUtils/mixins'
-import { createMonthDay } from '../dateUtils/monthDay'
 import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
@@ -155,7 +154,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
-  toPlainMonthDay(): PlainMonthDay { return createMonthDay(this.getISOFields()) }
+  toPlainMonthDay(): PlainMonthDay { return this.calendar.monthDayFromFields(this) }
 }
 
 // mixin
