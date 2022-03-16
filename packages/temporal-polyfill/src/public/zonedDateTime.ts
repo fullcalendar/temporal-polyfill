@@ -25,7 +25,7 @@ import {
   mixinISOFields,
 } from '../dateUtils/mixins'
 import { parseZonedDateTime } from '../dateUtils/parse'
-import { refineZonedDateTimeParse } from '../dateUtils/parseRefine'
+import { refineZonedObj } from '../dateUtils/parseRefine'
 import { TimeFields, createTime } from '../dateUtils/time'
 import { nanoInHour } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
@@ -124,7 +124,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
             extractCalendar(arg),
             extractTimeZone(arg),
           )
-          : refineZonedDateTimeParse(parseZonedDateTime(String(arg))),
+          : refineZonedObj(parseZonedDateTime(String(arg))),
       options,
       offsetHandling,
     )

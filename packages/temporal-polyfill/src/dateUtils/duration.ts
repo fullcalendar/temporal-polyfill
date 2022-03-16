@@ -29,8 +29,8 @@ import {
   tryParseZonedDateTime,
 } from './parse'
 import {
-  refineDateTimeParse,
-  refineZonedDateTimeParse,
+  refineBaseObj,
+  refineZonedObj,
 } from './parseRefine'
 import { roundBalancedDuration, roundNano } from './rounding'
 import { TimeFields, timeFieldsToNano } from './time'
@@ -407,12 +407,12 @@ function getMaybeZonedRelativeTo(
     const isoFields = parseZonedDateTime(String(arg))
     if (isoFields.timeZone !== undefined) {
       return createZonedDateTime(
-        refineZonedDateTimeParse(isoFields),
+        refineZonedObj(isoFields),
         undefined,
         OFFSET_PREFER,
       )
     } else {
-      return createDateTime(refineDateTimeParse(isoFields))
+      return createDateTime(refineBaseObj(isoFields))
     }
   }
 }
@@ -448,9 +448,9 @@ export function extractRelativeTo(
   const parsed = tryParseZonedDateTime(String(arg))
   if (parsed) {
     if (parsed.timeZone !== undefined) {
-      return createZonedDateTime(refineZonedDateTimeParse(parsed), undefined, OFFSET_REJECT)
+      return createZonedDateTime(refineZonedObj(parsed), undefined, OFFSET_REJECT)
     } else {
-      return createDateTime(refineDateTimeParse(parsed))
+      return createDateTime(refineBaseObj(parsed))
     }
   }
 

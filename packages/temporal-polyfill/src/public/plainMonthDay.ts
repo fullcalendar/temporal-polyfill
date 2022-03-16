@@ -21,7 +21,7 @@ import {
   overrideMonthDayFields,
 } from '../dateUtils/monthDay'
 import { parseMonthDay } from '../dateUtils/parse'
-import { refineDateTimeParse } from '../dateUtils/parseRefine'
+import { refineBaseObj } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import {
@@ -85,9 +85,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
       parsed.isoYear = isoEpochLeapYear
     }
 
-    return createMonthDay(
-      refineDateTimeParse(parsed as any), // HACK
-    )
+    return createMonthDay(refineBaseObj(parsed))
   }
 
   with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {

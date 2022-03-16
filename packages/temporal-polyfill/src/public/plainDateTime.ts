@@ -27,7 +27,7 @@ import {
   mixinISOFields,
 } from '../dateUtils/mixins'
 import { parseDateTime } from '../dateUtils/parse'
-import { refineDateTimeParse } from '../dateUtils/parseRefine'
+import { refineBaseObj } from '../dateUtils/parseRefine'
 import { TimeFields, createTime, ensureLooseTime } from '../dateUtils/time'
 import { createYearMonth } from '../dateUtils/yearMonth'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
@@ -105,7 +105,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
             overflowHandling,
             extractCalendar(arg),
           )
-          : refineDateTimeParse(parseDateTime(String(arg))),
+          : refineBaseObj(parseDateTime(String(arg))),
     )
   }
 

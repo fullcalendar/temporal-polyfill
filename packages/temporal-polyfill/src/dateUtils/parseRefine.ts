@@ -1,11 +1,17 @@
 import { Calendar, createDefaultCalendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
-import { DateTimeISOFields } from '../public/types'
-import { DateTimeParseResult, ZonedDateTimeParseResult } from './parse'
-import { ZonedDateTimeISOEssentials } from './zonedDateTime'
 
-// TODO: anything with calendar!!!
-export function refineDateTimeParse(parsed: DateTimeParseResult): DateTimeISOFields {
+interface BaseParseResult {
+  calendar: string | undefined
+}
+
+interface ZonedParseResult extends BaseParseResult {
+  timeZone: string | undefined
+}
+
+export function refineBaseObj<T extends BaseParseResult>(
+  parsed: T,
+): T & { calendar: Calendar } {
   return {
     ...parsed,
     calendar: parsed.calendar === undefined
@@ -14,12 +20,11 @@ export function refineDateTimeParse(parsed: DateTimeParseResult): DateTimeISOFie
   }
 }
 
-// TODO: anything with timeZone!!!
-export function refineZonedDateTimeParse(
-  parsed: ZonedDateTimeParseResult,
-): ZonedDateTimeISOEssentials {
+export function refineZonedObj<T extends ZonedParseResult>(
+  parsed: T,
+): T & { calendar: Calendar, timeZone: TimeZone } {
   return {
-    ...refineDateTimeParse(parsed),
+    ...refineBaseObj(parsed),
     timeZone: new TimeZone(parsed.timeZone!), // will throw error if empty timeZone
   }
 }
