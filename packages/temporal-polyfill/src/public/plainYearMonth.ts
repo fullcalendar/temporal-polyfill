@@ -22,7 +22,7 @@ import {
   createYearMonth,
   overrideYearMonthFields,
 } from '../dateUtils/yearMonth'
-import { FormatConfig, buildPlainFormatConfig } from '../native/intlFactory'
+import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
@@ -158,26 +158,19 @@ export interface PlainYearMonth extends YearMonthCalendarFields { calendar: Cale
 export interface PlainYearMonth extends ToLocaleStringMethods {}
 mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)
-mixinLocaleStringMethods(PlainYearMonth, buildFormatConfig)
-
-// toLocaleString
-function buildFormatConfig(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-): FormatConfig<PlainYearMonth> {
-  return buildPlainFormatConfig(locales, options, {
-    year: 'numeric',
-    month: 'numeric',
-  }, {
-    weekday: undefined,
-    day: undefined,
-    hour: undefined,
-    minute: undefined,
-    second: undefined,
-  }, true) // strictCalendar
-}
+mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({
+  year: 'numeric',
+  month: 'numeric',
+}, {
+  weekday: undefined,
+  day: undefined,
+  hour: undefined,
+  minute: undefined,
+  second: undefined,
+}, true)) // strictCalendar
 
 // utils
+
 function addDuration(
   yearMonth: PlainYearMonth,
   duration: Duration,

@@ -25,7 +25,7 @@ import { parseDateTimeISO, refineDateTimeParse } from '../dateUtils/parse'
 import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
-import { FormatConfig, buildPlainFormatConfig } from '../native/intlFactory'
+import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
@@ -162,21 +162,13 @@ export interface PlainDate extends DateCalendarFields { calendar: Calendar }
 export interface PlainDate extends ToLocaleStringMethods {}
 mixinISOFields(PlainDate)
 mixinCalendarFields(PlainDate, dateCalendarFields)
-mixinLocaleStringMethods(PlainDate, buildFormatConfig)
-
-// toLocaleString
-function buildFormatConfig(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-): FormatConfig<PlainDate> {
-  return buildPlainFormatConfig(locales, options, {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    weekday: undefined,
-  }, {
-    hour: undefined,
-    minute: undefined,
-    second: undefined,
-  })
-}
+mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  weekday: undefined,
+}, {
+  hour: undefined,
+  minute: undefined,
+  second: undefined,
+}))

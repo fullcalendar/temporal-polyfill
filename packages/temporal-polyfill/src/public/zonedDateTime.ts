@@ -39,7 +39,7 @@ import {
   zeroTimeISOFields,
   zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
-import { FormatConfig, buildZonedFormatConfig } from '../native/intlFactory'
+import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { compareValues } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
@@ -275,22 +275,14 @@ export interface ZonedDateTime extends ToLocaleStringMethods {}
 mixinISOFields(ZonedDateTime, timeUnitNames)
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
 mixinEpochFields(ZonedDateTime)
-mixinLocaleStringMethods(ZonedDateTime, buildFormatConfig)
-
-// toLocaleString
-function buildFormatConfig(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-): FormatConfig<ZonedDateTime> {
-  return buildZonedFormatConfig(locales, options, {
-    timeZoneName: 'short',
-  }, {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    weekday: undefined,
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-  }, {})
-}
+mixinLocaleStringMethods(ZonedDateTime, createZonedFormatFactoryFactory({
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  weekday: undefined,
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit',
+}, {
+  timeZoneName: 'short',
+}, {}))

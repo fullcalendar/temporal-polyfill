@@ -21,7 +21,7 @@ import {
   overrideMonthDayFields,
 } from '../dateUtils/monthDay'
 import { parseMonthDayISO, refineDateTimeParse } from '../dateUtils/parse'
-import { FormatConfig, buildPlainFormatConfig } from '../native/intlFactory'
+import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import {
 } from '../native/intlUtils'
@@ -123,21 +123,13 @@ export interface PlainMonthDay extends MonthDayCalendarFields { calendar: Calend
 export interface PlainMonthDay extends ToLocaleStringMethods {}
 mixinISOFields(PlainMonthDay)
 mixinCalendarFields(PlainMonthDay, monthDayCalendarFields)
-mixinLocaleStringMethods(PlainMonthDay, buildFormatConfig)
-
-// toLocaleString
-function buildFormatConfig(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-): FormatConfig<PlainMonthDay> {
-  return buildPlainFormatConfig(locales, options, {
-    month: 'numeric',
-    day: 'numeric',
-  }, {
-    weekday: undefined,
-    year: undefined,
-    hour: undefined,
-    minute: undefined,
-    second: undefined,
-  }, true) // strictCalendar
-}
+mixinLocaleStringMethods(PlainMonthDay, createPlainFormatFactoryFactory({
+  month: 'numeric',
+  day: 'numeric',
+}, {
+  weekday: undefined,
+  year: undefined,
+  hour: undefined,
+  minute: undefined,
+  second: undefined,
+}, true)) // strictCalendar

@@ -8,7 +8,7 @@ import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseDateTimeISO } from '../dateUtils/parse'
 import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
-import { FormatConfig, buildZonedFormatConfig } from '../native/intlFactory'
+import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { createWeakMap } from '../utils/obj'
 import { Duration } from './duration'
@@ -136,22 +136,14 @@ export class Instant extends AbstractNoValueObj {
 export interface Instant extends ComputedEpochFields {}
 export interface Instant extends ToLocaleStringMethods {}
 mixinEpochFields(Instant)
-mixinLocaleStringMethods(Instant, buildFormatConfig)
-
-// toLocaleString
-function buildFormatConfig(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-): FormatConfig<Instant> {
-  return buildZonedFormatConfig(locales, options, {
-    timeZoneName: undefined,
-  }, {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    weekday: undefined,
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-  }, {})
-}
+mixinLocaleStringMethods(Instant, createZonedFormatFactoryFactory({
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  weekday: undefined,
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit',
+}, {
+  timeZoneName: undefined,
+}, {}))

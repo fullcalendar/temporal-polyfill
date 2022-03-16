@@ -1,35 +1,36 @@
-import { formatConfigBuilderSymbol } from '../dateUtils/abstract'
+import { formatFactoryFactorySymbol } from '../dateUtils/abstract'
 import { LocalesArg } from '../public/types'
-import { FormatConfigBuilder } from './intlFactory'
+import { BaseEntity, FormatFactoryFactory } from './intlFactory'
 import { normalizeAndCopyLocalesArg } from './intlUtils'
 
 export interface ToLocaleStringMethods {
   toLocaleString(localesArg?: LocalesArg, options?: Intl.DateTimeFormatOptions): string
 }
 
-export function mixinLocaleStringMethods<Entity extends ToLocaleStringMethods>(
+export function mixinLocaleStringMethods<Entity extends (ToLocaleStringMethods & BaseEntity)>(
   ObjClass: { prototype: Entity },
-  buildFormatConfig: FormatConfigBuilder<Entity>,
+  buildFormatFactory: FormatFactoryFactory<Entity>,
 ): void {
   ObjClass.prototype.toLocaleString = function(
     this: Entity,
     localesArg?: LocalesArg,
     options?: Intl.DateTimeFormatOptions,
   ): string {
-    const formatConfig = buildFormatConfig(
+    const formatFactory = buildFormatFactory(
       normalizeAndCopyLocalesArg(localesArg),
       options || {},
     )
-    const [calendarID, timeZoneID] = formatConfig.buildKey(this)
-    return formatConfig.buildFormat(calendarID, timeZoneID).format(
-      formatConfig.buildEpochMilli(this),
+    const [calendarID, timeZoneID] = formatFactory.buildKey(this)
+    return formatFactory.buildFormat(calendarID, timeZoneID).format(
+      formatFactory.buildEpochMilli(this),
     )
   }
 
-  ;(ObjClass.prototype as any)[formatConfigBuilderSymbol] = buildFormatConfig
+  ;(ObjClass.prototype as any)[formatFactoryFactorySymbol] = buildFormatFactory
 }
 
-// TODO: rename to 'extract'
-export function getFormatConfigBuilder<Entity>(obj: any): FormatConfigBuilder<Entity> | undefined {
-  return obj?.[formatConfigBuilderSymbol]
+export function extractFormatFactoryFactory<Entity>(
+  obj: any,
+): FormatFactoryFactory<Entity> | undefined {
+  return obj?.[formatFactoryFactorySymbol]
 }

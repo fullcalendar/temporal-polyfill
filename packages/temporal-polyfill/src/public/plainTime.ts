@@ -22,7 +22,7 @@ import {
   timeLikeToISO,
 } from '../dateUtils/time'
 import { nanoInMilliBI } from '../dateUtils/units'
-import { FormatConfig } from '../native/intlFactory'
+import { FormatFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { OrigDateTimeFormat } from '../native/intlUtils'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -139,13 +139,12 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 export interface PlainTime extends TimeFields { calendar: Calendar }
 export interface PlainTime extends ToLocaleStringMethods {}
 mixinISOFields(PlainTime, timeUnitNames)
-mixinLocaleStringMethods(PlainTime, buildFormatConfig)
+mixinLocaleStringMethods(PlainTime, createPlainTimeFormatFactory)
 
-// toLocaleString
-function buildFormatConfig(
+function createPlainTimeFormatFactory(
   locales: string[],
   options: Intl.DateTimeFormatOptions,
-): FormatConfig<PlainTime> {
+): FormatFactory<PlainTime> {
   return {
     buildKey: () => ['', ''],
     buildFormat: () => new OrigDateTimeFormat(locales, {

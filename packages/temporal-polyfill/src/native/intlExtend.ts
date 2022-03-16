@@ -1,10 +1,10 @@
-import { isObjectLike } from '../argParse/refine'
 import { LocalesArg } from '../public/types'
-import { getFormatConfigBuilder } from './intlMixins'
+import { extractFormatFactoryFactory } from './intlMixins'
 import {
   DateTimeFormatArg,
   DateTimeFormatRangePart,
   OrigDateTimeFormat,
+  flattenOptions,
   normalizeAndCopyLocalesArg,
 } from './intlUtils'
 
@@ -26,7 +26,7 @@ export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
   }
 
   format(dateArg?: DateTimeFormatArg): string {
-    const parts = makeOne(this, dateArg)
+    const parts = createSingleArgs(this, dateArg)
 
     // HACK to overcome .format being unboundable
     // See NOTE here: https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
@@ -38,89 +38,66 @@ export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
   }
 
   formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[] {
-    return super.formatToParts.call(...makeOne(this, dateArg))
+    return super.formatToParts.call(...createSingleArgs(this, dateArg))
   }
 
   formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string {
-    return super.formatRange.call(...makeTwo(this, startArg, endArg))
+    return super.formatRange.call(...createRangeArgs(this, startArg, endArg))
   }
 
   formatRangeToParts(
     startArg: DateTimeFormatArg,
     endArg: DateTimeFormatArg,
   ): DateTimeFormatRangePart[] {
-    return super.formatRangeToParts.call(...makeTwo(this, startArg, endArg))
+    return super.formatRangeToParts.call(...createRangeArgs(this, startArg, endArg))
   }
 }
 
-function makeOne(
+function createSingleArgs(
   origDateTimeFormat: ExtendedDateTimeFormat,
   dateArg: DateTimeFormatArg | undefined,
 ): [ Intl.DateTimeFormat, DateTimeFormatArg | undefined ] {
-  const buildFormatConfig = getFormatConfigBuilder(dateArg)
+  const buildFormatFactory = extractFormatFactoryFactory(dateArg)
 
-  if (buildFormatConfig) {
-    const formatConfig = buildFormatConfig( // TODO: cache formatConfig too?
+  if (buildFormatFactory) {
+    const formatFactory = buildFormatFactory(
       origDateTimeFormat[origLocalesSymbol],
       origDateTimeFormat[origOptionsSymbol],
     )
-    const [calendarID, timeZoneID] = formatConfig.buildKey(dateArg)
-
-    // TODO: leverage cache
-
+    const [calendarID, timeZoneID] = formatFactory.buildKey(dateArg)
     return [
-      formatConfig.buildFormat(calendarID, timeZoneID),
-      formatConfig.buildEpochMilli(dateArg),
+      formatFactory.buildFormat(calendarID, timeZoneID),
+      formatFactory.buildEpochMilli(dateArg),
     ]
   }
 
   return [origDateTimeFormat, dateArg]
 }
 
-function makeTwo(
+function createRangeArgs(
   origDateTimeFormat: ExtendedDateTimeFormat,
   startArg: DateTimeFormatArg,
   endArg: DateTimeFormatArg,
 ): [ Intl.DateTimeFormat, DateTimeFormatArg, DateTimeFormatArg ] {
-  const buildFormatConfig = getFormatConfigBuilder(startArg)
-  const buildFormatConfigOther = getFormatConfigBuilder(endArg)
+  const buildFormatFactory = extractFormatFactoryFactory(startArg)
+  const buildFormatFactoryOther = extractFormatFactoryFactory(endArg)
 
-  if (buildFormatConfig !== buildFormatConfigOther) {
+  if (buildFormatFactory !== buildFormatFactoryOther) {
     throw new TypeError('Mismatch of types')
   }
 
-  if (buildFormatConfig) {
-    const formatConfig = buildFormatConfig(
+  if (buildFormatFactory) {
+    const formatFactory = buildFormatFactory(
       origDateTimeFormat[origLocalesSymbol],
       origDateTimeFormat[origOptionsSymbol],
     )
-    const [calendarID, timeZoneID] = formatConfig.buildKey(startArg, endArg)
-
-    // TODO: leverage cache
-
+    const [calendarID, timeZoneID] = formatFactory.buildKey(startArg, endArg)
     return [
-      formatConfig.buildFormat(calendarID, timeZoneID),
-      formatConfig.buildEpochMilli(startArg),
-      formatConfig.buildEpochMilli(endArg),
+      formatFactory.buildFormat(calendarID, timeZoneID),
+      formatFactory.buildEpochMilli(startArg),
+      formatFactory.buildEpochMilli(endArg),
     ]
   }
 
   return [origDateTimeFormat, startArg, endArg]
-}
-
-// TODO: more efficient way to do this, mapping resolvedOptions
-function flattenOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
-  const newOptions: Intl.DateTimeFormatOptions = {}
-
-  for (const name in options) {
-    let val = (options as any)[name]
-
-    if (isObjectLike(val)) {
-      val = val.toString()
-    }
-
-    (newOptions as any)[name] = val
-  }
-
-  return newOptions
 }

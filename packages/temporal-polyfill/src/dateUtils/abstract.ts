@@ -2,7 +2,7 @@ import { createWeakMap } from '../utils/obj'
 
 // weird to have this here
 // to prevent circular reference
-export const formatConfigBuilderSymbol = Symbol()
+export const formatFactoryFactorySymbol = Symbol()
 
 // Functions
 

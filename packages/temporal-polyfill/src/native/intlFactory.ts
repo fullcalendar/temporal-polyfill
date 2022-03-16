@@ -7,127 +7,134 @@ import { TimeZone } from '../public/timeZone'
 import { DateISOFields } from '../public/types'
 import { OrigDateTimeFormat } from './intlUtils'
 
-export type FormatConfigBuilder<Entity> = (
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-) => FormatConfig<Entity>
+// factory types
 
-interface BaseEntity {
+export interface BaseEntity {
   calendar?: Calendar
   timeZone?: TimeZone
 }
+
+export interface FormatFactory<Entity extends BaseEntity> {
+  buildKey: KeyFactory<Entity>
+  buildFormat: (calendarID: string, timeZoneID: string) => Intl.DateTimeFormat
+  buildEpochMilli: (entity: Entity) => number
+}
+
+export type FormatFactoryFactory<Entity extends BaseEntity> = (
+  locales: string[],
+  options: Intl.DateTimeFormatOptions,
+) => FormatFactory<Entity>
+
+// zoned format factory
 
 interface ZonedEntity extends BaseEntity {
   epochMilliseconds: number
 }
 
+export function createZonedFormatFactoryFactory<Entity extends ZonedEntity>(
+  greedyDefaults: Intl.DateTimeFormatOptions,
+  nonGreedyDefaults: Intl.DateTimeFormatOptions,
+  finalOptions: Intl.DateTimeFormatOptions,
+): FormatFactoryFactory<Entity> {
+  return (locales: string[], options: Intl.DateTimeFormatOptions): FormatFactory<Entity> => {
+    function buildFormat(calendarID: string, timeZoneID: string): Intl.DateTimeFormat {
+      let useDefaults = true
+
+      // TODO: more DRY
+      for (const optionName in greedyDefaults) {
+        if ((options as any)[optionName] !== undefined) {
+          useDefaults = false
+          break
+        }
+      }
+
+      return new OrigDateTimeFormat(locales, {
+        calendar: calendarID,
+        timeZone: timeZoneID || undefined, // empty string should mean current timezone
+        ...(useDefaults ? { ...nonGreedyDefaults, ...greedyDefaults } : {}),
+        ...options,
+        ...finalOptions,
+      })
+    }
+
+    return {
+      buildKey: createKeyFactory<Entity>(locales, options, false),
+      buildFormat,
+      buildEpochMilli: getEpochMilliFromZonedEntity,
+    }
+  }
+}
+
+function getEpochMilliFromZonedEntity(entity: ZonedEntity): number {
+  return entity.epochMilliseconds
+}
+
+// plain format factory
+
 interface PlainEntity extends BaseEntity {
   getISOFields: () => DateISOFields // might have time fields too
 }
 
-export interface FormatConfig<Entity> {
-  buildKey: (entity: Entity, otherEntity?: Entity) => [string, string]
-  buildFormat: (calendarID: string, timeZoneID: string) => Intl.DateTimeFormat
-  buildEpochMilli: (entity: Entity) => number
-}
-
-export function buildZonedFormatConfig<Entity extends ZonedEntity>(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-  nonGreedyDefaults: Intl.DateTimeFormatOptions,
+export function createPlainFormatFactoryFactory<Entity extends PlainEntity>(
   greedyDefaults: Intl.DateTimeFormatOptions,
   finalOptions: Intl.DateTimeFormatOptions,
-): FormatConfig<Entity> {
-  const buildKey = createKeyBuilder<Entity>(locales, options, false)
-
-  function buildFormat(calendarID: string, timeZoneID: string): Intl.DateTimeFormat {
-    let useDefaults = true
-
-    for (const availableOptionName in greedyDefaults) {
-      if ((options as any)[availableOptionName] !== undefined) {
-        useDefaults = false
-        break
-      }
-    }
-
-    return new OrigDateTimeFormat(locales, {
-      calendar: calendarID,
-      timeZone: timeZoneID || undefined, // empty string should mean current timezone
-      ...(useDefaults ? { ...nonGreedyDefaults, ...greedyDefaults } : {}),
-      ...options,
-      ...finalOptions,
-    })
-  }
-
-  function buildEpochMilli(entity: Entity): number {
-    return entity.epochMilliseconds
-  }
-
-  return {
-    buildKey,
-    buildFormat,
-    buildEpochMilli,
-  }
-}
-
-export function buildPlainFormatConfig<Entity extends PlainEntity>(
-  locales: string[],
-  options: Intl.DateTimeFormatOptions,
-  availableOptions: Intl.DateTimeFormatOptions,
-  finalOptions: Intl.DateTimeFormatOptions,
   strictCalendar?: boolean,
-): FormatConfig<Entity> {
-  const buildKey = createKeyBuilder(locales, options, strictCalendar)
+): FormatFactoryFactory<Entity> {
+  return (locales: string[], options: Intl.DateTimeFormatOptions): FormatFactory<Entity> => {
+    function buildFormat(calendarID: string, timeZoneID: string) {
+      let useDefaults = true
 
-  function buildFormat(calendarID: string, timeZoneID: string) {
-    let anyOverrides = false
-
-    for (const availableOptionName in availableOptions) {
-      if ((options as any)[availableOptionName] !== undefined) {
-        anyOverrides = true
-        break
+      // TODO: more DRY
+      for (const optionName in greedyDefaults) {
+        if ((options as any)[optionName] !== undefined) {
+          useDefaults = false
+          break
+        }
       }
-    }
 
-    return new OrigDateTimeFormat(locales, {
-      calendar: calendarID,
-      ...(anyOverrides ? options : availableOptions),
-      ...finalOptions,
-      timeZone: timeZoneID, // guaranteed to be defined because of above 'UTC'
-      timeZoneName: undefined, // never show timeZone name
-    })
-  }
-
-  let buildEpochMilli: (entity: Entity) => number
-
-  if (options.timeZone !== undefined) {
-    const timeZone = new TimeZone(options.timeZone)
-
-    buildEpochMilli = (entity: Entity) => {
-      const plainDateTime = createDateTime({ // necessary? pass directly into getInstantFor?
-        ...zeroTimeISOFields,
-        ...entity.getISOFields(),
+      return new OrigDateTimeFormat(locales, {
+        calendar: calendarID,
+        ...(useDefaults ? greedyDefaults : options),
+        ...finalOptions,
+        timeZone: timeZoneID, // guaranteed to be defined because of above 'UTC'
+        timeZoneName: undefined, // never show timeZone name
       })
-      return timeZone.getInstantFor(plainDateTime).epochMilliseconds
     }
-  } else {
-    buildEpochMilli = (entity: Entity) => {
-      return isoFieldsToEpochMilli(entity.getISOFields())
-    }
-  }
 
-  return {
-    buildKey,
-    buildFormat,
-    buildEpochMilli,
+    return {
+      buildKey: createKeyFactory(locales, options, strictCalendar),
+      buildFormat,
+      buildEpochMilli: options.timeZone !== undefined
+        ? computeEpochMilliViaTimeZone.bind(null, new TimeZone(options.timeZone))
+        : computeEpochMilliViaISO,
+    }
   }
 }
 
-function createKeyBuilder<Entity extends BaseEntity>(
+function computeEpochMilliViaTimeZone(timeZone: TimeZone, entity: PlainEntity): number {
+  const plainDateTime = createDateTime({ // necessary? pass directly into getInstantFor?
+    ...zeroTimeISOFields,
+    ...entity.getISOFields(),
+  })
+  return timeZone.getInstantFor(plainDateTime).epochMilliseconds
+}
+
+function computeEpochMilliViaISO(entity: PlainEntity): number {
+  return isoFieldsToEpochMilli(entity.getISOFields())
+}
+
+// keys
+
+export type KeyFactory<Entity extends BaseEntity> = (
+  entity: Entity,
+  otherEntity?: Entity
+) => [string, string] // [calendarID, timeZoneID]
+
+function createKeyFactory<Entity extends BaseEntity>(
   locales: string[],
   options: Intl.DateTimeFormatOptions,
   strictCalendar: boolean | undefined,
-) {
+): KeyFactory<Entity> {
   const optionsCalendarID = options.calendar ?? extractUnicodeCalendar(locales)
   const optionsTimeZoneID = options.timeZone
 
