@@ -1194,7 +1194,7 @@ describe('Intl', () => {
     })
   })
 
-  describe.skip('DateTimeFormat', () => {
+  describe('DateTimeFormat', () => {
     describe('supportedLocalesOf', () => {
       it('should return an Array', () => assert(Array.isArray((Intl.DateTimeFormat as ValidArg).supportedLocalesOf())))
     })
