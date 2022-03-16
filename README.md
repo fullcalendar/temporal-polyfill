@@ -6,7 +6,7 @@ A lightweight [Temporal] polyfill and other futuristic JavaScript date utilities
 
 ## temporal-polyfill
 
-A spec-compliant polyfill in less than 15kb.
+A spec-compliant polyfill in 15kb.
 
 ```
 npm install temporal-polyfill

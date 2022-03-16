@@ -1,7 +1,7 @@
 
 # temporal-polyfill
 
-A spec-compliant<super>*</super> [Temporal] JavaScript polyfill in less than 15kb<super>**</super>.
+A spec-compliant<super>*</super> [Temporal] JavaScript polyfill in 15kb<super>**</super>.
 
 Works in modern browsers<super>***</super>, not Internet Explorer.
 
