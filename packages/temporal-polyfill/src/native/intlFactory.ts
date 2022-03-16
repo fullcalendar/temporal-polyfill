@@ -110,6 +110,32 @@ function computeEpochMilliViaISO(entity: PlainEntity): number {
   return isoFieldsToEpochMilli(entity.getISOFields())
 }
 
+// cached format factory
+
+export type CachedFormatFactory<Entity extends BaseEntity> = {
+  buildFormat: (entity: Entity, otherEntity?: Entity) => Intl.DateTimeFormat
+  buildEpochMilli: (entity: Entity) => number
+}
+
+export function buildCachedFormatFactory<Entity extends BaseEntity>(
+  formatFactory: FormatFactory<Entity>,
+): CachedFormatFactory<Entity> {
+  const cachedFormats: { [key: string]: Intl.DateTimeFormat } = {}
+
+  function buildFormat(entity: Entity, otherEntity?: Entity): Intl.DateTimeFormat {
+    const keys = formatFactory.buildKey(entity, otherEntity)
+    const key = keys.join('|')
+
+    return cachedFormats[key] ||
+      (cachedFormats[key] = formatFactory.buildFormat(...keys))
+  }
+
+  return {
+    buildFormat,
+    buildEpochMilli: formatFactory.buildEpochMilli,
+  }
+}
+
 // keys
 
 export type KeyFactory<Entity extends BaseEntity> = (

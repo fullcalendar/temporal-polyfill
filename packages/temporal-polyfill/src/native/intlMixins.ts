@@ -20,8 +20,9 @@ export function mixinLocaleStringMethods<Entity extends (ToLocaleStringMethods &
       normalizeAndCopyLocalesArg(localesArg),
       options || {},
     )
-    const [calendarID, timeZoneID] = formatFactory.buildKey(this)
-    return formatFactory.buildFormat(calendarID, timeZoneID).format(
+    return formatFactory.buildFormat(
+      ...formatFactory.buildKey(this),
+    ).format(
       formatFactory.buildEpochMilli(this),
     )
   }

@@ -1,4 +1,5 @@
 import { LocalesArg } from '../public/types'
+import { CachedFormatFactory, FormatFactoryFactory, buildCachedFormatFactory } from './intlFactory'
 import { extractFormatFactoryFactory } from './intlMixins'
 import {
   DateTimeFormatArg,
@@ -10,10 +11,12 @@ import {
 
 const origLocalesSymbol = Symbol()
 const origOptionsSymbol = Symbol()
+const factoryMapSymbol = Symbol()
 
 export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
   [origLocalesSymbol]: string[]
   [origOptionsSymbol]: Intl.DateTimeFormatOptions
+  [factoryMapSymbol]: Map<FormatFactoryFactory<any>, CachedFormatFactory<any>>
 
   constructor(localesArg?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const normLocales = normalizeAndCopyLocalesArg(localesArg)
@@ -23,6 +26,7 @@ export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
 
     this[origLocalesSymbol] = normLocales
     this[origOptionsSymbol] = normOptions
+    this[factoryMapSymbol] = new Map()
   }
 
   format(dateArg?: DateTimeFormatArg): string {
@@ -56,17 +60,13 @@ export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
 function createSingleArgs(
   origDateTimeFormat: ExtendedDateTimeFormat,
   dateArg: DateTimeFormatArg | undefined,
-): [ Intl.DateTimeFormat, DateTimeFormatArg | undefined ] {
+): [Intl.DateTimeFormat, DateTimeFormatArg | undefined] {
   const buildFormatFactory = extractFormatFactoryFactory(dateArg)
 
   if (buildFormatFactory) {
-    const formatFactory = buildFormatFactory(
-      origDateTimeFormat[origLocalesSymbol],
-      origDateTimeFormat[origOptionsSymbol],
-    )
-    const [calendarID, timeZoneID] = formatFactory.buildKey(dateArg)
+    const formatFactory = queryFormatFactoryForType(origDateTimeFormat, buildFormatFactory)
     return [
-      formatFactory.buildFormat(calendarID, timeZoneID),
+      formatFactory.buildFormat(dateArg),
       formatFactory.buildEpochMilli(dateArg),
     ]
   }
@@ -78,7 +78,7 @@ function createRangeArgs(
   origDateTimeFormat: ExtendedDateTimeFormat,
   startArg: DateTimeFormatArg,
   endArg: DateTimeFormatArg,
-): [ Intl.DateTimeFormat, DateTimeFormatArg, DateTimeFormatArg ] {
+): [Intl.DateTimeFormat, DateTimeFormatArg, DateTimeFormatArg] {
   const buildFormatFactory = extractFormatFactoryFactory(startArg)
   const buildFormatFactoryOther = extractFormatFactoryFactory(endArg)
 
@@ -87,17 +87,33 @@ function createRangeArgs(
   }
 
   if (buildFormatFactory) {
-    const formatFactory = buildFormatFactory(
-      origDateTimeFormat[origLocalesSymbol],
-      origDateTimeFormat[origOptionsSymbol],
-    )
-    const [calendarID, timeZoneID] = formatFactory.buildKey(startArg, endArg)
+    const formatFactory = queryFormatFactoryForType(origDateTimeFormat, buildFormatFactory)
     return [
-      formatFactory.buildFormat(calendarID, timeZoneID),
+      formatFactory.buildFormat(startArg, endArg),
       formatFactory.buildEpochMilli(startArg),
       formatFactory.buildEpochMilli(endArg),
     ]
   }
 
   return [origDateTimeFormat, startArg, endArg]
+}
+
+function queryFormatFactoryForType<Entity>(
+  origDateTimeFormat: ExtendedDateTimeFormat,
+  buildFormatFactory: FormatFactoryFactory<Entity>,
+): CachedFormatFactory<Entity> {
+  const formatFactoryMap = origDateTimeFormat[factoryMapSymbol]
+  let formatFactory = formatFactoryMap.get(buildFormatFactory)
+
+  if (!formatFactory) {
+    formatFactory = buildCachedFormatFactory(
+      buildFormatFactory(
+        origDateTimeFormat[origLocalesSymbol],
+        origDateTimeFormat[origOptionsSymbol],
+      ),
+    )
+    formatFactoryMap.set(buildFormatFactory, formatFactory)
+  }
+
+  return formatFactory
 }
