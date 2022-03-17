@@ -4,18 +4,21 @@ import {
   DISAMBIG_REJECT,
   parseDisambigOption,
 } from '../argParse/disambig'
+import { OFFSET_REJECT } from '../argParse/offsetHandling'
 import { isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochSecs } from '../dateUtils/isoMath'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
+import { refineZonedObj } from '../dateUtils/parseRefine'
 import {
   nanoInMicroBI,
   nanoInMilliBI,
   nanoInSecond,
   nanoInSecondBI,
 } from '../dateUtils/units'
+import { computeEpochNanoViaOffset } from '../dateUtils/zonedDateTime'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
@@ -50,14 +53,22 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
         return arg as TimeZone // treat TimeZoneProtocols as TimeZones internally
       }
     }
-    const dateTimeParse = tryParseZonedDateTime(String(arg))
-    return new TimeZone(
-      (dateTimeParse && (
-        dateTimeParse.timeZone ||
-        (dateTimeParse.Z && 'UTC') ||
-        (dateTimeParse.offset !== undefined && formatOffsetISO(dateTimeParse.offset))
-      )) || arg, // consider arg the literal time zone ID string
-    )
+
+    const parsed = tryParseZonedDateTime(String(arg))
+
+    if (parsed) {
+      if (parsed.timeZone) {
+        const refined = refineZonedObj(parsed) // TODO: we don't need the calendar
+        computeEpochNanoViaOffset(refined, OFFSET_REJECT) // throws error if offset/tz inconsistent
+        return refined.timeZone
+      } else if (parsed.Z) {
+        return new TimeZone('UTC')
+      } else if (parsed.offset !== undefined) {
+        return new TimeZone(formatOffsetISO(parsed.offset))
+      }
+    }
+
+    return new TimeZone(arg) // consider arg the literal time zone ID string
   }
 
   get id(): string { return getImpl(this).id }

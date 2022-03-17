@@ -71,10 +71,20 @@ export function createZonedDateTime(
   options: ZonedDateTimeOptions | undefined, // given directly to timeZone
   offsetHandling: OffsetHandlingInt,
 ): ZonedDateTime {
-  const { calendar, timeZone, offset, Z } = isoFields
+  const { calendar, timeZone } = isoFields
+  const epochNano = computeEpochNanoViaOffset(isoFields, offsetHandling) ??
+    timeZone.getInstantFor(createDateTime(isoFields), options).epochNanoseconds
+
+  return new ZonedDateTime(epochNano, timeZone, calendar)
+}
+
+export function computeEpochNanoViaOffset(
+  isoFields: ZonedDateTimeISOEssentials,
+  offsetHandling: OffsetHandlingInt,
+): bigint | undefined {
+  const { timeZone, offset, Z } = isoFields
   let epochNano: bigint | undefined
 
-  // try using the given offset and see what happens...
   if (offset !== undefined && offsetHandling !== OFFSET_IGNORE) {
     epochNano = isoFieldsToEpochNano(isoFields) - BigInt(offset)
 
@@ -91,12 +101,7 @@ export function createZonedDateTime(
     }
   }
 
-  // calculate from timeZone if necessary
-  if (epochNano === undefined) {
-    epochNano = timeZone.getInstantFor(createDateTime(isoFields), options).epochNanoseconds
-  }
-
-  return new ZonedDateTime(epochNano, timeZone, calendar)
+  return epochNano
 }
 
 function matchesPossibleInstants(epochNano: bigint, possibleInstants: Instant[]): boolean {
