@@ -425,7 +425,11 @@ describe('Intl', () => {
           'roc: 1/3/1911 Before R.O.C.',
         ].join('\n'),
       }
-      equal(year1Content, year1Snapshots[`node${nodeVersion}`])
+      equal(
+        // a workaround (by fullcalendar/temporal), to normalize output on certain node environments
+        year1Content.replace('B.R.O.C.', 'Before R.O.C.'),
+        year1Snapshots[`node${nodeVersion}`],
+      )
     })
 
     const fromWithCases: { [calendarName: string]: any } = {
