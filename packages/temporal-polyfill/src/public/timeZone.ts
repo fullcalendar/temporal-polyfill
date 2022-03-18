@@ -9,15 +9,9 @@ import { isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
-import { epochNanoToISOFields, isoFieldsToEpochSecs } from '../dateUtils/isoMath'
+import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
-import {
-  nanoInMicroBI,
-  nanoInMilliBI,
-  nanoInSecond,
-  nanoInSecondBI,
-} from '../dateUtils/units'
 import { computeEpochNanoViaOffset } from '../dateUtils/zonedDateTime'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
@@ -81,7 +75,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
     const instant = ensureObj(Instant, instantArg)
-    return getImpl(this).getOffset(instant.epochSeconds) * nanoInSecond
+    return getImpl(this).getOffset(instant.epochNanoseconds)
   }
 
   getPlainDateTimeFor(
@@ -101,58 +95,58 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   getInstantFor(dateTimeArg: DateTimeArg, options?: { disambiguation?: Disambiguation }): Instant {
     const disambig = parseDisambigOption(options)
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
-    const zoneSecs = isoFieldsToEpochSecs(isoFields)
-    const possibleOffsetSecs = getImpl(this).getPossibleOffsets(zoneSecs)
-    let offsetSecs: number
+    const zoneNano = isoFieldsToEpochNano(isoFields)
+    const possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
+    let offsetNano: number
 
-    if (possibleOffsetSecs.length === 1 || disambig === DISAMBIG_COMPATIBLE) {
-      offsetSecs = possibleOffsetSecs[0]
+    if (possibleOffsetNanos.length === 1 || disambig === DISAMBIG_COMPATIBLE) {
+      offsetNano = possibleOffsetNanos[0]
     } else if (disambig === DISAMBIG_REJECT) {
       throw new RangeError('Ambiguous offset')
     } else {
-      offsetSecs = Math[
+      offsetNano = Math[
         disambig === DISAMBIG_EARLIER
-          ? 'max' // (results in an earlier epochNano, because offsetSecs is subtracted)
+          ? 'max' // (results in an earlier epochNano, because offsetNano is subtracted)
           : 'min' // DISAMBIG_LATER
-      ](...(possibleOffsetSecs as [number, number]))
+      ](...(possibleOffsetNanos as [number, number]))
     }
 
-    return epochSecsToInstant(zoneSecs - offsetSecs, isoFields)
+    return new Instant(zoneNano - BigInt(offsetNano))
   }
 
   getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[] {
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
-    const zoneSecs = isoFieldsToEpochSecs(isoFields)
-    let possibleOffsetSecs = getImpl(this).getPossibleOffsets(zoneSecs)
+    const zoneNano = isoFieldsToEpochNano(isoFields)
+    let possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
 
     // A forward transition looses an hour.
     // dateTimeArg is stuck in this lost hour, so return not results
     if (
-      possibleOffsetSecs.length === 2 &&
-      possibleOffsetSecs[0] < possibleOffsetSecs[1]
+      possibleOffsetNanos.length === 2 &&
+      possibleOffsetNanos[0] < possibleOffsetNanos[1]
     ) {
-      possibleOffsetSecs = []
+      possibleOffsetNanos = []
     }
 
-    return possibleOffsetSecs.map((offsetSecs) => (
-      epochSecsToInstant(zoneSecs - offsetSecs, isoFields)
+    return possibleOffsetNanos.map((offsetNano) => (
+      new Instant(zoneNano - BigInt(offsetNano))
     ))
   }
 
   getPreviousTransition(instantArg: InstantArg): Instant | null {
     const instant = ensureObj(Instant, instantArg)
-    const rawTransition = getImpl(this).getTransition(instant.epochSeconds, -1)
+    const rawTransition = getImpl(this).getTransition(instant.epochNanoseconds, -1)
     if (rawTransition) {
-      return epochSecsToInstant(rawTransition[0])
+      return new Instant(rawTransition[0])
     }
     return null
   }
 
   getNextTransition(instantArg: InstantArg): Instant | null {
     const instant = ensureObj(Instant, instantArg)
-    const rawTransition = getImpl(this).getTransition(instant.epochSeconds, 1)
+    const rawTransition = getImpl(this).getTransition(instant.epochNanoseconds, 1)
     if (rawTransition) {
-      return epochSecsToInstant(rawTransition[0])
+      return new Instant(rawTransition[0])
     }
     return null
   }
@@ -160,20 +154,4 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
   toString(): string {
     return getImpl(this).id
   }
-}
-
-function epochSecsToInstant(
-  epochSecs: number,
-  otherISOFields?: { isoMillisecond: number, isoMicrosecond: number, isoNanosecond: number },
-): Instant {
-  return new Instant(
-    BigInt(epochSecs) * nanoInSecondBI + (
-      otherISOFields
-        // TODO: use a common util for this?
-        ? BigInt(otherISOFields.isoMillisecond) * nanoInMilliBI +
-          BigInt(otherISOFields.isoMicrosecond) * nanoInMicroBI +
-          BigInt(otherISOFields.isoNanosecond)
-        : 0n
-    ),
-  )
 }

@@ -176,14 +176,14 @@ export function epochMilliToISOFields(epochMilli: number): DateTimeISOMilli {
   }
 }
 
-// Year <-> Epoch Minutes
-
-export function epochSecondsToISOYear(epochSeconds: number): number {
-  return nudgeToLegacyDate(epochSeconds * milliInSecond)[0].getUTCFullYear()
-}
+// Misc conversions
 
 export function isoYearToEpochSeconds(isoYear: number): number {
   return Math.floor(isoToEpochMilli(isoYear) / milliInSecond)
+}
+
+export function epochNanoToISOYear(epochNano: bigint): number {
+  return nudgeToLegacyDate(Number(epochNano / nanoInMilliBI))[0].getUTCFullYear()
 }
 
 // Epoch-Millisecond Math

@@ -10,6 +10,5 @@ module.exports = {
 
     // temporary exclusions
     '!**/usercalendar.spec.ts',
-    '!**/usertimezone.spec.ts',
   ],
 }

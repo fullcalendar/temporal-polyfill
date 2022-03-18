@@ -3,17 +3,17 @@ import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 export class FixedTimeZoneImpl extends TimeZoneImpl {
   constructor(
     id: string,
-    private offsetSecs: number,
+    private offsetNano: number,
   ) {
     super(id)
   }
 
   getPossibleOffsets(): number[] {
-    return [this.offsetSecs]
+    return [this.offsetNano]
   }
 
   getOffset(): number {
-    return this.offsetSecs
+    return this.offsetNano
   }
 
   getTransition(): RawTransition | undefined {
