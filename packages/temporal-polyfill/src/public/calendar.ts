@@ -74,7 +74,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  get id(): string { return getImpl(this).id }
+  get id(): string {
+    return this.toString()
+  }
 
   era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
@@ -262,7 +264,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return diffDateFields(d0, d1, impl, largestUnit)
   }
 
-  toString(): string { return this.id }
+  toString(): string {
+    return getImpl(this).id
+  }
 }
 
 export function createDefaultCalendar(): Calendar {

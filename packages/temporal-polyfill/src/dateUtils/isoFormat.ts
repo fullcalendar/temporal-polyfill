@@ -95,6 +95,8 @@ export function formatOffsetISO(offsetNano: number): string {
       : '')
 }
 
+// you MUST pass in Calendar::toString()
+// this is WEIRD. proper solution: have a proper CalendarProtocol object
 export function formatCalendarID(
   calendarID: string | undefined,
   display: CalendarDisplayInt,

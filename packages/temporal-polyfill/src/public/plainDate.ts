@@ -140,7 +140,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     const fields = this.getISOFields()
 
     return formatDateISO(fields) +
-      formatCalendarID(fields.calendar.id, calendarDisplay)
+      formatCalendarID(fields.calendar.toString(), calendarDisplay)
   }
 
   toZonedDateTime(options: { plainTime?: TimeArg, timeZone: TimeZoneArg }): ZonedDateTime {

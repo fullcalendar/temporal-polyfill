@@ -26,7 +26,6 @@ import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import {
 } from '../native/intlUtils'
-import { throwNew } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { PlainDate } from './plainDate'
 import {
@@ -44,16 +43,10 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     isoMonth: number,
     isoDay: number,
     calendar: CalendarProtocol = createDefaultCalendar(),
-    referenceISOYear?: number,
+    referenceISOYear: number = isoEpochLeapYear,
   ) {
-    const isoYear: number = referenceISOYear ??
-      (calendar.id === isoCalendarID
-        ? isoEpochLeapYear
-        : throwNew(Error, 'Must specify referenceYear')
-      )
-
     super({
-      ...constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT),
+      ...constrainDateISO({ isoYear: referenceISOYear, isoMonth, isoDay }, OVERFLOW_REJECT),
       calendar,
     })
   }
@@ -100,7 +93,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
 
   toString(options?: DateToStringOptions): string {
     const fields = this.getISOFields()
-    const calendarID = fields.calendar.id
+    const calendarID = fields.calendar.toString() // see note in formatCalendarID
     const calendarDisplay = parseCalendarDisplayOption(options)
 
     return (

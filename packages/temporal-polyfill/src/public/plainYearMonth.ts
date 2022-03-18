@@ -135,7 +135,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 
   toString(options?: DateToStringOptions): string {
     const fields = this.getISOFields()
-    const calendarID = fields.calendar.id
+    const calendarID = fields.calendar.toString() // see note in formatCalendarID
     const calendarDisplay = parseCalendarDisplayOption(options)
 
     return (

@@ -60,7 +60,3 @@ export function strArrayToHash<FieldType>(
   })
   return res
 }
-
-export function throwNew(ErrorClass: { new(message: string): Error }, message: string): any {
-  throw new ErrorClass(message)
-}

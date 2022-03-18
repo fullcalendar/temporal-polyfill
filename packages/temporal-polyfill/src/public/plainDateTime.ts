@@ -186,7 +186,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     ).getISOFields() // TODO: somehow have ISO fields returned directly
 
     return formatDateTimeISO(isoFields, formatConfig) +
-      formatCalendarID(isoFields.calendar.id, calendarDisplay)
+      formatCalendarID(isoFields.calendar.toString(), calendarDisplay)
   }
 
   // workhorse for converting to ZonedDateTime for other objects

@@ -264,7 +264,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     return formatDateTimeISO(isoFields, formatConfig) +
       (offsetDisplay === OFFSET_DISPLAY_AUTO ? isoFields.offset : '') + // already formatted
       formatTimeZoneID(isoFields.timeZone.toString(), timeZoneDisplay) +
-      formatCalendarID(isoFields.calendar.id, calendarDisplay)
+      formatCalendarID(isoFields.calendar.toString(), calendarDisplay)
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
