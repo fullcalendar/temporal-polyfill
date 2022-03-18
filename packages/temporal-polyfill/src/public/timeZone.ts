@@ -71,7 +71,9 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     return new TimeZone(arg) // consider arg the literal time zone ID string
   }
 
-  get id(): string { return getImpl(this).id }
+  get id(): string {
+    return this.toString()
+  }
 
   getOffsetStringFor(instantArg: InstantArg): string {
     return formatOffsetISO(this.getOffsetNanosecondsFor(instantArg))
@@ -155,7 +157,9 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     return null
   }
 
-  toString(): string { return this.id }
+  toString(): string {
+    return getImpl(this).id
+  }
 }
 
 function epochSecsToInstant(

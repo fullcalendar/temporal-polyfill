@@ -14,7 +14,12 @@ import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
-import { formatCalendarID, formatDateTimeISO, formatTimeZoneID } from '../dateUtils/isoFormat'
+import {
+  formatCalendarID,
+  formatDateTimeISO,
+  formatOffsetISO,
+  formatTimeZoneID,
+} from '../dateUtils/isoFormat'
 import { epochNanoToISOFields } from '../dateUtils/isoMath'
 import {
   ComputedEpochFields,
@@ -97,7 +102,9 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
       ...isoFields,
       calendar,
       timeZone,
-      offset: timeZone.getOffsetStringFor(instant),
+      // NOTE: must support TimeZone protocols that don't implement getOffsetStringFor
+      // TODO: more DRY with getOffsetStringFor
+      offset: formatOffsetISO(timeZone.getOffsetNanosecondsFor(instant)),
     })
 
     setPrivateFields(this, {
@@ -256,7 +263,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 
     return formatDateTimeISO(isoFields, formatConfig) +
       (offsetDisplay === OFFSET_DISPLAY_AUTO ? isoFields.offset : '') + // already formatted
-      formatTimeZoneID(isoFields.timeZone.id, timeZoneDisplay) +
+      formatTimeZoneID(isoFields.timeZone.toString(), timeZoneDisplay) +
       formatCalendarID(isoFields.calendar.id, calendarDisplay)
   }
 
