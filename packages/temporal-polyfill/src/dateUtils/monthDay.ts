@@ -1,5 +1,5 @@
 import { PlainMonthDay } from '../public/plainMonthDay'
-import { CompareResult, DateISOFields, MonthDayLikeFields } from '../public/types'
+import { CompareResult, DateISOFields } from '../public/types'
 import { compareValues } from '../utils/math'
 import { DateEssentials } from './date'
 import { isoFieldsToEpochNano } from './isoMath'
@@ -34,30 +34,6 @@ export function createMonthDay(isoFields: DateISOFields): PlainMonthDay {
     isoFields.calendar,
     isoFields.isoYear,
   )
-}
-
-export function overrideMonthDayFields(
-  overrides: Partial<MonthDayFields>,
-  base: MonthDayEssentials,
-): MonthDayLikeFields {
-  const merged = { day: overrides.day ?? base.day } as MonthDayFields
-
-  if (overrides.monthCode !== undefined) {
-    merged.monthCode = overrides.monthCode
-
-    if (overrides.month !== undefined) {
-      merged.month = overrides.month
-    }
-  } else if (overrides.month !== undefined) {
-    merged.month = overrides.month
-
-    // if not defined, will throw error in Calendar::monthDayFromFields
-    merged.year = overrides.year!
-  } else {
-    merged.monthCode = base.monthCode
-  }
-
-  return merged
 }
 
 export function monthDaysEqual(a: PlainMonthDay, b: PlainMonthDay): boolean {

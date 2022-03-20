@@ -7,17 +7,13 @@ import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { Duration } from '../public/duration'
 import { PlainDate } from '../public/plainDate'
-import { CompareResult, DateISOFields, DateLikeFields, DateUnit } from '../public/types'
+import { CompareResult, DateISOFields, DateUnit } from '../public/types'
 import { compareValues } from '../utils/math'
 import { addWholeDays } from './add'
 import { isoFieldsToEpochNano } from './isoMath'
 import { compareMonthDayFields } from './monthDay'
 import { roundBalancedDuration } from './rounding'
-import {
-  YearMonthEssentials,
-  YearMonthFields,
-  overrideYearMonthFields,
-} from './yearMonth'
+import { YearMonthEssentials, YearMonthFields } from './yearMonth'
 
 export type DateISOEssentials = { isoYear: number, isoMonth: number, isoDay: number }
 export type DateEssentials = YearMonthEssentials & { day: number }
@@ -30,16 +26,6 @@ export function createDate(isoFields: DateISOFields): PlainDate {
     isoFields.isoDay,
     isoFields.calendar,
   )
-}
-
-export function overrideDateFields(
-  overrides: Partial<DateFields>,
-  base: DateFields,
-): DateLikeFields {
-  return {
-    ...overrideYearMonthFields(overrides, base),
-    day: overrides.day ?? base.day,
-  }
 }
 
 export function constrainDateFields( // also ensures numbers

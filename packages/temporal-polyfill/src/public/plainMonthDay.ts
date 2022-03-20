@@ -1,10 +1,9 @@
-import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
-import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO } from '../dateUtils/date'
+import { processMonthDayLike, processMonthDayWith } from '../dateUtils/fromAndWith'
 import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
 import { isoEpochLeapYear } from '../dateUtils/isoMath'
 import {
@@ -13,13 +12,7 @@ import {
   mixinISOFields,
   monthDayCalendarFields,
 } from '../dateUtils/mixins'
-import {
-  MonthDayFields,
-  createMonthDay,
-  monthDayFieldMap,
-  monthDaysEqual,
-  overrideMonthDayFields,
-} from '../dateUtils/monthDay'
+import { createMonthDay, monthDaysEqual } from '../dateUtils/monthDay'
 import { parseMonthDay } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
@@ -33,7 +26,6 @@ import {
   DateISOFields,
   DateToStringOptions,
   MonthDayArg,
-  MonthDayLikeFields,
   MonthDayOverrides,
   OverflowOptions,
 } from './types'
@@ -59,21 +51,14 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     }
 
     if (typeof arg === 'object') {
-      const calendar = extractCalendar(arg)
-      let refinedFields = refineFields(arg, monthDayFieldMap) as Partial<MonthDayFields>
-
-      // be nice and guess year if no calendar specified
-      if (refinedFields.year === undefined && arg.calendar === undefined) {
-        refinedFields = { ...refinedFields, year: isoEpochLeapYear }
-      }
-
-      return calendar.monthDayFromFields(refinedFields as MonthDayLikeFields, options)
+      return processMonthDayLike(arg, options)
     }
 
     // a string...
     const parsed = parseMonthDay(String(arg))
 
     // for strings, force ISO year if no calendar specified
+    // TODO: more DRY with processMonthDayLike?
     if (parsed.calendar === undefined) {
       parsed.isoYear = isoEpochLeapYear
     }
@@ -82,9 +67,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   }
 
   with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {
-    const refinedFields = refineOverrideFields(fields, monthDayFieldMap)
-    const mergedFields = overrideMonthDayFields(refinedFields, this)
-    return this.calendar.monthDayFromFields(mergedFields, options)
+    return processMonthDayWith(this, fields, options)
   }
 
   equals(other: MonthDayArg): boolean {

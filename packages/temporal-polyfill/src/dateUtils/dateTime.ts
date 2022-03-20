@@ -1,14 +1,11 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
-import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
 import { PlainDateTime } from '../public/plainDateTime'
 import {
   CompareResult,
   DateTimeISOFields,
-  DateTimeLikeFields,
-  DateTimeOverrides,
   DateTimeRoundingOptions,
   DayTimeUnit,
   DiffOptions,
@@ -21,7 +18,6 @@ import {
   DateISOEssentials,
   constrainDateISO,
   createDate,
-  overrideDateFields,
 } from './date'
 import {
   durationToTimeFields,
@@ -39,8 +35,6 @@ import {
   TimeISOEssentials,
   TimeISOMilli,
   constrainTimeISO,
-  overrideTimeFields,
-  timeFieldsToConstrainedISO,
   timeFieldsToNano,
 } from './time'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR } from './units'
@@ -63,28 +57,6 @@ export function createDateTime(isoFields: DateTimeISOFields): PlainDateTime {
     isoFields.isoNanosecond,
     isoFields.calendar,
   )
-}
-
-export function dateTimeFieldsToISO(
-  fields: DateTimeLikeFields,
-  options: OverflowOptions | undefined,
-  overflowHandling: OverflowHandlingInt,
-  calendar: Calendar,
-): DateTimeISOFields {
-  return {
-    ...calendar.dateFromFields(fields, options).getISOFields(),
-    ...timeFieldsToConstrainedISO(fields, overflowHandling),
-  }
-}
-
-export function overrideDateTimeFields(
-  overrides: DateTimeOverrides,
-  base: DateTimeFields,
-): DateTimeLikeFields {
-  return {
-    ...overrideDateFields(overrides, base),
-    ...overrideTimeFields(overrides, base),
-  }
 }
 
 export function constrainDateTimeISO( // also ensures numbers

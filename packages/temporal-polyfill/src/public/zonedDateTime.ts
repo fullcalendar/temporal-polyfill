@@ -1,18 +1,16 @@
-import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
+import { getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDisambigOption } from '../argParse/disambig'
-import { zonedDateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplayOption } from '../argParse/offsetDisplay'
 import { OFFSET_PREFER, OFFSET_REJECT, parseOffsetHandlingOption } from '../argParse/offsetHandling'
 import { parseOverflowOption } from '../argParse/overflowHandling'
-import { refineFields, refineOverrideFields } from '../argParse/refine'
-import { extractTimeZone } from '../argParse/timeZone'
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
+import { processZonedDateTimeLike, processZonedDateTimeWith } from '../dateUtils/fromAndWith'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import {
   formatCalendarID,
@@ -39,11 +37,9 @@ import {
   computeNanoInDay,
   createZonedDateTime,
   diffZonedDateTimes,
-  overrideZonedDateTimeFields,
   roundZonedDateTime,
   roundZonedDateTimeWithOptions,
   zeroTimeISOFields,
-  zonedDateTimeFieldsToISO,
 } from '../dateUtils/zonedDateTime'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
@@ -70,7 +66,6 @@ import {
   TimeZoneArg,
   ZonedDateTimeArg,
   ZonedDateTimeISOFields,
-  ZonedDateTimeLikeFields,
   ZonedDateTimeOptions,
   ZonedDateTimeOverrides,
   ZonedDateTimeToStringOptions,
@@ -124,13 +119,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
             offset: arg.offsetNanoseconds,
           }
         : typeof arg === 'object'
-          ? zonedDateTimeFieldsToISO(
-            refineFields(arg, zonedDateTimeFieldMap) as ZonedDateTimeLikeFields,
-            options,
-            overflowHandling,
-            extractCalendar(arg),
-            extractTimeZone(arg),
-          )
+          ? processZonedDateTimeLike(arg, overflowHandling, options)
           : refineZonedObj(parseZonedDateTime(String(arg))),
       options,
       offsetHandling,
@@ -150,20 +139,12 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   get offset(): string { return this.getISOFields().offset }
 
   with(fields: ZonedDateTimeOverrides, options?: ZonedDateTimeOptions): ZonedDateTime {
-    const refinedFields = refineOverrideFields(fields, zonedDateTimeFieldMap)
-    const mergedFields = overrideZonedDateTimeFields(refinedFields, this)
-    const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
-    const overflowHandling = parseOverflowOption(options)
     parseDisambigOption(options) // for validation
+    const overflowHandling = parseOverflowOption(options) // for validation (?)
+    const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
 
     return createZonedDateTime(
-      zonedDateTimeFieldsToISO(
-        mergedFields,
-        options,
-        overflowHandling,
-        this.calendar,
-        this.timeZone,
-      ),
+      processZonedDateTimeWith(this, fields, overflowHandling, options),
       options,
       offsetHandling,
     )

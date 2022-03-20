@@ -7,10 +7,8 @@ import {
   OFFSET_USE,
   OffsetHandlingInt,
 } from '../argParse/offsetHandling'
-import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { unitNames } from '../argParse/unitStr'
-import { Calendar } from '../public/calendar'
 import { Duration } from '../public/duration'
 import { Instant } from '../public/instant'
 import { PlainDateTime } from '../public/plainDateTime'
@@ -24,23 +22,15 @@ import {
   DiffOptions,
   OverflowOptions,
   Unit,
-  ZonedDateTimeLikeFields,
   ZonedDateTimeOptions,
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { RoundingFunc } from '../utils/math'
 import { addWholeDays } from './add'
 import { createDate } from './date'
-import {
-  DateTimeFields,
-  createDateTime,
-  dateTimeFieldsToISO,
-  overrideDateTimeFields,
-  roundDateTime,
-} from './dateTime'
+import { DateTimeFields, createDateTime, roundDateTime } from './dateTime'
 import { addDurations, durationToTimeFields, extractBigDuration, nanoToDuration } from './duration'
 import { isoFieldsToEpochNano } from './isoMath'
-import { parseOffsetNano } from './parse'
 import {
   combineISOWithDayTimeFields,
   computeRoundingNanoIncrement,
@@ -111,30 +101,6 @@ function matchesPossibleInstants(epochNano: bigint, possibleInstants: Instant[])
     }
   }
   return false
-}
-
-export function zonedDateTimeFieldsToISO(
-  fields: ZonedDateTimeLikeFields,
-  options: ZonedDateTimeOptions | undefined,
-  overflowHandling: OverflowHandlingInt,
-  calendar: Calendar,
-  timeZone: TimeZone,
-): ZonedDateTimeISOEssentials {
-  return {
-    ...dateTimeFieldsToISO(fields, options, overflowHandling, calendar),
-    timeZone,
-    offset: fields.offset ? parseOffsetNano(fields.offset) : undefined,
-  }
-}
-
-export function overrideZonedDateTimeFields(
-  overrides: Partial<ZonedDateTimeFields>,
-  base: ZonedDateTimeFields,
-): ZonedDateTimeLikeFields {
-  return {
-    ...overrideDateTimeFields(overrides, base),
-    offset: overrides.offset ?? base.offset,
-  }
 }
 
 export function addToZonedDateTime(

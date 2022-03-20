@@ -4,8 +4,9 @@ import {
   isCalendarArgBag,
   parseCalendarArgFromBag,
 } from '../argParse/calendar'
+import { dateFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
-import { ensureOptionsObj } from '../argParse/refine'
+import { ensureOptionsObj, refineFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
 import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
@@ -181,8 +182,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return getImpl(this).inLeapYear(this.year(arg))
   }
 
-  dateFromFields(arg: DateLikeFields, options?: OverflowOptions): PlainDate {
-    const isoFields = queryDateISOFields(arg, getImpl(this), options)
+  dateFromFields(fields: DateLikeFields, options?: OverflowOptions): PlainDate {
+    const refinedFields = refineFields(fields, dateFieldMap) as DateLikeFields
+    const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
     return new PlainDate(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -262,6 +264,61 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
     ensureCalendarsEqual(getCommonCalendar(d0, d1), this)
     return diffDateFields(d0, d1, impl, largestUnit)
+  }
+
+  /*
+  Given a date-type's core field names, returns the field names that should be
+  given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
+  */
+  fields(inFields: string[]): string[] {
+    return inFields.slice() // copy
+  }
+
+  /*
+  Given a date-instance, and fields to override, returns the fields that should be
+  given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
+  */
+  mergeFields(fields: any, additionalFields: any): any { // TODO: better types?
+    const merged = {} as any
+
+    if (fields.year !== undefined) {
+      let anyAdditionalYear = false
+
+      if (additionalFields.era !== undefined || additionalFields.eraYear !== undefined) {
+        merged.era = additionalFields.era
+        merged.eraYear = additionalFields.eraYear
+        anyAdditionalYear = true
+      }
+      if (additionalFields.year !== undefined) {
+        merged.year = additionalFields.year
+        anyAdditionalYear = true
+      }
+      if (!anyAdditionalYear) {
+        merged.year = fields.year
+      }
+    }
+
+    if (fields.month !== undefined) {
+      let anyAdditionalMonth = false
+
+      if (additionalFields.month !== undefined) {
+        merged.month = additionalFields.month
+        anyAdditionalMonth = true
+      }
+      if (additionalFields.monthCode !== undefined) {
+        merged.monthCode = additionalFields.monthCode
+        anyAdditionalMonth = true
+      }
+      if (!anyAdditionalMonth) {
+        merged.month = fields.month
+      }
+    }
+
+    if (fields.day !== undefined) {
+      merged.day = additionalFields.day ?? fields.day
+    }
+
+    return merged
   }
 
   toString(): string {

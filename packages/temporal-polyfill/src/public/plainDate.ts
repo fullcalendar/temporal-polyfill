@@ -1,18 +1,15 @@
-import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
-import { dateFieldMap } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
-import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import {
   compareDates,
   constrainDateISO,
   createDate,
   diffDates,
-  overrideDateFields,
 } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
+import { processDateLike, processDateWith } from '../dateUtils/fromAndWith'
 import { validateDate } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
 import {
@@ -39,7 +36,6 @@ import {
   DateArg,
   DateDiffOptions,
   DateISOFields,
-  DateLikeFields,
   DateOverrides,
   DateToStringOptions,
   DateUnit,
@@ -76,8 +72,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     }
 
     if (typeof arg === 'object') {
-      const refinedFields = refineFields(arg, dateFieldMap) as DateLikeFields
-      return extractCalendar(arg).dateFromFields(refinedFields, options)
+      return processDateLike(arg, options)
     }
 
     return createDate(refineBaseObj(parseDateTime(String(arg))))
@@ -91,9 +86,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   with(fields: DateOverrides, options?: OverflowOptions): PlainDate {
-    const refinedFields = refineOverrideFields(fields, dateFieldMap)
-    const mergedFields = overrideDateFields(refinedFields, this)
-    return this.calendar.dateFromFields(mergedFields, options)
+    return processDateWith(this, fields, options)
   }
 
   withCalendar(calendarArg: CalendarArg): PlainDate {

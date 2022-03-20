@@ -1,9 +1,7 @@
-import { extractCalendar, getStrangerCalendar } from '../argParse/calendar'
+import { getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
-import { dateTimeFieldMap } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
-import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
@@ -12,12 +10,11 @@ import {
   compareDateTimes,
   constrainDateTimeISO,
   createDateTime,
-  dateTimeFieldsToISO,
   diffDateTimes,
-  overrideDateTimeFields,
   roundDateTime,
   roundDateTimeWithOptions,
 } from '../dateUtils/dateTime'
+import { processDateTimeLike, processDateTimeWith } from '../dateUtils/fromAndWith'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
 import {
@@ -45,7 +42,6 @@ import {
   DateArg,
   DateTimeArg,
   DateTimeISOFields,
-  DateTimeLikeFields,
   DateTimeOverrides,
   DateTimeRoundingOptions,
   DateTimeToStringOptions,
@@ -99,12 +95,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
       arg instanceof PlainDateTime
         ? arg.getISOFields() // optimization
         : typeof arg === 'object'
-          ? dateTimeFieldsToISO(
-            refineFields(arg, dateTimeFieldMap) as DateTimeLikeFields,
-            options,
-            overflowHandling,
-            extractCalendar(arg),
-          )
+          ? processDateTimeLike(arg, overflowHandling, options)
           : refineBaseObj(parseDateTime(String(arg))),
     )
   }
@@ -117,15 +108,9 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   with(fields: DateTimeOverrides, options?: OverflowOptions): PlainDateTime {
-    const refinedFields = refineOverrideFields(fields, dateTimeFieldMap)
-    const mergedFields = overrideDateTimeFields(refinedFields, this)
+    const overflowHandling = parseOverflowOption(options)
     return createDateTime(
-      dateTimeFieldsToISO(
-        mergedFields,
-        options,
-        parseOverflowOption(options),
-        this.calendar,
-      ),
+      processDateTimeWith(this, fields, overflowHandling, options),
     )
   }
 

@@ -1,12 +1,10 @@
-import { extractCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
-import { yearMonthFieldMap } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
-import { refineFields, refineOverrideFields } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO, diffDates } from '../dateUtils/date'
+import { processYearMonthLike, processYearMonthWith } from '../dateUtils/fromAndWith'
 import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
 import {
@@ -18,11 +16,7 @@ import {
 import { parseYearMonth } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { MONTH, YEAR, YearMonthUnitInt } from '../dateUtils/units'
-import {
-  comparePlainYearMonths,
-  createYearMonth,
-  overrideYearMonthFields,
-} from '../dateUtils/yearMonth'
+import { comparePlainYearMonths, createYearMonth } from '../dateUtils/yearMonth'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -37,7 +31,6 @@ import {
   OverflowOptions,
   YearMonthArg,
   YearMonthDiffOptions,
-  YearMonthLikeFields,
   YearMonthOverrides,
   YearMonthUnit,
 } from './types'
@@ -74,8 +67,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     }
 
     if (typeof arg === 'object') {
-      const refinedFields = refineFields(arg, yearMonthFieldMap) as YearMonthLikeFields
-      return extractCalendar(arg).yearMonthFromFields(refinedFields, options)
+      return processYearMonthLike(arg, options)
     }
 
     // a string...
@@ -97,11 +89,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   with(fields: YearMonthOverrides, options?: OverflowOptions): PlainYearMonth {
-    const refinedFields = refineOverrideFields(fields, yearMonthFieldMap)
-    return this.calendar.yearMonthFromFields(
-      overrideYearMonthFields(refinedFields, this),
-      options,
-    )
+    return processYearMonthWith(this, fields, options)
   }
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {

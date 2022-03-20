@@ -1,5 +1,5 @@
 import { PlainYearMonth } from '../public/plainYearMonth'
-import { CompareResult, DateISOFields, YearMonthLike } from '../public/types'
+import { CompareResult, DateISOFields } from '../public/types'
 import { compareValues } from '../utils/math'
 import { isoFieldsToEpochNano } from './isoMath'
 
@@ -23,42 +23,6 @@ export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
     isoFields.calendar,
     isoFields.isoDay,
   )
-}
-
-export function overrideYearMonthFields(
-  overrides: Partial<YearMonthFields>,
-  base: YearMonthFields,
-): YearMonthLike {
-  const merged = {} as YearMonthFields
-  let anyYear = false
-  let anyMonth = false
-
-  if (overrides.era !== undefined || overrides.eraYear !== undefined) {
-    merged.era = overrides.era
-    merged.eraYear = overrides.eraYear
-    anyYear = true
-  }
-  if (overrides.year !== undefined) {
-    merged.year = overrides.year
-    anyYear = true
-  }
-  if (!anyYear) {
-    merged.year = base.year
-  }
-
-  if (overrides.month !== undefined) {
-    merged.month = overrides.month
-    anyMonth = true
-  }
-  if (overrides.monthCode !== undefined) {
-    merged.monthCode = overrides.monthCode
-    anyMonth = true
-  }
-  if (!anyMonth) {
-    merged.month = base.month
-  }
-
-  return merged
 }
 
 export function comparePlainYearMonths(a: PlainYearMonth, b: PlainYearMonth): CompareResult {
