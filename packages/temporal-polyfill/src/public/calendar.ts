@@ -4,7 +4,7 @@ import {
   isCalendarArgBag,
   parseCalendarArgFromBag,
 } from '../argParse/calendar'
-import { dateFieldMap } from '../argParse/fieldStr'
+import { dateFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, refineFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
@@ -23,7 +23,7 @@ import {
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
 import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
-import { MonthDayFields } from '../dateUtils/monthDay'
+import { MonthDayFields, monthDayFieldMap } from '../dateUtils/monthDay'
 import { tryParseDateTime } from '../dateUtils/parse'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
@@ -185,6 +185,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   dateFromFields(fields: DateLikeFields, options?: OverflowOptions): PlainDate {
     const refinedFields = refineFields(fields, dateFieldMap) as DateLikeFields
     const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
+
     return new PlainDate(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -193,8 +194,10 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  yearMonthFromFields(arg: YearMonthLikeFields, options?: OverflowOptions): PlainYearMonth {
-    const isoFields = queryDateISOFields({ ...arg, day: 1 }, getImpl(this), options)
+  yearMonthFromFields(fields: YearMonthLikeFields, options?: OverflowOptions): PlainYearMonth {
+    const refinedFields = refineFields(fields, yearMonthFieldMap) as YearMonthLikeFields
+    const isoFields = queryDateISOFields({ ...refinedFields, day: 1 }, getImpl(this), options)
+
     return new PlainYearMonth(
       isoFields.isoYear,
       isoFields.isoMonth,
@@ -205,7 +208,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
   monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay {
     const impl = getImpl(this)
-    let { era, eraYear, year, month, monthCode, day } = fields as Partial<MonthDayFields>
+
+    const refinedFields = refineFields(fields, monthDayFieldMap) as MonthDayLikeFields
+    let { era, eraYear, year, month, monthCode, day } = refinedFields as Partial<MonthDayFields>
 
     if (day === undefined) {
       throw new TypeError('required property \'day\' missing or undefined')

@@ -68,17 +68,11 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   refinerMap: Map,
 ): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
   const res: { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } = {}
-  let cnt = 0
 
   for (const fieldName in refinerMap) {
     if (input[fieldName] !== undefined) {
       res[fieldName] = refinerMap[fieldName](input[fieldName])
-      cnt++
     }
-  }
-
-  if (!cnt) {
-    throw new TypeError('Invalid object, no keys')
   }
 
   return res
@@ -100,19 +94,4 @@ const objectLikeTypeRE = /object|function/
 
 export function isObjectLike(v: any): v is Record<string, unknown> {
   return v !== null && objectLikeTypeRE.test(typeof v)
-}
-
-const invalidOverrideFields = ['calendar', 'timeZone']
-
-export function refineOverrideFields<Map extends { [fieldName: string]: (input: unknown) => any }>(
-  input: { [FieldName in keyof Map]?: unknown },
-  refinerMap: Map,
-): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
-  for (const fieldName of invalidOverrideFields) {
-    if (input[fieldName] !== undefined) {
-      throw new TypeError(`Disallowed field ${fieldName}`)
-    }
-  }
-
-  return refineFields(input, refinerMap)
 }
