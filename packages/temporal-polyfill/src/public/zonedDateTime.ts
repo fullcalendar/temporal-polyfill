@@ -10,7 +10,10 @@ import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { createDate } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
-import { processZonedDateTimeLike, processZonedDateTimeWith } from '../dateUtils/fromAndWith'
+import {
+  processZonedDateTimeFromFields,
+  processZonedDateTimeWithFields,
+} from '../dateUtils/fromAndWith'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import {
   formatCalendarID,
@@ -119,7 +122,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
             offset: arg.offsetNanoseconds,
           }
         : typeof arg === 'object'
-          ? processZonedDateTimeLike(arg, overflowHandling, options)
+          ? processZonedDateTimeFromFields(arg, overflowHandling, options)
           : refineZonedObj(parseZonedDateTime(String(arg))),
       options,
       offsetHandling,
@@ -144,7 +147,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
 
     return createZonedDateTime(
-      processZonedDateTimeWith(this, fields, overflowHandling, options),
+      processZonedDateTimeWithFields(this, fields, overflowHandling, options),
       options,
       offsetHandling,
     )

@@ -9,7 +9,7 @@ import {
   diffDates,
 } from '../dateUtils/date'
 import { createDateTime } from '../dateUtils/dateTime'
-import { processDateLike, processDateWith } from '../dateUtils/fromAndWith'
+import { processDateFromFields, processDateWithFields } from '../dateUtils/fromAndWith'
 import { validateDate } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
 import {
@@ -72,7 +72,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     }
 
     if (typeof arg === 'object') {
-      return processDateLike(arg, options)
+      return processDateFromFields(arg, options)
     }
 
     return createDate(refineBaseObj(parseDateTime(String(arg))))
@@ -86,7 +86,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   with(fields: DateOverrides, options?: OverflowOptions): PlainDate {
-    return processDateWith(this, fields, options)
+    return processDateWithFields(this, fields, options)
   }
 
   withCalendar(calendarArg: CalendarArg): PlainDate {

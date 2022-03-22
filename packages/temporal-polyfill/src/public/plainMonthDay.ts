@@ -3,7 +3,7 @@ import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandli
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { constrainDateISO } from '../dateUtils/date'
-import { processMonthDayLike, processMonthDayWith } from '../dateUtils/fromAndWith'
+import { processMonthDayFromFields, processMonthDayWithFields } from '../dateUtils/fromAndWith'
 import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
 import { isoEpochLeapYear } from '../dateUtils/isoMath'
 import {
@@ -51,7 +51,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     }
 
     if (typeof arg === 'object') {
-      return processMonthDayLike(arg, options)
+      return processMonthDayFromFields(arg, options)
     }
 
     // a string...
@@ -67,7 +67,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   }
 
   with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {
-    return processMonthDayWith(this, fields, options)
+    return processMonthDayWithFields(this, fields, options)
   }
 
   equals(other: MonthDayArg): boolean {

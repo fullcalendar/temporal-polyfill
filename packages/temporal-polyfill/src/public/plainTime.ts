@@ -2,7 +2,7 @@ import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { processPlainTimeLike, processPlainTimeWith } from '../dateUtils/fromAndWith'
+import { processTimeFromFields, processTimeWithFields } from '../dateUtils/fromAndWith'
 import { formatTimeISO } from '../dateUtils/isoFormat'
 import { mixinISOFields } from '../dateUtils/mixins'
 import { parseTime } from '../dateUtils/parse'
@@ -72,7 +72,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
       arg instanceof PlainTime
         ? arg.getISOFields() // optimization
         : typeof arg === 'object'
-          ? processPlainTimeLike(arg, overflowHandling)
+          ? processTimeFromFields(arg, overflowHandling)
           : parseTime(String(arg)),
     )
   }
@@ -83,7 +83,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 
   with(fields: TimeLike, options?: OverflowOptions): PlainTime {
     return createTime(
-      processPlainTimeWith(this, fields, parseOverflowOption(options)),
+      processTimeWithFields(this, fields, parseOverflowOption(options)),
     )
   }
 

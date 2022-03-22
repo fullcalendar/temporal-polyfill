@@ -14,7 +14,7 @@ import {
   roundDateTime,
   roundDateTimeWithOptions,
 } from '../dateUtils/dateTime'
-import { processDateTimeLike, processDateTimeWith } from '../dateUtils/fromAndWith'
+import { processDateTimeFromFields, processDateTimeWithFields } from '../dateUtils/fromAndWith'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
 import {
@@ -95,7 +95,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
       arg instanceof PlainDateTime
         ? arg.getISOFields() // optimization
         : typeof arg === 'object'
-          ? processDateTimeLike(arg, overflowHandling, options)
+          ? processDateTimeFromFields(arg, overflowHandling, options)
           : refineBaseObj(parseDateTime(String(arg))),
     )
   }
@@ -110,7 +110,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   with(fields: DateTimeOverrides, options?: OverflowOptions): PlainDateTime {
     const overflowHandling = parseOverflowOption(options)
     return createDateTime(
-      processDateTimeWith(this, fields, overflowHandling, options),
+      processDateTimeWithFields(this, fields, overflowHandling, options),
     )
   }
 

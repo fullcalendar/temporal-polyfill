@@ -1,5 +1,4 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
-import { timeFieldMap } from '../argParse/fieldStr'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainInt } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
@@ -15,7 +14,6 @@ import {
   TimeUnit,
 } from '../public/types'
 import { compareValues, numSignBI } from '../utils/math'
-import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { DayTimeFields, nanoToDayTimeFields, splitEpochNano } from './dayTime'
 import { durationToTimeFields, nanoToDuration } from './duration'
@@ -79,12 +77,6 @@ export function constrainTimeISO( // also converts to number
   isoMicrosecond = constrainInt(isoMicrosecond, 0, 999, overflow)
   isoNanosecond = constrainInt(isoNanosecond, 0, 999, overflow)
   return { isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond }
-}
-
-export function overrideTimeFields(overrides: Partial<TimeFields>, base: TimeFields): TimeFields {
-  return mapHash(timeFieldMap, (_refineFunc, fieldName) => (
-    overrides[fieldName as keyof TimeFields] ?? base[fieldName as keyof TimeFields]
-  ))
 }
 
 export function addToPlainTime(time: PlainTime, dur: Duration): PlainTime {
