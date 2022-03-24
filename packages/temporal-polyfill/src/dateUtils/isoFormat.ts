@@ -143,6 +143,12 @@ export function formatDurationISO(
     seconds += BigInt(res[1])
   }
 
+  // guarantee display of seconds if...
+  const forceSeconds =
+    fractionalSecondDigits !== undefined || // fractionalSecondDigits explicitly specified
+    partialSecondsStr || // partial seconds, either via fractionalSecondDigits or default
+    !sign // duration is completely empty, display 'PT0S'
+
   return (sign < 0 ? '-' : '') + 'P' +
     collapseDurationTuples([
       [BigInt(fields.years), 'Y'],
@@ -150,7 +156,7 @@ export function formatDurationISO(
       [BigInt(fields.weeks), 'W'],
       [BigInt(fields.days), 'D'],
     ]) +
-    (hours || minutes || seconds || partialSecondsStr || !sign // see below for last 2 conditions
+    (hours || minutes || seconds || forceSeconds
       ? 'T' +
       collapseDurationTuples([
         [hours, 'H'],
@@ -158,9 +164,7 @@ export function formatDurationISO(
         [
           smallestUnit <= SECOND ? seconds : BigInt(0), // TODO: BigInt(0) const
           partialSecondsStr + 'S',
-          partialSecondsStr || !sign,
-          // ^^^ ensures seconds if partialSecondsStr OR
-          // OR ensures 'PT0S' if completely empty
+          forceSeconds,
         ],
       ])
       : '')
