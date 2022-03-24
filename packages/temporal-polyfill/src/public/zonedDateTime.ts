@@ -32,7 +32,7 @@ import {
 } from '../dateUtils/mixins'
 import { parseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
-import { TimeFields, createTime } from '../dateUtils/time'
+import { TimeFields, createTime, zeroTimeISOFields } from '../dateUtils/time'
 import { nanoInHour } from '../dateUtils/units'
 import { createYearMonth } from '../dateUtils/yearMonth'
 import {
@@ -42,7 +42,6 @@ import {
   diffZonedDateTimes,
   roundZonedDateTime,
   roundZonedDateTimeWithOptions,
-  zeroTimeISOFields,
 } from '../dateUtils/zonedDateTime'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'

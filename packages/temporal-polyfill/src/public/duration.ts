@@ -1,6 +1,5 @@
-import { durationFieldMap } from '../argParse/fieldStr'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
-import { ensureOptionsObj, refineFields } from '../argParse/refine'
+import { ensureOptionsObj } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import {
@@ -12,6 +11,7 @@ import {
   refineDurationFields,
   roundAndBalanceDuration,
 } from '../dateUtils/duration'
+import { processDurationFields } from '../dateUtils/fromAndWith'
 import { formatDurationISO } from '../dateUtils/isoFormat'
 import { parseDuration } from '../dateUtils/parseDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
@@ -63,7 +63,7 @@ export class Duration extends AbstractNoValueObj {
   static from(arg: DurationArg): Duration {
     return createDuration(
       typeof arg === 'object'
-        ? refineFields(arg, durationFieldMap)
+        ? processDurationFields(arg)
         : parseDuration(arg),
     )
   }
@@ -92,7 +92,7 @@ export class Duration extends AbstractNoValueObj {
   with(fields: DurationLike): Duration {
     return createDuration({
       ...getFields(this),
-      ...refineFields(fields, durationFieldMap),
+      ...processDurationFields(fields),
     })
   }
 

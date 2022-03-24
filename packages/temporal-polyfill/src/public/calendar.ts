@@ -283,47 +283,8 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   Given a date-instance, and fields to override, returns the fields that should be
   given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
   */
-  mergeFields(fields: any, additionalFields: any): any { // TODO: better types?
-    const merged = {} as any
-
-    if (fields.year !== undefined) {
-      let anyAdditionalYear = false
-
-      if (additionalFields.era !== undefined || additionalFields.eraYear !== undefined) {
-        merged.era = additionalFields.era
-        merged.eraYear = additionalFields.eraYear
-        anyAdditionalYear = true
-      }
-      if (additionalFields.year !== undefined) {
-        merged.year = additionalFields.year
-        anyAdditionalYear = true
-      }
-      if (!anyAdditionalYear) {
-        merged.year = fields.year
-      }
-    }
-
-    if (fields.month !== undefined) {
-      let anyAdditionalMonth = false
-
-      if (additionalFields.month !== undefined) {
-        merged.month = additionalFields.month
-        anyAdditionalMonth = true
-      }
-      if (additionalFields.monthCode !== undefined) {
-        merged.monthCode = additionalFields.monthCode
-        anyAdditionalMonth = true
-      }
-      if (!anyAdditionalMonth) {
-        merged.month = fields.month
-      }
-    }
-
-    if (fields.day !== undefined) {
-      merged.day = additionalFields.day ?? fields.day
-    }
-
-    return merged
+  mergeFields(baseFields: any, additionalFields: any): any {
+    return mergeCalFields(baseFields, additionalFields)
   }
 
   toString(): string {
@@ -333,6 +294,57 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
 
 export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
+}
+
+// TODO: better types?
+export function mergeCalFields(baseFields: any, additionalFields: any): any {
+  const merged = { ...baseFields, ...additionalFields } as any
+
+  if (baseFields.year !== undefined) {
+    delete merged.era
+    delete merged.eraYear
+    delete merged.year
+
+    let anyAdditionalYear = false
+
+    if (additionalFields.era !== undefined || additionalFields.eraYear !== undefined) {
+      merged.era = additionalFields.era
+      merged.eraYear = additionalFields.eraYear
+      anyAdditionalYear = true
+    }
+    if (additionalFields.year !== undefined) {
+      merged.year = additionalFields.year
+      anyAdditionalYear = true
+    }
+    if (!anyAdditionalYear) {
+      merged.year = baseFields.year
+    }
+  }
+
+  if (baseFields.monthCode !== undefined) {
+    delete merged.monthCode
+    delete merged.month
+
+    let anyAdditionalMonth = false
+
+    if (additionalFields.month !== undefined) {
+      merged.month = additionalFields.month
+      anyAdditionalMonth = true
+    }
+    if (additionalFields.monthCode !== undefined) {
+      merged.monthCode = additionalFields.monthCode
+      anyAdditionalMonth = true
+    }
+    if (!anyAdditionalMonth) {
+      merged.monthCode = baseFields.monthCode
+    }
+  }
+
+  if (baseFields.day !== undefined) {
+    merged.day = additionalFields.day ?? baseFields.day
+  }
+
+  return merged
 }
 
 // utils

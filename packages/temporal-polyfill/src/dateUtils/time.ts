@@ -52,6 +52,15 @@ export interface TimeFields {
   nanosecond: number
 }
 
+export const zeroTimeISOFields: TimeISOEssentials = {
+  isoHour: 0,
+  isoMinute: 0,
+  isoSecond: 0,
+  isoMillisecond: 0,
+  isoMicrosecond: 0,
+  isoNanosecond: 0,
+}
+
 export function createTime(isoFields: TimeISOEssentials): PlainTime {
   return new PlainTime(
     isoFields.isoHour,

@@ -1,7 +1,7 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { createDateTime } from '../dateUtils/dateTime'
 import { isoFieldsToEpochMilli } from '../dateUtils/isoMath'
-import { zeroTimeISOFields } from '../dateUtils/zonedDateTime'
+import { zeroTimeISOFields } from '../dateUtils/time'
 import { Calendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
 import { DateISOFields } from '../public/types'

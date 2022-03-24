@@ -7,8 +7,5 @@ module.exports = {
   ],
   testMatch: [
     '<rootDir>/src/specs/*.spec.ts',
-
-    // temporary exclusions
-    '!**/usercalendar.spec.ts',
   ],
 }

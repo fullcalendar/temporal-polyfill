@@ -23,14 +23,4 @@ export const timeFieldMap = {
   nanosecond: Number,
 }
 
-export const dateTimeFieldMap = {
-  ...dateFieldMap,
-  ...timeFieldMap,
-}
-
-export const zonedDateTimeFieldMap = {
-  ...dateTimeFieldMap,
-  offset: String,
-}
-
 export const durationFieldMap = strArrayToHash(durationUnitNames, () => Number)

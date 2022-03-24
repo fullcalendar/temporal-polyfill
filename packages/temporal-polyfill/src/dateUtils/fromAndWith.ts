@@ -1,211 +1,285 @@
 import { extractCalendar } from '../argParse/calendar'
-import { dateFieldMap, timeFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
+import {
+  dateFieldMap,
+  durationFieldMap,
+  timeFieldMap,
+  yearMonthFieldMap,
+} from '../argParse/fieldStr'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
-import { refineFields } from '../argParse/refine'
+import { isObjectLike, refineFields } from '../argParse/refine'
 import { extractTimeZone } from '../argParse/timeZone'
-import { Calendar } from '../public/calendar'
+import { Calendar, mergeCalFields } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
-import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
-import {
-  DateLike,
-  DateTimeISOFields,
-  DateTimeLike,
-  DateTimeOverrides,
-  MonthDayOverrides,
-  OverflowOptions,
-  TimeLike,
-  YearMonthLike,
-  YearMonthOverrides,
-  ZonedDateTimeLike,
-  ZonedDateTimeOptions,
-  ZonedDateTimeOverrides,
-} from '../public/types'
+import { DateLike, DateTimeISOFields, OverflowOptions, YearMonthLike } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { mapHash } from '../utils/obj'
+import { DurationFields } from './duration'
 import { isoEpochLeapYear } from './isoMath'
 import { monthDayFieldMap } from './monthDay'
 import { parseOffsetNano } from './parse'
-import { TimeFields, TimeISOEssentials, timeFieldsToConstrainedISO } from './time'
+import {
+  TimeFields,
+  TimeISOEssentials,
+  timeFieldsToConstrainedISO,
+  zeroTimeISOFields,
+} from './time'
 import { ZonedDateTimeISOEssentials } from './zonedDateTime'
 
-// ::from
+export const processZonedDateTimeFromFields = buildSafeFunc(tryZonedDateTimeFromFields)
+export const processDateTimeFromFields = buildSafeFunc(tryDateTimeFromFields)
+export const processDateFromFields = buildSafeFunc(tryDateFromFields)
+export const processYearMonthFromFields = buildSafeFunc(tryYearMonthFromFields)
+export const processMonthDayFromFields = buildSafeFunc(tryMonthDayFromFields)
+export const processTimeFromFields = buildSafeFunc(tryTimeFromFields)
 
-export function processMonthDayFromFields(
-  fields: any, // MonthDayLike,
+export const processZonedDateTimeWithFields = buildSafeFunc(tryZonedDateTimeWithFields, true)
+export const processDateTimeWithFields = buildSafeFunc(tryDateTimeWithFields, true)
+export const processDateWithFields = buildSafeFunc(tryDateWithFields, true)
+export const processYearMonthWithFields = buildSafeFunc(tryYearMonthWithFields, true)
+export const processMonthDayWithFields = buildSafeFunc(tryMonthDayWithFields, true)
+export const processTimeWithFields = buildSafeFunc(tryTimeWithFields, true)
+
+export const processDurationFields = buildSafeFunc(tryDurationFields)
+
+// ::from (UNSAFE verions)
+
+function tryZonedDateTimeFromFields(
+  rawFields: any,
+  overflowHandling: OverflowHandlingInt,
   options?: OverflowOptions,
-): PlainMonthDay {
-  const calendar = extractCalendar(fields)
-  fields = processFromFields(fields, calendar, monthDayFieldMap)
+): ZonedDateTimeISOEssentials | undefined {
+  const res = tryDateTimeFromFields(rawFields, overflowHandling, options)
 
-  // be nice and guess year if no calendar specified
-  if (fields.year === undefined && fields.calendar === undefined) {
-    fields.year = isoEpochLeapYear
+  if (res) {
+    return {
+      ...res,
+      timeZone: extractTimeZone(rawFields),
+      offset: rawFields.offset !== undefined
+        ? parseOffsetNano(String(rawFields.offset))
+        : undefined,
+    }
   }
-
-  return calendar.monthDayFromFields(fields, options)
 }
 
-export function processYearMonthFromFields(
-  fields: YearMonthLike,
+function tryDateTimeFromFields(
+  rawFields: DateLike,
+  overflowHandling: OverflowHandlingInt,
   options?: OverflowOptions,
-): PlainYearMonth {
-  const calendar = extractCalendar(fields)
+): DateTimeISOFields | undefined {
+  const dateRes = tryDateFromFields(rawFields, options)
+  const timeRes = tryTimeFromFields(rawFields, overflowHandling)
 
-  return calendar.yearMonthFromFields(
-    processFromFields(fields, calendar, yearMonthFieldMap),
-    options,
-  )
-}
-
-export function processDateFromFields(arg: DateLike, options?: OverflowOptions): PlainDate {
-  const calendar = extractCalendar(arg)
-
-  return calendar.dateFromFields(
-    processFromFields(arg, calendar, dateFieldMap),
-    options,
-  )
-}
-
-export function processDateTimeFromFields(
-  fields: DateTimeLike,
-  overflowHandling: OverflowHandlingInt,
-  origOptions?: OverflowOptions,
-): DateTimeISOFields {
-  return {
-    ...processDateFromFields(fields, origOptions).getISOFields(),
-    ...processTimeFromFields(fields, overflowHandling),
+  if (dateRes) {
+    return {
+      ...dateRes.getISOFields(),
+      ...(timeRes || zeroTimeISOFields),
+    }
   }
 }
 
-export function processZonedDateTimeFromFields(
-  fields: ZonedDateTimeLike,
-  overflowHandling: OverflowHandlingInt,
-  origOptions?: OverflowOptions,
-): ZonedDateTimeISOEssentials {
-  return {
-    ...processDateFromFields(fields, origOptions).getISOFields(),
-    ...processTimeFromFields(fields, overflowHandling),
-    timeZone: extractTimeZone(fields),
-    offset: fields.offset ? parseOffsetNano(fields.offset) : undefined,
+function tryDateFromFields(
+  rawFields: DateLike,
+  options?: OverflowOptions,
+): PlainDate | undefined {
+  const calendar = extractCalendar(rawFields)
+  const filteredFields = filterFieldsViaCalendar(rawFields, dateFieldMap, calendar)
+
+  if (hasAnyProps(filteredFields)) {
+    return calendar.dateFromFields(filteredFields, options)
   }
 }
 
-export function processTimeFromFields(
-  fields: any,
-  overflowHandling: OverflowHandlingInt,
-): TimeISOEssentials {
-  return timeFieldsToConstrainedISO(
-    refineFields(fields, timeFieldMap),
-    overflowHandling,
-  )
+function tryYearMonthFromFields(
+  rawFields: YearMonthLike,
+  options?: OverflowOptions,
+): PlainYearMonth | undefined {
+  const calendar = extractCalendar(rawFields)
+  const filteredFields = filterFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
+
+  if (hasAnyProps(filteredFields)) {
+    return calendar.yearMonthFromFields(filteredFields, options)
+  }
 }
 
-function processFromFields(fields: any, calendar: Calendar, fieldMap: any): any {
+function tryMonthDayFromFields(
+  rawFields: any,
+  options?: OverflowOptions,
+): PlainMonthDay | undefined {
+  const calendar = extractCalendar(rawFields)
+  const filteredFields = filterFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
+
+  if (hasAnyProps(filteredFields)) {
+    if (rawFields.year === undefined && rawFields.calendar === undefined) {
+      filteredFields.year = isoEpochLeapYear
+    }
+
+    return calendar.monthDayFromFields(filteredFields, options)
+  }
+}
+
+function tryTimeFromFields(
+  rawFields: any,
+  overflowHandling: OverflowHandlingInt,
+): TimeISOEssentials | undefined {
+  const refinedFields = refineFields(rawFields, timeFieldMap)
+
+  if (hasAnyProps(refinedFields)) {
+    return timeFieldsToConstrainedISO(refinedFields, overflowHandling)
+  }
+}
+
+// ::with (UNSAFE versions)
+
+function tryZonedDateTimeWithFields(
+  zonedDateTime: ZonedDateTime,
+  rawFields: any,
+  overflowHandling: OverflowHandlingInt,
+  options?: OverflowOptions,
+): ZonedDateTimeISOEssentials | undefined {
+  const res = tryDateTimeWithFields(zonedDateTime, rawFields, overflowHandling, options)
+  const hasNewOffset = rawFields.offset !== undefined
+
+  if (res || hasNewOffset) {
+    return {
+      ...(res || zonedDateTime.getISOFields()),
+      timeZone: zonedDateTime.timeZone,
+      offset: hasNewOffset
+        ? parseOffsetNano(String(rawFields.offset))
+        : zonedDateTime.offsetNanoseconds,
+    }
+  }
+}
+
+function tryDateTimeWithFields(
+  plainDateTime: any,
+  rawFields: any,
+  overflowHandling: OverflowHandlingInt,
+  options?: OverflowOptions,
+): DateTimeISOFields | undefined {
+  const dateRes = tryDateWithFields(plainDateTime, rawFields, options)
+  const timeRes = tryTimeWithFields(plainDateTime, rawFields, overflowHandling)
+
+  if (dateRes || timeRes) {
+    return {
+      ...plainDateTime.getISOFields(),
+      ...(dateRes ? dateRes.getISOFields() : {}),
+      ...timeRes,
+    }
+  }
+}
+
+function tryDateWithFields(
+  plainDate: any,
+  rawFields: any,
+  options?: OverflowOptions,
+): PlainDate | undefined {
+  const calendar: Calendar = plainDate.calendar
+  const filteredFields = filterFieldsViaCalendar(rawFields, dateFieldMap, calendar)
+
+  if (hasAnyProps(filteredFields)) {
+    const mergedFields = mergeFieldsViaCalendar(plainDate, filteredFields, dateFieldMap, calendar)
+    return calendar.dateFromFields(mergedFields, options)
+  }
+}
+
+function tryYearMonthWithFields(
+  plainYearMonth: any,
+  rawFields: any,
+  options?: OverflowOptions,
+): PlainYearMonth | undefined {
+  const calendar: Calendar = plainYearMonth.calendar
+  const filteredFields = filterFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
+
+  if (hasAnyProps(filteredFields)) {
+    const mergedFields = mergeFieldsViaCalendar(
+      plainYearMonth,
+      rawFields,
+      yearMonthFieldMap,
+      calendar,
+    )
+    return calendar.yearMonthFromFields(mergedFields, options)
+  }
+}
+
+function tryMonthDayWithFields(
+  plainMonthDay: any,
+  rawFields: any,
+  options?: OverflowOptions,
+): PlainMonthDay | undefined {
+  const calendar: Calendar = plainMonthDay.calendar
+  const filteredFields = filterFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
+
+  if (hasAnyProps(filteredFields)) {
+    const mergedFields = mergeFieldsViaCalendar(
+      plainMonthDay,
+      rawFields,
+      monthDayFieldMap,
+      calendar,
+    )
+    return calendar.monthDayFromFields(mergedFields, options)
+  }
+}
+
+function tryTimeWithFields(
+  plainTime: any,
+  rawFields: any,
+  overflowHandling: OverflowHandlingInt,
+): TimeISOEssentials | undefined {
+  const refinedFields = refineFields(rawFields, timeFieldMap)
+  const mergedFields = mergeTimeFields(plainTime, refinedFields)
+
+  if (hasAnyProps(refinedFields)) {
+    return timeFieldsToConstrainedISO(mergedFields, overflowHandling)
+  }
+}
+
+// duration (used for ::from and ::with)
+
+function tryDurationFields(rawFields: any): DurationFields | undefined {
+  const refinedFields = refineFields(rawFields, durationFieldMap) as any // !!!
+
+  if (hasAnyProps(refinedFields)) {
+    return refinedFields
+  }
+}
+
+// utils
+
+function filterFieldsViaCalendar(fields: any, fieldMap: any, calendar: Calendar): any {
   let fieldNames = Object.keys(fieldMap)
 
   if (calendar.fields) { // can be a minimal Calendar 'protocol'
     fieldNames = calendar.fields(fieldNames)
   }
 
-  return filterFromFields(fields, fieldNames)
+  return filterFieldsViaWhitelist(fields, fieldNames)
 }
 
-function filterFromFields(fields: any, whitelist: string[]): any {
+function filterFieldsViaWhitelist(fields: any, whitelist: string[]): any {
   const filtered = {} as any
-  let cnt = 0
 
   for (const propName of whitelist) {
     if (fields[propName] !== undefined) {
       filtered[propName] = fields[propName]
-      cnt++
     }
-  }
-
-  if (!cnt) {
-    throw new TypeError('Invalid object, no keys')
   }
 
   return filtered
 }
 
-// ::with
-
-export function processMonthDayWithFields(
-  plainMonthDay: PlainMonthDay,
-  fields: MonthDayOverrides,
-  options?: OverflowOptions,
-): PlainMonthDay {
-  const { calendar } = plainMonthDay
-
-  return calendar.monthDayFromFields(
-    processWithFields(plainMonthDay, calendar, fields, monthDayFieldMap),
-    options,
-  )
-}
-
-export function processYearMonthWithFields(
-  plainYearMonth: PlainYearMonth,
-  fields: YearMonthOverrides,
-  options?: OverflowOptions,
-): PlainYearMonth {
-  const { calendar } = plainYearMonth
-
-  return calendar.yearMonthFromFields(
-    processWithFields(plainYearMonth, calendar, fields, yearMonthFieldMap),
-    options,
-  )
-}
-
-export function processDateWithFields(
-  plainDate: any, // !!!
-  fields: MonthDayOverrides,
-  options?: OverflowOptions,
-): PlainDate {
-  const { calendar } = plainDate
-
-  return calendar.dateFromFields(
-    processWithFields(plainDate, calendar, fields, dateFieldMap),
-    options,
-  )
-}
-
-export function processDateTimeWithFields(
-  plainDateTime: PlainDateTime,
-  fields: DateTimeOverrides,
-  overflowHandling: OverflowHandlingInt,
-  origOptions?: OverflowOptions,
-): DateTimeISOFields {
-  return {
-    ...processDateWithFields(plainDateTime, fields, origOptions).getISOFields(),
-    ...processTimeWithFields(plainDateTime, fields, overflowHandling),
+function mergeFieldsViaCalendar(
+  existingObj: any,
+  fields: any,
+  fieldMap: any,
+  calendar: Calendar,
+): any {
+  const existingFields = filterFieldsViaCalendar(existingObj, fieldMap, calendar)
+  if (calendar.mergeFields) { // check not minimal Calendar 'protocol'
+    return calendar.mergeFields(existingFields, fields)
   }
-}
-
-export function processZonedDateTimeWithFields(
-  zonedDateTime: ZonedDateTime,
-  fields: ZonedDateTimeOverrides,
-  overflowHandling: OverflowHandlingInt,
-  origOptions?: ZonedDateTimeOptions, // need this specificity?
-): ZonedDateTimeISOEssentials {
-  return {
-    ...processDateWithFields(zonedDateTime, fields, origOptions).getISOFields(),
-    ...processTimeWithFields(zonedDateTime, fields, overflowHandling),
-    timeZone: zonedDateTime.timeZone,
-    offset: fields.offset ? parseOffsetNano(fields.offset) : zonedDateTime.offsetNanoseconds,
-  }
-}
-
-export function processTimeWithFields(
-  plainTime: any, // !!!
-  fields: TimeLike,
-  overflowHandling: OverflowHandlingInt,
-): TimeISOEssentials {
-  const refinedTimeFields = refineFields(fields, timeFieldMap)
-  const mergedTimeFields = mergeTimeFields(plainTime, refinedTimeFields)
-
-  return timeFieldsToConstrainedISO(mergedTimeFields, overflowHandling)
+  return mergeCalFields(existingFields, fields)
 }
 
 function mergeTimeFields(base: TimeFields, fields: Partial<TimeFields>): TimeFields {
@@ -214,26 +288,31 @@ function mergeTimeFields(base: TimeFields, fields: Partial<TimeFields>): TimeFie
   ))
 }
 
-function processWithFields(base: any, calendar: Calendar, fields: any, fieldMap: any): any {
-  let fieldNames = Object.keys(fieldMap)
-
-  if (calendar.fields) { // can be a minimal Calendar 'protocol'
-    fieldNames = calendar.fields(fieldNames)
+function buildSafeFunc<Args extends any[], Res>(
+  func: (...args: Args) => Res | undefined,
+  isWith?: boolean,
+): (...args: Args) => Res {
+  return (...args: Args) => {
+    if (isWith) {
+      const rawFields = args[1]
+      if (!isObjectLike(rawFields)) {
+        throw new TypeError('must be object-like')
+      }
+      if (rawFields.calendar !== undefined) {
+        throw new TypeError('calendar not allowed')
+      }
+      if (rawFields.timeZone !== undefined) {
+        throw new TypeError('timeZone not allowed')
+      }
+    }
+    const res = func(...args)
+    if (!res) {
+      throw new TypeError('No valid fields')
+    }
+    return res
   }
-
-  const validFields = filterWithFields(fields, fieldNames)
-
-  return calendar.mergeFields(base, validFields)
 }
 
-const invalidWithFields = ['calendar', 'timeZone']
-
-function filterWithFields(fields: any, whitelist: string[]): any {
-  for (const fieldName of invalidWithFields) {
-    if (fields[fieldName] !== undefined) {
-      throw new TypeError(`Disallowed field ${fieldName}`)
-    }
-  }
-
-  return filterFromFields(fields, whitelist)
+function hasAnyProps(fields: any): boolean {
+  return Object.keys(fields).length > 0
 }

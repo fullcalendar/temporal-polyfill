@@ -37,7 +37,7 @@ import {
   roundBalancedDuration,
   roundTimeToSpecialDay,
 } from './rounding'
-import { TimeISOEssentials, timeFieldsToNano } from './time'
+import { timeFieldsToNano, zeroTimeISOFields } from './time'
 import {
   DAY,
   DayTimeUnitInt,
@@ -237,15 +237,6 @@ export function roundZonedDateTimeWithOptions(
     computeRoundingNanoIncrement(roundingConfig),
     roundingConfig.roundingMode,
   )
-}
-
-export const zeroTimeISOFields: TimeISOEssentials = { // TODO: more reusable?
-  isoHour: 0,
-  isoMinute: 0,
-  isoSecond: 0,
-  isoMillisecond: 0,
-  isoMicrosecond: 0,
-  isoNanosecond: 0,
 }
 
 export function computeNanoInDay(zonedDateTime: ZonedDateTime): number {
