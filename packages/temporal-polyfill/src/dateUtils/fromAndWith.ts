@@ -228,9 +228,9 @@ function tryTimeWithFields(
   overflowHandling: OverflowHandlingInt,
 ): TimeISOEssentials | undefined {
   const refinedFields = refineFields(rawFields, timeFieldMap)
-  const mergedFields = mergeTimeFields(plainTime, refinedFields)
 
   if (hasAnyProps(refinedFields)) {
+    const mergedFields = mergeTimeFields(plainTime, refinedFields)
     return timeFieldsToConstrainedISO(mergedFields, overflowHandling)
   }
 }
@@ -276,9 +276,11 @@ function mergeFieldsViaCalendar(
   calendar: Calendar,
 ): any {
   const existingFields = filterFieldsViaCalendar(existingObj, fieldMap, calendar)
-  if (calendar.mergeFields) { // check not minimal Calendar 'protocol'
+
+  if (calendar.mergeFields) { // can be a minimal Calendar 'protocol'
     return calendar.mergeFields(existingFields, fields)
   }
+
   return mergeCalFields(existingFields, fields)
 }
 
@@ -288,6 +290,7 @@ function mergeTimeFields(base: TimeFields, fields: Partial<TimeFields>): TimeFie
   ))
 }
 
+// TODO: use chaining instead of flag
 function buildSafeFunc<Args extends any[], Res>(
   func: (...args: Args) => Res | undefined,
   isWith?: boolean,
