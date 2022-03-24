@@ -11,6 +11,7 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "jestrunner.changeDirectoryToWorkspaceRoot": false, // allows entering sub-workspace, is faster
   "jestrunner.enableYarnPnpSupport": true,
+  "jestrunner.codeLensSelector": "**/tests/**/*.{js,jsx,ts,tsx}",
   "jestrunner.debugOptions": {
     "args": ["--no-cache", "--watchAll=false"] // NOTE: keep in sync with launch.json
   }

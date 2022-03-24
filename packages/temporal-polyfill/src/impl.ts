@@ -9,6 +9,7 @@ export * from './public/types'
 export * from './native/date'
 export type { DateTimeFormatArg, DateTimeFormatRangePart } from './native/intlUtils'
 export { ExtendedDateTimeFormat } from './native/intlExtend'
+// TODO: fix problem noted in tests/exports.js
 
 export { PlainYearMonth } from './public/plainYearMonth'
 export { PlainMonthDay } from './public/plainMonthDay'

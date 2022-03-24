@@ -2,10 +2,14 @@ const base = require('../../jest.config.base.cjs')
 
 module.exports = {
   ...base,
-  roots: [
-    '<rootDir>/src',
+  setupFilesAfterEnv: [
+    '<rootDir>/jest-setup.js',
   ],
+  moduleNameMapper: {
+    // TODO: supply the built file when in CI mode
+    'temporal-polyfill/impl': '<rootDir>/src/impl.ts',
+  },
   testMatch: [
-    '<rootDir>/src/specs/*.spec.ts',
+    '<rootDir>/tests/**/*.js',
   ],
 }
