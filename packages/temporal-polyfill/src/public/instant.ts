@@ -29,6 +29,9 @@ const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
 export class Instant extends AbstractNoValueObj {
   constructor(epochNanoseconds: bigint) {
     super()
+    if (typeof epochNanoseconds === 'number') {
+      throw new TypeError('Must supply bigint, not number')
+    }
     epochNanoseconds = BigInt(epochNanoseconds) // cast
     validateInstant(epochNanoseconds)
     setEpochNano(this, epochNanoseconds)

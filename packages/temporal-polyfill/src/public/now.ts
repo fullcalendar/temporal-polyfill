@@ -60,4 +60,5 @@ export const Now = {
   plainTimeISO: getPlainTimeISO,
   instant: getInstant,
   timeZone: getTimeZone,
+  [Symbol.toStringTag]: 'Temporal.Now', // TODO: do on other objects
 }
