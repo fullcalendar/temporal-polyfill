@@ -10,7 +10,6 @@ import {
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { unitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
-import { Instant } from '../public/instant'
 import { PlainDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
 import {
@@ -25,7 +24,7 @@ import {
   ZonedDateTimeOptions,
 } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
-import { RoundingFunc } from '../utils/math'
+import { RoundingFunc, roundToMinute } from '../utils/math'
 import { addWholeDays } from './add'
 import { createDate } from './date'
 import { DateTimeFields, createDateTime, roundDateTime } from './dateTime'
@@ -60,47 +59,76 @@ export function createZonedDateTime(
   isoFields: ZonedDateTimeISOEssentials,
   options: ZonedDateTimeOptions | undefined, // given directly to timeZone
   offsetHandling: OffsetHandlingInt,
+  fromString?: boolean,
 ): ZonedDateTime {
   const { calendar, timeZone } = isoFields
-  const epochNano = computeEpochNanoViaOffset(isoFields, offsetHandling) ??
-    timeZone.getInstantFor(createDateTime(isoFields), options).epochNanoseconds
+  const epochNano = computeZonedDateTimeEpochNano(isoFields, offsetHandling, options, fromString)
 
   return new ZonedDateTime(epochNano, timeZone, calendar)
 }
 
-export function computeEpochNanoViaOffset(
-  isoFields: ZonedDateTimeISOEssentials,
-  offsetHandling: OffsetHandlingInt,
-): bigint | undefined {
-  const { timeZone, offset, Z } = isoFields
-  let epochNano: bigint | undefined
+export function checkInvalidOffset(isoFields: ZonedDateTimeISOEssentials): void {
+  const { offset, timeZone, Z } = isoFields
 
-  if (offset !== undefined && offsetHandling !== OFFSET_IGNORE) {
-    epochNano = isoFieldsToEpochNano(isoFields) - BigInt(offset)
+  // a non-Z offset defined? (for ALWAYS use Z as zero offset)
+  if (offset !== undefined && !Z) {
+    const matchingEpochNano = findMatchingEpochNano(isoFields, offset, timeZone)
 
-    if (offsetHandling !== OFFSET_USE && !Z) { // if time zone is 'Z', always use
-      const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
-
-      if (!matchesPossibleInstants(epochNano, possibleInstants)) {
-        if (offsetHandling === OFFSET_REJECT) {
-          throw new RangeError('Mismatching offset/timezone')
-        } else { // OFFSET_PREFER
-          epochNano = undefined // will calculate from timeZone
-        }
-      }
+    if (matchingEpochNano === undefined) {
+      throw new RangeError('Mismatching offset/timezone') // TODO: more DRY
     }
   }
-
-  return epochNano
 }
 
-function matchesPossibleInstants(epochNano: bigint, possibleInstants: Instant[]): boolean {
-  for (const instant of possibleInstants) {
-    if (instant.epochNanoseconds === epochNano) {
-      return true
+function computeZonedDateTimeEpochNano(
+  isoFields: ZonedDateTimeISOEssentials,
+  offsetHandling: OffsetHandlingInt,
+  options: ZonedDateTimeOptions | undefined,
+  fuzzyMatching?: boolean,
+): bigint {
+  const { offset, timeZone, Z } = isoFields
+
+  if (offset !== undefined && offsetHandling !== OFFSET_IGNORE) {
+    // we ALWAYS use Z as zero offset
+    if (offsetHandling === OFFSET_USE || Z) {
+      return isoFieldsToEpochNano(isoFields) - BigInt(offset)
+    } else {
+      const matchingEpochNano = findMatchingEpochNano(isoFields, offset, timeZone, fuzzyMatching)
+      if (matchingEpochNano !== undefined) {
+        return matchingEpochNano
+      }
+      if (offsetHandling === OFFSET_REJECT) {
+        throw new RangeError('Mismatching offset/timezone')
+      }
+      // else, OFFSET_PREFER...
     }
   }
-  return false
+
+  // compute fresh from TimeZone
+  return timeZone.getInstantFor(createDateTime(isoFields), options).epochNanoseconds
+}
+
+function findMatchingEpochNano(
+  isoFields: ZonedDateTimeISOEssentials,
+  offsetNano: number,
+  timeZone: TimeZone,
+  fuzzyMatching?: boolean,
+): bigint | undefined {
+  const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
+  const utcEpochNano = isoFieldsToEpochNano(isoFields)
+  const roundedOffsetNano = fuzzyMatching ? roundToMinute(offsetNano) : offsetNano
+
+  for (const instant of possibleInstants) {
+    const possibleEpochNano = instant.epochNanoseconds
+    const possibleOffsetNano = Number(utcEpochNano - possibleEpochNano)
+    const possibleOffsetRefined = fuzzyMatching
+      ? roundToMinute(possibleOffsetNano)
+      : possibleOffsetNano
+
+    if (possibleOffsetRefined === roundedOffsetNano) {
+      return possibleEpochNano
+    }
+  }
 }
 
 export function addToZonedDateTime(

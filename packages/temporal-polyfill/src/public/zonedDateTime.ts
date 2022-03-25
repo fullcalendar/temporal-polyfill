@@ -45,7 +45,7 @@ import {
 } from '../dateUtils/zonedDateTime'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { compareValues } from '../utils/math'
+import { compareValues, roundToMinute } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
@@ -113,6 +113,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   static from(arg: ZonedDateTimeArg, options?: ZonedDateTimeOptions): ZonedDateTime {
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_REJECT)
     const overflowHandling = parseOverflowOption(options)
+    const isObject = typeof arg === 'object'
 
     return createZonedDateTime(
       arg instanceof ZonedDateTime
@@ -120,11 +121,12 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
             ...arg.getISOFields(),
             offset: arg.offsetNanoseconds,
           }
-        : typeof arg === 'object'
+        : isObject
           ? processZonedDateTimeFromFields(arg, overflowHandling, options)
           : refineZonedObj(parseZonedDateTime(String(arg))),
       options,
       offsetHandling,
+      !isObject, // fromString
     )
   }
 
@@ -238,16 +240,20 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     const offsetDisplay = parseOffsetDisplayOption(options)
     const timeZoneDisplay = parseTimeZoneDisplayOption(options)
     const calendarDisplay = parseCalendarDisplayOption(options)
-    const isoFields = roundZonedDateTime(
+    const roundedZdt = roundZonedDateTime(
       this,
       formatConfig.roundingIncrement,
       formatConfig.roundingMode,
-    ).getISOFields()
+    )
+    const roundedISOFields = roundedZdt.getISOFields()
 
-    return formatDateTimeISO(isoFields, formatConfig) +
-      (offsetDisplay === OFFSET_DISPLAY_AUTO ? isoFields.offset : '') + // already formatted
-      formatTimeZoneID(isoFields.timeZone.toString(), timeZoneDisplay) +
-      formatCalendarID(isoFields.calendar.toString(), calendarDisplay)
+    return formatDateTimeISO(roundedISOFields, formatConfig) +
+      (offsetDisplay === OFFSET_DISPLAY_AUTO
+        ? formatOffsetISO(roundToMinute(roundedZdt.offsetNanoseconds))
+        : ''
+      ) +
+      formatTimeZoneID(roundedISOFields.timeZone.toString(), timeZoneDisplay) +
+      formatCalendarID(roundedISOFields.calendar.toString(), calendarDisplay)
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }

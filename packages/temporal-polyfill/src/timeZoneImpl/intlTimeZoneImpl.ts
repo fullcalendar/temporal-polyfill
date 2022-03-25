@@ -18,6 +18,8 @@ const ISLAND_SEARCH_DAYS = [
 ]
 
 // TODO: general question: why not use minutes internally instead of seconds?
+// No... Temporal.ZonedDateTime.from({ year: 1971, month: 1, day: 1, timeZone: 'Africa/Monrovia' })
+// .offset => '-00:44:30' // seconds
 
 export class IntlTimeZoneImpl extends TimeZoneImpl {
   private format: Intl.DateTimeFormat

@@ -410,6 +410,7 @@ function getMaybeZonedRelativeTo(
         refineZonedObj(isoFields),
         undefined,
         OFFSET_PREFER,
+        true,
       )
     } else {
       return createDateTime(refineBaseObj(isoFields))
@@ -448,7 +449,7 @@ export function extractRelativeTo(
   const parsed = tryParseZonedDateTime(String(arg))
   if (parsed) {
     if (parsed.timeZone !== undefined) {
-      return createZonedDateTime(refineZonedObj(parsed), undefined, OFFSET_REJECT)
+      return createZonedDateTime(refineZonedObj(parsed), undefined, OFFSET_REJECT, true)
     } else {
       return createDateTime(refineBaseObj(parsed))
     }

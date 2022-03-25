@@ -16,7 +16,6 @@ import { formatDurationISO } from '../dateUtils/isoFormat'
 import { parseDuration } from '../dateUtils/parseDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
-import { createWeakMap, mapHash } from '../utils/obj'
 import {
   CompareResult,
   DateTimeArg,
@@ -27,8 +26,10 @@ import {
   DurationToStringUnit,
   DurationTotalOptions,
   LocalesArg,
+  Unit,
   ZonedDateTimeArg,
-} from './types'
+} from '../public/types'
+import { createWeakMap, mapHash } from '../utils/obj'
 
 const [getFields, setFields] = createWeakMap<Duration, SignedDurationFields>()
 
@@ -131,11 +132,21 @@ export class Duration extends AbstractNoValueObj {
     return roundAndBalanceDuration(this, options)
   }
 
-  total(options: DurationTotalOptions): number {
+  total(options: DurationTotalOptions | Unit): number {
+    let relativeTo: DateTimeArg | undefined
+    let unitName: Unit | undefined
+
+    if (typeof options === 'string') {
+      unitName = options
+    } else {
+      unitName = ensureOptionsObj(options).unit
+      relativeTo = options.relativeTo
+    }
+
     return computeTotalUnits(
       this,
-      parseUnit<UnitInt>(ensureOptionsObj(options).unit, undefined, NANOSECOND, YEAR),
-      options.relativeTo,
+      parseUnit<UnitInt>(unitName, undefined, NANOSECOND, YEAR),
+      relativeTo,
     )
   }
 

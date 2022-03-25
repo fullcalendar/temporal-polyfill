@@ -1,3 +1,4 @@
+import { nanoInMinute } from '../dateUtils/units'
 import { CompareResult } from '../public/types'
 
 export type RoundingFunc = (n: number) => number
@@ -26,6 +27,16 @@ export function roundToIncrement(
   roundingFunc: RoundingFunc,
 ): number {
   return roundingFunc(num / inc) * inc
+}
+
+export function roundToMinute(nano: number): number {
+  return roundToIncrement(nano, nanoInMinute, halfExpand)
+}
+
+// like round, but does rounds negatives "down" (closer to -0.9)
+// use elsewhere?
+function halfExpand(n: number) {
+  return Math.round(Math.abs(n)) * numSign(n)
 }
 
 export function roundToIncrementBI(

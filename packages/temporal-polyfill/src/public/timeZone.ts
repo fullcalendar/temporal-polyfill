@@ -4,7 +4,6 @@ import {
   DISAMBIG_REJECT,
   parseDisambigOption,
 } from '../argParse/disambig'
-import { OFFSET_REJECT } from '../argParse/offsetHandling'
 import { isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { createDateTime } from '../dateUtils/dateTime'
@@ -12,7 +11,7 @@ import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
-import { computeEpochNanoViaOffset } from '../dateUtils/zonedDateTime'
+import { checkInvalidOffset } from '../dateUtils/zonedDateTime'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
@@ -53,7 +52,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     if (parsed) {
       if (parsed.timeZone) {
         const refined = refineZonedObj(parsed) // TODO: we don't need the calendar
-        computeEpochNanoViaOffset(refined, OFFSET_REJECT) // throws error if offset/tz inconsistent
+        checkInvalidOffset(refined)
         return refined.timeZone
       } else if (parsed.Z) {
         return new TimeZone('UTC')
