@@ -111,7 +111,10 @@ export function diffPlainTimes(
   )
 }
 
-export function roundPlainTime(plainTime: PlainTime, options: TimeRoundingOptions): PlainTime {
+export function roundPlainTime(
+  plainTime: PlainTime,
+  options: TimeRoundingOptions | TimeUnit,
+): PlainTime {
   const roundingConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
     options,
     undefined, // no default. required

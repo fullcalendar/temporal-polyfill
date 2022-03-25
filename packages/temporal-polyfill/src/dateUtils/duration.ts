@@ -1,5 +1,5 @@
 import { parseDiffOptions } from '../argParse/diffOptions'
-import { OFFSET_PREFER, OFFSET_REJECT } from '../argParse/offsetHandling'
+import { OFFSET_REJECT } from '../argParse/offsetHandling'
 import { isObjectLike } from '../argParse/refine'
 import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames, unitNames } from '../argParse/unitStr'
@@ -215,17 +215,21 @@ export function balanceComplexDuration<T extends (ZonedDateTime | PlainDateTime)
 
 export function roundAndBalanceDuration(
   duration: Duration,
-  options: DurationRoundingOptions,
+  options: DurationRoundingOptions | Unit,
 ): Duration {
-  if (!isObjectLike(options)) {
+  const optionsObj: DurationRoundingOptions = typeof options === 'string'
+    ? { smallestUnit: options }
+    : options
+
+  if (!isObjectLike(optionsObj)) {
     throw new TypeError('Must specify options') // best place for this?
-  } else if (options.largestUnit === undefined && options.smallestUnit === undefined) {
+  } else if (optionsObj.largestUnit === undefined && optionsObj.smallestUnit === undefined) {
     throw new RangeError('Must specify either largestUnit or smallestUnit')
   }
 
   const defaultLargestUnit = computeLargestDurationUnit(duration)
   const diffConfig = parseDiffOptions<Unit, UnitInt>(
-    options,
+    optionsObj,
     defaultLargestUnit, // largestUnitDefault
     NANOSECOND, // smallestUnitDefault
     NANOSECOND, // minUnit
@@ -237,7 +241,7 @@ export function roundAndBalanceDuration(
   const dayTimeFields = durationToDayTimeFields(duration)
 
   if (
-    options.relativeTo === undefined && // skip this block if relativeTo defined
+    optionsObj.relativeTo === undefined && // skip this block if relativeTo defined
     dayTimeFields &&
     isDayTimeUnit(largestUnit) &&
     isDayTimeUnit(smallestUnit)
@@ -250,7 +254,7 @@ export function roundAndBalanceDuration(
     return dayTimeFieldsToDuration(roundedFields)
   }
 
-  const relativeTo = extractRelativeTo(options.relativeTo)
+  const relativeTo = extractRelativeTo(optionsObj.relativeTo)
   const balancedDuration = balanceComplexDuration(
     duration,
     largestUnit,
@@ -409,7 +413,7 @@ function getMaybeZonedRelativeTo(
       return createZonedDateTime(
         refineZonedObj(isoFields),
         undefined,
-        OFFSET_PREFER,
+        OFFSET_REJECT,
         true,
       )
     } else {

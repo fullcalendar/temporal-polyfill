@@ -59,10 +59,10 @@ export function createZonedDateTime(
   isoFields: ZonedDateTimeISOEssentials,
   options: ZonedDateTimeOptions | undefined, // given directly to timeZone
   offsetHandling: OffsetHandlingInt,
-  fromString?: boolean,
+  fuzzyMatching?: boolean,
 ): ZonedDateTime {
   const { calendar, timeZone } = isoFields
-  const epochNano = computeZonedDateTimeEpochNano(isoFields, offsetHandling, options, fromString)
+  const epochNano = computeZonedDateTimeEpochNano(isoFields, offsetHandling, options, fuzzyMatching)
 
   return new ZonedDateTime(epochNano, timeZone, calendar)
 }
@@ -241,7 +241,7 @@ export function toNano(dt: PlainDateTime | ZonedDateTime): bigint {
 
 export function roundZonedDateTimeWithOptions(
   zonedDateTime: ZonedDateTime,
-  options: DateTimeRoundingOptions | undefined,
+  options: DateTimeRoundingOptions | DayTimeUnit | undefined,
 ): ZonedDateTime {
   const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
     options,

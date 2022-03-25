@@ -1,6 +1,6 @@
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { ensureOptionsObj } from '../argParse/refine'
-import { parseUnit } from '../argParse/unitStr'
+import { parseTotalConfig } from '../argParse/totalOptions'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import {
   SignedDurationFields,
@@ -15,7 +15,7 @@ import { processDurationFields } from '../dateUtils/fromAndWith'
 import { formatDurationISO } from '../dateUtils/isoFormat'
 import { parseDuration } from '../dateUtils/parseDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
-import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
+import { SECOND } from '../dateUtils/units'
 import {
   CompareResult,
   DateTimeArg,
@@ -128,26 +128,14 @@ export class Duration extends AbstractNoValueObj {
     )
   }
 
-  round(options: DurationRoundingOptions): Duration {
+  round(options: DurationRoundingOptions | Unit): Duration {
     return roundAndBalanceDuration(this, options)
   }
 
   total(options: DurationTotalOptions | Unit): number {
-    let relativeTo: DateTimeArg | undefined
-    let unitName: Unit | undefined
+    const totalConfig = parseTotalConfig(options)
 
-    if (typeof options === 'string') {
-      unitName = options
-    } else {
-      unitName = ensureOptionsObj(options).unit
-      relativeTo = options.relativeTo
-    }
-
-    return computeTotalUnits(
-      this,
-      parseUnit<UnitInt>(unitName, undefined, NANOSECOND, YEAR),
-      relativeTo,
-    )
+    return computeTotalUnits(this, totalConfig.unit, totalConfig.relativeTo)
   }
 
   toString(options?: DurationToStringOptions): string {

@@ -61,6 +61,7 @@ import {
   CompareResult,
   DateArg,
   DateTimeRoundingOptions,
+  DayTimeUnit,
   DiffOptions,
   DurationArg,
   OverflowOptions,
@@ -206,7 +207,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options, true)
   }
 
-  round(options?: DateTimeRoundingOptions): ZonedDateTime {
+  round(options?: DateTimeRoundingOptions | DayTimeUnit): ZonedDateTime {
     return roundZonedDateTimeWithOptions(this, options)
   }
 

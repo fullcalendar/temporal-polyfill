@@ -127,7 +127,7 @@ export function diffDateTimes( // why not in diff.ts?
 
 export function roundDateTimeWithOptions(
   dateTime: PlainDateTime,
-  options: DateTimeRoundingOptions,
+  options: DateTimeRoundingOptions | DayTimeUnit,
 ): PlainDateTime {
   const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
     options,

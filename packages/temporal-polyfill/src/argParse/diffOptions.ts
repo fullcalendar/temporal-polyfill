@@ -22,8 +22,10 @@ export function parseDiffOptions<
   forInstant?: boolean, // weird
   forRounding?: boolean, // weird
 ): DiffConfig<UnitIntType> {
+  const optionsObj = ensureOptionsObj(options)
+
   const roundingConfig = parseRoundingOptions<UnitArg, UnitIntType>(
-    options,
+    optionsObj, // even though accepts a unit, only ever give an object
     smallestUnitDefault,
     minUnit,
     maxUnit,
@@ -33,7 +35,7 @@ export function parseDiffOptions<
 
   largestUnitDefault = Math.max(largestUnitDefault, roundingConfig.smallestUnit) as UnitIntType
 
-  let largestUnitArg = ensureOptionsObj(options).largestUnit
+  let largestUnitArg = ensureOptionsObj(optionsObj).largestUnit
   if (largestUnitArg === 'auto') {
     largestUnitArg = undefined
   }

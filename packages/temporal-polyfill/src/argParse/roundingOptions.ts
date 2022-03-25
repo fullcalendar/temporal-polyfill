@@ -15,18 +15,23 @@ export function parseRoundingOptions<
   UnitArgType extends Unit,
   UnitType extends UnitInt
 >(
-  options: Partial<RoundingOptions<UnitArgType>> | undefined,
+  options: Partial<RoundingOptions<UnitArgType>> | UnitArgType | undefined,
   smallestUnitDefault: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
   forDiffing?: boolean,
   forInstant?: boolean,
 ): RoundingConfig<UnitType> {
-  if (smallestUnitDefault === undefined && !isObjectLike(options)) {
+  const optionsObj: Partial<RoundingOptions<UnitArgType>> | undefined =
+    typeof options === 'string'
+      ? { smallestUnit: options }
+      : options
+
+  if (smallestUnitDefault === undefined && !isObjectLike(optionsObj)) {
     throw new TypeError('Need rounding options')
   }
 
-  const ensuredOptions = ensureOptionsObj(options)
+  const ensuredOptions = ensureOptionsObj(optionsObj)
   const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
   const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
 
@@ -57,7 +62,7 @@ export function parseRoundingOptions<
 
   return {
     smallestUnit,
-    roundingMode: parseRoundingModeOption(options, forDiffing ? Math.trunc : Math.round),
+    roundingMode: parseRoundingModeOption(optionsObj, forDiffing ? Math.trunc : Math.round),
     roundingIncrement,
   }
 }

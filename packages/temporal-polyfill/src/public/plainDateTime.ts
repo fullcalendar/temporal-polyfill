@@ -45,6 +45,7 @@ import {
   DateTimeOverrides,
   DateTimeRoundingOptions,
   DateTimeToStringOptions,
+  DayTimeUnit,
   DiffOptions,
   Disambiguation,
   DurationArg,
@@ -153,7 +154,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     return diffDateTimes(this, ensureObj(PlainDateTime, other), options, true)
   }
 
-  round(options: DateTimeRoundingOptions): PlainDateTime {
+  round(options: DateTimeRoundingOptions | DayTimeUnit): PlainDateTime {
     return roundDateTimeWithOptions(this, options)
   }
 
