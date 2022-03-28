@@ -43,6 +43,7 @@ import {
   OverflowOptions,
   TimeArg,
   TimeZoneArg,
+  TimeZoneProtocol,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -136,8 +137,13 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
       formatCalendarID(fields.calendar.toString(), calendarDisplay)
   }
 
-  toZonedDateTime(options: { plainTime?: TimeArg, timeZone: TimeZoneArg }): ZonedDateTime {
-    return this.toPlainDateTime(options.plainTime).toZonedDateTime(options.timeZone)
+  toZonedDateTime(
+    options: { plainTime?: TimeArg, timeZone: TimeZoneArg } | TimeZoneArg,
+  ): ZonedDateTime {
+    const refinedOptions = processToZonedDateTimeOptions(options)
+
+    return this.toPlainDateTime(refinedOptions.plainTime)
+      .toZonedDateTime(refinedOptions.timeZone)
   }
 
   toPlainDateTime(timeArg?: TimeArg): PlainDateTime {
@@ -166,3 +172,32 @@ mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({
   minute: undefined,
   second: undefined,
 }))
+
+// argument processing
+function processToZonedDateTimeOptions(
+  options?: { plainTime?: TimeArg, timeZone: TimeZoneArg } | TimeZoneArg,
+): {
+    plainTime?: TimeArg,
+    timeZone: TimeZoneArg,
+  } {
+  let plainTime: TimeArg | undefined
+  let timeZone: TimeZoneArg | undefined
+
+  if (typeof options === 'string') {
+    timeZone = options
+  } else if (typeof options === 'object') {
+    if ((options as TimeZoneProtocol).id !== undefined) {
+      timeZone = options as TimeZoneProtocol
+    } else {
+      timeZone = options.timeZone
+      plainTime = (options as { plainTime?: TimeArg }).plainTime
+    }
+    if (timeZone === undefined) {
+      throw new TypeError('Invalid timeZone argument')
+    }
+  } else {
+    throw new TypeError('Invalid options/timeZone argument')
+  }
+
+  return { plainTime, timeZone }
+}
