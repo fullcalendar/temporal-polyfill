@@ -84,6 +84,8 @@ export function parseTime(str: string): TimeISOEssentials {
 
 // soft functions (return undefined on failure)
 
+const zRE = /^Z$/i
+
 export function tryParseZonedDateTime(str: string): ZonedDateTimeParseResult | undefined {
   const m = dateTimeRegExp.exec(normalizeDashes(str))
   if (m) {
@@ -93,7 +95,10 @@ export function tryParseZonedDateTime(str: string): ZonedDateTimeParseResult | u
 
 export function tryParseDateTime(str: string): DateTimeParseResult | undefined {
   const m = dateTimeRegExp.exec(normalizeDashes(str))
-  if (m) {
+  if (
+    m &&
+    !zRE.test(m[12]) // don't allow Z (12 means index 11 when unsliced)
+  ) {
     return parseDateTimeParts(m.slice(1))
   }
 }
@@ -136,7 +141,7 @@ function parseZonedDateTimeParts(parts: string[]): ZonedDateTimeParseResult {
   let Z = false
 
   if (zOrOffset) {
-    Z = zOrOffset.toUpperCase() === 'Z'
+    Z = zRE.test(zOrOffset)
     offset = Z ? 0 : parseOffsetParts(parts.slice(12))
   }
 
