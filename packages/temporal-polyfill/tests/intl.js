@@ -642,12 +642,20 @@ describe('Intl', () => {
           withValues === RangeError || (nodeVersion === '12' && withValues.node12 === RangeError);
         itOrSkip(id)(`with: ${id} ${name} ${withErrorExpected ? ' (throws)' : ''}`, () => {
           const now = globalThis.performance ? globalThis.performance.now() : Date.now();
-          const inCal = date.withCalendar(id);
+
+          // fullcalendar/temporal NOTE: we assume error will occur during .withCalendar, not .with
+          let inCal;
           if (withErrorExpected) {
             // Some calendars will fail due to Chromium bugs noted in the test definitions
-            throws(() => inCal.with({ day: 1 }).year, RangeError);
+            throws(() => {
+              inCal = date.withCalendar(id);
+              inCal.with({ day: 1 }).year
+            }, RangeError);
             return;
+          } else {
+            inCal = date.withCalendar(id);
           }
+
           const afterWithDay = inCal.with({ day: 1 });
           let t = '(after setting day)';
           equal(`${t} year: ${afterWithDay.year}`, `${t} year: ${inCal.year}`);
