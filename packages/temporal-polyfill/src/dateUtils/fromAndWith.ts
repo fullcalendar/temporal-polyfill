@@ -247,22 +247,26 @@ function tryDurationFields(rawFields: any): DurationFields | undefined {
 
 // utils
 
-function filterFieldsViaCalendar(fields: any, fieldMap: any, calendar: Calendar): any {
+function filterFieldsViaCalendar(objOrFields: any, fieldMap: any, calendar: Calendar): any {
   let fieldNames = Object.keys(fieldMap)
 
-  if (calendar.fields) { // can be a minimal Calendar 'protocol'
+  if (calendar.fields) {
     fieldNames = calendar.fields(fieldNames)
+  } else {
+    // a Calendar 'protocol'
+    // filter by method names
+    fieldNames = Object.keys(filterFieldsViaWhitelist(calendar, fieldNames))
   }
 
-  return filterFieldsViaWhitelist(fields, fieldNames)
+  return filterFieldsViaWhitelist(objOrFields, fieldNames)
 }
 
-function filterFieldsViaWhitelist(fields: any, whitelist: string[]): any {
+function filterFieldsViaWhitelist(objOrFields: any, whitelist: string[]): any {
   const filtered = {} as any
 
   for (const propName of whitelist) {
-    if (fields[propName] !== undefined) {
-      filtered[propName] = fields[propName]
+    if (objOrFields[propName] !== undefined) {
+      filtered[propName] = objOrFields[propName]
     }
   }
 
