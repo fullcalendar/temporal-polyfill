@@ -1,4 +1,4 @@
-import { DateISOEssentials } from './date'
+import { DateISOEssentials, isValidDateISO } from './date'
 import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { isoEpochLeapYear } from './isoMath'
@@ -75,7 +75,20 @@ export function parseOffsetNano(str: string): number {
 }
 
 export function parseTime(str: string): TimeISOEssentials {
-  const res = tryParseTime(str) || tryParseDateTime(str, true)
+  let res = tryParseTime(str)
+
+  if (res !== undefined) {
+    // detect ambiguity in format
+    if (str.charAt(0) !== 'T') {
+      const tryOther = tryParseYearMonth(str) || tryParseMonthDay(str)
+      if (tryOther && isValidDateISO(tryOther)) {
+        res = undefined // invalid
+      }
+    }
+  } else {
+    res = tryParseDateTime(str, true)
+  }
+
   if (res === undefined) {
     throw createParseError('time', str)
   }

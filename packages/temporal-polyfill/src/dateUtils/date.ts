@@ -1,6 +1,6 @@
 import { getCommonCalendar } from '../argParse/calendar'
 import { DiffConfig } from '../argParse/diffOptions'
-import { OverflowHandlingInt } from '../argParse/overflowHandling'
+import { OVERFLOW_REJECT, OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainInt } from '../argParse/refine'
 import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
@@ -54,6 +54,16 @@ export function constrainDateISO( // also ensures numbers
     overflow,
   )
   return { isoYear, isoMonth, isoDay }
+}
+
+export function isValidDateISO(isoFields: DateISOEssentials): boolean {
+  // HACK
+  try {
+    constrainDateISO(isoFields, OVERFLOW_REJECT)
+    return true
+  } catch (ex) {
+    return false
+  }
 }
 
 export function compareDates(a: PlainDate, b: PlainDate): CompareResult {
