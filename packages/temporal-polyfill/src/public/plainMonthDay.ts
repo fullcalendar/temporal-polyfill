@@ -86,12 +86,14 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     ) + formatCalendarID(calendarID, calendarDisplay)
   }
 
-  toPlainDate(fields: { year: number }, options?: OverflowOptions): PlainDate {
+  toPlainDate(fields: { year: number }): PlainDate {
     return this.calendar.dateFromFields({
       year: fields.year,
       monthCode: this.monthCode,
       day: this.day,
-    }, options)
+    }, {
+      overflow: 'reject', // always reject
+    })
   }
 }
 
