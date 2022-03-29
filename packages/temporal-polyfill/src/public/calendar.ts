@@ -67,7 +67,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
         return arg as Calendar // treat CalendarProtocols as Calendars internally
       }
     }
-    const parsed = tryParseDateTime(String(arg))
+    const parsed = tryParseDateTime(String(arg), false, true) // allowZ=true
     return new Calendar(
       parsed // a date-time string?
         ? parsed.calendar || isoCalendarID

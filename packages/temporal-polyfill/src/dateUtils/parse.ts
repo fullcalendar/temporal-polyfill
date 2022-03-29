@@ -109,11 +109,12 @@ export function tryParseZonedDateTime(str: string): ZonedDateTimeParseResult | u
 export function tryParseDateTime(
   str: string,
   requireTime?: boolean,
+  allowZ?: boolean,
 ): DateTimeParseResult | undefined {
   const m = dateTimeRegExp.exec(normalizeDashes(str))
   if (
     m &&
-    !zRE.test(m[12]) && // don't allow Z (12 means index 11 when unsliced)
+    (allowZ || !zRE.test(m[12])) && // don't allow Z (12 means index 11 when unsliced)
     (!requireTime || m[4]) // timeEverything (4 means index 3 when unsliced)
   ) {
     return parseDateTimeParts(m.slice(1))
