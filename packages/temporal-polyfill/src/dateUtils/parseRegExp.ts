@@ -42,7 +42,7 @@ const endingRegExpStr =
 export const yearMonthRegExp = createRegExp(yearMonthRegExpStr + endingRegExpStr)
 export const monthDayRegExp = createRegExp(monthDayRegExpStr + endingRegExpStr)
 export const dateTimeRegExp = createRegExp(dateTimeRegExpStr + endingRegExpStr)
-export const timeRegExp = createRegExp(timeRegExpStr + endingRegExpStr)
+export const timeRegExp = createRegExp('T?' + timeRegExpStr + endingRegExpStr)
 export const offsetRegExp = createRegExp(offsetRegExpStr)
 
 // TODO: use same DRY technique as above
