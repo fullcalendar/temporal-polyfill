@@ -72,7 +72,7 @@ export function checkInvalidOffset(isoFields: ZonedDateTimeISOEssentials): void 
 
   // a non-Z offset defined? (for ALWAYS use Z as zero offset)
   if (offset !== undefined && !Z) {
-    const matchingEpochNano = findMatchingEpochNano(isoFields, offset, timeZone)
+    const matchingEpochNano = findMatchingEpochNano(isoFields, offset, timeZone, true)
 
     if (matchingEpochNano === undefined) {
       throw new RangeError('Mismatching offset/timezone') // TODO: more DRY
