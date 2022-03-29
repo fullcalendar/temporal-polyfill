@@ -75,7 +75,7 @@ export function parseOffsetNano(str: string): number {
 }
 
 export function parseTime(str: string): TimeISOEssentials {
-  const res = tryParseTime(str) || tryParseDateTime(str)
+  const res = tryParseTime(str) || tryParseDateTime(str, true)
   if (res === undefined) {
     throw createParseError('time', str)
   }
@@ -93,11 +93,15 @@ export function tryParseZonedDateTime(str: string): ZonedDateTimeParseResult | u
   }
 }
 
-export function tryParseDateTime(str: string): DateTimeParseResult | undefined {
+export function tryParseDateTime(
+  str: string,
+  requireTime?: boolean,
+): DateTimeParseResult | undefined {
   const m = dateTimeRegExp.exec(normalizeDashes(str))
   if (
     m &&
-    !zRE.test(m[12]) // don't allow Z (12 means index 11 when unsliced)
+    !zRE.test(m[12]) && // don't allow Z (12 means index 11 when unsliced)
+    (!requireTime || m[4]) // timeEverything (4 means index 3 when unsliced)
   ) {
     return parseDateTimeParts(m.slice(1))
   }

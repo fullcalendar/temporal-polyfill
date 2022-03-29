@@ -23,7 +23,7 @@ const timeRegExpStr =
 
 const dateTimeRegExpStr =
   dateRegExpStr + // 0-2: date
-  '([T ]' +
+  '([T ]' + // 3: timeEverything
   timeRegExpStr + // 4-10: time
   ')?'
   // ending... 11: zOrOffset, 12-19: offset, 21: timeZone, 23: calendar
