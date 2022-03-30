@@ -6,10 +6,8 @@ import { compareValues } from '../utils/math'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
-// Europe/Amsterdam and America/New_York have long gaps
-// see timezone.spec.ts
-// TODO: this is probably very expensive for timezones WITHOUT transitions
-const MAX_YEAR_TRAVEL = 100
+const DST_EARLIEST_YEAR = 1847 // year with the first DST transitions
+const DST_PERSIST_YEAR = new Date().getUTCFullYear() + 10 // DST won't change on or after this
 
 const ISLAND_SEARCH_DAYS = [
   182, // 50% through year
@@ -120,20 +118,45 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   }
 
   /*
-  Always exclusive. Will never return a transition that starts exactly on epochSec
+  Always exclusive. Will never return a transition that starts exactly on epochNano
   */
   getTransition(epochNano: bigint, direction: -1 | 1): RawTransition | undefined {
-    const startYear = epochNanoToISOYear(epochNano)
+    let year = epochNanoToISOYear(epochNano)
 
-    for (let yearTravel = 0; yearTravel < MAX_YEAR_TRAVEL; yearTravel++) {
-      const year = startYear + yearTravel * direction
-      const transitions = this.getTransitionsInYear(year)
-      const len = transitions.length
-      const startIndex = direction < 0 ? len - 1 : 0
+    if (year > DST_PERSIST_YEAR) {
+      // look ahead or behine ONE year
+      const res = this.getTransitionFrom(year, year + direction, direction, epochNano)
+      if (res || direction > 0) {
+        return res
+      }
+      // fast-backwards in-bounds
+      year = DST_PERSIST_YEAR
+    }
 
-      for (let travel = 0; travel < len; travel++) {
-        const transition = transitions[startIndex + travel * direction]
+    return this.getTransitionFrom(
+      Math.max(year, DST_EARLIEST_YEAR),
+      direction < 0
+        ? DST_EARLIEST_YEAR - 1 // inclusive -> exclusive
+        : DST_PERSIST_YEAR,
+      direction,
+      epochNano,
+    )
+  }
 
+  getTransitionFrom(
+    year: number,
+    endYear: number, // exclusive
+    direction: -1 | 1,
+    epochNano: bigint,
+  ): RawTransition | undefined {
+    for (; year !== endYear; year += direction) {
+      let transitions = this.getTransitionsInYear(year)
+
+      if (direction < 0) {
+        transitions = transitions.slice().reverse()
+      }
+
+      for (const transition of transitions) {
         // does the current transition overtake epochNano in the direction of travel?
         if (compareValues(transition[0], epochNano) === direction) {
           return transition
