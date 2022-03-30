@@ -23,4 +23,13 @@ export const timeFieldMap = {
   nanosecond: Number,
 }
 
+export const monthDayFieldMap = {
+  era: String,
+  eraYear: Number,
+  year: Number,
+  month: Number,
+  monthCode: String,
+  day: Number,
+}
+
 export const durationFieldMap = strArrayToHash(durationUnitNames, () => Number)

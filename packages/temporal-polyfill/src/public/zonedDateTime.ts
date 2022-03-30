@@ -3,13 +3,18 @@ import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDisambigOption } from '../argParse/disambig'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplayOption } from '../argParse/offsetDisplay'
-import { OFFSET_PREFER, OFFSET_REJECT, parseOffsetHandlingOption } from '../argParse/offsetHandling'
+import {
+  OFFSET_PREFER,
+  OFFSET_REJECT,
+  OffsetHandlingInt,
+  parseOffsetHandlingOption,
+} from '../argParse/offsetHandling'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { createDate } from '../dateUtils/date'
-import { createDateTime } from '../dateUtils/dateTime'
+import { addToZonedDateTime } from '../dateUtils/add'
+import { diffZonedDateTimes } from '../dateUtils/diff'
 import {
   processZonedDateTimeFromFields,
   processZonedDateTimeWithFields,
@@ -21,7 +26,7 @@ import {
   formatOffsetISO,
   formatTimeZoneID,
 } from '../dateUtils/isoFormat'
-import { epochNanoToISOFields } from '../dateUtils/isoMath'
+import { epochNanoToISOFields, zeroTimeISOFields } from '../dateUtils/isoMath'
 import {
   ComputedEpochFields,
   DateCalendarFields,
@@ -30,19 +35,12 @@ import {
   mixinEpochFields,
   mixinISOFields,
 } from '../dateUtils/mixins'
+import { computeNanoInDay, computeZonedDateTimeEpochNano } from '../dateUtils/offset'
 import { parseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
-import { TimeFields, createTime, zeroTimeISOFields } from '../dateUtils/time'
+import { roundZonedDateTime, roundZonedDateTimeWithOptions } from '../dateUtils/rounding'
+import { TimeFields, ZonedDateTimeISOEssentials } from '../dateUtils/types-private'
 import { nanoInHour } from '../dateUtils/units'
-import { createYearMonth } from '../dateUtils/yearMonth'
-import {
-  addToZonedDateTime,
-  computeNanoInDay,
-  createZonedDateTime,
-  diffZonedDateTimes,
-  roundZonedDateTime,
-  roundZonedDateTimeWithOptions,
-} from '../dateUtils/zonedDateTime'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { compareValues, roundToMinute } from '../utils/math'
@@ -50,11 +48,11 @@ import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
+import { PlainDate, createDate } from './plainDate'
+import { PlainDateTime, createDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime } from './plainTime'
-import { PlainYearMonth } from './plainYearMonth'
+import { PlainTime, createTime } from './plainTime'
+import { PlainYearMonth, createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import {
   CalendarArg,
@@ -284,3 +282,15 @@ mixinLocaleStringMethods(ZonedDateTime, createZonedFormatFactoryFactory({
 }, {
   timeZoneName: 'short',
 }, {}))
+
+export function createZonedDateTime(
+  isoFields: ZonedDateTimeISOEssentials,
+  options: ZonedDateTimeOptions | undefined, // given directly to timeZone
+  offsetHandling: OffsetHandlingInt,
+  fuzzyMatching?: boolean,
+): ZonedDateTime {
+  const { calendar, timeZone } = isoFields
+  const epochNano = computeZonedDateTimeEpochNano(isoFields, offsetHandling, options, fuzzyMatching)
+
+  return new ZonedDateTime(epochNano, timeZone, calendar)
+}

@@ -1,14 +1,27 @@
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
-import { DateTimeISOEssentials, DateTimeISOMilli } from '../dateUtils/dateTime'
-import { DateTimeISOFields } from '../public/types'
+import { PlainDateTime } from '../public/plainDateTime'
+import { DateTimeISOFields, TimeLike } from '../public/types'
+import { ZonedDateTime } from '../public/zonedDateTime'
 import { numSign, positiveModulo } from '../utils/math'
+import { DayTimeFields, nanoToDayTimeFields, splitEpochNano } from './dayTime'
 import {
+  DateTimeISOEssentials,
+  DateTimeISOMilli,
+  TimeFields,
+  TimeISOEssentials,
+} from './types-private'
+import {
+  HOUR,
   milliInDay,
   milliInSecond,
+  nanoInDayBI,
+  nanoInHourBI,
   nanoInMicro,
   nanoInMicroBI,
   nanoInMilli,
   nanoInMilliBI,
+  nanoInMinuteBI,
+  nanoInSecondBI,
 } from './units'
 
 export const isoEpochOriginYear = 1970
@@ -235,4 +248,62 @@ function isInvalid(n: { valueOf(): number }): boolean {
 
 export function throwOutOfRange(): void {
   throw new RangeError('Date outside of supported range')
+}
+
+// time stuff
+
+export const zeroTimeISOFields: TimeISOEssentials = {
+  isoHour: 0,
+  isoMinute: 0,
+  isoSecond: 0,
+  isoMillisecond: 0,
+  isoMicrosecond: 0,
+  isoNanosecond: 0,
+}
+
+export function timeFieldsToNano(timeFields: TimeFields): bigint {
+  return BigInt(timeFields.hour) * nanoInHourBI +
+    BigInt(timeFields.minute) * nanoInMinuteBI +
+    BigInt(timeFields.second) * nanoInSecondBI +
+    BigInt(timeFields.millisecond) * nanoInMilliBI +
+    BigInt(timeFields.microsecond) * nanoInMicroBI +
+    BigInt(timeFields.nanosecond)
+}
+
+export function timeISOToNano(timeISO: TimeISOEssentials): bigint {
+  return BigInt(timeISO.isoHour) * nanoInHourBI +
+    BigInt(timeISO.isoMinute) * nanoInMinuteBI +
+    BigInt(timeISO.isoSecond) * nanoInSecondBI +
+    BigInt(timeISO.isoMillisecond) * nanoInMilliBI +
+    BigInt(timeISO.isoMicrosecond) * nanoInMicroBI +
+    BigInt(timeISO.isoNanosecond)
+}
+
+export function timeLikeToISO(fields: TimeLike): TimeISOEssentials {
+  return {
+    isoNanosecond: fields.nanosecond ?? 0,
+    isoMicrosecond: fields.microsecond ?? 0,
+    isoMillisecond: fields.millisecond ?? 0,
+    isoSecond: fields.second ?? 0,
+    isoMinute: fields.minute ?? 0,
+    isoHour: fields.hour ?? 0,
+  }
+}
+
+// TODO: move to dayTime.ts?
+// if nano is positive, will wrap once reaching 24h, giving a positive day value
+// if nano is negative, will go into previous days, giving a negative day value
+export function wrapTimeOfDayNano(nano: bigint): DayTimeFields {
+  const [dayNano, timeNano] = splitEpochNano(nano)
+  return {
+    ...(nanoToDayTimeFields(timeNano, HOUR) as TimeFields),
+    day: Number(dayNano / nanoInDayBI), // always an int: dayNano is evenly divisible by nanoInDayBI
+  }
+}
+
+export function toNano(dt: PlainDateTime | ZonedDateTime): bigint {
+  if (dt instanceof PlainDateTime) {
+    return isoFieldsToEpochNano(dt.getISOFields()) // TODO: util for this?
+  }
+  return dt.epochNanoseconds
 }

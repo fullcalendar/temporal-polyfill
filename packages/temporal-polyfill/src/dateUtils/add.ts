@@ -2,10 +2,57 @@ import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainInt } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Duration } from '../public/duration'
-import { DateISOFields } from '../public/types'
-import { DateEssentials, DateISOEssentials } from './date'
-import { extractDurationTimeFields } from './duration'
-import { addDaysMilli, epochMilliToISOFields, isoFieldsToEpochMilli } from './isoMath'
+import { Instant } from '../public/instant'
+import { createDate } from '../public/plainDate'
+import { PlainDateTime, createDateTime } from '../public/plainDateTime'
+import { PlainTime, createTime } from '../public/plainTime'
+import { DateISOFields, OverflowOptions } from '../public/types'
+import { ZonedDateTime } from '../public/zonedDateTime'
+import { DayTimeFields } from './dayTime'
+import {
+  computeLargestDurationUnit,
+  durationToTimeFields,
+  extractBigDuration,
+  extractDurationTimeFields,
+} from './duration'
+import {
+  addDaysMilli,
+  epochMilliToISOFields,
+  epochNanoToISOFields,
+  isoFieldsToEpochMilli,
+  isoFieldsToEpochNano,
+  timeFieldsToNano,
+  timeLikeToISO,
+  wrapTimeOfDayNano,
+} from './isoMath'
+import { DateEssentials, DateISOEssentials, TimeFields } from './types-private'
+import { DAY } from './units'
+
+export function addToDateTime(
+  dateTime: PlainDateTime,
+  duration: Duration,
+  options: OverflowOptions | undefined, // Calendar needs raw options
+): PlainDateTime {
+  const { calendar } = dateTime
+  const bigDuration = extractBigDuration(duration)
+  const durationTimeFields = durationToTimeFields(duration)
+
+  // add large fields first
+  const date = calendar.dateAdd(
+    createDate(dateTime.getISOFields()),
+    bigDuration,
+    options,
+  )
+
+  return createDateTime({
+    ...epochNanoToISOFields(
+      isoFieldsToEpochNano(date.getISOFields()) +
+      timeFieldsToNano(dateTime) + // restore time-of-day
+      timeFieldsToNano(durationTimeFields),
+    ),
+    calendar,
+  })
+}
 
 export function addToDateFields(
   dateFields: DateEssentials,
@@ -79,4 +126,50 @@ export function addWholeDays(
     }
   }
   return fields
+}
+
+export function addToPlainTime(time: PlainTime, dur: Duration): PlainTime {
+  const dayTimeFields = translateTimeOfDay(time, durationToTimeFields(dur))
+  return createTime(timeLikeToISO(dayTimeFields))
+}
+
+function translateTimeOfDay(timeOfDay: TimeFields, delta: TimeFields): DayTimeFields {
+  return wrapTimeOfDayNano(timeFieldsToNano(timeOfDay) + timeFieldsToNano(delta))
+}
+
+export function addToInstant(instant: Instant, duration: Duration): Instant {
+  const largestUnit = computeLargestDurationUnit(duration)
+
+  if (largestUnit >= DAY) {
+    throw new RangeError('Duration cant have units larger than days')
+  }
+
+  return new Instant(
+    instant.epochNanoseconds + timeFieldsToNano(durationToTimeFields(duration)),
+  )
+}
+
+export function addToZonedDateTime(
+  zonedDateTime: ZonedDateTime,
+  duration: Duration,
+  options: OverflowOptions | undefined, // Calendar needs these options to be raw
+): ZonedDateTime {
+  const { calendar, timeZone } = zonedDateTime
+  const bigDuration = extractBigDuration(duration)
+  const timeFields = durationToTimeFields(duration)
+
+  // add large fields first
+  const translated = calendar.dateAdd(
+    zonedDateTime.toPlainDate(),
+    bigDuration,
+    options,
+  ).toZonedDateTime({
+    plainTime: zonedDateTime,
+    timeZone,
+  })
+
+  // add time fields
+  const timeNano = timeFieldsToNano(timeFields)
+  const epochNano = translated.epochNanoseconds + timeNano
+  return new ZonedDateTime(epochNano, timeZone, calendar)
 }

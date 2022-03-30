@@ -5,7 +5,7 @@ import { RoundingConfig } from '../argParse/roundingOptions'
 import { durationUnitNames, unitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
 import { PlainDate } from '../public/plainDate'
-import { PlainDateTime } from '../public/plainDateTime'
+import { PlainDateTime, createDateTime } from '../public/plainDateTime'
 import {
   CompareResult,
   DateTimeArg,
@@ -17,13 +17,14 @@ import {
   ZonedDateTimeArg,
   ZonedDateTimeLike,
 } from '../public/types'
-import { ZonedDateTime } from '../public/zonedDateTime'
+import { ZonedDateTime, createZonedDateTime } from '../public/zonedDateTime'
 import { compareValues, numSign } from '../utils/math'
 import { mapHash } from '../utils/obj'
 import { ensureObj } from './abstract'
 import { DateLikeInstance } from './calendar'
-import { createDateTime } from './dateTime'
 import { DayTimeFields, dayTimeFieldsToNano, nanoToDayTimeFields } from './dayTime'
+import { diffAccurate } from './diff'
+import { timeFieldsToNano } from './isoMath'
 import {
   parseZonedDateTime,
   tryParseZonedDateTime,
@@ -33,7 +34,7 @@ import {
   refineZonedObj,
 } from './parseRefine'
 import { roundBalancedDuration, roundNano } from './rounding'
-import { TimeFields, timeFieldsToNano } from './time'
+import { TimeFields } from './types-private'
 import {
   DAY,
   DateUnitInt,
@@ -51,7 +52,6 @@ import {
   isDayTimeUnit,
   nanoInDayBI,
 } from './units'
-import { createZonedDateTime, diffAccurate } from './zonedDateTime'
 
 export interface DurationTimeFields {
   hours: number

@@ -4,7 +4,7 @@ import {
   isCalendarArgBag,
   parseCalendarArgFromBag,
 } from '../argParse/calendar'
-import { dateFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
+import { dateFieldMap, monthDayFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, refineFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
@@ -23,8 +23,8 @@ import {
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
 import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
-import { MonthDayFields, monthDayFieldMap } from '../dateUtils/monthDay'
 import { tryParseDateTime } from '../dateUtils/parse'
+import { MonthDayFields } from '../dateUtils/types-private'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
 import { createWeakMap } from '../utils/obj'

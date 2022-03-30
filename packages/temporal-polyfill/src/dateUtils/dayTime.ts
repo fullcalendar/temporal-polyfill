@@ -1,6 +1,6 @@
 import { unitNames } from '../argParse/unitStr'
-import { epochNanoToISOFields, isoToEpochNano } from './isoMath'
-import { TimeFields, timeFieldsToNano, timeISOToNano } from './time'
+import { epochNanoToISOFields, isoToEpochNano, timeFieldsToNano, timeISOToNano } from './isoMath'
+import { TimeFields } from './types-private'
 import { DayTimeUnitInt, NANOSECOND, nanoIn, nanoInDayBI } from './units'
 
 export type DayTimeFields = TimeFields & { day: number }

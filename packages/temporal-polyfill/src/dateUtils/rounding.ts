@@ -1,19 +1,81 @@
 import { DiffConfig } from '../argParse/diffOptions'
-import { RoundingConfig } from '../argParse/roundingOptions'
+import { OFFSET_PREFER } from '../argParse/offsetHandling'
+import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { durationUnitNames } from '../argParse/unitStr'
 import { Duration } from '../public/duration'
-import { PlainDateTime } from '../public/plainDateTime'
-import { DateISOFields, DateTimeISOFields } from '../public/types'
-import { ZonedDateTime } from '../public/zonedDateTime'
+import { Instant } from '../public/instant'
+import { PlainDateTime, createDateTime } from '../public/plainDateTime'
+import { PlainTime, createTime } from '../public/plainTime'
+import {
+  DateISOFields, DateTimeISOFields, DateTimeRoundingOptions,
+  DayTimeUnit,
+  TimeRoundingOptions,
+  TimeUnit,
+} from '../public/types'
+import { ZonedDateTime, createZonedDateTime } from '../public/zonedDateTime'
 import { RoundingFunc, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { addWholeDays } from './add'
 import { DateLikeInstance } from './calendar'
-import { DayTimeFields } from './dayTime'
+import { DayTimeFields, splitEpochNano } from './dayTime'
 import { balanceDuration, createDuration, nanoToDuration, negateFields } from './duration'
-import { TimeFields, timeFieldsToNano, timeLikeToISO, wrapTimeOfDayNano } from './time'
+import { timeFieldsToNano, timeLikeToISO, toNano, wrapTimeOfDayNano } from './isoMath'
+import { computeNanoInDay } from './offset'
 import { computeExactDuration } from './totalUnits'
-import { DayTimeUnitInt, NANOSECOND, isDateUnit, nanoIn } from './units'
-import { toNano } from './zonedDateTime'
+import { TimeFields } from './types-private'
+import { DAY, DayTimeUnitInt, HOUR, NANOSECOND, TimeUnitInt, isDateUnit, nanoIn } from './units'
+
+export function roundInstant(instant: Instant, options: TimeRoundingOptions): Instant {
+  const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, false, true)
+  const [dayNano, timeNano] = splitEpochNano(instant.epochNanoseconds)
+
+  return new Instant(dayNano + roundNano(timeNano, roundingConfig))
+}
+
+export function roundPlainTime(
+  plainTime: PlainTime,
+  options: TimeRoundingOptions | TimeUnit,
+): PlainTime {
+  const roundingConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
+    options,
+    undefined, // no default. required
+    NANOSECOND, // minUnit
+    HOUR, // maxUnit
+  )
+  const dayTimeFields = roundTime(
+    plainTime,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
+  )
+  return createTime(timeLikeToISO(dayTimeFields))
+}
+
+export function roundDateTimeWithOptions(
+  dateTime: PlainDateTime,
+  options: DateTimeRoundingOptions | DayTimeUnit,
+): PlainDateTime {
+  const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
+    options,
+    undefined, // no default. required
+    NANOSECOND, // minUnit
+    DAY, // maxUnit
+  )
+  return roundDateTime(
+    dateTime,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
+  )
+}
+
+export function roundDateTime(
+  dateTime: PlainDateTime,
+  nanoIncrement: number,
+  roundingFunc: RoundingFunc,
+): PlainDateTime {
+  const dayTimeFields = roundTime(dateTime, nanoIncrement, roundingFunc)
+  return createDateTime(
+    combineISOWithDayTimeFields(dateTime.getISOFields(), dayTimeFields),
+  )
+}
 
 export function roundBalancedDuration(
   balancedDuration: Duration,
@@ -136,4 +198,53 @@ export function combineISOWithDayTimeFields(
     ...dateISOFields,
     ...timeLikeToISO(dayTimeFields),
   }
+}
+
+export function roundZonedDateTimeWithOptions(
+  zonedDateTime: ZonedDateTime,
+  options: DateTimeRoundingOptions | DayTimeUnit | undefined,
+): ZonedDateTime {
+  const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
+    options,
+    undefined, // no default. will error-out if unset
+    NANOSECOND, // minUnit
+    DAY, // maxUnit
+  )
+  if (roundingConfig.smallestUnit === DAY) {
+    const dayTimeFields = roundTimeToSpecialDay(
+      zonedDateTime,
+      computeNanoInDay(zonedDateTime),
+      roundingConfig.roundingMode,
+    )
+    // TODO: more DRY
+    return createDateTime(
+      combineISOWithDayTimeFields(zonedDateTime.getISOFields(), dayTimeFields),
+    ).toZonedDateTime(zonedDateTime.timeZone)
+  }
+  return roundZonedDateTime(
+    zonedDateTime,
+    computeRoundingNanoIncrement(roundingConfig),
+    roundingConfig.roundingMode,
+  )
+}
+
+export function roundZonedDateTime(
+  zonedDateTime: ZonedDateTime,
+  nanoIncrement: number,
+  roundingFunc: RoundingFunc,
+): ZonedDateTime {
+  const dateTime = roundDateTime(
+    zonedDateTime.toPlainDateTime(), // TODO: way around this conversion?
+    nanoIncrement,
+    roundingFunc,
+  )
+  return createZonedDateTime(
+    {
+      ...dateTime.getISOFields(),
+      timeZone: zonedDateTime.timeZone,
+      offset: zonedDateTime.offsetNanoseconds, // try to keep same offset with OFFSET_PREFER
+    },
+    undefined, // options
+    OFFSET_PREFER,
+  )
 }

@@ -6,14 +6,12 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { TimeISOEssentials } from '../dateUtils/time'
 import { DateISOFields } from '../public/types'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
-import { DateISOEssentials } from './date'
-import { DateTimeISOEssentials } from './dateTime'
 import { nanoToDayTimeFields } from './dayTime'
 import { SignedDurationFields } from './duration'
+import { DateISOEssentials, DateTimeISOEssentials, TimeISOEssentials } from './types-private'
 import {
   HOUR,
   MINUTE,

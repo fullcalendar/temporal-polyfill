@@ -2,22 +2,17 @@ import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import { addToPlainTime } from '../dateUtils/add'
+import { compareTimes } from '../dateUtils/compare'
+import { constrainTimeISO } from '../dateUtils/constrain'
+import { diffPlainTimes } from '../dateUtils/diff'
 import { processTimeFromFields, processTimeWithFields } from '../dateUtils/fromAndWith'
 import { formatTimeISO } from '../dateUtils/isoFormat'
+import { timeFieldsToNano, timeLikeToISO } from '../dateUtils/isoMath'
 import { mixinISOFields } from '../dateUtils/mixins'
 import { parseTime } from '../dateUtils/parse'
-import { roundTime } from '../dateUtils/rounding'
-import {
-  TimeFields,
-  addToPlainTime,
-  compareTimes,
-  constrainTimeISO,
-  createTime,
-  diffPlainTimes,
-  roundPlainTime,
-  timeFieldsToNano,
-  timeLikeToISO,
-} from '../dateUtils/time'
+import { roundPlainTime, roundTime } from '../dateUtils/rounding'
+import { TimeFields, TimeISOEssentials } from '../dateUtils/types-private'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { FormatFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
@@ -159,4 +154,21 @@ function createPlainTimeFormatFactory(
       Number(timeFieldsToNano(plainTime) / nanoInMilliBI)
     ),
   }
+}
+
+export function createTime(isoFields: TimeISOEssentials): PlainTime {
+  return new PlainTime(
+    isoFields.isoHour,
+    isoFields.isoMinute,
+    isoFields.isoSecond,
+    isoFields.isoMillisecond,
+    isoFields.isoMicrosecond,
+    isoFields.isoNanosecond,
+  )
+}
+
+// Normally ensureObj and ::from would fail when undefined is specified
+// Fallback to 00:00 time
+export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
+  return ensureObj(PlainTime, arg ?? { hour: 0 })
 }

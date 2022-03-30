@@ -3,7 +3,9 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { constrainDateISO, diffDates } from '../dateUtils/date'
+import { comparePlainYearMonths } from '../dateUtils/compare'
+import { constrainDateISO } from '../dateUtils/constrain'
+import { diffDates } from '../dateUtils/diff'
 import { processYearMonthFromFields, processYearMonthWithFields } from '../dateUtils/fromAndWith'
 import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
@@ -16,7 +18,6 @@ import {
 import { parseYearMonth } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { MONTH, YEAR, YearMonthUnitInt } from '../dateUtils/units'
-import { comparePlainYearMonths, createYearMonth } from '../dateUtils/yearMonth'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
@@ -158,8 +159,17 @@ mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({
   second: undefined,
 }, true)) // strictCalendar
 
-// utils
+// creation
+export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
+  return new PlainYearMonth(
+    isoFields.isoYear,
+    isoFields.isoMonth,
+    isoFields.calendar,
+    isoFields.isoDay,
+  )
+}
 
+// utils
 function addDuration(
   yearMonth: PlainYearMonth,
   duration: Duration,

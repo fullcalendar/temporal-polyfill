@@ -2,13 +2,9 @@ import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import {
-  compareDates,
-  constrainDateISO,
-  createDate,
-  diffDates,
-} from '../dateUtils/date'
-import { createDateTime } from '../dateUtils/dateTime'
+import { compareDates } from '../dateUtils/compare'
+import { constrainDateISO } from '../dateUtils/constrain'
+import { diffDates } from '../dateUtils/diff'
 import { processDateFromFields, processDateWithFields } from '../dateUtils/fromAndWith'
 import { validateDate } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
@@ -20,16 +16,15 @@ import {
 } from '../dateUtils/mixins'
 import { parseDateTime } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
-import { ensureLooseTime } from '../dateUtils/time'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
-import { createYearMonth } from '../dateUtils/yearMonth'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration } from './duration'
-import { PlainDateTime } from './plainDateTime'
+import { PlainDateTime, createDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
-import { PlainYearMonth } from './plainYearMonth'
+import { ensureLooseTime } from './plainTime'
+import { PlainYearMonth, createYearMonth } from './plainYearMonth'
 import {
   CalendarArg,
   CompareResult,
@@ -172,6 +167,16 @@ mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({
   minute: undefined,
   second: undefined,
 }))
+
+// creation
+export function createDate(isoFields: DateISOFields): PlainDate {
+  return new PlainDate(
+    isoFields.isoYear,
+    isoFields.isoMonth,
+    isoFields.isoDay,
+    isoFields.calendar,
+  )
+}
 
 // argument processing
 function processToZonedDateTimeOptions(

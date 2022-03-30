@@ -1,8 +1,6 @@
-import { DateFields } from '../dateUtils/date'
 import { DurationFields } from '../dateUtils/duration'
-import { TimeFields } from '../dateUtils/time'
+import { DateFields, TimeFields, YearMonthFields } from '../dateUtils/types-private'
 import { UnitInt } from '../dateUtils/units'
-import { YearMonthFields } from '../dateUtils/yearMonth'
 import { DateUnit, TimeUnit, Unit } from '../public/types'
 import { strArrayToHash } from '../utils/obj'
 

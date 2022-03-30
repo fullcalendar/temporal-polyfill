@@ -2,7 +2,8 @@ import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { constrainDateISO } from '../dateUtils/date'
+import { monthDaysEqual } from '../dateUtils/compare'
+import { constrainDateISO } from '../dateUtils/constrain'
 import { processMonthDayFromFields, processMonthDayWithFields } from '../dateUtils/fromAndWith'
 import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
 import { isoEpochLeapYear } from '../dateUtils/isoMath'
@@ -12,7 +13,6 @@ import {
   mixinISOFields,
   monthDayCalendarFields,
 } from '../dateUtils/mixins'
-import { createMonthDay, monthDaysEqual } from '../dateUtils/monthDay'
 import { parseMonthDay } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
@@ -112,3 +112,13 @@ mixinLocaleStringMethods(PlainMonthDay, createPlainFormatFactoryFactory({
   minute: undefined,
   second: undefined,
 }, true)) // strictCalendar
+
+// create
+export function createMonthDay(isoFields: DateISOFields): PlainMonthDay {
+  return new PlainMonthDay(
+    isoFields.isoMonth,
+    isoFields.isoDay,
+    isoFields.calendar,
+    isoFields.isoYear,
+  )
+}

@@ -2,14 +2,15 @@ import { ensureCalendarsEqual } from '../argParse/calendar'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
-import { PlainDate } from '../public/plainDate'
+import { PlainDate, createDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
 import { DateArg, DateLikeFields, OverflowOptions } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
-import { DateFields, DateISOEssentials, constrainDateFields, createDate } from './date'
+import { constrainDateFields } from './constrain'
 import { diffDaysMilli, epochMilliToISOFields } from './isoMath'
+import { DateFields, DateISOEssentials } from './types-private'
 
 // Date-type Testing (TODO: move this?)
 
