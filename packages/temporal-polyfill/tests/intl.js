@@ -644,6 +644,9 @@ describe('Intl', () => {
           const now = globalThis.performance ? globalThis.performance.now() : Date.now();
 
           // fullcalendar/temporal NOTE: we assume error will occur during .withCalendar, not .with
+          // this is better, because we don't want an obj to fail randomly after instantiation:
+          //   pd = new Temporal.PlainDate(1, 1, 1, 'japanese') // works
+          //   pd.day // fails!
           let inCal;
           if (withErrorExpected) {
             // Some calendars will fail due to Chromium bugs noted in the test definitions
