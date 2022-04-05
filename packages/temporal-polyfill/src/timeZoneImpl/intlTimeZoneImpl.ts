@@ -1,5 +1,5 @@
+import { epochNanoToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/epoch'
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
-import { epochNanoToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../dateUtils/isoMath'
 import { milliInSecond, nanoInSecond, nanoInSecondBI, secondsInDay } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
 import { compareValues } from '../utils/math'

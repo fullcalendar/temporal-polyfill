@@ -1,4 +1,4 @@
-import { epochMilliToISOFields, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
+import { epochMilliToISOFields, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/epoch'
 import { CalendarImpl, CalendarImplFields } from './calendarImpl'
 
 export class ISOCalendarImpl extends CalendarImpl {

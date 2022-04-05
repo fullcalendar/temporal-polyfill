@@ -13,7 +13,6 @@ import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImp
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
-import { addToDateFields } from '../dateUtils/add'
 import {
   computeDayOfYear,
   computeDaysInYear,
@@ -22,13 +21,14 @@ import {
   queryDateISOFields,
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
-import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/isoMath'
+import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/epoch'
 import { tryParseDateTime } from '../dateUtils/parse'
-import { MonthDayFields } from '../dateUtils/types-private'
+import { translateDate } from '../dateUtils/translate'
+import { InputDateFields } from '../dateUtils/typesPrivate'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
 import { createWeakMap } from '../utils/obj'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
@@ -210,7 +210,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     const impl = getImpl(this)
 
     const refinedFields = refineFields(fields, monthDayFieldMap) as MonthDayLikeFields
-    let { era, eraYear, year, month, monthCode, day } = refinedFields as Partial<MonthDayFields>
+    let { era, eraYear, year, month, monthCode, day } = refinedFields as Partial<InputDateFields>
 
     if (day === undefined) {
       throw new TypeError('required property \'day\' missing or undefined')
@@ -249,7 +249,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     const date = ensureObj(PlainDate, dateArg, options)
     const duration = ensureObj(Duration, durationArg)
     const overflowHandling = parseOverflowOption(options)
-    const isoFields = addToDateFields(date, duration, impl, overflowHandling)
+    const isoFields = translateDate(date, duration, impl, overflowHandling)
 
     return new PlainDate(
       isoFields.isoYear,
@@ -267,8 +267,11 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
       ensureOptionsObj(options).largestUnit, DAY, DAY, YEAR,
     )
 
-    ensureCalendarsEqual(getCommonCalendar(d0, d1), this)
-    return diffDateFields(d0, d1, impl, largestUnit)
+    ensureCalendarsEqual(this, getCommonCalendar(d0, d1))
+
+    return createDuration(
+      diffDateFields(d0, d1, impl, largestUnit),
+    )
   }
 
   /*

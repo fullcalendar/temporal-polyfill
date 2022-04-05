@@ -40,6 +40,20 @@ export function mapHash<Hash, ResType>(
   return res
 }
 
+export function mapHashByKeys<PropInputType, PropOutputType>(
+  input: { [prop: string]: PropInputType },
+  keys: string[],
+  func: (inputProp: PropInputType) => PropOutputType,
+): { [prop: string]: PropOutputType } {
+  const output = {} as { [prop: string]: PropOutputType }
+
+  for (const key of keys) {
+    output[key] = func(input[key])
+  }
+
+  return output
+}
+
 export function excludeUndefined(obj: GenericHash): GenericHash {
   const res: GenericHash = {}
   for (const key in obj) {

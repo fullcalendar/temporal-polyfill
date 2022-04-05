@@ -1,34 +1,26 @@
-import { getCommonCalendar } from '../argParse/calendar'
-import { DiffConfig, parseDiffOptions } from '../argParse/diffOptions'
+import { DiffConfig } from '../argParse/diffOptions'
 import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
 import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { Duration } from '../public/duration'
-import { Instant } from '../public/instant'
-import { PlainDate, createDate } from '../public/plainDate'
-import { PlainDateTime } from '../public/plainDateTime'
-import { PlainTime } from '../public/plainTime'
-import {
-  CompareResult, DateUnit, DiffOptions,
-  TimeDiffOptions,
-  TimeUnit,
-  Unit,
-} from '../public/types'
-import { ZonedDateTime } from '../public/zonedDateTime'
+import { Calendar } from '../public/calendar'
+import { createDate } from '../public/plainDate'
+import { CompareResult, DateUnit } from '../public/types'
 import { compareValues } from '../utils/math'
-import { addWholeMonths, addWholeYears } from './add'
-import { compareDateFields } from './compare'
+import { compareLocalDateFields } from './compare'
 import { constrainDateFields } from './constrain'
-import { addDurations, nanoToDuration } from './duration'
-import { diffDaysMilli, timeFieldsToNano, toNano } from './isoMath'
-import { roundBalancedDuration, roundNano } from './rounding'
-import { DateEssentials } from './types-private'
+import { isoTimeToNano, nanoToDuration } from './dayAndTime'
+import { mergeDurations, signDuration } from './durationFields'
+import { EpochableObj, diffDaysMilli, toEpochNano } from './epoch'
+import { roundDurationSpan, roundNano, roundNanoBI } from './rounding'
+import { addMonths, addYears } from './translate'
 import {
-  DAY,
+  DurationFields,
+  ISOTimeFields,
+  LocalDateFields,
+} from './typesPrivate'
+import {
   HOUR,
   MONTH,
-  NANOSECOND,
-  SECOND,
   TimeUnitInt,
   UnitInt,
   WEEK,
@@ -36,76 +28,81 @@ import {
   isDateUnit,
 } from './units'
 
-export function diffPlainTimes(
-  t0: PlainTime,
-  t1: PlainTime,
-  options: TimeDiffOptions | undefined,
-): Duration {
-  const diffConfig = parseDiffOptions<TimeUnit, TimeUnitInt>(
-    options,
-    HOUR, // largestUnitDefault
-    NANOSECOND, // smallestUnitDefault
-    NANOSECOND, // minUnit
-    HOUR, // maxUnit
-  )
-  return nanoToDuration(
-    roundNano(timeFieldsToNano(t1) - timeFieldsToNano(t0), diffConfig),
-    diffConfig.largestUnit,
-  )
+export type DiffableObj = LocalDateFields & EpochableObj & {
+  add(durationFields: Partial<DurationFields>): DiffableObj
 }
 
+// used for zoned date times as well
 export function diffDateTimes(
-  dt0: PlainDateTime,
-  dt1: PlainDateTime,
-  options: DiffOptions | undefined,
-  flip?: boolean,
-): Duration {
-  const diffConfig = parseDiffOptions<Unit, UnitInt>(
-    options,
-    DAY, // largestUnitDefault
-    NANOSECOND, // smallestUnitDefault
-    NANOSECOND, // minUnit
-    YEAR, // maxUnit
-  )
-
-  return roundBalancedDuration(
-    diffAccurate(dt0, dt1, diffConfig.largestUnit),
-    diffConfig,
+  dt0: DiffableObj,
+  dt1: DiffableObj,
+  calendar: Calendar,
+  flip: boolean,
+  diffConfig: DiffConfig,
+): DurationFields {
+  return roundDurationSpan(
+    diffAccurate(dt0, dt1, calendar, diffConfig.largestUnit),
     dt0,
     dt1,
+    calendar,
     flip,
+    diffConfig,
   )
 }
 
 export function diffDates(
-  d0: PlainDate,
-  d1: PlainDate,
+  d0: DiffableObj,
+  d1: DiffableObj,
+  calendar: Calendar,
+  flip: boolean,
   diffConfig: DiffConfig,
-  flip?: boolean,
-): Duration {
-  const calendar = getCommonCalendar(d0, d1)
+): DurationFields {
   const balancedDuration = calendar.dateUntil(d0, d1, {
     largestUnit: unitNames[diffConfig.largestUnit] as DateUnit,
   })
-  return roundBalancedDuration(balancedDuration, diffConfig, d0, d1, flip)
+  return roundDurationSpan(balancedDuration, d0, d1, calendar, flip, diffConfig)
 }
 
+export function diffTimes(
+  t0: ISOTimeFields,
+  t1: ISOTimeFields,
+  diffConfig: DiffConfig<TimeUnitInt>,
+): DurationFields {
+  const nanoDiff = isoTimeToNano(t1) - isoTimeToNano(t0)
+  const roundedDiff = BigInt(roundNano(nanoDiff, diffConfig)) // yuck
+  return nanoToDuration(roundedDiff, diffConfig.largestUnit)
+}
+
+export function diffEpochNanos(
+  epochNano0: bigint,
+  epochNano1: bigint,
+  diffConfig: DiffConfig<TimeUnitInt>,
+): DurationFields {
+  return nanoToDuration(
+    roundNanoBI(epochNano1 - epochNano0, diffConfig),
+    diffConfig.largestUnit,
+  )
+}
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
 export function diffDateFields(
-  d0: DateEssentials,
-  d1: DateEssentials,
+  d0: LocalDateFields,
+  d1: LocalDateFields,
   calendarImpl: CalendarImpl,
   largestUnit: UnitInt,
-): Duration {
+): DurationFields {
   let years = 0; let months = 0; let weeks = 0; let days = 0
 
   switch (largestUnit) {
     case YEAR:
       years = wholeYearsUntil(d0, d1, calendarImpl)
-      d0 = addWholeYears(d0, years, calendarImpl, OVERFLOW_CONSTRAIN)
+      d0 = addYears(d0, years, calendarImpl, OVERFLOW_CONSTRAIN)
       // fallthrough
     case MONTH:
       months = wholeMonthsUntil(d0, d1, calendarImpl)
-      d0 = addWholeMonths(d0, months, calendarImpl, OVERFLOW_CONSTRAIN)
+      d0 = addMonths(d0, months, calendarImpl, OVERFLOW_CONSTRAIN)
   }
 
   days = diffDaysMilli(
@@ -118,12 +115,23 @@ export function diffDateFields(
     days %= 7
   }
 
-  return new Duration(years, months, weeks, days)
+  return signDuration({
+    years,
+    months,
+    weeks,
+    days,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    milliseconds: 0,
+    microseconds: 0,
+    nanoseconds: 0,
+  })
 }
 
 function wholeYearsUntil(
-  d0: DateEssentials,
-  d1: DateEssentials,
+  d0: LocalDateFields,
+  d1: LocalDateFields,
   calendarImpl: CalendarImpl,
 ): number {
   // simulate destination year
@@ -135,7 +143,7 @@ function wholeYearsUntil(
     OVERFLOW_CONSTRAIN,
   )
 
-  const generalSign = compareDateFields(d1, d0)
+  const generalSign = compareLocalDateFields(d1, d0)
   const monthSign = compareValues(d1.month, newMonth) || compareValues(d1.day, newDay)
 
   return d1.year - d0.year - (
@@ -146,12 +154,12 @@ function wholeYearsUntil(
 }
 
 function wholeMonthsUntil(
-  d0: DateEssentials,
-  d1: DateEssentials,
+  d0: LocalDateFields,
+  d1: LocalDateFields,
   calendarImpl: CalendarImpl,
 ): number {
   let monthsToAdd = 0
-  const generalSign = compareDateFields(d1, d0)
+  const generalSign = compareLocalDateFields(d1, d0)
 
   if (generalSign) {
     // move ahead by whole years
@@ -183,63 +191,22 @@ function wholeMonthsUntil(
   return monthsToAdd
 }
 
-export function diffInstants(a: Instant, b: Instant, options?: TimeDiffOptions): Duration {
-  const diffConfig = parseDiffOptions(options, SECOND, NANOSECOND, NANOSECOND, HOUR, true)
-
-  return nanoToDuration(
-    roundNano(
-      b.epochNanoseconds - a.epochNanoseconds,
-      diffConfig,
-    ),
-    diffConfig.largestUnit,
-  )
-}
-
-export function diffZonedDateTimes(
-  dt0: ZonedDateTime,
-  dt1: ZonedDateTime,
-  options: DiffOptions | undefined,
-  flip?: boolean,
-): Duration {
-  const diffConfig = parseDiffOptions<Unit, UnitInt>(
-    options,
-    HOUR, // largestUnitDefault
-    NANOSECOND, // smallestUnitDefault
-    NANOSECOND, // minUnit
-    YEAR, // maxUnit
-  )
-  const { largestUnit } = diffConfig
-
-  if (largestUnit >= DAY && dt0.timeZone.id !== dt1.timeZone.id) {
-    throw new Error('Must be same timeZone')
-  }
-
-  return roundBalancedDuration(
-    diffAccurate(dt0, dt1, largestUnit),
-    diffConfig,
-    dt0,
-    dt1,
-    flip,
-  )
-}
-
-export function diffAccurate<T extends (ZonedDateTime | PlainDateTime)>(
-  dt0: T,
-  dt1: T,
+export function diffAccurate(
+  dt0: DiffableObj,
+  dt1: DiffableObj,
+  calendar: Calendar,
   largestUnit: UnitInt,
-): Duration {
-  const calendar = getCommonCalendar(dt0, dt1)
-
+): DurationFields {
   // a time unit
   if (!isDateUnit(largestUnit)) {
     return diffTimeScale(dt0, dt1, largestUnit)
   }
 
-  const dateStart = createDate(dt0.getISOFields()) // TODO: util for this?
-  let dateMiddle = createDate(dt1.getISOFields()) // TODO: util for this?
-  let dateTimeMiddle: T
-  let bigDuration: Duration
-  let timeDuration: Duration
+  const dateStart = createDate({ ...dt0.getISOFields(), calendar })
+  let dateMiddle = createDate({ ...dt1.getISOFields(), calendar })
+  let dateTimeMiddle: DiffableObj
+  let bigDuration: DurationFields
+  let timeDuration: DurationFields
   let bigSign: CompareResult
   let timeSign: CompareResult
 
@@ -249,23 +216,24 @@ export function diffAccurate<T extends (ZonedDateTime | PlainDateTime)>(
       dateMiddle,
       { largestUnit: unitNames[largestUnit] as DateUnit },
     )
-    dateTimeMiddle = dt0.add(bigDuration) as T
+    dateTimeMiddle = dt0.add(bigDuration)
     timeDuration = diffTimeScale(dateTimeMiddle, dt1, HOUR)
     bigSign = bigDuration.sign
     timeSign = timeDuration.sign
   } while (
+    // did we overshoot? keep backing up a day
     bigSign && timeSign &&
     bigSign !== timeSign &&
     (dateMiddle = dateMiddle.add({ days: timeSign })) // move dateMiddle closer to dt0
   )
 
-  return addDurations(bigDuration, timeDuration)
+  return mergeDurations(bigDuration, timeDuration)
 }
 
-function diffTimeScale<T extends (ZonedDateTime | PlainDateTime)>(
-  dt0: T,
-  dt1: T,
+function diffTimeScale(
+  dt0: EpochableObj,
+  dt1: EpochableObj,
   largestUnit: TimeUnitInt,
-): Duration {
-  return nanoToDuration(toNano(dt1) - toNano(dt0), largestUnit)
+): DurationFields {
+  return nanoToDuration(toEpochNano(dt1) - toEpochNano(dt0), largestUnit)
 }

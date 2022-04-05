@@ -1,6 +1,6 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
-import { isoFieldsToEpochNano, throwOutOfRange } from './isoMath'
-import { DateISOEssentials, DateTimeISOEssentials } from './types-private'
+import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
+import { ISODateFields, ISODateTimeFields } from './typesPrivate'
 
 /*
 Extreme valid inputs
@@ -21,7 +21,7 @@ Extreme valid inputs
     new Temporal.PlainYearMonth(275760, 9).toString()
 */
 
-export function validateYearMonth(isoFields: DateISOEssentials, calendarID: string): void {
+export function validateYearMonth(isoFields: ISODateFields, calendarID: string): void {
   // might throw an error
   // moves between days in month
   const epochNano = isoFieldsToEpochNano(isoFields)
@@ -29,7 +29,7 @@ export function validateYearMonth(isoFields: DateISOEssentials, calendarID: stri
   checkEpochNanoBuggy(epochNano, calendarID)
 }
 
-export function validateDate(isoFields: DateISOEssentials, calendarID: string): void {
+export function validateDate(isoFields: ISODateFields, calendarID: string): void {
   const epochNano = isoFieldsToEpochNano(isoFields)
 
   validatePlain(
@@ -40,7 +40,7 @@ export function validateDate(isoFields: DateISOEssentials, calendarID: string): 
   checkEpochNanoBuggy(epochNano, calendarID)
 }
 
-export function validateDateTime(isoFields: DateTimeISOEssentials, calendarID: string): void {
+export function validateDateTime(isoFields: ISODateTimeFields, calendarID: string): void {
   const epochNano = isoFieldsToEpochNano(isoFields)
 
   validatePlain(epochNano)

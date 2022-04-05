@@ -1,11 +1,11 @@
 import { computeDaysInYear } from '../dateUtils/calendar'
-import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import {
   addDaysMilli,
   diffDaysMilli,
   isoEpochOriginYear,
   isoToEpochMilli,
-} from '../dateUtils/isoMath'
+} from '../dateUtils/epoch'
+import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { OrigDateTimeFormat } from '../native/intlUtils'
 import {
   CalendarImpl,
@@ -232,7 +232,7 @@ export class IntlCalendarImpl extends CalendarImpl {
     const monthStrToNum: { [monthStr: string]: number } = {}
 
     // either part-way through the desired year or very slightly before
-    let epochMilli = isoToEpochMilli(this.guessISOYear(year))
+    let epochMilli = isoToEpochMilli(this.guessISOYear(year), 1, 1)
 
     // ensure marker is in year+1
     epochMilli = addDaysMilli(epochMilli, 400)

@@ -16,11 +16,12 @@ import { PlainYearMonth } from '../public/plainYearMonth'
 import { DateLike, DateTimeISOFields, OverflowOptions, YearMonthLike } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { mapHash } from '../utils/obj'
-import { timeFieldsToConstrainedISO } from './constrain'
-import { DurationFields } from './duration'
-import { isoEpochLeapYear, zeroTimeISOFields } from './isoMath'
+import { constrainTimeISO } from './constrain'
+import { partialLocalTimeToISO, zeroISOTimeFields } from './dayAndTime'
+import { isoEpochLeapYear } from './epoch'
+import { OffsetComputableFields } from './offset'
 import { parseOffsetNano } from './parse'
-import { TimeFields, TimeISOEssentials, ZonedDateTimeISOEssentials } from './types-private'
+import { DurationFields, ISOTimeFields, LocalTimeFields } from './typesPrivate'
 
 export const processZonedDateTimeFromFields = buildSafeFunc(tryZonedDateTimeFromFields)
 export const processDateTimeFromFields = buildSafeFunc(tryDateTimeFromFields)
@@ -44,14 +45,14 @@ function tryZonedDateTimeFromFields(
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
   options?: OverflowOptions,
-): ZonedDateTimeISOEssentials | undefined {
+): OffsetComputableFields | undefined {
   const res = tryDateTimeFromFields(rawFields, overflowHandling, options)
 
   if (res) {
     return {
       ...res,
       timeZone: extractTimeZone(rawFields),
-      offset: rawFields.offset !== undefined
+      offsetNanoseconds: rawFields.offset !== undefined
         ? parseOffsetNano(String(rawFields.offset))
         : undefined,
     }
@@ -69,7 +70,7 @@ function tryDateTimeFromFields(
   if (dateRes) {
     return {
       ...dateRes.getISOFields(),
-      ...(timeRes || zeroTimeISOFields),
+      ...(timeRes || zeroISOTimeFields),
     }
   }
 }
@@ -117,11 +118,11 @@ function tryMonthDayFromFields(
 function tryTimeFromFields(
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
-): TimeISOEssentials | undefined {
+): ISOTimeFields | undefined {
   const refinedFields = refineFields(rawFields, timeFieldMap)
 
   if (hasAnyProps(refinedFields)) {
-    return timeFieldsToConstrainedISO(refinedFields, overflowHandling)
+    return constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling)
   }
 }
 
@@ -132,7 +133,7 @@ function tryZonedDateTimeWithFields(
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
   options?: OverflowOptions,
-): ZonedDateTimeISOEssentials | undefined {
+): OffsetComputableFields | undefined {
   const res = tryDateTimeWithFields(zonedDateTime, rawFields, overflowHandling, options)
   const hasNewOffset = rawFields.offset !== undefined
 
@@ -140,7 +141,7 @@ function tryZonedDateTimeWithFields(
     return {
       ...(res || zonedDateTime.getISOFields()),
       timeZone: zonedDateTime.timeZone,
-      offset: hasNewOffset
+      offsetNanoseconds: hasNewOffset
         ? parseOffsetNano(String(rawFields.offset))
         : zonedDateTime.offsetNanoseconds,
     }
@@ -221,12 +222,12 @@ function tryTimeWithFields(
   plainTime: any,
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
-): TimeISOEssentials | undefined {
+): ISOTimeFields | undefined {
   const refinedFields = refineFields(rawFields, timeFieldMap)
 
   if (hasAnyProps(refinedFields)) {
-    const mergedFields = mergeTimeFields(plainTime, refinedFields)
-    return timeFieldsToConstrainedISO(mergedFields, overflowHandling)
+    const mergedFields = mergeLocalTimeFields(plainTime, refinedFields)
+    return constrainTimeISO(partialLocalTimeToISO(mergedFields), overflowHandling)
   }
 }
 
@@ -283,9 +284,12 @@ function mergeFieldsViaCalendar(
   return mergeCalFields(existingFields, fields)
 }
 
-function mergeTimeFields(base: TimeFields, fields: Partial<TimeFields>): TimeFields {
+function mergeLocalTimeFields(
+  base: LocalTimeFields,
+  fields: Partial<LocalTimeFields>,
+): LocalTimeFields {
   return mapHash(timeFieldMap, (_refineFunc, fieldName) => (
-    fields[fieldName as keyof TimeFields] ?? base[fieldName as keyof TimeFields]
+    fields[fieldName as keyof LocalTimeFields] ?? base[fieldName as keyof LocalTimeFields]
   ))
 }
 

@@ -1,4 +1,4 @@
-import { isoToEpochMilli } from '../dateUtils/isoMath'
+import { isoToEpochMilli } from '../dateUtils/epoch'
 import { milliInDay, nanoInMilliBI } from '../dateUtils/units'
 import { queryCalendarImpl } from './calendarImplQuery'
 import { IntlCalendarImpl } from './intlCalendarImpl'

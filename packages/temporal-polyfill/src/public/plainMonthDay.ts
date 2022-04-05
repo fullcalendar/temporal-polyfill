@@ -2,11 +2,11 @@ import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { monthDaysEqual } from '../dateUtils/compare'
+import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
+import { isoEpochLeapYear } from '../dateUtils/epoch'
 import { processMonthDayFromFields, processMonthDayWithFields } from '../dateUtils/fromAndWith'
 import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
-import { isoEpochLeapYear } from '../dateUtils/isoMath'
 import {
   MonthDayCalendarFields,
   mixinCalendarFields,
@@ -22,7 +22,6 @@ import {
 import { Calendar, createDefaultCalendar } from './calendar'
 import { PlainDate } from './plainDate'
 import {
-  CalendarProtocol,
   DateISOFields,
   DateToStringOptions,
   MonthDayArg,
@@ -34,7 +33,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   constructor(
     isoMonth: number,
     isoDay: number,
-    calendar: CalendarProtocol = createDefaultCalendar(),
+    calendar: Calendar = createDefaultCalendar(), // TODO: change back to CalendarProtocol
     referenceISOYear: number = isoEpochLeapYear,
   ) {
     super({
@@ -71,7 +70,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
   }
 
   equals(other: MonthDayArg): boolean {
-    return monthDaysEqual(this, ensureObj(PlainMonthDay, other))
+    return !compareDateTimes(this, ensureObj(PlainMonthDay, other))
   }
 
   toString(options?: DateToStringOptions): string {

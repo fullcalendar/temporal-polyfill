@@ -1,7 +1,7 @@
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { positiveModulo } from '../utils/math'
 import { computeDayOfYear, computeDaysInYear } from './calendar'
-import { computeISODayOfWeek } from './isoMath'
+import { computeISODayOfWeek } from './epoch'
 
 // TODO: fix lots of 1-index problems!!!
 

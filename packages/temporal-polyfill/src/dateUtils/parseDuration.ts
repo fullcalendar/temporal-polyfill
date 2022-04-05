@@ -1,8 +1,9 @@
 import { excludeUndefined } from '../utils/obj'
-import { nanoToDayTimeFields } from './dayTime'
-import { DurationFields, negateFields } from './duration'
+import { nanoToDuration } from './dayAndTime'
+import { negateDuration, signDuration } from './durationFields'
 import { createParseError, normalizeDashes, parseNanoAfterDecimal, toIntMaybe } from './parse'
 import { durationRegExp } from './parseRegExp'
+import { DurationFields, UnsignedDurationFields } from './typesPrivate'
 import {
   HOUR,
   MILLISECOND,
@@ -33,7 +34,7 @@ function tryParseDuration(str: string): DurationFields | undefined {
     ([minutes, leftoverNano] = parseDurationTimeUnit(match[12], match[14], MINUTE, leftoverNano));
     ([seconds, leftoverNano] = parseDurationTimeUnit(match[16], match[18], SECOND, leftoverNano))
 
-    let fields: Partial<DurationFields> = excludeUndefined({
+    const fields: Partial<UnsignedDurationFields> = excludeUndefined({
       years: toIntMaybe(match[2]),
       months: toIntMaybe(match[3]),
       weeks: toIntMaybe(match[4]),
@@ -47,16 +48,19 @@ function tryParseDuration(str: string): DurationFields | undefined {
       throw new RangeError('Duration string must have at least one field')
     }
 
-    const small = nanoToDayTimeFields(BigInt(leftoverNano || 0), MILLISECOND)
-    fields.milliseconds = small.millisecond
-    fields.microseconds = small.microsecond
-    fields.nanoseconds = small.nanosecond
+    const small = nanoToDuration(BigInt(leftoverNano || 0), MILLISECOND)
+    // TODO: use mergeDurations somehow?
+    fields.milliseconds = small.milliseconds
+    fields.microseconds = small.microseconds
+    fields.nanoseconds = small.nanoseconds
+
+    let signedDuration = signDuration(fields as UnsignedDurationFields)
 
     if (match[1] === '-') {
-      fields = negateFields(fields)
+      signedDuration = negateDuration(signedDuration)
     }
 
-    return fields as DurationFields
+    return signedDuration
   }
 }
 

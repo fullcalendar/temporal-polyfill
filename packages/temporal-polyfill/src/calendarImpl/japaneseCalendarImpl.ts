@@ -1,5 +1,5 @@
+import { isoToEpochMilli } from '../dateUtils/epoch'
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
-import { isoToEpochMilli } from '../dateUtils/isoMath'
 import { CalendarImplFields } from './calendarImpl'
 import { GregoryCalendarImpl } from './gregoryCalendarImpl'
 import { buildFormat } from './intlCalendarImpl'

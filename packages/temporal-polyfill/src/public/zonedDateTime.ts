@@ -1,5 +1,6 @@
-import { getStrangerCalendar } from '../argParse/calendar'
+import { getCommonCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
+import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseDisambigOption } from '../argParse/disambig'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplayOption } from '../argParse/offsetDisplay'
@@ -10,11 +11,15 @@ import {
   parseOffsetHandlingOption,
 } from '../argParse/offsetHandling'
 import { parseOverflowOption } from '../argParse/overflowHandling'
+import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { addToZonedDateTime } from '../dateUtils/add'
-import { diffZonedDateTimes } from '../dateUtils/diff'
+import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
+import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
+import { diffDateTimes } from '../dateUtils/diff'
+import { negateDuration } from '../dateUtils/durationFields'
+import { epochNanoToISOFields } from '../dateUtils/epoch'
 import {
   processZonedDateTimeFromFields,
   processZonedDateTimeWithFields,
@@ -26,7 +31,6 @@ import {
   formatOffsetISO,
   formatTimeZoneID,
 } from '../dateUtils/isoFormat'
-import { epochNanoToISOFields, zeroTimeISOFields } from '../dateUtils/isoMath'
 import {
   ComputedEpochFields,
   DateCalendarFields,
@@ -35,18 +39,31 @@ import {
   mixinEpochFields,
   mixinISOFields,
 } from '../dateUtils/mixins'
-import { computeNanoInDay, computeZonedDateTimeEpochNano } from '../dateUtils/offset'
+import {
+  OffsetComputableFields,
+  computeNanoInDay,
+  computeZonedDateTimeEpochNano,
+} from '../dateUtils/offset'
 import { parseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
-import { roundZonedDateTime, roundZonedDateTimeWithOptions } from '../dateUtils/rounding'
-import { TimeFields, ZonedDateTimeISOEssentials } from '../dateUtils/types-private'
-import { nanoInHour } from '../dateUtils/units'
+import { roundZonedDateTimeFields } from '../dateUtils/rounding'
+import { translateZonedDateTimeFields } from '../dateUtils/translate'
+import { DurationFields, ISODateTimeFields, LocalTimeFields } from '../dateUtils/typesPrivate'
+import {
+  DAY,
+  DayTimeUnitInt,
+  HOUR,
+  NANOSECOND,
+  UnitInt,
+  YEAR,
+  nanoInHour,
+} from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { compareValues, roundToMinute } from '../utils/math'
+import { roundToMinute } from '../utils/math'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import { Instant } from './instant'
 import { PlainDate, createDate } from './plainDate'
 import { PlainDateTime, createDateTime } from './plainDateTime'
@@ -65,6 +82,7 @@ import {
   OverflowOptions,
   TimeArg,
   TimeZoneArg,
+  Unit,
   ZonedDateTimeArg,
   ZonedDateTimeISOFields,
   ZonedDateTimeOptions,
@@ -88,10 +106,8 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   ) {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
-    const instant = new Instant(epochNanoseconds) // will do validation
-    const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(instant)
-    const isoFields = epochNanoToISOFields(epochNanoseconds + BigInt(offsetNanoseconds))
 
+    const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNanoseconds, timeZone)
     validateDateTime(isoFields, calendar.id)
 
     super({
@@ -100,39 +116,40 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
       timeZone,
       // NOTE: must support TimeZone protocols that don't implement getOffsetStringFor
       // TODO: more DRY with getOffsetStringFor
-      offset: formatOffsetISO(timeZone.getOffsetNanosecondsFor(instant)),
+      offset: formatOffsetISO(offsetNano),
     })
 
     setPrivateFields(this, {
       epochNanoseconds,
-      offsetNanoseconds,
+      offsetNanoseconds: offsetNano,
     })
   }
 
   static from(arg: ZonedDateTimeArg, options?: ZonedDateTimeOptions): ZonedDateTime {
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_REJECT)
     const overflowHandling = parseOverflowOption(options)
-    const isObject = typeof arg === 'object'
 
-    return createZonedDateTime(
-      arg instanceof ZonedDateTime
-        ? { // optimization
-            ...arg.getISOFields(),
-            offset: arg.offsetNanoseconds,
-          }
-        : isObject
-          ? processZonedDateTimeFromFields(arg, overflowHandling, options)
-          : refineZonedObj(parseZonedDateTime(String(arg))),
-      options,
+    if (arg instanceof ZonedDateTime) {
+      return new ZonedDateTime(arg.epochNanoseconds, arg.timeZone, arg.calendar)
+    }
+
+    const isObject = typeof arg === 'object'
+    const fields = isObject
+      ? processZonedDateTimeFromFields(arg, overflowHandling, options)
+      : refineZonedObj(parseZonedDateTime(String(arg)))
+
+    return createZonedDateTimeFromFields(
+      fields,
+      !isObject, // fuzzyMatching
       offsetHandling,
-      !isObject, // fromString
+      options,
     )
   }
 
   static compare(a: ZonedDateTimeArg, b: ZonedDateTimeArg): CompareResult {
-    return compareValues(
-      ensureObj(ZonedDateTime, a).epochNanoseconds,
-      ensureObj(ZonedDateTime, b).epochNanoseconds,
+    return compareEpochObjs(
+      ensureObj(ZonedDateTime, a),
+      ensureObj(ZonedDateTime, b),
     )
   }
 
@@ -145,12 +162,9 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     parseDisambigOption(options) // for validation
     const overflowHandling = parseOverflowOption(options) // for validation (?)
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
+    const refined = processZonedDateTimeWithFields(this, fields, overflowHandling, options)
 
-    return createZonedDateTime(
-      processZonedDateTimeWithFields(this, fields, overflowHandling, options),
-      options,
-      offsetHandling,
-    )
+    return createZonedDateTimeFromFields(refined, false, offsetHandling, options)
   }
 
   withPlainDate(dateArg: DateArg): ZonedDateTime {
@@ -167,9 +181,11 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   withPlainTime(timeArg?: TimeArg): ZonedDateTime {
-    return this.toPlainDate().toZonedDateTime({
-      plainTime: timeArg,
-      timeZone: this.timeZone,
+    const plainTime = ensureObj(PlainTime, timeArg)
+
+    return createZonedDateTimeFromFields({
+      ...this.getISOFields(),
+      ...plainTime.getISOFields(),
     })
   }
 
@@ -190,48 +206,47 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   add(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
-    return addToZonedDateTime(this, ensureObj(Duration, durationArg), options)
+    return translateZonedDateTime(this, ensureObj(Duration, durationArg), options)
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
-    return addToZonedDateTime(this, ensureObj(Duration, durationArg).negated(), options)
+    return translateZonedDateTime(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
   until(other: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options)
+    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), false, options)
   }
 
   since(other: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), options, true)
+    return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), true, options)
   }
 
   round(options?: DateTimeRoundingOptions | DayTimeUnit): ZonedDateTime {
-    return roundZonedDateTimeWithOptions(this, options)
+    const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
+      options,
+      undefined, // no default. will error-out if unset
+      NANOSECOND, // minUnit
+      DAY, // maxUnit
+    )
+
+    return roundZonedDateTime(this, roundingConfig)
   }
 
   equals(other: ZonedDateTimeArg): boolean {
-    const otherZdt = ensureObj(ZonedDateTime, other)
-
-    return this.epochNanoseconds === otherZdt.epochNanoseconds &&
-      this.calendar.id === otherZdt.calendar.id &&
-      this.timeZone.id === otherZdt.timeZone.id
+    return zonedDateTimesEqual(this, ensureObj(ZonedDateTime, other))
   }
 
   startOfDay(): ZonedDateTime {
-    return createZonedDateTime( // TODO: more DRY with computeNanoInDay
-      {
-        ...this.getISOFields(),
-        ...zeroTimeISOFields,
-        offset: undefined,
-      },
-      undefined, // options
-      OFFSET_REJECT, // doesn't matter b/c no explicit offset given
-    )
+    return createZonedDateTimeFromFields({
+      ...this.getISOFields(),
+      ...zeroISOTimeFields,
+      offsetNanoseconds: this.offsetNanoseconds,
+    })
   }
 
   // TODO: turn into a lazy-getter, like what mixinCalendarFields does
   get hoursInDay(): number {
-    return computeNanoInDay(this) / nanoInHour
+    return computeNanoInDay(this.getISOFields()) / nanoInHour
   }
 
   toString(options?: ZonedDateTimeToStringOptions): string {
@@ -239,20 +254,15 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
     const offsetDisplay = parseOffsetDisplayOption(options)
     const timeZoneDisplay = parseTimeZoneDisplayOption(options)
     const calendarDisplay = parseCalendarDisplayOption(options)
-    const roundedZdt = roundZonedDateTime(
-      this,
-      formatConfig.roundingIncrement,
-      formatConfig.roundingMode,
-    )
-    const roundedISOFields = roundedZdt.getISOFields()
+    const roundedZdt = roundZonedDateTime(this, formatConfig)
 
-    return formatDateTimeISO(roundedISOFields, formatConfig) +
+    return formatDateTimeISO(roundedZdt.getISOFields(), formatConfig) +
       (offsetDisplay === OFFSET_DISPLAY_AUTO
         ? formatOffsetISO(roundToMinute(roundedZdt.offsetNanoseconds))
         : ''
       ) +
-      formatTimeZoneID(roundedISOFields.timeZone.toString(), timeZoneDisplay) +
-      formatCalendarID(roundedISOFields.calendar.toString(), calendarDisplay)
+      formatTimeZoneID(this.timeZone.toString(), timeZoneDisplay) +
+      formatCalendarID(this.calendar.toString(), calendarDisplay)
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
@@ -265,7 +275,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 
 // mixins
 export interface ZonedDateTime extends DateCalendarFields { calendar: Calendar }
-export interface ZonedDateTime extends TimeFields {}
+export interface ZonedDateTime extends LocalTimeFields {}
 export interface ZonedDateTime extends ComputedEpochFields {}
 export interface ZonedDateTime extends ToLocaleStringMethods {}
 mixinISOFields(ZonedDateTime, timeUnitNames)
@@ -283,14 +293,71 @@ mixinLocaleStringMethods(ZonedDateTime, createZonedFormatFactoryFactory({
   timeZoneName: 'short',
 }, {}))
 
-export function createZonedDateTime(
-  isoFields: ZonedDateTimeISOEssentials,
-  options: ZonedDateTimeOptions | undefined, // given directly to timeZone
-  offsetHandling: OffsetHandlingInt,
+export function createZonedDateTimeFromFields(
+  fields: OffsetComputableFields,
   fuzzyMatching?: boolean,
+  offsetHandling?: OffsetHandlingInt,
+  disambigOptions?: ZonedDateTimeOptions, // TODO: more specific type
 ): ZonedDateTime {
-  const { calendar, timeZone } = isoFields
-  const epochNano = computeZonedDateTimeEpochNano(isoFields, offsetHandling, options, fuzzyMatching)
+  const epochNano = computeZonedDateTimeEpochNano(
+    fields,
+    fuzzyMatching,
+    offsetHandling,
+    disambigOptions,
+  )
+  return new ZonedDateTime(epochNano, fields.timeZone, fields.calendar)
+}
 
-  return new ZonedDateTime(epochNano, timeZone, calendar)
+export function buildZonedDateTimeISOFields(
+  epochNano: bigint,
+  timeZone: TimeZone,
+): [ISODateTimeFields, number] {
+  const instant = new Instant(epochNano) // will do validation
+  const offsetNano = timeZone.getOffsetNanosecondsFor(instant)
+  const isoFields = epochNanoToISOFields(epochNano + BigInt(offsetNano))
+  return [isoFields, offsetNano]
+}
+
+function translateZonedDateTime(
+  zdt: ZonedDateTime,
+  dur: DurationFields,
+  options: OverflowOptions | undefined,
+): ZonedDateTime {
+  const isoFields = zdt.getISOFields()
+  const epochNano = translateZonedDateTimeFields(isoFields, dur, options)
+  return new ZonedDateTime(epochNano, isoFields.timeZone, isoFields.calendar)
+}
+
+function roundZonedDateTime(
+  zdt: ZonedDateTime,
+  roundingConfig: RoundingConfig<DayTimeUnitInt>,
+): ZonedDateTime {
+  const isoFields = zdt.getISOFields()
+  const epochNano = roundZonedDateTimeFields(isoFields, roundingConfig)
+  return new ZonedDateTime(epochNano, isoFields.timeZone, isoFields.calendar)
+}
+
+// TODO: make common util with PlainDateTime, because leverages same diffDateTimes?
+function diffZonedDateTimes(
+  dt0: ZonedDateTime,
+  dt1: ZonedDateTime,
+  flip: boolean,
+  options: DiffOptions | undefined,
+): Duration {
+  const diffConfig = parseDiffOptions<Unit, UnitInt>(
+    options,
+    HOUR, // largestUnitDefault
+    NANOSECOND, // smallestUnitDefault
+    NANOSECOND, // minUnit
+    YEAR, // maxUnit
+  )
+  const { largestUnit } = diffConfig
+
+  if (largestUnit >= DAY && dt0.timeZone.id !== dt1.timeZone.id) {
+    throw new Error('Must be same timeZone')
+  }
+
+  return createDuration(
+    diffDateTimes(dt0, dt1, getCommonCalendar(dt0, dt1), flip, diffConfig),
+  )
 }

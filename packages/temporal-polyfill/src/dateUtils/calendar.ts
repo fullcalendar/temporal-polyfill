@@ -9,8 +9,8 @@ import { PlainYearMonth } from '../public/plainYearMonth'
 import { DateArg, DateLikeFields, OverflowOptions } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { constrainDateFields } from './constrain'
-import { diffDaysMilli, epochMilliToISOFields } from './isoMath'
-import { DateFields, DateISOEssentials } from './types-private'
+import { diffDaysMilli, epochMilliToISOFields } from './epoch'
+import { ISODateFields, InputDateFields, LocalDateFields } from './typesPrivate'
 
 // Date-type Testing (TODO: move this?)
 
@@ -40,7 +40,7 @@ export function queryDateFields(
   arg: DateISOInstance | DateArg,
   calendar: Calendar,
   disallowMonthDay?: boolean,
-): DateFields {
+): LocalDateFields {
   let date: PlainDate
 
   if (arg instanceof PlainDate) {
@@ -64,12 +64,12 @@ export function queryDateISOFields(
   dateLike: DateISOInstance | DateLikeFields,
   calendarImpl: CalendarImpl,
   options: OverflowOptions | undefined,
-): DateISOEssentials {
+): ISODateFields {
   if (isDateISOInstance(dateLike)) {
     return dateLike.getISOFields() // hard work has already been done
   }
 
-  let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<DateFields>
+  let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<InputDateFields>
   const yearFromEra = (eraYear !== undefined && era !== undefined)
     ? convertEraYear(calendarImpl.id, eraYear, era)
     : undefined
@@ -126,7 +126,7 @@ export function queryDateISOFields(
 export function getExistingDateISOFields(
   dateArg: DateISOInstance | DateArg,
   disallowMonthDay?: boolean,
-): DateISOEssentials {
+): ISODateFields {
   if (isDateISOInstance(dateArg)) {
     if (disallowMonthDay && dateArg instanceof PlainMonthDay) {
       throw new TypeError('PlainMonthDay not allowed')

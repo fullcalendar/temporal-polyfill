@@ -1,20 +1,30 @@
+import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
+import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
-import { addToInstant } from '../dateUtils/add'
-import { compareInstants } from '../dateUtils/compare'
+import { compareEpochObjs } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
-import { diffInstants } from '../dateUtils/diff'
+import { diffEpochNanos } from '../dateUtils/diff'
+import { negateDuration } from '../dateUtils/durationFields'
+import { isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { validateInstant } from '../dateUtils/isoFieldValidation'
-import { isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
 import { parseZonedDateTime } from '../dateUtils/parse'
-import { roundInstant } from '../dateUtils/rounding'
-import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from '../dateUtils/units'
+import { roundEpochNano } from '../dateUtils/rounding'
+import { translateEpochNano } from '../dateUtils/translate'
+import {
+  HOUR,
+  NANOSECOND,
+  SECOND,
+  nanoInMicroBI,
+  nanoInMilliBI,
+  nanoInSecondBI,
+} from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { createWeakMap } from '../utils/obj'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import {
   CalendarArg,
   CompareResult,
@@ -46,7 +56,7 @@ export class Instant extends AbstractNoValueObj {
     }
 
     const fields = parseZonedDateTime(String(arg))
-    const offsetNano = fields.offset
+    const offsetNano = fields.offsetNanoseconds
     if (offsetNano === undefined) {
       throw new RangeError('Must specify an offset')
     }
@@ -74,7 +84,7 @@ export class Instant extends AbstractNoValueObj {
   }
 
   static compare(a: InstantArg, b: InstantArg): CompareResult {
-    return compareInstants(
+    return compareEpochObjs(
       ensureObj(Instant, a),
       ensureObj(Instant, b),
     )
@@ -83,11 +93,15 @@ export class Instant extends AbstractNoValueObj {
   get epochNanoseconds(): bigint { return getEpochNano(this) }
 
   add(durationArg: DurationArg): Instant {
-    return addToInstant(this, ensureObj(Duration, durationArg))
+    return new Instant(
+      translateEpochNano(this.epochNanoseconds, ensureObj(Duration, durationArg)),
+    )
   }
 
   subtract(durationArg: DurationArg): Instant {
-    return addToInstant(this, ensureObj(Duration, durationArg).negated())
+    return new Instant(
+      translateEpochNano(this.epochNanoseconds, negateDuration(ensureObj(Duration, durationArg))),
+    )
   }
 
   until(other: InstantArg, options?: TimeDiffOptions): Duration {
@@ -99,11 +113,15 @@ export class Instant extends AbstractNoValueObj {
   }
 
   round(options: TimeRoundingOptions): Instant {
-    return roundInstant(this, options)
+    const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, false, true)
+
+    return new Instant(
+      roundEpochNano(this.epochNanoseconds, roundingConfig),
+    )
   }
 
   equals(other: InstantArg): boolean {
-    return compareInstants(this, ensureObj(Instant, other)) === 0
+    return !compareEpochObjs(this, ensureObj(Instant, other))
   }
 
   toString(options?: InstantToStringOptions): string {
@@ -153,3 +171,15 @@ mixinLocaleStringMethods(Instant, createZonedFormatFactoryFactory({
 }, {
   timeZoneName: undefined,
 }, {}))
+
+function diffInstants(
+  inst0: Instant,
+  inst1: Instant,
+  options: TimeDiffOptions | undefined,
+): Duration {
+  const diffConfig = parseDiffOptions(options, SECOND, NANOSECOND, NANOSECOND, HOUR, true)
+
+  return createDuration(
+    diffEpochNanos(inst0.epochNanoseconds, inst1.epochNanoseconds, diffConfig),
+  )
+}

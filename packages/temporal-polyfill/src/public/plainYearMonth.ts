@@ -1,11 +1,13 @@
+import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { comparePlainYearMonths } from '../dateUtils/compare'
+import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
 import { diffDates } from '../dateUtils/diff'
+import { negateDuration } from '../dateUtils/durationFields'
 import { processYearMonthFromFields, processYearMonthWithFields } from '../dateUtils/fromAndWith'
 import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
@@ -17,11 +19,12 @@ import {
 } from '../dateUtils/mixins'
 import { parseYearMonth } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
+import { DurationFields } from '../dateUtils/typesPrivate'
 import { MONTH, YEAR, YearMonthUnitInt } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import { PlainDate } from './plainDate'
 import {
   CalendarArg,
@@ -83,7 +86,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   static compare(a: YearMonthArg, b: YearMonthArg): CompareResult {
-    return comparePlainYearMonths(
+    return compareDateTimes(
       ensureObj(PlainYearMonth, a),
       ensureObj(PlainYearMonth, b),
     )
@@ -94,32 +97,23 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
   }
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-    return addDuration(this, ensureObj(Duration, durationArg), options)
+    return translatePlainYearMonth(this, ensureObj(Duration, durationArg), options)
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-    return addDuration(this, ensureObj(Duration, durationArg).negated(), options)
+    return translatePlainYearMonth(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
   until(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
-    return diffDates(
-      this.toPlainDate(day1),
-      ensureObj(PlainYearMonth, other).toPlainDate(day1),
-      parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
-    )
+    return diffPlainYearMonths(this, ensureObj(PlainYearMonth, other), false, options)
   }
 
   since(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
-    return diffDates(
-      this.toPlainDate(day1),
-      ensureObj(PlainYearMonth, other).toPlainDate(day1),
-      parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
-      true,
-    )
+    return diffPlainYearMonths(this, ensureObj(PlainYearMonth, other), true, options)
   }
 
   equals(other: YearMonthArg): boolean {
-    return comparePlainYearMonths(this, ensureObj(PlainYearMonth, other)) === 0
+    return !compareDateTimes(this, ensureObj(PlainYearMonth, other))
   }
 
   toString(options?: DateToStringOptions): string {
@@ -159,7 +153,6 @@ mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({
   second: undefined,
 }, true)) // strictCalendar
 
-// creation
 export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
   return new PlainYearMonth(
     isoFields.isoYear,
@@ -169,10 +162,9 @@ export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
   )
 }
 
-// utils
-function addDuration(
+function translatePlainYearMonth(
   yearMonth: PlainYearMonth,
-  duration: Duration,
+  duration: DurationFields,
   options?: OverflowOptions,
 ): PlainYearMonth {
   return yearMonth.toPlainDate({
@@ -182,4 +174,21 @@ function addDuration(
   })
     .add(duration, options)
     .toPlainYearMonth()
+}
+
+function diffPlainYearMonths(
+  pym0: PlainYearMonth,
+  pym1: PlainYearMonth,
+  flip: boolean,
+  options: YearMonthDiffOptions | undefined,
+): Duration {
+  return createDuration(
+    diffDates(
+      pym0.toPlainDate(day1),
+      pym1.toPlainDate(day1),
+      getCommonCalendar(pym0, pym1),
+      flip,
+      parseDiffOptions<YearMonthUnit, YearMonthUnitInt>(options, YEAR, MONTH, MONTH, YEAR),
+    ),
+  )
 }

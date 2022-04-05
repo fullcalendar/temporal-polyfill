@@ -6,8 +6,8 @@ import {
 } from '../argParse/disambig'
 import { isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
+import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
-import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/isoMath'
 import { checkInvalidOffset } from '../dateUtils/offset'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
@@ -55,8 +55,8 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
         return refined.timeZone
       } else if (parsed.Z) {
         return new TimeZone('UTC')
-      } else if (parsed.offset !== undefined) {
-        return new TimeZone(formatOffsetISO(parsed.offset))
+      } else if (parsed.offsetNanoseconds !== undefined) {
+        return new TimeZone(formatOffsetISO(parsed.offsetNanoseconds))
       }
     }
 

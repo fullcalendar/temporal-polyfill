@@ -1,6 +1,6 @@
 import { isValidDateISO } from './constrain'
-import { nanoToDayTimeFields } from './dayTime'
-import { isoEpochLeapYear, timeLikeToISO } from './isoMath'
+import { nanoToISOTime } from './dayAndTime'
+import { isoEpochLeapYear } from './epoch'
 import {
   dateTimeRegExp,
   monthDayRegExp,
@@ -9,26 +9,25 @@ import {
   unicodeDashRegExp,
   yearMonthRegExp,
 } from './parseRegExp'
-import { DateISOEssentials, DateTimeISOEssentials, TimeISOEssentials } from './types-private'
+import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './typesPrivate'
 import {
-  MILLISECOND,
   nanoInHour,
   nanoInMinute,
   nanoInSecond,
 } from './units'
 
-export interface DateParseResults extends DateISOEssentials {
+export interface DateParseResults extends ISODateFields {
   calendar: string | undefined
 }
 
-export interface DateTimeParseResult extends DateTimeISOEssentials {
+export interface DateTimeParseResult extends ISODateTimeFields {
   calendar: string | undefined
 }
 
 export interface ZonedDateTimeParseResult extends DateTimeParseResult {
   timeZone: string | undefined
-  offset: number | undefined
-  Z?: boolean // whether ISO8601 specified with 'Z' as offset indicator
+  offsetNanoseconds: number | undefined
+  Z: boolean | undefined // whether ISO8601 specified with 'Z' as offset indicator
 }
 
 // hard functions (throw error on failure)
@@ -73,7 +72,7 @@ export function parseOffsetNano(str: string): number {
   return res
 }
 
-export function parseTime(str: string): TimeISOEssentials {
+export function parseTime(str: string): ISOTimeFields {
   let res = tryParseTime(str)
 
   if (res !== undefined) {
@@ -154,18 +153,18 @@ export function tryParseOffsetNano(str: string): number | undefined {
 
 function parseZonedDateTimeParts(parts: string[]): ZonedDateTimeParseResult {
   const zOrOffset = parts[11]
-  let offset: number | undefined
+  let offsetNanoseconds: number | undefined
   let Z = false
 
   if (zOrOffset) {
     Z = zRE.test(zOrOffset)
-    offset = Z ? 0 : parseOffsetParts(parts.slice(12))
+    offsetNanoseconds = Z ? 0 : parseOffsetParts(parts.slice(12))
   }
 
   return {
     ...parseDateTimeParts(parts),
     timeZone: parts[21],
-    offset,
+    offsetNanoseconds,
     Z,
   }
 }
@@ -198,15 +197,11 @@ function parseMonthDayParts(parts: string[]): DateParseResults {
   }
 }
 
-function parseTimeParts(parts: string[]): TimeISOEssentials {
+function parseTimeParts(parts: string[]): ISOTimeFields {
   const isoSecond = toInt0(parts[4])
+
   return {
-    ...timeLikeToISO( // properties like isoMillisecond/isoMicrosecond
-      nanoToDayTimeFields( // properties like millisecond/microsecond
-        BigInt(parseNanoAfterDecimal(parts[6] || '')),
-        MILLISECOND,
-      ),
-    ),
+    ...nanoToISOTime(parseNanoAfterDecimal(parts[6] || ''))[0],
     isoHour: toInt0(parts[0]),
     isoMinute: toInt0(parts[2]),
     isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage lead-second

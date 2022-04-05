@@ -1,12 +1,16 @@
-import { DurationFields } from '../dateUtils/duration'
-import { DateFields, TimeFields, YearMonthFields } from '../dateUtils/types-private'
+import {
+  LocalDateFields,
+  LocalTimeFields,
+  LocalYearMonthFields,
+  UnsignedDurationFields,
+} from '../dateUtils/typesPrivate'
 import { UnitInt } from '../dateUtils/units'
 import { DateUnit, TimeUnit, Unit } from '../public/types'
 import { strArrayToHash } from '../utils/obj'
 
-export type YearMonthUnitProper = keyof YearMonthFields
-export type DateUnitProper = keyof DateFields | 'week'
-export type TimeUnitProper = keyof TimeFields
+export type YearMonthUnitProper = keyof LocalYearMonthFields
+export type DateUnitProper = keyof LocalDateFields | 'week'
+export type TimeUnitProper = keyof LocalTimeFields
 
 // These names must match the indexes of the Unit integers
 
@@ -31,8 +35,8 @@ export const unitNames: Unit[] = [
 
 // Duration / Plurals
 
-export const durationUnitNames: (keyof DurationFields)[] = unitNames.map(
-  (unit) => (unit + 's') as keyof DurationFields,
+export const durationUnitNames: (keyof UnsignedDurationFields)[] = unitNames.map(
+  (unit) => (unit + 's') as keyof UnsignedDurationFields,
 )
 
 // Parsing

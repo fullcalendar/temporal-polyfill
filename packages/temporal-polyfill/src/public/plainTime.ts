@@ -1,26 +1,30 @@
+import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { addToPlainTime } from '../dateUtils/add'
 import { compareTimes } from '../dateUtils/compare'
 import { constrainTimeISO } from '../dateUtils/constrain'
-import { diffPlainTimes } from '../dateUtils/diff'
+import { isoTimeToNano } from '../dateUtils/dayAndTime'
+import { diffTimes } from '../dateUtils/diff'
+import { negateDuration } from '../dateUtils/durationFields'
 import { processTimeFromFields, processTimeWithFields } from '../dateUtils/fromAndWith'
 import { formatTimeISO } from '../dateUtils/isoFormat'
-import { timeFieldsToNano, timeLikeToISO } from '../dateUtils/isoMath'
 import { mixinISOFields } from '../dateUtils/mixins'
 import { parseTime } from '../dateUtils/parse'
-import { roundPlainTime, roundTime } from '../dateUtils/rounding'
-import { TimeFields, TimeISOEssentials } from '../dateUtils/types-private'
-import { nanoInMilliBI } from '../dateUtils/units'
+import { roundTime } from '../dateUtils/rounding'
+import { translateTime } from '../dateUtils/translate'
+import { DurationFields, ISOTimeFields, LocalTimeFields } from '../dateUtils/typesPrivate'
+import { HOUR, NANOSECOND, TimeUnitInt, nanoInMilli } from '../dateUtils/units'
 import { FormatFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { OrigDateTimeFormat } from '../native/intlUtils'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
+import { TimeZone } from './timeZone'
 import {
   CompareResult,
   DateArg,
@@ -35,7 +39,7 @@ import {
   TimeUnit,
   TimeZoneArg,
 } from './types'
-import { ZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, createZonedDateTimeFromFields } from './zonedDateTime'
 
 export class PlainTime extends AbstractISOObj<TimeISOFields> {
   constructor(
@@ -84,11 +88,11 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   add(durationArg: DurationArg): PlainTime {
-    return addToPlainTime(this, ensureObj(Duration, durationArg))
+    return translatePlainTime(this, ensureObj(Duration, durationArg))
   }
 
   subtract(durationArg: DurationArg): PlainTime {
-    return addToPlainTime(this, ensureObj(Duration, durationArg).negated())
+    return translatePlainTime(this, negateDuration(ensureObj(Duration, durationArg)))
   }
 
   until(other: TimeArg, options?: TimeDiffOptions): Duration {
@@ -100,25 +104,36 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
   }
 
   round(options: TimeRoundingOptions | TimeUnit): PlainTime {
-    return roundPlainTime(this, options)
+    const roundingConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
+      options,
+      undefined, // no default. required
+      NANOSECOND, // minUnit
+      HOUR, // maxUnit
+    )
+
+    return createTime(roundTime(this.getISOFields(), roundingConfig))
   }
 
   equals(other: TimeArg): boolean {
-    return compareTimes(this, ensureObj(PlainTime, other)) === 0
+    return !compareTimes(this, ensureObj(PlainTime, other))
   }
 
   toString(options?: TimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
-    const roundedISOFields = roundTime(
-      this,
-      formatConfig.roundingIncrement,
-      formatConfig.roundingMode,
-    )
-    return formatTimeISO(timeLikeToISO(roundedISOFields), formatConfig)
+    const roundedISOFields: ISOTimeFields = roundTime(this.getISOFields(), formatConfig)
+    return formatTimeISO(roundedISOFields, formatConfig)
   }
 
   toZonedDateTime(options: { plainDate: DateArg, timeZone: TimeZoneArg }): ZonedDateTime {
-    return this.toPlainDateTime(options.plainDate).toZonedDateTime(options.timeZone)
+    // TODO: ensure options object first?
+    const plainDate = ensureObj(PlainDate, options.plainDate)
+    const timeZone = ensureObj(TimeZone, options.timeZone)
+
+    return createZonedDateTimeFromFields({
+      ...plainDate.getISOFields(),
+      ...this.getISOFields(),
+      timeZone,
+    })
   }
 
   toPlainDateTime(dateArg: DateArg): PlainDateTime {
@@ -127,7 +142,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 }
 
 // mixin
-export interface PlainTime extends TimeFields { calendar: Calendar }
+export interface PlainTime extends LocalTimeFields { calendar: Calendar }
 export interface PlainTime extends ToLocaleStringMethods {}
 mixinISOFields(PlainTime, timeUnitNames)
 mixinLocaleStringMethods(PlainTime, createPlainTimeFormatFactory)
@@ -151,12 +166,12 @@ function createPlainTimeFormatFactory(
       weekday: undefined,
     }),
     buildEpochMilli: (plainTime: PlainTime) => (
-      Number(timeFieldsToNano(plainTime) / nanoInMilliBI)
+      Math.trunc(isoTimeToNano(plainTime.getISOFields()) / nanoInMilli)
     ),
   }
 }
 
-export function createTime(isoFields: TimeISOEssentials): PlainTime {
+export function createTime(isoFields: ISOTimeFields): PlainTime {
   return new PlainTime(
     isoFields.isoHour,
     isoFields.isoMinute,
@@ -171,4 +186,27 @@ export function createTime(isoFields: TimeISOEssentials): PlainTime {
 // Fallback to 00:00 time
 export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
   return ensureObj(PlainTime, arg ?? { hour: 0 })
+}
+
+function translatePlainTime(pt: PlainTime, dur: DurationFields): PlainTime {
+  return createTime(translateTime(pt.getISOFields(), dur))
+}
+
+function diffPlainTimes(
+  pt0: PlainTime,
+  pt1: PlainTime,
+  options: TimeDiffOptions | undefined,
+): Duration {
+  const diffConfig = parseDiffOptions<TimeUnit, TimeUnitInt>(
+    options,
+    HOUR, // largestUnitDefault
+    NANOSECOND, // smallestUnitDefault
+    NANOSECOND, // minUnit
+    HOUR, // maxUnit
+  )
+
+  return createDuration(
+    // TODO: use local-time-fields as-is somehow???
+    diffTimes(pt0.getISOFields(), pt1.getISOFields(), diffConfig),
+  )
 }

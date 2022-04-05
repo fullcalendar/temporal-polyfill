@@ -1,5 +1,6 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { isoFieldsToEpochMilli, zeroTimeISOFields } from '../dateUtils/isoMath'
+import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
+import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
 import { Calendar } from '../public/calendar'
 import { createDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
@@ -99,7 +100,7 @@ export function createPlainFormatFactoryFactory<Entity extends PlainEntity>(
 
 function computeEpochMilliViaTimeZone(timeZone: TimeZone, entity: PlainEntity): number {
   const plainDateTime = createDateTime({ // necessary? pass directly into getInstantFor?
-    ...zeroTimeISOFields,
+    ...zeroISOTimeFields,
     ...entity.getISOFields(),
   })
   return timeZone.getInstantFor(plainDateTime).epochMilliseconds

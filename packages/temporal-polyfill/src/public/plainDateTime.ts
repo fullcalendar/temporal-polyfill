@@ -1,13 +1,15 @@
-import { getStrangerCalendar } from '../argParse/calendar'
+import { getCommonCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
+import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { addToDateTime } from '../dateUtils/add'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
 import { diffDateTimes } from '../dateUtils/diff'
+import { negateDuration } from '../dateUtils/durationFields'
 import { processDateTimeFromFields, processDateTimeWithFields } from '../dateUtils/fromAndWith'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
@@ -19,12 +21,14 @@ import {
 } from '../dateUtils/mixins'
 import { parseDateTime } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
-import { roundDateTime, roundDateTimeWithOptions } from '../dateUtils/rounding'
-import { TimeFields } from '../dateUtils/types-private'
+import { roundDateTime } from '../dateUtils/rounding'
+import { translateDateTime } from '../dateUtils/translate'
+import { DurationFields, LocalTimeFields } from '../dateUtils/typesPrivate'
+import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import { PlainDate, createDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createTime, ensureLooseTime } from './plainTime'
@@ -46,6 +50,7 @@ import {
   OverflowOptions,
   TimeArg,
   TimeZoneArg,
+  Unit,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -133,43 +138,58 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
-    return addToDateTime(this, ensureObj(Duration, durationArg), options)
+    return translatePlainDateTime(this, ensureObj(Duration, durationArg), options)
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
-    return addToDateTime(this, ensureObj(Duration, durationArg).negated(), options)
+    return translatePlainDateTime(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
   until(other: DateTimeArg, options?: DiffOptions): Duration {
-    return diffDateTimes(this, ensureObj(PlainDateTime, other), options)
+    return diffPlainDateTimes(
+      this,
+      ensureObj(PlainDateTime, other),
+      false,
+      options,
+    )
   }
 
   since(other: DateTimeArg, options?: DiffOptions): Duration {
-    return diffDateTimes(this, ensureObj(PlainDateTime, other), options, true)
+    return diffPlainDateTimes(
+      ensureObj(PlainDateTime, other),
+      this,
+      true,
+      options,
+    )
   }
 
   round(options: DateTimeRoundingOptions | DayTimeUnit): PlainDateTime {
-    return roundDateTimeWithOptions(this, options)
+    const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
+      options,
+      undefined, // no default. required
+      NANOSECOND, // minUnit
+      DAY, // maxUnit
+    )
+
+    return createDateTime({
+      ...roundDateTime(this.getISOFields(), roundingConfig),
+      calendar: this.calendar,
+    })
   }
 
   equals(other: DateTimeArg): boolean {
-    return compareDateTimes(this, ensureObj(PlainDateTime, other)) === 0
+    return !compareDateTimes(this, ensureObj(PlainDateTime, other))
   }
 
   toString(options?: DateTimeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
     const calendarDisplay = parseCalendarDisplayOption(options)
-    const isoFields = roundDateTime(
-      this,
-      formatConfig.roundingIncrement,
-      formatConfig.roundingMode,
-    ).getISOFields() // TODO: somehow have ISO fields returned directly
+    const isoFields = roundDateTime(this.getISOFields(), formatConfig)
 
     return formatDateTimeISO(isoFields, formatConfig) +
-      formatCalendarID(isoFields.calendar.toString(), calendarDisplay)
+      formatCalendarID(this.calendar.toString(), calendarDisplay)
   }
 
-  // workhorse for converting to ZonedDateTime for other objects
   toZonedDateTime(
     timeZoneArg: TimeZoneArg,
     options?: { disambiguation?: Disambiguation },
@@ -177,11 +197,8 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const instant = timeZone.getInstantFor(this, options)
 
-    return new ZonedDateTime(
-      instant.epochNanoseconds,
-      timeZone,
-      this.calendar,
-    )
+    // more succinct than createZonedDateTimeFromFields
+    return new ZonedDateTime(instant.epochNanoseconds, timeZone, this.calendar)
   }
 
   toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
@@ -192,7 +209,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
 
 // mixin
 export interface PlainDateTime extends DateCalendarFields { calendar: Calendar }
-export interface PlainDateTime extends TimeFields {}
+export interface PlainDateTime extends LocalTimeFields {}
 export interface PlainDateTime extends ToLocaleStringMethods {}
 mixinISOFields(PlainDateTime, timeUnitNames)
 mixinCalendarFields(PlainDateTime, dateCalendarFields)
@@ -219,5 +236,36 @@ export function createDateTime(isoFields: DateTimeISOFields): PlainDateTime {
     isoFields.isoMicrosecond,
     isoFields.isoNanosecond,
     isoFields.calendar,
+  )
+}
+
+function translatePlainDateTime(
+  pdt0: PlainDateTime,
+  dur: DurationFields,
+  options: OverflowOptions | undefined,
+): PlainDateTime {
+  const isoFields = translateDateTime(pdt0.getISOFields(), dur, options)
+  return createDateTime({
+    ...isoFields,
+    calendar: pdt0.calendar,
+  })
+}
+
+function diffPlainDateTimes(
+  pdt0: PlainDateTime,
+  pdt1: PlainDateTime,
+  flip: boolean,
+  options: DiffOptions | undefined,
+): Duration {
+  const diffConfig = parseDiffOptions<Unit, UnitInt>(
+    options,
+    DAY, // largestUnitDefault
+    NANOSECOND, // smallestUnitDefault
+    NANOSECOND, // minUnit
+    YEAR, // maxUnit
+  )
+
+  return createDuration(
+    diffDateTimes(pdt0, pdt1, getCommonCalendar(pdt0, pdt1), flip, diffConfig),
   )
 }

@@ -9,11 +9,14 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { DateISOFields } from '../public/types'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
-import { nanoToDayTimeFields } from './dayTime'
-import { SignedDurationFields } from './duration'
-import { DateISOEssentials, DateTimeISOEssentials, TimeISOEssentials } from './types-private'
+import { nanoToISOTime } from './dayAndTime'
 import {
-  HOUR,
+  DurationFields,
+  ISODateFields,
+  ISODateTimeFields,
+  ISOTimeFields,
+} from './typesPrivate'
+import {
   MINUTE,
   SECOND,
   TimeUnitInt,
@@ -25,17 +28,17 @@ import {
 
 // given ISO fields should already be rounded
 export function formatDateTimeISO(
-  fields: DateTimeISOEssentials,
+  fields: ISODateTimeFields,
   formatConfig: TimeToStringConfig,
 ): string {
   return formatDateISO(fields) + 'T' + formatTimeISO(fields, formatConfig)
 }
 
-export function formatDateISO(fields: DateISOEssentials): string {
+export function formatDateISO(fields: ISODateFields): string {
   return formatYearMonthISO(fields) + '-' + padZeros(fields.isoDay, 2)
 }
 
-export function formatYearMonthISO(fields: DateISOEssentials): string {
+export function formatYearMonthISO(fields: ISODateFields): string {
   const { isoYear } = fields
   return (
     (isoYear < 1000 || isoYear > 9999)
@@ -51,7 +54,7 @@ export function formatMonthDayISO(fields: DateISOFields): string {
 // given ISO fields should already be rounded
 // formatConfig is NOT for rounding. only for smallestUnit/fractionalSecondDigits
 export function formatTimeISO(
-  fields: TimeISOEssentials,
+  fields: ISOTimeFields,
   formatConfig: TimeToStringConfig, // tighten type? remove roundingMode?
 ): string {
   const parts: string[] = [padZeros(fields.isoHour, 2)]
@@ -77,19 +80,19 @@ export function formatTimeISO(
 
 // TODO: combine with formatTimeISO
 export function formatOffsetISO(offsetNano: number): string {
-  const fields = nanoToDayTimeFields(BigInt(Math.abs(offsetNano)), HOUR) // TODO: cleaner util
+  const [fields] = nanoToISOTime(Math.abs(offsetNano))
   const partialSecondsStr = formatPartialSeconds(
-    fields.millisecond!,
-    fields.microsecond!,
-    fields.nanosecond!,
+    fields.isoMillisecond,
+    fields.isoMicrosecond,
+    fields.isoNanosecond,
     undefined,
   )[0]
 
   return getSignStr(offsetNano) +
-    padZeros(fields.hour!, 2) + ':' +
-    padZeros(fields.minute!, 2) +
-    ((fields.second || partialSecondsStr)
-      ? ':' + padZeros(fields.second!, 2) + partialSecondsStr
+    padZeros(fields.isoHour, 2) + ':' +
+    padZeros(fields.isoMinute, 2) +
+    ((fields.isoSecond || partialSecondsStr)
+      ? ':' + padZeros(fields.isoSecond, 2) + partialSecondsStr
       : '')
 }
 
@@ -118,7 +121,7 @@ export function formatTimeZoneID(timeZoneID: string, display: TimeZoneDisplayInt
 }
 
 export function formatDurationISO(
-  fields: SignedDurationFields,
+  fields: DurationFields,
   formatConfig: DurationToStringConfig,
 ): string {
   const { smallestUnit, fractionalSecondDigits, roundingMode } = formatConfig

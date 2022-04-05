@@ -1,54 +1,77 @@
+import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
+import { ensureObj } from '../dateUtils/abstract'
+import { ISODateTimeFields } from '../dateUtils/typesPrivate'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
+import { Calendar } from './calendar'
 import { Instant } from './instant'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { PlainTime } from './plainTime'
+import { PlainDate, createDate } from './plainDate'
+import { PlainDateTime, createDateTime } from './plainDateTime'
+import { PlainTime, createTime } from './plainTime'
 import { TimeZone } from './timeZone'
 import { CalendarArg, TimeZoneArg } from './types'
-import { ZonedDateTime } from './zonedDateTime'
+import {
+  ZonedDateTime,
+  buildZonedDateTimeISOFields,
+  createZonedDateTimeFromFields,
+} from './zonedDateTime'
 
-function getZonedDateTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): ZonedDateTime {
-  return getInstant().toZonedDateTimeISO(timeZoneArg)
+function getZonedDateTimeISO(timeZoneArg?: TimeZoneArg): ZonedDateTime {
+  return createZonedDateTimeFromFields(buidZonedFields(isoCalendarID, timeZoneArg))
 }
 
 function getZonedDateTime(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): ZonedDateTime {
-  if (calendarArg === undefined) {
-    throw new RangeError('Must specify calendar') // bad
-  }
-  return getInstant().toZonedDateTime({
-    calendar: calendarArg,
-    timeZone: timeZoneArg ?? getTimeZone(),
-  })
+  return createZonedDateTimeFromFields(buidZonedFields(calendarArg, timeZoneArg))
 }
 
-function getPlainDateTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainDateTime {
-  return getZonedDateTimeISO(timeZoneArg).toPlainDateTime()
+function getPlainDateTimeISO(timeZoneArg?: TimeZoneArg): PlainDateTime {
+  return createDateTime(buidZonedFields(isoCalendarID, timeZoneArg))
 }
 
 function getPlainDateTime(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): PlainDateTime {
-  return getZonedDateTime(calendarArg, timeZoneArg).toPlainDateTime()
+  return createDateTime(buidZonedFields(calendarArg, timeZoneArg))
 }
 
-function getPlainDateISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainDate {
-  return getPlainDateTimeISO(timeZoneArg).toPlainDate()
+function getPlainDateISO(timeZoneArg: TimeZoneArg): PlainDate {
+  return createDate(buidZonedFields(isoCalendarID, timeZoneArg))
 }
 
 function getPlainDate(calendarArg: CalendarArg, timeZoneArg?: TimeZoneArg): PlainDate {
-  return getPlainDateTime(calendarArg, timeZoneArg).toPlainDate()
+  return createDate(buidZonedFields(calendarArg, timeZoneArg))
 }
 
-function getPlainTimeISO(timeZoneArg: TimeZoneArg = getTimeZone()): PlainTime {
-  return getInstant().toZonedDateTimeISO(timeZoneArg).toPlainTime()
+function getPlainTimeISO(timeZoneArg: TimeZoneArg): PlainTime {
+  return createTime(buidZonedFields(isoCalendarID, timeZoneArg))
 }
 
 function getInstant(): Instant {
-  return new Instant(BigInt(Date.now()) * nanoInMilliBI)
+  return new Instant(getEpochNano())
 }
 
 function getTimeZone(): TimeZone {
   return new TimeZone(new OrigDateTimeFormat().resolvedOptions().timeZone)
 }
+
+// utils
+
+function buidZonedFields(
+  calendarArg: CalendarArg,
+  timeZoneArg: TimeZoneArg = getTimeZone(),
+): ISODateTimeFields & { timeZone: TimeZone, calendar: Calendar } {
+  const timeZone = ensureObj(TimeZone, timeZoneArg)
+  return {
+    ...buildZonedDateTimeISOFields(getEpochNano(), timeZone)[0],
+    // build these in to buildZonedDateTimeISOFields?
+    timeZone,
+    calendar: ensureObj(Calendar, calendarArg),
+  }
+}
+
+function getEpochNano(): bigint {
+  return BigInt(Date.now()) * nanoInMilliBI
+}
+
+// exports
 
 export const Now = {
   zonedDateTimeISO: getZonedDateTimeISO,

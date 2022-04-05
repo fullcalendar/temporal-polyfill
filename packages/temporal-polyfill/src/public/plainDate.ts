@@ -1,9 +1,11 @@
+import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { compareDates } from '../dateUtils/compare'
+import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
+import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDates } from '../dateUtils/diff'
 import { processDateFromFields, processDateWithFields } from '../dateUtils/fromAndWith'
 import { validateDate } from '../dateUtils/isoFieldValidation'
@@ -20,11 +22,12 @@ import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration } from './duration'
+import { Duration, createDuration } from './duration'
 import { PlainDateTime, createDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
-import { ensureLooseTime } from './plainTime'
+import { PlainTime, ensureLooseTime } from './plainTime'
 import { PlainYearMonth, createYearMonth } from './plainYearMonth'
+import { TimeZone } from './timeZone'
 import {
   CalendarArg,
   CompareResult,
@@ -40,7 +43,7 @@ import {
   TimeZoneArg,
   TimeZoneProtocol,
 } from './types'
-import { ZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, createZonedDateTimeFromFields } from './zonedDateTime'
 
 export class PlainDate extends AbstractISOObj<DateISOFields> {
   constructor(
@@ -75,7 +78,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   static compare(a: DateArg, b: DateArg): CompareResult {
-    return compareDates(
+    return compareDateTimes(
       ensureObj(PlainDate, a),
       ensureObj(PlainDate, b),
     )
@@ -104,24 +107,25 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
   }
 
   until(other: DateArg, options?: DateDiffOptions): Duration {
-    return diffDates(
+    return diffPlainDates(
       this,
       ensureObj(PlainDate, other),
-      parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
+      false,
+      options,
     )
   }
 
   since(other: DateArg, options?: DateDiffOptions): Duration {
-    return diffDates(
+    return diffPlainDates(
       this,
       ensureObj(PlainDate, other),
-      parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
       true,
+      options,
     )
   }
 
   equals(other: DateArg): boolean {
-    return compareDates(this, ensureObj(PlainDate, other)) === 0
+    return !compareDateTimes(this, ensureObj(PlainDate, other))
   }
 
   toString(options?: DateToStringOptions): string {
@@ -136,9 +140,16 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     options: { plainTime?: TimeArg, timeZone: TimeZoneArg } | TimeZoneArg,
   ): ZonedDateTime {
     const refinedOptions = processToZonedDateTimeOptions(options)
+    const timeZone = ensureObj(TimeZone, refinedOptions.timeZone)
+    const plainTime = refinedOptions.plainTime === undefined
+      ? undefined
+      : ensureObj(PlainTime, refinedOptions.plainTime)
 
-    return this.toPlainDateTime(refinedOptions.plainTime)
-      .toZonedDateTime(refinedOptions.timeZone)
+    return createZonedDateTimeFromFields({
+      ...this.getISOFields(),
+      ...(plainTime ? plainTime.getISOFields() : zeroISOTimeFields),
+      timeZone,
+    })
   }
 
   toPlainDateTime(timeArg?: TimeArg): PlainDateTime {
@@ -205,4 +216,21 @@ function processToZonedDateTimeOptions(
   }
 
   return { plainTime, timeZone }
+}
+
+function diffPlainDates(
+  pd0: PlainDate,
+  pd1: PlainDate,
+  flip: boolean,
+  options: DateDiffOptions | undefined,
+): Duration {
+  return createDuration(
+    diffDates(
+      pd0,
+      pd1,
+      getCommonCalendar(pd0, pd1),
+      flip,
+      parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
+    ),
+  )
 }

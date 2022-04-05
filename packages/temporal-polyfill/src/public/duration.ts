@@ -1,21 +1,24 @@
+import { parseDiffOptions } from '../argParse/diffOptions'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
-import { ensureOptionsObj } from '../argParse/refine'
+import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseTotalConfig } from '../argParse/totalOptions'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
+import { compareDurations } from '../dateUtils/compare'
 import {
-  SignedDurationFields,
-  addAndBalanceDurations,
-  compareDurations,
-  createDuration,
-  negateFields,
-  refineDurationFields,
-  roundAndBalanceDuration,
-} from '../dateUtils/duration'
+  absDuration,
+  computeLargestDurationUnit,
+  negateDuration,
+  refineDurationNumbers,
+} from '../dateUtils/durationFields'
 import { processDurationFields } from '../dateUtils/fromAndWith'
 import { formatDurationISO } from '../dateUtils/isoFormat'
 import { parseDuration } from '../dateUtils/parseDuration'
+import { extractRelativeTo } from '../dateUtils/relativeTo'
+import { roundDuration } from '../dateUtils/rounding'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
-import { SECOND } from '../dateUtils/units'
+import { addDurationFields } from '../dateUtils/translate'
+import { DurationFields, UnsignedDurationFields } from '../dateUtils/typesPrivate'
+import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
 import {
   CompareResult,
   DateTimeArg,
@@ -29,9 +32,9 @@ import {
   Unit,
   ZonedDateTimeArg,
 } from '../public/types'
-import { createWeakMap, mapHash } from '../utils/obj'
+import { createWeakMap } from '../utils/obj'
 
-const [getFields, setFields] = createWeakMap<Duration, SignedDurationFields>()
+const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
 
 export class Duration extends AbstractNoValueObj {
   constructor(
@@ -47,7 +50,7 @@ export class Duration extends AbstractNoValueObj {
     nanoseconds = 0,
   ) {
     super()
-    setFields(this, refineDurationFields({
+    const numberFields = processDurationFields({ // TODO: overkill. does hasAnyProps
       years,
       months,
       weeks,
@@ -58,7 +61,8 @@ export class Duration extends AbstractNoValueObj {
       milliseconds,
       microseconds,
       nanoseconds,
-    }))
+    })
+    setFields(this, refineDurationNumbers(numberFields))
   }
 
   static from(arg: DurationArg): Duration {
@@ -74,7 +78,11 @@ export class Duration extends AbstractNoValueObj {
     b: DurationArg,
     options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg },
   ): CompareResult {
-    return compareDurations(a, b, ensureOptionsObj(options).relativeTo)
+    return compareDurations(
+      ensureObj(Duration, a),
+      ensureObj(Duration, b),
+      extractRelativeTo(ensureOptionsObj(options).relativeTo),
+    )
   }
 
   get years(): number { return getFields(this).years }
@@ -98,44 +106,60 @@ export class Duration extends AbstractNoValueObj {
   }
 
   negated(): Duration {
-    return createDuration(
-      negateFields(getFields(this) as Partial<SignedDurationFields>), // TODO: fix types
-    )
+    return createDuration(negateDuration(getFields(this)))
   }
 
   abs(): Duration {
-    return createDuration(
-      mapHash(
-        getFields(this),
-        (num: number) => Math.abs(num),
-      ),
-    )
+    return createDuration(absDuration(getFields(this)))
   }
 
   add(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
-    return addAndBalanceDurations(
-      this,
-      ensureObj(Duration, other),
-      ensureOptionsObj(options).relativeTo,
-    )
+    return addDurations(this, ensureObj(Duration, other), options)
   }
 
   subtract(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
-    return addAndBalanceDurations(
-      this,
-      ensureObj(Duration, other).negated(),
-      ensureOptionsObj(options).relativeTo,
-    )
+    return addDurations(this, negateDuration(ensureObj(Duration, other)), options)
   }
 
   round(options: DurationRoundingOptions | Unit): Duration {
-    return roundAndBalanceDuration(this, options)
+    const optionsObj: DurationRoundingOptions = typeof options === 'string'
+      ? { smallestUnit: options }
+      : options
+
+    if (!isObjectLike(optionsObj)) {
+      throw new TypeError('Must specify options') // best place for this?
+    } else if (optionsObj.largestUnit === undefined && optionsObj.smallestUnit === undefined) {
+      throw new RangeError('Must specify either largestUnit or smallestUnit')
+    }
+
+    const defaultLargestUnit = computeLargestDurationUnit(this)
+    const diffConfig = parseDiffOptions<Unit, UnitInt>(
+      optionsObj,
+      defaultLargestUnit, // largestUnitDefault
+      NANOSECOND, // smallestUnitDefault
+      NANOSECOND, // minUnit
+      YEAR, // maxUnit
+      false, // forInstant
+      true, // forRounding
+    )
+
+    const relativeTo = extractRelativeTo(optionsObj.relativeTo)
+
+    return createDuration(
+      roundDuration(this, diffConfig, relativeTo, relativeTo ? relativeTo.calendar : undefined),
+    )
   }
 
   total(options: DurationTotalOptions | Unit): number {
     const totalConfig = parseTotalConfig(options)
+    const relativeTo = extractRelativeTo(totalConfig.relativeTo)
 
-    return computeTotalUnits(this, totalConfig.unit, totalConfig.relativeTo)
+    return computeTotalUnits(
+      this,
+      totalConfig.unit,
+      relativeTo,
+      relativeTo ? relativeTo.calendar : undefined,
+    )
   }
 
   toString(options?: DurationToStringOptions): string {
@@ -149,4 +173,31 @@ export class Duration extends AbstractNoValueObj {
     // the spec recommends this in the absence of Intl.DurationFormat
     return this.toString()
   }
+}
+
+export function createDuration(fields: UnsignedDurationFields): Duration {
+  return new Duration(
+    fields.years,
+    fields.months,
+    fields.weeks,
+    fields.days,
+    fields.hours,
+    fields.minutes,
+    fields.seconds,
+    fields.milliseconds,
+    fields.microseconds,
+    fields.nanoseconds,
+  )
+}
+
+function addDurations(
+  d0: DurationFields,
+  d1: DurationFields,
+  options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg },
+): Duration {
+  const relativeTo = extractRelativeTo(ensureOptionsObj(options).relativeTo)
+
+  return createDuration(
+    addDurationFields(d0, d1, relativeTo, relativeTo ? relativeTo.calendar : undefined),
+  )
 }

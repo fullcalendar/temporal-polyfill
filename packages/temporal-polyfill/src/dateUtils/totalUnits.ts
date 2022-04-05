@@ -1,46 +1,48 @@
 import { durationUnitNames } from '../argParse/unitStr'
-import { Duration } from '../public/duration'
-import { PlainDate } from '../public/plainDate'
-import { PlainDateTime } from '../public/plainDateTime'
-import { DateTimeArg, DurationLike } from '../public/types'
-import { ZonedDateTime } from '../public/zonedDateTime'
-import { DateLikeInstance } from './calendar'
-import { dayTimeFieldsToNano } from './dayTime'
-import {
-  balanceComplexDuration,
-  durationToDayTimeFields,
-  extractRelativeTo,
-} from './duration'
-import { isoFieldsToEpochNano } from './isoMath'
-import { UnitInt, YEAR, isDayTimeUnit, nanoIn } from './units'
+import { Calendar } from '../public/calendar'
+import { durationDayTimeToNano } from './dayAndTime'
+import { DiffableObj } from './diff'
+import { computeLargestDurationUnit, signDuration } from './durationFields'
+import { spanDurationFromDateTime } from './durationSpan'
+import { toEpochNano } from './epoch'
+import { DurationFields, UnsignedDurationFields } from './typesPrivate'
+import { DAY, UnitInt, YEAR, isDayTimeUnit, nanoIn } from './units'
 
 export function computeTotalUnits(
-  duration: Duration,
+  duration: DurationFields,
   unit: UnitInt,
-  relativeToArg: DateTimeArg | undefined,
+  relativeTo: DiffableObj | undefined,
+  calendar: Calendar | undefined,
 ): number {
-  const fields = durationToDayTimeFields(duration)
   if (
-    relativeToArg === undefined &&
-    fields &&
+    relativeTo === undefined &&
+    computeLargestDurationUnit(duration) <= DAY &&
     isDayTimeUnit(unit)
   ) {
-    return Number(dayTimeFieldsToNano(fields)) / nanoIn[unit]
+    return Number(durationDayTimeToNano(duration)) / nanoIn[unit]
   }
-  const relativeTo = extractRelativeTo(relativeToArg) // throws an exception if undefined
-  const balancedDuration = balanceComplexDuration(
+
+  if (!relativeTo) {
+    throw new RangeError('Need relativeTo')
+  }
+
+  const [balancedDuration, relativeToTranslated] = spanDurationFromDateTime(
     duration,
     unit,
     relativeTo,
+    calendar!,
     true, // dissolveWeeks
   )
+
   const durationLike = computeExactDuration(
-    balancedDuration,
+    signDuration(balancedDuration),
     unit,
     relativeTo,
-    relativeTo.add(balancedDuration),
+    relativeToTranslated,
   )
-  return durationLike[durationUnitNames[unit]]! // computeExactDuration guarantees this
+
+  const unitName = durationUnitNames[unit] as keyof UnsignedDurationFields
+  return durationLike[unitName]
 }
 
 // TODO: rename to computeFracDuration
@@ -48,40 +50,31 @@ export function computeTotalUnits(
 // RETURNS: raw duration fields that might have floating-point values
 // Those floating-point values will need to rounded before creating a proper Duration
 export function computeExactDuration(
-  balancedDuration: Duration,
+  balancedDuration: DurationFields,
   smallestUnit: UnitInt,
-  d0: DateLikeInstance,
-  d1: DateLikeInstance,
-): DurationLike {
-  const smallestUnitName = durationUnitNames[smallestUnit]
+  dt0: DiffableObj,
+  dt1: DiffableObj,
+): DurationFields {
+  const smallestUnitName = durationUnitNames[smallestUnit] as keyof UnsignedDurationFields
   const { sign } = balancedDuration
 
   // make a new duration object that excludes units smaller than smallestUnit
-  const dur: DurationLike = {}
+  const dur: Partial<DurationFields> = {}
   for (let unit = YEAR; unit >= smallestUnit; unit--) {
-    const durationUnit = durationUnitNames[unit]
+    const durationUnit = durationUnitNames[unit] as keyof UnsignedDurationFields
     dur[durationUnit] = balancedDuration[durationUnit]
   }
 
   // a single additional unit of `unit`
-  const incDur: DurationLike = { [smallestUnitName]: sign }
-  const startDateTime = d0.add(dur)
+  const incDur: Partial<DurationFields> = { [smallestUnitName]: sign }
+  const startDateTime = dt0.add(dur)
   const endDateTime = startDateTime.add(incDur)
 
-  const startNano = realisticEpochNano(startDateTime)
-  const endNano = realisticEpochNano(endDateTime)
-  const middleNano = realisticEpochNano(d1)
+  const startNano = toEpochNano(startDateTime)
+  const endNano = toEpochNano(endDateTime)
+  const middleNano = toEpochNano(dt1)
   const unitFrac = Number(middleNano - startNano) / Number(endNano - startNano) * sign
 
   dur[smallestUnitName]! += unitFrac // above loop populated this
-  return dur
-}
-
-// TODO: use this everywhere instead of isoFieldsToEpochNano?
-// Make a separate sub-util JUST for PlainDatetime/PlainDate?
-function realisticEpochNano(dt: ZonedDateTime | PlainDateTime | PlainDate): bigint {
-  const { epochNanoseconds } = dt as ZonedDateTime
-  return epochNanoseconds !== undefined
-    ? epochNanoseconds
-    : isoFieldsToEpochNano(dt.getISOFields())
+  return dur as DurationFields
 }

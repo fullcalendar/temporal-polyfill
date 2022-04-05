@@ -8,8 +8,13 @@ import { RoundingModeMap } from '../argParse/roundingMode'
 import { TimeZoneArgBag, TimeZoneArgSimple } from '../argParse/timeZone'
 import { TimeZoneDisplayMap } from '../argParse/timeZoneDisplay'
 import { DateUnitProper, TimeUnitProper, YearMonthUnitProper } from '../argParse/unitStr'
-import { DurationFields } from '../dateUtils/duration'
-import { DateISOEssentials, TimeFields, TimeISOEssentials } from '../dateUtils/types-private'
+import {
+  DurationFields,
+  ISODateFields,
+  ISOTimeFields,
+  LocalTimeFields,
+} from '../dateUtils/typesPrivate'
+import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
@@ -100,10 +105,10 @@ export type ZonedDateTimeToStringOptions = DateTimeToStringOptions & {
   offset?: OffsetDisplay
 }
 
-// iso-fields
-export type DateISOFields = DateISOEssentials & { calendar: CalendarProtocol }
-export type TimeISOFields = TimeISOEssentials & { calendar: CalendarProtocol }
-export type DateTimeISOFields = DateISOFields & TimeISOEssentials
+// iso-fields (TODO: change back to CalendarProtocol!!!)
+export type DateISOFields = ISODateFields & { calendar: Calendar }
+export type TimeISOFields = ISOTimeFields & { calendar: Calendar }
+export type DateTimeISOFields = DateISOFields & ISOTimeFields
 export type ZonedDateTimeISOFields = DateTimeISOFields & { timeZone: TimeZone, offset: string }
 
 // like-fields (for Calendar::dateFromFields, etc) (does NOT have calendar/timezone)
@@ -115,7 +120,7 @@ export type MonthDayLikeFields =
   | (({ year: number } | { era: string, eraYear: number }) & { month: number })) &
   { day: number }
 export type DateLikeFields = YearMonthLikeFields & { day: number }
-export type DateTimeLikeFields = DateLikeFields & Partial<TimeFields>
+export type DateTimeLikeFields = DateLikeFields & Partial<LocalTimeFields>
 export type ZonedDateTimeLikeFields = DateTimeLikeFields & { offset?: string }
 
 // like (has calendar/timezone)
@@ -126,7 +131,7 @@ export type MonthDayLike =
   { era: string, eraYear: number, month: number, calendar: CalendarArgSimple } |
   { month: number, day: number, calendar?: never } // lack of a calendar implies ISO
 export type DateLike = YearMonthLike & { day: number }
-export type TimeLike = Partial<TimeFields>
+export type TimeLike = Partial<LocalTimeFields>
 export type DateTimeLike = DateLike & TimeLike
 export type ZonedDateTimeLike = DateTimeLike & { timeZone: TimeZoneArgSimple, offset?: string }
 export type DurationLike = Partial<DurationFields>
