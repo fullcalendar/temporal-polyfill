@@ -4,9 +4,9 @@ import { isoEpochLeapYear } from './epoch'
 import {
   dateTimeRegExp,
   monthDayRegExp,
+  normalizeDashes,
   offsetRegExp,
   timeRegExp,
-  unicodeDashRegExp,
   yearMonthRegExp,
 } from './parseRegExp'
 import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './typesPrivate'
@@ -237,10 +237,6 @@ function toInt1(input: string | undefined): number { // 1-based
 
 export function toIntMaybe(input: string | undefined): number | undefined {
   return input === undefined ? undefined : parseInt(input)
-}
-
-export function normalizeDashes(str: string): string {
-  return str.replace(unicodeDashRegExp, '-')
 }
 
 export function createParseError(type: string, str: string): any {

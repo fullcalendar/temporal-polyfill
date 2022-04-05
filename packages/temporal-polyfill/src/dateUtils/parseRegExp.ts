@@ -49,8 +49,12 @@ export const offsetRegExp = createRegExp(offsetRegExpStr)
 export const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T((\d+)([.,](\d{1,9}))?H)?((\d+)([.,](\d{1,9}))?M)?((\d+)([.,](\d{1,9}))?S)?)?$/i
 
 // TODO: inject this into regexes above?
-export const unicodeDashRegExp = /\u2212/g
+const unicodeDashRegExp = /\u2212/g
 
 function createRegExp(meat: string): RegExp {
   return new RegExp(`^${meat}$`, 'i')
+}
+
+export function normalizeDashes(str: string): string {
+  return str.replace(unicodeDashRegExp, '-')
 }
