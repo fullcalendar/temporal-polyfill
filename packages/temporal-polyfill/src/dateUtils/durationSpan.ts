@@ -3,6 +3,7 @@ import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { DateUnit } from '../public/types'
 import { DiffableObj, diffAccurate } from './diff'
+import { overrideDuration } from './durationFields'
 import { DurationFields } from './typesPrivate'
 import { DAY, DateUnitInt, UnitInt, WEEK } from './units'
 
@@ -48,19 +49,21 @@ export function spanDurationFromDateTime(
   dissolveWeeks?: boolean,
 ): [DurationFields, DiffableObj] {
   // balancing does not care about weeks
+  // TODO: make this more readable. responsibility of caller?
   const forcedWeeks = dissolveWeeks !== true && largestUnit > WEEK && fields.weeks
   if (forcedWeeks) {
-    fields = { ...fields, weeks: 0 }
+    fields = overrideDuration(fields, { weeks: 0 })
   }
 
-  const translated = relativeTo.add(fields)
+  let translated = relativeTo.add(fields)
 
   // ***uses calendar.dateUntil under the hood
   let balancedDuration = diffAccurate(relativeTo, translated, calendar, largestUnit)
 
   // add weeks back in
   if (forcedWeeks) {
-    balancedDuration = { ...fields, weeks: forcedWeeks }
+    balancedDuration = overrideDuration(balancedDuration, { weeks: forcedWeeks })
+    translated = translated.add({ weeks: forcedWeeks })
   }
 
   return [balancedDuration, translated]

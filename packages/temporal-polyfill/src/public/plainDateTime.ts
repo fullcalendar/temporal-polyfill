@@ -156,8 +156,8 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
 
   since(other: DateTimeArg, options?: DiffOptions): Duration {
     return diffPlainDateTimes(
-      ensureObj(PlainDateTime, other),
       this,
+      ensureObj(PlainDateTime, other),
       true,
       options,
     )

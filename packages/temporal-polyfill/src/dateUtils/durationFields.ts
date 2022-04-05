@@ -5,6 +5,8 @@ import { mapHashByKeys } from '../utils/obj'
 import { DurationFields, UnsignedDurationFields } from './typesPrivate'
 import { NANOSECOND, UnitInt, YEAR } from './units'
 
+// special note about not doing spreads
+
 const durationFieldNames: (keyof DurationFields)[] =
   (durationUnitNames as (keyof DurationFields)[]).concat('sign')
 
@@ -40,6 +42,23 @@ export function mergeDurations(d0: DurationFields, d1: DurationFields): Duration
     microseconds: d0.microseconds + d1.microseconds,
     nanoseconds: d0.nanoseconds + d1.nanoseconds,
   }
+}
+
+// workaround for not being able to do spreads
+// TODO: use refineDuration somehow?
+export function overrideDuration(d0: DurationFields, d1: Partial<DurationFields>): DurationFields {
+  return signDuration({
+    years: d1.years ?? d0.years,
+    months: d1.months ?? d0.months,
+    weeks: d1.weeks ?? d0.weeks,
+    days: d1.days ?? d0.days,
+    hours: d1.hours ?? d0.hours,
+    minutes: d1.minutes ?? d0.minutes,
+    seconds: d1.seconds ?? d0.seconds,
+    milliseconds: d1.milliseconds ?? d0.milliseconds,
+    microseconds: d1.microseconds ?? d0.microseconds,
+    nanoseconds: d1.nanoseconds ?? d0.nanoseconds,
+  })
 }
 
 export function refineDurationNumbers(unsignedFields: UnsignedDurationFields): DurationFields {

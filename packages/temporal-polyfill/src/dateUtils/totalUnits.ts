@@ -2,7 +2,7 @@ import { durationUnitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { durationDayTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
-import { computeLargestDurationUnit, signDuration } from './durationFields'
+import { computeLargestDurationUnit } from './durationFields'
 import { spanDurationFromDateTime } from './durationSpan'
 import { toEpochNano } from './epoch'
 import { DurationFields, UnsignedDurationFields } from './typesPrivate'
@@ -35,7 +35,7 @@ export function computeTotalUnits(
   )
 
   const durationLike = computeExactDuration(
-    signDuration(balancedDuration),
+    balancedDuration,
     unit,
     relativeTo,
     relativeToTranslated,

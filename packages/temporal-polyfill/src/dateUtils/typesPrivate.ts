@@ -1,6 +1,7 @@
 import { CompareResult } from '../public/types'
 
 // local essentials
+// special note about not doing spreads
 
 export interface LocalYearFields {
   year: number
@@ -71,6 +72,7 @@ export type ISODateTimeFields = ISODateFields & ISOTimeFields
 export type ISODateTimeFieldsMilli = ISODateFields & ISOTimeFieldsMilli
 
 // duration
+// special note about not doing spreads
 
 // prefer this over unsigned
 export interface UnsignedDurationFields {

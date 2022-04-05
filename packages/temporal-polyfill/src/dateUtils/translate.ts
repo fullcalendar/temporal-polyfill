@@ -170,7 +170,7 @@ export function addDurationFields(
 
   if (relativeTo === undefined && largestUnit <= DAY) {
     return nanoToDuration(
-      durationDayTimeToNano(d0) + durationDayTimeToNano(d0),
+      durationDayTimeToNano(d0) + durationDayTimeToNano(d1),
       largestUnit,
     )
   }
