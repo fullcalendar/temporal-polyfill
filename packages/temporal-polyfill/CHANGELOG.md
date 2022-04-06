@@ -1,4 +1,10 @@
 
+v0.0.6 (2022-04-06)
+-------------------
+
+- Improved spec-compliance. Passes all tests from @js-temporal/polyfill repo.
+
+
 v0.0.5 (2022-03-16)
 -------------------
 
