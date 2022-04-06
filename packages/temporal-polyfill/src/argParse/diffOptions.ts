@@ -1,13 +1,15 @@
-import { UnitInt } from '../dateUtils/units'
+import { DAY, UnitInt, nanoIn } from '../dateUtils/units'
 import { DiffOptions, Unit } from '../public/types'
+import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj } from './refine'
-import { RoundingConfig, parseRoundingOptions } from './roundingOptions'
+import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
-export interface DiffConfig<
-  UnitType extends UnitInt = UnitInt
-> extends RoundingConfig<UnitType> {
+export interface DiffConfig<UnitType extends UnitInt = UnitInt> {
+  smallestUnit: UnitType
   largestUnit: UnitType
+  roundingFunc: RoundingFunc
+  roundingIncrement: number
 }
 
 export function parseDiffOptions<
@@ -19,35 +21,45 @@ export function parseDiffOptions<
   smallestUnitDefault: UnitIntType,
   minUnit: UnitIntType,
   maxUnit: UnitIntType,
-  forInstant?: boolean, // weird
-  forRounding?: boolean, // weird
+  forDurationRounding?: boolean,
 ): DiffConfig<UnitIntType> {
-  const optionsObj = ensureOptionsObj(options)
-
-  const roundingConfig = parseRoundingOptions<UnitArg, UnitIntType>(
-    optionsObj, // even though accepts a unit, only ever give an object
-    smallestUnitDefault,
-    minUnit,
-    maxUnit,
-    !forRounding,
-    forInstant,
+  const ensuredOptions = ensureOptionsObj(options)
+  const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
+  const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
+  const roundingFunc = parseRoundingModeOption(
+    ensuredOptions,
+    forDurationRounding ? Math.round : Math.trunc,
   )
 
-  largestUnitDefault = Math.max(largestUnitDefault, roundingConfig.smallestUnit) as UnitIntType
-
-  let largestUnitArg = ensureOptionsObj(optionsObj).largestUnit
+  let largestUnitArg = ensuredOptions.largestUnit
   if (largestUnitArg === 'auto') {
     largestUnitArg = undefined
   }
 
+  largestUnitDefault = Math.max(largestUnitDefault, smallestUnit) as UnitIntType
   const largestUnit = parseUnit(largestUnitArg, largestUnitDefault, minUnit, maxUnit)
 
-  if (roundingConfig.smallestUnit > largestUnit) {
+  if (smallestUnit > largestUnit) {
     throw new RangeError('Bad smallestUnit/largestUnit')
   }
 
+  if (smallestUnit < DAY) {
+    const largerNano = nanoIn[smallestUnit + 1]
+    const incNano = nanoIn[smallestUnit] * roundingIncrement
+
+    if (largerNano === incNano) {
+      throw new RangeError('Must not equal larger unit')
+    }
+
+    if (largerNano % incNano) {
+      throw new RangeError('Must divide into larger unit')
+    }
+  }
+
   return {
+    smallestUnit,
     largestUnit,
-    ...roundingConfig,
+    roundingFunc,
+    roundingIncrement,
   }
 }

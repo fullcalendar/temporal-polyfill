@@ -113,7 +113,7 @@ export class Instant extends AbstractNoValueObj {
   }
 
   round(options: TimeRoundingOptions): Instant {
-    const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, false, true)
+    const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, true)
 
     return new Instant(
       roundEpochNano(this.epochNanoseconds, roundingConfig),
@@ -126,7 +126,7 @@ export class Instant extends AbstractNoValueObj {
 
   toString(options?: InstantToStringOptions): string {
     const timeZoneArg = ensureOptionsObj(options).timeZone
-    const zonedDateTime = this.toZonedDateTimeISO(timeZoneArg ?? 'UTC')
+    const zonedDateTime = this.toZonedDateTimeISO(timeZoneArg ?? 'UTC') // TODO: don't use util!!!
     return zonedDateTime.toString({
       ...options,
       offset: timeZoneArg === undefined ? 'never' : 'auto',
@@ -177,7 +177,13 @@ function diffInstants(
   inst1: Instant,
   options: TimeDiffOptions | undefined,
 ): Duration {
-  const diffConfig = parseDiffOptions(options, SECOND, NANOSECOND, NANOSECOND, HOUR, true)
+  const diffConfig = parseDiffOptions(
+    options,
+    SECOND,
+    NANOSECOND,
+    NANOSECOND,
+    HOUR,
+  )
 
   return createDuration(
     diffEpochNanos(inst0.epochNanoseconds, inst1.epochNanoseconds, diffConfig),

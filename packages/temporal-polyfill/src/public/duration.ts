@@ -14,7 +14,7 @@ import { processDurationFields } from '../dateUtils/fromAndWith'
 import { formatDurationISO } from '../dateUtils/isoFormat'
 import { parseDuration } from '../dateUtils/parseDuration'
 import { extractRelativeTo } from '../dateUtils/relativeTo'
-import { roundDuration } from '../dateUtils/rounding'
+import { roundDuration } from '../dateUtils/roundingDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
 import { addDurationFields } from '../dateUtils/translate'
 import { DurationFields, UnsignedDurationFields } from '../dateUtils/typesPrivate'
@@ -139,8 +139,7 @@ export class Duration extends AbstractNoValueObj {
       NANOSECOND, // smallestUnitDefault
       NANOSECOND, // minUnit
       YEAR, // maxUnit
-      false, // forInstant
-      true, // forRounding
+      true, // forDurationRounding
     )
 
     const relativeTo = extractRelativeTo(optionsObj.relativeTo)

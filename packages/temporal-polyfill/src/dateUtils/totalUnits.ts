@@ -19,6 +19,7 @@ export function computeTotalUnits(
     computeLargestDurationUnit(duration) <= DAY &&
     isDayTimeUnit(unit)
   ) {
+    // TODO: accidentaly loss of precision?
     return Number(durationDayTimeToNano(duration)) / nanoIn[unit]
   }
 

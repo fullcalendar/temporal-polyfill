@@ -50,7 +50,7 @@ export function translateZonedDateTimeFields(
 
   // add time fields of duration
   const translatedInstant = timeZone.getInstantFor(translatedDateTime) // what about option!!!
-  return translatedInstant.epochNanoseconds + BigInt(durationTimeToNano(duration))
+  return translatedInstant.epochNanoseconds + durationTimeToNano(duration)
 }
 
 export function translateDateTime(
@@ -65,7 +65,7 @@ export function translateDateTime(
 
   const epochNano = isoFieldsToEpochNano(date.getISOFields()) +
     BigInt(isoTimeToNano(fields)) + // restore original time-of-day
-    BigInt(durationTimeToNano(duration)) // add duration time parts
+    durationTimeToNano(duration) // add duration time parts
 
   return epochNanoToISOFields(epochNano)
 }
@@ -140,7 +140,8 @@ export function translateTime(
   timeFields: ISOTimeFields,
   durationFields: DurationFields,
 ): ISOTimeFields {
-  const nano = isoTimeToNano(timeFields) + durationTimeToNano(durationFields)
+  // TODO: will loss of precision cause a bug?
+  const nano = isoTimeToNano(timeFields) + Number(durationTimeToNano(durationFields))
   const [newTimeFields] = nanoToISOTime(nano)
   return newTimeFields
 }
@@ -152,7 +153,7 @@ export function translateEpochNano(epochNano: bigint, durationFields: DurationFi
     throw new RangeError('Duration cant have units >= days')
   }
 
-  return epochNano + BigInt(durationTimeToNano(durationFields))
+  return epochNano + durationTimeToNano(durationFields)
 }
 
 // duration

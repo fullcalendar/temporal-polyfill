@@ -49,16 +49,18 @@ export function partialLocalTimeToISO(fields: Partial<LocalTimeFields>): ISOTime
 // -------------------------------------------------------------------------------------------------
 
 export function durationDayTimeToNano(fields: DurationFields): bigint {
-  return BigInt(fields.days) * nanoInDayBI + BigInt(durationTimeToNano(fields))
+  return BigInt(fields.days) * nanoInDayBI + durationTimeToNano(fields)
 }
 
-export function durationTimeToNano(fields: DurationFields): number {
-  return fields.hours * nanoInHour +
-    fields.minutes * nanoInMinute +
-    fields.seconds * nanoInSecond +
-    fields.milliseconds * nanoInMilli +
-    fields.microseconds * nanoInMicro +
-    fields.nanoseconds
+// must return bigint because there could be huge hour value,
+// which would cause the nanosecond's precision to max out.
+export function durationTimeToNano(fields: DurationFields): bigint {
+  return BigInt(fields.hours) * nanoInHourBI +
+    BigInt(fields.minutes) * nanoInMinuteBI +
+    BigInt(fields.seconds) * nanoInSecondBI +
+    BigInt(fields.milliseconds) * nanoInMilliBI +
+    BigInt(fields.microseconds) * nanoInMicroBI +
+    BigInt(fields.nanoseconds)
 }
 
 export function isoTimeToNano(fields: ISOTimeFields): number {

@@ -124,7 +124,7 @@ export function formatDurationISO(
   fields: DurationFields,
   formatConfig: DurationToStringConfig,
 ): string {
-  const { smallestUnit, fractionalSecondDigits, roundingMode } = formatConfig
+  const { smallestUnit, fractionalSecondDigits, roundingFunc } = formatConfig
   const { sign } = fields
   const hours = BigInt(fields.hours)
   const minutes = BigInt(fields.minutes)
@@ -137,7 +137,7 @@ export function formatDurationISO(
       fields.microseconds,
       fields.nanoseconds,
       fractionalSecondDigits,
-      roundingMode,
+      roundingFunc,
       smallestUnit,
     )
     partialSecondsStr = res[0]

@@ -5,13 +5,13 @@ import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
 import { createDate } from '../public/plainDate'
 import { CompareResult, DateUnit } from '../public/types'
-import { compareValues } from '../utils/math'
+import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { compareLocalDateFields } from './compare'
 import { constrainDateFields } from './constrain'
 import { isoTimeToNano, nanoToDuration } from './dayAndTime'
 import { mergeDurations, signDuration } from './durationFields'
 import { EpochableObj, diffDaysMilli, toEpochNano } from './epoch'
-import { roundDurationSpan, roundNano, roundNanoBI } from './rounding'
+import { roundDurationSpan } from './roundingDuration'
 import { addMonths, addYears } from './translate'
 import {
   DurationFields,
@@ -26,6 +26,7 @@ import {
   WEEK,
   YEAR,
   isDateUnit,
+  nanoIn,
 } from './units'
 
 export type DiffableObj = LocalDateFields & EpochableObj & {
@@ -68,9 +69,12 @@ export function diffTimes(
   t1: ISOTimeFields,
   diffConfig: DiffConfig<TimeUnitInt>,
 ): DurationFields {
-  const nanoDiff = isoTimeToNano(t1) - isoTimeToNano(t0)
-  const roundedDiff = BigInt(roundNano(nanoDiff, diffConfig)) // yuck
-  return nanoToDuration(roundedDiff, diffConfig.largestUnit)
+  const roundedDiff = roundToIncrement(
+    isoTimeToNano(t1) - isoTimeToNano(t0),
+    nanoIn[diffConfig.smallestUnit] * diffConfig.roundingIncrement,
+    diffConfig.roundingFunc,
+  )
+  return nanoToDuration(BigInt(roundedDiff), diffConfig.largestUnit)
 }
 
 export function diffEpochNanos(
@@ -78,10 +82,12 @@ export function diffEpochNanos(
   epochNano1: bigint,
   diffConfig: DiffConfig<TimeUnitInt>,
 ): DurationFields {
-  return nanoToDuration(
-    roundNanoBI(epochNano1 - epochNano0, diffConfig),
-    diffConfig.largestUnit,
+  const roundedDiff = roundToIncrementBI(
+    epochNano1 - epochNano0,
+    nanoIn[diffConfig.smallestUnit] * diffConfig.roundingIncrement,
+    diffConfig.roundingFunc,
   )
+  return nanoToDuration(roundedDiff, diffConfig.largestUnit)
 }
 
 // Utils
