@@ -1,9 +1,9 @@
 
 # temporal-polyfill
 
-A spec-compliant<super>*</super> [Temporal] JavaScript polyfill in 15kb<super>**</super>.
+A spec-compliant [Temporal] JavaScript polyfill in 15kb<super>*</super>.
 
-Works in modern browsers<super>***</super>, not Internet Explorer.
+Works in modern browsers<super>**</super>, not Internet Explorer.
 
 [Codepen](https://codepen.io/arshaw/pen/VwrMQPJ?editors=1111)
 
@@ -45,14 +45,9 @@ const zdt = ZonedDateTime.from('2020-08-05T20:06:13[America/Chicago]')
 console.log(zdt.toLocaleString())
 ```
 
+<super>*</super> = the size will shrink as the codebase is cleaned up
 
-<super>*</super> = *almost* spec-compliant.
-[a few more tests must pass](jest.config.cjs)
-([see results](https://github.com/fullcalendar/temporal/actions))
-
-<super>**</super> = the size will shrink as the codebase is cleaned up
-
-<super>***</super> = targets browsers that support [BigInt], however, more browser-compatibility
+<super>**</super> = targets browsers that support [BigInt], however, more browser-compatibility
 work is needed
 
 
