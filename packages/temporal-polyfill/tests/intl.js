@@ -427,7 +427,8 @@ describe('Intl', () => {
       };
       year1Snapshots.other = year1Snapshots.node17;
       equal(
-        // a workaround (by fullcalendar/temporal), to normalize output on certain node environments
+        // [fullcalendar/temporal]
+        // a workaround to normalize output on certain node environments
         year1Content.replace('Before R.O.C.', 'B.R.O.C.'),
         year1Snapshots[`node${nodeVersion}`] || year1Snapshots.other,
       );
@@ -643,10 +644,12 @@ describe('Intl', () => {
         itOrSkip(id)(`with: ${id} ${name} ${withErrorExpected ? ' (throws)' : ''}`, () => {
           const now = globalThis.performance ? globalThis.performance.now() : Date.now();
 
-          // fullcalendar/temporal NOTE: we assume error will occur during .withCalendar, not .with
+          // [fullcalendar/temporal]
+          // NOTE: we assume error will occur during .withCalendar, not .with
           // this is better, because we don't want an obj to fail randomly after instantiation:
           //   pd = new Temporal.PlainDate(1, 1, 1, 'japanese') // works
           //   pd.day // fails!
+          //
           let inCal;
           if (withErrorExpected) {
             // Some calendars will fail due to Chromium bugs noted in the test definitions
