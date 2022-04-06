@@ -7,7 +7,7 @@ Works in modern browsers<super>**</super>, not Internet Explorer.
 
 [Codepen](https://codepen.io/arshaw/pen/VwrMQPJ?editors=1111)
 
-[CDN link](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.0.5/dist/global.js)
+[CDN link](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.0.6/dist/global.js)
 <!-- NOTE: when updating this link, update the codepen too -->
 
 ## Installation
