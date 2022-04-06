@@ -80,7 +80,7 @@ export function formatTimeISO(
 
 // TODO: combine with formatTimeISO
 export function formatOffsetISO(offsetNano: number): string {
-  const [fields] = nanoToISOTime(Math.abs(offsetNano))
+  const [fields, dayDelta] = nanoToISOTime(Math.abs(offsetNano))
   const partialSecondsStr = formatPartialSeconds(
     fields.isoMillisecond,
     fields.isoMicrosecond,
@@ -89,7 +89,8 @@ export function formatOffsetISO(offsetNano: number): string {
   )[0]
 
   return getSignStr(offsetNano) +
-    padZeros(fields.isoHour, 2) + ':' +
+    // format beyond 24:00 (TODO: somehow convince nanoToISOTime to have topheavy hours?)
+    padZeros(fields.isoHour + dayDelta * 24, 2) + ':' +
     padZeros(fields.isoMinute, 2) +
     ((fields.isoSecond || partialSecondsStr)
       ? ':' + padZeros(fields.isoSecond, 2) + partialSecondsStr

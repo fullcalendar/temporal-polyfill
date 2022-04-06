@@ -19,7 +19,7 @@ export function parseRoundingOptions<
   smallestUnitDefault: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
-  relaxedDivisibility?: boolean, // if true, only checks whether divides into a day
+  relaxedDivisibility?: boolean,
 ): RoundingConfig<UnitType> {
   const optionsObj: Partial<RoundingOptions<UnitArgType>> | undefined =
     typeof options === 'string'
@@ -43,7 +43,7 @@ export function parseRoundingOptions<
   } else {
     const largerNano = relaxedDivisibility ? nanoInDay : nanoIn[smallestUnit + 1]
 
-    if (largerNano === incNano) {
+    if (!relaxedDivisibility && largerNano === incNano) {
       throw new RangeError('Must not equal larger unit')
     }
 
