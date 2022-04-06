@@ -13,6 +13,7 @@ import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
 import {
   YearMonthCalendarFields,
+  attachStringTag,
   mixinCalendarFields,
   mixinISOFields,
   yearMonthCalendarFields,
@@ -140,6 +141,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 // mixin
 export interface PlainYearMonth extends YearMonthCalendarFields { calendar: Calendar }
 export interface PlainYearMonth extends ToLocaleStringMethods {}
+attachStringTag(PlainYearMonth, 'PlainYearMonth')
 mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)
 mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({

@@ -12,6 +12,7 @@ import { validateDate } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
 import {
   DateCalendarFields,
+  attachStringTag,
   dateCalendarFields,
   mixinCalendarFields,
   mixinISOFields,
@@ -166,6 +167,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
 // mixin
 export interface PlainDate extends DateCalendarFields { calendar: Calendar }
 export interface PlainDate extends ToLocaleStringMethods {}
+attachStringTag(PlainDate, 'PlainDate')
 mixinISOFields(PlainDate)
 mixinCalendarFields(PlainDate, dateCalendarFields)
 mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({

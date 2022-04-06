@@ -12,6 +12,7 @@ import {
 } from '../dateUtils/durationFields'
 import { processDurationFields } from '../dateUtils/fromAndWith'
 import { formatDurationISO } from '../dateUtils/isoFormat'
+import { attachStringTag } from '../dateUtils/mixins'
 import { parseDuration } from '../dateUtils/parseDuration'
 import { extractRelativeTo } from '../dateUtils/relativeTo'
 import { roundDuration } from '../dateUtils/roundingDuration'
@@ -173,6 +174,8 @@ export class Duration extends AbstractNoValueObj {
     return this.toString()
   }
 }
+
+attachStringTag(Duration, 'Duration')
 
 export function createDuration(fields: UnsignedDurationFields): Duration {
   return new Duration(

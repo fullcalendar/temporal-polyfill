@@ -1,5 +1,6 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
+import { attachStringTag } from '../dateUtils/mixins'
 import { ISODateTimeFields } from '../dateUtils/typesPrivate'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
@@ -15,6 +16,21 @@ import {
   buildZonedDateTimeISOFields,
   createZonedDateTimeFromFields,
 } from './zonedDateTime'
+
+const Now = {
+  zonedDateTimeISO: getZonedDateTimeISO,
+  zonedDateTime: getZonedDateTime,
+  plainDateTimeISO: getPlainDateTimeISO,
+  plainDateTime: getPlainDateTime,
+  plainDateISO: getPlainDateISO,
+  plainDate: getPlainDate,
+  plainTimeISO: getPlainTimeISO,
+  instant: getInstant,
+  timeZone: getTimeZone,
+}
+attachStringTag(Now, 'Now')
+
+export { Now }
 
 function getZonedDateTimeISO(timeZoneArg?: TimeZoneArg): ZonedDateTime {
   return createZonedDateTimeFromFields(buidZonedFields(isoCalendarID, timeZoneArg))
@@ -69,19 +85,4 @@ function buidZonedFields(
 
 function getEpochNano(): bigint {
   return BigInt(Date.now()) * nanoInMilliBI
-}
-
-// exports
-
-export const Now = {
-  zonedDateTimeISO: getZonedDateTimeISO,
-  zonedDateTime: getZonedDateTime,
-  plainDateTimeISO: getPlainDateTimeISO,
-  plainDateTime: getPlainDateTime,
-  plainDateISO: getPlainDateISO,
-  plainDate: getPlainDate,
-  plainTimeISO: getPlainTimeISO,
-  instant: getInstant,
-  timeZone: getTimeZone,
-  [Symbol.toStringTag]: 'Temporal.Now', // TODO: do on other objects
 }

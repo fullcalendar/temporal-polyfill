@@ -22,6 +22,7 @@ import {
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
 import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/epoch'
+import { attachStringTag } from '../dateUtils/mixins'
 import { tryParseDateTime } from '../dateUtils/parse'
 import { translateDate } from '../dateUtils/translate'
 import { InputDateFields } from '../dateUtils/typesPrivate'
@@ -294,6 +295,8 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return getImpl(this).id
   }
 }
+
+attachStringTag(Calendar, 'Calendar')
 
 export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)

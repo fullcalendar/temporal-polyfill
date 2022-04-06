@@ -9,7 +9,7 @@ import { diffEpochNanos } from '../dateUtils/diff'
 import { negateDuration } from '../dateUtils/durationFields'
 import { isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { validateInstant } from '../dateUtils/isoFieldValidation'
-import { ComputedEpochFields, mixinEpochFields } from '../dateUtils/mixins'
+import { ComputedEpochFields, attachStringTag, mixinEpochFields } from '../dateUtils/mixins'
 import { parseZonedDateTime } from '../dateUtils/parse'
 import { roundEpochNano } from '../dateUtils/rounding'
 import { translateEpochNano } from '../dateUtils/translate'
@@ -159,6 +159,7 @@ export class Instant extends AbstractNoValueObj {
 // mixins
 export interface Instant extends ComputedEpochFields {}
 export interface Instant extends ToLocaleStringMethods {}
+attachStringTag(Instant, 'Instant')
 mixinEpochFields(Instant)
 mixinLocaleStringMethods(Instant, createZonedFormatFactoryFactory({
   year: 'numeric',

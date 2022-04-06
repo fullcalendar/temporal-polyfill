@@ -11,7 +11,7 @@ import { diffTimes } from '../dateUtils/diff'
 import { negateDuration } from '../dateUtils/durationFields'
 import { processTimeFromFields, processTimeWithFields } from '../dateUtils/fromAndWith'
 import { formatTimeISO } from '../dateUtils/isoFormat'
-import { mixinISOFields } from '../dateUtils/mixins'
+import { attachStringTag, mixinISOFields } from '../dateUtils/mixins'
 import { parseTime } from '../dateUtils/parse'
 import { roundTime } from '../dateUtils/rounding'
 import { translateTime } from '../dateUtils/translate'
@@ -144,6 +144,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
 // mixin
 export interface PlainTime extends LocalTimeFields { calendar: Calendar }
 export interface PlainTime extends ToLocaleStringMethods {}
+attachStringTag(PlainTime, 'PlainTime')
 mixinISOFields(PlainTime, timeUnitNames)
 mixinLocaleStringMethods(PlainTime, createPlainTimeFormatFactory)
 

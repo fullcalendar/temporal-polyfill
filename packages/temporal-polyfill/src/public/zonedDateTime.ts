@@ -34,6 +34,7 @@ import {
 import {
   ComputedEpochFields,
   DateCalendarFields,
+  attachStringTag,
   dateCalendarFields,
   mixinCalendarFields,
   mixinEpochFields,
@@ -280,6 +281,7 @@ export interface ZonedDateTime extends DateCalendarFields { calendar: Calendar }
 export interface ZonedDateTime extends LocalTimeFields {}
 export interface ZonedDateTime extends ComputedEpochFields {}
 export interface ZonedDateTime extends ToLocaleStringMethods {}
+attachStringTag(ZonedDateTime, 'ZonedDateTime')
 mixinISOFields(ZonedDateTime, timeUnitNames)
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
 mixinEpochFields(ZonedDateTime)
