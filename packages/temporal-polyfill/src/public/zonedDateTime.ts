@@ -140,7 +140,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
 
     return createZonedDateTimeFromFields(
       fields,
-      !isObject, // fuzzyMatching
+      !isObject, // fuzzyMatching (if string)
       offsetHandling,
       options,
     )
@@ -181,11 +181,13 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
   }
 
   withPlainTime(timeArg?: TimeArg): ZonedDateTime {
-    const plainTime = ensureObj(PlainTime, timeArg)
-
     return createZonedDateTimeFromFields({
       ...this.getISOFields(),
-      ...plainTime.getISOFields(),
+      ...(
+        timeArg === undefined
+          ? zeroISOTimeFields
+          : ensureObj(PlainTime, timeArg).getISOFields()
+      ),
     })
   }
 
@@ -241,7 +243,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields> {
       ...this.getISOFields(),
       ...zeroISOTimeFields,
       offsetNanoseconds: this.offsetNanoseconds,
-    })
+    }, false, OFFSET_PREFER)
   }
 
   // TODO: turn into a lazy-getter, like what mixinCalendarFields does
@@ -333,7 +335,7 @@ function roundZonedDateTime(
   roundingConfig: RoundingConfig<DayTimeUnitInt>,
 ): ZonedDateTime {
   const isoFields = zdt.getISOFields()
-  const epochNano = roundZonedDateTimeFields(isoFields, roundingConfig)
+  const epochNano = roundZonedDateTimeFields(isoFields, zdt.offsetNanoseconds, roundingConfig)
   return new ZonedDateTime(epochNano, isoFields.timeZone, isoFields.calendar)
 }
 

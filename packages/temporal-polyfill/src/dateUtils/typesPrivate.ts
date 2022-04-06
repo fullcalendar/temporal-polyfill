@@ -73,13 +73,9 @@ export type ISODateTimeFieldsMilli = ISODateFields & ISOTimeFieldsMilli
 
 // duration
 // special note about not doing spreads
+// NO.... just use the internal props instead!
 
-// prefer this over unsigned
-export interface UnsignedDurationFields {
-  years: number
-  months: number
-  weeks: number
-  days: number
+export interface DurationTimeFields {
   hours: number
   minutes: number
   seconds: number
@@ -88,6 +84,14 @@ export interface UnsignedDurationFields {
   nanoseconds: number
 }
 
+export interface UnsignedDurationFields extends DurationTimeFields {
+  years: number
+  months: number
+  weeks: number
+  days: number
+}
+
+// prefer this over unsigned
 export interface DurationFields extends UnsignedDurationFields {
   sign: CompareResult
 }

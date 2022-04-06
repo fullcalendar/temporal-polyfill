@@ -36,11 +36,20 @@ export function parseRoundingOptions<
   const roundingFunc = parseRoundingModeOption(ensuredOptions, Math.round)
   const incNano = nanoIn[smallestUnit] * roundingIncrement
 
-  if (
-    smallestUnit < DAY &&
-    (relaxedDivisibility ? nanoInDay : nanoIn[smallestUnit + 1]) % incNano
-  ) {
-    throw new RangeError('Increment must evenly divide')
+  if (smallestUnit === DAY) {
+    if (roundingIncrement !== 1) {
+      throw new RangeError('When smallestUnit is days, roundingIncrement must be 1')
+    }
+  } else {
+    const largerNano = relaxedDivisibility ? nanoInDay : nanoIn[smallestUnit + 1]
+
+    if (largerNano === incNano) {
+      throw new RangeError('Must not equal larger unit')
+    }
+
+    if (largerNano % incNano) {
+      throw new RangeError('Must divide into larger unit')
+    }
   }
 
   return {

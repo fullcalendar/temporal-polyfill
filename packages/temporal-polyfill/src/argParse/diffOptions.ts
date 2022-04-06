@@ -21,7 +21,7 @@ export function parseDiffOptions<
   smallestUnitDefault: UnitIntType,
   minUnit: UnitIntType,
   maxUnit: UnitIntType,
-  forDurationRounding?: boolean,
+  forDurationRounding?: boolean, // TODO: change to 'defaultRoundingFunc'
 ): DiffConfig<UnitIntType> {
   const ensuredOptions = ensureOptionsObj(options)
   const roundingIncrement = ensuredOptions.roundingIncrement ?? 1

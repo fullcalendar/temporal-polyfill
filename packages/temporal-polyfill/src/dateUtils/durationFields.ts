@@ -28,6 +28,7 @@ export function absDuration(fields: DurationFields): DurationFields {
   ) as unknown as DurationFields
 }
 
+// TODO: rename. confusing with 'override'
 export function mergeDurations(d0: DurationFields, d1: DurationFields): DurationFields {
   return {
     sign: d0.sign || d1.sign,

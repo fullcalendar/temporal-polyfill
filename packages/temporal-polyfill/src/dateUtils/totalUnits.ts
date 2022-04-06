@@ -59,6 +59,10 @@ export function computeExactDuration(
   const smallestUnitName = durationUnitNames[smallestUnit] as keyof UnsignedDurationFields
   const { sign } = balancedDuration
 
+  if (!sign) { // prevents division by zero
+    return balancedDuration
+  }
+
   // make a new duration object that excludes units smaller than smallestUnit
   const dur: Partial<DurationFields> = {}
   for (let unit = YEAR; unit >= smallestUnit; unit--) {

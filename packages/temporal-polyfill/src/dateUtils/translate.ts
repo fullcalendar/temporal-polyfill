@@ -12,9 +12,10 @@ import {
   isoTimeToNano,
   nanoToDuration,
   nanoToISOTime,
+  zeroDurationTimeFields,
 } from './dayAndTime'
 import { DiffableObj, diffAccurate } from './diff'
-import { computeLargestDurationUnit } from './durationFields'
+import { computeLargestDurationUnit, overrideDuration } from './durationFields'
 import {
   addDaysMilli,
   epochMilliToISOFields,
@@ -29,7 +30,7 @@ import {
   ISOTimeFields,
   LocalDateFields,
 } from './typesPrivate'
-import { DAY, DayTimeUnitInt } from './units'
+import { DAY, DayTimeUnitInt, nanoInDay } from './units'
 
 export function translateZonedDateTimeFields(
   fields: ISODateTimeFields & { calendar: Calendar, timeZone: TimeZone },
@@ -39,8 +40,12 @@ export function translateZonedDateTimeFields(
   const { calendar, timeZone } = fields
 
   // add date fields first
-  // will ignore smaller time parts???
-  const translatedDate = calendar.dateAdd(createDate(fields), duration, options)
+  const translatedDate = calendar.dateAdd(
+    createDate(fields),
+    // don't let calendar round time fields to day
+    overrideDuration(duration, zeroDurationTimeFields),
+    options,
+  )
 
   // add time-of-day back in
   const translatedDateTime = createDateTime({
@@ -61,7 +66,12 @@ export function translateDateTime(
   const { calendar } = fields
 
   // add large fields first
-  const date = calendar.dateAdd(createDate(fields), duration, options)
+  const date = calendar.dateAdd(
+    createDate(fields),
+    // don't let calendar round time fields to day
+    overrideDuration(duration, zeroDurationTimeFields),
+    options,
+  )
 
   const epochNano = isoFieldsToEpochNano(date.getISOFields()) +
     BigInt(isoTimeToNano(fields)) + // restore original time-of-day
@@ -71,16 +81,20 @@ export function translateDateTime(
 }
 
 export function translateDate(
-  fields: LocalDateFields,
+  dateFields: LocalDateFields,
   durationFields: DurationFields,
   calendarImpl: CalendarImpl,
   overflowHandling: OverflowHandlingInt,
 ): ISODateFields {
-  fields = addYears(fields, durationFields.years, calendarImpl, overflowHandling)
-  fields = addMonths(fields, durationFields.months, calendarImpl, overflowHandling)
+  dateFields = addYears(dateFields, durationFields.years, calendarImpl, overflowHandling)
+  dateFields = addMonths(dateFields, durationFields.months, calendarImpl, overflowHandling)
 
-  let epochMilli = calendarImpl.epochMilliseconds(fields.year, fields.month, fields.day)
-  epochMilli = addDaysMilli(epochMilli, durationFields.weeks * 7 + durationFields.days)
+  let epochMilli = calendarImpl.epochMilliseconds(dateFields.year, dateFields.month, dateFields.day)
+
+  // TODO: loss of precision?
+  const daysFromTime = Math.trunc(Number(durationTimeToNano(durationFields)) / nanoInDay)
+  const days = durationFields.weeks * 7 + durationFields.days + daysFromTime
+  epochMilli = addDaysMilli(epochMilli, days)
 
   return epochMilliToISOFields(epochMilli)
 }

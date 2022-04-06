@@ -1,5 +1,5 @@
 import { signDuration } from './durationFields'
-import { DurationFields, ISOTimeFields, LocalTimeFields } from './typesPrivate'
+import { DurationFields, DurationTimeFields, ISOTimeFields, LocalTimeFields } from './typesPrivate'
 import {
   DAY,
   DayTimeUnitInt,
@@ -31,6 +31,15 @@ export const zeroISOTimeFields: ISOTimeFields = {
   isoNanosecond: 0,
 }
 
+export const zeroDurationTimeFields: DurationTimeFields = {
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  milliseconds: 0,
+  microseconds: 0,
+  nanoseconds: 0,
+}
+
 // fields -> fields
 // -------------------------------------------------------------------------------------------------
 
@@ -54,7 +63,7 @@ export function durationDayTimeToNano(fields: DurationFields): bigint {
 
 // must return bigint because there could be huge hour value,
 // which would cause the nanosecond's precision to max out.
-export function durationTimeToNano(fields: DurationFields): bigint {
+export function durationTimeToNano(fields: DurationTimeFields): bigint {
   return BigInt(fields.hours) * nanoInHourBI +
     BigInt(fields.minutes) * nanoInMinuteBI +
     BigInt(fields.seconds) * nanoInSecondBI +

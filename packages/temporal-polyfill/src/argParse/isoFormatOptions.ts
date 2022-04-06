@@ -14,7 +14,7 @@ import { parseRoundingModeOption } from './roundingMode'
 import { RoundingConfig } from './roundingOptions'
 import { parseUnit } from './unitStr'
 
-export type DurationToStringUnitInt =
+export type DurationToStringUnitInt = // TODO: move this??? weird name/location for this
   typeof SECOND |
   typeof MILLISECOND |
   typeof MICROSECOND |

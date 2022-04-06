@@ -44,6 +44,7 @@ export function roundEpochNano(
 // returns epochNano!
 export function roundZonedDateTimeFields(
   fields: ISODateTimeFields & { calendar: Calendar, timeZone: TimeZone },
+  offsetNanoseconds: number,
   roundingConfig: RoundingConfig<DayTimeUnitInt>,
 ): bigint {
   const { calendar, timeZone } = fields
@@ -53,7 +54,7 @@ export function roundZonedDateTimeFields(
 
   if (roundingConfig.smallestUnit === DAY) {
     isoTimeFields = zeroISOTimeFields
-    dayDelta = Math.round(timeNano / computeNanoInDay(fields))
+    dayDelta = roundingConfig.roundingFunc(timeNano / computeNanoInDay(fields))
   } else {
     timeNano = roundNano(timeNano, roundingConfig)
     ;([isoTimeFields, dayDelta] = nanoToISOTime(timeNano))
@@ -64,11 +65,12 @@ export function roundZonedDateTimeFields(
     {
       ...dayStartTranslated,
       ...isoTimeFields,
+      offsetNanoseconds,
       calendar, // !!!
       timeZone, // !!!
     },
     false,
-    OFFSET_PREFER,
+    OFFSET_PREFER, // for offsetNanoseconds conflicts
   )
 }
 
