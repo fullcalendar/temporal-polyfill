@@ -22,22 +22,22 @@ import { DurationFields, UnsignedDurationFields } from '../dateUtils/typesPrivat
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
 import {
   CompareResult,
-  DateTimeArg,
-  DurationArg,
   DurationLike,
   DurationRoundingOptions,
-  DurationToStringOptions,
   DurationToStringUnit,
-  DurationTotalOptions,
   LocalesArg,
   Unit,
-  ZonedDateTimeArg,
 } from '../public/types'
+import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
+
+export type DurationArg = Temporal.Duration | DurationLike | string
 
 const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
 
-export class Duration extends AbstractNoValueObj {
+export class Duration extends AbstractNoValueObj implements Temporal.Duration {
+  readonly [Symbol.toStringTag]: 'Temporal.Duration' // hack
+
   constructor(
     years = 0,
     months = 0,
@@ -66,7 +66,7 @@ export class Duration extends AbstractNoValueObj {
     setFields(this, refineDurationNumbers(numberFields))
   }
 
-  static from(arg: DurationArg): Duration {
+  static from(arg: DurationArg): Temporal.Duration {
     return createDuration(
       typeof arg === 'object'
         ? processDurationFields(arg)
@@ -77,7 +77,7 @@ export class Duration extends AbstractNoValueObj {
   static compare(
     a: DurationArg,
     b: DurationArg,
-    options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg },
+    options?: Temporal.DurationArithmeticOptions,
   ): CompareResult {
     return compareDurations(
       ensureObj(Duration, a),
@@ -99,30 +99,30 @@ export class Duration extends AbstractNoValueObj {
   get sign(): CompareResult { return getFields(this).sign }
   get blank(): boolean { return !this.sign }
 
-  with(fields: DurationLike): Duration {
+  with(fields: Temporal.DurationLike): Temporal.Duration {
     return createDuration({
       ...getFields(this),
       ...processDurationFields(fields),
     })
   }
 
-  negated(): Duration {
+  negated(): Temporal.Duration {
     return createDuration(negateDuration(getFields(this)))
   }
 
-  abs(): Duration {
+  abs(): Temporal.Duration {
     return createDuration(absDuration(getFields(this)))
   }
 
-  add(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
+  add(other: DurationArg, options?: Temporal.DurationArithmeticOptions): Temporal.Duration {
     return addDurations(this, ensureObj(Duration, other), options)
   }
 
-  subtract(other: DurationArg, options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg}): Duration {
+  subtract(other: DurationArg, options?: Temporal.DurationArithmeticOptions): Temporal.Duration {
     return addDurations(this, negateDuration(ensureObj(Duration, other)), options)
   }
 
-  round(options: DurationRoundingOptions | Unit): Duration {
+  round(options: Temporal.DurationRoundTo): Temporal.Duration {
     const optionsObj: DurationRoundingOptions = typeof options === 'string'
       ? { smallestUnit: options }
       : options
@@ -150,7 +150,7 @@ export class Duration extends AbstractNoValueObj {
     )
   }
 
-  total(options: DurationTotalOptions | Unit): number {
+  total(options: Temporal.DurationTotalOf): number {
     const totalConfig = parseTotalConfig(options)
     const relativeTo = extractRelativeTo(totalConfig.relativeTo)
 
@@ -162,7 +162,7 @@ export class Duration extends AbstractNoValueObj {
     )
   }
 
-  toString(options?: DurationToStringOptions): string {
+  toString(options?: Temporal.ToStringPrecisionOptions): string {
     const formatConfig = parseTimeToStringOptions<DurationToStringUnit, DurationToStringUnitInt>(
       options, SECOND,
     )
@@ -195,7 +195,7 @@ export function createDuration(fields: UnsignedDurationFields): Duration {
 function addDurations(
   d0: DurationFields,
   d1: DurationFields,
-  options?: { relativeTo?: ZonedDateTimeArg | DateTimeArg },
+  options?: Temporal.DurationArithmeticOptions,
 ): Duration {
   const relativeTo = extractRelativeTo(ensureOptionsObj(options).relativeTo)
 

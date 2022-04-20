@@ -23,23 +23,37 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
+import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
 import { Duration, createDuration } from './duration'
-import {
-  CalendarArg,
-  CompareResult,
-  DurationArg,
-  InstantArg,
-  InstantToStringOptions,
-  TimeDiffOptions,
-  TimeRoundingOptions,
-  TimeZoneArg,
-} from './types'
 import { ZonedDateTime } from './zonedDateTime'
+
+export type InstantArg = Temporal.Instant | string
+
+type TranslateArg = Omit<
+Temporal.Duration | Temporal.DurationLike,
+'years' | 'months' | 'weeks' | 'days'
+> | string
+
+type DiffOptions = Temporal.DifferenceOptions<
+'hour' | 'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond'
+>
+
+type RoundOptions = Temporal.RoundTo<
+'hour' | 'minute' | 'second' |
+'millisecond' | 'microsecond' | 'nanosecond'
+>
+
+type ToZonedDateTimeOptions = {
+  timeZone: Temporal.TimeZoneLike
+  calendar: Temporal.CalendarLike
+}
 
 const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
 
-export class Instant extends AbstractNoValueObj {
+export class Instant extends AbstractNoValueObj implements Temporal.Instant {
+  readonly [Symbol.toStringTag]: 'Temporal.Instant' // hack
+
   constructor(epochNanoseconds: bigint) {
     super()
     if (typeof epochNanoseconds === 'number') {
@@ -50,7 +64,7 @@ export class Instant extends AbstractNoValueObj {
     setEpochNano(this, epochNanoseconds)
   }
 
-  static from(arg: InstantArg): Instant {
+  static from(arg: InstantArg): Temporal.Instant {
     if (arg instanceof Instant) {
       return new Instant(arg.epochNanoseconds)
     }
@@ -67,23 +81,23 @@ export class Instant extends AbstractNoValueObj {
     )
   }
 
-  static fromEpochSeconds(epochSeconds: number): Instant {
+  static fromEpochSeconds(epochSeconds: number): Temporal.Instant {
     return new Instant(BigInt(epochSeconds) * nanoInSecondBI)
   }
 
-  static fromEpochMilliseconds(epochMilliseconds: number): Instant {
+  static fromEpochMilliseconds(epochMilliseconds: number): Temporal.Instant {
     return new Instant(BigInt(epochMilliseconds) * nanoInMilliBI)
   }
 
-  static fromEpochMicroseconds(epochMicroseconds: bigint): Instant {
+  static fromEpochMicroseconds(epochMicroseconds: bigint): Temporal.Instant {
     return new Instant(epochMicroseconds * nanoInMicroBI)
   }
 
-  static fromEpochNanoseconds(epochNanoseconds: bigint): Instant {
+  static fromEpochNanoseconds(epochNanoseconds: bigint): Temporal.Instant {
     return new Instant(epochNanoseconds)
   }
 
-  static compare(a: InstantArg, b: InstantArg): CompareResult {
+  static compare(a: InstantArg, b: InstantArg): Temporal.ComparisonResult {
     return compareEpochObjs(
       ensureObj(Instant, a),
       ensureObj(Instant, b),
@@ -92,27 +106,27 @@ export class Instant extends AbstractNoValueObj {
 
   get epochNanoseconds(): bigint { return getEpochNano(this) }
 
-  add(durationArg: DurationArg): Instant {
+  add(durationArg: TranslateArg): Temporal.Instant {
     return new Instant(
       translateEpochNano(this.epochNanoseconds, ensureObj(Duration, durationArg)),
     )
   }
 
-  subtract(durationArg: DurationArg): Instant {
+  subtract(durationArg: TranslateArg): Temporal.Instant {
     return new Instant(
       translateEpochNano(this.epochNanoseconds, negateDuration(ensureObj(Duration, durationArg))),
     )
   }
 
-  until(other: InstantArg, options?: TimeDiffOptions): Duration {
+  until(other: InstantArg, options?: DiffOptions): Temporal.Duration {
     return diffInstants(this, ensureObj(Instant, other), options)
   }
 
-  since(other: InstantArg, options?: TimeDiffOptions): Duration {
+  since(other: InstantArg, options?: DiffOptions): Temporal.Duration {
     return diffInstants(ensureObj(Instant, other), this, options)
   }
 
-  round(options: TimeRoundingOptions): Instant {
+  round(options: RoundOptions): Temporal.Instant {
     const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, true)
 
     return new Instant(
@@ -124,7 +138,7 @@ export class Instant extends AbstractNoValueObj {
     return !compareEpochObjs(this, ensureObj(Instant, other))
   }
 
-  toString(options?: InstantToStringOptions): string {
+  toString(options?: Temporal.InstantToStringOptions): string {
     const timeZoneArg = ensureOptionsObj(options).timeZone
     const zonedDateTime = this.toZonedDateTimeISO(timeZoneArg ?? 'UTC') // TODO: don't use util!!!
     return zonedDateTime.toString({
@@ -134,11 +148,11 @@ export class Instant extends AbstractNoValueObj {
     }) + (timeZoneArg === undefined ? 'Z' : '')
   }
 
-  toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
+  toZonedDateTimeISO(timeZoneArg: Temporal.TimeZoneLike): Temporal.ZonedDateTime {
     return new ZonedDateTime(this.epochNanoseconds, timeZoneArg)
   }
 
-  toZonedDateTime(options: { calendar: CalendarArg, timeZone: TimeZoneArg }): ZonedDateTime {
+  toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
     // TODO: more official options-processing utils for this
     if (!isObjectLike(options)) {
       throw new TypeError('Must specify options')
@@ -176,7 +190,7 @@ mixinLocaleStringMethods(Instant, createZonedFormatFactoryFactory({
 function diffInstants(
   inst0: Instant,
   inst1: Instant,
-  options: TimeDiffOptions | undefined,
+  options: DiffOptions | undefined,
 ): Duration {
   const diffConfig = parseDiffOptions(
     options,

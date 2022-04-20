@@ -18,23 +18,19 @@ import { parseMonthDay } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import {
-} from '../native/intlUtils'
-import { Calendar, createDefaultCalendar } from './calendar'
-import { PlainDate } from './plainDate'
-import {
-  DateISOFields,
-  DateToStringOptions,
-  MonthDayArg,
-  MonthDayOverrides,
-  OverflowOptions,
-} from './types'
+import { Temporal } from '../spec'
+import { createDefaultCalendar } from './calendar'
+import { DateISOFields } from './types'
 
-export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
+export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLike | string
+
+export class PlainMonthDay extends AbstractISOObj<DateISOFields> implements Temporal.PlainMonthDay {
+  readonly [Symbol.toStringTag]: 'Temporal.PlainMonthDay' // hack
+
   constructor(
     isoMonth: number,
     isoDay: number,
-    calendar: Calendar = createDefaultCalendar(), // TODO: change back to CalendarProtocol
+    calendar: Temporal.CalendarLike = createDefaultCalendar(),
     referenceISOYear: number = isoEpochLeapYear,
   ) {
     super({
@@ -43,7 +39,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     })
   }
 
-  static from(arg: MonthDayArg, options?: OverflowOptions): PlainMonthDay {
+  static from(arg: PlainMonthDayArg, options?: Temporal.AssignmentOptions): Temporal.PlainMonthDay {
     parseOverflowOption(options) // unused, but need to validate, regardless of input type
 
     if (arg instanceof PlainMonthDay) {
@@ -66,15 +62,18 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     return createMonthDay(refineBaseObj(parsed))
   }
 
-  with(fields: MonthDayOverrides, options?: OverflowOptions): PlainMonthDay {
+  with(
+    fields: Temporal.PlainMonthDayLike,
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainMonthDay {
     return processMonthDayWithFields(this, fields, options)
   }
 
-  equals(other: MonthDayArg): boolean {
+  equals(other: PlainMonthDayArg): boolean {
     return !compareDateTimes(this, ensureObj(PlainMonthDay, other))
   }
 
-  toString(options?: DateToStringOptions): string {
+  toString(options?: Temporal.ShowCalendarOption): string {
     const fields = this.getISOFields()
     const calendarID = fields.calendar.toString() // see note in formatCalendarID
     const calendarDisplay = parseCalendarDisplayOption(options)
@@ -86,7 +85,7 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
     ) + formatCalendarID(calendarID, calendarDisplay)
   }
 
-  toPlainDate(fields: { year: number }): PlainDate {
+  toPlainDate(fields: { year: number }): Temporal.PlainDate {
     return this.calendar.dateFromFields({
       year: fields.year,
       monthCode: this.monthCode,
@@ -98,7 +97,9 @@ export class PlainMonthDay extends AbstractISOObj<DateISOFields> {
 }
 
 // mixin
-export interface PlainMonthDay extends MonthDayCalendarFields { calendar: Calendar }
+export interface PlainMonthDay extends MonthDayCalendarFields {
+  calendar: Temporal.CalendarProtocol
+}
 export interface PlainMonthDay extends ToLocaleStringMethods {}
 attachStringTag(PlainMonthDay, 'PlainMonthDay')
 mixinISOFields(PlainMonthDay)

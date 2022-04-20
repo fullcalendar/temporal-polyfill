@@ -24,29 +24,25 @@ import { DurationFields } from '../dateUtils/typesPrivate'
 import { MONTH, YEAR, YearMonthUnitInt } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
+import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration, createDuration } from './duration'
-import { PlainDate } from './plainDate'
-import {
-  CalendarArg,
-  CompareResult,
-  DateISOFields,
-  DateToStringOptions,
-  DurationArg,
-  OverflowOptions,
-  YearMonthArg,
-  YearMonthDiffOptions,
-  YearMonthOverrides,
-  YearMonthUnit,
-} from './types'
+import { Duration, DurationArg, createDuration } from './duration'
+import { DateISOFields, YearMonthUnit } from './types'
+
+export type PlainYearMonthArg = Temporal.PlainYearMonth | Temporal.PlainYearMonthLike | string
+
+type DiffOptions = Temporal.DifferenceOptions<'year' | 'month'>
 
 const day1 = { day: 1 }
 
-export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
+export class PlainYearMonth extends AbstractISOObj<DateISOFields>
+  implements Temporal.PlainYearMonth {
+  readonly [Symbol.toStringTag]: 'Temporal.PlainYearMonth' // hack
+
   constructor(
     isoYear: number,
     isoMonth: number,
-    calendarArg: CalendarArg = createDefaultCalendar(),
+    calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
     referenceISODay = 1,
   ) {
     const constrained = constrainDateISO({
@@ -64,7 +60,10 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     })
   }
 
-  static from(arg: YearMonthArg, options?: OverflowOptions): PlainYearMonth {
+  static from(
+    arg: PlainYearMonthArg,
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainYearMonth {
     parseOverflowOption(options) // unused, but need to validate, regardless of input type
 
     if (arg instanceof PlainYearMonth) {
@@ -86,38 +85,47 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     return createYearMonth(refineBaseObj(parsed))
   }
 
-  static compare(a: YearMonthArg, b: YearMonthArg): CompareResult {
+  static compare(a: PlainYearMonthArg, b: PlainYearMonthArg): Temporal.ComparisonResult {
     return compareDateTimes(
       ensureObj(PlainYearMonth, a),
       ensureObj(PlainYearMonth, b),
     )
   }
 
-  with(fields: YearMonthOverrides, options?: OverflowOptions): PlainYearMonth {
+  with(
+    fields: Temporal.PlainYearMonthLike,
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainYearMonth {
     return processYearMonthWithFields(this, fields, options)
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
+  add(
+    durationArg: DurationArg,
+    options?: Temporal.ArithmeticOptions,
+  ): Temporal.PlainYearMonth {
     return translatePlainYearMonth(this, ensureObj(Duration, durationArg), options)
   }
 
-  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
+  subtract(
+    durationArg: DurationArg,
+    options?: Temporal.ArithmeticOptions,
+  ): Temporal.PlainYearMonth {
     return translatePlainYearMonth(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
-  until(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
+  until(other: PlainYearMonthArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainYearMonths(this, ensureObj(PlainYearMonth, other), false, options)
   }
 
-  since(other: YearMonthArg, options?: YearMonthDiffOptions): Duration {
+  since(other: PlainYearMonthArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainYearMonths(this, ensureObj(PlainYearMonth, other), true, options)
   }
 
-  equals(other: YearMonthArg): boolean {
+  equals(other: PlainYearMonthArg): boolean {
     return !compareDateTimes(this, ensureObj(PlainYearMonth, other))
   }
 
-  toString(options?: DateToStringOptions): string {
+  toString(options?: Temporal.ShowCalendarOption): string {
     const fields = this.getISOFields()
     const calendarID = fields.calendar.toString() // see note in formatCalendarID
     const calendarDisplay = parseCalendarDisplayOption(options)
@@ -129,7 +137,7 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
     ) + formatCalendarID(calendarID, calendarDisplay)
   }
 
-  toPlainDate(fields: { day: number }): PlainDate {
+  toPlainDate(fields: { day: number }): Temporal.PlainDate {
     return this.calendar.dateFromFields({
       year: this.year,
       month: this.month,
@@ -139,7 +147,9 @@ export class PlainYearMonth extends AbstractISOObj<DateISOFields> {
 }
 
 // mixin
-export interface PlainYearMonth extends YearMonthCalendarFields { calendar: Calendar }
+export interface PlainYearMonth extends YearMonthCalendarFields {
+  calendar: Temporal.CalendarProtocol
+}
 export interface PlainYearMonth extends ToLocaleStringMethods {}
 attachStringTag(PlainYearMonth, 'PlainYearMonth')
 mixinISOFields(PlainYearMonth)
@@ -167,7 +177,7 @@ export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
 function translatePlainYearMonth(
   yearMonth: PlainYearMonth,
   duration: DurationFields,
-  options?: OverflowOptions,
+  options?: Temporal.ArithmeticOptions,
 ): PlainYearMonth {
   return yearMonth.toPlainDate({
     day: duration.sign < 0
@@ -182,7 +192,7 @@ function diffPlainYearMonths(
   pym0: PlainYearMonth,
   pym1: PlainYearMonth,
   flip: boolean,
-  options: YearMonthDiffOptions | undefined,
+  options: DiffOptions | undefined,
 ): Duration {
   return createDuration(
     diffDates(

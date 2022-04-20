@@ -31,7 +31,7 @@ export abstract class AbstractObj {
 }
 
 export abstract class AbstractNoValueObj extends AbstractObj {
-  valueOf(): void {
+  valueOf(): never {
     throw new Error('Cannot convert object using valueOf')
   }
 }

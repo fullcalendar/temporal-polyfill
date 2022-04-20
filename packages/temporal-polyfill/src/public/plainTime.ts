@@ -20,28 +20,34 @@ import { HOUR, NANOSECOND, TimeUnitInt, nanoInMilli } from '../dateUtils/units'
 import { FormatFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { Calendar, createDefaultCalendar } from './calendar'
+import { Temporal } from '../spec'
+import { createDefaultCalendar } from './calendar'
 import { Duration, createDuration } from './duration'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
+import { PlainDate, PlainDateArg } from './plainDate'
 import { TimeZone } from './timeZone'
-import {
-  CompareResult,
-  DateArg,
-  DurationArg,
-  OverflowOptions,
-  TimeArg,
-  TimeDiffOptions,
-  TimeISOFields,
-  TimeLike,
-  TimeRoundingOptions,
-  TimeToStringOptions,
-  TimeUnit,
-  TimeZoneArg,
-} from './types'
-import { ZonedDateTime, createZonedDateTimeFromFields } from './zonedDateTime'
+import { TimeISOFields, TimeUnit } from './types'
+import { createZonedDateTimeFromFields } from './zonedDateTime'
 
-export class PlainTime extends AbstractISOObj<TimeISOFields> {
+export type PlainTimeArg = Temporal.PlainTime | Temporal.PlainTimeLike | string
+
+type DiffOptions = Temporal.DifferenceOptions<
+'hour' | 'minute' | 'second' |
+'millisecond' | 'microsecond' | 'nanosecond'
+>
+
+type RoundOptions = Temporal.RoundTo<
+'hour' | 'minute' | 'second' |
+'millisecond' | 'microsecond' | 'nanosecond'
+>
+
+type ToZonedDateTimeOptions = {
+  timeZone: Temporal.TimeZoneLike
+  plainDate: Temporal.PlainDate | Temporal.PlainDateLike | string
+}
+
+export class PlainTime extends AbstractISOObj<TimeISOFields> implements Temporal.PlainTime {
+  readonly [Symbol.toStringTag]: 'Temporal.PlainTime' // hack
+
   constructor(
     isoHour = 0,
     isoMinute = 0,
@@ -65,7 +71,7 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     )
   }
 
-  static from(arg: TimeArg, options?: OverflowOptions): PlainTime {
+  static from(arg: PlainTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainTime {
     const overflowHandling = parseOverflowOption(options)
 
     return createTime(
@@ -77,33 +83,33 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     )
   }
 
-  static compare(a: TimeArg, b: TimeArg): CompareResult {
+  static compare(a: PlainTimeArg, b: PlainTimeArg): Temporal.ComparisonResult {
     return compareTimes(ensureObj(PlainTime, a), ensureObj(PlainTime, b))
   }
 
-  with(fields: TimeLike, options?: OverflowOptions): PlainTime {
+  with(fields: Temporal.PlainTimeLike, options?: Temporal.AssignmentOptions): Temporal.PlainTime {
     return createTime(
       processTimeWithFields(this, fields, parseOverflowOption(options)),
     )
   }
 
-  add(durationArg: DurationArg): PlainTime {
+  add(durationArg: Temporal.Duration | Temporal.DurationLike | string): Temporal.PlainTime {
     return translatePlainTime(this, ensureObj(Duration, durationArg))
   }
 
-  subtract(durationArg: DurationArg): PlainTime {
+  subtract(durationArg: Temporal.Duration | Temporal.DurationLike | string): Temporal.PlainTime {
     return translatePlainTime(this, negateDuration(ensureObj(Duration, durationArg)))
   }
 
-  until(other: TimeArg, options?: TimeDiffOptions): Duration {
+  until(other: PlainTimeArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainTimes(this, ensureObj(PlainTime, other), options)
   }
 
-  since(other: TimeArg, options?: TimeDiffOptions): Duration {
+  since(other: PlainTimeArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainTimes(ensureObj(PlainTime, other), this, options)
   }
 
-  round(options: TimeRoundingOptions | TimeUnit): PlainTime {
+  round(options: RoundOptions): Temporal.PlainTime {
     const roundingConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
       options,
       undefined, // no default. required
@@ -114,17 +120,17 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     return createTime(roundTime(this.getISOFields(), roundingConfig))
   }
 
-  equals(other: TimeArg): boolean {
+  equals(other: Temporal.PlainTime | Temporal.PlainTimeLike | string): boolean {
     return !compareTimes(this, ensureObj(PlainTime, other))
   }
 
-  toString(options?: TimeToStringOptions): string {
+  toString(options?: Temporal.ToStringPrecisionOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
     const roundedISOFields: ISOTimeFields = roundTime(this.getISOFields(), formatConfig)
     return formatTimeISO(roundedISOFields, formatConfig)
   }
 
-  toZonedDateTime(options: { plainDate: DateArg, timeZone: TimeZoneArg }): ZonedDateTime {
+  toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
     // TODO: ensure options object first?
     const plainDate = ensureObj(PlainDate, options.plainDate)
     const timeZone = ensureObj(TimeZone, options.timeZone)
@@ -136,13 +142,13 @@ export class PlainTime extends AbstractISOObj<TimeISOFields> {
     })
   }
 
-  toPlainDateTime(dateArg: DateArg): PlainDateTime {
+  toPlainDateTime(dateArg: PlainDateArg): Temporal.PlainDateTime {
     return ensureObj(PlainDate, dateArg).toPlainDateTime(this)
   }
 }
 
 // mixin
-export interface PlainTime extends LocalTimeFields { calendar: Calendar }
+export interface PlainTime extends LocalTimeFields { calendar: Temporal.Calendar }
 export interface PlainTime extends ToLocaleStringMethods {}
 attachStringTag(PlainTime, 'PlainTime')
 mixinISOFields(PlainTime, timeUnitNames)
@@ -185,7 +191,7 @@ export function createTime(isoFields: ISOTimeFields): PlainTime {
 
 // Normally ensureObj and ::from would fail when undefined is specified
 // Fallback to 00:00 time
-export function ensureLooseTime(arg: TimeArg | undefined): PlainTime {
+export function ensureLooseTime(arg: PlainTimeArg | undefined): PlainTime {
   return ensureObj(PlainTime, arg ?? { hour: 0 })
 }
 
@@ -196,7 +202,7 @@ function translatePlainTime(pt: PlainTime, dur: DurationFields): PlainTime {
 function diffPlainTimes(
   pt0: PlainTime,
   pt1: PlainTime,
-  options: TimeDiffOptions | undefined,
+  options: DiffOptions | undefined,
 ): Duration {
   const diffConfig = parseDiffOptions<TimeUnit, TimeUnitInt>(
     options,

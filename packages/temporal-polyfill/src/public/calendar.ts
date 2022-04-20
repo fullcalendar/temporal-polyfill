@@ -28,28 +28,23 @@ import { translateDate } from '../dateUtils/translate'
 import { InputDateFields } from '../dateUtils/typesPrivate'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
+import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
-import { Duration, createDuration } from './duration'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
+import { Duration, DurationArg, createDuration } from './duration'
+import { PlainDate, PlainDateArg } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import {
-  CalendarArg,
-  CalendarProtocol,
-  DateArg,
   DateLikeFields,
-  DateUnit,
-  DurationArg,
   MonthDayLikeFields,
-  OverflowOptions,
   YearMonthLikeFields,
 } from './types'
-import { ZonedDateTime } from './zonedDateTime'
 
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 
-export class Calendar extends AbstractObj implements CalendarProtocol {
+export class Calendar extends AbstractObj implements Temporal.Calendar {
+  readonly [Symbol.toStringTag]: 'Temporal.Calendar' // hack
+
   constructor(id: string) {
     super()
 
@@ -60,7 +55,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     setImpl(this, queryCalendarImpl(id))
   }
 
-  static from(arg: CalendarArg): Calendar {
+  static from(arg: Temporal.CalendarLike): Temporal.Calendar {
     if (typeof arg === 'object' && arg) { // TODO: isObjectLike
       if (isCalendarArgBag(arg)) {
         return parseCalendarArgFromBag(arg.calendar)
@@ -80,7 +75,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return this.toString()
   }
 
-  era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined {
+  era(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): string | undefined {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -90,7 +87,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     ).era
   }
 
-  eraYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number | undefined {
+  eraYear(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): number | undefined {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -100,7 +99,14 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     ).eraYear
   }
 
-  year(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+  year(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDateLike
+    | string,
+  ): number {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -110,7 +116,15 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     ).year
   }
 
-  month(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+  month(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainMonthDay
+    | Temporal.PlainDateLike
+    | string,
+  ): number {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -120,12 +134,27 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     ).month
   }
 
-  monthCode(arg: PlainYearMonth | PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): string {
+  monthCode(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainMonthDay
+    | Temporal.PlainDateLike
+    | string,
+  ): string {
     const fields = queryDateFields(arg, this)
     return getImpl(this).monthCode(fields.month, fields.year)
   }
 
-  day(arg: PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): number {
+  day(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainMonthDay
+    | Temporal.PlainDateLike
+    | string,
+  ): number {
     const isoFields = getExistingDateISOFields(arg)
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -135,17 +164,23 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     ).day
   }
 
-  dayOfWeek(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+  dayOfWeek(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): number {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeISODayOfWeek(isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay)
   }
 
-  dayOfYear(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+  dayOfYear(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): number {
     const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return computeDayOfYear(getImpl(this), fields.year, fields.month, fields.day)
   }
 
-  weekOfYear(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+  weekOfYear(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): number {
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeWeekOfISOYear(
       isoFields.isoYear,
@@ -156,7 +191,9 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  daysInWeek(arg: DateArg | PlainDateTime | ZonedDateTime): number {
+  daysInWeek(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): number {
     // will throw error if invalid type
     getExistingDateISOFields(arg, true) // disallowMonthDay=true
 
@@ -164,26 +201,57 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     return 7
   }
 
-  daysInMonth(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+  daysInMonth(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDateLike
+    | string,
+  ): number {
     const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return getImpl(this).daysInMonth(fields.year, fields.month)
   }
 
-  daysInYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+  daysInYear(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDateLike
+    | string,
+  ): number {
     const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return computeDaysInYear(getImpl(this), fields.year)
   }
 
-  monthsInYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number {
+  monthsInYear(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDateLike
+    | string,
+  ): number {
     const calFields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return getImpl(this).monthsInYear(calFields.year)
   }
 
-  inLeapYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): boolean {
+  inLeapYear(
+    arg:
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDateLike
+    | string,
+  ): boolean {
     return getImpl(this).inLeapYear(this.year(arg))
   }
 
-  dateFromFields(fields: DateLikeFields, options?: OverflowOptions): PlainDate {
+  dateFromFields(
+    fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode & { day: number },
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainDate {
     const refinedFields = refineFields(fields, dateFieldMap) as DateLikeFields
     const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
 
@@ -195,7 +263,10 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  yearMonthFromFields(fields: YearMonthLikeFields, options?: OverflowOptions): PlainYearMonth {
+  yearMonthFromFields(
+    fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode,
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainYearMonth {
     const refinedFields = refineFields(fields, yearMonthFieldMap) as YearMonthLikeFields
     const isoFields = queryDateISOFields({ ...refinedFields, day: 1 }, getImpl(this), options)
 
@@ -207,7 +278,10 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay {
+  monthDayFromFields(
+    fields: Temporal.MonthCodeOrMonthAndYear & { day: number },
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainMonthDay {
     const impl = getImpl(this)
 
     const refinedFields = refineFields(fields, monthDayFieldMap) as MonthDayLikeFields
@@ -245,7 +319,11 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  dateAdd(dateArg: DateArg, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+  dateAdd(
+    dateArg: PlainDateArg,
+    durationArg: DurationArg,
+    options?: Temporal.ArithmeticOptions,
+  ): Temporal.PlainDate {
     const impl = getImpl(this)
     const date = ensureObj(PlainDate, dateArg, options)
     const duration = ensureObj(Duration, durationArg)
@@ -260,7 +338,11 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
     )
   }
 
-  dateUntil(dateArg0: DateArg, dateArg1: DateArg, options?: { largestUnit?: DateUnit }): Duration {
+  dateUntil(
+    dateArg0: PlainDateArg,
+    dateArg1: PlainDateArg,
+    options?: Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>,
+  ): Temporal.Duration {
     const impl = getImpl(this)
     const d0 = ensureObj(PlainDate, dateArg0)
     const d1 = ensureObj(PlainDate, dateArg1)
@@ -279,6 +361,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   Given a date-type's core field names, returns the field names that should be
   given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
   */
+  // TODO: for inFields, use Iterable<string>
   fields(inFields: string[]): string[] {
     return inFields.slice() // copy
   }
@@ -287,6 +370,7 @@ export class Calendar extends AbstractObj implements CalendarProtocol {
   Given a date-instance, and fields to override, returns the fields that should be
   given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
   */
+  // TODO: use Record<string, unknown>
   mergeFields(baseFields: any, additionalFields: any): any {
     return mergeCalFields(baseFields, additionalFields)
   }

@@ -106,6 +106,7 @@ module.exports = {
     'dist',
     '/scripts/data',
     '/packages/temporal-polyfill/tests',
+    '/packages/temporal-polyfill/src/spec.d.ts',
   ],
 }
 

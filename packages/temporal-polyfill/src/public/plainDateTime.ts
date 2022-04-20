@@ -28,34 +28,36 @@ import { DurationFields, LocalTimeFields } from '../dateUtils/typesPrivate'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
+import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration, createDuration } from './duration'
-import { PlainDate, createDate } from './plainDate'
-import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime, createTime, ensureLooseTime } from './plainTime'
-import { PlainYearMonth, createYearMonth } from './plainYearMonth'
+import { Duration, DurationArg, createDuration } from './duration'
+import { PlainDate, PlainDateArg, createDate } from './plainDate'
+import { PlainTimeArg, createTime, ensureLooseTime } from './plainTime'
+import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import {
-  CalendarArg,
-  CompareResult,
-  DateArg,
-  DateTimeArg,
   DateTimeISOFields,
-  DateTimeOverrides,
-  DateTimeRoundingOptions,
-  DateTimeToStringOptions,
   DayTimeUnit,
-  DiffOptions,
-  Disambiguation,
-  DurationArg,
-  OverflowOptions,
-  TimeArg,
-  TimeZoneArg,
   Unit,
 } from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
-export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
+export type PlainDateTimeArg = Temporal.PlainDateTime | Temporal.PlainDateTimeLike | string
+
+type DiffOptions = Temporal.DifferenceOptions<
+'year' | 'month' | 'week' | 'day' |
+'hour' | 'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond'
+>
+
+type RoundOptions = Temporal.RoundTo<
+'day' | 'hour' | 'minute' | 'second' |
+'millisecond' | 'microsecond' | 'nanosecond'
+>
+
+export class PlainDateTime extends AbstractISOObj<DateTimeISOFields>
+  implements Temporal.PlainDateTime {
+  readonly [Symbol.toStringTag]: 'Temporal.PlainDateTime' // hack
+
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -66,7 +68,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     isoMillisecond = 0,
     isoMicrosecond = 0,
     isoNanosecond = 0,
-    calendarArg: CalendarArg = createDefaultCalendar(),
+    calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
     const constrained = constrainDateTimeISO({
       isoYear,
@@ -89,7 +91,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     })
   }
 
-  static from(arg: DateTimeArg, options?: OverflowOptions): PlainDateTime {
+  static from(arg: PlainDateTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainDateTime {
     const overflowHandling = parseOverflowOption(options)
 
     return createDateTime(
@@ -101,21 +103,24 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     )
   }
 
-  static compare(a: DateTimeArg, b: DateTimeArg): CompareResult {
+  static compare(a: PlainDateTimeArg, b: PlainDateTimeArg): Temporal.ComparisonResult {
     return compareDateTimes(
       ensureObj(PlainDateTime, a),
       ensureObj(PlainDateTime, b),
     )
   }
 
-  with(fields: DateTimeOverrides, options?: OverflowOptions): PlainDateTime {
+  with(
+    fields: Temporal.PlainDateTimeLike,
+    options?: Temporal.AssignmentOptions,
+  ): Temporal.PlainDateTime {
     const overflowHandling = parseOverflowOption(options)
     return createDateTime(
       processDateTimeWithFields(this, fields, overflowHandling, options),
     )
   }
 
-  withPlainDate(dateArg: DateArg): PlainDateTime {
+  withPlainDate(dateArg: PlainDateArg): Temporal.PlainDateTime {
     const date = ensureObj(PlainDate, dateArg)
     return createDateTime({
       ...this.getISOFields(), // provides time fields
@@ -124,29 +129,29 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     })
   }
 
-  withPlainTime(timeArg?: TimeArg): PlainDateTime {
+  withPlainTime(timeArg?: PlainTimeArg): Temporal.PlainDateTime {
     return createDateTime({
       ...this.getISOFields(), // provides date & calendar fields
       ...ensureLooseTime(timeArg).getISOFields(),
     })
   }
 
-  withCalendar(calendarArg: CalendarArg): PlainDateTime {
+  withCalendar(calendarArg: Temporal.CalendarLike): Temporal.PlainDateTime {
     return createDateTime({
       ...this.getISOFields(),
       calendar: ensureObj(Calendar, calendarArg),
     })
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+  add(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDateTime {
     return translatePlainDateTime(this, ensureObj(Duration, durationArg), options)
   }
 
-  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+  subtract(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDateTime {
     return translatePlainDateTime(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
-  until(other: DateTimeArg, options?: DiffOptions): Duration {
+  until(other: PlainDateTimeArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainDateTimes(
       this,
       ensureObj(PlainDateTime, other),
@@ -155,7 +160,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     )
   }
 
-  since(other: DateTimeArg, options?: DiffOptions): Duration {
+  since(other: PlainDateTimeArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainDateTimes(
       this,
       ensureObj(PlainDateTime, other),
@@ -164,7 +169,7 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     )
   }
 
-  round(options: DateTimeRoundingOptions | DayTimeUnit): PlainDateTime {
+  round(options: RoundOptions): Temporal.PlainDateTime {
     const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
       options,
       undefined, // no default. required
@@ -178,11 +183,11 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     })
   }
 
-  equals(other: DateTimeArg): boolean {
+  equals(other: PlainDateTimeArg): boolean {
     return !compareDateTimes(this, ensureObj(PlainDateTime, other))
   }
 
-  toString(options?: DateTimeToStringOptions): string {
+  toString(options?: Temporal.CalendarTypeToStringOptions): string {
     const formatConfig = parseTimeToStringOptions(options)
     const calendarDisplay = parseCalendarDisplayOption(options)
     const isoFields = roundDateTime(this.getISOFields(), formatConfig)
@@ -192,9 +197,9 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
   }
 
   toZonedDateTime(
-    timeZoneArg: TimeZoneArg,
-    options?: { disambiguation?: Disambiguation },
-  ): ZonedDateTime {
+    timeZoneArg: Temporal.TimeZoneLike,
+    options?: Temporal.ToInstantOptions,
+  ): Temporal.ZonedDateTime {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const instant = timeZone.getInstantFor(this, options)
 
@@ -202,14 +207,14 @@ export class PlainDateTime extends AbstractISOObj<DateTimeISOFields> {
     return new ZonedDateTime(instant.epochNanoseconds, timeZone, this.calendar)
   }
 
-  toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
-  toPlainMonthDay(): PlainMonthDay { return this.calendar.monthDayFromFields(this) }
-  toPlainDate(): PlainDate { return createDate(this.getISOFields()) }
-  toPlainTime(): PlainTime { return createTime(this.getISOFields()) }
+  toPlainYearMonth(): Temporal.PlainYearMonth { return createYearMonth(this.getISOFields()) }
+  toPlainMonthDay(): Temporal.PlainMonthDay { return this.calendar.monthDayFromFields(this) }
+  toPlainDate(): Temporal.PlainDate { return createDate(this.getISOFields()) }
+  toPlainTime(): Temporal.PlainTime { return createTime(this.getISOFields()) }
 }
 
 // mixin
-export interface PlainDateTime extends DateCalendarFields { calendar: Calendar }
+export interface PlainDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 export interface PlainDateTime extends LocalTimeFields {}
 export interface PlainDateTime extends ToLocaleStringMethods {}
 attachStringTag(PlainDateTime, 'PlainDateTime')
@@ -244,7 +249,7 @@ export function createDateTime(isoFields: DateTimeISOFields): PlainDateTime {
 function translatePlainDateTime(
   pdt0: PlainDateTime,
   dur: DurationFields,
-  options: OverflowOptions | undefined,
+  options: Temporal.ArithmeticOptions | undefined,
 ): PlainDateTime {
   const isoFields = translateDateTime(pdt0.getISOFields(), dur, options)
   return createDateTime({

@@ -22,36 +22,39 @@ import { refineBaseObj } from '../dateUtils/parseRefine'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
+import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Duration, createDuration } from './duration'
-import { PlainDateTime, createDateTime } from './plainDateTime'
-import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime, ensureLooseTime } from './plainTime'
-import { PlainYearMonth, createYearMonth } from './plainYearMonth'
+import { Duration, DurationArg, createDuration } from './duration'
+import { createDateTime } from './plainDateTime'
+import { PlainTime, PlainTimeArg, ensureLooseTime } from './plainTime'
+import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import {
-  CalendarArg,
-  CompareResult,
-  DateArg,
-  DateDiffOptions,
   DateISOFields,
-  DateOverrides,
   DateToStringOptions,
   DateUnit,
-  DurationArg,
-  OverflowOptions,
-  TimeArg,
-  TimeZoneArg,
-  TimeZoneProtocol,
+  TimeArg, // TODO: kill, use by processToZonedDateTimeOptions
+  TimeZoneArg, // TODO: kill, use by processToZonedDateTimeOptions
 } from './types'
-import { ZonedDateTime, createZonedDateTimeFromFields } from './zonedDateTime'
+import { createZonedDateTimeFromFields } from './zonedDateTime'
 
-export class PlainDate extends AbstractISOObj<DateISOFields> {
+export type PlainDateArg = Temporal.PlainDate | Temporal.PlainDateLike | string
+
+type ToZonedDateTimeOptions = Temporal.TimeZoneProtocol | string | {
+  timeZone: Temporal.TimeZoneLike
+  plainTime?: Temporal.PlainTime | Temporal.PlainTimeLike | string
+}
+
+type DiffOptions = Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>
+
+export class PlainDate extends AbstractISOObj<DateISOFields> implements Temporal.PlainDate {
+  readonly [Symbol.toStringTag]: 'Temporal.PlainDate' // hack
+
   constructor(
     isoYear: number,
     isoMonth: number,
     isoDay: number,
-    calendarArg: CalendarArg = createDefaultCalendar(),
+    calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
     const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
@@ -64,7 +67,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     })
   }
 
-  static from(arg: DateArg, options?: OverflowOptions): PlainDate {
+  static from(arg: PlainDateArg, options?: Temporal.AssignmentOptions): Temporal.PlainDate {
     parseOverflowOption(options) // unused, but need to validate, regardless of input type
 
     if (arg instanceof PlainDate) {
@@ -78,18 +81,18 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     return createDate(refineBaseObj(parseDateTime(String(arg))))
   }
 
-  static compare(a: DateArg, b: DateArg): CompareResult {
+  static compare(a: PlainDateArg, b: PlainDateArg): Temporal.ComparisonResult {
     return compareDateTimes(
       ensureObj(PlainDate, a),
       ensureObj(PlainDate, b),
     )
   }
 
-  with(fields: DateOverrides, options?: OverflowOptions): PlainDate {
+  with(fields: Temporal.PlainDateLike, options?: Temporal.AssignmentOptions): Temporal.PlainDate {
     return processDateWithFields(this, fields, options)
   }
 
-  withCalendar(calendarArg: CalendarArg): PlainDate {
+  withCalendar(calendarArg: Temporal.CalendarLike): Temporal.PlainDate {
     const isoFields = this.getISOFields()
     return new PlainDate(
       isoFields.isoYear,
@@ -99,15 +102,15 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     )
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+  add(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
     return this.calendar.dateAdd(this, durationArg, options)
   }
 
-  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+  subtract(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
     return this.calendar.dateAdd(this, ensureObj(Duration, durationArg).negated(), options)
   }
 
-  until(other: DateArg, options?: DateDiffOptions): Duration {
+  until(other: PlainDateArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainDates(
       this,
       ensureObj(PlainDate, other),
@@ -116,7 +119,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     )
   }
 
-  since(other: DateArg, options?: DateDiffOptions): Duration {
+  since(other: PlainDateArg, options?: DiffOptions): Temporal.Duration {
     return diffPlainDates(
       this,
       ensureObj(PlainDate, other),
@@ -125,7 +128,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     )
   }
 
-  equals(other: DateArg): boolean {
+  equals(other: PlainDateArg): boolean {
     return !compareDateTimes(this, ensureObj(PlainDate, other))
   }
 
@@ -137,9 +140,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
       formatCalendarID(fields.calendar.toString(), calendarDisplay)
   }
 
-  toZonedDateTime(
-    options: { plainTime?: TimeArg, timeZone: TimeZoneArg } | TimeZoneArg,
-  ): ZonedDateTime {
+  toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
     const refinedOptions = processToZonedDateTimeOptions(options)
     const timeZone = ensureObj(TimeZone, refinedOptions.timeZone)
     const plainTime = refinedOptions.plainTime === undefined
@@ -153,19 +154,24 @@ export class PlainDate extends AbstractISOObj<DateISOFields> {
     })
   }
 
-  toPlainDateTime(timeArg?: TimeArg): PlainDateTime {
+  toPlainDateTime(timeArg?: PlainTimeArg): Temporal.PlainDateTime {
     return createDateTime({
       ...this.getISOFields(),
       ...ensureLooseTime(timeArg).getISOFields(),
     })
   }
 
-  toPlainYearMonth(): PlainYearMonth { return createYearMonth(this.getISOFields()) }
-  toPlainMonthDay(): PlainMonthDay { return this.calendar.monthDayFromFields(this) }
+  toPlainYearMonth(): Temporal.PlainYearMonth {
+    return createYearMonth(this.getISOFields())
+  }
+
+  toPlainMonthDay(): Temporal.PlainMonthDay {
+    return this.calendar.monthDayFromFields(this)
+  }
 }
 
 // mixin
-export interface PlainDate extends DateCalendarFields { calendar: Calendar }
+export interface PlainDate extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 export interface PlainDate extends ToLocaleStringMethods {}
 attachStringTag(PlainDate, 'PlainDate')
 mixinISOFields(PlainDate)
@@ -193,7 +199,7 @@ export function createDate(isoFields: DateISOFields): PlainDate {
 
 // argument processing
 function processToZonedDateTimeOptions(
-  options?: { plainTime?: TimeArg, timeZone: TimeZoneArg } | TimeZoneArg,
+  options?: ToZonedDateTimeOptions,
 ): {
     plainTime?: TimeArg,
     timeZone: TimeZoneArg,
@@ -204,8 +210,8 @@ function processToZonedDateTimeOptions(
   if (typeof options === 'string') {
     timeZone = options
   } else if (typeof options === 'object') {
-    if ((options as TimeZoneProtocol).id !== undefined) {
-      timeZone = options as TimeZoneProtocol
+    if ((options as Temporal.TimeZoneProtocol).id !== undefined) {
+      timeZone = options as Temporal.TimeZoneProtocol
     } else {
       timeZone = options.timeZone
       plainTime = (options as { plainTime?: TimeArg }).plainTime
@@ -224,7 +230,7 @@ function diffPlainDates(
   pd0: PlainDate,
   pd1: PlainDate,
   flip: boolean,
-  options: DateDiffOptions | undefined,
+  options: DiffOptions | undefined,
 ): Duration {
   return createDuration(
     diffDates(

@@ -12,24 +12,19 @@ import { attachStringTag } from '../dateUtils/mixins'
 import { checkInvalidOffset } from '../dateUtils/offset'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
+import { Temporal } from '../spec'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
 import { Calendar, createDefaultCalendar } from './calendar'
-import { Instant } from './instant'
-import { PlainDateTime, createDateTime } from './plainDateTime'
-import {
-  CalendarArg,
-  DateTimeArg,
-  Disambiguation,
-  InstantArg,
-  TimeZoneArg,
-  TimeZoneProtocol,
-} from './types'
+import { Instant, InstantArg } from './instant'
+import { PlainDateTime, PlainDateTimeArg, createDateTime } from './plainDateTime'
 
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
 
-export class TimeZone extends AbstractObj implements TimeZoneProtocol {
+export class TimeZone extends AbstractObj implements Temporal.TimeZone {
+  readonly [Symbol.toStringTag]: 'Temporal.TimeZone' // hack
+
   constructor(id: string) {
     if (!id) {
       throw new RangeError('Invalid timezone ID')
@@ -38,7 +33,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     setImpl(this, queryTimeZoneImpl(id))
   }
 
-  static from(arg: TimeZoneArg): TimeZone {
+  static from(arg: Temporal.TimeZoneLike): Temporal.TimeZone {
     if (typeof arg === 'object') {
       if (isTimeZoneArgBag(arg)) {
         return parseTimeZoneFromBag(arg.timeZone)
@@ -79,8 +74,8 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
 
   getPlainDateTimeFor(
     instantArg: InstantArg,
-    calendarArg: CalendarArg = createDefaultCalendar(),
-  ): PlainDateTime {
+    calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
+  ): Temporal.PlainDateTime {
     const instant = ensureObj(Instant, instantArg)
     const isoFields = epochNanoToISOFields(
       instant.epochNanoseconds + BigInt(this.getOffsetNanosecondsFor(instant)),
@@ -91,7 +86,10 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     })
   }
 
-  getInstantFor(dateTimeArg: DateTimeArg, options?: { disambiguation?: Disambiguation }): Instant {
+  getInstantFor(
+    dateTimeArg: PlainDateTimeArg,
+    options?: Temporal.ToInstantOptions,
+  ): Temporal.Instant {
     const disambig = parseDisambigOption(options)
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneNano = isoFieldsToEpochNano(isoFields)
@@ -113,7 +111,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     return new Instant(zoneNano - BigInt(offsetNano))
   }
 
-  getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[] {
+  getPossibleInstantsFor(dateTimeArg: PlainDateTimeArg): Temporal.Instant[] {
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneNano = isoFieldsToEpochNano(isoFields)
     let possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
@@ -132,7 +130,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     ))
   }
 
-  getPreviousTransition(instantArg: InstantArg): Instant | null {
+  getPreviousTransition(instantArg: InstantArg): Temporal.Instant | null {
     const instant = ensureObj(Instant, instantArg)
     const rawTransition = getImpl(this).getTransition(instant.epochNanoseconds, -1)
     if (rawTransition) {
@@ -141,7 +139,7 @@ export class TimeZone extends AbstractObj implements TimeZoneProtocol {
     return null
   }
 
-  getNextTransition(instantArg: InstantArg): Instant | null {
+  getNextTransition(instantArg: InstantArg): Temporal.Instant | null {
     const instant = ensureObj(Instant, instantArg)
     const rawTransition = getImpl(this).getTransition(instant.epochNanoseconds, 1)
     if (rawTransition) {

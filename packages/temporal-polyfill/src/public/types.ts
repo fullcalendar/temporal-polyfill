@@ -14,15 +14,8 @@ import {
   ISOTimeFields,
   LocalTimeFields,
 } from '../dateUtils/typesPrivate'
-import { Calendar } from './calendar'
-import { Duration } from './duration'
+import { Temporal } from '../spec'
 import { Instant } from './instant'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { PlainMonthDay } from './plainMonthDay'
-import { PlainYearMonth } from './plainYearMonth'
-import { TimeZone } from './timeZone'
-import { ZonedDateTime } from './zonedDateTime'
 
 /*
 SPECIAL NOTE:
@@ -106,10 +99,13 @@ export type ZonedDateTimeToStringOptions = DateTimeToStringOptions & {
 }
 
 // iso-fields (TODO: change back to CalendarProtocol!!!)
-export type DateISOFields = ISODateFields & { calendar: Calendar }
-export type TimeISOFields = ISOTimeFields & { calendar: Calendar }
+export type DateISOFields = ISODateFields & { calendar: Temporal.CalendarProtocol }
+export type TimeISOFields = ISOTimeFields & { calendar: Temporal.Calendar } // strict
 export type DateTimeISOFields = DateISOFields & ISOTimeFields
-export type ZonedDateTimeISOFields = DateTimeISOFields & { timeZone: TimeZone, offset: string }
+export type ZonedDateTimeISOFields = DateTimeISOFields & {
+  timeZone: Temporal.TimeZoneProtocol
+  offset: string
+}
 
 // like-fields (for Calendar::dateFromFields, etc) (does NOT have calendar/timezone)
 export type YearMonthLikeFields =
@@ -169,44 +165,4 @@ export type ZonedDateTimeOptions = {
   overflow?: OverflowHandling
   disambiguation?: Disambiguation
   offset?: OffsetHandling
-}
-
-// object protocols
-export interface CalendarProtocol {
-  id?: string
-  calendar?: never
-  era(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): string | undefined
-  eraYear(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number | undefined
-  year(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
-  month(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
-  monthCode(arg: PlainYearMonth | PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): string
-  day(arg: PlainMonthDay | DateArg | PlainDateTime | ZonedDateTime): number
-  dayOfWeek?(arg: DateArg | PlainDateTime | ZonedDateTime): number
-  dayOfYear?(arg: DateArg | PlainDateTime | ZonedDateTime): number
-  weekOfYear?(arg: DateArg | PlainDateTime | ZonedDateTime): number
-  daysInWeek?(arg: DateArg | PlainDateTime | ZonedDateTime): number
-  daysInMonth?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
-  daysInYear?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
-  monthsInYear?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): number
-  inLeapYear?(arg: PlainYearMonth | DateArg | PlainDateTime | ZonedDateTime): boolean
-  dateFromFields(arg: DateLikeFields, options?: OverflowOptions): PlainDate
-  yearMonthFromFields(arg: YearMonthLikeFields, options?: OverflowOptions): PlainYearMonth
-  monthDayFromFields(fields: MonthDayLikeFields, options?: OverflowOptions): PlainMonthDay
-  dateAdd?(dateArg: DateArg, durationArg: DurationArg, options?: OverflowOptions): PlainDate
-  dateUntil?(dateArg0: DateArg, dateArg1: DateArg, options?: { largestUnit?: DateUnit }): Duration
-  // TODO: fields/mergeFields
-  toString(): string
-}
-export interface TimeZoneProtocol {
-  id?: string
-  timeZone?: never
-  getOffsetNanosecondsFor(instantArg: InstantArg): number
-  getOffsetStringFor?(instantArg: InstantArg): string
-  getPlainDateTimeFor?(instantArg: InstantArg, calendarArg?: CalendarArg): PlainDateTime
-  getInstantFor?(dateTimeArg: DateTimeArg, options?: { disambiguation?: Disambiguation }): Instant
-  getNextTransition?(instantArg: InstantArg): Instant | null
-  getPreviousTransition?(instantArg: InstantArg): Instant | null
-  getPossibleInstantsFor(dateTimeArg: DateTimeArg): Instant[]
-  toString(): string
-  toJSON?(): string
 }
