@@ -129,7 +129,7 @@ export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields>
     })
   }
 
-  static from(arg: ZonedDateTimeArg, options?: Temporal.AssignmentOptions): ZonedDateTime {
+  static from(arg: ZonedDateTimeArg, options?: Temporal.AssignmentOptions): Temporal.ZonedDateTime {
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_REJECT)
     const overflowHandling = parseOverflowOption(options)
 

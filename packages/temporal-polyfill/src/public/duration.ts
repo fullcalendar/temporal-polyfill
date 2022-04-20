@@ -21,8 +21,6 @@ import { addDurationFields } from '../dateUtils/translate'
 import { DurationFields, UnsignedDurationFields } from '../dateUtils/typesPrivate'
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
 import {
-  CompareResult,
-  DurationLike,
   DurationRoundingOptions,
   DurationToStringUnit,
   LocalesArg,
@@ -31,7 +29,7 @@ import {
 import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
 
-export type DurationArg = Temporal.Duration | DurationLike | string
+export type DurationArg = Temporal.Duration | Temporal.DurationLike | string
 
 const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
 
@@ -78,7 +76,7 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
     a: DurationArg,
     b: DurationArg,
     options?: Temporal.DurationArithmeticOptions,
-  ): CompareResult {
+  ): Temporal.ComparisonResult {
     return compareDurations(
       ensureObj(Duration, a),
       ensureObj(Duration, b),
@@ -96,7 +94,7 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
   get milliseconds(): number { return getFields(this).milliseconds }
   get microseconds(): number { return getFields(this).microseconds }
   get nanoseconds(): number { return getFields(this).nanoseconds }
-  get sign(): CompareResult { return getFields(this).sign }
+  get sign(): Temporal.ComparisonResult { return getFields(this).sign }
   get blank(): boolean { return !this.sign }
 
   with(fields: Temporal.DurationLike): Temporal.Duration {

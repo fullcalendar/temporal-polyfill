@@ -40,6 +40,9 @@ import {
   YearMonthLikeFields,
 } from './types'
 
+// FYI: the Temporal.CalendarLike type includes `string`,
+// unlike many other object types
+
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 
 export class Calendar extends AbstractObj implements Temporal.Calendar {

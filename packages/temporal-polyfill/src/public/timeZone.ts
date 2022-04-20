@@ -20,6 +20,9 @@ import { Calendar, createDefaultCalendar } from './calendar'
 import { Instant, InstantArg } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createDateTime } from './plainDateTime'
 
+// FYI: the Temporal.TimeZoneLike type includes `string`
+// unlike many other object types
+
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
 
 export class TimeZone extends AbstractObj implements Temporal.TimeZone {
