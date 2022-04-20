@@ -13,6 +13,10 @@ const origLocalesSymbol = Symbol()
 const origOptionsSymbol = Symbol()
 const factoryMapSymbol = Symbol()
 
+/*
+We can't monkeypatch Intl.DateTimeFormat because this auto-bound .format would be inaccessible
+to our override method.
+*/
 export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
   [origLocalesSymbol]: string[]
   [origOptionsSymbol]: Intl.DateTimeFormatOptions
