@@ -36,7 +36,6 @@ import { LocalTimeFields } from '../dateUtils/localFields'
 import {
   ComputedEpochFields,
   DateCalendarFields,
-  attachStringTag,
   dateCalendarFields,
   mixinCalendarFields,
   mixinEpochFields,
@@ -96,7 +95,7 @@ const [getPrivateFields, setPrivateFields] =
 
 export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOFields>
   implements Temporal.ZonedDateTime {
-  readonly [Symbol.toStringTag]: 'Temporal.ZonedDateTime' // hack
+  readonly [Symbol.toStringTag]: 'Temporal.ZonedDateTime'
 
   constructor(
     epochNanoseconds: bigint,
@@ -282,7 +281,6 @@ export interface ZonedDateTime extends DateCalendarFields { calendar: Temporal.C
 export interface ZonedDateTime extends LocalTimeFields {}
 export interface ZonedDateTime extends ComputedEpochFields {}
 export interface ZonedDateTime extends ToLocaleStringMethods {}
-attachStringTag(ZonedDateTime, 'ZonedDateTime')
 mixinISOFields(ZonedDateTime, timeUnitNames)
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
 mixinEpochFields(ZonedDateTime)

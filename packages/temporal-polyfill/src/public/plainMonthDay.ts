@@ -9,7 +9,6 @@ import { processMonthDayFromFields, processMonthDayWithFields } from '../dateUti
 import { formatCalendarID, formatDateISO, formatMonthDayISO } from '../dateUtils/isoFormat'
 import {
   MonthDayCalendarFields,
-  attachStringTag,
   mixinCalendarFields,
   mixinISOFields,
   monthDayCalendarFields,
@@ -25,7 +24,7 @@ export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLi
 
 export class PlainMonthDay extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainMonthDay {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainMonthDay' // hack
+  readonly [Symbol.toStringTag]: 'Temporal.PlainMonthDay'
 
   constructor(
     isoMonth: number,
@@ -101,7 +100,6 @@ export interface PlainMonthDay extends MonthDayCalendarFields {
   calendar: Temporal.CalendarProtocol
 }
 export interface PlainMonthDay extends ToLocaleStringMethods {}
-attachStringTag(PlainMonthDay, 'PlainMonthDay')
 mixinISOFields(PlainMonthDay)
 mixinCalendarFields(PlainMonthDay, monthDayCalendarFields)
 mixinLocaleStringMethods(PlainMonthDay, createPlainFormatFactoryFactory({

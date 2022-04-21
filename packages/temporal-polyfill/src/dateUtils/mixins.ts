@@ -63,7 +63,6 @@ export interface YearMonthCalendarFields {
   year: number
   month: number
   monthCode: string
-  daysInWeek: number
   daysInMonth: number
   daysInYear: number
   monthsInYear: number
@@ -77,6 +76,7 @@ export interface MonthDayCalendarFields {
 
 export interface DateCalendarFields extends YearMonthCalendarFields {
   day: number
+  daysInWeek: number
   dayOfWeek: number
   dayOfYear: number
   weekOfYear: number
@@ -122,10 +122,4 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
       return value
     }),
   )
-}
-
-// affects how objects are displayed in console
-
-export function attachStringTag(objOrClass: any, name: string): void {
-  (objOrClass.prototype || objOrClass)[Symbol.toStringTag] = 'Temporal.' + name
 }

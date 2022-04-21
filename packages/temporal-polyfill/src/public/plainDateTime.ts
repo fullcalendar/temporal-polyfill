@@ -17,7 +17,6 @@ import { formatCalendarID, formatDateTimeISO } from '../dateUtils/isoFormat'
 import { LocalTimeFields } from '../dateUtils/localFields'
 import {
   DateCalendarFields,
-  attachStringTag,
   dateCalendarFields,
   mixinCalendarFields,
   mixinISOFields,
@@ -52,7 +51,7 @@ type RoundOptions = Temporal.RoundTo<
 
 export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOFields>
   implements Temporal.PlainDateTime {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainDateTime' // hack
+  readonly [Symbol.toStringTag]: 'Temporal.PlainDateTime'
 
   constructor(
     isoYear: number,
@@ -213,7 +212,6 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
 export interface PlainDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 export interface PlainDateTime extends LocalTimeFields {}
 export interface PlainDateTime extends ToLocaleStringMethods {}
-attachStringTag(PlainDateTime, 'PlainDateTime')
 mixinISOFields(PlainDateTime, timeUnitNames)
 mixinCalendarFields(PlainDateTime, dateCalendarFields)
 mixinLocaleStringMethods(PlainDateTime, createPlainFormatFactoryFactory({

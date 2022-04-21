@@ -1,7 +1,6 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { ISODateTimeFields } from '../dateUtils/isoFields'
-import { attachStringTag } from '../dateUtils/mixins'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
 import { Temporal } from '../spec'
@@ -26,8 +25,8 @@ const Now = {
   plainTimeISO: getPlainTimeISO,
   instant: getInstant,
   timeZone: getTimeZone,
+  [Symbol.toStringTag]: 'Temporal.Now', // TODO: make readonly
 }
-attachStringTag(Now, 'Now')
 
 export { Now }
 

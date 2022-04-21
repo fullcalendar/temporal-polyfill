@@ -12,7 +12,6 @@ import { validateDate } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO } from '../dateUtils/isoFormat'
 import {
   DateCalendarFields,
-  attachStringTag,
   dateCalendarFields,
   mixinCalendarFields,
   mixinISOFields,
@@ -43,7 +42,7 @@ type DiffOptions = Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>
 
 export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainDate {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainDate' // hack
+  readonly [Symbol.toStringTag]: 'Temporal.PlainDate'
 
   constructor(
     isoYear: number,
@@ -168,7 +167,6 @@ export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
 // mixin
 export interface PlainDate extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 export interface PlainDate extends ToLocaleStringMethods {}
-attachStringTag(PlainDate, 'PlainDate')
 mixinISOFields(PlainDate)
 mixinCalendarFields(PlainDate, dateCalendarFields)
 mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({

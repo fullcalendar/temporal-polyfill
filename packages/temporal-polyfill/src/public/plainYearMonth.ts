@@ -13,7 +13,6 @@ import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
 import {
   YearMonthCalendarFields,
-  attachStringTag,
   mixinCalendarFields,
   mixinISOFields,
   yearMonthCalendarFields,
@@ -36,7 +35,7 @@ const day1 = { day: 1 }
 
 export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainYearMonth {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainYearMonth' // hack
+  readonly [Symbol.toStringTag]: 'Temporal.PlainYearMonth'
 
   constructor(
     isoYear: number,
@@ -150,7 +149,6 @@ export interface PlainYearMonth extends YearMonthCalendarFields {
   calendar: Temporal.CalendarProtocol
 }
 export interface PlainYearMonth extends ToLocaleStringMethods {}
-attachStringTag(PlainYearMonth, 'PlainYearMonth')
 mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)
 mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({
