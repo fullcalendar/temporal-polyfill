@@ -1,5 +1,4 @@
 import { unitNames } from '../argParse/unitStr'
-import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { Temporal } from '../spec'
 import { DiffableObj, diffAccurate } from './diff'
@@ -10,7 +9,7 @@ export function spanDurationFrom(
   duration: DurationFields,
   largestUnit: UnitInt,
   relativeTo: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
 ): DurationFields {
   return (
     relativeTo instanceof PlainDate
@@ -30,7 +29,7 @@ export function spanDurationFromDate(
   duration: DurationFields,
   largestUnit: DateUnitInt,
   relativeTo: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
 ): [DurationFields, DiffableObj] {
   const translated = relativeTo.add(duration)
   const newDuration = calendar.dateUntil(relativeTo, translated, {
@@ -44,7 +43,7 @@ export function spanDurationFromDateTime(
   fields: DurationFields,
   largestUnit: UnitInt,
   relativeTo: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
   dissolveWeeks?: boolean,
 ): [DurationFields, DiffableObj] {
   // balancing does not care about weeks

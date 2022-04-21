@@ -2,7 +2,7 @@ import { DayTimeUnit } from '../dateUtils/dayAndTime'
 import { DAY, DayTimeUnitInt, nanoIn, nanoInDay } from '../dateUtils/units'
 import { Temporal } from '../spec'
 import { RoundingFunc } from '../utils/math'
-import { ensureOptionsObj, isObjectLike } from './refine'
+import { ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
 
@@ -16,24 +16,19 @@ export function parseRoundingOptions<
   UnitArgType extends DayTimeUnit,
   UnitType extends DayTimeUnitInt
 >(
-  options: Partial<Temporal.RoundTo<UnitArgType>> | UnitArgType | undefined,
-  smallestUnitDefault: UnitType | undefined,
+  options: Temporal.RoundTo<UnitArgType> | UnitArgType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
   relaxedDivisibility?: boolean,
 ): RoundingConfig<UnitType> {
-  const optionsObj: Partial<Temporal.RoundTo<UnitArgType>> | undefined =
+  const optionsObj: Temporal.RoundTo<UnitArgType> | undefined =
     typeof options === 'string'
       ? { smallestUnit: options }
       : options
 
-  if (smallestUnitDefault === undefined && !isObjectLike(optionsObj)) {
-    throw new TypeError('Need rounding options')
-  }
-
   const ensuredOptions = ensureOptionsObj(optionsObj)
   const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
-  const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
+  const smallestUnit = parseUnit(ensuredOptions.smallestUnit, undefined, minUnit, maxUnit)
   const roundingFunc = parseRoundingModeOption(ensuredOptions, Math.round)
   const incNano = nanoIn[smallestUnit] * roundingIncrement
 

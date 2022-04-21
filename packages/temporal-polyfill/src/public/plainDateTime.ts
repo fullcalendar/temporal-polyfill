@@ -6,7 +6,7 @@ import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandli
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
-import { compareDateTimes } from '../dateUtils/compare'
+import { compareDateTimes, dateTimesEqual } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
 import { DayTimeUnit } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
@@ -167,7 +167,6 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
   round(options: RoundOptions): Temporal.PlainDateTime {
     const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
       options,
-      undefined, // no default. required
       NANOSECOND, // minUnit
       DAY, // maxUnit
     )
@@ -179,7 +178,7 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
   }
 
   equals(other: PlainDateTimeArg): boolean {
-    return !compareDateTimes(this, ensureObj(PlainDateTime, other))
+    return dateTimesEqual(this, ensureObj(PlainDateTime, other))
   }
 
   toString(options?: Temporal.CalendarTypeToStringOptions): string {
@@ -212,6 +211,7 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
 export interface PlainDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 export interface PlainDateTime extends LocalTimeFields {}
 export interface PlainDateTime extends ToLocaleStringMethods {}
+
 mixinISOFields(PlainDateTime, timeUnitNames)
 mixinCalendarFields(PlainDateTime, dateCalendarFields)
 mixinLocaleStringMethods(PlainDateTime, createPlainFormatFactoryFactory({

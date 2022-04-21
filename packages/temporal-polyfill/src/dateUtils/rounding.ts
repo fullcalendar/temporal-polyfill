@@ -1,7 +1,6 @@
 import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundingConfig } from '../argParse/roundingOptions'
-import { Calendar } from '../public/calendar'
-import { TimeZone } from '../public/timeZone'
+import { Temporal } from '../spec'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { isoTimeToNano, nanoToISOTime, zeroISOTimeFields } from './dayAndTime'
 import { splitEpochNano } from './epoch'
@@ -43,7 +42,10 @@ export function roundEpochNano(
 
 // returns epochNano!
 export function roundZonedDateTimeFields(
-  fields: ISODateTimeFields & { calendar: Calendar, timeZone: TimeZone },
+  fields: ISODateTimeFields & {
+    calendar: Temporal.CalendarProtocol,
+    timeZone: Temporal.TimeZoneProtocol,
+  },
   offsetNanoseconds: number,
   roundingConfig: RoundingConfig<DayTimeUnitInt>,
 ): bigint {

@@ -1,10 +1,8 @@
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainInt } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { Calendar } from '../public/calendar'
 import { createDate } from '../public/plainDate'
 import { createDateTime } from '../public/plainDateTime'
-import { TimeZone } from '../public/timeZone'
 import { Temporal } from '../spec'
 import {
   durationDayTimeToNano,
@@ -31,8 +29,11 @@ import {
 import { LocalDateFields } from './localFields'
 import { DAY, DayTimeUnitInt, nanoInDay } from './units'
 
+type TranslatableObj = ISODateTimeFields & { calendar: Temporal.CalendarProtocol }
+type ZonedTranslatableObj = TranslatableObj & { timeZone: Temporal.TimeZoneProtocol }
+
 export function translateZonedDateTimeFields(
-  fields: ISODateTimeFields & { calendar: Calendar, timeZone: TimeZone },
+  fields: ZonedTranslatableObj,
   duration: DurationFields,
   options: Temporal.AssignmentOptions | undefined, // Calendar needs these options to be raw
 ): bigint {
@@ -58,7 +59,7 @@ export function translateZonedDateTimeFields(
 }
 
 export function translateDateTime(
-  fields: ISODateTimeFields & { calendar: Calendar },
+  fields: TranslatableObj,
   duration: DurationFields,
   options: Temporal.AssignmentOptions | undefined, // Calendar needs raw options
 ): ISODateTimeFields {
@@ -175,7 +176,7 @@ export function addDurationFields(
   d0: DurationFields, // should be added to relativeToArg FIRST
   d1: DurationFields, // should be added to relativeToArg SECOND
   relativeTo: DiffableObj | undefined,
-  calendar: Calendar | undefined,
+  calendar: Temporal.CalendarProtocol | undefined,
 ): DurationFields {
   const largestUnit = Math.max(
     computeLargestDurationUnit(d0),

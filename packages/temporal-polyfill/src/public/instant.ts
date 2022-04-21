@@ -127,7 +127,7 @@ export class Instant extends AbstractNoValueObj implements Temporal.Instant {
   }
 
   round(options: RoundOptions): Temporal.Instant {
-    const roundingConfig = parseRoundingOptions(options, undefined, NANOSECOND, HOUR, true)
+    const roundingConfig = parseRoundingOptions(options, NANOSECOND, HOUR, true)
 
     return new Instant(
       roundEpochNano(this.epochNanoseconds, roundingConfig),

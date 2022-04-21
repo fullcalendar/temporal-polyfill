@@ -1,5 +1,5 @@
 import { durationUnitNames } from '../argParse/unitStr'
-import { Calendar } from '../public/calendar'
+import { Temporal } from '../spec'
 import { durationDayTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
 import {
@@ -15,7 +15,7 @@ export function computeTotalUnits(
   duration: DurationFields,
   unit: UnitInt,
   relativeTo: DiffableObj | undefined,
-  calendar: Calendar | undefined,
+  calendar: Temporal.CalendarProtocol | undefined,
 ): number {
   if (
     relativeTo === undefined &&

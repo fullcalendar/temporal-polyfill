@@ -227,7 +227,6 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
   round(options?: RoundOptions): Temporal.ZonedDateTime {
     const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
       options,
-      undefined, // no default. will error-out if unset
       NANOSECOND, // minUnit
       DAY, // maxUnit
     )

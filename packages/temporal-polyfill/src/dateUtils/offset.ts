@@ -15,8 +15,8 @@ import { ISODateFields, ISODateTimeFields } from './isoFields'
 import { addDays } from './translate'
 
 export interface OffsetComputableFields extends ISODateTimeFields {
-  calendar: Calendar
-  timeZone: TimeZone
+  calendar: Temporal.CalendarProtocol
+  timeZone: Temporal.TimeZoneProtocol
   offsetNanoseconds?: number // TODO: change this back to `offset`? better for ZonedDateTime?
   Z?: boolean
 }
@@ -68,9 +68,9 @@ export function computeZonedDateTimeEpochNano(
 }
 
 function findMatchingEpochNano(
-  isoFields: ISODateTimeFields & { calendar: Calendar },
+  isoFields: ISODateTimeFields & { calendar: Temporal.CalendarProtocol },
   offsetNano: number,
-  timeZone: TimeZone,
+  timeZone: Temporal.TimeZoneProtocol,
   fuzzyMatching?: boolean,
 ): bigint | undefined {
   const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
@@ -92,7 +92,7 @@ function findMatchingEpochNano(
 
 // best file for this?
 export function computeNanoInDay(
-  fields: ISODateFields & { timeZone: TimeZone },
+  fields: ISODateFields & { timeZone: Temporal.TimeZoneProtocol },
 ): number {
   const { timeZone } = fields
 

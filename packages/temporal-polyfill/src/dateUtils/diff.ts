@@ -2,7 +2,6 @@ import { DiffConfig } from '../argParse/diffOptions'
 import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
 import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
-import { Calendar } from '../public/calendar'
 import { createDate } from '../public/plainDate'
 import { Temporal } from '../spec'
 import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
@@ -34,7 +33,7 @@ export type DiffableObj = LocalDateFields & EpochableObj & {
 export function diffDateTimes(
   dt0: DiffableObj,
   dt1: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
   flip: boolean,
   diffConfig: DiffConfig,
 ): DurationFields {
@@ -51,7 +50,7 @@ export function diffDateTimes(
 export function diffDates(
   d0: DiffableObj,
   d1: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
   flip: boolean,
   diffConfig: DiffConfig,
 ): DurationFields {
@@ -197,7 +196,7 @@ function wholeMonthsUntil(
 export function diffAccurate(
   dt0: DiffableObj,
   dt1: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
   largestUnit: UnitInt,
 ): DurationFields {
   // a time unit

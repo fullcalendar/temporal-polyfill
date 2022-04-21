@@ -340,9 +340,10 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
     const impl = getImpl(this)
     const d0 = ensureObj(PlainDate, dateArg0)
     const d1 = ensureObj(PlainDate, dateArg1)
-    const largestUnit = parseUnit<DateUnitInt>(
-      ensureOptionsObj(options).largestUnit, DAY, DAY, YEAR,
-    )
+    const largestUnitStr = ensureOptionsObj(options).largestUnit
+    const largestUnit = largestUnitStr === 'auto'
+      ? DAY // TODO: util for this?
+      : parseUnit<DateUnitInt>(largestUnitStr, DAY, DAY, YEAR)
 
     ensureCalendarsEqual(this, getCommonCalendar(d0, d1))
 

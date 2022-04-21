@@ -1,6 +1,6 @@
 import { DiffConfig } from '../argParse/diffOptions'
 import { durationUnitNames } from '../argParse/unitStr'
-import { Calendar } from '../public/calendar'
+import { Temporal } from '../spec'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { durationDayTimeToNano, nanoToDuration } from './dayAndTime'
 import { DiffableObj } from './diff'
@@ -30,7 +30,7 @@ export function roundDuration(
   duration: DurationFields,
   diffConfig: DiffConfig<UnitInt>,
   relativeTo: DiffableObj | undefined, // TODO: start using `DurationRoundingConfig`
-  calendar: Calendar | undefined,
+  calendar: Temporal.CalendarProtocol | undefined,
 ): DurationFields {
   const { largestUnit, smallestUnit, roundingIncrement, roundingFunc } = diffConfig
 
@@ -73,7 +73,7 @@ export function roundDurationSpan(
   spannedDuration: DurationFields,
   d0: DiffableObj,
   d1: DiffableObj,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
   flip: boolean,
   diffConfig: DiffConfig,
 ): DurationFields {

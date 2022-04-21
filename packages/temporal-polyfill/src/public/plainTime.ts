@@ -113,7 +113,6 @@ export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
   round(options: RoundOptions): Temporal.PlainTime {
     const roundingConfig = parseRoundingOptions<Temporal.TimeUnit, TimeUnitInt>(
       options,
-      undefined, // no default. required
       NANOSECOND, // minUnit
       HOUR, // maxUnit
     )

@@ -1,7 +1,6 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
-import { Calendar } from '../public/calendar'
 import { createDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
 import { Temporal } from '../spec'
@@ -10,8 +9,8 @@ import { OrigDateTimeFormat } from './intlUtils'
 // factory types
 
 export interface BaseEntity {
-  calendar?: Calendar
-  timeZone?: TimeZone
+  calendar?: Temporal.CalendarProtocol
+  timeZone?: Temporal.TimeZoneProtocol
 }
 
 export interface FormatFactory<Entity extends BaseEntity> {

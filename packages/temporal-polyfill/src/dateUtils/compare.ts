@@ -1,5 +1,3 @@
-import { Calendar } from '../public/calendar'
-import { TimeZone } from '../public/timeZone'
 import { Temporal } from '../spec'
 import { compareValues } from '../utils/math'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
@@ -25,20 +23,17 @@ export interface ComparableEpochObj {
 // Equality (considers Calendar & timeZone)
 // -------------------------------------------------------------------------------------------------
 
-export function zonedDateTimesEqual(
-  a: ComparableDateTime & { timeZone: TimeZone, calendar: Calendar },
-  b: ComparableDateTime & { timeZone: TimeZone, calendar: Calendar },
-): boolean {
+type EqualityTestObj = ComparableDateTime & { calendar: Temporal.CalendarProtocol }
+type ZonedEqualityTestObj = EqualityTestObj & { timeZone: Temporal.TimeZoneProtocol }
+
+export function zonedDateTimesEqual(a: ZonedEqualityTestObj, b: ZonedEqualityTestObj): boolean {
   return dateTimesEqual(a, b) &&
-    a.timeZone.id === b.timeZone.id
+    a.timeZone.toString() === b.timeZone.toString()
 }
 
-export function dateTimesEqual(
-  a: ComparableDateTime & { calendar: Calendar },
-  b: ComparableDateTime & { calendar: Calendar },
-): boolean {
+export function dateTimesEqual(a: EqualityTestObj, b: EqualityTestObj): boolean {
   return !compareDateTimes(a, b) &&
-    a.calendar.id === b.calendar.id
+    a.calendar.toString() === b.calendar.toString()
 }
 
 // Comparison

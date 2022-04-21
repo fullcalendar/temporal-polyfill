@@ -1,7 +1,6 @@
 import { ensureCalendarsEqual } from '../argParse/calendar'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
-import { Calendar } from '../public/calendar'
 import { PlainDate, PlainDateArg, createDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
@@ -39,7 +38,7 @@ function isDateISOInstance(arg: unknown): arg is DateISOInstance {
 
 export function queryDateFields(
   arg: DateISOInstance | PlainDateArg,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
   disallowMonthDay?: boolean,
 ): LocalDateFields {
   let date: PlainDate

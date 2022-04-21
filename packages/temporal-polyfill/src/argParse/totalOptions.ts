@@ -13,7 +13,7 @@ export interface DurationTotalConfig {
 
 export function parseTotalConfig(optionsArg: Temporal.DurationTotalOf): DurationTotalConfig {
   let relativeTo: PlainDateTimeArg | undefined
-  let unitName: Temporal.DateTimeUnit | undefined
+  let unitName: Temporal.TotalUnit<Temporal.DateTimeUnit> | undefined
 
   if (typeof optionsArg === 'string') {
     unitName = optionsArg

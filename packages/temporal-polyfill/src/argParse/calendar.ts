@@ -32,18 +32,18 @@ export function extractCalendar(input: { calendar?: Temporal.CalendarLike }): Ca
 }
 
 export function getCommonCalendar(
-  obj0: { calendar: Calendar },
-  obj1: { calendar: Calendar },
-): Calendar {
+  obj0: { calendar: Temporal.CalendarProtocol },
+  obj1: { calendar: Temporal.CalendarProtocol },
+): Temporal.CalendarProtocol {
   const { calendar } = obj0
   ensureCalendarsEqual(calendar, obj1.calendar)
   return calendar
 }
 
 export function getStrangerCalendar(
-  obj0: { calendar: Calendar },
-  obj1: { calendar: Calendar },
-): Calendar {
+  obj0: { calendar: Temporal.CalendarProtocol },
+  obj1: { calendar: Temporal.CalendarProtocol },
+): Temporal.CalendarProtocol {
   const calendar0 = obj0.calendar
   const calendar1 = obj1.calendar
 
@@ -61,10 +61,10 @@ export function getStrangerCalendar(
 }
 
 export function ensureCalendarsEqual(
-  calendar0: Calendar,
-  calendar1: Calendar,
+  calendar0: Temporal.CalendarProtocol,
+  calendar1: Temporal.CalendarProtocol,
 ): void {
-  if (calendar0.id !== calendar1.id) {
+  if (calendar0.toString() !== calendar1.toString()) {
     throw new RangeError('Calendars must match')
   }
 }

@@ -143,7 +143,8 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
       true, // forDurationRounding
     )
 
-    const relativeTo = extractRelativeTo(optionsObj.relativeTo)
+    const relativeTo = extractRelativeTo((optionsObj as DurationRoundingOptions).relativeTo)
+    // weird
 
     return createDuration(
       roundDuration(this, diffConfig, relativeTo, relativeTo ? relativeTo.calendar : undefined),

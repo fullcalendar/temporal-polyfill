@@ -25,6 +25,7 @@ export const unitNames: Temporal.DateTimeUnit[] = [
 ]
 
 // Duration / Plurals
+// TODO: use Temporal.PluralUnit type somehow?
 
 export const durationUnitNames: (keyof UnsignedDurationFields)[] = unitNames.map(
   (unit) => (unit + 's') as keyof UnsignedDurationFields,
@@ -36,7 +37,7 @@ const unitMap = strArrayToHash(unitNames, (_str, i) => i)
 const pluralUnitMap = strArrayToHash(durationUnitNames, (_str, i) => i)
 
 export function parseUnit<UnitType extends UnitInt>(
-  input: Temporal.DateTimeUnit | undefined,
+  input: Temporal.DateTimeUnit | Temporal.PluralUnit<Temporal.DateTimeUnit> | undefined,
   defaultUnit: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
