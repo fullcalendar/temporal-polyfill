@@ -1,4 +1,5 @@
 import { Duration, DurationLike } from 'temporal-polyfill'
+// TODO: use temporal-spec
 
 // Unfortunately neccesary as typescript does not include typings for ecma drafts
 // TODO: Remove when ListFormat becomes part of the official spec

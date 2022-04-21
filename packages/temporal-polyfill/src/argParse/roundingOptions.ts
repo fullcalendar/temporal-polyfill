@@ -1,9 +1,11 @@
 import { DAY, DayTimeUnitInt, nanoIn, nanoInDay } from '../dateUtils/units'
-import { DayTimeUnit, RoundingOptions } from '../public/types'
+import { Temporal } from '../spec'
 import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj, isObjectLike } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
+
+type DayTimeUnit = 'day' | Temporal.TimeUnit
 
 export interface RoundingConfig<UnitType extends DayTimeUnitInt = DayTimeUnitInt> {
   smallestUnit: UnitType
@@ -15,13 +17,13 @@ export function parseRoundingOptions<
   UnitArgType extends DayTimeUnit,
   UnitType extends DayTimeUnitInt
 >(
-  options: Partial<RoundingOptions<UnitArgType>> | UnitArgType | undefined,
+  options: Partial<Temporal.RoundTo<UnitArgType>> | UnitArgType | undefined,
   smallestUnitDefault: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,
   relaxedDivisibility?: boolean,
 ): RoundingConfig<UnitType> {
-  const optionsObj: Partial<RoundingOptions<UnitArgType>> | undefined =
+  const optionsObj: Partial<Temporal.RoundTo<UnitArgType>> | undefined =
     typeof options === 'string'
       ? { smallestUnit: options }
       : options

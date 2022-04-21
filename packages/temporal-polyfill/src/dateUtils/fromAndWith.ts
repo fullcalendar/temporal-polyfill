@@ -13,8 +13,8 @@ import { Calendar, mergeCalFields } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
-import { DateLike, DateTimeISOFields, OverflowOptions, YearMonthLike } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
+import { Temporal } from '../spec'
 import { mapHash } from '../utils/obj'
 import { constrainTimeISO } from './constrain'
 import { partialLocalTimeToISO, zeroISOTimeFields } from './dayAndTime'
@@ -46,7 +46,7 @@ export const processDurationFields = buildSafeFunc(tryDurationFields)
 function tryZonedDateTimeFromFields(
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
-  options?: OverflowOptions,
+  options?: Temporal.AssignmentOptions,
 ): OffsetComputableFields | undefined {
   const res = tryDateTimeFromFields(rawFields, overflowHandling, options)
 
@@ -62,10 +62,10 @@ function tryZonedDateTimeFromFields(
 }
 
 function tryDateTimeFromFields(
-  rawFields: DateLike,
+  rawFields: Temporal.PlainDateLike,
   overflowHandling: OverflowHandlingInt,
-  options?: OverflowOptions,
-): DateTimeISOFields | undefined {
+  options?: Temporal.AssignmentOptions,
+): Temporal.PlainDateTimeISOFields | undefined {
   const dateRes = tryDateFromFields(rawFields, options)
   const timeRes = tryTimeFromFields(rawFields, overflowHandling)
 
@@ -78,8 +78,8 @@ function tryDateTimeFromFields(
 }
 
 function tryDateFromFields(
-  rawFields: DateLike,
-  options?: OverflowOptions,
+  rawFields: Temporal.PlainDateLike,
+  options?: Temporal.AssignmentOptions,
 ): PlainDate | undefined {
   const calendar = extractCalendar(rawFields)
   const filteredFields = filterFieldsViaCalendar(rawFields, dateFieldMap, calendar)
@@ -90,8 +90,8 @@ function tryDateFromFields(
 }
 
 function tryYearMonthFromFields(
-  rawFields: YearMonthLike,
-  options?: OverflowOptions,
+  rawFields: Temporal.PlainYearMonthLike,
+  options?: Temporal.AssignmentOptions,
 ): PlainYearMonth | undefined {
   const calendar = extractCalendar(rawFields)
   const filteredFields = filterFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
@@ -103,7 +103,7 @@ function tryYearMonthFromFields(
 
 function tryMonthDayFromFields(
   rawFields: any,
-  options?: OverflowOptions,
+  options?: Temporal.AssignmentOptions,
 ): PlainMonthDay | undefined {
   const calendar = extractCalendar(rawFields)
   const filteredFields = filterFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
@@ -134,7 +134,7 @@ function tryZonedDateTimeWithFields(
   zonedDateTime: ZonedDateTime,
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
-  options?: OverflowOptions,
+  options?: Temporal.AssignmentOptions,
 ): OffsetComputableFields | undefined {
   const res = tryDateTimeWithFields(zonedDateTime, rawFields, overflowHandling, options)
   const hasNewOffset = rawFields.offset !== undefined
@@ -154,8 +154,8 @@ function tryDateTimeWithFields(
   plainDateTime: any,
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
-  options?: OverflowOptions,
-): DateTimeISOFields | undefined {
+  options?: Temporal.AssignmentOptions,
+): Temporal.PlainDateTimeISOFields | undefined {
   const dateRes = tryDateWithFields(plainDateTime, rawFields, options)
   const timeRes = tryTimeWithFields(plainDateTime, rawFields, overflowHandling)
 
@@ -171,7 +171,7 @@ function tryDateTimeWithFields(
 function tryDateWithFields(
   plainDate: any,
   rawFields: any,
-  options?: OverflowOptions,
+  options?: Temporal.AssignmentOptions,
 ): PlainDate | undefined {
   const calendar: Calendar = plainDate.calendar
   const filteredFields = filterFieldsViaCalendar(rawFields, dateFieldMap, calendar)
@@ -185,7 +185,7 @@ function tryDateWithFields(
 function tryYearMonthWithFields(
   plainYearMonth: any,
   rawFields: any,
-  options?: OverflowOptions,
+  options?: Temporal.AssignmentOptions,
 ): PlainYearMonth | undefined {
   const calendar: Calendar = plainYearMonth.calendar
   const filteredFields = filterFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
@@ -204,7 +204,7 @@ function tryYearMonthWithFields(
 function tryMonthDayWithFields(
   plainMonthDay: any,
   rawFields: any,
-  options?: OverflowOptions,
+  options?: Temporal.AssignmentOptions,
 ): PlainMonthDay | undefined {
   const calendar: Calendar = plainMonthDay.calendar
   const filteredFields = filterFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)

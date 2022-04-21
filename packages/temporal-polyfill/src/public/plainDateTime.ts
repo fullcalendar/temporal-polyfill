@@ -36,7 +36,6 @@ import { PlainTimeArg, createTime, ensureLooseTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import {
-  DateTimeISOFields,
   DayTimeUnit,
   Unit,
 } from './types'
@@ -54,7 +53,7 @@ type RoundOptions = Temporal.RoundTo<
 'millisecond' | 'microsecond' | 'nanosecond'
 >
 
-export class PlainDateTime extends AbstractISOObj<DateTimeISOFields>
+export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOFields>
   implements Temporal.PlainDateTime {
   readonly [Symbol.toStringTag]: 'Temporal.PlainDateTime' // hack
 
@@ -231,7 +230,7 @@ mixinLocaleStringMethods(PlainDateTime, createPlainFormatFactoryFactory({
 }, {}))
 
 // creation
-export function createDateTime(isoFields: DateTimeISOFields): PlainDateTime {
+export function createDateTime(isoFields: Temporal.PlainDateTimeISOFields): PlainDateTime {
   return new PlainDateTime(
     isoFields.isoYear,
     isoFields.isoMonth,

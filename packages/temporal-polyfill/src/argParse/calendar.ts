@@ -1,9 +1,10 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { Calendar, createDefaultCalendar } from '../public/calendar'
-import { CalendarArg, CalendarProtocol } from '../public/types'
+import { Temporal } from '../spec'
 
-export type CalendarArgSimple = CalendarProtocol | string
+// Temporal.CalendarLike broken in two
+export type CalendarArgSimple = Temporal.CalendarProtocol | string
 export type CalendarArgBag = { calendar: CalendarArgSimple }
 
 export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
@@ -23,7 +24,7 @@ export function parseCalendarArgFromBag(arg: CalendarArgSimple): Calendar {
   return new Calendar(String(arg))
 }
 
-export function extractCalendar(input: { calendar?: CalendarArg; }): Calendar {
+export function extractCalendar(input: { calendar?: Temporal.CalendarLike }): Calendar {
   if (input.calendar === undefined) {
     return createDefaultCalendar()
   }

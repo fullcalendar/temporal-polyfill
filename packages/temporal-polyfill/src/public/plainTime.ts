@@ -26,7 +26,7 @@ import { createDefaultCalendar } from './calendar'
 import { Duration, createDuration } from './duration'
 import { PlainDate, PlainDateArg } from './plainDate'
 import { TimeZone } from './timeZone'
-import { TimeISOFields, TimeUnit } from './types'
+import { TimeUnit } from './types'
 import { createZonedDateTimeFromFields } from './zonedDateTime'
 
 export type PlainTimeArg = Temporal.PlainTime | Temporal.PlainTimeLike | string
@@ -46,7 +46,8 @@ type ToZonedDateTimeOptions = {
   plainDate: Temporal.PlainDate | Temporal.PlainDateLike | string
 }
 
-export class PlainTime extends AbstractISOObj<TimeISOFields> implements Temporal.PlainTime {
+export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
+  implements Temporal.PlainTime {
   readonly [Symbol.toStringTag]: 'Temporal.PlainTime' // hack
 
   constructor(

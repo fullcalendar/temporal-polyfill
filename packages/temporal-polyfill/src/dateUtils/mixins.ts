@@ -1,6 +1,7 @@
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
-import { DateLike, Unit } from '../public/types'
+import { Unit } from '../public/types'
+import { Temporal } from '../spec'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'
@@ -115,7 +116,9 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
   attachGetters(
     ObjClass,
     strArrayToHash(propNames, (propName) => function(this: Obj) {
-      const value = this.calendar[propName as keyof DateCalendarFields](this as DateLike)
+      const value = this.calendar[propName as keyof DateCalendarFields](
+        this as Temporal.PlainDateLike,
+      )
       Object.defineProperty(this, propName, { value }) // cache the value on the object
       return value
     }),

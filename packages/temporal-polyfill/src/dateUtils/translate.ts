@@ -5,7 +5,7 @@ import { Calendar } from '../public/calendar'
 import { createDate } from '../public/plainDate'
 import { createDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
-import { OverflowOptions } from '../public/types'
+import { Temporal } from '../spec'
 import {
   durationDayTimeToNano,
   durationTimeToNano,
@@ -34,7 +34,7 @@ import { DAY, DayTimeUnitInt, nanoInDay } from './units'
 export function translateZonedDateTimeFields(
   fields: ISODateTimeFields & { calendar: Calendar, timeZone: TimeZone },
   duration: DurationFields,
-  options: OverflowOptions | undefined, // Calendar needs these options to be raw
+  options: Temporal.AssignmentOptions | undefined, // Calendar needs these options to be raw
 ): bigint {
   const { calendar, timeZone } = fields
 
@@ -60,7 +60,7 @@ export function translateZonedDateTimeFields(
 export function translateDateTime(
   fields: ISODateTimeFields & { calendar: Calendar },
   duration: DurationFields,
-  options: OverflowOptions | undefined, // Calendar needs raw options
+  options: Temporal.AssignmentOptions | undefined, // Calendar needs raw options
 ): ISODateTimeFields {
   const { calendar } = fields
 

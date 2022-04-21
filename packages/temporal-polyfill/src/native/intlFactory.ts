@@ -4,7 +4,7 @@ import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
 import { Calendar } from '../public/calendar'
 import { createDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
-import { DateISOFields } from '../public/types'
+import { Temporal } from '../spec'
 import { OrigDateTimeFormat } from './intlUtils'
 
 // factory types
@@ -66,7 +66,7 @@ function getEpochMilliFromZonedEntity(entity: ZonedEntity): number {
 // plain format factory
 
 interface PlainEntity extends BaseEntity {
-  getISOFields: () => DateISOFields // might have time fields too
+  getISOFields: () => Temporal.PlainDateISOFields // might have time fields too
 }
 
 export function createPlainFormatFactoryFactory<Entity extends PlainEntity>(

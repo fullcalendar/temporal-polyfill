@@ -26,7 +26,7 @@ import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlM
 import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
-import { DateISOFields, YearMonthUnit } from './types'
+import { YearMonthUnit } from './types'
 
 export type PlainYearMonthArg = Temporal.PlainYearMonth | Temporal.PlainYearMonthLike | string
 
@@ -34,7 +34,7 @@ type DiffOptions = Temporal.DifferenceOptions<'year' | 'month'>
 
 const day1 = { day: 1 }
 
-export class PlainYearMonth extends AbstractISOObj<DateISOFields>
+export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainYearMonth {
   readonly [Symbol.toStringTag]: 'Temporal.PlainYearMonth' // hack
 
@@ -164,7 +164,7 @@ mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({
   second: undefined,
 }, true)) // strictCalendar
 
-export function createYearMonth(isoFields: DateISOFields): PlainYearMonth {
+export function createYearMonth(isoFields: Temporal.PlainDateISOFields): PlainYearMonth {
   return new PlainYearMonth(
     isoFields.isoYear,
     isoFields.isoMonth,

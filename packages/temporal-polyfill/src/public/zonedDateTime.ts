@@ -76,8 +76,6 @@ import { TimeZone } from './timeZone'
 import {
   DayTimeUnit,
   Unit,
-  ZonedDateTimeISOFields,
-  ZonedDateTimeOptions,
 } from './types'
 
 export type ZonedDateTimeArg = Temporal.ZonedDateTime | Temporal.ZonedDateTimeLike | string
@@ -100,7 +98,7 @@ interface ZonedDateTimePrivateFields {
 const [getPrivateFields, setPrivateFields] =
   createWeakMap<ZonedDateTime, ZonedDateTimePrivateFields>()
 
-export class ZonedDateTime extends AbstractISOObj<ZonedDateTimeISOFields>
+export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOFields>
   implements Temporal.ZonedDateTime {
   readonly [Symbol.toStringTag]: 'Temporal.ZonedDateTime' // hack
 
@@ -308,7 +306,7 @@ export function createZonedDateTimeFromFields(
   fields: OffsetComputableFields,
   fuzzyMatching?: boolean,
   offsetHandling?: OffsetHandlingInt,
-  disambigOptions?: ZonedDateTimeOptions, // TODO: more specific type
+  disambigOptions?: Temporal.AssignmentOptions,
 ): ZonedDateTime {
   const epochNano = computeZonedDateTimeEpochNano(
     fields,

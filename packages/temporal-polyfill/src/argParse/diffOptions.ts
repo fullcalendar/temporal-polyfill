@@ -1,5 +1,5 @@
 import { DAY, UnitInt, nanoIn } from '../dateUtils/units'
-import { DiffOptions, Unit } from '../public/types'
+import { Temporal } from '../spec'
 import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
@@ -13,10 +13,10 @@ export interface DiffConfig<UnitType extends UnitInt = UnitInt> {
 }
 
 export function parseDiffOptions<
-  UnitArg extends Unit,
+  UnitArg extends Temporal.DateTimeUnit,
   UnitIntType extends UnitInt
 >(
-  options: DiffOptions<UnitArg> | undefined,
+  options: Temporal.DifferenceOptions<UnitArg> | undefined,
   largestUnitDefault: UnitIntType,
   smallestUnitDefault: UnitIntType,
   minUnit: UnitIntType,

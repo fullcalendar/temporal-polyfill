@@ -6,7 +6,6 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { DateISOFields } from '../public/types'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'
@@ -43,7 +42,7 @@ export function formatYearMonthISO(fields: ISODateFields): string {
   ) + '-' + padZeros(fields.isoMonth, 2)
 }
 
-export function formatMonthDayISO(fields: DateISOFields): string {
+export function formatMonthDayISO(fields: ISODateFields): string {
   return padZeros(fields.isoMonth, 2) + '-' + padZeros(fields.isoDay, 2)
 }
 

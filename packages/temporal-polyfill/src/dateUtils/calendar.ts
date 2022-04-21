@@ -2,12 +2,12 @@ import { ensureCalendarsEqual } from '../argParse/calendar'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
-import { PlainDate, createDate } from '../public/plainDate'
+import { PlainDate, PlainDateArg, createDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
-import { DateArg, DateLikeFields, OverflowOptions } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
+import { Temporal } from '../spec'
 import { constrainDateFields } from './constrain'
 import { diffDaysMilli, epochMilliToISOFields } from './epoch'
 import { ISODateFields } from './isoFields'
@@ -35,19 +35,10 @@ function isDateISOInstance(arg: unknown): arg is DateISOInstance {
   )
 }
 
-export interface InputDateFields {
-  era: string
-  eraYear: number
-  year: number
-  month: number
-  monthCode: string
-  day: number
-}
-
 // Calendar-dependent Field Querying
 
 export function queryDateFields(
-  arg: DateISOInstance | DateArg,
+  arg: DateISOInstance | PlainDateArg,
   calendar: Calendar,
   disallowMonthDay?: boolean,
 ): LocalDateFields {
@@ -71,15 +62,15 @@ export function queryDateFields(
 // ISO Field Querying
 
 export function queryDateISOFields(
-  dateLike: DateISOInstance | DateLikeFields,
+  dateLike: DateISOInstance | Temporal.PlainDateLike,
   calendarImpl: CalendarImpl,
-  options: OverflowOptions | undefined,
+  options: Temporal.AssignmentOptions | undefined,
 ): ISODateFields {
   if (isDateISOInstance(dateLike)) {
     return dateLike.getISOFields() // hard work has already been done
   }
 
-  let { era, eraYear, year, month, monthCode, day } = dateLike as Partial<InputDateFields>
+  let { era, eraYear, year, month, monthCode, day } = dateLike
   const yearFromEra = (eraYear !== undefined && era !== undefined)
     ? convertEraYear(calendarImpl.id, eraYear, era)
     : undefined
@@ -134,7 +125,7 @@ export function queryDateISOFields(
 }
 
 export function getExistingDateISOFields(
-  dateArg: DateISOInstance | DateArg,
+  dateArg: DateISOInstance | PlainDateArg,
   disallowMonthDay?: boolean,
 ): ISODateFields {
   if (isDateISOInstance(dateArg)) {

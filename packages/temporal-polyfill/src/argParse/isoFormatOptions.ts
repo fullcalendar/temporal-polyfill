@@ -7,7 +7,7 @@ import {
   nanoIn,
   unitDigitMap,
 } from '../dateUtils/units'
-import { TimeToStringOptions, TimeToStringUnit } from '../public/types'
+import { Temporal } from '../spec'
 import { OVERFLOW_REJECT } from './overflowHandling'
 import { constrainInt, ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
@@ -30,11 +30,8 @@ export interface TimeToStringConfig<
 
 export type DurationToStringConfig = TimeToStringConfig<DurationToStringUnitInt>
 
-export function parseTimeToStringOptions<
-  UnitArgType extends TimeToStringUnit,
-  UnitType extends TimeToStringUnitInt
->(
-  options: TimeToStringOptions<UnitArgType> | undefined,
+export function parseTimeToStringOptions<UnitType extends TimeToStringUnitInt>(
+  options: Temporal.ToStringPrecisionOptions | undefined,
   largestUnit: UnitType = MINUTE as UnitType,
 ): TimeToStringConfig<UnitType> {
   const ensuredOptions = ensureOptionsObj(options)

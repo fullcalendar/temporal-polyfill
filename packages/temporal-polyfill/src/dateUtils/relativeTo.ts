@@ -1,13 +1,17 @@
 import { isObjectLike } from '../argParse/refine'
-import { PlainDateTime, createDateTime } from '../public/plainDateTime'
-import { DateTimeArg, ZonedDateTimeArg, ZonedDateTimeLike } from '../public/types'
-import { ZonedDateTime, createZonedDateTimeFromFields } from '../public/zonedDateTime'
+import { PlainDateTime, PlainDateTimeArg, createDateTime } from '../public/plainDateTime'
+import {
+  ZonedDateTime,
+  ZonedDateTimeArg,
+  createZonedDateTimeFromFields,
+} from '../public/zonedDateTime'
+import { Temporal } from '../spec'
 import { ensureObj } from './abstract'
 import { tryParseZonedDateTime } from './parse'
 import { refineBaseObj, refineZonedObj } from './parseRefine'
 
 export function extractRelativeTo(
-  arg: ZonedDateTimeArg | DateTimeArg | undefined,
+  arg: ZonedDateTimeArg | PlainDateTimeArg | undefined,
 ): ZonedDateTime | PlainDateTime | undefined {
   if (arg === undefined) {
     return undefined
@@ -17,11 +21,11 @@ export function extractRelativeTo(
     if (arg instanceof ZonedDateTime || arg instanceof PlainDateTime) {
       return arg
     }
-    return ensureObj<ZonedDateTime | PlainDateTime, ZonedDateTimeLike, []>(
-      (arg as ZonedDateTimeLike).timeZone !== undefined
+    return ensureObj<ZonedDateTime | PlainDateTime, Temporal.ZonedDateTimeLike, []>(
+      (arg as Temporal.ZonedDateTimeLike).timeZone !== undefined
         ? ZonedDateTime
         : PlainDateTime,
-      arg as ZonedDateTimeLike,
+      arg as Temporal.ZonedDateTimeLike,
     )
   }
 

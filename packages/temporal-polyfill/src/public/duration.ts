@@ -22,15 +22,20 @@ import { computeTotalUnits } from '../dateUtils/totalUnits'
 import { addDurationFields } from '../dateUtils/translate'
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
 import {
-  DurationRoundingOptions,
-  DurationToStringUnit,
   LocalesArg,
   Unit,
 } from '../public/types'
 import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
+import { PlainDateTimeArg } from './plainDateTime'
+import { ZonedDateTimeArg } from './zonedDateTime'
 
 export type DurationArg = Temporal.Duration | Temporal.DurationLike | string
+
+// guaranteed options object
+type DurationRoundingOptions = Temporal.DifferenceOptions<Temporal.DateTimeUnit> & {
+  relativeTo?: ZonedDateTimeArg | PlainDateTimeArg
+}
 
 const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
 
@@ -162,7 +167,7 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
   }
 
   toString(options?: Temporal.ToStringPrecisionOptions): string {
-    const formatConfig = parseTimeToStringOptions<DurationToStringUnit, DurationToStringUnitInt>(
+    const formatConfig = parseTimeToStringOptions<DurationToStringUnitInt>(
       options, SECOND,
     )
     return formatDurationISO(getFields(this), formatConfig)

@@ -20,11 +20,11 @@ import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Temporal } from '../spec'
 import { createDefaultCalendar } from './calendar'
-import { DateISOFields } from './types'
 
 export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLike | string
 
-export class PlainMonthDay extends AbstractISOObj<DateISOFields> implements Temporal.PlainMonthDay {
+export class PlainMonthDay extends AbstractISOObj<Temporal.PlainDateISOFields>
+  implements Temporal.PlainMonthDay {
   readonly [Symbol.toStringTag]: 'Temporal.PlainMonthDay' // hack
 
   constructor(
@@ -116,7 +116,7 @@ mixinLocaleStringMethods(PlainMonthDay, createPlainFormatFactoryFactory({
 }, true)) // strictCalendar
 
 // create
-export function createMonthDay(isoFields: DateISOFields): PlainMonthDay {
+export function createMonthDay(isoFields: Temporal.PlainDateISOFields): PlainMonthDay {
   return new PlainMonthDay(
     isoFields.isoMonth,
     isoFields.isoDay,

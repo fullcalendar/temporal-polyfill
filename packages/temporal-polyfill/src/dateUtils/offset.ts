@@ -7,7 +7,7 @@ import {
 import { Calendar } from '../public/calendar'
 import { createDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
-import { ZonedDateTimeOptions } from '../public/types'
+import { Temporal } from '../spec'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
 import { isoFieldsToEpochNano } from './epoch'
@@ -38,7 +38,7 @@ export function computeZonedDateTimeEpochNano(
   isoFields: OffsetComputableFields,
   fuzzyMatching?: boolean,
   offsetHandling: OffsetHandlingInt = OFFSET_REJECT,
-  disambigOptions?: ZonedDateTimeOptions, // TODO: more specific type
+  disambigOptions?: Temporal.AssignmentOptions,
 ): bigint {
   const { offsetNanoseconds: offsetNano, timeZone, Z } = isoFields
 

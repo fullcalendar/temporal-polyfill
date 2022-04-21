@@ -14,7 +14,6 @@ import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import {
-  InputDateFields,
   computeDayOfYear,
   computeDaysInYear,
   getExistingDateISOFields,
@@ -34,11 +33,6 @@ import { Duration, DurationArg, createDuration } from './duration'
 import { PlainDate, PlainDateArg } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
-import {
-  DateLikeFields,
-  MonthDayLikeFields,
-  YearMonthLikeFields,
-} from './types'
 
 // FYI: the Temporal.CalendarLike type includes `string`,
 // unlike many other object types
@@ -255,7 +249,7 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
     fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode & { day: number },
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainDate {
-    const refinedFields = refineFields(fields, dateFieldMap) as DateLikeFields
+    const refinedFields = refineFields(fields, dateFieldMap)
     const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
 
     return new PlainDate(
@@ -270,7 +264,7 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
     fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode,
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainYearMonth {
-    const refinedFields = refineFields(fields, yearMonthFieldMap) as YearMonthLikeFields
+    const refinedFields = refineFields(fields, yearMonthFieldMap)
     const isoFields = queryDateISOFields({ ...refinedFields, day: 1 }, getImpl(this), options)
 
     return new PlainYearMonth(
@@ -286,9 +280,7 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainMonthDay {
     const impl = getImpl(this)
-
-    const refinedFields = refineFields(fields, monthDayFieldMap) as MonthDayLikeFields
-    let { era, eraYear, year, month, monthCode, day } = refinedFields as Partial<InputDateFields>
+    let { era, eraYear, year, month, monthCode, day } = refineFields(fields, monthDayFieldMap)
 
     if (day === undefined) {
       throw new TypeError('required property \'day\' missing or undefined')

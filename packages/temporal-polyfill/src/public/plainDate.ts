@@ -29,17 +29,12 @@ import { createDateTime } from './plainDateTime'
 import { PlainTime, PlainTimeArg, ensureLooseTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import {
-  DateISOFields,
-  DateToStringOptions,
-  DateUnit,
-  TimeArg, // TODO: kill, use by processToZonedDateTimeOptions
-  TimeZoneArg, // TODO: kill, use by processToZonedDateTimeOptions
-} from './types'
+import { DateUnit } from './types'
 import { createZonedDateTimeFromFields } from './zonedDateTime'
 
 export type PlainDateArg = Temporal.PlainDate | Temporal.PlainDateLike | string
 
+// inlined in the spec. not easy to get out
 type ToZonedDateTimeOptions = Temporal.TimeZoneProtocol | string | {
   timeZone: Temporal.TimeZoneLike
   plainTime?: Temporal.PlainTime | Temporal.PlainTimeLike | string
@@ -47,7 +42,8 @@ type ToZonedDateTimeOptions = Temporal.TimeZoneProtocol | string | {
 
 type DiffOptions = Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>
 
-export class PlainDate extends AbstractISOObj<DateISOFields> implements Temporal.PlainDate {
+export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
+  implements Temporal.PlainDate {
   readonly [Symbol.toStringTag]: 'Temporal.PlainDate' // hack
 
   constructor(
@@ -132,7 +128,7 @@ export class PlainDate extends AbstractISOObj<DateISOFields> implements Temporal
     return !compareDateTimes(this, ensureObj(PlainDate, other))
   }
 
-  toString(options?: DateToStringOptions): string {
+  toString(options?: Temporal.ShowCalendarOption): string {
     const calendarDisplay = parseCalendarDisplayOption(options)
     const fields = this.getISOFields()
 
@@ -188,7 +184,7 @@ mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({
 }))
 
 // creation
-export function createDate(isoFields: DateISOFields): PlainDate {
+export function createDate(isoFields: Temporal.PlainDateISOFields): PlainDate {
   return new PlainDate(
     isoFields.isoYear,
     isoFields.isoMonth,
@@ -201,11 +197,11 @@ export function createDate(isoFields: DateISOFields): PlainDate {
 function processToZonedDateTimeOptions(
   options?: ToZonedDateTimeOptions,
 ): {
-    plainTime?: TimeArg,
-    timeZone: TimeZoneArg,
+    plainTime?: PlainTimeArg,
+    timeZone: Temporal.TimeZoneLike,
   } {
-  let plainTime: TimeArg | undefined
-  let timeZone: TimeZoneArg | undefined
+  let plainTime: PlainTimeArg | undefined
+  let timeZone: Temporal.TimeZoneLike | undefined
 
   if (typeof options === 'string') {
     timeZone = options
@@ -214,7 +210,7 @@ function processToZonedDateTimeOptions(
       timeZone = options as Temporal.TimeZoneProtocol
     } else {
       timeZone = options.timeZone
-      plainTime = (options as { plainTime?: TimeArg }).plainTime
+      plainTime = (options as { plainTime?: PlainTimeArg }).plainTime
     }
     if (timeZone === undefined) {
       throw new TypeError('Invalid timeZone argument')
