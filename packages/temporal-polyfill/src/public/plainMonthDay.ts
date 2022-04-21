@@ -18,7 +18,7 @@ import { refineBaseObj } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Temporal } from '../spec'
-import { createDefaultCalendar } from './calendar'
+import { Calendar, createDefaultCalendar } from './calendar'
 
 export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLike | string
 
@@ -34,7 +34,7 @@ export class PlainMonthDay extends AbstractISOObj<Temporal.PlainDateISOFields>
   ) {
     super({
       ...constrainDateISO({ isoYear: referenceISOYear, isoMonth, isoDay }, OVERFLOW_REJECT),
-      calendar,
+      calendar: ensureObj(Calendar, calendar),
     })
   }
 

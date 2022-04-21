@@ -2,29 +2,20 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { Calendar, createDefaultCalendar } from '../public/calendar'
 import { Temporal } from '../spec'
+import { isObjectLike } from './refine'
 
-// Temporal.CalendarLike broken in two
-export type CalendarArgSimple = Temporal.CalendarProtocol | string
-export type CalendarArgBag = { calendar: CalendarArgSimple }
-
-export function isCalendarArgBag(arg: any): arg is CalendarArgBag {
-  return arg.calendar // boolean-ish
-}
-
-// bag ITEM
-// weird
-export function parseCalendarArgFromBag(arg: CalendarArgSimple): Calendar {
-  if (typeof arg === 'object' && arg) { // TODO: isObjectLike
-    if (typeof arg.id === 'string') {
-      return arg as Calendar // custom implementation
-    } else {
-      throw new RangeError('Invalid calendar')
-    }
+export function calendarFromObj(obj: any): Temporal.CalendarProtocol {
+  const innerCalendar = obj.calendar
+  if (innerCalendar === undefined) {
+    return obj
   }
-  return new Calendar(String(arg))
+  if (isObjectLike(innerCalendar) && innerCalendar.calendar === undefined) {
+    return innerCalendar as any
+  }
+  return new Calendar(String(obj))
 }
 
-export function extractCalendar(input: { calendar?: Temporal.CalendarLike }): Calendar {
+export function extractCalendar(input: any): Temporal.CalendarProtocol {
   if (input.calendar === undefined) {
     return createDefaultCalendar()
   }

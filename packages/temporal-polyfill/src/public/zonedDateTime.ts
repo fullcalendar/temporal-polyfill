@@ -49,6 +49,7 @@ import {
 import { parseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
 import { roundZonedDateTimeFields } from '../dateUtils/rounding'
+import { getInstantFor } from '../dateUtils/timeZone'
 import { translateZonedDateTimeFields } from '../dateUtils/translate'
 import {
   DAY,
@@ -106,7 +107,7 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
     const calendar = ensureObj(Calendar, calendarArg)
 
     const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNanoseconds, timeZone)
-    validateDateTime(isoFields, calendar.id)
+    validateDateTime(isoFields, calendar.toString())
 
     super({
       ...isoFields,
@@ -172,7 +173,7 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
     const date = ensureObj(PlainDate, dateArg)
     const dateTime = date.toPlainDateTime(this) // timeArg=this
     const { timeZone } = this
-    const instant = timeZone.getInstantFor(dateTime)
+    const instant = getInstantFor(timeZone, dateTime)
 
     return new ZonedDateTime(
       instant.epochNanoseconds,
@@ -312,7 +313,7 @@ export function createZonedDateTimeFromFields(
 
 export function buildZonedDateTimeISOFields(
   epochNano: bigint,
-  timeZone: TimeZone,
+  timeZone: Temporal.TimeZoneProtocol,
 ): [ISODateTimeFields, number] {
   const instant = new Instant(epochNano) // will do validation
   const offsetNano = timeZone.getOffsetNanosecondsFor(instant)

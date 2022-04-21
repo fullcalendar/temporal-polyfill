@@ -80,7 +80,10 @@ function getTimeZone(): Temporal.TimeZone {
 function buidZonedFields(
   calendarArg: Temporal.CalendarLike,
   timeZoneArg: Temporal.TimeZoneLike = getTimeZone(),
-): ISODateTimeFields & { timeZone: TimeZone, calendar: Calendar } {
+): ISODateTimeFields & {
+    timeZone: Temporal.TimeZoneProtocol,
+    calendar: Temporal.CalendarProtocol,
+  } {
   const timeZone = ensureObj(TimeZone, timeZoneArg)
   return {
     ...buildZonedDateTimeISOFields(getEpochNano(), timeZone)[0],

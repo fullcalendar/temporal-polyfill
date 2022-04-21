@@ -27,6 +27,7 @@ import {
   ISOTimeFields,
 } from './isoFields'
 import { LocalDateFields } from './localFields'
+import { getInstantFor } from './timeZone'
 import { DAY, DayTimeUnitInt, nanoInDay } from './units'
 
 type TranslatableObj = ISODateTimeFields & { calendar: Temporal.CalendarProtocol }
@@ -54,7 +55,7 @@ export function translateZonedDateTimeFields(
   })
 
   // add time fields of duration
-  const translatedInstant = timeZone.getInstantFor(translatedDateTime) // what about option!!!
+  const translatedInstant = getInstantFor(timeZone, translatedDateTime)
   return translatedInstant.epochNanoseconds + durationTimeToNano(duration)
 }
 

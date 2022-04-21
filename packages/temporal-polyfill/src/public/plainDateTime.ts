@@ -1,6 +1,7 @@
 import { getCommonCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { parseDisambigOption } from '../argParse/disambig'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
@@ -24,6 +25,7 @@ import {
 import { parseDateTime } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { roundDateTime } from '../dateUtils/rounding'
+import { getInstantFor } from '../dateUtils/timeZone'
 import { translateDateTime } from '../dateUtils/translate'
 import { DAY, DayTimeUnitInt, NANOSECOND, UnitInt, YEAR } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
@@ -78,7 +80,7 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
     }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    validateDateTime(constrained, calendar.id)
+    validateDateTime(constrained, calendar.toString())
 
     super({
       ...constrained,
@@ -195,7 +197,7 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
     options?: Temporal.ToInstantOptions,
   ): Temporal.ZonedDateTime {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
-    const instant = timeZone.getInstantFor(this, options)
+    const instant = getInstantFor(timeZone, this, parseDisambigOption(options))
 
     // more succinct than createZonedDateTimeFromFields
     return new ZonedDateTime(instant.epochNanoseconds, timeZone, this.calendar)

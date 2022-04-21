@@ -1,3 +1,4 @@
+import { parseDisambigOption } from '../argParse/disambig'
 import {
   OFFSET_IGNORE,
   OFFSET_REJECT,
@@ -6,12 +7,12 @@ import {
 } from '../argParse/offsetHandling'
 import { Calendar } from '../public/calendar'
 import { createDateTime } from '../public/plainDateTime'
-import { TimeZone } from '../public/timeZone'
 import { Temporal } from '../spec'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
 import { isoFieldsToEpochNano } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
+import { getInstantFor } from './timeZone'
 import { addDays } from './translate'
 
 export interface OffsetComputableFields extends ISODateTimeFields {
@@ -64,7 +65,11 @@ export function computeZonedDateTimeEpochNano(
   }
 
   // compute fresh from TimeZone
-  return timeZone.getInstantFor(createDateTime(isoFields), disambigOptions).epochNanoseconds
+  return getInstantFor(
+    timeZone,
+    createDateTime(isoFields),
+    parseDisambigOption(disambigOptions),
+  ).epochNanoseconds
 }
 
 function findMatchingEpochNano(
@@ -99,8 +104,8 @@ export function computeNanoInDay(
   // TODO: awkard with iso8601 calendar
   const day0 = { ...fields, ...zeroISOTimeFields, calendar: new Calendar('iso8601') }
   const day1 = { ...addDays(day0, 1), ...zeroISOTimeFields, calendar: new Calendar('iso8601') }
-  const epochNano0 = timeZone.getInstantFor(createDateTime(day0)).epochNanoseconds
-  const epochNano1 = timeZone.getInstantFor(createDateTime(day1)).epochNanoseconds
+  const epochNano0 = getInstantFor(timeZone, createDateTime(day0)).epochNanoseconds
+  const epochNano1 = getInstantFor(timeZone, createDateTime(day1)).epochNanoseconds
 
   return Number(epochNano1 - epochNano0)
 }

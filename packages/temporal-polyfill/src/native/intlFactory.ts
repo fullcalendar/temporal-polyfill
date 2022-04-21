@@ -87,6 +87,9 @@ export function createPlainFormatFactoryFactory<Entity extends PlainEntity>(
       })
     }
 
+    // TODO: investigate if Intl.DateTimeFormat allows passing in an object/protocol `TimeZone`
+    // value. If so, we shouldn't call `new TimeZone`, but instead ensureTimeZoneProtocol
+
     return {
       buildKey: createKeyFactory(locales, options, strictCalendar),
       buildFormat,

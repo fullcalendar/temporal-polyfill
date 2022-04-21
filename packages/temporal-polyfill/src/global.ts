@@ -41,11 +41,6 @@ declare global {
     export import TimeZone = TemporalImpl.TimeZone
     export import Duration = TemporalImpl.Duration
     export import Now = TemporalImpl.Now
-
-    /*
-    SPECIAL NOTE:
-    Must keep in sync with ./public/types.ts
-    */
   }
 }
 

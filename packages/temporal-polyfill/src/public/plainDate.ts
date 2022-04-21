@@ -53,7 +53,7 @@ export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
     const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    validateDate(constrained, calendar.id)
+    validateDate(constrained, calendar.toString())
 
     super({
       ...constrained,

@@ -1,12 +1,7 @@
-import {
-  ensureCalendarsEqual,
-  getCommonCalendar,
-  isCalendarArgBag,
-  parseCalendarArgFromBag,
-} from '../argParse/calendar'
+import { calendarFromObj, ensureCalendarsEqual, getCommonCalendar } from '../argParse/calendar'
 import { dateFieldMap, monthDayFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
-import { ensureOptionsObj, refineFields } from '../argParse/refine'
+import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
 import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
@@ -51,19 +46,16 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
     setImpl(this, queryCalendarImpl(id))
   }
 
-  static from(arg: Temporal.CalendarLike): Temporal.Calendar {
-    if (typeof arg === 'object' && arg) { // TODO: isObjectLike
-      if (isCalendarArgBag(arg)) {
-        return parseCalendarArgFromBag(arg.calendar)
-      } else {
-        return arg as Calendar // treat CalendarProtocols as Calendars internally
-      }
+  static from(arg: Temporal.CalendarLike): Temporal.CalendarProtocol {
+    if (isObjectLike(arg)) {
+      return calendarFromObj(arg)
     }
+
     const parsed = tryParseDateTime(String(arg), false, true) // allowZ=true
     return new Calendar(
       parsed // a date-time string?
         ? parsed.calendar || isoCalendarID
-        : arg, // any other type of string
+        : String(arg), // any other type of string
     )
   }
 

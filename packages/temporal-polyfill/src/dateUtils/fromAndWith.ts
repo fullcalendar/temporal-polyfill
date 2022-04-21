@@ -245,11 +245,16 @@ function tryDurationFields(rawFields: any): DurationFields | undefined {
 
 // utils
 
-function filterFieldsViaCalendar(objOrFields: any, fieldMap: any, calendar: Calendar): any {
+function filterFieldsViaCalendar(
+  objOrFields: any,
+  fieldMap: any,
+  calendar: Temporal.CalendarProtocol,
+): any {
   let fieldNames = Object.keys(fieldMap)
 
   if (calendar.fields) {
-    fieldNames = calendar.fields(fieldNames)
+    // convert Iterable<string> to string[]... better way?
+    fieldNames = Array.prototype.slice.call(calendar.fields(fieldNames))
   } else {
     // a Calendar 'protocol'
     // filter by method names
@@ -275,11 +280,11 @@ function mergeFieldsViaCalendar(
   existingObj: any,
   fields: any,
   fieldMap: any,
-  calendar: Calendar,
+  calendar: Temporal.CalendarProtocol,
 ): any {
   const existingFields = filterFieldsViaCalendar(existingObj, fieldMap, calendar)
 
-  if (calendar.mergeFields) { // can be a minimal Calendar 'protocol'
+  if (calendar.mergeFields) {
     return calendar.mergeFields(existingFields, fields)
   }
 

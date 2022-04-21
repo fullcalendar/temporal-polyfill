@@ -1,5 +1,4 @@
 import { unitNames } from '../argParse/unitStr'
-import { Calendar } from '../public/calendar'
 import { Temporal } from '../spec'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
@@ -110,7 +109,7 @@ export const dateCalendarFields: (keyof DateCalendarFields)[] = [
 
 export function mixinCalendarFields<Obj extends DateISOInstance>(
   ObjClass: { prototype: Obj },
-  propNames: (keyof Calendar)[],
+  propNames: (keyof DateCalendarFields)[],
 ): void {
   attachGetters(
     ObjClass,

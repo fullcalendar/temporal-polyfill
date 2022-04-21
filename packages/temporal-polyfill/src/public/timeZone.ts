@@ -1,16 +1,13 @@
-import {
-  DISAMBIG_COMPATIBLE,
-  DISAMBIG_EARLIER,
-  DISAMBIG_REJECT,
-  parseDisambigOption,
-} from '../argParse/disambig'
-import { isTimeZoneArgBag, parseTimeZoneFromBag } from '../argParse/timeZone'
+import { parseDisambigOption } from '../argParse/disambig'
+import { isObjectLike } from '../argParse/refine'
+import { timeZoneFromObj } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { checkInvalidOffset } from '../dateUtils/offset'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
+import { getInstantFor } from '../dateUtils/timeZone'
 import { Temporal } from '../spec'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
@@ -35,13 +32,9 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
     setImpl(this, queryTimeZoneImpl(id))
   }
 
-  static from(arg: Temporal.TimeZoneLike): Temporal.TimeZone {
-    if (typeof arg === 'object') {
-      if (isTimeZoneArgBag(arg)) {
-        return parseTimeZoneFromBag(arg.timeZone)
-      } else {
-        return arg as TimeZone // treat TimeZoneProtocols as TimeZones internally
-      }
+  static from(arg: Temporal.TimeZoneLike): Temporal.TimeZoneProtocol {
+    if (isObjectLike(arg)) {
+      return timeZoneFromObj(arg)
     }
 
     const parsed = tryParseZonedDateTime(String(arg))
@@ -58,7 +51,7 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
       }
     }
 
-    return new TimeZone(arg) // consider arg the literal time zone ID string
+    return new TimeZone(String(arg)) // consider arg the literal time zone ID string
   }
 
   get id(): string {
@@ -92,25 +85,7 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
     dateTimeArg: PlainDateTimeArg,
     options?: Temporal.ToInstantOptions,
   ): Temporal.Instant {
-    const disambig = parseDisambigOption(options)
-    const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
-    const zoneNano = isoFieldsToEpochNano(isoFields)
-    const possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
-    let offsetNano: number
-
-    if (possibleOffsetNanos.length === 1 || disambig === DISAMBIG_COMPATIBLE) {
-      offsetNano = possibleOffsetNanos[0]
-    } else if (disambig === DISAMBIG_REJECT) {
-      throw new RangeError('Ambiguous offset')
-    } else {
-      offsetNano = Math[
-        disambig === DISAMBIG_EARLIER
-          ? 'max' // (results in an earlier epochNano, because offsetNano is subtracted)
-          : 'min' // DISAMBIG_LATER
-      ](...(possibleOffsetNanos as [number, number]))
-    }
-
-    return new Instant(zoneNano - BigInt(offsetNano))
+    return getInstantFor(this, dateTimeArg, parseDisambigOption(options))
   }
 
   getPossibleInstantsFor(dateTimeArg: PlainDateTimeArg): Temporal.Instant[] {

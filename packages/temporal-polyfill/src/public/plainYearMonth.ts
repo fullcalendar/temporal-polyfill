@@ -50,7 +50,7 @@ export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
     }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    validateYearMonth(constrained, calendar.id)
+    validateYearMonth(constrained, calendar.toString())
 
     super({
       ...constrained,
