@@ -26,11 +26,11 @@ import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlM
 import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
-import { YearMonthUnit } from './types'
 
 export type PlainYearMonthArg = Temporal.PlainYearMonth | Temporal.PlainYearMonthLike | string
 
-type DiffOptions = Temporal.DifferenceOptions<'year' | 'month'>
+type YearMonthUnit = 'year' | 'month'
+type DiffOptions = Temporal.DifferenceOptions<YearMonthUnit>
 
 const day1 = { day: 1 }
 

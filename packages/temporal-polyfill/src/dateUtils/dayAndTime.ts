@@ -1,3 +1,4 @@
+import { Temporal } from '../spec'
 import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
 import { ISOTimeFields } from './isoFields'
 import { LocalTimeFields } from './localFields'
@@ -22,6 +23,9 @@ import {
   nanoInSecond,
   nanoInSecondBI,
 } from './units'
+
+// weird place for this
+export type DayTimeUnit = 'day' | Temporal.TimeUnit
 
 export const zeroISOTimeFields: ISOTimeFields = {
   isoHour: 0,

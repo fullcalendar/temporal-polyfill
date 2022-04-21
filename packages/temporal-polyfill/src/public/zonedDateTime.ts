@@ -16,7 +16,7 @@ import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
-import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
+import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
 import { DurationFields, negateDuration } from '../dateUtils/durationFields'
 import { epochNanoToISOFields } from '../dateUtils/epoch'
@@ -73,10 +73,6 @@ import { createDateTime } from './plainDateTime'
 import { PlainTime, PlainTimeArg, createTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import {
-  DayTimeUnit,
-  Unit,
-} from './types'
 
 export type ZonedDateTimeArg = Temporal.ZonedDateTime | Temporal.ZonedDateTimeLike | string
 
@@ -353,7 +349,7 @@ function diffZonedDateTimes(
   flip: boolean,
   options: DiffOptions | undefined,
 ): Duration {
-  const diffConfig = parseDiffOptions<Unit, UnitInt>(
+  const diffConfig = parseDiffOptions<Temporal.DateTimeUnit, UnitInt>(
     options,
     HOUR, // largestUnitDefault
     NANOSECOND, // smallestUnitDefault

@@ -1,20 +1,11 @@
 import { UnsignedDurationFields } from '../dateUtils/durationFields'
-import {
-  LocalDateFields,
-  LocalTimeFields,
-  LocalYearMonthFields,
-} from '../dateUtils/localFields'
 import { UnitInt } from '../dateUtils/units'
-import { DateUnit, TimeUnit, Unit } from '../public/types'
+import { Temporal } from '../spec'
 import { strArrayToHash } from '../utils/obj'
-
-export type YearMonthUnitProper = keyof LocalYearMonthFields
-export type DateUnitProper = keyof LocalDateFields | 'week'
-export type TimeUnitProper = keyof LocalTimeFields
 
 // These names must match the indexes of the Unit integers
 
-export const timeUnitNames: TimeUnit[] = [
+export const timeUnitNames: Temporal.TimeUnit[] = [
   'nanosecond',
   'microsecond',
   'millisecond',
@@ -22,13 +13,13 @@ export const timeUnitNames: TimeUnit[] = [
   'minute',
   'hour',
 ]
-export const dateUnitNames: DateUnit[] = [
+export const dateUnitNames: Temporal.DateUnit[] = [
   'day',
   'week',
   'month',
   'year',
 ]
-export const unitNames: Unit[] = [
+export const unitNames: Temporal.DateTimeUnit[] = [
   ...timeUnitNames,
   ...dateUnitNames,
 ]
@@ -45,7 +36,7 @@ const unitMap = strArrayToHash(unitNames, (_str, i) => i)
 const pluralUnitMap = strArrayToHash(durationUnitNames, (_str, i) => i)
 
 export function parseUnit<UnitType extends UnitInt>(
-  input: Unit | undefined,
+  input: Temporal.DateTimeUnit | undefined,
   defaultUnit: UnitType | undefined,
   minUnit: UnitType,
   maxUnit: UnitType,

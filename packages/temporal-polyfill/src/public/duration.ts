@@ -21,10 +21,7 @@ import { roundDuration } from '../dateUtils/roundingDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
 import { addDurationFields } from '../dateUtils/translate'
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
-import {
-  LocalesArg,
-  Unit,
-} from '../public/types'
+import { LocalesArg } from '../public/types'
 import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
 import { PlainDateTimeArg } from './plainDateTime'
@@ -138,7 +135,7 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
     }
 
     const defaultLargestUnit = computeLargestDurationUnit(this)
-    const diffConfig = parseDiffOptions<Unit, UnitInt>(
+    const diffConfig = parseDiffOptions<Temporal.DateTimeUnit, UnitInt>(
       optionsObj,
       defaultLargestUnit, // largestUnitDefault
       NANOSECOND, // smallestUnitDefault

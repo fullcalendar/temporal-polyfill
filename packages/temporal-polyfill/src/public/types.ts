@@ -5,33 +5,6 @@ import { OffsetHandlingMap } from '../argParse/offsetHandling'
 import { OverflowHandlingMap } from '../argParse/overflowHandling'
 import { RoundingModeMap } from '../argParse/roundingMode'
 import { TimeZoneDisplayMap } from '../argParse/timeZoneDisplay'
-import { DateUnitProper, TimeUnitProper, YearMonthUnitProper } from '../argParse/unitStr'
-
-/*
-SPECIAL NOTE:
-Must keep in sync with global.ts
-*/
-
-// units
-// TODO: more DRY way to define deprecated units
-export type TimeUnit = TimeUnitProper
-| /** @deprecated */ 'hours'
-| /** @deprecated */ 'minutes'
-| /** @deprecated */ 'seconds'
-| /** @deprecated */ 'milliseconds'
-| /** @deprecated */ 'microseconds'
-| /** @deprecated */ 'nanoseconds'
-export type YearMonthUnit = YearMonthUnitProper
-| /** @deprecated */ 'years'
-| /** @deprecated */ 'months'
-export type DateUnit = DateUnitProper
-| /** @deprecated */ 'years'
-| /** @deprecated */ 'months'
-| /** @deprecated */ 'weeks'
-| /** @deprecated */ 'days'
-export type Unit = TimeUnit | DateUnit
-export type DayTimeUnit = TimeUnit | 'day'
-| /** @deprecated */ 'days'
 
 // rounding
 export type RoundingMode = keyof RoundingModeMap

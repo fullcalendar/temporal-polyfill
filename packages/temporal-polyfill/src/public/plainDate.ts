@@ -29,7 +29,6 @@ import { createDateTime } from './plainDateTime'
 import { PlainTime, PlainTimeArg, ensureLooseTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { DateUnit } from './types'
 import { createZonedDateTimeFromFields } from './zonedDateTime'
 
 export type PlainDateArg = Temporal.PlainDate | Temporal.PlainDateLike | string
@@ -234,7 +233,7 @@ function diffPlainDates(
       pd1,
       getCommonCalendar(pd0, pd1),
       flip,
-      parseDiffOptions<DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
+      parseDiffOptions<Temporal.DateUnit, DateUnitInt>(options, DAY, DAY, DAY, YEAR),
     ),
   )
 }

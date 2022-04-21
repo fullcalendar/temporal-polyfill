@@ -1,6 +1,5 @@
 import { NANOSECOND, UnitInt, YEAR } from '../dateUtils/units'
 import { PlainDateTimeArg } from '../public/plainDateTime'
-import { Unit } from '../public/types'
 import { Temporal } from '../spec'
 import { ensureOptionsObj } from './refine'
 import { parseUnit } from './unitStr'
@@ -14,7 +13,7 @@ export interface DurationTotalConfig {
 
 export function parseTotalConfig(optionsArg: Temporal.DurationTotalOf): DurationTotalConfig {
   let relativeTo: PlainDateTimeArg | undefined
-  let unitName: Unit | undefined
+  let unitName: Temporal.DateTimeUnit | undefined
 
   if (typeof optionsArg === 'string') {
     unitName = optionsArg

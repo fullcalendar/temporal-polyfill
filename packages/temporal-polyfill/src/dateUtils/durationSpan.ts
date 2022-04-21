@@ -1,7 +1,7 @@
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
-import { DateUnit } from '../public/types'
+import { Temporal } from '../spec'
 import { DiffableObj, diffAccurate } from './diff'
 import { DurationFields, overrideDuration } from './durationFields'
 import { DAY, DateUnitInt, UnitInt, WEEK } from './units'
@@ -34,7 +34,7 @@ export function spanDurationFromDate(
 ): [DurationFields, DiffableObj] {
   const translated = relativeTo.add(duration)
   const newDuration = calendar.dateUntil(relativeTo, translated, {
-    largestUnit: unitNames[largestUnit] as DateUnit,
+    largestUnit: unitNames[largestUnit] as Temporal.DateUnit,
   })
 
   return [newDuration, translated]

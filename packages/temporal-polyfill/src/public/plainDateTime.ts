@@ -8,6 +8,7 @@ import { timeUnitNames } from '../argParse/unitStr'
 import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
+import { DayTimeUnit } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
 import { DurationFields, negateDuration } from '../dateUtils/durationFields'
 import { processDateTimeFromFields, processDateTimeWithFields } from '../dateUtils/fromAndWith'
@@ -35,10 +36,6 @@ import { PlainDate, PlainDateArg, createDate } from './plainDate'
 import { PlainTimeArg, createTime, ensureLooseTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import {
-  DayTimeUnit,
-  Unit,
-} from './types'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTimeArg = Temporal.PlainDateTime | Temporal.PlainDateTimeLike | string
@@ -263,7 +260,7 @@ function diffPlainDateTimes(
   flip: boolean,
   options: DiffOptions | undefined,
 ): Duration {
-  const diffConfig = parseDiffOptions<Unit, UnitInt>(
+  const diffConfig = parseDiffOptions<Temporal.DateTimeUnit, UnitInt>(
     options,
     DAY, // largestUnitDefault
     NANOSECOND, // smallestUnitDefault

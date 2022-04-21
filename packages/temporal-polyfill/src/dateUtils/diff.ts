@@ -4,7 +4,6 @@ import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
 import { createDate } from '../public/plainDate'
-import { DateUnit } from '../public/types'
 import { Temporal } from '../spec'
 import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { compareLocalDateFields } from './compare'
@@ -57,7 +56,7 @@ export function diffDates(
   diffConfig: DiffConfig,
 ): DurationFields {
   const balancedDuration = calendar.dateUntil(d0, d1, {
-    largestUnit: unitNames[diffConfig.largestUnit] as DateUnit,
+    largestUnit: unitNames[diffConfig.largestUnit] as Temporal.DateUnit,
   })
   return roundDurationSpan(balancedDuration, d0, d1, calendar, flip, diffConfig)
 }
@@ -218,7 +217,7 @@ export function diffAccurate(
     bigDuration = calendar.dateUntil(
       dateStart,
       dateMiddle,
-      { largestUnit: unitNames[largestUnit] as DateUnit },
+      { largestUnit: unitNames[largestUnit] as Temporal.DateUnit },
     )
     dateTimeMiddle = dt0.add(bigDuration)
     timeDuration = diffTimeScale(dateTimeMiddle, dt1, HOUR)

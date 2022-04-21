@@ -1,6 +1,5 @@
 import { unitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
-import { Unit } from '../public/types'
 import { Temporal } from '../spec'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
@@ -43,7 +42,7 @@ for (const unitName of unitNames) {
 // always mixes in `calendar`
 export function mixinISOFields<Obj extends { getISOFields(): any }>(
   ObjClass: { prototype: Obj },
-  unitNames: Unit[] = [],
+  unitNames: Temporal.DateTimeUnit[] = [],
 ): void {
   attachGetters(
     ObjClass,

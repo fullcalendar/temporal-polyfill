@@ -1,11 +1,10 @@
+import { DayTimeUnit } from '../dateUtils/dayAndTime'
 import { DAY, DayTimeUnitInt, nanoIn, nanoInDay } from '../dateUtils/units'
 import { Temporal } from '../spec'
 import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj, isObjectLike } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
-
-type DayTimeUnit = 'day' | Temporal.TimeUnit
 
 export interface RoundingConfig<UnitType extends DayTimeUnitInt = DayTimeUnitInt> {
   smallestUnit: UnitType

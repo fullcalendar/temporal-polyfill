@@ -26,7 +26,6 @@ import { createDefaultCalendar } from './calendar'
 import { Duration, createDuration } from './duration'
 import { PlainDate, PlainDateArg } from './plainDate'
 import { TimeZone } from './timeZone'
-import { TimeUnit } from './types'
 import { createZonedDateTimeFromFields } from './zonedDateTime'
 
 export type PlainTimeArg = Temporal.PlainTime | Temporal.PlainTimeLike | string
@@ -112,7 +111,7 @@ export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
   }
 
   round(options: RoundOptions): Temporal.PlainTime {
-    const roundingConfig = parseRoundingOptions<TimeUnit, TimeUnitInt>(
+    const roundingConfig = parseRoundingOptions<Temporal.TimeUnit, TimeUnitInt>(
       options,
       undefined, // no default. required
       NANOSECOND, // minUnit
@@ -206,7 +205,7 @@ function diffPlainTimes(
   pt1: PlainTime,
   options: DiffOptions | undefined,
 ): Duration {
-  const diffConfig = parseDiffOptions<TimeUnit, TimeUnitInt>(
+  const diffConfig = parseDiffOptions<Temporal.TimeUnit, TimeUnitInt>(
     options,
     HOUR, // largestUnitDefault
     NANOSECOND, // smallestUnitDefault
