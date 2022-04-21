@@ -1,9 +1,9 @@
-import { LocalesArg } from '../public/types'
 import { CachedFormatFactory, FormatFactoryFactory, buildCachedFormatFactory } from './intlFactory'
 import { extractFormatFactoryFactory } from './intlMixins'
 import {
   DateTimeFormatArg,
   DateTimeFormatRangePart,
+  LocalesArg,
   OrigDateTimeFormat,
   flattenOptions,
   normalizeAndCopyLocalesArg,

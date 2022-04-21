@@ -5,7 +5,6 @@ SPECIAL NOTE:
 Must keep in sync with ./performant.ts
 */
 
-export * from './public/types'
 export * from './native/date'
 export type { DateTimeFormatArg, DateTimeFormatRangePart } from './native/intlUtils'
 export { ExtendedDateTimeFormat } from './native/intlExtend'

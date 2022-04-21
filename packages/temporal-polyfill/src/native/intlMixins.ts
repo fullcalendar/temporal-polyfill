@@ -1,7 +1,6 @@
 import { formatFactoryFactorySymbol } from '../dateUtils/abstract'
-import { LocalesArg } from '../public/types'
 import { BaseEntity, FormatFactoryFactory } from './intlFactory'
-import { normalizeAndCopyLocalesArg } from './intlUtils'
+import { LocalesArg, normalizeAndCopyLocalesArg } from './intlUtils'
 
 export interface ToLocaleStringMethods {
   toLocaleString(localesArg?: LocalesArg, options?: Intl.DateTimeFormatOptions): string

@@ -5,8 +5,9 @@ import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainTime } from '../public/plainTime'
 import { PlainYearMonth } from '../public/plainYearMonth'
-import { LocalesArg } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
+
+export type LocalesArg = string | string[]
 
 export interface DateTimeFormatRangePart extends Intl.DateTimeFormatPart {
   source: 'startDate' | 'endDate'
