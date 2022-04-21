@@ -1,9 +1,13 @@
 import { excludeUndefined } from '../utils/obj'
 import { nanoToDuration } from './dayAndTime'
-import { negateDuration, signDuration } from './durationFields'
+import {
+  DurationFields,
+  UnsignedDurationFields,
+  negateDuration,
+  signDuration,
+} from './durationFields'
 import { createParseError, parseNanoAfterDecimal, toIntMaybe } from './parse'
 import { durationRegExp, normalizeDashes } from './parseRegExp'
-import { DurationFields, UnsignedDurationFields } from './typesPrivate'
 import {
   HOUR,
   MILLISECOND,

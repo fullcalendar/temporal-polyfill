@@ -15,7 +15,7 @@ import {
   zeroDurationTimeFields,
 } from './dayAndTime'
 import { DiffableObj, diffAccurate } from './diff'
-import { computeLargestDurationUnit, overrideDuration } from './durationFields'
+import { DurationFields, computeLargestDurationUnit, overrideDuration } from './durationFields'
 import {
   addDaysMilli,
   epochMilliToISOFields,
@@ -24,12 +24,11 @@ import {
   isoToEpochMilli,
 } from './epoch'
 import {
-  DurationFields,
   ISODateFields,
   ISODateTimeFields,
   ISOTimeFields,
-  LocalDateFields,
-} from './typesPrivate'
+} from './isoFields'
+import { LocalDateFields } from './localFields'
 import { DAY, DayTimeUnitInt, nanoInDay } from './units'
 
 export function translateZonedDateTimeFields(

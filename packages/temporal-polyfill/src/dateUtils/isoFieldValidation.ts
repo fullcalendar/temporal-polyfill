@@ -1,6 +1,6 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
-import { ISODateFields, ISODateTimeFields } from './typesPrivate'
+import { ISODateFields, ISODateTimeFields } from './isoFields'
 
 /*
 Extreme valid inputs

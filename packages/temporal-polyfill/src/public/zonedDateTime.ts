@@ -18,19 +18,21 @@ import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
 import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
 import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
-import { negateDuration } from '../dateUtils/durationFields'
+import { DurationFields, negateDuration } from '../dateUtils/durationFields'
 import { epochNanoToISOFields } from '../dateUtils/epoch'
 import {
   processZonedDateTimeFromFields,
   processZonedDateTimeWithFields,
 } from '../dateUtils/fromAndWith'
 import { validateDateTime } from '../dateUtils/isoFieldValidation'
+import { ISODateTimeFields } from '../dateUtils/isoFields'
 import {
   formatCalendarID,
   formatDateTimeISO,
   formatOffsetISO,
   formatTimeZoneID,
 } from '../dateUtils/isoFormat'
+import { LocalTimeFields } from '../dateUtils/localFields'
 import {
   ComputedEpochFields,
   DateCalendarFields,
@@ -49,7 +51,6 @@ import { parseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
 import { roundZonedDateTimeFields } from '../dateUtils/rounding'
 import { translateZonedDateTimeFields } from '../dateUtils/translate'
-import { DurationFields, ISODateTimeFields, LocalTimeFields } from '../dateUtils/typesPrivate'
 import {
   DAY,
   DayTimeUnitInt,

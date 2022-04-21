@@ -1,6 +1,7 @@
 import { isValidDateISO } from './constrain'
 import { nanoToISOTime } from './dayAndTime'
 import { isoEpochLeapYear } from './epoch'
+import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './isoFields'
 import {
   dateTimeRegExp,
   monthDayRegExp,
@@ -9,7 +10,6 @@ import {
   timeRegExp,
   yearMonthRegExp,
 } from './parseRegExp'
-import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './typesPrivate'
 import {
   nanoInHour,
   nanoInMinute,

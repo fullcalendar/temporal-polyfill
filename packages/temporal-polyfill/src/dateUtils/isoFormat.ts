@@ -10,12 +10,8 @@ import { DateISOFields } from '../public/types'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'
-import {
-  DurationFields,
-  ISODateFields,
-  ISODateTimeFields,
-  ISOTimeFields,
-} from './typesPrivate'
+import { DurationFields } from './durationFields'
+import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './isoFields'
 import {
   MINUTE,
   SECOND,

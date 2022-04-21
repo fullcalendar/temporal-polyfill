@@ -18,10 +18,12 @@ import { ZonedDateTime } from '../public/zonedDateTime'
 import { mapHash } from '../utils/obj'
 import { constrainTimeISO } from './constrain'
 import { partialLocalTimeToISO, zeroISOTimeFields } from './dayAndTime'
+import { DurationFields } from './durationFields'
 import { isoEpochLeapYear } from './epoch'
+import { ISOTimeFields } from './isoFields'
+import { LocalTimeFields } from './localFields'
 import { OffsetComputableFields } from './offset'
 import { parseOffsetNano } from './parse'
-import { DurationFields, ISOTimeFields, LocalTimeFields } from './typesPrivate'
 
 export const processZonedDateTimeFromFields = buildSafeFunc(tryZonedDateTimeFromFields)
 export const processDateTimeFromFields = buildSafeFunc(tryDateTimeFromFields)

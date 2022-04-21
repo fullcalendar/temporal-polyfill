@@ -2,7 +2,7 @@ import { OVERFLOW_REJECT, OverflowHandlingInt } from '../argParse/overflowHandli
 import { constrainInt } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
-import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './typesPrivate'
+import { ISODateFields, ISODateTimeFields, ISOTimeFields } from './isoFields'
 
 export function constrainDateFields(
   year: number,

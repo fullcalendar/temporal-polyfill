@@ -5,9 +5,9 @@ import { TimeZone } from '../public/timeZone'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { isoTimeToNano, nanoToISOTime, zeroISOTimeFields } from './dayAndTime'
 import { splitEpochNano } from './epoch'
+import { ISODateTimeFields, ISOTimeFields } from './isoFields'
 import { computeNanoInDay, computeZonedDateTimeEpochNano } from './offset'
 import { addDays } from './translate'
-import { ISODateTimeFields, ISOTimeFields } from './typesPrivate'
 import { DAY, DayTimeUnitInt, TimeUnitInt } from './units'
 
 export function roundDateTime(

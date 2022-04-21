@@ -6,7 +6,7 @@ import {
   ISODateTimeFields,
   ISODateTimeFieldsMilli,
   ISOTimeFields,
-} from './typesPrivate'
+} from './isoFields'
 import {
   milliInDay,
   milliInSecond, nanoInMicro,

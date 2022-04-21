@@ -8,12 +8,12 @@ import { RoundingModeMap } from '../argParse/roundingMode'
 import { TimeZoneArgBag, TimeZoneArgSimple } from '../argParse/timeZone'
 import { TimeZoneDisplayMap } from '../argParse/timeZoneDisplay'
 import { DateUnitProper, TimeUnitProper, YearMonthUnitProper } from '../argParse/unitStr'
+import { DurationFields } from '../dateUtils/durationFields'
 import {
-  DurationFields,
   ISODateFields,
   ISOTimeFields,
-  LocalTimeFields,
-} from '../dateUtils/typesPrivate'
+} from '../dateUtils/isoFields'
+import { LocalTimeFields } from '../dateUtils/localFields'
 import { Temporal } from '../spec'
 import { Instant } from './instant'
 
@@ -21,9 +21,6 @@ import { Instant } from './instant'
 SPECIAL NOTE:
 Must keep in sync with global.ts
 */
-
-// math
-export type CompareResult = -1 | 0 | 1
 
 // units
 // TODO: more DRY way to define deprecated units

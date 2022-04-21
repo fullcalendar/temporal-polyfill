@@ -1,9 +1,33 @@
 import { durationUnitNames } from '../argParse/unitStr'
-import { CompareResult } from '../public/types'
+import { Temporal } from '../spec'
 import { numSign } from '../utils/math'
 import { mapHashByKeys } from '../utils/obj'
-import { DurationFields, UnsignedDurationFields } from './typesPrivate'
 import { NANOSECOND, UnitInt, YEAR } from './units'
+
+// duration
+// special note about not doing spreads
+// NO.... just use the internal props instead!
+
+export interface DurationTimeFields {
+  hours: number
+  minutes: number
+  seconds: number
+  milliseconds: number
+  microseconds: number
+  nanoseconds: number
+}
+
+export interface UnsignedDurationFields extends DurationTimeFields {
+  years: number
+  months: number
+  weeks: number
+  days: number
+}
+
+// prefer this over unsigned
+export interface DurationFields extends UnsignedDurationFields {
+  sign: Temporal.ComparisonResult
+}
 
 // special note about not doing spreads
 
@@ -86,8 +110,8 @@ export function signDuration(fields: UnsignedDurationFields): DurationFields {
   return { ...fields, sign: computeDurationSign(fields) }
 }
 
-function computeDurationSign(fields: UnsignedDurationFields): CompareResult {
-  let sign: CompareResult = 0
+function computeDurationSign(fields: UnsignedDurationFields): Temporal.ComparisonResult {
+  let sign: Temporal.ComparisonResult = 0
 
   for (const fieldName of durationUnitNames) {
     const fieldNum = fields[fieldName as keyof UnsignedDurationFields]

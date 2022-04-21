@@ -2,10 +2,13 @@ import { durationUnitNames } from '../argParse/unitStr'
 import { Calendar } from '../public/calendar'
 import { durationDayTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
-import { computeLargestDurationUnit } from './durationFields'
+import {
+  DurationFields,
+  UnsignedDurationFields,
+  computeLargestDurationUnit,
+} from './durationFields'
 import { spanDurationFromDateTime } from './durationSpan'
 import { toEpochNano } from './epoch'
-import { DurationFields, UnsignedDurationFields } from './typesPrivate'
 import { DAY, UnitInt, YEAR, isDayTimeUnit, nanoIn } from './units'
 
 export function computeTotalUnits(

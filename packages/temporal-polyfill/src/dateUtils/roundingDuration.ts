@@ -4,11 +4,15 @@ import { Calendar } from '../public/calendar'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { durationDayTimeToNano, nanoToDuration } from './dayAndTime'
 import { DiffableObj } from './diff'
-import { computeLargestDurationUnit, negateDuration } from './durationFields'
+import {
+  DurationFields,
+  UnsignedDurationFields,
+  computeLargestDurationUnit,
+  negateDuration,
+} from './durationFields'
 import { spanDurationFrom, spanDurationFromDateTime } from './durationSpan'
 import { toEpochNano } from './epoch'
 import { computeExactDuration } from './totalUnits'
-import { DurationFields, UnsignedDurationFields } from './typesPrivate'
 import {
   DAY,
   NANOSECOND,

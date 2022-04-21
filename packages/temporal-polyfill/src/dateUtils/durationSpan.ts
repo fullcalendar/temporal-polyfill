@@ -3,8 +3,7 @@ import { Calendar } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { DateUnit } from '../public/types'
 import { DiffableObj, diffAccurate } from './diff'
-import { overrideDuration } from './durationFields'
-import { DurationFields } from './typesPrivate'
+import { DurationFields, overrideDuration } from './durationFields'
 import { DAY, DateUnitInt, UnitInt, WEEK } from './units'
 
 export function spanDurationFrom(

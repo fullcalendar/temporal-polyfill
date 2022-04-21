@@ -10,7 +10,8 @@ import { DateArg, DateLikeFields, OverflowOptions } from '../public/types'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { constrainDateFields } from './constrain'
 import { diffDaysMilli, epochMilliToISOFields } from './epoch'
-import { ISODateFields, InputDateFields, LocalDateFields } from './typesPrivate'
+import { ISODateFields } from './isoFields'
+import { LocalDateFields } from './localFields'
 
 // Date-type Testing (TODO: move this?)
 
@@ -32,6 +33,15 @@ function isDateISOInstance(arg: unknown): arg is DateISOInstance {
     arg instanceof PlainYearMonth ||
     arg instanceof PlainMonthDay
   )
+}
+
+export interface InputDateFields {
+  era: string
+  eraYear: number
+  year: number
+  month: number
+  monthCode: string
+  day: number
 }
 
 // Calendar-dependent Field Querying

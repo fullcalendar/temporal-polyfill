@@ -4,20 +4,18 @@ import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Calendar } from '../public/calendar'
 import { createDate } from '../public/plainDate'
-import { CompareResult, DateUnit } from '../public/types'
+import { DateUnit } from '../public/types'
+import { Temporal } from '../spec'
 import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { compareLocalDateFields } from './compare'
 import { constrainDateFields } from './constrain'
 import { isoTimeToNano, nanoToDuration } from './dayAndTime'
-import { mergeDurations, signDuration } from './durationFields'
+import { DurationFields, mergeDurations, signDuration } from './durationFields'
 import { EpochableObj, diffDaysMilli, toEpochNano } from './epoch'
+import { ISOTimeFields } from './isoFields'
+import { LocalDateFields } from './localFields'
 import { roundDurationSpan } from './roundingDuration'
 import { addMonths, addYears } from './translate'
-import {
-  DurationFields,
-  ISOTimeFields,
-  LocalDateFields,
-} from './typesPrivate'
 import {
   HOUR,
   MONTH,
@@ -213,8 +211,8 @@ export function diffAccurate(
   let dateTimeMiddle: DiffableObj
   let bigDuration: DurationFields
   let timeDuration: DurationFields
-  let bigSign: CompareResult
-  let timeSign: CompareResult
+  let bigSign: Temporal.ComparisonResult
+  let timeSign: Temporal.ComparisonResult
 
   do {
     bigDuration = calendar.dateUntil(

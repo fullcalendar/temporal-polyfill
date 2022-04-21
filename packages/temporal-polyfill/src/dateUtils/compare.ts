@@ -1,12 +1,13 @@
 import { Calendar } from '../public/calendar'
 import { TimeZone } from '../public/timeZone'
-import { CompareResult } from '../public/types'
+import { Temporal } from '../spec'
 import { compareValues } from '../utils/math'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
-import { computeLargestDurationUnit } from './durationFields'
+import { DurationFields, computeLargestDurationUnit } from './durationFields'
 import { EpochableFields, isoFieldsToEpochNano } from './epoch'
-import { DurationFields, ISOTimeFields, LocalDateFields } from './typesPrivate'
+import { ISOTimeFields } from './isoFields'
+import { LocalDateFields } from './localFields'
 import { DAY } from './units'
 
 export interface ComparableDateTime {
@@ -43,27 +44,36 @@ export function dateTimesEqual(
 // Comparison
 // -------------------------------------------------------------------------------------------------
 
-export function compareDateTimes(a: ComparableDateTime, b: ComparableDateTime): CompareResult {
+export function compareDateTimes(
+  a: ComparableDateTime,
+  b: ComparableDateTime,
+): Temporal.ComparisonResult {
   return compareValues(
     isoFieldsToEpochNano(a.getISOFields()),
     isoFieldsToEpochNano(b.getISOFields()),
   )
 }
 
-export function compareTimes(t0: ComparableTime, t1: ComparableTime): CompareResult {
+export function compareTimes(t0: ComparableTime, t1: ComparableTime): Temporal.ComparisonResult {
   return compareValues(
     isoTimeToNano(t0.getISOFields()),
     isoTimeToNano(t1.getISOFields()),
   )
 }
 
-export function compareLocalDateFields(d0: LocalDateFields, d1: LocalDateFields): CompareResult {
+export function compareLocalDateFields(
+  d0: LocalDateFields,
+  d1: LocalDateFields,
+): Temporal.ComparisonResult {
   return compareValues(d0.year, d1.year) ||
     compareValues(d0.month, d1.month) ||
     compareValues(d0.day, d1.day)
 }
 
-export function compareEpochObjs(a: ComparableEpochObj, b: ComparableEpochObj): CompareResult {
+export function compareEpochObjs(
+  a: ComparableEpochObj,
+  b: ComparableEpochObj,
+): Temporal.ComparisonResult {
   return compareValues(a.epochNanoseconds, b.epochNanoseconds)
 }
 
@@ -71,7 +81,7 @@ export function compareDurations(
   fields0: DurationFields,
   fields1: DurationFields,
   relativeTo: DiffableObj | undefined,
-): CompareResult {
+): Temporal.ComparisonResult {
   if (
     relativeTo === undefined &&
     computeLargestDurationUnit(fields0) <= DAY &&

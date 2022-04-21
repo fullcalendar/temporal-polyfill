@@ -1,9 +1,12 @@
 import { nanoInMinute } from '../dateUtils/units'
-import { CompareResult } from '../public/types'
+import { Temporal } from '../spec'
 
 export type RoundingFunc = (n: number) => number
 
-export function compareValues<T extends (number | bigint | string)>(a: T, b: T): CompareResult {
+export function compareValues<T extends (number | bigint | string)>(
+  a: T,
+  b: T,
+): Temporal.ComparisonResult {
   if (a < b) {
     return -1
   } else if (a > b) {
@@ -12,12 +15,12 @@ export function compareValues<T extends (number | bigint | string)>(a: T, b: T):
   return 0
 }
 
-export function numSign(num: number): CompareResult {
+export function numSign(num: number): Temporal.ComparisonResult {
   return compareValues(num, 0)
 }
 
 // HACK
-export function numSignBI(num: bigint): CompareResult {
+export function numSignBI(num: bigint): Temporal.ComparisonResult {
   return !num ? 0 : num < 0n ? -1 : 1
 }
 

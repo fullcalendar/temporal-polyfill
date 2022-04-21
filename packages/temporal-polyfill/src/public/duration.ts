@@ -5,6 +5,8 @@ import { parseTotalConfig } from '../argParse/totalOptions'
 import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
 import { compareDurations } from '../dateUtils/compare'
 import {
+  DurationFields,
+  UnsignedDurationFields,
   absDuration,
   computeLargestDurationUnit,
   negateDuration,
@@ -18,7 +20,6 @@ import { extractRelativeTo } from '../dateUtils/relativeTo'
 import { roundDuration } from '../dateUtils/roundingDuration'
 import { computeTotalUnits } from '../dateUtils/totalUnits'
 import { addDurationFields } from '../dateUtils/translate'
-import { DurationFields, UnsignedDurationFields } from '../dateUtils/typesPrivate'
 import { NANOSECOND, SECOND, UnitInt, YEAR } from '../dateUtils/units'
 import {
   DurationRoundingOptions,

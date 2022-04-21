@@ -1,9 +1,9 @@
+import { UnsignedDurationFields } from '../dateUtils/durationFields'
 import {
   LocalDateFields,
   LocalTimeFields,
   LocalYearMonthFields,
-  UnsignedDurationFields,
-} from '../dateUtils/typesPrivate'
+} from '../dateUtils/localFields'
 import { UnitInt } from '../dateUtils/units'
 import { DateUnit, TimeUnit, Unit } from '../public/types'
 import { strArrayToHash } from '../utils/obj'

@@ -1,5 +1,6 @@
-import { signDuration } from './durationFields'
-import { DurationFields, DurationTimeFields, ISOTimeFields, LocalTimeFields } from './typesPrivate'
+import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
+import { ISOTimeFields } from './isoFields'
+import { LocalTimeFields } from './localFields'
 import {
   DAY,
   DayTimeUnitInt,

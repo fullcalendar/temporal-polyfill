@@ -11,8 +11,8 @@ import { ZonedDateTimeOptions } from '../public/types'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
 import { isoFieldsToEpochNano } from './epoch'
+import { ISODateFields, ISODateTimeFields } from './isoFields'
 import { addDays } from './translate'
-import { ISODateFields, ISODateTimeFields } from './typesPrivate'
 
 export interface OffsetComputableFields extends ISODateTimeFields {
   calendar: Calendar

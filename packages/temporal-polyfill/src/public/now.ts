@@ -1,7 +1,7 @@
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
+import { ISODateTimeFields } from '../dateUtils/isoFields'
 import { attachStringTag } from '../dateUtils/mixins'
-import { ISODateTimeFields } from '../dateUtils/typesPrivate'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
 import { Temporal } from '../spec'

@@ -14,6 +14,7 @@ import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import {
+  InputDateFields,
   computeDayOfYear,
   computeDaysInYear,
   getExistingDateISOFields,
@@ -25,7 +26,6 @@ import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateU
 import { attachStringTag } from '../dateUtils/mixins'
 import { tryParseDateTime } from '../dateUtils/parse'
 import { translateDate } from '../dateUtils/translate'
-import { InputDateFields } from '../dateUtils/typesPrivate'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { computeWeekOfISOYear } from '../dateUtils/week'
 import { Temporal } from '../spec'
