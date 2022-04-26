@@ -3,7 +3,7 @@ import { assert } from 'chai';
 const { deepEqual, strictEqual: equal, throws } = assert;
 
 import * as Temporal from 'temporal-polyfill/impl';
-const { ExtendedDateTimeFormat } = Temporal;
+const ExtendedDateTimeFormat = Temporal.extendDateTimeFormat(Intl.DateTimeFormat)
 
 describe('Intl', () => {
   // TODO: move these to their respective test files.

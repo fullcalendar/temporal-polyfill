@@ -4,7 +4,6 @@ import {
   DateTimeFormatArg,
   DateTimeFormatRangePart,
   LocalesArg,
-  OrigDateTimeFormat,
   flattenOptions,
   normalizeAndCopyLocalesArg,
 } from './intlUtils'
@@ -13,56 +12,68 @@ const origLocalesSymbol = Symbol()
 const origOptionsSymbol = Symbol()
 const factoryMapSymbol = Symbol()
 
+interface DateTimeFormatCacheProps {
+  [origLocalesSymbol]: string[]
+  [origOptionsSymbol]: Intl.DateTimeFormatOptions
+  [factoryMapSymbol]: Map<FormatFactoryFactory<any>, CachedFormatFactory<any>>
+}
+
+type DateTimeFormatWithCache = Intl.DateTimeFormat & DateTimeFormatCacheProps
+
 /*
 We can't monkeypatch Intl.DateTimeFormat because this auto-bound .format would be inaccessible
 to our override method.
 */
-export class ExtendedDateTimeFormat extends OrigDateTimeFormat {
-  [origLocalesSymbol]: string[]
-  [origOptionsSymbol]: Intl.DateTimeFormatOptions
-  [factoryMapSymbol]: Map<FormatFactoryFactory<any>, CachedFormatFactory<any>>
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function extendDateTimeFormat(BaseDateTimeFormat: typeof Intl.DateTimeFormat) {
+  return class extends BaseDateTimeFormat
+    implements DateTimeFormatCacheProps {
+    [origLocalesSymbol]: string[]
+    [origOptionsSymbol]: Intl.DateTimeFormatOptions
+    [factoryMapSymbol]: Map<FormatFactoryFactory<any>, CachedFormatFactory<any>>
 
-  constructor(localesArg?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    const normLocales = normalizeAndCopyLocalesArg(localesArg)
-    const normOptions = flattenOptions(options || {}) // so that props aren't accessed again
+    constructor(localesArg?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+      const normLocales = normalizeAndCopyLocalesArg(localesArg)
+      const normOptions = flattenOptions(options || {}) // so that props aren't accessed again
 
-    super(normLocales, normOptions)
+      super(normLocales, normOptions)
 
-    this[origLocalesSymbol] = normLocales
-    this[origOptionsSymbol] = normOptions
-    this[factoryMapSymbol] = new Map()
-  }
-
-  format(dateArg?: DateTimeFormatArg): string {
-    const parts = createSingleArgs(this, dateArg)
-
-    // HACK to overcome .format being unboundable
-    // See NOTE here: https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
-    if (parts[0] === this) {
-      return super.format(dateArg)
+      this[origLocalesSymbol] = normLocales
+      this[origOptionsSymbol] = normOptions
+      this[factoryMapSymbol] = new Map()
     }
 
-    return parts[0].format(parts[1])
-  }
+    format(dateArg?: DateTimeFormatArg): string {
+      const parts = createSingleArgs(this, dateArg)
 
-  formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[] {
-    return super.formatToParts.call(...createSingleArgs(this, dateArg))
-  }
+      // HACK to overcome .format being unboundable
+      // See NOTE here: https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
+      if (parts[0] === this) {
+        return super.format(dateArg)
+      }
 
-  formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string {
-    return super.formatRange.call(...createRangeArgs(this, startArg, endArg))
-  }
+      return parts[0].format(parts[1])
+    }
 
-  formatRangeToParts(
-    startArg: DateTimeFormatArg,
-    endArg: DateTimeFormatArg,
-  ): DateTimeFormatRangePart[] {
-    return super.formatRangeToParts.call(...createRangeArgs(this, startArg, endArg))
+    formatToParts(dateArg?: DateTimeFormatArg): Intl.DateTimeFormatPart[] {
+      return super.formatToParts.call(...createSingleArgs(this, dateArg))
+    }
+
+    formatRange(startArg: DateTimeFormatArg, endArg: DateTimeFormatArg): string {
+      return super.formatRange.call(...createRangeArgs(this, startArg, endArg))
+    }
+
+    formatRangeToParts(
+      startArg: DateTimeFormatArg,
+      endArg: DateTimeFormatArg,
+    ): DateTimeFormatRangePart[] {
+      return super.formatRangeToParts.call(...createRangeArgs(this, startArg, endArg))
+    }
   }
 }
 
 function createSingleArgs(
-  origDateTimeFormat: ExtendedDateTimeFormat,
+  origDateTimeFormat: DateTimeFormatWithCache,
   dateArg: DateTimeFormatArg | undefined,
 ): [Intl.DateTimeFormat, DateTimeFormatArg | undefined] {
   const buildFormatFactory = extractFormatFactoryFactory(dateArg)
@@ -79,7 +90,7 @@ function createSingleArgs(
 }
 
 function createRangeArgs(
-  origDateTimeFormat: ExtendedDateTimeFormat,
+  origDateTimeFormat: DateTimeFormatWithCache,
   startArg: DateTimeFormatArg,
   endArg: DateTimeFormatArg,
 ): [Intl.DateTimeFormat, DateTimeFormatArg, DateTimeFormatArg] {
@@ -103,7 +114,7 @@ function createRangeArgs(
 }
 
 function queryFormatFactoryForType<Entity>(
-  origDateTimeFormat: ExtendedDateTimeFormat,
+  origDateTimeFormat: DateTimeFormatWithCache,
   buildFormatFactory: FormatFactoryFactory<Entity>,
 ): CachedFormatFactory<Entity> {
   const formatFactoryMap = origDateTimeFormat[factoryMapSymbol]

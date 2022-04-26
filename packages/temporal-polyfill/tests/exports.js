@@ -11,7 +11,7 @@ describe('Exports', () => {
   // [fullcalendar/temporal]
   // exclude polyfill-specific utilities
   // TODO: better solution
-  const nonStandardRE = /^(ExtendedDateTimeFormat|dateToTemporalInstant)$/
+  const nonStandardRE = /^(extendDateTimeFormat|toTemporalInstant)$/
   const named = Object.keys(Temporal).filter((key) => !nonStandardRE.test(key))
 
   it('should be 11 things', () => {

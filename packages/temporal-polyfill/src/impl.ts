@@ -7,7 +7,7 @@ Must keep in sync with ./performant.ts
 
 export * from './native/date'
 export type { DateTimeFormatArg, DateTimeFormatRangePart } from './native/intlUtils'
-export { ExtendedDateTimeFormat } from './native/intlExtend'
+export { extendDateTimeFormat } from './native/intlExtend'
 // TODO: fix problem noted in tests/exports.js
 
 export { PlainYearMonth } from './public/plainYearMonth'

@@ -29,6 +29,6 @@ export const TimeZone = TemporalPerformant.TimeZone
 export const Duration = TemporalPerformant.Duration
 export const Now = TemporalPerformant.Now
 
-export const dateToTemporalInstant = TemporalNative
+export const toTemporalInstant = TemporalNative
   ? (date: DateWithTemporal) => date.toTemporalInstant()
-  : TemporalImpl.dateToTemporalInstant
+  : TemporalImpl.toTemporalInstant

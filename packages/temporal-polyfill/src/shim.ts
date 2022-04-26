@@ -8,7 +8,6 @@ Imports from non-top-level files are not allowed
 import {
   Calendar,
   Duration,
-  ExtendedDateTimeFormat,
   Instant,
   Now,
   PlainDate,
@@ -18,10 +17,11 @@ import {
   PlainYearMonth,
   TimeZone,
   ZonedDateTime,
-  dateToTemporalInstant,
+  extendDateTimeFormat,
+  toTemporalInstant,
 } from './impl'
 
-export function shimTemporal(): void {
+export function ensureGlobals(): void {
   if (!globalThis.Temporal) {
     globalThis.Temporal = {
       PlainYearMonth,
@@ -37,11 +37,16 @@ export function shimTemporal(): void {
       Now,
     }
 
-    globalThis.Date.prototype.toTemporalInstant = function() {
-      return dateToTemporalInstant(this)
-    }
+    patchDate(globalThis.Date)
 
-    // wasn't possible to patch existing methods. must create subclass
-    ;(globalThis.Intl as any).DateTimeFormat = ExtendedDateTimeFormat
+    ;(globalThis.Intl as any).DateTimeFormat = extendDateTimeFormat(globalThis.Intl.DateTimeFormat)
   }
 }
+
+export function patchDate(DateClass: typeof Date): void {
+  DateClass.prototype.toTemporalInstant = function() {
+    return toTemporalInstant(this) // TODO: forward arguments?
+  }
+}
+
+export { extendDateTimeFormat }
