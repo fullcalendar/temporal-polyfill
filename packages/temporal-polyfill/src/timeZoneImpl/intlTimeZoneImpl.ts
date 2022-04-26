@@ -73,7 +73,13 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       // stuck in a transition?
       } else {
-        return [offsetNanoBefore, offsetNanoAfter]
+        // if the offset increases, we're inside a forward transition that looses an hour
+        // return an empty result because zoneNano lives within this empty region
+        if (offsetNanoBefore < offsetNanoAfter) {
+          return []
+        } else {
+          return [offsetNanoBefore, offsetNanoAfter]
+        }
       }
 
       lastOffsetNano = offsetNanoAfter
@@ -124,7 +130,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     let year = epochNanoToISOYear(epochNano)
 
     if (year > DST_PERSIST_YEAR) {
-      // look ahead or behine ONE year
+      // look ahead or behind ONE year
       const res = this.getTransitionFrom(year, year + direction, direction, epochNano)
       if (res || direction > 0) {
         return res

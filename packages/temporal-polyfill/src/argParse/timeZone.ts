@@ -11,7 +11,7 @@ export function timeZoneFromObj(obj: any): Temporal.TimeZoneProtocol {
   if (isObjectLike(innerTimeZone) && innerTimeZone.timeZone === undefined) {
     return innerTimeZone as any
   }
-  return new TimeZone(String(obj))
+  return new TimeZone(innerTimeZone)
 }
 
 export function extractTimeZone(input: any): Temporal.TimeZoneProtocol {

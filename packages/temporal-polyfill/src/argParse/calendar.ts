@@ -4,6 +4,7 @@ import { Calendar, createDefaultCalendar } from '../public/calendar'
 import { Temporal } from '../spec'
 import { isObjectLike } from './refine'
 
+// TODO: move to argParse like timeZoneFromObj?
 export function calendarFromObj(obj: any): Temporal.CalendarProtocol {
   const innerCalendar = obj.calendar
   if (innerCalendar === undefined) {
@@ -12,7 +13,7 @@ export function calendarFromObj(obj: any): Temporal.CalendarProtocol {
   if (isObjectLike(innerCalendar) && innerCalendar.calendar === undefined) {
     return innerCalendar as any
   }
-  return new Calendar(String(obj))
+  return new Calendar(innerCalendar)
 }
 
 export function extractCalendar(input: any): Temporal.CalendarProtocol {

@@ -85,22 +85,13 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
     dateTimeArg: PlainDateTimeArg,
     options?: Temporal.ToInstantOptions,
   ): Temporal.Instant {
-    return getInstantFor(this, dateTimeArg, parseDisambigOption(options))
+    return getInstantFor(this, ensureObj(PlainDateTime, dateTimeArg), parseDisambigOption(options))
   }
 
   getPossibleInstantsFor(dateTimeArg: PlainDateTimeArg): Temporal.Instant[] {
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneNano = isoFieldsToEpochNano(isoFields)
-    let possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
-
-    // A forward transition looses an hour.
-    // dateTimeArg is stuck in this lost hour, so return not results
-    if (
-      possibleOffsetNanos.length === 2 &&
-      possibleOffsetNanos[0] < possibleOffsetNanos[1]
-    ) {
-      possibleOffsetNanos = []
-    }
+    const possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
 
     return possibleOffsetNanos.map((offsetNano) => (
       new Instant(zoneNano - BigInt(offsetNano))

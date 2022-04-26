@@ -80,8 +80,9 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
 
 export function ensureOptionsObj<OptionsType>(
   options: Partial<OptionsType> | undefined,
+  strict?: boolean,
 ): Partial<OptionsType> {
-  if (options === undefined) {
+  if (options === undefined && !strict) {
     return {}
   }
   if (!isObjectLike(options)) {

@@ -16,7 +16,7 @@ export function parseRoundingOptions<
   UnitArgType extends DayTimeUnit,
   UnitType extends DayTimeUnitInt
 >(
-  options: Temporal.RoundTo<UnitArgType> | UnitArgType | undefined,
+  options: Temporal.RoundTo<UnitArgType> | UnitArgType,
   minUnit: UnitType,
   maxUnit: UnitType,
   relaxedDivisibility?: boolean,
@@ -26,7 +26,7 @@ export function parseRoundingOptions<
       ? { smallestUnit: options }
       : options
 
-  const ensuredOptions = ensureOptionsObj(optionsObj)
+  const ensuredOptions = ensureOptionsObj(optionsObj, true) // strict=true
   const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
   const smallestUnit = parseUnit(ensuredOptions.smallestUnit, undefined, minUnit, maxUnit)
   const roundingFunc = parseRoundingModeOption(ensuredOptions, Math.round)
