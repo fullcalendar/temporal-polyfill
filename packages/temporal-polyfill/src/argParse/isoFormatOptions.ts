@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import {
   MICROSECOND,
   MILLISECOND,
@@ -7,7 +8,6 @@ import {
   nanoIn,
   unitDigitMap,
 } from '../dateUtils/units'
-import { Temporal } from '../spec'
 import { OVERFLOW_REJECT } from './overflowHandling'
 import { constrainInt, ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'

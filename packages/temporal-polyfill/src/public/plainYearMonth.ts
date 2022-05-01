@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
@@ -22,7 +23,6 @@ import { refineBaseObj } from '../dateUtils/parseRefine'
 import { MONTH, YEAR, YearMonthUnitInt } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
 

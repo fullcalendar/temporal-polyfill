@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { isObjectLike } from '../argParse/refine'
 import { PlainDateTime, PlainDateTimeArg, createDateTime } from '../public/plainDateTime'
 import {
@@ -5,7 +6,6 @@ import {
   ZonedDateTimeArg,
   createZonedDateTimeFromFields,
 } from '../public/zonedDateTime'
-import { Temporal } from '../spec'
 import { ensureObj } from './abstract'
 import { tryParseZonedDateTime } from './parse'
 import { refineBaseObj, refineZonedObj } from './parseRefine'

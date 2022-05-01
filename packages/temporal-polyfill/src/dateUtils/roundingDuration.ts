@@ -1,6 +1,6 @@
 import { DiffConfig } from '../argParse/diffOptions'
 import { durationUnitNames } from '../argParse/unitStr'
-import { Temporal } from '../spec'
+import { Temporal } from 'temporal-spec'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { durationDayTimeToNano, nanoToDuration } from './dayAndTime'
 import { DiffableObj } from './diff'

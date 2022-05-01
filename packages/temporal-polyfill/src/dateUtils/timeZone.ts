@@ -1,4 +1,4 @@
-import { Instant } from '..'
+import { Temporal } from 'temporal-spec'
 import {
   DISAMBIG_COMPATIBLE,
   DISAMBIG_EARLIER,
@@ -6,8 +6,8 @@ import {
   DISAMBIG_REJECT,
   DisambigInt,
 } from '../argParse/disambig'
+import { Instant } from '../public/instant'
 import { PlainDateTime } from '../public/plainDateTime'
-import { Temporal } from '../spec'
 import { toEpochNano } from './epoch'
 import { nanoInDayBI } from './units'
 

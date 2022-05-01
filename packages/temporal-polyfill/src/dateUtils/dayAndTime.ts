@@ -1,4 +1,4 @@
-import { Temporal } from '../spec'
+import { Temporal } from 'temporal-spec'
 import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
 import { ISOTimeFields } from './isoFields'
 import { LocalTimeFields } from './localFields'

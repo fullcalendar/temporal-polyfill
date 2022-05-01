@@ -48,6 +48,9 @@
     "/dist",
     "/*.d.ts"
   ],
+  "dependencies": {
+    "temporal-spec": "workspace:*"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.22",
     "@types/jest": "^26.0.24",

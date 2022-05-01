@@ -1,6 +1,6 @@
+import { Temporal } from 'temporal-spec'
 import { ensureObj } from '../dateUtils/abstract'
 import { TimeZone } from '../public/timeZone'
-import { Temporal } from '../spec'
 import { isObjectLike } from './refine'
 
 export function timeZoneFromObj(obj: any): Temporal.TimeZoneProtocol {

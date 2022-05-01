@@ -1,9 +1,9 @@
+import { Temporal } from 'temporal-spec'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { ISODateTimeFields } from '../dateUtils/isoFields'
 import { nanoInMilliBI } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { Temporal } from '../spec'
 import { Calendar } from './calendar'
 import { Instant } from './instant'
 import { createDate } from './plainDate'
@@ -25,7 +25,7 @@ const Now = {
   plainTimeISO: getPlainTimeISO,
   instant: getInstant,
   timeZone: getTimeZone,
-  [Symbol.toStringTag]: 'Temporal.Now', // TODO: make readonly
+  [Symbol.toStringTag]: 'Temporal.Now' as ('Temporal.Now'), // TODO: make readonly
 }
 
 export { Now }
@@ -52,7 +52,7 @@ function getPlainDateTime(
   return createDateTime(buidZonedFields(calendarArg, timeZoneArg))
 }
 
-function getPlainDateISO(timeZoneArg: Temporal.TimeZoneLike): Temporal.PlainDate {
+function getPlainDateISO(timeZoneArg?: Temporal.TimeZoneLike): Temporal.PlainDate {
   return createDate(buidZonedFields(isoCalendarID, timeZoneArg))
 }
 
@@ -63,7 +63,7 @@ function getPlainDate(
   return createDate(buidZonedFields(calendarArg, timeZoneArg))
 }
 
-function getPlainTimeISO(timeZoneArg: Temporal.TimeZoneLike): Temporal.PlainTime {
+function getPlainTimeISO(timeZoneArg?: Temporal.TimeZoneLike): Temporal.PlainTime {
   return createTime(buidZonedFields(isoCalendarID, timeZoneArg))
 }
 

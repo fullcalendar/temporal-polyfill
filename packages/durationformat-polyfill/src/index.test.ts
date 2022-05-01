@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
-import { Duration } from 'temporal-polyfill' // TODO: how to import without building?
+import { Temporal } from 'temporal-polyfill'
 import { DurationFormat } from './index'
+
+const { Duration } = Temporal
 
 test.each`
   dur | expected

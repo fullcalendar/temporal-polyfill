@@ -2659,6 +2659,7 @@ __metadata:
     "@types/jest": ^26.0.23
     jest: ^27.0.4
     temporal-polyfill: "workspace:*"
+    temporal-spec: "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -2823,6 +2824,7 @@ __metadata:
     "@types/jest": ^26.0.23
     jest: ^27.0.4
     temporal-polyfill: "workspace:*"
+    temporal-spec: "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -6471,7 +6473,14 @@ __metadata:
     chai: ^4.3.4
     jest: ^27.0.6
     jest-date-mock: ^1.0.8
+    temporal-spec: "workspace:*"
     typescript: ^4.3.5
+  languageName: unknown
+  linkType: soft
+
+"temporal-spec@workspace:*, temporal-spec@workspace:packages/temporal-spec":
+  version: 0.0.0-use.local
+  resolution: "temporal-spec@workspace:packages/temporal-spec"
   languageName: unknown
   linkType: soft
 

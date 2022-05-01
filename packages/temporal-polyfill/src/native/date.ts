@@ -10,6 +10,6 @@ export type DateWithTemporal = Date & DateTemporalMethods
 
 // implementation
 
-export function toTemporalInstant(date: Date): Instant {
-  return Instant.fromEpochMilliseconds(date.valueOf())
+export function toTemporalInstant(this: Date): Instant {
+  return Instant.fromEpochMilliseconds(this.valueOf())
 }

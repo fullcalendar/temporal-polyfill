@@ -1462,8 +1462,8 @@ export namespace Temporal {
   };
 }
 
-declare namespace Intl {
-  type Formattable =
+export namespace Intl {
+  export type Formattable =
     | Date
     | Temporal.Instant
     | Temporal.ZonedDateTime
@@ -1473,7 +1473,7 @@ declare namespace Intl {
     | Temporal.PlainYearMonth
     | Temporal.PlainMonthDay;
 
-  interface DateTimeFormatRangePart extends globalThis.Intl.DateTimeFormatPart {
+  export interface DateTimeFormatRangePart extends globalThis.Intl.DateTimeFormatPart {
     source: 'shared' | 'startRange' | 'endRange';
   }
 
@@ -1517,15 +1517,6 @@ declare namespace Intl {
     formatRangeToParts(startDate: Date | number, endDate: Date | number): DateTimeFormatRangePart[];
   }
 
-  export interface DateTimeFormatOptions extends Omit<globalThis.Intl.DateTimeFormatOptions, 'timeZone' | 'calendar'> {
-    calendar?: string | Temporal.CalendarProtocol;
-    timeZone?: string | Temporal.TimeZoneProtocol;
-    // TODO: remove the props below after TS lib declarations are updated
-    dayPeriod?: 'narrow' | 'short' | 'long';
-    dateStyle?: 'full' | 'long' | 'medium' | 'short';
-    timeStyle?: 'full' | 'long' | 'medium' | 'short';
-  }
-
   export const DateTimeFormat: {
     /**
      * Creates `Intl.DateTimeFormat` objects that enable language-sensitive
@@ -1541,8 +1532,16 @@ declare namespace Intl {
      */
     supportedLocalesOf(locales: string | string[], options?: DateTimeFormatOptions): string[];
   };
-}
 
-export { Intl as Intl };
+  export interface DateTimeFormatOptions extends Omit<globalThis.Intl.DateTimeFormatOptions, 'timeZone' | 'calendar'> {
+    calendar?: string | Temporal.CalendarProtocol;
+    timeZone?: string | Temporal.TimeZoneProtocol;
+
+    // TODO: remove the props below after TS lib declarations are updated
+    dayPeriod?: 'narrow' | 'short' | 'long';
+    dateStyle?: 'full' | 'long' | 'medium' | 'short';
+    timeStyle?: 'full' | 'long' | 'medium' | 'short';
+  };
+}
 
 export function toTemporalInstant(this: Date): Temporal.Instant;

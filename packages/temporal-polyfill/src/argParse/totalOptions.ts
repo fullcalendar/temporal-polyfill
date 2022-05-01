@@ -1,6 +1,6 @@
+import { Temporal } from 'temporal-spec'
 import { NANOSECOND, UnitInt, YEAR } from '../dateUtils/units'
 import { PlainDateTimeArg } from '../public/plainDateTime'
-import { Temporal } from '../spec'
 import { ensureOptionsObj } from './refine'
 import { parseUnit } from './unitStr'
 

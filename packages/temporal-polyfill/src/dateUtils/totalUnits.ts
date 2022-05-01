@@ -1,5 +1,5 @@
+import { Temporal } from 'temporal-spec'
 import { durationUnitNames } from '../argParse/unitStr'
-import { Temporal } from '../spec'
 import { durationDayTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
 import {

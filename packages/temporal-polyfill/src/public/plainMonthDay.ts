@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
@@ -17,7 +18,6 @@ import { parseMonthDay } from '../dateUtils/parse'
 import { refineBaseObj } from '../dateUtils/parseRefine'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { Temporal } from '../spec'
 import { Calendar, createDefaultCalendar } from './calendar'
 
 export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLike | string

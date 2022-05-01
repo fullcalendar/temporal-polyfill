@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
@@ -23,7 +24,6 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { Temporal } from '../spec'
 import { createWeakMap } from '../utils/obj'
 import { Duration, createDuration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'

@@ -1,52 +1,12 @@
-/*
-Exports a single function that, when called, installs the API globally
-Does NOT export global types
+import { DateTimeFormat, Temporal, toTemporalInstant } from './internals'
 
-SPECIAL NOTE:
-Imports from non-top-level files are not allowed
-*/
-import {
-  Calendar,
-  Duration,
-  Instant,
-  Now,
-  PlainDate,
-  PlainDateTime,
-  PlainMonthDay,
-  PlainTime,
-  PlainYearMonth,
-  TimeZone,
-  ZonedDateTime,
-  extendDateTimeFormat,
-  toTemporalInstant,
-} from './impl'
+// TODO: better way to extend already-polyfilled rootObj
 
-export function ensureGlobals(): void {
+export default function(): void {
   if (!globalThis.Temporal) {
-    globalThis.Temporal = {
-      PlainYearMonth,
-      PlainMonthDay,
-      PlainDate,
-      PlainTime,
-      PlainDateTime,
-      ZonedDateTime,
-      Instant,
-      Calendar,
-      TimeZone,
-      Duration,
-      Now,
-    }
-
-    patchDate(globalThis.Date)
-
-    ;(globalThis.Intl as any).DateTimeFormat = extendDateTimeFormat(globalThis.Intl.DateTimeFormat)
+    globalThis.Temporal = Temporal
+    Intl.DateTimeFormat = DateTimeFormat
+    // eslint-disable-next-line no-extend-native
+    Date.prototype.toTemporalInstant = toTemporalInstant
   }
 }
-
-export function patchDate(DateClass: typeof Date): void {
-  DateClass.prototype.toTemporalInstant = function() {
-    return toTemporalInstant(this) // TODO: forward arguments?
-  }
-}
-
-export { extendDateTimeFormat }

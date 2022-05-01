@@ -1,9 +1,9 @@
+import { Temporal } from 'temporal-spec'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
 import { createDateTime } from '../public/plainDateTime'
 import { TimeZone } from '../public/timeZone'
-import { Temporal } from '../spec'
 import { OrigDateTimeFormat } from './intlUtils'
 
 // factory types

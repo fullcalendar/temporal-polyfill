@@ -1,6 +1,6 @@
+import { Temporal } from 'temporal-spec'
 import { DayTimeUnit } from '../dateUtils/dayAndTime'
 import { DAY, DayTimeUnitInt, nanoIn, nanoInDay } from '../dateUtils/units'
-import { Temporal } from '../spec'
 import { RoundingFunc } from '../utils/math'
 import { ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'

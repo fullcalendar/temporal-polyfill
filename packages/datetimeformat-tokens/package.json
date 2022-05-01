@@ -32,10 +32,11 @@
     "locales-compile": "yarn run compile-localeOrdinalsData"
   },
   "dependencies": {
-    "temporal-polyfill": "workspace:*"
+    "temporal-spec": "workspace:*"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
-    "jest": "^27.0.4"
+    "jest": "^27.0.4",
+    "temporal-polyfill": "workspace:*"
   }
 }

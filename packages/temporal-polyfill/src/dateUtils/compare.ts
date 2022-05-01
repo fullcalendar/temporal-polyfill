@@ -1,4 +1,4 @@
-import { Temporal } from '../spec'
+import { Temporal } from 'temporal-spec'
 import { compareValues } from '../utils/math'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'

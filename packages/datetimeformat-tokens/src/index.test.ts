@@ -1,5 +1,7 @@
-import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
+import { Temporal } from 'temporal-polyfill'
 import { TokenDateTimeFormat } from './index'
+
+const { ZonedDateTime, PlainDateTime } = Temporal
 
 const plainDates = [
   new PlainDateTime(1970, 1, 1, 2, 46, 40),

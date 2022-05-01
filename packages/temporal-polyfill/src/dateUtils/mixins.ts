@@ -1,5 +1,5 @@
+import { Temporal } from 'temporal-spec'
 import { unitNames } from '../argParse/unitStr'
-import { Temporal } from '../spec'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'

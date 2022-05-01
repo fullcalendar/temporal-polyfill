@@ -1,6 +1,6 @@
+import { Temporal } from 'temporal-spec'
 import { unitNames } from '../argParse/unitStr'
 import { PlainDate } from '../public/plainDate'
-import { Temporal } from '../spec'
 import { DiffableObj, diffAccurate } from './diff'
 import { DurationFields, overrideDuration } from './durationFields'
 import { DAY, DateUnitInt, UnitInt, WEEK } from './units'

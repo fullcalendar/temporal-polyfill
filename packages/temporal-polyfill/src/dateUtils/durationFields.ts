@@ -1,5 +1,5 @@
+import { Temporal } from 'temporal-spec'
 import { durationUnitNames } from '../argParse/unitStr'
-import { Temporal } from '../spec'
 import { numSign } from '../utils/math'
 import { mapHashByKeys } from '../utils/obj'
 import { NANOSECOND, UnitInt, YEAR } from './units'

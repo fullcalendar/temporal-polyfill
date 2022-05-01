@@ -1,6 +1,6 @@
+import { Temporal } from 'temporal-spec'
 import { UnsignedDurationFields } from '../dateUtils/durationFields'
 import { UnitInt } from '../dateUtils/units'
-import { Temporal } from '../spec'
 import { strArrayToHash } from '../utils/obj'
 
 // These names must match the indexes of the Unit integers

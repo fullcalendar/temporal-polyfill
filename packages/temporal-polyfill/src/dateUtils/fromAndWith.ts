@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { extractCalendar } from '../argParse/calendar'
 import {
   dateFieldMap,
@@ -14,7 +15,6 @@ import { PlainDate } from '../public/plainDate'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
 import { ZonedDateTime } from '../public/zonedDateTime'
-import { Temporal } from '../spec'
 import { mapHash } from '../utils/obj'
 import { constrainTimeISO } from './constrain'
 import { partialLocalTimeToISO, zeroISOTimeFields } from './dayAndTime'

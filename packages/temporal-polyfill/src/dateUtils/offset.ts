@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { parseDisambigOption } from '../argParse/disambig'
 import {
   OFFSET_IGNORE,
@@ -7,7 +8,6 @@ import {
 } from '../argParse/offsetHandling'
 import { Calendar } from '../public/calendar'
 import { createDateTime } from '../public/plainDateTime'
-import { Temporal } from '../spec'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
 import { isoFieldsToEpochNano } from './epoch'

@@ -1,5 +1,4 @@
-import { Duration, DurationLike } from 'temporal-polyfill'
-// TODO: use temporal-spec
+import { Temporal } from 'temporal-spec'
 
 // Unfortunately neccesary as typescript does not include typings for ecma drafts
 // TODO: Remove when ListFormat becomes part of the official spec
@@ -43,7 +42,7 @@ function largestCommonString(a: string, b: string): string {
 
 type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
 
-const durationFields: (keyof DurationLike)[] = [ // TODO: get this from temporal?
+const durationFields: (keyof Temporal.DurationLike)[] = [
   'years',
   'months',
   'weeks',
@@ -137,12 +136,12 @@ export class DurationFormat {
   }
 
   formatToParts(
-    durationLike: Duration | DurationLike,
+    durationLike: Temporal.Duration | Temporal.DurationLike,
   ): Intl.RelativeTimeFormatPart[] {
     const duration =
-      durationLike instanceof Duration
+      durationLike instanceof Temporal.Duration
         ? durationLike
-        : Duration.from(durationLike)
+        : Temporal.Duration.from(durationLike)
 
     // Storage array
     const durationPartArrays: Intl.RelativeTimeFormatPart[][] = []
@@ -188,7 +187,7 @@ export class DurationFormat {
     return combinePartsArrays(durationPartArrays, this.listFormatter)
   }
 
-  format(durationLike: Duration | DurationLike): string {
+  format(durationLike: Temporal.Duration | Temporal.DurationLike): string {
     const parts = this.formatToParts(durationLike)
     return parts
       .map((val) => {

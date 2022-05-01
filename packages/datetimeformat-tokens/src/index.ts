@@ -1,4 +1,4 @@
-import { PlainDateTime, ZonedDateTime } from 'temporal-polyfill'
+import { Temporal } from 'temporal-spec'
 import { getOrdinalForValue } from './ordinals'
 
 // Regex to replace token string with actual values
@@ -18,7 +18,7 @@ const tokenMap: {
     property: string
     transform?: (
       parts: { [x: string]: string },
-      date: PlainDateTime | ZonedDateTime,
+      date: Temporal.PlainDateTime | Temporal.ZonedDateTime,
       locale: string
     ) => string
   }
@@ -130,8 +130,8 @@ export class TokenDateTimeFormat {
     this.formatter = new Intl.DateTimeFormat(locale, internalOptions)
   }
 
-  format(dt: PlainDateTime | ZonedDateTime): string {
-    const timeZone = dt instanceof ZonedDateTime ? dt.timeZone.id : 'UTC'
+  format(dt: Temporal.PlainDateTime | Temporal.ZonedDateTime): string {
+    const timeZone = dt instanceof Temporal.ZonedDateTime ? dt.timeZone.id : 'UTC'
     const resolvedOptions = this.formatter.resolvedOptions()
 
     // Adjust formatter only if timeZone is different
@@ -142,7 +142,7 @@ export class TokenDateTimeFormat {
       } as Intl.DateTimeFormatOptions)
     }
 
-    const zdt = dt instanceof ZonedDateTime ? dt : dt.toZonedDateTime('UTC')
+    const zdt = dt instanceof Temporal.ZonedDateTime ? dt : dt.toZonedDateTime('UTC')
     const parts = this.formatter
       .formatToParts(zdt.epochMilliseconds)
       .reduce((accum: Record<string, string>, { type, value }) => {

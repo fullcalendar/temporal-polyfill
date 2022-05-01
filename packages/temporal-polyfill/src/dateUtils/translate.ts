@@ -1,9 +1,9 @@
+import { Temporal } from 'temporal-spec'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainInt } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { createDate } from '../public/plainDate'
 import { createDateTime } from '../public/plainDateTime'
-import { Temporal } from '../spec'
 import {
   durationDayTimeToNano,
   durationTimeToNano,

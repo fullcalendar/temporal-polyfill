@@ -1,7 +1,7 @@
+import { Temporal } from 'temporal-spec'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { Calendar, createDefaultCalendar } from '../public/calendar'
-import { Temporal } from '../spec'
 import { isObjectLike } from './refine'
 
 // TODO: move to argParse like timeZoneFromObj?
