@@ -1,12 +1,26 @@
 
-export { PlainYearMonth } from './plainYearMonth'
-export { PlainMonthDay } from './plainMonthDay'
-export { PlainDate } from './plainDate'
-export { PlainTime } from './plainTime'
-export { PlainDateTime } from './plainDateTime'
-export { ZonedDateTime } from './zonedDateTime'
-export { Instant } from './instant'
-export { Calendar } from './calendar'
-export { TimeZone } from './timeZone'
-export { Duration } from './duration'
-export { Now } from './now'
+import { Calendar } from './calendar'
+import { Duration } from './duration'
+import { Instant } from './instant'
+import { Now } from './now'
+import { PlainDate } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
+import { TimeZone } from './timeZone'
+import { ZonedDateTime } from './zonedDateTime'
+
+export const Temporal = {
+  PlainYearMonth,
+  PlainMonthDay,
+  PlainDate,
+  PlainTime,
+  PlainDateTime,
+  ZonedDateTime,
+  Instant,
+  Calendar,
+  TimeZone,
+  Duration,
+  Now,
+}

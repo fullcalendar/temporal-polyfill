@@ -1,4 +1,6 @@
-import { DateTimeFormat, Temporal, toTemporalInstant } from './internals'
+import { toTemporalInstant } from './native/date'
+import { DateTimeFormat } from './native/intlTemporal'
+import { Temporal } from './public/temporal'
 
 // TODO: better way to extend already-polyfilled rootObj
 

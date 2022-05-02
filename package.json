@@ -21,6 +21,7 @@
   "scripts": {
     "preinstall": "npx only-allow yarn",
     "clean": "yall -pw pkg:clean",
+    "cool": "node ./scripts/pkgCool.cjs",
     "build": "yall -s types bundle-types bundle-js exports-fix",
     "watch": "yall -p types bundle-js --watch",
     "types": "tsc --build",

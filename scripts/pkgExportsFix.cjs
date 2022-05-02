@@ -24,4 +24,5 @@ function doExportsFix(dir) {
 
 function buildDtsCode(exportSubname) {
   return `export * from './dist/${exportSubname}'\n`
+  // export default as default ???
 }

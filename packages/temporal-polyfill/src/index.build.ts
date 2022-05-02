@@ -1,4 +1,4 @@
-import * as Spec from 'temporal-spec'
+import type * as Spec from 'temporal-spec'
 import {
   Intl as IntlImpl,
   Temporal as TemporalImpl,
@@ -8,6 +8,7 @@ import {
 const TemporalNative = globalThis.Temporal
 const IntlNative = globalThis.Intl as any
 // `any` because of DateTimeFormatOptions shortcoming temporal-spec/global
+// ^^^fix this up
 
 export const Temporal: typeof Spec.Temporal = TemporalNative || TemporalImpl
 export const Intl: typeof Spec.Intl = TemporalNative ? IntlNative : IntlImpl

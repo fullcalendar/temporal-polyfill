@@ -5,6 +5,8 @@ dist
 
 # see pkgExportsFix
 /packages/*/*.d.ts
+# hack
+!/packages/temporal-spec/*.d.ts
 
 .yarn/*
 !.yarn/patches
