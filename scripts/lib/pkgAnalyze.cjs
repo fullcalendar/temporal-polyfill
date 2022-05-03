@@ -71,6 +71,7 @@ function analyzePkgConfig2(pkgConfig) {
 
   const sideEffectsArray = Array.isArray(pkgConfig.sideEffects) ? pkgConfig.sideEffects : []
   const entryPoints = []
+  const entryPointTypes = []
   let globalEntryPoint = ''
 
   for (const exportId in exportsHash) {
@@ -95,10 +96,13 @@ function analyzePkgConfig2(pkgConfig) {
         globalEntryPoint = entryPoint
       }
     }
+
+    entryPointTypes.push(importPathNoExt + '.d.ts')
   }
 
   return {
     entryPoints,
+    entryPointTypes,
     globalEntryPoint,
     dependencyNames: Object.keys(pkgConfig.dependencies || {}),
   }

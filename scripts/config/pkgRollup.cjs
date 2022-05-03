@@ -3,10 +3,13 @@ const { analyzePkgConfig2, getPkgConfigAtRoot } = require('../lib/pkgAnalyze.cjs
 const resolve = require('@rollup/plugin-node-resolve').default
 const sucrase = require('@rollup/plugin-sucrase')
 const { terser } = require('rollup-plugin-terser')
+const dts = require('rollup-plugin-dts').default
 
 module.exports = (commandLineArgs) => {
   const { watch } = commandLineArgs
-  const { entryPoints, globalEntryPoint, dependencyNames } = analyzePkgConfig2(getPkgConfigAtRoot())
+  const { entryPoints, entryPointTypes, globalEntryPoint, dependencyNames } = analyzePkgConfig2(
+    getPkgConfigAtRoot(),
+  )
 
   return [
     {
@@ -23,6 +26,12 @@ module.exports = (commandLineArgs) => {
       external: dependencyNames,
       output: buildGlobalOutputConfig(),
       plugins: buildPlugins(watch),
+    },
+    !watch && {
+      input: entryPointTypes,
+      external: dependencyNames,
+      output: { format: 'es', dir: 'dist-dts' },
+      plugins: [dts()],
     },
   ]
 }
