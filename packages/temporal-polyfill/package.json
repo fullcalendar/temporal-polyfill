@@ -23,26 +23,29 @@
   },
   "type": "module",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./impl": {
       "require": "./dist/impl.cjs",
-      "import": "./dist/impl.js"
+      "import": "./dist/impl.mjs"
     },
     "./shim": {
       "require": "./dist/shim.cjs",
-      "import": "./dist/shim.js"
+      "import": "./dist/shim.mjs"
     },
     "./global": {
       "require": "./dist/global.cjs",
-      "import": "./dist/global.js"
+      "import": "./dist/global.mjs"
     }
   },
+  "sideEffects": [
+    "./dist/global.*"
+  ],
   "files": [
     "/src",
     "/dist",

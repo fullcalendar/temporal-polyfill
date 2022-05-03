@@ -1,9 +1,11 @@
 const path = require('path')
+const minimatch = require('minimatch')
 
 module.exports = {
   getPkgConfigAtRoot,
   getPkgConfig,
   analyzePkgConfig,
+  analyzePkgConfig2,
 }
 
 function getPkgConfigAtRoot() {
@@ -42,4 +44,62 @@ function analyzePkgConfig(pkgConfig) {
   }
 
   return { exportSubnames, exportPaths }
+}
+
+function analyzePkgConfig2(pkgConfig) {
+  if (pkgConfig.type !== 'module') {
+    throw new Error('In package.json, must specify "type":"module"')
+  }
+  ['main', 'module', 'types'].forEach((prop) => {
+    if (!pkgConfig[prop]) {
+      throw new Error(`In package.json, must specify "${prop}"`)
+    }
+  })
+
+  const exportsHash = pkgConfig.exports || {}
+  const defaultExport = exportsHash['.']
+
+  if (typeof defaultExport !== 'object' || !defaultExport) {
+    throw new Error('Must specify default "." export')
+  }
+  if (defaultExport.import !== pkgConfig.module) {
+    throw new Error('default export must be consistent with pkg.module')
+  }
+  if (defaultExport.require !== pkgConfig.main) {
+    throw new Error('default export must be consistent with pkg.main')
+  }
+
+  const sideEffectsArray = Array.isArray(pkgConfig.sideEffects) ? pkgConfig.sideEffects : []
+  const entryPoints = []
+  let globalEntryPoint = ''
+
+  for (const exportId in exportsHash) {
+    const exportPaths = exportsHash[exportId]
+    const importPath = exportPaths.import || ''
+    const requirePath = exportPaths.require || ''
+    const importPathNoExt = importPath.replace(/\.mjs$/, '')
+    const requirePathNoExt = requirePath.replace(/\.cjs$/, '')
+
+    if (importPathNoExt !== requirePathNoExt) {
+      throw new Error('Inconsistent "import" and "require"')
+    }
+
+    const entryPoint = importPathNoExt.replace(/\.\/dist\//, './src/') + '.ts'
+    entryPoints.push(entryPoint)
+
+    for (const sideEffectsGlob of sideEffectsArray) {
+      if (minimatch(importPath, sideEffectsGlob)) {
+        if (globalEntryPoint) {
+          throw new Error('Can only have one sideEffects entry point')
+        }
+        globalEntryPoint = entryPoint
+      }
+    }
+  }
+
+  return {
+    entryPoints,
+    globalEntryPoint,
+    dependencyNames: Object.keys(pkgConfig.dependencies || {}),
+  }
 }
