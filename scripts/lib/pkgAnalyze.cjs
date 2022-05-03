@@ -85,24 +85,27 @@ function analyzePkgConfig2(pkgConfig) {
       throw new Error('Inconsistent "import" and "require"')
     }
 
-    const entryPoint = importPathNoExt.replace(/\.\/dist\//, './src/') + '.ts'
-    entryPoints.push(entryPoint)
+    const match = importPathNoExt.match(/\.\/dist\/(.*)$/)
+    if (match) {
+      const entryPoint = './src/' + match[1] + '.ts'
+      entryPoints.push(entryPoint)
 
-    for (const sideEffectsGlob of sideEffectsArray) {
-      if (minimatch(importPath, sideEffectsGlob)) {
-        if (globalEntryPoint) {
-          throw new Error('Can only have one sideEffects entry point')
+      for (const sideEffectsGlob of sideEffectsArray) {
+        if (minimatch(importPath, sideEffectsGlob)) {
+          if (globalEntryPoint) {
+            throw new Error('Can only have one sideEffects entry point')
+          }
+          globalEntryPoint = entryPoint
         }
-        globalEntryPoint = entryPoint
       }
-    }
 
-    entryPointTypes.push(importPathNoExt + '.d.ts')
+      entryPointTypes.push(importPathNoExt + '.d.ts')
+    }
   }
 
   return {
-    entryPoints,
-    entryPointTypes,
+    entryPoints, // in src
+    entryPointTypes, // in dist
     globalEntryPoint,
     dependencyNames: Object.keys(pkgConfig.dependencies || {}),
   }

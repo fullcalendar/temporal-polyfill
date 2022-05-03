@@ -1,3 +1,4 @@
+const path = require('path')
 const fs = require('fs/promises')
 const { analyzePkgConfig2, getPkgConfigAtRoot } = require('../lib/pkgAnalyze.cjs')
 const resolve = require('@rollup/plugin-node-resolve').default
@@ -7,9 +8,12 @@ const dts = require('rollup-plugin-dts').default
 
 module.exports = (commandLineArgs) => {
   const { watch } = commandLineArgs
-  const { entryPoints, entryPointTypes, globalEntryPoint, dependencyNames } = analyzePkgConfig2(
-    getPkgConfigAtRoot(),
-  )
+  const pkgInfo = analyzePkgConfig2(getPkgConfigAtRoot())
+  const { entryPoints, entryPointTypes, globalEntryPoint, dependencyNames } = pkgInfo
+
+  if (!entryPoints.length) {
+    return []
+  }
 
   return [
     {
@@ -30,7 +34,25 @@ module.exports = (commandLineArgs) => {
     !watch && {
       input: entryPointTypes,
       external: dependencyNames,
-      output: { format: 'es', dir: 'dist-dts' },
+      output: { // use buildOutputConfig?
+        format: 'es',
+        dir: 'dist',
+        entryFileNames: '[name].d.ts',
+        chunkFileNames: 'common-[hash].d.ts',
+        // no source maps
+        plugins: [
+          {
+            // before writing .d.ts files
+            generateBundle: async(options, bundle) => {
+              const rootPaths = Object.keys(bundle)
+              return Promise.all([
+                cleanDistTypes(),
+                cleanRootTypes().then(writeRootTypes(rootPaths)),
+              ])
+            },
+          },
+        ],
+      },
       plugins: [dts()],
     },
   ]
@@ -71,7 +93,7 @@ function buildPlugins(watch) {
   ]
 }
 
-function tsFileOverriding(forcedExtension) {
+async function tsFileOverriding(forcedExtension) {
   return {
     load: async(id) => {
       const match = id.match(/^(.*)\.ts$/)
@@ -83,5 +105,45 @@ function tsFileOverriding(forcedExtension) {
       }
       return null
     },
+  }
+}
+
+async function cleanDistTypes() {
+  // tsbuild cache is invalid now
+  await fs.rm('tsconfig.tsbuildinfo', { recursive: true, force: true })
+
+  const distDir = path.join(process.cwd(), 'dist')
+  const files = await fs.readdir(distDir)
+
+  for (const file of files) {
+    const filePath = path.join(distDir, file)
+    const stat = await fs.lstat(filePath)
+    if (
+      stat.isDirectory() ||
+      file.match(/\.d\.ts$/) ||
+      file.match(/\.d\.ts\.map$/)
+    ) {
+      await fs.rm(filePath, { recursive: true, force: true })
+    }
+  }
+}
+
+async function cleanRootTypes() {
+  const files = await fs.readdir(process.cwd())
+  for (const file of files) {
+    if (file.match(/\.d\.ts$/)) {
+      await fs.rm(file, { recursive: true, force: true })
+    }
+  }
+}
+
+async function writeRootTypes(rootPaths) {
+  for (const rootPath of rootPaths) {
+    console.log('writing', rootPath)
+    await fs.writeFile(
+      rootPath,
+      `export * from './dist/${rootPath}'\n`,
+      // export default too ???
+    )
   }
 }
