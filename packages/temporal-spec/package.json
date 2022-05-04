@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "type": "module",
   "main": "./index.cjs",
-  "module": "./index.js",
+  "module": "./index.mjs",
   "types": "./index.d.ts",
   "exports": {
     ".": {
       "require": "./index.cjs",
-      "import": "./index.js"
+      "import": "./index.mjs"
     },
     "./global": {
       "require": "./global.cjs",
-      "import": "./global.js"
+      "import": "./global.mjs"
     }
   }
 }
