@@ -78,7 +78,7 @@ function buildPlugins(watch) {
 }
 
 // a Rollup plugin
-async function tsFileOverriding(forcedExtension) {
+function tsFileOverriding(forcedExtension) {
   return {
     load: async(id) => {
       const match = id.match(/^(.*)\.ts$/)

@@ -26,7 +26,7 @@ function typePreparing() {
 }
 
 async function cleanDistTypes(pkgDir) {
-  await cleanTypeScriptCache() // invalid now that we're deleting .d.ts files
+  await cleanTypeScriptCache(pkgDir) // invalid now that we're deleting .d.ts files
 
   const distDir = path.join(pkgDir, 'dist')
   const filenames = await fs.readdir(distDir)
@@ -53,15 +53,9 @@ async function cleanTypeScriptCache(pkgDir) {
 }
 
 /*
-delete this file but transplant the comments
-also, remove esbuild
-
 HACK to overcome export maps not working in TypeScript
 https://github.com/microsoft/TypeScript/issues/33079
 Writes .d.ts files in root of package, referencing ./dist/*
-
-When removing this hack, grep the codebase for 'pkgExportsFix'
-Also, remove package.json::files entry for "/*.d.ts"
 */
 async function writeRootTypesHack(pkgDir, rootPaths) {
   for (const rootPath of rootPaths) {
