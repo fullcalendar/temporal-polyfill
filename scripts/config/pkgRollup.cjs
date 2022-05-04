@@ -1,70 +1,52 @@
-const path = require('path')
 const fs = require('fs/promises')
-const { analyzePkgConfig2, getPkgConfigAtRoot } = require('../lib/pkgAnalyze.cjs')
+const { analyzePkgConfig, getPkgConfig } = require('../lib/pkgAnalyze.cjs')
 const resolve = require('@rollup/plugin-node-resolve').default
 const sucrase = require('@rollup/plugin-sucrase')
 const { terser } = require('rollup-plugin-terser')
 const dts = require('rollup-plugin-dts').default
+const { typePreparing } = require('../lib/pkgTypes.cjs')
+const terserConfig = require('./terser.json')
 
 module.exports = (commandLineArgs) => {
   const { watch } = commandLineArgs
-  const pkgInfo = analyzePkgConfig2(getPkgConfigAtRoot())
-  const { entryPoints, entryPointTypes, globalEntryPoint, dependencyNames } = pkgInfo
-
-  if (!entryPoints.length) {
-    return []
-  }
+  const pkgAnalysis = analyzePkgConfig(getPkgConfig(process.cwd()))
+  const { entryPoints, entryPointTypes, globalEntryPoints, dependencyNames } = pkgAnalysis
 
   return [
-    {
+    entryPoints.length && {
       input: entryPoints,
       external: dependencyNames,
       output: [
-        buildOutputConfig('es', '.mjs'),
-        buildOutputConfig('cjs', '.cjs'),
+        buildOutputConfig('es', '.mjs', true),
+        buildOutputConfig('cjs', '.cjs', true),
       ],
       plugins: buildPlugins(watch),
     },
-    globalEntryPoint && {
+    ...globalEntryPoints.map((globalEntryPoint) => ({
       input: globalEntryPoint,
       external: dependencyNames,
       output: buildGlobalOutputConfig(),
       plugins: buildPlugins(watch),
-    },
-    !watch && {
+    })),
+    (entryPointTypes.length && !watch) && {
       input: entryPointTypes,
       external: dependencyNames,
-      output: { // use buildOutputConfig?
-        format: 'es',
-        dir: 'dist',
-        entryFileNames: '[name].d.ts',
-        chunkFileNames: 'common-[hash].d.ts',
-        // no source maps
-        plugins: [
-          {
-            // before writing .d.ts files
-            generateBundle: async(options, bundle) => {
-              const rootPaths = Object.keys(bundle)
-              return Promise.all([
-                cleanDistTypes(),
-                cleanRootTypes().then(writeRootTypes(rootPaths)),
-              ])
-            },
-          },
-        ],
-      },
-      plugins: [dts()],
+      output: buildOutputConfig('es', '.d.ts', false),
+      plugins: [dts(), typePreparing()],
     },
   ]
 }
 
-function buildOutputConfig(format, extension) {
+// Output config
+// -------------------------------------------------------------------------------------------------
+
+function buildOutputConfig(format, extension, sourcemap) {
   return {
     format,
     dir: 'dist',
     entryFileNames: '[name]' + extension,
     chunkFileNames: 'common-[hash]' + extension,
-    sourcemap: true,
+    sourcemap,
     sourcemapExcludeSources: true,
   }
 }
@@ -79,20 +61,23 @@ function buildGlobalOutputConfig() {
   }
 }
 
+// Rollup plugins
+// -------------------------------------------------------------------------------------------------
+
 function buildPlugins(watch) {
   return [
     resolve({
       extensions: ['.js', '.ts'],
     }),
     sucrase({
-      exclude: ['node_modules/**'],
       transforms: ['typescript'],
     }),
     tsFileOverriding('.build.ts'),
-    !watch && terser(), // TODO: use terser.json config (import json)
+    !watch && terser(terserConfig),
   ]
 }
 
+// a Rollup plugin
 async function tsFileOverriding(forcedExtension) {
   return {
     load: async(id) => {
@@ -105,45 +90,5 @@ async function tsFileOverriding(forcedExtension) {
       }
       return null
     },
-  }
-}
-
-async function cleanDistTypes() {
-  // tsbuild cache is invalid now
-  await fs.rm('tsconfig.tsbuildinfo', { recursive: true, force: true })
-
-  const distDir = path.join(process.cwd(), 'dist')
-  const files = await fs.readdir(distDir)
-
-  for (const file of files) {
-    const filePath = path.join(distDir, file)
-    const stat = await fs.lstat(filePath)
-    if (
-      stat.isDirectory() ||
-      file.match(/\.d\.ts$/) ||
-      file.match(/\.d\.ts\.map$/)
-    ) {
-      await fs.rm(filePath, { recursive: true, force: true })
-    }
-  }
-}
-
-async function cleanRootTypes() {
-  const files = await fs.readdir(process.cwd())
-  for (const file of files) {
-    if (file.match(/\.d\.ts$/)) {
-      await fs.rm(file, { recursive: true, force: true })
-    }
-  }
-}
-
-async function writeRootTypes(rootPaths) {
-  for (const rootPath of rootPaths) {
-    console.log('writing', rootPath)
-    await fs.writeFile(
-      rootPath,
-      `export * from './dist/${rootPath}'\n`,
-      // export default too ???
-    )
   }
 }

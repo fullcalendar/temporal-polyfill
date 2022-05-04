@@ -1,16 +1,18 @@
-const shell = require('shelljs')
-const { getPkgConfigAtRoot } = require('./lib/pkgAnalyze.cjs')
+const path = require('path')
+const fs = require('fs/promises')
+const { getPkgConfig } = require('./lib/pkgAnalyze.cjs')
+const { cleanTypeScriptCache, cleanRootTypesHack } = require('./lib/pkgTypes.cjs')
 
-const pkgConfig = getPkgConfigAtRoot() // will throw error if doesn't exist
+const pkgDir = process.cwd()
+const pkgConfig = getPkgConfig(pkgDir)
 
-shell.rm('-rf', [
-  'dist',
-  'tsconfig.tsbuildinfo', // much faster to delete manually than `tsc --build --clean`
-  /*
-  HACK to prevent top-level .d.ts files in temporal-spec
-  from being deleted
-  */
-  pkgConfig.name === 'temporal-spec'
-    ? null
-    : '*.d.ts', // see pkgExportsFix
+Promise.all([
+  fs.rm(
+    path.join(pkgDir, 'dist'),
+    { recursive: true, force: true },
+  ),
+  ...(pkgConfig.entryPointTypes.length && [
+    cleanTypeScriptCache(pkgDir),
+    cleanRootTypesHack(pkgDir),
+  ]),
 ])

@@ -1,20 +1,24 @@
 const path = require('path')
-const shell = require('shelljs')
-const { getPkgConfig, analyzePkgConfig } = require('./lib/pkgAnalyze.cjs')
+const fs = require('fs/promises')
+const { exec } = require('./lib/exec.cjs')
 
 require('colors')
-printPkgSize(process.cwd())
+await printPkgSize(process.cwd())
 
-function printPkgSize(dir) {
-  const pkgConfig = getPkgConfig(dir)
-  const { exportSubnames } = analyzePkgConfig(pkgConfig)
+async function printPkgSize(pkgDir) {
+  const distDir = path.join(pkgDir, 'dist')
+  const filenames = await fs.readdir(distDir)
+  let bytes = 0
 
-  const distName = exportSubnames.includes('impl') ? 'impl' : 'index'
-  const { stdout } = shell.exec(`gzip -c -r dist/${distName}.js | wc -c`, { silent: true })
-  const bytes = parseInt(stdout.trim())
+  for (const filename of filenames) {
+    const filePath = path.join(distDir, filename)
+    const { stdout } = exec(`gzip -c -r ${filePath} | wc -c`)
+    const fileBytes = parseInt(stdout.trim())
+    bytes = Math.max(bytes, fileBytes)
+  }
 
   console.log(
-    path.basename(process.cwd()) + ':',
+    path.basename(pkgDir) + ':',
     bytes
       ? (bytes / 1024).toFixed(3).green + ' kb'
       : 'Empty or nonexistent file'.red,
