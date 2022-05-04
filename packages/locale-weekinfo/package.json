@@ -17,15 +17,15 @@
   "copyright": "2022 Adam Shaw",
   "type": "module",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     "require": "./dist/index.cjs",
-    "import": "./dist/index.js"
+    "import": "./dist/index.mjs"
   },
   "files": [
     "/dist",
-    "/*.d.ts"
+    "/src"
   ],
   "scripts": {
     "compile-firstDays": "node ./scripts/compile-firstDays.cjs",

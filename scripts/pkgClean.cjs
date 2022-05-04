@@ -6,14 +6,19 @@ const { cleanTypeScriptCache, cleanRootTypesHack } = require('./lib/pkgTypes.cjs
 const pkgDir = process.cwd()
 const pkgConfig = getPkgConfig(pkgDir)
 const pkgAnalysis = analyzePkgConfig(pkgConfig)
+const promises = []
 
-Promise.all([
+promises.push(
   fs.rm(
     path.join(pkgDir, 'dist'),
     { recursive: true, force: true },
   ),
-  ...(pkgAnalysis.entryPointTypes.length && [
-    cleanTypeScriptCache(pkgDir),
-    cleanRootTypesHack(pkgDir),
-  ]),
-])
+)
+
+// has generated types?
+if (pkgAnalysis.entryPointTypes.length) {
+  promises.push(cleanTypeScriptCache(pkgDir))
+  promises.push(cleanRootTypesHack(pkgDir))
+}
+
+Promise.all(promises) // .then...

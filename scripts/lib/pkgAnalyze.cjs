@@ -20,7 +20,7 @@ function analyzePkgConfig(pkgConfig) {
     }
   })
 
-  const exportsHash = pkgConfig.exports || {}
+  const exportsHash = normalizeExportsHash(pkgConfig.exports || {})
   const defaultExport = exportsHash['.']
 
   if (typeof defaultExport !== 'object' || !defaultExport) {
@@ -64,10 +64,53 @@ function analyzePkgConfig(pkgConfig) {
     }
   }
 
+  // is there building? check the package.json's "files" array
+  if (entryPoints.length) {
+    const fileGlobs = pkgConfig.files || []
+    const hasTypesHackFiles = fileGlobs.includes('/*.d.ts')
+    const hasMultExports = Object.keys(exportsHash).length > 1
+
+    ;['/dist', '/src'].forEach((glob) => {
+      if (!fileGlobs.includes(glob)) {
+        throw new Error(`Must include "${glob}" in "files" array`)
+      }
+    })
+
+    if (hasTypesHackFiles !== hasMultExports) {
+      throw new Error(
+        (hasMultExports ? 'Must have' : 'Must NOT have') +
+        '"/*.d.ts" included in the "files" array',
+      )
+    }
+  }
+
   return {
     entryPoints, // in src
     entryPointTypes, // in dist
     globalEntryPoints,
     dependencyNames: Object.keys(pkgConfig.dependencies || {}),
   }
+}
+
+/*
+The package.json "exports" hash can take two forms:
+1. { require, import }
+2. { ".": { require, import } }
+Normalize to the 2nd
+*/
+function normalizeExportsHash(obj) {
+  let hasPaths = false
+
+  for (const key in obj) {
+    if (key.match(/^\./)) {
+      hasPaths = true
+      break
+    }
+  }
+
+  if (hasPaths) {
+    return obj
+  }
+
+  return { '.': obj }
 }

@@ -4,7 +4,7 @@ const resolve = require('@rollup/plugin-node-resolve').default
 const sucrase = require('@rollup/plugin-sucrase')
 const { terser } = require('rollup-plugin-terser')
 const dts = require('rollup-plugin-dts').default
-const { typePreparing } = require('../lib/pkgTypes.cjs')
+const { createTypeInputHash, typePreparing } = require('../lib/pkgTypes.cjs')
 const terserConfig = require('./terser.json')
 
 module.exports = (commandLineArgs) => {
@@ -12,8 +12,15 @@ module.exports = (commandLineArgs) => {
   const pkgAnalysis = analyzePkgConfig(getPkgConfig(process.cwd()))
   const { entryPoints, entryPointTypes, globalEntryPoints, dependencyNames } = pkgAnalysis
 
-  return [
-    entryPoints.length && {
+  const configs = globalEntryPoints.map((globalEntryPoint) => ({
+    input: globalEntryPoint,
+    external: dependencyNames,
+    output: buildGlobalOutputConfig(),
+    plugins: buildPlugins(watch),
+  }))
+
+  if (entryPoints.length) {
+    configs.push({
       input: entryPoints,
       external: dependencyNames,
       output: [
@@ -21,20 +28,21 @@ module.exports = (commandLineArgs) => {
         buildOutputConfig('cjs', '.cjs', true),
       ],
       plugins: buildPlugins(watch),
-    },
-    ...globalEntryPoints.map((globalEntryPoint) => ({
-      input: globalEntryPoint,
-      external: dependencyNames,
-      output: buildGlobalOutputConfig(),
-      plugins: buildPlugins(watch),
-    })),
-    (entryPointTypes.length && !watch) && {
-      input: entryPointTypes,
+    })
+  }
+
+  if (entryPointTypes.length && !watch) {
+    configs.push({
+      input: createTypeInputHash(entryPointTypes),
       external: dependencyNames,
       output: buildOutputConfig('es', '.d.ts', false),
       plugins: [dts(), typePreparing()],
-    },
-  ]
+    })
+  }
+
+  // if there are no configs, will throw an error
+  // must prevent Rollup compilation from happening altogether if package doesn't need building
+  return configs
 }
 
 // Output config

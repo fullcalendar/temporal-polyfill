@@ -5,6 +5,7 @@ module.exports = {
   typePreparing,
   cleanTypeScriptCache,
   cleanRootTypesHack,
+  createTypeInputHash,
 }
 
 // a Rollup plugin
@@ -59,10 +60,12 @@ Writes .d.ts files in root of package, referencing ./dist/*
 */
 async function writeRootTypesHack(pkgDir, rootPaths) {
   for (const rootPath of rootPaths) {
-    await fs.writeFile(
-      path.join(pkgDir, rootPath),
-      `export * from './dist/${rootPath}'\n`, // does not support default exports
-    )
+    if (rootPath !== 'index.d.ts') { // no need. always specified in package.json "types"
+      await fs.writeFile(
+        path.join(pkgDir, rootPath),
+        `export * from './dist/${rootPath}'\n`, // does not support default exports
+      )
+    }
   }
 }
 
@@ -76,4 +79,16 @@ async function cleanRootTypesHack(pkgDir) {
       await fs.rm(filePath, { recursive: true, force: true })
     }
   }
+}
+
+/*
+Rollup gets confused with deriving module names from filename extensions for .d.ts.
+Make a hash the explicitly names modules
+*/
+function createTypeInputHash(inputArray) {
+  return inputArray.reduce((accum, inputPath) => {
+    const moduleName = path.basename(inputPath).replace(/\.d\.ts$/, '')
+    accum[moduleName] = inputPath
+    return accum
+  }, {})
 }
