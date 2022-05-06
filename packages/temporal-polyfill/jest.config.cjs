@@ -7,6 +7,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     // TODO: supply the built file when in CI mode
+    // TODO: way to test built files?
     'temporal-polyfill/impl': '<rootDir>/src/impl.build.ts',
   },
   testMatch: [

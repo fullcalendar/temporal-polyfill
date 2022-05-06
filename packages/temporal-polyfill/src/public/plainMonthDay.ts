@@ -100,7 +100,7 @@ export interface PlainMonthDay extends MonthDayCalendarFields {
   calendar: Temporal.CalendarProtocol
 }
 export interface PlainMonthDay extends ToLocaleStringMethods {}
-attachStringTag(PlainMonthDay, 'PlainDate')
+attachStringTag(PlainMonthDay, 'PlainMonthDay')
 mixinISOFields(PlainMonthDay)
 mixinCalendarFields(PlainMonthDay, monthDayCalendarFields)
 mixinLocaleStringMethods(PlainMonthDay, createPlainFormatFactoryFactory({

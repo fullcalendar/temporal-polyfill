@@ -8,11 +8,7 @@ const { strictEqual: equal } = assert;
 import { Temporal } from 'temporal-polyfill/impl';
 
 describe('Exports', () => {
-  // [fullcalendar/temporal]
-  // exclude polyfill-specific utilities
-  // TODO: better solution
-  const nonStandardRE = /^(extendDateTimeFormat|toTemporalInstant)$/
-  const named = Object.keys(Temporal).filter((key) => !nonStandardRE.test(key))
+  const named = Object.keys(Temporal)
 
   it('should be 11 things', () => {
     equal(named.length, 11);
@@ -50,4 +46,33 @@ describe('Exports', () => {
   it('should contain `Now`', () => {
     assert(named.includes('Now'));
   });
+
+  // [fullcalendar/temporal]
+  it('should have correct Symbol.toStringTag values', () => {
+    const map = {
+      Instant: Temporal.Now.instant(),
+      ZonedDateTime: Temporal.Now.zonedDateTimeISO(),
+      PlainDateTime: Temporal.Now.plainDateTimeISO(),
+      PlainDate: Temporal.Now.plainDateISO(),
+      PlainTime: Temporal.Now.plainTimeISO(),
+      PlainYearMonth: Temporal.Now.plainDateISO().toPlainYearMonth(),
+      PlainMonthDay: Temporal.Now.plainDateISO().toPlainMonthDay(),
+      Calendar: new Temporal.Calendar('iso8601'),
+      TimeZone: new Temporal.TimeZone('UTC'),
+      Now: Temporal.Now,
+      Duration: new Temporal.Duration(),
+    }
+    for (let key in map) {
+      equal(
+        map[key][Symbol.toStringTag],
+        `Temporal.${key}`
+      )
+    }
+  });
+  it('should have correct Symbol.toStringTag value for Temporal', () => {
+    equal(
+      Temporal[Symbol.toStringTag],
+      'Temporal',
+    )
+  })
 });
