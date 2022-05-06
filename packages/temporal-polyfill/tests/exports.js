@@ -5,7 +5,7 @@
 import { assert } from 'chai';
 const { strictEqual: equal } = assert;
 
-import * as Temporal from 'temporal-polyfill/impl';
+import { Temporal } from 'temporal-polyfill/impl';
 
 describe('Exports', () => {
   // [fullcalendar/temporal]

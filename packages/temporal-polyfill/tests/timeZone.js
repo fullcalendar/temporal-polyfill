@@ -5,7 +5,7 @@
 import { assert } from 'chai';
 const { deepEqual, strictEqual: equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill/impl';
+import { Temporal } from 'temporal-polyfill/impl';
 
 describe('TimeZone', () => {
   describe('Structure', () => {

@@ -2,14 +2,13 @@
 import { assert } from 'chai';
 const { deepEqual, strictEqual: equal, throws } = assert;
 
-import * as Temporal from 'temporal-polyfill/impl';
-const ExtendedDateTimeFormat = Temporal.extendDateTimeFormat(Intl.DateTimeFormat)
+import { Temporal, Intl } from 'temporal-polyfill/impl';
 
 describe('Intl', () => {
   // TODO: move these to their respective test files.
 
   function maybeGetWeekdayOnlyFormat() {
-    const fmt = new ExtendedDateTimeFormat('en', { weekday: 'long', timeZone: 'Europe/Vienna' });
+    const fmt = new Intl.DateTimeFormat('en', { weekday: 'long', timeZone: 'Europe/Vienna' });
     if (
       ['era', 'year', 'month', 'day', 'hour', 'minute', 'second', 'timeZoneName'].some(
         (prop) => prop in fmt.resolvedOptions()
@@ -158,7 +157,7 @@ describe('Intl', () => {
     });
   });
   describe('yearmonth.toLocaleString()', () => {
-    const calendar = new ExtendedDateTimeFormat('en').resolvedOptions().calendar;
+    const calendar = new Intl.DateTimeFormat('en').resolvedOptions().calendar;
     const yearmonth = Temporal.PlainYearMonth.from({ year: 1976, month: 11, calendar });
     it(`(${yearmonth.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
       equal(`${yearmonth.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/1976'));
@@ -183,7 +182,7 @@ describe('Intl', () => {
     });
   });
   describe('monthday.toLocaleString()', () => {
-    const calendar = new ExtendedDateTimeFormat('en').resolvedOptions().calendar;
+    const calendar = new Intl.DateTimeFormat('en').resolvedOptions().calendar;
     const monthday = Temporal.PlainMonthDay.from({ monthCode: 'M11', day: 18, calendar });
     it(`(${monthday.toString()}).toLocaleString('en-US', { timeZone: 'America/New_York' })`, () =>
       equal(`${monthday.toLocaleString('en', { timeZone: 'America/New_York' })}`, '11/18'));
@@ -1201,7 +1200,7 @@ describe('Intl', () => {
 
   describe('DateTimeFormat', () => {
     describe('supportedLocalesOf', () => {
-      it('should return an Array', () => assert(Array.isArray(ExtendedDateTimeFormat.supportedLocalesOf())));
+      it('should return an Array', () => assert(Array.isArray(Intl.DateTimeFormat.supportedLocalesOf())));
     });
 
     // Verify that inputs to DateTimeFormat constructor are immune to mutation.
@@ -1231,15 +1230,15 @@ describe('Intl', () => {
       }
     };
     const localesAT = ['de-AT'];
-    const us = new ExtendedDateTimeFormat('en-US', optionsUS);
-    const at = new ExtendedDateTimeFormat(localesAT, optionsAT);
+    const us = new Intl.DateTimeFormat('en-US', optionsUS);
+    const at = new Intl.DateTimeFormat(localesAT, optionsAT);
     optionsAT.timeZone = {
       toString: () => 'Bogus/Time-Zone',
       toJSON: () => 'Bogus/Time-Zone'
     };
     optionsUS.timeZone = 'Bogus/Time-Zone';
-    const us2 = new ExtendedDateTimeFormat('en-US');
-    const at2 = new ExtendedDateTimeFormat(localesAT);
+    const us2 = new Intl.DateTimeFormat('en-US');
+    const at2 = new Intl.DateTimeFormat(localesAT);
     localesAT[0] = ['invalid locale'];
     const usCalendar = us.resolvedOptions().calendar;
     const atCalendar = at.resolvedOptions().calendar;

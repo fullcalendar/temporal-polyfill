@@ -5,7 +5,7 @@
 import { assert } from 'chai';
 const { strictEqual: equal } = assert;
 
-import * as Temporal from 'temporal-polyfill/impl';
+import { Temporal } from 'temporal-polyfill/impl';
 
 describe('Date.since(simple, simple)', () => {
   build('Before Leap Day', '2020-01-03', '2020-02-15');
