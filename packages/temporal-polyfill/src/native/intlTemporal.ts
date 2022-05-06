@@ -58,7 +58,6 @@ class _DateTimeFormat extends Intl.DateTimeFormat {
     startArg: T,
     endArg: T,
   ): IntlSpec.DateTimeFormatRangePart[] {
-    this.formatRangeToParts(new Date(), new Date())
     return super.formatRangeToParts.call(
       ...createRangeArgs(this, startArg, endArg),
     ) as IntlSpec.DateTimeFormatRangePart[]

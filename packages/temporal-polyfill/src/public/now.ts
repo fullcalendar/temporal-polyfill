@@ -15,7 +15,7 @@ import {
   createZonedDateTimeFromFields,
 } from './zonedDateTime'
 
-const Now = {
+export const Now = {
   zonedDateTimeISO: getZonedDateTimeISO,
   zonedDateTime: getZonedDateTime,
   plainDateTimeISO: getPlainDateTimeISO,
@@ -27,8 +27,6 @@ const Now = {
   timeZone: getTimeZone,
   [Symbol.toStringTag]: 'Temporal.Now' as ('Temporal.Now'), // TODO: make readonly
 }
-
-export { Now }
 
 function getZonedDateTimeISO(timeZoneArg?: Temporal.TimeZoneLike): Temporal.ZonedDateTime {
   return createZonedDateTimeFromFields(buidZonedFields(isoCalendarID, timeZoneArg))
