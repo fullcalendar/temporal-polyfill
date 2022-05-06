@@ -1,4 +1,13 @@
 
+v0.0.7 (2022-05-06)
+-------------------
+
+- BREAKING: side-effect-free entrypoint now exports named exports instead of default `Temporal`
+  - No longer works: `import Temporal from 'temporal-polyfill'`
+  - Works: `import { Temporal } from 'temporal-polyfill'`
+  - Allows access to `Intl` side-effect-free export
+
+
 v0.0.6 (2022-04-06)
 -------------------
 
