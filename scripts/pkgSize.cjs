@@ -1,20 +1,31 @@
 const path = require('path')
 const fs = require('fs/promises')
-const { exec } = require('./lib/exec.cjs')
+const { promisify } = require('util')
+const exec = promisify(require('child_process').exec)
 
 require('colors')
-await printPkgSize(process.cwd())
+printPkgSize(process.cwd())
 
 async function printPkgSize(pkgDir) {
   const distDir = path.join(pkgDir, 'dist')
-  const filenames = await fs.readdir(distDir)
+  let filenames
   let bytes = 0
 
+  try {
+    filenames = await fs.readdir(distDir)
+  } catch (ex) {
+    // some projects aren't buildable and don't have a dist directory
+    process.exit(0)
+  }
+
+  // find the largest non-map file in dist
   for (const filename of filenames) {
-    const filePath = path.join(distDir, filename)
-    const { stdout } = exec(`gzip -c -r ${filePath} | wc -c`)
-    const fileBytes = parseInt(stdout.trim())
-    bytes = Math.max(bytes, fileBytes)
+    if (!filename.match(/\.map$/)) {
+      const filePath = path.join(distDir, filename)
+      const { stdout } = await exec(`gzip -c -r ${filePath} | wc -c`)
+      const fileBytes = parseInt(stdout.trim())
+      bytes = Math.max(bytes, fileBytes)
+    }
   }
 
   console.log(

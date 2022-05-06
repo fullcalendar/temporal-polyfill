@@ -1,3 +1,4 @@
+const path = require('path')
 const fs = require('fs/promises')
 const { analyzePkgConfig, getPkgConfig } = require('../lib/pkgAnalyze.cjs')
 const resolve = require('@rollup/plugin-node-resolve').default
@@ -5,53 +6,63 @@ const sucrase = require('@rollup/plugin-sucrase')
 const { terser } = require('rollup-plugin-terser')
 const dts = require('rollup-plugin-dts').default
 const { createTypeInputHash, typePreparing } = require('../lib/pkgTypes.cjs')
-const terserConfig = require('./terser.json')
+const terserConfig = require('../config/terser.json')
 
-module.exports = (commandLineArgs) => {
+module.exports = {
+  buildPkgBundleConfigs,
+}
+
+const watchOptions = {
+  buildDelay: 100,
+  clearScreen: false, // don't clear tsc's concurrent output (see preserveWatchOutput)
+}
+
+async function buildPkgBundleConfigs(pkgDir, commandLineArgs) {
   const { watch } = commandLineArgs
-  const pkgAnalysis = analyzePkgConfig(getPkgConfig(process.cwd()))
+  const pkgConfig = await getPkgConfig(pkgDir)
+  const pkgAnalysis = analyzePkgConfig(pkgConfig)
   const { entryPoints, entryPointTypes, globalEntryPoints, dependencyNames } = pkgAnalysis
 
   const configs = globalEntryPoints.map((globalEntryPoint) => ({
-    input: globalEntryPoint,
+    input: path.join(pkgDir, globalEntryPoint),
     external: dependencyNames,
-    output: buildGlobalOutputConfig(),
+    output: buildGlobalOutputConfig(pkgDir),
+    watch: watchOptions,
     plugins: buildPlugins(watch),
   }))
 
   if (entryPoints.length) {
     configs.push({
-      input: entryPoints,
+      input: entryPoints.map((f) => path.join(pkgDir, f)),
       external: dependencyNames,
       output: [
-        buildOutputConfig('es', '.mjs', true),
-        buildOutputConfig('cjs', '.cjs', true),
+        buildOutputConfig(pkgDir, 'es', '.mjs', true),
+        buildOutputConfig(pkgDir, 'cjs', '.cjs', true),
       ],
+      watch: watchOptions,
       plugins: buildPlugins(watch),
     })
   }
 
   if (entryPointTypes.length && !watch) {
     configs.push({
-      input: createTypeInputHash(entryPointTypes),
+      input: createTypeInputHash(entryPointTypes.map((f) => path.join(pkgDir, f))),
       external: dependencyNames,
-      output: buildOutputConfig('es', '.d.ts', false),
-      plugins: [dts(), typePreparing()],
+      output: buildOutputConfig(pkgDir, 'es', '.d.ts', false),
+      plugins: [dts(), typePreparing(pkgDir)],
     })
   }
 
-  // if there are no configs, will throw an error
-  // must prevent Rollup compilation from happening altogether if package doesn't need building
   return configs
 }
 
 // Output config
 // -------------------------------------------------------------------------------------------------
 
-function buildOutputConfig(format, extension, sourcemap) {
+function buildOutputConfig(pkgDir, format, extension, sourcemap) {
   return {
     format,
-    dir: 'dist',
+    dir: path.join(pkgDir, 'dist'),
     entryFileNames: '[name]' + extension,
     chunkFileNames: 'common-[hash]' + extension,
     sourcemap,
@@ -59,10 +70,10 @@ function buildOutputConfig(format, extension, sourcemap) {
   }
 }
 
-function buildGlobalOutputConfig() {
+function buildGlobalOutputConfig(pkgDir) {
   return {
     format: 'iife',
-    dir: 'dist',
+    dir: path.join(pkgDir, 'dist'),
     // no code splitting
     sourcemap: true,
     sourcemapExcludeSources: true,

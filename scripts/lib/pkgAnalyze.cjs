@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs/promises')
 const minimatch = require('minimatch')
 
 module.exports = {
@@ -6,17 +7,20 @@ module.exports = {
   analyzePkgConfig,
 }
 
-function getPkgConfig(dir) {
-  return require(path.join(dir, 'package.json'))
+async function getPkgConfig(dir) {
+  const rawData = await fs.readFile(path.join(dir, 'package.json'))
+  return JSON.parse(rawData)
 }
 
 function analyzePkgConfig(pkgConfig) {
+  const pkgName = pkgConfig.name
+
   if (pkgConfig.type !== 'module') {
-    throw new Error('In package.json, must specify "type":"module"')
+    throw new Error(`[${pkgName}] Must specify "type":"module"`)
   }
   ['main', 'module', 'types'].forEach((prop) => {
     if (!pkgConfig[prop]) {
-      throw new Error(`In package.json, must specify "${prop}"`)
+      throw new Error(`[${pkgName}] Must specify "${prop}"`)
     }
   })
 
@@ -24,13 +28,13 @@ function analyzePkgConfig(pkgConfig) {
   const defaultExport = exportsHash['.']
 
   if (typeof defaultExport !== 'object' || !defaultExport) {
-    throw new Error('Must specify default "." export')
+    throw new Error(`[${pkgName}] Must specify default "." export`)
   }
   if (defaultExport.import !== pkgConfig.module) {
-    throw new Error('default export must be consistent with pkg.module')
+    throw new Error(`[${pkgName}] default export must be consistent with pkg.module`)
   }
   if (defaultExport.require !== pkgConfig.main) {
-    throw new Error('default export must be consistent with pkg.main')
+    throw new Error(`[${pkgName}] default export must be consistent with pkg.main`)
   }
 
   const sideEffectsArray = Array.isArray(pkgConfig.sideEffects) ? pkgConfig.sideEffects : []
@@ -46,7 +50,7 @@ function analyzePkgConfig(pkgConfig) {
     const requirePathNoExt = requirePath.replace(/\.cjs$/, '')
 
     if (importPathNoExt !== requirePathNoExt) {
-      throw new Error('Inconsistent "import" and "require"')
+      throw new Error(`[${pkgName}] Inconsistent "import" and "require"`)
     }
 
     const match = importPathNoExt.match(/\.\/dist\/(.*)$/)

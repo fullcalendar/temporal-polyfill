@@ -9,12 +9,11 @@ module.exports = {
 }
 
 // a Rollup plugin
-function typePreparing() {
+function typePreparing(pkgDir) {
   return {
     // before writing .d.ts files
     generateBundle: async(options, bundle) => {
       const rootPaths = Object.keys(bundle)
-      const pkgDir = process.cwd()
 
       return Promise.all([
         cleanDistTypes(pkgDir),
