@@ -1,5 +1,5 @@
 /* eslint-disable */
-// derived from https://raw.githubusercontent.com/tc39/proposal-temporal/main/polyfill/index.d.ts
+// derived from https://github.com/js-temporal/temporal-polyfill/blob/main/index.d.ts
 
 export {} // treat as a module
 

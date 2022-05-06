@@ -1,6 +1,18 @@
 {
   "name": "temporal-spec",
   "version": "0.0.1",
+  "title": "TypeScript types for Temporal",
+  "author": {
+    "name": "Adam Shaw",
+    "email": "arshaw@users.noreply.github.com",
+    "url": "http://arshaw.com/"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fullcalendar/temporal.git",
+    "directory": "packages/temporal-spec"
+  },
   "type": "module",
   "main": "./index.cjs",
   "module": "./index.mjs",
