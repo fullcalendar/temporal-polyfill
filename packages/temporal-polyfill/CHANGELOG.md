@@ -1,4 +1,10 @@
 
+next
+----
+- fixed root .d.ts exports (only affects legacy node)
+- TODO: ensure <root>/impl.d.ts exported
+
+
 v0.0.7 (2022-05-06)
 -------------------
 

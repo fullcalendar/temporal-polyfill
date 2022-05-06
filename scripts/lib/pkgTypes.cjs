@@ -59,10 +59,11 @@ Writes .d.ts files in root of package, referencing ./dist/*
 */
 async function writeRootTypesHack(pkgDir, rootPaths) {
   for (const rootPath of rootPaths) {
-    if (rootPath !== 'index.d.ts') { // no need. always specified in package.json "types"
+    const moduleName = rootPath.replace(/\.d\.ts$/, '')
+    if (moduleName !== 'index') { // no need. always specified in package.json "types"
       await fs.writeFile(
         path.join(pkgDir, rootPath),
-        `export * from './dist/${rootPath}'\n`, // does not support default exports
+        `export * from './dist/${moduleName}'\n`, // does not support default exports
       )
     }
   }
