@@ -22,7 +22,9 @@ import { PlainDateTime, PlainDateTimeArg, createDateTime } from './plainDateTime
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
 
 export class TimeZone extends AbstractObj implements Temporal.TimeZone {
-  readonly [Symbol.toStringTag]: 'Temporal.TimeZone'
+  get [Symbol.toStringTag](): 'Temporal.TimeZone' {
+    return 'Temporal.TimeZone'
+  }
 
   constructor(id: string) {
     if (!id) {

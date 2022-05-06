@@ -34,7 +34,9 @@ import { PlainYearMonth } from './plainYearMonth'
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 
 export class Calendar extends AbstractObj implements Temporal.Calendar {
-  readonly [Symbol.toStringTag]: 'Temporal.Calendar'
+  get [Symbol.toStringTag](): 'Temporal.Calendar' {
+    return 'Temporal.Calendar'
+  }
 
   constructor(id: string) {
     super()

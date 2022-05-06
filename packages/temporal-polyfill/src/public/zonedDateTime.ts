@@ -96,7 +96,9 @@ const [getPrivateFields, setPrivateFields] =
 
 export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOFields>
   implements Temporal.ZonedDateTime {
-  readonly [Symbol.toStringTag]: 'Temporal.ZonedDateTime'
+  get [Symbol.toStringTag](): 'Temporal.ZonedDateTime' {
+    return 'Temporal.ZonedDateTime'
+  }
 
   constructor(
     epochNanoseconds: bigint,

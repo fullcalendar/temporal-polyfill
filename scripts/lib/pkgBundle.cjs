@@ -90,6 +90,7 @@ function buildPlugins(watch) {
     }),
     sucrase({
       transforms: ['typescript'],
+      disableESTransforms: true,
     }),
     tsFileOverriding('.build.ts'),
     !watch && terser(terserConfig),

@@ -42,7 +42,9 @@ type DiffOptions = Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>
 
 export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainDate {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainDate'
+  get [Symbol.toStringTag](): 'Temporal.PlainDate' {
+    return 'Temporal.PlainDate'
+  }
 
   constructor(
     isoYear: number,

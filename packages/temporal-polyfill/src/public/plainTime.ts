@@ -47,7 +47,9 @@ type ToZonedDateTimeOptions = {
 
 export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
   implements Temporal.PlainTime {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainTime'
+  get [Symbol.toStringTag](): 'Temporal.PlainTime' {
+    return 'Temporal.PlainTime'
+  }
 
   constructor(
     isoHour = 0,

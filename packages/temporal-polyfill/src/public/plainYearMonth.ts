@@ -35,7 +35,9 @@ const day1 = { day: 1 }
 
 export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainYearMonth {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainYearMonth'
+  get [Symbol.toStringTag](): 'Temporal.PlainYearMonth' {
+    return 'Temporal.PlainYearMonth'
+  }
 
   constructor(
     isoYear: number,

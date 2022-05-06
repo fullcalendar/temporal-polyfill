@@ -24,7 +24,9 @@ export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLi
 
 export class PlainMonthDay extends AbstractISOObj<Temporal.PlainDateISOFields>
   implements Temporal.PlainMonthDay {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainMonthDay'
+  get [Symbol.toStringTag](): 'Temporal.PlainMonthDay' {
+    return 'Temporal.PlainMonthDay'
+  }
 
   constructor(
     isoMonth: number,

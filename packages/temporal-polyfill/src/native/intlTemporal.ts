@@ -15,11 +15,12 @@ to our override method.
 
 TODO: accept timeZone and calendar OBJECTS in options
 */
-class _DateTimeFormat extends Intl.DateTimeFormat {
+interface _DateTimeFormat {
   [origLocalesSymbol]: string[]
   [origOptionsSymbol]: Intl.DateTimeFormatOptions
   [factoryMapSymbol]: Map<FormatFactoryFactory<any>, CachedFormatFactory<any>>
-
+}
+class _DateTimeFormat extends Intl.DateTimeFormat {
   constructor(localesArg?: LocalesArg, options?: IntlSpec.DateTimeFormatOptions) {
     const normLocales = normalizeAndCopyLocalesArg(localesArg)
     const normOptions = flattenOptions(options || {}) // so that props aren't accessed again

@@ -53,7 +53,9 @@ type RoundOptions = Temporal.RoundTo<
 
 export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOFields>
   implements Temporal.PlainDateTime {
-  readonly [Symbol.toStringTag]: 'Temporal.PlainDateTime'
+  get [Symbol.toStringTag](): 'Temporal.PlainDateTime' {
+    return 'Temporal.PlainDateTime'
+  }
 
   constructor(
     isoYear: number,

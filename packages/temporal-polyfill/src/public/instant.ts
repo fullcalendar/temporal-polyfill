@@ -52,7 +52,9 @@ type ToZonedDateTimeOptions = {
 const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
 
 export class Instant extends AbstractNoValueObj implements Temporal.Instant {
-  readonly [Symbol.toStringTag]: 'Temporal.Instant'
+  get [Symbol.toStringTag](): 'Temporal.Instant' {
+    return 'Temporal.Instant'
+  }
 
   constructor(epochNanoseconds: bigint) {
     super()
