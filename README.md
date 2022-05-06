@@ -17,18 +17,15 @@ npm install temporal-polyfill
 ```js
 import 'temporal-polyfill/global'
 
-// the global Temporal object is now available
-const zdt = Temporal.ZonedDateTime.from('2020-08-05T20:06:13[America/Chicago]')
-console.log(zdt.toLocaleString())
+console.log(Temporal.Now.zonedDateTimeISO().toString())
 ```
 
 **B) Import as an ES module** without side effects:
 
 ```js
-import { ZonedDateTime } from 'temporal-polyfill'
+import { Temporal } from 'temporal-polyfill'
 
-const zdt = ZonedDateTime.from('2020-08-05T20:06:13[America/Chicago]')
-console.log(zdt.toLocaleString())
+console.log(Temporal.Now.zonedDateTimeISO().toString())
 ```
 
 [Read more about temporal-polyfill](packages/temporal-polyfill/README.md)
