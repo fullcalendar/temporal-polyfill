@@ -99,12 +99,14 @@ function buildPlugins(watch) {
 // a Rollup plugin
 function tsFileOverriding(forcedExtension) {
   return {
-    load: async(id) => {
+    async load(id) {
       const match = id.match(/^(.*)\.ts$/)
       if (match) {
         const altPath = match[1] + forcedExtension
         try {
-          return await fs.readFile(altPath, 'utf8')
+          const contents = await fs.readFile(altPath, 'utf8')
+          this.addWatchFile(altPath) // watch the alt file
+          return contents
         } catch (err) {}
       }
       return null
