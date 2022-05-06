@@ -5,6 +5,7 @@ import { timeZoneFromObj } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
 import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
+import { attachStringTag } from '../dateUtils/mixins'
 import { checkInvalidOffset } from '../dateUtils/offset'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
@@ -22,10 +23,6 @@ import { PlainDateTime, PlainDateTimeArg, createDateTime } from './plainDateTime
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
 
 export class TimeZone extends AbstractObj implements Temporal.TimeZone {
-  get [Symbol.toStringTag](): 'Temporal.TimeZone' {
-    return 'Temporal.TimeZone'
-  }
-
   constructor(id: string) {
     if (!id) {
       throw new RangeError('Invalid timezone ID')
@@ -122,3 +119,7 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
     return getImpl(this).id
   }
 }
+
+// mixins
+export interface TimeZone { [Symbol.toStringTag]: 'Temporal.TimeZone' }
+attachStringTag(TimeZone, 'TimeZone')

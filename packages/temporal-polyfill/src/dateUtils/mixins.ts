@@ -122,3 +122,10 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
     }),
   )
 }
+
+// affects how objects are displayed in console
+
+// TODO: make readonly somehow?
+export function attachStringTag(objOrClass: any, name: string): void {
+  (objOrClass.prototype || objOrClass)[Symbol.toStringTag] = 'Temporal.' + name
+}

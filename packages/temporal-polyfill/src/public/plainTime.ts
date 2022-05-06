@@ -14,7 +14,7 @@ import { processTimeFromFields, processTimeWithFields } from '../dateUtils/fromA
 import { ISOTimeFields } from '../dateUtils/isoFields'
 import { formatTimeISO } from '../dateUtils/isoFormat'
 import { LocalTimeFields } from '../dateUtils/localFields'
-import { mixinISOFields } from '../dateUtils/mixins'
+import { attachStringTag, mixinISOFields } from '../dateUtils/mixins'
 import { parseTime } from '../dateUtils/parse'
 import { roundTime } from '../dateUtils/rounding'
 import { translateTime } from '../dateUtils/translate'
@@ -47,10 +47,6 @@ type ToZonedDateTimeOptions = {
 
 export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
   implements Temporal.PlainTime {
-  get [Symbol.toStringTag](): 'Temporal.PlainTime' {
-    return 'Temporal.PlainTime'
-  }
-
   constructor(
     isoHour = 0,
     isoMinute = 0,
@@ -150,8 +146,10 @@ export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
 }
 
 // mixin
+export interface PlainTime { [Symbol.toStringTag]: 'Temporal.PlainTime' }
 export interface PlainTime extends LocalTimeFields { calendar: Temporal.Calendar }
 export interface PlainTime extends ToLocaleStringMethods {}
+attachStringTag(PlainTime, 'PlainTime')
 mixinISOFields(PlainTime, timeUnitNames)
 mixinLocaleStringMethods(PlainTime, createPlainTimeFormatFactory)
 

@@ -18,6 +18,7 @@ import {
 } from '../dateUtils/calendar'
 import { diffDateFields } from '../dateUtils/diff'
 import { computeISODayOfWeek, isoEpochLeapYear, isoToEpochMilli } from '../dateUtils/epoch'
+import { attachStringTag } from '../dateUtils/mixins'
 import { tryParseDateTime } from '../dateUtils/parse'
 import { translateDate } from '../dateUtils/translate'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
@@ -34,10 +35,6 @@ import { PlainYearMonth } from './plainYearMonth'
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 
 export class Calendar extends AbstractObj implements Temporal.Calendar {
-  get [Symbol.toStringTag](): 'Temporal.Calendar' {
-    return 'Temporal.Calendar'
-  }
-
   constructor(id: string) {
     super()
 
@@ -368,6 +365,10 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
     return getImpl(this).id
   }
 }
+
+// mixins
+export interface Calendar { [Symbol.toStringTag]: 'Temporal.Calendar' }
+attachStringTag(Calendar, 'Calendar')
 
 export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)

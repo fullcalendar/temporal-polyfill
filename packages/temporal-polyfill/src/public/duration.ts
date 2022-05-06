@@ -15,6 +15,7 @@ import {
 } from '../dateUtils/durationFields'
 import { processDurationFields } from '../dateUtils/fromAndWith'
 import { formatDurationISO } from '../dateUtils/isoFormat'
+import { attachStringTag } from '../dateUtils/mixins'
 import { parseDuration } from '../dateUtils/parseDuration'
 import { extractRelativeTo } from '../dateUtils/relativeTo'
 import { roundDuration } from '../dateUtils/roundingDuration'
@@ -36,10 +37,6 @@ type DurationRoundingOptions = Temporal.DifferenceOptions<Temporal.DateTimeUnit>
 const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
 
 export class Duration extends AbstractNoValueObj implements Temporal.Duration {
-  get [Symbol.toStringTag](): 'Temporal.Duration' {
-    return 'Temporal.Duration'
-  }
-
   constructor(
     years = 0,
     months = 0,
@@ -177,6 +174,10 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
     return this.toString()
   }
 }
+
+// mixins
+export interface Duration { [Symbol.toStringTag]: 'Temporal.Duration' }
+attachStringTag(Duration, 'Duration')
 
 export function createDuration(fields: UnsignedDurationFields): Duration {
   return new Duration(
