@@ -4,7 +4,7 @@ import { Temporal } from './public/temporal'
 
 // TODO: better way to extend already-polyfilled rootObj
 
-export default function(): void {
+export function shim(): void {
   if (!globalThis.Temporal) {
     globalThis.Temporal = Temporal
     Intl.DateTimeFormat = DateTimeFormat

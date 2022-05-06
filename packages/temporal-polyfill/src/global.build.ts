@@ -1,3 +1,3 @@
-import shim from './shim'
+import { shim } from './shim'
 
 shim()
