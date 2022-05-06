@@ -23,4 +23,5 @@ export const Temporal = {
   TimeZone,
   Duration,
   Now,
+  [Symbol.toStringTag]: 'Temporal', // TODO: make readonly, dry with attachStringTag?
 }
