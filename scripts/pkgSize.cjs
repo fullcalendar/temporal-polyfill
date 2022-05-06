@@ -18,9 +18,11 @@ async function printPkgSize(pkgDir) {
     process.exit(0)
   }
 
-  // find the largest non-map file in dist
   for (const filename of filenames) {
-    if (!filename.match(/\.map$/)) {
+    if (
+      !filename.match(/\.map$/) &&
+      !filename.match(/\.cjs$/)
+    ) {
       const filePath = path.join(distDir, filename)
       const { stdout } = await exec(`gzip -c -r ${filePath} | wc -c`)
       const fileBytes = parseInt(stdout.trim())
