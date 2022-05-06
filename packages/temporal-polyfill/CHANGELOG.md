@@ -6,6 +6,7 @@ v0.0.7 (2022-05-06)
   - No longer works: `import Temporal from 'temporal-polyfill'`
   - Works: `import { Temporal } from 'temporal-polyfill'`
   - Allows access to `Intl` side-effect-free export
+- Uses types created by TC39 Committee
 
 
 v0.0.6 (2022-04-06)
