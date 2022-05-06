@@ -1,5 +1,5 @@
-// from https://raw.githubusercontent.com/tc39/proposal-temporal/main/polyfill/index.d.ts
-// linting is turned off for this file (do it here?)
+/* eslint-disable */
+// derived from https://raw.githubusercontent.com/tc39/proposal-temporal/main/polyfill/index.d.ts
 
 export namespace Temporal {
   export type ComparisonResult = -1 | 0 | 1;
