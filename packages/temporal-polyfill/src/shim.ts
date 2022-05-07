@@ -3,6 +3,7 @@ import { DateTimeFormat } from './native/intlTemporal'
 import { Temporal } from './public/temporal'
 
 // TODO: better way to extend already-polyfilled rootObj
+// somehow WRAP the whole lib, UMD-style?
 
 export function shim(): void {
   if (!globalThis.Temporal) {
