@@ -21,7 +21,7 @@ export function numSign(num: number): Temporal.ComparisonResult {
 
 // HACK
 export function numSignBI(num: bigint): Temporal.ComparisonResult {
-  return !num ? 0 : num < 0n ? -1 : 1
+  return !num ? 0 : num < BigInt(0) ? -1 : 1
 }
 
 export function roundToIncrement(

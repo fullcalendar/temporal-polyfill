@@ -152,7 +152,7 @@ export function epochNanoToISOFields(epochNano: bigint): ISODateTimeFields {
   // HACK for flooring bigints
   if (leftoverNano < 0) {
     leftoverNano += nanoInMilli
-    epochMilli -= 1n
+    epochMilli -= BigInt(1)
   }
 
   const isoMicrosecond = Math.floor(leftoverNano / nanoInMicro)

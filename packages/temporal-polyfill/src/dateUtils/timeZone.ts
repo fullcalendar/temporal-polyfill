@@ -65,10 +65,10 @@ function computeGapNear(
 ): number {
   const utcEpochNano = toEpochNano(plainDateTime)
   const offsetDayBefore = timeZoneProtocol.getOffsetNanosecondsFor(
-    new Instant(utcEpochNano + nanoInDayBI * -1n),
+    new Instant(utcEpochNano + nanoInDayBI * BigInt(-1)),
   )
   const offsetDayAfter = timeZoneProtocol.getOffsetNanosecondsFor(
-    new Instant(utcEpochNano + nanoInDayBI * 1n),
+    new Instant(utcEpochNano + nanoInDayBI * BigInt(1)),
   )
   return Number(offsetDayAfter - offsetDayBefore)
 }

@@ -50,7 +50,8 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
     const transitions = [
       this.getTransition(zoneNano, -1),
-      this.getTransition(zoneNano - 1n, 1), // subtract 1 b/c getTransition is always exclusive
+      this.getTransition(zoneNano - BigInt(1), 1),
+      // ^subtract 1 b/c getTransition is always exclusive
     ].filter(Boolean) as RawTransition[]
 
     // loop transitions from past to future
