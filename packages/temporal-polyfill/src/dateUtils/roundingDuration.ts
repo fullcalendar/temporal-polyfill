@@ -81,7 +81,7 @@ export function roundDurationSpan(
 
   // optimize for time units
   if (!isDateUnit(largestUnit)) {
-    const diffNano = (toEpochNano(d1) - toEpochNano(d0)) * BigInt(flip ? -1 : 1)
+    const diffNano = toEpochNano(d1).sub(toEpochNano(d0)).mult(flip ? -1 : 1)
     const diffNanoRounded = roundToIncrementBI(
       diffNano,
       nanoIn[smallestUnit] * roundingIncrement,

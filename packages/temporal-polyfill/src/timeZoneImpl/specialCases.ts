@@ -1,4 +1,5 @@
-import { nanoInMilliBI } from '../dateUtils/units'
+import { nanoInMilli } from '../dateUtils/units'
+import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
 import { RawTransition } from './timeZoneImpl'
 
 export const specialCases: {
@@ -15,6 +16,6 @@ export const specialCases: {
   },
 }
 
-function toNano(milli: number) {
-  return nanoInMilliBI * BigInt(milli)
+function toNano(milli: number): NanoWrap {
+  return createNanoWrap(milli).mult(nanoInMilli)
 }

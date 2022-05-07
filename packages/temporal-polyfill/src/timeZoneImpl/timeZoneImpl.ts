@@ -1,6 +1,7 @@
+import { NanoWrap } from '../utils/nanoWrap'
 
 export type RawTransition = [
-  bigint, // epochNano
+  NanoWrap, // epochNano
   number, // offsetNanoBefore
   number, // offsetNanoAfter
 ]
@@ -8,7 +9,7 @@ export type RawTransition = [
 export abstract class TimeZoneImpl {
   constructor(public id: string) {}
 
-  abstract getPossibleOffsets(zoneNano: bigint): number[] // offsetNanos
-  abstract getOffset(epochNano: bigint): number // offsetNano
-  abstract getTransition(epochNano: bigint, direction: -1 | 1): RawTransition | undefined
+  abstract getPossibleOffsets(zoneNano: NanoWrap): number[] // offsetNanos
+  abstract getOffset(epochNano: NanoWrap): number // offsetNano
+  abstract getTransition(epochNano: NanoWrap, direction: -1 | 1): RawTransition | undefined
 }

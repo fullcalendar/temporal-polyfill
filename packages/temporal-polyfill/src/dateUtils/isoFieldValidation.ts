@@ -1,7 +1,8 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
+import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
-import { nanoInDay, nanoInDayBI } from './units'
+import { nanoInDay } from './units'
 
 /*
 Extreme valid inputs
@@ -22,12 +23,11 @@ Extreme valid inputs
     new Temporal.PlainYearMonth(275760, 9).toString()
 */
 
-const zeroBI = BigInt(0)
-const almostDayBI = BigInt(nanoInDay - 1) // one nanosecond shy of day
-const maxInstantBI = nanoInDayBI * BigInt(100000000) // 100,000,000 days
-const minInstantBI = -maxInstantBI
-const maxPlainBI = maxInstantBI + almostDayBI
-const minPlainBI = minInstantBI - almostDayBI
+const almostDay = nanoInDay - 1 // one nanosecond shy of day
+const maxInstantBI = createNanoWrap(nanoInDay).mult(100000000) // 100,000,000 days
+const minInstantBI = maxInstantBI.mult(-1)
+const maxPlainBI = maxInstantBI.add(almostDay)
+const minPlainBI = minInstantBI.sub(almostDay)
 
 export function validateYearMonth(isoFields: ISODateFields, calendarID: string): void {
   // might throw an error
@@ -43,7 +43,7 @@ export function validateDate(isoFields: ISODateFields, calendarID: string): void
   validatePlain(
     // if potentially very negative, measure last nanosecond of day
     // to increase chances it's in-bounds
-    epochNano + (epochNano < zeroBI ? almostDayBI : zeroBI),
+    epochNano.add(epochNano.sign() < 0 ? almostDay : 0),
   )
   checkEpochNanoBuggy(epochNano, calendarID)
 }
@@ -55,20 +55,20 @@ export function validateDateTime(isoFields: ISODateTimeFields, calendarID: strin
   checkEpochNanoBuggy(epochNano, calendarID)
 }
 
-export function validateInstant(epochNano: bigint): void {
+export function validateInstant(epochNanoWrap: NanoWrap): void {
   if (
-    epochNano < minInstantBI ||
-    epochNano > maxInstantBI
+    epochNanoWrap.cmp(minInstantBI) === -1 ||
+    epochNanoWrap.cmp(maxInstantBI) === 1
   ) {
     throwOutOfRange()
   }
 }
 
-export function validatePlain(epochNano: bigint): void {
+export function validatePlain(epochNano: NanoWrap): void {
   // like validateInstant's bounds, but expanded 24:59:59.999999999
   if (
-    epochNano < minPlainBI ||
-    epochNano > maxPlainBI
+    epochNano.cmp(minPlainBI) === -1 ||
+    epochNano.cmp(maxPlainBI) === 1
   ) {
     throwOutOfRange()
   }

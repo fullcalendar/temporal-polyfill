@@ -20,7 +20,7 @@ import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
 import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
 import { DurationFields, negateDuration } from '../dateUtils/durationFields'
-import { epochNanoToISOFields } from '../dateUtils/epoch'
+import { epochNanoSymbol, epochNanoToISOFields } from '../dateUtils/epoch'
 import {
   processZonedDateTimeFromFields,
   processZonedDateTimeWithFields,
@@ -65,7 +65,7 @@ import {
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { roundToMinute } from '../utils/math'
-import { createWeakMap } from '../utils/obj'
+import { NanoInput, NanoWrap, ensureNanoWrap } from '../utils/nanoWrap'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
 import { Instant } from './instant'
@@ -87,25 +87,24 @@ type RoundOptions = Temporal.RoundTo<
 'millisecond' | 'microsecond' | 'nanosecond'
 >
 
-interface ZonedDateTimePrivateFields {
-  offsetNanoseconds: number
-  epochNanoseconds: bigint
+const offsetNanoSymbol = Symbol()
+
+export interface ZonedDateTime {
+  [offsetNanoSymbol]: number
+  [epochNanoSymbol]: NanoWrap
 }
-
-const [getPrivateFields, setPrivateFields] =
-  createWeakMap<ZonedDateTime, ZonedDateTimePrivateFields>()
-
 export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOFields>
   implements Temporal.ZonedDateTime {
   constructor(
-    epochNanoseconds: bigint,
+    epochNanoseconds: NanoInput,
     timeZoneArg: Temporal.TimeZoneLike,
     calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNanoseconds, timeZone)
+    const epochNanoWrap = ensureNanoWrap(epochNanoseconds)
+    const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNanoWrap, timeZone)
     validateDateTime(isoFields, calendar.toString())
 
     super({
@@ -117,13 +116,12 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
       offset: formatOffsetISO(offsetNano),
     })
 
-    setPrivateFields(this, {
-      epochNanoseconds,
-      offsetNanoseconds: offsetNano,
-    })
+    this[epochNanoSymbol] = epochNanoWrap
+    this[offsetNanoSymbol] = offsetNano
   }
 
-  static from(arg: ZonedDateTimeArg, options?: Temporal.AssignmentOptions): Temporal.ZonedDateTime {
+  // okay to have return-type be ZonedDateTime? needed
+  static from(arg: ZonedDateTimeArg, options?: Temporal.AssignmentOptions): ZonedDateTime {
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_REJECT)
     const overflowHandling = parseOverflowOption(options)
 
@@ -152,8 +150,7 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
   }
 
   get timeZone(): Temporal.TimeZoneProtocol { return this.getISOFields().timeZone }
-  get epochNanoseconds(): bigint { return getPrivateFields(this).epochNanoseconds }
-  get offsetNanoseconds(): number { return getPrivateFields(this).offsetNanoseconds }
+  get offsetNanoseconds(): number { return this[offsetNanoSymbol] }
   get offset(): string { return this.getISOFields().offset }
 
   with(
@@ -313,12 +310,12 @@ export function createZonedDateTimeFromFields(
 }
 
 export function buildZonedDateTimeISOFields(
-  epochNano: bigint,
+  epochNanoWrap: NanoWrap,
   timeZone: Temporal.TimeZoneProtocol,
 ): [ISODateTimeFields, number] {
-  const instant = new Instant(epochNano) // will do validation
+  const instant = new Instant(epochNanoWrap) // will do validation
   const offsetNano = timeZone.getOffsetNanosecondsFor(instant)
-  const isoFields = epochNanoToISOFields(epochNano + BigInt(offsetNano))
+  const isoFields = epochNanoToISOFields(epochNanoWrap.add(offsetNano))
   return [isoFields, offsetNano]
 }
 

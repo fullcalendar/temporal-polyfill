@@ -17,7 +17,6 @@ export const WEEK = 7
 export const MONTH = 8
 export const YEAR = 9
 
-// TODO: audit use of these. Use bigint exclusively?
 export const nanoInMicro = 1000
 export const nanoInMilli = 1000000
 export const nanoInSecond = 1000000000
@@ -34,14 +33,9 @@ export const nanoIn = [
   nanoInDay,
 ]
 
-export const nanoInMicroBI = BigInt(nanoInMicro)
-export const nanoInMilliBI = BigInt(nanoInMilli)
-export const nanoInSecondBI = BigInt(nanoInSecond)
-export const nanoInMinuteBI = BigInt(nanoInMinute)
-export const nanoInHourBI = BigInt(nanoInHour)
-export const nanoInDayBI = BigInt(nanoInDay)
-
 export const milliInDay = 86400000
+export const milliInHour = 3600000
+export const milliInMinute = 60000
 export const milliInSecond = 1000
 export const secondsInDay = 24 * 60 * 60
 

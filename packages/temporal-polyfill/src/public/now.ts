@@ -3,8 +3,8 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { ISODateTimeFields } from '../dateUtils/isoFields'
 import { attachStringTag } from '../dateUtils/mixins'
-import { nanoInMilliBI } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
+import { NanoWrap } from '../utils/nanoWrap'
 import { Calendar } from './calendar'
 import { Instant } from './instant'
 import { createDate } from './plainDate'
@@ -95,6 +95,6 @@ function buidZonedFields(
   }
 }
 
-function getEpochNano(): bigint {
-  return BigInt(Date.now()) * nanoInMilliBI
+function getEpochNano(): NanoWrap {
+  return new NanoWrap(Date.now(), 0)
 }

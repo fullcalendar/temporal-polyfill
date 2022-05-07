@@ -7,6 +7,7 @@ import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoForma
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
+import { NanoWrap } from '../utils/nanoWrap'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'
 import { DurationFields } from './durationFields'
@@ -16,9 +17,8 @@ import {
   SECOND,
   TimeUnitInt,
   nanoIn,
-  nanoInMicroBI,
-  nanoInMilliBI,
-  nanoInSecondBI,
+  nanoInMicro,
+  nanoInSecond,
 } from './units'
 
 // given ISO fields should already be rounded
@@ -186,10 +186,12 @@ function formatPartialSeconds(
   roundingFunc?: RoundingFunc, // HACK for forcing this func to do rounding
   smallestUnit?: TimeUnitInt, // HACK for forcing this func to do rounding
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
-  let totalNano =
-    BigInt(nanoseconds) +
-    BigInt(microseconds) * nanoInMicroBI +
-    BigInt(milliseconds) * nanoInMilliBI
+  // okay to use constructor because all units are positive
+  let totalNano = new NanoWrap(
+    milliseconds,
+    microseconds * nanoInMicro +
+    nanoseconds,
+  )
 
   // HACK. sometimes input is pre-rounded, other times not
   // not DRY. search for Math.pow
@@ -203,9 +205,9 @@ function formatPartialSeconds(
     )
   }
 
-  const totalNanoAbs = totalNano < 0 ? -totalNano : totalNano // TODO: util for abs() for bigints
-  const seconds = totalNanoAbs / nanoInSecondBI
-  const leftoverNano = totalNanoAbs - (seconds * nanoInSecondBI)
+  const totalNanoAbs = totalNano.abs()
+  const seconds = totalNanoAbs.div(nanoInSecond)
+  const leftoverNano = totalNanoAbs.sub(seconds.mult(nanoInSecond))
 
   let afterDecimal = padZeros(Number(leftoverNano), 9)
   afterDecimal = fractionalSecondDigits === undefined
@@ -214,6 +216,6 @@ function formatPartialSeconds(
 
   return [
     afterDecimal ? '.' + afterDecimal : '',
-    Number(seconds) * (totalNano < 0 ? -1 : 1), // restore sign (TODO: sign util for bigints)
+    Number(seconds) * (totalNano.sign() || 1), // restore sign
   ]
 }

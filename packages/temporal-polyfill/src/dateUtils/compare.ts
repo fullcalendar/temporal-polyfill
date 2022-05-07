@@ -1,9 +1,10 @@
 import { Temporal } from 'temporal-spec'
 import { compareValues } from '../utils/math'
+import { NanoWrap } from '../utils/nanoWrap'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
 import { DurationFields, computeLargestDurationUnit } from './durationFields'
-import { EpochableFields, isoFieldsToEpochNano } from './epoch'
+import { EpochableFields, epochNanoSymbol, isoFieldsToEpochNano } from './epoch'
 import { ISOTimeFields } from './isoFields'
 import { LocalDateFields } from './localFields'
 import { DAY } from './units'
@@ -17,7 +18,7 @@ export interface ComparableTime {
 }
 
 export interface ComparableEpochObj {
-  epochNanoseconds: bigint
+  [epochNanoSymbol]: NanoWrap
 }
 
 // Equality (considers Calendar & timeZone)
@@ -43,8 +44,7 @@ export function compareDateTimes(
   a: ComparableDateTime,
   b: ComparableDateTime,
 ): Temporal.ComparisonResult {
-  return compareValues(
-    isoFieldsToEpochNano(a.getISOFields()),
+  return isoFieldsToEpochNano(a.getISOFields()).cmp(
     isoFieldsToEpochNano(b.getISOFields()),
   )
 }
@@ -69,7 +69,7 @@ export function compareEpochObjs(
   a: ComparableEpochObj,
   b: ComparableEpochObj,
 ): Temporal.ComparisonResult {
-  return compareValues(a.epochNanoseconds, b.epochNanoseconds)
+  return a[epochNanoSymbol].cmp(b[epochNanoSymbol])
 }
 
 export function compareDurations(
@@ -82,8 +82,7 @@ export function compareDurations(
     computeLargestDurationUnit(fields0) <= DAY &&
     computeLargestDurationUnit(fields1) <= DAY
   ) {
-    return compareValues(
-      durationDayTimeToNano(fields0),
+    return durationDayTimeToNano(fields0).cmp(
       durationDayTimeToNano(fields1),
     )
   }
@@ -95,7 +94,7 @@ export function compareDurations(
   const date0 = relativeTo.add(fields0)
   const date1 = relativeTo.add(fields1)
 
-  if (relativeTo.epochNanoseconds !== undefined) {
+  if (relativeTo[epochNanoSymbol] !== undefined) {
     return compareEpochObjs(date0 as ComparableEpochObj, date1 as ComparableEpochObj)
   }
 

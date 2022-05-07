@@ -27,25 +27,25 @@ describe('NanoWrap', () => {
     it('positive by positive wrap', () => {
       expect(
         ensureNanoWrap(12392922812381123123n)
-          .subWrap(ensureNanoWrap(56843732763n)).toBigInt()
+          .sub(ensureNanoWrap(56843732763n)).toBigInt()
       ).toBe(12392922812381123123n - 56843732763n)
     })
     it('positive by negative wrap', () => {
       expect(
         ensureNanoWrap(12392922812381123123n)
-          .subWrap(ensureNanoWrap(-56843732763n)).toBigInt()
+          .sub(ensureNanoWrap(-56843732763n)).toBigInt()
       ).toBe(12392922812381123123n + 56843732763n)
     })
     it('negative by positive wrap', () => {
       expect(
         ensureNanoWrap(-12392922812381123123n)
-          .subWrap(ensureNanoWrap(56843732763n)).toBigInt()
+          .sub(ensureNanoWrap(56843732763n)).toBigInt()
       ).toBe(-12392922812381123123n - 56843732763n)
     })
     it('negative by negative wrap', () => {
       expect(
         ensureNanoWrap(-12392922812381123123n)
-          .subWrap(ensureNanoWrap(-56843732763n)).toBigInt()
+          .sub(ensureNanoWrap(-56843732763n)).toBigInt()
       ).toBe(-12392922812381123123n + 56843732763n)
     })
   })
