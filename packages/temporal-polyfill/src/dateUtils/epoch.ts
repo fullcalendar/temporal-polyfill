@@ -1,6 +1,6 @@
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
+import { BigNano, createBigNano } from '../utils/bigNano'
 import { numSign, positiveModulo } from '../utils/math'
-import { BigNano, createBigNano } from '../utils/nanoWrap'
 import { isoTimeToNano } from './dayAndTime'
 import {
   ISODateFields,

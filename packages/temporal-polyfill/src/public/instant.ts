@@ -24,7 +24,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { BigNano, BigNanoInput, createBigNano, ensureBigNano } from '../utils/nanoWrap'
+import { BigNano, BigNanoInput, createBigNano, ensureBigNano } from '../utils/bigNano'
 import { Duration, createDuration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'
 

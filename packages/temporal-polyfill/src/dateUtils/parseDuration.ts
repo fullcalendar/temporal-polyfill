@@ -1,4 +1,4 @@
-import { createBigNano } from '../utils/nanoWrap'
+import { createBigNano } from '../utils/bigNano'
 import { excludeUndefined } from '../utils/obj'
 import { nanoToDuration } from './dayAndTime'
 import {

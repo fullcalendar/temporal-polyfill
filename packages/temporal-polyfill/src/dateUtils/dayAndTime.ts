@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { BigNano, createBigNano } from '../utils/nanoWrap'
+import { BigNano, createBigNano } from '../utils/bigNano'
 import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
 import { ISOTimeFields } from './isoFields'
 import { LocalTimeFields } from './localFields'

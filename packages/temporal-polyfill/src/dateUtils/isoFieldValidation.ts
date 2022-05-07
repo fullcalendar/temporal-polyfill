@@ -1,5 +1,5 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
-import { BigNano, compareBigNanos, createBigNano } from '../utils/nanoWrap'
+import { BigNano, compareBigNanos, createBigNano } from '../utils/bigNano'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
 import { nanoInDay } from './units'

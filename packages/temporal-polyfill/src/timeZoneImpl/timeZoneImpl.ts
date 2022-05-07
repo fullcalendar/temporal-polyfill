@@ -1,4 +1,4 @@
-import { BigNano } from '../utils/nanoWrap'
+import { BigNano } from '../utils/bigNano'
 
 export type RawTransition = [
   BigNano, // epochNano

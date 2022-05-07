@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-spec'
+import { BigNano, compareBigNanos } from '../utils/bigNano'
 import { compareValues } from '../utils/math'
-import { BigNano, compareBigNanos } from '../utils/nanoWrap'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
 import { DurationFields, computeLargestDurationUnit } from './durationFields'
