@@ -65,7 +65,7 @@ import {
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { roundToMinute } from '../utils/math'
-import { NanoInput, NanoWrap, ensureNanoWrap } from '../utils/nanoWrap'
+import { BigNano, BigNanoInput, ensureBigNano } from '../utils/nanoWrap'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
 import { Instant } from './instant'
@@ -91,19 +91,19 @@ const offsetNanoSymbol = Symbol()
 
 export interface ZonedDateTime {
   [offsetNanoSymbol]: number
-  [epochNanoSymbol]: NanoWrap
+  [epochNanoSymbol]: BigNano
 }
 export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOFields>
   implements Temporal.ZonedDateTime {
   constructor(
-    epochNanoseconds: NanoInput,
+    epochNanoseconds: BigNanoInput,
     timeZoneArg: Temporal.TimeZoneLike,
     calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    const epochNanoWrap = ensureNanoWrap(epochNanoseconds)
+    const epochNanoWrap = ensureBigNano(epochNanoseconds)
     const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNanoWrap, timeZone)
     validateDateTime(isoFields, calendar.toString())
 
@@ -310,7 +310,7 @@ export function createZonedDateTimeFromFields(
 }
 
 export function buildZonedDateTimeISOFields(
-  epochNanoWrap: NanoWrap,
+  epochNanoWrap: BigNano,
   timeZone: Temporal.TimeZoneProtocol,
 ): [ISODateTimeFields, number] {
   const instant = new Instant(epochNanoWrap) // will do validation

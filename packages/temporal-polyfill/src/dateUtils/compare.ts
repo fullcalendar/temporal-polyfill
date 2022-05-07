@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { compareValues } from '../utils/math'
-import { NanoWrap, compareNanoWraps } from '../utils/nanoWrap'
+import { BigNano, compareBigNanos } from '../utils/nanoWrap'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
 import { DurationFields, computeLargestDurationUnit } from './durationFields'
@@ -18,7 +18,7 @@ export interface ComparableTime {
 }
 
 export interface ComparableEpochObj {
-  [epochNanoSymbol]: NanoWrap
+  [epochNanoSymbol]: BigNano
 }
 
 // Equality (considers Calendar & timeZone)
@@ -44,7 +44,7 @@ export function compareDateTimes(
   a: ComparableDateTime,
   b: ComparableDateTime,
 ): Temporal.ComparisonResult {
-  return compareNanoWraps(
+  return compareBigNanos(
     isoFieldsToEpochNano(a.getISOFields()),
     isoFieldsToEpochNano(b.getISOFields()),
   )
@@ -70,7 +70,7 @@ export function compareEpochObjs(
   a: ComparableEpochObj,
   b: ComparableEpochObj,
 ): Temporal.ComparisonResult {
-  return compareNanoWraps(
+  return compareBigNanos(
     a[epochNanoSymbol],
     b[epochNanoSymbol],
   )
@@ -86,7 +86,7 @@ export function compareDurations(
     computeLargestDurationUnit(fields0) <= DAY &&
     computeLargestDurationUnit(fields1) <= DAY
   ) {
-    return compareNanoWraps(
+    return compareBigNanos(
       durationDayTimeToNano(fields0),
       durationDayTimeToNano(fields1),
     )

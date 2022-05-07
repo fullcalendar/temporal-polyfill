@@ -2,7 +2,7 @@ import { epochNanoToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../d
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { milliInSecond, nanoInSecond, secondsInDay } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { NanoWrap, compareNanoWraps, createNanoWrap } from '../utils/nanoWrap'
+import { BigNano, compareBigNanos, createBigNano } from '../utils/nanoWrap'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
@@ -45,7 +45,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   }
 
   // `zoneNano` is like epochNano, but from zone's pseudo-epoch
-  getPossibleOffsets(zoneNano: NanoWrap): number[] {
+  getPossibleOffsets(zoneNano: BigNano): number[] {
     let lastOffsetNano: number | undefined
 
     const transitions = [
@@ -97,7 +97,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     ]
   }
 
-  getOffset(epochNano: NanoWrap): number {
+  getOffset(epochNano: BigNano): number {
     return this.getOffsetForEpochSecs(
       epochNano.div(nanoInSecond).toNumber(),
     ) * nanoInSecond
@@ -129,7 +129,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   /*
   Always exclusive. Will never return a transition that starts exactly on epochNano
   */
-  getTransition(epochNano: NanoWrap, direction: -1 | 1): RawTransition | undefined {
+  getTransition(epochNano: BigNano, direction: -1 | 1): RawTransition | undefined {
     let year = epochNanoToISOYear(epochNano)
 
     if (year > DST_PERSIST_YEAR) {
@@ -156,7 +156,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     year: number,
     endYear: number, // exclusive
     direction: -1 | 1,
-    epochNano: NanoWrap,
+    epochNano: BigNano,
   ): RawTransition | undefined {
     for (; year !== endYear; year += direction) {
       let transitions = this.getTransitionsInYear(year)
@@ -167,7 +167,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       for (const transition of transitions) {
         // does the current transition overtake epochNano in the direction of travel?
-        if (compareNanoWraps(transition[0], epochNano) === direction) {
+        if (compareBigNanos(transition[0], epochNano) === direction) {
           return transition
         }
       }
@@ -234,7 +234,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
       }
     }
     return [
-      createNanoWrap(endEpochSec).mult(nanoInSecond),
+      createBigNano(endEpochSec).mult(nanoInSecond),
       startOffsetSec * nanoInSecond,
       endOffsetSec * nanoInSecond,
     ]

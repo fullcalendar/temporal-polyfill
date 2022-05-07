@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
+import { BigNano, createBigNano } from '../utils/nanoWrap'
 import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
 import { ISOTimeFields } from './isoFields'
 import { LocalTimeFields } from './localFields'
@@ -61,17 +61,17 @@ export function partialLocalTimeToISO(fields: Partial<LocalTimeFields>): ISOTime
 // fields -> nano
 // -------------------------------------------------------------------------------------------------
 
-export function durationDayTimeToNano(fields: DurationFields): NanoWrap {
-  return createNanoWrap(nanoInDay)
+export function durationDayTimeToNano(fields: DurationFields): BigNano {
+  return createBigNano(nanoInDay)
     .mult(fields.days)
     .add(durationTimeToNano(fields))
 }
 
 // must return bigint because there could be huge hour value,
 // which would cause the nanosecond's precision to max out.
-export function durationTimeToNano(fields: DurationTimeFields): NanoWrap {
+export function durationTimeToNano(fields: DurationTimeFields): BigNano {
   // we're allowed to ue the constructor because same-sign is guaranteed
-  return new NanoWrap(
+  return new BigNano(
     fields.hours * milliInHour +
     fields.minutes * milliInMinute +
     fields.seconds * milliInSecond +
@@ -93,7 +93,7 @@ export function isoTimeToNano(fields: ISOTimeFields): number {
 // nano -> fields
 // -------------------------------------------------------------------------------------------------
 
-export function nanoToDuration(nanoWrap: NanoWrap, largestUnit: DayTimeUnitInt): DurationFields {
+export function nanoToDuration(nanoWrap: BigNano, largestUnit: DayTimeUnitInt): DurationFields {
   let nanoseconds = nanoWrap.nanoRemainder
   let microseconds = 0
   let milliseconds = nanoWrap.milli

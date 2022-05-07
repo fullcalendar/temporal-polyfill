@@ -7,7 +7,7 @@ import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoForma
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
-import { NanoWrap } from '../utils/nanoWrap'
+import { BigNano } from '../utils/nanoWrap'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'
 import { DurationFields } from './durationFields'
@@ -187,7 +187,7 @@ function formatPartialSeconds(
   smallestUnit?: TimeUnitInt, // HACK for forcing this func to do rounding
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
   // okay to use constructor because all units are positive
-  let totalNano = new NanoWrap(
+  let totalNano = new BigNano(
     milliseconds,
     microseconds * nanoInMicro +
     nanoseconds,

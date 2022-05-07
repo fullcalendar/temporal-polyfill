@@ -1,6 +1,6 @@
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
 import { numSign, positiveModulo } from '../utils/math'
-import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
+import { BigNano, createBigNano } from '../utils/nanoWrap'
 import { isoTimeToNano } from './dayAndTime'
 import {
   ISODateFields,
@@ -22,7 +22,7 @@ export type EpochableFields = ISODateFields & Partial<ISOTimeFields>
 export const epochNanoSymbol = Symbol()
 
 export interface EpochableObj {
-  [epochNanoSymbol]?: NanoWrap
+  [epochNanoSymbol]?: BigNano
   getISOFields(): EpochableFields
 }
 
@@ -35,7 +35,7 @@ GENERAL ROUNDING TIPS:
 */
 // ISO Field <-> Epoch Math
 
-export function isoFieldsToEpochNano(isoFields: EpochableFields): NanoWrap {
+export function isoFieldsToEpochNano(isoFields: EpochableFields): BigNano {
   return isoToEpochNano(
     isoFields.isoYear,
     isoFields.isoMonth,
@@ -71,8 +71,8 @@ export function isoToEpochNano(
   isoMillisecond?: number,
   isoMicrosecond?: number,
   isoNanosecond?: number,
-): NanoWrap {
-  return createNanoWrap(
+): BigNano {
+  return createBigNano(
     (isoMicrosecond ?? 0) * nanoInMicro +
       (isoNanosecond ?? 0),
     isoToEpochMilli(
@@ -141,7 +141,7 @@ export function isoToEpochMilli(
   return milli!
 }
 
-export function epochNanoToISOFields(epochNanoWrap: NanoWrap): ISODateTimeFields {
+export function epochNanoToISOFields(epochNanoWrap: BigNano): ISODateTimeFields {
   let epochMilli = epochNanoWrap.milli
   let leftoverNano = epochNanoWrap.nanoRemainder
 
@@ -176,7 +176,7 @@ export function epochMilliToISOFields(epochMilli: number): ISODateTimeFieldsMill
 
 // High-level conversions
 
-export function toEpochNano(dt: EpochableObj): NanoWrap {
+export function toEpochNano(dt: EpochableObj): BigNano {
   return dt[epochNanoSymbol] ?? isoFieldsToEpochNano(dt.getISOFields())
 }
 
@@ -186,7 +186,7 @@ export function isoYearToEpochSeconds(isoYear: number): number {
   return Math.floor(isoToEpochMilli(isoYear, 1, 1) / milliInSecond)
 }
 
-export function epochNanoToISOYear(epochNanoWrap: NanoWrap): number {
+export function epochNanoToISOYear(epochNanoWrap: BigNano): number {
   return nudgeToLegacyDate(epochNanoWrap.milli)[0].getUTCFullYear()
 }
 
@@ -244,7 +244,7 @@ export function addDaysMilli(epochMilli: number, days: number): number {
   return epochMilli + days * milliInDay
 }
 
-export function splitEpochNano(epochNanoWrap: NanoWrap): [NanoWrap, number] {
+export function splitEpochNano(epochNanoWrap: BigNano): [BigNano, number] {
   const isoFields = epochNanoToISOFields(epochNanoWrap)
   const dayEpochNano = isoToEpochNano(isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay)
   const timeNano = isoTimeToNano(isoFields)

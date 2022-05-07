@@ -5,7 +5,7 @@ import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { createDate } from '../public/plainDate'
 import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
-import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
+import { BigNano, createBigNano } from '../utils/nanoWrap'
 import { compareLocalDateFields } from './compare'
 import { constrainDateFields } from './constrain'
 import { isoTimeToNano, nanoToDuration } from './dayAndTime'
@@ -71,12 +71,12 @@ export function diffTimes(
     nanoIn[diffConfig.smallestUnit] * diffConfig.roundingIncrement,
     diffConfig.roundingFunc,
   )
-  return nanoToDuration(createNanoWrap(roundedDiff), diffConfig.largestUnit)
+  return nanoToDuration(createBigNano(roundedDiff), diffConfig.largestUnit)
 }
 
 export function diffEpochNanos(
-  epochNano0: NanoWrap,
-  epochNano1: NanoWrap,
+  epochNano0: BigNano,
+  epochNano1: BigNano,
   diffConfig: DiffConfig<TimeUnitInt>,
 ): DurationFields {
   const roundedDiff = roundToIncrementBI(

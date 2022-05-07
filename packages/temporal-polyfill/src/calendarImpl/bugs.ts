@@ -1,6 +1,6 @@
 import { isoToEpochMilli } from '../dateUtils/epoch'
 import { milliInDay } from '../dateUtils/units'
-import { NanoWrap } from '../utils/nanoWrap'
+import { BigNano } from '../utils/nanoWrap'
 import { queryCalendarImpl } from './calendarImplQuery'
 import { IntlCalendarImpl } from './intlCalendarImpl'
 
@@ -21,7 +21,7 @@ const goodEpochMillis: { [cal: string]: number } = {
 
 const hasBugByID: { [cal: string]: boolean } = {}
 
-export function checkEpochNanoBuggy(epochNanoWrap: NanoWrap, calendarID: string): void {
+export function checkEpochNanoBuggy(epochNanoWrap: BigNano, calendarID: string): void {
   return checkEpochMilliBuggy(epochNanoWrap.milli, calendarID)
 }
 

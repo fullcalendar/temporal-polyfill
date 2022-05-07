@@ -5,7 +5,7 @@ import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Instant } from '../public/instant'
 import { createDate } from '../public/plainDate'
 import { createDateTime } from '../public/plainDateTime'
-import { NanoWrap } from '../utils/nanoWrap'
+import { BigNano } from '../utils/nanoWrap'
 import {
   durationDayTimeToNano,
   durationTimeToNano,
@@ -40,7 +40,7 @@ export function translateZonedDateTimeFields(
   fields: ZonedTranslatableObj,
   duration: DurationFields,
   options: Temporal.AssignmentOptions | undefined, // Calendar needs these options to be raw
-): NanoWrap {
+): BigNano {
   const { calendar, timeZone } = fields
 
   // add date fields first
@@ -164,7 +164,7 @@ export function translateTime(
   return newTimeFields
 }
 
-export function translateEpochNano(epochNano: NanoWrap, durationFields: DurationFields): NanoWrap {
+export function translateEpochNano(epochNano: BigNano, durationFields: DurationFields): BigNano {
   const largestUnit = computeLargestDurationUnit(durationFields)
 
   if (largestUnit >= DAY) {
