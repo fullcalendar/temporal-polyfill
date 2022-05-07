@@ -1,8 +1,8 @@
 import { nanoInMilli } from '../dateUtils/units'
-import { positiveModulo } from '../utils/math'
 
 export class NanoWrap {
   constructor(
+    // always have same sign
     public milli: number,
     public nano: number,
   ) {}
@@ -28,7 +28,11 @@ export class NanoWrap {
   }
 
   div(n: number): NanoWrap {
-    return balance(Math.trunc(this.milli / n), Math.trunc(this.nano / n))
+    const milliFloat = this.milli / n
+    const milliInt = Math.trunc(milliFloat)
+    const milliUnder = Math.trunc((milliFloat - milliInt) * nanoInMilli)
+    const nano = Math.trunc(this.nano / n) + milliUnder
+    return balance(milliInt, nano)
   }
 
   toNumber(): number {
@@ -43,16 +47,17 @@ export class NanoWrap {
 export function ensureNanoWrap(input: bigint | NanoWrap): NanoWrap {
   if (typeof input === 'bigint') {
     const nanoInMilliBI = BigInt(nanoInMilli)
-    const milliBI = input / nanoInMilliBI
-    const nanoBI = input - (milliBI * nanoInMilliBI)
-    return new NanoWrap(Number(milliBI), Number(nanoBI))
+    return new NanoWrap(
+      Number(input / nanoInMilliBI), // does trunc
+      Number(input % nanoInMilliBI),
+    )
   }
   return input
 }
 
 function balance(milli: number, nano: number): NanoWrap {
   return new NanoWrap(
-    milli + Math.floor(nano / nanoInMilli),
-    positiveModulo(nano, nanoInMilli),
+    milli + Math.trunc(nano / nanoInMilli),
+    nano % nanoInMilli,
   )
 }
