@@ -1,5 +1,5 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
-import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
+import { NanoWrap, compareNanoWraps, createNanoWrap } from '../utils/nanoWrap'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
 import { nanoInDay } from './units'
@@ -57,8 +57,8 @@ export function validateDateTime(isoFields: ISODateTimeFields, calendarID: strin
 
 export function validateInstant(epochNanoWrap: NanoWrap): void {
   if (
-    epochNanoWrap.cmp(minInstantBI) === -1 ||
-    epochNanoWrap.cmp(maxInstantBI) === 1
+    compareNanoWraps(epochNanoWrap, minInstantBI) === -1 ||
+    compareNanoWraps(epochNanoWrap, maxInstantBI) === 1
   ) {
     throwOutOfRange()
   }
@@ -67,8 +67,8 @@ export function validateInstant(epochNanoWrap: NanoWrap): void {
 export function validatePlain(epochNano: NanoWrap): void {
   // like validateInstant's bounds, but expanded 24:59:59.999999999
   if (
-    epochNano.cmp(minPlainBI) === -1 ||
-    epochNano.cmp(maxPlainBI) === 1
+    compareNanoWraps(epochNano, minPlainBI) === -1 ||
+    compareNanoWraps(epochNano, maxPlainBI) === 1
   ) {
     throwOutOfRange()
   }

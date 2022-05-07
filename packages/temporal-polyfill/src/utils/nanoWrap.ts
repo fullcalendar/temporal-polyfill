@@ -25,13 +25,6 @@ export class NanoWrap {
     return this
   }
 
-  // TODO: make separate util
-  cmp(input: NanoWrap | number): Temporal.ComparisonResult {
-    const [milliOther, nanoOther] = ensureVals(input)
-    return compareValues(this.milli, milliOther) ||
-      compareValues(this.nanoRemainder, nanoOther)
-  }
-
   add(input: NanoWrap | number): NanoWrap {
     const [milliAdd, nanoAdd] = ensureVals(input, true) // skipBalance=true
     return createNanoWrap(this.nanoRemainder + nanoAdd, this.milli + milliAdd) // will balance
@@ -61,6 +54,14 @@ export class NanoWrap {
   toBigInt(): bigint {
     return BigInt(this.milli) * BigInt(nanoInMilli) + BigInt(this.nanoRemainder)
   }
+}
+
+export function compareNanoWraps(
+  a: NanoWrap,
+  b: NanoWrap,
+): Temporal.ComparisonResult {
+  return compareValues(a.milli, b.milli) ||
+    compareValues(a.nanoRemainder, b.nanoRemainder)
 }
 
 export function ensureNanoWrap(input: NanoInput): NanoWrap {

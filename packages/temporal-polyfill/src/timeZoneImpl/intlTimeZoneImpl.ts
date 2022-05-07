@@ -2,7 +2,7 @@ import { epochNanoToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../d
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { milliInSecond, nanoInSecond, secondsInDay } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { NanoWrap, createNanoWrap } from '../utils/nanoWrap'
+import { NanoWrap, compareNanoWraps, createNanoWrap } from '../utils/nanoWrap'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
@@ -167,7 +167,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       for (const transition of transitions) {
         // does the current transition overtake epochNano in the direction of travel?
-        if (transition[0].cmp(epochNano) === direction) {
+        if (compareNanoWraps(transition[0], epochNano) === direction) {
           return transition
         }
       }
