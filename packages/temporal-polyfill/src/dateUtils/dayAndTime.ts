@@ -93,10 +93,10 @@ export function isoTimeToNano(fields: ISOTimeFields): number {
 // nano -> fields
 // -------------------------------------------------------------------------------------------------
 
-export function nanoToDuration(nanoWrap: BigNano, largestUnit: DayTimeUnitInt): DurationFields {
-  let nanoseconds = nanoWrap.nanoRemainder
+export function nanoToDuration(bigNano: BigNano, largestUnit: DayTimeUnitInt): DurationFields {
+  let nanoseconds = bigNano.nanoRemainder
   let microseconds = 0
-  let milliseconds = nanoWrap.milli
+  let milliseconds = bigNano.milli
   let seconds = 0
   let minutes = 0
   let hours = 0

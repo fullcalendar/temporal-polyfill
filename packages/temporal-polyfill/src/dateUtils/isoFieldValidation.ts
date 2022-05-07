@@ -55,10 +55,10 @@ export function validateDateTime(isoFields: ISODateTimeFields, calendarID: strin
   checkEpochNanoBuggy(epochNano, calendarID)
 }
 
-export function validateInstant(epochNanoWrap: BigNano): void {
+export function validateInstant(epochNano: BigNano): void {
   if (
-    compareBigNanos(epochNanoWrap, minInstantBI) === -1 ||
-    compareBigNanos(epochNanoWrap, maxInstantBI) === 1
+    compareBigNanos(epochNano, minInstantBI) === -1 ||
+    compareBigNanos(epochNano, maxInstantBI) === 1
   ) {
     throwOutOfRange()
   }

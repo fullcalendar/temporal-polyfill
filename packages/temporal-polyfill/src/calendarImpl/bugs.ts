@@ -21,8 +21,8 @@ const goodEpochMillis: { [cal: string]: number } = {
 
 const hasBugByID: { [cal: string]: boolean } = {}
 
-export function checkEpochNanoBuggy(epochNanoWrap: BigNano, calendarID: string): void {
-  return checkEpochMilliBuggy(epochNanoWrap.milli, calendarID)
+export function checkEpochNanoBuggy(epochNano: BigNano, calendarID: string): void {
+  return checkEpochMilliBuggy(epochNano.milli, calendarID)
 }
 
 export function checkEpochMilliBuggy(epochMilli: number, calendarID: string): void {

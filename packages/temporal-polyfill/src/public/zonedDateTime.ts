@@ -103,8 +103,8 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    const epochNanoWrap = ensureBigNano(epochNanoseconds)
-    const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNanoWrap, timeZone)
+    const epochNano = ensureBigNano(epochNanoseconds)
+    const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNano, timeZone)
     validateDateTime(isoFields, calendar.toString())
 
     super({
@@ -116,7 +116,7 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
       offset: formatOffsetISO(offsetNano),
     })
 
-    this[epochNanoSymbol] = epochNanoWrap
+    this[epochNanoSymbol] = epochNano
     this[offsetNanoSymbol] = offsetNano
   }
 
@@ -310,12 +310,12 @@ export function createZonedDateTimeFromFields(
 }
 
 export function buildZonedDateTimeISOFields(
-  epochNanoWrap: BigNano,
+  epochNano: BigNano,
   timeZone: Temporal.TimeZoneProtocol,
 ): [ISODateTimeFields, number] {
-  const instant = new Instant(epochNanoWrap) // will do validation
+  const instant = new Instant(epochNano) // will do validation
   const offsetNano = timeZone.getOffsetNanosecondsFor(instant)
-  const isoFields = epochNanoToISOFields(epochNanoWrap.add(offsetNano))
+  const isoFields = epochNanoToISOFields(epochNano.add(offsetNano))
   return [isoFields, offsetNano]
 }
 

@@ -55,9 +55,9 @@ export interface Instant {
 export class Instant extends AbstractNoValueObj implements Temporal.Instant {
   constructor(epochNanoseconds: BigNanoInput) {
     super()
-    const epochNanoWrap = ensureBigNano(epochNanoseconds)
-    validateInstant(epochNanoWrap)
-    this[epochNanoSymbol] = epochNanoWrap
+    const epochNano = ensureBigNano(epochNanoseconds)
+    validateInstant(epochNano)
+    this[epochNanoSymbol] = epochNano
   }
 
   static from(arg: InstantArg): Instant { // okay to have return-type be Instant? needed
