@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs/promises')
 const { analyzePkgConfig, getPkgConfig } = require('../lib/pkgAnalyze.cjs')
 const resolve = require('@rollup/plugin-node-resolve').default
-const sucrase = require('@rollup/plugin-sucrase')
+const esbuild = require('rollup-plugin-esbuild').default
 const { terser } = require('rollup-plugin-terser')
 const dts = require('rollup-plugin-dts').default
 const { createTypeInputHash, typePreparing } = require('../lib/pkgTypes.cjs')
@@ -88,9 +88,8 @@ function buildPlugins(watch) {
     resolve({
       extensions: ['.js', '.ts'],
     }),
-    sucrase({
-      transforms: ['typescript'],
-      disableESTransforms: true,
+    esbuild({
+      target: 'es2020', // for BigInt literals (Sept 2020 for mobile safari)
     }),
     tsFileOverriding('.build.ts'),
     !watch && terser(terserConfig),
