@@ -17,11 +17,12 @@ export class BigNano {
     return numSign(this.milli) || numSign(this.nanoRemainder)
   }
 
+  neg(): BigNano {
+    return new BigNano(-this.milli, -this.nanoRemainder)
+  }
+
   abs(): BigNano {
-    if (this.sign() < 0) {
-      return new BigNano(-this.milli, -this.nanoRemainder)
-    }
-    return this
+    return this.sign() < 0 ? this.neg() : this
   }
 
   add(input: BigNano | number): BigNano {
@@ -103,12 +104,13 @@ function ensureVals(input: BigNano | number, skipBalance?: boolean): [number, nu
 function balanceVals(nano: number, milli: number): [number, number] {
   let newNano = nano % nanoInMilli
   let newMilli = milli + Math.trunc(nano / nanoInMilli)
-  const newSign = numSign(newMilli)
-  const altSign = numSign(newNano)
+  const signMilli = numSign(newMilli) // all signs must equal this
+  const signNano = numSign(newNano)
 
-  if (altSign && altSign !== (newSign || 1)) {
-    newMilli += altSign
-    newNano -= nanoInMilli * altSign
+  // ensure same signs. more performant way to do this?
+  if (signNano && signNano !== (signMilli || 1)) {
+    newMilli += signNano
+    newNano -= nanoInMilli * signNano
   }
 
   return [newMilli, newNano]
