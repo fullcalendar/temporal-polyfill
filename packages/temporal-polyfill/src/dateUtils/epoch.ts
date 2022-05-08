@@ -73,8 +73,6 @@ export function isoToEpochNano(
   isoNanosecond?: number,
 ): BigNano {
   return createBigNano(
-    (isoMicrosecond ?? 0) * nanoInMicro +
-      (isoNanosecond ?? 0),
     isoToEpochMilli(
       isoYear,
       isoMonth,
@@ -84,6 +82,9 @@ export function isoToEpochNano(
       isoSecond,
       isoMillisecond,
     ),
+  ).mult(nanoInMilli).add(
+    (isoMicrosecond ?? 0) * nanoInMicro +
+      (isoNanosecond ?? 0),
   )
 }
 
@@ -142,20 +143,20 @@ export function isoToEpochMilli(
 }
 
 export function epochNanoToISOFields(epochNano: BigNano): ISODateTimeFields {
-  let epochMilli = epochNano.milli
-  let leftoverNano = epochNano.nanoRemainder
+  let epochMilli = epochNano.div(nanoInMilli)
+  let leftoverNano = epochNano.sub(epochMilli.mult(nanoInMilli)).toNumber()
 
   // ensure leftoverNano. bump to millisecond below if necessary
   if (leftoverNano < 0) {
     leftoverNano += nanoInMilli
-    epochMilli -= 1
+    epochMilli = epochMilli.sub(1)
   }
 
   const isoMicrosecond = Math.floor(leftoverNano / nanoInMicro)
   leftoverNano -= isoMicrosecond * nanoInMicro
 
   return {
-    ...epochMilliToISOFields(epochMilli),
+    ...epochMilliToISOFields(epochMilli.toNumber()),
     isoMicrosecond,
     isoNanosecond: leftoverNano,
   }
@@ -187,7 +188,9 @@ export function isoYearToEpochSeconds(isoYear: number): number {
 }
 
 export function epochNanoToISOYear(epochNano: BigNano): number {
-  return nudgeToLegacyDate(epochNano.milli)[0].getUTCFullYear()
+  return nudgeToLegacyDate(
+    epochNano.div(nanoInMilli).toNumber(),
+  )[0].getUTCFullYear()
 }
 
 // Day-of-Week (move?)

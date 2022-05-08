@@ -11,10 +11,6 @@ import {
   MILLISECOND,
   MINUTE,
   SECOND,
-  milliInDay,
-  milliInHour,
-  milliInMinute,
-  milliInSecond,
   nanoInDay,
   nanoInHour,
   nanoInMicro,
@@ -70,15 +66,12 @@ export function durationDayTimeToNano(fields: DurationFields): BigNano {
 // must return bigint because there could be huge hour value,
 // which would cause the nanosecond's precision to max out.
 export function durationTimeToNano(fields: DurationTimeFields): BigNano {
-  // we're allowed to ue the constructor because same-sign is guaranteed
-  return new BigNano(
-    fields.hours * milliInHour +
-    fields.minutes * milliInMinute +
-    fields.seconds * milliInSecond +
-    fields.milliseconds,
-    fields.microseconds * nanoInMicro +
-    fields.nanoseconds,
-  )
+  return createBigNano(fields.nanoseconds)
+    .add(createBigNano(fields.microseconds).mult(nanoInMicro))
+    .add(createBigNano(fields.milliseconds).mult(nanoInMilli))
+    .add(createBigNano(fields.seconds).mult(nanoInSecond))
+    .add(createBigNano(fields.minutes).mult(nanoInMinute))
+    .add(createBigNano(fields.hours).mult(nanoInHour))
 }
 
 export function isoTimeToNano(fields: ISOTimeFields): number {
@@ -93,36 +86,45 @@ export function isoTimeToNano(fields: ISOTimeFields): number {
 // nano -> fields
 // -------------------------------------------------------------------------------------------------
 
-export function nanoToDuration(bigNano: BigNano, largestUnit: DayTimeUnitInt): DurationFields {
-  let nanoseconds = bigNano.nanoRemainder
-  let microseconds = 0
-  let milliseconds = bigNano.milli
-  let seconds = 0
-  let minutes = 0
-  let hours = 0
+export function nanoToDuration(nano: BigNano, largestUnit: DayTimeUnitInt): DurationFields {
   let days = 0
+  let hours = 0
+  let minutes = 0
+  let seconds = 0
+  let milliseconds = 0
+  let microseconds = 0
+  let temp: BigNano
 
   switch (largestUnit) {
     case DAY:
-      days = Math.trunc(milliseconds / milliInDay)
-      milliseconds -= days * milliInDay
+      temp = nano.div(nanoInDay)
+      days = temp.toNumber()
+      nano = nano.sub(temp.mult(nanoInDay))
       // fall through
     case HOUR:
-      hours = Math.trunc(milliseconds / milliInHour)
-      milliseconds -= hours * milliInHour
+      temp = nano.div(nanoInHour)
+      hours = temp.toNumber()
+      nano = nano.sub(temp.mult(nanoInHour))
       // fall through
     case MINUTE:
-      minutes = Math.trunc(milliseconds / milliInMinute)
-      milliseconds -= minutes * milliInMinute
+      temp = nano.div(nanoInMinute)
+      minutes = temp.toNumber()
+      nano = nano.sub(temp.mult(nanoInMinute))
       // fall through
     case SECOND:
-      seconds = Math.trunc(milliseconds / milliInSecond)
-      milliseconds -= seconds * milliInSecond
+      temp = nano.div(nanoInSecond)
+      seconds = temp.toNumber()
+      nano = nano.sub(temp.mult(nanoInSecond))
       // fall through
     case MILLISECOND:
+      temp = nano.div(nanoInMilli)
+      milliseconds = temp.toNumber()
+      nano = nano.sub(temp.mult(nanoInMilli))
+      // fall through
     case MICROSECOND:
-      microseconds = Math.trunc(nanoseconds / nanoInMicro)
-      nanoseconds -= microseconds * nanoInMicro
+      temp = nano.div(nanoInMicro)
+      microseconds = temp.toNumber()
+      nano = nano.sub(temp.mult(nanoInMicro))
   }
 
   return signDuration({
@@ -135,7 +137,7 @@ export function nanoToDuration(bigNano: BigNano, largestUnit: DayTimeUnitInt): D
     seconds,
     milliseconds,
     microseconds,
-    nanoseconds,
+    nanoseconds: nano.toNumber(),
   })
 }
 

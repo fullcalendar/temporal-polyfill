@@ -64,7 +64,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { BigNano, BigNanoInput, ensureBigNano } from '../utils/bigNano'
+import { BigNano, BigNanoInput, createBigNano } from '../utils/bigNano'
 import { roundToMinute } from '../utils/math'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
@@ -103,7 +103,7 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    const epochNano = ensureBigNano(epochNanoseconds)
+    const epochNano = createBigNano(epochNanoseconds)
     const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNano, timeZone)
     validateDateTime(isoFields, calendar.toString())
 

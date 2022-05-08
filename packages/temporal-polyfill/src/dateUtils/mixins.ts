@@ -5,7 +5,7 @@ import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'
 import { epochNanoSymbol } from './epoch'
-import { milliInSecond, nanoInMicro } from './units'
+import { nanoInMicro, nanoInMilli, nanoInSecond } from './units'
 
 // Epoch Fields
 
@@ -27,10 +27,10 @@ export function mixinEpochFields<Obj extends { [epochNanoSymbol]: BigNano }>(
       return this[epochNanoSymbol].div(nanoInMicro).toBigInt()
     },
     epochMilliseconds(): number {
-      return this[epochNanoSymbol].milli
+      return this[epochNanoSymbol].div(nanoInMilli).toNumber()
     },
     epochSeconds(): number {
-      return Math.floor(this[epochNanoSymbol].milli / milliInSecond)
+      return this[epochNanoSymbol].div(nanoInSecond).toNumber()
     },
   })
 }

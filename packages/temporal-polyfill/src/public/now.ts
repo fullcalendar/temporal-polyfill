@@ -3,8 +3,9 @@ import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { ISODateTimeFields } from '../dateUtils/isoFields'
 import { attachStringTag } from '../dateUtils/mixins'
+import { nanoInMilli } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { BigNano } from '../utils/bigNano'
+import { BigNano, createBigNano } from '../utils/bigNano'
 import { Calendar } from './calendar'
 import { Instant } from './instant'
 import { createDate } from './plainDate'
@@ -96,5 +97,5 @@ function buidZonedFields(
 }
 
 function getEpochNano(): BigNano {
-  return new BigNano(Date.now(), 0)
+  return createBigNano(Date.now()).mult(nanoInMilli)
 }

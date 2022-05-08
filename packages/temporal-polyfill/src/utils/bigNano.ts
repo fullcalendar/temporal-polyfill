@@ -1,24 +1,25 @@
 import { Temporal } from 'temporal-spec'
-import { nanoInMilli } from '../dateUtils/units'
 import { compareValues, numSign } from './math'
 
-export type BigNanoInput = BigNano | bigint | string
+// MAX_SAFE_INTEGER has 16 digits, but go lower so low value doesn't overflow
+const maxLowDigits = 8
+const maxLowNum = Math.pow(10, maxLowDigits)
 
-// operations do not support floating-point math
+export type BigNanoInput = BigNano | bigint | number | string
+
+// TODO: rename to LargeInt
 export class BigNano {
-  // cannot have conflicting signs
-  // nanoRemainder must be below nanoInMilli
   constructor(
-    public milli: number,
-    public nanoRemainder: number = 0,
+    public high: number,
+    public low: number,
   ) {}
 
   sign(): Temporal.ComparisonResult {
-    return numSign(this.milli) || numSign(this.nanoRemainder)
+    return numSign(this.high) || numSign(this.low)
   }
 
   neg(): BigNano {
-    return new BigNano(-this.milli || 0, -this.nanoRemainder || 0) // prevents -0
+    return new BigNano(-this.high || 0, -this.low || 0) // prevents -0
   }
 
   abs(): BigNano {
@@ -26,33 +27,33 @@ export class BigNano {
   }
 
   add(input: BigNano | number): BigNano {
-    const [milliAdd, nanoAdd] = ensureVals(input, true) // skipBalance=true
-    return createBigNano(this.nanoRemainder + nanoAdd, this.milli + milliAdd) // will balance
+    const [high, low] = getHighLow(input)
+    return balanceAndCreate(this.high + high, this.low + low)
   }
 
   sub(input: BigNano | number): BigNano {
-    const [milliAdd, nanoAdd] = ensureVals(input, true) // skipBalance=true
-    return createBigNano(this.nanoRemainder - nanoAdd, this.milli - milliAdd) // will balance
+    const [high, low] = getHighLow(input)
+    return balanceAndCreate(this.high - high, this.low - low)
   }
 
   mult(n: number): BigNano {
-    return createBigNano(this.nanoRemainder * n, this.milli * n)
+    return balanceAndCreate(this.high * n, this.low * n)
   }
 
   div(n: number): BigNano {
-    const milliFloat = this.milli / n
-    const milli = Math.trunc(milliFloat)
-    const nanoUnder = Math.trunc((milliFloat - milli) * nanoInMilli)
-    const nanoRemainder = Math.trunc(this.nanoRemainder / n) + nanoUnder
-    return createBigNano(nanoRemainder, milli) // will balance
+    const highFloat = this.high / n
+    const high = Math.trunc(highFloat)
+    const lowScraps = Math.round((highFloat - high) * maxLowNum) // round for float-precision
+    const low = Math.trunc(this.low / n) + lowScraps
+    return balanceAndCreate(high, low)
   }
 
   toNumber(): number {
-    return this.milli * nanoInMilli + this.nanoRemainder
+    return this.high * maxLowNum + this.low
   }
 
   toBigInt(): bigint {
-    return BigInt(this.milli) * BigInt(nanoInMilli) + BigInt(this.nanoRemainder)
+    return BigInt(this.high) * BigInt(maxLowNum) + BigInt(this.low)
   }
 
   // valueOf(): void {
@@ -60,62 +61,51 @@ export class BigNano {
   // }
 }
 
-export function compareBigNanos(
-  a: BigNano,
-  b: BigNano,
-): Temporal.ComparisonResult {
-  return compareValues(a.milli, b.milli) ||
-    compareValues(a.nanoRemainder, b.nanoRemainder)
-}
-
-export function ensureBigNano(input: BigNanoInput): BigNano {
+export function createBigNano(input: BigNanoInput): BigNano {
+  let high: number
+  let low: number
   if (input instanceof BigNano) {
-    return input
+    high = input.high
+    low = input.low
+  } else if (typeof input === 'number') { // TODO: don't allow this in Instant or ZonedDateTime
+    high = Math.trunc(input / maxLowNum)
+    low = input % maxLowNum
+  } else if (typeof input === 'bigint') {
+    const maxNumBI = BigInt(maxLowNum)
+    high = Number(input / maxNumBI)
+    low = Number(input % maxNumBI)
+  } else if (typeof input === 'string') { // TODO: write test
+    const gapIndex = input.length - maxLowDigits
+    high = Number(input.substr(gapIndex))
+    low = Number(input.substr(0, gapIndex))
+  } else {
+    throw new Error('Invalid type of BigNano')
   }
-  if (typeof input === 'bigint') {
-    const nanoInMilliBI = BigInt(nanoInMilli)
-    return new BigNano(
-      Number(input / nanoInMilliBI), // does trunc
-      Number(input % nanoInMilliBI),
-    )
-  }
-  if (typeof input === 'string') { // TODO: write test
-    const gapIndex = input.length - 6
-    return new BigNano(
-      Number(input.substr(gapIndex)),
-      Number(input.substr(0, gapIndex)),
-    )
-  }
-  throw new TypeError('Must supply bigint or string')
+  return new BigNano(high, low)
 }
 
-// balances+creates
-// accepts [nano, milli] - different than the constructor!
-export function createBigNano(nano: number, milli = 0): BigNano {
-  return new BigNano(...balanceVals(nano, milli))
+export function compareBigNanos(a: BigNano, b: BigNano): Temporal.ComparisonResult {
+  return compareValues(a.high, b.high) || compareValues(a.low, b.low)
 }
 
-// returns [milli, nanoRemainger]
-function ensureVals(input: BigNano | number, skipBalance?: boolean): [number, number] {
+function getHighLow(input: BigNano | number): [number, number] {
   if (typeof input === 'number') {
-    return skipBalance ? [0, input] : balanceVals(input, 0)
+    return [0, input]
   }
-  return [input.milli, input.nanoRemainder]
+  return [input.high, input.low]
 }
 
-// accepts [nano, milli] - different than the constructor!
-// returns [milli, nanoRemainger]
-function balanceVals(nano: number, milli: number): [number, number] {
-  let newNano = nano % nanoInMilli
-  let newMilli = milli + Math.trunc(nano / nanoInMilli)
-  const signMilli = numSign(newMilli) // all signs must equal this
-  const signNano = numSign(newNano)
+function balanceAndCreate(high: number, low: number): BigNano {
+  let newLow = low % maxLowNum
+  let newHigh = high + Math.trunc(low / maxLowNum)
+  const signHigh = numSign(newHigh) // all signs must equal this
+  const signLow = numSign(newLow)
 
   // ensure same signs. more performant way to do this?
-  if (signNano && signNano !== (signMilli || 1)) {
-    newMilli += signNano
-    newNano -= nanoInMilli * signNano
+  if (signLow && signLow !== (signHigh || 1)) {
+    newHigh += signLow
+    newLow -= maxLowNum * signLow
   }
 
-  return [newMilli, newNano]
+  return new BigNano(newHigh, newLow)
 }
