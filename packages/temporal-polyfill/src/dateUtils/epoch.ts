@@ -128,10 +128,12 @@ export function isoToEpochMilli(
     }
   }
 
-  if (milli === undefined ||
+  if (
+    milli === undefined ||
     // ensure day didn't underflow/overflow to get to an in-bounds date
     isoDayTry! < 1 ||
-    isoDayTry! > isoCalendarImpl.daysInMonth(isoYear, isoMonth)) {
+    isoDayTry! > isoCalendarImpl.daysInMonth(isoYear, isoMonth)
+  ) {
     throwOutOfRange()
   }
 
