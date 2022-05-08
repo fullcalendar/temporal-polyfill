@@ -65,11 +65,17 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
       const epochNanoB = zoneNano.sub(offsetNanoAfter)
 
       // is the transition after both possibilities?
-      if (transitionEpochNano > epochNanoA && transitionEpochNano > epochNanoB) {
+      if (
+        compareBigNanos(transitionEpochNano, epochNanoA) > 0 && // >
+        compareBigNanos(transitionEpochNano, epochNanoB) > 0 // >
+      ) {
         return [offsetNanoBefore]
 
       // is the transition before both possibilities?
-      } else if (transitionEpochNano <= epochNanoA && transitionEpochNano <= epochNanoB) {
+      } else if (
+        compareBigNanos(transitionEpochNano, epochNanoA) <= 0 && // <=
+        compareBigNanos(transitionEpochNano, epochNanoB) <= 0 // <=
+      ) {
         // keep looping...
 
       // stuck in a transition?

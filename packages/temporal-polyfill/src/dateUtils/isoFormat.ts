@@ -209,13 +209,13 @@ function formatPartialSeconds(
   const seconds = totalNanoAbs.div(nanoInSecond)
   const leftoverNano = totalNanoAbs.sub(seconds.mult(nanoInSecond))
 
-  let afterDecimal = padZeros(Number(leftoverNano), 9)
+  let afterDecimal = padZeros(leftoverNano.toNumber(), 9)
   afterDecimal = fractionalSecondDigits === undefined
     ? afterDecimal.replace(/0+$/, '') // strip trailing zeros
     : afterDecimal.substr(0, fractionalSecondDigits)
 
   return [
     afterDecimal ? '.' + afterDecimal : '',
-    Number(seconds) * (totalNano.sign() || 1), // restore sign
+    seconds.toNumber() * (totalNano.sign() || 1), // restore sign
   ]
 }

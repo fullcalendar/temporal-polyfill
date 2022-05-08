@@ -109,8 +109,8 @@ export function computeNanoInDay(
   // TODO: awkard with iso8601 calendar
   const day0 = { ...fields, ...zeroISOTimeFields, calendar: new Calendar('iso8601') }
   const day1 = { ...addDays(day0, 1), ...zeroISOTimeFields, calendar: new Calendar('iso8601') }
-  const epochNano0 = getInstantFor(timeZone, createDateTime(day0)).epochNanoseconds
-  const epochNano1 = getInstantFor(timeZone, createDateTime(day1)).epochNanoseconds
+  const epochNano0 = (getInstantFor(timeZone, createDateTime(day0)) as Instant)[epochNanoSymbol]
+  const epochNano1 = (getInstantFor(timeZone, createDateTime(day1)) as Instant)[epochNanoSymbol]
 
-  return Number(epochNano1 - epochNano0)
+  return epochNano1.sub(epochNano0).toNumber()
 }

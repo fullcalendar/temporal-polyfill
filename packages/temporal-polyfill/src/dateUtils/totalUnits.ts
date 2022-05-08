@@ -23,7 +23,7 @@ export function computeTotalUnits(
     isDayTimeUnit(unit)
   ) {
     // TODO: accidentaly loss of precision?
-    return Number(durationDayTimeToNano(duration)) / nanoIn[unit]
+    return durationDayTimeToNano(duration).toNumber() / nanoIn[unit]
   }
 
   if (!relativeTo) {

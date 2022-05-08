@@ -95,8 +95,7 @@ export function translateDate(
 
   let epochMilli = calendarImpl.epochMilliseconds(dateFields.year, dateFields.month, dateFields.day)
 
-  // TODO: loss of precision?
-  const daysFromTime = Math.trunc(Number(durationTimeToNano(durationFields)) / nanoInDay)
+  const daysFromTime = Math.trunc(durationTimeToNano(durationFields).div(nanoInDay).toNumber())
   const days = durationFields.weeks * 7 + durationFields.days + daysFromTime
   epochMilli = addDaysMilli(epochMilli, days)
 
@@ -159,7 +158,7 @@ export function translateTime(
   durationFields: DurationFields,
 ): ISOTimeFields {
   // TODO: will loss of precision cause a bug?
-  const nano = isoTimeToNano(timeFields) + Number(durationTimeToNano(durationFields))
+  const nano = isoTimeToNano(timeFields) + durationTimeToNano(durationFields).toNumber()
   const [newTimeFields] = nanoToISOTime(nano)
   return newTimeFields
 }

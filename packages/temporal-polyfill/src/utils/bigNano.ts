@@ -13,12 +13,12 @@ export class BigNano {
     public nanoRemainder: number = 0,
   ) {}
 
-  sign(): number {
+  sign(): Temporal.ComparisonResult {
     return numSign(this.milli) || numSign(this.nanoRemainder)
   }
 
   neg(): BigNano {
-    return new BigNano(-this.milli, -this.nanoRemainder)
+    return new BigNano(-this.milli || 0, -this.nanoRemainder || 0) // prevents -0
   }
 
   abs(): BigNano {
@@ -54,6 +54,10 @@ export class BigNano {
   toBigInt(): bigint {
     return BigInt(this.milli) * BigInt(nanoInMilli) + BigInt(this.nanoRemainder)
   }
+
+  // valueOf(): void {
+  //   throw new Error('Cant get valueOf of BigNano')
+  // }
 }
 
 export function compareBigNanos(
