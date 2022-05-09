@@ -42,8 +42,11 @@ export class BigNano {
 
   div(n: number): BigNano {
     const highFloat = this.high / n
-    const high = Math.trunc(highFloat)
-    const lowScraps = Math.round((highFloat - high) * maxLowNum) // round for float-precision
+    // use string manip to avoid floating-point precision loss
+    const afterDecimal = highFloat.toFixed(maxLowDigits + 1).split('.')[1]
+    const high = Math.trunc(highFloat) || 0 // prevent -0
+    // we previously got one digit extra so we can trunc, whereas toFixed does rounding
+    const lowScraps = Math.trunc(parseInt(afterDecimal) / 10) * (numSign(highFloat) || 1)
     const low = Math.trunc(this.low / n) + lowScraps
     return balanceAndCreate(high, low)
   }
@@ -102,7 +105,7 @@ function balanceAndCreate(high: number, low: number): BigNano {
   const signLow = numSign(newLow)
 
   // ensure same signs. more performant way to do this?
-  if (signLow && signLow !== (signHigh || 1)) {
+  if (signLow && signHigh && signLow !== signHigh) {
     newHigh += signLow
     newLow -= maxLowNum * signLow
   }
