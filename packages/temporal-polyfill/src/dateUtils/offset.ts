@@ -9,7 +9,7 @@ import {
 import { Calendar } from '../public/calendar'
 import { Instant } from '../public/instant'
 import { createDateTime } from '../public/plainDateTime'
-import { BigNano } from '../utils/bigNano'
+import { LargeInt } from '../utils/bigNano'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
 import { epochNanoSymbol, isoFieldsToEpochNano } from './epoch'
@@ -42,7 +42,7 @@ export function computeZonedDateTimeEpochNano(
   fuzzyMatching?: boolean,
   offsetHandling: OffsetHandlingInt = OFFSET_REJECT,
   disambigOptions?: Temporal.AssignmentOptions,
-): BigNano {
+): LargeInt {
   const { offsetNanoseconds: offsetNano, timeZone, Z } = isoFields
 
   if (offsetNano !== undefined && offsetHandling !== OFFSET_IGNORE) {
@@ -82,7 +82,7 @@ function findMatchingEpochNano(
   offsetNano: number,
   timeZone: Temporal.TimeZoneProtocol,
   fuzzyMatching?: boolean,
-): BigNano | undefined {
+): LargeInt | undefined {
   const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
   const utcEpochNano = isoFieldsToEpochNano(isoFields)
   const roundedOffsetNano = fuzzyMatching ? roundToMinute(offsetNano) : offsetNano

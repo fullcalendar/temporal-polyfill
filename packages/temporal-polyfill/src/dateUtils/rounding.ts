@@ -1,7 +1,7 @@
 import { Temporal } from 'temporal-spec'
 import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundingConfig } from '../argParse/roundingOptions'
-import { BigNano } from '../utils/bigNano'
+import { LargeInt } from '../utils/bigNano'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { isoTimeToNano, nanoToISOTime, zeroISOTimeFields } from './dayAndTime'
 import { splitEpochNano } from './epoch'
@@ -33,9 +33,9 @@ export function roundTime(
 }
 
 export function roundEpochNano(
-  epochNano: BigNano,
+  epochNano: LargeInt,
   roundingConfig: RoundingConfig<TimeUnitInt>,
-): BigNano {
+): LargeInt {
   const [dayEpochNano, timeNano] = splitEpochNano(epochNano)
   const roundedTimeNano = roundNano(timeNano, roundingConfig)
   return dayEpochNano.add(roundedTimeNano)
@@ -49,7 +49,7 @@ export function roundZonedDateTimeFields(
   },
   offsetNanoseconds: number,
   roundingConfig: RoundingConfig<DayTimeUnitInt>,
-): BigNano {
+): LargeInt {
   const { calendar, timeZone } = fields
   let timeNano = isoTimeToNano(fields)
   let isoTimeFields: ISOTimeFields
@@ -88,9 +88,9 @@ export function roundNano(nano: number, roundingConfig: RoundingConfig<DayTimeUn
 }
 
 export function roundNanoBI(
-  nano: BigNano,
+  nano: LargeInt,
   roundingConfig: RoundingConfig<DayTimeUnitInt>,
-): BigNano {
+): LargeInt {
   return roundToIncrementBI(
     nano,
     roundingConfig.incNano,

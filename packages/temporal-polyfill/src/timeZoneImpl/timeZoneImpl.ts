@@ -1,7 +1,7 @@
-import { BigNano } from '../utils/bigNano'
+import { LargeInt } from '../utils/bigNano'
 
 export type RawTransition = [
-  BigNano, // epochNano
+  LargeInt, // epochNano
   number, // offsetNanoBefore
   number, // offsetNanoAfter
 ]
@@ -9,7 +9,7 @@ export type RawTransition = [
 export abstract class TimeZoneImpl {
   constructor(public id: string) {}
 
-  abstract getPossibleOffsets(zoneNano: BigNano): number[] // offsetNanos
-  abstract getOffset(epochNano: BigNano): number // offsetNano
-  abstract getTransition(epochNano: BigNano, direction: -1 | 1): RawTransition | undefined
+  abstract getPossibleOffsets(zoneNano: LargeInt): number[] // offsetNanos
+  abstract getOffset(epochNano: LargeInt): number // offsetNano
+  abstract getTransition(epochNano: LargeInt, direction: -1 | 1): RawTransition | undefined
 }

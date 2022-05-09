@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { nanoInMinute } from '../dateUtils/units'
-import { BigNano } from './bigNano'
+import { LargeInt } from './bigNano'
 
 export type RoundingFunc = (n: number) => number
 
@@ -36,10 +36,10 @@ function halfExpand(n: number) {
 }
 
 export function roundToIncrementBI(
-  num: BigNano,
+  num: LargeInt,
   inc: number,
   roundingFunc: RoundingFunc,
-): BigNano {
+): LargeInt {
   const wholeUnits = num.div(inc)
   const wholeNum = wholeUnits.mult(inc)
   const leftover = num.sub(wholeNum).toNumber()

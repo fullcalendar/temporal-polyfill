@@ -24,7 +24,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { BigNano, BigNanoInputStrict, createBigNano } from '../utils/bigNano'
+import { LargeInt, LargeIntArgStrict, createLargeInt } from '../utils/bigNano'
 import { Duration, createDuration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -50,12 +50,12 @@ type ToZonedDateTimeOptions = {
 }
 
 export interface Instant {
-  [epochNanoSymbol]: BigNano
+  [epochNanoSymbol]: LargeInt
 }
 export class Instant extends AbstractNoValueObj implements Temporal.Instant {
-  constructor(epochNanoseconds: BigNanoInputStrict) {
+  constructor(epochNanoseconds: LargeIntArgStrict) {
     super()
-    const epochNano = createBigNano(epochNanoseconds, true) // strict=true
+    const epochNano = createLargeInt(epochNanoseconds, true) // strict=true
     validateInstant(epochNano)
     this[epochNanoSymbol] = epochNano
   }
@@ -78,11 +78,11 @@ export class Instant extends AbstractNoValueObj implements Temporal.Instant {
   }
 
   static fromEpochSeconds(epochSeconds: number): Temporal.Instant {
-    return new Instant(createBigNano(epochSeconds).mult(nanoInSecond))
+    return new Instant(createLargeInt(epochSeconds).mult(nanoInSecond))
   }
 
   static fromEpochMilliseconds(epochMilliseconds: number): Temporal.Instant {
-    return new Instant(createBigNano(epochMilliseconds).mult(nanoInMilli))
+    return new Instant(createLargeInt(epochMilliseconds).mult(nanoInMilli))
   }
 
   static fromEpochMicroseconds(epochMicroseconds: bigint): Temporal.Instant {

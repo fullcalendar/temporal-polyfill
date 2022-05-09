@@ -6,7 +6,7 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { createBigNano } from '../utils/bigNano'
+import { createLargeInt } from '../utils/bigNano'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'
@@ -189,8 +189,8 @@ function formatPartialSeconds(
   roundingFunc?: RoundingFunc, // HACK for forcing this func to do rounding
   smallestUnit?: TimeUnitInt, // HACK for forcing this func to do rounding
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
-  let totalNano = createBigNano(milliseconds).mult(nanoInMilli)
-    .add(createBigNano(microseconds).mult(nanoInMicro))
+  let totalNano = createLargeInt(milliseconds).mult(nanoInMilli)
+    .add(createLargeInt(microseconds).mult(nanoInMicro))
     .add(nanoseconds)
 
   // HACK. sometimes input is pre-rounded, other times not

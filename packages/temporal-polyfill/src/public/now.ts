@@ -5,7 +5,7 @@ import { ISODateTimeFields } from '../dateUtils/isoFields'
 import { attachStringTag } from '../dateUtils/mixins'
 import { nanoInMilli } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { BigNano, createBigNano } from '../utils/bigNano'
+import { LargeInt, createLargeInt } from '../utils/bigNano'
 import { Calendar } from './calendar'
 import { Instant } from './instant'
 import { createDate } from './plainDate'
@@ -96,6 +96,6 @@ function buidZonedFields(
   }
 }
 
-function getEpochNano(): BigNano {
-  return createBigNano(Date.now()).mult(nanoInMilli)
+function getEpochNano(): LargeInt {
+  return createLargeInt(Date.now()).mult(nanoInMilli)
 }

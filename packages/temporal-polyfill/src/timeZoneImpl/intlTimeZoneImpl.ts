@@ -2,7 +2,7 @@ import { epochNanoToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../d
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { milliInSecond, nanoInSecond, secondsInDay } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { BigNano, compareBigNanos, createBigNano } from '../utils/bigNano'
+import { LargeInt, compareLargeInts, createLargeInt } from '../utils/bigNano'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
@@ -45,7 +45,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   }
 
   // `zoneNano` is like epochNano, but from zone's pseudo-epoch
-  getPossibleOffsets(zoneNano: BigNano): number[] {
+  getPossibleOffsets(zoneNano: LargeInt): number[] {
     let lastOffsetNano: number | undefined
 
     const transitions = [
@@ -66,15 +66,15 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       // is the transition after both possibilities?
       if (
-        compareBigNanos(transitionEpochNano, epochNanoA) > 0 && // >
-        compareBigNanos(transitionEpochNano, epochNanoB) > 0 // >
+        compareLargeInts(transitionEpochNano, epochNanoA) > 0 && // >
+        compareLargeInts(transitionEpochNano, epochNanoB) > 0 // >
       ) {
         return [offsetNanoBefore]
 
       // is the transition before both possibilities?
       } else if (
-        compareBigNanos(transitionEpochNano, epochNanoA) <= 0 && // <=
-        compareBigNanos(transitionEpochNano, epochNanoB) <= 0 // <=
+        compareLargeInts(transitionEpochNano, epochNanoA) <= 0 && // <=
+        compareLargeInts(transitionEpochNano, epochNanoB) <= 0 // <=
       ) {
         // keep looping...
 
@@ -103,7 +103,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     ]
   }
 
-  getOffset(epochNano: BigNano): number {
+  getOffset(epochNano: LargeInt): number {
     return this.getOffsetForEpochSecs(
       epochNano.div(nanoInSecond).toNumber(),
     ) * nanoInSecond
@@ -135,7 +135,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
   /*
   Always exclusive. Will never return a transition that starts exactly on epochNano
   */
-  getTransition(epochNano: BigNano, direction: -1 | 1): RawTransition | undefined {
+  getTransition(epochNano: LargeInt, direction: -1 | 1): RawTransition | undefined {
     let year = epochNanoToISOYear(epochNano)
 
     if (year > DST_PERSIST_YEAR) {
@@ -162,7 +162,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
     year: number,
     endYear: number, // exclusive
     direction: -1 | 1,
-    epochNano: BigNano,
+    epochNano: LargeInt,
   ): RawTransition | undefined {
     for (; year !== endYear; year += direction) {
       let transitions = this.getTransitionsInYear(year)
@@ -173,7 +173,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
 
       for (const transition of transitions) {
         // does the current transition overtake epochNano in the direction of travel?
-        if (compareBigNanos(transition[0], epochNano) === direction) {
+        if (compareLargeInts(transition[0], epochNano) === direction) {
           return transition
         }
       }
@@ -240,7 +240,7 @@ export class IntlTimeZoneImpl extends TimeZoneImpl {
       }
     }
     return [
-      createBigNano(endEpochSec).mult(nanoInSecond),
+      createLargeInt(endEpochSec).mult(nanoInSecond),
       startOffsetSec * nanoInSecond,
       endOffsetSec * nanoInSecond,
     ]

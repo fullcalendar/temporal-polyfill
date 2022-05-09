@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { BigNano, createBigNano } from '../utils/bigNano'
+import { LargeInt, createLargeInt } from '../utils/bigNano'
 import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
 import { ISOTimeFields } from './isoFields'
 import { LocalTimeFields } from './localFields'
@@ -57,21 +57,21 @@ export function partialLocalTimeToISO(fields: Partial<LocalTimeFields>): ISOTime
 // fields -> nano
 // -------------------------------------------------------------------------------------------------
 
-export function durationDayTimeToNano(fields: DurationFields): BigNano {
-  return createBigNano(nanoInDay)
+export function durationDayTimeToNano(fields: DurationFields): LargeInt {
+  return createLargeInt(nanoInDay)
     .mult(fields.days)
     .add(durationTimeToNano(fields))
 }
 
 // must return bigint because there could be huge hour value,
 // which would cause the nanosecond's precision to max out.
-export function durationTimeToNano(fields: DurationTimeFields): BigNano {
-  return createBigNano(fields.nanoseconds)
-    .add(createBigNano(fields.microseconds).mult(nanoInMicro))
-    .add(createBigNano(fields.milliseconds).mult(nanoInMilli))
-    .add(createBigNano(fields.seconds).mult(nanoInSecond))
-    .add(createBigNano(fields.minutes).mult(nanoInMinute))
-    .add(createBigNano(fields.hours).mult(nanoInHour))
+export function durationTimeToNano(fields: DurationTimeFields): LargeInt {
+  return createLargeInt(fields.nanoseconds)
+    .add(createLargeInt(fields.microseconds).mult(nanoInMicro))
+    .add(createLargeInt(fields.milliseconds).mult(nanoInMilli))
+    .add(createLargeInt(fields.seconds).mult(nanoInSecond))
+    .add(createLargeInt(fields.minutes).mult(nanoInMinute))
+    .add(createLargeInt(fields.hours).mult(nanoInHour))
 }
 
 export function isoTimeToNano(fields: ISOTimeFields): number {
@@ -86,14 +86,14 @@ export function isoTimeToNano(fields: ISOTimeFields): number {
 // nano -> fields
 // -------------------------------------------------------------------------------------------------
 
-export function nanoToDuration(nano: BigNano, largestUnit: DayTimeUnitInt): DurationFields {
+export function nanoToDuration(nano: LargeInt, largestUnit: DayTimeUnitInt): DurationFields {
   let days = 0
   let hours = 0
   let minutes = 0
   let seconds = 0
   let milliseconds = 0
   let microseconds = 0
-  let temp: BigNano
+  let temp: LargeInt
 
   switch (largestUnit) {
     case DAY:

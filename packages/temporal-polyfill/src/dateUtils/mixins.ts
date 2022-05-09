@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { unitNames } from '../argParse/unitStr'
-import { BigNano } from '../utils/bigNano'
+import { LargeInt } from '../utils/bigNano'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'
@@ -16,7 +16,7 @@ export interface ComputedEpochFields {
   epochSeconds: number
 }
 
-export function mixinEpochFields<Obj extends { [epochNanoSymbol]: BigNano }>(
+export function mixinEpochFields<Obj extends { [epochNanoSymbol]: LargeInt }>(
   ObjClass: { prototype: Obj },
 ): void {
   attachGetters(ObjClass, {

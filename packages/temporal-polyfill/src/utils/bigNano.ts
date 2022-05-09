@@ -5,11 +5,10 @@ import { compareValues, numSign } from './math'
 const maxLowDigits = 8
 const maxLowNum = Math.pow(10, maxLowDigits)
 
-export type BigNanoInputStrict = BigNano | bigint | string
-export type BigNanoInput = BigNanoInputStrict | number // allow number, which might loose precision
+export type LargeIntArgStrict = LargeInt | bigint | string
+export type LargeIntArg = LargeIntArgStrict | number // allow number, which might loose precision
 
-// TODO: rename to LargeInt
-export class BigNano {
+export class LargeInt {
   constructor(
     public high: number,
     public low: number,
@@ -19,29 +18,29 @@ export class BigNano {
     return numSign(this.high) || numSign(this.low)
   }
 
-  neg(): BigNano {
-    return new BigNano(-this.high || 0, -this.low || 0) // prevents -0
+  neg(): LargeInt {
+    return new LargeInt(-this.high || 0, -this.low || 0) // prevents -0
   }
 
-  abs(): BigNano {
+  abs(): LargeInt {
     return this.sign() < 0 ? this.neg() : this
   }
 
-  add(input: BigNano | number): BigNano {
+  add(input: LargeInt | number): LargeInt {
     const [high, low] = getHighLow(input)
     return balanceAndCreate(this.high + high, this.low + low)
   }
 
-  sub(input: BigNano | number): BigNano {
+  sub(input: LargeInt | number): LargeInt {
     const [high, low] = getHighLow(input)
     return balanceAndCreate(this.high - high, this.low - low)
   }
 
-  mult(n: number): BigNano {
+  mult(n: number): LargeInt {
     return balanceAndCreate(this.high * n, this.low * n)
   }
 
-  div(n: number): BigNano {
+  div(n: number): LargeInt {
     const highFloat = this.high / n
     let highStr = String(highFloat) // more exact output than toFixed
 
@@ -78,12 +77,12 @@ export class BigNano {
   // }
 }
 
-export function createBigNano(input: BigNanoInput): BigNano
-export function createBigNano(input: BigNanoInputStrict, strict: true): BigNano
-export function createBigNano(input: BigNanoInput, strict?: true): BigNano {
+export function createLargeInt(input: LargeIntArg): LargeInt
+export function createLargeInt(input: LargeIntArgStrict, strict: true): LargeInt
+export function createLargeInt(input: LargeIntArg, strict?: true): LargeInt {
   let high: number
   let low: number
-  if (input instanceof BigNano) {
+  if (input instanceof LargeInt) {
     high = input.high
     low = input.low
   } else if (typeof input === 'number') { // TODO: don't allow this in Instant or ZonedDateTime
@@ -107,21 +106,21 @@ export function createBigNano(input: BigNanoInput, strict?: true): BigNano {
   } else {
     throw new Error('Invalid type of BigNano')
   }
-  return new BigNano(high, low)
+  return new LargeInt(high, low)
 }
 
-export function compareBigNanos(a: BigNano, b: BigNano): Temporal.ComparisonResult {
+export function compareLargeInts(a: LargeInt, b: LargeInt): Temporal.ComparisonResult {
   return compareValues(a.high, b.high) || compareValues(a.low, b.low)
 }
 
-function getHighLow(input: BigNano | number): [number, number] {
+function getHighLow(input: LargeInt | number): [number, number] {
   if (typeof input === 'number') {
     return [0, input]
   }
   return [input.high, input.low]
 }
 
-function balanceAndCreate(high: number, low: number): BigNano {
+function balanceAndCreate(high: number, low: number): LargeInt {
   let newLow = low % maxLowNum || 0
   let newHigh = high + Math.trunc(low / maxLowNum)
   const signHigh = numSign(newHigh) // all signs must equal this
@@ -133,5 +132,5 @@ function balanceAndCreate(high: number, low: number): BigNano {
     newLow -= maxLowNum * signLow
   }
 
-  return new BigNano(newHigh, newLow)
+  return new LargeInt(newHigh, newLow)
 }

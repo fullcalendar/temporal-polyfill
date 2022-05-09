@@ -1,4 +1,4 @@
-import { createBigNano } from '../utils/bigNano'
+import { createLargeInt } from '../utils/bigNano'
 import { excludeUndefined } from '../utils/obj'
 import { nanoToDuration } from './dayAndTime'
 import {
@@ -53,7 +53,7 @@ function tryParseDuration(str: string): DurationFields | undefined {
       throw new RangeError('Duration string must have at least one field')
     }
 
-    const small = nanoToDuration(createBigNano(leftoverNano || 0), MILLISECOND)
+    const small = nanoToDuration(createLargeInt(leftoverNano || 0), MILLISECOND)
     // TODO: use mergeDurations somehow?
     fields.milliseconds = small.milliseconds
     fields.microseconds = small.microseconds
