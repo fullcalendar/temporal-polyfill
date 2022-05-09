@@ -6,7 +6,7 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { createLargeInt } from '../utils/bigNano'
+import { createLargeInt } from '../utils/largeInt'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'

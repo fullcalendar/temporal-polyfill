@@ -5,7 +5,7 @@ import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { Instant } from '../public/instant'
 import { createDate } from '../public/plainDate'
 import { createDateTime } from '../public/plainDateTime'
-import { LargeInt } from '../utils/bigNano'
+import { LargeInt } from '../utils/largeInt'
 import {
   durationDayTimeToNano,
   durationTimeToNano,

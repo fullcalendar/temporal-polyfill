@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { nanoInMinute } from '../dateUtils/units'
-import { LargeInt } from './bigNano'
+import { LargeInt } from './largeInt'
 
 export type RoundingFunc = (n: number) => number
 

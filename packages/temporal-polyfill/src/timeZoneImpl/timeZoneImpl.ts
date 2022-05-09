@@ -1,4 +1,4 @@
-import { LargeInt } from '../utils/bigNano'
+import { LargeInt } from '../utils/largeInt'
 
 export type RawTransition = [
   LargeInt, // epochNano

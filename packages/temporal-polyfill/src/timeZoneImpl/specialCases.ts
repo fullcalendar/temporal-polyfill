@@ -1,5 +1,5 @@
 import { nanoInMilli } from '../dateUtils/units'
-import { LargeInt, createLargeInt } from '../utils/bigNano'
+import { LargeInt, createLargeInt } from '../utils/largeInt'
 import { RawTransition } from './timeZoneImpl'
 
 export const specialCases: {

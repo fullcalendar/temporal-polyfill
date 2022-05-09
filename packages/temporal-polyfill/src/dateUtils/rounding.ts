@@ -1,7 +1,7 @@
 import { Temporal } from 'temporal-spec'
 import { OFFSET_PREFER } from '../argParse/offsetHandling'
 import { RoundingConfig } from '../argParse/roundingOptions'
-import { LargeInt } from '../utils/bigNano'
+import { LargeInt } from '../utils/largeInt'
 import { roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { isoTimeToNano, nanoToISOTime, zeroISOTimeFields } from './dayAndTime'
 import { splitEpochNano } from './epoch'

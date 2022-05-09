@@ -9,7 +9,7 @@ import {
 import { Calendar } from '../public/calendar'
 import { Instant } from '../public/instant'
 import { createDateTime } from '../public/plainDateTime'
-import { LargeInt } from '../utils/bigNano'
+import { LargeInt } from '../utils/largeInt'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
 import { epochNanoSymbol, isoFieldsToEpochNano } from './epoch'

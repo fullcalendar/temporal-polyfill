@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { LargeInt, createLargeInt } from '../utils/bigNano'
+import { LargeInt, createLargeInt } from '../utils/largeInt'
 import { DurationFields, DurationTimeFields, signDuration } from './durationFields'
 import { ISOTimeFields } from './isoFields'
 import { LocalTimeFields } from './localFields'

@@ -1,4 +1,4 @@
-import { createLargeInt } from '../utils/bigNano'
+import { createLargeInt } from '../utils/largeInt'
 import { excludeUndefined } from '../utils/obj'
 import { nanoToDuration } from './dayAndTime'
 import {

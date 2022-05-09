@@ -1,5 +1,5 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
-import { LargeInt, compareLargeInts, createLargeInt } from '../utils/bigNano'
+import { LargeInt, compareLargeInts, createLargeInt } from '../utils/largeInt'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
 import { nanoInDay } from './units'

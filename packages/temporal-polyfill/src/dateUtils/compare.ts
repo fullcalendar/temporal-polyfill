@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { LargeInt, compareLargeInts } from '../utils/bigNano'
+import { LargeInt, compareLargeInts } from '../utils/largeInt'
 import { compareValues } from '../utils/math'
 import { durationDayTimeToNano, isoTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'

@@ -24,7 +24,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { LargeInt, LargeIntArgStrict, createLargeInt } from '../utils/bigNano'
+import { LargeInt, LargeIntArgStrict, createLargeInt } from '../utils/largeInt'
 import { Duration, createDuration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'
 

@@ -64,7 +64,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { LargeIntArg, LargeInt, createLargeInt } from '../utils/bigNano'
+import { LargeInt, LargeIntArg, createLargeInt } from '../utils/largeInt'
 import { roundToMinute } from '../utils/math'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'

@@ -1,5 +1,5 @@
 import { isoCalendarImpl } from '../calendarImpl/isoCalendarImpl'
-import { LargeInt, createLargeInt } from '../utils/bigNano'
+import { LargeInt, createLargeInt } from '../utils/largeInt'
 import { numSign, positiveModulo } from '../utils/math'
 import { isoTimeToNano } from './dayAndTime'
 import {

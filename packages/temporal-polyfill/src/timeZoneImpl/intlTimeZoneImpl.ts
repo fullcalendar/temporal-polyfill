@@ -2,7 +2,7 @@ import { epochNanoToISOYear, isoToEpochMilli, isoYearToEpochSeconds } from '../d
 import { hashIntlFormatParts, normalizeShortEra } from '../dateUtils/intlFormat'
 import { milliInSecond, nanoInSecond, secondsInDay } from '../dateUtils/units'
 import { OrigDateTimeFormat } from '../native/intlUtils'
-import { LargeInt, compareLargeInts, createLargeInt } from '../utils/bigNano'
+import { LargeInt, compareLargeInts, createLargeInt } from '../utils/largeInt'
 import { specialCases } from './specialCases'
 import { RawTransition, TimeZoneImpl } from './timeZoneImpl'
 
