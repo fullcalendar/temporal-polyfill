@@ -42,12 +42,19 @@ export class BigNano {
 
   div(n: number): BigNano {
     const highFloat = this.high / n
-    // use string manip to avoid floating-point precision loss
-    const afterDecimal = highFloat.toFixed(maxLowDigits + 1).split('.')[1]
+    const highStr = highFloat.toFixed(maxLowDigits + 1) // extra precision, for trunc-ing later
+    const highDot = highStr.indexOf('.')
+    let lowScraps = 0
+
+    if (highDot !== -1) {
+      const afterDot = highStr.substr(highDot + 1)
+      lowScraps = Math.trunc(parseInt(afterDot) / 10) * // do our own trunc b/c toFixed rounds
+        (numSign(highFloat) || 1)
+    }
+
     const high = Math.trunc(highFloat) || 0 // prevent -0
-    // we previously got one digit extra so we can trunc, whereas toFixed does rounding
-    const lowScraps = Math.trunc(parseInt(afterDecimal) / 10) * (numSign(highFloat) || 1)
     const low = Math.trunc(this.low / n) + lowScraps
+
     return balanceAndCreate(high, low)
   }
 
