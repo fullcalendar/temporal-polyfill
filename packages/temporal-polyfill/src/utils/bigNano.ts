@@ -43,14 +43,20 @@ export class BigNano {
 
   div(n: number): BigNano {
     const highFloat = this.high / n
-    const highStr = highFloat.toFixed(maxLowDigits + 1) // extra precision, for trunc-ing later
+    let highStr = String(highFloat) // more exact output than toFixed
+
+    if (highStr.indexOf('e-') !== -1) { // has negative scientific notation?
+      highStr = highFloat.toFixed(20) // return maximum-guaranteed precision
+    }
+
     const highDot = highStr.indexOf('.')
     let lowScraps = 0
 
     if (highDot !== -1) {
       const afterDot = highStr.substr(highDot + 1)
-      lowScraps = Math.trunc(parseInt(afterDot) / 10) * // do our own trunc b/c toFixed rounds
-        (numSign(highFloat) || 1)
+        .padEnd(maxLowDigits, '0')
+        .substr(0, maxLowDigits)
+      lowScraps = parseInt(afterDot) * (numSign(highFloat) || 1)
     }
 
     const high = Math.trunc(highFloat) || 0 // prevent -0
@@ -85,12 +91,16 @@ export function createBigNano(input: BigNanoInput, strict?: true): BigNano {
       throw new TypeError('Must supply bigint, not number')
     }
     high = Math.trunc(input / maxLowNum)
-    low = input % maxLowNum
+    low = input % maxLowNum || 0
   } else if (typeof input === 'bigint') {
     const maxNumBI = BigInt(maxLowNum)
     high = Number(input / maxNumBI)
-    low = Number(input % maxNumBI)
+    low = Number(input % maxNumBI || 0)
   } else if (typeof input === 'string') { // TODO: write test
+    input = input.trim()
+    if (input.match(/\D/)) {
+      throw new SyntaxError(`Cannot parse ${input} to a BigInt`)
+    }
     const gapIndex = input.length - maxLowDigits
     high = Number(input.substr(gapIndex))
     low = Number(input.substr(0, gapIndex))
@@ -112,7 +122,7 @@ function getHighLow(input: BigNano | number): [number, number] {
 }
 
 function balanceAndCreate(high: number, low: number): BigNano {
-  let newLow = low % maxLowNum
+  let newLow = low % maxLowNum || 0
   let newHigh = high + Math.trunc(low / maxLowNum)
   const signHigh = numSign(newHigh) // all signs must equal this
   const signLow = numSign(newLow)
