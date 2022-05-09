@@ -5,7 +5,8 @@ import { compareValues, numSign } from './math'
 const maxLowDigits = 8
 const maxLowNum = Math.pow(10, maxLowDigits)
 
-export type BigNanoInput = BigNano | bigint | number | string
+export type BigNanoInputStrict = BigNano | bigint | string
+export type BigNanoInput = BigNanoInputStrict | number // allow number, which might loose precision
 
 // TODO: rename to LargeInt
 export class BigNano {
@@ -71,13 +72,18 @@ export class BigNano {
   // }
 }
 
-export function createBigNano(input: BigNanoInput): BigNano {
+export function createBigNano(input: BigNanoInput): BigNano
+export function createBigNano(input: BigNanoInputStrict, strict: true): BigNano
+export function createBigNano(input: BigNanoInput, strict?: true): BigNano {
   let high: number
   let low: number
   if (input instanceof BigNano) {
     high = input.high
     low = input.low
   } else if (typeof input === 'number') { // TODO: don't allow this in Instant or ZonedDateTime
+    if (strict) {
+      throw new TypeError('Must supply bigint, not number')
+    }
     high = Math.trunc(input / maxLowNum)
     low = input % maxLowNum
   } else if (typeof input === 'bigint') {

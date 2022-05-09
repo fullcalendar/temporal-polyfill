@@ -100,10 +100,11 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
     timeZoneArg: Temporal.TimeZoneLike,
     calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
+    // TODO: throw error when number?
     const timeZone = ensureObj(TimeZone, timeZoneArg)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    const epochNano = createBigNano(epochNanoseconds)
+    const epochNano = createBigNano(epochNanoseconds) // TODO: do strict, like Instant?
     const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNano, timeZone)
     validateDateTime(isoFields, calendar.toString())
 

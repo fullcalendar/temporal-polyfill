@@ -24,7 +24,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { BigNano, BigNanoInput, createBigNano } from '../utils/bigNano'
+import { BigNano, BigNanoInputStrict, createBigNano } from '../utils/bigNano'
 import { Duration, createDuration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -53,9 +53,9 @@ export interface Instant {
   [epochNanoSymbol]: BigNano
 }
 export class Instant extends AbstractNoValueObj implements Temporal.Instant {
-  constructor(epochNanoseconds: BigNanoInput) {
+  constructor(epochNanoseconds: BigNanoInputStrict) {
     super()
-    const epochNano = createBigNano(epochNanoseconds)
+    const epochNano = createBigNano(epochNanoseconds, true) // strict=true
     validateInstant(epochNano)
     this[epochNanoSymbol] = epochNano
   }
