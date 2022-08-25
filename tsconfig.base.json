@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "skipLibCheck": true,
-    "checkJs": true
+    "skipLibCheck": false,
+    "checkJs": false
   }
 }
