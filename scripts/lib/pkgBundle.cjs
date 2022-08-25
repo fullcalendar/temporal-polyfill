@@ -89,6 +89,8 @@ function buildPlugins(watch) {
       extensions: ['.js', '.ts'],
     }),
     esbuild({
+      // TODO: this is a bad technique because it has the potential to inject multiple
+      // helper-functions in the same output. Luckily it doesn't for this target.
       target: 'es2018',
     }),
     tsFileOverriding('.build.ts'),

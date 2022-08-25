@@ -74,7 +74,7 @@ export class LargeInt {
   }
 
   // valueOf(): void {
-  //   throw new Error('Cant get valueOf of BigNano')
+  //   throw new Error('Cant get valueOf of LargeInt')
   // }
 }
 
