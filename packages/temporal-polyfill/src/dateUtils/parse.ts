@@ -1,3 +1,4 @@
+import { padEnd } from '../utils/string'
 import { isValidDateISO } from './constrain'
 import { nanoToISOTime } from './dayAndTime'
 import { isoEpochLeapYear } from './epoch'
@@ -222,7 +223,7 @@ function timePartsToNano(parts: string[]): number {
 }
 
 export function parseNanoAfterDecimal(str: string): number {
-  return parseInt(str.padEnd(9, '0'))
+  return parseInt(padEnd(str, 9, '0'))
 }
 
 // general utils

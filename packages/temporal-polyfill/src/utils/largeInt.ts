@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { compareValues, numSign } from './math'
+import { padEnd } from './string'
 
 // MAX_SAFE_INTEGER has 16 digits, but go lower so low value doesn't overflow
 const maxLowDigits = 8
@@ -52,9 +53,9 @@ export class LargeInt {
     let lowScraps = 0
 
     if (highDot !== -1) {
-      const afterDot = highStr.substr(highDot + 1)
-        .padEnd(maxLowDigits, '0')
-        .substr(0, maxLowDigits)
+      let afterDot = highStr.substr(highDot + 1)
+      afterDot = padEnd(afterDot, maxLowDigits, '0')
+      afterDot = afterDot.substr(0, maxLowDigits)
       lowScraps = parseInt(afterDot) * (numSign(highFloat) || 1)
     }
 
