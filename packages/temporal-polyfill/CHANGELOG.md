@@ -1,9 +1,8 @@
 
-next
-----
-- fixed root .d.ts exports (only affects legacy node)
-- TODO: ensure <root>/impl.d.ts exported
-- TODO: fix broken sourcemaps
+v0.0.8
+------
+- Support environments without BigInt. See browser version matrix in README.
+- Fixed missing .d.ts files for environments that don't support export maps.
 
 
 v0.0.7 (2022-05-06)
