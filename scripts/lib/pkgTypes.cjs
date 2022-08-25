@@ -17,9 +17,9 @@ function typePreparing(pkgDir) {
 
       return Promise.all([
         cleanDistTypes(pkgDir),
-        cleanRootTypesHack(pkgDir).then(
-          writeRootTypesHack(pkgDir, rootPaths),
-        ),
+        cleanRootTypesHack(pkgDir).then(() => {
+          writeRootTypesHack(pkgDir, rootPaths)
+        }),
       ])
     },
   }
