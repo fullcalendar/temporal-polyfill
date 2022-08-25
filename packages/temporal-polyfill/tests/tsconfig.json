@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.base",
+  "compilerOptions": {
+    "types": ["jest", "chai", "node"],
+    "paths": {
+      "temporal-polyfill/impl": ["../src/impl.build"]
+    }
+  }
+}
