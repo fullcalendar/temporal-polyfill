@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset='utf-8' />
-<script src='./packages/temporal-polyfill/dist/global.js'></script>
-</head>
-<body>
-Open the dev console and start using the global <code>Temporal</code> object.
-</body>
+  <head>
+    <meta charset='utf-8' />
+    <script src='./packages/temporal-polyfill/dist/global.js'></script>
+  </head>
+  <body>
+    <script>
+      document.write(
+        '<h1>' +
+        Temporal.Now.zonedDateTimeISO().toLocaleString() +
+        '</h1>'
+      )
+    </script>
+    Open the dev console and start using the global <code>Temporal</code> object.
+  </body>
 </html>
