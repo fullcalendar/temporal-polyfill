@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { Instant } from '../public/instant'
 
 // types
@@ -10,6 +11,6 @@ export type DateWithTemporal = Date & DateTemporalMethods
 
 // implementation
 
-export function toTemporalInstant(this: Date): Instant {
+export function toTemporalInstant(this: Date): Temporal.Instant {
   return Instant.fromEpochMilliseconds(this.valueOf())
 }

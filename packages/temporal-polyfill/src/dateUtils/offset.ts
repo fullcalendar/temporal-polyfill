@@ -7,10 +7,12 @@ import {
   OffsetHandlingInt,
 } from '../argParse/offsetHandling'
 import { Calendar } from '../public/calendar'
+import { Instant } from '../public/instant'
 import { createDateTime } from '../public/plainDateTime'
+import { LargeInt } from '../utils/largeInt'
 import { roundToMinute } from '../utils/math'
 import { zeroISOTimeFields } from './dayAndTime'
-import { isoFieldsToEpochNano } from './epoch'
+import { epochNanoSymbol, isoFieldsToEpochNano } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
 import { getInstantFor } from './timeZone'
 import { addDays } from './translate'
@@ -40,13 +42,13 @@ export function computeZonedDateTimeEpochNano(
   fuzzyMatching?: boolean,
   offsetHandling: OffsetHandlingInt = OFFSET_REJECT,
   disambigOptions?: Temporal.AssignmentOptions,
-): bigint {
+): LargeInt {
   const { offsetNanoseconds: offsetNano, timeZone, Z } = isoFields
 
   if (offsetNano !== undefined && offsetHandling !== OFFSET_IGNORE) {
     // we ALWAYS use Z as zero offset
     if (offsetHandling === OFFSET_USE || Z) {
-      return isoFieldsToEpochNano(isoFields) - BigInt(offsetNano)
+      return isoFieldsToEpochNano(isoFields).sub(offsetNano)
     } else {
       const matchingEpochNano = findMatchingEpochNano(
         isoFields,
@@ -65,11 +67,14 @@ export function computeZonedDateTimeEpochNano(
   }
 
   // compute fresh from TimeZone
-  return getInstantFor(
+  const instant = getInstantFor(
     timeZone,
     createDateTime(isoFields),
     parseDisambigOption(disambigOptions),
-  ).epochNanoseconds
+  )
+
+  // TODO: better typing solution
+  return (instant as Instant)[epochNanoSymbol]
 }
 
 function findMatchingEpochNano(
@@ -77,14 +82,14 @@ function findMatchingEpochNano(
   offsetNano: number,
   timeZone: Temporal.TimeZoneProtocol,
   fuzzyMatching?: boolean,
-): bigint | undefined {
+): LargeInt | undefined {
   const possibleInstants = timeZone.getPossibleInstantsFor(createDateTime(isoFields))
   const utcEpochNano = isoFieldsToEpochNano(isoFields)
   const roundedOffsetNano = fuzzyMatching ? roundToMinute(offsetNano) : offsetNano
 
   for (const instant of possibleInstants) {
-    const possibleEpochNano = instant.epochNanoseconds
-    const possibleOffsetNano = Number(utcEpochNano - possibleEpochNano)
+    const possibleEpochNano = (instant as Instant)[epochNanoSymbol] // TODO: better typing
+    const possibleOffsetNano = utcEpochNano.sub(possibleEpochNano).toNumber()
     const possibleOffsetRefined = fuzzyMatching
       ? roundToMinute(possibleOffsetNano)
       : possibleOffsetNano
@@ -104,8 +109,8 @@ export function computeNanoInDay(
   // TODO: awkard with iso8601 calendar
   const day0 = { ...fields, ...zeroISOTimeFields, calendar: new Calendar('iso8601') }
   const day1 = { ...addDays(day0, 1), ...zeroISOTimeFields, calendar: new Calendar('iso8601') }
-  const epochNano0 = getInstantFor(timeZone, createDateTime(day0)).epochNanoseconds
-  const epochNano1 = getInstantFor(timeZone, createDateTime(day1)).epochNanoseconds
+  const epochNano0 = (getInstantFor(timeZone, createDateTime(day0)) as Instant)[epochNanoSymbol]
+  const epochNano1 = (getInstantFor(timeZone, createDateTime(day1)) as Instant)[epochNanoSymbol]
 
-  return Number(epochNano1 - epochNano0)
+  return epochNano1.sub(epochNano0).toNumber()
 }

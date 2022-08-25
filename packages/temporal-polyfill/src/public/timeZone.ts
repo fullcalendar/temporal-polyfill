@@ -3,7 +3,7 @@ import { parseDisambigOption } from '../argParse/disambig'
 import { isObjectLike } from '../argParse/refine'
 import { timeZoneFromObj } from '../argParse/timeZone'
 import { AbstractObj, ensureObj } from '../dateUtils/abstract'
-import { epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
+import { epochNanoSymbol, epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { attachStringTag } from '../dateUtils/mixins'
 import { checkInvalidOffset } from '../dateUtils/offset'
@@ -63,7 +63,7 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
     const instant = ensureObj(Instant, instantArg)
-    return getImpl(this).getOffset(instant.epochNanoseconds)
+    return getImpl(this).getOffset(instant[epochNanoSymbol])
   }
 
   getPlainDateTimeFor(
@@ -72,7 +72,7 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
   ): Temporal.PlainDateTime {
     const instant = ensureObj(Instant, instantArg)
     const isoFields = epochNanoToISOFields(
-      instant.epochNanoseconds + BigInt(this.getOffsetNanosecondsFor(instant)),
+      instant[epochNanoSymbol].add(this.getOffsetNanosecondsFor(instant)),
     )
     return createDateTime({
       ...isoFields,
@@ -93,13 +93,13 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
     const possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
 
     return possibleOffsetNanos.map((offsetNano) => (
-      new Instant(zoneNano - BigInt(offsetNano))
+      new Instant(zoneNano.sub(offsetNano))
     ))
   }
 
   getPreviousTransition(instantArg: InstantArg): Temporal.Instant | null {
     const instant = ensureObj(Instant, instantArg)
-    const rawTransition = getImpl(this).getTransition(instant.epochNanoseconds, -1)
+    const rawTransition = getImpl(this).getTransition(instant[epochNanoSymbol], -1)
     if (rawTransition) {
       return new Instant(rawTransition[0])
     }
@@ -108,7 +108,7 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
 
   getNextTransition(instantArg: InstantArg): Temporal.Instant | null {
     const instant = ensureObj(Instant, instantArg)
-    const rawTransition = getImpl(this).getTransition(instant.epochNanoseconds, 1)
+    const rawTransition = getImpl(this).getTransition(instant[epochNanoSymbol], 1)
     if (rawTransition) {
       return new Instant(rawTransition[0])
     }

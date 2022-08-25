@@ -2,8 +2,10 @@ import { Temporal } from 'temporal-spec'
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { constrainInt } from '../argParse/refine'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
+import { Instant } from '../public/instant'
 import { createDate } from '../public/plainDate'
 import { createDateTime } from '../public/plainDateTime'
+import { LargeInt } from '../utils/largeInt'
 import {
   durationDayTimeToNano,
   durationTimeToNano,
@@ -17,6 +19,7 @@ import { DurationFields, computeLargestDurationUnit, overrideDuration } from './
 import {
   addDaysMilli,
   epochMilliToISOFields,
+  epochNanoSymbol,
   epochNanoToISOFields,
   isoFieldsToEpochNano,
   isoToEpochMilli,
@@ -37,7 +40,7 @@ export function translateZonedDateTimeFields(
   fields: ZonedTranslatableObj,
   duration: DurationFields,
   options: Temporal.AssignmentOptions | undefined, // Calendar needs these options to be raw
-): bigint {
+): LargeInt {
   const { calendar, timeZone } = fields
 
   // add date fields first
@@ -55,8 +58,8 @@ export function translateZonedDateTimeFields(
   })
 
   // add time fields of duration
-  const translatedInstant = getInstantFor(timeZone, translatedDateTime)
-  return translatedInstant.epochNanoseconds + durationTimeToNano(duration)
+  const translatedInstant = getInstantFor(timeZone, translatedDateTime) as Instant // TODO: better
+  return translatedInstant[epochNanoSymbol].add(durationTimeToNano(duration))
 }
 
 export function translateDateTime(
@@ -74,9 +77,9 @@ export function translateDateTime(
     options,
   )
 
-  const epochNano = isoFieldsToEpochNano(date.getISOFields()) +
-    BigInt(isoTimeToNano(fields)) + // restore original time-of-day
-    durationTimeToNano(duration) // add duration time parts
+  const epochNano = isoFieldsToEpochNano(date.getISOFields())
+    .add(isoTimeToNano(fields)) // restore original time-of-day
+    .add(durationTimeToNano(duration)) // add duration time parts
 
   return epochNanoToISOFields(epochNano)
 }
@@ -92,8 +95,7 @@ export function translateDate(
 
   let epochMilli = calendarImpl.epochMilliseconds(dateFields.year, dateFields.month, dateFields.day)
 
-  // TODO: loss of precision?
-  const daysFromTime = Math.trunc(Number(durationTimeToNano(durationFields)) / nanoInDay)
+  const daysFromTime = Math.trunc(durationTimeToNano(durationFields).div(nanoInDay).toNumber())
   const days = durationFields.weeks * 7 + durationFields.days + daysFromTime
   epochMilli = addDaysMilli(epochMilli, days)
 
@@ -156,19 +158,19 @@ export function translateTime(
   durationFields: DurationFields,
 ): ISOTimeFields {
   // TODO: will loss of precision cause a bug?
-  const nano = isoTimeToNano(timeFields) + Number(durationTimeToNano(durationFields))
+  const nano = isoTimeToNano(timeFields) + durationTimeToNano(durationFields).toNumber()
   const [newTimeFields] = nanoToISOTime(nano)
   return newTimeFields
 }
 
-export function translateEpochNano(epochNano: bigint, durationFields: DurationFields): bigint {
+export function translateEpochNano(epochNano: LargeInt, durationFields: DurationFields): LargeInt {
   const largestUnit = computeLargestDurationUnit(durationFields)
 
   if (largestUnit >= DAY) {
     throw new RangeError('Duration cant have units >= days')
   }
 
-  return epochNano + durationTimeToNano(durationFields)
+  return epochNano.add(durationTimeToNano(durationFields))
 }
 
 // duration
@@ -186,7 +188,7 @@ export function addDurationFields(
 
   if (relativeTo === undefined && largestUnit <= DAY) {
     return nanoToDuration(
-      durationDayTimeToNano(d0) + durationDayTimeToNano(d1),
+      durationDayTimeToNano(d0).add(durationDayTimeToNano(d1)),
       largestUnit,
     )
   }

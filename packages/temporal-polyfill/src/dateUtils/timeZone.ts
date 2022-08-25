@@ -9,7 +9,7 @@ import {
 import { Instant } from '../public/instant'
 import { PlainDateTime } from '../public/plainDateTime'
 import { toEpochNano } from './epoch'
-import { nanoInDayBI } from './units'
+import { nanoInDay } from './units'
 
 // Utils for working with TimeZoneProtocol
 
@@ -65,10 +65,10 @@ function computeGapNear(
 ): number {
   const utcEpochNano = toEpochNano(plainDateTime)
   const offsetDayBefore = timeZoneProtocol.getOffsetNanosecondsFor(
-    new Instant(utcEpochNano + nanoInDayBI * -1n),
+    new Instant(utcEpochNano.sub(nanoInDay)),
   )
   const offsetDayAfter = timeZoneProtocol.getOffsetNanosecondsFor(
-    new Instant(utcEpochNano + nanoInDayBI * 1n),
+    new Instant(utcEpochNano.add(nanoInDay)),
   )
-  return Number(offsetDayAfter - offsetDayBefore)
+  return offsetDayAfter - offsetDayBefore
 }

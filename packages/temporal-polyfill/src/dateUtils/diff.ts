@@ -4,6 +4,7 @@ import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
 import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
 import { createDate } from '../public/plainDate'
+import { LargeInt, createLargeInt } from '../utils/largeInt'
 import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
 import { compareLocalDateFields } from './compare'
 import { constrainDateFields } from './constrain'
@@ -70,16 +71,16 @@ export function diffTimes(
     nanoIn[diffConfig.smallestUnit] * diffConfig.roundingIncrement,
     diffConfig.roundingFunc,
   )
-  return nanoToDuration(BigInt(roundedDiff), diffConfig.largestUnit)
+  return nanoToDuration(createLargeInt(roundedDiff), diffConfig.largestUnit)
 }
 
 export function diffEpochNanos(
-  epochNano0: bigint,
-  epochNano1: bigint,
+  epochNano0: LargeInt,
+  epochNano1: LargeInt,
   diffConfig: DiffConfig<TimeUnitInt>,
 ): DurationFields {
   const roundedDiff = roundToIncrementBI(
-    epochNano1 - epochNano0,
+    epochNano1.sub(epochNano0),
     nanoIn[diffConfig.smallestUnit] * diffConfig.roundingIncrement,
     diffConfig.roundingFunc,
   )
@@ -237,5 +238,5 @@ function diffTimeScale(
   dt1: EpochableObj,
   largestUnit: TimeUnitInt,
 ): DurationFields {
-  return nanoToDuration(toEpochNano(dt1) - toEpochNano(dt0), largestUnit)
+  return nanoToDuration(toEpochNano(dt1).sub(toEpochNano(dt0)), largestUnit)
 }

@@ -8,7 +8,7 @@ import { compareEpochObjs } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
 import { diffEpochNanos } from '../dateUtils/diff'
 import { negateDuration } from '../dateUtils/durationFields'
-import { isoFieldsToEpochNano } from '../dateUtils/epoch'
+import { epochNanoSymbol, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { validateInstant } from '../dateUtils/isoFieldValidation'
 import { ComputedEpochFields, attachStringTag, mixinEpochFields } from '../dateUtils/mixins'
 import { parseZonedDateTime } from '../dateUtils/parse'
@@ -18,13 +18,13 @@ import {
   HOUR,
   NANOSECOND,
   SECOND,
-  nanoInMicroBI,
-  nanoInMilliBI,
-  nanoInSecondBI,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInSecond,
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { createWeakMap } from '../utils/obj'
+import { LargeInt, LargeIntArgStrict, createLargeInt } from '../utils/largeInt'
 import { Duration, createDuration } from './duration'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -49,20 +49,18 @@ type ToZonedDateTimeOptions = {
   calendar: Temporal.CalendarLike
 }
 
-const [getEpochNano, setEpochNano] = createWeakMap<Instant, bigint>()
-
+export interface Instant {
+  [epochNanoSymbol]: LargeInt
+}
 export class Instant extends AbstractNoValueObj implements Temporal.Instant {
-  constructor(epochNanoseconds: bigint) {
+  constructor(epochNanoseconds: LargeIntArgStrict) {
     super()
-    if (typeof epochNanoseconds === 'number') {
-      throw new TypeError('Must supply bigint, not number')
-    }
-    epochNanoseconds = BigInt(epochNanoseconds) // cast
-    validateInstant(epochNanoseconds)
-    setEpochNano(this, epochNanoseconds)
+    const epochNano = createLargeInt(epochNanoseconds, true) // strict=true
+    validateInstant(epochNano)
+    this[epochNanoSymbol] = epochNano
   }
 
-  static from(arg: InstantArg): Temporal.Instant {
+  static from(arg: InstantArg): Instant { // okay to have return-type be Instant? needed
     if (arg instanceof Instant) {
       return new Instant(arg.epochNanoseconds)
     }
@@ -74,21 +72,21 @@ export class Instant extends AbstractNoValueObj implements Temporal.Instant {
     }
 
     return new Instant(
-      isoFieldsToEpochNano(constrainDateTimeISO(fields, OVERFLOW_REJECT)) -
-      BigInt(offsetNano),
+      isoFieldsToEpochNano(constrainDateTimeISO(fields, OVERFLOW_REJECT))
+        .sub(offsetNano),
     )
   }
 
   static fromEpochSeconds(epochSeconds: number): Temporal.Instant {
-    return new Instant(BigInt(epochSeconds) * nanoInSecondBI)
+    return new Instant(createLargeInt(epochSeconds).mult(nanoInSecond))
   }
 
   static fromEpochMilliseconds(epochMilliseconds: number): Temporal.Instant {
-    return new Instant(BigInt(epochMilliseconds) * nanoInMilliBI)
+    return new Instant(createLargeInt(epochMilliseconds).mult(nanoInMilli))
   }
 
   static fromEpochMicroseconds(epochMicroseconds: bigint): Temporal.Instant {
-    return new Instant(epochMicroseconds * nanoInMicroBI)
+    return new Instant(epochMicroseconds * BigInt(nanoInMicro))
   }
 
   static fromEpochNanoseconds(epochNanoseconds: bigint): Temporal.Instant {
@@ -102,17 +100,15 @@ export class Instant extends AbstractNoValueObj implements Temporal.Instant {
     )
   }
 
-  get epochNanoseconds(): bigint { return getEpochNano(this) }
-
   add(durationArg: TranslateArg): Temporal.Instant {
     return new Instant(
-      translateEpochNano(this.epochNanoseconds, ensureObj(Duration, durationArg)),
+      translateEpochNano(this[epochNanoSymbol], ensureObj(Duration, durationArg)),
     )
   }
 
   subtract(durationArg: TranslateArg): Temporal.Instant {
     return new Instant(
-      translateEpochNano(this.epochNanoseconds, negateDuration(ensureObj(Duration, durationArg))),
+      translateEpochNano(this[epochNanoSymbol], negateDuration(ensureObj(Duration, durationArg))),
     )
   }
 
@@ -128,7 +124,7 @@ export class Instant extends AbstractNoValueObj implements Temporal.Instant {
     const roundingConfig = parseRoundingOptions(options, NANOSECOND, HOUR, true)
 
     return new Instant(
-      roundEpochNano(this.epochNanoseconds, roundingConfig),
+      roundEpochNano(this[epochNanoSymbol], roundingConfig),
     )
   }
 
@@ -200,6 +196,6 @@ function diffInstants(
   )
 
   return createDuration(
-    diffEpochNanos(inst0.epochNanoseconds, inst1.epochNanoseconds, diffConfig),
+    diffEpochNanos(inst0[epochNanoSymbol], inst1[epochNanoSymbol], diffConfig),
   )
 }

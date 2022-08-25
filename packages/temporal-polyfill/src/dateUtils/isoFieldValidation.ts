@@ -1,6 +1,8 @@
 import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
+import { LargeInt, compareLargeInts, createLargeInt } from '../utils/largeInt'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
+import { nanoInDay } from './units'
 
 /*
 Extreme valid inputs
@@ -21,6 +23,12 @@ Extreme valid inputs
     new Temporal.PlainYearMonth(275760, 9).toString()
 */
 
+const almostDay = nanoInDay - 1 // one nanosecond shy of day
+const maxInstantBI = createLargeInt(nanoInDay).mult(100000000) // 100,000,000 days
+const minInstantBI = maxInstantBI.mult(-1)
+const maxPlainBI = maxInstantBI.add(almostDay)
+const minPlainBI = minInstantBI.sub(almostDay)
+
 export function validateYearMonth(isoFields: ISODateFields, calendarID: string): void {
   // might throw an error
   // moves between days in month
@@ -34,8 +42,8 @@ export function validateDate(isoFields: ISODateFields, calendarID: string): void
 
   validatePlain(
     // if potentially very negative, measure last nanosecond of day
-    // to increase changes it's in-bounds
-    epochNano + (epochNano < 0n ? 86399999999999n : 0n),
+    // to increase chances it's in-bounds
+    epochNano.add(epochNano.sign() < 0 ? almostDay : 0),
   )
   checkEpochNanoBuggy(epochNano, calendarID)
 }
@@ -47,20 +55,20 @@ export function validateDateTime(isoFields: ISODateTimeFields, calendarID: strin
   checkEpochNanoBuggy(epochNano, calendarID)
 }
 
-export function validateInstant(epochNano: bigint): void {
+export function validateInstant(epochNano: LargeInt): void {
   if (
-    epochNano < -8640000000000000000000n ||
-    epochNano > 8640000000000000000000n
+    compareLargeInts(epochNano, minInstantBI) === -1 ||
+    compareLargeInts(epochNano, maxInstantBI) === 1
   ) {
     throwOutOfRange()
   }
 }
 
-export function validatePlain(epochNano: bigint): void {
+export function validatePlain(epochNano: LargeInt): void {
   // like validateInstant's bounds, but expanded 24:59:59.999999999
   if (
-    epochNano < -8640000086399999999999n ||
-    epochNano > 8640000086399999999999n
+    compareLargeInts(epochNano, minPlainBI) === -1 ||
+    compareLargeInts(epochNano, maxPlainBI) === 1
   ) {
     throwOutOfRange()
   }

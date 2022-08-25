@@ -6,6 +6,7 @@ import {
 import { DurationToStringConfig, TimeToStringConfig } from '../argParse/isoFormatOptions'
 import { TIME_ZONE_DISPLAY_NEVER, TimeZoneDisplayInt } from '../argParse/timeZoneDisplay'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
+import { createLargeInt } from '../utils/largeInt'
 import { RoundingFunc, roundToIncrementBI } from '../utils/math'
 import { getSignStr, padZeros } from '../utils/string'
 import { nanoToISOTime } from './dayAndTime'
@@ -16,9 +17,9 @@ import {
   SECOND,
   TimeUnitInt,
   nanoIn,
-  nanoInMicroBI,
-  nanoInMilliBI,
-  nanoInSecondBI,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInSecond,
 } from './units'
 
 // given ISO fields should already be rounded
@@ -122,9 +123,9 @@ export function formatDurationISO(
 ): string {
   const { smallestUnit, fractionalSecondDigits, roundingFunc } = formatConfig
   const { sign } = fields
-  const hours = BigInt(fields.hours)
-  const minutes = BigInt(fields.minutes)
-  let seconds = BigInt(fields.seconds)
+  const hours = fields.hours
+  const minutes = fields.minutes
+  let seconds = fields.seconds
   let partialSecondsStr = ''
 
   if (smallestUnit <= SECOND) { // should be just less-than!!?
@@ -137,7 +138,7 @@ export function formatDurationISO(
       smallestUnit,
     )
     partialSecondsStr = res[0]
-    seconds += BigInt(res[1])
+    seconds += res[1]
   }
 
   // guarantee display of seconds if...
@@ -148,10 +149,10 @@ export function formatDurationISO(
 
   return (sign < 0 ? '-' : '') + 'P' +
     collapseDurationTuples([
-      [BigInt(fields.years), 'Y'],
-      [BigInt(fields.months), 'M'],
-      [BigInt(fields.weeks), 'W'],
-      [BigInt(fields.days), 'D'],
+      [fields.years, 'Y'],
+      [fields.months, 'M'],
+      [fields.weeks, 'W'],
+      [fields.days, 'D'],
     ]) +
     (hours || minutes || seconds || forceSeconds
       ? 'T' +
@@ -159,7 +160,7 @@ export function formatDurationISO(
         [hours, 'H'],
         [minutes, 'M'],
         [
-          smallestUnit <= SECOND ? seconds : BigInt(0), // TODO: BigInt(0) const
+          smallestUnit <= SECOND ? seconds : 0,
           partialSecondsStr + 'S',
           forceSeconds,
         ],
@@ -168,11 +169,13 @@ export function formatDurationISO(
 }
 
 // use BigInts, because less likely to overflow and formatting never does scientific notation
-function collapseDurationTuples(tuples: [BigInt, string, unknown?][]): string {
+function collapseDurationTuples(tuples: [number, string, unknown?][]): string {
   return tuples.map(([num, postfix, forceShow]) => {
     if (forceShow || num) {
-      // TODO: make BigInt Math.abs util
-      return (num < BigInt(0) ? -num : num) + postfix
+      // avoid outputting scientific notation
+      // https://stackoverflow.com/a/50978675/96342
+      const numStr = Math.abs(num).toLocaleString('fullwide', { useGrouping: false })
+      return numStr + postfix
     }
     return ''
   }).join('')
@@ -186,10 +189,9 @@ function formatPartialSeconds(
   roundingFunc?: RoundingFunc, // HACK for forcing this func to do rounding
   smallestUnit?: TimeUnitInt, // HACK for forcing this func to do rounding
 ): [string, number] { // [afterDecimalStr, secondsOverflow]
-  let totalNano =
-    BigInt(nanoseconds) +
-    BigInt(microseconds) * nanoInMicroBI +
-    BigInt(milliseconds) * nanoInMilliBI
+  let totalNano = createLargeInt(milliseconds).mult(nanoInMilli)
+    .add(createLargeInt(microseconds).mult(nanoInMicro))
+    .add(nanoseconds)
 
   // HACK. sometimes input is pre-rounded, other times not
   // not DRY. search for Math.pow
@@ -203,17 +205,17 @@ function formatPartialSeconds(
     )
   }
 
-  const totalNanoAbs = totalNano < 0 ? -totalNano : totalNano // TODO: util for abs() for bigints
-  const seconds = totalNanoAbs / nanoInSecondBI
-  const leftoverNano = totalNanoAbs - (seconds * nanoInSecondBI)
+  const totalNanoAbs = totalNano.abs()
+  const seconds = totalNanoAbs.div(nanoInSecond)
+  const leftoverNano = totalNanoAbs.sub(seconds.mult(nanoInSecond))
 
-  let afterDecimal = padZeros(Number(leftoverNano), 9)
+  let afterDecimal = padZeros(leftoverNano.toNumber(), 9)
   afterDecimal = fractionalSecondDigits === undefined
     ? afterDecimal.replace(/0+$/, '') // strip trailing zeros
     : afterDecimal.substr(0, fractionalSecondDigits)
 
   return [
     afterDecimal ? '.' + afterDecimal : '',
-    Number(seconds) * (totalNano < 0 ? -1 : 1), // restore sign (TODO: sign util for bigints)
+    seconds.toNumber() * (totalNano.sign() || 1), // restore sign
   ]
 }

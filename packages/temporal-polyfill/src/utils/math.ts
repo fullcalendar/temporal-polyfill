@@ -1,12 +1,10 @@
 import { Temporal } from 'temporal-spec'
 import { nanoInMinute } from '../dateUtils/units'
+import { LargeInt } from './largeInt'
 
 export type RoundingFunc = (n: number) => number
 
-export function compareValues<T extends (number | bigint | string)>(
-  a: T,
-  b: T,
-): Temporal.ComparisonResult {
+export function compareValues(a: number, b: number): Temporal.ComparisonResult {
   if (a < b) {
     return -1
   } else if (a > b) {
@@ -17,11 +15,6 @@ export function compareValues<T extends (number | bigint | string)>(
 
 export function numSign(num: number): Temporal.ComparisonResult {
   return compareValues(num, 0)
-}
-
-// HACK
-export function numSignBI(num: bigint): Temporal.ComparisonResult {
-  return !num ? 0 : num < 0n ? -1 : 1
 }
 
 export function roundToIncrement(
@@ -43,15 +36,14 @@ function halfExpand(n: number) {
 }
 
 export function roundToIncrementBI(
-  num: bigint,
+  num: LargeInt,
   inc: number,
   roundingFunc: RoundingFunc,
-): bigint {
-  const incBI = BigInt(inc)
-  const wholeUnits = num / incBI
-  const wholeNum = wholeUnits * incBI
-  const leftover = Number(num - wholeNum)
-  return wholeNum + BigInt(roundingFunc(leftover / inc)) * incBI
+): LargeInt {
+  const wholeUnits = num.div(inc)
+  const wholeNum = wholeUnits.mult(inc)
+  const leftover = num.sub(wholeNum).toNumber()
+  return wholeNum.add(roundingFunc(leftover / inc) * inc)
 }
 
 // wraps `n` to 0...max (not including max)

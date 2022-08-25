@@ -23,7 +23,7 @@ export function computeTotalUnits(
     isDayTimeUnit(unit)
   ) {
     // TODO: accidentaly loss of precision?
-    return Number(durationDayTimeToNano(duration)) / nanoIn[unit]
+    return durationDayTimeToNano(duration).toNumber() / nanoIn[unit]
   }
 
   if (!relativeTo) {
@@ -81,7 +81,9 @@ export function computeExactDuration(
   const startNano = toEpochNano(startDateTime)
   const endNano = toEpochNano(endDateTime)
   const middleNano = toEpochNano(dt1)
-  const unitFrac = Number(middleNano - startNano) / Number(endNano - startNano) * sign
+  const unitFrac =
+    middleNano.sub(startNano).toNumber() /
+    endNano.sub(startNano).toNumber() * sign
 
   dur[smallestUnitName]! += unitFrac // above loop populated this
   return dur as DurationFields

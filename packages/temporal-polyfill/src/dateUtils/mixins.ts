@@ -1,30 +1,36 @@
 import { Temporal } from 'temporal-spec'
 import { unitNames } from '../argParse/unitStr'
+import { LargeInt } from '../utils/largeInt'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
 import { DateISOInstance } from './calendar'
-import { nanoInMicroBI, nanoInMilliBI, nanoInSecondBI } from './units'
+import { epochNanoSymbol } from './epoch'
+import { nanoInMicro, nanoInMilli, nanoInSecond } from './units'
 
 // Epoch Fields
 
 export interface ComputedEpochFields {
+  epochNanoseconds: bigint
   epochMicroseconds: bigint
   epochMilliseconds: number
   epochSeconds: number
 }
 
-export function mixinEpochFields<Obj extends { epochNanoseconds: bigint }>(
+export function mixinEpochFields<Obj extends { [epochNanoSymbol]: LargeInt }>(
   ObjClass: { prototype: Obj },
 ): void {
   attachGetters(ObjClass, {
+    epochNanoseconds(): bigint {
+      return this[epochNanoSymbol].toBigInt()
+    },
     epochMicroseconds(): bigint {
-      return this.epochNanoseconds / nanoInMicroBI
+      return this[epochNanoSymbol].div(nanoInMicro).toBigInt()
     },
     epochMilliseconds(): number {
-      return Number(this.epochNanoseconds / nanoInMilliBI)
+      return this[epochNanoSymbol].div(nanoInMilli).toNumber()
     },
     epochSeconds(): number {
-      return Number(this.epochNanoseconds / nanoInSecondBI)
+      return this[epochNanoSymbol].div(nanoInSecond).toNumber()
     },
   })
 }
