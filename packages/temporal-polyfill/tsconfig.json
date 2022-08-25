@@ -3,7 +3,14 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "types": []
+    "types": [],
+    "target": "ES2018",
+    "lib": [
+      "ES2015",
+      "ES2017.Intl",
+      "ES2020.Intl",
+      "ES2020.BigInt"
+    ]
   },
   "include": [
     "src/**/*"

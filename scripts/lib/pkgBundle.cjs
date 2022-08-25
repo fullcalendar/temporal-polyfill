@@ -89,7 +89,7 @@ function buildPlugins(watch) {
       extensions: ['.js', '.ts'],
     }),
     esbuild({
-      target: 'es2020', // for BigInt literals (Sept 2020 for mobile safari)
+      target: 'es2018',
     }),
     tsFileOverriding('.build.ts'),
     !watch && terser(terserConfig),
