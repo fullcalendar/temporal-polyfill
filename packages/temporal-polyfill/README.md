@@ -5,7 +5,7 @@ A spec-compliant [Temporal] JavaScript polyfill in 16kb.
 
 [Codepen](https://codepen.io/arshaw/pen/VwrMQPJ?editors=1111)
 
-[CDN link](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.0.7/dist/global.js)
+[CDN link](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.0.8/dist/global.js)
 <!-- NOTE: when updating this link, update the codepen too -->
 
 

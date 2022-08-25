@@ -1,7 +1,8 @@
 
-v0.0.8
-------
+v0.0.8 (2022-08-24)
+-------------------
 - Support environments without BigInt. See browser version matrix in README.
+- Fixed TypeScript syntax error in `temporal-spec/index.d.ts` (#10)
 - Fixed missing .d.ts files for environments that don't support export maps.
 
 
