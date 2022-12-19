@@ -4,3 +4,6 @@
 [submodule "scripts/data/fullcalendar"]
 	path = scripts/data/fullcalendar
 	url = https://github.com/fullcalendar/fullcalendar.git
+[submodule "packages/temporal-polyfill/test262"]
+	path = packages/temporal-polyfill/test262
+	url = https://github.com/tc39/test262

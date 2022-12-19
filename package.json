@@ -26,6 +26,7 @@
     "types": "tsc --build --preserveWatchOutput",
     "bundle": "rollup -c ./scripts/config/bundle.cjs",
     "test": "jest",
+    "test262": "TEST262=1 yarn build && cd packages/temporal-polyfill && node ./runtest262.mjs",
     "lint": "eslint .",
     "size": "yall -pwq pkg:size",
     "pkg:clean": "cd $INIT_CWD && node $PROJECT_CWD/scripts/pkgClean.cjs",
