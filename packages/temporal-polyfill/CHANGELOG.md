@@ -1,4 +1,10 @@
 
+v0.1.0 (2023-02-09)
+-------------------
+- fix: Support TypeScript 4.7 moduleResolution:node16 (#17)
+- fix: Avoiding fallback to native Temporal implementation (#19)
+
+
 v0.0.8 (2022-08-24)
 -------------------
 - Support environments without BigInt. See browser version matrix in README.
