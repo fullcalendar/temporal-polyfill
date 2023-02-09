@@ -9,10 +9,13 @@ import { getGlobalThis } from './utils/dom'
 export function shim(): void {
   const theGlobalThis = getGlobalThis()
 
-  if (!theGlobalThis.Temporal) {
-    theGlobalThis.Temporal = Temporal
-    Intl.DateTimeFormat = DateTimeFormat
-    // eslint-disable-next-line no-extend-native
-    Date.prototype.toTemporalInstant = toTemporalInstant
-  }
+  // TODO: when Temporal is in stage 4, make polyfill conditional
+  // if (!theGlobalThis.Temporal) {
+
+  theGlobalThis.Temporal = Temporal
+  Intl.DateTimeFormat = DateTimeFormat
+  // eslint-disable-next-line no-extend-native
+  Date.prototype.toTemporalInstant = toTemporalInstant
+
+  // }
 }
