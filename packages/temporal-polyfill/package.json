@@ -1,6 +1,6 @@
 {
   "name": "temporal-polyfill",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "title": "Temporal Polyfill",
   "description": "A spec-compliant Temporal JavaScript polyfill in 16kb",
   "author": {
