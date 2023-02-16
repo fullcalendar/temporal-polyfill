@@ -1,7 +1,8 @@
 
 v0.1.1 (2023-02-15)
 -------------------
-- fix: upgrade temporal-spec, which is now compatible with moduleResolution:node16 (#17)
+- fix: upgrade temporal-spec, which is now compatible with moduleResolution:node16 (#17 cont'd)
+- fix: don't fallback to native Temporal implementation for ponyfill (#19 cont'd)
 
 
 v0.1.0 (2023-02-09)

@@ -1,3 +1,6 @@
+
+/* CONDITIONAL, based on presence of native implementation. disable until Stage 4
+
 import type * as Spec from 'temporal-spec'
 import { getGlobalThis } from './utils/dom'
 import {
@@ -16,3 +19,6 @@ export const Intl: typeof Spec.Intl = TemporalNative
 export const toTemporalInstant = TemporalNative
   ? theGlobalThis.Date.prototype.toTemporalInstant
   : toTemporalInstantImpl
+*/
+
+export { Intl, Temporal, toTemporalInstant } from './impl'
