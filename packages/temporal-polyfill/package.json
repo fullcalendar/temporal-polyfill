@@ -1,6 +1,6 @@
 {
   "name": "temporal-polyfill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "title": "Temporal Polyfill",
   "description": "A spec-compliant Temporal JavaScript polyfill in 16kb",
   "author": {
@@ -56,7 +56,7 @@
     "/*.d.ts"
   ],
   "dependencies": {
-    "temporal-spec": "workspace:*"
+    "temporal-spec": "~0.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",

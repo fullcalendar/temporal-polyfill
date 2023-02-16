@@ -1,4 +1,9 @@
 
+v0.1.1 (2023-02-15)
+-------------------
+- fix: upgrade temporal-spec, which is now compatible with moduleResolution:node16 (#17)
+
+
 v0.1.0 (2023-02-09)
 -------------------
 - fix: Support TypeScript 4.7 moduleResolution:node16 (#17)

@@ -1,6 +1,6 @@
 {
   "name": "temporal-spec",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "title": "TypeScript types for Temporal",
   "author": {
     "name": "Adam Shaw",
@@ -14,15 +14,17 @@
     "directory": "packages/temporal-spec"
   },
   "type": "module",
+  "types": "./index.d.ts",
   "main": "./index.cjs",
   "module": "./index.mjs",
-  "types": "./index.d.ts",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "require": "./index.cjs",
       "import": "./index.mjs"
     },
     "./global": {
+      "types": "./global.d.ts",
       "require": "./global.cjs",
       "import": "./global.mjs"
     }
