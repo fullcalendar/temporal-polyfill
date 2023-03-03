@@ -104,6 +104,7 @@ module.exports = {
     // TODO: derive from .gitignore/.gitsubmodules while working with vscode?
     'dist',
     'tests', // TODO revive for some packages
+    'test262', // HACK
   ],
 }
 
