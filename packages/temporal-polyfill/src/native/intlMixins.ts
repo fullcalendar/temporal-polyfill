@@ -31,6 +31,6 @@ export function mixinLocaleStringMethods<Entity extends (ToLocaleStringMethods &
 
 export function extractFormatFactoryFactory<Entity>(
   obj: any,
-): FormatFactoryFactory<Entity> | undefined {
+): FormatFactoryFactory<Entity | any> | undefined { // HACK
   return obj?.[formatFactoryFactorySymbol]
 }

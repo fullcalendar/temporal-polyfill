@@ -31,7 +31,7 @@ export function createParser<Map>(nameForError: string, map: Map, defaultVal?: V
       return d
     }
     if (map[input] === undefined) {
-      throw new RangeError(`Invalid ${nameForError}: ${input}`)
+      throw new RangeError(`Invalid ${nameForError}: ${String(input)}`)
     }
     return map[input]
   }

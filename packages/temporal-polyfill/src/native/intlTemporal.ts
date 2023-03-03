@@ -121,8 +121,8 @@ function createRangeArgs(
 
 function queryFormatFactoryForType<Entity>(
   origDateTimeFormat: _DateTimeFormat,
-  buildFormatFactory: FormatFactoryFactory<Entity>,
-): CachedFormatFactory<Entity> {
+  buildFormatFactory: FormatFactoryFactory<Entity | any>, // HACK
+): CachedFormatFactory<Entity | any> { // HACK
   const formatFactoryMap = origDateTimeFormat[factoryMapSymbol]
   let formatFactory = formatFactoryMap.get(buildFormatFactory)
 
