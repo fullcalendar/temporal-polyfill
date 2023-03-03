@@ -26,8 +26,7 @@ const esRules = {
 }
 
 const esmRules = {
-  // Import verification doesn't work with advanced Yarn dependency protocols like "workspace:"
-  // TypeScript does this anyway
+  // let TypeScript do this
   'import/no-unresolved': 'off',
 
   // Multiple same-name exports are useful for declaration merging. Shortcoming:

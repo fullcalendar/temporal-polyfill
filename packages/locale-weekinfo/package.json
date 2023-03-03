@@ -30,7 +30,7 @@
   "scripts": {
     "compile-firstDays": "node ./scripts/compile-firstDays.cjs",
     "compile-minimalDays": "node ./scripts/compile-minimalDays.cjs",
-    "locales-compile": "yarn compile-firstDays && yarn compile-minimalDays"
+    "locales-compile": "pnpm compile-firstDays && pnpm compile-minimalDays"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

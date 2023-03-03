@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "compile-directions": "node ./scripts/compile-directions.cjs",
-    "locales-compile": "yarn run compile-directions"
+    "locales-compile": "pnpm run compile-directions"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

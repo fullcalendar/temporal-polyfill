@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.cjs",
-    "locales-compile": "yarn run compile-localeOrdinalsData"
+    "locales-compile": "pnpm run compile-localeOrdinalsData"
   },
   "dependencies": {
     "temporal-spec": "workspace:*"

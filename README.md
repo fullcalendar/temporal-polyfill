@@ -34,12 +34,12 @@ console.log(Temporal.Now.zonedDateTimeISO().toString())
 ## Repo Dev Commands
 
 ```
-yarn build
-yarn watch
-yarn test --watch
-yarn test --coverage
-yarn lint
-yarn size
+pnpm build
+pnpm watch
+pnpm test --watch
+pnpm test --coverage
+pnpm lint
+pnpm size
 ```
 
 
