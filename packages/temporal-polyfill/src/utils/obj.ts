@@ -24,7 +24,10 @@ export function attachGetters<Obj>(
     ObjClass.prototype,
     mapHash(
       getters,
-      (func) => ({ get: func }),
+      (func) => ({
+        get: func,
+        configurable: true, // what classes do. TODO: ensure everywhere
+      }),
     ),
   )
 }

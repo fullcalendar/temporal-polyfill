@@ -123,7 +123,10 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
       const value = this.calendar[propName as keyof DateCalendarFields](
         this as Temporal.PlainDateLike,
       )
-      Object.defineProperty(this, propName, { value }) // cache the value on the object
+      Object.defineProperty(this, propName, { // cache the value on the object
+        value,
+        configurable: true, // what classes do. TODO: ensure everywhere
+      })
       return value
     }),
   )
