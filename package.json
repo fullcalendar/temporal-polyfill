@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
     "build": "cd ./packages/temporal-polyfill && pnpm run build",
     "watch": "cd ./packages/temporal-polyfill && pnpm run watch",
     "test": "cd ./packages/temporal-polyfill && pnpm run test",
