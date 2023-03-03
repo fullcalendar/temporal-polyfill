@@ -4,28 +4,43 @@
       "name": "Jest: Debug All",
       "type": "node",
       "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        // NOTE: keep following args in sync with settings.json
+        "--no-cache",
+        "--watchAll=false"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      // NOTE: keep args in sync with settings.json
-      "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false"],
       "sourceMaps": true
     },
     {
       "name": "Jest: Debug File",
       "type": "node",
       "request": "launch",
+      // NOTE: keep args in sync with settings.json
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        // NOTE: keep following args in sync with settings.json
+        "--no-cache",
+        "--watchAll=false",
+        // specific file
+        "${file}"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      // NOTE: keep args in sync with settings.json
-      "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false", "${file}"],
       "sourceMaps": true
     },
     {
       "name": "Test262",
-      "request": "launch",
       "type": "node",
       // To run only specific tests, set the third argument below
       // to a glob pattern for the filenames of tests you want to run.
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "test262", "**"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
