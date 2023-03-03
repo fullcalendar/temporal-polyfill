@@ -4,7 +4,6 @@ importers:
 
   .:
     specifiers:
-      '@arshaw/yall': ^1.2.1
       '@babel/core': ^7.14.6
       '@babel/preset-env': ^7.14.5
       '@babel/preset-typescript': ^7.15.0
@@ -30,7 +29,6 @@ importers:
       typescript: ^4.3.5
       yargs: ^17.0.1
     devDependencies:
-      '@arshaw/yall': 1.2.1
       '@babel/core': 7.21.0
       '@babel/preset-env': 7.20.2_@babel+core@7.21.0
       '@babel/preset-typescript': 7.21.0_@babel+core@7.21.0
@@ -136,15 +134,6 @@ packages:
     dependencies:
       '@jridgewell/gen-mapping': 0.1.1
       '@jridgewell/trace-mapping': 0.3.17
-    dev: true
-
-  /@arshaw/yall/1.2.1:
-    resolution: {integrity: sha512-CfUGwl8KPJKeXnriFfAJpQfTNzc+1oN2KTOKuhcf2N+1yP3lVjUd5/o4VP5fsdyRJ4Nix7bkie3HXxuOGUmjOg==}
-    engines: {node: '>= 10', yarn: '>= 1'}
-    hasBin: true
-    dependencies:
-      cross-spawn: 7.0.3
-      picomatch: 2.3.1
     dev: true
 
   /@babel/code-frame/7.12.11:
