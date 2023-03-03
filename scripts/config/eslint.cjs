@@ -104,8 +104,7 @@ module.exports = {
   ignorePatterns: [
     // TODO: derive from .gitignore/.gitsubmodules while working with vscode?
     'dist',
-    '/scripts/data',
-    '/packages/temporal-polyfill/tests',
+    'tests', // TODO revive for some packages
   ],
 }
 

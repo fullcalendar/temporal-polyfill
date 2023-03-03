@@ -21,6 +21,18 @@
     "url": "https://github.com/fullcalendar/temporal.git",
     "directory": "packages/temporal-polyfill"
   },
+  "scripts": {
+    "build": "pnpm run types && pnpm run bundle",
+    "watch": "concurrently npm:types:watch npm:bundle:watch",
+    "types": "tsc --build --preserveWatchOutput",
+    "types:watch": "tsc --build --preserveWatchOutput --watch",
+    "bundle": "rollup -c ../../scripts/config/pkgBundle.cjs",
+    "bundle:watch": "rollup -c ../../scripts/config/pkgBundle.cjs --watch",
+    "test": "jest .",
+    "lint": "eslint .",
+    "size": "node ../../scripts/pkgSize.cjs",
+    "clean": "node ../../scripts/pkgClean.cjs"
+  },
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.cjs",
@@ -63,8 +75,11 @@
     "@types/jest": "^26.0.24",
     "@types/node": "^16.9.1",
     "chai": "^4.3.4",
+    "concurrently": "^7.6.0",
+    "eslint": "^7.25.0",
     "jest": "^27.0.6",
     "jest-date-mock": "^1.0.8",
+    "rollup": "^2.55.1",
     "typescript": "^4.3.5"
   }
 }

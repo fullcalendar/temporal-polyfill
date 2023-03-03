@@ -6,11 +6,9 @@
       "request": "launch",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "runtimeExecutable": "yarn",
       // NOTE: keep args in sync with settings.json
       "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false"],
-      "sourceMaps": true,
-      "disableOptimisticBPs": true
+      "sourceMaps": true
     },
     {
       "name": "Jest: Debug File",
@@ -18,11 +16,9 @@
       "request": "launch",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "runtimeExecutable": "yarn",
       // NOTE: keep args in sync with settings.json
       "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false", "${file}"],
-      "sourceMaps": true,
-      "disableOptimisticBPs": true
+      "sourceMaps": true
     }
   ]
 }

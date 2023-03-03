@@ -1,3 +1,6 @@
+
+# TODO: make this work with pnpm
+
 name: CI
 on: [push]
 env:

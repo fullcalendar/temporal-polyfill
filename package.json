@@ -24,7 +24,6 @@
     "build": "yall -s types bundle",
     "watch": "yall -p types bundle --watch",
     "types": "tsc --build --preserveWatchOutput",
-    "bundle": "rollup -c ./scripts/config/bundle.cjs",
     "test": "jest",
     "lint": "eslint .",
     "size": "yall -pwq pkg:size",
