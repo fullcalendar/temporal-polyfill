@@ -19,6 +19,22 @@
       // NOTE: keep args in sync with settings.json
       "args": ["run", "jest", "--runInBand", "--no-cache", "--watchAll=false", "${file}"],
       "sourceMaps": true
+    },
+    {
+      "name": "Test262",
+      "request": "launch",
+      "type": "node",
+      // To run only specific tests, set the third argument below
+      // to a glob pattern for the filenames of tests you want to run.
+      "runtimeArgs": ["run", "test262", "**"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "env": {
+        // Msecs before killing a test. To debug a test at a breakpoint,
+        // increase this timeout.
+        "TIMEOUT": "1000"
+      }
     }
   ]
 }
