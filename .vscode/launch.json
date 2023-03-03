@@ -38,6 +38,7 @@
     {
       "name": "Test262",
       "type": "node",
+      "request": "launch",
       // To run only specific tests, set the third argument below
       // to a glob pattern for the filenames of tests you want to run.
       "runtimeExecutable": "pnpm",
