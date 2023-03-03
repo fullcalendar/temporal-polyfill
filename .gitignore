@@ -1,4 +1,6 @@
 
+node_modules
+
 /coverage
 tsconfig.tsbuildinfo
 dist
@@ -7,11 +9,3 @@ dist
 /packages/*/*.d.ts
 # hack
 !/packages/temporal-spec/*.d.ts
-
-.yarn/*
-!.yarn/patches
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
-.pnp.*

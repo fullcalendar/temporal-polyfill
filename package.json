@@ -19,7 +19,7 @@
     "packages/*"
   ],
   "scripts": {
-    "preinstall": "npx only-allow yarn",
+    "preinstall": "npx only-allow pnpm",
     "clean": "yall -pw pkg:clean",
     "build": "yall -s types bundle",
     "watch": "yall -p types bundle --watch",
