@@ -8,7 +8,7 @@ const dts = require('rollup-plugin-dts').default
 const { createTypeInputHash, typePreparing } = require('../lib/pkgTypes.cjs')
 const terserConfig = require('../config/terser.json')
 
-const isTest262 = !!process.env.TEST262
+const noMin = Boolean(process.env.NO_MIN)
 
 module.exports = {
   buildPkgBundleConfigs,
@@ -96,7 +96,7 @@ function buildPlugins(watch) {
       target: 'es2018',
     }),
     tsFileOverriding('.build.ts'),
-    !watch && !isTest262 && terser(terserConfig),
+    !watch && !noMin && terser(terserConfig),
   ]
 }
 
