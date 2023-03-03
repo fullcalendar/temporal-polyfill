@@ -1,12 +1,12 @@
-import color from 'ansi-colors'
 import fs from 'node:fs'
-import globSync from 'tiny-glob/sync.js'
 import path from 'node:path'
 import process from 'node:process'
-import ProgressBar from 'progress'
 import util from 'node:util'
 import vm from 'node:vm'
+import color from 'ansi-colors'
 import yaml from 'js-yaml'
+import ProgressBar from 'progress'
+import globSync from 'tiny-glob/sync.js'
 
 // = Temporal test262 runner =
 
