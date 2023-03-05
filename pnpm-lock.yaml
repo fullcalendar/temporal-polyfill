@@ -98,6 +98,7 @@ importers:
 
   packages/temporal-polyfill:
     specifiers:
+      '@js-temporal/temporal-test262-runner': ^0.9.0
       '@types/chai': ^4.2.22
       '@types/jest': ^26.0.24
       '@types/node': ^16.9.1
@@ -116,6 +117,7 @@ importers:
     dependencies:
       temporal-spec: link:../temporal-spec
     devDependencies:
+      '@js-temporal/temporal-test262-runner': 0.9.0
       '@types/chai': 4.3.4
       '@types/jest': 26.0.24
       '@types/node': 16.18.14
@@ -1658,6 +1660,15 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
+    dev: true
+
+  /@js-temporal/temporal-test262-runner/0.9.0:
+    resolution: {integrity: sha512-+DbfZ6oyuFyHbfe77HOuYEPfIkSNlYvFfS7hA+o9n1MxTqjdTN1xxQ0IOkGloVblIsl5Ceu1yzG4RNVzZHWL9Q==}
+    dependencies:
+      ansi-colors: 4.1.3
+      js-yaml: 4.1.0
+      progress: 2.0.3
+      tiny-glob: 0.2.9
     dev: true
 
   /@nodelib/fs.scandir/2.1.5:
