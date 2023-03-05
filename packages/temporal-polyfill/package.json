@@ -23,13 +23,14 @@
   },
   "scripts": {
     "build": "pnpm run types && pnpm run bundle",
+    "build:dev": "pnpm run types && NO_MIN=1 pnpm run bundle",
     "watch": "concurrently npm:types:watch npm:bundle:watch",
     "types": "tsc --build --preserveWatchOutput",
     "types:watch": "tsc --build --preserveWatchOutput --watch",
     "bundle": "rollup -c ../../scripts/config/pkgBundle.cjs",
     "bundle:watch": "rollup -c ../../scripts/config/pkgBundle.cjs --watch",
     "test": "jest .",
-    "test262": "NO_MIN=1 pnpm run build && node ./runtest262.js",
+    "test262": "node ./runtest262.js",
     "lint": "eslint .",
     "size": "node ../../scripts/pkgSize.cjs",
     "clean": "node ../../scripts/pkgClean.cjs"
