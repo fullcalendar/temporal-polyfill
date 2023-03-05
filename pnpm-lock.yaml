@@ -1,5 +1,10 @@
 lockfileVersion: 5.4
 
+patchedDependencies:
+  '@js-temporal/temporal-test262-runner@0.9.0':
+    hash: a5sbr7rbe6j2wt5ajt2xelhpza
+    path: patches/@js-temporal__temporal-test262-runner@0.9.0.patch
+
 importers:
 
   .:

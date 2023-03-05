@@ -56,5 +56,10 @@
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.3.5",
     "yargs": "^17.0.1"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@js-temporal/temporal-test262-runner@0.9.0": "patches/@js-temporal__temporal-test262-runner@0.9.0.patch"
+    }
   }
 }

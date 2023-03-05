@@ -1,0 +1,24 @@
+diff --git a/index.mjs b/index.mjs
+index 9d8e1d707c52654e172da37049b8a0d10d3e088a..3314ac363239d7488830b3244cd5d09d0dfc10f2 100644
+--- a/index.mjs
++++ b/index.mjs
+@@ -282,7 +282,7 @@ export default function runTest262({ test262Dir, testGlobs, polyfillCodeFile, ex
+ 
+     // Include a sourceURL so that when tests are run in a debugger they can be
+     // found using the names listed in the expected-failures-style files.
+-    testCode += `\n//# sourceURL=${testRelPath}`;
++    testCode += `\n//# sourceURL=file://${testFile}`;
+ 
+     const frontmatterString = frontmatterMatcher.exec(testCode)?.[1] ?? '';
+     const frontmatter = yaml.load(frontmatterString);
+@@ -316,7 +316,9 @@ export default function runTest262({ test262Dir, testGlobs, polyfillCodeFile, ex
+     // what it's supposed to be. This is so that you don't have to wait until the
+     // end to see if your test failed.
+     try {
+-      vm.runInContext(testCode, testContext, { timeout: timeoutMsecs });
++      const testScript = new vm.Script(testCode, { filename: testFile });
++      testScript.runInContext(testContext, { timeout: timeoutMsecs });
++
+       if (!expectedFailureLists) {
+         passCount++;
+       } else {
