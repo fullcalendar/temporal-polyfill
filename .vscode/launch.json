@@ -36,6 +36,16 @@
       "sourceMaps": true
     },
     {
+      "name": "Test262: Run All",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "test262"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true
+    },
+    {
       "name": "Test262: Debug File",
       "type": "node",
       "request": "launch",
