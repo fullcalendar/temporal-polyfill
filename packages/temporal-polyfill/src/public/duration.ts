@@ -3,7 +3,7 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseTotalConfig } from '../argParse/totalOptions'
-import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
+import { NoValueMethods, ensureObj, mixinNoValueMethods } from '../dateUtils/abstract'
 import { compareDurations } from '../dateUtils/compare'
 import {
   DurationFields,
@@ -36,7 +36,7 @@ type DurationRoundingOptions = Temporal.DifferenceOptions<Temporal.DateTimeUnit>
 
 const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
 
-export class Duration extends AbstractNoValueObj implements Temporal.Duration {
+export class Duration implements Temporal.Duration {
   constructor(
     years = 0,
     months = 0,
@@ -49,7 +49,6 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
     microseconds = 0,
     nanoseconds = 0,
   ) {
-    super()
     const numberFields = processDurationFields({ // TODO: overkill. does hasAnyProps
       years,
       months,
@@ -176,6 +175,9 @@ export class Duration extends AbstractNoValueObj implements Temporal.Duration {
 }
 
 // mixins
+export interface Duration extends NoValueMethods {}
+mixinNoValueMethods(Duration)
+//
 export interface Duration { [Symbol.toStringTag]: 'Temporal.Duration' }
 attachStringTag(Duration, 'Duration')
 

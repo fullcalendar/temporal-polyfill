@@ -2,7 +2,12 @@ import { Temporal } from 'temporal-spec'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import {
+  IsoMasterMethods,
+  ensureObj,
+  initIsoMaster,
+  mixinIsoMasterMethods,
+} from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
 import { isoEpochLeapYear } from '../dateUtils/epoch'
@@ -23,15 +28,14 @@ import { Calendar, createDefaultCalendar } from './calendar'
 
 export type PlainMonthDayArg = Temporal.PlainMonthDay | Temporal.PlainMonthDayLike | string
 
-export class PlainMonthDay extends AbstractISOObj<Temporal.PlainDateISOFields>
-  implements Temporal.PlainMonthDay {
+export class PlainMonthDay implements Temporal.PlainMonthDay {
   constructor(
     isoMonth: number,
     isoDay: number,
     calendar: Temporal.CalendarLike = createDefaultCalendar(),
     referenceISOYear: number = isoEpochLeapYear,
   ) {
-    super({
+    initIsoMaster(this, {
       ...constrainDateISO({ isoYear: referenceISOYear, isoMonth, isoDay }, OVERFLOW_REJECT),
       calendar: ensureObj(Calendar, calendar),
     })
@@ -94,15 +98,20 @@ export class PlainMonthDay extends AbstractISOObj<Temporal.PlainDateISOFields>
   }
 }
 
-// mixin
+// mixins
+export interface PlainMonthDay extends IsoMasterMethods<Temporal.PlainDateISOFields> {}
+mixinIsoMasterMethods(PlainMonthDay)
+//
 export interface PlainMonthDay { [Symbol.toStringTag]: 'Temporal.PlainMonthDay' }
+attachStringTag(PlainMonthDay, 'PlainMonthDay')
+//
 export interface PlainMonthDay extends MonthDayCalendarFields {
   calendar: Temporal.CalendarProtocol
 }
-export interface PlainMonthDay extends ToLocaleStringMethods {}
-attachStringTag(PlainMonthDay, 'PlainMonthDay')
-mixinISOFields(PlainMonthDay)
 mixinCalendarFields(PlainMonthDay, monthDayCalendarFields)
+mixinISOFields(PlainMonthDay)
+//
+export interface PlainMonthDay extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(PlainMonthDay, createPlainFormatFactoryFactory({
   month: 'numeric',
   day: 'numeric',

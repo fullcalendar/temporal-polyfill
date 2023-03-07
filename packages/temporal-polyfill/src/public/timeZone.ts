@@ -2,7 +2,7 @@ import { Temporal } from 'temporal-spec'
 import { parseDisambigOption } from '../argParse/disambig'
 import { isObjectLike } from '../argParse/refine'
 import { timeZoneFromObj } from '../argParse/timeZone'
-import { AbstractObj, ensureObj } from '../dateUtils/abstract'
+import { JsonMethods, ensureObj, mixinJsonMethods } from '../dateUtils/abstract'
 import { epochNanoSymbol, epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { attachStringTag } from '../dateUtils/mixins'
@@ -22,12 +22,11 @@ import { PlainDateTime, PlainDateTimeArg, createDateTime } from './plainDateTime
 
 const [getImpl, setImpl] = createWeakMap<TimeZone, TimeZoneImpl>()
 
-export class TimeZone extends AbstractObj implements Temporal.TimeZone {
+export class TimeZone implements Temporal.TimeZone {
   constructor(id: string) {
     if (!id) {
       throw new RangeError('Invalid timezone ID')
     }
-    super()
     setImpl(this, queryTimeZoneImpl(id))
   }
 
@@ -121,5 +120,8 @@ export class TimeZone extends AbstractObj implements Temporal.TimeZone {
 }
 
 // mixins
+export interface TimeZone extends JsonMethods {}
+mixinJsonMethods(TimeZone)
+//
 export interface TimeZone { [Symbol.toStringTag]: 'Temporal.TimeZone' }
 attachStringTag(TimeZone, 'TimeZone')

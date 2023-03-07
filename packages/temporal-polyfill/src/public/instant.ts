@@ -3,7 +3,7 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
-import { AbstractNoValueObj, ensureObj } from '../dateUtils/abstract'
+import { NoValueMethods, ensureObj, mixinNoValueMethods } from '../dateUtils/abstract'
 import { compareEpochObjs } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
 import { diffEpochNanos } from '../dateUtils/diff'
@@ -52,9 +52,8 @@ type ToZonedDateTimeOptions = {
 export interface Instant {
   [epochNanoSymbol]: LargeInt
 }
-export class Instant extends AbstractNoValueObj implements Temporal.Instant {
+export class Instant implements Temporal.Instant {
   constructor(epochNanoseconds: LargeIntArgStrict) {
-    super()
     const epochNano = createLargeInt(epochNanoseconds, true) // strict=true
     validateInstant(epochNano)
     this[epochNanoSymbol] = epochNano
@@ -165,11 +164,16 @@ export class Instant extends AbstractNoValueObj implements Temporal.Instant {
 }
 
 // mixins
+export interface Instant extends NoValueMethods {}
+mixinNoValueMethods(Instant)
+//
 export interface Instant { [Symbol.toStringTag]: 'Temporal.Instant' }
-export interface Instant extends ComputedEpochFields {}
-export interface Instant extends ToLocaleStringMethods {}
 attachStringTag(Instant, 'Instant')
+//
+export interface Instant extends ComputedEpochFields {}
 mixinEpochFields(Instant)
+//
+export interface Instant extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(Instant, createZonedFormatFactoryFactory({
   year: 'numeric',
   month: 'numeric',

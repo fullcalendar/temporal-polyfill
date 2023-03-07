@@ -4,7 +4,12 @@ import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
-import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import {
+  IsoMasterMethods,
+  ensureObj,
+  initIsoMaster,
+  mixinIsoMasterMethods,
+} from '../dateUtils/abstract'
 import { compareTimes } from '../dateUtils/compare'
 import { constrainTimeISO } from '../dateUtils/constrain'
 import { isoTimeToNano } from '../dateUtils/dayAndTime'
@@ -45,8 +50,7 @@ type ToZonedDateTimeOptions = {
   plainDate: Temporal.PlainDate | Temporal.PlainDateLike | string
 }
 
-export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
-  implements Temporal.PlainTime {
+export class PlainTime implements Temporal.PlainTime {
   constructor(
     isoHour = 0,
     isoMinute = 0,
@@ -55,19 +59,17 @@ export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
     isoMicrosecond = 0,
     isoNanosecond = 0,
   ) {
-    super(
-      {
-        ...constrainTimeISO({
-          isoHour,
-          isoMinute,
-          isoSecond,
-          isoMillisecond,
-          isoMicrosecond,
-          isoNanosecond,
-        }, OVERFLOW_REJECT),
-        calendar: createDefaultCalendar(),
-      },
-    )
+    initIsoMaster(this, {
+      ...constrainTimeISO({
+        isoHour,
+        isoMinute,
+        isoSecond,
+        isoMillisecond,
+        isoMicrosecond,
+        isoNanosecond,
+      }, OVERFLOW_REJECT),
+      calendar: createDefaultCalendar(),
+    })
   }
 
   static from(arg: PlainTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainTime {
@@ -145,12 +147,17 @@ export class PlainTime extends AbstractISOObj<Temporal.PlainTimeISOFields>
   }
 }
 
-// mixin
+// mixins
+export interface PlainTime extends IsoMasterMethods<Temporal.PlainTimeISOFields> {}
+mixinIsoMasterMethods(PlainTime)
+//
 export interface PlainTime { [Symbol.toStringTag]: 'Temporal.PlainTime' }
-export interface PlainTime extends LocalTimeFields { calendar: Temporal.Calendar }
-export interface PlainTime extends ToLocaleStringMethods {}
 attachStringTag(PlainTime, 'PlainTime')
+//
+export interface PlainTime extends LocalTimeFields { calendar: Temporal.Calendar }
 mixinISOFields(PlainTime, timeUnitNames)
+//
+export interface PlainTime extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(PlainTime, createPlainTimeFormatFactory)
 
 function createPlainTimeFormatFactory(

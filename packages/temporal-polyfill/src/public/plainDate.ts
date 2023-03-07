@@ -3,7 +3,12 @@ import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
-import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import {
+  IsoMasterMethods,
+  ensureObj,
+  initIsoMaster,
+  mixinIsoMasterMethods,
+} from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
 import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
@@ -41,8 +46,7 @@ type ToZonedDateTimeOptions = Temporal.TimeZoneProtocol | string | {
 
 type DiffOptions = Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>
 
-export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
-  implements Temporal.PlainDate {
+export class PlainDate implements Temporal.PlainDate {
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -54,7 +58,7 @@ export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
 
     validateDate(constrained, calendar.toString())
 
-    super({
+    initIsoMaster(this, {
       ...constrained,
       calendar,
     })
@@ -163,13 +167,18 @@ export class PlainDate extends AbstractISOObj<Temporal.PlainDateISOFields>
   }
 }
 
-// mixin
+// mixins
+export interface PlainDate extends IsoMasterMethods<Temporal.PlainDateISOFields> {}
+mixinIsoMasterMethods(PlainDate)
+//
 export interface PlainDate { [Symbol.toStringTag]: 'Temporal.PlainDate' }
-export interface PlainDate extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
-export interface PlainDate extends ToLocaleStringMethods {}
 attachStringTag(PlainDate, 'PlainDate')
-mixinISOFields(PlainDate)
+//
+export interface PlainDate extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 mixinCalendarFields(PlainDate, dateCalendarFields)
+mixinISOFields(PlainDate)
+//
+export interface PlainDate extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({
   year: 'numeric',
   month: 'numeric',

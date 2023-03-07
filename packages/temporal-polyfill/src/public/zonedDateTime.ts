@@ -15,7 +15,12 @@ import { parseOverflowOption } from '../argParse/overflowHandling'
 import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
-import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import {
+  IsoMasterMethods,
+  ensureObj,
+  initIsoMaster,
+  mixinIsoMasterMethods,
+} from '../dateUtils/abstract'
 import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
 import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
@@ -93,8 +98,7 @@ export interface ZonedDateTime {
   [offsetNanoSymbol]: number
   [epochNanoSymbol]: LargeInt
 }
-export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOFields>
-  implements Temporal.ZonedDateTime {
+export class ZonedDateTime implements Temporal.ZonedDateTime {
   constructor(
     epochNanoseconds: LargeIntArg,
     timeZoneArg: Temporal.TimeZoneLike,
@@ -108,7 +112,7 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
     const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNano, timeZone)
     validateDateTime(isoFields, calendar.toString())
 
-    super({
+    initIsoMaster(this, {
       ...isoFields,
       calendar,
       timeZone,
@@ -274,15 +278,22 @@ export class ZonedDateTime extends AbstractISOObj<Temporal.ZonedDateTimeISOField
 }
 
 // mixins
+export interface ZonedDateTime extends IsoMasterMethods<Temporal.ZonedDateTimeISOFields> {}
+mixinIsoMasterMethods(ZonedDateTime)
+//
 export interface ZonedDateTime { [Symbol.toStringTag]: 'Temporal.ZonedDateTime' }
-export interface ZonedDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
-export interface ZonedDateTime extends LocalTimeFields {}
-export interface ZonedDateTime extends ComputedEpochFields {}
-export interface ZonedDateTime extends ToLocaleStringMethods {}
 attachStringTag(ZonedDateTime, 'ZonedDateTime')
-mixinISOFields(ZonedDateTime, timeUnitNames)
+//
+export interface ZonedDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 mixinCalendarFields(ZonedDateTime, dateCalendarFields)
+//
+export interface ZonedDateTime extends LocalTimeFields {}
+mixinISOFields(ZonedDateTime, timeUnitNames)
+//
+export interface ZonedDateTime extends ComputedEpochFields {}
 mixinEpochFields(ZonedDateTime)
+//
+export interface ZonedDateTime extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(ZonedDateTime, createZonedFormatFactoryFactory({
   year: 'numeric',
   month: 'numeric',

@@ -20,31 +20,55 @@ export function ensureObj<Obj, ObjArg, OtherArgs extends any[]>(
   return ObjClass.from(arg, ...otherArgs)
 }
 
-// Classes
+// Mixins
+// use this technique instead of class inheritance because spec demands no intermediate prototypes
 
-export abstract class AbstractObj {
-  abstract toString(): string
+export interface JsonMethods {
+  toJSON(): string
+}
 
-  toJSON(): string {
+export function mixinJsonMethods<Obj extends JsonMethods>(
+  ObjClass: { prototype: Obj },
+): void {
+  ObjClass.prototype.toJSON = function(this: Obj) {
     return this.toString()
   }
 }
 
-export abstract class AbstractNoValueObj extends AbstractObj {
-  valueOf(): never {
+export interface NoValueMethods extends JsonMethods {
+  valueOf(): never
+}
+
+export function mixinNoValueMethods<Obj extends NoValueMethods>(
+  ObjClass: { prototype: Obj },
+): void {
+  mixinJsonMethods(ObjClass)
+
+  ObjClass.prototype.valueOf = function(this: Obj) {
     throw new Error('Cannot convert object using valueOf')
   }
 }
 
-const [getISOFields, setISOFields] = createWeakMap<AbstractISOObj<unknown>, any>()
+export interface IsoMasterMethods<ISOFields> extends NoValueMethods {
+  getISOFields(): ISOFields
+}
 
-export abstract class AbstractISOObj<ISOFields> extends AbstractNoValueObj {
-  constructor(isoFields: ISOFields) {
-    super()
-    setISOFields(this, Object.freeze(isoFields))
-  }
+const [getISOFields, setISOFields] = createWeakMap<IsoMasterMethods<unknown>, any>()
 
-  getISOFields(): ISOFields {
+export function mixinIsoMasterMethods<ISOFields, Obj extends IsoMasterMethods<ISOFields>>(
+  ObjClass: { prototype: Obj },
+): void {
+  mixinNoValueMethods(ObjClass)
+
+  ObjClass.prototype.getISOFields = function(this: Obj) {
     return getISOFields(this)
   }
+}
+
+// must be called from constructor
+export function initIsoMaster<ISOFields>(
+  obj: IsoMasterMethods<ISOFields>,
+  isoFields: ISOFields,
+): void {
+  setISOFields(obj, Object.freeze(isoFields))
 }

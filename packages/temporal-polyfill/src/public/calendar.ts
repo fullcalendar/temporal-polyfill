@@ -8,7 +8,7 @@ import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { AbstractObj, ensureObj } from '../dateUtils/abstract'
+import { JsonMethods, ensureObj, mixinJsonMethods } from '../dateUtils/abstract'
 import {
   computeDayOfYear,
   computeDaysInYear,
@@ -34,10 +34,8 @@ import { PlainYearMonth } from './plainYearMonth'
 
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
 
-export class Calendar extends AbstractObj implements Temporal.Calendar {
+export class Calendar implements Temporal.Calendar {
   constructor(id: string) {
-    super()
-
     if (id === 'islamicc') { // deprecated... TODO: use conversion map
       id = 'islamic-civil'
     }
@@ -367,6 +365,9 @@ export class Calendar extends AbstractObj implements Temporal.Calendar {
 }
 
 // mixins
+export interface Calendar extends JsonMethods {}
+mixinJsonMethods(Calendar)
+//
 export interface Calendar { [Symbol.toStringTag]: 'Temporal.Calendar' }
 attachStringTag(Calendar, 'Calendar')
 

@@ -4,7 +4,12 @@ import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import {
+  IsoMasterMethods,
+  ensureObj,
+  initIsoMaster,
+  mixinIsoMasterMethods,
+} from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
 import { diffDates } from '../dateUtils/diff'
@@ -34,8 +39,7 @@ type DiffOptions = Temporal.DifferenceOptions<YearMonthUnit>
 
 const day1 = { day: 1 }
 
-export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
-  implements Temporal.PlainYearMonth {
+export class PlainYearMonth implements Temporal.PlainYearMonth {
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -51,7 +55,7 @@ export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
 
     validateYearMonth(constrained, calendar.toString())
 
-    super({
+    initIsoMaster(this, {
       ...constrained,
       calendar,
     })
@@ -143,15 +147,20 @@ export class PlainYearMonth extends AbstractISOObj<Temporal.PlainDateISOFields>
   }
 }
 
-// mixin
+// mixins
+export interface PlainYearMonth extends IsoMasterMethods<Temporal.PlainDateISOFields> {}
+mixinIsoMasterMethods(PlainYearMonth)
+//
 export interface PlainYearMonth { [Symbol.toStringTag]: 'Temporal.PlainYearMonth' }
+attachStringTag(PlainYearMonth, 'PlainYearMonth')
+//
 export interface PlainYearMonth extends YearMonthCalendarFields {
   calendar: Temporal.CalendarProtocol
 }
-export interface PlainYearMonth extends ToLocaleStringMethods {}
-attachStringTag(PlainYearMonth, 'PlainYearMonth')
 mixinISOFields(PlainYearMonth)
 mixinCalendarFields(PlainYearMonth, yearMonthCalendarFields)
+//
+export interface PlainYearMonth extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(PlainYearMonth, createPlainFormatFactoryFactory({
   year: 'numeric',
   month: 'numeric',

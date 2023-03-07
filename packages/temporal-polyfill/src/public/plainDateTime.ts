@@ -7,7 +7,12 @@ import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
-import { AbstractISOObj, ensureObj } from '../dateUtils/abstract'
+import {
+  IsoMasterMethods,
+  ensureObj,
+  initIsoMaster,
+  mixinIsoMasterMethods,
+} from '../dateUtils/abstract'
 import { compareDateTimes, dateTimesEqual } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
 import { DayTimeUnit } from '../dateUtils/dayAndTime'
@@ -52,8 +57,7 @@ type RoundOptions = Temporal.RoundTo<
 'millisecond' | 'microsecond' | 'nanosecond'
 >
 
-export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOFields>
-  implements Temporal.PlainDateTime {
+export class PlainDateTime implements Temporal.PlainDateTime {
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -81,7 +85,7 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
 
     validateDateTime(constrained, calendar.toString())
 
-    super({
+    initIsoMaster(this, {
       ...constrained,
       calendar,
     })
@@ -208,14 +212,20 @@ export class PlainDateTime extends AbstractISOObj<Temporal.PlainDateTimeISOField
   toPlainTime(): Temporal.PlainTime { return createTime(this.getISOFields()) }
 }
 
-// mixin
+// mixins
+export interface PlainDateTime extends IsoMasterMethods<Temporal.PlainDateTimeISOFields> {}
+mixinIsoMasterMethods(PlainDateTime)
+//
 export interface PlainDateTime { [Symbol.toStringTag]: 'Temporal.PlainDateTime' }
-export interface PlainDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
-export interface PlainDateTime extends LocalTimeFields {}
-export interface PlainDateTime extends ToLocaleStringMethods {}
 attachStringTag(PlainDateTime, 'PlainDateTime')
-mixinISOFields(PlainDateTime, timeUnitNames)
+//
+export interface PlainDateTime extends DateCalendarFields { calendar: Temporal.CalendarProtocol }
 mixinCalendarFields(PlainDateTime, dateCalendarFields)
+//
+export interface PlainDateTime extends LocalTimeFields {}
+mixinISOFields(PlainDateTime, timeUnitNames)
+//
+export interface PlainDateTime extends ToLocaleStringMethods {}
 mixinLocaleStringMethods(PlainDateTime, createPlainFormatFactoryFactory({
   year: 'numeric',
   month: 'numeric',
