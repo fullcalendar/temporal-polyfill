@@ -50,7 +50,7 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test262", "${file}"],
+      "runtimeArgs": ["run", "test262", "--no-timeout", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true

@@ -3,3 +3,10 @@
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
 # https://github.com/tc39/test262/pull/3548
+
+#
+# fullcalendar/temporal notes
+#
+# Start with `pn test262 'Calendar/**'`
+# Figure out `[input.high, input.low]` error
+#
