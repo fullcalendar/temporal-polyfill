@@ -81,6 +81,7 @@ export class PlainDateTime implements Temporal.PlainDateTime {
       isoMicrosecond,
       isoNanosecond,
     }, OVERFLOW_REJECT)
+
     const calendar = ensureObj(Calendar, calendarArg)
 
     validateDateTime(constrained, calendar.toString())

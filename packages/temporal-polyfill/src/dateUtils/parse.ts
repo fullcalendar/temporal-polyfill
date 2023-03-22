@@ -229,11 +229,19 @@ export function parseNanoAfterDecimal(str: string): number {
 // general utils
 
 function toInt0(input: string | undefined): number { // 0-based
-  return parseInt(input || '0')
+  const n = parseInt(input || '0')
+  if (Object.is(n, -0)) {
+    throw RangeError('no negative zero')
+  }
+  return n
 }
 
 function toInt1(input: string | undefined): number { // 1-based
-  return parseInt(input || '1')
+  const n = parseInt(input || '1')
+  if (Object.is(n, -0)) {
+    throw RangeError('no negative zero')
+  }
+  return n
 }
 
 export function toIntMaybe(input: string | undefined): number | undefined {

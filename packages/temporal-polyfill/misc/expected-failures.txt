@@ -7,6 +7,74 @@
 #
 # fullcalendar/temporal notes
 #
-# Start with `pn test262 'Calendar/**'`
-# Figure out `[input.high, input.low]` error
+
 #
+# Calendar
+# `pn test262 'Calendar/**'`
+#
+
+# really specific calling order of object properties
+built-ins/Temporal/Calendar/from/calendar-object-operations.js
+
+# when creating calendar from datetime-like, .calendar should not be accessed,
+# instead, an internal slot should be accessed
+built-ins/Temporal/Calendar/from/calendar-temporal-object.js
+
+# another required optimization to read internal slots
+# checkPlainDateTimeConversionFastPath
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-plaindatetime.js
+
+# similar internal-slot-access-only problem
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-slots.js
+built-ins/Temporal/Calendar/prototype/dateAdd/calendar-temporal-object.js
+built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
+
+# I'm going crazy with RangeError vs TypeError
+built-ins/Temporal/Calendar/from/calendar-object-invalid.js
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-wrong-type.js
+
+# refactor parsing for `[u-ca=iso8601][!u-ca=discord]`, higher-level
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-string-calendar-annotation.js
+
+# refactor parsing so that strings that end with timezone info must have at least one time part
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-string-date-with-utc-offset.js
+
+# refactor parsing to allow arbitrary notation at end of any string
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-string-unknown-annotation.js
+built-ins/Temporal/Calendar/prototype/dateUntil/argument-string-unknown-annotation.js
+
+# i don't know how TimeZone::getOffsetNanosecondsFor WOULDN'T be called while instantiating
+# a new ZonedDateTime, unless the spec wants the local fields to be lazy?
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-convert.js
+
+# error needs to be thrown for weird constant timezone offset, but it should happen when
+# ZonedDateTime is instantiated
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-non-integer.js
+# for debugging:
+# class SpecificOffsetTimeZone extends Temporal.TimeZone {
+#   constructor() {
+#     super("UTC");
+#   }
+#   getOffsetNanosecondsFor() {
+#     return 3600_000_000_000.5;
+#   }
+#   getPossibleInstantsFor() {
+#     return [];
+#   }
+# }
+# const timeZone = new SpecificOffsetTimeZone()
+# const dateTime = new Temporal.ZonedDateTime(1_000_000_000_987_654_321n, timeZone);
+
+# similar lazy-timezone-offset issue
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
+
+# similar
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-out-of-range.js
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-wrong-type.js
+
+# lame weird prototype stuff
+built-ins/Temporal/Calendar/prototype/dateAdd/builtin.js
+built-ins/Temporal/Calendar/prototype/dateAdd/calendar-fields-iterable.js
+built-ins/Temporal/Calendar/prototype/dateAdd/not-a-constructor.js
+
+# NEXT: deal with `throw new TypeError("Must be a calendar");`

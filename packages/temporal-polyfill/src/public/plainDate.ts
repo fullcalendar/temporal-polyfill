@@ -10,7 +10,7 @@ import {
   mixinIsoMasterMethods,
 } from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
-import { constrainDateISO } from '../dateUtils/constrain'
+import { constrainDateISO, constrainTimeISO } from '../dateUtils/constrain'
 import { zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDates } from '../dateUtils/diff'
 import { processDateFromFields, processDateWithFields } from '../dateUtils/fromAndWith'
@@ -75,7 +75,13 @@ export class PlainDate implements Temporal.PlainDate {
       return processDateFromFields(arg, options)
     }
 
-    return createDate(refineBaseObj(parseDateTime(String(arg))))
+    const parsed = parseDateTime(String(arg))
+
+    // reject out-of-bound time values if included in the string
+    // the date values will be checked in constructor
+    constrainTimeISO(parsed, OVERFLOW_REJECT)
+
+    return createDate(refineBaseObj(parsed))
   }
 
   static compare(a: PlainDateArg, b: PlainDateArg): Temporal.ComparisonResult {

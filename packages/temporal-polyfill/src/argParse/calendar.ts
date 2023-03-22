@@ -2,18 +2,39 @@ import { Temporal } from 'temporal-spec'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import { ensureObj } from '../dateUtils/abstract'
 import { Calendar, createDefaultCalendar } from '../public/calendar'
+import { TimeZone } from '../public/timeZone'
 import { isObjectLike } from './refine'
 
 // TODO: move to argParse like timeZoneFromObj?
 export function calendarFromObj(obj: any): Temporal.CalendarProtocol {
-  const innerCalendar = obj.calendar
-  if (innerCalendar === undefined) {
+  if ('id' in obj) {
+    if (obj instanceof TimeZone) {
+      throw RangeError('Cannot be TimeZone')
+    }
     return obj
   }
-  if (isObjectLike(innerCalendar) && innerCalendar.calendar === undefined) {
-    return innerCalendar as any
+
+  // a date-like object
+  if ('calendar' in obj) {
+    const objCalendar = obj.calendar
+
+    if (typeof objCalendar === 'symbol') {
+      throw new TypeError('Calendar cannot be symbol')
+    } else if (isObjectLike(objCalendar)) {
+      if ('id' in objCalendar) {
+        if (objCalendar instanceof TimeZone) {
+          throw RangeError('Cannot be TimeZone')
+        }
+        return objCalendar as any
+      } else {
+        throw new TypeError('Must be a calendar')
+      }
+    } else { // objCalendar converted to string
+      return new Calendar(objCalendar)
+    }
   }
-  return new Calendar(innerCalendar)
+
+  throw new TypeError('Must be a calendar') // TODO: improve error
 }
 
 export function extractCalendar(input: any): Temporal.CalendarProtocol {

@@ -327,6 +327,9 @@ export function buildZonedDateTimeISOFields(
 ): [ISODateTimeFields, number] {
   const instant = new Instant(epochNano) // will do validation
   const offsetNano = timeZone.getOffsetNanosecondsFor(instant)
+  if (typeof offsetNano !== 'number') {
+    throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
+  }
   const isoFields = epochNanoToISOFields(epochNano.add(offsetNano))
   return [isoFields, offsetNano]
 }

@@ -25,3 +25,11 @@ export const Temporal = {
   Now,
   [Symbol.toStringTag]: 'Temporal', // TODO: make readonly, dry with attachStringTag?
 }
+
+for (const key of Object.keys(Temporal)) {
+  Object.defineProperty(Temporal, key, {
+    value: (Temporal as any)[key],
+    enumerable: false,
+    configurable: true,
+  })
+}

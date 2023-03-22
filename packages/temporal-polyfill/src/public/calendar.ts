@@ -48,6 +48,9 @@ export class Calendar implements Temporal.Calendar {
     if (isObjectLike(arg)) {
       return calendarFromObj(arg)
     }
+    if (typeof arg === 'symbol') {
+      throw new TypeError('Calendar cannot be symbol')
+    }
 
     const parsed = tryParseDateTime(String(arg), false, true) // allowZ=true
     return new Calendar(

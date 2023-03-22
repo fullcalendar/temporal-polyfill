@@ -1,3 +1,4 @@
+import { tryParseDateTime } from '../dateUtils/parse'
 import { CalendarImpl, getCalendarIDBase } from './calendarImpl'
 import { GregoryCalendarImpl } from './gregoryCalendarImpl'
 import { IntlCalendarImpl } from './intlCalendarImpl'
@@ -17,6 +18,13 @@ const implCache: { [calendarID: string]: CalendarImpl } = {
 
 export function queryCalendarImpl(id: string): CalendarImpl {
   id = String(id)
+
+  // TODO: more DRY with Calendar::from
+  const parsedDateTime = tryParseDateTime(id, false, true) // allowZ=true
+  if (parsedDateTime !== undefined) {
+    id = parsedDateTime.calendar || 'iso8601'
+  }
+
   const key = id.toLocaleLowerCase() // lowercase matches isoCalendarID
 
   return implCache[key] ||

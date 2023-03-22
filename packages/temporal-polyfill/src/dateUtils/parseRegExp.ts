@@ -37,7 +37,7 @@ const endingRegExpStr =
   offsetRegExpStr + // 1-8: offset
   ')?' +
   '(\\[([^=\\]]+)\\])?' + // 10: timeZone
-  '(\\[u-ca=([^\\]]+)\\])?' // 12: calendar
+  '(\\[\\!?u-ca=([^\\]]+)\\])?' // 12: calendar
 
 export const yearMonthRegExp = createRegExp(yearMonthRegExpStr + endingRegExpStr)
 export const monthDayRegExp = createRegExp(monthDayRegExpStr + endingRegExpStr)

@@ -109,6 +109,9 @@ export function addYears(
   overflowHandling: OverflowHandlingInt,
 ): LocalDateFields {
   year += yearsToAdd
+  if (year < Number.MIN_SAFE_INTEGER || year > Number.MAX_SAFE_INTEGER) {
+    throw new RangeError('out of range')
+  }
   const newMonth = constrainInt(month, 1, calendarImpl.monthsInYear(year), overflowHandling)
   let newDay = month === newMonth ? day : 1 // month was constrained? reset day
   newDay = constrainInt(newDay, 1, calendarImpl.daysInMonth(year, newMonth), overflowHandling)
@@ -125,10 +128,16 @@ export function addMonths(
     month += monthsToAdd
 
     if (monthsToAdd < 0) {
+      if (month < Number.MIN_SAFE_INTEGER) {
+        throw new RangeError('too low')
+      }
       while (month < 1) {
         month += calendarImpl.monthsInYear(--year)
       }
     } else {
+      if (month > Number.MAX_SAFE_INTEGER) {
+        throw new RangeError('too high')
+      }
       let monthsInYear
       while (month > (monthsInYear = calendarImpl.monthsInYear(year))) {
         month -= monthsInYear

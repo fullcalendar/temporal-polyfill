@@ -265,10 +265,13 @@ function filterFieldsViaCalendar(
 }
 
 function filterFieldsViaWhitelist(objOrFields: any, whitelist: string[]): any {
-  const filtered = {} as any
+  /*
+  needed for "* should be called with null-prototype fields object"
+  */
+  const filtered = Object.create(null) as any
 
   for (const propName of whitelist) {
-    if (objOrFields[propName] !== undefined) {
+    if (propName in objOrFields) {
       filtered[propName] = objOrFields[propName]
     }
   }
