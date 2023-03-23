@@ -136,8 +136,6 @@ built-ins/Temporal/Calendar/prototype/dayOfYear/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/daysInMonth/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/daysInWeek/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/daysInYear/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/fields/long-input.js
-built-ins/Temporal/Calendar/prototype/fields/repeated-throw.js
 built-ins/Temporal/Calendar/prototype/inLeapYear/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/month/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/monthCode/argument-wrong-type.js
@@ -148,7 +146,6 @@ built-ins/Temporal/Calendar/prototype/year/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/yearMonthFromFields/overflow-wrong-type.js
 intl402/Temporal/Calendar/prototype/era/argument-wrong-type.js
 intl402/Temporal/Calendar/prototype/eraYear/argument-wrong-type.js
-intl402/Temporal/Calendar/prototype/yearOfWeek/infinity-throws-rangeerror.js
 built-ins/Temporal/TimeZone/from/argument-primitive.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/argument-not-datetime.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/argument-wrong-type.js
@@ -236,9 +233,7 @@ intl402/Temporal/TimeZone/from/timezone-string-datetime.js
 
 # TimeZone::getOffsetNanosecondsFor laziness/incorrectness
 built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-convert.js
-built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-non-integer.js
 built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
-built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-out-of-range.js
 built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-wrong-type.js
 built-ins/Temporal/Calendar/prototype/dateUntil/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/Calendar/prototype/dateUntil/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-wrong-type.js
@@ -357,6 +352,8 @@ built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/timezone-getoffsetnano
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-non-integer.js
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-out-of-range.js
 built-ins/Temporal/TimeZone/prototype/getPreviousTransition/instant-string-limits.js
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-non-integer.js
+built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-out-of-range.js
 
 # calendars must match
 built-ins/Temporal/Calendar/prototype/dateUntil/calendar-temporal-object.js
@@ -376,6 +373,7 @@ built-ins/Temporal/Calendar/prototype/fields/argument-throws-duplicate-keys.js
 built-ins/Temporal/Calendar/prototype/fields/argument-throws-invalid-keys.js
 built-ins/Temporal/Calendar/prototype/fields/long-input.js
 built-ins/Temporal/Calendar/prototype/fields/non-string-element-throws.js
+built-ins/Temporal/Calendar/prototype/fields/repeated-throw.js
 
 # Calendar::mergeFields
 built-ins/Temporal/Calendar/prototype/mergeFields/arguments-empty-object.js
@@ -429,6 +427,7 @@ built-ins/Temporal/Calendar/prototype/yearOfWeek/name.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/prop-desc.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/year-zero.js
+intl402/Temporal/Calendar/prototype/yearOfWeek/infinity-throws-rangeerror.js
 
 # TimeZone parsing
 built-ins/Temporal/TimeZone/from/timezone-string-datetime.js
