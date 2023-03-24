@@ -1,26 +1,6 @@
 
-opinionated class/prototype/descriptor
---------------------------------------
-
-failing on es5-compiled tests. also borked with ensureThisContext
-  assert.sameValue(
-    Temporal.Calendar.prototype.dateAdd.hasOwnProperty("prototype"),
-    false,
-    "prototype property"
-  );
-
-remove ensureThisContext and then check this-context in EACH METHOD
-  will be like ensureObj calls. won't  be that bad
-
-for calendar-fields-iterable, don't worry about weird iterable protocol,
-  just ensure calls to Calendar::fields use [...yoyoyo]
-  should fix everything
-
-
 Internal Access
 ---------------
-
-meta: fix Calendar parsing first!!!
 
 Calendar::from
   "has outer.calendar"

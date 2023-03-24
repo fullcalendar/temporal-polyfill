@@ -66,7 +66,7 @@ function tryDateTimeFromFields(
   overflowHandling: OverflowHandlingInt,
   options?: Temporal.AssignmentOptions,
 ): Temporal.PlainDateTimeISOFields | undefined {
-  const dateRes = tryDateFromFields(rawFields, options)
+  const dateRes = tryDateFromFields(rawFields, options, true)
   const timeRes = tryTimeFromFields(rawFields, overflowHandling)
 
   if (dateRes) {
@@ -80,9 +80,14 @@ function tryDateTimeFromFields(
 function tryDateFromFields(
   rawFields: Temporal.PlainDateLike,
   options?: Temporal.AssignmentOptions,
+  doingDateTime?: boolean,
 ): PlainDate | undefined {
   const calendar = extractCalendar(rawFields)
-  const filteredFields = filterFieldsViaCalendar(rawFields, dateFieldMap, calendar)
+  const filteredFields = filterFieldsViaCalendar(
+    rawFields,
+    doingDateTime ? { ...dateFieldMap, ...timeFieldMap } : dateFieldMap,
+    calendar,
+  )
 
   if (hasAnyProps(filteredFields)) {
     return calendar.dateFromFields(filteredFields, options)
@@ -258,7 +263,7 @@ function filterFieldsViaCalendar(
   fieldNames = fieldNames.filter((fieldName) => fieldName !== 'era' && fieldName !== 'eraYear')
 
   if (calendar.fields) {
-    // conveniently orders what tests expect (day/month/monthCode/year)
+    // Calendar::fields tests always expect alphabetical order
     fieldNames.sort()
 
     // convert to array and/or copy (done twice?)
