@@ -97,7 +97,10 @@ export class PlainDateTime implements Temporal.PlainDateTime {
   static from(arg: PlainDateTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainDateTime {
     const overflowHandling = parseOverflowOption(options)
 
-    if (arg instanceof PlainDateTime) {
+    if (
+      arg instanceof PlainDateTime ||
+      arg instanceof ZonedDateTime
+    ) {
       return createDateTime(arg.getISOFields()) // optimization
     }
     if (isObjectLike(arg)) {

@@ -12,12 +12,8 @@
 #
 
 # internal property access
-built-ins/Temporal/Calendar/prototype/dateAdd/argument-plaindatetime.js
-built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-slots.js
 built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
-built-ins/Temporal/Calendar/prototype/dateUntil/argument-plaindatetime.js
-built-ins/Temporal/Calendar/prototype/dateUntil/argument-zoneddatetime-slots.js
 built-ins/Temporal/Calendar/prototype/dateUntil/order-of-operations.js
 built-ins/Temporal/Calendar/prototype/id/custom-calendar.js
 built-ins/Temporal/Calendar/prototype/mergeFields/order-of-operations.js

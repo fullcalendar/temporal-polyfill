@@ -32,8 +32,9 @@ import { OrigDateTimeFormat } from '../native/intlUtils'
 import { createDefaultCalendar } from './calendar'
 import { Duration, createDuration } from './duration'
 import { PlainDate, PlainDateArg } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
 import { TimeZone } from './timeZone'
-import { createZonedDateTimeFromFields } from './zonedDateTime'
+import { ZonedDateTime, createZonedDateTimeFromFields } from './zonedDateTime'
 
 export type PlainTimeArg = Temporal.PlainTime | Temporal.PlainTimeLike | string
 
@@ -77,7 +78,11 @@ export class PlainTime implements Temporal.PlainTime {
   static from(arg: PlainTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainTime {
     const overflowHandling = parseOverflowOption(options)
 
-    if (arg instanceof PlainTime) {
+    if (
+      arg instanceof PlainTime ||
+      arg instanceof PlainDateTime ||
+      arg instanceof ZonedDateTime
+    ) {
       return createTime(arg.getISOFields())
     }
     if (isObjectLike(arg)) {

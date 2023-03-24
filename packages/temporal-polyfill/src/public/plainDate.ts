@@ -32,11 +32,11 @@ import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
-import { createDateTime } from './plainDateTime'
+import { PlainDateTime, createDateTime } from './plainDateTime'
 import { PlainTime, PlainTimeArg, ensureLooseTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { createZonedDateTimeFromFields } from './zonedDateTime'
+import { ZonedDateTime, createZonedDateTimeFromFields } from './zonedDateTime'
 
 export type PlainDateArg = Temporal.PlainDate | Temporal.PlainDateLike | string
 
@@ -69,7 +69,11 @@ export class PlainDate implements Temporal.PlainDate {
   static from(arg: PlainDateArg, options?: Temporal.AssignmentOptions): Temporal.PlainDate {
     parseOverflowOption(options) // unused, but need to validate, regardless of input type
 
-    if (arg instanceof PlainDate) {
+    if (
+      arg instanceof PlainDate ||
+      arg instanceof PlainDateTime ||
+      arg instanceof ZonedDateTime
+    ) {
       return createDate(arg.getISOFields()) // optimization
     }
     if (isObjectLike(arg)) {
