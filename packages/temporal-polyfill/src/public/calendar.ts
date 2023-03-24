@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { calendarFromObj, ensureCalendarsEqual, getCommonCalendar } from '../argParse/calendar'
+import { ensureCalendarsEqual, getCommonCalendar } from '../argParse/calendar'
 import { dateFieldMap, monthDayFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'
@@ -28,6 +28,7 @@ import { Duration, DurationArg, createDuration } from './duration'
 import { PlainDate, PlainDateArg } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
+import { TimeZone } from './timeZone'
 
 // FYI: the Temporal.CalendarLike type includes `string`,
 // unlike many other object types
@@ -45,12 +46,30 @@ export class Calendar implements Temporal.Calendar {
 
   static from(arg: Temporal.CalendarLike): Temporal.CalendarProtocol {
     if (isObjectLike(arg)) {
-      return calendarFromObj(arg)
+      if (arg instanceof Calendar) {
+        return arg as any
+      }
+      if (arg instanceof TimeZone) {
+        throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')
+      }
+      if (!('calendar' in arg)) {
+        return arg
+      } else {
+        arg = arg.calendar
+
+        if (arg instanceof TimeZone) {
+          throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')
+        }
+        if (isObjectLike(arg) && !('calendar' in arg)) {
+          return arg as any
+        }
+      }
     }
+
+    // parse as string...
     if (typeof arg === 'symbol') {
       throw new TypeError('Calendar cannot be symbol')
     }
-
     const parsed = tryParseDateTime(String(arg), false, true) // allowZ=true
     return new Calendar(
       parsed // a date-time string?

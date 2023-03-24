@@ -61,9 +61,13 @@ export class Instant implements Temporal.Instant {
 
   static from(arg: InstantArg): Instant { // okay to have return-type be Instant? needed
     if (arg instanceof Instant) {
-      return new Instant(arg.epochNanoseconds)
+      return new Instant(arg.epochNanoseconds) // optimization
     }
 
+    // parse as string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
     const fields = parseZonedDateTime(String(arg))
     const offsetNano = fields.offsetNanoseconds
     if (offsetNano === undefined) {

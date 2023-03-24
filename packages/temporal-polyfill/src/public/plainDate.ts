@@ -3,6 +3,7 @@ import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { isObjectLike } from '../argParse/refine'
 import {
   IsoMasterMethods,
   ensureObj,
@@ -71,11 +72,14 @@ export class PlainDate implements Temporal.PlainDate {
     if (arg instanceof PlainDate) {
       return createDate(arg.getISOFields()) // optimization
     }
-
-    if (typeof arg === 'object') { // TODO: ensure not null
+    if (isObjectLike(arg)) {
       return processDateFromFields(arg, options)
     }
 
+    // parse as string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
     const parsed = parseDateTime(String(arg))
 
     // reject out-of-bound time values if included in the string

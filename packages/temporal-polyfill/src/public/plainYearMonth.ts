@@ -3,6 +3,7 @@ import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { isObjectLike } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import {
   IsoMasterMethods,
@@ -71,12 +72,14 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
     if (arg instanceof PlainYearMonth) {
       return createYearMonth(arg.getISOFields()) // optimization
     }
-
-    if (typeof arg === 'object') {
+    if (isObjectLike(arg)) {
       return processYearMonthFromFields(arg, options)
     }
 
-    // a string...
+    // parse as  string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
     const parsed = parseYearMonth(String(arg))
 
     // don't allow day-numbers in ISO strings

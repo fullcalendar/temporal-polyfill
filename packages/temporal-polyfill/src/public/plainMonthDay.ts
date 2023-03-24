@@ -1,6 +1,7 @@
 import { Temporal } from 'temporal-spec'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { isObjectLike } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
 import {
   IsoMasterMethods,
@@ -48,12 +49,14 @@ export class PlainMonthDay implements Temporal.PlainMonthDay {
     if (arg instanceof PlainMonthDay) {
       return createMonthDay(arg.getISOFields()) // optimization
     }
-
-    if (typeof arg === 'object') {
+    if (isObjectLike(arg)) {
       return processMonthDayFromFields(arg, options)
     }
 
-    // a string...
+    // parse as string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
     const parsed = parseMonthDay(String(arg))
 
     // for strings, force ISO year if no calendar specified

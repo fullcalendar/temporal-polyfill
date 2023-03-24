@@ -1,7 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { parseDisambigOption } from '../argParse/disambig'
 import { isObjectLike } from '../argParse/refine'
-import { timeZoneFromObj } from '../argParse/timeZone'
 import { JsonMethods, ensureObj, mixinJsonMethods, needReceiver } from '../dateUtils/abstract'
 import { epochNanoSymbol, epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
@@ -32,9 +31,21 @@ export class TimeZone implements Temporal.TimeZone {
 
   static from(arg: Temporal.TimeZoneLike): Temporal.TimeZoneProtocol {
     if (isObjectLike(arg)) {
-      return timeZoneFromObj(arg)
+      if (!('timeZone' in arg)) {
+        return arg
+      } else {
+        arg = arg.timeZone
+
+        if (isObjectLike(arg) && !('timeZone' in arg)) {
+          return arg as any
+        }
+      }
     }
 
+    // parse as a string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
     const parsed = tryParseZonedDateTime(String(arg))
 
     if (parsed) {

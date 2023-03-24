@@ -5,6 +5,7 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseDisambigOption } from '../argParse/disambig'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { isObjectLike } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
 import {
@@ -96,13 +97,18 @@ export class PlainDateTime implements Temporal.PlainDateTime {
   static from(arg: PlainDateTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainDateTime {
     const overflowHandling = parseOverflowOption(options)
 
-    return createDateTime(
-      arg instanceof PlainDateTime
-        ? arg.getISOFields() // optimization
-        : typeof arg === 'object'
-          ? processDateTimeFromFields(arg, overflowHandling, options)
-          : refineBaseObj(parseDateTime(String(arg))),
-    )
+    if (arg instanceof PlainDateTime) {
+      return createDateTime(arg.getISOFields()) // optimization
+    }
+    if (isObjectLike(arg)) {
+      return createDateTime(processDateTimeFromFields(arg, overflowHandling, options))
+    }
+
+    // parse as string
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
+    return createDateTime(refineBaseObj(parseDateTime(String(arg))))
   }
 
   static compare(a: PlainDateTimeArg, b: PlainDateTimeArg): Temporal.ComparisonResult {

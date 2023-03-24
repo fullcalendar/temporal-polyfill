@@ -2,6 +2,7 @@ import { Temporal } from 'temporal-spec'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
+import { isObjectLike } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
 import { timeUnitNames } from '../argParse/unitStr'
 import {
@@ -76,13 +77,18 @@ export class PlainTime implements Temporal.PlainTime {
   static from(arg: PlainTimeArg, options?: Temporal.AssignmentOptions): Temporal.PlainTime {
     const overflowHandling = parseOverflowOption(options)
 
-    return createTime(
-      arg instanceof PlainTime
-        ? arg.getISOFields() // optimization
-        : typeof arg === 'object'
-          ? processTimeFromFields(arg, overflowHandling)
-          : parseTime(String(arg)),
-    )
+    if (arg instanceof PlainTime) {
+      return createTime(arg.getISOFields())
+    }
+    if (isObjectLike(arg)) {
+      return createTime(processTimeFromFields(arg, overflowHandling))
+    }
+
+    // parse as string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
+    return createTime(parseTime(String(arg)))
   }
 
   static compare(a: PlainTimeArg, b: PlainTimeArg): Temporal.ComparisonResult {

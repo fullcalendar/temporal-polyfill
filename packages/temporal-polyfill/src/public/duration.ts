@@ -65,11 +65,15 @@ export class Duration implements Temporal.Duration {
   }
 
   static from(arg: DurationArg): Temporal.Duration {
-    return createDuration(
-      typeof arg === 'object'
-        ? processDurationFields(arg)
-        : parseDuration(arg),
-    )
+    if (isObjectLike(arg)) {
+      return createDuration(processDurationFields(arg))
+    }
+
+    // parse as string...
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
+    }
+    return createDuration(parseDuration(String(arg)))
   }
 
   static compare(

@@ -52,41 +52,12 @@ built-ins/Temporal/Calendar/prototype/yearOfWeek/calendar-temporal-object.js
 
 # input processing and error types (ex: RangeError vs TypeError)
 built-ins/Temporal/Calendar/prototype/id/branding.js
-built-ins/Temporal/Calendar/from/calendar-object-invalid.js
-built-ins/Temporal/Calendar/prototype/dateAdd/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/dateAdd/overflow-wrong-type.js
 built-ins/Temporal/Calendar/prototype/dateFromFields/overflow-wrong-type.js
-built-ins/Temporal/Calendar/prototype/dateUntil/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/day/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/dayOfWeek/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/dayOfYear/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/daysInMonth/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/daysInWeek/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/daysInYear/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/inLeapYear/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/month/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/monthCode/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/overflow-wrong-type.js
-built-ins/Temporal/Calendar/prototype/monthsInYear/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/weekOfYear/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/year/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/yearMonthFromFields/overflow-wrong-type.js
-intl402/Temporal/Calendar/prototype/era/argument-wrong-type.js
-intl402/Temporal/Calendar/prototype/eraYear/argument-wrong-type.js
-built-ins/Temporal/TimeZone/from/argument-primitive.js
-built-ins/Temporal/TimeZone/prototype/getInstantFor/argument-not-datetime.js
-built-ins/Temporal/TimeZone/prototype/getInstantFor/argument-wrong-type.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/disambiguation-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getNextTransition/argument-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getOffsetNanosecondsFor/argument-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/argument-not-absolute-getOffsetNanosecondsFor-override.js
-built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/argument-wrong-type.js
 built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/timezone-getoffsetnanosecondsfor-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-not-datetime.js
-built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getPreviousTransition/argument-wrong-type.js
-built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
 
 # parsing
@@ -158,7 +129,6 @@ built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-string-unk
 built-ins/Temporal/TimeZone/prototype/getPreviousTransition/argument-string-calendar-annotation.js
 built-ins/Temporal/TimeZone/prototype/getPreviousTransition/argument-string-date-with-utc-offset.js
 built-ins/Temporal/TimeZone/prototype/getPreviousTransition/argument-string-unknown-annotation.js
-intl402/Temporal/TimeZone/from/timezone-string-datetime.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-string-calendar-annotation.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-string-date-with-utc-offset.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-string-unknown-annotation.js
@@ -323,8 +293,6 @@ intl402/Temporal/Calendar/from/calendar-case-insensitive.js
 
 # TimeZone parsing
 built-ins/Temporal/TimeZone/from/timezone-string-datetime.js
-built-ins/Temporal/TimeZone/from/timezone-string-leap-second.js
-built-ins/Temporal/TimeZone/from/timezone-string-multiple-offsets.js
 built-ins/Temporal/TimeZone/from/timezone-wrong-type.js
 
 # TimeZone transitions

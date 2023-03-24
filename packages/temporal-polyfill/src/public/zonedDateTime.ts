@@ -12,6 +12,7 @@ import {
   parseOffsetHandlingOption,
 } from '../argParse/offsetHandling'
 import { parseOverflowOption } from '../argParse/overflowHandling'
+import { isObjectLike } from '../argParse/refine'
 import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
@@ -132,10 +133,13 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
     const overflowHandling = parseOverflowOption(options)
 
     if (arg instanceof ZonedDateTime) {
-      return new ZonedDateTime(arg.epochNanoseconds, arg.timeZone, arg.calendar)
+      return new ZonedDateTime(arg.epochNanoseconds, arg.timeZone, arg.calendar) // optimization
+    }
+    if (typeof arg === 'symbol') {
+      throw new TypeError('cannot accept symbol')
     }
 
-    const isObject = typeof arg === 'object'
+    const isObject = isObjectLike(arg)
     const fields = isObject
       ? processZonedDateTimeFromFields(arg, overflowHandling, options)
       : refineZonedObj(parseZonedDateTime(String(arg)))
