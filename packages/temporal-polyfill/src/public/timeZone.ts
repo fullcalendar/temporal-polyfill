@@ -31,6 +31,9 @@ export class TimeZone implements Temporal.TimeZone {
 
   static from(arg: Temporal.TimeZoneLike): Temporal.TimeZoneProtocol {
     if (isObjectLike(arg)) {
+      if (arg instanceof TimeZone) {
+        return arg as any
+      }
       if (!('timeZone' in arg)) {
         return arg
       } else {
@@ -66,7 +69,7 @@ export class TimeZone implements Temporal.TimeZone {
 
   get id(): string {
     needReceiver(TimeZone, this)
-    return this.toString()
+    return getImpl(this).id
   }
 
   getOffsetStringFor(instantArg: InstantArg): string {

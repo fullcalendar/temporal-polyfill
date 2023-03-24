@@ -90,7 +90,8 @@ export class Calendar implements Temporal.Calendar {
   }
 
   get id(): string {
-    return this.toString()
+    needReceiver(Calendar, this)
+    return getImpl(this).id
   }
 
   era(

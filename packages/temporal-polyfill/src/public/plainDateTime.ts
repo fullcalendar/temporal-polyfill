@@ -17,7 +17,7 @@ import {
 } from '../dateUtils/abstract'
 import { compareDateTimes, dateTimesEqual } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
-import { DayTimeUnit } from '../dateUtils/dayAndTime'
+import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
 import { DurationFields, negateDuration } from '../dateUtils/durationFields'
 import { processDateTimeFromFields, processDateTimeWithFields } from '../dateUtils/fromAndWith'
@@ -102,6 +102,9 @@ export class PlainDateTime implements Temporal.PlainDateTime {
       arg instanceof ZonedDateTime
     ) {
       return createDateTime(arg.getISOFields()) // optimization
+    }
+    if (arg instanceof PlainDate) {
+      return createDateTime({ ...arg.getISOFields(), ...zeroISOTimeFields })
     }
     if (isObjectLike(arg)) {
       return createDateTime(processDateTimeFromFields(arg, overflowHandling, options))

@@ -42,7 +42,7 @@ export function mixinJsonMethods<Obj extends JsonMethods>(
   class JsonMixin {
     toJSON(this: Obj) {
       needReceiver(ObjClass, this)
-      return this.toString()
+      return String(this) // better than .toString, looks at [Symbol.toPrimitive]
     }
   }
   Object.defineProperty(ObjClass.prototype, 'toJSON', {

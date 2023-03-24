@@ -60,7 +60,10 @@ export class Instant implements Temporal.Instant {
   }
 
   static from(arg: InstantArg): Instant { // okay to have return-type be Instant? needed
-    if (arg instanceof Instant) {
+    if (
+      arg instanceof Instant ||
+      arg instanceof ZonedDateTime
+    ) {
       return new Instant(arg.epochNanoseconds) // optimization
     }
 
