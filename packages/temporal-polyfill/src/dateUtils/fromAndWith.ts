@@ -252,9 +252,18 @@ function filterFieldsViaCalendar(
 ): any {
   let fieldNames = Object.keys(fieldMap)
 
+  // HACK: Calendar::fields doesn't like to accept era/eraYear
+  // instead, the fields() method of the Calendar will inject it
+  // TODO: adjust callers of this function
+  fieldNames = fieldNames.filter((fieldName) => fieldName !== 'era' && fieldName !== 'eraYear')
+
   if (calendar.fields) {
-    // convert Iterable<string> to string[]... better way?
-    fieldNames = Array.prototype.slice.call(calendar.fields(fieldNames))
+    // conveniently orders what tests expect (day/month/monthCode/year)
+    fieldNames.sort()
+
+    // convert to array and/or copy (done twice?)
+    // (convert `fieldNames` result to Iterable as well?)
+    fieldNames = [...calendar.fields(fieldNames)]
   } else {
     // a Calendar 'protocol'
     // filter by method names

@@ -13,49 +13,37 @@
 
 # opinionated class/prototype/descriptor
 built-ins/Temporal/Calendar/prototype/dateAdd/builtin.js
-built-ins/Temporal/Calendar/prototype/dateAdd/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/dateAdd/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/dateFromFields/builtin.js
 built-ins/Temporal/Calendar/prototype/dateFromFields/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/dateUntil/builtin.js
-built-ins/Temporal/Calendar/prototype/dateUntil/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/dateUntil/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/day/builtin.js
-built-ins/Temporal/Calendar/prototype/day/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/day/not-a-constructor.js
-built-ins/Temporal/Calendar/prototype/dayOfWeek/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/dayOfWeek/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/dayOfYear/builtin.js
-built-ins/Temporal/Calendar/prototype/dayOfYear/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/dayOfWeek/builtin.js
 built-ins/Temporal/Calendar/prototype/dayOfYear/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/daysInMonth/builtin.js
-built-ins/Temporal/Calendar/prototype/daysInMonth/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/daysInMonth/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/daysInWeek/builtin.js
-built-ins/Temporal/Calendar/prototype/daysInWeek/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/daysInWeek/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/daysInYear/builtin.js
-built-ins/Temporal/Calendar/prototype/daysInYear/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/daysInYear/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/fields/builtin.js
 built-ins/Temporal/Calendar/prototype/fields/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/id/branding.js
 built-ins/Temporal/Calendar/prototype/inLeapYear/builtin.js
-built-ins/Temporal/Calendar/prototype/inLeapYear/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/inLeapYear/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/mergeFields/builtin.js
 built-ins/Temporal/Calendar/prototype/mergeFields/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/month/builtin.js
-built-ins/Temporal/Calendar/prototype/month/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/month/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/monthCode/builtin.js
-built-ins/Temporal/Calendar/prototype/monthCode/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/monthCode/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/builtin.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/monthsInYear/builtin.js
-built-ins/Temporal/Calendar/prototype/monthsInYear/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/monthsInYear/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/toJSON/builtin.js
 built-ins/Temporal/Calendar/prototype/toJSON/not-a-constructor.js
@@ -64,10 +52,8 @@ built-ins/Temporal/Calendar/prototype/toString/builtin.js
 built-ins/Temporal/Calendar/prototype/toString/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/toStringTag/prop-desc.js
 built-ins/Temporal/Calendar/prototype/weekOfYear/builtin.js
-built-ins/Temporal/Calendar/prototype/weekOfYear/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/weekOfYear/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/year/builtin.js
-built-ins/Temporal/Calendar/prototype/year/calendar-fields-iterable.js
 built-ins/Temporal/Calendar/prototype/year/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/yearMonthFromFields/builtin.js
 built-ins/Temporal/Calendar/prototype/yearMonthFromFields/not-a-constructor.js
@@ -75,9 +61,7 @@ intl402/Temporal/Calendar/prototype/era/builtin.js
 intl402/Temporal/Calendar/prototype/era/not-a-constructor.js
 intl402/Temporal/Calendar/prototype/eraYear/builtin.js
 intl402/Temporal/Calendar/prototype/eraYear/not-a-constructor.js
-built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-fields-iterable.js
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
-built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/calendar-fields-iterable.js
 built-ins/Temporal/TimeZone/prototype/id/branding.js
 built-ins/Temporal/TimeZone/prototype/toJSON/branding.js
 built-ins/Temporal/TimeZone/prototype/toJSON/builtin.js
@@ -367,8 +351,6 @@ built-ins/Temporal/Calendar/prototype/monthsInYear/calendar-temporal-object.js
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
 # Calendar::fields
-built-ins/Temporal/Calendar/prototype/fields/argument-iterable-not-array.js
-built-ins/Temporal/Calendar/prototype/fields/reverse.js
 built-ins/Temporal/Calendar/prototype/fields/argument-throws-duplicate-keys.js
 built-ins/Temporal/Calendar/prototype/fields/argument-throws-invalid-keys.js
 built-ins/Temporal/Calendar/prototype/fields/long-input.js
@@ -411,7 +393,6 @@ built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-convert.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-slots.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-non-integer.js
-built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-out-of-range.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-wrong-type.js
 built-ins/Temporal/Calendar/prototype/yearOfWeek/basic.js

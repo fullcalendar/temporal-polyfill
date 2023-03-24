@@ -349,9 +349,14 @@ export class Calendar implements Temporal.Calendar {
   Given a date-type's core field names, returns the field names that should be
   given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
   */
-  // TODO: for inFields, use Iterable<string>
   fields(inFields: string[]): string[] {
-    return inFields.slice() // copy
+    const outFields = [...inFields] // convert to array and/or copy (handles iterators)
+
+    if (this.toString() !== 'iso8601' && outFields.indexOf('year') !== -1) {
+      outFields.push('era', 'eraYear')
+    }
+
+    return outFields
   }
 
   /*

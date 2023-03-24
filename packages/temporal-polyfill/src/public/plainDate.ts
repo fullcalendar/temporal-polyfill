@@ -71,7 +71,7 @@ export class PlainDate implements Temporal.PlainDate {
       return createDate(arg.getISOFields()) // optimization
     }
 
-    if (typeof arg === 'object') {
+    if (typeof arg === 'object') { // TODO: ensure not null
       return processDateFromFields(arg, options)
     }
 
