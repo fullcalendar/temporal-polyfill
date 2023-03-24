@@ -6,6 +6,15 @@ export const formatFactoryFactorySymbol = Symbol()
 
 // Functions
 
+export function needReceiver<Obj>(
+  ObjClass: { new(...constructorArgs: any[]): Obj },
+  arg: Obj,
+): void {
+  if (!(arg instanceof ObjClass)) {
+    throw new TypeError('Invalid receiver')
+  }
+}
+
 export function ensureObj<Obj, ObjArg, OtherArgs extends any[]>(
   ObjClass: {
     new(...constructorArgs: any[]): Obj
@@ -28,9 +37,10 @@ export interface JsonMethods {
 }
 
 export function mixinJsonMethods<Obj extends JsonMethods>(
-  ObjClass: { prototype: Obj },
+  ObjClass: { new(...constructorArgs: any[]): Obj },
 ): void {
   ObjClass.prototype.toJSON = function(this: Obj) {
+    needReceiver(ObjClass, this)
     return this.toString()
   }
 }
@@ -40,11 +50,12 @@ export interface NoValueMethods extends JsonMethods {
 }
 
 export function mixinNoValueMethods<Obj extends NoValueMethods>(
-  ObjClass: { prototype: Obj },
+  ObjClass: { new(...constructorArgs: any[]): Obj },
 ): void {
   mixinJsonMethods(ObjClass)
 
   ObjClass.prototype.valueOf = function(this: Obj) {
+    needReceiver(ObjClass, this)
     throw new Error('Cannot convert object using valueOf')
   }
 }
@@ -56,11 +67,12 @@ export interface IsoMasterMethods<ISOFields> extends NoValueMethods {
 const [getISOFields, setISOFields] = createWeakMap<IsoMasterMethods<unknown>, any>()
 
 export function mixinIsoMasterMethods<ISOFields, Obj extends IsoMasterMethods<ISOFields>>(
-  ObjClass: { prototype: Obj },
+  ObjClass: { new(...constructorArgs: any[]): Obj },
 ): void {
   mixinNoValueMethods(ObjClass)
 
   ObjClass.prototype.getISOFields = function(this: Obj) {
+    needReceiver(ObjClass, this)
     return getISOFields(this)
   }
 }

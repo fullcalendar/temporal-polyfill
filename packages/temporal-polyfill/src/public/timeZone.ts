@@ -2,7 +2,7 @@ import { Temporal } from 'temporal-spec'
 import { parseDisambigOption } from '../argParse/disambig'
 import { isObjectLike } from '../argParse/refine'
 import { timeZoneFromObj } from '../argParse/timeZone'
-import { JsonMethods, ensureObj, mixinJsonMethods } from '../dateUtils/abstract'
+import { JsonMethods, ensureObj, mixinJsonMethods, needReceiver } from '../dateUtils/abstract'
 import { epochNanoSymbol, epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { attachStringTag } from '../dateUtils/mixins'
@@ -53,14 +53,17 @@ export class TimeZone implements Temporal.TimeZone {
   }
 
   get id(): string {
+    needReceiver(TimeZone, this)
     return this.toString()
   }
 
   getOffsetStringFor(instantArg: InstantArg): string {
+    needReceiver(TimeZone, this)
     return formatOffsetISO(this.getOffsetNanosecondsFor(instantArg))
   }
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
+    needReceiver(TimeZone, this)
     const instant = ensureObj(Instant, instantArg)
     return getImpl(this).getOffset(instant[epochNanoSymbol])
   }
@@ -69,6 +72,7 @@ export class TimeZone implements Temporal.TimeZone {
     instantArg: InstantArg,
     calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ): Temporal.PlainDateTime {
+    needReceiver(TimeZone, this)
     const instant = ensureObj(Instant, instantArg)
     const isoFields = epochNanoToISOFields(
       instant[epochNanoSymbol].add(this.getOffsetNanosecondsFor(instant)),
@@ -83,10 +87,13 @@ export class TimeZone implements Temporal.TimeZone {
     dateTimeArg: PlainDateTimeArg,
     options?: Temporal.ToInstantOptions,
   ): Temporal.Instant {
+    needReceiver(TimeZone, this)
     return getInstantFor(this, ensureObj(PlainDateTime, dateTimeArg), parseDisambigOption(options))
   }
 
   getPossibleInstantsFor(dateTimeArg: PlainDateTimeArg): Temporal.Instant[] {
+    needReceiver(TimeZone, this)
+
     const isoFields = ensureObj(PlainDateTime, dateTimeArg).getISOFields()
     const zoneNano = isoFieldsToEpochNano(isoFields)
     const possibleOffsetNanos = getImpl(this).getPossibleOffsets(zoneNano)
@@ -97,6 +104,7 @@ export class TimeZone implements Temporal.TimeZone {
   }
 
   getPreviousTransition(instantArg: InstantArg): Temporal.Instant | null {
+    needReceiver(TimeZone, this)
     const instant = ensureObj(Instant, instantArg)
     const rawTransition = getImpl(this).getTransition(instant[epochNanoSymbol], -1)
     if (rawTransition) {
@@ -106,6 +114,7 @@ export class TimeZone implements Temporal.TimeZone {
   }
 
   getNextTransition(instantArg: InstantArg): Temporal.Instant | null {
+    needReceiver(TimeZone, this)
     const instant = ensureObj(Instant, instantArg)
     const rawTransition = getImpl(this).getTransition(instant[epochNanoSymbol], 1)
     if (rawTransition) {
@@ -115,6 +124,7 @@ export class TimeZone implements Temporal.TimeZone {
   }
 
   toString(): string {
+    needReceiver(TimeZone, this)
     return getImpl(this).id
   }
 }

@@ -9,6 +9,7 @@ import {
   ensureObj,
   initIsoMaster,
   mixinIsoMasterMethods,
+  needReceiver,
 } from '../dateUtils/abstract'
 import { compareTimes } from '../dateUtils/compare'
 import { constrainTimeISO } from '../dateUtils/constrain'
@@ -89,28 +90,35 @@ export class PlainTime implements Temporal.PlainTime {
   }
 
   with(fields: Temporal.PlainTimeLike, options?: Temporal.AssignmentOptions): Temporal.PlainTime {
+    needReceiver(PlainTime, this)
     return createTime(
       processTimeWithFields(this, fields, parseOverflowOption(options)),
     )
   }
 
   add(durationArg: Temporal.Duration | Temporal.DurationLike | string): Temporal.PlainTime {
+    needReceiver(PlainTime, this)
     return translatePlainTime(this, ensureObj(Duration, durationArg))
   }
 
   subtract(durationArg: Temporal.Duration | Temporal.DurationLike | string): Temporal.PlainTime {
+    needReceiver(PlainTime, this)
     return translatePlainTime(this, negateDuration(ensureObj(Duration, durationArg)))
   }
 
   until(other: PlainTimeArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(PlainTime, this)
     return diffPlainTimes(this, ensureObj(PlainTime, other), options)
   }
 
   since(other: PlainTimeArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(PlainTime, this)
     return diffPlainTimes(ensureObj(PlainTime, other), this, options)
   }
 
   round(options: RoundOptions): Temporal.PlainTime {
+    needReceiver(PlainTime, this)
+
     const roundingConfig = parseRoundingOptions<Temporal.TimeUnit, TimeUnitInt>(
       options,
       NANOSECOND, // minUnit
@@ -121,16 +129,20 @@ export class PlainTime implements Temporal.PlainTime {
   }
 
   equals(other: Temporal.PlainTime | Temporal.PlainTimeLike | string): boolean {
+    needReceiver(PlainTime, this)
     return !compareTimes(this, ensureObj(PlainTime, other))
   }
 
   toString(options?: Temporal.ToStringPrecisionOptions): string {
+    needReceiver(PlainTime, this)
     const formatConfig = parseTimeToStringOptions(options)
     const roundedISOFields: ISOTimeFields = roundTime(this.getISOFields(), formatConfig)
     return formatTimeISO(roundedISOFields, formatConfig)
   }
 
   toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
+    needReceiver(PlainTime, this)
+
     // TODO: ensure options object first?
     const plainDate = ensureObj(PlainDate, options.plainDate)
     const timeZone = ensureObj(TimeZone, options.timeZone)
@@ -143,6 +155,7 @@ export class PlainTime implements Temporal.PlainTime {
   }
 
   toPlainDateTime(dateArg: PlainDateArg): Temporal.PlainDateTime {
+    needReceiver(PlainTime, this)
     return ensureObj(PlainDate, dateArg).toPlainDateTime(this)
   }
 }

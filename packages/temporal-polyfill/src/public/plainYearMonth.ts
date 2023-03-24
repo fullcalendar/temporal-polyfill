@@ -9,6 +9,7 @@ import {
   ensureObj,
   initIsoMaster,
   mixinIsoMasterMethods,
+  needReceiver,
 } from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
@@ -97,6 +98,7 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
     fields: Temporal.PlainYearMonthLike,
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainYearMonth {
+    needReceiver(PlainYearMonth, this)
     return processYearMonthWithFields(this, fields, options)
   }
 
@@ -104,6 +106,7 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
     durationArg: DurationArg,
     options?: Temporal.ArithmeticOptions,
   ): Temporal.PlainYearMonth {
+    needReceiver(PlainYearMonth, this)
     return translatePlainYearMonth(this, ensureObj(Duration, durationArg), options)
   }
 
@@ -111,22 +114,28 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
     durationArg: DurationArg,
     options?: Temporal.ArithmeticOptions,
   ): Temporal.PlainYearMonth {
+    needReceiver(PlainYearMonth, this)
     return translatePlainYearMonth(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
   until(other: PlainYearMonthArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(PlainYearMonth, this)
     return diffPlainYearMonths(this, ensureObj(PlainYearMonth, other), false, options)
   }
 
   since(other: PlainYearMonthArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(PlainYearMonth, this)
     return diffPlainYearMonths(this, ensureObj(PlainYearMonth, other), true, options)
   }
 
   equals(other: PlainYearMonthArg): boolean {
+    needReceiver(PlainYearMonth, this)
     return !compareDateTimes(this, ensureObj(PlainYearMonth, other))
   }
 
   toString(options?: Temporal.ShowCalendarOption): string {
+    needReceiver(PlainYearMonth, this)
+
     const fields = this.getISOFields()
     const calendarID = fields.calendar.toString() // see note in formatCalendarID
     const calendarDisplay = parseCalendarDisplayOption(options)
@@ -139,6 +148,7 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
   }
 
   toPlainDate(fields: { day: number }): Temporal.PlainDate {
+    needReceiver(PlainYearMonth, this)
     return this.calendar.dateFromFields({
       year: this.year,
       month: this.month,

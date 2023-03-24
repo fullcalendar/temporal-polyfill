@@ -3,7 +3,7 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
-import { NoValueMethods, ensureObj, mixinNoValueMethods } from '../dateUtils/abstract'
+import { NoValueMethods, ensureObj, mixinNoValueMethods, needReceiver } from '../dateUtils/abstract'
 import { compareEpochObjs } from '../dateUtils/compare'
 import { constrainDateTimeISO } from '../dateUtils/constrain'
 import { diffEpochNanos } from '../dateUtils/diff'
@@ -100,26 +100,32 @@ export class Instant implements Temporal.Instant {
   }
 
   add(durationArg: TranslateArg): Temporal.Instant {
+    needReceiver(Instant, this)
     return new Instant(
       translateEpochNano(this[epochNanoSymbol], ensureObj(Duration, durationArg)),
     )
   }
 
   subtract(durationArg: TranslateArg): Temporal.Instant {
+    needReceiver(Instant, this)
     return new Instant(
       translateEpochNano(this[epochNanoSymbol], negateDuration(ensureObj(Duration, durationArg))),
     )
   }
 
   until(other: InstantArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(Instant, this)
     return diffInstants(this, ensureObj(Instant, other), options)
   }
 
   since(other: InstantArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(Instant, this)
     return diffInstants(ensureObj(Instant, other), this, options)
   }
 
   round(options: RoundOptions): Temporal.Instant {
+    needReceiver(Instant, this)
+
     const roundingConfig = parseRoundingOptions(options, NANOSECOND, HOUR, true)
 
     return new Instant(
@@ -128,10 +134,12 @@ export class Instant implements Temporal.Instant {
   }
 
   equals(other: InstantArg): boolean {
+    needReceiver(Instant, this)
     return !compareEpochObjs(this, ensureObj(Instant, other))
   }
 
   toString(options?: Temporal.InstantToStringOptions): string {
+    needReceiver(Instant, this)
     const timeZoneArg = ensureOptionsObj(options).timeZone
     const zonedDateTime = this.toZonedDateTimeISO(timeZoneArg ?? 'UTC') // TODO: don't use util!!!
     return zonedDateTime.toString({
@@ -142,10 +150,13 @@ export class Instant implements Temporal.Instant {
   }
 
   toZonedDateTimeISO(timeZoneArg: Temporal.TimeZoneLike): Temporal.ZonedDateTime {
+    needReceiver(Instant, this)
     return new ZonedDateTime(this.epochNanoseconds, timeZoneArg)
   }
 
   toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
+    needReceiver(Instant, this)
+
     // TODO: more official options-processing utils for this
     if (!isObjectLike(options)) {
       throw new TypeError('Must specify options')

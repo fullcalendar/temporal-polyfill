@@ -3,6 +3,7 @@ import { unitNames } from '../argParse/unitStr'
 import { LargeInt } from '../utils/largeInt'
 import { attachGetters, strArrayToHash } from '../utils/obj'
 import { capitalizeFirstLetter } from '../utils/string'
+import { needReceiver } from './abstract'
 import { DateISOInstance } from './calendar'
 import { epochNanoSymbol } from './epoch'
 import { nanoInMicro, nanoInMilli, nanoInSecond } from './units'
@@ -17,19 +18,23 @@ export interface ComputedEpochFields {
 }
 
 export function mixinEpochFields<Obj extends { [epochNanoSymbol]: LargeInt }>(
-  ObjClass: { prototype: Obj },
+  ObjClass: { new(...constructorArgs: any[]): Obj },
 ): void {
   attachGetters(ObjClass, {
     epochNanoseconds(): bigint {
+      needReceiver(ObjClass, this)
       return this[epochNanoSymbol].toBigInt()
     },
     epochMicroseconds(): bigint {
+      needReceiver(ObjClass, this)
       return this[epochNanoSymbol].div(nanoInMicro).toBigInt()
     },
     epochMilliseconds(): number {
+      needReceiver(ObjClass, this)
       return this[epochNanoSymbol].div(nanoInMilli).toNumber()
     },
     epochSeconds(): number {
+      needReceiver(ObjClass, this)
       return this[epochNanoSymbol].div(nanoInSecond).toNumber()
     },
   })
@@ -46,7 +51,7 @@ for (const unitName of unitNames) {
 
 // always mixes in `calendar`
 export function mixinISOFields<Obj extends { getISOFields(): any }>(
-  ObjClass: { prototype: Obj },
+  ObjClass: { new(...constructorArgs: any[]): Obj },
   unitNames: Temporal.DateTimeUnit[] = [],
 ): void {
   attachGetters(
@@ -54,6 +59,7 @@ export function mixinISOFields<Obj extends { getISOFields(): any }>(
     strArrayToHash(
       (unitNames as string[]).concat('calendar'),
       (propName) => function(this: Obj) {
+        needReceiver(ObjClass, this)
         return this.getISOFields()[isoFieldMap[propName]]
       },
     ),
@@ -114,12 +120,13 @@ export const dateCalendarFields: (keyof DateCalendarFields)[] = [
 ]
 
 export function mixinCalendarFields<Obj extends DateISOInstance>(
-  ObjClass: { prototype: Obj },
+  ObjClass: { new(...constructorArgs: any[]): Obj },
   propNames: (keyof DateCalendarFields)[],
 ): void {
   attachGetters(
     ObjClass,
     strArrayToHash(propNames, (propName) => function(this: Obj) {
+      needReceiver(ObjClass, this)
       const value = this.calendar[propName as keyof DateCalendarFields](
         this as Temporal.PlainDateLike,
       )

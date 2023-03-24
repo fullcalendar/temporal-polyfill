@@ -3,7 +3,7 @@ import { parseDiffOptions } from '../argParse/diffOptions'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseTotalConfig } from '../argParse/totalOptions'
-import { NoValueMethods, ensureObj, mixinNoValueMethods } from '../dateUtils/abstract'
+import { NoValueMethods, ensureObj, mixinNoValueMethods, needReceiver } from '../dateUtils/abstract'
 import { compareDurations } from '../dateUtils/compare'
 import {
   DurationFields,
@@ -84,20 +84,68 @@ export class Duration implements Temporal.Duration {
     )
   }
 
-  get years(): number { return getFields(this).years }
-  get months(): number { return getFields(this).months }
-  get weeks(): number { return getFields(this).weeks }
-  get days(): number { return getFields(this).days }
-  get hours(): number { return getFields(this).hours }
-  get minutes(): number { return getFields(this).minutes }
-  get seconds(): number { return getFields(this).seconds }
-  get milliseconds(): number { return getFields(this).milliseconds }
-  get microseconds(): number { return getFields(this).microseconds }
-  get nanoseconds(): number { return getFields(this).nanoseconds }
-  get sign(): Temporal.ComparisonResult { return getFields(this).sign }
-  get blank(): boolean { return !this.sign }
+  get years(): number {
+    needReceiver(Duration, this)
+    return getFields(this).years
+  }
+
+  get months(): number {
+    needReceiver(Duration, this)
+    return getFields(this).months
+  }
+
+  get weeks(): number {
+    needReceiver(Duration, this)
+    return getFields(this).weeks
+  }
+
+  get days(): number {
+    needReceiver(Duration, this)
+    return getFields(this).days
+  }
+
+  get hours(): number {
+    needReceiver(Duration, this)
+    return getFields(this).hours
+  }
+
+  get minutes(): number {
+    needReceiver(Duration, this)
+    return getFields(this).minutes
+  }
+
+  get seconds(): number {
+    needReceiver(Duration, this)
+    return getFields(this).seconds
+  }
+
+  get milliseconds(): number {
+    needReceiver(Duration, this)
+    return getFields(this).milliseconds
+  }
+
+  get microseconds(): number {
+    needReceiver(Duration, this)
+    return getFields(this).microseconds
+  }
+
+  get nanoseconds(): number {
+    needReceiver(Duration, this)
+    return getFields(this).nanoseconds
+  }
+
+  get sign(): Temporal.ComparisonResult {
+    needReceiver(Duration, this)
+    return getFields(this).sign
+  }
+
+  get blank(): boolean {
+    needReceiver(Duration, this)
+    return !this.sign
+  }
 
   with(fields: Temporal.DurationLike): Temporal.Duration {
+    needReceiver(Duration, this)
     return createDuration({
       ...getFields(this),
       ...processDurationFields(fields),
@@ -105,22 +153,28 @@ export class Duration implements Temporal.Duration {
   }
 
   negated(): Temporal.Duration {
+    needReceiver(Duration, this)
     return createDuration(negateDuration(getFields(this)))
   }
 
   abs(): Temporal.Duration {
+    needReceiver(Duration, this)
     return createDuration(absDuration(getFields(this)))
   }
 
   add(other: DurationArg, options?: Temporal.DurationArithmeticOptions): Temporal.Duration {
+    needReceiver(Duration, this)
     return addDurations(this, ensureObj(Duration, other), options)
   }
 
   subtract(other: DurationArg, options?: Temporal.DurationArithmeticOptions): Temporal.Duration {
+    needReceiver(Duration, this)
     return addDurations(this, negateDuration(ensureObj(Duration, other)), options)
   }
 
   round(options: Temporal.DurationRoundTo): Temporal.Duration {
+    needReceiver(Duration, this)
+
     const optionsObj: DurationRoundingOptions = typeof options === 'string'
       ? { smallestUnit: options }
       : options
@@ -150,6 +204,8 @@ export class Duration implements Temporal.Duration {
   }
 
   total(options: Temporal.DurationTotalOf): number {
+    needReceiver(Duration, this)
+
     const totalConfig = parseTotalConfig(options)
     const relativeTo = extractRelativeTo(totalConfig.relativeTo)
 
@@ -162,13 +218,13 @@ export class Duration implements Temporal.Duration {
   }
 
   toString(options?: Temporal.ToStringPrecisionOptions): string {
-    const formatConfig = parseTimeToStringOptions<DurationToStringUnitInt>(
-      options, SECOND,
-    )
+    needReceiver(Duration, this)
+    const formatConfig = parseTimeToStringOptions<DurationToStringUnitInt>(options, SECOND)
     return formatDurationISO(getFields(this), formatConfig)
   }
 
   toLocaleString(_locales?: LocalesArg, _options?: unknown): string {
+    needReceiver(Duration, this)
     // the spec recommends this in the absence of Intl.DurationFormat
     return this.toString()
   }

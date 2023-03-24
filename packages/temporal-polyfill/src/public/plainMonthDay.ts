@@ -7,6 +7,7 @@ import {
   ensureObj,
   initIsoMaster,
   mixinIsoMasterMethods,
+  needReceiver,
 } from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
@@ -68,14 +69,18 @@ export class PlainMonthDay implements Temporal.PlainMonthDay {
     fields: Temporal.PlainMonthDayLike,
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainMonthDay {
+    needReceiver(PlainMonthDay, this)
     return processMonthDayWithFields(this, fields, options)
   }
 
   equals(other: PlainMonthDayArg): boolean {
+    needReceiver(PlainMonthDay, this)
     return !compareDateTimes(this, ensureObj(PlainMonthDay, other))
   }
 
   toString(options?: Temporal.ShowCalendarOption): string {
+    needReceiver(PlainMonthDay, this)
+
     const fields = this.getISOFields()
     const calendarID = fields.calendar.toString() // see note in formatCalendarID
     const calendarDisplay = parseCalendarDisplayOption(options)
@@ -88,6 +93,7 @@ export class PlainMonthDay implements Temporal.PlainMonthDay {
   }
 
   toPlainDate(fields: { year: number }): Temporal.PlainDate {
+    needReceiver(PlainMonthDay, this)
     return this.calendar.dateFromFields({
       year: fields.year,
       monthCode: this.monthCode,

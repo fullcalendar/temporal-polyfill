@@ -20,6 +20,7 @@ import {
   ensureObj,
   initIsoMaster,
   mixinIsoMasterMethods,
+  needReceiver,
 } from '../dateUtils/abstract'
 import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
 import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
@@ -154,14 +155,27 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
     )
   }
 
-  get timeZone(): Temporal.TimeZoneProtocol { return this.getISOFields().timeZone }
-  get offsetNanoseconds(): number { return this[offsetNanoSymbol] }
-  get offset(): string { return this.getISOFields().offset }
+  get timeZone(): Temporal.TimeZoneProtocol {
+    needReceiver(ZonedDateTime, this)
+    return this.getISOFields().timeZone
+  }
+
+  get offsetNanoseconds(): number {
+    needReceiver(ZonedDateTime, this)
+    return this[offsetNanoSymbol]
+  }
+
+  get offset(): string {
+    needReceiver(ZonedDateTime, this)
+    return this.getISOFields().offset
+  }
 
   with(
     fields: Temporal.ZonedDateTimeLike,
     options?: Temporal.AssignmentOptions,
   ): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
+
     parseDisambigOption(options) // for validation
     const overflowHandling = parseOverflowOption(options) // for validation (?)
     const offsetHandling = parseOffsetHandlingOption(options, OFFSET_PREFER)
@@ -171,6 +185,8 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   }
 
   withPlainDate(dateArg: PlainDateArg): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
+
     const date = ensureObj(PlainDate, dateArg)
     const dateTime = date.toPlainDateTime(this) // timeArg=this
     const { timeZone } = this
@@ -184,6 +200,7 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   }
 
   withPlainTime(timeArg?: PlainTimeArg): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
     return createZonedDateTimeFromFields({
       ...this.getISOFields(),
       ...(
@@ -195,6 +212,7 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   }
 
   withCalendar(calendarArg: Temporal.CalendarLike): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
     return new ZonedDateTime(
       this.epochNanoseconds,
       this.timeZone,
@@ -203,6 +221,7 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   }
 
   withTimeZone(timeZoneArg: Temporal.TimeZoneLike): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
     return new ZonedDateTime(
       this.epochNanoseconds,
       timeZoneArg,
@@ -211,22 +230,28 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   }
 
   add(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
     return translateZonedDateTime(this, ensureObj(Duration, durationArg), options)
   }
 
   subtract(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
     return translateZonedDateTime(this, negateDuration(ensureObj(Duration, durationArg)), options)
   }
 
   until(other: ZonedDateTimeArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(ZonedDateTime, this)
     return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), false, options)
   }
 
   since(other: ZonedDateTimeArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(ZonedDateTime, this)
     return diffZonedDateTimes(this, ensureObj(ZonedDateTime, other), true, options)
   }
 
   round(options: RoundOptions): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
+
     const roundingConfig = parseRoundingOptions<DayTimeUnit, DayTimeUnitInt>(
       options,
       NANOSECOND, // minUnit
@@ -237,10 +262,12 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   }
 
   equals(other: ZonedDateTimeArg): boolean {
+    needReceiver(ZonedDateTime, this)
     return zonedDateTimesEqual(this, ensureObj(ZonedDateTime, other))
   }
 
   startOfDay(): Temporal.ZonedDateTime {
+    needReceiver(ZonedDateTime, this)
     return createZonedDateTimeFromFields({
       ...this.getISOFields(),
       ...zeroISOTimeFields,
@@ -250,10 +277,13 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
 
   // TODO: turn into a lazy-getter, like what mixinCalendarFields does
   get hoursInDay(): number {
+    needReceiver(ZonedDateTime, this)
     return computeNanoInDay(this.getISOFields()) / nanoInHour
   }
 
   toString(options?: Temporal.CalendarTypeToStringOptions): string {
+    needReceiver(ZonedDateTime, this)
+
     const formatConfig = parseTimeToStringOptions(options)
     const offsetDisplay = parseOffsetDisplayOption(options)
     const timeZoneDisplay = parseTimeZoneDisplayOption(options)
@@ -269,12 +299,35 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
       formatCalendarID(this.calendar.toString(), calendarDisplay)
   }
 
-  toPlainYearMonth(): Temporal.PlainYearMonth { return createYearMonth(this.getISOFields()) }
-  toPlainMonthDay(): Temporal.PlainMonthDay { return this.calendar.monthDayFromFields(this) }
-  toPlainDateTime(): Temporal.PlainDateTime { return createDateTime(this.getISOFields()) }
-  toPlainDate(): Temporal.PlainDate { return createDate(this.getISOFields()) }
-  toPlainTime(): Temporal.PlainTime { return createTime(this.getISOFields()) }
-  toInstant(): Temporal.Instant { return new Instant(this.epochNanoseconds) }
+  toPlainYearMonth(): Temporal.PlainYearMonth {
+    needReceiver(ZonedDateTime, this)
+    return createYearMonth(this.getISOFields())
+  }
+
+  toPlainMonthDay(): Temporal.PlainMonthDay {
+    needReceiver(ZonedDateTime, this)
+    return this.calendar.monthDayFromFields(this)
+  }
+
+  toPlainDateTime(): Temporal.PlainDateTime {
+    needReceiver(ZonedDateTime, this)
+    return createDateTime(this.getISOFields())
+  }
+
+  toPlainDate(): Temporal.PlainDate {
+    needReceiver(ZonedDateTime, this)
+    return createDate(this.getISOFields())
+  }
+
+  toPlainTime(): Temporal.PlainTime {
+    needReceiver(ZonedDateTime, this)
+    return createTime(this.getISOFields())
+  }
+
+  toInstant(): Temporal.Instant {
+    needReceiver(ZonedDateTime, this)
+    return new Instant(this.epochNanoseconds)
+  }
 }
 
 // mixins

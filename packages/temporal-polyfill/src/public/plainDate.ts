@@ -8,6 +8,7 @@ import {
   ensureObj,
   initIsoMaster,
   mixinIsoMasterMethods,
+  needReceiver,
 } from '../dateUtils/abstract'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO, constrainTimeISO } from '../dateUtils/constrain'
@@ -92,10 +93,12 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   with(fields: Temporal.PlainDateLike, options?: Temporal.AssignmentOptions): Temporal.PlainDate {
+    needReceiver(PlainDate, this)
     return processDateWithFields(this, fields, options)
   }
 
   withCalendar(calendarArg: Temporal.CalendarLike): Temporal.PlainDate {
+    needReceiver(PlainDate, this)
     const isoFields = this.getISOFields()
     return new PlainDate(
       isoFields.isoYear,
@@ -106,14 +109,17 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   add(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
+    needReceiver(PlainDate, this)
     return this.calendar.dateAdd(this, durationArg, options)
   }
 
   subtract(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
+    needReceiver(PlainDate, this)
     return this.calendar.dateAdd(this, ensureObj(Duration, durationArg).negated(), options)
   }
 
   until(other: PlainDateArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(PlainDate, this)
     return diffPlainDates(
       this,
       ensureObj(PlainDate, other),
@@ -123,6 +129,7 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   since(other: PlainDateArg, options?: DiffOptions): Temporal.Duration {
+    needReceiver(PlainDate, this)
     return diffPlainDates(
       this,
       ensureObj(PlainDate, other),
@@ -132,10 +139,13 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   equals(other: PlainDateArg): boolean {
+    needReceiver(PlainDate, this)
     return !compareDateTimes(this, ensureObj(PlainDate, other))
   }
 
   toString(options?: Temporal.ShowCalendarOption): string {
+    needReceiver(PlainDate, this)
+
     const calendarDisplay = parseCalendarDisplayOption(options)
     const fields = this.getISOFields()
 
@@ -144,6 +154,8 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
+    needReceiver(PlainDate, this)
+
     const refinedOptions = processToZonedDateTimeOptions(options)
     const timeZone = ensureObj(TimeZone, refinedOptions.timeZone)
     const plainTime = refinedOptions.plainTime === undefined
@@ -158,6 +170,7 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   toPlainDateTime(timeArg?: PlainTimeArg): Temporal.PlainDateTime {
+    needReceiver(PlainDate, this)
     return createDateTime({
       ...this.getISOFields(),
       ...ensureLooseTime(timeArg).getISOFields(),
@@ -165,10 +178,12 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   toPlainYearMonth(): Temporal.PlainYearMonth {
+    needReceiver(PlainDate, this)
     return createYearMonth(this.getISOFields())
   }
 
   toPlainMonthDay(): Temporal.PlainMonthDay {
+    needReceiver(PlainDate, this)
     return this.calendar.monthDayFromFields(this)
   }
 }

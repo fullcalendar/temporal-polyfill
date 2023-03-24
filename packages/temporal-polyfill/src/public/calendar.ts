@@ -8,7 +8,7 @@ import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { JsonMethods, ensureObj, mixinJsonMethods } from '../dateUtils/abstract'
+import { JsonMethods, ensureObj, mixinJsonMethods, needReceiver } from '../dateUtils/abstract'
 import {
   computeDayOfYear,
   computeDaysInYear,
@@ -66,6 +66,7 @@ export class Calendar implements Temporal.Calendar {
   era(
     arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
   ): string | undefined {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -78,6 +79,7 @@ export class Calendar implements Temporal.Calendar {
   eraYear(
     arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
   ): number | undefined {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -95,6 +97,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): number {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -113,6 +116,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): number {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -131,6 +135,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): string {
+    needReceiver(Calendar, this)
     const fields = queryDateFields(arg, this)
     return getImpl(this).monthCode(fields.month, fields.year)
   }
@@ -143,6 +148,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): number {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg)
     return isoToEpochNanoSafe(
       getImpl(this),
@@ -155,6 +161,7 @@ export class Calendar implements Temporal.Calendar {
   dayOfWeek(
     arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
   ): number {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeISODayOfWeek(isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay)
   }
@@ -162,6 +169,7 @@ export class Calendar implements Temporal.Calendar {
   dayOfYear(
     arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
   ): number {
+    needReceiver(Calendar, this)
     const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return computeDayOfYear(getImpl(this), fields.year, fields.month, fields.day)
   }
@@ -169,6 +177,7 @@ export class Calendar implements Temporal.Calendar {
   weekOfYear(
     arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
   ): number {
+    needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeWeekOfISOYear(
       isoFields.isoYear,
@@ -182,6 +191,8 @@ export class Calendar implements Temporal.Calendar {
   daysInWeek(
     arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
   ): number {
+    needReceiver(Calendar, this)
+
     // will throw error if invalid type
     getExistingDateISOFields(arg, true) // disallowMonthDay=true
 
@@ -197,6 +208,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): number {
+    needReceiver(Calendar, this)
     const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return getImpl(this).daysInMonth(fields.year, fields.month)
   }
@@ -209,6 +221,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): number {
+    needReceiver(Calendar, this)
     const fields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return computeDaysInYear(getImpl(this), fields.year)
   }
@@ -221,6 +234,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): number {
+    needReceiver(Calendar, this)
     const calFields = queryDateFields(arg, this, true) // disallowMonthDay=true
     return getImpl(this).monthsInYear(calFields.year)
   }
@@ -233,6 +247,7 @@ export class Calendar implements Temporal.Calendar {
     | Temporal.PlainDateLike
     | string,
   ): boolean {
+    needReceiver(Calendar, this)
     return getImpl(this).inLeapYear(this.year(arg))
   }
 
@@ -240,6 +255,8 @@ export class Calendar implements Temporal.Calendar {
     fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode & { day: number },
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainDate {
+    needReceiver(Calendar, this)
+
     const refinedFields = refineFields(fields, dateFieldMap)
     const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
 
@@ -255,6 +272,8 @@ export class Calendar implements Temporal.Calendar {
     fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode,
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainYearMonth {
+    needReceiver(Calendar, this)
+
     const refinedFields = refineFields(fields, yearMonthFieldMap)
     const isoFields = queryDateISOFields({ ...refinedFields, day: 1 }, getImpl(this), options)
 
@@ -270,6 +289,8 @@ export class Calendar implements Temporal.Calendar {
     fields: Temporal.MonthCodeOrMonthAndYear & { day: number },
     options?: Temporal.AssignmentOptions,
   ): Temporal.PlainMonthDay {
+    needReceiver(Calendar, this)
+
     const impl = getImpl(this)
     let { era, eraYear, year, month, monthCode, day } = refineFields(fields, monthDayFieldMap)
 
@@ -310,6 +331,8 @@ export class Calendar implements Temporal.Calendar {
     durationArg: DurationArg,
     options?: Temporal.ArithmeticOptions,
   ): Temporal.PlainDate {
+    needReceiver(Calendar, this)
+
     const impl = getImpl(this)
     const date = ensureObj(PlainDate, dateArg, options)
     const duration = ensureObj(Duration, durationArg)
@@ -329,6 +352,8 @@ export class Calendar implements Temporal.Calendar {
     dateArg1: PlainDateArg,
     options?: Temporal.DifferenceOptions<'year' | 'month' | 'week' | 'day'>,
   ): Temporal.Duration {
+    needReceiver(Calendar, this)
+
     const impl = getImpl(this)
     const d0 = ensureObj(PlainDate, dateArg0)
     const d1 = ensureObj(PlainDate, dateArg1)
@@ -349,6 +374,8 @@ export class Calendar implements Temporal.Calendar {
   given to Calendar::yearMonthFromFields/monthDayFromFields/dateFromFields
   */
   fields(inFields: string[]): string[] {
+    needReceiver(Calendar, this)
+
     const outFields = [...inFields] // convert to array and/or copy (handles iterators)
 
     if (this.toString() !== 'iso8601' && outFields.indexOf('year') !== -1) {
@@ -364,10 +391,12 @@ export class Calendar implements Temporal.Calendar {
   */
   // TODO: use Record<string, unknown>
   mergeFields(baseFields: any, additionalFields: any): any {
+    needReceiver(Calendar, this)
     return mergeCalFields(baseFields, additionalFields)
   }
 
   toString(): string {
+    needReceiver(Calendar, this)
     return getImpl(this).id
   }
 }
