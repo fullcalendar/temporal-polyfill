@@ -143,5 +143,11 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
 
 // TODO: make readonly somehow?
 export function attachStringTag(objOrClass: any, name: string): void {
-  (objOrClass.prototype || objOrClass)[Symbol.toStringTag] = 'Temporal.' + name
+  Object.defineProperty(
+    objOrClass.prototype || objOrClass,
+    Symbol.toStringTag, {
+      value: 'Temporal.' + name,
+      configurable: true,
+    },
+  )
 }

@@ -11,11 +11,6 @@
 # pn test262 'TimeZone/**'
 #
 
-# opinionated class/prototype/descriptor
-built-ins/Temporal/Calendar/prototype/toStringTag/prop-desc.js
-built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
-built-ins/Temporal/TimeZone/prototype/toStringTag/prop-desc.js
-
 # internal property access
 built-ins/Temporal/Calendar/from/calendar-object-operations.js
 built-ins/Temporal/Calendar/from/calendar-temporal-object.js
@@ -213,6 +208,7 @@ intl402/Temporal/Calendar/prototype/eraYear/argument-zoneddatetime-timezone-geto
 built-ins/Temporal/TimeZone/prototype/getInstantFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-wrong-type.js
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-wrong-type.js
+built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
 
 #
 # Legit bugs
