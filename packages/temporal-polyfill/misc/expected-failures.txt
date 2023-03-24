@@ -12,7 +12,6 @@
 #
 
 # internal property access
-built-ins/Temporal/Calendar/from/calendar-object-operations.js
 built-ins/Temporal/Calendar/from/calendar-temporal-object.js
 built-ins/Temporal/Calendar/prototype/dateAdd/argument-plaindatetime.js
 built-ins/Temporal/Calendar/prototype/dateAdd/argument-zoneddatetime-slots.js

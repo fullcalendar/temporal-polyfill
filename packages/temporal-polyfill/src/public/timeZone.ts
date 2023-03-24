@@ -46,7 +46,8 @@ export class TimeZone implements Temporal.TimeZone {
     if (typeof arg === 'symbol') {
       throw new TypeError('cannot accept symbol')
     }
-    const parsed = tryParseZonedDateTime(String(arg))
+    const strVal = String(arg)
+    const parsed = tryParseZonedDateTime(strVal)
 
     if (parsed) {
       if (parsed.timeZone) {
@@ -60,7 +61,7 @@ export class TimeZone implements Temporal.TimeZone {
       }
     }
 
-    return new TimeZone(String(arg)) // consider arg the literal time zone ID string
+    return new TimeZone(strVal) // consider arg the literal time zone ID string
   }
 
   get id(): string {

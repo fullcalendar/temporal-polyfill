@@ -70,11 +70,12 @@ export class Calendar implements Temporal.Calendar {
     if (typeof arg === 'symbol') {
       throw new TypeError('Calendar cannot be symbol')
     }
-    const parsed = tryParseDateTime(String(arg), false, true) // allowZ=true
+    const strVal = String(arg)
+    const parsed = tryParseDateTime(strVal, false, true) // allowZ=true
     return new Calendar(
       parsed // a date-time string?
         ? parsed.calendar || isoCalendarID
-        : String(arg), // any other type of string
+        : strVal, // any other type of string
     )
   }
 
