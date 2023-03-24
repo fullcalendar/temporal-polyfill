@@ -3,7 +3,6 @@ import { calendarFromObj, ensureCalendarsEqual, getCommonCalendar } from '../arg
 import { dateFieldMap, monthDayFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'
-import { ensureThisContext } from '../argParse/thisContext'
 import { parseUnit } from '../argParse/unitStr'
 import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
@@ -379,8 +378,6 @@ mixinJsonMethods(Calendar)
 //
 export interface Calendar { [Symbol.toStringTag]: 'Temporal.Calendar' }
 attachStringTag(Calendar, 'Calendar')
-//
-ensureThisContext(Calendar)
 
 export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
