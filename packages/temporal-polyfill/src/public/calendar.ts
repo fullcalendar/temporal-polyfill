@@ -8,7 +8,13 @@ import { checkEpochMilliBuggy } from '../calendarImpl/bugs'
 import { CalendarImpl, CalendarImplFields, convertEraYear } from '../calendarImpl/calendarImpl'
 import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
-import { JsonMethods, ensureObj, mixinJsonMethods, needReceiver } from '../dateUtils/abstract'
+import {
+  JsonMethods,
+  ensureObj,
+  getISOFields,
+  mixinJsonMethods,
+  needReceiver,
+} from '../dateUtils/abstract'
 import {
   computeDayOfYear,
   computeDaysInYear,
@@ -48,6 +54,10 @@ export class Calendar implements Temporal.Calendar {
     if (isObjectLike(arg)) {
       if (arg instanceof Calendar) {
         return arg as any
+      }
+      const secretCalendar = getISOFields(arg as any)?.calendar
+      if (secretCalendar) {
+        return secretCalendar
       }
       if (arg instanceof TimeZone) {
         throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')

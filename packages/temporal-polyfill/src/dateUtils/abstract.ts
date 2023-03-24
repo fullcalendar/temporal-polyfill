@@ -79,6 +79,7 @@ export interface IsoMasterMethods<ISOFields> extends NoValueMethods {
 }
 
 const [getISOFields, setISOFields] = createWeakMap<IsoMasterMethods<unknown>, any>()
+export { getISOFields }
 
 export function mixinIsoMasterMethods<ISOFields, Obj extends IsoMasterMethods<ISOFields>>(
   ObjClass: { new(...constructorArgs: any[]): Obj },
