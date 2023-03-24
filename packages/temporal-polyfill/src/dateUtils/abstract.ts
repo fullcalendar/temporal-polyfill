@@ -39,10 +39,13 @@ export interface JsonMethods {
 export function mixinJsonMethods<Obj extends JsonMethods>(
   ObjClass: { new(...constructorArgs: any[]): Obj },
 ): void {
-  ObjClass.prototype.toJSON = function(this: Obj) {
-    needReceiver(ObjClass, this)
-    return this.toString()
+  class JsonMixin {
+    toJSON(this: Obj) {
+      needReceiver(ObjClass, this)
+      return this.toString()
+    }
   }
+  ObjClass.prototype.toJSON = JsonMixin.prototype.toJSON
 }
 
 export interface NoValueMethods extends JsonMethods {
@@ -54,10 +57,13 @@ export function mixinNoValueMethods<Obj extends NoValueMethods>(
 ): void {
   mixinJsonMethods(ObjClass)
 
-  ObjClass.prototype.valueOf = function(this: Obj) {
-    needReceiver(ObjClass, this)
-    throw new Error('Cannot convert object using valueOf')
+  class NoValueMixin {
+    valueOf(this: Obj) {
+      needReceiver(ObjClass, this)
+      throw new Error('Cannot convert object using valueOf')
+    }
   }
+  ObjClass.prototype.valueOf = NoValueMixin.prototype.valueOf
 }
 
 export interface IsoMasterMethods<ISOFields> extends NoValueMethods {
@@ -71,10 +77,13 @@ export function mixinIsoMasterMethods<ISOFields, Obj extends IsoMasterMethods<IS
 ): void {
   mixinNoValueMethods(ObjClass)
 
-  ObjClass.prototype.getISOFields = function(this: Obj) {
-    needReceiver(ObjClass, this)
-    return getISOFields(this)
+  class IsoMasterMixin {
+    getISOFields(this: Obj) {
+      needReceiver(ObjClass, this)
+      return getISOFields(this)
+    }
   }
+  ObjClass.prototype.getISOFields = IsoMasterMixin.prototype.getISOFields
 }
 
 // must be called from constructor
