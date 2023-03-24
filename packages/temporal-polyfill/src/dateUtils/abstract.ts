@@ -45,7 +45,11 @@ export function mixinJsonMethods<Obj extends JsonMethods>(
       return this.toString()
     }
   }
-  ObjClass.prototype.toJSON = JsonMixin.prototype.toJSON
+  Object.defineProperty(ObjClass.prototype, 'toJSON', {
+    value: JsonMixin.prototype.toJSON,
+    writable: true,
+    configurable: true,
+  })
 }
 
 export interface NoValueMethods extends JsonMethods {
@@ -63,7 +67,11 @@ export function mixinNoValueMethods<Obj extends NoValueMethods>(
       throw new Error('Cannot convert object using valueOf')
     }
   }
-  ObjClass.prototype.valueOf = NoValueMixin.prototype.valueOf
+  Object.defineProperty(ObjClass.prototype, 'valueOf', {
+    value: NoValueMixin.prototype.valueOf,
+    writable: true,
+    configurable: true,
+  })
 }
 
 export interface IsoMasterMethods<ISOFields> extends NoValueMethods {
@@ -83,7 +91,11 @@ export function mixinIsoMasterMethods<ISOFields, Obj extends IsoMasterMethods<IS
       return getISOFields(this)
     }
   }
-  ObjClass.prototype.getISOFields = IsoMasterMixin.prototype.getISOFields
+  Object.defineProperty(ObjClass.prototype, 'getISOFields', {
+    value: IsoMasterMixin.prototype.getISOFields,
+    writable: true,
+    configurable: true,
+  })
 }
 
 // must be called from constructor

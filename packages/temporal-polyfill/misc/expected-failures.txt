@@ -12,11 +12,8 @@
 #
 
 # opinionated class/prototype/descriptor
-built-ins/Temporal/Calendar/prototype/id/branding.js
-built-ins/Temporal/Calendar/prototype/toJSON/prop-desc.js
 built-ins/Temporal/Calendar/prototype/toStringTag/prop-desc.js
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/argument-zoneddatetime-timezone-getoffsetnanosecondsfor-not-callable.js
-built-ins/Temporal/TimeZone/prototype/toJSON/prop-desc.js
 built-ins/Temporal/TimeZone/prototype/toStringTag/prop-desc.js
 
 # internal property access
@@ -57,7 +54,8 @@ built-ins/Temporal/TimeZone/prototype/id/custom-timezone.js
 built-ins/Temporal/TimeZone/prototype/toJSON/tostring-call.js
 built-ins/Temporal/TimeZone/prototype/toJSON/tostring-undefined-custom.js
 
-# error types (ex: RangeError vs TypeError)
+# input processing and error types (ex: RangeError vs TypeError)
+built-ins/Temporal/Calendar/prototype/id/branding.js
 built-ins/Temporal/Calendar/from/calendar-object-invalid.js
 built-ins/Temporal/Calendar/prototype/dateAdd/argument-wrong-type.js
 built-ins/Temporal/Calendar/prototype/dateAdd/overflow-wrong-type.js
