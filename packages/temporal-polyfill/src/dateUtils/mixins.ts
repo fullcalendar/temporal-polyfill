@@ -91,6 +91,7 @@ export interface DateCalendarFields extends YearMonthCalendarFields {
   dayOfWeek: number
   dayOfYear: number
   weekOfYear: number
+  yearOfWeek: number
 }
 
 export const yearMonthCalendarFields: (keyof YearMonthCalendarFields)[] = [
@@ -116,6 +117,7 @@ export const dateCalendarFields: (keyof DateCalendarFields)[] = [
   'dayOfWeek',
   'dayOfYear',
   'weekOfYear',
+  'yearOfWeek',
   'daysInWeek',
 ]
 

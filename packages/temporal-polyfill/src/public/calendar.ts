@@ -22,7 +22,7 @@ import { attachStringTag } from '../dateUtils/mixins'
 import { tryParseDateTime } from '../dateUtils/parse'
 import { translateDate } from '../dateUtils/translate'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
-import { computeWeekOfISOYear } from '../dateUtils/week'
+import { computeWeekOfISOYear, computeYearOfISOWeek } from '../dateUtils/week'
 import { createWeakMap } from '../utils/obj'
 import { Duration, DurationArg, createDuration } from './duration'
 import { PlainDate, PlainDateArg } from './plainDate'
@@ -180,6 +180,20 @@ export class Calendar implements Temporal.Calendar {
     needReceiver(Calendar, this)
     const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
     return computeWeekOfISOYear(
+      isoFields.isoYear,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+      1, // TODO: document what this means
+      4, // "
+    )
+  }
+
+  yearOfWeek(
+    arg: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike | string,
+  ): number {
+    needReceiver(Calendar, this)
+    const isoFields = getExistingDateISOFields(arg, true) // disallowMonthDay=true
+    return computeYearOfISOWeek(
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,

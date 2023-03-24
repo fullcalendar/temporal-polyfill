@@ -5,6 +5,41 @@ import { computeISODayOfWeek } from './epoch'
 
 // TODO: fix lots of 1-index problems!!!
 
+// TODO: more DRY
+export function computeYearOfISOWeek(
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+  firstDay: number,
+  minimalDays: number,
+): number {
+  // Days to ignore till first week
+  const weekOffset = computeFirstWeekOffset(
+    isoYear,
+    firstDay,
+    minimalDays,
+  )
+  // Current week #
+  const week =
+    Math.floor(
+      (computeDayOfYear(isoCalendarImpl, isoYear, isoMonth, isoDay) - weekOffset - 1) / 7,
+    ) + 1
+
+  // Go to previous year if 0 weeks
+  if (week < 1) {
+    return isoYear - 1
+  }
+
+  const weeksYear = computeWeeksInISOYear(isoYear, firstDay, minimalDays)
+
+  // Go to next year if greater than weeks in current year
+  if (week > weeksYear) {
+    return isoYear + 1
+  }
+
+  return isoYear
+}
+
 export function computeWeekOfISOYear(
   isoYear: number,
   isoMonth: number,
