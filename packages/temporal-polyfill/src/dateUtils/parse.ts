@@ -7,7 +7,7 @@ import {
   dateTimeRegExp,
   monthDayRegExp,
   normalizeDashes,
-  offsetRegExp,
+  numericOffsetRegExp,
   timeRegExp,
   yearMonthRegExp,
 } from './parseRegExp'
@@ -23,10 +23,10 @@ export interface DateParseResults extends ISODateFields {
 
 export interface DateTimeParseResult extends ISODateTimeFields {
   calendar: string | undefined
+  timeZone: string | undefined // not needed for most cases
 }
 
 export interface ZonedDateTimeParseResult extends DateTimeParseResult {
-  timeZone: string | undefined
   offsetNanoseconds: number | undefined
   Z: boolean | undefined // whether ISO8601 specified with 'Z' as offset indicator
 }
@@ -142,9 +142,9 @@ function tryParseTime(str: string) {
 }
 
 export function tryParseOffsetNano(str: string): number | undefined {
-  const m = offsetRegExp.exec(normalizeDashes(str))
+  const m = numericOffsetRegExp.exec(normalizeDashes(str))
   if (m) {
-    return parseOffsetParts(m.slice(1))
+    return parseNumericOffsetParts(m.slice(1))
   }
 }
 
@@ -159,12 +159,11 @@ function parseZonedDateTimeParts(parts: string[]): ZonedDateTimeParseResult {
 
   if (zOrOffset) {
     Z = zRE.test(zOrOffset)
-    offsetNanoseconds = Z ? 0 : parseOffsetParts(parts.slice(12))
+    offsetNanoseconds = Z ? 0 : parseNumericOffsetParts(parts.slice(12))
   }
 
   return {
     ...parseDateTimeParts(parts),
-    timeZone: parts[21],
     offsetNanoseconds,
     Z,
   }
@@ -172,33 +171,35 @@ function parseZonedDateTimeParts(parts: string[]): ZonedDateTimeParseResult {
 
 function parseDateTimeParts(parts: string[]): DateTimeParseResult {
   return {
-    calendar: parts[23],
     isoYear: toInt1(parts[0]),
     isoMonth: toInt1(parts[1]),
     isoDay: toInt1(parts[2]),
-    ...parseTimeParts(parts.slice(4)),
+    ...parseTimeParts(parts.slice(4)), // parses annotations
   }
 }
 
 function parseYearMonthParts(parts: string[]): DateParseResults {
   return {
-    calendar: parts[14],
     isoYear: toInt1(parts[0]),
     isoMonth: toInt1(parts[1]),
     isoDay: 1,
+    ...parseAnnotations(parts[2]),
   }
 }
 
 function parseMonthDayParts(parts: string[]): DateParseResults {
   return {
-    calendar: parts[15],
     isoYear: isoEpochLeapYear,
     isoMonth: toInt1(parts[1]),
     isoDay: toInt1(parts[2]),
+    ...parseAnnotations(parts[3]),
   }
 }
 
-function parseTimeParts(parts: string[]): ISOTimeFields {
+function parseTimeParts(parts: string[]): ISOTimeFields & {
+  timeZone: string | undefined
+  calendar: string | undefined
+} {
   const isoSecond = toInt0(parts[4])
 
   return {
@@ -206,10 +207,11 @@ function parseTimeParts(parts: string[]): ISOTimeFields {
     isoHour: toInt0(parts[0]),
     isoMinute: toInt0(parts[2]),
     isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage lead-second
+    ...parseAnnotations(parts[16]),
   }
 }
 
-function parseOffsetParts(parts: string[]): number {
+function parseNumericOffsetParts(parts: string[]): number {
   return (parts[0] === '+' ? 1 : -1) * timePartsToNano(parts.slice(1))
 }
 
@@ -224,6 +226,44 @@ function timePartsToNano(parts: string[]): number {
 
 export function parseNanoAfterDecimal(str: string): number {
   return parseInt(padEnd(str, 9, '0'))
+}
+
+// annotations
+
+function parseAnnotations(s: string): {
+  calendar: string | undefined
+  timeZone: string | undefined
+} {
+  let calendar: string | undefined
+  let timeZone: string | undefined
+
+  for (const chunk of s.split(']')) {
+    if (chunk) { // not the empty end chunk
+      let annotation = chunk.slice(1) // remove leading '['
+      let isCritical = false
+
+      if (annotation.charAt(0) === '!') {
+        isCritical = true
+        annotation = annotation.slice(1)
+      }
+
+      const annotationParts = annotation.split('=')
+      if (annotationParts.length === 1) {
+        if (timeZone !== undefined) {
+          throw new RangeError('Cannot specify timeZone multiple times')
+        }
+        timeZone = annotation
+      } else if (annotationParts[0] === 'u-ca') {
+        if (calendar === undefined) { // ignore subsequent calendar annotations
+          calendar = annotationParts[1]
+        }
+      } else if (isCritical) {
+        throw new RangeError(`Critical annotation '${annotationParts[0]}' not used`)
+      }
+    }
+  }
+
+  return { calendar, timeZone }
 }
 
 // general utils

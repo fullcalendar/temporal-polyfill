@@ -1,49 +1,56 @@
 
 const yearMonthRegExpStr =
-  '([+-]\\d{6}|\\d{4})' + // 0: year
-  '-?(\\d{2})' // 1: month
-  // ending... 12: timeZone, 14: calendar
+  '([+-]\\d{6}|\\d{4})' + // 0:year
+  '-?(\\d{2})' // 1:month
+  // 2:annotations
 
 const dateRegExpStr =
-  yearMonthRegExpStr + // 0-1: yearMonth
-  '-?(\\d{2})' // 2: day
-  // ending... 13: timeZone, 15: calendar
+  yearMonthRegExpStr + // 0:year, 1:month
+  '-?(\\d{2})' // 2:day
+  // 3:annotations
 
 const monthDayRegExpStr =
-  '(--)?(\\d{2})' + // 1: month
-  '-?(\\d{2})' // 2: day
-  // ending... 13: timeZone, 15: calendar
+  '(--)?(\\d{2})' + // 1:month
+  '-?(\\d{2})' // 2:day
+  // 3:annotations
 
-const timeRegExpStr =
-  '(\\d{2})' + // 0: hour
-  '(:?(\\d{2})' + // 2: minute
-  '(:?(\\d{2})' + // 4: second
-  '([.,](\\d{1,9}))?' + // 6: afterDecimal
+const numericTimeRegExpStr =
+  '(\\d{2})' + // 0:hour
+  '(:?(\\d{2})' + // 2:minute (NOTE: ':?' means optional ':')
+  '(:?(\\d{2})' + // 4:second
+  '([.,](\\d{1,9}))?' + // 6:afterDecimal
   ')?)?'
 
-const dateTimeRegExpStr =
-  dateRegExpStr + // 0-2: date
-  '([T ]' + // 3: timeEverything
-  timeRegExpStr + // 4-10: time
-  ')?'
-  // ending... 11: zOrOffset, 12-19: offset, 21: timeZone, 23: calendar
+const numericOffsetRegExpStr =
+  '([+-])' + // 0:plusOrMinus
+  numericTimeRegExpStr // 1:hour, 3:minute, 5:second, 7:afterDecimal
 
 const offsetRegExpStr =
-  '([+-])' + // 0: plusOrMinus
-  timeRegExpStr // 1-7: time
+  '(Z|' + // 0:zOrOffset
+  numericOffsetRegExpStr + // 1:plusOrMinus, 2:hour, 4:minute, 6:second, 8:afterDecimal
+  ')?'
 
-const endingRegExpStr =
-  '(Z|' + // 0: zOrOffset
-  offsetRegExpStr + // 1-8: offset
-  ')?' +
-  '(\\[([^=\\]]+)\\])?' + // 10: timeZone
-  '(\\[\\!?u-ca=([^\\]]+)\\])?' // 12: calendar
+const timeRegExpStr =
+  numericTimeRegExpStr + // 0:hour, 2:minute, 4:second, 6:afterDecimal
+  offsetRegExpStr // 7:zOrOffset, 8:plusOrMinus, 9:hour, 11:minute, 13:second, 15:afterDecimal
+  // 16:annotations
 
-export const yearMonthRegExp = createRegExp(yearMonthRegExpStr + endingRegExpStr)
-export const monthDayRegExp = createRegExp(monthDayRegExpStr + endingRegExpStr)
-export const dateTimeRegExp = createRegExp(dateTimeRegExpStr + endingRegExpStr)
-export const timeRegExp = createRegExp('T?' + timeRegExpStr + endingRegExpStr)
-export const offsetRegExp = createRegExp(offsetRegExpStr)
+const dateTimeRegExpStr =
+  dateRegExpStr + // 0:year, 1:month, 2:day
+  '([T ]' + // 3:timeEverything
+  timeRegExpStr +
+  // 4:hour, 6:minute, 8:second, 10:afterDecimal
+  // 11:zOrOffset, 12:plusOrMinus, 13:hour, 15:minute, 17:second, 19:afterDecimal
+  ')?'
+  // 20:annotations
+
+const annotationRegExpStr = '((\\[[^\\]]*\\])*)'
+
+export const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationRegExpStr)
+export const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationRegExpStr)
+export const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationRegExpStr)
+export const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationRegExpStr)
+export const numericOffsetRegExp = createRegExp(numericOffsetRegExpStr) // annotations not allowed
 
 // TODO: use same DRY technique as above
 export const durationRegExp = /^([-+])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T((\d+)([.,](\d{1,9}))?H)?((\d+)([.,](\d{1,9}))?M)?((\d+)([.,](\d{1,9}))?S)?)?$/i
