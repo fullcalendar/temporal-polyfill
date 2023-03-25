@@ -16,13 +16,7 @@ import { isObjectLike } from '../argParse/refine'
 import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOptions'
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
-import {
-  IsoMasterMethods,
-  ensureObj,
-  initIsoMaster,
-  mixinIsoMasterMethods,
-  needReceiver,
-} from '../dateUtils/abstract'
+import { ensureObj, needReceiver } from '../dateUtils/abstract'
 import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
 import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
@@ -58,7 +52,7 @@ import {
 import { parseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
 import { roundZonedDateTimeFields } from '../dateUtils/rounding'
-import { getInstantFor } from '../dateUtils/timeZone'
+import { getInstantFor, getSafeOffsetNanosecondsFor } from '../dateUtils/timeZone'
 import { translateZonedDateTimeFields } from '../dateUtils/translate'
 import {
   DAY,
@@ -94,37 +88,71 @@ type RoundOptions = Temporal.RoundTo<
 'millisecond' | 'microsecond' | 'nanosecond'
 >
 
-const offsetNanoSymbol = Symbol()
+// Internals
+// -------------------------------------------------------------------------------------------------
+
+interface ZonedDateTimeInternals {
+  epochNanoseconds: LargeInt
+  timeZone: TimeZone
+  calendar: Calendar
+}
+
+interface ZonedDateTimeComputeds extends ISODateTimeFields {
+  offsetNanoseconds: number
+  offset: string
+}
 
 export interface ZonedDateTime {
-  [offsetNanoSymbol]: number
-  [epochNanoSymbol]: LargeInt
+  [epochNanoSymbol]: LargeInt // for mixinEpochFields
 }
+
+const internalsMap = new WeakMap<ZonedDateTime, ZonedDateTimeInternals>()
+const computedsMap = new WeakMap<ZonedDateTime, ZonedDateTimeComputeds>()
+
+function getInternals(zdt: ZonedDateTime): ZonedDateTimeInternals {
+  return internalsMap.get(zdt)!
+}
+
+export { getInternals as getZonedDateTimeInterals }
+
+function getComputeds(zdt: ZonedDateTime): ZonedDateTimeComputeds {
+  let computeds = computedsMap.get(zdt)
+  if (computeds === undefined) {
+    computeds = buildComputeds(getInternals(zdt))
+    computedsMap.set(zdt, computeds)
+  }
+  return computeds
+}
+
+function buildComputeds(internals: ZonedDateTimeInternals): ZonedDateTimeComputeds {
+  const [isoFields, offsetNanoseconds] = buildZonedDateTimeISOFields(
+    internals.epochNanoseconds,
+    internals.timeZone,
+  )
+  validateDateTime(isoFields, internals.calendar.toString())
+  return {
+    ...isoFields,
+    offsetNanoseconds,
+    offset: formatOffsetISO(offsetNanoseconds),
+  }
+}
+
+// Public
+// -------------------------------------------------------------------------------------------------
+
 export class ZonedDateTime implements Temporal.ZonedDateTime {
   constructor(
     epochNanoseconds: LargeIntArg,
     timeZoneArg: Temporal.TimeZoneLike,
     calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
-    // TODO: throw error when number?
-    const timeZone = ensureObj(TimeZone, timeZoneArg)
-    const calendar = ensureObj(Calendar, calendarArg)
-
     const epochNano = createLargeInt(epochNanoseconds) // TODO: do strict, like Instant?
-    const [isoFields, offsetNano] = buildZonedDateTimeISOFields(epochNano, timeZone)
-    validateDateTime(isoFields, calendar.toString())
-
-    initIsoMaster(this, {
-      ...isoFields,
-      calendar,
-      timeZone,
-      // NOTE: must support TimeZone protocols that don't implement getOffsetStringFor
-      // TODO: more DRY with getOffsetStringFor
-      offset: formatOffsetISO(offsetNano),
-    })
-
     this[epochNanoSymbol] = epochNano
-    this[offsetNanoSymbol] = offsetNano
+    internalsMap.set(this, {
+      epochNanoseconds: epochNano,
+      timeZone: ensureObj(TimeZone, timeZoneArg) as TimeZone,
+      calendar: ensureObj(Calendar, calendarArg) as Calendar,
+    })
   }
 
   // okay to have return-type be ZonedDateTime? needed
@@ -161,17 +189,17 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
 
   get timeZone(): Temporal.TimeZoneProtocol {
     needReceiver(ZonedDateTime, this)
-    return this.getISOFields().timeZone
+    return getInternals(this).timeZone
   }
 
   get offsetNanoseconds(): number {
     needReceiver(ZonedDateTime, this)
-    return this[offsetNanoSymbol]
+    return getComputeds(this).offsetNanoseconds
   }
 
   get offset(): string {
     needReceiver(ZonedDateTime, this)
-    return this.getISOFields().offset
+    return getComputeds(this).offset
   }
 
   with(
@@ -206,7 +234,8 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   withPlainTime(timeArg?: PlainTimeArg): Temporal.ZonedDateTime {
     needReceiver(ZonedDateTime, this)
     return createZonedDateTimeFromFields({
-      ...this.getISOFields(),
+      ...getInternals(this),
+      ...getComputeds(this),
       ...(
         timeArg === undefined
           ? zeroISOTimeFields
@@ -273,7 +302,8 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   startOfDay(): Temporal.ZonedDateTime {
     needReceiver(ZonedDateTime, this)
     return createZonedDateTimeFromFields({
-      ...this.getISOFields(),
+      ...getInternals(this),
+      ...getComputeds(this),
       ...zeroISOTimeFields,
       offsetNanoseconds: this.offsetNanoseconds,
     }, false, OFFSET_PREFER)
@@ -282,7 +312,10 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
   // TODO: turn into a lazy-getter, like what mixinCalendarFields does
   get hoursInDay(): number {
     needReceiver(ZonedDateTime, this)
-    return computeNanoInDay(this.getISOFields()) / nanoInHour
+    return computeNanoInDay({
+      ...getInternals(this),
+      ...getComputeds(this),
+    }) / nanoInHour
   }
 
   toString(options?: Temporal.CalendarTypeToStringOptions): string {
@@ -305,7 +338,10 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
 
   toPlainYearMonth(): Temporal.PlainYearMonth {
     needReceiver(ZonedDateTime, this)
-    return createYearMonth(this.getISOFields())
+    return createYearMonth({
+      ...getInternals(this),
+      ...getComputeds(this),
+    })
   }
 
   toPlainMonthDay(): Temporal.PlainMonthDay {
@@ -315,29 +351,51 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
 
   toPlainDateTime(): Temporal.PlainDateTime {
     needReceiver(ZonedDateTime, this)
-    return createDateTime(this.getISOFields())
+    return createDateTime({
+      ...getInternals(this),
+      ...getComputeds(this),
+    })
   }
 
   toPlainDate(): Temporal.PlainDate {
     needReceiver(ZonedDateTime, this)
-    return createDate(this.getISOFields())
+    return createDate({
+      ...getInternals(this),
+      ...getComputeds(this),
+    })
   }
 
   toPlainTime(): Temporal.PlainTime {
     needReceiver(ZonedDateTime, this)
-    return createTime(this.getISOFields())
+    return createTime({ ...getComputeds(this) })
   }
 
   toInstant(): Temporal.Instant {
     needReceiver(ZonedDateTime, this)
     return new Instant(this.epochNanoseconds)
   }
+
+  getISOFields(): Temporal.ZonedDateTimeISOFields {
+    needReceiver(ZonedDateTime, this)
+    return {
+      ...getInternals(this),
+      ...getComputeds(this),
+      // TODO: remove some props right?
+    }
+  }
+
+  valueOf(): never {
+    needReceiver(ZonedDateTime, this)
+    throw new Error('Cannot convert object using valueOf')
+  }
+
+  toJSON(): string {
+    needReceiver(ZonedDateTime, this)
+    return String(this) // better than .toString, looks at [Symbol.toPrimitive]
+  }
 }
 
 // mixins
-export interface ZonedDateTime extends IsoMasterMethods<Temporal.ZonedDateTimeISOFields> {}
-mixinIsoMasterMethods(ZonedDateTime)
-//
 export interface ZonedDateTime { [Symbol.toStringTag]: 'Temporal.ZonedDateTime' }
 attachStringTag(ZonedDateTime, 'ZonedDateTime')
 //
@@ -383,10 +441,7 @@ export function buildZonedDateTimeISOFields(
   timeZone: Temporal.TimeZoneProtocol,
 ): [ISODateTimeFields, number] {
   const instant = new Instant(epochNano) // will do validation
-  const offsetNano = timeZone.getOffsetNanosecondsFor(instant)
-  if (typeof offsetNano !== 'number') {
-    throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
-  }
+  const offsetNano = getSafeOffsetNanosecondsFor(timeZone, instant)
   const isoFields = epochNanoToISOFields(epochNano.add(offsetNano))
   return [isoFields, offsetNano]
 }

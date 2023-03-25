@@ -64,7 +64,7 @@ export class Instant implements Temporal.Instant {
       arg instanceof Instant ||
       arg instanceof ZonedDateTime
     ) {
-      return new Instant(arg.epochNanoseconds) // optimization
+      return new Instant(arg.epochNanoseconds) // optimization. TODO: use slots
     }
 
     // parse as string...

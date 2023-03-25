@@ -64,11 +64,27 @@ function computeGapNear(
   plainDateTime: PlainDateTime,
 ): number {
   const utcEpochNano = toEpochNano(plainDateTime)
-  const offsetDayBefore = timeZoneProtocol.getOffsetNanosecondsFor(
+  const offsetDayBefore = getSafeOffsetNanosecondsFor(
+    timeZoneProtocol,
     new Instant(utcEpochNano.sub(nanoInDay)),
   )
-  const offsetDayAfter = timeZoneProtocol.getOffsetNanosecondsFor(
+  const offsetDayAfter = getSafeOffsetNanosecondsFor(
+    timeZoneProtocol,
     new Instant(utcEpochNano.add(nanoInDay)),
   )
   return offsetDayAfter - offsetDayBefore
+}
+
+export function getSafeOffsetNanosecondsFor(
+  timeZone: Temporal.TimeZoneProtocol,
+  arg: Temporal.Instant | string,
+): number {
+  // if (typeof timeZone.getOffsetNanosecondsFor !== 'function') {
+  //   throw new TypeError('getOffsetNanosecondsFor should be callable')
+  // }
+  const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(arg)
+  if (typeof offsetNanoseconds !== 'number') {
+    throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
+  }
+  return offsetNanoseconds
 }

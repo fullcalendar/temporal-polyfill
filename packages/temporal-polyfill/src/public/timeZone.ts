@@ -8,7 +8,7 @@ import { attachStringTag } from '../dateUtils/mixins'
 import { checkInvalidOffset } from '../dateUtils/offset'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
-import { getInstantFor } from '../dateUtils/timeZone'
+import { getInstantFor, getSafeOffsetNanosecondsFor } from '../dateUtils/timeZone'
 import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createWeakMap } from '../utils/obj'
@@ -74,7 +74,7 @@ export class TimeZone implements Temporal.TimeZone {
 
   getOffsetStringFor(instantArg: InstantArg): string {
     needReceiver(TimeZone, this)
-    return formatOffsetISO(this.getOffsetNanosecondsFor(instantArg))
+    return formatOffsetISO(getSafeOffsetNanosecondsFor(this, instantArg))
   }
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
@@ -90,7 +90,7 @@ export class TimeZone implements Temporal.TimeZone {
     needReceiver(TimeZone, this)
     const instant = ensureObj(Instant, instantArg)
     const isoFields = epochNanoToISOFields(
-      instant[epochNanoSymbol].add(this.getOffsetNanosecondsFor(instant)),
+      instant[epochNanoSymbol].add(getSafeOffsetNanosecondsFor(this, instant)),
     )
     return createDateTime({
       ...isoFields,

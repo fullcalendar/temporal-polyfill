@@ -35,6 +35,7 @@ import { PlainDate, PlainDateArg } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
+import { getZonedDateTimeInterals } from './zonedDateTime'
 
 // FYI: the Temporal.CalendarLike type includes `string`,
 // unlike many other object types
@@ -55,7 +56,9 @@ export class Calendar implements Temporal.Calendar {
       if (arg instanceof Calendar) {
         return arg as any
       }
-      const secretCalendar = getISOFields(arg as any)?.calendar
+      const secretCalendar =
+        getZonedDateTimeInterals(arg as any)?.calendar ||
+        getISOFields(arg as any)?.calendar
       if (secretCalendar) {
         return secretCalendar
       }

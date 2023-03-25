@@ -19,6 +19,8 @@ export const isoEpochLeapYear = 1972 // first ISO leap year after origin
 
 export type EpochableFields = ISODateFields & Partial<ISOTimeFields>
 
+// TODO: phas this out. use WeakMap instead. like:
+// https://github.com/js-temporal/temporal-polyfill/blob/main/lib/slots.ts#L153
 export const epochNanoSymbol = Symbol()
 
 export interface EpochableObj {

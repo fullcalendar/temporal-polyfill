@@ -62,7 +62,7 @@ export function mixinNoValueMethods<Obj extends NoValueMethods>(
   mixinJsonMethods(ObjClass)
 
   class NoValueMixin {
-    valueOf(this: Obj) {
+    valueOf(this: Obj): never {
       needReceiver(ObjClass, this)
       throw new Error('Cannot convert object using valueOf')
     }
