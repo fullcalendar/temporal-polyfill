@@ -89,7 +89,11 @@ export function getSafeOffsetNanosecondsFor(
   if (typeof offsetNanoseconds !== 'number') {
     throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
   }
-  if (!Number.isInteger(offsetNanoseconds)) {
+
+  if (
+    !Number.isInteger(offsetNanoseconds) ||
+    Math.abs(offsetNanoseconds) >= nanoInDay
+  ) {
     throw new RangeError('Invalid return value from getOffsetNanosecondsFor')
   }
 
