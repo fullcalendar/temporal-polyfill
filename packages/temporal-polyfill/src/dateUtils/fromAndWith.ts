@@ -286,8 +286,23 @@ function filterFieldsViaWhitelist(objOrFields: any, whitelist: string[]): any {
   const filtered = Object.create(null) as any
 
   for (const propName of whitelist) {
-    if (propName in objOrFields) {
-      filtered[propName] = objOrFields[propName]
+    let val = objOrFields[propName]
+    if (val !== undefined) {
+      // HACK until refactor
+      // must refine props at same time as whitelist
+      if (
+        propName === 'monthCode'
+      ) {
+        val = String(val)
+      } else if (
+        propName !== 'calendar' &&
+        propName !== 'timeZone' &&
+        propName !== 'offset'
+      ) {
+        val = Number(val)
+      }
+
+      filtered[propName] = val
     }
   }
 

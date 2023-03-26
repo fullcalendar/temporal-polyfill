@@ -74,8 +74,10 @@ export function refineFields<Map extends { [fieldName: string]: (input: unknown)
   const res: { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } = {}
 
   for (const fieldName in refinerMap) {
-    if (input[fieldName] !== undefined) {
-      res[fieldName] = refinerMap[fieldName](input[fieldName])
+    const val = input[fieldName] // only query once
+
+    if (val !== undefined) {
+      res[fieldName] = refinerMap[fieldName](val)
     }
   }
 
