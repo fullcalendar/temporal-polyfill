@@ -30,10 +30,14 @@ export function createParser<Map>(nameForError: string, map: Map, defaultVal?: V
       }
       return d
     }
-    if (map[input] === undefined) {
+    if (typeof input === 'symbol') {
+      throw new TypeError('Invalid type')
+    }
+    const strInput = String(input) as keyof Map
+    if (map[strInput] === undefined) {
       throw new RangeError(`Invalid ${nameForError}: ${String(input)}`)
     }
-    return map[input]
+    return map[strInput]
   }
 }
 

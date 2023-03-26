@@ -49,11 +49,6 @@ built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-g
 built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/instant-string-limits.js
 built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/instant-string-limits.js
 built-ins/Temporal/TimeZone/prototype/getPreviousTransition/instant-string-limits.js
-built-ins/Temporal/Calendar/prototype/dateAdd/overflow-wrong-type.js
-built-ins/Temporal/Calendar/prototype/dateFromFields/overflow-wrong-type.js
-built-ins/Temporal/Calendar/prototype/monthDayFromFields/overflow-wrong-type.js
-built-ins/Temporal/Calendar/prototype/yearMonthFromFields/overflow-wrong-type.js
-built-ins/Temporal/TimeZone/prototype/getInstantFor/disambiguation-wrong-type.js
 
 # calendars must match
 built-ins/Temporal/Calendar/prototype/dateUntil/calendar-temporal-object.js
