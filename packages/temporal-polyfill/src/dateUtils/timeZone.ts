@@ -79,12 +79,19 @@ export function getSafeOffsetNanosecondsFor(
   timeZone: Temporal.TimeZoneProtocol,
   arg: Temporal.Instant | string,
 ): number {
+  // TODO: do a better error message?
   // if (typeof timeZone.getOffsetNanosecondsFor !== 'function') {
   //   throw new TypeError('getOffsetNanosecondsFor should be callable')
   // }
+
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(arg)
+
   if (typeof offsetNanoseconds !== 'number') {
     throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
   }
+  if (!Number.isInteger(offsetNanoseconds)) {
+    throw new RangeError('Invalid return value from getOffsetNanosecondsFor')
+  }
+
   return offsetNanoseconds
 }
