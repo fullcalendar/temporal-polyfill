@@ -262,13 +262,14 @@ function filterFieldsViaCalendar(
   // TODO: adjust callers of this function
   fieldNames = fieldNames.filter((fieldName) => fieldName !== 'era' && fieldName !== 'eraYear')
 
-  if (calendar.fields) {
+  const fieldsMethod = calendar.fields // access right away (no `has`)
+  if (fieldsMethod) {
     // Calendar::fields tests always expect alphabetical order
     fieldNames.sort()
 
     // convert to array and/or copy (done twice?)
     // (convert `fieldNames` result to Iterable as well?)
-    fieldNames = [...calendar.fields(fieldNames)]
+    fieldNames = [...fieldsMethod.call(calendar, fieldNames)]
   } else {
     // a Calendar 'protocol'
     // filter by method names
@@ -328,10 +329,10 @@ function buildSafeFunc<Args extends any[], Res>(
       if (!isObjectLike(rawFields)) {
         throw new TypeError('must be object-like')
       }
-      if (rawFields.calendar !== undefined) {
+      if (rawFields.calendar !== undefined) { // TODO: use `in` ?
         throw new TypeError('calendar not allowed')
       }
-      if (rawFields.timeZone !== undefined) {
+      if (rawFields.timeZone !== undefined) { // TODO: use `in` ?
         throw new TypeError('timeZone not allowed')
       }
     }

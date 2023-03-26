@@ -382,7 +382,7 @@ export class Calendar implements Temporal.Calendar {
     needReceiver(Calendar, this)
 
     const impl = getImpl(this)
-    const date = ensureObj(PlainDate, dateArg, options)
+    const date = ensureObj(PlainDate, dateArg)
     const duration = ensureObj(Duration, durationArg)
     const overflowHandling = parseOverflowOption(options)
     const isoFields = translateDate(date, duration, impl, overflowHandling)

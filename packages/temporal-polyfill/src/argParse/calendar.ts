@@ -4,10 +4,11 @@ import { ensureObj } from '../dateUtils/abstract'
 import { Calendar, createDefaultCalendar } from '../public/calendar'
 
 export function extractCalendar(input: any): Temporal.CalendarProtocol {
-  if (input.calendar === undefined) {
+  const { calendar } = input // access right away. don't use `has`
+  if (calendar === undefined) {
     return createDefaultCalendar()
   }
-  return ensureObj(Calendar, input.calendar)
+  return ensureObj(Calendar, calendar)
 }
 
 export function getCommonCalendar(
