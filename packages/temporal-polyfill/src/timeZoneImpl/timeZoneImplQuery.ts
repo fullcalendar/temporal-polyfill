@@ -20,9 +20,11 @@ export function queryTimeZoneImpl(id: string): TimeZoneImpl {
   // parse a literal time zone offset
   const offsetNano = tryParseOffsetNano(id)
   if (offsetNano !== undefined) {
-    if (Math.abs(offsetNano) > nanoInDay) {
+    // TODO: more DRY. search `>= nanoInDay`
+    if (Math.abs(offsetNano) >= nanoInDay) {
       throw new RangeError('Offset out of bounds')
     }
+
     // don't store fixed-offset zones in cache. there could be many
     return new FixedTimeZoneImpl(
       formatOffsetISO(offsetNano),

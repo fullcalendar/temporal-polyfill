@@ -18,6 +18,7 @@ import {
   HOUR,
   NANOSECOND,
   SECOND,
+  nanoInDay,
   nanoInMicro,
   nanoInMilli,
   nanoInSecond,
@@ -75,6 +76,9 @@ export class Instant implements Temporal.Instant {
     const offsetNano = fields.offsetNanoseconds
     if (offsetNano === undefined) {
       throw new RangeError('Must specify an offset')
+    }
+    if (Math.abs(offsetNano) >= nanoInDay) {
+      throw new RangeError('Offset out of bounds')
     }
 
     return new Instant(
