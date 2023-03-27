@@ -80,11 +80,6 @@ export function getSafeOffsetNanosecondsFor(
   timeZone: Temporal.TimeZoneProtocol,
   arg: Temporal.Instant | string,
 ): number {
-  // TODO: do a better error message?
-  // if (typeof timeZone.getOffsetNanosecondsFor !== 'function') {
-  //   throw new TypeError('getOffsetNanosecondsFor should be callable')
-  // }
-
   // important that arg-parsing failure happens here, before getOffsetNanosecondsFor called
   const instant = ensureObj(Instant, arg)
 
