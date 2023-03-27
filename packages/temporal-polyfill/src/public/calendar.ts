@@ -438,8 +438,6 @@ export class Calendar implements Temporal.Calendar {
       ? DAY // TODO: util for this?
       : parseUnit<DateUnitInt>(largestUnitStr, DAY, DAY, YEAR)
 
-    // ensureCalendarsEqual(this, getCommonCalendar(d0, d1))
-
     // TODO: make less verbose. ALSO, cache cal dates in WeakMap for use by non-iso calImpl
     const isoFields0 = getExistingDateISOFields(d0, true) // disallowMonthDay=true
     const calFields0 = isoToEpochNanoSafe(

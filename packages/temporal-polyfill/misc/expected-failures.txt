@@ -1,8 +1,3 @@
-# Failures in this file are expected to fail for all Test262 tests. To record
-# expected test failures for the transpiled or optimized builds of the polyfill,
-# see expected-failures-es5.txt and expected-failures-opt.txt respectively.
-
-# https://github.com/tc39/test262/pull/3548
 
 #
 # fullcalendar/temporal notes
@@ -11,12 +6,8 @@
 # pn test262 'TimeZone/**'
 #
 
-# complicated internal property access
+# complicated internal property access (needs class refactor)
 built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
-
-#
-# Legit bugs
-#
 
 # monthDayFromFields
 intl402/Temporal/Calendar/prototype/monthDayFromFields/reference-year-1972.js
@@ -26,13 +17,6 @@ intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 
 # out-of-range
 built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-getOffsetNanosecondsFor-override.js
-
-# calendars must match
-built-ins/Temporal/Calendar/prototype/dayOfYear/calendar-temporal-object.js
-built-ins/Temporal/Calendar/prototype/daysInMonth/calendar-temporal-object.js
-built-ins/Temporal/Calendar/prototype/daysInYear/calendar-temporal-object.js
-built-ins/Temporal/Calendar/prototype/monthCode/calendar-temporal-object.js
-built-ins/Temporal/Calendar/prototype/monthsInYear/calendar-temporal-object.js
 
 # Calendr::dateUntil
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js

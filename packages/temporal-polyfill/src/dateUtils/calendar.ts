@@ -1,5 +1,4 @@
 import { Temporal } from 'temporal-spec'
-import { ensureCalendarsEqual } from '../argParse/calendar'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
 import { PlainDate, PlainDateArg, createDate } from '../public/plainDate'
@@ -54,7 +53,6 @@ export function queryDateFields(
     date = PlainDate.from(arg)
   }
 
-  ensureCalendarsEqual(date.calendar, calendar)
   return date
 }
 
