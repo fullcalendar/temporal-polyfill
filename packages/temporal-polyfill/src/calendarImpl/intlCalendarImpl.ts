@@ -94,13 +94,17 @@ export class IntlCalendarImpl extends CalendarImpl {
   convertMonthCode(monthCode: string, year: number): [number, boolean] {
     const leapMonth = this.queryLeapMonthByYear(year) // 0 if none
 
-    // TODO: more DRY
-    let monthCodeIsLeap = /L$/.test(monthCode)
-    let monthCodeInt = parseInt(monthCode.substr(1)) // chop off 'M'
+    // TODO: more DRY with calendarImpl
+    const m = monthCode.match(/^M(\d{2})(L?)$/)
+    if (!m) {
+      throw new RangeError('Invalid monthCode format')
+    }
+    let monthCodeInt = parseInt(m[1])
+    let monthCodeIsLeap: string | boolean = m[2]
     let unusedLeap = false
 
     // validate the leap-month
-    if (monthCodeIsLeap) {
+    if (m[2]) {
       const presetLeapMonth = calLeapMonths[this.id] // TODO: use base ID?
 
       if (presetLeapMonth === undefined) {

@@ -1,5 +1,4 @@
 import { Temporal } from 'temporal-spec'
-import { ensureCalendarsEqual, getCommonCalendar } from '../argParse/calendar'
 import { allDateFieldMap, allMonthDayFieldMap, allYearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'

@@ -103,6 +103,11 @@ export function queryDateISOFields(
 
     month = tryMonth
 
+    // always throw RangeError for out-of-range monthCode, regardless of 'constrain' option
+    if (month < 1 || month > calendarImpl.monthsInYear(year)) {
+      throw new RangeError('monthCode out of range')
+    }
+
     if (unusedLeap) {
       if (overflow === OVERFLOW_REJECT) {
         throw new RangeError('Month code out of range')

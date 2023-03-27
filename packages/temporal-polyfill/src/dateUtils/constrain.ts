@@ -11,6 +11,14 @@ export function constrainDateFields(
   calendarImpl: CalendarImpl,
   overflow: OverflowHandlingInt,
 ): [number, number, number] {
+  // regardless of overflow option
+  if (month < 1) {
+    throw new RangeError('Month must be positive')
+  }
+  if (day < 1) {
+    throw new RangeError('Day must be positive')
+  }
+
   year = Number(year) // not using constrainValue, which converts to a number
   month = constrainInt(month, 1, calendarImpl.monthsInYear(year), overflow)
   day = constrainInt(day, 1, calendarImpl.daysInMonth(year, month), overflow)

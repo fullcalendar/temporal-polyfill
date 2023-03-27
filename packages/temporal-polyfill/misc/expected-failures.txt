@@ -13,22 +13,16 @@
 
 # complicated internal property access
 built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
-
-#
-# Legit bugs
-#
-
-# monthCode
 built-ins/Temporal/Calendar/prototype/dateFromFields/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/monthDayFromFields/monthcode-invalid.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/monthDayFromFields/overflow-constrain.js
-built-ins/Temporal/Calendar/prototype/yearMonthFromFields/monthcode-invalid.js
-built-ins/Temporal/Calendar/prototype/yearMonthFromFields/overflow-constrain.js
 intl402/Temporal/Calendar/prototype/dateFromFields/order-of-operations.js
 intl402/Temporal/Calendar/prototype/monthDayFromFields/order-of-operations.js
 intl402/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
 built-ins/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
+
+#
+# Legit bugs
+#
 
 # monthDayFromFields
 intl402/Temporal/Calendar/prototype/monthDayFromFields/reference-year-1972.js
@@ -37,7 +31,6 @@ intl402/Temporal/Calendar/prototype/monthDayFromFields/reference-year-1972.js
 intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 
 # out-of-range
-built-ins/Temporal/Calendar/prototype/dateFromFields/throws-range-error.js
 built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-getOffsetNanosecondsFor-override.js
 
 # calendars must match
