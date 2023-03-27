@@ -525,37 +525,31 @@ export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
 }
 
-export function mergeCalFields(baseFields: any, additionalFields: any, isIso: boolean): any {
-  const baseFieldsCopy = { ...baseFields } // don't access mult times
-  const additionalFieldsCopy = { ...additionalFields } // "
+export function mergeCalFields(baseFields: any, newFields: any, isIso: boolean): any {
+  const baseFieldsCopy = { ...baseFields }
+  const newFieldsCopy = { ...newFields }
 
-  // way to spread together while having null-prototype required by tests
-  const combinedFields = Object.assign(Object.create(null), baseFieldsCopy, additionalFieldsCopy)
+  const hasNewMonth =
+    newFieldsCopy.month !== undefined ||
+    newFieldsCopy.monthCode !== undefined
 
-  if (additionalFieldsCopy.monthCode !== undefined && additionalFieldsCopy.month === undefined) {
-    delete combinedFields.month
+  const hasNewYear = !isIso && (
+    newFieldsCopy.era !== undefined ||
+    newFieldsCopy.eraYear !== undefined ||
+    newFieldsCopy.year !== undefined
+  )
+
+  if (hasNewMonth) {
+    delete baseFieldsCopy.month
+    delete baseFieldsCopy.monthCode
   }
-  if (additionalFieldsCopy.month !== undefined && additionalFieldsCopy.monthCode === undefined) {
-    delete combinedFields.monthCode
-  }
-
-  if (!isIso) {
-    if (
-      (additionalFieldsCopy.era !== undefined || additionalFieldsCopy.eraYear !== undefined) &&
-      additionalFieldsCopy.year === undefined
-    ) {
-      delete combinedFields.year
-    } else if (additionalFieldsCopy.year !== undefined) {
-      if (additionalFieldsCopy.era === undefined) {
-        delete combinedFields.era
-      }
-      if (additionalFieldsCopy.eraYear === undefined) {
-        delete combinedFields.eraYear
-      }
-    }
+  if (hasNewYear) {
+    delete baseFieldsCopy.era
+    delete baseFieldsCopy.eraYear
+    delete baseFieldsCopy.year
   }
 
-  return combinedFields
+  return Object.assign(Object.create(null), baseFieldsCopy, newFieldsCopy)
 }
 
 // utils

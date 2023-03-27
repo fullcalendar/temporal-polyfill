@@ -1,7 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { extractCalendar } from '../argParse/calendar'
 import {
-  allDateFieldMap,
   dateFieldMap,
   dateTimeFieldMap,
   durationFieldMap,
@@ -296,7 +295,11 @@ function mergeFieldsViaCalendar(
     return calendar.mergeFields(existingFields, fields)
   }
 
-  return mergeCalFields(existingFields, fields)
+  return mergeCalFields(
+    existingFields,
+    fields,
+    true, // isIso. TODO: know this for sure
+  )
 }
 
 function mergeLocalTimeFields(
