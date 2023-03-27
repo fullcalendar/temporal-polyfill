@@ -498,7 +498,8 @@ export class Calendar implements Temporal.Calendar {
   // TODO: use Record<string, unknown>
   mergeFields(baseFields: any, additionalFields: any): any {
     needReceiver(Calendar, this)
-    return mergeCalFields(baseFields, additionalFields)
+    const isIso = getImpl(this).id === 'iso8601'
+    return mergeCalFields(baseFields, additionalFields, isIso)
   }
 
   toString(): string {
@@ -518,55 +519,27 @@ export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
 }
 
-// TODO: better types?
-export function mergeCalFields(baseFields: any, additionalFields: any): any {
-  const merged = { ...baseFields, ...additionalFields } as any
+export function mergeCalFields(baseFields: any, additionalFields: any, isIso: boolean): any {
+  const baseFieldsCopy = { ...baseFields } // don't access mult times
+  const additionalFieldsCopy = { ...additionalFields } // "
+  const combinedFields = { ...baseFieldsCopy, ...additionalFieldsCopy }
 
-  if (baseFields.year !== undefined) {
-    delete merged.era
-    delete merged.eraYear
-    delete merged.year
+  if (additionalFieldsCopy.monthCode !== undefined) {
+    delete combinedFields.month
+  } else if (additionalFieldsCopy.month !== undefined) {
+    delete combinedFields.monthCode
+  }
 
-    let anyAdditionalYear = false
-
-    if (additionalFields.era !== undefined || additionalFields.eraYear !== undefined) {
-      merged.era = additionalFields.era
-      merged.eraYear = additionalFields.eraYear
-      anyAdditionalYear = true
-    }
-    if (additionalFields.year !== undefined) {
-      merged.year = additionalFields.year
-      anyAdditionalYear = true
-    }
-    if (!anyAdditionalYear) {
-      merged.year = baseFields.year
+  if (!isIso) {
+    if (additionalFieldsCopy.era !== undefined || additionalFieldsCopy.eraYear !== undefined) {
+      delete combinedFields.year
+    } else if (additionalFields.year !== undefined) {
+      delete combinedFields.era
+      delete combinedFields.eraYear
     }
   }
 
-  if (baseFields.monthCode !== undefined) {
-    delete merged.monthCode
-    delete merged.month
-
-    let anyAdditionalMonth = false
-
-    if (additionalFields.month !== undefined) {
-      merged.month = additionalFields.month
-      anyAdditionalMonth = true
-    }
-    if (additionalFields.monthCode !== undefined) {
-      merged.monthCode = additionalFields.monthCode
-      anyAdditionalMonth = true
-    }
-    if (!anyAdditionalMonth) {
-      merged.monthCode = baseFields.monthCode
-    }
-  }
-
-  if (baseFields.day !== undefined) {
-    merged.day = additionalFields.day ?? baseFields.day
-  }
-
-  return merged
+  return combinedFields
 }
 
 // utils
