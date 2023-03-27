@@ -4,6 +4,7 @@ import {
   allMonthDayFieldMap,
   allYearMonthFieldMap,
   dateFieldMap,
+  dateTimeFieldMap,
   monthDayFieldMap,
   toString,
   yearMonthFieldMap,
@@ -466,7 +467,22 @@ export class Calendar implements Temporal.Calendar {
   fields(inFields: string[]): string[] {
     needReceiver(Calendar, this)
 
-    const outFields = [...inFields] // convert to array and/or copy (handles iterators)
+    const outFields: string[] = []
+    const outFieldMap: any = {}
+
+    for (const fieldName of inFields) { // inField could be iterator! TODO: adjust type
+      if (typeof fieldName !== 'string') {
+        throw new TypeError('Field must be string')
+      }
+      if (!(fieldName in dateTimeFieldMap)) {
+        throw new RangeError('Invalid field')
+      }
+      if (outFieldMap[fieldName]) {
+        throw new RangeError('Cannot have duplicate field')
+      }
+      outFieldMap[fieldName] = true
+      outFields.push(fieldName)
+    }
 
     if (this.toString() !== 'iso8601' && outFields.indexOf('year') !== -1) {
       outFields.push('era', 'eraYear')

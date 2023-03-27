@@ -21,13 +21,6 @@ built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-g
 # Calendr::dateUntil
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
-# Calendar::fields
-built-ins/Temporal/Calendar/prototype/fields/argument-throws-duplicate-keys.js
-built-ins/Temporal/Calendar/prototype/fields/argument-throws-invalid-keys.js
-built-ins/Temporal/Calendar/prototype/fields/long-input.js
-built-ins/Temporal/Calendar/prototype/fields/non-string-element-throws.js
-built-ins/Temporal/Calendar/prototype/fields/repeated-throw.js
-
 # Calendar::mergeFields
 built-ins/Temporal/Calendar/prototype/mergeFields/arguments-empty-object.js
 built-ins/Temporal/Calendar/prototype/mergeFields/arguments-not-object.js
