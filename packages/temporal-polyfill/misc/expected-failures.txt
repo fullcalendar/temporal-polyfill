@@ -26,3 +26,7 @@ staging/Temporal/TimeZone/old/getInstantFor.js
 # Intl.DateTimeFormat
 # (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
 #intl402/DateTimeFormat/prototype/format/temporal-objects-timezone-getoffsetnanosecondsfor-not-callable.js
+
+# NOTE: tests related to func.length fail because optional params need default values to make sure
+# they're not included in func.length
+#built-ins/Temporal/Calendar/prototype/dateAdd/length.js
