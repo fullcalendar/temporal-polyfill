@@ -129,7 +129,7 @@ function buildComputeds(internals: ZonedDateTimeInternals): ZonedDateTimeCompute
     internals.epochNanoseconds,
     internals.timeZone,
   )
-  validateDateTime(isoFields, internals.calendar.toString())
+  validateDateTime(isoFields)
   return {
     ...isoFields,
     offsetNanoseconds,

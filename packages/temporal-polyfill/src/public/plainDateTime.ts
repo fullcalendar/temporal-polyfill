@@ -86,7 +86,7 @@ export class PlainDateTime implements Temporal.PlainDateTime {
 
     const calendar = ensureObj(Calendar, calendarArg)
 
-    validateDateTime(constrained, calendar.toString())
+    validateDateTime(constrained)
 
     initIsoMaster(this, {
       ...constrained,

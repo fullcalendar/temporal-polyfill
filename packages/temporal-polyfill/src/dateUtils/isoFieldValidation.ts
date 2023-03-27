@@ -1,4 +1,3 @@
-import { checkEpochNanoBuggy } from '../calendarImpl/bugs'
 import { LargeInt, compareLargeInts, createLargeInt } from '../utils/largeInt'
 import { isoFieldsToEpochNano, throwOutOfRange } from './epoch'
 import { ISODateFields, ISODateTimeFields } from './isoFields'
@@ -29,30 +28,22 @@ const minInstantBI = maxInstantBI.mult(-1)
 const maxPlainBI = maxInstantBI.add(almostDay)
 const minPlainBI = minInstantBI.sub(almostDay)
 
-export function validateYearMonth(isoFields: ISODateFields, calendarID: string): void {
-  // might throw an error
-  // moves between days in month
-  const epochNano = isoFieldsToEpochNano(isoFields)
-
-  checkEpochNanoBuggy(epochNano, calendarID)
-}
-
-export function validateDate(isoFields: ISODateFields, calendarID: string): void {
+export function validateDate(isoFields: ISODateFields): void {
   const epochNano = isoFieldsToEpochNano(isoFields)
 
   validatePlain(
     // if potentially very negative, measure last nanosecond of day
     // to increase chances it's in-bounds
+    // TODO: checkout how js-temporal uses 12:00
+    // ALSO, js-temporal might just police years, not epochNano
     epochNano.add(epochNano.sign() < 0 ? almostDay : 0),
   )
-  checkEpochNanoBuggy(epochNano, calendarID)
 }
 
-export function validateDateTime(isoFields: ISODateTimeFields, calendarID: string): void {
+export function validateDateTime(isoFields: ISODateTimeFields): void {
   const epochNano = isoFieldsToEpochNano(isoFields)
 
   validatePlain(epochNano)
-  checkEpochNanoBuggy(epochNano, calendarID)
 }
 
 export function validateInstant(epochNano: LargeInt): void {

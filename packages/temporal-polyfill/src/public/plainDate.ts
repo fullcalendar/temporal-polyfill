@@ -58,8 +58,7 @@ export class PlainDate implements Temporal.PlainDate {
     const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
 
-    validateDate(constrained, calendar.toString())
-
+    validateDate(constrained)
     initIsoMaster(this, {
       ...constrained,
       calendar,

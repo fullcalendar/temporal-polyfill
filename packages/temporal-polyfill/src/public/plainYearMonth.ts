@@ -17,7 +17,6 @@ import { constrainDateISO } from '../dateUtils/constrain'
 import { diffDates } from '../dateUtils/diff'
 import { DurationFields, negateDuration } from '../dateUtils/durationFields'
 import { processYearMonthFromFields, processYearMonthWithFields } from '../dateUtils/fromAndWith'
-import { validateYearMonth } from '../dateUtils/isoFieldValidation'
 import { formatCalendarID, formatDateISO, formatYearMonthISO } from '../dateUtils/isoFormat'
 import {
   YearMonthCalendarFields,
@@ -54,8 +53,6 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
       isoDay: referenceISODay,
     }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
-
-    validateYearMonth(constrained, calendar.toString())
 
     initIsoMaster(this, {
       ...constrained,
