@@ -498,6 +498,12 @@ export class Calendar implements Temporal.Calendar {
   // TODO: use Record<string, unknown>
   mergeFields(baseFields: any, additionalFields: any): any {
     needReceiver(Calendar, this)
+    if (
+      baseFields == null ||
+      additionalFields == null
+    ) {
+      throw new TypeError('Both arguments must be coercible into objects')
+    }
     const isIso = getImpl(this).id === 'iso8601'
     return mergeCalFields(baseFields, additionalFields, isIso)
   }
@@ -522,7 +528,9 @@ export function createDefaultCalendar(): Calendar {
 export function mergeCalFields(baseFields: any, additionalFields: any, isIso: boolean): any {
   const baseFieldsCopy = { ...baseFields } // don't access mult times
   const additionalFieldsCopy = { ...additionalFields } // "
-  const combinedFields = { ...baseFieldsCopy, ...additionalFieldsCopy }
+
+  // way to spread together while having null-prototype required by tests
+  const combinedFields = Object.assign(Object.create(null), baseFieldsCopy, additionalFieldsCopy)
 
   if (additionalFieldsCopy.monthCode !== undefined) {
     delete combinedFields.month

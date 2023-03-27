@@ -22,7 +22,6 @@ built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-g
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
 # Calendar::mergeFields
-built-ins/Temporal/Calendar/prototype/mergeFields/arguments-not-object.js
 built-ins/Temporal/Calendar/prototype/mergeFields/iso8601-calendar-month-monthCode.js
 intl402/Temporal/Calendar/prototype/mergeFields/gregorian-mutually-exclusive-fields.js
 intl402/Temporal/Calendar/prototype/mergeFields/japanese-mutually-exclusive-fields.js
