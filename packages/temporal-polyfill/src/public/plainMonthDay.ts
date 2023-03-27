@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
+import { toString } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isObjectLike } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
@@ -54,10 +55,7 @@ export class PlainMonthDay implements Temporal.PlainMonthDay {
     }
 
     // parse as string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    const parsed = parseMonthDay(String(arg))
+    const parsed = parseMonthDay(toString(arg))
 
     // for strings, force ISO year if no calendar specified
     // TODO: more DRY with processMonthDayLike?

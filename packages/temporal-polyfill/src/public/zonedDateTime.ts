@@ -3,6 +3,7 @@ import { getCommonCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseDisambigOption } from '../argParse/disambig'
+import { toString } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OFFSET_DISPLAY_AUTO, parseOffsetDisplayOption } from '../argParse/offsetDisplay'
 import {
@@ -163,14 +164,12 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
     if (arg instanceof ZonedDateTime) {
       return new ZonedDateTime(arg.epochNanoseconds, arg.timeZone, arg.calendar) // optimization
     }
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
 
+    const strVal = toString(arg)
     const isObject = isObjectLike(arg)
     const fields = isObject
       ? processZonedDateTimeFromFields(arg, overflowHandling, options)
-      : refineZonedObj(parseZonedDateTime(String(arg)))
+      : refineZonedObj(parseZonedDateTime(strVal))
 
     return createZonedDateTimeFromFields(
       fields,

@@ -2,6 +2,7 @@ import { Temporal } from 'temporal-spec'
 import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { toString } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isObjectLike } from '../argParse/refine'
 import {
@@ -80,10 +81,7 @@ export class PlainDate implements Temporal.PlainDate {
     }
 
     // parse as string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    const parsed = parseDateTime(String(arg))
+    const parsed = parseDateTime(toString(arg))
 
     // reject out-of-bound time values if included in the string
     // the date values will be checked in constructor

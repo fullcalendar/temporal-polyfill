@@ -3,6 +3,7 @@ import { getCommonCalendar, getStrangerCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { parseDisambigOption } from '../argParse/disambig'
+import { toString } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isObjectLike } from '../argParse/refine'
@@ -110,11 +111,8 @@ export class PlainDateTime implements Temporal.PlainDateTime {
       return createDateTime(processDateTimeFromFields(arg, overflowHandling, options))
     }
 
-    // parse as string
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    return createDateTime(refineBaseObj(parseDateTime(String(arg))))
+    // parse as string...
+    return createDateTime(refineBaseObj(parseDateTime(toString(arg))))
   }
 
   static compare(a: PlainDateTimeArg, b: PlainDateTimeArg): Temporal.ComparisonResult {

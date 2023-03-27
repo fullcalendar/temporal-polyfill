@@ -1,5 +1,10 @@
 import { Temporal } from 'temporal-spec'
-import { allDateFieldMap, allMonthDayFieldMap, allYearMonthFieldMap } from '../argParse/fieldStr'
+import {
+  allDateFieldMap,
+  allMonthDayFieldMap,
+  allYearMonthFieldMap,
+  toString,
+} from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
@@ -79,10 +84,7 @@ export class Calendar implements Temporal.Calendar {
     }
 
     // parse as string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('Calendar cannot be symbol')
-    }
-    const strVal = String(arg)
+    const strVal = toString(arg)
     const parsed = tryParseDateTime(strVal, false, true) // allowZ=true
     return new Calendar(
       parsed // a date-time string?

@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { toString } from '../argParse/fieldStr'
 import { parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isObjectLike } from '../argParse/refine'
@@ -90,10 +91,7 @@ export class PlainTime implements Temporal.PlainTime {
     }
 
     // parse as string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    return createTime(parseTime(String(arg)))
+    return createTime(parseTime(toString(arg)))
   }
 
   static compare(a: PlainTimeArg, b: PlainTimeArg): Temporal.ComparisonResult {

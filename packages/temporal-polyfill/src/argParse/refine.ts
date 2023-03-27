@@ -1,4 +1,5 @@
 import { ValueOf } from '../utils/obj'
+import { toString } from './fieldStr'
 import { OVERFLOW_REJECT, OverflowHandlingInt } from './overflowHandling'
 
 export function createOptionParser<Map>(propName: string, map: Map, defaultVal?: ValueOf<Map>): (
@@ -30,10 +31,7 @@ export function createParser<Map>(nameForError: string, map: Map, defaultVal?: V
       }
       return d
     }
-    if (typeof input === 'symbol') {
-      throw new TypeError('Invalid type')
-    }
-    const strInput = String(input) as keyof Map
+    const strInput = toString(input) as keyof Map
     if (map[strInput] === undefined) {
       throw new RangeError(`Invalid ${nameForError}: ${String(input)}`)
     }

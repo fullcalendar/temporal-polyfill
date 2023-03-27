@@ -1,4 +1,5 @@
 import { Temporal } from 'temporal-spec'
+import { toString } from '../argParse/fieldStr'
 import { isObjectLike } from '../argParse/refine'
 import { PlainDateTime, PlainDateTimeArg, createDateTime } from '../public/plainDateTime'
 import {
@@ -29,14 +30,7 @@ export function extractRelativeTo(
     )
   }
 
-  // assume a string...
-  // TODO: general toString util for ALL parsing that prevents parsing symbols
-  // https://github.com/ljharb/es-abstract/blob/main/2020/ToString.js
-  if (typeof arg === 'symbol') {
-    throw new TypeError('Incorrect relativeTo type')
-  }
-
-  const parsed = tryParseZonedDateTime(String(arg))
+  const parsed = tryParseZonedDateTime(toString(arg))
   if (parsed) {
     if (parsed.timeZone !== undefined) {
       return createZonedDateTimeFromFields(refineZonedObj(parsed), true)

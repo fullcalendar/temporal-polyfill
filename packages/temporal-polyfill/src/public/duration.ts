@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { toString } from '../argParse/fieldStr'
 import { DurationToStringUnitInt, parseTimeToStringOptions } from '../argParse/isoFormatOptions'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseTotalConfig } from '../argParse/totalOptions'
@@ -68,12 +69,7 @@ export class Duration implements Temporal.Duration {
     if (isObjectLike(arg)) {
       return createDuration(processDurationFields(arg))
     }
-
-    // parse as string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    return createDuration(parseDuration(String(arg)))
+    return createDuration(parseDuration(toString(arg)))
   }
 
   static compare(

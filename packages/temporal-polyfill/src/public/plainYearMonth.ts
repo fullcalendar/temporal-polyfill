@@ -2,6 +2,7 @@ import { Temporal } from 'temporal-spec'
 import { getCommonCalendar } from '../argParse/calendar'
 import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { toString } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { isObjectLike } from '../argParse/refine'
 import { isoCalendarID } from '../calendarImpl/isoCalendarImpl'
@@ -74,10 +75,7 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
     }
 
     // parse as  string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    const parsed = parseYearMonth(String(arg))
+    const parsed = parseYearMonth(toString(arg))
 
     // don't allow day-numbers in ISO strings
     if (parsed.calendar === undefined) {

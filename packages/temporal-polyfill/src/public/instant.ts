@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { parseDiffOptions } from '../argParse/diffOptions'
+import { toString } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike } from '../argParse/refine'
 import { parseRoundingOptions } from '../argParse/roundingOptions'
@@ -69,10 +70,7 @@ export class Instant implements Temporal.Instant {
     }
 
     // parse as string...
-    if (typeof arg === 'symbol') {
-      throw new TypeError('cannot accept symbol')
-    }
-    const fields = parseZonedDateTime(String(arg))
+    const fields = parseZonedDateTime(toString(arg))
     const offsetNano = fields.offsetNanoseconds
     if (offsetNano === undefined) {
       throw new RangeError('Must specify an offset')
