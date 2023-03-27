@@ -15,9 +15,6 @@ intl402/Temporal/Calendar/prototype/monthDayFromFields/reference-year-1972.js
 # yearMonthFromFields
 intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 
-# out-of-range
-built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-getOffsetNanosecondsFor-override.js
-
 # Calendr::dateUntil
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 

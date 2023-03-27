@@ -8,6 +8,7 @@ import {
 } from '../argParse/disambig'
 import { Instant } from '../public/instant'
 import { PlainDateTime } from '../public/plainDateTime'
+import { ensureObj } from './abstract'
 import { toEpochNano } from './epoch'
 import { nanoInDay } from './units'
 
@@ -84,7 +85,10 @@ export function getSafeOffsetNanosecondsFor(
   //   throw new TypeError('getOffsetNanosecondsFor should be callable')
   // }
 
-  const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(arg)
+  // important that arg-parsing failure happens here, before getOffsetNanosecondsFor called
+  const instant = ensureObj(Instant, arg)
+
+  const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(instant)
 
   if (typeof offsetNanoseconds !== 'number') {
     throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
