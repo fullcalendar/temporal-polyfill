@@ -19,7 +19,6 @@ intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
 # TimeZone parsing
-built-ins/Temporal/TimeZone/from/timezone-string-datetime.js
 built-ins/Temporal/TimeZone/from/timezone-wrong-type.js
 
 # TimeZone transitions

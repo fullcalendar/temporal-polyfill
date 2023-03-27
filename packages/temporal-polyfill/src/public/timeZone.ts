@@ -6,7 +6,6 @@ import { JsonMethods, ensureObj, mixinJsonMethods, needReceiver } from '../dateU
 import { epochNanoSymbol, epochNanoToISOFields, isoFieldsToEpochNano } from '../dateUtils/epoch'
 import { formatOffsetISO } from '../dateUtils/isoFormat'
 import { attachStringTag } from '../dateUtils/mixins'
-import { checkInvalidOffset } from '../dateUtils/offset'
 import { tryParseZonedDateTime } from '../dateUtils/parse'
 import { refineZonedObj } from '../dateUtils/parseRefine'
 import { getInstantFor, getSafeOffsetNanosecondsFor } from '../dateUtils/timeZone'
@@ -53,7 +52,6 @@ export class TimeZone implements Temporal.TimeZone {
     if (parsed) {
       if (parsed.timeZone) {
         const refined = refineZonedObj(parsed) // TODO: we don't need the calendar
-        checkInvalidOffset(refined)
         return refined.timeZone
       } else if (parsed.Z) {
         return new TimeZone('UTC')

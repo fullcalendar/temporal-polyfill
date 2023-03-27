@@ -24,19 +24,6 @@ export interface OffsetComputableFields extends ISODateTimeFields {
   Z?: boolean
 }
 
-export function checkInvalidOffset(isoFields: OffsetComputableFields): void {
-  const { offsetNanoseconds: offsetNano, timeZone, Z } = isoFields
-
-  // a non-Z offset defined? (for ALWAYS use Z as zero offset)
-  if (offsetNano !== undefined && !Z) {
-    const matchingEpochNano = findMatchingEpochNano(isoFields, offsetNano, timeZone, true)
-
-    if (matchingEpochNano === undefined) {
-      throw new RangeError('Mismatching offset/timezone') // TODO: more DRY
-    }
-  }
-}
-
 export function computeZonedDateTimeEpochNano(
   isoFields: OffsetComputableFields,
   fuzzyMatching?: boolean,
