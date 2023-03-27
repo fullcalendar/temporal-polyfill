@@ -532,18 +532,26 @@ export function mergeCalFields(baseFields: any, additionalFields: any, isIso: bo
   // way to spread together while having null-prototype required by tests
   const combinedFields = Object.assign(Object.create(null), baseFieldsCopy, additionalFieldsCopy)
 
-  if (additionalFieldsCopy.monthCode !== undefined) {
+  if (additionalFieldsCopy.monthCode !== undefined && additionalFieldsCopy.month === undefined) {
     delete combinedFields.month
-  } else if (additionalFieldsCopy.month !== undefined) {
+  }
+  if (additionalFieldsCopy.month !== undefined && additionalFieldsCopy.monthCode === undefined) {
     delete combinedFields.monthCode
   }
 
   if (!isIso) {
-    if (additionalFieldsCopy.era !== undefined || additionalFieldsCopy.eraYear !== undefined) {
+    if (
+      (additionalFieldsCopy.era !== undefined || additionalFieldsCopy.eraYear !== undefined) &&
+      additionalFieldsCopy.year === undefined
+    ) {
       delete combinedFields.year
-    } else if (additionalFields.year !== undefined) {
-      delete combinedFields.era
-      delete combinedFields.eraYear
+    } else if (additionalFieldsCopy.year !== undefined) {
+      if (additionalFieldsCopy.era === undefined) {
+        delete combinedFields.era
+      }
+      if (additionalFieldsCopy.eraYear === undefined) {
+        delete combinedFields.eraYear
+      }
     }
   }
 
