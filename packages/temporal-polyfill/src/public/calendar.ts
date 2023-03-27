@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { ensureCalendarsEqual, getCommonCalendar } from '../argParse/calendar'
-import { dateFieldMap, monthDayFieldMap, yearMonthFieldMap } from '../argParse/fieldStr'
+import { allDateFieldMap, allMonthDayFieldMap, allYearMonthFieldMap } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'
 import { parseUnit } from '../argParse/unitStr'
@@ -305,7 +305,13 @@ export class Calendar implements Temporal.Calendar {
   ): Temporal.PlainDate {
     needReceiver(Calendar, this)
 
-    const refinedFields = refineFields(fields, dateFieldMap)
+    const refinedFields = refineFields(
+      fields,
+      allDateFieldMap,
+      getImpl(this).id === 'iso8601'
+        ? { year: true, day: true }
+        : {},
+    )
     const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
 
     return new PlainDate(
@@ -322,7 +328,13 @@ export class Calendar implements Temporal.Calendar {
   ): Temporal.PlainYearMonth {
     needReceiver(Calendar, this)
 
-    const refinedFields = refineFields(fields, yearMonthFieldMap)
+    const refinedFields = refineFields(
+      fields,
+      allYearMonthFieldMap,
+      getImpl(this).id === 'iso8601'
+        ? { year: true }
+        : {},
+    )
     const isoFields = queryDateISOFields({ ...refinedFields, day: 1 }, getImpl(this), options)
 
     return new PlainYearMonth(
@@ -340,7 +352,13 @@ export class Calendar implements Temporal.Calendar {
     needReceiver(Calendar, this)
 
     const impl = getImpl(this)
-    let { era, eraYear, year, month, monthCode, day } = refineFields(fields, monthDayFieldMap)
+    let { era, eraYear, year, month, monthCode, day } = refineFields(
+      fields,
+      allMonthDayFieldMap,
+      getImpl(this).id === 'iso8601'
+        ? { day: true }
+        : {},
+    )
 
     if (day === undefined) {
       throw new TypeError('required property \'day\' missing or undefined')
@@ -385,12 +403,21 @@ export class Calendar implements Temporal.Calendar {
     const date = ensureObj(PlainDate, dateArg)
     const duration = ensureObj(Duration, durationArg)
     const overflowHandling = parseOverflowOption(options)
-    const isoFields = translateDate(date, duration, impl, overflowHandling)
 
-    return new PlainDate(
+    // TODO: make less verbose. ALSO, cache cal dates in WeakMap for use by non-iso calImpl
+    const isoFields = getExistingDateISOFields(date, true) // disallowMonthDay=true
+    const calFields = isoToEpochNanoSafe(
+      getImpl(this),
       isoFields.isoYear,
       isoFields.isoMonth,
       isoFields.isoDay,
+    )
+    const translatedIsoFields = translateDate(calFields, duration, impl, overflowHandling)
+
+    return new PlainDate(
+      translatedIsoFields.isoYear,
+      translatedIsoFields.isoMonth,
+      translatedIsoFields.isoDay,
       this,
     )
   }
@@ -410,10 +437,26 @@ export class Calendar implements Temporal.Calendar {
       ? DAY // TODO: util for this?
       : parseUnit<DateUnitInt>(largestUnitStr, DAY, DAY, YEAR)
 
-    ensureCalendarsEqual(this, getCommonCalendar(d0, d1))
+    // ensureCalendarsEqual(this, getCommonCalendar(d0, d1))
+
+    // TODO: make less verbose. ALSO, cache cal dates in WeakMap for use by non-iso calImpl
+    const isoFields0 = getExistingDateISOFields(d0, true) // disallowMonthDay=true
+    const calFields0 = isoToEpochNanoSafe(
+      getImpl(this),
+      isoFields0.isoYear,
+      isoFields0.isoMonth,
+      isoFields0.isoDay,
+    )
+    const isoFields1 = getExistingDateISOFields(d1, true) // disallowMonthDay=true
+    const calFields1 = isoToEpochNanoSafe(
+      getImpl(this),
+      isoFields1.isoYear,
+      isoFields1.isoMonth,
+      isoFields1.isoDay,
+    )
 
     return createDuration(
-      diffDateFields(d0, d1, impl, largestUnit),
+      diffDateFields(calFields0, calFields1, impl, largestUnit),
     )
   }
 

@@ -1,5 +1,6 @@
 // local essentials
 // special note about not doing spreads
+// BAD: is "local" the best name? nothing to do with timezones
 
 export interface LocalYearFields {
   year: number;

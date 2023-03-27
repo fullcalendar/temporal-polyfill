@@ -12,13 +12,7 @@
 #
 
 # complicated internal property access
-built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/dateUntil/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/mergeFields/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
-built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
 
 #
 # Legit bugs
@@ -34,6 +28,7 @@ built-ins/Temporal/Calendar/prototype/yearMonthFromFields/overflow-constrain.js
 intl402/Temporal/Calendar/prototype/dateFromFields/order-of-operations.js
 intl402/Temporal/Calendar/prototype/monthDayFromFields/order-of-operations.js
 intl402/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
+built-ins/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
 
 # monthDayFromFields
 intl402/Temporal/Calendar/prototype/monthDayFromFields/reference-year-1972.js
@@ -46,7 +41,6 @@ built-ins/Temporal/Calendar/prototype/dateFromFields/throws-range-error.js
 built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-getOffsetNanosecondsFor-override.js
 
 # calendars must match
-built-ins/Temporal/Calendar/prototype/dateUntil/calendar-temporal-object.js
 built-ins/Temporal/Calendar/prototype/dayOfYear/calendar-temporal-object.js
 built-ins/Temporal/Calendar/prototype/daysInMonth/calendar-temporal-object.js
 built-ins/Temporal/Calendar/prototype/daysInYear/calendar-temporal-object.js
@@ -66,6 +60,7 @@ built-ins/Temporal/Calendar/prototype/fields/repeated-throw.js
 # Calendar::mergeFields
 built-ins/Temporal/Calendar/prototype/mergeFields/arguments-empty-object.js
 built-ins/Temporal/Calendar/prototype/mergeFields/arguments-not-object.js
+built-ins/Temporal/Calendar/prototype/mergeFields/order-of-operations.js
 built-ins/Temporal/Calendar/prototype/mergeFields/iso8601-calendar-month-monthCode.js
 intl402/Temporal/Calendar/prototype/mergeFields/gregorian-mutually-exclusive-fields.js
 intl402/Temporal/Calendar/prototype/mergeFields/japanese-mutually-exclusive-fields.js

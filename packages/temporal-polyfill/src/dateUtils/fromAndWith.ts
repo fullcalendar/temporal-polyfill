@@ -1,7 +1,9 @@
 import { Temporal } from 'temporal-spec'
 import { extractCalendar } from '../argParse/calendar'
 import {
+  allDateFieldMap,
   dateFieldMap,
+  dateTimeFieldMap,
   durationFieldMap,
   monthDayFieldMap,
   timeFieldMap,
@@ -17,7 +19,7 @@ import { PlainYearMonth } from '../public/plainYearMonth'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { mapHash } from '../utils/obj'
 import { constrainTimeISO } from './constrain'
-import { partialLocalTimeToISO, zeroISOTimeFields } from './dayAndTime'
+import { partialLocalTimeToISO } from './dayAndTime'
 import { DurationFields } from './durationFields'
 import { isoEpochLeapYear } from './epoch'
 import { ISOTimeFields } from './isoFields'
@@ -66,13 +68,17 @@ function tryDateTimeFromFields(
   overflowHandling: OverflowHandlingInt,
   options?: Temporal.AssignmentOptions,
 ): Temporal.PlainDateTimeISOFields | undefined {
-  const dateRes = tryDateFromFields(rawFields, options, true)
-  const timeRes = tryTimeFromFields(rawFields, overflowHandling)
+  const calendar = extractCalendar(rawFields)
+  const refinedFields = refineFieldsViaCalendar(rawFields, dateTimeFieldMap, calendar)
 
-  if (dateRes) {
+  if (hasAnyProps(refinedFields)) {
     return {
-      ...dateRes.getISOFields(),
-      ...(timeRes || zeroISOTimeFields),
+      // TODO: more DRY with tryTimeFromFields
+      // ALSO: very important time-fields are read from refinedFields before passing
+      // refinedFields to dateFromFields, because dateFromFields has potential to mutate it
+      ...constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling),
+      //
+      ...calendar.dateFromFields(refinedFields, options).getISOFields(),
     }
   }
 }
@@ -80,17 +86,12 @@ function tryDateTimeFromFields(
 function tryDateFromFields(
   rawFields: Temporal.PlainDateLike,
   options?: Temporal.AssignmentOptions,
-  doingDateTime?: boolean,
 ): PlainDate | undefined {
   const calendar = extractCalendar(rawFields)
-  const filteredFields = filterFieldsViaCalendar(
-    rawFields,
-    doingDateTime ? { ...dateFieldMap, ...timeFieldMap } : dateFieldMap,
-    calendar,
-  )
+  const refinedFields = refineFieldsViaCalendar(rawFields, dateFieldMap, calendar)
 
-  if (hasAnyProps(filteredFields)) {
-    return calendar.dateFromFields(filteredFields, options)
+  if (hasAnyProps(refinedFields)) {
+    return calendar.dateFromFields(refinedFields, options)
   }
 }
 
@@ -99,10 +100,10 @@ function tryYearMonthFromFields(
   options?: Temporal.AssignmentOptions,
 ): PlainYearMonth | undefined {
   const calendar = extractCalendar(rawFields)
-  const filteredFields = filterFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
+  const refinedFields = refineFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
 
-  if (hasAnyProps(filteredFields)) {
-    return calendar.yearMonthFromFields(filteredFields, options)
+  if (hasAnyProps(refinedFields)) {
+    return calendar.yearMonthFromFields(refinedFields, options)
   }
 }
 
@@ -111,14 +112,14 @@ function tryMonthDayFromFields(
   options?: Temporal.AssignmentOptions,
 ): PlainMonthDay | undefined {
   const calendar = extractCalendar(rawFields)
-  const filteredFields = filterFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
+  const refinedFields = refineFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
 
-  if (hasAnyProps(filteredFields)) {
+  if (hasAnyProps(refinedFields)) {
     if (rawFields.year === undefined && rawFields.calendar === undefined) {
-      filteredFields.year = isoEpochLeapYear
+      refinedFields.year = isoEpochLeapYear
     }
 
-    return calendar.monthDayFromFields(filteredFields, options)
+    return calendar.monthDayFromFields(refinedFields, options)
   }
 }
 
@@ -179,7 +180,7 @@ function tryDateWithFields(
   options?: Temporal.AssignmentOptions,
 ): PlainDate | undefined {
   const calendar: Calendar = plainDate.calendar
-  const filteredFields = filterFieldsViaCalendar(rawFields, dateFieldMap, calendar)
+  const filteredFields = refineFieldsViaCalendar(rawFields, dateFieldMap, calendar)
 
   if (hasAnyProps(filteredFields)) {
     const mergedFields = mergeFieldsViaCalendar(plainDate, filteredFields, dateFieldMap, calendar)
@@ -193,7 +194,7 @@ function tryYearMonthWithFields(
   options?: Temporal.AssignmentOptions,
 ): PlainYearMonth | undefined {
   const calendar: Calendar = plainYearMonth.calendar
-  const filteredFields = filterFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
+  const filteredFields = refineFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
 
   if (hasAnyProps(filteredFields)) {
     const mergedFields = mergeFieldsViaCalendar(
@@ -212,7 +213,7 @@ function tryMonthDayWithFields(
   options?: Temporal.AssignmentOptions,
 ): PlainMonthDay | undefined {
   const calendar: Calendar = plainMonthDay.calendar
-  const filteredFields = filterFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
+  const filteredFields = refineFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
 
   if (hasAnyProps(filteredFields)) {
     const mergedFields = mergeFieldsViaCalendar(
@@ -250,17 +251,12 @@ function tryDurationFields(rawFields: any): DurationFields | undefined {
 
 // utils
 
-function filterFieldsViaCalendar(
+function refineFieldsViaCalendar(
   objOrFields: any,
   fieldMap: any,
   calendar: Temporal.CalendarProtocol,
 ): any {
   let fieldNames = Object.keys(fieldMap)
-
-  // HACK: Calendar::fields doesn't like to accept era/eraYear
-  // instead, the fields() method of the Calendar will inject it
-  // TODO: adjust callers of this function
-  fieldNames = fieldNames.filter((fieldName) => fieldName !== 'era' && fieldName !== 'eraYear')
 
   const fieldsMethod = calendar.fields // access right away (no `has`)
   if (fieldsMethod) {
@@ -270,43 +266,22 @@ function filterFieldsViaCalendar(
     // convert to array and/or copy (done twice?)
     // (convert `fieldNames` result to Iterable as well?)
     fieldNames = [...fieldsMethod.call(calendar, fieldNames)]
-  } else {
-    // a Calendar 'protocol'
-    // filter by method names
-    fieldNames = Object.keys(filterFieldsViaWhitelist(calendar, fieldNames))
   }
 
-  return filterFieldsViaWhitelist(objOrFields, fieldNames)
-}
-
-function filterFieldsViaWhitelist(objOrFields: any, whitelist: string[]): any {
-  /*
-  needed for "* should be called with null-prototype fields object"
-  */
-  const filtered = Object.create(null) as any
-
-  for (const propName of whitelist) {
-    let val = objOrFields[propName]
-    if (val !== undefined) {
-      // HACK until refactor
-      // must refine props at same time as whitelist
-      if (
-        propName === 'monthCode'
-      ) {
-        val = String(val)
-      } else if (
-        propName !== 'calendar' &&
-        propName !== 'timeZone' &&
-        propName !== 'offset'
-      ) {
-        val = Number(val)
-      }
-
-      filtered[propName] = val
+  // TODO: more DRY with refineFields
+  const refinedFields: any = Object.create(null) // must be null-prototype for dateFromFields,etc
+  for (const fieldName of fieldNames) {
+    const rawValue = objOrFields[fieldName]
+    if (rawValue !== undefined) {
+      refinedFields[fieldName] = (fieldMap[fieldName] || identifyFunc)(rawValue)
     }
   }
 
-  return filtered
+  return refinedFields
+}
+
+function identifyFunc(a: any): any {
+  return a
 }
 
 function mergeFieldsViaCalendar(
@@ -315,9 +290,9 @@ function mergeFieldsViaCalendar(
   fieldMap: any,
   calendar: Temporal.CalendarProtocol,
 ): any {
-  const existingFields = filterFieldsViaCalendar(existingObj, fieldMap, calendar)
+  const existingFields = refineFieldsViaCalendar(existingObj, fieldMap, calendar)
 
-  if (calendar.mergeFields) {
+  if (calendar.mergeFields) { // TODO: more frugal querying?
     return calendar.mergeFields(existingFields, fields)
   }
 

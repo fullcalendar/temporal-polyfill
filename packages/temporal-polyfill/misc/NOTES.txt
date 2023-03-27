@@ -1,14 +1,6 @@
 
 complicated internal property access
 ------------------------------------
-
-order of day/month/year access,
-  whitelist and refine propertybag props in once pass (hack in place)
-  ensure proper refining of duration fields
-  why parsing these fields after parsing options?
-    51: 'get date.calendar.year'
-    52: 'call date.calendar.year'
-    53: 'get date.calendar.month'
-    54: 'call date.calendar.month'
-    55: 'get date.calendar.day'
-    56: 'call date.calendar.day'
+failing because we need to bypass constructor when creating internal instances,
+to avoid re-parsing input. technique:
+https://github.com/js-temporal/temporal-polyfill/blob/main/lib/ecmascript.ts#L1826-L1827

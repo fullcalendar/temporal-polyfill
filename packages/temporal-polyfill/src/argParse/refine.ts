@@ -70,13 +70,22 @@ export function constrainInt(
 export function refineFields<Map extends { [fieldName: string]: (input: unknown) => any }>(
   input: { [FieldName in keyof Map]?: unknown },
   refinerMap: Map,
+  isRequiredMap: any = {},
 ): { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } {
-  const res: { [FieldName in keyof Map]?: ReturnType<Map[FieldName]> } = {}
+  const res: any = {}
 
-  for (const fieldName in refinerMap) {
+  // guarantees strict order
+  // very suboptimal!
+  const fieldNames = Object.keys(refinerMap).sort()
+
+  for (const fieldName of fieldNames) {
     const val = input[fieldName] // only query once
 
-    if (val !== undefined) {
+    if (val === undefined) {
+      if (isRequiredMap[fieldName]) {
+        throw new TypeError(`Prop ${fieldName} is required`)
+      }
+    } else {
       res[fieldName] = refinerMap[fieldName](val)
     }
   }

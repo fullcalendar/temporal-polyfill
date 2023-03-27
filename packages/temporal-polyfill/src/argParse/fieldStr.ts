@@ -1,17 +1,42 @@
 import { strArrayToHash } from '../utils/obj'
 import { durationUnitNames } from './unitStr'
 
-export const yearMonthFieldMap = {
+const eraFieldMap = {
   era: String,
   eraYear: refineNumber,
+}
+
+export const yearMonthFieldMap = {
   year: refineNumber,
   month: refineNumber,
   monthCode: String,
 }
 
+export const allYearMonthFieldMap = {
+  ...eraFieldMap,
+  ...yearMonthFieldMap,
+}
+
+export const monthDayFieldMap = {
+  year: refineNumber,
+  month: refineNumber,
+  monthCode: String,
+  day: refineNumber,
+}
+
+export const allMonthDayFieldMap = {
+  ...eraFieldMap,
+  ...monthDayFieldMap,
+}
+
 export const dateFieldMap = {
   ...yearMonthFieldMap,
   day: refineNumber,
+}
+
+export const allDateFieldMap = {
+  ...eraFieldMap,
+  ...dateFieldMap,
 }
 
 export const timeFieldMap = {
@@ -23,13 +48,9 @@ export const timeFieldMap = {
   nanosecond: refineNumber,
 }
 
-export const monthDayFieldMap = {
-  era: String,
-  eraYear: refineNumber,
-  year: refineNumber,
-  month: refineNumber,
-  monthCode: String,
-  day: refineNumber,
+export const dateTimeFieldMap = {
+  ...dateFieldMap,
+  ...timeFieldMap,
 }
 
 // TODO: more DRY with constrainInt
