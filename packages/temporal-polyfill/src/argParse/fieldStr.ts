@@ -3,7 +3,7 @@ import { durationUnitNames } from './unitStr'
 
 const eraFieldMap = {
   era: String,
-  eraYear: refineNumber,
+  eraYear: toIntNoInfinity,
 }
 
 export const yearMonthFieldMap = {
@@ -55,16 +55,6 @@ export const dateTimeFieldMap = {
 
 // TODO: more DRY with constrainInt
 // ...
-
-function refineNumber(input: any): number {
-  const num = Number(input)
-
-  if (!Number.isFinite(num)) {
-    throw new RangeError('Number must be finite')
-  }
-
-  return num
-}
 
 function toPositiveInt(valueParam: unknown, property?: string): number {
   const value = toInt(valueParam)
