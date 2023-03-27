@@ -34,11 +34,17 @@ export class TimeZone implements Temporal.TimeZone {
       if (arg instanceof TimeZone) {
         return arg as any
       }
+      if (arg instanceof Calendar) {
+        throw new RangeError('Cant create TimeZone from Calendar')
+      }
       if (!('timeZone' in arg)) {
         return arg
       } else {
         arg = arg.timeZone
 
+        if (arg instanceof Calendar) {
+          throw new RangeError('Cant create TimeZone from Calendar')
+        }
         if (isObjectLike(arg) && !('timeZone' in arg)) {
           return arg as any
         }

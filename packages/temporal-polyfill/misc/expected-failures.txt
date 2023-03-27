@@ -18,9 +18,6 @@ intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 # Calendr::dateUntil
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
-# TimeZone parsing
-built-ins/Temporal/TimeZone/from/timezone-wrong-type.js
-
 # TimeZone transitions
 intl402/Temporal/TimeZone/prototype/getNextTransition/subtract-second-and-nanosecond-from-last-transition.js
 intl402/Temporal/TimeZone/prototype/getOffsetNanosecondsFor/nanoseconds-subtracted-or-added-at-dst-transition.js
