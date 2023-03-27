@@ -3,7 +3,10 @@ import {
   allDateFieldMap,
   allMonthDayFieldMap,
   allYearMonthFieldMap,
+  dateFieldMap,
+  monthDayFieldMap,
   toString,
+  yearMonthFieldMap,
 } from '../argParse/fieldStr'
 import { parseOverflowOption } from '../argParse/overflowHandling'
 import { ensureOptionsObj, isObjectLike, refineFields } from '../argParse/refine'
@@ -306,12 +309,11 @@ export class Calendar implements Temporal.Calendar {
   ): Temporal.PlainDate {
     needReceiver(Calendar, this)
 
+    const isIso = getImpl(this).id === 'iso8601'
     const refinedFields = refineFields(
       fields,
-      allDateFieldMap,
-      getImpl(this).id === 'iso8601'
-        ? { year: true, day: true }
-        : {},
+      isIso ? dateFieldMap : allDateFieldMap,
+      isIso ? { year: true, day: true } : {},
     )
     const isoFields = queryDateISOFields(refinedFields, getImpl(this), options)
 
@@ -329,12 +331,11 @@ export class Calendar implements Temporal.Calendar {
   ): Temporal.PlainYearMonth {
     needReceiver(Calendar, this)
 
+    const isIso = getImpl(this).id === 'iso8601'
     const refinedFields = refineFields(
       fields,
-      allYearMonthFieldMap,
-      getImpl(this).id === 'iso8601'
-        ? { year: true }
-        : {},
+      isIso ? yearMonthFieldMap : allYearMonthFieldMap,
+      isIso ? { year: true } : {},
     )
     const isoFields = queryDateISOFields({ ...refinedFields, day: 1 }, getImpl(this), options)
 
@@ -353,13 +354,12 @@ export class Calendar implements Temporal.Calendar {
     needReceiver(Calendar, this)
 
     const impl = getImpl(this)
+    const isIso = getImpl(this).id === 'iso8601'
     let { era, eraYear, year, month, monthCode, day } = refineFields(
       fields,
-      allMonthDayFieldMap,
-      getImpl(this).id === 'iso8601'
-        ? { day: true }
-        : {},
-    )
+      isIso ? monthDayFieldMap : allMonthDayFieldMap,
+      isIso ? { day: true } : {},
+    ) as any // HACK for era/eraYear
 
     if (day === undefined) {
       throw new TypeError('required property \'day\' missing or undefined')

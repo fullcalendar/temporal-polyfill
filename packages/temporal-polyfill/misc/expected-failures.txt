@@ -13,11 +13,8 @@
 
 # complicated internal property access
 built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/dateFromFields/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/monthDayFromFields/order-of-operations.js
 intl402/Temporal/Calendar/prototype/dateFromFields/order-of-operations.js
 intl402/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/yearMonthFromFields/order-of-operations.js
 
 #
 # Legit bugs
