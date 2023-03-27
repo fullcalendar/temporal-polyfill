@@ -49,6 +49,7 @@ import { getZonedDateTimeInterals } from './zonedDateTime'
 // unlike many other object types
 
 const [getImpl, setImpl] = createWeakMap<Calendar, CalendarImpl>()
+export { getImpl as getCalendarImpl }
 
 export class Calendar implements Temporal.Calendar {
   constructor(id: string) {
@@ -504,8 +505,7 @@ export class Calendar implements Temporal.Calendar {
     ) {
       throw new TypeError('Both arguments must be coercible into objects')
     }
-    const isIso = getImpl(this).id === 'iso8601'
-    return mergeCalFields(baseFields, additionalFields, isIso)
+    return mergeCalFields(baseFields, additionalFields, getImpl(this).id)
   }
 
   toString(): string {
@@ -525,28 +525,39 @@ export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
 }
 
-export function mergeCalFields(baseFields: any, newFields: any, isIso: boolean): any {
+export function mergeCalFields(baseFields: any, newFields: any, calendarID: string): any {
   const baseFieldsCopy = { ...baseFields }
   const newFieldsCopy = { ...newFields }
 
-  const hasNewMonth =
+  if (
     newFieldsCopy.month !== undefined ||
     newFieldsCopy.monthCode !== undefined
-
-  const hasNewYear = !isIso && (
-    newFieldsCopy.era !== undefined ||
-    newFieldsCopy.eraYear !== undefined ||
-    newFieldsCopy.year !== undefined
-  )
-
-  if (hasNewMonth) {
+  ) {
     delete baseFieldsCopy.month
     delete baseFieldsCopy.monthCode
   }
-  if (hasNewYear) {
+
+  if (
+    calendarID !== 'iso8601' && (
+      newFieldsCopy.era !== undefined ||
+      newFieldsCopy.eraYear !== undefined ||
+      newFieldsCopy.year !== undefined
+    )
+  ) {
     delete baseFieldsCopy.era
     delete baseFieldsCopy.eraYear
     delete baseFieldsCopy.year
+  }
+
+  if (
+    calendarID === 'japanese' && ( // erasBeginMidYear?
+      newFieldsCopy.day !== undefined ||
+      newFieldsCopy.monthCode !== undefined ||
+      newFieldsCopy.month !== undefined
+    )
+  ) {
+    delete baseFieldsCopy.era
+    delete baseFieldsCopy.eraYear
   }
 
   return Object.assign(Object.create(null), baseFieldsCopy, newFieldsCopy)

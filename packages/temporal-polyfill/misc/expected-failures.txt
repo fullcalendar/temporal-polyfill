@@ -21,9 +21,6 @@ built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/argument-not-absolute-g
 # Calendr::dateUntil
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
-# Calendar::mergeFields
-intl402/Temporal/Calendar/prototype/mergeFields/japanese-mutually-exclusive-fields.js
-
 # Calendar id
 intl402/Temporal/Calendar/calendar-case-insensitive.js
 intl402/Temporal/Calendar/from/calendar-case-insensitive.js

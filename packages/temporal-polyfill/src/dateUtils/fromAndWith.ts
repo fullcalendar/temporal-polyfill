@@ -11,7 +11,7 @@ import {
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { isObjectLike, refineFields } from '../argParse/refine'
 import { extractTimeZone } from '../argParse/timeZone'
-import { Calendar, mergeCalFields } from '../public/calendar'
+import { Calendar, getCalendarImpl, mergeCalFields } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
@@ -298,7 +298,7 @@ function mergeFieldsViaCalendar(
   return mergeCalFields(
     existingFields,
     fields,
-    true, // isIso. TODO: know this for sure
+    getCalendarImpl(calendar as any)?.id || calendar.toString(), // HACK
   )
 }
 
