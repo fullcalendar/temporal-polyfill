@@ -18,10 +18,6 @@ intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 # Calendr::dateUntil
 built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
-# Calendar id
-intl402/Temporal/Calendar/calendar-case-insensitive.js
-intl402/Temporal/Calendar/from/calendar-case-insensitive.js
-
 # TimeZone parsing
 built-ins/Temporal/TimeZone/from/timezone-string-datetime.js
 built-ins/Temporal/TimeZone/from/timezone-wrong-type.js
@@ -30,3 +26,7 @@ built-ins/Temporal/TimeZone/from/timezone-wrong-type.js
 intl402/Temporal/TimeZone/prototype/getNextTransition/subtract-second-and-nanosecond-from-last-transition.js
 intl402/Temporal/TimeZone/prototype/getOffsetNanosecondsFor/nanoseconds-subtracted-or-added-at-dst-transition.js
 staging/Temporal/TimeZone/old/getInstantFor.js
+
+# Intl.DateTimeFormat
+# (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
+#intl402/DateTimeFormat/prototype/format/temporal-objects-timezone-getoffsetnanosecondsfor-not-callable.js

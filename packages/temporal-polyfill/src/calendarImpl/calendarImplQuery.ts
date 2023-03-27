@@ -17,7 +17,7 @@ const implCache: { [calendarID: string]: CalendarImpl } = {
 }
 
 export function queryCalendarImpl(id: string): CalendarImpl {
-  id = String(id)
+  id = String(id).toLocaleLowerCase() // always normalized to lowercase
 
   // TODO: more DRY with Calendar::from
   const parsedDateTime = tryParseDateTime(id, false, true) // allowZ=true
@@ -25,11 +25,9 @@ export function queryCalendarImpl(id: string): CalendarImpl {
     id = parsedDateTime.calendar || 'iso8601'
   }
 
-  const key = id.toLocaleLowerCase() // lowercase matches isoCalendarID
-
-  return implCache[key] ||
-    (implCache[key] = new (
-      implClasses[getCalendarIDBase(key)] ||
+  return implCache[id] ||
+    (implCache[id] = new (
+      implClasses[getCalendarIDBase(id)] ||
       IntlCalendarImpl
     )(id))
 }
