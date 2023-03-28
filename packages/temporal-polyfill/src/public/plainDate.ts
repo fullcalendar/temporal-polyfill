@@ -77,18 +77,19 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   static from(arg: PlainDateArg, options?: Temporal.AssignmentOptions): Temporal.PlainDate {
-    parseOverflowOption(options) // unused, but need to validate, regardless of input type
-
     if (
       arg instanceof PlainDate ||
       arg instanceof PlainDateTime ||
       arg instanceof ZonedDateTime
     ) {
+      parseOverflowOption(options) // unused, but must validate
       return createDate(arg.getISOFields()) // optimization
     }
     if (isObjectLike(arg)) {
-      return processDateFromFields(arg, options)
+      return processDateFromFields(arg, options) // will parse options
     }
+
+    parseOverflowOption(options) // unused, but must validate
 
     // parse as string...
     const parsed = parseDateTime(toString(arg))
