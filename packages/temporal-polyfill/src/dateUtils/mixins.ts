@@ -129,9 +129,28 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
     ObjClass,
     strArrayToHash(propNames, (propName) => function(this: Obj) {
       needReceiver(ObjClass, this)
-      const value = this.calendar[propName as keyof DateCalendarFields](
+      const calendar = this.calendar
+      const value = calendar[propName as keyof DateCalendarFields](
         this as Temporal.PlainDateLike,
       )
+
+      if (
+        // things that are allowed to be non-integers
+        propName !== 'monthCode' &&
+        propName !== 'era' && // can be undefined
+        propName !== 'eraYear' // can be undefined
+      ) {
+        if (typeof value !== 'number') {
+          throw new TypeError('bad number')
+        }
+        if (!Number.isInteger(value)) {
+          throw new RangeError('bad range')
+        }
+        if (propName !== 'year' && value <= 0) {
+          throw new RangeError('bad range')
+        }
+      }
+
       Object.defineProperty(this, propName, { // cache the value on the object
         value,
         configurable: true, // what classes do. TODO: ensure everywhere
