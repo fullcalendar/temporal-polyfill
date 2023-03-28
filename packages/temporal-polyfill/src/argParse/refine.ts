@@ -47,7 +47,7 @@ export function constrainInt(
   overflowHandling: OverflowHandlingInt,
   mustBePositive?: boolean,
 ): number {
-  if (val === undefined) {
+  if (val === undefined && overflowHandling !== OVERFLOW_REJECT) {
     return min
   }
 
