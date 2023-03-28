@@ -117,13 +117,21 @@ export class PlainDate implements Temporal.PlainDate {
   add(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
     needReceiver(PlainDate, this)
     const duration = ensureObj(Duration, durationArg)
-    return this.calendar.dateAdd(this, duration, options)
+    const plainDate = this.calendar.dateAdd(this, duration, options)
+    if (!(plainDate instanceof PlainDate)) {
+      throw new TypeError('Invalid return type')
+    }
+    return plainDate
   }
 
   subtract(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
     needReceiver(PlainDate, this)
     const duration = ensureObj(Duration, durationArg).negated()
-    return this.calendar.dateAdd(this, duration, options)
+    const plainDate = this.calendar.dateAdd(this, duration, options)
+    if (!(plainDate instanceof PlainDate)) {
+      throw new TypeError('Invalid return type')
+    }
+    return plainDate
   }
 
   until(other: PlainDateArg, options?: DiffOptions): Temporal.Duration {
