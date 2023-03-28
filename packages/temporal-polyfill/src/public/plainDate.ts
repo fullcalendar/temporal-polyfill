@@ -156,7 +156,9 @@ export class PlainDate implements Temporal.PlainDate {
 
   equals(other: PlainDateArg): boolean {
     needReceiver(PlainDate, this)
-    return !compareDateTimes(this, ensureObj(PlainDate, other))
+    const otherPlainDate = ensureObj(PlainDate, other)
+    return !compareDateTimes(this, otherPlainDate) &&
+      this.calendar.toString() === otherPlainDate.calendar.toString()
   }
 
   toString(options?: Temporal.ShowCalendarOption): string {
