@@ -70,15 +70,13 @@ function tryDateTimeFromFields(
   const calendar = extractCalendar(rawFields)
   const refinedFields = refineFieldsViaCalendar(rawFields, dateTimeFieldMap, calendar)
 
-  if (hasAnyProps(refinedFields)) {
-    return {
-      // TODO: more DRY with tryTimeFromFields
-      // ALSO: very important time-fields are read from refinedFields before passing
-      // refinedFields to dateFromFields, because dateFromFields has potential to mutate it
-      ...constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling),
-      //
-      ...calendar.dateFromFields(refinedFields, options).getISOFields(),
-    }
+  return {
+    // TODO: more DRY with tryTimeFromFields
+    // ALSO: very important time-fields are read from refinedFields before passing
+    // refinedFields to dateFromFields, because dateFromFields has potential to mutate it
+    ...constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling),
+    //
+    ...calendar.dateFromFields(refinedFields, options).getISOFields(),
   }
 }
 
@@ -89,9 +87,7 @@ function tryDateFromFields(
   const calendar = extractCalendar(rawFields)
   const refinedFields = refineFieldsViaCalendar(rawFields, dateFieldMap, calendar)
 
-  if (hasAnyProps(refinedFields)) {
-    return calendar.dateFromFields(refinedFields, options)
-  }
+  return calendar.dateFromFields(refinedFields, options)
 }
 
 function tryYearMonthFromFields(
@@ -101,9 +97,7 @@ function tryYearMonthFromFields(
   const calendar = extractCalendar(rawFields)
   const refinedFields = refineFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
 
-  if (hasAnyProps(refinedFields)) {
-    return calendar.yearMonthFromFields(refinedFields, options)
-  }
+  return calendar.yearMonthFromFields(refinedFields, options)
 }
 
 function tryMonthDayFromFields(
@@ -113,13 +107,11 @@ function tryMonthDayFromFields(
   const calendar = extractCalendar(rawFields)
   const refinedFields = refineFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
 
-  if (hasAnyProps(refinedFields)) {
-    if (rawFields.year === undefined && rawFields.calendar === undefined) {
-      refinedFields.year = isoEpochLeapYear
-    }
-
-    return calendar.monthDayFromFields(refinedFields, options)
+  if (rawFields.year === undefined && rawFields.calendar === undefined) {
+    refinedFields.year = isoEpochLeapYear
   }
+
+  return calendar.monthDayFromFields(refinedFields, options)
 }
 
 function tryTimeFromFields(
@@ -127,10 +119,7 @@ function tryTimeFromFields(
   overflowHandling: OverflowHandlingInt,
 ): ISOTimeFields | undefined {
   const refinedFields = refineFields(rawFields, timeFieldMap)
-
-  if (hasAnyProps(refinedFields)) {
-    return constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling)
-  }
+  return constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling)
 }
 
 // ::with (UNSAFE versions)
@@ -161,8 +150,8 @@ function tryDateTimeWithFields(
   overflowHandling: OverflowHandlingInt,
   options?: Temporal.AssignmentOptions,
 ): Temporal.PlainDateTimeISOFields | undefined {
-  const dateRes = tryDateWithFields(plainDateTime, rawFields, options)
-  const timeRes = tryTimeWithFields(plainDateTime, rawFields, overflowHandling)
+  const dateRes = tryDateWithFields(plainDateTime, rawFields, options, true)
+  const timeRes = tryTimeWithFields(plainDateTime, rawFields, overflowHandling, true)
 
   if (dateRes || timeRes) {
     return {
@@ -177,11 +166,12 @@ function tryDateWithFields(
   plainDate: any,
   rawFields: any,
   options?: Temporal.AssignmentOptions,
+  undefinedIfEmpty?: boolean,
 ): PlainDate | undefined {
   const calendar: Calendar = plainDate.calendar
   const filteredFields = refineFieldsViaCalendar(rawFields, dateFieldMap, calendar)
 
-  if (hasAnyProps(filteredFields)) {
+  if (!undefinedIfEmpty || hasAnyProps(filteredFields)) {
     const mergedFields = mergeFieldsViaCalendar(plainDate, filteredFields, dateFieldMap, calendar)
     return calendar.dateFromFields(mergedFields, options)
   }
@@ -193,17 +183,13 @@ function tryYearMonthWithFields(
   options?: Temporal.AssignmentOptions,
 ): PlainYearMonth | undefined {
   const calendar: Calendar = plainYearMonth.calendar
-  const filteredFields = refineFieldsViaCalendar(rawFields, yearMonthFieldMap, calendar)
-
-  if (hasAnyProps(filteredFields)) {
-    const mergedFields = mergeFieldsViaCalendar(
-      plainYearMonth,
-      rawFields,
-      yearMonthFieldMap,
-      calendar,
-    )
-    return calendar.yearMonthFromFields(mergedFields, options)
-  }
+  const mergedFields = mergeFieldsViaCalendar(
+    plainYearMonth,
+    rawFields,
+    yearMonthFieldMap,
+    calendar,
+  )
+  return calendar.yearMonthFromFields(mergedFields, options)
 }
 
 function tryMonthDayWithFields(
@@ -212,27 +198,24 @@ function tryMonthDayWithFields(
   options?: Temporal.AssignmentOptions,
 ): PlainMonthDay | undefined {
   const calendar: Calendar = plainMonthDay.calendar
-  const filteredFields = refineFieldsViaCalendar(rawFields, monthDayFieldMap, calendar)
-
-  if (hasAnyProps(filteredFields)) {
-    const mergedFields = mergeFieldsViaCalendar(
-      plainMonthDay,
-      rawFields,
-      monthDayFieldMap,
-      calendar,
-    )
-    return calendar.monthDayFromFields(mergedFields, options)
-  }
+  const mergedFields = mergeFieldsViaCalendar(
+    plainMonthDay,
+    rawFields,
+    monthDayFieldMap,
+    calendar,
+  )
+  return calendar.monthDayFromFields(mergedFields, options)
 }
 
 function tryTimeWithFields(
   plainTime: any,
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
+  undefinedIfEmpty?: boolean,
 ): ISOTimeFields | undefined {
   const refinedFields = refineFields(rawFields, timeFieldMap)
 
-  if (hasAnyProps(refinedFields)) {
+  if (!undefinedIfEmpty || hasAnyProps(refinedFields)) {
     const mergedFields = mergeLocalTimeFields(plainTime, refinedFields)
     return constrainTimeISO(partialLocalTimeToISO(mergedFields), overflowHandling)
   }
@@ -265,6 +248,9 @@ function refineFieldsViaCalendar(
     // convert to array and/or copy (done twice?)
     // (convert `fieldNames` result to Iterable as well?)
     fieldNames = [...fieldsMethod.call(calendar, fieldNames)]
+
+    // guarantee order of access later
+    fieldNames.sort()
   }
 
   // TODO: more DRY with refineFields
@@ -273,6 +259,8 @@ function refineFieldsViaCalendar(
     const rawValue = objOrFields[fieldName]
     if (rawValue !== undefined) {
       refinedFields[fieldName] = (fieldMap[fieldName] || identifyFunc)(rawValue)
+    } else {
+      refinedFields[fieldName] = undefined
     }
   }
 
