@@ -61,8 +61,9 @@ export class PlainDate implements Temporal.PlainDate {
 
     validateDate(constrained)
     initIsoMaster(this, {
-      ...constrained,
+      // order matters for getISOFIelds
       calendar,
+      ...constrained,
     })
   }
 

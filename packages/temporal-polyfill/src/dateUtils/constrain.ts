@@ -30,7 +30,8 @@ export function constrainDateISO( // also ensures numbers
     isoCalendarImpl,
     overflow,
   )
-  return { isoYear, isoMonth, isoDay }
+  // order matters for getISOFields()
+  return { isoDay, isoMonth, isoYear }
 }
 
 export function isValidDateISO(isoFields: ISODateFields): boolean {

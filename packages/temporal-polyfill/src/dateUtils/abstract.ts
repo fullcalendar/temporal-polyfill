@@ -89,7 +89,7 @@ export function mixinIsoMasterMethods<ISOFields, Obj extends IsoMasterMethods<IS
   class IsoMasterMixin {
     getISOFields(this: Obj) {
       needReceiver(ObjClass, this)
-      return getISOFields(this)
+      return { ...getISOFields(this) }
     }
   }
   Object.defineProperty(ObjClass.prototype, 'getISOFields', {
@@ -104,5 +104,5 @@ export function initIsoMaster<ISOFields>(
   obj: IsoMasterMethods<ISOFields>,
   isoFields: ISOFields,
 ): void {
-  setISOFields(obj, Object.freeze(isoFields))
+  setISOFields(obj, isoFields)
 }
