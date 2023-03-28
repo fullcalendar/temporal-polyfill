@@ -9,7 +9,7 @@ export function ensureOptionsObject(obj: any): any {
   if (!isObjectLike(obj)) {
     throw new TypeError('Options must be object')
   }
-  return Object.assign(Object.create(null), obj)
+  return obj
 }
 
 export function createOptionParser<Map>(propName: string, map: Map, defaultVal?: ValueOf<Map>): (
