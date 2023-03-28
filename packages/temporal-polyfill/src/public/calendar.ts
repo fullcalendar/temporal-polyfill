@@ -61,41 +61,7 @@ export class Calendar implements Temporal.Calendar {
   }
 
   static from(arg: Temporal.CalendarLike): Temporal.CalendarProtocol {
-    if (isObjectLike(arg)) {
-      if (arg instanceof Calendar) {
-        return arg as any
-      }
-      const secretCalendar =
-        getZonedDateTimeInterals(arg as any)?.calendar ||
-        getISOFields(arg as any)?.calendar
-      if (secretCalendar) {
-        return secretCalendar
-      }
-      if (arg instanceof TimeZone) {
-        throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')
-      }
-      if (!('calendar' in arg)) {
-        return arg
-      } else {
-        arg = arg.calendar
-
-        if (arg instanceof TimeZone) {
-          throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')
-        }
-        if (isObjectLike(arg) && !('calendar' in arg)) {
-          return arg as any
-        }
-      }
-    }
-
-    // parse as string...
-    const strVal = toString(arg)
-    const parsed = tryParseDateTime(strVal, false, true) // allowZ=true
-    return new Calendar(
-      parsed // a date-time string?
-        ? parsed.calendar || isoCalendarID
-        : strVal, // any other type of string
-    )
+    return calendarFrom(arg)
   }
 
   get id(): string {
@@ -523,6 +489,44 @@ attachStringTag(Calendar, 'Calendar')
 
 export function createDefaultCalendar(): Calendar {
   return new Calendar(isoCalendarID)
+}
+
+export function calendarFrom(arg: Temporal.CalendarLike): Temporal.CalendarProtocol {
+  if (isObjectLike(arg)) {
+    if (arg instanceof Calendar) {
+      return arg as any
+    }
+    const secretCalendar =
+      getZonedDateTimeInterals(arg as any)?.calendar ||
+      getISOFields(arg as any)?.calendar
+    if (secretCalendar) {
+      return secretCalendar
+    }
+    if (arg instanceof TimeZone) {
+      throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')
+    }
+    if (!('calendar' in arg)) {
+      return arg
+    } else {
+      arg = arg.calendar
+
+      if (arg instanceof TimeZone) {
+        throw new RangeError('Expected a calendar object but received a Temporal.TimeZone')
+      }
+      if (isObjectLike(arg) && !('calendar' in arg)) {
+        return arg as any
+      }
+    }
+  }
+
+  // parse as string...
+  const strVal = toString(arg)
+  const parsed = tryParseDateTime(strVal, false, true) // allowZ=true
+  return new Calendar(
+    parsed // a date-time string?
+      ? parsed.calendar || isoCalendarID
+      : strVal, // any other type of string
+  )
 }
 
 export function mergeCalFields(baseFields: any, newFields: any, calendarID: string): any {

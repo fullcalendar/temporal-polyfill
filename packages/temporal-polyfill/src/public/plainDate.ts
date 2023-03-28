@@ -31,7 +31,7 @@ import { refineBaseObj } from '../dateUtils/parseRefine'
 import { DAY, DateUnitInt, YEAR } from '../dateUtils/units'
 import { createPlainFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { Calendar, createDefaultCalendar } from './calendar'
+import { calendarFrom, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
 import { PlainDateTime, createDateTime } from './plainDateTime'
 import { PlainTime, PlainTimeArg, ensureLooseTime } from './plainTime'
@@ -67,7 +67,7 @@ export class PlainDate implements Temporal.PlainDate {
     }
 
     const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
-    const calendar = ensureObj(Calendar, calendarArg)
+    const calendar = calendarFrom(calendarArg)
 
     validateDate(constrained)
     initIsoMaster(this, {
