@@ -56,6 +56,16 @@ export class PlainDate implements Temporal.PlainDate {
     isoDay: number,
     calendarArg: Temporal.CalendarLike = createDefaultCalendar(),
   ) {
+    if (isoYear === undefined) {
+      throw new RangeError('Invalid isoYear')
+    }
+    if (isoMonth === undefined) {
+      throw new RangeError('Invalid isoMonth')
+    }
+    if (isoDay === undefined) {
+      throw new RangeError('Invalid isoDay')
+    }
+
     const constrained = constrainDateISO({ isoYear, isoMonth, isoDay }, OVERFLOW_REJECT)
     const calendar = ensureObj(Calendar, calendarArg)
 

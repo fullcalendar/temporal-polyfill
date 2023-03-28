@@ -4,6 +4,7 @@
 #
 # pn test262 'Calendar/**'
 # pn test262 'TimeZone/**'
+# pn test262 'PlainDate/**'
 #
 
 # complicated internal property access (needs class refactor)

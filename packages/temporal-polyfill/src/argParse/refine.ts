@@ -1,5 +1,5 @@
 import { ValueOf } from '../utils/obj'
-import { toString } from './fieldStr'
+import { toInt, toString } from './fieldStr'
 import { OVERFLOW_REJECT, OverflowHandlingInt } from './overflowHandling'
 
 export function createOptionParser<Map>(propName: string, map: Map, defaultVal?: ValueOf<Map>): (
@@ -45,17 +45,17 @@ export function constrainInt(
   min: number, // inclusive. serves as default
   max: number, // inclusive
   overflowHandling: OverflowHandlingInt,
+  mustBePositive?: boolean,
 ): number {
   if (val === undefined) {
     return min
   }
 
-  if (!Number.isFinite(val)) {
-    throw new RangeError('Number must be finite')
-  }
+  val = toInt(val, overflowHandling === OVERFLOW_REJECT)
 
-  // convert floating-point to integer
-  val = Math.trunc(val)
+  if (mustBePositive && val < 0) {
+    throw new RangeError('Int must be positive')
+  }
 
   const newVal = Math.min(Math.max(val, min), max)
   if (newVal !== val && overflowHandling === OVERFLOW_REJECT) {

@@ -90,8 +90,8 @@ function toIntNoFrac(valueParam: unknown): number {
 throws on infinity
 truncates on fractional values
 */
-function toIntNoInfinity(value: unknown): number {
-  const integer = toInt(value)
+export function toIntNoInfinity(value: unknown, throwOnNaN?: boolean): number {
+  const integer = toInt(value, throwOnNaN)
   if (!Number.isFinite(integer)) {
     throw new RangeError('infinity is out of range')
   }
@@ -102,9 +102,14 @@ function toIntNoInfinity(value: unknown): number {
 allows infinity
 truncates on fractional values
 */
-function toInt(value: unknown): number { // truncates fraction values to integers
+export function toInt(value: unknown, throwOnNaN?: boolean): number {
   const num = toNumber(value)
-  if (isNaN(num)) return 0
+  if (isNaN(num)) {
+    if (throwOnNaN) {
+      throw new RangeError('Invalid number')
+    }
+    return 0
+  }
   const integer = Math.trunc(num)
   if (num === 0) return 0 // prevents -0. TODO: remove other places that do this
   return integer
