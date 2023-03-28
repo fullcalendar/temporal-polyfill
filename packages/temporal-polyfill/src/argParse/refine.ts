@@ -2,6 +2,16 @@ import { ValueOf } from '../utils/obj'
 import { toInt, toString } from './fieldStr'
 import { OVERFLOW_REJECT, OverflowHandlingInt } from './overflowHandling'
 
+export function ensureOptionsObject(obj: any): any {
+  if (obj === undefined) {
+    return Object.create(null)
+  }
+  if (!isObjectLike(obj)) {
+    throw new TypeError('Options must be object')
+  }
+  return Object.assign(Object.create(null), obj)
+}
+
 export function createOptionParser<Map>(propName: string, map: Map, defaultVal?: ValueOf<Map>): (
   options: Record<string, unknown> | undefined, // TODO: better type
   runtimeDefaultVal?: ValueOf<Map>,

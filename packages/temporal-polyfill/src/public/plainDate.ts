@@ -4,7 +4,7 @@ import { parseCalendarDisplayOption } from '../argParse/calendarDisplay'
 import { parseDiffOptions } from '../argParse/diffOptions'
 import { toString } from '../argParse/fieldStr'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
-import { isObjectLike } from '../argParse/refine'
+import { ensureOptionsObject, isObjectLike } from '../argParse/refine'
 import {
   IsoMasterMethods,
   ensureObj,
@@ -117,7 +117,7 @@ export class PlainDate implements Temporal.PlainDate {
   add(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
     needReceiver(PlainDate, this)
     const duration = ensureObj(Duration, durationArg)
-    const plainDate = this.calendar.dateAdd(this, duration, options)
+    const plainDate = this.calendar.dateAdd(this, duration, ensureOptionsObject(options))
     if (!(plainDate instanceof PlainDate)) {
       throw new TypeError('Invalid return type')
     }
@@ -127,7 +127,7 @@ export class PlainDate implements Temporal.PlainDate {
   subtract(durationArg: DurationArg, options?: Temporal.ArithmeticOptions): Temporal.PlainDate {
     needReceiver(PlainDate, this)
     const duration = ensureObj(Duration, durationArg).negated()
-    const plainDate = this.calendar.dateAdd(this, duration, options)
+    const plainDate = this.calendar.dateAdd(this, duration, ensureOptionsObject(options))
     if (!(plainDate instanceof PlainDate)) {
       throw new TypeError('Invalid return type')
     }
