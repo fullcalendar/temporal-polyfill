@@ -134,21 +134,32 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
         this as Temporal.PlainDateLike,
       )
 
-      if (
-        // things that are allowed to be non-integers
-        propName !== 'monthCode' &&
-        propName !== 'era' && // can be undefined
-        propName !== 'eraYear' // can be undefined
-      ) {
-        if (typeof value !== 'number') {
-          throw new TypeError('bad number')
-        }
-        if (!Number.isInteger(value)) {
-          throw new RangeError('bad range')
-        }
-        if (propName !== 'year' && value <= 0) {
-          throw new RangeError('bad range')
-        }
+      switch (propName) {
+        case 'inLeapYear':
+          if (typeof value !== 'boolean') {
+            throw new TypeError('Must be boolean')
+          }
+          break
+        case 'monthCode':
+          if (typeof value !== 'string') {
+            throw new TypeError('Must be string')
+          }
+          break
+        default:
+          if (
+            propName !== 'era' && // can be undefined
+            propName !== 'eraYear' // can be undefined
+          ) {
+            if (typeof value !== 'number') {
+              throw new TypeError('bad number')
+            }
+            if (!Number.isInteger(value)) {
+              throw new RangeError('bad range')
+            }
+            if (propName !== 'year' && value <= 0) {
+              throw new RangeError('bad range')
+            }
+          }
       }
 
       Object.defineProperty(this, propName, { // cache the value on the object
