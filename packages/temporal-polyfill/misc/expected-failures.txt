@@ -37,3 +37,6 @@ built-ins/Temporal/PlainDate/prototype/since/calendar-dateuntil-called-with-null
 built-ins/Temporal/PlainDate/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/PlainDate/prototype/since/custom.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
+
+# new crazy rounding options
+built-ins/Temporal/PlainDate/prototype/since/roundingincrement-non-integer.js

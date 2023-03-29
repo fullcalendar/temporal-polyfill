@@ -1,7 +1,7 @@
 import { Temporal } from 'temporal-spec'
 import { DAY, UnitInt, nanoIn } from '../dateUtils/units'
 import { RoundingFunc } from '../utils/math'
-import { toInt } from './fieldStr'
+import { toPositiveInt } from './fieldStr'
 import { ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
@@ -25,7 +25,12 @@ export function parseDiffOptions<
   forDurationRounding?: boolean, // TODO: change to 'defaultRoundingFunc'
 ): DiffConfig<UnitIntType> {
   const ensuredOptions = ensureOptionsObj(options)
-  const roundingIncrement = toInt(ensuredOptions.roundingIncrement ?? 1, true)
+
+  const roundingIncrement = toPositiveInt(ensuredOptions.roundingIncrement ?? 1)
+  if (roundingIncrement > 1e9) { // what spec says
+    throw new RangeError('Out-of-range roundingIncrement')
+  }
+
   const smallestUnit = parseUnit(ensuredOptions.smallestUnit, smallestUnitDefault, minUnit, maxUnit)
   const roundingFunc = parseRoundingModeOption(
     ensuredOptions,

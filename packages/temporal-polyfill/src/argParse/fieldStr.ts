@@ -56,10 +56,10 @@ export const dateTimeFieldMap = {
 // TODO: more DRY with constrainInt
 // ...
 
-function toPositiveInt(valueParam: unknown, property?: string): number {
+export function toPositiveInt(valueParam: unknown, property?: string): number {
   const value = toInt(valueParam)
   if (!Number.isFinite(value)) {
-    throw new RangeError('infinity is out of range')
+    throw new RangeError('infinity is out of range') // TODO: message about fractions
   }
   if (value < 1) {
     if (property !== undefined) {
