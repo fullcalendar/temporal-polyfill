@@ -27,11 +27,14 @@ export function mixinLocaleStringMethods<Entity extends (ToLocaleStringMethods &
       )
     }
   }
+
   Object.defineProperty(ObjClass.prototype, 'toLocaleString', {
     value: LocaleStringMixin.prototype.toLocaleString,
     writable: true,
     configurable: true,
   })
+
+  ;(ObjClass.prototype as any)[formatFactoryFactorySymbol] = buildFormatFactory
 }
 
 export function extractFormatFactoryFactory<Entity>(
