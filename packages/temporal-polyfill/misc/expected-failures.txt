@@ -40,3 +40,8 @@ built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 
 # new crazy rounding options
 built-ins/Temporal/PlainDate/prototype/since/roundingincrement-non-integer.js
+built-ins/Temporal/PlainDate/prototype/since/roundingmode-expand.js
+built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfCeil.js
+built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfEven.js
+built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfFloor.js
+built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfTrunc.js
