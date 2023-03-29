@@ -102,7 +102,7 @@ export class PlainDate implements Temporal.PlainDate {
 
   with(fields: Temporal.PlainDateLike, options?: Temporal.AssignmentOptions): Temporal.PlainDate {
     needReceiver(PlainDate, this)
-    return processDateWithFields(this, fields, options)
+    return processDateWithFields(this, fields, options, true) // failIfEmpty
   }
 
   withCalendar(calendarArg: Temporal.CalendarLike): Temporal.PlainDate {

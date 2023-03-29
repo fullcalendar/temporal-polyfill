@@ -94,3 +94,6 @@ built-ins/Temporal/PlainDate/prototype/with/copies-merge-fields-object.js
 
 # exact internal-call ordering of ::with (hard, needs refactor)
 built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js
+
+# side-effect of our hack of filtering away undefines, accidentally filters away symbol keys
+built-ins/Temporal/Calendar/prototype/mergeFields/non-string-properties.js

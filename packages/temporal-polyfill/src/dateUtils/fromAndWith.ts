@@ -340,5 +340,17 @@ function buildSafeFunc<Args extends any[], Res>(
 }
 
 function hasAnyProps(fields: any): boolean {
-  return Object.keys(fields).length > 0
+  return Object.keys(filterAwayUndefined(fields)).length > 0
+}
+
+// hack
+function filterAwayUndefined(obj: any) {
+  const res: any = {}
+  for (const key in obj) {
+    const val = obj[key]
+    if (val !== undefined) {
+      res[key] = val
+    }
+  }
+  return res
 }
