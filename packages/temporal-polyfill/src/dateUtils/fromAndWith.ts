@@ -111,7 +111,7 @@ function tryMonthDayFromFields(
     refinedFields.year = isoEpochLeapYear
   }
 
-  return calendar.monthDayFromFields(refinedFields, options)
+  return calendar.monthDayFromFields(refinedFields, Object.assign(Object.create(null), options))
 }
 
 function tryTimeFromFields(
@@ -201,7 +201,7 @@ function tryYearMonthWithFields(
     yearMonthFieldMap,
     calendar,
   )
-  return calendar.yearMonthFromFields(mergedFields, options)
+  return calendar.yearMonthFromFields(mergedFields, Object.assign(Object.create(null), options))
 }
 
 function tryMonthDayWithFields(
@@ -216,7 +216,7 @@ function tryMonthDayWithFields(
     monthDayFieldMap,
     calendar,
   )
-  return calendar.monthDayFromFields(mergedFields, options)
+  return calendar.monthDayFromFields(mergedFields, Object.assign(Object.create(null), options))
 }
 
 function tryTimeWithFields(

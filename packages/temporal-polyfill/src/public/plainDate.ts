@@ -34,6 +34,7 @@ import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlM
 import { calendarFrom, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
 import { PlainDateTime, createDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, ensureLooseTime } from './plainTime'
 import { createYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
@@ -203,7 +204,11 @@ export class PlainDate implements Temporal.PlainDate {
 
   toPlainMonthDay(): Temporal.PlainMonthDay {
     needReceiver(PlainDate, this)
-    return this.calendar.monthDayFromFields(this)
+    const res = this.calendar.monthDayFromFields(this, undefined) // important we comply to 2 args!
+    if (!(res instanceof PlainMonthDay)) {
+      throw new TypeError('Invalid return type')
+    }
+    return res
   }
 }
 

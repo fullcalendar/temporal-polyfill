@@ -22,7 +22,6 @@ built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 # TimeZone transitions
 intl402/Temporal/TimeZone/prototype/getNextTransition/subtract-second-and-nanosecond-from-last-transition.js
 intl402/Temporal/TimeZone/prototype/getOffsetNanosecondsFor/nanoseconds-subtracted-or-added-at-dst-transition.js
-staging/Temporal/TimeZone/old/getInstantFor.js
 
 # Intl.DateTimeFormat
 # (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
@@ -48,3 +47,11 @@ built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfTrunc.js
 
 # OrigDateTimeFormat bugs
 built-ins/Temporal/PlainDate/prototype/toLocaleString/return-string.js
+
+# Calendar::monthDayFromFields needs to call Calendar::fields somehow
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
+
+# dateFromFields/yearMonthFromFields/monthDayFromFields
+# First `fields` argument must be plain object with null-prototype, not Temporal object
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fromfields-called-with-null-prototype-fields.js
