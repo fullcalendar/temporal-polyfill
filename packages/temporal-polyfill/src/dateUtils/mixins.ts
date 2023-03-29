@@ -145,20 +145,32 @@ export function mixinCalendarFields<Obj extends DateISOInstance>(
             throw new TypeError('Must be string')
           }
           break
-        default:
-          if (
-            propName !== 'era' && // can be undefined
-            propName !== 'eraYear' // can be undefined
-          ) {
+        case 'era':
+          if (value !== undefined) {
+            if (typeof value !== 'string') {
+              throw new TypeError('bad era')
+            }
+          }
+          break
+        case 'eraYear':
+          if (value !== undefined) {
             if (typeof value !== 'number') {
               throw new TypeError('bad number')
             }
             if (!Number.isInteger(value)) {
               throw new RangeError('bad range')
             }
-            if (propName !== 'year' && value <= 0) {
-              throw new RangeError('bad range')
-            }
+          }
+          break
+        default:
+          if (typeof value !== 'number') {
+            throw new TypeError('bad number')
+          }
+          if (!Number.isInteger(value)) {
+            throw new RangeError('bad range')
+          }
+          if (propName !== 'year' && value <= 0) {
+            throw new RangeError('bad range')
           }
       }
 

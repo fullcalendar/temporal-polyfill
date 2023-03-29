@@ -106,6 +106,9 @@ export class PlainDate implements Temporal.PlainDate {
   }
 
   withCalendar(calendarArg: Temporal.CalendarLike): Temporal.PlainDate {
+    if (calendarArg === undefined) {
+      throw new RangeError('Missing calendar')
+    }
     needReceiver(PlainDate, this)
     const isoFields = this.getISOFields()
     return new PlainDate(
