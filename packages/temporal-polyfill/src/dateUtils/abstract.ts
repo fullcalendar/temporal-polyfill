@@ -64,7 +64,7 @@ export function mixinNoValueMethods<Obj extends NoValueMethods>(
   class NoValueMixin {
     valueOf(this: Obj): never {
       needReceiver(ObjClass, this)
-      throw new Error('Cannot convert object using valueOf')
+      throw new TypeError('Cannot convert object using valueOf')
     }
   }
   Object.defineProperty(ObjClass.prototype, 'valueOf', {
