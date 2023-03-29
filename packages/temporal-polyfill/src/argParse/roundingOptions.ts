@@ -29,7 +29,10 @@ export function parseRoundingOptions<
 
   const ensuredOptions = ensureOptionsObj(optionsObj, true) // strict=true
 
-  const roundingIncrement = toPositiveInt(ensuredOptions.roundingIncrement ?? 1)
+  const roundingIncrementInput = ensuredOptions.roundingIncrement
+  const roundingIncrement = toPositiveInt(
+    roundingIncrementInput === undefined ? 1 : roundingIncrementInput,
+  )
   if (roundingIncrement > 1e9) { // what spec says
     throw new RangeError('Out-of-range roundingIncrement')
   }
