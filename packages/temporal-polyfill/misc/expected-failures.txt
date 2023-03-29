@@ -27,6 +27,7 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 # Intl.DateTimeFormat
 # (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
 #intl402/DateTimeFormat/prototype/format/temporal-objects-timezone-getoffsetnanosecondsfor-not-callable.js
+intl402/Temporal/PlainDate/prototype/toLocaleString/timezone-getoffsetnanosecondsfor-not-callable.js
 
 # NOTE: tests related to func.length fail because optional params need default values to make sure
 # they're not included in func.length

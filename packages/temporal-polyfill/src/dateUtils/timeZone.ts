@@ -83,7 +83,11 @@ export function getSafeOffsetNanosecondsFor(
   // important that arg-parsing failure happens here, before getOffsetNanosecondsFor called
   const instant = ensureObj(Instant, arg)
 
-  const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(instant)
+  const { getOffsetNanosecondsFor } = timeZone
+  if (typeof getOffsetNanosecondsFor !== 'function') {
+    throw new TypeError('getOffsetNanosecondsFor must be callable')
+  }
+  const offsetNanoseconds = getOffsetNanosecondsFor.call(timeZone, instant)
 
   if (typeof offsetNanoseconds !== 'number') {
     throw new TypeError('Invalid return value from getOffsetNanosecondsFor')
