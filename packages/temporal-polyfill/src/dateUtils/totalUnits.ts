@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { durationUnitNames } from '../argParse/unitStr'
+import { Duration, getDurationFields } from '../public/duration'
 import { durationDayTimeToNano } from './dayAndTime'
 import { DiffableObj } from './diff'
 import {
@@ -63,6 +64,9 @@ export function computeExactDuration(
   const { sign } = balancedDuration
 
   if (!sign) { // prevents division by zero
+    if (balancedDuration instanceof Duration) { // hack because caller needs writeable obj
+      return getDurationFields(balancedDuration)
+    }
     return balancedDuration
   }
 

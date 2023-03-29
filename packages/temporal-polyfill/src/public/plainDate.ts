@@ -170,7 +170,10 @@ export class PlainDate implements Temporal.PlainDate {
     const fields = this.getISOFields()
 
     return formatDateISO(fields) +
-      formatCalendarID(fields.calendar.toString(), calendarDisplay)
+      formatCalendarID(
+        String(fields.calendar), // important for [Symbol.toPrimitive] access
+        calendarDisplay,
+      )
   }
 
   toZonedDateTime(options: ToZonedDateTimeOptions): Temporal.ZonedDateTime {
@@ -183,8 +186,8 @@ export class PlainDate implements Temporal.PlainDate {
       : ensureObj(PlainTime, refinedOptions.plainTime)
 
     return createZonedDateTimeFromFields({
-      ...this.getISOFields(),
-      ...(plainTime ? plainTime.getISOFields() : zeroISOTimeFields),
+      ...(plainTime ? plainTime.getISOFields() : zeroISOTimeFields), // always iso8601 calendar!
+      ...this.getISOFields(), // put this second to prevent overriding!
       timeZone,
     })
   }
@@ -199,7 +202,10 @@ export class PlainDate implements Temporal.PlainDate {
 
   toPlainYearMonth(): Temporal.PlainYearMonth {
     needReceiver(PlainDate, this)
-    return createYearMonth(this.getISOFields())
+    return createYearMonth({
+      ...this.getISOFields(),
+      isoDay: 1,
+    })
   }
 
   toPlainMonthDay(): Temporal.PlainMonthDay {
@@ -255,20 +261,24 @@ function processToZonedDateTimeOptions(
   let plainTime: PlainTimeArg | undefined
   let timeZone: Temporal.TimeZoneLike | undefined
 
-  if (typeof options === 'string') {
-    timeZone = options
-  } else if (typeof options === 'object') {
-    if ((options as Temporal.TimeZoneProtocol).id !== undefined) {
-      timeZone = options as Temporal.TimeZoneProtocol
+  if (isObjectLike(options)) {
+    if (options instanceof TimeZone) {
+      timeZone = options as any
     } else {
-      timeZone = options.timeZone
-      plainTime = (options as { plainTime?: PlainTimeArg }).plainTime
-    }
-    if (timeZone === undefined) {
-      throw new TypeError('Invalid timeZone argument')
+      const timeZoneLike = options.timeZone
+      if (timeZoneLike === undefined) {
+        timeZone = options
+      } else {
+        timeZone = timeZoneLike
+        plainTime = options.plainTime
+      }
     }
   } else {
-    throw new TypeError('Invalid options/timeZone argument')
+    timeZone = options
+  }
+
+  if (timeZone === undefined) {
+    throw new TypeError('Invalid timezone argument')
   }
 
   return { plainTime, timeZone }

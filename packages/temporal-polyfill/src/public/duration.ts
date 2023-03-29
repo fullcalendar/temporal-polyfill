@@ -36,6 +36,7 @@ type DurationRoundingOptions = Temporal.DifferenceOptions<Temporal.DateTimeUnit>
 }
 
 const [getFields, setFields] = createWeakMap<Duration, DurationFields>()
+export { getFields as getDurationFields }
 
 export class Duration implements Temporal.Duration {
   constructor(

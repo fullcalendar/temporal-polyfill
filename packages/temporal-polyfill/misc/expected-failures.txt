@@ -22,6 +22,7 @@ built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 # TimeZone transitions
 intl402/Temporal/TimeZone/prototype/getNextTransition/subtract-second-and-nanosecond-from-last-transition.js
 intl402/Temporal/TimeZone/prototype/getOffsetNanosecondsFor/nanoseconds-subtracted-or-added-at-dst-transition.js
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor-iterable.js
 
 # Intl.DateTimeFormat
 # (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
@@ -44,14 +45,33 @@ built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfCeil.js
 built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfEven.js
 built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfFloor.js
 built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfTrunc.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfFloor.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfExpand.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfEven.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfCeil.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-expand.js
+built-ins/Temporal/PlainDate/prototype/until/roundingincrement-non-integer.js
 
 # OrigDateTimeFormat bugs
 built-ins/Temporal/PlainDate/prototype/toLocaleString/return-string.js
+intl402/Temporal/PlainDate/prototype/toLocaleString/options-conflict.js
 
-# Calendar::monthDayFromFields needs to call Calendar::fields somehow
+# Calendar::monthDayFromFields needs to call Calendar::fields somehow. similar problems
 built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-fields-iterable.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-invalid-return.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-yearmonthfromfields-called-with-options-undefined.js
 
 # dateFromFields/yearMonthFromFields/monthDayFromFields
 # First `fields` argument must be plain object with null-prototype, not Temporal object
 built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
 built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-fromfields-called-with-null-prototype-fields.js
+
+# far-future, far-past, out-of-range problems
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/limits.js
+built-ins/Temporal/PlainDate/prototype/yearOfWeek/validate-calendar-value.js
+
+# toString options (calendarName:critical)
+built-ins/Temporal/PlainDate/prototype/toString/calendar-tostring.js
+built-ins/Temporal/PlainDate/prototype/toString/calendarname-critical.js
