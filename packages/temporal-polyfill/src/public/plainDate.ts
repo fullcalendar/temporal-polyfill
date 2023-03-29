@@ -141,7 +141,7 @@ export class PlainDate implements Temporal.PlainDate {
       this,
       ensureObj(PlainDate, other),
       false,
-      options,
+      ensureOptionsObject(options),
     )
   }
 
@@ -151,7 +151,7 @@ export class PlainDate implements Temporal.PlainDate {
       this,
       ensureObj(PlainDate, other),
       true,
-      options,
+      ensureOptionsObject(options),
     )
   }
 

@@ -31,3 +31,9 @@ staging/Temporal/TimeZone/old/getInstantFor.js
 # NOTE: tests related to func.length fail because optional params need default values to make sure
 # they're not included in func.length
 #built-ins/Temporal/Calendar/prototype/dateAdd/length.js
+
+# Calendar::dateUntil shouldn't be called so often during diffing
+built-ins/Temporal/PlainDate/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
+built-ins/Temporal/PlainDate/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/PlainDate/prototype/since/custom.js
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js

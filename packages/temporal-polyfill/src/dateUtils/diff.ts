@@ -3,6 +3,7 @@ import { DiffConfig } from '../argParse/diffOptions'
 import { OVERFLOW_CONSTRAIN } from '../argParse/overflowHandling'
 import { unitNames } from '../argParse/unitStr'
 import { CalendarImpl } from '../calendarImpl/calendarImpl'
+import { Duration } from '../public/duration'
 import { createDate } from '../public/plainDate'
 import { LargeInt, createLargeInt } from '../utils/largeInt'
 import { compareValues, roundToIncrement, roundToIncrementBI } from '../utils/math'
@@ -55,9 +56,16 @@ export function diffDates(
   flip: boolean,
   diffConfig: DiffConfig,
 ): DurationFields {
-  const balancedDuration = calendar.dateUntil(d0, d1, {
-    largestUnit: unitNames[diffConfig.largestUnit] as Temporal.DateUnit,
-  })
+  const balancedDuration = calendar.dateUntil(
+    d0,
+    d1,
+    Object.assign(Object.create(null), {
+      largestUnit: unitNames[diffConfig.largestUnit] as Temporal.DateUnit,
+    }),
+  )
+  if (!(balancedDuration instanceof Duration)) {
+    throw new TypeError('Wrong return type for dateUntil')
+  }
   return roundDurationSpan(balancedDuration, d0, d1, calendar, flip, diffConfig)
 }
 
@@ -217,8 +225,14 @@ export function diffAccurate(
     bigDuration = calendar.dateUntil(
       dateStart,
       dateMiddle,
-      { largestUnit: unitNames[largestUnit] as Temporal.DateUnit },
+      Object.assign(Object.create(null), {
+        largestUnit: unitNames[largestUnit] as Temporal.DateUnit,
+      }),
     )
+    if (!(bigDuration instanceof Duration)) {
+      throw new TypeError('Wrong return type for dateUntil')
+    }
+
     dateTimeMiddle = dt0.add(bigDuration)
     timeDuration = diffTimeScale(dateTimeMiddle, dt1, HOUR)
     bigSign = bigDuration.sign

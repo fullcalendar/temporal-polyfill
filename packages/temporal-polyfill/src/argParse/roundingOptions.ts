@@ -2,6 +2,7 @@ import { Temporal } from 'temporal-spec'
 import { DayTimeUnit } from '../dateUtils/dayAndTime'
 import { DAY, DayTimeUnitInt, nanoIn, nanoInDay } from '../dateUtils/units'
 import { RoundingFunc } from '../utils/math'
+import { toInt } from './fieldStr'
 import { ensureOptionsObj } from './refine'
 import { parseRoundingModeOption } from './roundingMode'
 import { parseUnit } from './unitStr'
@@ -27,7 +28,7 @@ export function parseRoundingOptions<
       : options
 
   const ensuredOptions = ensureOptionsObj(optionsObj, true) // strict=true
-  const roundingIncrement = ensuredOptions.roundingIncrement ?? 1
+  const roundingIncrement = toInt(ensuredOptions.roundingIncrement ?? 1, true)
   const smallestUnit = parseUnit(ensuredOptions.smallestUnit, undefined, minUnit, maxUnit)
   const roundingFunc = parseRoundingModeOption(ensuredOptions, Math.round)
   const incNano = nanoIn[smallestUnit] * roundingIncrement

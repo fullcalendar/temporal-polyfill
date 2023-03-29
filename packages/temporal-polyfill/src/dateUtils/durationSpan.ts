@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-spec'
 import { unitNames } from '../argParse/unitStr'
+import { Duration } from '../public/duration'
 import { PlainDate } from '../public/plainDate'
 import { DiffableObj, diffAccurate } from './diff'
 import { DurationFields, overrideDuration } from './durationFields'
@@ -32,9 +33,16 @@ export function spanDurationFromDate(
   calendar: Temporal.CalendarProtocol,
 ): [DurationFields, DiffableObj] {
   const translated = relativeTo.add(duration)
-  const newDuration = calendar.dateUntil(relativeTo, translated, {
-    largestUnit: unitNames[largestUnit] as Temporal.DateUnit,
-  })
+  const newDuration = calendar.dateUntil(
+    relativeTo,
+    translated,
+    Object.assign(Object.create(null), {
+      largestUnit: unitNames[largestUnit] as Temporal.DateUnit,
+    }),
+  )
+  if (!(newDuration instanceof Duration)) {
+    throw new TypeError('Wrong return type for dateUntil')
+  }
 
   return [newDuration, translated]
 }
