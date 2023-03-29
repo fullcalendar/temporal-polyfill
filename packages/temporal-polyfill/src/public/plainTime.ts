@@ -87,7 +87,7 @@ export class PlainTime implements Temporal.PlainTime {
       return createTime(arg.getISOFields())
     }
     if (isObjectLike(arg)) {
-      return createTime(processTimeFromFields(arg, overflowHandling))
+      return createTime(processTimeFromFields(arg, overflowHandling, true))
     }
 
     // parse as string...
@@ -220,7 +220,7 @@ export function createTime(isoFields: ISOTimeFields): PlainTime {
 // Normally ensureObj and ::from would fail when undefined is specified
 // Fallback to 00:00 time
 export function ensureLooseTime(arg: PlainTimeArg | undefined): PlainTime {
-  return ensureObj(PlainTime, arg ?? { hour: 0 })
+  return ensureObj(PlainTime, arg === undefined ? { hour: 0 } : arg)
 }
 
 function translatePlainTime(pt: PlainTime, dur: DurationFields): PlainTime {

@@ -11,7 +11,7 @@ import {
 import { OverflowHandlingInt } from '../argParse/overflowHandling'
 import { isObjectLike, refineFields } from '../argParse/refine'
 import { extractTimeZone } from '../argParse/timeZone'
-import { Calendar, getCalendarImpl, mergeCalFields } from '../public/calendar'
+import { Calendar, calendarFrom, getCalendarImpl, mergeCalFields } from '../public/calendar'
 import { PlainDate } from '../public/plainDate'
 import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
@@ -117,9 +117,21 @@ function tryMonthDayFromFields(
 function tryTimeFromFields(
   rawFields: any,
   overflowHandling: OverflowHandlingInt,
+  undefinedIfEmpty?: boolean,
 ): ISOTimeFields | undefined {
   const refinedFields = refineFields(rawFields, timeFieldMap)
-  return constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling)
+
+  let { calendar } = rawFields
+  if (calendar !== undefined) {
+    calendar = calendarFrom(calendar)
+    if (calendar.toString() !== 'iso8601') {
+      throw new RangeError('Cannot specify non-iso calendar for time')
+    }
+  }
+
+  if (!undefinedIfEmpty || hasAnyProps(refinedFields)) {
+    return constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling)
+  }
 }
 
 // ::with (UNSAFE versions)

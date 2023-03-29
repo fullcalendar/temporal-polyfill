@@ -10,23 +10,28 @@ export function mixinLocaleStringMethods<Entity extends (ToLocaleStringMethods &
   ObjClass: { prototype: Entity },
   buildFormatFactory: FormatFactoryFactory<Entity>,
 ): void {
-  ObjClass.prototype.toLocaleString = function(
-    this: Entity,
-    localesArg?: LocalesArg,
-    options?: Intl.DateTimeFormatOptions,
-  ): string {
-    const formatFactory = buildFormatFactory(
-      normalizeAndCopyLocalesArg(localesArg),
-      options || {},
-    )
-    return formatFactory.buildFormat(
-      ...formatFactory.buildKey(this),
-    ).format(
-      formatFactory.buildEpochMilli(this),
-    )
+  class LocaleStringMixin {
+    toLocaleString(
+      this: Entity,
+      localesArg?: LocalesArg,
+      options?: Intl.DateTimeFormatOptions,
+    ): string {
+      const formatFactory = buildFormatFactory(
+        normalizeAndCopyLocalesArg(localesArg),
+        options || {},
+      )
+      return formatFactory.buildFormat(
+        ...formatFactory.buildKey(this),
+      ).format(
+        formatFactory.buildEpochMilli(this),
+      )
+    }
   }
-
-  ;(ObjClass.prototype as any)[formatFactoryFactorySymbol] = buildFormatFactory
+  Object.defineProperty(ObjClass.prototype, 'toLocaleString', {
+    value: LocaleStringMixin.prototype.toLocaleString,
+    writable: true,
+    configurable: true,
+  })
 }
 
 export function extractFormatFactoryFactory<Entity>(

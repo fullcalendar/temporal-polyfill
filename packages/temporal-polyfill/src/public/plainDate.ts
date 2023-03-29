@@ -191,8 +191,8 @@ export class PlainDate implements Temporal.PlainDate {
   toPlainDateTime(timeArg?: PlainTimeArg): Temporal.PlainDateTime {
     needReceiver(PlainDate, this)
     return createDateTime({
-      ...this.getISOFields(),
-      ...ensureLooseTime(timeArg).getISOFields(),
+      ...ensureLooseTime(timeArg).getISOFields(), // always provides iso8601 calendar!
+      ...this.getISOFields(), // put this second to prevent overriding!
     })
   }
 
