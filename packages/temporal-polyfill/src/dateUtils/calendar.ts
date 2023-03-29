@@ -1,6 +1,7 @@
 import { Temporal } from 'temporal-spec'
 import { OVERFLOW_REJECT, parseOverflowOption } from '../argParse/overflowHandling'
 import { CalendarImpl, convertEraYear } from '../calendarImpl/calendarImpl'
+import { Calendar } from '../public/calendar'
 import { PlainDate, PlainDateArg, createDate } from '../public/plainDate'
 import { PlainDateTime } from '../public/plainDateTime'
 import { PlainMonthDay } from '../public/plainMonthDay'
@@ -31,6 +32,20 @@ function isDateISOInstance(arg: unknown): arg is DateISOInstance {
     arg instanceof PlainYearMonth ||
     arg instanceof PlainMonthDay
   )
+}
+
+// ah
+
+export function safeDateFromFields(
+  calendar: Temporal.CalendarProtocol,
+  fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode & { day: number },
+  options?: Temporal.AssignmentOptions,
+): PlainDate {
+  const res = calendar.dateFromFields(fields, options)
+  if (!(res instanceof PlainDate)) {
+    throw new TypeError('dateFromFields must return PlainDate')
+  }
+  return res
 }
 
 // Calendar-dependent Field Querying

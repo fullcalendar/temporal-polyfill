@@ -17,6 +17,7 @@ import { PlainMonthDay } from '../public/plainMonthDay'
 import { PlainYearMonth } from '../public/plainYearMonth'
 import { ZonedDateTime } from '../public/zonedDateTime'
 import { mapHash } from '../utils/obj'
+import { safeDateFromFields } from './calendar'
 import { constrainTimeISO } from './constrain'
 import { partialLocalTimeToISO } from './dayAndTime'
 import { DurationFields } from './durationFields'
@@ -76,7 +77,7 @@ function tryDateTimeFromFields(
     // refinedFields to dateFromFields, because dateFromFields has potential to mutate it
     ...constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling),
     //
-    ...calendar.dateFromFields(refinedFields, options).getISOFields(),
+    ...safeDateFromFields(calendar, refinedFields, options).getISOFields(),
   }
 }
 
@@ -87,7 +88,7 @@ function tryDateFromFields(
   const calendar = extractCalendar(rawFields)
   const refinedFields = refineFieldsViaCalendar(rawFields, dateFieldMap, calendar)
 
-  return calendar.dateFromFields(refinedFields, options)
+  return safeDateFromFields(calendar, refinedFields, options)
 }
 
 function tryYearMonthFromFields(
@@ -185,7 +186,7 @@ function tryDateWithFields(
 
   if (!undefinedIfEmpty || hasAnyProps(filteredFields)) {
     const mergedFields = mergeFieldsViaCalendar(plainDate, filteredFields, dateFieldMap, calendar)
-    return calendar.dateFromFields(mergedFields, options)
+    return safeDateFromFields(calendar, mergedFields, options)
   }
 }
 
@@ -291,8 +292,9 @@ function mergeFieldsViaCalendar(
 ): any {
   const existingFields = refineFieldsViaCalendar(existingObj, fieldMap, calendar)
 
-  if (calendar.mergeFields) { // TODO: more frugal querying?
-    return calendar.mergeFields(existingFields, fields)
+  const mergeFields = calendar.mergeFields
+  if (mergeFields) {
+    return mergeFields.call(calendar, existingFields, fields)
   }
 
   return mergeCalFields(

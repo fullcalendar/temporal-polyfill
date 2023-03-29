@@ -13,6 +13,7 @@ import {
   mixinIsoMasterMethods,
   needReceiver,
 } from '../dateUtils/abstract'
+import { safeDateFromFields } from '../dateUtils/calendar'
 import { compareDateTimes } from '../dateUtils/compare'
 import { constrainDateISO } from '../dateUtils/constrain'
 import { diffDates } from '../dateUtils/diff'
@@ -147,11 +148,15 @@ export class PlainYearMonth implements Temporal.PlainYearMonth {
 
   toPlainDate(fields: { day: number }): Temporal.PlainDate {
     needReceiver(PlainYearMonth, this)
-    return this.calendar.dateFromFields({
-      year: this.year,
-      month: this.month,
-      day: fields.day,
-    })
+
+    return safeDateFromFields(
+      this.calendar,
+      {
+        year: this.year,
+        month: this.month,
+        day: fields.day,
+      },
+    )
   }
 }
 

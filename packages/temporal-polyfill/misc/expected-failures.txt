@@ -41,6 +41,8 @@ built-ins/Temporal/PlainDate/prototype/until/calendar-dateuntil-called-with-null
 built-ins/Temporal/PlainDate/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/PlainDate/prototype/until/custom.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/with/calendar-fields-iterable.js
+built-ins/Temporal/PlainDate/prototype/with/calendar-merge-fields-returns-primitive.js
 
 # new crazy rounding options
 built-ins/Temporal/PlainDate/prototype/since/roundingincrement-non-integer.js
@@ -85,3 +87,10 @@ built-ins/Temporal/PlainDate/prototype/yearOfWeek/validate-calendar-value.js
 # toString options (calendarName:critical)
 built-ins/Temporal/PlainDate/prototype/toString/calendar-tostring.js
 built-ins/Temporal/PlainDate/prototype/toString/calendarname-critical.js
+
+# I don't undersand why the result of Calendar::mergeFields being fed into Calendar::dateFromFields
+# has anything to do with copying
+built-ins/Temporal/PlainDate/prototype/with/copies-merge-fields-object.js
+
+# exact internal-call ordering of ::with (hard, needs refactor)
+built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js

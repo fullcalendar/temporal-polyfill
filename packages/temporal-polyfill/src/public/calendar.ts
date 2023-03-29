@@ -564,7 +564,16 @@ export function mergeCalFields(baseFields: any, newFields: any, calendarID: stri
     delete baseFieldsCopy.eraYear
   }
 
-  return Object.assign(Object.create(null), baseFieldsCopy, newFieldsCopy)
+  // HACK against undefined values
+  const definedNewFields = {} as any
+  for (const fieldName in newFieldsCopy) {
+    const v = newFieldsCopy[fieldName]
+    if (v !== undefined) {
+      definedNewFields[fieldName] = v
+    }
+  }
+
+  return Object.assign(Object.create(null), baseFieldsCopy, definedNewFields)
 }
 
 // utils
