@@ -78,6 +78,8 @@ function tryDateTimeFromFields(
     ...constrainTimeISO(partialLocalTimeToISO(refinedFields), overflowHandling),
     //
     ...safeDateFromFields(calendar, refinedFields, options).getISOFields(),
+    // ahh..
+    calendar,
   }
 }
 

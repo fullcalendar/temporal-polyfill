@@ -25,12 +25,13 @@ export interface ComparableEpochObj {
 // -------------------------------------------------------------------------------------------------
 
 type EqualityTestObj = ComparableDateTime & { calendar: Temporal.CalendarProtocol }
-type ZonedEqualityTestObj = EqualityTestObj & { timeZone: Temporal.TimeZoneProtocol }
 
-export function zonedDateTimesEqual(a: ZonedEqualityTestObj, b: ZonedEqualityTestObj): boolean {
-  return dateTimesEqual(a, b) &&
-    a.timeZone.toString() === b.timeZone.toString()
-}
+// type ZonedEqualityTestObj = EqualityTestObj & { timeZone: Temporal.TimeZoneProtocol }
+//
+// export function zonedDateTimesEqual(a: ZonedEqualityTestObj, b: ZonedEqualityTestObj): boolean {
+//   return dateTimesEqual(a, b) &&
+//     a.timeZone.toString() === b.timeZone.toString()
+// }
 
 export function dateTimesEqual(a: EqualityTestObj, b: EqualityTestObj): boolean {
   return !compareDateTimes(a, b) &&

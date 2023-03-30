@@ -18,7 +18,7 @@ import { RoundingConfig, parseRoundingOptions } from '../argParse/roundingOption
 import { parseTimeZoneDisplayOption } from '../argParse/timeZoneDisplay'
 import { timeUnitNames } from '../argParse/unitStr'
 import { ensureObj, needReceiver } from '../dateUtils/abstract'
-import { compareEpochObjs, zonedDateTimesEqual } from '../dateUtils/compare'
+import { compareEpochObjs } from '../dateUtils/compare'
 import { DayTimeUnit, zeroISOTimeFields } from '../dateUtils/dayAndTime'
 import { diffDateTimes } from '../dateUtils/diff'
 import { DurationFields, negateDuration } from '../dateUtils/durationFields'
@@ -66,7 +66,7 @@ import {
 } from '../dateUtils/units'
 import { createZonedFormatFactoryFactory } from '../native/intlFactory'
 import { ToLocaleStringMethods, mixinLocaleStringMethods } from '../native/intlMixins'
-import { LargeInt, LargeIntArg, createLargeInt } from '../utils/largeInt'
+import { LargeInt, LargeIntArg, compareLargeInts, createLargeInt } from '../utils/largeInt'
 import { roundToMinute } from '../utils/math'
 import { Calendar, createDefaultCalendar } from './calendar'
 import { Duration, DurationArg, createDuration } from './duration'
@@ -295,7 +295,14 @@ export class ZonedDateTime implements Temporal.ZonedDateTime {
 
   equals(other: ZonedDateTimeArg): boolean {
     needReceiver(ZonedDateTime, this)
-    return zonedDateTimesEqual(this, ensureObj(ZonedDateTime, other))
+    const otherZdt = ensureObj(ZonedDateTime, other)
+
+    return !compareLargeInts(
+      getInternals(this).epochNanoseconds,
+      getInternals(otherZdt).epochNanoseconds,
+    ) &&
+    getInternals(this).calendar.toString() === getInternals(otherZdt).calendar.toString() &&
+    getInternals(this).timeZone.toString() === getInternals(otherZdt).timeZone.toString()
   }
 
   startOfDay(): Temporal.ZonedDateTime {
