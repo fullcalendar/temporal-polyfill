@@ -52,18 +52,42 @@ built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfCeil.js
 built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfEven.js
 built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfFloor.js
 built-ins/Temporal/PlainDate/prototype/since/roundingmode-halfTrunc.js
-built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfFloor.js
-built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfExpand.js
-built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfEven.js
-built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfCeil.js
-built-ins/Temporal/PlainDate/prototype/until/roundingmode-expand.js
 built-ins/Temporal/PlainDate/prototype/until/roundingincrement-non-integer.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-expand.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfCeil.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfEven.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfFloor.js
 built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfTrunc.js
+built-ins/Temporal/PlainDateTime/prototype/since/roundingincrement-non-integer.js
+built-ins/Temporal/PlainDateTime/prototype/since/roundingmode-expand.js
+built-ins/Temporal/PlainDateTime/prototype/since/roundingmode-halfCeil.js
+built-ins/Temporal/PlainDateTime/prototype/since/roundingmode-halfEven.js
+built-ins/Temporal/PlainDateTime/prototype/since/roundingmode-halfFloor.js
+built-ins/Temporal/PlainDateTime/prototype/since/roundingmode-halfTrunc.js
+built-ins/Temporal/PlainDateTime/prototype/until/roundingincrement-non-integer.js
+built-ins/Temporal/PlainDateTime/prototype/until/roundingmode-expand.js
+built-ins/Temporal/PlainDateTime/prototype/until/roundingmode-halfCeil.js
+built-ins/Temporal/PlainDateTime/prototype/until/roundingmode-halfEven.js
+built-ins/Temporal/PlainDateTime/prototype/until/roundingmode-halfFloor.js
+built-ins/Temporal/PlainDateTime/prototype/until/roundingmode-halfTrunc.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingincrement-non-integer.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingmode-expand.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingmode-halfCeil.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingmode-halfEven.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingmode-halfFloor.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingmode-halfTrunc.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingincrement-non-integer.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingmode-expand.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingmode-halfCeil.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingmode-halfEven.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingmode-halfFloor.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingmode-halfTrunc.js
 
 # rounding with weeks returns -0 for some reason
 built-ins/Temporal/PlainDate/prototype/until/roundingmode-ceil.js
 built-ins/Temporal/PlainDate/prototype/until/roundingmode-floor.js
 built-ins/Temporal/PlainDate/prototype/until/roundingmode-trunc.js
+built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfExpand.js
 
 # OrigDateTimeFormat bugs
 built-ins/Temporal/PlainDate/prototype/toLocaleString/return-string.js
