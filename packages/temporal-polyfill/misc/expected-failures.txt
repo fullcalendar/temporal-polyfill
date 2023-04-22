@@ -1,4 +1,11 @@
 
+# NEXT: see where all refining/parsing/validating happens.
+# sometimes date-time fields are massaged into strings (with/from/constructor)
+# other times they throw errors (Calendar::day)
+# same validations between calendarFields and isoFields?
+#
+# start writing PlainDate::from/with
+
 #
 # fullcalendar/temporal notes
 #
@@ -7,33 +14,78 @@
 # pn test262 'PlainDate/**'
 #
 
-# complicated internal property access (needs class refactor)
-built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
+### with/from OBJECTS
 
-# monthDayFromFields
+# exact internal-call ordering of ::with (hard, needs refactor)
+built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js
+
+# side-effect of our hack of filtering away undefines, accidentally filters away symbol keys
+built-ins/Temporal/Calendar/prototype/mergeFields/non-string-properties.js
+
+
+### dateFromFields, etc
+
+# monthDayFromFields/yearMonthFromFields must work off calendar-fields (not iso fields)
+# thus, must follow from/with flow
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-fields-iterable.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-invalid-return.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-yearmonthfromfields-called-with-options-undefined.js
+
+# before calling dateFromFields, use result of fields() as a whitelist after merging-in partial
+built-ins/Temporal/PlainDate/prototype/with/copies-merge-fields-object.js
+
+# First `fields` argument must be plain object with null-prototype, not Temporal object
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-fromfields-called-with-null-prototype-fields.js
+
+# actual bugs?
 intl402/Temporal/Calendar/prototype/monthDayFromFields/reference-year-1972.js
-
-# yearMonthFromFields
 intl402/Temporal/Calendar/prototype/yearMonthFromFields/reference-day.js
 
-# Calendr::dateUntil
-built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
+
+### validation
+
+# far-future, far-past, out-of-range problems
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/limits.js
+built-ins/Temporal/PlainDate/prototype/yearOfWeek/validate-calendar-value.js
+
+## ecmascript.mjs
+#const DAY_SECONDS = 86400;
+#const DAY_NANOS = bigInt(DAY_SECONDS).multiply(1e9);
+#const NS_MIN = bigInt(-DAY_SECONDS).multiply(1e17);
+#const NS_MAX = bigInt(DAY_SECONDS).multiply(1e17);
+#const YEAR_MIN = -271821;
+#const YEAR_MAX = 275760;
+#const BEFORE_FIRST_DST = bigInt(-388152).multiply(1e13); // 1847-01-01T00:00:00Z
+## will also check if GetUTCEpochNanoseconds(...) === null
+
+# is my isoToEpochMilli overly complicated?
+# YES. BETTER: https://github.com/tc39/proposal-temporal/blob/84d1b184ac200a81a6648f2d148082f69ae0547b/polyfill/lib/ecmascript.mjs#L2393
+
+
+### timezone/instant
+
+# complicated internal property access (needs class refactor)
+built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
 
 # TimeZone transitions
 intl402/Temporal/TimeZone/prototype/getNextTransition/subtract-second-and-nanosecond-from-last-transition.js
 intl402/Temporal/TimeZone/prototype/getOffsetNanosecondsFor/nanoseconds-subtracted-or-added-at-dst-transition.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor-iterable.js
 
-# Intl.DateTimeFormat
-# (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
-#intl402/DateTimeFormat/prototype/format/temporal-objects-timezone-getoffsetnanosecondsfor-not-callable.js
-intl402/Temporal/PlainDate/prototype/toLocaleString/timezone-getoffsetnanosecondsfor-not-callable.js
 
-# NOTE: tests related to func.length fail because optional params need default values to make sure
-# they're not included in func.length
-#built-ins/Temporal/Calendar/prototype/dateAdd/length.js
+### diffing/rounding
 
-# Calendar::dateUntil shouldn't be called so often during diffing
+# Calendar::dateUntil shouldn't be called so often during since/until (because of rounding!)
+# SOLUTION: rewrite roundDuration. but it's crazy:
+# https://github.com/tc39/proposal-temporal/blob/main/polyfill/lib/ecmascript.mjs#L4780
+# compare to my `roundDurationSpan`
+#
+# it's all because of the "balancing"
+# Temporal.PlainDate.from('2022-01-01').until('2022-12-24', { largestUnit: 'year', smallestUnit: 'month', roundingMode: 'ceil' }).toString()
+# WOAH. doesn't round up to next year!? gives 12months, not 1year!!! weird, but easier!
+#
 built-ins/Temporal/PlainDate/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/PlainDate/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/PlainDate/prototype/since/custom.js
@@ -44,6 +96,9 @@ built-ins/Temporal/PlainDate/prototype/until/custom.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/with/calendar-fields-iterable.js
 built-ins/Temporal/PlainDate/prototype/with/calendar-merge-fields-returns-primitive.js
+
+# Calendar::dateUntil
+built-ins/Temporal/Calendar/prototype/dateUntil/largest-unit-week.js
 
 # new crazy rounding options
 built-ins/Temporal/PlainDate/prototype/since/roundingincrement-non-integer.js
@@ -89,36 +144,18 @@ built-ins/Temporal/PlainDate/prototype/until/roundingmode-floor.js
 built-ins/Temporal/PlainDate/prototype/until/roundingmode-trunc.js
 built-ins/Temporal/PlainDate/prototype/until/roundingmode-halfExpand.js
 
+
+### formatting
+
 # OrigDateTimeFormat bugs
 built-ins/Temporal/PlainDate/prototype/toLocaleString/return-string.js
 intl402/Temporal/PlainDate/prototype/toLocaleString/options-conflict.js
-
-# Calendar::monthDayFromFields needs to call Calendar::fields somehow. similar problems
-built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
-built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-fields-iterable.js
-built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-invalid-return.js
-built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-yearmonthfromfields-called-with-options-undefined.js
-
-# dateFromFields/yearMonthFromFields/monthDayFromFields
-# First `fields` argument must be plain object with null-prototype, not Temporal object
-built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fields-iterable.js
-built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-fromfields-called-with-null-prototype-fields.js
-
-# far-future, far-past, out-of-range problems
-built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/limits.js
-built-ins/Temporal/PlainDate/prototype/yearOfWeek/validate-calendar-value.js
 
 # toString options (calendarName:critical)
 built-ins/Temporal/PlainDate/prototype/toString/calendar-tostring.js
 built-ins/Temporal/PlainDate/prototype/toString/calendarname-critical.js
 
-# I don't undersand why the result of Calendar::mergeFields being fed into Calendar::dateFromFields
-# has anything to do with copying
-built-ins/Temporal/PlainDate/prototype/with/copies-merge-fields-object.js
-
-# exact internal-call ordering of ::with (hard, needs refactor)
-built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js
-
-# side-effect of our hack of filtering away undefines, accidentally filters away symbol keys
-built-ins/Temporal/Calendar/prototype/mergeFields/non-string-properties.js
+# Intl.DateTimeFormat
+# (even PlainDate should be reduced to timestamp, should have be displayable with timeZone options)
+intl402/DateTimeFormat/prototype/format/temporal-objects-timezone-getoffsetnanosecondsfor-not-callable.js
+intl402/Temporal/PlainDate/prototype/toLocaleString/timezone-getoffsetnanosecondsfor-not-callable.js
