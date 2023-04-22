@@ -4,6 +4,14 @@
 A lightweight [Temporal] polyfill and other futuristic JavaScript date utilities.
 
 
+## Project Update (2023-04-22)
+
+The codebase is undergoing a rewrite to respond to the lastest changes in the [Temporal] spec.
+This rewrite will also improve minification size, performance, and conformance to
+[TC39 tests](https://github.com/tc39/test262). Please subscribe to
+[this ticket](https://github.com/fullcalendar/temporal/issues/3) for updates.
+
+
 ## temporal-polyfill
 
 A spec-compliant polyfill in 16kb.
