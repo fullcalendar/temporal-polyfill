@@ -1,4 +1,4 @@
-import { isoCalendarId } from './calendarAdapter'
+import { isoCalendarId } from './calendarConfig'
 import { toCalendarNameOption } from './options'
 
 export function formatPossibleDate(internals, options, formatSimple) {

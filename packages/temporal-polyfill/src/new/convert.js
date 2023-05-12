@@ -1,12 +1,9 @@
 import {
-  dateFieldsToIso,
+  getRequiredDateFields,
+  getRequiredMonthDayFields,
+  getRequiredYearMonthFields,
   isoCalendarId,
-  mergeFields,
-  monthDayFieldsToIso,
-  toCalendarSlot,
-  transformFieldNames,
-  yearMonthFieldsToIso,
-} from './calendarAdapter'
+} from './calendarConfig'
 import {
   dateFieldNames,
   dateTimeFieldNames,
@@ -18,30 +15,26 @@ import {
   yearMonthBasicNames,
   yearMonthFieldNames,
 } from './calendarFields'
+import { queryCalendarOps } from './calendarOps'
 import { toInteger, toObject } from './cast'
 import {
   durationFieldDefaults,
   durationFieldRefiners,
   refineDurationFields,
 } from './durationFields'
+import { getInternals } from './internalClass'
 import {
-  regulateIsoDateTimeFields,
-  regulateIsoTimeFields,
+  constrainIsoDateTimeFields,
+  constrainIsoTimeFields,
 } from './isoFields'
 import { isObjectLike, pluckProps, removeDuplicateStrings } from './obj'
-import { toDisambiguation, toOffsetHandling, toOverflowOptions } from './options'
+import { optionsToOverflow, toDisambiguation, toOffsetHandling, toOverflowOptions } from './options'
 import { parseOffsetNanoseconds } from './parse'
 import { createPlainDate } from './plainDate'
-import { createPlainDateTime } from './plainDateTime'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainTime } from './plainTime'
 import { createPlainYearMonth } from './plainYearMonth'
-import { getInternals } from './temporalClass'
-import {
-  computeIsoFieldEpochNanoseconds,
-  plainDateTimeToEpochNanoseconds,
-  toTimeZoneSlot,
-} from './timeZoneProtocol'
+import { computeIsoFieldEpochNanoseconds, getBestInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
 
 // Duration
@@ -55,19 +48,21 @@ export function bagToDurationFields(bag) {
 // -------------------------------------------------------------------------------------------------
 
 export function bagToZonedDateTimeInternals(bag, options) {
-  const [calendar, fields] = refineBag(
+  const calendarOps = extractCalendarOpsFromBag(bag)
+  const fields = refineBag(
+    calendarOps,
     bag,
     dateTimeFieldNames,
-    ['offset'],
+    getRequiredDateFields(calendarOps).concat(['offset']),
     ['timeZone'],
   )
 
-  const timeZone = toTimeZoneSlot(fields.timeZone)
-  const isoFields = dateFieldsToIso(calendar, fields, options) // overflow options
+  const timeZone = queryTimeZoneOps(fields.timeZone)
+  const isoFields = calendarOps.dateFromFields(fields, optionsToOverflow(options))
 
   const epochNanoseconds = computeIsoFieldEpochNanoseconds(
-    { ...isoFields, ...timeFieldsToIso(fields) },
     timeZone,
+    { ...isoFields, ...timeFieldsToIso(fields) },
     fields.offset !== undefined ? parseOffsetNanoseconds(fields.offset) : undefined,
     false, // z?
     toOffsetHandling(options),
@@ -78,18 +73,18 @@ export function bagToZonedDateTimeInternals(bag, options) {
   return {
     epochNanoseconds,
     timeZone,
-    calendar,
+    calendar: calendarOps,
   }
 }
 
 export function zonedDateTimeWithBag(zonedDateTime, bag, options) {
-  const { timeZone } = getInternals(zonedDateTime)
-  const [calendar, fields] = mergeBag(zonedDateTime, bag, dateTimeFieldNames, ['offset'])
-  const isoFields = dateFieldsToIso(calendar, fields, options)
+  const { calendar, timeZone } = getInternals(zonedDateTime)
+  const fields = mergeBag(calendar, zonedDateTime, bag, dateTimeFieldNames, ['offset'])
+  const isoFields = calendar.dateFromFields(fields, optionsToOverflow(options))
 
   const epochNanoseconds = computeIsoFieldEpochNanoseconds(
-    { ...isoFields, ...timeFieldsToIso(fields) },
     timeZone,
+    { ...isoFields, ...timeFieldsToIso(fields) },
     parseOffsetNanoseconds(fields.offset),
     false, // z?
     toOffsetHandling(options),
@@ -105,21 +100,16 @@ export function zonedDateTimeWithBag(zonedDateTime, bag, options) {
 }
 
 export function bagToPlainMonthDayInternals(bag, options) {
-  let calendar = extractCalendar(bag)
+  let calendar = extractCalendarFieldFromBag(bag)
   let calendarAbsent = !calendar
 
   if (calendarAbsent) {
     calendar = bag.calendar
     calendarAbsent = calendar === undefined
-
-    if (calendarAbsent) {
-      calendar = isoCalendarId
-    } else {
-      calendar = toCalendarSlot(calendar)
-    }
+    calendar = queryCalendarOps(calendarAbsent ? isoCalendarId : calendar)
   }
 
-  const fieldNames = transformFieldNames(calendar, ['day', 'month', 'monthCode', 'year'])
+  const fieldNames = calendar.fields(dateFieldNames)
   const fields = prepareFields(bag, fieldNames, [])
 
   // Callers who omit the calendar are not writing calendar-independent
@@ -134,31 +124,36 @@ export function bagToPlainMonthDayInternals(bag, options) {
     fields.year = 1972
   }
 
-  return monthDayFieldsToIso(calendar, fields, options)
+  return calendar.monthDayFromFields(calendar, fields, optionsToOverflow(options))
 }
 
 export function plainMonthDayWithBag(plainMonthDay, bag, options) {
-  return monthDayFieldsToIso(
-    ...mergeBag(plainMonthDay, bag, ['month', 'monthCode', 'year']),
-    options,
-  )
+  const { calendar } = getInternals(plainMonthDay)
+  const fields = mergeBag(calendar, plainMonthDay, bag, dateFieldNames)
+  return calendar.monthDayFromFields(fields, optionsToOverflow(options))
 }
 
 export function bagToPlainYearMonthInternals(bag, options) {
-  return yearMonthFieldsToIso(...refineBag(bag, yearMonthFieldNames), options)
+  const calendarOps = extractCalendarOpsFromBag(bag)
+  const fields = refineBag(
+    calendarOps,
+    bag,
+    yearMonthFieldNames,
+    getRequiredYearMonthFields(calendarOps),
+  )
+  return calendarOps.yearMonthFromFields(fields, optionsToOverflow(options))
 }
 
 export function plainYearMonthWithBag(plainYearMonth, bag, options) {
-  return yearMonthFieldsToIso(
-    ...mergeBag(plainYearMonth, bag, yearMonthFieldNames),
-    options,
-  )
+  const { calendar } = getInternals(plainYearMonth)
+  const fields = mergeBag(calendar, plainYearMonth, bag, yearMonthFieldNames)
+  return calendar.yearMonthFromFields(fields, optionsToOverflow(options))
 }
 
 export function bagToPlainTimeInternals(bag, options) {
   const overflowOpt = toOverflowOptions(options) // TODO: single opt!
 
-  return regulateIsoTimeFields(
+  return constrainIsoTimeFields(
     timeFieldsToIso(
       prepareFields(bag, timeFieldNames, []),
     ),
@@ -175,33 +170,57 @@ export function plainTimeWithBag(plainTime, bag, options) {
     ...additionalFields,
   })
   return createPlainTime(
-    regulateIsoTimeFields(newInternals, overflowOpt),
+    constrainIsoTimeFields(newInternals, overflowOpt),
   )
 }
 
 export function bagToPlainDateSlots(bag, options) {
-  return dateFieldsToIso(...refineBag(bag, dateFieldNames), options)
+  const calendarOps = extractCalendarOpsFromBag(bag)
+  const fields = refineBag(
+    calendarOps,
+    bag,
+    dateFieldNames,
+    getRequiredDateFields(calendarOps),
+  )
+
+  return {
+    calendar: calendarOps,
+    ...calendarOps.dateFromFields(fields, optionsToOverflow(options)),
+  }
 }
 
 export function plainDateWithBag(plainDate, bag, options) {
-  return dateFieldsToIso(...mergeBag(plainDate, bag, dateFieldNames), options)
+  const { calendar } = getInternals(plainDate)
+  const fields = mergeBag(calendar, plainDate, bag, dateFieldNames)
+
+  return {
+    calendar,
+    ...calendar.dateFromFields(fields, optionsToOverflow(options)),
+  }
 }
 
 export function bagToPlainDateTimeInternals(bag, options) {
-  const [calendar, fields] = refineBag(bag, dateTimeFieldNames)
-  const plainDateTimeInternals = dateFieldsToIso(calendar, fields, options)
+  const calendarOps = extractCalendarOpsFromBag(bag)
+  const fields = refineBag(
+    calendarOps,
+    bag,
+    dateTimeFieldNames,
+    getRequiredDateFields(calendarOps),
+  )
+  const plainDateTimeInternals = calendarOps.dateFromFields(fields, optionsToOverflow(options))
 
-  return regulateIsoDateTimeFields({
+  return constrainIsoDateTimeFields({
     ...plainDateTimeInternals,
     ...timeFieldsToIso(fields),
   })
 }
 
 export function plainDateTimeWithBag(plainDate, bag, options) {
-  const [calendar, fields] = mergeBag(plainDate, bag, dateTimeFieldNames)
-  const plainDateTimeInternals = dateFieldsToIso(calendar, fields, options)
+  const { calendar } = getInternals(plainDate)
+  const fields = mergeBag(calendar, plainDate, bag, dateTimeFieldNames)
+  const plainDateTimeInternals = calendar.dateFromFields(fields, optionsToOverflow(options))
 
-  return regulateIsoDateTimeFields({
+  return constrainIsoDateTimeFields({
     ...plainDateTimeInternals,
     ...timeFieldsToIso(fields),
   })
@@ -213,13 +232,27 @@ export function plainDateTimeWithBag(plainDate, bag, options) {
 export function dateToPlainYearMonth(
   dateObj, // PlainDate/PlainDateTime/ZonedDateTime
 ) {
-  return createPlainYearMonth(yearMonthFieldsToIso(...pluckFields(dateObj, yearMonthBasicNames)))
+  const calendarOps = getInternals(dateObj).calendar
+  const fields = refineBag(
+    calendarOps,
+    dateObj,
+    yearMonthBasicNames,
+    getRequiredYearMonthFields(calendarOps),
+  )
+  return createPlainYearMonth(calendarOps.yearMonthFromFields(fields, 'constrain'))
 }
 
 export function dateToPlainMonthDay(
   dateObj, // PlainDate/PlainDateTime/ZonedDateTime
 ) {
-  return createPlainMonthDay(monthDayFieldsToIso(...pluckFields(dateObj, monthDayBasicNames)))
+  const calendarOps = getInternals(dateObj).calendar
+  const fields = refineBag(
+    calendarOps,
+    dateObj,
+    monthDayBasicNames,
+    getRequiredMonthDayFields(calendarOps),
+  )
+  return createPlainMonthDay(calendarOps.monthDayFromFields(fields, 'constrain'))
 }
 
 // to PlainDate
@@ -230,21 +263,32 @@ export function plainYearMonthToPlainDateFirst(plainYearMonth) {
 }
 
 export function plainYearMonthToPlainDate(plainYearMonth, bag) {
-  return mergeToPlainDate(plainYearMonth, yearMonthBasicNames, bag, ['day'])
+  return mergeToPlainDate(
+    plainYearMonth,
+    yearMonthBasicNames, // what to extract from plainYearMonth
+    bag,
+    ['day'], // what to extract from bag
+  )
 }
 
 export function plainMonthDayToPlainDate(plainMonthDay, bag) {
-  return mergeToPlainDate(plainMonthDay, monthDayBasicNames, bag, ['year'])
+  return mergeToPlainDate(
+    plainMonthDay,
+    monthDayBasicNames, // what to extract from plainMonthDay
+    bag,
+    ['year'], // what to extract from bag
+  )
 }
 
 // to PlainDateTime
 // -------------------------------------------------------------------------------------------------
 
 // bad name now. should have something with 'slots'
+// should return calendar/timezone??? needed in many places
 export function zonedDateTimeInternalsToIso(internals) {
   // use timeZone2.js
   /*
-  return instantToPlainDateTime(
+  return instantToPlainDateTime222(
     internals.timeZone,
     internals.calendar,
     createInstant(internals.epochNanoseconds),
@@ -255,15 +299,15 @@ export function zonedDateTimeInternalsToIso(internals) {
 // to ZonedDateTime
 // -------------------------------------------------------------------------------------------------
 
-export function createZonedDateTimeConverter(getRequiredInternals) {
+export function createZonedDateTimeConverter(getAdditionalIsoFields) {
   return (internals, options) => {
     const refinedOptions = toObject(options) // required!!!
-    const epochNanoseconds = plainDateTimeToEpochNanoseconds(
-      refinedOptions.timeZone,
-      createPlainDateTime({
+    const epochNanoseconds = getBestInstantFor(
+      internals.timeZone,
+      {
         ...internals,
-        ...getRequiredInternals(refinedOptions),
-      }),
+        ...getAdditionalIsoFields(refinedOptions),
+      },
     )
 
     return createZonedDateTime({
@@ -277,34 +321,34 @@ export function createZonedDateTimeConverter(getRequiredInternals) {
 // Calendar-field processing
 // -------------------------------------------------------------------------------------------------
 
-export function refineBag(
+function refineBag(
+  calendarOps,
   bag,
   validFieldNames,
   requiredFieldNames = [],
   forcedValidFieldNames = [],
 ) {
-  const calendar = extractCalendar(bag) || isoCalendarId
-  const fieldNames = transformFieldNames(calendar, validFieldNames)
+  const fieldNames = calendarOps.fields(validFieldNames)
     .concat(requiredFieldNames, forcedValidFieldNames)
   const fields = prepareFields(bag, fieldNames, requiredFieldNames)
-  return [calendar, fields]
+  return fields
 }
 
-export function mergeBag(
+function mergeBag(
+  calendarOps,
   obj,
   bag,
   validFieldNames,
   requiredFieldNames = [],
 ) {
   // TODO: check bag doesn't have timezone/calendar
-  const { calendar } = getInternals(obj)
-  const fieldNames = transformFieldNames(calendar, validFieldNames)
+  const fieldNames = calendarOps.fields(validFieldNames)
   fieldNames.push(...requiredFieldNames)
   let fields = prepareFields(obj, fieldNames, requiredFieldNames)
   const additionalFields = prepareFields(bag, fieldNames) // partial
-  fields = mergeFields(calendar, fields, additionalFields)
+  fields = calendarOps.mergeFields(fields, additionalFields)
   fields = prepareFields(fields, fieldNames, requiredFieldNames)
-  return [calendar, fields]
+  return [fields]
 }
 
 function mergeToPlainDate(
@@ -314,20 +358,17 @@ function mergeToPlainDate(
   otherFieldNames,
 ) {
   const { calendar } = getInternals(obj)
-  const receiverFieldNames = transformFieldNames(calendar, objFieldNames)
+  const receiverFieldNames = calendar.fields(objFieldNames)
   const receiverFields = pluckProps(obj, receiverFieldNames)
-  const inputFieldNames = transformFieldNames(calendar, otherFieldNames)
-  const inputFields = prepareFields(other, inputFieldNames, [])
+  const inputFieldNames = calendar.fields(otherFieldNames)
+  const inputFields = prepareFields(other, inputFieldNames, getRequiredDateFields(calendar))
   const mergedFieldNames = removeDuplicateStrings(receiverFieldNames.concat(inputFieldNames))
-  let mergedFields = mergeFields(calendar, receiverFields, inputFields)
+  let mergedFields = calendar.mergeFields(receiverFields, inputFields)
   mergedFields = prepareFields(mergedFields, mergedFieldNames, [])
-  return createPlainDate(mergedFields, { overflow: 'reject' })
-}
-
-function pluckFields(obj, validFieldNames) {
-  const { calendar } = getInternals(obj)
-  const fieldNames = transformFieldNames(calendar, validFieldNames)
-  return [calendar, pluckProps(obj, fieldNames)]
+  return createPlainDate({
+    ...calendar.dateFromFields(mergedFields, 'reject'),
+    calendar,
+  })
 }
 
 // ahhh
@@ -386,10 +427,11 @@ export function isStringCastsEqual(obj0, obj1) {
     String(obj0) === String(obj1)
 }
 
-/*
-Won't default to iso
-*/
-function extractCalendar(bag) {
+function extractCalendarOpsFromBag(bag) {
+  return queryCalendarOps(extractCalendarFieldFromBag(bag) || isoCalendarId)
+}
+
+function extractCalendarFieldFromBag(bag) {
   const internals = getInternals(bag)
   const { calendar } = internals || {}
   if (calendar) {
@@ -397,7 +439,7 @@ function extractCalendar(bag) {
   }
   ({ calendar }) = bag
   if (calendar) {
-    return toCalendarSlot(calendar)
+    return queryCalendarOps(calendar)
   }
 }
 

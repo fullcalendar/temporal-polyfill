@@ -10,19 +10,21 @@ import { diffTimes } from './diff'
 import { createDuration, toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import { formatIsoTimeFields } from './format'
+import { neverValueOf } from './internalClass'
 import {
   compareIsoTimeFields,
   isoTimeFieldRefiners,
   pluckIsoTimeFields,
-  regulateIsoTimeFields,
+  constrainIsoTimeFields,
 } from './isoFields'
-import { movePlainTime } from './move'
+import { moveTime } from './move'
 import { optionsToOverflow } from './options'
 import { stringToPlainTimeInternals } from './parse'
 import { toPlainDateInternals } from './plainDate'
-import { createPlainDateTime } from './plainDateTime'
+import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { roundIsoTimeFields } from './round'
-import { createTemporalClass, neverValueOf } from './temporalClass'
+import { createTemporalClass } from './temporalClass'
+import { ZonedDateTime } from './zonedDateTime'
 
 export const [
   PlainTime,
@@ -34,6 +36,7 @@ export const [
   // Creation
   // -----------------------------------------------------------------------------------------------
 
+  // constructorToInternals
   (
     isoHour = 0,
     isoMinute = 0,
@@ -42,7 +45,7 @@ export const [
     isoMicrosecond = 0,
     isoNanosecond = 0,
   ) => {
-    return regulateIsoTimeFields(
+    return constrainIsoTimeFields(
       mapRefiners({
         isoHour,
         isoMinute,
@@ -53,12 +56,24 @@ export const [
       }, isoTimeFieldRefiners),
     )
   },
-  {
-    PlainDateTime: pluckIsoTimeFields,
-    ZonedDateTime: (internals) => pluckIsoTimeFields(zonedDateTimeInternalsToIso(internals)),
+
+  // massageOtherInternals
+  (arg, argInternals) => {
+    if (arg instanceof PlainDateTime) {
+      return pluckIsoTimeFields(argInternals)
+    }
+    if (arg instanceof ZonedDateTime) {
+      return pluckIsoTimeFields(zonedDateTimeInternalsToIso(argInternals))
+    }
   },
+
+  // bagToInternals
   bagToPlainTimeInternals,
+
+  // stringToInternals
   stringToPlainTimeInternals,
+
+  // handleUnusedOptions
   optionsToOverflow,
 
   // Getters
@@ -75,13 +90,20 @@ export const [
     },
 
     add(internals, durationArg) {
-      return movePlainTime(internals, toDurationInternals(durationArg))
+      return createPlainTime(
+        moveTime(
+          internals,
+          toDurationInternals(durationArg),
+        ),
+      )
     },
 
     subtract(internals, durationArg) {
-      return movePlainTime(
-        internals,
-        negateDurationFields(toDurationInternals(durationArg)),
+      return createPlainTime(
+        moveTime(
+          internals,
+          negateDurationFields(toDurationInternals(durationArg)),
+        ),
       )
     },
 
@@ -136,9 +158,7 @@ export const [
       })
     },
 
-    getISOFields(internals) {
-      return pluckIsoTimeFields(internals)
-    },
+    getISOFields: pluckIsoTimeFields,
   },
 
   // Static

@@ -41,6 +41,7 @@ export const durationTimeFieldDefaults = remapProps(
 export const durationFieldDefaults = { // does not include 'sign'
   years: 0,
   months: 0,
+  // TODO: weeks!!!
   days: 0,
   ...durationTimeFieldDefaults,
 }

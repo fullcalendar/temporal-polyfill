@@ -1,10 +1,10 @@
-import { toCalendarSlot } from './calendarAdapter'
+import { queryCalendarOps } from './calendarOps'
 import { toIntegerThrowOnInfinity, toIntegerWithoutRounding, toPositiveInteger } from './cast'
 import { pluckProps } from './obj'
 
 export const isoDateSlotRefiners = {
   // sorted alphabetically
-  calendar: toCalendarSlot,
+  calendar: queryCalendarOps, // prolly kill this!!!
   isoDay: toPositiveInteger,
   isoMonth: toPositiveInteger,
   isoYear: toIntegerWithoutRounding,
@@ -27,6 +27,7 @@ export const isoDateTimeSlotRefiners = {
 }
 
 export const isoDateSlotNames = Object.keys(isoDateSlotRefiners)
+export const isoDateFieldNames = isoDateSlotNames.slice(1)
 export const isoTimeFieldNames = Object.keys(isoTimeFieldRefiners) // no calendar
 export const isoDateTimeSlotNames = Object.keys(isoDateTimeSlotRefiners).sort()
 
@@ -39,12 +40,28 @@ export const isoTimeFieldDefaults = {
   isoSecond: 0,
 }
 
+export function generatePublicIsoDateFields(internals) {
+  const publicFields = pluckIsoDateSlots(internals)
+  publicFields.calendar = publicFields.calendar.id // correct?
+  return publicFields
+}
+
+export function generatePublicIsoDateTimeFields(internals) {
+  const publicFields = pluckIsoDateTimeSlots(internals)
+  publicFields.calendar = publicFields.calendar.id // correct?
+  return publicFields
+}
+
 export function pluckIsoDateTimeSlots(isoFields) {
   return pluckProps(isoFields, isoDateTimeSlotNames)
 }
 
 export function pluckIsoDateSlots(isoFields) {
   return pluckProps(isoFields, isoDateSlotNames)
+}
+
+export function pluckIsoDateFields(isoFields) {
+  return pluckProps(isoFields, isoDateFieldNames)
 }
 
 export function pluckIsoTimeFields(isoFields) {
@@ -59,18 +76,15 @@ export function compareIsoTimeFields() {
   // uses conversion to milliseconds
 }
 
-// TODO: make distinction between "regulate" (which considers overflow) and "reject" (throws error)
-
-export function regulateIsoDateTimeFields() {
-
+export function constrainIsoDateTimeFields(isoDateTimeFields, overflow = 'reject') {
+  // ahhhh! calendar gets passed in here!!!
 }
 
-export function regulateIsoDateFields() {
-
+export function constrainIsoDateFields(isoDateFields, overflow = 'reject') {
+  // ahhhh! calendar gets passed in here!!!
 }
 
-export function regulateIsoTimeFields() {
-
+export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
 }
 
 export function addDaysToIsoFields() {

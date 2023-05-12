@@ -1,5 +1,6 @@
-import { isoCalendarId, toCalendarSlot } from './calendarAdapter'
+import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
+import { getPublicCalendar, queryCalendarOps } from './calendarOps'
 import {
   bagToPlainDateTimeInternals,
   dateToPlainMonthDay,
@@ -13,24 +14,25 @@ import { diffDateTimes } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import { formatCalendar, formatIsoDateTimeFields } from './format'
+import { neverValueOf } from './internalClass'
 import {
   compareIsoFields,
+  generatePublicIsoDateTimeFields,
   isoDateTimeSlotRefiners,
   isoTimeFieldDefaults,
   pluckIsoDateSlots,
-  pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
-  regulateIsoDateTimeFields,
+  constrainIsoDateTimeFields,
 } from './isoFields'
-import { movePlainDateTime } from './move'
-import { optionsToOverflow, validateRoundingOptions } from './options'
+import { moveDateTime } from './move'
+import { optionsToOverflow, toDisambiguation, validateRoundingOptions } from './options'
 import { stringToPlainDateTimeInternals } from './parse'
-import { createPlainDate, toPlainDateInternals } from './plainDate'
+import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
-import { createTemporalClass, neverValueOf } from './temporalClass'
-import { plainDateTimeToEpochNanoseconds, toTimeZoneSlot } from './timeZoneProtocol'
-import { createZonedDateTime } from './zonedDateTime'
+import { createTemporalClass } from './temporalClass'
+import { getBestInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export const [
   PlainDateTime,
@@ -42,6 +44,7 @@ export const [
   // Creation
   // -----------------------------------------------------------------------------------------------
 
+  // constructorToInternals
   (
     isoYear,
     isoMonth,
@@ -54,7 +57,7 @@ export const [
     isoNanosecond = 0,
     calendarArg = isoCalendarId,
   ) => {
-    return regulateIsoDateTimeFields(
+    return constrainIsoDateTimeFields(
       mapRefiners({
         isoYear,
         isoMonth,
@@ -65,16 +68,28 @@ export const [
         isoMillisecond,
         isoMicrosecond,
         isoNanosecond,
-        calendar: toCalendarSlot(calendarArg),
+        calendar: queryCalendarOps(calendarArg),
       }, isoDateTimeSlotRefiners),
     )
   },
-  {
-    PlainDate: (internals) => ({ ...internals, ...isoTimeFieldDefaults }),
-    ZonedDateTime: zonedDateTimeInternalsToIso,
+
+  // massageOtherInternals
+  (arg, argInternals) => {
+    if (arg instanceof PlainDate) {
+      return { ...argInternals, ...isoTimeFieldDefaults }
+    }
+    if (arg instanceof ZonedDateTime) {
+      return zonedDateTimeInternalsToIso(argInternals)
+    }
   },
+
+  // bagToInternals
   bagToPlainDateTimeInternals,
+
+  // stringToInternals
   stringToPlainDateTimeInternals,
+
+  // handleUnusedOptions
   optionsToOverflow,
 
   // Getters
@@ -107,23 +122,29 @@ export const [
     withCalendar(internals, calendarArg) {
       return createPlainDateTime({
         ...internals,
-        calendar: toCalendarSlot(calendarArg),
+        calendar: queryCalendarOps(calendarArg),
       })
     },
 
     add(internals, durationArg, options) {
-      return movePlainDateTime(
-        internals,
-        toDurationInternals(durationArg),
-        options,
+      return createPlainDateTime(
+        moveDateTime(
+          internals,
+          toDurationInternals(durationArg),
+          internals.calendar,
+          optionsToOverflow(options),
+        ),
       )
     },
 
     subtract(internals, durationArg, options) {
-      return movePlainDateTime(
-        internals,
-        negateDurationFields(toDurationInternals(durationArg)),
-        options,
+      return createPlainDateTime(
+        moveDateTime(
+          internals,
+          negateDurationFields(toDurationInternals(durationArg)),
+          internals.calendar,
+          optionsToOverflow(options),
+        ),
       )
     },
 
@@ -176,8 +197,8 @@ export const [
       options, // { disambiguation } - optional
     ) {
       const { calendar } = internals
-      const timeZone = toTimeZoneSlot(timeZoneArg)
-      const epochNanoseconds = plainDateTimeToEpochNanoseconds(timeZone, this, options),
+      const timeZone = queryTimeZoneOps(timeZoneArg)
+      const epochNanoseconds = getBestInstantFor(timeZone, internals, toDisambiguation(options))
 
       return createZonedDateTime({
         epochNanoseconds,
@@ -202,7 +223,9 @@ export const [
       return createPlainTime(pluckIsoTimeFields(internals))
     },
 
-    getISOFields: pluckIsoDateTimeSlots,
+    getISOFields: generatePublicIsoDateTimeFields,
+
+    getCalendar: getPublicCalendar,
   },
 
   // Static

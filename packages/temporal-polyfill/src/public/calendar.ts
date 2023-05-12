@@ -578,6 +578,7 @@ export function mergeCalFields(baseFields: any, newFields: any, calendarID: stri
 
 // utils
 
+// BAD NAME
 // TODO: can we eliminate this now that it's checked in public date classes?
 function isoToEpochNanoSafe(
   calendarImpl: CalendarImpl,

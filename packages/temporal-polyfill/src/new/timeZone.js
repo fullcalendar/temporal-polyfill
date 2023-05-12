@@ -1,35 +1,43 @@
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { Calendar } from './calendar'
+import { queryCalendarOps } from './calendarOps'
 import { createComplexBagRefiner } from './convert'
 import { formatOffsetNanoseconds } from './format'
-import { toInstantEpochNanoseconds } from './instant'
+import { createInstant, toInstantEpochNanoseconds } from './instant'
+import { internalIdGetters, returnId } from './internalClass'
+import { identityFunc, noop } from './lang'
+import { mapProps } from './obj'
+import { toDisambiguation } from './options'
 import { stringToTimeZoneId } from './parse'
+import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { createTemporalClass } from './temporalClass'
-import { instantToOffsetNanoseconds } from './timeZoneProtocol'
+import { getBestInstantFor } from './timeZoneOps'
 
-export const [TimeZone] = createTemporalClass(
+export const [TimeZone, createTimeZone] = createTemporalClass(
   'TimeZone',
 
   // Creation
   // -----------------------------------------------------------------------------------------------
 
-  // constructor to internals
-  (id) => {
-    return queryTimeZoneImpl(id)
-  },
-  {},
+  // constructorToInternals
+  queryTimeZoneImpl,
+
+  // massageOtherInternals
+  noop,
+
+  // bagToInternals
   createComplexBagRefiner('timeZone', Calendar),
-  stringToTimeZoneId,
-  undefined,
+
+  // stringToInternals
+  (str) => queryTimeZoneImpl(stringToTimeZoneId(str)),
+
+  // handleUnusedOptions
+  noop,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  {
-    id(impl) {
-      return impl.id
-    },
-  },
+  internalIdGetters,
 
   // Methods
   // -----------------------------------------------------------------------------------------------
@@ -37,40 +45,50 @@ export const [TimeZone] = createTemporalClass(
   {
     getOffsetStringFor(impl, instantArg) {
       return formatOffsetNanoseconds(
-        // TODO: figure out timeZoneProtocol
-        instantToOffsetNanoseconds(
-          this,
-          toInstantEpochNanoseconds(instantArg),
-        ),
+        impl.getOffsetNanosecondsFor(toInstantEpochNanoseconds(instantArg)),
       )
     },
 
-    getOffsetNanosecondsFor(impl, instantArg) {
-      // TODO
-    },
-
     getPlainDateTimeFor(impl, instantArg, calendarArg) {
-      // TODO
+      const epochNanoseconds = toInstantEpochNanoseconds(instantArg)
+      const offsetNanoseconds = impl.getOffsetNanosecondsFor(impl, epochNanoseconds)
+
+      return createPlainDateTime({
+        ...epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds)),
+        calendar: queryCalendarOps(calendarArg),
+      })
     },
 
-    getInstantFor(impl, dateTimeArg, options) {
-      // TODO
+    getInstantFor(impl, plainDateTimeArg, options) {
+      return getBestInstantFor(
+        impl,
+        toPlainDateTimeInternals(plainDateTimeArg),
+        toDisambiguation(options),
+      )
     },
 
-    getPossibleInstantsFor(impl, dateTimeArg) {
-      // TODO
+    getPossibleInstantsFor(impl, plainDateTimeArg) {
+      return impl.getPossibleInstantsFor(toPlainDateTimeInternals(plainDateTimeArg))
+        .map(createInstant)
     },
 
-    getPreviousTransition(impl, instantArg) {
-      // TODO
-    },
+    ...mapProps({
+      getPreviousTransition: createInstant,
+      getNextTransition: createInstant,
+      getOffsetNanosecondsFor: identityFunc,
+    }, (transformRes, methodName) => {
+      return (impl, instantArg) => {
+        return transformRes(impl[methodName](toInstantEpochNanoseconds(instantArg)))
+      }
+    }),
 
-    getNextTransition(impl, instantArg) {
-      // TODO
-    },
-
-    toString(impl) {
-      return impl.id
-    },
+    toString: returnId,
   },
 )
+
+// TimeZone Conversions
+// -------------------------------------------------------------------------------------------------
+
+function epochNanosecondsToIso(epochNanoseconds, timeZone) {
+
+}

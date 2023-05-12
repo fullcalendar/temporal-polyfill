@@ -1,3 +1,4 @@
+import { isoMonthsInYear } from './calendarImpl'
 import { addDaysToIsoFields, pluckIsoTimeFields } from './isoFields'
 import { compareLargeInts } from './largeInt'
 import { nanosecondsInDay } from './nanoseconds'
@@ -24,7 +25,7 @@ export function diffEpochNanoseconds(
   )
 }
 
-export function diffZoneEpochNanoseconds(
+export function diffZonedEpochNanoseconds(
   startEpochNanoseconds,
   endEpochNanoseconds,
   timeZone,
@@ -65,12 +66,7 @@ export function diffZoneEpochNanoseconds(
     midEpochNanoseconds = isoToZoneEpochNanoseconds(midIsoFields)
   }
 
-  const dateDiff = diffExactDates(
-    startIsoFields,
-    midIsoFields,
-    calendar,
-    largestUnit,
-  )
+  const dateDiff = calendar.dateUntil(startIsoFields, midIsoFields, largestUnit)
   const timeDiff = diffExactLargeNanoseconds(
     endEpochNanoseconds.subtract(midEpochNanoseconds),
     'hours', // largestUnit (default?)
@@ -129,12 +125,7 @@ export function diffDateTimes(
     timeNanosecondDiff += nanosecondsInDay
   }
 
-  const dateDiff = diffExactDates(
-    midIsoFields,
-    endIsoFields,
-    calendar,
-    largestUnit,
-  )
+  const dateDiff = calendar.dateUntil(midIsoFields, endIsoFields, largestUnit)
   const timeDiff = nanosecondsToTimeDuration(
     timeNanosecondDiff,
     'hours', // largestUnit (default?)
@@ -178,12 +169,7 @@ export function diffDates(
     )
   }
 
-  const dateDiff = diffExactDates(
-    startIsoDateFields,
-    endIsoDateFields,
-    calendar,
-    largestUnit,
-  )
+  const dateDiff = calendar.dateUntil(startIsoDateFields, endIsoDateFields, largestUnit)
 
   return roundRelativeDuration(
     dateDiff,
@@ -202,6 +188,75 @@ export function diffDates(
 
 export function diffTimes() {
 
+}
+
+// CalendarImpl Utils
+// -------------------------------------------------------------------------------------------------
+
+export function diffYearMonthDay(year0, month0, day0, year1, month1, day1, calendarImpl) {
+  let yearDiff
+  let monthsInYear1
+  let monthDiff
+  let daysInMonth1
+  let dayDiff
+
+  function updateYearMonth() {
+    yearDiff = year1 - year0
+    monthsInYear1 = calendarImpl.monthsInYear(year1)
+    monthDiff = month1 - Math.min(month0, monthsInYear1)
+  }
+
+  function updateYearMonthDay() {
+    updateYearMonth()
+    daysInMonth1 = calendarImpl.daysInMonth(year1, month1)
+    dayDiff = day1 - Math.min(day0, daysInMonth1)
+  }
+
+  updateYearMonthDay()
+  const daySign = numberSign(dayDiff)
+  const sign = numberSign(yearDiff) || numberSign(monthDiff) || daySign
+
+  if (sign) {
+    // overshooting day? - correct by moving to penultimate month
+    if (daySign && daySign !== sign) {
+      const oldDaysInMonth1 = daysInMonth1
+      ;([year1, month1] = calendarImpl.addMonths(year1, month1, -sign))
+      updateYearMonthDay()
+      dayDiff += sign < 0 // correct with days-in-month further in past
+        ? oldDaysInMonth1 // correcting from past -> future
+        : daysInMonth1 // correcting from future -> past
+    }
+
+    // overshooting month? - correct by moving to penultimate year
+    const monthSign = numberSign(monthDiff)
+    if (monthSign && monthSign !== sign) {
+      const oldMonthsInYear1 = monthsInYear1
+      year1 -= sign
+      updateYearMonth()
+      monthDiff += sign < 0 // correct with months-in-year further in past
+        ? oldMonthsInYear1 // correcting from past -> future
+        : monthsInYear1 // correcting from future -> past
+    }
+  }
+
+  return [yearDiff, monthDiff, dayDiff]
+}
+
+export function computeIsoMonthsInYearSpan(isoYearStart, yearDelta) {
+  return yearDelta * isoMonthsInYear
+}
+
+export function computeIntlMonthsInYearSpan(yearStart, yearDelta, calendarImpl) {
+  const yearEnd = yearStart + yearDelta
+  const yearSign = numberSign(yearDelta)
+  const yearCorrection = yearSign < 0 ? -1 : 0
+  let months = 0
+
+  for (let year = 0; year !== yearEnd; year += yearSign) {
+    months += calendarImpl.queryMonthsInYear(year + yearCorrection)
+  }
+
+  return months
 }
 
 // Public Duration Stuff
@@ -228,15 +283,6 @@ export function computeDurationTotal(
 
 // Exact Diffing
 // -------------------------------------------------------------------------------------------------
-
-function diffExactDates(
-  startIsoDateFields,
-  endIsoDateFields,
-  calendar,
-  largestUnit,
-) {
-  // defers to CalendarProtocol
-}
 
 function diffExactLargeNanoseconds(
   nanoseconds,

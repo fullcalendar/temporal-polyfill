@@ -1,10 +1,10 @@
-import {
-  getCommonCalendar,
-  isoCalendarId,
-  moveDate,
-  toCalendarSlot,
-} from './calendarAdapter'
+import { isoCalendarId } from './calendarConfig'
 import { dateGetters } from './calendarFields'
+import {
+  getCommonCalendarOps,
+  getPublicCalendar,
+  queryCalendarOps,
+} from './calendarOps'
 import {
   bagToPlainDateSlots,
   createZonedDateTimeConverter,
@@ -19,18 +19,21 @@ import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import { formatCalendar, formatIsoDateFields } from './format'
+import { neverValueOf } from './internalClass'
 import {
   compareIsoFields,
+  constrainIsoDateFields,
+  generatePublicIsoDateFields,
   isoDateSlotRefiners,
   isoTimeFieldDefaults,
   pluckIsoDateSlots,
-  regulateIsoDateFields,
 } from './isoFields'
 import { optionsToOverflow } from './options'
 import { stringToPlainDateInternals } from './parse'
-import { createPlainDateTime } from './plainDateTime'
+import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
-import { createTemporalClass, neverValueOf } from './temporalClass'
+import { createTemporalClass } from './temporalClass'
+import { ZonedDateTime } from './zonedDateTime'
 
 export const [
   PlainDate,
@@ -42,8 +45,9 @@ export const [
   // Creation
   // -----------------------------------------------------------------------------------------------
 
+  // constructorToInternals
   (isoYear, isoMonth, isoDay, calendarArg = isoCalendarId) => {
-    return regulateIsoDateFields(
+    return constrainIsoDateFields(
       mapRefiners({
         isoYear,
         isoMonth,
@@ -52,12 +56,24 @@ export const [
       }, isoDateSlotRefiners),
     )
   },
-  {
-    PlainDateTime: pluckIsoDateSlots,
-    ZonedDateTime: zonedDateTimeInternalsToIso,
+
+  // massageOtherInternals
+  (arg, argInternals) => {
+    if (arg instanceof PlainDateTime) {
+      return pluckIsoDateSlots(argInternals)
+    }
+    if (arg instanceof ZonedDateTime) {
+      return zonedDateTimeInternalsToIso(argInternals)
+    }
   },
+
+  // bagToInternals
   bagToPlainDateSlots,
+
+  // stringToInternals
   stringToPlainDateInternals,
+
+  // handleUnusedOptions
   optionsToOverflow,
 
   // Getters
@@ -76,13 +92,12 @@ export const [
     withCalendar(internals, calendarArg) {
       return createPlainDate({
         ...internals,
-        calendar: toCalendarSlot(calendarArg),
+        calendar: queryCalendarOps(calendarArg),
       })
     },
 
     add(internals, durationArg, options) {
-      return moveDate(
-        internals.calendar,
+      return internals.calendar.dateAdd(
         internals,
         toDurationInternals(durationArg),
         options,
@@ -90,8 +105,7 @@ export const [
     },
 
     subtract(internals, durationArg, options) {
-      return moveDate(
-        internals.calendar,
+      return internals.calendar.dateAdd(
         internals,
         negateDurationFields(toDurationInternals(durationArg)),
         options,
@@ -100,13 +114,13 @@ export const [
 
     until(internals, otherArg, options) {
       const otherInternals = toPlainDateInternals(otherArg)
-      const calendar = getCommonCalendar(internals, otherInternals)
+      const calendar = getCommonCalendarOps(internals, otherInternals)
       return diffDates(calendar, internals, otherInternals, options, 1)
     },
 
     since(internals, otherArg, options) {
       const otherInternals = toPlainDateInternals(otherArg)
-      const calendar = getCommonCalendar(internals, otherInternals)
+      const calendar = getCommonCalendarOps(internals, otherInternals)
       return diffDates(calendar, internals, otherInternals, options, -1)
     },
 
@@ -146,7 +160,9 @@ export const [
       return dateToPlainMonthDay(this)
     },
 
-    getISOFields: pluckIsoDateSlots,
+    getISOFields: generatePublicIsoDateFields,
+
+    getCalendar: getPublicCalendar,
   },
 
   // Static

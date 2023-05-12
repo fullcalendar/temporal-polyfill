@@ -1,5 +1,5 @@
-import { getCommonCalendar, toCalendarSlot } from './calendarAdapter'
 import { dateTimeGetters } from './calendarFields'
+import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import {
   bagToZonedDateTimeInternals,
   dateToPlainMonthDay,
@@ -8,7 +8,7 @@ import {
   zonedDateTimeInternalsToIso,
   zonedDateTimeWithBag,
 } from './convert'
-import { diffZoneEpochNanoseconds } from './diff'
+import { diffZonedEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import {
@@ -18,14 +18,16 @@ import {
   formatTimeZone,
 } from './format'
 import { createInstant } from './instant'
+import { neverValueOf } from './internalClass'
 import {
   isoTimeFieldDefaults,
   pluckIsoDateSlots,
   pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
 } from './isoFields'
+import { noop } from './lang'
 import { compareLargeInts, toLargeInt } from './largeInt'
-import { moveZonedDateTimeInternals } from './move'
+import { moveZonedEpochNanoseconds } from './move'
 import { epochGetters, nanosecondsInHour } from './nanoseconds'
 import { mapProps } from './obj'
 import { optionsToOverflow } from './options'
@@ -34,17 +36,15 @@ import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
-import { createTemporalClass, neverValueOf } from './temporalClass'
+import { createTemporalClass } from './temporalClass'
 import {
   computeIsoFieldEpochNanoseconds,
   computeNanosecondsInDay,
-  getCommonTimeZone,
-  instantToOffsetNanoseconds,
-  instantToPlainDateTimeInternals,
-  plainDateTimeToEpochNanoseconds,
-  toTimeZoneSlot,
-  zonedDateTimeInternalsToOffsetNanoseconds,
-} from './timeZoneProtocol'
+  getBestInstantFor,
+  getCommonTimeZoneOps,
+  getPublicTimeZone,
+  queryTimeZoneOps,
+} from './timeZoneOps'
 
 export const [
   ZonedDateTime,
@@ -56,16 +56,25 @@ export const [
   // Creation
   // -----------------------------------------------------------------------------------------------
 
+  // constructorToInternals
   (epochNanoseconds, timeZoneArg, calendarArg) => {
     return {
       epochNanoseconds: toLargeInt(epochNanoseconds), // TODO: stricter
-      timeZone: toTimeZoneSlot(timeZoneArg),
-      calendar: toCalendarSlot(calendarArg),
+      timeZone: queryTimeZoneOps(timeZoneArg),
+      calendar: queryCalendarOps(calendarArg),
     }
   },
-  {},
+
+  // massageOtherInternals
+  noop,
+
+  // bagToInternals
   bagToZonedDateTimeInternals,
+
+  // stringToInternals
   stringToZonedDateTimeInternals,
+
+  // handleUnusedOptions
   optionsToOverflow,
 
   // Getters
@@ -85,8 +94,10 @@ export const [
     }),
 
     hoursInDay(internals) {
-      return computeNanosecondsInDay(internals.epochNanoseconds, internals.timeZone) /
-        nanosecondsInHour
+      return computeNanosecondsInDay(
+        internals.timeZone,
+        zonedDateTimeInternalsToIso(internals),
+      ) / nanosecondsInHour
     },
 
     offsetNanoseconds(internals) {
@@ -108,12 +119,12 @@ export const [
 
     withPlainTime(internals, plainTimeArg) {
       const { timeZone } = internals
-      const epochNanoseconds = plainDateTimeToEpochNanoseconds(
+      const epochNanoseconds = getBestInstantFor(
         timeZone,
-        createPlainDateTime({
+        {
           ...zonedDateTimeInternalsToIso(internals),
           ...toPlainTimeInternals(plainTimeArg),
-        }),
+        },
       )
 
       return createZonedDateTime({
@@ -125,13 +136,12 @@ export const [
 
     withPlainDate(internals, plainDateArg) {
       const { timeZone } = internals
-      const epochNanoseconds = plainDateTimeToEpochNanoseconds(
+      const epochNanoseconds = getBestInstantFor(
         timeZone,
-        createPlainDateTime({
+        {
           ...zonedDateTimeInternalsToIso(internals),
           ...toPlainDateInternals(plainDateArg),
-          // calendar doesn't matter
-        }),
+        },
       )
 
       return createZonedDateTime({
@@ -144,14 +154,14 @@ export const [
     withTimeZone(internals, timeZoneArg) {
       return createZonedDateTime({
         ...internals,
-        timeZone: toTimeZoneSlot(timeZoneArg),
+        timeZone: queryTimeZoneOps(timeZoneArg),
       })
     },
 
     withCalendar(internals, calendarArg) {
       return createZonedDateTime({
         ...internals,
-        calendar: toCalendarSlot(calendarArg),
+        calendar: queryCalendarOps(calendarArg),
       })
     },
 
@@ -177,22 +187,22 @@ export const [
 
     until(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
-      return diffZoneEpochNanoseconds(
+      return diffZonedEpochNanoseconds(
         internals.epochNanoseconds,
         otherInternals.epochNanoseconds,
-        getCommonTimeZone(internals, otherInternals),
-        getCommonCalendar(internals, otherInternals),
+        getCommonTimeZoneOps(internals, otherInternals),
+        getCommonCalendarOps(internals, otherInternals),
         options, // TODO: spread out lots of options!!!
       )
     },
 
     since(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
-      return diffZoneEpochNanoseconds(
+      return diffZonedEpochNanoseconds(
         otherInternals.epochNanoseconds,
         internals.epochNanoseconds,
-        getCommonTimeZone(internals, otherInternals),
-        getCommonCalendar(internals, otherInternals),
+        getCommonTimeZoneOps(internals, otherInternals),
+        getCommonCalendarOps(internals, otherInternals),
         options, // TODO: flip rounding options!!!!!
       )
     },
@@ -200,13 +210,13 @@ export const [
     round(internals, options) {
       let { epochNanoseconds, timeZone, calendar } = internals
 
-      const instant = createInstant(epochNanoseconds)
-      const offsetNanoseconds = instantToOffsetNanoseconds(timeZone, instant)
-      let isoFields = instantToPlainDateTimeInternals(timeZone, calendar, instant)
+      const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+      let isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
+
       isoFields = roundIsoDateTimeFields(
         isoFields,
         options,
-        () => computeNanosecondsInDay(isoFields, timeZone),
+        () => computeNanosecondsInDay(timeZone, isoFields),
       )
       epochNanoseconds = computeIsoFieldEpochNanoseconds(
         isoFields,
@@ -263,13 +273,13 @@ export const [
 
       // TODO: don't let options be accessed twice! once by rounding, twice by formatting
 
-      let instant = createInstant(epochNanoseconds)
-      let offsetNanoseconds = instantToOffsetNanoseconds(timeZone, instant)
-      let isoFields = instantToPlainDateTimeInternals(timeZone, calendar, instant)
+      let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+      let isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
+
       isoFields = roundIsoDateTimeFields(
         isoFields,
         options,
-        () => computeNanosecondsInDay(isoFields, timeZone),
+        () => computeNanosecondsInDay(timeZone, isoFields),
       )
       epochNanoseconds = computeIsoFieldEpochNanoseconds(
         isoFields,
@@ -280,9 +290,9 @@ export const [
         'compatible',
         true, // fuzzy
       )
-      instant = createInstant(epochNanoseconds)
-      offsetNanoseconds = instantToOffsetNanoseconds(timeZone, instant)
-      isoFields = instantToPlainDateTimeInternals(timeZone, calendar, instant)
+
+      offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+      isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
 
       return formatIsoDateTimeFields(isoFields, options) +
         formatOffsetNanoseconds(offsetNanoseconds) +
@@ -325,12 +335,15 @@ export const [
 
       return {
         // maintain alphabetical order
-        calendar,
+        calendar: calendar.id, // correct?
         ...pluckIsoDateTimeSlots(zonedDateTimeInternalsToIso(internals)),
         offset: formatOffsetNanoseconds(zonedDateTimeInternalsToOffsetNanoseconds(internals)),
-        timeZone: String(timeZone),
+        timeZone: timeZone.id, // correct?
       }
     },
+
+    getCalendar: getPublicCalendar,
+    getTimeZone: getPublicTimeZone,
   },
 
   // Static
@@ -345,3 +358,24 @@ export const [
     },
   },
 )
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+function moveZonedDateTimeInternals(internals, durationFields, overflowHandling) {
+  return moveZonedEpochNanoseconds(
+    internals.epochNanoseconds,
+    durationFields,
+    internals.calendar,
+    internals.timeZone,
+    overflowHandling,
+  )
+}
+
+function zonedDateTimeInternalsToOffsetNanoseconds(internals) {
+  return internals.timeZone // TimeZoneOps
+    .getOffsetNanosecondsFor(internals.epochNanoseconds)
+}
+
+function epochNanosecondsToIso() {
+}

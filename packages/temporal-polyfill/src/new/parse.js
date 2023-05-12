@@ -1,29 +1,30 @@
-import { isoCalendarId, toCalendarSlot } from './calendarAdapter'
+import { isoCalendarId } from './calendarConfig'
+import { queryCalendarOps } from './calendarOps'
 import {
   isValidIsoFields,
   pluckIsoDateSlots,
   pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
 } from './isoFields'
-import { computeIsoFieldEpochNanoseconds, toTimeZoneSlot } from './timeZoneProtocol'
+import { computeIsoFieldEpochNanoseconds, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
 export function stringToZonedDateTimeInternals(s) {
-  const parsed = parseDateTime(s)
+  const parsed = parseDateTime(s) // TODO: use just 'calendar' and 'timeZone' ?
   if (parsed) {
     if (!parsed.timeZoneId) {
       throw new Error()
     }
 
-    const calendar = toCalendarSlot(parsed.calendarId || isoCalendarId)
-    const timeZone = toTimeZoneSlot(parsed.timeZoneId)
+    const calendar = queryCalendarOps(parsed.calendarId || isoCalendarId)
+    const timeZone = queryTimeZoneOps(parsed.timeZoneId)
 
     const epochNanoseconds = computeIsoFieldEpochNanoseconds(
-      parsed,
       timeZone,
+      parsed,
       parsed.offset !== undefined ? parseOffsetNanoseconds(parsed.offset) : undefined,
       parsed.z,
       'reject',
@@ -142,7 +143,7 @@ export function stringToTimeZoneId(s) {
       return parsed.timeZonedId // TODO: need to canonicalize (run through DateTimeFormat)
     }
     if (parsed.hasZ) {
-      return 'UTC'
+      return utcTimeZoneId
     }
     if (parsed.offset) {
       return parsed.offset

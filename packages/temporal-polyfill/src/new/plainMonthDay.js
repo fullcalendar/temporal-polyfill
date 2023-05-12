@@ -1,5 +1,6 @@
-import { isoCalendarId } from './calendarAdapter'
+import { isoCalendarId } from './calendarConfig'
 import { monthDayGetters } from './calendarFields'
+import { getPublicCalendar } from './calendarOps'
 import {
   bagToPlainMonthDayInternals,
   isStringCastsEqual,
@@ -8,15 +9,17 @@ import {
   plainMonthDayWithBag,
 } from './convert'
 import { formatIsoMonthDayFields, formatPossibleDate } from './format'
+import { neverValueOf } from './internalClass'
 import {
   compareIsoFields,
+  constrainIsoDateFields,
+  generatePublicIsoDateFields,
   isoDateSlotRefiners,
-  pluckIsoDateSlots,
-  regulateIsoDateFields,
 } from './isoFields'
+import { noop } from './lang'
 import { optionsToOverflow } from './options'
 import { stringToMonthDayInternals } from './parse'
-import { createTemporalClass, neverValueOf } from './temporalClass'
+import { createTemporalClass } from './temporalClass'
 
 export const [
   PlainMonthDay,
@@ -28,8 +31,9 @@ export const [
   // Creation
   // -----------------------------------------------------------------------------------------------
 
+  // constructorToInternals
   (isoMonth, isoDay, calendarArg = isoCalendarId, referenceIsoYear = 1972) => {
-    return regulateIsoDateFields(
+    return constrainIsoDateFields(
       mapRefiners({
         isoYear: referenceIsoYear,
         isoMonth,
@@ -38,9 +42,17 @@ export const [
       }, isoDateSlotRefiners),
     )
   },
-  {},
+
+  // massageOtherInternals
+  noop,
+
+  // bagToInternals
   bagToPlainMonthDayInternals,
+
+  // stringToInternals
   stringToMonthDayInternals,
+
+  // handleUnusedOptions
   optionsToOverflow,
 
   // Getters
@@ -76,6 +88,8 @@ export const [
       return plainMonthDayToPlainDate(this, bag)
     },
 
-    getISOFields: pluckIsoDateSlots,
+    getISOFields: generatePublicIsoDateFields,
+
+    getCalendar: getPublicCalendar,
   },
 )

@@ -2,6 +2,8 @@ import { toIntegerThrowOnInfinity, toPositiveInteger } from './cast'
 import { isoTimeFieldDefaults, isoTimeFieldNames } from './isoFields'
 import { mapProps, remapProps } from './obj'
 
+// does NOT contain era/eraYear (considered special-case for certain calendars)
+
 export const yearMonthFieldRefiners = {
   // sorted alphabetically
   month: toPositiveInteger,
@@ -37,11 +39,17 @@ export const dateTimeFieldRefiners = {
   ...timeFieldRefiners,
 }
 
-export const yearMonthStatRefiners = {
-  daysInMonth: toPositiveInteger,
+export const yearStatRefiners = {
+  // sorted alphabetically, for predictable macros
   daysInYear: toPositiveInteger,
-  monthsInYear: toPositiveInteger,
   inLeapYear: toPositiveInteger,
+  monthsInYear: toPositiveInteger,
+}
+export const yearStatNames = Object.keys(yearStatRefiners)
+
+export const yearMonthStatRefiners = {
+  ...yearStatRefiners,
+  daysInMonth: toPositiveInteger,
 }
 
 export const dateStatRefiners = {
@@ -53,13 +61,21 @@ export const dateStatRefiners = {
   daysInWeek: toPositiveInteger,
 }
 
+//
+// NOTE: "basic" names are for converting between Plain* objects. Don't need all numeric fields
+//
 export const dateFieldNames = Object.keys(dateFieldRefiners)
+export const dateFieldBasics = ['day', 'month', 'year']
 export const yearMonthFieldNames = Object.keys(yearMonthFieldRefiners) // month/monthCode/year
 export const yearMonthBasicNames = yearMonthFieldNames.slice(1) // monthCode/year
 export const monthDayFieldNames = dateFieldNames.slice(0, 3) // day/month/monthCode
 export const monthDayBasicNames = ['day', 'monthCode']
+export const monthFieldNames = monthDayFieldNames.slice(1) // month/monthCode
 export const dateTimeFieldNames = Object.keys(dateTimeFieldRefiners).sort()
 export const timeFieldNames = Object.keys(timeFieldRefiners)
+
+export const eraYearFieldNames = ['era', 'eraYear']
+export const allYearFieldNames = [...eraYearFieldNames, 'year']
 
 export const yearMonthGetters = createCalendarGetters({
   ...yearMonthFieldRefiners,
@@ -90,12 +106,14 @@ export const dateTimeGetters = {
 function createCalendarGetters(refiners) {
   const getters = mapProps(refiners, (refiner, fieldName) => {
     return function(internals) {
-      return refiner(internals.calendar[fieldName][this])
+      return refiner(internals.calendar[fieldName](this))
     }
   })
-  getters.calendar = function(internals) {
-    return internals.calendar
+
+  getters.calendarId = function(internals) {
+    return internals.calendar.id
   }
+
   return getters
 }
 

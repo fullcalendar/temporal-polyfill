@@ -2,7 +2,7 @@ import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
 import { Now } from './now'
-import { defineProps } from './obj'
+import { createPropDescriptors } from './obj'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
@@ -11,7 +11,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
 
-export const Temporal = defineProps({}, {
+export const Temporal = Object.defineProperties({}, createPropDescriptors({
   PlainYearMonth,
   PlainMonthDay,
   PlainDate,
@@ -23,4 +23,4 @@ export const Temporal = defineProps({}, {
   TimeZone,
   Duration,
   Now,
-})
+}))

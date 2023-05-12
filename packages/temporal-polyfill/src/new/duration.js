@@ -5,8 +5,10 @@ import {
   negateDurationFields,
   refineDurationFields,
 } from './durationFields'
+import { neverValueOf } from './internalClass'
+import { noop } from './lang'
 import { stringToDurationFields } from './parse'
-import { createTemporalClass, neverValueOf } from './temporalClass'
+import { createTemporalClass } from './temporalClass'
 
 export const [
   Duration,
@@ -18,6 +20,7 @@ export const [
   // Creation
   // -----------------------------------------------------------------------------------------------
 
+  // constructorToInternals
   (
     years = 0,
     months = 0,
@@ -43,10 +46,18 @@ export const [
       nanoseconds,
     })
   },
-  {},
+
+  // massageOtherInternals
+  noop,
+
+  // bagToInternals
   bagToDurationFields,
+
+  // stringToInternals
   stringToDurationFields,
-  undefined,
+
+  // handleUnusedOptions
+  noop,
 
   // Getters
   // -----------------------------------------------------------------------------------------------

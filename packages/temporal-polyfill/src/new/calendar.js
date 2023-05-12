@@ -1,7 +1,15 @@
-import { queryCalendarImpl } from '../calendarImpl/calendarImplQuery' // ah
-import { dateCalendarRefiners } from './calendarFields'
-import { createComplexBagRefiner } from './convert'
+import {
+  getRequiredDateFields,
+  getRequiredMonthDayFields,
+  getRequiredYearMonthFields,
+} from './calendarConfig'
+import { dateCalendarRefiners, dateFieldNames, yearMonthFieldNames } from './calendarFields'
+import { isoDaysInWeek, queryCalendarImpl } from './calendarImpl'
+import { strictArrayOfStrings, toObject } from './cast'
+import { createComplexBagRefiner, prepareFields } from './convert'
 import { createDuration, toDurationInternals } from './duration'
+import { internalIdGetters, returnId } from './internalClass'
+import { noop } from './lang'
 import { mapProps } from './obj'
 import { optionsToLargestUnit, optionsToOverflow } from './options'
 import { stringToCalendarId } from './parse'
@@ -11,28 +19,34 @@ import { createPlainYearMonth } from './plainYearMonth'
 import { createTemporalClass } from './temporalClass'
 import { TimeZone } from './timeZone'
 
-export const [Calendar] = createTemporalClass(
+/*
+Must do input validation
+*/
+export const [Calendar, createCalendar] = createTemporalClass(
   'Calendar',
 
   // Creation
   // -----------------------------------------------------------------------------------------------
 
-  (id) => {
-    return queryCalendarImpl(id)
-  },
-  {},
+  // constructorToInternals
+  queryCalendarImpl,
+
+  // massageOtherInternals
+  noop,
+
+  // bagToInternals
   createComplexBagRefiner('calendar', TimeZone),
-  stringToCalendarId,
-  undefined,
+
+  // stringToInternals
+  (str) => queryCalendarImpl(stringToCalendarId(str)),
+
+  // handleUnusedOptions
+  noop,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  {
-    id(impl) {
-      return impl.id // TODO: more DRY with toString()
-    },
-  },
+  internalIdGetters,
 
   // Methods
   // -----------------------------------------------------------------------------------------------
@@ -44,10 +58,14 @@ export const [Calendar] = createTemporalClass(
       }
     }),
 
+    daysInWeek() {
+      return isoDaysInWeek
+    },
+
     dateAdd(impl, plainDateArg, durationArg, options) {
       return createPlainDate(
         impl.dateAdd(
-          toPlainDateInternals(plainDateArg),
+          toPlainDateInternals(plainDateArg), // round time parts???
           toDurationInternals(durationArg),
           optionsToLargestUnit(options),
         ),
@@ -57,34 +75,61 @@ export const [Calendar] = createTemporalClass(
     dateUntil(impl, startPlainDateArg, endPlainDateArg, options) {
       return createDuration(
         impl.dateUntil(
-          toPlainDateInternals(startPlainDateArg),
-          toPlainDateInternals(endPlainDateArg),
+          toPlainDateInternals(startPlainDateArg), // round time parts???
+          toPlainDateInternals(endPlainDateArg), // round time parts???
           optionsToOverflow(options),
         ),
       )
     },
 
-    ...mapProps({
-      dateFromFields: createPlainDate,
-      yearMonthFromFields: createPlainYearMonth,
-      monthDayFromFields: createPlainMonthDay,
-      fields: identityFunc,
-      mergeFields: identityFunc,
-    }, transformInternalMethod),
-
-    toString(impl) {
-      return impl.id // TODO: more DRY with toString()
+    dateFromFields(impl, fields, options) {
+      return createPlainDate({
+        calendar: impl,
+        ...impl.dateFromFields(
+          prepareFields(fields, impl.fields(dateFieldNames), getRequiredDateFields(impl)),
+          optionsToOverflow(options),
+        ),
+      })
     },
+
+    yearMonthFromFields(impl, fields, options) {
+      return createPlainYearMonth({
+        calendar: impl,
+        ...impl.yearMonthFromFields(
+          prepareFields(fields, impl.fields(yearMonthFieldNames), getRequiredYearMonthFields(impl)),
+          optionsToOverflow(options),
+        ),
+      })
+    },
+
+    monthDayFromFields(impl, fields, options) {
+      return createPlainMonthDay({
+        calendar: impl,
+        ...impl.monthDayFromFields(
+          // refine y/m/d fields
+          prepareFields(fields, impl.fields(dateFieldNames), getRequiredMonthDayFields(impl)),
+          optionsToOverflow(options),
+        ),
+      })
+    },
+
+    fields(impl, fieldNames) {
+      return impl.fields(strictArrayOfStrings(fieldNames))
+    },
+
+    mergeFields(impl, fields0, fields1) {
+      return impl.mergeFields(
+        removeUndefines(toObject(fields0)),
+        removeUndefines(toObject(fields1)),
+      )
+    },
+
+    toString: returnId,
   },
 )
 
-// Misc
-// ----
+// utils
 
-function identityFunc(input) { return input }
+function removeUndefines(obj) { // and copy
 
-function transformInternalMethod(transformRes, methodName) {
-  return (impl, ...args) => {
-    return transformRes(impl[methodName](...args))
-  }
 }

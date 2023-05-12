@@ -1,11 +1,19 @@
 
+export function strictNumber(input) {
+
+}
+
 export function strictInstanceOf(obj, Class) {
 }
 
-export function strictArrayOfStrings(obj) {
+export function strictArrayOfStrings(obj) { // rethink
 }
 
-export function strictArrayOfType(obj) {
+export function strictArrayOfType(obj) { // used?
+}
+
+export function strictArray() {
+
 }
 
 export function toObject() {

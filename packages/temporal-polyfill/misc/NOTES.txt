@@ -9,14 +9,24 @@ https://github.com/js-temporal/temporal-polyfill/blob/main/lib/ecmascript.ts#L18
 
 TODO: move to global builtin casts!!!!
 
-now = Temporal.PlainDate.from('2022-01-01')
-then = Temporal.PlainDate.from('2023-12-25')
 
-duration = now.until(then, { largestUnit: 'year', smallestUnit: 'month', roundingMode: 'ceil' })
-console.log(duration.toString())
+const past = Temporal.PlainDate.from('2022-01-01')
+const future = Temporal.PlainDate.from('2023-12-25')
 
-roundedDuration = duration.round({ relativeTo: now, largestUnit: 'year', smallestUnit: 'month', roundingMode: 'ceil' })
-console.log(roundedDuration.toString())
+const durationViaUntil = past.until(future, {
+  largestUnit: 'year',
+  smallestUnit: 'month',
+  roundingMode: 'ceil'
+})
+console.log(durationViaUntil.toString()) // P1Y12M (undesirable result IMO)
+
+const durationViaRound = past.until(future).round({
+  relativeTo: past,
+  largestUnit: 'year',
+  smallestUnit: 'month',
+  roundingMode: 'ceil'
+})
+console.log(durationViaRound.toString()) // P2Y (expected result)
 
 
 
