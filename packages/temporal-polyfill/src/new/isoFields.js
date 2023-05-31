@@ -88,9 +88,14 @@ export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
 }
 
 export function addDaysToIsoFields() {
-
+  // short-circuit if nothing to add
 }
 
 export function isValidIsoFields() {
 
 }
+
+/*
+TODO: move AWAY from just 'isofields' because might get confused with getISOFields()
+name it 'isodatetimefields'
+*/

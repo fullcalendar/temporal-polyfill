@@ -19,13 +19,14 @@ export function queryCalendarOps(calendarSlot) {
   return queryCalendarImpl(calendarSlot) // string
 }
 
-export function getCommonCalendarOps(internals0, internals1) {
-}
-
 export function getPublicCalendar(internals) {
   const { calendar } = internals
   return getInternals(calendar) || // if CalendarOpsAdapter
     createCalendar(calendar) // if CalendarImpl
+}
+
+export function getCommonCalendarOps(internals0, internals1) {
+  // TODO
 }
 
 // Adapter

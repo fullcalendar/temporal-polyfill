@@ -19,6 +19,7 @@ import { queryCalendarOps } from './calendarOps'
 import { toInteger, toObject } from './cast'
 import {
   durationFieldDefaults,
+  durationFieldNames,
   durationFieldRefiners,
   refineDurationFields,
 } from './durationFields'
@@ -34,14 +35,22 @@ import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainTime } from './plainTime'
 import { createPlainYearMonth } from './plainYearMonth'
-import { computeIsoFieldEpochNanoseconds, getBestInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
+
+// TODO: rename bag?
 
 // Duration
 // -------------------------------------------------------------------------------------------------
 
 export function bagToDurationFields(bag) {
   return refineDurationFields({ ...durationFieldDefaults, ...bag })
+}
+
+export function durationWithBag(durationFields, bag) {
+  const partialDurationFields = prepareFields(bag, durationFieldNames)
+  return refineDurationFields({ ...durationFields, ...partialDurationFields })
+  // TODO: inefficient b/c refineDurationFields will re-parse
 }
 
 // high level yo
@@ -60,7 +69,7 @@ export function bagToZonedDateTimeInternals(bag, options) {
   const timeZone = queryTimeZoneOps(fields.timeZone)
   const isoFields = calendarOps.dateFromFields(fields, optionsToOverflow(options))
 
-  const epochNanoseconds = computeIsoFieldEpochNanoseconds(
+  const epochNanoseconds = getMatchingInstantFor(
     timeZone,
     { ...isoFields, ...timeFieldsToIso(fields) },
     fields.offset !== undefined ? parseOffsetNanoseconds(fields.offset) : undefined,
@@ -82,7 +91,7 @@ export function zonedDateTimeWithBag(zonedDateTime, bag, options) {
   const fields = mergeBag(calendar, zonedDateTime, bag, dateTimeFieldNames, ['offset'])
   const isoFields = calendar.dateFromFields(fields, optionsToOverflow(options))
 
-  const epochNanoseconds = computeIsoFieldEpochNanoseconds(
+  const epochNanoseconds = getMatchingInstantFor(
     timeZone,
     { ...isoFields, ...timeFieldsToIso(fields) },
     parseOffsetNanoseconds(fields.offset),
@@ -283,18 +292,19 @@ export function plainMonthDayToPlainDate(plainMonthDay, bag) {
 // to PlainDateTime
 // -------------------------------------------------------------------------------------------------
 
-// bad name now. should have something with 'slots'
-// should return calendar/timezone??? needed in many places
-export function zonedDateTimeInternalsToIso(internals) {
-  // use timeZone2.js
-  /*
-  return instantToPlainDateTime222(
-    internals.timeZone,
-    internals.calendar,
-    createInstant(internals.epochNanoseconds),
+export const zonedDateTimeInternalsToIso = createLazyMap((
+  internals, // { epochNanoseconds, timeZone }
+) => { // { isoYear..., offsetNanoseconds }
+  const offsetNanoseconds = internals.timeZone.getOffsetNanosecondsFor(internals.epochNanoseconds)
+  const isoDateTimeFields = epochNanoToIsoFields(
+    internals.epochNanoseconds.sub(offsetNanoseconds), // subtraction correct?
   )
-  */
-}
+
+  return {
+    ...isoDateTimeFields,
+    offsetNanoseconds,
+  }
+})
 
 // to ZonedDateTime
 // -------------------------------------------------------------------------------------------------
@@ -302,7 +312,7 @@ export function zonedDateTimeInternalsToIso(internals) {
 export function createZonedDateTimeConverter(getAdditionalIsoFields) {
   return (internals, options) => {
     const refinedOptions = toObject(options) // required!!!
-    const epochNanoseconds = getBestInstantFor(
+    const epochNanoseconds = getSingleInstantFor(
       internals.timeZone,
       {
         ...internals,
@@ -445,4 +455,14 @@ function extractCalendarFieldFromBag(bag) {
 
 export function mapRefiners(input, refinerMap) {
   // loops get driven props of input
+}
+
+// util
+// ----
+
+function createLazyMap() {
+}
+
+function epochNanoToIsoFields() {
+
 }

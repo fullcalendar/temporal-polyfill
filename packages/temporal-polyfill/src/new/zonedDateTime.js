@@ -8,6 +8,7 @@ import {
   zonedDateTimeInternalsToIso,
   zonedDateTimeWithBag,
 } from './convert'
+import { resolveZonedFormattable } from './dateTimeFormat'
 import { diffZonedEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -25,7 +26,6 @@ import {
   pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
 } from './isoFields'
-import { noop } from './lang'
 import { compareLargeInts, toLargeInt } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
 import { epochGetters, nanosecondsInHour } from './nanoseconds'
@@ -38,10 +38,9 @@ import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
 import { createTemporalClass } from './temporalClass'
 import {
-  computeIsoFieldEpochNanoseconds,
   computeNanosecondsInDay,
-  getBestInstantFor,
   getCommonTimeZoneOps,
+  getMatchingInstantFor,
   getPublicTimeZone,
   queryTimeZoneOps,
 } from './timeZoneOps'
@@ -65,8 +64,8 @@ export const [
     }
   },
 
-  // massageOtherInternals
-  noop,
+  // internalsConversionMap
+  {},
 
   // bagToInternals
   bagToZonedDateTimeInternals,
@@ -100,12 +99,17 @@ export const [
       ) / nanosecondsInHour
     },
 
+    // TODO: make this a getter?
     offsetNanoseconds(internals) {
-      return zonedDateTimeInternalsToOffsetNanoseconds(internals)
+      // TODO: more DRY
+      return zonedDateTimeInternalsToIso(internals).offsetNanoseconds
     },
 
     offset(internals) {
-      return formatOffsetNanoseconds(zonedDateTimeInternalsToOffsetNanoseconds(internals))
+      return formatOffsetNanoseconds(
+        // TODO: more DRY
+        zonedDateTimeInternalsToIso(internals).offsetNanoseconds,
+      )
     },
   },
 
@@ -118,36 +122,51 @@ export const [
     },
 
     withPlainTime(internals, plainTimeArg) {
-      const { timeZone } = internals
-      const epochNanoseconds = getBestInstantFor(
+      const { calendar, timeZone } = internals
+      const isoFields = {
+        ...zonedDateTimeInternalsToIso(internals),
+        ...toPlainTimeInternals(plainTimeArg),
+      }
+
+      const epochNano = getMatchingInstantFor(
         timeZone,
-        {
-          ...zonedDateTimeInternalsToIso(internals),
-          ...toPlainTimeInternals(plainTimeArg),
-        },
+        isoFields,
+        isoFields.offsetNano,
+        false, // hasZ
+        undefined, // offsetHandling
+        undefined, // disambig
+        false, // fuzzy
       )
 
       return createZonedDateTime({
-        epochNanoseconds,
+        epochNanoseconds: epochNano,
         timeZone,
-        calendar: internals.calendar,
+        calendar,
       })
     },
 
+    // TODO: more DRY with withPlainTime and zonedDateTimeWithBag?
     withPlainDate(internals, plainDateArg) {
-      const { timeZone } = internals
-      const epochNanoseconds = getBestInstantFor(
+      const { calendar, timeZone } = internals
+      const isoFields = {
+        ...zonedDateTimeInternalsToIso(internals),
+        ...toPlainDateInternals(plainDateArg),
+      }
+
+      const epochNano = getMatchingInstantFor(
         timeZone,
-        {
-          ...zonedDateTimeInternalsToIso(internals),
-          ...toPlainDateInternals(plainDateArg),
-        },
+        isoFields,
+        isoFields.offsetNano,
+        false, // hasZ
+        undefined, // offsetHandling
+        undefined, // disambig
+        false, // fuzzy
       )
 
       return createZonedDateTime({
-        epochNanoseconds,
+        epochNanoseconds: epochNano,
         timeZone,
-        calendar: internals.calendar,
+        calendar,
       })
     },
 
@@ -188,10 +207,10 @@ export const [
     until(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
       return diffZonedEpochNanoseconds(
+        getCommonCalendarOps(internals, otherInternals),
+        getCommonTimeZoneOps(internals, otherInternals),
         internals.epochNanoseconds,
         otherInternals.epochNanoseconds,
-        getCommonTimeZoneOps(internals, otherInternals),
-        getCommonCalendarOps(internals, otherInternals),
         options, // TODO: spread out lots of options!!!
       )
     },
@@ -199,10 +218,10 @@ export const [
     since(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
       return diffZonedEpochNanoseconds(
+        getCommonCalendarOps(internals, otherInternals),
+        getCommonTimeZoneOps(internals, otherInternals),
         otherInternals.epochNanoseconds,
         internals.epochNanoseconds,
-        getCommonTimeZoneOps(internals, otherInternals),
-        getCommonCalendarOps(internals, otherInternals),
         options, // TODO: flip rounding options!!!!!
       )
     },
@@ -218,7 +237,7 @@ export const [
         options,
         () => computeNanosecondsInDay(timeZone, isoFields),
       )
-      epochNanoseconds = computeIsoFieldEpochNanoseconds(
+      epochNanoseconds = getMatchingInstantFor(
         isoFields,
         timeZone,
         offsetNanoseconds,
@@ -243,7 +262,7 @@ export const [
         ...isoTimeFieldDefaults,
       }
 
-      epochNanoseconds = computeIsoFieldEpochNanoseconds(
+      epochNanoseconds = getMatchingInstantFor(
         isoFields,
         timeZone,
         undefined, // offsetNanoseconds
@@ -281,7 +300,7 @@ export const [
         options,
         () => computeNanosecondsInDay(timeZone, isoFields),
       )
-      epochNanoseconds = computeIsoFieldEpochNanoseconds(
+      epochNanoseconds = getMatchingInstantFor(
         isoFields,
         timeZone,
         offsetNanoseconds,
@@ -301,7 +320,8 @@ export const [
     },
 
     toLocaleString(internals, locales, options) {
-      return ''
+      const [epochMilli, format] = resolveZonedFormattable(internals, locales, options)
+      return format.format(epochMilli)
     },
 
     valueOf: neverValueOf,
@@ -319,7 +339,7 @@ export const [
     },
 
     toPlainDateTime(internals) {
-      return createPlainDateTime(zonedDateTimeInternalsToIso(internals))
+      return createPlainDateTime(pluckIsoDateTimeSlots(zonedDateTimeInternalsToIso(internals)))
     },
 
     toPlainYearMonth() {
@@ -337,7 +357,10 @@ export const [
         // maintain alphabetical order
         calendar: calendar.id, // correct?
         ...pluckIsoDateTimeSlots(zonedDateTimeInternalsToIso(internals)),
-        offset: formatOffsetNanoseconds(zonedDateTimeInternalsToOffsetNanoseconds(internals)),
+        offset: formatOffsetNanoseconds(
+          // TODO: more DRY
+          zonedDateTimeInternalsToIso(internals).offsetNanoseconds,
+        ),
         timeZone: timeZone.id, // correct?
       }
     },
@@ -364,17 +387,12 @@ export const [
 
 function moveZonedDateTimeInternals(internals, durationFields, overflowHandling) {
   return moveZonedEpochNanoseconds(
-    internals.epochNanoseconds,
-    durationFields,
     internals.calendar,
     internals.timeZone,
+    internals.epochNanoseconds,
+    durationFields,
     overflowHandling,
   )
-}
-
-function zonedDateTimeInternalsToOffsetNanoseconds(internals) {
-  return internals.timeZone // TimeZoneOps
-    .getOffsetNanosecondsFor(internals.epochNanoseconds)
 }
 
 function epochNanosecondsToIso() {

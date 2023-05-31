@@ -1,6 +1,6 @@
 import { mapHash } from '../utils/obj'
 import { strictInstanceOf } from './cast'
-import { identityFunc } from './lang'
+import { identityFunc, noop } from './lang'
 import { createGetterDescriptors, createPropDescriptors } from './obj'
 
 export const internalsMap = new WeakMap()
@@ -14,9 +14,11 @@ export function createInternalClass(
   constructorToInternals = identityFunc,
   extraPrototypeDescriptors = {},
   staticMembers = {},
+  handleInstance = noop,
 ) {
   function InternalObj(...args) {
     internalsMap.set(this, constructorToInternals(...args))
+    handleInstance(this)
   }
 
   function curryMethod(method) {

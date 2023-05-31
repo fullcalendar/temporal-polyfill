@@ -20,10 +20,9 @@ import {
   generatePublicIsoDateFields,
   isoDateSlotRefiners,
 } from './isoFields'
-import { noop } from './lang'
 import { optionsToOverflow } from './options'
 import { stringToPlainYearMonthInternals } from './parse'
-import { createTemporalClass } from './temporalClass'
+import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 
 export const [
   PlainYearMonth,
@@ -47,8 +46,8 @@ export const [
     )
   },
 
-  // massageOtherInternals
-  noop,
+  // internalsConversionMap
+  {},
 
   // bagToInternals
   bagToPlainYearMonthInternals,
@@ -124,9 +123,7 @@ export const [
       return formatPossibleDate(internals, options, formatIsoYearMonthFields)
     },
 
-    toLocaleString(internals, locales, options) {
-      return ''
-    },
+    toLocaleString: toLocaleStringMethod,
 
     valueOf: neverValueOf,
 

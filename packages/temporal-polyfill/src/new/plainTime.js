@@ -13,18 +13,17 @@ import { formatIsoTimeFields } from './format'
 import { neverValueOf } from './internalClass'
 import {
   compareIsoTimeFields,
+  constrainIsoTimeFields,
   isoTimeFieldRefiners,
   pluckIsoTimeFields,
-  constrainIsoTimeFields,
 } from './isoFields'
 import { moveTime } from './move'
 import { optionsToOverflow } from './options'
 import { stringToPlainTimeInternals } from './parse'
 import { toPlainDateInternals } from './plainDate'
-import { PlainDateTime, createPlainDateTime } from './plainDateTime'
+import { createPlainDateTime } from './plainDateTime'
 import { roundIsoTimeFields } from './round'
-import { createTemporalClass } from './temporalClass'
-import { ZonedDateTime } from './zonedDateTime'
+import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 
 export const [
   PlainTime,
@@ -57,14 +56,10 @@ export const [
     )
   },
 
-  // massageOtherInternals
-  (arg, argInternals) => {
-    if (arg instanceof PlainDateTime) {
-      return pluckIsoTimeFields(argInternals)
-    }
-    if (arg instanceof ZonedDateTime) {
-      return pluckIsoTimeFields(zonedDateTimeInternalsToIso(argInternals))
-    }
+  // internalsConversionMap
+  {
+    PlainDateTime: pluckIsoTimeFields,
+    ZonedDateTime: (argInternals) => pluckIsoTimeFields(zonedDateTimeInternalsToIso(argInternals)),
   },
 
   // bagToInternals
@@ -141,9 +136,7 @@ export const [
       return formatIsoTimeFields(roundIsoTimeFields(internals, options), options)
     },
 
-    toLocaleString(internals, locales, options) {
-      return ''
-    },
+    toLocaleString: toLocaleStringMethod,
 
     valueOf: neverValueOf,
 

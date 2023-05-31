@@ -10,12 +10,13 @@ import {
 } from './calendarConfig'
 import {
   allYearFieldNames,
-  dateFieldBasics,
+  dateBasicNames,
   eraYearFieldNames,
   monthDayFieldNames,
   monthFieldNames,
   yearStatNames,
 } from './calendarFields'
+import { IntlDateTimeFormat } from './dateTimeFormat'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan, diffYearMonthDay } from './diff'
 import { durationFieldDefaults } from './durationFields'
 import { isoDateFieldNames, isoTimeFieldDefaults } from './isoFields'
@@ -140,6 +141,8 @@ class IsoCalendarImpl {
   }
 
   dateAdd(isoDateFields, durationFields, overflow) {
+    // TODO: move all of this into move.js file?
+
     const { years, months, weeks, days } = durationFields
     let ms
 
@@ -168,31 +171,40 @@ class IsoCalendarImpl {
   }
 
   dateUntil(startIsoDateFields, endIsoDateFields, largestUnit) {
+    // TODO: move all of this into diff.js file?
+
     if (largestUnit <= 'week') { // TODO
       let weeks = 0
       let days = diffDaysMilli(
         isoFieldsToEpochMilli(startIsoDateFields),
         isoFieldsToEpochMilli(endIsoDateFields),
       )
+      const sign = numSign(days)
 
       if (largestUnit === 'day') { // TODO
         weeks = Math.trunc(days / isoDaysInWeek)
         days %= isoDaysInWeek
       }
 
-      return { ...durationFieldDefaults, weeks, days }
+      return { ...durationFieldDefaults, weeks, days, sign }
     }
 
     const yearMonthDayStart = this.queryYearMonthDay(startIsoDateFields)
     const yearMonthDayEnd = this.queryYearMonthDay(endIsoDateFields)
-    let [years, months, days] = diffYearMonthDay(...yearMonthDayStart, ...yearMonthDayEnd, this)
+    let [years, months, days, sign] = diffYearMonthDay(
+      ...yearMonthDayStart,
+      ...yearMonthDayEnd,
+      this,
+    )
 
     if (largestUnit === 'month') { // TODO
       months = this.queryMonthsInYearSpan(yearMonthDayStart[0], years)
       years = 0
     }
 
-    return { ...durationFieldDefaults, years, months, days }
+    return { ...durationFieldDefaults, years, months, days, sign }
+
+    // TODO: only return DateDurationFields
   }
 
   // Field "Refining" (Reading & Constraining)
@@ -328,7 +340,7 @@ Object.assign(IsoCalendarImpl.prototype, {
 })
 
 // year/month/day
-dateFieldBasics.forEach((dateFieldName, i) => {
+dateBasicNames.forEach((dateFieldName, i) => {
   IsoCalendarImpl.prototype[dateFieldName] = function(isoDateFields) {
     return isoDateFields[isoDateFieldNames[i]]
   }
@@ -579,6 +591,15 @@ function createEpochMillisecondsToIntlFields(calendarId) {
 }
 
 function parseIntlParts(intlParts, calendarId) {
+  return {
+    ...parseIntlYear(intlParts, calendarId),
+    month: intlParts.month, // a short month string!
+    day: parseInt(intlParts.day),
+  }
+}
+
+// best place for this?
+export function parseIntlYear(intlParts, calendarId) {
   let year = parseInt(intlParts.relatedYear || intlParts.year)
   let era
   let eraYear
@@ -591,29 +612,26 @@ function parseIntlParts(intlParts, calendarId) {
     }
   }
 
-  return {
-    era,
-    eraYear,
-    year,
-    month: intlParts.month, // a short month string!
-    day: parseInt(intlParts.day),
-  }
+  return { era, eraYear, year }
 }
 
-// Intl.DateTimeFormat Utils
+// DateTimeFormat Utils
 // -------------------------------------------------------------------------------------------------
 
+const standardCalendarId = 'en-GB' // gives 24-hour clock
+
 function buildIntlFormat(calendarId) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new IntlDateTimeFormat(standardCalendarId, {
     calendar: calendarId,
+    timeZone: 'UTC',
     era: 'short', // 'narrow' is too terse for japanese months
     year: 'numeric',
     month: 'short', // easier to identify monthCodes
     day: 'numeric',
-    timeZone: 'UTC',
   })
 }
 
+// best place for this?
 function hashIntlFormatParts(intlFormat, epochMilliseconds) {
   const parts = intlFormat.formatToParts(epochMilliseconds)
   const hash = {}
@@ -748,7 +766,7 @@ function getCalendarIdBase(calendarId) {
 
 export const isoMonthsInYear = 12
 export const isoDaysInWeek = 7
-const isoEpochOriginYear = 1970
+export const isoEpochOriginYear = 1970 // best place?
 const isoEpochFirstLeapYear = 1972
 
 export function computeIsoMonthsInYear(isoYear) {

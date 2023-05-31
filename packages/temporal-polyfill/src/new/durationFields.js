@@ -81,3 +81,7 @@ function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
   // should throw error if mismatch
   // TODO: audit repeat uses of this
 }
+
+export function addDurationFields(durationFields0, durationFields1, sign) {
+
+}

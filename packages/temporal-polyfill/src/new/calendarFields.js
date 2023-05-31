@@ -65,7 +65,7 @@ export const dateStatRefiners = {
 // NOTE: "basic" names are for converting between Plain* objects. Don't need all numeric fields
 //
 export const dateFieldNames = Object.keys(dateFieldRefiners)
-export const dateFieldBasics = ['day', 'month', 'year']
+export const dateBasicNames = ['day', 'month', 'year']
 export const yearMonthFieldNames = Object.keys(yearMonthFieldRefiners) // month/monthCode/year
 export const yearMonthBasicNames = yearMonthFieldNames.slice(1) // monthCode/year
 export const monthDayFieldNames = dateFieldNames.slice(0, 3) // day/month/monthCode

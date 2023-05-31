@@ -6,7 +6,7 @@ import {
   pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
 } from './isoFields'
-import { computeIsoFieldEpochNanoseconds, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
+import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
 
 // High-level
@@ -22,7 +22,7 @@ export function stringToZonedDateTimeInternals(s) {
     const calendar = queryCalendarOps(parsed.calendarId || isoCalendarId)
     const timeZone = queryTimeZoneOps(parsed.timeZoneId)
 
-    const epochNanoseconds = computeIsoFieldEpochNanoseconds(
+    const epochNanoseconds = getMatchingInstantFor(
       timeZone,
       parsed,
       parsed.offset !== undefined ? parseOffsetNanoseconds(parsed.offset) : undefined,

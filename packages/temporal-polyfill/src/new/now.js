@@ -2,8 +2,9 @@ import { nanoInMilli } from '../dateUtils/units'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { zonedDateTimeInternalsToIso } from './convert'
+import { IntlDateTimeFormat } from './dateTimeFormat'
 import { createInstant } from './instant'
-import { pluckIsoDateSlots, pluckIsoTimeFields } from './isoFields'
+import { pluckIsoDateSlots, pluckIsoDateTimeSlots, pluckIsoTimeFields } from './isoFields'
 import { createLargeInt } from './largeInt'
 import { createPropDescriptors, createTemporalNameDescriptors } from './obj'
 import { createPlainDate } from './plainDate'
@@ -56,7 +57,9 @@ function getCurrentInstant() {
 }
 
 function getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg) {
-  return zonedDateTimeInternalsToIso(getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg))
+  return pluckIsoDateTimeSlots(
+    zonedDateTimeInternalsToIso(getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)),
+  )
 }
 
 function getCurrentZonedDateTimeSlots(
@@ -75,5 +78,5 @@ function getCurrentEpochNanoseconds() {
 }
 
 function getCurrentTimeZoneId() {
-  return new Intl.DateTimeFormat().resolvedOptions().timeZone
+  return new IntlDateTimeFormat().resolvedOptions().timeZone
 }

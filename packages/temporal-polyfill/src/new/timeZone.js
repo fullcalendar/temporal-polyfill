@@ -5,13 +5,12 @@ import { createComplexBagRefiner } from './convert'
 import { formatOffsetNanoseconds } from './format'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
 import { internalIdGetters, returnId } from './internalClass'
-import { identityFunc, noop } from './lang'
-import { mapProps } from './obj'
+import { noop } from './lang'
 import { toDisambiguation } from './options'
 import { stringToTimeZoneId } from './parse'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { createTemporalClass } from './temporalClass'
-import { getBestInstantFor } from './timeZoneOps'
+import { getSingleInstantFor } from './timeZoneOps'
 
 export const [TimeZone, createTimeZone] = createTemporalClass(
   'TimeZone',
@@ -22,8 +21,8 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
   // constructorToInternals
   queryTimeZoneImpl,
 
-  // massageOtherInternals
-  noop,
+  // internalsConversionMap
+  {},
 
   // bagToInternals
   createComplexBagRefiner('timeZone', Calendar),
@@ -60,7 +59,7 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
     },
 
     getInstantFor(impl, plainDateTimeArg, options) {
-      return getBestInstantFor(
+      return getSingleInstantFor(
         impl,
         toPlainDateTimeInternals(plainDateTimeArg),
         toDisambiguation(options),
@@ -72,15 +71,17 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
         .map(createInstant)
     },
 
-    ...mapProps({
-      getPreviousTransition: createInstant,
-      getNextTransition: createInstant,
-      getOffsetNanosecondsFor: identityFunc,
-    }, (transformRes, methodName) => {
-      return (impl, instantArg) => {
-        return transformRes(impl[methodName](toInstantEpochNanoseconds(instantArg)))
-      }
-    }),
+    getOffsetNanosecondsFor(impl, instantArg) {
+      return impl.getOffsetNanosecondsFor(toInstantEpochNanoseconds(instantArg))
+    },
+
+    getNextTransition(impl, instantArg) {
+      return impl.getTransition(toInstantEpochNanoseconds(instantArg), 1)
+    },
+
+    getPreviousTransition(impl, instantArg) {
+      return impl.getTransition(toInstantEpochNanoseconds(instantArg), -1)
+    },
 
     toString: returnId,
   },

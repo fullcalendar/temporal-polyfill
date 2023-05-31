@@ -1,9 +1,12 @@
 import { isoMonthsInYear } from './calendarImpl'
 import { addDaysToIsoFields, pluckIsoTimeFields } from './isoFields'
+import { identityFunc } from './lang'
 import { compareLargeInts } from './largeInt'
-import { nanosecondsInDay } from './nanoseconds'
+import { moveDateTime, moveZonedEpochNanoseconds } from './move'
+import { nanosecondsInIsoDay } from './nanoseconds'
+import { roundLargeNanoseconds, roundRelativeDuration } from './round'
 
-// Diffing & Rounding
+// Diffing
 // -------------------------------------------------------------------------------------------------
 
 export function diffEpochNanoseconds(
@@ -14,8 +17,8 @@ export function diffEpochNanoseconds(
   roundingMode,
   roundingIncrement,
 ) {
-  return diffExactLargeNanoseconds(
-    roundLargeNanoseconds(
+  return roundLargeNanoseconds(
+    diffExactLargeNanoseconds(
       endEpochNanoseconds.subtract(startEpochNanoseconds),
       smallestUnit,
       roundingMode,
@@ -26,16 +29,19 @@ export function diffEpochNanoseconds(
 }
 
 export function diffZonedEpochNanoseconds(
+  calendar,
+  timeZone,
   startEpochNanoseconds,
   endEpochNanoseconds,
-  timeZone,
-  calendar,
   largestUnit,
-  smallestUnit,
-  roundingMode,
-  roundingIncrement,
+  // for createMarkerSystem's convenience
+  // TODO: eventually make these universal variables defaultSmallestUnit/defaultRoundingMode
+  // for input-validation
+  smallestUnit = 'nanoseconds',
+  roundingMode = 'halfExpand',
+  roundingIncrement = 1,
 ) {
-  if (smallestUnit < 'day') { // TODO
+  if (largestUnit < 'day') { // TODO
     return diffEpochNanoseconds(
       startEpochNanoseconds,
       endEpochNanoseconds,
@@ -74,23 +80,21 @@ export function diffZonedEpochNanoseconds(
 
   return roundRelativeDuration(
     { ...dateDiff, ...timeDiff, sign },
-    startIsoFields,
-    startEpochNanoseconds,
-    endIsoFields,
     endEpochNanoseconds,
-    isoToZoneEpochNanoseconds,
-    calendar,
-    largestUnit,
+    startEpochNanoseconds, // marker
+    identityFunc, // markerToEpochNanoseconds
+    moveZonedEpochNanoseconds.bind(undefined, calendar, timeZone), // moveMarker
     smallestUnit,
     roundingMode,
     roundingIncrement,
+    largestUnit,
   )
 }
 
 export function diffDateTimes(
+  calendar,
   startIsoFields,
   endIsoFields,
-  calendar,
   largestUnit,
   smallestUnit,
   roundingMode,
@@ -99,7 +103,7 @@ export function diffDateTimes(
   const startEpochNanoseconds = isoToUtcEpochNanoseconds(startIsoFields)
   const endEpochNanoseconds = isoToUtcEpochNanoseconds(endIsoFields)
 
-  if (smallestUnit < 'day') { // TODO
+  if (largestUnit < 'day') { // TODO
     return diffEpochNanoseconds(
       startEpochNanoseconds,
       endEpochNanoseconds,
@@ -109,12 +113,13 @@ export function diffDateTimes(
       roundingIncrement,
     )
   }
+  // TODO: what about day optimization?
 
   const sign = compareLargeInts(startEpochNanoseconds, endEpochNanoseconds)
   const startTimeNanoseconds = isoTimeToNanoseconds(startIsoFields) // number
   const endTimeNanoseconds = isoTimeToNanoseconds(endIsoFields) // number
   let timeNanosecondDiff = endTimeNanoseconds - startTimeNanoseconds
-  const timeSign = numberSign(timeNanosecondDiff)
+  const timeSign = Math.sign(timeNanosecondDiff)
   let midIsoFields = startIsoFields
 
   if (timeSign === -sign) {
@@ -122,7 +127,7 @@ export function diffDateTimes(
       ...addDaysToIsoFields(startIsoFields, sign),
       ...pluckIsoTimeFields(startIsoFields),
     }
-    timeNanosecondDiff += nanosecondsInDay
+    timeNanosecondDiff += nanosecondsInIsoDay
   }
 
   const dateDiff = calendar.dateUntil(midIsoFields, endIsoFields, largestUnit)
@@ -133,35 +138,30 @@ export function diffDateTimes(
 
   return roundRelativeDuration(
     { ...dateDiff, ...timeDiff, sign },
-    startIsoFields,
-    startEpochNanoseconds,
-    endIsoFields,
     endEpochNanoseconds,
-    isoToUtcEpochNanoseconds,
-    calendar,
-    largestUnit,
+    startIsoFields, // marker
+    isoToUtcEpochNanoseconds, // markerToEpochNanoseconds
+    moveDateTime.bind(undefined, calendar), // moveMarker
     smallestUnit,
     roundingMode,
     roundingIncrement,
+    largestUnit,
   )
 }
 
 export function diffDates(
+  calendar,
   startIsoDateFields,
   endIsoDateFields,
-  calendar,
   largestUnit,
   smallestUnit,
   roundingMode,
   roundingIncrement,
 ) {
-  const startEpochNanoseconds = isoToUtcEpochNanoseconds(startIsoDateFields)
-  const endEpochNanoseconds = isoToUtcEpochNanoseconds(endIsoDateFields)
-
-  if (smallestUnit < 'day') { // TODO
+  if (largestUnit < 'day') { // TODO
     return diffEpochNanoseconds(
-      startEpochNanoseconds,
-      endEpochNanoseconds,
+      isoToUtcEpochNanoseconds(startIsoDateFields),
+      isoToUtcEpochNanoseconds(endIsoDateFields),
       largestUnit,
       smallestUnit,
       roundingMode,
@@ -173,16 +173,14 @@ export function diffDates(
 
   return roundRelativeDuration(
     dateDiff,
-    startIsoDateFields,
-    startEpochNanoseconds,
-    endIsoDateFields,
-    endEpochNanoseconds,
-    isoToUtcEpochNanoseconds,
-    calendar,
-    largestUnit,
+    isoToUtcEpochNanoseconds(endIsoDateFields),
+    startIsoDateFields, // marker
+    isoToUtcEpochNanoseconds, // markerToEpochNanoseconds
+    calendar.dateAdd.bind(calendar), // moveMarker
     smallestUnit,
     roundingMode,
     roundingIncrement,
+    largestUnit,
   )
 }
 
@@ -213,8 +211,8 @@ export function diffYearMonthDay(year0, month0, day0, year1, month1, day1, calen
   }
 
   updateYearMonthDay()
-  const daySign = numberSign(dayDiff)
-  const sign = numberSign(yearDiff) || numberSign(monthDiff) || daySign
+  const daySign = Math.sign(dayDiff)
+  const sign = Math.sign(yearDiff) || Math.sign(monthDiff) || daySign
 
   if (sign) {
     // overshooting day? - correct by moving to penultimate month
@@ -228,7 +226,7 @@ export function diffYearMonthDay(year0, month0, day0, year1, month1, day1, calen
     }
 
     // overshooting month? - correct by moving to penultimate year
-    const monthSign = numberSign(monthDiff)
+    const monthSign = Math.sign(monthDiff)
     if (monthSign && monthSign !== sign) {
       const oldMonthsInYear1 = monthsInYear1
       year1 -= sign
@@ -239,7 +237,7 @@ export function diffYearMonthDay(year0, month0, day0, year1, month1, day1, calen
     }
   }
 
-  return [yearDiff, monthDiff, dayDiff]
+  return [yearDiff, monthDiff, dayDiff, sign]
 }
 
 export function computeIsoMonthsInYearSpan(isoYearStart, yearDelta) {
@@ -248,7 +246,7 @@ export function computeIsoMonthsInYearSpan(isoYearStart, yearDelta) {
 
 export function computeIntlMonthsInYearSpan(yearStart, yearDelta, calendarImpl) {
   const yearEnd = yearStart + yearDelta
-  const yearSign = numberSign(yearDelta)
+  const yearSign = Math.sign(yearDelta)
   const yearCorrection = yearSign < 0 ? -1 : 0
   let months = 0
 
@@ -259,28 +257,6 @@ export function computeIntlMonthsInYearSpan(yearStart, yearDelta, calendarImpl) 
   return months
 }
 
-// Public Duration Stuff
-// -------------------------------------------------------------------------------------------------
-
-export function roundDuration(
-  durationFields,
-  largestUnit,
-  smallestUnit,
-  roundingMode,
-  roundingIncrement,
-  relativeTo,
-) {
-
-}
-
-export function computeDurationTotal(
-  durationFields,
-  unit,
-  relativeTo,
-) {
-
-}
-
 // Exact Diffing
 // -------------------------------------------------------------------------------------------------
 
@@ -288,36 +264,6 @@ function diffExactLargeNanoseconds(
   nanoseconds,
   largestUnit,
 ) {
-
-}
-
-// Rounding
-// -------------------------------------------------------------------------------------------------
-
-function roundRelativeDuration(
-  durationFields,
-  startIsoFields,
-  startEpochNanoseconds,
-  endIsoFields,
-  endEpochNanoseconds,
-  isoToZoneEpochNanoseconds,
-  calendar,
-  largestUnit,
-  smallestUnit,
-  roundingMode,
-  roundingIncrement,
-) {
-  // TOOO: figure out edge case where time fields round up past end of zoned day,
-  // and then must be rerounded with the next day's reference frame
-}
-
-function roundLargeNanoseconds(
-  nanoseconds,
-  smallestUnit,
-  roundingMode,
-  roundingIncrement,
-) {
-
 }
 
 // Epoch/Time
@@ -347,12 +293,5 @@ function isoToEpochNanoseconds(isoFields, timeZone, disambig) {
 }
 
 function isoToPossibleEpochNanoseconds(isoFields, timeZone) {
-
-}
-
-// Random Utils
-// -------------------------------------------------------------------------------------------------
-
-function numberSign(number) {
 
 }

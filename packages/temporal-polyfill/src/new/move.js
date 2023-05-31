@@ -11,10 +11,10 @@ export function moveEpochNanoseconds(epochNanoseconds, durationFields) {
 }
 
 export function moveZonedEpochNanoseconds(
-  epochNanoseconds,
-  durationFields,
   calendar,
   timeZone,
+  epochNanoseconds,
+  durationFields,
   overflowHandling,
 ) {
   const durationTimeNanoseconds = isoTimeFieldsToNanoseconds(
@@ -45,9 +45,9 @@ export function moveZonedEpochNanoseconds(
 }
 
 export function moveDateTime(
+  calendar,
   isoDateTimeFields,
   durationFields,
-  calendar,
   overflowHandling,
 ) {
   const [movedIsoTimeFields, dayDelta] = addIsoTimeFields(

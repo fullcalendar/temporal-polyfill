@@ -31,8 +31,8 @@ export const [Calendar, createCalendar] = createTemporalClass(
   // constructorToInternals
   queryCalendarImpl,
 
-  // massageOtherInternals
-  noop,
+  // internalsConversionMap
+  {},
 
   // bagToInternals
   createComplexBagRefiner('calendar', TimeZone),

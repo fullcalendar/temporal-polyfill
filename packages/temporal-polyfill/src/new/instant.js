@@ -21,10 +21,10 @@ import {
   nanosecondsInSecond,
   regulateEpochNanoseconds,
 } from './nanoseconds'
-import { roundEpochNanoseconds } from './round'
+import { roundLargeNanoseconds } from './round'
 import { createTemporalClass } from './temporalClass'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
-import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
+import { createZonedDateTime } from './zonedDateTime'
 
 export const [
   Instant,
@@ -41,11 +41,9 @@ export const [
     return regulateEpochNanoseconds(toLargeInt(epochNanoseconds))
   },
 
-  // massageOtherInternals
-  (arg, argInternals) => {
-    if (arg instanceof ZonedDateTime) {
-      return argInternals.epochNanoseconds
-    }
+  // internalsConversionMap
+  {
+    ZonedDateTime: (argInternals) => argInternals.epochNanoseconds,
   },
 
   // bagToInternals
@@ -119,7 +117,12 @@ export const [
     },
 
     round(epochNanoseconds, options) {
-      return createInstant(roundEpochNanoseconds(epochNanoseconds, options))
+      return createInstant(
+        roundLargeNanoseconds(
+          epochNanoseconds,
+          options, // TODO: break apart options
+        ),
+      )
     },
 
     equals(epochNanoseconds, otherArg) {
@@ -136,7 +139,10 @@ export const [
       const calendar = queryCalendarOps(refinedOptions.calendar || isoCalendarId)
       const timeZone = queryTimeZoneOps(refinedOptions.timeZone || utcTimeZoneId)
 
-      epochNanoseconds = roundEpochNanoseconds(epochNanoseconds, refinedOptions)
+      epochNanoseconds = roundLargeNanoseconds(
+        epochNanoseconds,
+        refinedOptions, // TODO: break apart options
+      )
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       const isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
 

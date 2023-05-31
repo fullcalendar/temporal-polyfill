@@ -30,10 +30,9 @@ import {
 } from './isoFields'
 import { optionsToOverflow } from './options'
 import { stringToPlainDateInternals } from './parse'
-import { PlainDateTime, createPlainDateTime } from './plainDateTime'
+import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
-import { createTemporalClass } from './temporalClass'
-import { ZonedDateTime } from './zonedDateTime'
+import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 
 export const [
   PlainDate,
@@ -57,14 +56,10 @@ export const [
     )
   },
 
-  // massageOtherInternals
-  (arg, argInternals) => {
-    if (arg instanceof PlainDateTime) {
-      return pluckIsoDateSlots(argInternals)
-    }
-    if (arg instanceof ZonedDateTime) {
-      return zonedDateTimeInternalsToIso(argInternals)
-    }
+  // internalsConversionMap
+  {
+    PlainDateTime: pluckIsoDateSlots,
+    ZonedDateTime: (argInternals) => pluckIsoDateSlots(zonedDateTimeInternalsToIso(argInternals)),
   },
 
   // bagToInternals
@@ -135,9 +130,7 @@ export const [
         formatCalendar(internals.calendar, options)
     },
 
-    toLocaleString(internals, locales, options) {
-      return ''
-    },
+    toLocaleString: toLocaleStringMethod,
 
     valueOf: neverValueOf,
 
