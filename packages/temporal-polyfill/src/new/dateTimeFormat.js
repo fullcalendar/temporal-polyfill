@@ -7,10 +7,16 @@ import { epochNanoToMilli } from './nanoseconds'
 import { getTemporalName } from './temporalClass'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 
+export const IntlDateTimeFormat = Intl.DateTimeFormat
+
+const getGetSpecificFormat = createLazyMap(() => createLazyMap(createSpecificFormat), WeakMap)
+
+function createSpecificFormat(massageOptions, resolvedOptions) {
+  return new IntlDateTimeFormat(resolvedOptions.locale, massageOptions(resolvedOptions))
+}
+
 // DateTimeFormat
 // -------------------------------------------------------------------------------------------------
-
-export const IntlDateTimeFormat = Intl.DateTimeFormat
 
 export class DateTimeFormat extends IntlDateTimeFormat {
   format(arg) {
@@ -32,46 +38,39 @@ export class DateTimeFormat extends IntlDateTimeFormat {
 
 ['formatRange', 'formatRangeToParts'].forEach((methodName) => {
   const origMethod = IntlDateTimeFormat.prototype[methodName]
+
   if (origMethod) {
     DateTimeFormat.prototype[methodName] = function(arg0, arg1) {
       const [formattable0, formattable1, format] = resolveRangeFormattables(this, arg0, arg1)
-      return origMethod.call(format || this, formattable0, formattable1)
+      return origMethod.call(format, formattable0, formattable1)
     }
   }
 })
 
-function resolveSingleFormattable(origFormat, arg) {
-  const getSpecificFormat = getGetSpecificFormat(origFormat)
-  const resolvedOptions = origFormat.resolvedOptions()
+function resolveSingleFormattable(format, arg) {
+  const getSpecificFormat = getGetSpecificFormat(format)
+  const resolvedOptions = format.resolvedOptions()
 
+  // returned format might be undefined
   return resolveFormattable(arg, getSpecificFormat, resolvedOptions)
 }
 
-function resolveRangeFormattables(origFormat, arg0, arg1) {
-  const getSpecificFormat = getGetSpecificFormat(origFormat)
-  const resolvedOptions = origFormat.resolvedOptions()
+function resolveRangeFormattables(format, arg0, arg1) {
+  const getSpecificFormat = getGetSpecificFormat(format)
+  const resolvedOptions = format.resolvedOptions()
 
-  let [formattable0, format0] = resolveFormattable(arg0, getSpecificFormat, resolvedOptions)
+  const [formattable0, format0] = resolveFormattable(arg0, getSpecificFormat, resolvedOptions)
   const [formattable1, format1] = resolveFormattable(arg1, getSpecificFormat, resolvedOptions)
 
   if (format0 && format1) {
     if (format0 !== format1) {
       throw new TypeError('Accepts two Temporal values of same type')
     }
-  } else {
-    format0 = undefined
+    format = format0
   }
 
-  return [formattable0, formattable1, format0]
-}
-
-// Internal Nested DateTimeFormat Cache
-// -------------------------------------------------------------------------------------------------
-
-const getGetSpecificFormat = createLazyMap(() => createLazyMap(createSpecificFormat), WeakMap)
-
-function createSpecificFormat(massageOptions, resolvedOptions) {
-  return new IntlDateTimeFormat(resolvedOptions.locale, massageOptions(resolvedOptions))
+  // always returns a format
+  return [formattable0, formattable1, format]
 }
 
 // Resolving Formattable Objects (and Format)
@@ -207,20 +206,20 @@ const epochNanoConverters = {
   // otherwise, use dateTimeInternalsToEpochNano
 }
 
-function timeInternalsToEpochNano(internals, options) {
+function timeInternalsToEpochNano(internals, resolvedOptions) {
   return getSingleInstantFor({
     isoYear: isoEpochOriginYear,
     isoMonth: 1,
     isoDay: 1,
     ...internals,
-    timeZone: queryTimeZoneOps(options.timeZone),
+    timeZone: queryTimeZoneOps(resolvedOptions.timeZone),
   })
 }
 
-function dateTimeInternalsToEpochNano(internals, options, temporalName) {
+function dateTimeInternalsToEpochNano(internals, resolvedOptions, temporalName) {
   checkCalendarsCompatible(
     internals.calendar.id,
-    options.calendarId,
+    resolvedOptions.calendarId,
     strictCalendarCheck[temporalName],
   )
 
@@ -228,7 +227,7 @@ function dateTimeInternalsToEpochNano(internals, options, temporalName) {
     ...timeFieldDefaults,
     isoHour: 12,
     ...internals,
-    timeZone: queryTimeZoneOps(options.timeZone),
+    timeZone: queryTimeZoneOps(resolvedOptions.timeZone),
   })
 }
 
