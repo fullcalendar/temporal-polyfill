@@ -7,16 +7,9 @@ import { epochNanoToMilli } from './nanoseconds'
 import { getTemporalName } from './temporalClass'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 
+// TODO: rename to intlFormat?
+
 export const IntlDateTimeFormat = Intl.DateTimeFormat
-
-const getGetSpecificFormat = createLazyMap(() => createLazyMap(createSpecificFormat), WeakMap)
-
-function createSpecificFormat(massageOptions, resolvedOptions) {
-  return new IntlDateTimeFormat(resolvedOptions.locale, massageOptions(resolvedOptions))
-}
-
-// DateTimeFormat
-// -------------------------------------------------------------------------------------------------
 
 export class DateTimeFormat extends IntlDateTimeFormat {
   format(arg) {
@@ -46,6 +39,15 @@ export class DateTimeFormat extends IntlDateTimeFormat {
     }
   }
 })
+
+// DateTimeFormat Helpers
+// -------------------------------------------------------------------------------------------------
+
+const getGetSpecificFormat = createLazyMap(() => createLazyMap(createSpecificFormat), WeakMap)
+
+function createSpecificFormat(transformOptions, resolvedOptions) {
+  return new IntlDateTimeFormat(resolvedOptions.locale, transformOptions(resolvedOptions))
+}
 
 function resolveSingleFormattable(format, arg) {
   const getSpecificFormat = getGetSpecificFormat(format)
@@ -115,15 +117,15 @@ function resolveFormattable(
   resolvedOptions,
 ) {
   const temporalName = getTemporalName(arg)
-  const massageOptions = optionMassagers[temporalName]
+  const transformOptions = optionTransformers[temporalName]
 
-  if (massageOptions) {
+  if (transformOptions) {
     const internalsToEpochNano = epochNanoConverters[temporalName] || dateTimeInternalsToEpochNano
     const epochNano = internalsToEpochNano(getInternals(arg), resolvedOptions, temporalName)
 
     return [
       epochNanoToMilli(epochNano),
-      getSpecificFormat(massageOptions, resolvedOptions),
+      getSpecificFormat(transformOptions, resolvedOptions),
     ]
   }
 
@@ -171,7 +173,19 @@ const monthDayExclusions = [
   ...timeOptionNames,
 ]
 
-function createMassager(optionNames, basicNames, exclusionNames) {
+const optionTransformers = {
+  PlainTime: createTransformer(timeOptionNames, timeBasicNames, timeExclusions),
+  PlainDateTime: createTransformer(dateTimeOptionNames, dateTimeBasicNames, dateTimeExclusions),
+  PlainDate: createTransformer(dateOptionNames, dateBasicNames, dateExclusions),
+  PlainYearMonth: createTransformer(yearMonthBasicNames, yearMonthBasicNames, yearMonthExclusions),
+  PlainMonthDay: createTransformer(monthDayBasicNames, monthDayBasicNames, monthDayExclusions),
+  Instant: createTransformer(dateTimeOptionNames, dateTimeBasicNames, []),
+  ZonedDateTime: () => {
+    throw new TypeError('Cant do on ZonedDateTime')
+  },
+}
+
+function createTransformer(optionNames, basicNames, exclusionNames) {
   const defaults = propsWithSameValue(basicNames, 'numeric')
 
   return (options) => {
@@ -183,18 +197,6 @@ function createMassager(optionNames, basicNames, exclusionNames) {
 
     return options
   }
-}
-
-const optionMassagers = {
-  PlainTime: createMassager(timeOptionNames, timeBasicNames, timeExclusions),
-  PlainDateTime: createMassager(dateTimeOptionNames, dateTimeBasicNames, dateTimeExclusions),
-  PlainDate: createMassager(dateOptionNames, dateBasicNames, dateExclusions),
-  PlainYearMonth: createMassager(yearMonthBasicNames, yearMonthBasicNames, yearMonthExclusions),
-  PlainMonthDay: createMassager(monthDayBasicNames, monthDayBasicNames, monthDayExclusions),
-  Instant: createMassager(dateTimeOptionNames, dateTimeBasicNames, []),
-  ZonedDateTime: () => {
-    throw new TypeError('Cant do on ZonedDateTime')
-  },
 }
 
 // Epoch Conversions
@@ -225,7 +227,7 @@ function dateTimeInternalsToEpochNano(internals, resolvedOptions, temporalName) 
 
   return getSingleInstantFor({
     ...timeFieldDefaults,
-    isoHour: 12,
+    isoHour: 12, // will not dst-shift into prev/next day
     ...internals,
     timeZone: queryTimeZoneOps(resolvedOptions.timeZone),
   })
