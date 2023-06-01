@@ -1,5 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
+import { createTemporalClass, neverValueOf } from './class'
 import { diffEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -21,10 +22,8 @@ import { compareLargeInts, createLargeInt, toLargeInt } from './largeInt'
 import { moveEpochNanoseconds } from './move'
 import { toObject } from './options'
 import { roundLargeNanoseconds } from './round'
-import { createTemporalClass } from './temporalClass'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './util'
-import { neverValueOf } from './wrapperClass'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const [

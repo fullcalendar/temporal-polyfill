@@ -5,6 +5,7 @@ import {
   zonedDateTimeInternalsToIso,
 } from './bag'
 import { timeGetters } from './calendarFields'
+import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import { diffTimes } from './diff'
 import { createDuration, toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -21,9 +22,7 @@ import { optionsToOverflow } from './options'
 import { toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { roundIsoTimeFields } from './round'
-import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 import { mapRefiners } from './util'
-import { neverValueOf } from './wrapperClass'
 
 export const [
   PlainTime,

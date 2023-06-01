@@ -13,6 +13,7 @@ import {
   getPublicCalendar,
   queryCalendarOps,
 } from './calendarOps'
+import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -29,9 +30,7 @@ import { stringToPlainDateInternals } from './isoParse'
 import { optionsToOverflow } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
-import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 import { isIdPropsEqual, mapRefiners } from './util'
-import { neverValueOf } from './wrapperClass'
 
 export const [
   PlainDate,

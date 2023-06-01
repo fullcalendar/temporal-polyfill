@@ -49,6 +49,18 @@ class IsoCalendarImpl {
     this.id = id
   }
 
+  year(isoDateFields) {
+    return isoDateFields.isoYear
+  }
+
+  month(isoDateFields) {
+    return isoDateFields.isoMonth
+  }
+
+  day(isoDateFields) {
+    return isoDateFields.isoDay
+  }
+
   era(isoDateFields) {
     // undefined
   }
@@ -423,8 +435,16 @@ class IntlCalendarImpl extends IsoCalendarImpl {
     this.yearAtEpoch = yearAtEpoch
   }
 
+  year(isoDateFields) {
+    return this.queryYearMonthDay(isoDateFields)[0]
+  }
+
   month(isoDateFields) {
     return this.queryYearMonthDay(isoDateFields)[1]
+  }
+
+  day(isoDateFields) {
+    return this.queryYearMonthDay(isoDateFields)[2]
   }
 
   monthCode(isoDateFields) {

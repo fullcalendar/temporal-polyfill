@@ -1,30 +1,36 @@
-import { isoTimeFieldDefaults, isoTimeFieldNames } from './isoFields'
-import { toIntegerThrowOnInfinity, toPositiveInteger } from './options'
-import { mapProps, remapProps } from './util'
+import { isoTimeFieldNames } from './isoFields'
+import { toBoolean, toInteger, toIntegerThrowOnInfinity, toPositiveInteger } from './options'
+import { mapArrayToProps, remapProps, zipSingleValue } from './util'
 
-// does NOT contain era/eraYear (considered special-case for certain calendars)
+// Refiners
+// -------------------------------------------------------------------------------------------------
 
-export const yearMonthFieldRefiners = {
-  // sorted alphabetically
+const dayFieldRefiners = { day: toPositiveInteger }
+const monthCodeFieldRefiners = { monthCode: toString }
+
+// Ordered alphabetically
+export const eraYearFieldRefiners = {
+  era: toString,
+  eraYear: toInteger,
+}
+
+// Ordered alphabetically
+// Does not include era/eraYear
+const yearMonthFieldRefiners = {
   month: toPositiveInteger,
-  monthCode: toString,
+  ...monthCodeFieldRefiners,
   year: toIntegerThrowOnInfinity,
 }
 
+// Ordered alphabetically
+// Does not include era/eraYear
 export const dateFieldRefiners = {
-  // sorted alphabetically
-  day: toPositiveInteger,
+  ...dayFieldRefiners,
   ...yearMonthFieldRefiners,
 }
 
-export const monthDayFieldRefiners = {
-  // sorted alphabetically
-  day: toPositiveInteger, // not DRY
-  monthCode: toString, // not DRY
-}
-
-export const timeFieldRefiners = {
-  // sorted alphabetically
+// Ordered alphabetically
+const timeFieldRefiners = {
   hour: toIntegerThrowOnInfinity,
   microsecond: toIntegerThrowOnInfinity,
   millisecond: toIntegerThrowOnInfinity,
@@ -33,25 +39,27 @@ export const timeFieldRefiners = {
   second: toIntegerThrowOnInfinity,
 }
 
+// Unordered
+// Does not include era/eraYear
 export const dateTimeFieldRefiners = {
-  // keys must be resorted
   ...dateFieldRefiners,
   ...timeFieldRefiners,
 }
 
-export const yearStatRefiners = {
-  // sorted alphabetically, for predictable macros
+// Ordered alphabetically, for predictable macros
+const yearStatRefiners = {
   daysInYear: toPositiveInteger,
-  inLeapYear: toPositiveInteger,
+  inLeapYear: toBoolean,
   monthsInYear: toPositiveInteger,
 }
-export const yearStatNames = Object.keys(yearStatRefiners)
 
+// Unordered
 export const yearMonthStatRefiners = {
   ...yearStatRefiners,
   daysInMonth: toPositiveInteger,
 }
 
+// Unordered
 export const dateStatRefiners = {
   ...yearMonthStatRefiners,
   dayOfWeek: toPositiveInteger,
@@ -61,52 +69,53 @@ export const dateStatRefiners = {
   daysInWeek: toPositiveInteger,
 }
 
-//
-// NOTE: "basic" names are for converting between Plain* objects. Don't need all numeric fields
-//
+// Property Names
+// -------------------------------------------------------------------------------------------------
+
+export const eraYearFieldNames = Object.keys(eraYearFieldRefiners)
+export const allYearFieldNames = [...eraYearFieldNames, 'year']
+
 export const dateFieldNames = Object.keys(dateFieldRefiners)
-export const dateBasicNames = ['day', 'month', 'year']
 export const yearMonthFieldNames = Object.keys(yearMonthFieldRefiners) // month/monthCode/year
-export const yearMonthBasicNames = yearMonthFieldNames.slice(1) // monthCode/year
 export const monthDayFieldNames = dateFieldNames.slice(0, 3) // day/month/monthCode
-export const monthDayBasicNames = ['day', 'monthCode']
 export const monthFieldNames = monthDayFieldNames.slice(1) // month/monthCode
 export const dateTimeFieldNames = Object.keys(dateTimeFieldRefiners).sort()
 export const timeFieldNames = Object.keys(timeFieldRefiners)
 
-export const eraYearFieldNames = ['era', 'eraYear']
-export const allYearFieldNames = [...eraYearFieldNames, 'year']
+export const dateBasicNames = ['day', 'month', 'year']
+export const yearMonthBasicNames = yearMonthFieldNames.slice(1) // monthCode/year
+export const monthDayBasicNames = ['day', 'monthCode']
 
-export const yearMonthGetters = createCalendarGetters({
-  ...yearMonthFieldRefiners,
-  ...yearMonthStatRefiners,
-})
+export const yearStatNames = Object.keys(yearStatRefiners) // ordered, for predictable macros
+export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) // unordered
+export const dateStatNames = Object.keys(dateStatRefiners) // unordered
 
-export const monthDayGetters = createCalendarGetters(monthDayFieldRefiners)
+export const dateGetterNames = [...dateFieldNames, ...dateStatNames] // unordered
+export const yearMonthGetterNames = [...yearMonthFieldNames, ...yearMonthStatNames] // unordered
+export const monthDayGetterNames = monthDayFieldNames // unordered
 
-export const dateCalendarRefiners = {
-  ...dateFieldRefiners,
-  ...dateStatRefiners,
-}
+// Getters
+// -------------------------------------------------------------------------------------------------
 
-export const dateGetters = createCalendarGetters(dateCalendarRefiners)
+export const dateGetters = createGetters(dateGetterNames)
+export const yearMonthGetters = createGetters(yearMonthGetterNames)
+export const monthDayGetters = createGetters(monthDayGetterNames)
 
-export const timeGetters = isoTimeFieldNames.reduce((accum, isoTimeField, i) => {
-  accum[timeFieldNames[i]] = function(internals) {
-    return internals[isoTimeField]
+export const timeGetters = mapArrayToProps(timeFieldNames, (timeFieldName, i) => {
+  return (isoTimeFieldsInternals) => {
+    return isoTimeFieldsInternals[isoTimeFieldNames[i]]
   }
-  return accum
-}, {}) // TODO: somehow leverage remapProps instead?
+})
 
 export const dateTimeGetters = {
   ...dateGetters,
   ...timeGetters,
 }
 
-function createCalendarGetters(refiners) {
-  const getters = mapProps(refiners, (refiner, fieldName) => {
-    return function(internals) {
-      return refiner(internals.calendar[fieldName](this))
+function createGetters(getterNames) {
+  const getters = mapArrayToProps(getterNames, (fieldName) => {
+    return (internals) => {
+      return internals.calendar[fieldName](internals)
     }
   })
 
@@ -117,8 +126,14 @@ function createCalendarGetters(refiners) {
   return getters
 }
 
+// Defaults
+// -------------------------------------------------------------------------------------------------
+
+export const timeFieldDefaults = zipSingleValue(timeFieldNames, 0)
+
+// Conversion
+// -------------------------------------------------------------------------------------------------
+
 export function timeFieldsToIso(timeFields) {
   return remapProps(timeFields, timeFieldNames, isoTimeFieldNames)
 }
-
-export const timeFieldDefaults = remapProps(isoTimeFieldDefaults, isoTimeFieldNames, timeFieldNames)

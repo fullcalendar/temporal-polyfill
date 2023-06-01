@@ -8,10 +8,10 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { createPropDescriptors } from './util'
+import { defineProps } from './util'
 import { ZonedDateTime } from './zonedDateTime'
 
-export const Temporal = Object.defineProperties({}, createPropDescriptors({
+export const Temporal = defineProps({}, {
   PlainYearMonth,
   PlainMonthDay,
   PlainDate,
@@ -23,4 +23,4 @@ export const Temporal = Object.defineProperties({}, createPropDescriptors({
   TimeZone,
   Duration,
   Now,
-}))
+})

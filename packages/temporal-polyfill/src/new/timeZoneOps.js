@@ -1,3 +1,10 @@
+import {
+  createAdapterMethods,
+  createWrapperClass,
+  getInternals,
+  getStrictInternals,
+  internalIdGetters,
+} from './class'
 import { Instant, createInstant } from './instant'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
@@ -11,12 +18,6 @@ import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { createTimeZone } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
-import {
-  createInternalGetter,
-  createWrapperClass,
-  getInternals,
-  internalIdGetters,
-} from './wrapperClass'
 
 export const utcTimeZoneId = 'UTC'
 
@@ -168,26 +169,32 @@ function computeGapNear(timeZoneOps, zonedEpochNano) {
 // Adapter
 // -------
 
-const getStrictInstantEpochNanoseconds = createInternalGetter(Instant)
+const getStrictInstantEpochNanoseconds = getStrictInternals(Instant)
 
-const TimeZoneOpsAdapter = createWrapperClass(internalIdGetters, {
-  getOffsetNanosecondsFor(timeZone, epochNanoseconds) {
-    const nanoseconds = strictNumber( // TODO: integer?
-      timeZone.getOffsetNanosecondsFor(createInstant(epochNanoseconds)),
-    )
+export const TimeZoneOpsAdapter = createWrapperClass(
+  internalIdGetters,
+  createAdapterMethods({
+    getOffsetNanosecondsFor: [
+      validateOffsetNano,
+      createInstant,
+    ],
+    getPossibleInstantsFor: [
+      extractEpochNanos,
+      createPlainDateTime,
+    ],
+  }),
+)
 
-    if (Math.abs(nanoseconds) >= nanosecondsInIsoDay) {
-      throw new RangeError('out of range')
-    }
+function validateOffsetNano(offsetNano) {
+  offsetNano = strictNumber(offsetNano)
 
-    return nanoseconds
-  },
+  if (Math.abs(offsetNano) >= nanosecondsInIsoDay) {
+    throw new RangeError('out of range')
+  }
 
-  getPossibleInstantsFor(timeZone, isoDateTimeFields) {
-    return strictArray(
-      timeZone.getPossibleInstantsFor(
-        createPlainDateTime(isoDateTimeFields), // hopefully won't look at blank .calendar
-      ),
-    ).map(getStrictInstantEpochNanoseconds)
-  },
-})
+  return offsetNano
+}
+
+function extractEpochNanos(instants) {
+  return strictArray(instants).map(getStrictInstantEpochNanoseconds)
+}

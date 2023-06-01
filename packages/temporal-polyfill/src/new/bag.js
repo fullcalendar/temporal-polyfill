@@ -8,6 +8,7 @@ import {
   dateFieldNames,
   dateTimeFieldNames,
   dateTimeFieldRefiners,
+  eraYearFieldRefiners,
   monthDayBasicNames,
   timeFieldDefaults,
   timeFieldNames,
@@ -16,11 +17,11 @@ import {
   yearMonthFieldNames,
 } from './calendarFields'
 import { queryCalendarOps } from './calendarOps'
+import { getInternals } from './class'
 import {
-  durationFieldDefaults,
+  addSignToDurationFields,
   durationFieldNames,
   durationFieldRefiners,
-  refineDurationFields,
 } from './durationFields'
 import {
   constrainIsoDateTimeFields,
@@ -31,7 +32,6 @@ import { parseOffsetNanoseconds } from './isoParse'
 import {
   optionsToOverflow,
   toDisambiguation,
-  toInteger,
   toObject,
   toOffsetHandling,
   toOverflowOptions,
@@ -42,20 +42,18 @@ import { createPlainTime } from './plainTime'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { createLazyMap, isObjectLike, pluckProps, removeDuplicateStrings } from './util'
-import { getInternals } from './wrapperClass'
 import { createZonedDateTime } from './zonedDateTime'
 
 // Duration
 // -------------------------------------------------------------------------------------------------
 
 export function bagToDurationFields(bag) {
-  return refineDurationFields({ ...durationFieldDefaults, ...bag })
+  return prepareFields(bag, durationFieldNames, [])
 }
 
 export function durationWithBag(durationFields, bag) {
   const partialDurationFields = prepareFields(bag, durationFieldNames)
-  return refineDurationFields({ ...durationFields, ...partialDurationFields })
-  // TODO: inefficient b/c refineDurationFields will re-parse
+  return addSignToDurationFields({ ...durationFields, ...partialDurationFields })
 }
 
 // high level yo
@@ -390,10 +388,9 @@ function mergeToPlainDate(
 // -------------------------------------------------------------------------------------------------
 
 const builtinRefiners = {
+  ...eraYearFieldRefiners,
   ...dateTimeFieldRefiners,
   ...durationFieldRefiners,
-  era: toString,
-  eraYear: toInteger,
   offset: toString,
 }
 

@@ -7,6 +7,7 @@ import {
 import { isoCalendarId } from './calendarConfig'
 import { yearMonthGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
+import { createTemporalClass, getInternals, neverValueOf, toLocaleStringMethod } from './class'
 import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -19,9 +20,7 @@ import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { compareIsoFields } from './isoMath'
 import { stringToPlainYearMonthInternals } from './isoParse'
 import { optionsToOverflow } from './options'
-import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 import { isIdPropsEqual, mapRefiners } from './util'
-import { getInternals, neverValueOf } from './wrapperClass'
 
 export const [
   PlainYearMonth,

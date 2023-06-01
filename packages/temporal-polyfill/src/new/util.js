@@ -10,6 +10,10 @@ export function mapProps(input, refinerMap) {
   // loops get driven my refinerMap
 }
 
+export function mapArrayToProps() {
+
+}
+
 export function remapProps(obj, oldKeys, newKeys) {
 }
 
@@ -38,7 +42,7 @@ export function zipSingleValue() {
 }
 
 export function defineProps(target, propVals) {
-  Object.defineProperties(target, createPropDescriptors(propVals))
+  return Object.defineProperties(target, createPropDescriptors(propVals))
 }
 
 // descriptor stuff

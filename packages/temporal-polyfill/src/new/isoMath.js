@@ -3,7 +3,6 @@ import { createLargeInt } from './largeInt'
 export const nanosecondsInMicrosecond = 1000
 export const nanosecondsInMillisecond = 1000000
 export const nanosecondsInSecond = 1000000000
-export const nanosecondsInMinute = 60000000000 // used?
 export const nanosecondsInHour = 3600000000000
 export const nanosecondsInIsoDay = 86400000000000
 

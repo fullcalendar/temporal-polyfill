@@ -8,6 +8,7 @@ import {
 import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
 import { getPublicCalendar, queryCalendarOps } from './calendarOps'
+import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import { diffDateTimes } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -28,10 +29,8 @@ import { optionsToOverflow, toDisambiguation, validateRoundingOptions } from './
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
-import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { isIdPropsEqual, mapRefiners } from './util'
-import { neverValueOf } from './wrapperClass'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const [

@@ -7,6 +7,7 @@ import {
 } from './bag'
 import { dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
+import { createTemporalClass, neverValueOf } from './class'
 import { diffZonedEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
@@ -33,7 +34,6 @@ import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
-import { createTemporalClass } from './temporalClass'
 import {
   computeNanosecondsInDay,
   getCommonTimeZoneOps,
@@ -42,7 +42,6 @@ import {
   queryTimeZoneOps,
 } from './timeZoneOps'
 import { isIdPropsEqual, mapProps } from './util'
-import { neverValueOf } from './wrapperClass'
 
 export const [
   ZonedDateTime,

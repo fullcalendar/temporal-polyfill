@@ -2,16 +2,15 @@ import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { createComplexBagRefiner } from './bag'
 import { Calendar } from './calendar'
 import { queryCalendarOps } from './calendarOps'
+import { createTemporalClass, internalIdGetters, returnId } from './class'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
 import { formatOffsetNanoseconds } from './isoFormat'
 import { epochNanosecondsToIso } from './isoMath'
 import { stringToTimeZoneId } from './isoParse'
 import { toDisambiguation } from './options'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { createTemporalClass } from './temporalClass'
 import { getSingleInstantFor } from './timeZoneOps'
 import { noop } from './util'
-import { internalIdGetters, returnId } from './wrapperClass'
 
 export const [TimeZone, createTimeZone] = createTemporalClass(
   'TimeZone',

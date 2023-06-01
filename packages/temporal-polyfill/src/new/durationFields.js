@@ -71,9 +71,12 @@ export function durationTimeFieldsToIso(durationFields0) {
 }
 
 export function refineDurationFields(input) {
-  const obj = mapRefiners(input, durationFieldRefiners)
-  obj.sign = computeDurationFieldsSign(obj)
-  return obj
+  return addSignToDurationFields(mapRefiners(input, durationFieldRefiners))
+}
+
+export function addSignToDurationFields(fields) {
+  fields.sign = computeDurationFieldsSign(fields)
+  return fields
 }
 
 function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {

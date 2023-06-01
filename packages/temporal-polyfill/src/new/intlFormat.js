@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { dateBasicNames, timeFieldDefaults } from './calendarFields'
+import { getInternals, getTemporalName } from './class'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
-import { getTemporalName } from './temporalClass'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
   createLazyMap,
@@ -10,7 +10,6 @@ import {
   identityFunc,
   zipSingleValue,
 } from './util'
-import { getInternals } from './wrapperClass'
 
 export const standardCalendarId = 'en-GB' // gives 24-hour clock
 

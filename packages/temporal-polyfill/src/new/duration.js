@@ -1,4 +1,5 @@
 import { bagToDurationFields, durationWithBag } from './bag'
+import { createTemporalClass, neverValueOf } from './class'
 import { diffZonedEpochNanoseconds } from './diff'
 import {
   absolutizeDurationFields,
@@ -25,9 +26,7 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { createTemporalClass } from './temporalClass'
 import { identityFunc, noop } from './util'
-import { neverValueOf } from './wrapperClass'
 
 export const [
   Duration,

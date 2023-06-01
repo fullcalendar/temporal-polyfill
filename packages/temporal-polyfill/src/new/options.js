@@ -34,6 +34,13 @@ export function toInteger(value) {
   return integer
 }
 
+export function toStringOrUndefined() {
+}
+
+export function toNumberOrUndefined() {
+
+}
+
 export function toString(value) {
   if (typeof value === 'symbol') {
     throw new TypeError('Cannot convert a Symbol value to a String')
@@ -47,6 +54,10 @@ export function toIntegerThrowOnInfinity(value) {
     throw new RangeError('infinity is out of range')
   }
   return integer
+}
+
+export function toBoolean() {
+
 }
 
 export function toPositiveInteger(valueParam, property) {
@@ -166,4 +177,12 @@ export function optionsToRoundingIncrement(options) {
 }
 
 export function optionsToRoundingMode(options) {
+}
+
+export function overflowToOptions(overflow) {
+  return { overflow }
+}
+
+export function largestUnitToOptions(largestUnit) {
+  return { largestUnit }
 }

@@ -77,6 +77,15 @@ function getCurrentEpochNanoseconds() {
   return createLargeInt(Date.now()).mult(nanoInMilli)
 }
 
+// TimeZone
+// --------
+
+let queriedCurrentTimeZoneId
+
 function getCurrentTimeZoneId() {
+  return queriedCurrentTimeZoneId ?? (queriedCurrentTimeZoneId = queryCurrentTimeZoneId())
+}
+
+function queryCurrentTimeZoneId() {
   return new IntlDateTimeFormat().resolvedOptions().timeZone
 }

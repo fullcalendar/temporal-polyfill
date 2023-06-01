@@ -4,8 +4,13 @@ import {
   getRequiredMonthDayFields,
   getRequiredYearMonthFields,
 } from './calendarConfig'
-import { dateCalendarRefiners, dateFieldNames, yearMonthFieldNames } from './calendarFields'
+import {
+  dateFieldNames,
+  dateGetterNames,
+  yearMonthFieldNames,
+} from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
+import { createAdapterMethods, createTemporalClass, internalIdGetters, returnId } from './class'
 import { createDuration, toDurationInternals } from './duration'
 import { isoDaysInWeek } from './isoMath'
 import { stringToCalendarId } from './isoParse'
@@ -13,10 +18,8 @@ import { optionsToLargestUnit, optionsToOverflow, strictArrayOfStrings, toObject
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
-import { createTemporalClass } from './temporalClass'
 import { TimeZone } from './timeZone'
-import { mapProps, noop, removeUndefines } from './util'
-import { internalIdGetters, returnId } from './wrapperClass'
+import { identityFunc, mapArrayToProps, noop, removeUndefines } from './util'
 
 /*
 Must do input validation
@@ -51,9 +54,9 @@ export const [Calendar, createCalendar] = createTemporalClass(
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...mapProps(dateCalendarRefiners, (refiner, methodName) => {
+    ...mapArrayToProps(dateGetterNames, (propName) => {
       return (impl, plainDateArg) => {
-        return impl[methodName](toPlainDateInternals(plainDateArg))
+        return impl[propName](toPlainDateInternals(plainDateArg))
       }
     }),
 
@@ -61,25 +64,12 @@ export const [Calendar, createCalendar] = createTemporalClass(
       return isoDaysInWeek
     },
 
-    dateAdd(impl, plainDateArg, durationArg, options) {
-      return createPlainDate(
-        impl.dateAdd(
-          toPlainDateInternals(plainDateArg),
-          toDurationInternals(durationArg), // TODO: balance-up time parts to days
-          optionsToLargestUnit(options),
-        ),
-      )
-    },
-
-    dateUntil(impl, startPlainDateArg, endPlainDateArg, options) {
-      return createDuration(
-        impl.dateUntil(
-          toPlainDateInternals(startPlainDateArg),
-          toPlainDateInternals(endPlainDateArg),
-          optionsToOverflow(options),
-        ),
-      )
-    },
+    ...createAdapterMethods({
+      dateAdd: [createPlainDate, toPlainDateInternals, toDurationInternals, optionsToLargestUnit],
+      dateUntil: [createDuration, toPlainDateInternals, toPlainDateInternals, optionsToOverflow],
+      fields: [identityFunc, strictArrayOfStrings],
+      mergeFields: [identityFunc, removeUndefinesStrict, removeUndefinesStrict],
+    }),
 
     dateFromFields(impl, fields, options) {
       return createPlainDate({
@@ -112,17 +102,10 @@ export const [Calendar, createCalendar] = createTemporalClass(
       })
     },
 
-    fields(impl, fieldNames) {
-      return impl.fields(strictArrayOfStrings(fieldNames))
-    },
-
-    mergeFields(impl, fields0, fields1) {
-      return impl.mergeFields(
-        removeUndefines(toObject(fields0)),
-        removeUndefines(toObject(fields1)),
-      )
-    },
-
     toString: returnId,
   },
 )
+
+function removeUndefinesStrict(obj) {
+  return removeUndefines(toObject(obj))
+}
