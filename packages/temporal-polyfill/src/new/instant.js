@@ -168,9 +168,7 @@ export const [
       return createInstant(createLargeInt(epochSeconds).mult(nanosecondsInSecond))
     },
 
-    fromEpochMilliseconds(epochMilliseconds) {
-      return createInstant(createLargeInt(epochMilliseconds).mult(nanosecondsInMillisecond))
-    },
+    fromEpochMilliseconds: epochMilliToInstant,
 
     fromEpochMicroseconds(epochMicroseconds) {
       return createInstant(toLargeInt(epochMicroseconds).mult(nanosecondsInMicrosecond))
@@ -184,4 +182,13 @@ export const [
 
 function stringToEpochNanoseconds(str) {
   // TODO
+}
+
+function epochMilliToInstant(epochMilli) {
+  return createInstant(createLargeInt(epochMilli).mult(nanosecondsInMillisecond))
+}
+
+// a method for Date
+export function toTemporalInstant() {
+  return epochMilliToInstant(this.valueOf())
 }

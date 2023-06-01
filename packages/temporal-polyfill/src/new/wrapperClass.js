@@ -1,5 +1,12 @@
 import { strictInstanceOf } from './options'
-import { createGetterDescriptors, createPropDescriptors, identityFunc, mapProps, noop } from './util'
+import {
+  createGetterDescriptors,
+  createPropDescriptors,
+  defineProps,
+  identityFunc,
+  mapProps,
+  noop,
+} from './util'
 
 export const internalsMap = new WeakMap()
 export const getInternals = internalsMap.get.bind(internalsMap)
@@ -32,7 +39,7 @@ export function createWrapperClass(
     ...extraPrototypeDescriptors,
   })
 
-  Object.defineProperties(InternalObj, createPropDescriptors(staticMembers))
+  defineProps(InternalObj, staticMembers)
 
   return InternalObj
 }

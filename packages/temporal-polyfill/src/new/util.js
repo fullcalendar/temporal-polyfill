@@ -37,6 +37,10 @@ export function hasAnyMatchingProps(props, propNames) {
 export function zipSingleValue() {
 }
 
+export function defineProps(target, propVals) {
+  Object.defineProperties(target, createPropDescriptors(propVals))
+}
+
 // descriptor stuff
 // ----------------
 
