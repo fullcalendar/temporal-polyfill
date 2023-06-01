@@ -1,17 +1,22 @@
-import { strictArray, strictNumber } from './cast'
 import { Instant, createInstant } from './instant'
+import { isoTimeFieldDefaults } from './isoFields'
 import {
-  createInternalClass,
-  createInternalGetter,
-  getInternals,
-  internalIdGetters,
-} from './internalClass'
-import { addDaysToIsoFields, isoTimeFieldDefaults } from './isoFields'
-import { nanosecondsInIsoDay } from './nanoseconds'
+  addDaysToIsoFields,
+  epochNanoToIsoFields,
+  isoFieldsToEpochNano,
+  nanosecondsInIsoDay,
+} from './isoMath'
+import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { createTimeZone } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
+import {
+  createInternalGetter,
+  createWrapperClass,
+  getInternals,
+  internalIdGetters,
+} from './wrapperClass'
 
 export const utcTimeZoneId = 'UTC'
 
@@ -165,7 +170,7 @@ function computeGapNear(timeZoneOps, zonedEpochNano) {
 
 const getStrictInstantEpochNanoseconds = createInternalGetter(Instant)
 
-const TimeZoneOpsAdapter = createInternalClass(internalIdGetters, {
+const TimeZoneOpsAdapter = createWrapperClass(internalIdGetters, {
   getOffsetNanosecondsFor(timeZone, epochNanoseconds) {
     const nanoseconds = strictNumber( // TODO: integer?
       timeZone.getOffsetNanosecondsFor(createInstant(epochNanoseconds)),
@@ -186,14 +191,3 @@ const TimeZoneOpsAdapter = createInternalClass(internalIdGetters, {
     ).map(getStrictInstantEpochNanoseconds)
   },
 })
-
-// Utils
-// -----
-
-function isoFieldsToEpochNano() {
-
-}
-
-function epochNanoToIsoFields() {
-
-}

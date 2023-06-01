@@ -1,15 +1,18 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-unmodified-loop-condition */
 import { parseIntlYear } from './calendarImpl'
-import { IntlDateTimeFormat } from './dateTimeFormat'
-import { createLargeInt } from './largeInt'
-import { nanosecondsInSecond } from './nanoseconds'
-import { parseOffsetNanoseconds } from './parse'
+import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
+import {
+  epochNanoToSec,
+  epochSecToNano,
+  isoFieldsToEpochNano,
+  isoFieldsToEpochSec,
+  isoToEpochSec,
+  milliInSec, nanosecondsInSecond, secInDay,
+} from './isoMath'
+import { parseOffsetNanoseconds } from './isoParse'
+import { clamp, compareNumbers, createLazyMap } from './util'
 
-const nanoInMilli = 1000
-const nanoInMicro = 1000
-const milliInSec = 1000
-const secInDay = 86400
 const periodDur = secInDay * 60
 const minPossibleTransition = isoToEpochSec(1847)
 const maxPossibleTransition = isoToEpochSec(new Date().getUTCFullYear() + 10)
@@ -220,8 +223,6 @@ function createComputeOffsetSec(timeZoneId) {
   }
 }
 
-const standardCalendarId = 'en-GB' // gives 24-hour clock
-
 function buildIntlFormat(timeZoneId) {
   // format will ALWAYS do gregorian. need to parse year
   return new IntlDateTimeFormat(standardCalendarId, {
@@ -234,65 +235,4 @@ function buildIntlFormat(timeZoneId) {
     minute: 'numeric',
     second: 'numeric',
   })
-}
-
-// Utils
-// -------------------------------------------------------------------------------------------------
-
-// does floor
-function epochNanoToSec(epochNano) {
-  let epochSec = epochNano.div(nanosecondsInSecond).toNumber() // does truncation
-  let subsecNano = epochNano.sub(createLargeInt(epochSec).mult(nanosecondsInSecond)).toNumber()
-
-  if (subsecNano < 0) {
-    epochSec--
-    subsecNano += nanosecondsInSecond
-  }
-
-  return [epochSec, subsecNano]
-}
-
-function epochSecToNano(epochSec) {
-  return createLargeInt(epochSec).mult(nanosecondsInSecond)
-}
-
-function createLazyMap(computeFunc) {
-}
-
-function isoFieldsToEpochNano(isoFields) {
-}
-
-function compareNumbers() {
-}
-
-function clamp() {
-}
-
-function hashIntlFormatParts() {
-}
-
-// TODO: rename these to UTC-something?
-
-function isoToEpochSec(...args) { // doesn't accept beyond sec
-  return isoToEpochMilli(...args) / milliInSec // no need for rounding
-}
-
-function isoToEpochMilli() {
-}
-
-function isoFieldsToEpochSec(isoDateTimeFields) {
-  const epochSec = isoToEpochSec(
-    isoDateTimeFields.year,
-    isoDateTimeFields.month,
-    isoDateTimeFields.day,
-    isoDateTimeFields.hour,
-    isoDateTimeFields.minute,
-    isoDateTimeFields.second,
-  )
-  const subsecNano =
-    isoDateTimeFields.millisecond * nanoInMilli +
-    isoDateTimeFields.microsecond * nanoInMicro +
-    isoDateTimeFields.nanosecond
-
-  return [epochSec, subsecNano]
 }

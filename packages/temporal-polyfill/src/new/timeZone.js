@@ -1,16 +1,17 @@
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
+import { createComplexBagRefiner } from './bag'
 import { Calendar } from './calendar'
 import { queryCalendarOps } from './calendarOps'
-import { createComplexBagRefiner } from './convert'
-import { formatOffsetNanoseconds } from './format'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
-import { internalIdGetters, returnId } from './internalClass'
-import { noop } from './lang'
+import { formatOffsetNanoseconds } from './isoFormat'
+import { epochNanosecondsToIso } from './isoMath'
+import { stringToTimeZoneId } from './isoParse'
 import { toDisambiguation } from './options'
-import { stringToTimeZoneId } from './parse'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { createTemporalClass } from './temporalClass'
 import { getSingleInstantFor } from './timeZoneOps'
+import { noop } from './util'
+import { internalIdGetters, returnId } from './wrapperClass'
 
 export const [TimeZone, createTimeZone] = createTemporalClass(
   'TimeZone',
@@ -86,10 +87,3 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
     toString: returnId,
   },
 )
-
-// TimeZone Conversions
-// -------------------------------------------------------------------------------------------------
-
-function epochNanosecondsToIso(epochNanoseconds, timeZone) {
-
-}

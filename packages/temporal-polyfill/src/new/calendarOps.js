@@ -1,16 +1,16 @@
 import { createCalendar } from './calendar'
 import { queryCalendarImpl } from './calendarImpl'
-import { strictArrayOfStrings, toObject } from './cast'
 import { createDuration } from './duration'
-import {
-  createInternalClass,
-  createInternalGetter,
-  getInternals,
-  internalIdGetters,
-} from './internalClass'
+import { strictArrayOfStrings, toObject } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
+import {
+  createInternalGetter,
+  createWrapperClass,
+  getInternals,
+  internalIdGetters,
+} from './wrapperClass'
 
 export function queryCalendarOps(calendarSlot) {
   if (typeof calendarSlot === 'object') {
@@ -37,7 +37,7 @@ const getStrictPlainDateInternals = createInternalGetter(PlainDate)
 /*
 Must do output-validation on whatever internal Calendar returns
 */
-const CalendarOpsAdapter = createInternalClass(internalIdGetters, {
+const CalendarOpsAdapter = createWrapperClass(internalIdGetters, {
   dateAdd(calendar, isoDateFields, durationFields, overflow) {
     return getStrictPlainDateInternals(
       calendar.dateAdd(

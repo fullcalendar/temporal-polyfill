@@ -1,14 +1,10 @@
-import { mapHash } from '../utils/obj'
-import { strictInstanceOf } from './cast'
-import { identityFunc, noop } from './lang'
-import { createGetterDescriptors, createPropDescriptors } from './obj'
+import { strictInstanceOf } from './options'
+import { createGetterDescriptors, createPropDescriptors, identityFunc, mapProps, noop } from './util'
 
 export const internalsMap = new WeakMap()
 export const getInternals = internalsMap.get.bind(internalsMap)
 
-// TODO: rename to 'wrapper' class?
-
-export function createInternalClass(
+export function createWrapperClass(
   getters,
   methods,
   constructorToInternals = identityFunc,
@@ -31,8 +27,8 @@ export function createInternalClass(
   }
 
   Object.defineProperties(InternalObj.prototype, {
-    ...createGetterDescriptors(mapHash(getters, curryMethod)),
-    ...createPropDescriptors(mapHash(methods, curryMethod)),
+    ...createGetterDescriptors(mapProps(getters, curryMethod)),
+    ...createPropDescriptors(mapProps(methods, curryMethod)),
     ...extraPrototypeDescriptors,
   })
 
@@ -55,6 +51,7 @@ export function returnId(internals) {
   return internals.id
 }
 
+// TODO: make a versoin that casts the id to string? For adapters
 export const internalIdGetters = { id: returnId }
 
 export function createInternalGetter(Class) {

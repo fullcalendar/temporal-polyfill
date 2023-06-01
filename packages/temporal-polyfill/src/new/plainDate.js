@@ -1,3 +1,11 @@
+import {
+  bagToPlainDateSlots,
+  createZonedDateTimeConverter,
+  dateToPlainMonthDay,
+  dateToPlainYearMonth,
+  plainDateWithBag,
+  zonedDateTimeInternalsToIso,
+} from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { dateGetters } from './calendarFields'
 import {
@@ -5,34 +13,25 @@ import {
   getPublicCalendar,
   queryCalendarOps,
 } from './calendarOps'
-import {
-  bagToPlainDateSlots,
-  createZonedDateTimeConverter,
-  dateToPlainMonthDay,
-  dateToPlainYearMonth,
-  isStringCastsEqual,
-  mapRefiners,
-  plainDateWithBag,
-  zonedDateTimeInternalsToIso,
-} from './convert'
 import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
-import { formatCalendar, formatIsoDateFields } from './format'
-import { neverValueOf } from './internalClass'
 import {
-  compareIsoFields,
   constrainIsoDateFields,
   generatePublicIsoDateFields,
   isoDateSlotRefiners,
   isoTimeFieldDefaults,
   pluckIsoDateSlots,
 } from './isoFields'
+import { formatCalendar, formatIsoDateFields } from './isoFormat'
+import { compareIsoFields } from './isoMath'
+import { stringToPlainDateInternals } from './isoParse'
 import { optionsToOverflow } from './options'
-import { stringToPlainDateInternals } from './parse'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
+import { isIdPropsEqual, mapRefiners } from './util'
+import { neverValueOf } from './wrapperClass'
 
 export const [
   PlainDate,
@@ -122,7 +121,7 @@ export const [
     equals(internals, other) {
       const otherInternals = toPlainDateInternals(other)
       return !compareIsoFields(internals, otherInternals) &&
-        isStringCastsEqual(internals.calendar, otherInternals.calendar)
+        isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals, options) {
@@ -174,6 +173,7 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
+// move to options file?
 function optionalToPlainTimeInternals(timeArg) {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeInternals(timeArg)
 }

@@ -1,23 +1,22 @@
+import { createComplexBagRefiner, prepareFields } from './bag'
 import {
   getRequiredDateFields,
   getRequiredMonthDayFields,
   getRequiredYearMonthFields,
 } from './calendarConfig'
 import { dateCalendarRefiners, dateFieldNames, yearMonthFieldNames } from './calendarFields'
-import { isoDaysInWeek, queryCalendarImpl } from './calendarImpl'
-import { strictArrayOfStrings, toObject } from './cast'
-import { createComplexBagRefiner, prepareFields } from './convert'
+import { queryCalendarImpl } from './calendarImpl'
 import { createDuration, toDurationInternals } from './duration'
-import { internalIdGetters, returnId } from './internalClass'
-import { noop } from './lang'
-import { mapProps } from './obj'
-import { optionsToLargestUnit, optionsToOverflow } from './options'
-import { stringToCalendarId } from './parse'
+import { isoDaysInWeek } from './isoMath'
+import { stringToCalendarId } from './isoParse'
+import { optionsToLargestUnit, optionsToOverflow, strictArrayOfStrings, toObject } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { createTemporalClass } from './temporalClass'
 import { TimeZone } from './timeZone'
+import { mapProps, noop, removeUndefines } from './util'
+import { internalIdGetters, returnId } from './wrapperClass'
 
 /*
 Must do input validation
@@ -65,8 +64,8 @@ export const [Calendar, createCalendar] = createTemporalClass(
     dateAdd(impl, plainDateArg, durationArg, options) {
       return createPlainDate(
         impl.dateAdd(
-          toPlainDateInternals(plainDateArg), // round time parts???
-          toDurationInternals(durationArg),
+          toPlainDateInternals(plainDateArg),
+          toDurationInternals(durationArg), // TODO: balance-up time parts to days
           optionsToLargestUnit(options),
         ),
       )
@@ -75,8 +74,8 @@ export const [Calendar, createCalendar] = createTemporalClass(
     dateUntil(impl, startPlainDateArg, endPlainDateArg, options) {
       return createDuration(
         impl.dateUntil(
-          toPlainDateInternals(startPlainDateArg), // round time parts???
-          toPlainDateInternals(endPlainDateArg), // round time parts???
+          toPlainDateInternals(startPlainDateArg),
+          toPlainDateInternals(endPlainDateArg),
           optionsToOverflow(options),
         ),
       )
@@ -127,9 +126,3 @@ export const [Calendar, createCalendar] = createTemporalClass(
     toString: returnId,
   },
 )
-
-// utils
-
-function removeUndefines(obj) { // and copy
-
-}

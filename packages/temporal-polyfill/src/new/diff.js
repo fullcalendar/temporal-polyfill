@@ -1,10 +1,18 @@
-import { isoMonthsInYear } from './calendarImpl'
-import { addDaysToIsoFields, pluckIsoTimeFields } from './isoFields'
-import { identityFunc } from './lang'
+import { pluckIsoTimeFields } from './isoFields'
+import {
+  addDaysToIsoFields,
+  epochNanosecondsToIso,
+  isoMonthsInYear,
+  isoTimeToNanoseconds,
+  isoToUtcEpochNanoseconds,
+  nanosecondsInIsoDay,
+  nanosecondsToTimeDuration,
+} from './isoMath'
 import { compareLargeInts } from './largeInt'
 import { moveDateTime, moveZonedEpochNanoseconds } from './move'
-import { nanosecondsInIsoDay } from './nanoseconds'
 import { roundLargeNanoseconds, roundRelativeDuration } from './round'
+import { getSingleInstantFor } from './timeZoneOps'
+import { identityFunc } from './util'
 
 // Diffing
 // -------------------------------------------------------------------------------------------------
@@ -53,7 +61,7 @@ export function diffZonedEpochNanoseconds(
   }
 
   function isoToZoneEpochNanoseconds(isoFields) {
-    return isoToEpochNanoseconds(isoFields, timeZone)
+    return getSingleInstantFor(timeZone, isoFields)
   }
 
   const sign = compareLargeInts(startEpochNanoseconds, endEpochNanoseconds)
@@ -264,34 +272,4 @@ function diffExactLargeNanoseconds(
   nanoseconds,
   largestUnit,
 ) {
-}
-
-// Epoch/Time
-// -------------------------------------------------------------------------------------------------
-
-function isoToUtcEpochNanoseconds(isoFields) {
-
-}
-
-function isoTimeToNanoseconds(isoTimeFields) {
-
-}
-
-function nanosecondsToTimeDuration(nanoseconds) { // nanoseconds is a number
-
-}
-
-// TimeZone Conversions
-// -------------------------------------------------------------------------------------------------
-
-function epochNanosecondsToIso(epochNanoseconds, timeZone) {
-
-}
-
-function isoToEpochNanoseconds(isoFields, timeZone, disambig) {
-  return isoToPossibleEpochNanoseconds(isoFields, timeZone)[0] // example
-}
-
-function isoToPossibleEpochNanoseconds(isoFields, timeZone) {
-
 }

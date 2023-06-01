@@ -1,4 +1,4 @@
-import { bagToDurationFields, durationWithBag } from './convert'
+import { bagToDurationFields, durationWithBag } from './bag'
 import { diffZonedEpochNanoseconds } from './diff'
 import {
   absolutizeDurationFields,
@@ -7,12 +7,18 @@ import {
   negateDurationFields,
   refineDurationFields,
 } from './durationFields'
-import { neverValueOf } from './internalClass'
-import { identityFunc, noop } from './lang'
+import { isoToUtcEpochNanoseconds } from './isoMath'
+import { stringToDurationFields } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
-import { optionsToLargestUnit } from './options'
-import { stringToDurationFields } from './parse'
+import {
+  optionsToLargestUnit,
+  optionsToRelativeTo,
+  optionsToRoundingIncrement,
+  optionsToRoundingMode,
+  optionsToSmallestUnit,
+  optionsToTotalUnit,
+} from './options'
 import {
   roundDayTimeDuration,
   roundRelativeDuration,
@@ -20,6 +26,8 @@ import {
   totalRelativeDuration,
 } from './round'
 import { createTemporalClass } from './temporalClass'
+import { identityFunc, noop } from './util'
+import { neverValueOf } from './wrapperClass'
 
 export const [
   Duration,
@@ -253,23 +261,4 @@ function getLargestDurationUnit(durationFields) {
 function durationDayTimeToNanoseconds(
   durationFields, // NOT BALANCED
 ) {
-}
-
-function optionsToTotalUnit() {
-}
-
-function optionsToRelativeTo() {
-  // should return ZoneDateTimeINTERNALS or PlainDateINTERNALS
-}
-
-function isoToUtcEpochNanoseconds(isoFields) {
-}
-
-function optionsToSmallestUnit(options) {
-}
-
-function optionsToRoundingIncrement(options) {
-}
-
-function optionsToRoundingMode(options) {
 }

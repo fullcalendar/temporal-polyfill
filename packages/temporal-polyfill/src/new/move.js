@@ -1,10 +1,15 @@
-import { isoMonthsInYear } from './calendarImpl'
 import {
   durationHasDateParts,
   durationTimeFieldDefaults,
   durationTimeFieldsToIso,
 } from './durationFields'
-import { isoTimeFieldsToNanoseconds, nanosecondsToIsoTimeFields } from './nanoseconds'
+import {
+  epochNanosecondsToIso,
+  isoMonthsInYear,
+  isoTimeFieldsToNanoseconds,
+  nanosecondsToIsoTimeFields,
+} from './isoMath'
+import { getSingleInstantFor } from './timeZoneOps'
 
 export function moveEpochNanoseconds(epochNanoseconds, durationFields) {
   return epochNanoseconds.add(onlyDurationTimeFieldsToIso(durationFields))
@@ -37,7 +42,7 @@ export function moveZonedEpochNanoseconds(
       ...isoDateTimeFields, // time parts
       ...movedIsoDateFields, // date parts
     }
-    epochNanoseconds = isoToEpochNanoseconds(movedIsoDateTimeFields, timeZone)
+    epochNanoseconds = getSingleInstantFor(timeZone, movedIsoDateTimeFields)
       .add(durationTimeNanoseconds)
   }
 
@@ -130,18 +135,6 @@ function addIsoTimeFields(isoTimeFields0, isoTimeFields1) {
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-function epochNanosecondsToIso(epochNanoseconds, timeZone) {
-
-}
-
-function isoToEpochNanoseconds(isoFields, timeZone, disambig) {
-  return isoToPossibleEpochNanoseconds(isoFields, timeZone)[0] // example
-}
-
-function isoToPossibleEpochNanoseconds(isoFields, timeZone) {
-
-}
 
 function onlyDurationTimeFieldsToIso(durationFields) {
   if (durationHasDateParts(durationFields)) {

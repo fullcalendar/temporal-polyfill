@@ -1,7 +1,6 @@
-import { DateTimeFormat } from './dateTimeFormat'
-import { createInternalClass, getInternals, internalsMap } from './internalClass'
-import { noop } from './lang'
-import { createTemporalNameDescriptors, isObjectLike } from './obj'
+import { DateTimeFormat } from './intlFormat'
+import { createTemporalNameDescriptors, isObjectLike, noop } from './util'
+import { createWrapperClass, getInternals, internalsMap } from './wrapperClass'
 
 const temporaNameMap = WeakMap()
 export const getTemporalName = temporaNameMap.get.bind(temporaNameMap)
@@ -24,7 +23,7 @@ export function createTemporalClass(
     return createInstance(toInternals(arg, options))
   }
 
-  const TemporalObj = createInternalClass(
+  const TemporalObj = createWrapperClass(
     getters,
     methods,
     constructorToInternals,
@@ -60,6 +59,10 @@ export function createTemporalClass(
 }
 
 export function toLocaleStringMethod(internals, locales, options) {
+  /*
+  Will create two internal Intl.DateTimeFormats :(
+  Create just one instead
+  */
   const format = new DateTimeFormat(locales, options)
   return format.format(this)
 }

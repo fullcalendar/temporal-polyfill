@@ -1,37 +1,34 @@
-import { dateTimeGetters } from './calendarFields'
-import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import {
   bagToZonedDateTimeInternals,
   dateToPlainMonthDay,
   dateToPlainYearMonth,
-  isStringCastsEqual,
   zonedDateTimeInternalsToIso,
   zonedDateTimeWithBag,
-} from './convert'
-import { resolveZonedFormattable } from './dateTimeFormat'
+} from './bag'
+import { dateTimeGetters } from './calendarFields'
+import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import { diffZonedEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
-import {
-  formatCalendar,
-  formatIsoDateTimeFields,
-  formatOffsetNanoseconds,
-  formatTimeZone,
-} from './format'
 import { createInstant } from './instant'
-import { neverValueOf } from './internalClass'
+import { resolveZonedFormattable } from './intlFormat'
 import {
   isoTimeFieldDefaults,
   pluckIsoDateSlots,
   pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
 } from './isoFields'
+import {
+  formatCalendar,
+  formatIsoDateTimeFields,
+  formatOffsetNanoseconds,
+  formatTimeZone,
+} from './isoFormat'
+import { epochGetters, epochNanosecondsToIso, nanosecondsInHour } from './isoMath'
+import { stringToZonedDateTimeInternals } from './isoParse'
 import { compareLargeInts, toLargeInt } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
-import { epochGetters, nanosecondsInHour } from './nanoseconds'
-import { mapProps } from './obj'
 import { optionsToOverflow } from './options'
-import { stringToZonedDateTimeInternals } from './parse'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
@@ -44,6 +41,8 @@ import {
   getPublicTimeZone,
   queryTimeZoneOps,
 } from './timeZoneOps'
+import { isIdPropsEqual, mapProps } from './util'
+import { neverValueOf } from './wrapperClass'
 
 export const [
   ZonedDateTime,
@@ -283,8 +282,8 @@ export const [
       const otherInternals = toZonedDateTimeInternals(otherZonedDateTimeArg)
 
       return !compareLargeInts(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
-        isStringCastsEqual(internals.calendar, otherInternals.calendar) &&
-        isStringCastsEqual(internals.timeZone, otherInternals.timeZone)
+        isIdPropsEqual(internals.calendar, otherInternals.calendar) &&
+        isIdPropsEqual(internals.timeZone, otherInternals.timeZone)
     },
 
     toString(internals, options) {
@@ -393,7 +392,4 @@ function moveZonedDateTimeInternals(internals, durationFields, overflowHandling)
     durationFields,
     overflowHandling,
   )
-}
-
-function epochNanosecondsToIso() {
 }

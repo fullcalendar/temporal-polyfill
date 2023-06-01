@@ -1,24 +1,23 @@
+import {
+  bagToPlainMonthDayInternals,
+  plainMonthDayToPlainDate,
+  plainMonthDayWithBag,
+} from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
 import {
-  bagToPlainMonthDayInternals,
-  isStringCastsEqual,
-  mapRefiners,
-  plainMonthDayToPlainDate,
-  plainMonthDayWithBag,
-} from './convert'
-import { formatIsoMonthDayFields, formatPossibleDate } from './format'
-import { neverValueOf } from './internalClass'
-import {
-  compareIsoFields,
   constrainIsoDateFields,
   generatePublicIsoDateFields,
   isoDateSlotRefiners,
 } from './isoFields'
+import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
+import { compareIsoFields, isoEpochFirstLeapYear } from './isoMath'
+import { stringToMonthDayInternals } from './isoParse'
 import { optionsToOverflow } from './options'
-import { stringToMonthDayInternals } from './parse'
 import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
+import { isIdPropsEqual, mapRefiners } from './util'
+import { neverValueOf } from './wrapperClass'
 
 export const [
   PlainMonthDay,
@@ -31,7 +30,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (isoMonth, isoDay, calendarArg = isoCalendarId, referenceIsoYear = 1972) => {
+  (isoMonth, isoDay, calendarArg = isoCalendarId, referenceIsoYear = isoEpochFirstLeapYear) => {
     return constrainIsoDateFields(
       mapRefiners({
         isoYear: referenceIsoYear,
@@ -70,7 +69,7 @@ export const [
     equals(internals, otherArg) {
       const otherInternals = toPlainMonthDayInternals(otherArg)
       return !compareIsoFields(internals, otherInternals) &&
-        isStringCastsEqual(internals.calendar, otherInternals.calendar)
+        isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals, options) {

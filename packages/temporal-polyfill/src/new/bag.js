@@ -16,29 +16,34 @@ import {
   yearMonthFieldNames,
 } from './calendarFields'
 import { queryCalendarOps } from './calendarOps'
-import { toInteger, toObject } from './cast'
 import {
   durationFieldDefaults,
   durationFieldNames,
   durationFieldRefiners,
   refineDurationFields,
 } from './durationFields'
-import { getInternals } from './internalClass'
 import {
   constrainIsoDateTimeFields,
   constrainIsoTimeFields,
 } from './isoFields'
-import { isObjectLike, pluckProps, removeDuplicateStrings } from './obj'
-import { optionsToOverflow, toDisambiguation, toOffsetHandling, toOverflowOptions } from './options'
-import { parseOffsetNanoseconds } from './parse'
+import { epochNanoToIsoFields, isoEpochFirstLeapYear } from './isoMath'
+import { parseOffsetNanoseconds } from './isoParse'
+import {
+  optionsToOverflow,
+  toDisambiguation,
+  toInteger,
+  toObject,
+  toOffsetHandling,
+  toOverflowOptions,
+} from './options'
 import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainTime } from './plainTime'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { createLazyMap, isObjectLike, pluckProps, removeDuplicateStrings } from './util'
+import { getInternals } from './wrapperClass'
 import { createZonedDateTime } from './zonedDateTime'
-
-// TODO: rename bag?
 
 // Duration
 // -------------------------------------------------------------------------------------------------
@@ -130,7 +135,7 @@ export function bagToPlainMonthDayInternals(bag, options) {
     fields.monthCode === undefined &&
     fields.year === undefined
   ) {
-    fields.year = 1972
+    fields.year = isoEpochFirstLeapYear
   }
 
   return calendar.monthDayFromFields(calendar, fields, optionsToOverflow(options))
@@ -432,11 +437,6 @@ export function prepareFields(bag, fieldNames, requiredFields) {
   // TODO: error-out if no valid vields
 }
 
-export function isStringCastsEqual(obj0, obj1) {
-  return obj0 === obj1 || // optimization
-    String(obj0) === String(obj1)
-}
-
 function extractCalendarOpsFromBag(bag) {
   return queryCalendarOps(extractCalendarFieldFromBag(bag) || isoCalendarId)
 }
@@ -451,18 +451,4 @@ function extractCalendarFieldFromBag(bag) {
   if (calendar) {
     return queryCalendarOps(calendar)
   }
-}
-
-export function mapRefiners(input, refinerMap) {
-  // loops get driven props of input
-}
-
-// util
-// ----
-
-function createLazyMap() {
-}
-
-function epochNanoToIsoFields() {
-
 }

@@ -16,11 +16,30 @@ import {
   monthFieldNames,
   yearStatNames,
 } from './calendarFields'
-import { IntlDateTimeFormat } from './dateTimeFormat'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan, diffYearMonthDay } from './diff'
 import { durationFieldDefaults } from './durationFields'
+import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import { isoDateFieldNames, isoTimeFieldDefaults } from './isoFields'
+import {
+  addDaysMilli,
+  computeIsoDayOfWeek,
+  computeIsoDaysInMonth,
+  computeIsoDaysInYear,
+  computeIsoIsLeapYear,
+  computeIsoMonthsInYear,
+  computeIsoWeekOfYear,
+  computeIsoYearOfWeek,
+  diffDaysMilli,
+  epochMilliToIsoFields,
+  isoDaysInWeek,
+  isoEpochFirstLeapYear,
+  isoEpochOriginYear,
+  isoFieldsToEpochMilli,
+  isoToEpochMilli,
+} from './isoMath'
 import { addIntlMonths, addIsoMonths } from './move'
+import { constrainInt } from './options'
+import { buildWeakMapCache, twoDigit } from './util'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -179,7 +198,7 @@ class IsoCalendarImpl {
         isoFieldsToEpochMilli(startIsoDateFields),
         isoFieldsToEpochMilli(endIsoDateFields),
       )
-      const sign = numSign(days)
+      const sign = Math.sign(days)
 
       if (largestUnit === 'day') { // TODO
         weeks = Math.trunc(days / isoDaysInWeek)
@@ -618,8 +637,6 @@ export function parseIntlYear(intlParts, calendarId) {
 // DateTimeFormat Utils
 // -------------------------------------------------------------------------------------------------
 
-const standardCalendarId = 'en-GB' // gives 24-hour clock
-
 function buildIntlFormat(calendarId) {
   return new IntlDateTimeFormat(standardCalendarId, {
     calendar: calendarId,
@@ -629,18 +646,6 @@ function buildIntlFormat(calendarId) {
     month: 'short', // easier to identify monthCodes
     day: 'numeric',
   })
-}
-
-// best place for this?
-function hashIntlFormatParts(intlFormat, epochMilliseconds) {
-  const parts = intlFormat.formatToParts(epochMilliseconds)
-  const hash = {}
-
-  for (const part of parts) {
-    hash[part.type] = part.value
-  }
-
-  return hash
 }
 
 // Intl Month Cache
@@ -705,7 +710,7 @@ function getEraOrigins(calendarId) {
 
 function eraYearToYear(eraYear, eraOrigin) {
   // see the origin format in calendarConfig
-  return (eraOrigin + eraYear) * (numSign(eraOrigin) || 1)
+  return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1)
 }
 
 function normalizeShortEra(formattedEra) {
@@ -761,67 +766,6 @@ function getCalendarIdBase(calendarId) {
   return calendarId.split('-')[0]
 }
 
-// ISO & Time
-// -------------------------------------------------------------------------------------------------
-
-export const isoMonthsInYear = 12
-export const isoDaysInWeek = 7
-export const isoEpochOriginYear = 1970 // best place?
-const isoEpochFirstLeapYear = 1972
-
-export function computeIsoMonthsInYear(isoYear) {
-  return isoMonthsInYear
-}
-
-function computeIsoDaysInMonth(isoYear, isoMonth) {
-  switch (isoMonth) {
-    case 2:
-      return computeIsoIsLeapYear(isoYear) ? 29 : 28
-    case 4:
-    case 6:
-    case 9:
-    case 11:
-      return 30
-  }
-  return 31
-}
-
-function computeIsoDaysInYear(isoYear) {
-  return computeIsoIsLeapYear(isoYear) ? 365 : 366
-}
-
-function computeIsoIsLeapYear(isoYear) {
-  return isoYear % 4 === 0 && (isoYear % 100 !== 0 || isoYear % 400 === 0)
-}
-
-function computeIsoDayOfWeek(isoDateFields) {
-  return generateLegacyDate(isoDateFields).getDay() + 1
-}
-
-function computeIsoWeekOfYear(isoDateFields) {
-}
-
-function computeIsoYearOfWeek(isoDateFields) {
-}
-
-function isoFieldsToEpochMilli(isoFields) {
-}
-
-function isoToEpochMilli(isoYear, isoMonth, isoDate) {
-}
-
-function diffDaysMilli(milli0, milli1) {
-}
-
-function addDaysMilli() {
-}
-
-function generateLegacyDate(isoDateTimeFields) {
-}
-
-function epochMilliToIsoFields() {
-}
-
 // General Utils
 // -------------------------------------------------------------------------------------------------
 
@@ -839,17 +783,4 @@ function removePropSet(
       break
     }
   }
-}
-
-function twoDigit(num) {
-}
-
-function buildWeakMapCache() {
-}
-
-function constrainInt(subject, minIncl, maxIncl, overflow = 'reject') {
-  // maybe don't accept min? already vetted to be positive (or non-negative) integer
-}
-
-function numSign() {
 }

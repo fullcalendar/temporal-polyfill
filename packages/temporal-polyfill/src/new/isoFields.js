@@ -1,6 +1,6 @@
 import { queryCalendarOps } from './calendarOps'
-import { toIntegerThrowOnInfinity, toIntegerWithoutRounding, toPositiveInteger } from './cast'
-import { pluckProps } from './obj'
+import { toIntegerThrowOnInfinity, toIntegerWithoutRounding, toPositiveInteger } from './options'
+import { pluckProps } from './util'
 
 export const isoDateSlotRefiners = {
   // sorted alphabetically
@@ -68,14 +68,6 @@ export function pluckIsoTimeFields(isoFields) {
   return pluckProps(isoFields, isoTimeFieldNames)
 }
 
-export function compareIsoFields() {
-  // uses Date.UTC
-}
-
-export function compareIsoTimeFields() {
-  // uses conversion to milliseconds
-}
-
 export function constrainIsoDateTimeFields(isoDateTimeFields, overflow = 'reject') {
   // ahhhh! calendar gets passed in here!!!
 }
@@ -87,12 +79,7 @@ export function constrainIsoDateFields(isoDateFields, overflow = 'reject') {
 export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
 }
 
-export function addDaysToIsoFields() {
-  // short-circuit if nothing to add
-}
-
 export function isValidIsoFields() {
-
 }
 
 /*

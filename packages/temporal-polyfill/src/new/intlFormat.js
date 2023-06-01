@@ -1,11 +1,34 @@
 import { isoCalendarId } from './calendarConfig'
 import { dateBasicNames, timeFieldDefaults } from './calendarFields'
-import { isoEpochOriginYear } from './calendarImpl'
-import { getInternals } from './internalClass'
-import { identityFunc } from './lang'
-import { epochNanoToMilli } from './nanoseconds'
+import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { getTemporalName } from './temporalClass'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import {
+  createLazyMap,
+  excludeProps,
+  hasAnyMatchingProps,
+  identityFunc,
+  zipSingleValue,
+} from './util'
+import { getInternals } from './wrapperClass'
+
+export const standardCalendarId = 'en-GB' // gives 24-hour clock
+
+export function hashIntlFormatParts(intlFormat, epochMilliseconds) {
+  const parts = intlFormat.formatToParts(epochMilliseconds)
+  const hash = {}
+
+  for (const part of parts) {
+    hash[part.type] = part.value
+  }
+
+  return hash
+}
+
+// Stuff
+// -------------------------------------------------------------------------------------------------
+
+// AHHH... problem with resolvedOptions... need to whitelist original
 
 // TODO: rename to intlFormat?
 
@@ -186,7 +209,7 @@ const optionTransformers = {
 }
 
 function createTransformer(optionNames, basicNames, exclusionNames) {
-  const defaults = propsWithSameValue(basicNames, 'numeric')
+  const defaults = zipSingleValue(basicNames, 'numeric')
 
   return (options) => {
     options = excludeProps(options, exclusionNames)
@@ -251,19 +274,4 @@ function checkCalendarsCompatible(calendarId, resolveCalendarId, strict) {
   )) {
     throw new RangeError('Mismatching calendars')
   }
-}
-
-// Utils
-// -------------------------------------------------------------------------------------------------
-
-function excludeProps(options, propNames) {
-}
-
-function hasAnyMatchingProps(props, propNames) {
-}
-
-function createLazyMap() {
-}
-
-function propsWithSameValue() {
 }

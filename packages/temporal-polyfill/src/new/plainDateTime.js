@@ -1,22 +1,17 @@
-import { isoCalendarId } from './calendarConfig'
-import { dateTimeGetters } from './calendarFields'
-import { getPublicCalendar, queryCalendarOps } from './calendarOps'
 import {
   bagToPlainDateTimeInternals,
   dateToPlainMonthDay,
   dateToPlainYearMonth,
-  isStringCastsEqual,
-  mapRefiners,
   plainDateTimeWithBag,
   zonedDateTimeInternalsToIso,
-} from './convert'
+} from './bag'
+import { isoCalendarId } from './calendarConfig'
+import { dateTimeGetters } from './calendarFields'
+import { getPublicCalendar, queryCalendarOps } from './calendarOps'
 import { diffDateTimes } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
-import { formatCalendar, formatIsoDateTimeFields } from './format'
-import { neverValueOf } from './internalClass'
 import {
-  compareIsoFields,
   constrainIsoDateTimeFields,
   generatePublicIsoDateTimeFields,
   isoDateTimeSlotRefiners,
@@ -25,14 +20,18 @@ import {
   pluckIsoDateTimeSlots,
   pluckIsoTimeFields,
 } from './isoFields'
+import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
+import { compareIsoFields } from './isoMath'
+import { stringToPlainDateTimeInternals } from './isoParse'
 import { moveDateTime } from './move'
 import { optionsToOverflow, toDisambiguation, validateRoundingOptions } from './options'
-import { stringToPlainDateTimeInternals } from './parse'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
 import { createTemporalClass, toLocaleStringMethod } from './temporalClass'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { isIdPropsEqual, mapRefiners } from './util'
+import { neverValueOf } from './wrapperClass'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const [
@@ -177,7 +176,7 @@ export const [
     equals(internals, other) {
       const otherInternals = toPlainDateTimeInternals(other)
       return !compareIsoFields(internals, otherInternals) &&
-        isStringCastsEqual(internals.calendar, otherInternals.calendar)
+        isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals, options) {

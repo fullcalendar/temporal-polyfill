@@ -1,8 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { toCalendarNameOption } from './options'
 
-// rename file to 'isoFormat'?
-
 export function formatPossibleDate(internals, options, formatSimple) {
   const calendarNameOpt = toCalendarNameOption(options)
   const showCalendar =
