@@ -1,11 +1,13 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import {
+  constrainIsoDateInternals,
+  constrainIsoDateTimeInternals,
+  constrainIsoTimeFields,
   pluckIsoDateInternals,
   pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
 } from './isoFields'
-import { isValidIsoFields } from './options'
 import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -111,12 +113,10 @@ export function stringToPlainTimeInternals(s) {
       throw new Error()
     }
 
-    let otherParsed = parseMonthDay(s)
-    if (otherParsed && isValidIsoFields(otherParsed)) {
+    if (parseMonthDay(s)) {
       throw new Error()
     }
-    otherParsed = parseYearMonth(s)
-    if (otherParsed && isValidIsoFields(otherParsed)) {
+    if (parseYearMonth(s)) {
       throw new Error()
     }
 
@@ -157,33 +157,38 @@ export function stringToTimeZoneId(s) {
 // -------------------------------------------------------------------------------------------------
 
 export function parseDateTime(s) {
-  // { isYear, isoMonth, isoDay,
-  //   isoHour, isMinute, isoSecond, etc...
-  //   hasTime, hasZ, offset,
-  //   calendar, timeZone }
-  //
-  // TODO: make calendar default to ISO!
+  return constrainIsoDateTimeInternals({
+    // { isYear, isoMonth, isoDay,
+    //   isoHour, isMinute, isoSecond, etc...
+    //   hasTime, hasZ, offset,
+    //   calendar, timeZone }
+  })
 }
 
 export function parseYearMonth(s) {
-  // { isYear, isoMonth, isoDay
-  //   calendar, timeZone }
+  return constrainIsoDateInternals({
+    // { isYear, isoMonth, isoDay
+    //   calendar, timeZone }
+  })
 }
 
 export function parseMonthDay(s) {
-  // { isYear, isoMonth, isoDay
-  //   calendar, timeZone }
+  return constrainIsoDateInternals({
+    // { isYear, isoMonth, isoDay
+    //   calendar, timeZone }
+  })
 }
 
 export function parseTime(s) {
-  // { isoHour, isoMinute, isoSecond, etc...
-  //   calendar, timeZone }
+  return constrainIsoTimeFields({
+    // { isoHour, isoMinute, isoSecond, etc... }
+  })
 }
 
 export function parseOffsetNanoseconds(s) {
   // number
 }
 
-export function stringToDurationFields(s) {
-
+export function stringToDurationInternals(s) {
+  // includes sign
 }

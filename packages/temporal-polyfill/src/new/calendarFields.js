@@ -113,9 +113,9 @@ export const dateTimeGetters = {
 }
 
 function createGetters(getterNames) {
-  const getters = mapArrayToProps(getterNames, (fieldName) => {
+  const getters = mapArrayToProps(getterNames, (propName) => {
     return (internals) => {
-      return internals.calendar[fieldName](internals)
+      return internals.calendar[propName](internals)
     }
   })
 

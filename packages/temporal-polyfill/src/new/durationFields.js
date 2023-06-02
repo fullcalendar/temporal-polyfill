@@ -1,18 +1,20 @@
-import { isoTimeFieldDefaults, isoTimeFieldNames } from './isoFields'
+import { isoTimeFieldNames } from './isoFields'
 import { toIntegerWithoutRounding } from './options'
-import { mapRefiners, remapProps } from './util'
+import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './util'
 
+// Refiners
+// -------------------------------------------------------------------------------------------------
+
+// Ordered alphabetically
 const durationDateFieldRefiners = {
-  // sorted alphabetically
   days: toIntegerWithoutRounding,
   months: toIntegerWithoutRounding,
   weeks: toIntegerWithoutRounding,
   years: toIntegerWithoutRounding,
-  // does not have 'sign'
 }
 
+// Ordered alphabetically
 const durationTimeFieldRefiners = {
-  // sorted alphabetically
   hours: toIntegerWithoutRounding,
   microseconds: toIntegerWithoutRounding,
   milliseconds: toIntegerWithoutRounding,
@@ -21,38 +23,61 @@ const durationTimeFieldRefiners = {
   seconds: toIntegerWithoutRounding,
 }
 
-export const durationFieldRefiners = { // does not include 'sign'
-  // keys must be resorted
+// Unordered
+export const durationFieldRefiners = {
   ...durationDateFieldRefiners,
   ...durationTimeFieldRefiners,
 }
 
-export const durationDateFieldNames = Object.keys(durationDateFieldRefiners)
-export const durationTimeFieldNames = Object.keys(durationTimeFieldRefiners)
+// Property Names
+// -------------------------------------------------------------------------------------------------
+
+const durationDateFieldNames = Object.keys(durationDateFieldRefiners)
+const durationTimeFieldNames = Object.keys(durationTimeFieldRefiners)
 export const durationFieldNames = Object.keys(durationFieldRefiners).sort()
+const durationInternalNames = [...durationFieldNames, 'sign']
 
-export const durationTimeFieldDefaults = remapProps(
-  isoTimeFieldDefaults,
-  isoTimeFieldNames,
-  durationTimeFieldNames,
-)
+// Getters
+// -------------------------------------------------------------------------------------------------
 
-export const durationFieldDefaults = { // does not include 'sign'
-  years: 0,
-  months: 0,
-  // TODO: weeks!!!
-  days: 0,
+export const durationGetters = mapArrayToProps(durationInternalNames, (propName) => {
+  return (durationInternals) => {
+    return durationInternals[propName]
+  }
+})
+
+// Defaults
+// -------------------------------------------------------------------------------------------------
+
+const durationDateFieldDefaults = zipSingleValue(durationDateFieldNames, 0)
+export const durationTimeFieldDefaults = zipSingleValue(durationTimeFieldNames, 0)
+export const durationFieldDefaults = {
+  ...durationDateFieldDefaults,
   ...durationTimeFieldDefaults,
 }
 
-export const durationFieldGetters = durationFieldNames
-  .concat(['sign'])
-  .reduce((accum, durationFieldName, i) => {
-    accum[durationFieldName] = function(internals) {
-      return internals[durationFieldName]
-    }
-    return accum
-  }, {}) // TODO: somehow leverage remapProps instead?
+// Refining / Conversion
+// -------------------------------------------------------------------------------------------------
+
+export function refineDurationInternals(rawDurationFields) {
+  return updateDurationFieldSign(mapRefiners(rawDurationFields, durationFieldRefiners))
+}
+
+export function updateDurationFieldSign(fields) {
+  fields.sign = computeDurationFieldSign(fields)
+  return fields
+}
+
+export function durationTimeFieldsToIso(durationTimeFields) {
+  return remapProps(durationTimeFields, durationTimeFieldNames, isoTimeFieldNames)
+}
+
+// Math
+// -------------------------------------------------------------------------------------------------
+
+export function addDurationFields(durationFields0, durationFields1, sign) {
+  // recomputes sign
+}
 
 export function negateDurationFields(internals) {
   // recomputes sign
@@ -63,27 +88,10 @@ export function absolutizeDurationFields(internals) {
 }
 
 export function durationHasDateParts(internals) {
-  return Boolean(computeDurationFieldsSign(internals, durationDateFieldNames))
+  return Boolean(computeDurationFieldSign(internals, durationDateFieldNames))
 }
 
-export function durationTimeFieldsToIso(durationFields0) {
-  return remapProps(durationFields0, durationTimeFieldNames, isoTimeFieldNames)
-}
-
-export function refineDurationFields(input) {
-  return addSignToDurationFields(mapRefiners(input, durationFieldRefiners))
-}
-
-export function addSignToDurationFields(fields) {
-  fields.sign = computeDurationFieldsSign(fields)
-  return fields
-}
-
-function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
+function computeDurationFieldSign(internals, fieldNames = durationFieldNames) {
   // should throw error if mismatch
   // TODO: audit repeat uses of this
-}
-
-export function addDurationFields(durationFields0, durationFields1, sign) {
-
 }

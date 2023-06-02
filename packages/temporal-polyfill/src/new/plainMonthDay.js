@@ -7,12 +7,12 @@ import { isoCalendarId } from './calendarConfig'
 import { monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
 import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
-import { generatePublicIsoDateFields, isoDateInternalRefiners } from './isoFields'
+import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { compareIsoFields, isoEpochFirstLeapYear } from './isoMath'
 import { stringToMonthDayInternals } from './isoParse'
-import { constrainIsoDateFields, optionsToOverflow } from './options'
-import { isIdPropsEqual, mapRefiners } from './util'
+import { optionsToOverflow } from './options'
+import { isIdPropsEqual } from './util'
 
 export const [
   PlainMonthDay,
@@ -25,15 +25,13 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (isoMonth, isoDay, calendarArg = isoCalendarId, referenceIsoYear = isoEpochFirstLeapYear) => {
-    return constrainIsoDateFields(
-      mapRefiners({
-        isoYear: referenceIsoYear,
-        isoMonth,
-        isoDay,
-        calendar: calendarArg,
-      }, isoDateInternalRefiners),
-    )
+  (isoMonth, isoDay, calendar = isoCalendarId, referenceIsoYear = isoEpochFirstLeapYear) => {
+    return refineIsoDateInternals({
+      isoYear: referenceIsoYear,
+      isoMonth,
+      isoDay,
+      calendar,
+    })
   },
 
   // internalsConversionMap

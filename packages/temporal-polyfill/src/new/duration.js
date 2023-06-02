@@ -1,15 +1,15 @@
-import { bagToDurationFields, durationWithBag } from './bag'
+import { bagToDurationInternals, durationWithBag } from './bag'
 import { createTemporalClass, neverValueOf } from './class'
 import { diffZonedEpochNanoseconds } from './diff'
 import {
   absolutizeDurationFields,
   addDurationFields,
-  durationFieldGetters,
+  durationGetters,
   negateDurationFields,
-  refineDurationFields,
+  refineDurationInternals,
 } from './durationFields'
 import { isoToUtcEpochNanoseconds } from './isoMath'
-import { stringToDurationFields } from './isoParse'
+import { stringToDurationInternals } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
 import {
@@ -51,7 +51,7 @@ export const [
     microseconds = 0,
     nanoseconds = 0,
   ) => {
-    return refineDurationFields({
+    return refineDurationInternals({
       years,
       months,
       weeks,
@@ -69,10 +69,10 @@ export const [
   {},
 
   // bagToInternals
-  bagToDurationFields,
+  bagToDurationInternals,
 
   // stringToInternals
-  stringToDurationFields,
+  stringToDurationInternals,
 
   // handleUnusedOptions
   noop,
@@ -81,7 +81,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...durationFieldGetters,
+    ...durationGetters,
 
     blank(internals) {
       return !internals.sign

@@ -19,6 +19,7 @@ import {
   pluckIsoDateInternals,
   pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
+  validateEpochNano,
 } from './isoFields'
 import {
   formatCalendar,
@@ -57,7 +58,7 @@ export const [
   // constructorToInternals
   (epochNanoseconds, timeZoneArg, calendarArg) => {
     return {
-      epochNanoseconds: toLargeInt(epochNanoseconds), // TODO: stricter
+      epochNanoseconds: validateEpochNano(toLargeInt(epochNanoseconds)), // TODO: strictly BigInt
       timeZone: queryTimeZoneOps(timeZoneArg),
       calendar: queryCalendarOps(calendarArg),
     }

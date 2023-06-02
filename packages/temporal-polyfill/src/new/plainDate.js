@@ -19,17 +19,17 @@ import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import {
   generatePublicIsoDateFields,
-  isoDateInternalRefiners,
   isoTimeFieldDefaults,
   pluckIsoDateInternals,
+  refineIsoDateInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoFields } from './isoMath'
 import { stringToPlainDateInternals } from './isoParse'
-import { constrainIsoDateFields, optionsToOverflow } from './options'
+import { optionsToOverflow } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
-import { isIdPropsEqual, mapRefiners } from './util'
+import { isIdPropsEqual } from './util'
 
 export const [
   PlainDate,
@@ -42,15 +42,13 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (isoYear, isoMonth, isoDay, calendarArg = isoCalendarId) => {
-    return constrainIsoDateFields(
-      mapRefiners({
-        isoYear,
-        isoMonth,
-        isoDay,
-        calendar: calendarArg,
-      }, isoDateInternalRefiners),
-    )
+  (isoYear, isoMonth, isoDay, calendar = isoCalendarId) => {
+    return refineIsoDateInternals({
+      isoYear,
+      isoMonth,
+      isoDay,
+      calendar,
+    })
   },
 
   // internalsConversionMap

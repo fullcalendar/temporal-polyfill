@@ -32,11 +32,7 @@ export const epochGetters = {
   },
 }
 
-export function regulateEpochNanoseconds(epochNanoseconds) {
-  // ensure the browser allows it
-}
-
-// Stuff
+// ISO Calendar system
 
 export const isoMonthsInYear = 12
 export const isoDaysInWeek = 7
@@ -78,19 +74,24 @@ export function computeIsoWeekOfYear(isoDateFields) {
 export function computeIsoYearOfWeek(isoDateFields) {
 }
 
+// isoDateTimeFieldsToLegacyDate
+function generateLegacyDate(isoDateTimeFields) {
+}
+
+//
+
 export function isoFieldsToEpochMilli(isoDateTimeFields) {
 }
 
 export function isoToEpochMilli(isoYear, isoMonth, isoDate) {
 }
 
+// diff (diffEpochMilliByDays)
 export function diffDaysMilli(milli0, milli1) {
 }
 
+// move (moveEpochMilliByDays)
 export function addDaysMilli(epochMilli, milli) {
-}
-
-export function generateLegacyDate(isoDateTimeFields) {
 }
 
 export function epochMilliToIsoFields() {
@@ -130,6 +131,8 @@ export function isoToUtcEpochNanoseconds(isoDateTimeFields) {
 }
 
 export function isoFieldsToEpochNano(isoDateTimeFields) {
+  // if result is out-of-bounds, will return null or undefined?
+  // NOTE: caller should always check result
 }
 
 export function isoTimeToNanoseconds(isoTimeFields) {

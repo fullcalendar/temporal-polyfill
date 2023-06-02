@@ -19,15 +19,14 @@ import {
 import { queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
 import {
-  addSignToDurationFields,
   durationFieldNames,
   durationFieldRefiners,
+  updateDurationFieldSign,
 } from './durationFields'
+import { constrainIsoTimeFields } from './isoFields'
 import { epochNanoToIsoFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNanoseconds } from './isoParse'
 import {
-  constrainIsoDateTimeFields,
-  constrainIsoTimeFields,
   optionsToOverflow,
   toDisambiguation,
   toObject,
@@ -42,16 +41,19 @@ import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './
 import { createLazyMap, isObjectLike, pluckProps, removeDuplicateStrings } from './util'
 import { createZonedDateTime } from './zonedDateTime'
 
+// ahhh: some of these functions return internals, other Plain* objects
+
 // Duration
 // -------------------------------------------------------------------------------------------------
 
-export function bagToDurationFields(bag) {
-  return prepareFields(bag, durationFieldNames, [])
+export function bagToDurationInternals(bag) {
+  const durationFields = prepareFields(bag, durationFieldNames, [])
+  return updateDurationFieldSign(durationFields)
 }
 
 export function durationWithBag(durationFields, bag) {
   const partialDurationFields = prepareFields(bag, durationFieldNames)
-  return addSignToDurationFields({ ...durationFields, ...partialDurationFields })
+  return updateDurationFieldSign({ ...durationFields, ...partialDurationFields })
 }
 
 // high level yo
@@ -68,11 +70,13 @@ export function bagToZonedDateTimeInternals(bag, options) {
   )
 
   const timeZone = queryTimeZoneOps(fields.timeZone)
-  const isoDateFields = calendarOps.dateFromFields(fields, optionsToOverflow(options))
+  const overflowHandling = optionsToOverflow(options)
+  const isoDateFields = calendarOps.dateFromFields(fields, overflowHandling)
+  const isoTimeFields = constrainIsoTimeFields(timeFieldsToIso(fields), overflowHandling)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    { ...isoDateFields, ...timeFieldsToIso(fields) },
+    { ...isoDateFields, ...isoTimeFields },
     fields.offset !== undefined ? parseOffsetNanoseconds(fields.offset) : undefined,
     false, // z?
     toOffsetHandling(options),
@@ -90,11 +94,13 @@ export function bagToZonedDateTimeInternals(bag, options) {
 export function zonedDateTimeWithBag(zonedDateTime, bag, options) {
   const { calendar, timeZone } = getInternals(zonedDateTime)
   const fields = mergeBag(calendar, zonedDateTime, bag, dateTimeFieldNames, ['offset'])
-  const isoDateFields = calendar.dateFromFields(fields, optionsToOverflow(options))
+  const overflowHandling = optionsToOverflow(options)
+  const isoDateFields = calendar.dateFromFields(fields, overflowHandling)
+  const isoTimeFields = constrainIsoTimeFields(timeFieldsToIso(fields), overflowHandling)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    { ...isoDateFields, ...timeFieldsToIso(fields) },
+    { ...isoDateFields, ...isoTimeFields },
     parseOffsetNanoseconds(fields.offset),
     false, // z?
     toOffsetHandling(options),
@@ -161,27 +167,20 @@ export function plainYearMonthWithBag(plainYearMonth, bag, options) {
 }
 
 export function bagToPlainTimeInternals(bag, options) {
-  const overflowOpt = toOverflowOptions(options) // TODO: single opt!
+  const overflowHandling = toOverflowOptions(options) // TODO: single opt!
+  const fields = prepareFields(bag, timeFieldNames, [])
 
-  return constrainIsoTimeFields(
-    timeFieldsToIso(
-      prepareFields(bag, timeFieldNames, []),
-    ),
-    overflowOpt,
-  )
+  return constrainIsoTimeFields(timeFieldsToIso(fields), overflowHandling)
 }
 
 export function plainTimeWithBag(plainTime, bag, options) {
-  const overflowOpt = toOverflowOptions(options) // TODO: single opt!
   const fields = pluckProps(timeFieldNames, plainTime)
   const additionalFields = prepareFields(bag, timeFieldNames)
-  const newInternals = timeFieldsToIso({
-    ...fields,
-    ...additionalFields,
-  })
-  return createPlainTime(
-    constrainIsoTimeFields(newInternals, overflowOpt),
-  )
+  const newFields = { ...fields, ...additionalFields }
+  const overflowHandling = toOverflowOptions(options) // TODO: single opt!
+  const isoTimeFields = constrainIsoTimeFields(timeFieldsToIso(newFields), overflowHandling)
+
+  return createPlainTime(isoTimeFields)
 }
 
 export function bagToPlainDateSlots(bag, options) {
@@ -193,20 +192,14 @@ export function bagToPlainDateSlots(bag, options) {
     getRequiredDateFields(calendarOps),
   )
 
-  return {
-    calendar: calendarOps,
-    ...calendarOps.dateFromFields(fields, optionsToOverflow(options)),
-  }
+  return calendarOps.dateFromFields(fields, optionsToOverflow(options))
 }
 
 export function plainDateWithBag(plainDate, bag, options) {
   const { calendar } = getInternals(plainDate)
   const fields = mergeBag(calendar, plainDate, bag, dateFieldNames)
 
-  return {
-    calendar,
-    ...calendar.dateFromFields(fields, optionsToOverflow(options)),
-  }
+  return calendar.dateFromFields(fields, optionsToOverflow(options))
 }
 
 export function bagToPlainDateTimeInternals(bag, options) {
@@ -217,23 +210,27 @@ export function bagToPlainDateTimeInternals(bag, options) {
     dateTimeFieldNames,
     getRequiredDateFields(calendarOps),
   )
-  const plainDateTimeInternals = calendarOps.dateFromFields(fields, optionsToOverflow(options))
+  const overflowHandling = optionsToOverflow(options)
+  const isoDateInternals = calendarOps.dateFromFields(fields, overflowHandling)
+  const isoTimeFields = constrainIsoTimeFields(timeFieldsToIso(fields), overflowHandling)
 
-  return constrainIsoDateTimeFields({
-    ...plainDateTimeInternals,
-    ...timeFieldsToIso(fields),
-  })
+  return {
+    ...isoDateInternals,
+    ...isoTimeFields,
+  }
 }
 
 export function plainDateTimeWithBag(plainDate, bag, options) {
   const { calendar } = getInternals(plainDate)
   const fields = mergeBag(calendar, plainDate, bag, dateTimeFieldNames)
-  const plainDateTimeInternals = calendar.dateFromFields(fields, optionsToOverflow(options))
+  const overflowHandling = optionsToOverflow(options)
+  const isoDateInternals = calendar.dateFromFields(fields, overflowHandling)
+  const isoTimeFields = constrainIsoTimeFields(timeFieldsToIso(fields), overflowHandling)
 
-  return constrainIsoDateTimeFields({
-    ...plainDateTimeInternals,
-    ...timeFieldsToIso(fields),
-  })
+  return {
+    ...isoDateInternals,
+    ...isoTimeFields,
+  }
 }
 
 // to PlainYearMonth/PlainMonthDay

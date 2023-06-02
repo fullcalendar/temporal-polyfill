@@ -4,6 +4,7 @@ import { createTemporalClass, neverValueOf } from './class'
 import { diffEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
+import { validateEpochNano } from './isoFields'
 import {
   formatCalendar,
   formatIsoDateTimeFields,
@@ -16,7 +17,6 @@ import {
   nanosecondsInMicrosecond,
   nanosecondsInMillisecond,
   nanosecondsInSecond,
-  regulateEpochNanoseconds,
 } from './isoMath'
 import { compareLargeInts, createLargeInt, toLargeInt } from './largeInt'
 import { moveEpochNanoseconds } from './move'
@@ -38,7 +38,7 @@ export const [
 
   // constructorToInternals
   (epochNanoseconds) => {
-    return regulateEpochNanoseconds(toLargeInt(epochNanoseconds))
+    return validateEpochNano(toLargeInt(epochNanoseconds)) // TODO: strictly BigInt
   },
 
   // internalsConversionMap

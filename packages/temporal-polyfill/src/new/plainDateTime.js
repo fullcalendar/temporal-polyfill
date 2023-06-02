@@ -14,18 +14,17 @@ import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import {
   generatePublicIsoDateTimeFields,
-  isoDateTimeInternalRefiners,
   isoTimeFieldDefaults,
   pluckIsoDateInternals,
   pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
+  refineIsoDateTimeInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
 import { compareIsoFields } from './isoMath'
 import { stringToPlainDateTimeInternals } from './isoParse'
 import { moveDateTime } from './move'
 import {
-  constrainIsoDateTimeFields,
   optionsToOverflow,
   toDisambiguation,
   validateRoundingOptions,
@@ -34,7 +33,7 @@ import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { isIdPropsEqual, mapRefiners } from './util'
+import { isIdPropsEqual } from './util'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const [
@@ -58,22 +57,20 @@ export const [
     isoMillisecond = 0,
     isoMicrosecond = 0,
     isoNanosecond = 0,
-    calendarArg = isoCalendarId,
+    calendar = isoCalendarId,
   ) => {
-    return constrainIsoDateTimeFields(
-      mapRefiners({
-        isoYear,
-        isoMonth,
-        isoDay,
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-        isoMicrosecond,
-        isoNanosecond,
-        calendar: queryCalendarOps(calendarArg),
-      }, isoDateTimeInternalRefiners),
-    )
+    return refineIsoDateTimeInternals({
+      isoYear,
+      isoMonth,
+      isoDay,
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      isoMicrosecond,
+      isoNanosecond,
+      calendar,
+    })
   },
 
   // internalsConversionMap

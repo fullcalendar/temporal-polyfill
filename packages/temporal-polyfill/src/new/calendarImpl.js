@@ -139,6 +139,7 @@ class IsoCalendarImpl {
   // Internal Querying
   // -----------------
 
+  // year/month/day already constrained!
   queryIsoFields(year, month, day) { // return isoDateInternals
     return {
       calendar: this,
@@ -465,6 +466,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   // Internal Querying
   // -----------------
 
+  // year/month/day already constrained!
   queryIsoFields(year, month, day) { // returns isoDateInternals
     return {
       calendar: this,

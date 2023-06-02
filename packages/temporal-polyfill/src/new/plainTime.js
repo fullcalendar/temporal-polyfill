@@ -9,16 +9,15 @@ import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class
 import { diffTimes } from './diff'
 import { createDuration, toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
-import { isoTimeFieldRefiners, pluckIsoTimeFields } from './isoFields'
+import { pluckIsoTimeFields, refineIsoTimeInternals } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { compareIsoTimeFields } from './isoMath'
 import { stringToPlainTimeInternals } from './isoParse'
 import { moveTime } from './move'
-import { constrainIsoTimeFields, optionsToOverflow } from './options'
+import { optionsToOverflow } from './options'
 import { toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { roundIsoTimeFields } from './round'
-import { mapRefiners } from './util'
 
 export const [
   PlainTime,
@@ -39,22 +38,22 @@ export const [
     isoMicrosecond = 0,
     isoNanosecond = 0,
   ) => {
-    return constrainIsoTimeFields(
-      mapRefiners({
-        isoHour,
-        isoMinute,
-        isoSecond,
-        isoMillisecond,
-        isoMicrosecond,
-        isoNanosecond,
-      }, isoTimeFieldRefiners),
-    )
+    return refineIsoTimeInternals({
+      isoHour,
+      isoMinute,
+      isoSecond,
+      isoMillisecond,
+      isoMicrosecond,
+      isoNanosecond,
+    })
   },
 
   // internalsConversionMap
   {
     PlainDateTime: pluckIsoTimeFields,
-    ZonedDateTime: (argInternals) => pluckIsoTimeFields(zonedDateTimeInternalsToIso(argInternals)),
+    ZonedDateTime(argInternals) {
+      return pluckIsoTimeFields(zonedDateTimeInternalsToIso(argInternals))
+    },
   },
 
   // bagToInternals

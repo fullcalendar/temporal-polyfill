@@ -1,4 +1,6 @@
 
+// TODO: for unit parsing, ensure ceiling and correct increment
+
 export function strictNumber(input) {
 
 }
@@ -185,20 +187,4 @@ export function overflowToOptions(overflow) {
 
 export function largestUnitToOptions(largestUnit) {
   return { largestUnit }
-}
-
-// Stuff
-
-export function constrainIsoDateTimeFields(isoDateTimeFields, overflow = 'reject') {
-  // ahhhh! calendar gets passed in here!!!
-}
-
-export function constrainIsoDateFields(isoDateFields, overflow = 'reject') {
-  // ahhhh! calendar gets passed in here!!!
-}
-
-export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
-}
-
-export function isValidIsoFields() {
 }
