@@ -1,11 +1,11 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import {
-  isValidIsoFields,
-  pluckIsoDateSlots,
-  pluckIsoDateTimeSlots,
+  pluckIsoDateInternals,
+  pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
 } from './isoFields'
+import { isValidIsoFields } from './options'
 import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -45,7 +45,7 @@ export function stringToZonedDateTimeInternals(s) {
 export function stringToPlainDateTimeInternals(s) {
   const parsed = parseDateTime(s)
   if (parsed) {
-    return pluckIsoDateTimeSlots(parsed)
+    return pluckIsoDateTimeInternals(parsed)
   }
 
   throw new Error()
@@ -65,7 +65,7 @@ export function stringToPlainYearMonthInternals(s) {
   if (!parsed) {
     parsed = parseDateTime(s)
     if (parsed) {
-      parsed = pluckIsoDateSlots(parsed)
+      parsed = pluckIsoDateInternals(parsed)
     }
   }
 
@@ -81,7 +81,7 @@ export function stringToMonthDayInternals(s) {
   if (!parsed) {
     parsed = parseDateTime(s)
     if (parsed) {
-      parsed = pluckIsoDateSlots(parsed)
+      parsed = pluckIsoDateInternals(parsed)
     }
   }
 

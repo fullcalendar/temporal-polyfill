@@ -14,9 +14,10 @@ import { negateDurationFields } from './durationFields'
 import { createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
 import {
+  getPublicIdOrObj,
   isoTimeFieldDefaults,
-  pluckIsoDateSlots,
-  pluckIsoDateTimeSlots,
+  pluckIsoDateInternals,
+  pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
 } from './isoFields'
 import {
@@ -228,15 +229,15 @@ export const [
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
+      let isoDateTimeFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
 
-      isoFields = roundIsoDateTimeFields(
-        isoFields,
+      isoDateTimeFields = roundIsoDateTimeFields(
+        isoDateTimeFields,
         options,
-        () => computeNanosecondsInDay(timeZone, isoFields),
+        () => computeNanosecondsInDay(timeZone, isoDateTimeFields),
       )
       epochNanoseconds = getMatchingInstantFor(
-        isoFields,
+        isoDateTimeFields,
         timeZone,
         offsetNanoseconds,
         false, // z
@@ -291,15 +292,15 @@ export const [
       // TODO: don't let options be accessed twice! once by rounding, twice by formatting
 
       let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
+      let isoDateTimeFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
 
-      isoFields = roundIsoDateTimeFields(
-        isoFields,
+      isoDateTimeFields = roundIsoDateTimeFields(
+        isoDateTimeFields,
         options,
-        () => computeNanosecondsInDay(timeZone, isoFields),
+        () => computeNanosecondsInDay(timeZone, isoDateTimeFields),
       )
       epochNanoseconds = getMatchingInstantFor(
-        isoFields,
+        isoDateTimeFields,
         timeZone,
         offsetNanoseconds,
         false, // z
@@ -309,9 +310,9 @@ export const [
       )
 
       offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      isoFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
+      isoDateTimeFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
 
-      return formatIsoDateTimeFields(isoFields, options) +
+      return formatIsoDateTimeFields(isoDateTimeFields, options) +
         formatOffsetNanoseconds(offsetNanoseconds) +
         formatTimeZone(timeZone, options) +
         formatCalendar(calendar, options)
@@ -329,7 +330,7 @@ export const [
     },
 
     toPlainDate(internals) {
-      return createPlainDate(pluckIsoDateSlots(zonedDateTimeInternalsToIso(internals)))
+      return createPlainDate(pluckIsoDateInternals(zonedDateTimeInternalsToIso(internals)))
     },
 
     toPlainTime(internals) {
@@ -337,7 +338,7 @@ export const [
     },
 
     toPlainDateTime(internals) {
-      return createPlainDateTime(pluckIsoDateTimeSlots(zonedDateTimeInternalsToIso(internals)))
+      return createPlainDateTime(pluckIsoDateTimeInternals(zonedDateTimeInternalsToIso(internals)))
     },
 
     toPlainYearMonth() {
@@ -349,17 +350,15 @@ export const [
     },
 
     getISOFields(internals) {
-      const { timeZone, calendar } = internals
-
       return {
         // maintain alphabetical order
-        calendar: calendar.id, // correct?
-        ...pluckIsoDateTimeSlots(zonedDateTimeInternalsToIso(internals)),
+        calendar: getPublicIdOrObj(internals.calendar),
+        ...pluckIsoDateTimeInternals(zonedDateTimeInternalsToIso(internals)),
         offset: formatOffsetNanoseconds(
           // TODO: more DRY
           zonedDateTimeInternalsToIso(internals).offsetNanoseconds,
         ),
-        timeZone: timeZone.id, // correct?
+        timeZone: getPublicIdOrObj(internals.timeZone),
       }
     },
 

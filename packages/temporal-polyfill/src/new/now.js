@@ -4,7 +4,7 @@ import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { createInstant } from './instant'
 import { IntlDateTimeFormat } from './intlFormat'
-import { pluckIsoDateSlots, pluckIsoDateTimeSlots, pluckIsoTimeFields } from './isoFields'
+import { pluckIsoDateInternals, pluckIsoDateTimeInternals, pluckIsoTimeFields } from './isoFields'
 import { createLargeInt } from './largeInt'
 import { createPlainDate } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
@@ -42,7 +42,7 @@ function getCurrentPlainDateTime(calendarArg, timeZoneArg) {
 
 function getCurrentPlainDate(calendarArg, timeZoneArg) {
   return createPlainDate(
-    pluckIsoDateSlots(getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg)),
+    pluckIsoDateInternals(getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg)),
   )
 }
 
@@ -57,7 +57,7 @@ function getCurrentInstant() {
 }
 
 function getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg) {
-  return pluckIsoDateTimeSlots(
+  return pluckIsoDateTimeInternals(
     zonedDateTimeInternalsToIso(getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)),
   )
 }

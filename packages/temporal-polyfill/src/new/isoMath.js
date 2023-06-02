@@ -12,6 +12,10 @@ export function epochNanoToMilli(epochNano) {
   return epochNano.div(nanosecondsInMillisecond).toNumber()
 }
 
+export function epochSecToNano(epochSec) {
+  return createLargeInt(epochSec).mult(nanosecondsInSecond)
+}
+
 export const epochGetters = {
   epochNanoseconds(epochNanoseconds) {
     return epochNanoseconds.toBigInt()
@@ -74,7 +78,7 @@ export function computeIsoWeekOfYear(isoDateFields) {
 export function computeIsoYearOfWeek(isoDateFields) {
 }
 
-export function isoFieldsToEpochMilli(isoFields) {
+export function isoFieldsToEpochMilli(isoDateTimeFields) {
 }
 
 export function isoToEpochMilli(isoYear, isoMonth, isoDate) {
@@ -119,17 +123,13 @@ export function epochNanoToSec(epochNano) {
   return [epochSec, subsecNano]
 }
 
-export function epochSecToNano(epochSec) {
-  return createLargeInt(epochSec).mult(nanosecondsInSecond)
-}
-
 export function epochNanoToIsoFields() {
 }
 
-export function isoToUtcEpochNanoseconds(isoFields) {
+export function isoToUtcEpochNanoseconds(isoDateTimeFields) {
 }
 
-export function isoFieldsToEpochNano(isoFields) {
+export function isoFieldsToEpochNano(isoDateTimeFields) {
 }
 
 export function isoTimeToNanoseconds(isoTimeFields) {

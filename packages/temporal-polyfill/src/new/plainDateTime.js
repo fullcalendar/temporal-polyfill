@@ -13,19 +13,23 @@ import { diffDateTimes } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import {
-  constrainIsoDateTimeFields,
   generatePublicIsoDateTimeFields,
-  isoDateTimeSlotRefiners,
+  isoDateTimeInternalRefiners,
   isoTimeFieldDefaults,
-  pluckIsoDateSlots,
-  pluckIsoDateTimeSlots,
+  pluckIsoDateInternals,
+  pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
 } from './isoFields'
 import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
 import { compareIsoFields } from './isoMath'
 import { stringToPlainDateTimeInternals } from './isoParse'
 import { moveDateTime } from './move'
-import { optionsToOverflow, toDisambiguation, validateRoundingOptions } from './options'
+import {
+  constrainIsoDateTimeFields,
+  optionsToOverflow,
+  toDisambiguation,
+  validateRoundingOptions,
+} from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
@@ -68,7 +72,7 @@ export const [
         isoMicrosecond,
         isoNanosecond,
         calendar: queryCalendarOps(calendarArg),
-      }, isoDateTimeSlotRefiners),
+      }, isoDateTimeInternalRefiners),
     )
   },
 
@@ -76,7 +80,7 @@ export const [
   {
     PlainDate: (argInternals) => ({ ...argInternals, ...isoTimeFieldDefaults }),
     ZonedDateTime: (argInternals) => {
-      return pluckIsoDateTimeSlots(zonedDateTimeInternalsToIso(argInternals))
+      return pluckIsoDateTimeInternals(zonedDateTimeInternalsToIso(argInternals))
     },
   },
 
@@ -164,10 +168,10 @@ export const [
     },
 
     round(internals, options) {
-      const isoFields = roundIsoDateTimeFields(internals, validateRoundingOptions(options))
+      const isoDateTimeFields = roundIsoDateTimeFields(internals, validateRoundingOptions(options))
 
       return createPlainDateTime({
-        ...isoFields,
+        ...isoDateTimeFields,
         calendar: internals.calendar,
       })
     },
@@ -205,7 +209,7 @@ export const [
     },
 
     toPlainDate(internals) {
-      return createPlainDate(pluckIsoDateSlots(internals))
+      return createPlainDate(pluckIsoDateInternals(internals))
     },
 
     toPlainYearMonth() {

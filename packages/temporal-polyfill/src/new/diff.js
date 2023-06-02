@@ -60,8 +60,8 @@ export function diffZonedEpochNanoseconds(
     )
   }
 
-  function isoToZoneEpochNanoseconds(isoFields) {
-    return getSingleInstantFor(timeZone, isoFields)
+  function isoToZoneEpochNanoseconds(isoDateTimeFields) {
+    return getSingleInstantFor(timeZone, isoDateTimeFields)
   }
 
   const sign = compareLargeInts(startEpochNanoseconds, endEpochNanoseconds)

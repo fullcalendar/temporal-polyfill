@@ -7,15 +7,11 @@ import { isoCalendarId } from './calendarConfig'
 import { monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
 import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
-import {
-  constrainIsoDateFields,
-  generatePublicIsoDateFields,
-  isoDateSlotRefiners,
-} from './isoFields'
+import { generatePublicIsoDateFields, isoDateInternalRefiners } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { compareIsoFields, isoEpochFirstLeapYear } from './isoMath'
 import { stringToMonthDayInternals } from './isoParse'
-import { optionsToOverflow } from './options'
+import { constrainIsoDateFields, optionsToOverflow } from './options'
 import { isIdPropsEqual, mapRefiners } from './util'
 
 export const [
@@ -36,7 +32,7 @@ export const [
         isoMonth,
         isoDay,
         calendar: calendarArg,
-      }, isoDateSlotRefiners),
+      }, isoDateInternalRefiners),
     )
   },
 

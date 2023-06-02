@@ -1,17 +1,21 @@
 import { queryCalendarOps } from './calendarOps'
+import { getInternals } from './class'
 import { toIntegerThrowOnInfinity, toIntegerWithoutRounding, toPositiveInteger } from './options'
-import { pluckProps } from './util'
+import { pluckProps, zipSingleValue } from './util'
 
-export const isoDateSlotRefiners = {
-  // sorted alphabetically
-  calendar: queryCalendarOps, // prolly kill this!!!
+// Refiners
+// -------------------------------------------------------------------------------------------------
+
+// Ordered alphabetically
+export const isoDateInternalRefiners = {
+  calendar: queryCalendarOps,
   isoDay: toPositiveInteger,
   isoMonth: toPositiveInteger,
   isoYear: toIntegerWithoutRounding,
 }
 
+// Ordered alphabetically
 export const isoTimeFieldRefiners = {
-  // sorted alphabetically
   isoHour: toIntegerThrowOnInfinity,
   isoMicrosecond: toIntegerThrowOnInfinity,
   isoMillisecond: toIntegerThrowOnInfinity,
@@ -20,69 +24,47 @@ export const isoTimeFieldRefiners = {
   isoSecond: toPositiveInteger, // why different?
 }
 
-export const isoDateTimeSlotRefiners = {
-  // keys must be resorted
-  ...isoDateSlotRefiners,
+// Unordered
+export const isoDateTimeInternalRefiners = {
+  ...isoDateInternalRefiners,
   ...isoTimeFieldRefiners,
 }
 
-export const isoDateSlotNames = Object.keys(isoDateSlotRefiners)
-export const isoDateFieldNames = isoDateSlotNames.slice(1)
-export const isoTimeFieldNames = Object.keys(isoTimeFieldRefiners) // no calendar
-export const isoDateTimeSlotNames = Object.keys(isoDateTimeSlotRefiners).sort()
+// Property Names
+// -------------------------------------------------------------------------------------------------
 
-export const isoTimeFieldDefaults = {
-  isoHour: 0,
-  isoMicrosecond: 0,
-  isoMillisecond: 0,
-  isoMinute: 0,
-  isoNanosecond: 0,
-  isoSecond: 0,
-}
+export const isoDateInternalNames = Object.keys(isoDateInternalRefiners)
+export const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort()
 
-export function generatePublicIsoDateFields(internals) {
-  const publicFields = pluckIsoDateSlots(internals)
-  publicFields.calendar = publicFields.calendar.id // correct?
+export const isoDateFieldNames = isoDateInternalNames.slice(1) // no calendar
+export const isoTimeFieldNames = Object.keys(isoTimeFieldRefiners)
+
+// Defaults
+// -------------------------------------------------------------------------------------------------
+
+export const isoTimeFieldDefaults = zipSingleValue(isoTimeFieldNames, 0)
+
+// Conversion
+// -------------------------------------------------------------------------------------------------
+
+export const pluckIsoDateInternals = pluckProps.bind(undefined, isoDateInternalNames)
+export const pluckIsoDateTimeInternals = pluckProps.bind(undefined, isoDateTimeInternalNames)
+export const pluckIsoTimeFields = pluckProps.bind(undefined, isoTimeFieldNames)
+
+export const generatePublicIsoDateFields =
+  generatePublicIsoFields.bind(undefined, pluckIsoDateInternals)
+
+export const generatePublicIsoDateTimeFields =
+  generatePublicIsoFields.bind(undefined, pluckIsoDateTimeInternals)
+
+function generatePublicIsoFields(pluckFunc, internals) {
+  const publicFields = pluckFunc(internals)
+  publicFields.calendar = getPublicIdOrObj(internals.calendar)
   return publicFields
 }
 
-export function generatePublicIsoDateTimeFields(internals) {
-  const publicFields = pluckIsoDateTimeSlots(internals)
-  publicFields.calendar = publicFields.calendar.id // correct?
-  return publicFields
+// Similar to getPublicCalendar and getPublicTimeZone
+export function getPublicIdOrObj(ops) {
+  return getInternals(ops) || // adapter (return internal object)
+    ops.id // impl (return id)
 }
-
-export function pluckIsoDateTimeSlots(isoFields) {
-  return pluckProps(isoFields, isoDateTimeSlotNames)
-}
-
-export function pluckIsoDateSlots(isoFields) {
-  return pluckProps(isoFields, isoDateSlotNames)
-}
-
-export function pluckIsoDateFields(isoFields) {
-  return pluckProps(isoFields, isoDateFieldNames)
-}
-
-export function pluckIsoTimeFields(isoFields) {
-  return pluckProps(isoFields, isoTimeFieldNames)
-}
-
-export function constrainIsoDateTimeFields(isoDateTimeFields, overflow = 'reject') {
-  // ahhhh! calendar gets passed in here!!!
-}
-
-export function constrainIsoDateFields(isoDateFields, overflow = 'reject') {
-  // ahhhh! calendar gets passed in here!!!
-}
-
-export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
-}
-
-export function isValidIsoFields() {
-}
-
-/*
-TODO: move AWAY from just 'isofields' because might get confused with getISOFields()
-name it 'isodatetimefields'
-*/

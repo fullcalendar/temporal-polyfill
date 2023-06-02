@@ -18,16 +18,15 @@ import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import {
-  constrainIsoDateFields,
   generatePublicIsoDateFields,
-  isoDateSlotRefiners,
+  isoDateInternalRefiners,
   isoTimeFieldDefaults,
-  pluckIsoDateSlots,
+  pluckIsoDateInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoFields } from './isoMath'
 import { stringToPlainDateInternals } from './isoParse'
-import { optionsToOverflow } from './options'
+import { constrainIsoDateFields, optionsToOverflow } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { isIdPropsEqual, mapRefiners } from './util'
@@ -50,14 +49,16 @@ export const [
         isoMonth,
         isoDay,
         calendar: calendarArg,
-      }, isoDateSlotRefiners),
+      }, isoDateInternalRefiners),
     )
   },
 
   // internalsConversionMap
   {
-    PlainDateTime: pluckIsoDateSlots,
-    ZonedDateTime: (argInternals) => pluckIsoDateSlots(zonedDateTimeInternalsToIso(argInternals)),
+    PlainDateTime: pluckIsoDateInternals,
+    ZonedDateTime(argInternals) {
+      return pluckIsoDateInternals(zonedDateTimeInternalsToIso(argInternals))
+    },
   },
 
   // bagToInternals

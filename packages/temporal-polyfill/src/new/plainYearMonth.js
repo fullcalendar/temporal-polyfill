@@ -11,15 +11,11 @@ import { createTemporalClass, getInternals, neverValueOf, toLocaleStringMethod }
 import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
-import {
-  constrainIsoDateFields,
-  generatePublicIsoDateFields,
-  isoDateSlotRefiners,
-} from './isoFields'
+import { generatePublicIsoDateFields, isoDateInternalRefiners } from './isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { compareIsoFields } from './isoMath'
 import { stringToPlainYearMonthInternals } from './isoParse'
-import { optionsToOverflow } from './options'
+import { constrainIsoDateFields, optionsToOverflow } from './options'
 import { isIdPropsEqual, mapRefiners } from './util'
 
 export const [
@@ -40,7 +36,7 @@ export const [
         isoMonth,
         isoDay: referenceIsoDay,
         calendar: calendarArg,
-      }, isoDateSlotRefiners),
+      }, isoDateInternalRefiners),
     )
   },
 

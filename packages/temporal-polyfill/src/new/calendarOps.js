@@ -23,9 +23,9 @@ export function queryCalendarOps(calendarSlot) {
 }
 
 export function getPublicCalendar(internals) {
-  const { calendar } = internals
-  return getInternals(calendar) || // if CalendarOpsAdapter
-    createCalendar(calendar) // if CalendarImpl
+  const calendarOps = internals.calendar
+  return getInternals(calendarOps) || // CalendarOpsAdapter (return internal Calendar)
+    createCalendar(calendarOps) // CalendarImpl (create outer Calendar)
 }
 
 export function getCommonCalendarOps(internals0, internals1) {

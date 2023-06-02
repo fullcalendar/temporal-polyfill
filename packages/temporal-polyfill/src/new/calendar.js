@@ -72,34 +72,31 @@ export const [Calendar, createCalendar] = createTemporalClass(
     }),
 
     dateFromFields(impl, fields, options) {
-      return createPlainDate({
-        calendar: impl,
-        ...impl.dateFromFields(
+      return createPlainDate(
+        impl.dateFromFields(
           prepareFields(fields, impl.fields(dateFieldNames), getRequiredDateFields(impl)),
           optionsToOverflow(options),
         ),
-      })
+      )
     },
 
     yearMonthFromFields(impl, fields, options) {
-      return createPlainYearMonth({
-        calendar: impl,
-        ...impl.yearMonthFromFields(
+      return createPlainYearMonth(
+        impl.yearMonthFromFields(
           prepareFields(fields, impl.fields(yearMonthFieldNames), getRequiredYearMonthFields(impl)),
           optionsToOverflow(options),
         ),
-      })
+      )
     },
 
     monthDayFromFields(impl, fields, options) {
-      return createPlainMonthDay({
-        calendar: impl,
+      return createPlainMonthDay(
         ...impl.monthDayFromFields(
           // refine y/m/d fields
           prepareFields(fields, impl.fields(dateFieldNames), getRequiredMonthDayFields(impl)),
           optionsToOverflow(options),
         ),
-      })
+      )
     },
 
     toString: returnId,

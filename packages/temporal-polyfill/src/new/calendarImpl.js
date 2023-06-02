@@ -87,7 +87,7 @@ class IsoCalendarImpl {
   yearMonthFromFields(fields, overflow) {
     const year = this.readYear(fields)
     const month = this.refineMonth(fields, year, overflow)
-    return this.queryIsoFields(year, month)
+    return this.queryIsoFields(year, month, 1)
   }
 
   monthDayFromFields(fields, overflow) {
@@ -139,8 +139,13 @@ class IsoCalendarImpl {
   // Internal Querying
   // -----------------
 
-  queryIsoFields(year, month, day) {
-    return { isoYear: year, isoMonth: month, isoDay: day }
+  queryIsoFields(year, month, day) { // return isoDateInternals
+    return {
+      calendar: this,
+      isoYear: year,
+      isoMonth: month,
+      isoDay: day,
+    }
   }
 
   queryDateStart(year, month, day) {
@@ -198,7 +203,11 @@ class IsoCalendarImpl {
     }
 
     ms = addDaysMilli(ms, weeks * isoDaysInWeek + days)
-    return epochMilliToIsoFields(ms)
+
+    return {
+      calendar: this,
+      ...epochMilliToIsoFields(ms),
+    }
   }
 
   dateUntil(startIsoDateFields, endIsoDateFields, largestUnit) {
@@ -443,10 +452,6 @@ class IntlCalendarImpl extends IsoCalendarImpl {
     return this.queryYearMonthDay(isoDateFields)[1]
   }
 
-  day(isoDateFields) {
-    return this.queryYearMonthDay(isoDateFields)[2]
-  }
-
   monthCode(isoDateFields) {
     const [year, month] = this.queryYearMonthDay(isoDateFields)
     const leapMonth = this.queryLeapMonth(year)
@@ -460,8 +465,11 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   // Internal Querying
   // -----------------
 
-  queryIsoFields(year, month, day) {
-    return epochMilliToIsoFields(this.queryDateStart(year, month, day))
+  queryIsoFields(year, month, day) { // returns isoDateInternals
+    return {
+      calendar: this,
+      ...epochMilliToIsoFields(this.queryDateStart(year, month, day)),
+    }
   }
 
   queryDaysInYear(year) {

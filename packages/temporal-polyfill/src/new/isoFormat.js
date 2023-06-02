@@ -16,8 +16,9 @@ export function formatPossibleDate(internals, options, formatSimple) {
   }
 }
 
-export function formatIsoDateTimeFields(isoFields, options) {
-  return formatIsoDateFields(isoFields) + 'T' + formatIsoTimeFields(isoFields, options)
+export function formatIsoDateTimeFields(isoDateTimeFields, options) {
+  return formatIsoDateFields(isoDateTimeFields) +
+    'T' + formatIsoTimeFields(isoDateTimeFields, options)
 }
 
 export function formatIsoDateFields(isoDateFields) {

@@ -120,7 +120,7 @@ function createGetters(getterNames) {
   })
 
   getters.calendarId = function(internals) {
-    return internals.calendar.id
+    return internals.calendar.id // works for either CalendarOpsAdapter or CalendarImpl
   }
 
   return getters

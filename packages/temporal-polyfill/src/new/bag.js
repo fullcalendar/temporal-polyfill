@@ -23,13 +23,11 @@ import {
   durationFieldNames,
   durationFieldRefiners,
 } from './durationFields'
-import {
-  constrainIsoDateTimeFields,
-  constrainIsoTimeFields,
-} from './isoFields'
 import { epochNanoToIsoFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNanoseconds } from './isoParse'
 import {
+  constrainIsoDateTimeFields,
+  constrainIsoTimeFields,
   optionsToOverflow,
   toDisambiguation,
   toObject,
@@ -70,11 +68,11 @@ export function bagToZonedDateTimeInternals(bag, options) {
   )
 
   const timeZone = queryTimeZoneOps(fields.timeZone)
-  const isoFields = calendarOps.dateFromFields(fields, optionsToOverflow(options))
+  const isoDateFields = calendarOps.dateFromFields(fields, optionsToOverflow(options))
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    { ...isoFields, ...timeFieldsToIso(fields) },
+    { ...isoDateFields, ...timeFieldsToIso(fields) },
     fields.offset !== undefined ? parseOffsetNanoseconds(fields.offset) : undefined,
     false, // z?
     toOffsetHandling(options),
@@ -92,11 +90,11 @@ export function bagToZonedDateTimeInternals(bag, options) {
 export function zonedDateTimeWithBag(zonedDateTime, bag, options) {
   const { calendar, timeZone } = getInternals(zonedDateTime)
   const fields = mergeBag(calendar, zonedDateTime, bag, dateTimeFieldNames, ['offset'])
-  const isoFields = calendar.dateFromFields(fields, optionsToOverflow(options))
+  const isoDateFields = calendar.dateFromFields(fields, optionsToOverflow(options))
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    { ...isoFields, ...timeFieldsToIso(fields) },
+    { ...isoDateFields, ...timeFieldsToIso(fields) },
     parseOffsetNanoseconds(fields.offset),
     false, // z?
     toOffsetHandling(options),
@@ -175,7 +173,7 @@ export function bagToPlainTimeInternals(bag, options) {
 
 export function plainTimeWithBag(plainTime, bag, options) {
   const overflowOpt = toOverflowOptions(options) // TODO: single opt!
-  const fields = pluckProps(plainTime, timeFieldNames)
+  const fields = pluckProps(timeFieldNames, plainTime)
   const additionalFields = prepareFields(bag, timeFieldNames)
   const newInternals = timeFieldsToIso({
     ...fields,
@@ -372,7 +370,7 @@ function mergeToPlainDate(
 ) {
   const { calendar } = getInternals(obj)
   const receiverFieldNames = calendar.fields(objFieldNames)
-  const receiverFields = pluckProps(obj, receiverFieldNames)
+  const receiverFields = pluckProps(receiverFieldNames, obj)
   const inputFieldNames = calendar.fields(otherFieldNames)
   const inputFields = prepareFields(other, inputFieldNames, getRequiredDateFields(calendar))
   const mergedFieldNames = removeDuplicateStrings(receiverFieldNames.concat(inputFieldNames))
@@ -426,7 +424,7 @@ function forbidInstanceClass(obj, Class) {
 }
 
 /*
-If requiredFields not given, then assumed to be 'partial'
+If requiredFields not given, then assumed to be 'partial' (defaults won't be applied)
 */
 export function prepareFields(bag, fieldNames, requiredFields) {
   console.log(builtinRefiners)

@@ -1,4 +1,6 @@
 
+// in general, prefer .bind over macro functions
+
 export function isObjectLike() {
 }
 
@@ -10,14 +12,13 @@ export function mapProps(input, refinerMap) {
   // loops get driven my refinerMap
 }
 
-export function mapArrayToProps() {
-
+export function mapArrayToProps() { // propNameToProps
 }
 
 export function remapProps(obj, oldKeys, newKeys) {
 }
 
-export function pluckProps(obj, props) {
+export function pluckProps(propNames, obj) {
 }
 
 export function removeDuplicateStrings(a0, a1) {

@@ -29,9 +29,9 @@ export function queryTimeZoneOps(timeZoneSlot) {
 }
 
 export function getPublicTimeZone(internals) {
-  const { timeZone } = internals
-  return getInternals(timeZone) || // if TimeZoneOpsAdapter
-    createTimeZone(timeZone) // if TimeZoneImpl
+  const timeZoneOps = internals.timeZone
+  return getInternals(timeZoneOps) || // TimeZoneOpsAdapter (return internal TimeZone)
+    createTimeZone(timeZoneOps) // TimeZoneImpl (create outer TimeZone)
 }
 
 export function getCommonTimeZoneOps(internals0, internals1) {
