@@ -28,8 +28,7 @@ export function hashIntlFormatParts(intlFormat, epochMilliseconds) {
 // -------------------------------------------------------------------------------------------------
 
 // AHHH... problem with resolvedOptions... need to whitelist original
-
-// TODO: rename to intlFormat?
+// PERFORMANCE: avoid using our DateTimeFormat for toLocaleString, because creates two objects
 
 export const IntlDateTimeFormat = Intl.DateTimeFormat
 
@@ -39,7 +38,7 @@ export class DateTimeFormat extends IntlDateTimeFormat {
     return format
       ? format.format(formattable)
       : super.format(formattable)
-      // must use super because .format is always bound:
+      // can't use the origMethd.call trick because .format() is always bound
       // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
   }
 
@@ -243,7 +242,7 @@ function timeInternalsToEpochNano(internals, resolvedOptions) {
 function dateTimeInternalsToEpochNano(internals, resolvedOptions, temporalName) {
   checkCalendarsCompatible(
     internals.calendar.id,
-    resolvedOptions.calendarId,
+    resolvedOptions.calendar,
     strictCalendarCheck[temporalName],
   )
 
