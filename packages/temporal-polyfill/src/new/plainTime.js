@@ -2,7 +2,6 @@ import {
   bagToPlainTimeInternals,
   createZonedDateTimeConverter,
   plainTimeWithBag,
-  zonedDateTimeInternalsToIso,
 } from './bag'
 import { timeGetters } from './calendarFields'
 import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
@@ -18,6 +17,7 @@ import { optionsToOverflow } from './options'
 import { toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { roundIsoTimeFields } from './round'
+import { zonedInternalsToIso } from './timeZoneOps'
 
 export const [
   PlainTime,
@@ -52,7 +52,7 @@ export const [
   {
     PlainDateTime: pluckIsoTimeFields,
     ZonedDateTime(argInternals) {
-      return pluckIsoTimeFields(zonedDateTimeInternalsToIso(argInternals))
+      return pluckIsoTimeFields(zonedInternalsToIso(argInternals))
     },
   },
 

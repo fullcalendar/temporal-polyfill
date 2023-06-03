@@ -4,7 +4,6 @@ import {
   dateToPlainMonthDay,
   dateToPlainYearMonth,
   plainDateWithBag,
-  zonedDateTimeInternalsToIso,
 } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { dateGetters } from './calendarFields'
@@ -24,11 +23,12 @@ import {
   refineIsoDateInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
-import { compareIsoFields } from './isoMath'
+import { compareIsoDateTimeFields } from './isoMath'
 import { stringToPlainDateInternals } from './isoParse'
 import { optionsToOverflow } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
+import { zonedInternalsToIso } from './timeZoneOps'
 import { isIdPropsEqual } from './util'
 
 export const [
@@ -55,7 +55,7 @@ export const [
   {
     PlainDateTime: pluckIsoDateInternals,
     ZonedDateTime(argInternals) {
-      return pluckIsoDateInternals(zonedDateTimeInternalsToIso(argInternals))
+      return pluckIsoDateInternals(zonedInternalsToIso(argInternals))
     },
   },
 
@@ -118,7 +118,7 @@ export const [
 
     equals(internals, other) {
       const otherInternals = toPlainDateInternals(other)
-      return !compareIsoFields(internals, otherInternals) &&
+      return !compareIsoDateTimeFields(internals, otherInternals) &&
         isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 
@@ -160,7 +160,7 @@ export const [
 
   {
     compare(arg0, arg1) {
-      return compareIsoFields(
+      return compareIsoDateTimeFields(
         toPlainDateInternals(arg0),
         toPlainDateInternals(arg1),
       )

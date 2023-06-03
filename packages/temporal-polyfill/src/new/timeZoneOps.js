@@ -8,16 +8,17 @@ import {
 import { Instant, createInstant } from './instant'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
-  addDaysToIsoFields,
-  epochNanoToIsoFields,
-  isoFieldsToEpochNano,
-  nanosecondsInIsoDay,
+  epochNanoToIso,
+  isoToEpochNano,
+  nanoInUtcDay,
 } from './isoMath'
+import { addDaysToIsoFields } from './move'
 import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { createTimeZone } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
+import { createLazyMap } from './util'
 
 export const utcTimeZoneId = 'UTC'
 
@@ -64,7 +65,7 @@ export function getMatchingInstantFor(
   if (offsetNano !== undefined && offsetHandling !== 'ignore') {
     // we ALWAYS use Z as a zero offset
     if (offsetHandling === 'use' || hasZ) {
-      return isoFieldsToEpochNano(isoDateTimeFields).sub(offsetNano)
+      return isoToEpochNano(isoDateTimeFields).sub(offsetNano)
     }
 
     const matchingEpochNano = findMatchingEpochNano(
@@ -89,7 +90,7 @@ export function getMatchingInstantFor(
 
 function findMatchingEpochNano(timeZoneOps, isoDateTimeFields, offsetNano, fuzzy) {
   const possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
-  const zonedEpochNano = isoFieldsToEpochNano(isoDateTimeFields)
+  const zonedEpochNano = isoToEpochNano(isoDateTimeFields)
 
   if (fuzzy) {
     offsetNano = roundToMinute(offsetNano)
@@ -136,11 +137,11 @@ export function getSingleInstantFor(
   // within a transition that jumps forward...
   // ('compatible' means 'later')
 
-  const zonedEpochNano = isoFieldsToEpochNano(isoDateTimeFields)
+  const zonedEpochNano = isoToEpochNano(isoDateTimeFields)
   const gapNano = computeGapNear(timeZoneOps, zonedEpochNano)
 
   epochNanos = timeZoneOps.getPossibleInstantsFor(
-    epochNanoToIsoFields(
+    epochNanoToIso(
       zonedEpochNano.add(gapNano * (
         disambig === 'earlier'
           ? -1
@@ -158,12 +159,28 @@ export function getSingleInstantFor(
 
 function computeGapNear(timeZoneOps, zonedEpochNano) {
   const startOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    zonedEpochNano.add(-nanosecondsInIsoDay),
+    zonedEpochNano.add(-nanoInUtcDay),
   )
   const endOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    zonedEpochNano.add(nanosecondsInIsoDay),
+    zonedEpochNano.add(nanoInUtcDay),
   )
   return endOffsetNano - startOffsetNano
+}
+
+export const zonedInternalsToIso = createLazyMap((internals) => {
+  const { timeZone, epochNanoseconds } = internals
+  const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+  const isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
+
+  return {
+    ...isoDateTimeFields,
+    offsetNanoseconds,
+  }
+})
+
+export function zonedEpochNanoToIso(timeZoneOps, epochNano) {
+  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
+  return epochNanoToIso(epochNano.add(offsetNano))
 }
 
 // Adapter
@@ -188,7 +205,7 @@ export const TimeZoneOpsAdapter = createWrapperClass(
 function validateOffsetNano(offsetNano) {
   offsetNano = strictNumber(offsetNano)
 
-  if (Math.abs(offsetNano) >= nanosecondsInIsoDay) {
+  if (Math.abs(offsetNano) >= nanoInUtcDay) {
     throw new RangeError('out of range')
   }
 

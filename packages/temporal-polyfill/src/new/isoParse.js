@@ -1,13 +1,15 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import {
-  constrainIsoDateInternals,
-  constrainIsoDateTimeInternals,
-  constrainIsoTimeFields,
   pluckIsoDateInternals,
   pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
 } from './isoFields'
+import {
+  constrainIsoDateInternals,
+  constrainIsoDateTimeInternals,
+  constrainIsoTimeFields,
+} from './isoMath'
 import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { createZonedDateTime } from './zonedDateTime'
 

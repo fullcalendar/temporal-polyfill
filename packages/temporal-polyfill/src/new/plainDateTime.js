@@ -3,7 +3,6 @@ import {
   dateToPlainMonthDay,
   dateToPlainYearMonth,
   plainDateTimeWithBag,
-  zonedDateTimeInternalsToIso,
 } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
@@ -21,7 +20,7 @@ import {
   refineIsoDateTimeInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
-import { compareIsoFields } from './isoMath'
+import { compareIsoDateTimeFields } from './isoMath'
 import { stringToPlainDateTimeInternals } from './isoParse'
 import { moveDateTime } from './move'
 import {
@@ -32,7 +31,7 @@ import {
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
-import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { isIdPropsEqual } from './util'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -77,7 +76,7 @@ export const [
   {
     PlainDate: (argInternals) => ({ ...argInternals, ...isoTimeFieldDefaults }),
     ZonedDateTime: (argInternals) => {
-      return pluckIsoDateTimeInternals(zonedDateTimeInternalsToIso(argInternals))
+      return pluckIsoDateTimeInternals(zonedInternalsToIso(argInternals))
     },
   },
 
@@ -175,7 +174,7 @@ export const [
 
     equals(internals, other) {
       const otherInternals = toPlainDateTimeInternals(other)
-      return !compareIsoFields(internals, otherInternals) &&
+      return !compareIsoDateTimeFields(internals, otherInternals) &&
         isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 
@@ -231,7 +230,7 @@ export const [
 
   {
     compare(arg0, arg1) {
-      return compareIsoFields(
+      return compareIsoDateTimeFields(
         toPlainDateTimeInternals(arg0),
         toPlainDateTimeInternals(arg1),
       )

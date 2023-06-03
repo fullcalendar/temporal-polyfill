@@ -5,11 +5,10 @@ import { queryCalendarOps } from './calendarOps'
 import { createTemporalClass, internalIdGetters, returnId } from './class'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
 import { formatOffsetNanoseconds } from './isoFormat'
-import { epochNanosecondsToIso } from './isoMath'
 import { stringToTimeZoneId } from './isoParse'
 import { toDisambiguation } from './options'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { getSingleInstantFor } from './timeZoneOps'
+import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { noop } from './util'
 
 export const [TimeZone, createTimeZone] = createTemporalClass(
@@ -50,10 +49,9 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
 
     getPlainDateTimeFor(impl, instantArg, calendarArg) {
       const epochNanoseconds = toInstantEpochNanoseconds(instantArg)
-      const offsetNanoseconds = impl.getOffsetNanosecondsFor(impl, epochNanoseconds)
 
       return createPlainDateTime({
-        ...epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds)),
+        ...zonedEpochNanoToIso(impl, epochNanoseconds),
         calendar: queryCalendarOps(calendarArg),
       })
     },

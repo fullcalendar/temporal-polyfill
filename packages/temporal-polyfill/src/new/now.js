@@ -1,5 +1,4 @@
 import { nanoInMilli } from '../dateUtils/units'
-import { zonedDateTimeInternalsToIso } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { createInstant } from './instant'
@@ -9,7 +8,7 @@ import { createLargeInt } from './largeInt'
 import { createPlainDate } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime } from './plainTime'
-import { queryTimeZoneOps } from './timeZoneOps'
+import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { createPropDescriptors, createTemporalNameDescriptors } from './util'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -58,7 +57,7 @@ function getCurrentInstant() {
 
 function getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg) {
   return pluckIsoDateTimeInternals(
-    zonedDateTimeInternalsToIso(getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)),
+    zonedInternalsToIso(getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)),
   )
 }
 

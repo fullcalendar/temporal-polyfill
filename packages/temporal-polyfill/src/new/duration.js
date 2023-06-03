@@ -8,7 +8,7 @@ import {
   negateDurationFields,
   refineDurationInternals,
 } from './durationFields'
-import { isoToUtcEpochNanoseconds } from './isoMath'
+import { isoToEpochNano } from './isoMath'
 import { stringToDurationInternals } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
@@ -227,7 +227,7 @@ function createMarkerSystem(markerInternals) {
   } else {
     return [
       markerInternals, // marker (IsoDateFields)
-      isoToUtcEpochNanoseconds, // markerToEpochNanoseconds
+      isoToEpochNano, // markerToEpochNanoseconds
       calendar.dateAdd.bind(calendar), // moveMarker
       calendar.dateUntil.bind(calendar), // diffMarkers
     ]

@@ -1,45 +1,16 @@
-import { createLargeInt } from './largeInt'
+import { pluckIsoDateTimeFields } from './isoFields'
+import { compareLargeInts, createLargeInt } from './largeInt'
+import { clamp, positiveModulo } from './util'
 
-export const nanosecondsInMicrosecond = 1000
-export const nanosecondsInMillisecond = 1000000
-export const nanosecondsInSecond = 1000000000
-export const nanosecondsInHour = 3600000000000
-export const nanosecondsInIsoDay = 86400000000000
+// ISO Calendar
+// -------------------------------------------------------------------------------------------------
 
-export const nanosecondsInUnit = {} // include iso-day as well
-
-export function epochNanoToMilli(epochNano) {
-  return epochNano.div(nanosecondsInMillisecond).toNumber()
-}
-
-export function epochSecToNano(epochSec) {
-  return createLargeInt(epochSec).mult(nanosecondsInSecond)
-}
-
-export const epochGetters = {
-  epochNanoseconds(epochNanoseconds) {
-    return epochNanoseconds.toBigInt()
-  },
-
-  epochMicroseconds(epochNanoseconds) {
-    return epochNanoseconds.div(nanosecondsInMicrosecond).toBigInt()
-  },
-
-  epochMilliseconds: epochNanoToMilli,
-
-  epochSeconds(epochNanoseconds) {
-    return epochNanoseconds.div(nanosecondsInSecond).toNumber()
-  },
-}
-
-// ISO Calendar system
-
-export const isoMonthsInYear = 12
-export const isoDaysInWeek = 7
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
+export const isoMonthsInYear = 12
+export const isoDaysInWeek = 7
 
-export function computeIsoMonthsInYear(isoYear) {
+export function computeIsoMonthsInYear(isoYear) { // for methods
   return isoMonthsInYear
 }
 
@@ -65,7 +36,7 @@ export function computeIsoIsLeapYear(isoYear) {
 }
 
 export function computeIsoDayOfWeek(isoDateFields) {
-  return generateLegacyDate(isoDateFields).getDay() + 1
+  return isoToLegacyDate(isoDateFields).getDay() + 1
 }
 
 export function computeIsoWeekOfYear(isoDateFields) {
@@ -74,101 +45,177 @@ export function computeIsoWeekOfYear(isoDateFields) {
 export function computeIsoYearOfWeek(isoDateFields) {
 }
 
-// isoDateTimeFieldsToLegacyDate
-function generateLegacyDate(isoDateTimeFields) {
+// Constraining
+// -------------------------------------------------------------------------------------------------
+
+export function constrainIsoDateTimeInternals(isoDateTimeInternals) {
+  return validateIsoDateTimeInternals({
+    ...constrainIsoDateInternals(isoDateTimeInternals),
+    ...constrainIsoTimeFields(isoDateTimeInternals),
+  })
 }
 
-//
-
-export function isoFieldsToEpochMilli(isoDateTimeFields) {
+export function constrainIsoDateInternals(isoDateInternals) {
+  return validateIsoDateTimeInternals({
+    calendar: isoDateInternals.calendar,
+    isoYear: isoDateInternals.isoYear,
+    isoMonth: clamp(isoDateInternals.isoMonth, 1, isoMonthsInYear), // TODO: must error!
+    isoDay: clamp( // TODO: must error!
+      isoDateInternals.isoDay,
+      1,
+      computeIsoDaysInMonth(isoDateInternals.isoYear, isoDateInternals.isoMonth),
+    ),
+  })
 }
 
-export function isoToEpochMilli(isoYear, isoMonth, isoDate) {
+export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
+  return {
+    isoHour: clamp(isoTimeFields.isoHour, 1, 23, overflow),
+    isoMinute: clamp(isoTimeFields.isoMinute, 1, 59, overflow),
+    isoSecond: clamp(isoTimeFields.isoSecond, 1, 59, overflow),
+    isoMillisecond: clamp(isoTimeFields.isoMillisecond, 1, 999, overflow),
+    isoMicrosecond: clamp(isoTimeFields.isoMicrosecond, 1, 999, overflow),
+    isoNanosecond: clamp(isoTimeFields.isoNanosecond, 1, 999, overflow),
+  }
 }
 
-// diff (diffEpochMilliByDays)
-export function diffDaysMilli(milli0, milli1) {
+// Epoch Unit Conversion
+// -------------------------------------------------------------------------------------------------
+
+export const secInDay = 86400
+const millInUtcDay = 86400000
+export const milliInSec = 1000
+
+export const nanoInMicro = 1000 // consolidate with other 1000 units
+export const nanoInMilli = 1000000
+export const nanoInSec = 1000000000
+export const nanoInHour = 3600000000000
+export const nanoInUtcDay = 86400000000000
+export const nanosecondsInUnit = {
+  microsecond: nanoInMicro,
+  millisecond: nanoInMilli,
+  second: nanoInSec,
+  hour: nanoInHour,
+  day: nanoInUtcDay,
 }
 
-// move (moveEpochMilliByDays)
-export function addDaysMilli(epochMilli, milli) {
+// nano -> * (with floor)
+
+export function epochNanoToSecFloor(epochNano) {
+  return epochNanoToSec(epochNano)[0]
 }
 
-export function epochMilliToIsoFields() {
+export function epochNanoToMilliFloor(epochNano) {
+  return epochNanoToMicro(epochNano)[0]
 }
 
-// TIME math...
-
-export function isoTimeFieldsToNanoseconds() {
-
+function epochNanoToMicroFloor(epochNano) {
+  return epochNanoToMilli(epochNano)[0]
 }
 
-export function nanosecondsToIsoTimeFields() {
-  /*
-  const dayDelta = Math.floor(nanoseconds / nanosecondsInIsoDay)
-  nanoseconds %= nanosecondsInIsoDay
-  */
-  // return [isoTimeFields, dayDelta]
+// nano -> * (with remainder)
+
+export function epochNanoToUtcDays(epochNano) {
+  // TODO: use seconds instead?
+  const [epochMilli, nanoRemainder] = epochNanoToMilli(epochNano)
+  const days = Math.floor(epochMilli / millInUtcDay)
+  const milliRemainder = positiveModulo(epochMilli, millInUtcDay)
+
+  return [
+    days,
+    milliRemainder * nanoInMilli + nanoRemainder,
+  ]
 }
 
-// does floor
 export function epochNanoToSec(epochNano) {
-  let epochSec = epochNano.div(nanosecondsInSecond).toNumber() // does truncation
-  let subsecNano = epochNano.sub(createLargeInt(epochSec).mult(nanosecondsInSecond)).toNumber()
+  return epochNano.shift(9)
+}
 
-  if (subsecNano < 0) {
-    epochSec--
-    subsecNano += nanosecondsInSecond
+export function epochNanoToMilli(epochNano) {
+  return epochNano.shift(6)
+}
+
+export function epochNanoToMicro(epochNano) {
+  const [epochMilli, nanoRemainder] = epochNanoToMilli(epochNano)
+
+  return [
+    createLargeInt(epochMilli).mult(nanoInMicro),
+    nanoRemainder * nanoInMicro,
+  ]
+}
+
+// * -> nano
+
+export function epochSecToNano(epochSec) {
+  return createLargeInt(epochSec).mult(nanoInSec)
+}
+
+export function epochMilliToNano(epochMilli) {
+  return createLargeInt(epochMilli).mult(nanoInMilli)
+}
+
+export function epochMicroToNano(epochMicro) {
+  return epochMicro.mult(nanoInMicro)
+}
+
+// Epoch Getters
+// -------------------------------------------------------------------------------------------------
+
+export const epochGetters = {
+  epochSeconds: epochNanoToSecFloor,
+
+  epochMilliseconds: epochNanoToMilliFloor,
+
+  epochMicroseconds(epochNano) {
+    return epochNanoToMicroFloor(epochNano).toBigInt()
+  },
+
+  epochNanoseconds(epochNano) {
+    return epochNano.toBigInt()
+  },
+}
+
+// Validation
+// -------------------------------------------------------------------------------------------------
+
+const epochNanoMax = createLargeInt(nanoInUtcDay).mult(100000000) // inclusive
+const epochNanoMin = createLargeInt.mult(-1) // inclusive
+const isoYearMax = 275760 // shortcut. isoYear at epochNanoMax
+const isoYearMin = -271821 // shortcut. isoYear at epochNanoMin
+
+function validateIsoDateTimeInternals(isoDateTimeInternals) { // validateIsoInternals?
+  const { isoYear } = isoDateTimeInternals
+  clamp(isoYear, isoYearMin, isoYearMax) // TODO: must error!
+
+  const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
+
+  if (nudge) {
+    const epochNano = isoToEpochNano(isoDateTimeInternals)
+    validateEpochNano(epochNano && epochNano.add((nanoInUtcDay - 1) * nudge))
   }
 
-  return [epochSec, subsecNano]
+  return isoDateTimeInternals
 }
 
-export function epochNanoToIsoFields() {
+export function validateEpochNano(epochNano) {
+  if (
+    epochNano == null || // TODO: pick null or undefined
+    compareLargeInts(epochNano, epochNanoMin) === 1 || // epochNano < epochNanoMin
+    compareLargeInts(epochNanoMax, epochNano) === 1 // epochNanoMax < epochNano
+  ) {
+    throw new RangeError('aahh')
+  }
+  return epochNano
 }
 
-export function isoToUtcEpochNanoseconds(isoDateTimeFields) {
-}
+// ISO <-> Epoch Conversion
+// -------------------------------------------------------------------------------------------------
 
-export function isoFieldsToEpochNano(isoDateTimeFields) {
-  // if result is out-of-bounds, will return null or undefined?
-  // NOTE: caller should always check result
-}
+// ISO Fields -> Epoch
+// (could be out-of-bounds, return undefined!)
 
-export function isoTimeToNanoseconds(isoTimeFields) {
-}
-
-export function nanosecondsToTimeDuration(nanoseconds) { // nanoseconds is a number
-  // returns an (incomplete?) Duration?
-  // good idea to put here?
-}
-
-export function epochNanosecondsToIso(epochNanoseconds, timeZone) {
-}
-
-export function compareIsoFields() {
-  // uses Date.UTC
-}
-
-export function compareIsoTimeFields() {
-  // uses conversion to milliseconds
-}
-
-export function addDaysToIsoFields() {
-  // short-circuit if nothing to add
-}
-
-export const milliInSec = 1000
-export const nanoInMicro = 1000
-export const nanoInMilli = 1000
-export const secInDay = 86400
-
-export function isoToEpochSec(...args) { // doesn't accept beyond sec
-  return isoToEpochMilli(...args) / milliInSec // no need for rounding
-}
-
-export function isoFieldsToEpochSec(isoDateTimeFields) {
-  const epochSec = isoToEpochSec(
+export function isoToEpochSec(isoDateTimeFields) {
+  const epochSec = isoArgsToEpochSec(
     isoDateTimeFields.year,
     isoDateTimeFields.month,
     isoDateTimeFields.day,
@@ -182,4 +229,72 @@ export function isoFieldsToEpochSec(isoDateTimeFields) {
     isoDateTimeFields.nanosecond
 
   return [epochSec, subsecNano]
+}
+
+export function isoToEpochMilli(isoDateTimeFields) {
+  return isoArgsToEpochMilli(...pluckIsoDateTimeFields(isoDateTimeFields))
+}
+
+export function isoToEpochNano(isoDateTimeFields) {
+}
+
+// ISO Arguments -> Epoch
+// (could be out-of-bounds, return undefined!)
+
+export function isoArgsToEpochSec(...args) { // doesn't accept beyond sec
+  return isoArgsToEpochMilli(...args) / milliInSec // no need for rounding
+}
+
+export function isoArgsToEpochMilli(
+  isoYear,
+  isoMonth = 1,
+  isoDate, // rest are optional...
+  isoHour,
+  isMinute,
+  isoSec,
+  isoMilli,
+) {
+}
+
+function isoToLegacyDate(isoDateTimeFields) {
+}
+
+// Epoch -> ISO Fields
+
+export function epochNanoToIso() {
+}
+
+export function epochMilliToIso() {
+}
+
+// Comparison
+// -------------------------------------------------------------------------------------------------
+
+export function compareIsoDateTimeFields() {
+  // TODO: (use Math.sign technique?)
+}
+
+export function compareIsoTimeFields() {
+}
+
+// ISO Time
+// -------------------------------------------------------------------------------------------------
+
+export function isoTimeFieldsToNano(isoTimeFields) {
+}
+
+export function nanoToIsoTimeFields() {
+  /*
+  const dayDelta = Math.floor(nanoseconds / nanosecondsInIsoDay)
+  nanoseconds %= nanosecondsInIsoDay
+  */
+  // return [isoTimeFields, dayDelta]
+}
+
+// Duration
+// -------------------------------------------------------------------------------------------------
+
+export function nanosecondsToTimeDuration(nanoseconds) { // nanoseconds is a number
+  // returns an (incomplete?) Duration?
+  // good idea to put here?
 }

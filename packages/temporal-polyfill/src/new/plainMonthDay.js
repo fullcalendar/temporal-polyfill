@@ -9,7 +9,7 @@ import { getPublicCalendar } from './calendarOps'
 import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
-import { compareIsoFields, isoEpochFirstLeapYear } from './isoMath'
+import { compareIsoDateTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { stringToMonthDayInternals } from './isoParse'
 import { optionsToOverflow } from './options'
 import { isIdPropsEqual } from './util'
@@ -61,7 +61,7 @@ export const [
 
     equals(internals, otherArg) {
       const otherInternals = toPlainMonthDayInternals(otherArg)
-      return !compareIsoFields(internals, otherInternals) &&
+      return !compareIsoDateTimeFields(internals, otherInternals) &&
         isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 

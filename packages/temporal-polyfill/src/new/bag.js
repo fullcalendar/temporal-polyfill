@@ -23,8 +23,7 @@ import {
   durationFieldRefiners,
   updateDurationFieldSign,
 } from './durationFields'
-import { constrainIsoTimeFields } from './isoFields'
-import { epochNanoToIsoFields, isoEpochFirstLeapYear } from './isoMath'
+import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNanoseconds } from './isoParse'
 import {
   optionsToOverflow,
@@ -38,7 +37,7 @@ import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainTime } from './plainTime'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { createLazyMap, isObjectLike, pluckProps, removeDuplicateStrings } from './util'
+import { isObjectLike, pluckProps, removeDuplicateStrings } from './util'
 import { createZonedDateTime } from './zonedDateTime'
 
 // ahhh: some of these functions return internals, other Plain* objects
@@ -286,23 +285,6 @@ export function plainMonthDayToPlainDate(plainMonthDay, bag) {
     ['year'], // what to extract from bag
   )
 }
-
-// to PlainDateTime
-// -------------------------------------------------------------------------------------------------
-
-export const zonedDateTimeInternalsToIso = createLazyMap((
-  internals, // { epochNanoseconds, timeZone }
-) => { // { isoYear..., offsetNanoseconds }
-  const offsetNanoseconds = internals.timeZone.getOffsetNanosecondsFor(internals.epochNanoseconds)
-  const isoDateTimeFields = epochNanoToIsoFields(
-    internals.epochNanoseconds.sub(offsetNanoseconds), // subtraction correct?
-  )
-
-  return {
-    ...isoDateTimeFields,
-    offsetNanoseconds,
-  }
-})
 
 // to ZonedDateTime
 // -------------------------------------------------------------------------------------------------

@@ -4,12 +4,17 @@ import {
   durationTimeFieldsToIso,
 } from './durationFields'
 import {
-  epochNanosecondsToIso,
   isoMonthsInYear,
-  isoTimeFieldsToNanoseconds,
-  nanosecondsToIsoTimeFields,
+  isoTimeFieldsToNano,
+  nanoToIsoTimeFields,
 } from './isoMath'
-import { getSingleInstantFor } from './timeZoneOps'
+import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+
+export function addDaysMilli(epochMilli, milli) { // moveEpochMilliByDays
+}
+export function addDaysToIsoFields() {
+  // short-circuit if nothing to add
+}
 
 export function moveEpochNanoseconds(epochNanoseconds, durationFields) {
   return epochNanoseconds.add(onlyDurationTimeFieldsToIso(durationFields))
@@ -22,14 +27,14 @@ export function moveZonedEpochNanoseconds(
   durationFields,
   overflowHandling,
 ) {
-  const durationTimeNanoseconds = isoTimeFieldsToNanoseconds(
+  const durationTimeNanoseconds = isoTimeFieldsToNano(
     durationTimeFieldsToIso(durationFields),
   )
 
   if (!durationHasDateParts(durationFields)) {
     epochNanoseconds = epochNanoseconds.add(durationTimeNanoseconds)
   } else {
-    const isoDateTimeFields = epochNanosecondsToIso(epochNanoseconds, timeZone)
+    const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNanoseconds)
     const movedIsoDateFields = calendar.dateAdd(
       isoDateTimeFields,
       {
@@ -127,9 +132,9 @@ export function addIntlMonths(year, month, monthDelta, calendarImpl) {
 // -------------------------------------------------------------------------------------------------
 
 function addIsoTimeFields(isoTimeFields0, isoTimeFields1) {
-  return nanosecondsToIsoTimeFields( // returns [movedIsoTimeFields, dayDelta]
-    isoTimeFieldsToNanoseconds(isoTimeFields0) +
-    isoTimeFieldsToNanoseconds(isoTimeFields1),
+  return nanoToIsoTimeFields( // returns [movedIsoTimeFields, dayDelta]
+    isoTimeFieldsToNano(isoTimeFields0) +
+    isoTimeFieldsToNano(isoTimeFields1),
   )
 }
 

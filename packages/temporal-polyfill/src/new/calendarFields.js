@@ -86,7 +86,7 @@ export const dateBasicNames = ['day', 'month', 'year']
 export const yearMonthBasicNames = yearMonthFieldNames.slice(1) // monthCode/year
 export const monthDayBasicNames = ['day', 'monthCode']
 
-export const yearStatNames = Object.keys(yearStatRefiners) // ordered, for predictable macros
+export const yearStatNames = Object.keys(yearStatRefiners)
 export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) // unordered
 export const dateStatNames = Object.keys(dateStatRefiners) // unordered
 

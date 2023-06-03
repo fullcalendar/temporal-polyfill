@@ -4,7 +4,6 @@ import { createTemporalClass, neverValueOf } from './class'
 import { diffEpochNanoseconds } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
-import { validateEpochNano } from './isoFields'
 import {
   formatCalendar,
   formatIsoDateTimeFields,
@@ -13,12 +12,13 @@ import {
 } from './isoFormat'
 import {
   epochGetters,
-  epochNanosecondsToIso,
-  nanosecondsInMicrosecond,
-  nanosecondsInMillisecond,
-  nanosecondsInSecond,
+  epochMicroToNano,
+  epochMilliToNano,
+  epochNanoToIso,
+  epochSecToNano,
+  validateEpochNano,
 } from './isoMath'
-import { compareLargeInts, createLargeInt, toLargeInt } from './largeInt'
+import { compareLargeInts, toLargeInt } from './largeInt'
 import { moveEpochNanoseconds } from './move'
 import { toObject } from './options'
 import { roundLargeNanoseconds } from './round'
@@ -144,7 +144,7 @@ export const [
         refinedOptions, // TODO: break apart options
       )
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      const isoDateTimeFields = epochNanosecondsToIso(epochNanoseconds.add(offsetNanoseconds))
+      const isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
 
       return formatIsoDateTimeFields(isoDateTimeFields, refinedOptions) +
         formatOffsetNanoseconds(offsetNanoseconds) +
@@ -163,14 +163,12 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    fromEpochSeconds(epochSeconds) {
-      return createInstant(createLargeInt(epochSeconds).mult(nanosecondsInSecond))
-    },
+    fromEpochSeconds: epochSecToInstant,
 
     fromEpochMilliseconds: epochMilliToInstant,
 
-    fromEpochMicroseconds(epochMicroseconds) {
-      return createInstant(toLargeInt(epochMicroseconds).mult(nanosecondsInMicrosecond))
+    fromEpochMicroseconds(epochMicro) {
+      return epochMicroToInstant(toLargeInt(epochMicro))
     },
 
     fromEpochNanoseconds(epochNanoseconds) {
@@ -183,11 +181,24 @@ function stringToEpochNanoseconds(str) {
   // TODO
 }
 
-function epochMilliToInstant(epochMilli) {
-  return createInstant(createLargeInt(epochMilli).mult(nanosecondsInMillisecond))
+// Unit Conversion
+// -------------------------------------------------------------------------------------------------
+
+function epochSecToInstant(epochSec) {
+  return createInstant(epochSecToNano(epochSec))
 }
 
-// a method for Date
+function epochMilliToInstant(epochMilli) {
+  return createInstant(epochMilliToNano(epochMilli))
+}
+
+function epochMicroToInstant(epochMicro) {
+  return createInstant(epochMicroToNano(epochMicro))
+}
+
+// Legacy Date
+// -------------------------------------------------------------------------------------------------
+
 export function toTemporalInstant() {
   return epochMilliToInstant(this.valueOf())
 }

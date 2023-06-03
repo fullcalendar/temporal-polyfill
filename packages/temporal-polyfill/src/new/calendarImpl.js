@@ -16,12 +16,16 @@ import {
   monthFieldNames,
   yearStatNames,
 } from './calendarFields'
-import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan, diffYearMonthDay } from './diff'
+import {
+  computeIntlMonthsInYearSpan,
+  computeIsoMonthsInYearSpan,
+  diffDaysMilli,
+  diffYearMonthDay,
+} from './diff'
 import { durationFieldDefaults } from './durationFields'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import { isoDateFieldNames, isoTimeFieldDefaults } from './isoFields'
 import {
-  addDaysMilli,
   computeIsoDayOfWeek,
   computeIsoDaysInMonth,
   computeIsoDaysInYear,
@@ -29,15 +33,14 @@ import {
   computeIsoMonthsInYear,
   computeIsoWeekOfYear,
   computeIsoYearOfWeek,
-  diffDaysMilli,
-  epochMilliToIsoFields,
+  epochMilliToIso,
   isoDaysInWeek,
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
-  isoFieldsToEpochMilli,
   isoToEpochMilli,
+  isoArgsToEpochMilli,
 } from './isoMath'
-import { addIntlMonths, addIsoMonths } from './move'
+import { addDaysMilli, addIntlMonths, addIsoMonths } from './move'
 import { constrainInt } from './options'
 import { buildWeakMapCache, twoDigit } from './util'
 
@@ -150,7 +153,7 @@ class IsoCalendarImpl {
   }
 
   queryDateStart(year, month, day) {
-    return isoToEpochMilli(year, month, day)
+    return isoArgsToEpochMilli(year, month, day)
   }
 
   queryYearMonthDay(isoDateFields) {
@@ -169,7 +172,7 @@ class IsoCalendarImpl {
   // ------------------------
 
   dayOfYear(isoDateFields) {
-    const dayEpochMilliseconds = isoFieldsToEpochMilli({
+    const dayEpochMilliseconds = isoToEpochMilli({
       ...isoDateFields,
       ...isoTimeFieldDefaults,
     })
@@ -198,7 +201,7 @@ class IsoCalendarImpl {
 
       ms = this.queryDateStart(year, months, day)
     } else if (weeks || days) {
-      ms = isoFieldsToEpochMilli(isoDateFields)
+      ms = isoToEpochMilli(isoDateFields)
     } else {
       return isoDateFields
     }
@@ -207,7 +210,7 @@ class IsoCalendarImpl {
 
     return {
       calendar: this,
-      ...epochMilliToIsoFields(ms),
+      ...epochMilliToIso(ms),
     }
   }
 
@@ -217,8 +220,8 @@ class IsoCalendarImpl {
     if (largestUnit <= 'week') { // TODO
       let weeks = 0
       let days = diffDaysMilli(
-        isoFieldsToEpochMilli(startIsoDateFields),
-        isoFieldsToEpochMilli(endIsoDateFields),
+        isoToEpochMilli(startIsoDateFields),
+        isoToEpochMilli(endIsoDateFields),
       )
       const sign = Math.sign(days)
 
@@ -470,7 +473,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   queryIsoFields(year, month, day) { // returns isoDateInternals
     return {
       calendar: this,
-      ...epochMilliToIsoFields(this.queryDateStart(year, month, day)),
+      ...epochMilliToIso(this.queryDateStart(year, month, day)),
     }
   }
 
@@ -604,17 +607,17 @@ export function queryCalendarImpl(calendarId) {
 
 function createIntlFieldCache(epochMillisecondsToIntlFields) {
   return buildWeakMapCache((isoDateFields) => {
-    const epochMilliseconds = isoFieldsToEpochMilli(isoDateFields)
+    const epochMilliseconds = isoToEpochMilli(isoDateFields)
     return epochMillisecondsToIntlFields(epochMilliseconds)
   })
 }
 
 function createJapaneseFieldCache() {
   const epochMillisecondsToIntlFields = createEpochMillisecondsToIntlFields(japaneseCalendarId)
-  const primaryEraMilli = isoToEpochMilli(1868, 9, 8)
+  const primaryEraMilli = isoArgsToEpochMilli(1868, 9, 8)
 
   return buildWeakMapCache((isoDateFields) => {
-    const epochMilliseconds = isoFieldsToEpochMilli(isoDateFields)
+    const epochMilliseconds = isoToEpochMilli(isoDateFields)
     const intlFields = epochMillisecondsToIntlFields(epochMilliseconds)
 
     if (epochMilliseconds < primaryEraMilli) {
@@ -693,7 +696,7 @@ function createIntlMonthCache(epochMillisecondsToIntlFields) {
   }
 
   function buildYear(year) {
-    let ms = isoToEpochMilli(year - yearCorrection)
+    let ms = isoArgsToEpochMilli(year - yearCorrection)
     let intlFields
     const msReversed = []
     const monthStrsReversed = []

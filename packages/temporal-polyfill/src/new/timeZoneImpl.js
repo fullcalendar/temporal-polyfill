@@ -4,18 +4,19 @@ import { parseIntlYear } from './calendarImpl'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import {
   epochNanoToSec,
+  epochNanoToSecFloor,
   epochSecToNano,
-  isoFieldsToEpochNano,
-  isoFieldsToEpochSec,
+  isoToEpochNano,
   isoToEpochSec,
-  milliInSec, nanosecondsInSecond, secInDay,
+  isoArgsToEpochSec,
+  milliInSec, nanoInSec, secInDay,
 } from './isoMath'
 import { parseOffsetNanoseconds } from './isoParse'
 import { clamp, compareNumbers, createLazyMap } from './util'
 
 const periodDur = secInDay * 60
-const minPossibleTransition = isoToEpochSec(1847)
-const maxPossibleTransition = isoToEpochSec(new Date().getUTCFullYear() + 10)
+const minPossibleTransition = isoArgsToEpochSec(1847)
+const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
 
 const intlTimeZoneImplCache = {}
 
@@ -45,7 +46,7 @@ export class FixedTimeZoneImpl {
   }
 
   getPossibleInstantsFor(isoDateTimeFields) {
-    return [isoFieldsToEpochNano(isoDateTimeFields).add(this.offsetNano)]
+    return [isoToEpochNano(isoDateTimeFields).add(this.offsetNano)]
   }
 
   getTransition(epochNano, direction) {
@@ -63,12 +64,11 @@ export class IntlTimeZoneImpl {
   }
 
   getOffsetNanosecondsFor(epochNano) {
-    const [epochSec] = epochNanoToSec(epochNano)
-    return this.store.getOffsetSec(epochSec) * nanosecondsInSecond
+    return this.store.getOffsetSec(epochNanoToSecFloor(epochNano)) * nanoInSec
   }
 
   getPossibleInstantsFor(isoDateTimeFields) {
-    const [zonedEpochSec, subsecNano] = isoFieldsToEpochSec(isoDateTimeFields)
+    const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeFields)
     return this.store.getPossibleEpochSec(zonedEpochSec)
       .map((epochSec) => epochSecToNano(epochSec).add(subsecNano))
   }
@@ -211,7 +211,7 @@ function createComputeOffsetSec(timeZoneId) {
 
   return (epochSec) => {
     const intlParts = hashIntlFormatParts(format, epochSec * milliInSec)
-    const zonedEpochSec = isoToEpochSec(
+    const zonedEpochSec = isoArgsToEpochSec(
       parseIntlYear(intlParts).year,
       parseInt(intlParts.month),
       parseInt(intlParts.day),

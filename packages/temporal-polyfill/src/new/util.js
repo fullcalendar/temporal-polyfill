@@ -3,6 +3,8 @@
 
 // always prefer [...a] over [].concat(a)
 
+// monitor use of floor/trunc and modding. many are wrong
+
 export function isObjectLike() {
 }
 
@@ -18,6 +20,7 @@ export function mapArrayToProps() { // propNameToProps
 }
 
 export function remapProps(obj, oldKeys, newKeys) {
+  // TODO: put key args in front so can use bind?
 }
 
 export function pluckProps(propNames, obj) {

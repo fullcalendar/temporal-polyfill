@@ -1,18 +1,19 @@
 import { pluckIsoTimeFields } from './isoFields'
 import {
-  addDaysToIsoFields,
-  epochNanosecondsToIso,
+  isoToEpochNano,
   isoMonthsInYear,
-  isoTimeToNanoseconds,
-  isoToUtcEpochNanoseconds,
-  nanosecondsInIsoDay,
+  isoTimeFieldsToNano,
+  nanoInUtcDay,
   nanosecondsToTimeDuration,
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
-import { moveDateTime, moveZonedEpochNanoseconds } from './move'
+import { addDaysToIsoFields, moveDateTime, moveZonedEpochNanoseconds } from './move'
 import { roundLargeNanoseconds, roundRelativeDuration } from './round'
-import { getSingleInstantFor } from './timeZoneOps'
+import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { identityFunc } from './util'
+
+export function diffDaysMilli(milli0, milli1) { // diffEpochMilliByDays
+}
 
 // Diffing
 // -------------------------------------------------------------------------------------------------
@@ -65,9 +66,9 @@ export function diffZonedEpochNanoseconds(
   }
 
   const sign = compareLargeInts(startEpochNanoseconds, endEpochNanoseconds)
-  const startIsoFields = epochNanosecondsToIso(startEpochNanoseconds, timeZone)
+  const startIsoFields = zonedEpochNanoToIso(timeZone, startEpochNanoseconds)
   const startIsoTimeFields = pluckIsoTimeFields(startIsoFields)
-  const endIsoFields = epochNanosecondsToIso(endEpochNanoseconds, timeZone)
+  const endIsoFields = zonedEpochNanoToIso(timeZone, endEpochNanoseconds)
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
   let midEpochNanoseconds = isoToZoneEpochNanoseconds(midIsoFields)
   const midSign = compareLargeInts(midEpochNanoseconds, endEpochNanoseconds)
@@ -108,8 +109,8 @@ export function diffDateTimes(
   roundingMode,
   roundingIncrement,
 ) {
-  const startEpochNanoseconds = isoToUtcEpochNanoseconds(startIsoFields)
-  const endEpochNanoseconds = isoToUtcEpochNanoseconds(endIsoFields)
+  const startEpochNanoseconds = isoToEpochNano(startIsoFields)
+  const endEpochNanoseconds = isoToEpochNano(endIsoFields)
 
   if (largestUnit < 'day') { // TODO
     return diffEpochNanoseconds(
@@ -124,8 +125,8 @@ export function diffDateTimes(
   // TODO: what about day optimization?
 
   const sign = compareLargeInts(startEpochNanoseconds, endEpochNanoseconds)
-  const startTimeNanoseconds = isoTimeToNanoseconds(startIsoFields) // number
-  const endTimeNanoseconds = isoTimeToNanoseconds(endIsoFields) // number
+  const startTimeNanoseconds = isoTimeFieldsToNano(startIsoFields) // number
+  const endTimeNanoseconds = isoTimeFieldsToNano(endIsoFields) // number
   let timeNanosecondDiff = endTimeNanoseconds - startTimeNanoseconds
   const timeSign = Math.sign(timeNanosecondDiff)
   let midIsoFields = startIsoFields
@@ -135,7 +136,7 @@ export function diffDateTimes(
       ...addDaysToIsoFields(startIsoFields, sign),
       ...pluckIsoTimeFields(startIsoFields),
     }
-    timeNanosecondDiff += nanosecondsInIsoDay
+    timeNanosecondDiff += nanoInUtcDay
   }
 
   const dateDiff = calendar.dateUntil(midIsoFields, endIsoFields, largestUnit)
@@ -148,7 +149,7 @@ export function diffDateTimes(
     { ...dateDiff, ...timeDiff, sign },
     endEpochNanoseconds,
     startIsoFields, // marker
-    isoToUtcEpochNanoseconds, // markerToEpochNanoseconds
+    isoToEpochNano, // markerToEpochNanoseconds
     moveDateTime.bind(undefined, calendar), // moveMarker
     smallestUnit,
     roundingMode,
@@ -168,8 +169,8 @@ export function diffDates(
 ) {
   if (largestUnit < 'day') { // TODO
     return diffEpochNanoseconds(
-      isoToUtcEpochNanoseconds(startIsoDateFields),
-      isoToUtcEpochNanoseconds(endIsoDateFields),
+      isoToEpochNano(startIsoDateFields),
+      isoToEpochNano(endIsoDateFields),
       largestUnit,
       smallestUnit,
       roundingMode,
@@ -181,9 +182,9 @@ export function diffDates(
 
   return roundRelativeDuration(
     dateDiff,
-    isoToUtcEpochNanoseconds(endIsoDateFields),
+    isoToEpochNano(endIsoDateFields),
     startIsoDateFields, // marker
-    isoToUtcEpochNanoseconds, // markerToEpochNanoseconds
+    isoToEpochNano, // markerToEpochNanoseconds
     calendar.dateAdd.bind(calendar), // moveMarker
     smallestUnit,
     roundingMode,

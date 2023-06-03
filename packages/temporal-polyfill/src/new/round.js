@@ -1,13 +1,14 @@
 import { durationFieldDefaults, durationTimeFieldDefaults } from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
-  addDaysToIsoFields,
-  isoTimeFieldsToNanoseconds,
-  nanosecondsInIsoDay,
+  epochNanoToUtcDays,
+  isoTimeFieldsToNano,
+  nanoInUtcDay,
+  nanoToIsoTimeFields,
   nanosecondsInUnit,
-  nanosecondsToIsoTimeFields,
 } from './isoMath'
 import { createLargeInt } from './largeInt'
+import { addDaysToIsoFields } from './move'
 import { computeNanosecondsInDay } from './timeZoneOps'
 import { identityFunc } from './util'
 
@@ -31,10 +32,10 @@ export function roundIsoDateTimeFields(
   if (smallestUnit === 'day') {
     const nanosecondsInDay = timeZoneOps
       ? computeNanosecondsInDay(timeZoneOps, isoDateTimeFields)
-      : nanosecondsInIsoDay
+      : nanoInUtcDay
 
     dayDelta = roundNanoseconds(
-      isoTimeFieldsToNanoseconds(isoDateTimeFields),
+      isoTimeFieldsToNano(isoDateTimeFields),
       nanosecondsInDay,
       roundingMode,
     )
@@ -62,11 +63,11 @@ export function roundIsoTimeFields(
   roundingIncrement,
 ) {
   const nanoseconds = roundNanoseconds(
-    isoTimeFieldsToNanoseconds(isoTimeFields),
+    isoTimeFieldsToNano(isoTimeFields),
     nanosecondsInUnit[smallestUnit] * roundingIncrement,
     roundingMode,
   )
-  return nanosecondsToIsoTimeFields(nanoseconds)
+  return nanoToIsoTimeFields(nanoseconds)
 }
 
 // Rounding Duration
@@ -143,7 +144,7 @@ export function roundLargeNanoseconds(
   roundingMode,
   roundingIncrement,
 ) {
-  let [timeNanoseconds, days] = splitDayTimeNanoseconds(largeNanoseconds)
+  let [days, timeNanoseconds] = epochNanoToUtcDays(largeNanoseconds)
 
   timeNanoseconds = roundNanoseconds(
     timeNanoseconds,
@@ -151,17 +152,10 @@ export function roundLargeNanoseconds(
     roundingMode,
   )
 
-  const dayDelta = Math.trunc(timeNanoseconds / nanosecondsInIsoDay)
-  timeNanoseconds %= nanosecondsInIsoDay
+  const dayDelta = Math.trunc(timeNanoseconds / nanoInUtcDay)
+  timeNanoseconds %= nanoInUtcDay
 
-  return createLargeInt(nanosecondsInIsoDay).mult(days + dayDelta).add(timeNanoseconds)
-}
-
-function splitDayTimeNanoseconds(largeNanoseconds) {
-  const days = largeNanoseconds.div(nanosecondsInIsoDay)
-  const dayNanoseconds = createLargeInt(nanosecondsInIsoDay).mult(days)
-  const timeNanoseconds = largeNanoseconds.sub(dayNanoseconds)
-  return [timeNanoseconds, days]
+  return createLargeInt(nanoInUtcDay).mult(days + dayDelta).add(timeNanoseconds)
 }
 
 function roundNanoseconds(num, nanoIncrement, roundingMode) {

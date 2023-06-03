@@ -13,7 +13,7 @@ import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
-import { compareIsoFields } from './isoMath'
+import { compareIsoDateTimeFields } from './isoMath'
 import { stringToPlainYearMonthInternals } from './isoParse'
 import { optionsToOverflow } from './options'
 import { isIdPropsEqual } from './util'
@@ -107,7 +107,7 @@ export const [
 
     equals(internals, otherArg) {
       const otherInternals = toPlainYearMonthInternals(otherArg)
-      return !compareIsoFields(internals, otherInternals) &&
+      return !compareIsoDateTimeFields(internals, otherInternals) &&
         isIdPropsEqual(internals.calendar, otherInternals.calendar)
     },
 
@@ -133,7 +133,7 @@ export const [
 
   {
     compare(arg0, arg1) {
-      return compareIsoFields(
+      return compareIsoDateTimeFields(
         toPlainYearMonthInternals(arg0),
         toPlainYearMonthInternals(arg1),
       )
