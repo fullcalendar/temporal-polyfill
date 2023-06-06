@@ -1,4 +1,3 @@
-import { createComplexBagRefiner, refineFields } from './bag'
 import {
   getRequiredDateFields,
   getRequiredMonthDayFields,
@@ -11,6 +10,7 @@ import {
 } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
 import { createAdapterMethods, createTemporalClass, internalIdGetters, returnId } from './class'
+import { createComplexBagRefiner, refineFields } from './convert'
 import { createDuration, toDurationInternals } from './duration'
 import { isoDaysInWeek } from './isoMath'
 import { stringToCalendarId } from './isoParse'

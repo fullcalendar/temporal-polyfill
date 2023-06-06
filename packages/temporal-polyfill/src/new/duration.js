@@ -1,5 +1,5 @@
-import { refineDurationBag, mergeDurationBag } from './bag'
 import { createTemporalClass, neverValueOf } from './class'
+import { mergeDurationBag, refineDurationBag } from './convert'
 import { diffZonedEpochNanoseconds } from './diff'
 import {
   absolutizeDurationFields,

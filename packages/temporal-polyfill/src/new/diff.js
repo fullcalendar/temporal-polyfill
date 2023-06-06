@@ -1,8 +1,8 @@
 import { pluckIsoTimeFields } from './isoFields'
 import {
-  isoToEpochNano,
   isoMonthsInYear,
   isoTimeFieldsToNano,
+  isoToEpochNano,
   nanoInUtcDay,
   nanosecondsToTimeDuration,
 } from './isoMath'
