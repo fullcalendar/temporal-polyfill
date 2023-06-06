@@ -32,9 +32,9 @@ import {
   validateEpochNano,
 } from './isoMath'
 import { stringToZonedDateTimeInternals } from './isoParse'
-import { compareLargeInts, toLargeInt } from './largeInt'
+import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
-import { optionsToOverflow } from './options'
+import { optionsToOverflow, toEpochNano } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
@@ -62,8 +62,8 @@ export const [
   // constructorToInternals
   (epochNanoseconds, timeZoneArg, calendarArg) => {
     return {
-      epochNanoseconds: validateEpochNano(toLargeInt(epochNanoseconds)), // TODO: strictly BigInt
-      timeZone: queryTimeZoneOps(timeZoneArg),
+      epochNanoseconds: validateEpochNano(toEpochNano(epochNanoseconds)),
+      timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
       calendar: queryCalendarOps(calendarArg),
     }
   },

@@ -34,11 +34,11 @@ import {
   computeIsoWeekOfYear,
   computeIsoYearOfWeek,
   epochMilliToIso,
+  isoArgsToEpochMilli,
   isoDaysInWeek,
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
   isoToEpochMilli,
-  isoArgsToEpochMilli,
 } from './isoMath'
 import { addDaysMilli, addIntlMonths, addIsoMonths } from './move'
 import { constrainInt } from './options'

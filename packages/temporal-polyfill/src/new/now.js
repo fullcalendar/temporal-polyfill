@@ -4,7 +4,7 @@ import { queryCalendarOps } from './calendarOps'
 import { createInstant } from './instant'
 import { IntlDateTimeFormat } from './intlFormat'
 import { pluckIsoDateInternals, pluckIsoDateTimeInternals, pluckIsoTimeFields } from './isoFields'
-import { createLargeInt } from './largeInt'
+import { numberToLargeInt } from './largeInt'
 import { createPlainDate } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime } from './plainTime'
@@ -73,7 +73,7 @@ function getCurrentZonedDateTimeSlots(
 }
 
 function getCurrentEpochNanoseconds() {
-  return createLargeInt(Date.now()).mult(nanoInMilli)
+  return numberToLargeInt(Date.now()).mult(nanoInMilli)
 }
 
 // TimeZone

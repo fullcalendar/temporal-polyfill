@@ -1,6 +1,6 @@
 import { pluckIsoDateTimeFields } from './isoFields'
-import { compareLargeInts, createLargeInt } from './largeInt'
-import { clamp, positiveModulo } from './util'
+import { compareLargeInts, numberToLargeInt } from './largeInt'
+import { clamp } from './util'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -83,7 +83,6 @@ export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
 // -------------------------------------------------------------------------------------------------
 
 export const secInDay = 86400
-const millInUtcDay = 86400000
 export const milliInSec = 1000
 
 export const nanoInMicro = 1000 // consolidate with other 1000 units
@@ -101,57 +100,44 @@ export const nanosecondsInUnit = {
 
 // nano -> * (with floor)
 
-export function epochNanoToSecFloor(epochNano) {
-  return epochNanoToSec(epochNano)[0]
+export function epochNanoToSec(epochNano) {
+  return epochNanoToSecMod(epochNano)[0]
 }
 
-export function epochNanoToMilliFloor(epochNano) {
-  return epochNanoToMicro(epochNano)[0]
+export function epochNanoToMilli(epochNano) {
+  return epochNanoToMilliMod(epochNano)[0]
 }
 
-function epochNanoToMicroFloor(epochNano) {
-  return epochNanoToMilli(epochNano)[0]
+function epochNanoToMicro(epochNano) {
+  return epochNanoToMicroMod(epochNano)[0]
 }
 
 // nano -> * (with remainder)
 
-export function epochNanoToUtcDays(epochNano) {
-  // TODO: use seconds instead?
-  const [epochMilli, nanoRemainder] = epochNanoToMilli(epochNano)
-  const days = Math.floor(epochMilli / millInUtcDay)
-  const milliRemainder = positiveModulo(epochMilli, millInUtcDay)
-
-  return [
-    days,
-    milliRemainder * nanoInMilli + nanoRemainder,
-  ]
+export function epochNanoToUtcDaysMod(epochNano) {
+  return epochNano.divMod(nanoInUtcDay)
 }
 
-export function epochNanoToSec(epochNano) {
-  return epochNano.shift(9)
+export function epochNanoToSecMod(epochNano) {
+  return epochNano.divMod(nanoInSec)
 }
 
-export function epochNanoToMilli(epochNano) {
-  return epochNano.shift(6)
+function epochNanoToMilliMod(epochNano) {
+  return epochNano.divMod(nanoInMilli)
 }
 
-export function epochNanoToMicro(epochNano) {
-  const [epochMilli, nanoRemainder] = epochNanoToMilli(epochNano)
-
-  return [
-    createLargeInt(epochMilli).mult(nanoInMicro),
-    nanoRemainder * nanoInMicro,
-  ]
+function epochNanoToMicroMod(epochNano) {
+  return epochNano.divMod(nanoInMicro, true) // preserveLargeInt=true
 }
 
 // * -> nano
 
 export function epochSecToNano(epochSec) {
-  return createLargeInt(epochSec).mult(nanoInSec)
+  return numberToLargeInt(epochSec).mult(nanoInSec)
 }
 
 export function epochMilliToNano(epochMilli) {
-  return createLargeInt(epochMilli).mult(nanoInMilli)
+  return numberToLargeInt(epochMilli).mult(nanoInMilli)
 }
 
 export function epochMicroToNano(epochMicro) {
@@ -162,12 +148,12 @@ export function epochMicroToNano(epochMicro) {
 // -------------------------------------------------------------------------------------------------
 
 export const epochGetters = {
-  epochSeconds: epochNanoToSecFloor,
+  epochSeconds: epochNanoToSec,
 
-  epochMilliseconds: epochNanoToMilliFloor,
+  epochMilliseconds: epochNanoToMilli,
 
   epochMicroseconds(epochNano) {
-    return epochNanoToMicroFloor(epochNano).toBigInt()
+    return epochNanoToMicro(epochNano).toBigInt()
   },
 
   epochNanoseconds(epochNano) {
@@ -178,8 +164,8 @@ export const epochGetters = {
 // Validation
 // -------------------------------------------------------------------------------------------------
 
-const epochNanoMax = createLargeInt(nanoInUtcDay).mult(100000000) // inclusive
-const epochNanoMin = createLargeInt.mult(-1) // inclusive
+const epochNanoMax = numberToLargeInt(nanoInUtcDay).mult(100000000) // inclusive
+const epochNanoMin = epochNanoMax.mult(-1) // inclusive
 const isoYearMax = 275760 // shortcut. isoYear at epochNanoMax
 const isoYearMin = -271821 // shortcut. isoYear at epochNanoMin
 

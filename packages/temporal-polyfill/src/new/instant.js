@@ -18,9 +18,9 @@ import {
   epochSecToNano,
   validateEpochNano,
 } from './isoMath'
-import { compareLargeInts, toLargeInt } from './largeInt'
+import { compareLargeInts } from './largeInt'
 import { moveEpochNanoseconds } from './move'
-import { toObject } from './options'
+import { toEpochNano, toObject } from './options'
 import { roundLargeNanoseconds } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './util'
@@ -38,7 +38,7 @@ export const [
 
   // constructorToInternals
   (epochNanoseconds) => {
-    return validateEpochNano(toLargeInt(epochNanoseconds)) // TODO: strictly BigInt
+    return validateEpochNano(toEpochNano(epochNanoseconds))
   },
 
   // internalsConversionMap
@@ -168,11 +168,11 @@ export const [
     fromEpochMilliseconds: epochMilliToInstant,
 
     fromEpochMicroseconds(epochMicro) {
-      return epochMicroToInstant(toLargeInt(epochMicro))
+      return epochMicroToInstant(toEpochNano(epochMicro))
     },
 
     fromEpochNanoseconds(epochNanoseconds) {
-      return createInstant(toLargeInt(epochNanoseconds))
+      return createInstant(toEpochNano(epochNanoseconds))
     },
   },
 )

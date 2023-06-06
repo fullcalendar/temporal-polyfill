@@ -1,6 +1,8 @@
 
 // TODO: for unit parsing, ensure ceiling and correct increment
 
+import { bigIntToLargeInt } from './largeInt'
+
 export function strictNumber(input) {
 
 }
@@ -19,6 +21,13 @@ export function strictArray() {
 }
 
 export function toObject() {
+}
+
+export function toEpochNano(input) {
+  if (typeof input !== 'bigint') {
+    throw new TypeError('aaah')
+  }
+  return bigIntToLargeInt(input)
 }
 
 export function toNumber(value) {

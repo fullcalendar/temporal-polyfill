@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { dateBasicNames, timeFieldDefaults } from './calendarFields'
 import { getInternals, getTemporalName } from './class'
-import { epochNanoToMilliFloor, isoEpochOriginYear } from './isoMath'
+import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
   createLazyMap,
@@ -127,7 +127,7 @@ export function resolveZonedFormattable(
   )
 
   return [
-    epochNanoToMilliFloor(internals.epochNanoseconds),
+    epochNanoToMilli(internals.epochNanoseconds),
     format,
   ]
 }
@@ -145,7 +145,7 @@ function resolveFormattable(
     const epochNano = internalsToEpochNano(getInternals(arg), resolvedOptions, temporalName)
 
     return [
-      epochNanoToMilliFloor(epochNano),
+      epochNanoToMilli(epochNano),
       getSpecificFormat(transformOptions, resolvedOptions),
     ]
   }

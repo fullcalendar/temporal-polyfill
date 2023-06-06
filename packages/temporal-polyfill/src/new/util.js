@@ -88,10 +88,6 @@ export function identityFunc(thing) {
 export function noop() {
 }
 
-export function positiveModulo(n, max) {
-  return (n % max + max) % max
-}
-
 export function twoDigit(num) { // as a string
 }
 
@@ -102,4 +98,20 @@ export function clamp() {
 }
 
 export function isIdPropsEqual(obj0, obj1) {
+}
+
+/*
+Works with BigInt or Number (as long as the same)
+*/
+export function divMod(n, divisor) {
+  const remainder = floorMod(n, divisor)
+  const quotient = (n - remainder) / divisor
+  return [quotient, remainder]
+}
+
+/*
+Works with BigInt or Number (as long as the same)
+*/
+export function floorMod(n, divisor) {
+  return (n % divisor + divisor) % divisor
 }

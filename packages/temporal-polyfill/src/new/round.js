@@ -1,13 +1,13 @@
 import { durationFieldDefaults, durationTimeFieldDefaults } from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
-  epochNanoToUtcDays,
+  epochNanoToUtcDaysMod,
   isoTimeFieldsToNano,
   nanoInUtcDay,
   nanoToIsoTimeFields,
   nanosecondsInUnit,
 } from './isoMath'
-import { createLargeInt } from './largeInt'
+import { numberToLargeInt } from './largeInt'
 import { addDaysToIsoFields } from './move'
 import { computeNanosecondsInDay } from './timeZoneOps'
 import { identityFunc } from './util'
@@ -144,7 +144,7 @@ export function roundLargeNanoseconds(
   roundingMode,
   roundingIncrement,
 ) {
-  let [days, timeNanoseconds] = epochNanoToUtcDays(largeNanoseconds)
+  let [days, timeNanoseconds] = epochNanoToUtcDaysMod(largeNanoseconds)
 
   timeNanoseconds = roundNanoseconds(
     timeNanoseconds,
@@ -155,7 +155,7 @@ export function roundLargeNanoseconds(
   const dayDelta = Math.trunc(timeNanoseconds / nanoInUtcDay)
   timeNanoseconds %= nanoInUtcDay
 
-  return createLargeInt(nanoInUtcDay).mult(days + dayDelta).add(timeNanoseconds)
+  return numberToLargeInt(nanoInUtcDay).mult(days + dayDelta).add(timeNanoseconds)
 }
 
 function roundNanoseconds(num, nanoIncrement, roundingMode) {

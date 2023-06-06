@@ -4,11 +4,11 @@ import { parseIntlYear } from './calendarImpl'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import {
   epochNanoToSec,
-  epochNanoToSecFloor,
+  epochNanoToSecMod,
   epochSecToNano,
+  isoArgsToEpochSec,
   isoToEpochNano,
   isoToEpochSec,
-  isoArgsToEpochSec,
   milliInSec, nanoInSec, secInDay,
 } from './isoMath'
 import { parseOffsetNanoseconds } from './isoParse'
@@ -64,7 +64,7 @@ export class IntlTimeZoneImpl {
   }
 
   getOffsetNanosecondsFor(epochNano) {
-    return this.store.getOffsetSec(epochNanoToSecFloor(epochNano)) * nanoInSec
+    return this.store.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
   getPossibleInstantsFor(isoDateTimeFields) {
@@ -77,7 +77,7 @@ export class IntlTimeZoneImpl {
   exclusive for both directions
   */
   getTransition(epochNano, direction) {
-    const [epochSec, subsecNano] = epochNanoToSec(epochNano)
+    const [epochSec, subsecNano] = epochNanoToSecMod(epochNano)
     const resEpochSec = this.store.getTransition(
       epochSec + ((direction > 0 || subsecNano) ? 1 : 0),
       direction,
