@@ -1,7 +1,7 @@
 import {
-  bagToPlainTimeInternals,
+  refinePlainTimeBag,
   createZonedDateTimeConverter,
-  plainTimeWithBag,
+  mergePlainTimeBag,
 } from './bag'
 import { timeGetters } from './calendarFields'
 import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
@@ -57,7 +57,7 @@ export const [
   },
 
   // bagToInternals
-  bagToPlainTimeInternals,
+  refinePlainTimeBag,
 
   // stringToInternals
   stringToPlainTimeInternals,
@@ -75,7 +75,7 @@ export const [
 
   {
     with(internals, bag, options) {
-      return plainTimeWithBag(this, bag, options)
+      return mergePlainTimeBag(this, bag, options)
     },
 
     add(internals, durationArg) {

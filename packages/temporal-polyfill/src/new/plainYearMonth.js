@@ -1,8 +1,8 @@
 import {
-  bagToPlainYearMonthInternals,
-  plainYearMonthToPlainDate,
-  plainYearMonthToPlainDateFirst,
-  plainYearMonthWithBag,
+  convertPlainYearMonthToDate,
+  convertPlainYearMonthToFirst,
+  mergePlainYearMonthBag,
+  refinePlainYearMonthBag,
 } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { yearMonthGetters } from './calendarFields'
@@ -42,7 +42,7 @@ export const [
   {},
 
   // bagToInternals
-  bagToPlainYearMonthInternals,
+  refinePlainYearMonthBag,
 
   // stringToInternals
   stringToPlainYearMonthInternals,
@@ -60,7 +60,7 @@ export const [
 
   {
     with(internals, bag, options) {
-      return createPlainYearMonth(plainYearMonthWithBag(internals, bag, options))
+      return createPlainYearMonth(mergePlainYearMonthBag(internals, bag, options))
     },
 
     add(internals, durationArg, options) {
@@ -86,8 +86,8 @@ export const [
       return createPlainYearMonth(
         diffDates(
           calendar,
-          plainYearMonthToPlainDateFirst(internals),
-          plainYearMonthToPlainDateFirst(toPlainYearMonthInternals(otherArg)),
+          convertPlainYearMonthToFirst(internals),
+          convertPlainYearMonthToFirst(toPlainYearMonthInternals(otherArg)),
           options,
         ),
       )
@@ -98,8 +98,8 @@ export const [
       return createPlainYearMonth(
         diffDates(
           calendar,
-          plainYearMonthToPlainDateFirst(toPlainYearMonthInternals(otherArg)),
-          plainYearMonthToPlainDateFirst(internals),
+          convertPlainYearMonthToFirst(toPlainYearMonthInternals(otherArg)),
+          convertPlainYearMonthToFirst(internals),
           options, // TODO: flip rounding args
         ),
       )
@@ -120,7 +120,7 @@ export const [
     valueOf: neverValueOf,
 
     toPlainDate(internals, bag) {
-      return plainYearMonthToPlainDate(this, bag)
+      return convertPlainYearMonthToDate(this, bag)
     },
 
     getISOFields: generatePublicIsoDateFields,
@@ -150,7 +150,7 @@ function movePlainYearMonth(
   durationFields,
   overflowHandling,
 ) {
-  const plainDate = plainYearMonthToPlainDate(plainYearMonth, {
+  const plainDate = convertPlainYearMonthToDate(plainYearMonth, {
     day: durationFields.sign < 0
       ? calendar.daysInMonth(plainYearMonth)
       : 1,

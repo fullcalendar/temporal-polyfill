@@ -1,4 +1,4 @@
-import { createComplexBagRefiner, prepareFields } from './bag'
+import { createComplexBagRefiner, refineFields } from './bag'
 import {
   getRequiredDateFields,
   getRequiredMonthDayFields,
@@ -74,7 +74,7 @@ export const [Calendar, createCalendar] = createTemporalClass(
     dateFromFields(impl, fields, options) {
       return createPlainDate(
         impl.dateFromFields(
-          prepareFields(fields, impl.fields(dateFieldNames), getRequiredDateFields(impl)),
+          refineFields(fields, impl.fields(dateFieldNames), getRequiredDateFields(impl)),
           optionsToOverflow(options),
         ),
       )
@@ -83,7 +83,7 @@ export const [Calendar, createCalendar] = createTemporalClass(
     yearMonthFromFields(impl, fields, options) {
       return createPlainYearMonth(
         impl.yearMonthFromFields(
-          prepareFields(fields, impl.fields(yearMonthFieldNames), getRequiredYearMonthFields(impl)),
+          refineFields(fields, impl.fields(yearMonthFieldNames), getRequiredYearMonthFields(impl)),
           optionsToOverflow(options),
         ),
       )
@@ -93,7 +93,7 @@ export const [Calendar, createCalendar] = createTemporalClass(
       return createPlainMonthDay(
         ...impl.monthDayFromFields(
           // refine y/m/d fields
-          prepareFields(fields, impl.fields(dateFieldNames), getRequiredMonthDayFields(impl)),
+          refineFields(fields, impl.fields(dateFieldNames), getRequiredMonthDayFields(impl)),
           optionsToOverflow(options),
         ),
       )

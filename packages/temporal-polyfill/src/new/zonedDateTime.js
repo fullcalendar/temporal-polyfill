@@ -1,8 +1,8 @@
 import {
-  bagToZonedDateTimeInternals,
-  dateToPlainMonthDay,
-  dateToPlainYearMonth,
-  zonedDateTimeWithBag,
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
+  mergeZonedDateTimeBag,
+  refineZonedDateTimeBag,
 } from './bag'
 import { dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
@@ -72,7 +72,7 @@ export const [
   {},
 
   // bagToInternals
-  bagToZonedDateTimeInternals,
+  refineZonedDateTimeBag,
 
   // stringToInternals
   stringToZonedDateTimeInternals,
@@ -122,7 +122,7 @@ export const [
 
   {
     with(internals, bag, options) {
-      return zonedDateTimeWithBag(this, bag, options)
+      return createZonedDateTime(mergeZonedDateTimeBag(this, bag, options))
     },
 
     withPlainTime(internals, plainTimeArg) {
@@ -348,11 +348,11 @@ export const [
     },
 
     toPlainYearMonth() {
-      return dateToPlainYearMonth(this)
+      return convertToPlainYearMonth(this)
     },
 
     toPlainMonthDay() {
-      return dateToPlainMonthDay(this)
+      return convertToPlainMonthDay(this)
     },
 
     getISOFields(internals) {

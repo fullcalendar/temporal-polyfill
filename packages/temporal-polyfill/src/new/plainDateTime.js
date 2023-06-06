@@ -1,8 +1,8 @@
 import {
-  bagToPlainDateTimeInternals,
-  dateToPlainMonthDay,
-  dateToPlainYearMonth,
-  plainDateTimeWithBag,
+  refinePlainDateTimeBag,
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
+  mergePlainDateTimeBag,
 } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
@@ -81,7 +81,7 @@ export const [
   },
 
   // bagToInternals
-  bagToPlainDateTimeInternals,
+  refinePlainDateTimeBag,
 
   // stringToInternals
   stringToPlainDateTimeInternals,
@@ -99,7 +99,7 @@ export const [
 
   {
     with(internals, bag, options) {
-      return createPlainDateTime(plainDateTimeWithBag(this, bag, options))
+      return createPlainDateTime(mergePlainDateTimeBag(this, bag, options))
     },
 
     withPlainTime(internals, plainTimeArg) {
@@ -209,11 +209,11 @@ export const [
     },
 
     toPlainYearMonth() {
-      return dateToPlainYearMonth(this)
+      return convertToPlainYearMonth(this)
     },
 
     toPlainMonthDay() {
-      return dateToPlainMonthDay(this)
+      return convertToPlainMonthDay(this)
     },
 
     toPlainTime(internals) {

@@ -1,4 +1,4 @@
-import { bagToDurationInternals, durationWithBag } from './bag'
+import { refineDurationBag, mergeDurationBag } from './bag'
 import { createTemporalClass, neverValueOf } from './class'
 import { diffZonedEpochNanoseconds } from './diff'
 import {
@@ -69,7 +69,7 @@ export const [
   {},
 
   // bagToInternals
-  bagToDurationInternals,
+  refineDurationBag,
 
   // stringToInternals
   stringToDurationInternals,
@@ -92,7 +92,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with: durationWithBag,
+    with: mergeDurationBag,
 
     add: addToDuration.bind(undefined, 1),
 

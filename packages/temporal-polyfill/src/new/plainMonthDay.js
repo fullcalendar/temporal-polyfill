@@ -1,7 +1,7 @@
 import {
-  bagToPlainMonthDayInternals,
-  plainMonthDayToPlainDate,
-  plainMonthDayWithBag,
+  refinePlainMonthDayBag,
+  convertPlainMonthDayToDate,
+  mergePlainMonthDayBag,
 } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { monthDayGetters } from './calendarFields'
@@ -38,7 +38,7 @@ export const [
   {},
 
   // bagToInternals
-  bagToPlainMonthDayInternals,
+  refinePlainMonthDayBag,
 
   // stringToInternals
   stringToMonthDayInternals,
@@ -56,7 +56,7 @@ export const [
 
   {
     with(internals, bag, options) {
-      return createPlainMonthDay(plainMonthDayWithBag(this, bag, options))
+      return createPlainMonthDay(mergePlainMonthDayBag(this, bag, options))
     },
 
     equals(internals, otherArg) {
@@ -74,7 +74,7 @@ export const [
     valueOf: neverValueOf,
 
     toPlainDate(internals, bag) {
-      return plainMonthDayToPlainDate(this, bag)
+      return convertPlainMonthDayToDate(this, bag)
     },
 
     getISOFields: generatePublicIsoDateFields,

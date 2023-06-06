@@ -60,11 +60,11 @@ export const durationFieldDefaults = {
 // -------------------------------------------------------------------------------------------------
 
 export function refineDurationInternals(rawDurationFields) {
-  return updateDurationFieldSign(mapRefiners(rawDurationFields, durationFieldRefiners))
+  return updateDurationFieldsSign(mapRefiners(rawDurationFields, durationFieldRefiners))
 }
 
-export function updateDurationFieldSign(fields) {
-  fields.sign = computeDurationFieldSign(fields)
+export function updateDurationFieldsSign(fields) {
+  fields.sign = computeDurationFieldsSign(fields)
   return fields
 }
 
@@ -88,10 +88,10 @@ export function absolutizeDurationFields(internals) {
 }
 
 export function durationHasDateParts(internals) {
-  return Boolean(computeDurationFieldSign(internals, durationDateFieldNames))
+  return Boolean(computeDurationFieldsSign(internals, durationDateFieldNames))
 }
 
-function computeDurationFieldSign(internals, fieldNames = durationFieldNames) {
+function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
   // should throw error if mismatch
   // TODO: audit repeat uses of this
 }
