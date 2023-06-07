@@ -75,7 +75,7 @@ export const [
 
   {
     with(internals, bag, options) {
-      return mergePlainTimeBag(this, bag, options)
+      return createPlainTime(mergePlainTimeBag(this, bag, options))
     },
 
     add(internals, durationArg) {

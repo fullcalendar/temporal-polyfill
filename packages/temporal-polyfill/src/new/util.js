@@ -27,6 +27,7 @@ export function pluckProps(propNames, obj) {
 }
 
 export function removeDuplicateStrings(a0, a1) {
+  // if we use a Set(), can be generalized away from just strings!!!
 }
 
 export function removeUndefines(obj) { // and copy

@@ -20,7 +20,12 @@ export function strictArray() {
 
 }
 
+export function toObjectOptional(obj) {
+  return obj === undefined ? {} : toObject(obj)
+}
+
 export function toObject() {
+  // ensures a real object. throws error otherwise
 }
 
 export function toEpochNano(input) {
@@ -110,6 +115,20 @@ export function toOffsetHandling() {
 
 }
 
+export function toZonedRefiningOptions(options) {
+  options = toObjectOptional(options)
+
+  return { // TODO: use tuple?
+    overflow: toOverflow(options),
+    offset: toOffset(options),
+    disambiguation: toDisambiguation(options),
+  }
+}
+
+function toOffset() {
+
+}
+
 export function toDisambiguation() {
 
 }
@@ -133,6 +152,10 @@ export function toCalendarNameOption() {
 }
 
 export function toDiffOptions() {
+
+}
+
+export function toOverflow() {
 
 }
 
@@ -171,7 +194,8 @@ export function validateRoundingOptions(options) {
 export function optionsToLargestUnit() {
 }
 
-export function optionsToOverflow() {
+export function optionsToOverflow(options) {
+  return toOverflow(toObjectOptional(options).overflow)
 }
 
 export function optionsToTotalUnit() {

@@ -1,10 +1,10 @@
 import { isoCalendarId } from './calendarConfig'
 import { yearMonthGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
-import { createTemporalClass, getInternals, neverValueOf, toLocaleStringMethod } from './class'
+import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertPlainYearMonthToDate,
-  convertPlainYearMonthToFirst,
+  convertPlainYearMonthToIso,
   mergePlainYearMonthBag,
   refinePlainYearMonthBag,
 } from './convert'
@@ -86,8 +86,8 @@ export const [
       return createPlainYearMonth(
         diffDates(
           calendar,
-          convertPlainYearMonthToFirst(internals),
-          convertPlainYearMonthToFirst(toPlainYearMonthInternals(otherArg)),
+          convertPlainYearMonthToIso(internals),
+          convertPlainYearMonthToIso(toPlainYearMonthInternals(otherArg)),
           options,
         ),
       )
@@ -98,8 +98,8 @@ export const [
       return createPlainYearMonth(
         diffDates(
           calendar,
-          convertPlainYearMonthToFirst(toPlainYearMonthInternals(otherArg)),
-          convertPlainYearMonthToFirst(internals),
+          convertPlainYearMonthToIso(toPlainYearMonthInternals(otherArg)),
+          convertPlainYearMonthToIso(internals),
           options, // TODO: flip rounding args
         ),
       )
@@ -150,17 +150,13 @@ function movePlainYearMonth(
   durationFields,
   overflowHandling,
 ) {
-  const plainDate = convertPlainYearMonthToDate(plainYearMonth, {
+  const isoDateFields = convertPlainYearMonthToIso(plainYearMonth, {
     day: durationFields.sign < 0
       ? calendar.daysInMonth(plainYearMonth)
       : 1,
   })
 
-  let isoDateFields = getInternals(plainDate)
-  isoDateFields = calendar.dateAdd(isoDateFields, durationFields, overflowHandling)
-
-  return createPlainYearMonth({
-    ...isoDateFields,
-    calendar,
-  })
+  return createPlainYearMonth(
+    calendar.dateAdd(isoDateFields, durationFields, overflowHandling),
+  )
 }
