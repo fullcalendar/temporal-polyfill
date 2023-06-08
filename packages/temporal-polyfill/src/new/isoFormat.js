@@ -52,3 +52,7 @@ export function formatCalendar(calendarProtocol, options) {
 function formatCalendarWithSingleOpt(calendarProtocol, calendarNameOpt) {
 
 }
+
+export function formatDurationInternals(durationInternals, options) {
+
+}

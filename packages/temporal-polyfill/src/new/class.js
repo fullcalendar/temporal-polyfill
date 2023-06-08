@@ -1,5 +1,5 @@
 import { DateTimeFormat } from './intlFormat'
-import { strictInstanceOf } from './options'
+import { strictInstanceOf, toString } from './options'
 import {
   createGetterDescriptors, createPropDescriptors, createTemporalNameDescriptors,
   defineProps,
@@ -62,10 +62,15 @@ export function returnId(internals) {
   return internals.id
 }
 
-// TODO: make a versoin that casts the id to string? For adapters
+function returnIdStrict(internals) {
+  return toString(internals.id)
+}
+
 export const internalIdGetters = { id: returnId }
+export const adapterIdGetters = { id: returnIdStrict }
 
 // TODO: createStrictInternalGetter
+// TODO: move to .bind??
 export function getStrictInternals(Class) {
   return (res) => getInternals(strictInstanceOf(Class), res)
 }
@@ -136,12 +141,4 @@ export function toLocaleStringMethod(internals, locales, options) {
   */
   const format = new DateTimeFormat(locales, options)
   return format.format(this)
-}
-
-// Adapter Utils
-// -------------------------------------------------------------------------------------------------
-
-// TODO: rethink this. too meta
-export function createAdapterMethods() {
-
 }

@@ -115,6 +115,10 @@ export const [
         zonedInternalsToIso(internals).offsetNanoseconds,
       )
     },
+
+    timeZoneId(internals) {
+      return internals.timeZone.id
+    },
   },
 
   // Methods

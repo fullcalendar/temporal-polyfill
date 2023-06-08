@@ -1,9 +1,8 @@
 import {
-  createAdapterMethods,
+  adapterIdGetters,
   createWrapperClass,
   getInternals,
   getStrictInternals,
-  internalIdGetters,
 } from './class'
 import { Instant, createInstant } from './instant'
 import { isoTimeFieldDefaults } from './isoFields'
@@ -16,28 +15,35 @@ import { addDaysToIsoFields } from './move'
 import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
-import { createTimeZone } from './timeZone'
+import { TimeZone, createTimeZone, timeZoneVitalMethods } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
-import { createLazyMap } from './util'
+import { createLazyMap, createVitalsChecker, getCommonInternal } from './util'
 
 export const utcTimeZoneId = 'UTC'
 
-export function queryTimeZoneOps(timeZoneSlot) {
-  if (typeof timeZoneSlot === 'object') {
-    return new TimeZoneOpsAdapter(timeZoneSlot)
+const checkTimeZoneVitals = createVitalsChecker(timeZoneVitalMethods)
+
+export function queryTimeZoneOps(timeZoneArg) {
+  if (typeof timeZoneArg === 'object') {
+    if (timeZoneArg instanceof TimeZone) {
+      return getInternals(timeZoneArg)
+    }
+
+    checkTimeZoneVitals(timeZoneArg)
+    return new TimeZoneOpsAdapter(timeZoneArg)
   }
-  return queryTimeZoneImpl(timeZoneSlot) // string
+
+  return queryTimeZoneImpl(toString(timeZoneArg))
 }
 
 export function getPublicTimeZone(internals) {
-  const timeZoneOps = internals.timeZone
-  return getInternals(timeZoneOps) || // TimeZoneOpsAdapter (return internal TimeZone)
-    createTimeZone(timeZoneOps) // TimeZoneImpl (create outer TimeZone)
+  const { timeZone } = internals
+
+  return getInternals(timeZone) || // TimeZoneOpsAdapter (return internal TimeZone)
+    createTimeZone(timeZone) // TimeZoneImpl (create outer TimeZone)
 }
 
-export function getCommonTimeZoneOps(internals0, internals1) {
-  // TODO
-}
+export const getCommonTimeZoneOps = getCommonInternal.bind(undefined, 'timeZone')
 
 // Public Utils
 // ------------
@@ -188,19 +194,16 @@ export function zonedEpochNanoToIso(timeZoneOps, epochNano) {
 
 const getStrictInstantEpochNanoseconds = getStrictInternals(Instant)
 
-export const TimeZoneOpsAdapter = createWrapperClass(
-  internalIdGetters,
-  createAdapterMethods({
-    getOffsetNanosecondsFor: [
-      validateOffsetNano,
-      createInstant,
-    ],
-    getPossibleInstantsFor: [
-      extractEpochNanos,
-      createPlainDateTime,
-    ],
-  }),
-)
+export const TimeZoneOpsAdapter = createWrapperClass(adapterIdGetters, {
+  getOffsetNanosecondsFor(timeZone, epochNano) {
+    return validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
+  },
+
+  getPossibleInstantsFor(timeZone, isoDateTimeFields) {
+    return strictArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
+      .map(getStrictInstantEpochNanoseconds)
+  },
+})
 
 function validateOffsetNano(offsetNano) {
   offsetNano = strictNumber(offsetNano)
@@ -210,8 +213,4 @@ function validateOffsetNano(offsetNano) {
   }
 
   return offsetNano
-}
-
-function extractEpochNanos(instants) {
-  return strictArray(instants).map(getStrictInstantEpochNanoseconds)
 }

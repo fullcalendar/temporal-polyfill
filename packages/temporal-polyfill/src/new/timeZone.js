@@ -11,6 +11,15 @@ import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { noop } from './util'
 
+export const timeZoneVitalMethods = {
+  getPossibleInstantsFor(impl, plainDateTimeArg) {
+    return impl.getPossibleInstantsFor(toPlainDateTimeInternals(plainDateTimeArg))
+      .map(createInstant)
+  },
+
+  getOffsetNanosecondsFor: getImplOffsetNanosecondsFor,
+}
+
 export const [TimeZone, createTimeZone] = createTemporalClass(
   'TimeZone',
 
@@ -41,18 +50,18 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
   // -----------------------------------------------------------------------------------------------
 
   {
+    ...timeZoneVitalMethods,
+
     getOffsetStringFor(impl, instantArg) {
-      return formatOffsetNanoseconds(
-        impl.getOffsetNanosecondsFor(toInstantEpochNanoseconds(instantArg)),
-      )
+      return formatOffsetNanoseconds(getImplOffsetNanosecondsFor(impl, instantArg))
     },
 
     getPlainDateTimeFor(impl, instantArg, calendarArg) {
       const epochNanoseconds = toInstantEpochNanoseconds(instantArg)
 
       return createPlainDateTime({
-        ...zonedEpochNanoToIso(impl, epochNanoseconds),
         calendar: queryCalendarOps(calendarArg),
+        ...zonedEpochNanoToIso(impl, epochNanoseconds),
       })
     },
 
@@ -60,27 +69,23 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
       return getSingleInstantFor(
         impl,
         toPlainDateTimeInternals(plainDateTimeArg),
-        toDisambiguation(options),
+        toDisambiguation(options), // TODO: method w/ whole options object
       )
     },
 
-    getPossibleInstantsFor(impl, plainDateTimeArg) {
-      return impl.getPossibleInstantsFor(toPlainDateTimeInternals(plainDateTimeArg))
-        .map(createInstant)
-    },
+    getNextTransition: getImplTransition.bind(undefined, 1),
 
-    getOffsetNanosecondsFor(impl, instantArg) {
-      return impl.getOffsetNanosecondsFor(toInstantEpochNanoseconds(instantArg))
-    },
-
-    getNextTransition(impl, instantArg) {
-      return impl.getTransition(toInstantEpochNanoseconds(instantArg), 1)
-    },
-
-    getPreviousTransition(impl, instantArg) {
-      return impl.getTransition(toInstantEpochNanoseconds(instantArg), -1)
-    },
+    getPreviousTransition: getImplTransition.bind(undefined, -1),
 
     toString: returnId,
   },
 )
+
+function getImplOffsetNanosecondsFor(impl, instantArg) {
+  return impl.getOffsetNanosecondsFor(toInstantEpochNanoseconds(instantArg))
+}
+
+function getImplTransition(direction, impl, instantArg) {
+  const epochNano = impl.getTransition(toInstantEpochNanoseconds(instantArg), direction)
+  return epochNano ? createInstant(epochNano) : null
+}

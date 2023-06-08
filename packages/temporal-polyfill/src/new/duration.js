@@ -8,6 +8,7 @@ import {
   negateDurationFields,
   refineDurationInternals,
 } from './durationFields'
+import { formatDurationInternals } from './isoFormat'
 import { isoToEpochNano } from './isoMath'
 import { stringToDurationInternals } from './isoParse'
 import { compareLargeInts } from './largeInt'
@@ -155,6 +156,8 @@ export const [
         ...markerSystem,
       )
     },
+
+    toString: formatDurationInternals,
 
     valueOf: neverValueOf,
   },

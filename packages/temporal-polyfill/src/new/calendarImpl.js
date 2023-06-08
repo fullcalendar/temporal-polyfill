@@ -597,6 +597,7 @@ export function queryCalendarImpl(calendarId) {
     calendarId = calendarIdBase
   }
 
+  // TODO: lazy cache util
   return calendarImplCache[calendarId] || (
     calendarImplCache[calendarId] = new (CalendarImplClass || IntlCalendarImpl)(calendarId)
   )

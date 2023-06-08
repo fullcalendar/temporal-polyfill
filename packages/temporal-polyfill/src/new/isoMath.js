@@ -185,7 +185,7 @@ function validateIsoDateTimeInternals(isoDateTimeInternals) { // validateIsoInte
 
 export function validateEpochNano(epochNano) {
   if (
-    epochNano == null || // TODO: pick null or undefined
+    epochNano === undefined ||
     compareLargeInts(epochNano, epochNanoMin) === 1 || // epochNano < epochNanoMin
     compareLargeInts(epochNanoMax, epochNano) === 1 // epochNanoMax < epochNano
   ) {
@@ -222,6 +222,7 @@ export function isoToEpochMilli(isoDateTimeFields) {
 }
 
 export function isoToEpochNano(isoDateTimeFields) {
+  // if invalid, should return undefined
 }
 
 // ISO Arguments -> Epoch

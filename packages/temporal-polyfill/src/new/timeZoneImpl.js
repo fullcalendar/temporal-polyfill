@@ -50,7 +50,6 @@ export class FixedTimeZoneImpl {
   }
 
   getTransition(epochNano, direction) {
-    return null
   }
 }
 
@@ -82,10 +81,9 @@ export class IntlTimeZoneImpl {
       epochSec + ((direction > 0 || subsecNano) ? 1 : 0),
       direction,
     )
-    if (resEpochSec === undefined) {
-      return null
+    if (resEpochSec !== undefined) {
+      return epochSecToNano(resEpochSec)
     }
-    return epochSecToNano(resEpochSec)
   }
 }
 

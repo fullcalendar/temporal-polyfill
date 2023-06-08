@@ -16,6 +16,7 @@ import {
   yearMonthBasicNames,
   yearMonthFieldNames,
 } from './calendarFields'
+import { queryCalendarImpl } from './calendarImpl'
 import { queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
 import {
@@ -261,7 +262,7 @@ export function refinePlainMonthDayBag(bag, options, calendar = extractBagCalend
   const calendarAbsent = !calendar
 
   if (calendarAbsent) {
-    calendar = queryCalendarOps(isoCalendarId)
+    calendar = queryCalendarImpl(isoCalendarId)
   }
 
   const fieldNames = calendar.fields(dateFieldNames)
@@ -382,7 +383,7 @@ function mergeCalendarFields(
 }
 
 function getBagCalendarOps(bag) {
-  return extractBagCalendarOps(bag) || queryCalendarOps(isoCalendarId)
+  return extractBagCalendarOps(bag) || queryCalendarImpl(isoCalendarId)
 }
 
 function extractBagCalendarOps(bag) {
@@ -457,6 +458,7 @@ function refineFields(
   return res
 }
 
+// use .bind?
 export function createComplexBagRefiner(key, ForbiddenClass) {
   return function(bag) {
     const internalArg = getInternals(bag)?.[key]
