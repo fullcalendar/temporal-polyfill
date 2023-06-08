@@ -158,8 +158,7 @@ export function mergePlainDateTimeBag(plainDate, bag, options) {
 // PlainDate
 // -------------------------------------------------------------------------------------------------
 
-export function refinePlainDateBag(bag, options) {
-  const calendar = getBagCalendarOps(bag)
+export function refinePlainDateBag(bag, options, calendar = getBagCalendarOps(bag)) {
   const fields = refineCalendarFields(
     calendar,
     bag,
@@ -200,14 +199,13 @@ function convertToIso(
   const mergedFieldNames = removeDuplicateStrings(inputFieldNames.concat(extraFieldNames))
   mergedFields = refineFields(mergedFields, mergedFieldNames, [])
 
-  calendar.dateFromFields(mergedFields)
+  return calendar.dateFromFields(mergedFields)
 }
 
 // PlainYearMonth
 // -------------------------------------------------------------------------------------------------
 
-export function refinePlainYearMonthBag(bag, options) {
-  const calendar = getBagCalendarOps(bag)
+export function refinePlainYearMonthBag(bag, options, calendar = getBagCalendarOps(bag)) {
   const fields = refineCalendarFields(
     calendar,
     bag,
@@ -259,8 +257,7 @@ export function convertPlainYearMonthToIso(plainYearMonth, bag = { day: 1 }) {
 // PlainMonthDay
 // -------------------------------------------------------------------------------------------------
 
-export function refinePlainMonthDayBag(bag, options) {
-  let calendar = extractBagCalendarOps(bag)
+export function refinePlainMonthDayBag(bag, options, calendar = extractBagCalendarOps(bag)) {
   const calendarAbsent = !calendar
 
   if (calendarAbsent) {
@@ -424,15 +421,40 @@ const builtinRefiners = {
 
 const builtinDefaults = timeFieldDefaults
 
-export function refineFields(
+function refineFields(
   bag,
-  fieldNames,
-  requiredFields, // a subset of fieldNames
+  validFieldNames,
+  requiredFieldNames, // a subset of fieldNames
   // if not given, then assumed to be 'partial' (defaults won't be applied)
 ) {
-  console.log(builtinRefiners)
-  console.log(builtinDefaults)
-  // TODO: error-out if no valid vields
+  const res = {}
+  let any = false
+
+  for (const fieldName in validFieldNames) {
+    let fieldVal = bag[fieldName]
+
+    if (fieldVal !== undefined) {
+      any = true
+
+      if (builtinRefiners[fieldName]) {
+        fieldVal = builtinRefiners[fieldName]
+      }
+
+      res[fieldName] = fieldVal
+    } else if (requiredFieldNames) {
+      if (requiredFieldNames.includes(fieldName)) {
+        throw new TypeError('Missing required field name')
+      }
+
+      res[fieldName] = builtinDefaults[fieldName]
+    }
+  }
+
+  if (!any) {
+    throw new TypeError('No valid fields')
+  }
+
+  return res
 }
 
 export function createComplexBagRefiner(key, ForbiddenClass) {

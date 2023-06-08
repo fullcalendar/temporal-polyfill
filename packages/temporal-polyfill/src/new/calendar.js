@@ -1,16 +1,12 @@
-import {
-  getRequiredDateFields,
-  getRequiredMonthDayFields,
-  getRequiredYearMonthFields,
-} from './calendarConfig'
-import {
-  dateFieldNames,
-  dateGetterNames,
-  yearMonthFieldNames,
-} from './calendarFields'
+import { dateGetterNames } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
 import { createAdapterMethods, createTemporalClass, internalIdGetters, returnId } from './class'
-import { createComplexBagRefiner, refineFields } from './convert'
+import {
+  createComplexBagRefiner,
+  refinePlainDateBag,
+  refinePlainMonthDayBag,
+  refinePlainYearMonthBag,
+} from './convert'
 import { createDuration, toDurationInternals } from './duration'
 import { isoDaysInWeek } from './isoMath'
 import { stringToCalendarId } from './isoParse'
@@ -72,31 +68,15 @@ export const [Calendar, createCalendar] = createTemporalClass(
     }),
 
     dateFromFields(impl, fields, options) {
-      return createPlainDate(
-        impl.dateFromFields(
-          refineFields(fields, impl.fields(dateFieldNames), getRequiredDateFields(impl)),
-          optionsToOverflow(options),
-        ),
-      )
+      return createPlainDate(refinePlainDateBag(fields, options, impl))
     },
 
     yearMonthFromFields(impl, fields, options) {
-      return createPlainYearMonth(
-        impl.yearMonthFromFields(
-          refineFields(fields, impl.fields(yearMonthFieldNames), getRequiredYearMonthFields(impl)),
-          optionsToOverflow(options),
-        ),
-      )
+      return createPlainYearMonth(refinePlainYearMonthBag(fields, options, impl))
     },
 
     monthDayFromFields(impl, fields, options) {
-      return createPlainMonthDay(
-        ...impl.monthDayFromFields(
-          // refine y/m/d fields
-          refineFields(fields, impl.fields(dateFieldNames), getRequiredMonthDayFields(impl)),
-          optionsToOverflow(options),
-        ),
-      )
+      return createPlainMonthDay(refinePlainMonthDayBag(fields, options, impl))
     },
 
     toString: returnId,
