@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
-import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
+import { createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
@@ -10,9 +10,8 @@ import {
 import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields, isoEpochFirstLeapYear } from './isoMath'
-import { stringToMonthDayInternals } from './isoParse'
+import { parsePlainMonthDay } from './isoParse'
 import { optionsToOverflow } from './options'
-import { isIdPropsEqual } from './util'
 
 export const [
   PlainMonthDay,
@@ -41,7 +40,7 @@ export const [
   refinePlainMonthDayBag,
 
   // stringToInternals
-  stringToMonthDayInternals,
+  parsePlainMonthDay,
 
   // handleUnusedOptions
   optionsToOverflow,
@@ -62,7 +61,7 @@ export const [
     equals(internals, otherArg) {
       const otherInternals = toPlainMonthDayInternals(otherArg)
       return !compareIsoDateTimeFields(internals, otherInternals) &&
-        isIdPropsEqual(internals.calendar, otherInternals.calendar)
+        isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals, options) {

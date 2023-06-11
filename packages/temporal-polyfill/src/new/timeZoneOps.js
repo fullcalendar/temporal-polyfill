@@ -1,8 +1,10 @@
 import {
-  adapterIdGetters,
+  createProtocolChecker,
   createWrapperClass,
+  getCommonInnerObj,
   getInternals,
   getStrictInternals,
+  idGettersStrict,
 } from './class'
 import { Instant, createInstant } from './instant'
 import { isoTimeFieldDefaults } from './isoFields'
@@ -15,13 +17,13 @@ import { addDaysToIsoFields } from './move'
 import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
-import { TimeZone, createTimeZone, timeZoneVitalMethods } from './timeZone'
+import { TimeZone, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
-import { createLazyMap, createVitalsChecker, getCommonInternal } from './util'
+import { createLazyMap } from './util'
 
 export const utcTimeZoneId = 'UTC'
 
-const checkTimeZoneVitals = createVitalsChecker(timeZoneVitalMethods)
+const checkTimeZoneProtocol = createProtocolChecker(timeZoneProtocolMethods)
 
 export function queryTimeZoneOps(timeZoneArg) {
   if (typeof timeZoneArg === 'object') {
@@ -29,7 +31,7 @@ export function queryTimeZoneOps(timeZoneArg) {
       return getInternals(timeZoneArg)
     }
 
-    checkTimeZoneVitals(timeZoneArg)
+    checkTimeZoneProtocol(timeZoneArg)
     return new TimeZoneOpsAdapter(timeZoneArg)
   }
 
@@ -43,7 +45,7 @@ export function getPublicTimeZone(internals) {
     createTimeZone(timeZone) // TimeZoneImpl (create outer TimeZone)
 }
 
-export const getCommonTimeZoneOps = getCommonInternal.bind(undefined, 'timeZone')
+export const getCommonTimeZoneOps = getCommonInnerObj.bind(undefined, 'timeZone')
 
 // Public Utils
 // ------------
@@ -192,16 +194,16 @@ export function zonedEpochNanoToIso(timeZoneOps, epochNano) {
 // Adapter
 // -------
 
-const getStrictInstantEpochNanoseconds = getStrictInternals(Instant)
+const getInstantEpochNano = getStrictInternals.bind(undefined, Instant)
 
-export const TimeZoneOpsAdapter = createWrapperClass(adapterIdGetters, {
+export const TimeZoneOpsAdapter = createWrapperClass(idGettersStrict, {
   getOffsetNanosecondsFor(timeZone, epochNano) {
     return validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
   },
 
   getPossibleInstantsFor(timeZone, isoDateTimeFields) {
     return strictArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
-      .map(getStrictInstantEpochNanoseconds)
+      .map(getInstantEpochNano)
   },
 })
 

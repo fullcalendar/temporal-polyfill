@@ -11,7 +11,7 @@ import {
   isoToEpochSec,
   milliInSec, nanoInSec, secInDay,
 } from './isoMath'
-import { parseOffsetNanoseconds } from './isoParse'
+import { parseOffsetNano } from './isoParse'
 import { clamp, compareNumbers, createLazyMap } from './util'
 
 const periodDur = secInDay * 60
@@ -21,7 +21,7 @@ const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10
 const intlTimeZoneImplCache = {}
 
 export function queryTimeZoneImpl(timeZoneId) {
-  const offsetNano = parseOffsetNanoseconds(timeZoneId)
+  const offsetNano = parseOffsetNano(timeZoneId)
 
   if (offsetNano !== undefined) {
     return new FixedTimeZoneImpl(timeZoneId, offsetNano)

@@ -1,15 +1,15 @@
 import { dateGetterNames } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
-import { createTemporalClass, internalIdGetters, returnId } from './class'
+import { createTemporalClass, getObjId, idGetters } from './class'
 import {
-  createComplexBagRefiner,
+  refineComplexBag,
   refinePlainDateBag,
   refinePlainMonthDayBag,
   refinePlainYearMonthBag,
 } from './convert'
 import { createDuration, toDurationInternals } from './duration'
 import { isoDaysInWeek } from './isoMath'
-import { stringToCalendarId } from './isoParse'
+import { parseCalendarId } from './isoParse'
 import { optionsToOverflow, strictArray, toObject } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
@@ -17,7 +17,7 @@ import { createPlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import { mapArrayToProps, noop, removeUndefines } from './util'
 
-export const calendarVitalMethods = {
+export const calendarProtocolMethods = {
   ...mapArrayToProps(dateGetterNames, (propName) => {
     return (impl, plainDateArg) => {
       return impl[propName](toPlainDateInternals(plainDateArg))
@@ -85,10 +85,10 @@ export const [Calendar, createCalendar] = createTemporalClass(
   {},
 
   // bagToInternals
-  createComplexBagRefiner('calendar', TimeZone),
+  refineComplexBag.bind(undefined, 'calendar', TimeZone),
 
   // stringToInternals
-  (str) => queryCalendarImpl(stringToCalendarId(str)),
+  (str) => queryCalendarImpl(parseCalendarId(str)),
 
   // handleUnusedOptions
   noop,
@@ -96,14 +96,14 @@ export const [Calendar, createCalendar] = createTemporalClass(
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  internalIdGetters,
+  idGetters,
 
   // Methods
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...calendarVitalMethods,
+    ...calendarProtocolMethods,
 
-    toString: returnId,
+    toString: getObjId,
   },
 )

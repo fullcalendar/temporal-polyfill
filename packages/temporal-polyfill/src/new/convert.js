@@ -25,7 +25,7 @@ import {
   updateDurationFieldsSign,
 } from './durationFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
-import { parseOffsetNanoseconds } from './isoParse'
+import { parseOffsetNano } from './isoParse'
 import {
   optionsToOverflow,
   toObject,
@@ -60,7 +60,7 @@ export function refineZonedDateTimeBag(bag, options) {
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
     { ...isoDateFields, ...isoTimeFields },
-    fields.offset !== undefined && parseOffsetNanoseconds(fields.offset),
+    fields.offset !== undefined && parseOffsetNano(fields.offset),
     false, // z?
     offset,
     disambiguation,
@@ -91,7 +91,7 @@ export function mergeZonedDateTimeBag(zonedDateTime, bag, options) {
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
     { ...isoDateFields, ...isoTimeFields },
-    parseOffsetNanoseconds(fields.offset),
+    parseOffsetNano(fields.offset),
     false, // z?
     offset,
     disambiguation,
@@ -458,26 +458,23 @@ function refineFields(
   return res
 }
 
-// use .bind?
-export function createComplexBagRefiner(key, ForbiddenClass) {
-  return function(bag) {
-    const internalArg = getInternals(bag)?.[key]
-    if (internalArg) {
-      return internalArg
-    }
+export function refineComplexBag(key, ForbiddenClass, bag) {
+  const internalArg = getInternals(bag)?.[key]
+  if (internalArg) {
+    return internalArg
+  }
+
+  forbidInstanceClass(bag, ForbiddenClass)
+
+  if (!(key in bag)) {
+    return bag
+  } else {
+    bag = bag[key]
 
     forbidInstanceClass(bag, ForbiddenClass)
 
-    if (!(key in bag)) {
+    if (isObjectLike(bag) && !(key in bag)) {
       return bag
-    } else {
-      bag = bag[key]
-
-      forbidInstanceClass(bag, ForbiddenClass)
-
-      if (isObjectLike(bag) && !(key in bag)) {
-        return bag
-      }
     }
   }
 }

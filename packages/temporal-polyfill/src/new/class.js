@@ -3,6 +3,7 @@ import { strictInstanceOf, toString } from './options'
 import {
   createGetterDescriptors, createPropDescriptors, createTemporalNameDescriptors,
   defineProps,
+  hasAllMatchingProps,
   identityFunc,
   isObjectLike,
   mapProps,
@@ -48,31 +49,8 @@ export function createWrapperClass(
   return InternalObj
 }
 
-export function neverValueOf() {
-  throw new TypeError('Cannot convert object using valueOf')
-}
-
-export function transformInternalMethod(transformRes, methodName) {
-  return (impl, ...args) => {
-    return transformRes(impl[methodName](...args))
-  }
-}
-
-export function returnId(internals) {
-  return internals.id
-}
-
-function returnIdStrict(internals) {
-  return toString(internals.id)
-}
-
-export const internalIdGetters = { id: returnId }
-export const adapterIdGetters = { id: returnIdStrict }
-
-// TODO: createStrictInternalGetter
-// TODO: move to .bind??
-export function getStrictInternals(Class) {
-  return (res) => getInternals(strictInstanceOf(Class), res)
+export function getStrictInternals(Class, res) {
+  return getInternals(strictInstanceOf(res, Class))
 }
 
 // Temporal Class
@@ -134,6 +112,9 @@ export function createTemporalClass(
   return [TemporalObj, createInstance, toInternals]
 }
 
+// Utils for Specific Classes
+// -------------------------------------------------------------------------------------------------
+
 export function toLocaleStringMethod(internals, locales, options) {
   /*
   Will create two internal Intl.DateTimeFormats :(
@@ -142,3 +123,48 @@ export function toLocaleStringMethod(internals, locales, options) {
   const format = new DateTimeFormat(locales, options)
   return format.format(this)
 }
+
+export function neverValueOf() {
+  throw new TypeError('Cannot convert object using valueOf')
+}
+
+// Complex Objects with IDs
+// -------------------------------------------------------------------------------------------------
+
+export function createProtocolChecker(protocolMethods) {
+  const propNames = Object.keys(protocolMethods)
+  propNames.push('id')
+  propNames.sort() // order matters?
+
+  return (obj) => {
+    if (!hasAllMatchingProps(obj, propNames)) {
+      throw new TypeError('Invalid protocol')
+    }
+  }
+}
+
+export function getCommonInnerObj(propName, obj0, obj1) {
+  const internal0 = obj0[propName]
+  const internal1 = obj1[propName]
+
+  if (!isObjIdsEqual(internal0, internal1)) {
+    throw new TypeError(`${propName} not equal`)
+  }
+
+  return internal0
+}
+
+export function isObjIdsEqual(obj0, obj1) {
+  return obj0 === obj1 || obj0.id !== obj1.id
+}
+
+export function getObjId(internals) {
+  return internals.id
+}
+
+function getObjIdStrict(internals) {
+  return toString(internals.id)
+}
+
+export const idGetters = { id: getObjId }
+export const idGettersStrict = { id: getObjIdStrict }

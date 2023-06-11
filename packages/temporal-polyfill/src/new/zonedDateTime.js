@@ -1,6 +1,6 @@
 import { dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
-import { createTemporalClass, neverValueOf } from './class'
+import { createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -31,7 +31,7 @@ import {
   nanoInHour,
   validateEpochNano,
 } from './isoMath'
-import { stringToZonedDateTimeInternals } from './isoParse'
+import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
 import { optionsToOverflow, toEpochNano } from './options'
@@ -47,7 +47,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { isIdPropsEqual, mapProps } from './util'
+import { mapProps } from './util'
 
 export const [
   ZonedDateTime,
@@ -75,7 +75,7 @@ export const [
   refineZonedDateTimeBag,
 
   // stringToInternals
-  stringToZonedDateTimeInternals,
+  parseZonedDateTime,
 
   // handleUnusedOptions
   optionsToOverflow,
@@ -291,8 +291,8 @@ export const [
       const otherInternals = toZonedDateTimeInternals(otherZonedDateTimeArg)
 
       return !compareLargeInts(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
-        isIdPropsEqual(internals.calendar, otherInternals.calendar) &&
-        isIdPropsEqual(internals.timeZone, otherInternals.timeZone)
+        isObjIdsEqual(internals.calendar, otherInternals.calendar) &&
+        isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
     },
 
     toString(internals, options) {

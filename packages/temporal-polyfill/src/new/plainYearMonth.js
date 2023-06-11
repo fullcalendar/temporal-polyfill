@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { yearMonthGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
-import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
+import { createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertPlainYearMonthToDate,
   convertPlainYearMonthToIso,
@@ -14,9 +14,8 @@ import { negateDurationFields } from './durationFields'
 import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
-import { stringToPlainYearMonthInternals } from './isoParse'
+import { parsePlainYearMonth } from './isoParse'
 import { optionsToOverflow } from './options'
-import { isIdPropsEqual } from './util'
 
 export const [
   PlainYearMonth,
@@ -45,7 +44,7 @@ export const [
   refinePlainYearMonthBag,
 
   // stringToInternals
-  stringToPlainYearMonthInternals,
+  parsePlainYearMonth,
 
   // handleUnusedOptions
   optionsToOverflow,
@@ -108,7 +107,7 @@ export const [
     equals(internals, otherArg) {
       const otherInternals = toPlainYearMonthInternals(otherArg)
       return !compareIsoDateTimeFields(internals, otherInternals) &&
-        isIdPropsEqual(internals.calendar, otherInternals.calendar)
+        isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals, options) {

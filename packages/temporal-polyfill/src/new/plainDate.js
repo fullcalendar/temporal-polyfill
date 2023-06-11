@@ -5,7 +5,7 @@ import {
   getPublicCalendar,
   queryCalendarOps,
 } from './calendarOps'
-import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
+import { createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -24,12 +24,11 @@ import {
 } from './isoFields'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
-import { stringToPlainDateInternals } from './isoParse'
+import { parsePlainDate } from './isoParse'
 import { optionsToOverflow } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { isIdPropsEqual } from './util'
 
 export const [
   PlainDate,
@@ -63,7 +62,7 @@ export const [
   refinePlainDateBag,
 
   // stringToInternals
-  stringToPlainDateInternals,
+  parsePlainDate,
 
   // handleUnusedOptions
   optionsToOverflow,
@@ -119,7 +118,7 @@ export const [
     equals(internals, other) {
       const otherInternals = toPlainDateInternals(other)
       return !compareIsoDateTimeFields(internals, otherInternals) &&
-        isIdPropsEqual(internals.calendar, otherInternals.calendar)
+        isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals, options) {

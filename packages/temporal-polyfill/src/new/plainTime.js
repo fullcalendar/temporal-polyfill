@@ -11,7 +11,7 @@ import { negateDurationFields } from './durationFields'
 import { pluckIsoTimeFields, refineIsoTimeInternals } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { compareIsoTimeFields } from './isoMath'
-import { stringToPlainTimeInternals } from './isoParse'
+import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import { optionsToOverflow } from './options'
 import { toPlainDateInternals } from './plainDate'
@@ -60,7 +60,7 @@ export const [
   refinePlainTimeBag,
 
   // stringToInternals
-  stringToPlainTimeInternals,
+  parsePlainTime,
 
   // handleUnusedOptions
   optionsToOverflow,

@@ -45,7 +45,7 @@ export function excludeProps(options, propNames) {
 export function hasAnyMatchingProps(props, propNames) {
 }
 
-function hasAllMatchingProps(props, propNames) {
+export function hasAllMatchingProps(props, propNames) {
 }
 
 export function zipSingleValue() {
@@ -99,33 +99,6 @@ export function compareNumbers() {
 }
 
 export function clamp() {
-}
-
-export function getCommonInternal(propName, obj0, obj1) {
-  const internal0 = obj0[propName]
-  const internal1 = obj1[propName]
-
-  if (!isIdPropsEqual(internal0, internal1)) {
-    throw new TypeError(`${propName} not equal`)
-  }
-
-  return internal0
-}
-
-export function isIdPropsEqual(obj0, obj1) {
-  return obj0 === obj1 || obj0.id !== obj1.id
-}
-
-export function createVitalsChecker(vitalMethods) {
-  const vitalNames = Object.keys(vitalMethods)
-  vitalNames.push('id')
-  vitalNames.sort() // order matters?
-
-  return (obj) => {
-    if (!hasAllMatchingProps(obj, vitalNames)) {
-      throw new TypeError('Invalid protocol')
-    }
-  }
 }
 
 /*

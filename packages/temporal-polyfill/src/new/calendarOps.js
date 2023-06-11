@@ -1,15 +1,22 @@
-import { Calendar, calendarVitalMethods, createCalendar } from './calendar'
+import { Calendar, calendarProtocolMethods, createCalendar } from './calendar'
 import { dateFieldRefiners, dateStatRefiners, eraYearFieldRefiners } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
-import { adapterIdGetters, createWrapperClass, getInternals, getStrictInternals } from './class'
+import {
+  createProtocolChecker,
+  createWrapperClass,
+  getCommonInnerObj,
+  getInternals,
+  getStrictInternals,
+  idGettersStrict,
+} from './class'
 import { createDuration } from './duration'
 import { strictArray, toObject, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
-import { createVitalsChecker, getCommonInternal, mapProps } from './util'
+import { mapProps } from './util'
 
-const checkCalendarVitals = createVitalsChecker(calendarVitalMethods)
+const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 
 export function queryCalendarOps(calendarArg) {
   if (typeof calendarArg === 'object') {
@@ -17,7 +24,7 @@ export function queryCalendarOps(calendarArg) {
       return getInternals(calendarArg)
     }
 
-    checkCalendarVitals(calendarArg)
+    checkCalendarProtocol(calendarArg)
     return new CalendarOpsAdapter(calendarArg)
   }
 
@@ -31,16 +38,16 @@ export function getPublicCalendar(internals) {
     createCalendar(calendar) // CalendarImpl (create outer Calendar)
 }
 
-export const getCommonCalendarOps = getCommonInternal.bind(undefined, 'calendar')
+export const getCommonCalendarOps = getCommonInnerObj.bind(undefined, 'calendar')
 
 // Adapter
 // -------------------------------------------------------------------------------------------------
 
-const getPlainDateInternals = getStrictInternals(PlainDate)
-const getPlainYearMonthInternals = getStrictInternals(PlainYearMonth)
-const getPlainMonthDayInternals = getStrictInternals(PlainMonthDay)
+const getPlainDateInternals = getStrictInternals.bind(undefined, PlainDate)
+const getPlainYearMonthInternals = getStrictInternals.bind(undefined, PlainYearMonth)
+const getPlainMonthDayInternals = getStrictInternals.bind(undefined, PlainMonthDay)
 
-const CalendarOpsAdapter = createWrapperClass(adapterIdGetters, {
+const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
   ...mapProps({
     ...eraYearFieldRefiners,
     ...dateFieldRefiners,

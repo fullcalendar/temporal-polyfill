@@ -3,12 +3,14 @@ export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
 export const japaneseCalendarId = 'japanese'
 
-// for converting from [era,eraYear] -> year
-// if origin is >=0,
-//   year = origin + eraYear
-// if origin is <0, consider the era to be 'reverse' direction
-//   year = -origin - eraYear
-//   year = -(origin + eraYear)
+/*
+for converting from [era,eraYear] -> year
+if origin is >=0,
+  year = origin + eraYear
+if origin is <0, consider the era to be 'reverse' direction
+  year = -origin - eraYear
+  year = -(origin + eraYear)
+*/
 export const eraOriginsByCalendarId = {
   [gregoryCalendarId]: {
     bce: -1,

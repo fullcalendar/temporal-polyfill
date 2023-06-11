@@ -11,14 +11,13 @@ import {
   constrainIsoTimeFields,
 } from './isoMath'
 import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
-import { createZonedDateTime } from './zonedDateTime'
 
 // TODO: rename method names back to parse
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
-export function stringToZonedDateTimeInternals(s) {
+export function parseZonedDateTime(s) {
   const parsed = parseDateTime(s) // TODO: use just 'calendar' and 'timeZone' ?
   if (parsed) {
     if (!parsed.timeZoneId) {
@@ -31,24 +30,24 @@ export function stringToZonedDateTimeInternals(s) {
     const epochNanoseconds = getMatchingInstantFor(
       timeZone,
       parsed,
-      parsed.offset !== undefined ? parseOffsetNanoseconds(parsed.offset) : undefined,
+      parsed.offset !== undefined ? parseOffsetNano(parsed.offset) : undefined,
       parsed.z,
       'reject',
       'compatible',
       true, // fuzzy
     )
 
-    return createZonedDateTime({
+    return {
       epochNanoseconds,
       timeZone,
       calendar,
-    })
+    }
   }
 
   throw new Error()
 }
 
-export function stringToPlainDateTimeInternals(s) {
+export function parsePlainDateTime(s) {
   const parsed = parseDateTime(s)
   if (parsed) {
     return pluckIsoDateTimeInternals(parsed)
@@ -57,7 +56,7 @@ export function stringToPlainDateTimeInternals(s) {
   throw new Error()
 }
 
-export function stringToPlainDateInternals(s) {
+export function parsePlainDate(s) {
   const parsed = parseDateTime(s)
   if (parsed) {
     return parsed
@@ -66,7 +65,7 @@ export function stringToPlainDateInternals(s) {
   throw new Error()
 }
 
-export function stringToPlainYearMonthInternals(s) {
+export function parsePlainYearMonth(s) {
   let parsed = parseYearMonth(s)
   if (!parsed) {
     parsed = parseDateTime(s)
@@ -82,7 +81,7 @@ export function stringToPlainYearMonthInternals(s) {
   throw new Error()
 }
 
-export function stringToMonthDayInternals(s) {
+export function parsePlainMonthDay(s) {
   let parsed = parseMonthDay(s)
   if (!parsed) {
     parsed = parseDateTime(s)
@@ -98,7 +97,7 @@ export function stringToMonthDayInternals(s) {
   throw new Error()
 }
 
-export function stringToPlainTimeInternals(s) {
+export function parsePlainTime(s) {
   let parsed = parseTime(s)
 
   if (!parsed) {
@@ -130,7 +129,7 @@ export function stringToPlainTimeInternals(s) {
   throw new Error()
 }
 
-export function stringToCalendarId(s) {
+export function parseCalendarId(s) {
   if (s !== isoCalendarId) {
     s = (
       parseDateTime(s) || parseYearMonth(s) || parseMonthDay(s)
@@ -140,7 +139,7 @@ export function stringToCalendarId(s) {
   return s
 }
 
-export function stringToTimeZoneId(s) {
+export function parseTimeZoneId(s) {
   const parsed = parseDateTime(s)
   if (parsed !== undefined) {
     if (parsed.timeZonedId) {
@@ -160,7 +159,7 @@ export function stringToTimeZoneId(s) {
 // Low-level
 // -------------------------------------------------------------------------------------------------
 
-export function parseDateTime(s) {
+function parseDateTime(s) {
   return constrainIsoDateTimeInternals({
     // { isYear, isoMonth, isoDay,
     //   isoHour, isMinute, isoSecond, etc...
@@ -169,30 +168,30 @@ export function parseDateTime(s) {
   })
 }
 
-export function parseYearMonth(s) {
+function parseYearMonth(s) {
   return constrainIsoDateInternals({
     // { isYear, isoMonth, isoDay
     //   calendar, timeZone }
   })
 }
 
-export function parseMonthDay(s) {
+function parseMonthDay(s) {
   return constrainIsoDateInternals({
     // { isYear, isoMonth, isoDay
     //   calendar, timeZone }
   })
 }
 
-export function parseTime(s) {
+function parseTime(s) {
   return constrainIsoTimeFields({
     // { isoHour, isoMinute, isoSecond, etc... }
   })
 }
 
-export function parseOffsetNanoseconds(s) {
+export function parseOffsetNano(s) {
   // number
 }
 
-export function stringToDurationInternals(s) {
+export function parseDuration(s) {
   // includes sign
 }

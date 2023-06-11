@@ -1,17 +1,17 @@
 import { queryTimeZoneImpl } from '../timeZoneImpl/timeZoneImplQuery'
 import { Calendar } from './calendar'
 import { queryCalendarOps } from './calendarOps'
-import { createTemporalClass, internalIdGetters, returnId } from './class'
-import { createComplexBagRefiner } from './convert'
+import { createTemporalClass, getObjId, idGetters } from './class'
+import { refineComplexBag } from './convert'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
 import { formatOffsetNanoseconds } from './isoFormat'
-import { stringToTimeZoneId } from './isoParse'
+import { parseTimeZoneId } from './isoParse'
 import { toDisambiguation } from './options'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { noop } from './util'
 
-export const timeZoneVitalMethods = {
+export const timeZoneProtocolMethods = {
   getPossibleInstantsFor(impl, plainDateTimeArg) {
     return impl.getPossibleInstantsFor(toPlainDateTimeInternals(plainDateTimeArg))
       .map(createInstant)
@@ -33,10 +33,10 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
   {},
 
   // bagToInternals
-  createComplexBagRefiner('timeZone', Calendar),
+  refineComplexBag.bind(undefined, 'timeZone', Calendar),
 
   // stringToInternals
-  (str) => queryTimeZoneImpl(stringToTimeZoneId(str)),
+  (str) => queryTimeZoneImpl(parseTimeZoneId(str)),
 
   // handleUnusedOptions
   noop,
@@ -44,13 +44,13 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  internalIdGetters,
+  idGetters,
 
   // Methods
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...timeZoneVitalMethods,
+    ...timeZoneProtocolMethods,
 
     getOffsetStringFor(impl, instantArg) {
       return formatOffsetNanoseconds(getImplOffsetNanosecondsFor(impl, instantArg))
@@ -77,7 +77,7 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
 
     getPreviousTransition: getImplTransition.bind(undefined, -1),
 
-    toString: returnId,
+    toString: getObjId,
   },
 )
 

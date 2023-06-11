@@ -10,7 +10,7 @@ import {
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { isoToEpochNano } from './isoMath'
-import { stringToDurationInternals } from './isoParse'
+import { parseDuration } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNanoseconds } from './move'
 import {
@@ -73,7 +73,7 @@ export const [
   refineDurationBag,
 
   // stringToInternals
-  stringToDurationInternals,
+  parseDuration,
 
   // handleUnusedOptions
   noop,
