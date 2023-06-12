@@ -54,6 +54,7 @@ export class DateTimeFormat extends IntlDateTimeFormat {
   const origMethod = IntlDateTimeFormat.prototype[methodName]
 
   if (origMethod) {
+    // TODO: not sufficient for defining method
     DateTimeFormat.prototype[methodName] = function(arg0, arg1) {
       const [formattable0, formattable1, format] = resolveRangeFormattables(this, arg0, arg1)
       return origMethod.call(format, formattable0, formattable1)

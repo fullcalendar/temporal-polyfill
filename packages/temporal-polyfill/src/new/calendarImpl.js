@@ -17,12 +17,11 @@ import {
   yearStatNames,
 } from './calendarFields'
 import {
+  calendarImplDateUntil,
   computeIntlMonthsInYearSpan,
   computeIsoMonthsInYearSpan,
   diffDaysMilli,
-  diffYearMonthDay,
 } from './diff'
-import { durationFieldDefaults } from './durationFields'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import { isoDateFieldNames, isoTimeFieldDefaults } from './isoFields'
 import {
@@ -35,14 +34,13 @@ import {
   computeIsoYearOfWeek,
   epochMilliToIso,
   isoArgsToEpochMilli,
-  isoDaysInWeek,
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
   isoToEpochMilli,
 } from './isoMath'
-import { addDaysMilli, addIntlMonths, addIsoMonths } from './move'
+import { addDaysMilli, addIntlMonths, addIsoMonths, moveDate } from './move'
 import { constrainInt } from './options'
-import { buildWeakMapCache, twoDigit } from './util'
+import { buildWeakMapCache, createLazyMap, mapArrayToProps, twoDigit } from './util'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -81,14 +79,14 @@ class IsoCalendarImpl {
   }
 
   dateFromFields(fields, overflow) {
-    const year = this.readYear(fields)
+    const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
     const day = this.refineDay(fields, month, year, overflow)
     return this.queryIsoFields(year, month, day)
   }
 
   yearMonthFromFields(fields, overflow) {
-    const year = this.readYear(fields)
+    const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
     return this.queryIsoFields(year, month, 1)
   }
@@ -103,7 +101,7 @@ class IsoCalendarImpl {
       ;([year, month] = this.queryYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day))
     } else {
       // year is required
-      year = this.readYear(fields)
+      year = this.refineYear(fields)
       month = this.refineMonth(fields, year, overflow)
     }
 
@@ -111,24 +109,24 @@ class IsoCalendarImpl {
   }
 
   fields(fieldNames) {
-    if (getAllowErasInFields(this) && fieldNames.indexOf('year') !== -1) {
-      return fieldNames.concat(eraYearFieldNames)
+    if (getAllowErasInFields(this) && fieldNames.includes('year')) {
+      return [...fieldNames, ...eraYearFieldNames]
     }
 
     return fieldNames
   }
 
   mergeFields(baseFields, additionalFields) {
-    const merged = Object.assign({}, baseFields)
+    const merged = { ...baseFields }
 
-    removePropSet(merged, additionalFields, monthFieldNames)
+    removeIfAnyProps(merged, additionalFields, monthFieldNames)
 
     if (getAllowErasInFields(this)) {
-      removePropSet(merged, additionalFields, allYearFieldNames)
+      removeIfAnyProps(merged, additionalFields, allYearFieldNames)
     }
 
     if (getErasBeginMidYear(this)) {
-      removePropSet(
+      removeIfAnyProps(
         merged,
         additionalFields,
         monthDayFieldNames,
@@ -142,18 +140,13 @@ class IsoCalendarImpl {
   // Internal Querying
   // -----------------
 
-  // year/month/day already constrained!
-  queryIsoFields(year, month, day) { // return isoDateInternals
+  queryIsoFields(year, month, day) {
     return {
       calendar: this,
       isoYear: year,
       isoMonth: month,
       isoDay: day,
     }
-  }
-
-  queryDateStart(year, month, day) {
-    return isoArgsToEpochMilli(year, month, day)
   }
 
   queryYearMonthDay(isoDateFields) {
@@ -181,80 +174,54 @@ class IsoCalendarImpl {
   }
 
   dateAdd(isoDateFields, durationFields, overflow) {
-    // TODO: move all of this into move.js file?
-
-    const { years, months, weeks, days } = durationFields
-    let ms
-
-    if (years || months) {
-      let [year, month, day] = this.queryYearMonthDay(isoDateFields)
-
-      if (years) {
-        year += years
-        month = constrainInt(month, 1, this.queryMonthsInYear(year), overflow)
-      }
-
-      if (months) {
-        ([year, month] = this.addMonths(year, month, months))
-        day = constrainInt(day, 1, this.queryDaysInMonth(year, month), overflow)
-      }
-
-      ms = this.queryDateStart(year, months, day)
-    } else if (weeks || days) {
-      ms = isoToEpochMilli(isoDateFields)
-    } else {
-      return isoDateFields
-    }
-
-    ms = addDaysMilli(ms, weeks * isoDaysInWeek + days)
-
-    return {
-      calendar: this,
-      ...epochMilliToIso(ms),
-    }
+    return moveDate(this, isoDateFields, durationFields, overflow)
   }
 
   dateUntil(startIsoDateFields, endIsoDateFields, largestUnit) {
-    // TODO: move all of this into diff.js file?
-
-    if (largestUnit <= 'week') { // TODO
-      let weeks = 0
-      let days = diffDaysMilli(
-        isoToEpochMilli(startIsoDateFields),
-        isoToEpochMilli(endIsoDateFields),
-      )
-      const sign = Math.sign(days)
-
-      if (largestUnit === 'day') { // TODO
-        weeks = Math.trunc(days / isoDaysInWeek)
-        days %= isoDaysInWeek
-      }
-
-      return { ...durationFieldDefaults, weeks, days, sign }
-    }
-
-    const yearMonthDayStart = this.queryYearMonthDay(startIsoDateFields)
-    const yearMonthDayEnd = this.queryYearMonthDay(endIsoDateFields)
-    let [years, months, days, sign] = diffYearMonthDay(
-      ...yearMonthDayStart,
-      ...yearMonthDayEnd,
-      this,
-    )
-
-    if (largestUnit === 'month') { // TODO
-      months = this.queryMonthsInYearSpan(yearMonthDayStart[0], years)
-      years = 0
-    }
-
-    return { ...durationFieldDefaults, years, months, days, sign }
-
-    // TODO: only return DateDurationFields
+    return calendarImplDateUntil(this, startIsoDateFields, endIsoDateFields, largestUnit)
   }
 
-  // Field "Refining" (Reading & Constraining)
-  // -----------------------------------------
+  // Field Refining
+  // --------------
 
-  refineMonth(fields, year, overflow) {
+  refineYear(fields) {
+    let { era, eraYear, year } = fields
+    const allowEras = getAllowErasInFields(this)
+
+    if (allowEras && era !== undefined && eraYear !== undefined) {
+      const yearByEra = refineEraYear(this, era, eraYear)
+
+      if (year !== undefined && year !== yearByEra) {
+        throw new RangeError('The year and era/eraYear must agree')
+      }
+
+      year = yearByEra
+    } else if (year === undefined) {
+      throw new RangeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
+    }
+
+    return year
+  }
+
+  refineMonth(
+    fields,
+    year, // optional if known that calendar doesn't support leap months
+    overflow = 'reject',
+  ) {
+    let { month, monthCode } = fields
+
+    if (monthCode !== undefined) {
+      const monthByCode = refineMonthCode(this, monthCode, year, overflow)
+
+      if (month !== undefined && month !== monthByCode) {
+        throw new RangeError('The month and monthCode do not agree')
+      }
+
+      month = monthByCode
+    } else if (month === undefined) {
+      throw new RangeError('Must specify either month or monthCode')
+    }
+
     return constrainInt(
       this.readMonth(fields, year, overflow),
       1,
@@ -271,96 +238,55 @@ class IsoCalendarImpl {
       overflow,
     )
   }
+}
 
-  // Field Reading
-  // -------------
+// Refining Utils
+// --------------
 
-  readYear(fields) {
-    let { era, eraYear, year } = fields
-
-    if (getAllowErasInFields(this) && era !== undefined && eraYear !== undefined) {
-      const yearByEra = this.readYearByEra(era, eraYear)
-
-      if (year !== undefined && year !== yearByEra) {
-        throw new RangeError('The year and era/eraYear must agree')
-      }
-
-      year = yearByEra
-    } else if (year === undefined) {
-      // Will never reach this point for ISO calendar system b/c of required*Fields
-      // TODO: is this true for monthday parsing?
-      throw new RangeError('Must specify year or era/eraYear')
-    }
-
-    return year
+function refineEraYear(calendar, era, eraYear) {
+  const eraOrigins = getEraOrigins(calendar.id)
+  if (eraOrigins === undefined) {
+    throw new RangeError('Does not accept era/eraYear')
   }
 
-  readYearByEra(era, eraYear) {
-    const eraOrigins = getEraOrigins(this.id)
-    if (eraOrigins === undefined) {
-      throw new RangeError('Does not accept era/eraYear')
-    }
-
-    const eraOrigin = eraOrigins[era]
-    if (eraOrigin === undefined) {
-      throw new RangeError('Unknown era')
-    }
-
-    return eraYearToYear(eraYear, eraOrigin)
+  const eraOrigin = eraOrigins[era]
+  if (eraOrigin === undefined) {
+    throw new RangeError('Unknown era')
   }
 
-  readMonth(
-    fields,
-    year, // optional if known that calendar doesn't support leap months
-    overflowForLeap = 'reject',
-  ) {
-    let { month, monthCode } = fields
+  return eraYearToYear(eraYear, eraOrigin)
+}
 
-    if (monthCode !== undefined) {
-      const monthByCode = this.readMonthByCode(monthCode, year, overflowForLeap)
+function refineMonthCode(
+  calendar,
+  monthCode,
+  year, // optional if known that calendar doesn't support leap months
+  overflow = 'reject',
+) {
+  const leapMonth = calendar.queryLeapMonth(year)
+  const [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
+  const month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth)
 
-      if (month !== undefined && month !== monthByCode) {
-        throw new RangeError('The month and monthCode do not agree')
-      }
-
-      month = monthByCode
-    } else if (month === undefined) {
-      throw new RangeError('Must specify either month or monthCode')
+  if (isLeapMonth) {
+    const leapYearMeta = leapYearMetas[getCalendarIdBase(calendar.id)]
+    if (leapYearMeta === undefined) {
+      throw new RangeError('Calendar system doesnt support leap months')
     }
 
-    return month
-  }
-
-  readMonthByCode(
-    monthCode,
-    year, // optional if known that calendar doesn't support leap months
-    overflowForLeap = 'reject',
-  ) {
-    const leapMonth = this.queryLeapMonth(year)
-    const [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-    const month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth)
-
-    if (isLeapMonth) {
-      const leapYearMeta = leapYearMetas[getCalendarIdBase(this.id)]
-      if (leapYearMeta === undefined) {
-        throw new RangeError('Calendar system doesnt support leap months')
-      }
-
-      if (
-        leapYearMeta > 0
-          ? month > leapYearMeta // max possible leap month
-          : month !== -leapYearMeta // (negative) constant leap month
-      ) {
-        throw new RangeError('Invalid leap-month month code')
-      }
-
-      if (overflowForLeap === 'reject' && month !== leapMonth) {
-        throw new RangeError('Invalid leap-month month code')
-      }
+    if (
+      leapYearMeta > 0
+        ? month > leapYearMeta // max possible leap month
+        : month !== -leapYearMeta // (negative) constant leap month
+    ) {
+      throw new RangeError('Invalid leap-month month code')
     }
 
-    return month
+    if (overflow === 'reject' && month !== leapMonth) {
+      throw new RangeError('Invalid leap-month month code')
+    }
   }
+
+  return month
 }
 
 // Prototype Trickery
@@ -371,7 +297,6 @@ const isoYearQueryMethods = {
   queryDaysInYear: computeIsoDaysInYear,
   queryIsLeapYear: computeIsoIsLeapYear,
   queryMonthsInYear: computeIsoMonthsInYear,
-  queryMonthsInYearSpan: computeIsoMonthsInYearSpan,
 }
 
 Object.assign(IsoCalendarImpl.prototype, {
@@ -379,7 +304,9 @@ Object.assign(IsoCalendarImpl.prototype, {
   weekOfYear: computeIsoWeekOfYear,
   yearOfWeek: computeIsoYearOfWeek,
   addMonths: addIsoMonths,
+  queryDateStart: isoArgsToEpochMilli,
   queryDaysInMonth: computeIsoDaysInMonth,
+  queryMonthsInYearSpan: computeIsoMonthsInYearSpan,
   ...isoYearQueryMethods,
 })
 
@@ -440,10 +367,10 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   constructor(id) {
     super(id)
 
-    const epochMillisecondsToIntlFields = createEpochMillisecondsToIntlFields(id)
-    const [queryYear, yearAtEpoch] = createIntlMonthCache(epochMillisecondsToIntlFields)
+    const epochMilliToIntlFields = createEpochMilliToIntlFields(id)
+    const [queryYear, yearAtEpoch] = createIntlMonthCache(epochMilliToIntlFields)
 
-    this.isoDateFieldsToIntl = createIntlFieldCache(epochMillisecondsToIntlFields)
+    this.isoDateFieldsToIntl = createIntlFieldCache(epochMilliToIntlFields)
     this.queryYear = queryYear
     this.yearAtEpoch = yearAtEpoch
   }
@@ -469,8 +396,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   // Internal Querying
   // -----------------
 
-  // year/month/day already constrained!
-  queryIsoFields(year, month, day) { // returns isoDateInternals
+  queryIsoFields(year, month, day) {
     return {
       calendar: this,
       ...epochMilliToIso(this.queryDateStart(year, month, day)),
@@ -484,18 +410,16 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   }
 
   queryIsLeapYear(year) {
-    const daysPrev = this.queryDaysInYear(year - 1)
     const days = this.queryDaysInYear(year)
-    const daysNext = this.queryDaysInYear(year + 1)
-    return days > daysPrev && days > daysNext
+    return days > this.queryDaysInYear(year - 1) &&
+      days > this.queryDaysInYear(year + 1)
   }
 
   queryYearMonthDay(isoDateFields) {
     const intlFields = this.isoDateFieldsToIntl(isoDateFields)
-    const { year } = intlFields
-    const { monthStrToNum } = this.queryYear(year)
-    const month = monthStrToNum[intlFields.month]
-    return [year, month, intlFields.day]
+    const { year, month, day } = intlFields
+    const { monthStrToIndex } = this.queryYear(year)
+    return [year, monthStrToIndex[month] + 1, day]
   }
 
   queryYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day) {
@@ -532,8 +456,8 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   }
 
   queryMonthsInYear(year) {
-    const { monthEpochMilliseconds } = this.queryYear(year)
-    return monthEpochMilliseconds.length
+    const { monthEpochMilli } = this.queryYear(year)
+    return monthEpochMilli.length
   }
 
   queryMonthsInYearSpan(yearStart, yearDelta) {
@@ -541,30 +465,30 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   }
 
   queryDaysInMonth(year, month) {
-    const { monthEpochMilliseconds } = this.queryYear(year)
+    const { monthEpochMilli } = this.queryYear(year)
     let nextMonth = month + 1
-    let nextMonthEpochMilliseconds = monthEpochMilliseconds
+    let nextMonthEpochMilli = monthEpochMilli
 
-    if (nextMonth > monthEpochMilliseconds.length) {
+    if (nextMonth > monthEpochMilli.length) {
       nextMonth = 1
-      nextMonthEpochMilliseconds = this.queryYear(year + 1).monthEpochMilliseconds
+      nextMonthEpochMilli = this.queryYear(year + 1).monthEpochMilli
     }
 
     return diffDaysMilli(
-      monthEpochMilliseconds[month - 1],
-      nextMonthEpochMilliseconds[nextMonth - 1],
+      monthEpochMilli[month - 1],
+      nextMonthEpochMilli[nextMonth - 1],
     )
   }
 
   queryDateStart(year, month = 1, day = 1) {
     return addDaysMilli(
-      this.queryYear(year).monthEpochMilliseconds[month - 1],
+      this.queryYear(year).monthEpochMilli[month - 1],
       day - 1,
     )
   }
 
   queryMonthStrs(year) {
-    return Object.keys(this.queryYear(year).monthStrToNum)
+    return Object.keys(this.queryYear(year).monthStrToIndex)
   }
 }
 
@@ -572,7 +496,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
 // ------------------
 
 // era/eraYear/year/day
-allYearFieldNames.concat('day').forEach((dateFieldName) => {
+[...allYearFieldNames, 'day'].forEach((dateFieldName) => {
   IntlCalendarImpl.prototype[dateFieldName] = function(isoDateFields) {
     return this.isoDateFieldsToIntl(isoDateFields)[dateFieldName]
   }
@@ -587,7 +511,9 @@ const calendarImplClasses = {
   [japaneseCalendarId]: JapaneseCalendarImpl,
 }
 
-const calendarImplCache = {}
+const queryCalendarImplWithClass = createLazyMap((calendarId, CalendarImplClass) => {
+  return new CalendarImplClass(calendarId)
+})
 
 export function queryCalendarImpl(calendarId) {
   const calendarIdBase = getCalendarIdBase(calendarId)
@@ -597,31 +523,38 @@ export function queryCalendarImpl(calendarId) {
     calendarId = calendarIdBase
   }
 
-  // TODO: lazy cache util
-  return calendarImplCache[calendarId] || (
-    calendarImplCache[calendarId] = new (CalendarImplClass || IntlCalendarImpl)(calendarId)
-  )
+  return queryCalendarImplWithClass(calendarId, CalendarImplClass || IntlCalendarImpl)
 }
 
 // IntlFields Querying
 // -------------------------------------------------------------------------------------------------
 
-function createIntlFieldCache(epochMillisecondsToIntlFields) {
+/*
+interface IntlFields {
+  era: string
+  eraYear: number
+  year: number
+  month: string
+  day: number
+}
+*/
+
+function createIntlFieldCache(epochMilliToIntlFields) {
   return buildWeakMapCache((isoDateFields) => {
-    const epochMilliseconds = isoToEpochMilli(isoDateFields)
-    return epochMillisecondsToIntlFields(epochMilliseconds)
+    const epochMilli = isoToEpochMilli(isoDateFields)
+    return epochMilliToIntlFields(epochMilli)
   })
 }
 
 function createJapaneseFieldCache() {
-  const epochMillisecondsToIntlFields = createEpochMillisecondsToIntlFields(japaneseCalendarId)
+  const epochMilliToIntlFields = createEpochMilliToIntlFields(japaneseCalendarId)
   const primaryEraMilli = isoArgsToEpochMilli(1868, 9, 8)
 
   return buildWeakMapCache((isoDateFields) => {
-    const epochMilliseconds = isoToEpochMilli(isoDateFields)
-    const intlFields = epochMillisecondsToIntlFields(epochMilliseconds)
+    const epochMilli = isoToEpochMilli(isoDateFields)
+    const intlFields = epochMilliToIntlFields(epochMilli)
 
-    if (epochMilliseconds < primaryEraMilli) {
+    if (epochMilli < primaryEraMilli) {
       intlFields.era = computeGregoryEra(isoDateFields.isoYear)
       intlFields.eraYear = computeGregoryEraYear(isoDateFields.isoYear)
     }
@@ -630,15 +563,15 @@ function createJapaneseFieldCache() {
   })
 }
 
-function createEpochMillisecondsToIntlFields(calendarId) {
+function createEpochMilliToIntlFields(calendarId) {
   const intlFormat = buildIntlFormat(calendarId)
 
   if (!isCalendarIdsRelated(calendarId, intlFormat.resolvedOptions().calendar)) {
     throw new RangeError('Invalid calendar: ' + calendarId)
   }
 
-  return (epochMilliseconds) => {
-    const intlParts = hashIntlFormatParts(intlFormat, epochMilliseconds)
+  return (epochMilli) => {
+    const intlParts = hashIntlFormatParts(intlFormat, epochMilli)
     return parseIntlParts(intlParts, calendarId)
   }
 }
@@ -646,12 +579,11 @@ function createEpochMillisecondsToIntlFields(calendarId) {
 function parseIntlParts(intlParts, calendarId) {
   return {
     ...parseIntlYear(intlParts, calendarId),
-    month: intlParts.month, // a short month string!
+    month: intlParts.month, // a short month string
     day: parseInt(intlParts.day),
   }
 }
 
-// best place for this?
 export function parseIntlYear(intlParts, calendarId) {
   let year = parseInt(intlParts.relatedYear || intlParts.year)
   let era
@@ -661,15 +593,13 @@ export function parseIntlYear(intlParts, calendarId) {
     const eraOrigins = getEraOrigins(calendarId)
     if (eraOrigins !== undefined) {
       era = normalizeShortEra(intlParts.era)
-      year = eraYearToYear(eraYear = year, eraOrigins[era] || 0)
+      eraYear = year // TODO: will this get optimized to next line?
+      year = eraYearToYear(eraYear, eraOrigins[era] || 0)
     }
   }
 
   return { era, eraYear, year }
 }
-
-// DateTimeFormat Utils
-// -------------------------------------------------------------------------------------------------
 
 function buildIntlFormat(calendarId) {
   return new IntlDateTimeFormat(standardCalendarId, {
@@ -685,54 +615,43 @@ function buildIntlFormat(calendarId) {
 // Intl Month Cache
 // -------------------------------------------------------------------------------------------------
 
-function createIntlMonthCache(epochMillisecondsToIntlFields) {
-  const yearAtEpoch = epochMillisecondsToIntlFields(0)
+function createIntlMonthCache(epochMilliToIntlFields) {
+  const yearAtEpoch = epochMilliToIntlFields(0).year
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
-  const yearCache = {}
-
-  function queryYear(year) {
-    return yearCache[year] || ( // TODO: reusable pattern for this?
-      yearCache[year] = buildYear(year)
-    )
-  }
+  const queryYear = createLazyMap(buildYear)
 
   function buildYear(year) {
-    let ms = isoArgsToEpochMilli(year - yearCorrection)
+    let milli = isoArgsToEpochMilli(year - yearCorrection)
     let intlFields
-    const msReversed = []
+    const milliReversed = []
     const monthStrsReversed = []
 
     // move beyond current year
     do {
-      ms = addDaysMilli(ms, 400)
-    } while ((intlFields = epochMillisecondsToIntlFields(ms)).year <= year)
+      milli = addDaysMilli(milli, 400)
+    } while ((intlFields = epochMilliToIntlFields(milli)).year <= year)
 
     do {
       // move to start-of-month
-      ms = addDaysMilli(ms, 1 - intlFields.day)
+      milli = addDaysMilli(milli, 1 - intlFields.day)
 
       // only record the epochMilli if current year
       if (intlFields.year === year) {
-        msReversed.push(ms)
+        milliReversed.push(milli)
         monthStrsReversed.push(intlFields.month)
       }
 
       // move to last day of previous month
-      ms = addDaysMilli(ms, -1)
-    } while ((intlFields = epochMillisecondsToIntlFields(ms)).year >= year)
+      milli = addDaysMilli(milli, -1)
+    } while ((intlFields = epochMilliToIntlFields(milli)).year >= year)
 
     return {
-      monthEpochMilliseconds: msReversed.reverse(),
-      monthStrToNum: monthStrsReversed.reverse().reduce(accumMonthStrToNum, {}),
+      monthEpochMilli: milliReversed.reverse(),
+      monthStrToIndex: mapArrayToProps(monthStrsReversed.reverse()),
     }
   }
 
   return [queryYear, yearAtEpoch]
-}
-
-function accumMonthStrToNum(accum, monthStr, index) {
-  accum[monthStr] = index + 1
-  return accum
 }
 
 // Era Utils
@@ -759,8 +678,10 @@ function normalizeShortEra(formattedEra) {
 // Month Utils
 // -------------------------------------------------------------------------------------------------
 
+const monthCodeRegExp = /^M(\d{2})(L?)$/
+
 function parseMonthCode(monthCode) {
-  const m = monthCode.match(/^M(\d{2})(L?)$/)
+  const m = monthCodeRegExp.exec(monthCode)
   if (!m) {
     throw new RangeError('Invalid monthCode format')
   }
@@ -773,7 +694,7 @@ function parseMonthCode(monthCode) {
 
 function refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth) {
   return monthCodeNumber + (
-    (isLeapMonth || (leapMonth && monthCodeNumber >= leapMonth)) // TODO: double check this
+    (isLeapMonth || (leapMonth && monthCodeNumber >= leapMonth))
       ? 1
       : 0
   )
@@ -782,7 +703,7 @@ function refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth) {
 function formatMonthCode(month, leapMonth) {
   return 'M' + twoDigit(
     month - (
-      (leapMonth && month >= leapMonth) // TODO: double check this
+      (leapMonth && month >= leapMonth)
         ? 1
         : 0
     ),
@@ -803,7 +724,7 @@ function getCalendarIdBase(calendarId) {
 // General Utils
 // -------------------------------------------------------------------------------------------------
 
-function removePropSet(
+function removeIfAnyProps(
   targetObj,
   testObj,
   testPropNames,

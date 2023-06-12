@@ -197,7 +197,7 @@ function convertToIso(
   extra = refineFields(extra, extraFieldNames, getRequiredDateFields(calendar))
 
   let mergedFields = calendar.mergeFields(input, extra)
-  const mergedFieldNames = removeDuplicateStrings(inputFieldNames.concat(extraFieldNames))
+  const mergedFieldNames = removeDuplicateStrings([...inputFieldNames, ...extraFieldNames])
   mergedFields = refineFields(mergedFields, mergedFieldNames, [])
 
   return calendar.dateFromFields(mergedFields)
@@ -382,7 +382,7 @@ function mergeCalendarFields(
   return refineFields(fields, fieldNames, []) // guard against ridiculous .mergeField results
 }
 
-function getBagCalendarOps(bag) {
+function getBagCalendarOps(bag) { // defaults to ISO
   return extractBagCalendarOps(bag) || queryCalendarImpl(isoCalendarId)
 }
 

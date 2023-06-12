@@ -1,8 +1,6 @@
 
 // in general, prefer .bind over macro functions
 
-// always prefer [...a] over [].concat(a)
-
 // monitor use of floor/trunc and modding. many are wrong
 
 export function isObjectLike() {

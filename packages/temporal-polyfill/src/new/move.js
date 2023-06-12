@@ -4,10 +4,14 @@ import {
   durationTimeFieldsToIso,
 } from './durationFields'
 import {
+  epochMilliToIso,
+  isoDaysInWeek,
   isoMonthsInYear,
   isoTimeFieldsToNano,
+  isoToEpochMilli,
   nanoToIsoTimeFields,
 } from './isoMath'
+import { constrainInt } from './options'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 
 export function addDaysMilli(epochMilli, milli) { // moveEpochMilliByDays
@@ -79,6 +83,38 @@ export function moveDateTime(
   return {
     ...movedIsoDateFields,
     ...movedIsoTimeFields,
+  }
+}
+
+export function moveDate(calendar, isoDateFields, durationFields, overflow) {
+  const { years, months, weeks, days } = durationFields
+  let ms
+
+  if (years || months) {
+    let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)
+
+    if (years) {
+      year += years
+      month = constrainInt(month, 1, calendar.queryMonthsInYear(year), overflow)
+    }
+
+    if (months) {
+      ([year, month] = calendar.addMonths(year, month, months))
+      day = constrainInt(day, 1, calendar.queryDaysInMonth(year, month), overflow)
+    }
+
+    ms = calendar.queryDateStart(year, month, day)
+  } else if (weeks || days) {
+    ms = isoToEpochMilli(isoDateFields)
+  } else {
+    return isoDateFields
+  }
+
+  ms = addDaysMilli(ms, weeks * isoDaysInWeek + days)
+
+  return {
+    calendar,
+    ...epochMilliToIso(ms),
   }
 }
 

@@ -1,7 +1,10 @@
+import { durationFieldDefaults } from './durationFields'
 import { pluckIsoTimeFields } from './isoFields'
 import {
+  isoDaysInWeek,
   isoMonthsInYear,
   isoTimeFieldsToNano,
+  isoToEpochMilli,
   isoToEpochNano,
   nanoInUtcDay,
   nanosecondsToTimeDuration,
@@ -101,7 +104,7 @@ export function diffZonedEpochNanoseconds(
 }
 
 export function diffDateTimes(
-  calendar,
+  calendar, // calendarOps
   startIsoFields,
   endIsoFields,
   largestUnit,
@@ -191,6 +194,44 @@ export function diffDates(
     roundingIncrement,
     largestUnit,
   )
+}
+
+export function calendarImplDateUntil( // no rounding
+  calendar,
+  startIsoDateFields,
+  endIsoDateFields,
+  largestUnit,
+) {
+  if (largestUnit <= 'week') { // TODO
+    let weeks = 0
+    let days = diffDaysMilli(
+      isoToEpochMilli(startIsoDateFields),
+      isoToEpochMilli(endIsoDateFields),
+    )
+    const sign = Math.sign(days)
+
+    if (largestUnit === 'week') { // TODO
+      weeks = Math.trunc(days / isoDaysInWeek)
+      days %= isoDaysInWeek
+    }
+
+    return { ...durationFieldDefaults, weeks, days, sign }
+  }
+
+  const yearMonthDayStart = calendar.queryYearMonthDay(startIsoDateFields)
+  const yearMonthDayEnd = calendar.queryYearMonthDay(endIsoDateFields)
+  let [years, months, days, sign] = diffYearMonthDay(
+    ...yearMonthDayStart,
+    ...yearMonthDayEnd,
+    calendar, // TODO: make first param?
+  )
+
+  if (largestUnit === 'month') { // TODO
+    months += calendar.queryMonthsInYearSpan(yearMonthDayStart[0], years)
+    years = 0
+  }
+
+  return { ...durationFieldDefaults, years, months, days, sign }
 }
 
 export function diffTimes() {

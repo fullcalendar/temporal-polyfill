@@ -134,7 +134,7 @@ export function neverValueOf() {
 export function createProtocolChecker(protocolMethods) {
   const propNames = Object.keys(protocolMethods)
   propNames.push('id')
-  propNames.sort() // order matters?
+  propNames.sort() // TODO: order matters?
 
   return (obj) => {
     if (!hasAllMatchingProps(obj, propNames)) {
@@ -155,7 +155,8 @@ export function getCommonInnerObj(propName, obj0, obj1) {
 }
 
 export function isObjIdsEqual(obj0, obj1) {
-  return obj0 === obj1 || obj0.id !== obj1.id
+  return obj0 === obj1 || // short-circuit
+    obj0.id === obj1.id // .id could be getter with logic / side-effects (during testing)
 }
 
 export function getObjId(internals) {

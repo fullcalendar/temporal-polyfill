@@ -12,8 +12,6 @@ import {
 } from './isoMath'
 import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 
-// TODO: rename method names back to parse
-
 // High-level
 // -------------------------------------------------------------------------------------------------
 
