@@ -83,7 +83,7 @@ export const [
         moveTime(
           internals,
           toDurationInternals(durationArg),
-        ),
+        )[0],
       )
     },
 
@@ -92,7 +92,7 @@ export const [
         moveTime(
           internals,
           negateDurationFields(toDurationInternals(durationArg)),
-        ),
+        )[0],
       )
     },
 

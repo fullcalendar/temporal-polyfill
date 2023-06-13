@@ -1,7 +1,9 @@
 import {
+  durationFieldsToNano,
   durationHasDateParts,
   durationTimeFieldDefaults,
   durationTimeFieldsToIso,
+  durationTimeFieldsToIsoStrict,
 } from './durationFields'
 import {
   epochMilliToIso,
@@ -13,33 +15,24 @@ import {
 } from './isoMath'
 import { constrainInt } from './options'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+import { hourIndex, milliInDay, nanoInUtcDay } from './units'
 
-export function addDaysMilli(epochMilli, milli) { // moveEpochMilliByDays
-}
-
-export function addDaysToIsoFields() {
-  // short-circuit if nothing to add
-}
-
-export function moveEpochNano(epochNanoseconds, durationFields) {
-  return epochNanoseconds.addNumber(onlyDurationTimeFieldsToIso(durationFields))
-}
+// Epoch
+// -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
   calendar,
   timeZone,
-  epochNanoseconds,
+  epochNano,
   durationFields,
   overflowHandling,
 ) {
-  const durationTimeNanoseconds = isoTimeFieldsToNano(
-    durationTimeFieldsToIso(durationFields),
-  )
+  const durationTimeNano = isoTimeFieldsToNano(durationTimeFieldsToIso(durationFields))
 
   if (!durationHasDateParts(durationFields)) {
-    epochNanoseconds = epochNanoseconds.addNumber(durationTimeNanoseconds)
+    epochNano = epochNano.addNumber(durationTimeNano)
   } else {
-    const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNanoseconds)
+    const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
     const movedIsoDateFields = calendar.dateAdd(
       isoDateTimeFields,
       {
@@ -52,12 +45,19 @@ export function moveZonedEpochNano(
       ...isoDateTimeFields, // time parts
       ...movedIsoDateFields, // date parts
     }
-    epochNanoseconds = getSingleInstantFor(timeZone, movedIsoDateTimeFields)
-      .addNumber(durationTimeNanoseconds)
+    epochNano = getSingleInstantFor(timeZone, movedIsoDateTimeFields)
+      .addNumber(durationTimeNano)
   }
 
-  return epochNanoseconds
+  return epochNano
 }
+
+export function moveEpochNano(epochNanoseconds, durationFields) {
+  return epochNanoseconds.addNumber(durationTimeFieldsToIsoStrict(durationFields))
+}
+
+// Date & Time
+// -------------------------------------------------------------------------------------------------
 
 export function moveDateTime(
   calendar,
@@ -65,16 +65,13 @@ export function moveDateTime(
   durationFields,
   overflowHandling,
 ) {
-  const [movedIsoTimeFields, dayDelta] = addIsoTimeFields(
-    isoDateTimeFields,
-    durationTimeFieldsToIso(durationFields),
-  )
+  const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
   const movedIsoDateFields = calendar.dateAdd(
     isoDateTimeFields, // only date parts will be used
     {
       ...durationFields, // date parts
-      ...durationTimeFieldDefaults, // time parts (must be zero so calendar doesn't round)???
+      ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
     },
     overflowHandling,
@@ -87,8 +84,12 @@ export function moveDateTime(
 }
 
 export function moveDate(calendar, isoDateFields, durationFields, overflow) {
-  const { years, months, weeks, days } = durationFields
-  let ms
+  let { years, months, weeks, days } = durationFields
+  let epochMilli
+
+  // convert time fields to days
+  days += durationFieldsToNano(durationFields, hourIndex)
+    .divTruncMod(nanoInUtcDay)[0].toNumber()
 
   if (years || months) {
     let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)
@@ -103,30 +104,39 @@ export function moveDate(calendar, isoDateFields, durationFields, overflow) {
       day = constrainInt(day, 1, calendar.queryDaysInMonth(year, month), overflow)
     }
 
-    ms = calendar.queryDateStart(year, month, day)
+    epochMilli = calendar.queryDateStart(year, month, day)
   } else if (weeks || days) {
-    ms = isoToEpochMilli(isoDateFields)
+    epochMilli = isoToEpochMilli(isoDateFields)
   } else {
     return isoDateFields
   }
 
-  ms = addDaysMilli(ms, weeks * isoDaysInWeek + days)
+  epochMilli += (weeks * isoDaysInWeek + days) * milliInDay
 
   return {
     calendar,
-    ...epochMilliToIso(ms),
+    ...epochMilliToIso(epochMilli),
   }
 }
 
-export function moveTime(isoTimeFields, durationFields) {
-  const [movedIsoTimeFields] = addIsoTimeFields(
-    isoTimeFields,
-    onlyDurationTimeFieldsToIso(durationFields),
-  )
-  return movedIsoTimeFields
+export function moveDateByDays(isoDateFields, days) {
+  if (days) {
+    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields) + days * milliInDay)
+  }
+  return isoDateFields
 }
 
-export function addIsoMonths(year, month, monthDelta) {
+export function moveTime(isoTimeFields, durationFields) {
+  return nanoToIsoTimeAndDay(
+    isoTimeFieldsToNano(isoTimeFields) +
+    isoTimeFieldsToNano(durationTimeFieldsToIsoStrict(durationFields)),
+  )
+}
+
+// Calendar-related Utils
+// -------------------------------------------------------------------------------------------------
+
+export function moveByIsoMonths(year, month, monthDelta) {
   year += Math.trunc(monthDelta / isoMonthsInYear)
   month += monthDelta % isoMonthsInYear
 
@@ -141,7 +151,7 @@ export function addIsoMonths(year, month, monthDelta) {
   return [year, month]
 }
 
-export function addIntlMonths(year, month, monthDelta, calendarImpl) {
+export function moveByIntlMonths(year, month, monthDelta, calendarImpl) {
   month += monthDelta
 
   if (monthDelta < 0) {
@@ -163,24 +173,4 @@ export function addIntlMonths(year, month, monthDelta, calendarImpl) {
   }
 
   return [year, month]
-}
-
-// Epoch/Time Utils
-// -------------------------------------------------------------------------------------------------
-
-function addIsoTimeFields(isoTimeFields0, isoTimeFields1) {
-  return nanoToIsoTimeAndDay(
-    isoTimeFieldsToNano(isoTimeFields0) +
-    isoTimeFieldsToNano(isoTimeFields1),
-  )
-}
-
-// Utils
-// -------------------------------------------------------------------------------------------------
-
-function onlyDurationTimeFieldsToIso(durationFields) {
-  if (durationHasDateParts(durationFields)) {
-    throw new RangeError('Cant have date parts')
-  }
-  return durationTimeFieldsToIso(durationFields)
 }

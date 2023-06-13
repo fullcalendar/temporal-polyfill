@@ -38,8 +38,9 @@ import {
   isoEpochOriginYear,
   isoToEpochMilli,
 } from './isoMath'
-import { addDaysMilli, addIntlMonths, addIsoMonths, moveDate } from './move'
+import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { constrainInt } from './options'
+import { milliInDay } from './units'
 import { buildWeakMapCache, createLazyMap, mapArrayToProps, twoDigit } from './utils'
 
 // Base ISO Calendar
@@ -303,7 +304,7 @@ Object.assign(IsoCalendarImpl.prototype, {
   dayOfWeek: computeIsoDayOfWeek,
   weekOfYear: computeIsoWeekOfYear,
   yearOfWeek: computeIsoYearOfWeek,
-  addMonths: addIsoMonths,
+  addMonths: moveByIsoMonths,
   queryDateStart: isoArgsToEpochMilli,
   queryDaysInMonth: computeIsoDaysInMonth,
   queryMonthsInYearSpan: computeIsoMonthsInYearSpan,
@@ -390,7 +391,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   }
 
   addMonths(year, month, monthDelta) {
-    return addIntlMonths(year, month, monthDelta, this)
+    return moveByIntlMonths(year, month, monthDelta, this)
   }
 
   // Internal Querying
@@ -481,10 +482,8 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   }
 
   queryDateStart(year, month = 1, day = 1) {
-    return addDaysMilli(
-      this.queryYear(year).monthEpochMilli[month - 1],
-      day - 1,
-    )
+    return this.queryYear(year).monthEpochMilli[month - 1] +
+      (day - 1) * milliInDay
   }
 
   queryMonthStrs(year) {
@@ -621,29 +620,29 @@ function createIntlMonthCache(epochMilliToIntlFields) {
   const queryYear = createLazyMap(buildYear)
 
   function buildYear(year) {
-    let milli = isoArgsToEpochMilli(year - yearCorrection)
+    let epochMilli = isoArgsToEpochMilli(year - yearCorrection)
     let intlFields
     const milliReversed = []
     const monthStrsReversed = []
 
     // move beyond current year
     do {
-      milli = addDaysMilli(milli, 400)
-    } while ((intlFields = epochMilliToIntlFields(milli)).year <= year)
+      epochMilli += 400 * milliInDay
+    } while ((intlFields = epochMilliToIntlFields(epochMilli)).year <= year)
 
     do {
       // move to start-of-month
-      milli = addDaysMilli(milli, 1 - intlFields.day)
+      epochMilli += (1 - intlFields.day) * milliInDay
 
       // only record the epochMilli if current year
       if (intlFields.year === year) {
-        milliReversed.push(milli)
+        milliReversed.push(epochMilli)
         monthStrsReversed.push(intlFields.month)
       }
 
       // move to last day of previous month
-      milli = addDaysMilli(milli, -1)
-    } while ((intlFields = epochMilliToIntlFields(milli)).year >= year)
+      epochMilli -= milliInDay
+    } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
     return {
       monthEpochMilli: milliReversed.reverse(),

@@ -9,7 +9,7 @@ import {
 } from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
 import { isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './isoMath'
-import { addDaysToIsoFields } from './move'
+import { moveDateByDays } from './move'
 import { computeNanosecondsInDay } from './timeZoneOps'
 import { dayIndex, nanoInUtcDay, nanoIndex, unitIndexToNano, weekIndex } from './units'
 import { identityFunc } from './utils'
@@ -53,7 +53,7 @@ export function roundIsoDateTimeFields(
   }
 
   return {
-    ...addDaysToIsoFields(isoDateTimeFields, dayDelta),
+    ...moveDateByDays(isoDateTimeFields, dayDelta),
     ...isoTimeFields,
   }
 }

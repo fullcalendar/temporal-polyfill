@@ -12,7 +12,7 @@ import {
   epochNanoToIso,
   isoToEpochNano,
 } from './isoMath'
-import { addDaysToIsoFields } from './move'
+import { moveDateByDays } from './move'
 import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
@@ -56,7 +56,7 @@ export function computeNanosecondsInDay(
 ) {
   isoDateFields = { ...isoDateFields, ...isoTimeFieldDefaults }
   const epochNano0 = getSingleInstantFor(timeZoneOps, isoDateFields)
-  const epochNano1 = getSingleInstantFor(timeZoneOps, addDaysToIsoFields(isoDateFields, 1))
+  const epochNano1 = getSingleInstantFor(timeZoneOps, moveDateByDays(isoDateFields, 1))
   return epochNano1.sub(epochNano0).toNumber()
 }
 

@@ -12,7 +12,7 @@ import {
   isoToEpochNano,
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
-import { addDaysToIsoFields, moveDateTime, moveZonedEpochNano } from './move'
+import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
 import { roundLargeNano, roundNano, roundRelativeDuration } from './round'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
@@ -59,7 +59,7 @@ export function diffDateTimes(
   // move start-fields forward so time-diff-sign matches date-diff-sign
   if (timeSign === -sign) {
     midIsoFields = {
-      ...addDaysToIsoFields(startIsoFields, sign),
+      ...moveDateByDays(startIsoFields, sign),
       ...pluckIsoTimeFields(startIsoFields),
     }
     timeNano += nanoInUtcDay
@@ -212,7 +212,7 @@ export function diffZonedEpochNano(
 
   if (midSign === -sign) {
     midIsoFields = {
-      ...addDaysToIsoFields(endIsoFields, -sign),
+      ...moveDateByDays(endIsoFields, -sign),
       ...startIsoTimeFields,
     }
     midEpochNano = isoToZonedEpochNano(midIsoFields)

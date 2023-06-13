@@ -35,14 +35,14 @@ export class LargeInt {
   }
 
   divTruncMod(divisor) {
-    let [largeInt, remainder] = this.divFloorMod(divisor)
+    let [fullUnits, remainder] = this.divFloorMod(divisor)
 
-    if (largeInt.computeSign() === -1 && remainder) {
-      largeInt = largeInt.addNumber(1)
+    if (fullUnits.computeSign() === -1 && remainder) {
+      fullUnits = fullUnits.addNumber(1)
       remainder -= divisor
     }
 
-    return [largeInt, remainder]
+    return [fullUnits, remainder]
   }
 
   /*

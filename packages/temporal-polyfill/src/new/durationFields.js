@@ -13,6 +13,7 @@ import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './util
 // -------------------------------------------------------------------------------------------------
 
 // Ordered by ascending size
+// TODO: derive durationFieldNamesAsc from unitNamesAsc, and use zipWithSingleValue w/ refiner func?
 const durationTimeFieldRefiners = {
   nanoseconds: toIntegerWithoutRounding,
   microseconds: toIntegerWithoutRounding,
@@ -78,6 +79,13 @@ export function updateDurationFieldsSign(fields) {
 
 export function durationTimeFieldsToIso(durationTimeFields) {
   return remapProps(durationTimeFields, durationTimeFieldNames, isoTimeFieldNames)
+}
+
+export function durationTimeFieldsToIsoStrict(durationFields) {
+  if (durationHasDateParts(durationFields)) {
+    throw new RangeError('Operation not allowed')
+  }
+  return durationTimeFieldsToIso(durationFields)
 }
 
 // Field Math

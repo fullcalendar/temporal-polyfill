@@ -56,9 +56,11 @@ export function givenFieldsToLargeNano(fields, unitIndex, fieldNames) {
 
   for (; unitIndex >= nanoIndex; unitIndex--) {
     const divisor = unitIndexToNano[unitIndex]
-    largeNano = largeNano.addLargeInt(
-      numberToLargeInt(fields[fieldNames[unitIndex]]).mult(divisor),
-    )
+    const fieldValue = fields[fieldNames[unitIndex]]
+
+    if (fieldValue) {
+      largeNano = largeNano.addLargeInt(numberToLargeInt(fieldValue).mult(divisor))
+    }
   }
 
   return largeNano
@@ -69,7 +71,9 @@ export function givenFieldsToNano(fields, unitIndex, fieldNames) {
 
   for (; unitIndex >= nanoIndex; unitIndex--) {
     const divisor = unitIndexToNano[unitIndex]
-    nano += fields[fieldNames[unitIndex]] * divisor
+    const fieldValue = fields[fieldNames[unitIndex]]
+
+    nano += fieldValue * divisor
   }
 
   return nano
@@ -80,6 +84,7 @@ export function nanoToGivenFields(nano, unitIndex, fieldNames) {
 
   for (; unitIndex >= nanoIndex; unitIndex--) {
     const divisor = unitIndexToNano[unitIndex]
+
     fields[fieldNames[unitIndex]] = Math.trunc(nano / divisor)
     nano %= divisor
   }
