@@ -89,7 +89,7 @@ export class IntlTimeZoneImpl {
 
 function createIntlTimeZoneStore(computeOffsetSec) {
   const getSample = createLazyMap(computeOffsetSec) // always given startEpochSec/endEpochSec
-  const getSplit = createLazyMap((startEpochSec) => [startEpochSec, startEpochSec + periodDur])
+  const getSplit = createLazyMap((startEpochSec, endEpochSec) => [startEpochSec, endEpochSec])
   let minTransition = minPossibleTransition
   let maxTransition = maxPossibleTransition
 
@@ -127,7 +127,7 @@ function createIntlTimeZoneStore(computeOffsetSec) {
       return startOffsetSec
     }
 
-    const split = getSplit(startEpochSec)
+    const split = getSplit(startEpochSec, endEpochSec)
     return pinch(split, startOffsetSec, endOffsetSec, epochSec)
   }
 
@@ -148,7 +148,7 @@ function createIntlTimeZoneStore(computeOffsetSec) {
       const endOffsetSec = getSample(endEpochSec)
 
       if (startOffsetSec !== endOffsetSec) {
-        const split = getSplit(startEpochSec)
+        const split = getSplit(startEpochSec, endEpochSec)
         pinch(split, startOffsetSec, endOffsetSec)
         const transitionEpochSec = split[0]
 
