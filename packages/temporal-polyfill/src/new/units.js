@@ -42,9 +42,8 @@ export const yearIndex = 9
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-// TODO: rename to 'given'
 
-export function arbitraryFieldsToLargeNano(fields, unitIndex, fieldNames) {
+export function givenFieldsToLargeNano(fields, unitIndex, fieldNames) {
   let largeNano = new LargeInt(0, 0)
 
   for (; unitIndex >= nanoIndex; unitIndex--) {
@@ -57,7 +56,7 @@ export function arbitraryFieldsToLargeNano(fields, unitIndex, fieldNames) {
   return largeNano
 }
 
-export function arbitraryFieldsToNano(fields, unitIndex, fieldNames) {
+export function givenFieldsToNano(fields, unitIndex, fieldNames) {
   let nano = 0
 
   for (; unitIndex >= nanoIndex; unitIndex--) {
@@ -68,7 +67,7 @@ export function arbitraryFieldsToNano(fields, unitIndex, fieldNames) {
   return nano
 }
 
-export function nanoToArbitraryFields(nano, unitIndex, fieldNames) {
+export function nanoToGivenFields(nano, unitIndex, fieldNames) {
   const fields = {}
 
   for (; unitIndex >= nanoIndex; unitIndex--) {

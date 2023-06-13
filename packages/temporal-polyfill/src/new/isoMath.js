@@ -1,14 +1,14 @@
 import { isoTimeFieldNamesAsc, pluckIsoDateTimeFields } from './isoFields'
 import { compareLargeInts, numberToLargeInt } from './largeInt'
 import {
-  arbitraryFieldsToNano,
+  givenFieldsToNano,
   hourIndex,
   milliInSec,
   nanoInMicro,
   nanoInMilli,
   nanoInSec,
   nanoInUtcDay,
-  nanoToArbitraryFields,
+  nanoToGivenFields,
 } from './units'
 import { clamp, divMod } from './utils'
 
@@ -89,6 +89,19 @@ export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
   }
 }
 
+// Field <-> Nanosecond Conversion
+// -------------------------------------------------------------------------------------------------
+
+export function isoTimeFieldsToNano(isoTimeFields) {
+  return givenFieldsToNano(isoTimeFields, hourIndex, isoTimeFieldNamesAsc)
+}
+
+export function nanoToIsoTimeAndDay(nano) {
+  const [dayDelta, timeNano] = divMod(nano, nanoInUtcDay)
+  const isoTimeFields = nanoToGivenFields(timeNano, hourIndex, isoTimeFieldNamesAsc)
+  return [isoTimeFields, dayDelta]
+}
+
 // Epoch Unit Conversion
 // -------------------------------------------------------------------------------------------------
 
@@ -132,21 +145,6 @@ export function epochMilliToNano(epochMilli) {
 
 export function epochMicroToNano(epochMicro) {
   return epochMicro.mult(nanoInMicro)
-}
-
-// fields <-> nano
-
-export function isoTimeFieldsToNano(isoTimeFields) {
-  return arbitraryFieldsToNano(isoTimeFields, hourIndex, isoTimeFieldNamesAsc)
-}
-
-export function nanoToIsoTimeAndDay(nano) {
-  const [dayDelta, timeNano] = divMod(nano, nanoInUtcDay)
-
-  return [
-    nanoToArbitraryFields(timeNano, hourIndex, isoTimeFieldNamesAsc),
-    dayDelta,
-  ]
 }
 
 // Epoch Getters

@@ -1,10 +1,10 @@
 import { isoTimeFieldNames } from './isoFields'
 import { toIntegerWithoutRounding } from './options'
 import {
-  arbitraryFieldsToLargeNano,
+  givenFieldsToLargeNano,
   hourIndex,
   nanoInUnit,
-  nanoToArbitraryFields,
+  nanoToGivenFields,
   unitIndexes,
 } from './units'
 import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './utils'
@@ -104,15 +104,15 @@ function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
   // TODO: audit repeat uses of this
 }
 
-// Nano Math
+// Field <-> Nanosecond Conversion
 // -------------------------------------------------------------------------------------------------
 
 export function durationFieldsToNano(durationFields, largestUnit = 'day') {
-  return arbitraryFieldsToLargeNano(durationFields, unitIndexes[largestUnit], durationFieldNamesAsc)
+  return givenFieldsToLargeNano(durationFields, unitIndexes[largestUnit], durationFieldNamesAsc)
 }
 
 export function durationFieldsToTimeNano(durationFields) {
-  return arbitraryFieldsToLargeNano(durationFields, hourIndex, durationFieldNamesAsc).toNumber()
+  return givenFieldsToLargeNano(durationFields, hourIndex, durationFieldNamesAsc).toNumber()
 }
 
 export function nanoToDurationFields(largeNano, largestUnit = 'day') {
@@ -120,11 +120,11 @@ export function nanoToDurationFields(largeNano, largestUnit = 'day') {
   const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
 
   return {
-    ...nanoToArbitraryFields(remainder, unitIndexes[largestUnit] - 1, durationFieldNamesAsc),
-    [largestUnit]: largeUnitNum.toNumber(),
+    [largestUnit]: largeUnitNum.toNumber(), // BUG!!! doesn't work
+    ...nanoToGivenFields(remainder, unitIndexes[largestUnit] - 1, durationFieldNamesAsc),
   }
 }
 
 export function timeNanoToDurationFields(nano) {
-  return nanoToArbitraryFields(nano, hourIndex, durationFieldNamesAsc)
+  return nanoToGivenFields(nano, hourIndex, durationFieldNamesAsc)
 }
