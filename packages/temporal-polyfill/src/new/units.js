@@ -12,7 +12,7 @@ export const weekIndex = 7
 export const monthIndex = 8
 export const yearIndex = 9
 
-export const unitNamesAsc = [ // TODO: better way to compress this?
+export const unitNamesAsc = [
   'nanosecond',
   'microsecond',
   'millisecond',

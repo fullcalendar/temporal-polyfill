@@ -1,7 +1,6 @@
-import { durationFieldNamesAsc } from './durationFields'
+import { durationFieldIndexes } from './durationFields'
 import { bigIntToLargeInt } from './largeInt'
 import { unitIndexes, unitNamesAsc } from './units'
-import { mapArrayToProps } from './utils'
 
 // TODO: for unit parsing, ensure ceiling and correct increment
 
@@ -230,11 +229,9 @@ export function largestUnitToOptions(largestUnitIndex) {
 // Units
 // -------------------------------------------------------------------------------------------------
 
-const unitIndexesPlural = mapArrayToProps(durationFieldNamesAsc)
-
 export function toUnit(unitName) {
   unitName = toString(unitName)
-  const unitIndex = unitIndexes[unitName] ?? unitIndexesPlural[unitName]
+  const unitIndex = unitIndexes[unitName] ?? durationFieldIndexes[unitName]
 
   if (unitIndex === undefined) {
     throw new RangeError('Invalid unit')

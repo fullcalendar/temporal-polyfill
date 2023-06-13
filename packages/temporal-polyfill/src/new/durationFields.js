@@ -6,45 +6,32 @@ import {
   hourIndex,
   nanoToGivenFields,
   unitIndexToNano,
+  unitNamesAsc,
 } from './units'
 import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './utils'
-
-// Refiners
-// -------------------------------------------------------------------------------------------------
-
-// Ordered by ascending size
-// TODO: derive durationFieldNamesAsc from unitNamesAsc, and use zipWithSingleValue w/ refiner func?
-const durationTimeFieldRefiners = {
-  nanoseconds: toIntegerWithoutRounding,
-  microseconds: toIntegerWithoutRounding,
-  milliseconds: toIntegerWithoutRounding,
-  seconds: toIntegerWithoutRounding,
-  minutes: toIntegerWithoutRounding,
-  hours: toIntegerWithoutRounding,
-}
-
-// Ordered by ascending size
-const durationDateFieldRefiners = {
-  days: toIntegerWithoutRounding,
-  months: toIntegerWithoutRounding,
-  weeks: toIntegerWithoutRounding,
-  years: toIntegerWithoutRounding,
-}
-
-// Ordered by ascending size
-export const durationFieldRefiners = {
-  ...durationTimeFieldRefiners,
-  ...durationDateFieldRefiners,
-}
 
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-const durationDateFieldNames = Object.keys(durationDateFieldRefiners).sort()
-const durationTimeFieldNames = Object.keys(durationTimeFieldRefiners).sort()
-export const durationFieldNamesAsc = Object.keys(durationFieldRefiners)
+export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + 's') // pluralize
+export const durationFieldIndexes = mapArrayToProps(durationFieldNamesAsc)
 export const durationFieldNames = durationFieldNamesAsc.sort()
-const durationInternalNames = [...durationFieldNames, 'sign'] // unordered
+
+// unordered
+const durationTimeFieldNames = durationFieldNamesAsc.slice(0, dayIndex)
+const durationDateFieldNames = durationFieldNamesAsc.slice(dayIndex)
+const durationInternalNames = [...durationFieldNames, 'sign']
+
+// Defaults
+// -------------------------------------------------------------------------------------------------
+
+export const durationFieldDefaults = zipSingleValue(durationFieldNames, 0)
+export const durationTimeFieldDefaults = zipSingleValue(durationTimeFieldNames, 0)
+
+// Refiners
+// -------------------------------------------------------------------------------------------------
+
+export const durationFieldRefiners = zipSingleValue(durationFieldNames, toIntegerWithoutRounding)
 
 // Getters
 // -------------------------------------------------------------------------------------------------
@@ -55,17 +42,7 @@ export const durationGetters = mapArrayToProps(durationInternalNames, (propName)
   }
 })
 
-// Defaults
-// -------------------------------------------------------------------------------------------------
-
-const durationDateFieldDefaults = zipSingleValue(durationDateFieldNames, 0)
-export const durationTimeFieldDefaults = zipSingleValue(durationTimeFieldNames, 0)
-export const durationFieldDefaults = {
-  ...durationDateFieldDefaults,
-  ...durationTimeFieldDefaults,
-}
-
-// Refining / Conversion
+// Field <-> Field Conversion
 // -------------------------------------------------------------------------------------------------
 
 export function refineDurationInternals(rawDurationFields) {
@@ -86,30 +63,6 @@ export function durationTimeFieldsToIsoStrict(durationFields) {
     throw new RangeError('Operation not allowed')
   }
   return durationTimeFieldsToIso(durationFields)
-}
-
-// Field Math
-// -------------------------------------------------------------------------------------------------
-
-export function addDurationFields(durationFields0, durationFields1, sign) {
-  // recomputes sign
-}
-
-export function negateDurationFields(internals) {
-  // recomputes sign
-}
-
-export function absolutizeDurationFields(internals) {
-  // recomputes sign
-}
-
-export function durationHasDateParts(internals) {
-  return Boolean(computeDurationFieldsSign(internals, durationDateFieldNames))
-}
-
-function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
-  // should throw error if mismatch
-  // TODO: audit repeat uses of this
 }
 
 // Field <-> Nanosecond Conversion
@@ -135,4 +88,28 @@ export function nanoToDurationFields(largeNano, largestUnitIndex = dayIndex) {
 
 export function timeNanoToDurationFields(nano) {
   return nanoToGivenFields(nano, hourIndex, durationFieldNamesAsc)
+}
+
+// Field Math
+// -------------------------------------------------------------------------------------------------
+
+export function addDurationFields(durationFields0, durationFields1, sign) {
+  // recomputes sign
+}
+
+export function negateDurationFields(internals) {
+  // recomputes sign
+}
+
+export function absolutizeDurationFields(internals) {
+  // recomputes sign
+}
+
+export function durationHasDateParts(internals) {
+  return Boolean(computeDurationFieldsSign(internals, durationDateFieldNames))
+}
+
+function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
+  // should throw error if mismatch
+  // TODO: audit repeat uses of this
 }
