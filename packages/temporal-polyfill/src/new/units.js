@@ -17,6 +17,7 @@ export const unitNamesAsc = [
   'microsecond',
   'millisecond',
   'second',
+  'minute',
   'hour',
   'day',
   'week',
@@ -34,16 +35,18 @@ export const milliInDay = 86400000 // TODO: not DRY
 export const milliInSec = 1000
 
 export const nanoInMicro = 1000 // consolidate with other 1000 units
-export const nanoInMilli = 1000000
-export const nanoInSec = 1000000000
-export const nanoInHour = 3600000000000
-export const nanoInUtcDay = 86400000000000
+export const nanoInMilli = 1_000_000
+export const nanoInSec = 1_000_000_000
+export const nanoInMinute = 60_000_000_000
+export const nanoInHour = 3_600_000_000_000
+export const nanoInUtcDay = 86_400_000_000_000
 
 export const unitIndexToNano = [
   1, // nano-in-nano
   nanoInMicro,
   nanoInMilli,
   nanoInSec,
+  nanoInMinute,
   nanoInHour,
   nanoInUtcDay,
 ]
