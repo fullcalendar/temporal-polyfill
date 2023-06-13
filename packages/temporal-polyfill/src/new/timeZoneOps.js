@@ -13,12 +13,12 @@ import {
   isoToEpochNano,
 } from './isoMath'
 import { addDaysToIsoFields } from './move'
-import { nanoInUtcDay } from './units'
 import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { TimeZone, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
+import { nanoInUtcDay } from './units'
 import { createLazyMap } from './utils'
 
 export const utcTimeZoneId = 'UTC'
@@ -150,7 +150,7 @@ export function getSingleInstantFor(
 
   epochNanos = timeZoneOps.getPossibleInstantsFor(
     epochNanoToIso(
-      zonedEpochNano.add(gapNano * (
+      zonedEpochNano.addNumber(gapNano * (
         disambig === 'earlier'
           ? -1
           : 1 // 'later' or 'compatible'
@@ -167,10 +167,10 @@ export function getSingleInstantFor(
 
 function computeGapNear(timeZoneOps, zonedEpochNano) {
   const startOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    zonedEpochNano.add(-nanoInUtcDay),
+    zonedEpochNano.addNumber(-nanoInUtcDay),
   )
   const endOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    zonedEpochNano.add(nanoInUtcDay),
+    zonedEpochNano.addNumber(nanoInUtcDay),
   )
   return endOffsetNano - startOffsetNano
 }
@@ -178,7 +178,7 @@ function computeGapNear(timeZoneOps, zonedEpochNano) {
 export const zonedInternalsToIso = createLazyMap((internals) => {
   const { timeZone, epochNanoseconds } = internals
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-  const isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
+  const isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
   return {
     ...isoDateTimeFields,
@@ -188,7 +188,7 @@ export const zonedInternalsToIso = createLazyMap((internals) => {
 
 export function zonedEpochNanoToIso(timeZoneOps, epochNano) {
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
-  return epochNanoToIso(epochNano.add(offsetNano))
+  return epochNanoToIso(epochNano.addNumber(offsetNano))
 }
 
 // Adapter

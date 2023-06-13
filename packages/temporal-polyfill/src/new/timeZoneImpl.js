@@ -46,7 +46,7 @@ export class FixedTimeZoneImpl {
   }
 
   getPossibleInstantsFor(isoDateTimeFields) {
-    return [isoToEpochNano(isoDateTimeFields).add(this.offsetNano)]
+    return [isoToEpochNano(isoDateTimeFields).addNumber(this.offsetNano)]
   }
 
   getTransition(epochNano, direction) {
@@ -69,7 +69,7 @@ export class IntlTimeZoneImpl {
   getPossibleInstantsFor(isoDateTimeFields) {
     const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeFields)
     return this.store.getPossibleEpochSec(zonedEpochSec)
-      .map((epochSec) => epochSecToNano(epochSec).add(subsecNano))
+      .map((epochSec) => epochSecToNano(epochSec).addNumber(subsecNano))
   }
 
   /*

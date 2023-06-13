@@ -144,7 +144,7 @@ export const [
         refinedOptions, // TODO: break apart options
       )
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      const isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
+      const isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
       return formatIsoDateTimeFields(isoDateTimeFields, refinedOptions) +
         formatOffsetNanoseconds(offsetNanoseconds) +

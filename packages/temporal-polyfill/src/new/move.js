@@ -22,7 +22,7 @@ export function addDaysToIsoFields() {
 }
 
 export function moveEpochNano(epochNanoseconds, durationFields) {
-  return epochNanoseconds.add(onlyDurationTimeFieldsToIso(durationFields))
+  return epochNanoseconds.addNumber(onlyDurationTimeFieldsToIso(durationFields))
 }
 
 export function moveZonedEpochNano(
@@ -37,7 +37,7 @@ export function moveZonedEpochNano(
   )
 
   if (!durationHasDateParts(durationFields)) {
-    epochNanoseconds = epochNanoseconds.add(durationTimeNanoseconds)
+    epochNanoseconds = epochNanoseconds.addNumber(durationTimeNanoseconds)
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNanoseconds)
     const movedIsoDateFields = calendar.dateAdd(
@@ -53,7 +53,7 @@ export function moveZonedEpochNano(
       ...movedIsoDateFields, // date parts
     }
     epochNanoseconds = getSingleInstantFor(timeZone, movedIsoDateTimeFields)
-      .add(durationTimeNanoseconds)
+      .addNumber(durationTimeNanoseconds)
   }
 
   return epochNanoseconds

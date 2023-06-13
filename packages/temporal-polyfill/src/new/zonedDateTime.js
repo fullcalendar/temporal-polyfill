@@ -33,7 +33,6 @@ import {
 import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
-import { nanoInHour } from './units'
 import { optionsToOverflow, toEpochNano } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
@@ -47,6 +46,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
+import { nanoInHour } from './units'
 import { mapProps } from './utils'
 
 export const [
@@ -238,7 +238,7 @@ export const [
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
+      let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
       isoDateTimeFields = roundIsoDateTimeFields(
         isoDateTimeFields,
@@ -301,7 +301,7 @@ export const [
       // TODO: don't let options be accessed twice! once by rounding, twice by formatting
 
       let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
+      let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
       isoDateTimeFields = roundIsoDateTimeFields(
         isoDateTimeFields,
@@ -320,7 +320,7 @@ export const [
 
       // waa? non-dry code?
       offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      isoDateTimeFields = epochNanoToIso(epochNanoseconds.add(offsetNanoseconds))
+      isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
       return formatIsoDateTimeFields(isoDateTimeFields, options) +
         formatOffsetNanoseconds(offsetNanoseconds) +

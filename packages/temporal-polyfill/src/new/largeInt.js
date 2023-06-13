@@ -1,4 +1,4 @@
-import { compareNumbers, divMod } from './utils'
+import { compareNumbers, divFloorMod } from './utils'
 
 const maxLow = 1e8 // exclusive // TODO: explain why
 
@@ -12,7 +12,10 @@ export class LargeInt {
     return balanceAndCreate(this.high + n.high * sign, this.low + n.low * sign)
   }
 
-  add(n) {
+  /*
+  different than PlainTime/Duration::add, for minification
+  */
+  addNumber(n) {
     return balanceAndCreate(this.high, this.low + n)
   }
 
@@ -20,10 +23,10 @@ export class LargeInt {
     return balanceAndCreate(this.high * multiplier, this.low * multiplier)
   }
 
-  divMod(divisor) {
+  divFloorMod(divisor) {
     const { high, low } = this
-    const [newHigh, highRemainder] = divMod(high, divisor)
-    const [newLow, remainder] = divMod(highRemainder * maxLow + low, divisor)
+    const [newHigh, highRemainder] = divFloorMod(high, divisor)
+    const [newLow, remainder] = divFloorMod(highRemainder * maxLow + low, divisor)
 
     return [
       balanceAndCreate(newHigh, newLow),
@@ -31,11 +34,11 @@ export class LargeInt {
     ]
   }
 
-  divModTrunc(divisor) { // TODO: rename a lot of stuff?
-    let [largeInt, remainder] = this.divMod(divisor)
+  divTruncMod(divisor) {
+    let [largeInt, remainder] = this.divFloorMod(divisor)
 
     if (largeInt.computeSign() === -1 && remainder) {
-      largeInt = largeInt.add(1)
+      largeInt = largeInt.addNumber(1)
       remainder -= divisor
     }
 
@@ -59,17 +62,17 @@ export class LargeInt {
 }
 
 function balanceAndCreate(high, low) {
-  const [extraHigh, newLow] = divMod(low, maxLow)
+  const [extraHigh, newLow] = divFloorMod(low, maxLow)
   return new LargeInt(high + extraHigh, newLow)
 }
 
 export function numberToLargeInt(n) {
-  return new LargeInt(...divMod(n, maxLow))
+  return new LargeInt(...divFloorMod(n, maxLow))
 }
 
 export function bigIntToLargeInt(n) {
   // must create BigInt lazily for if browser lacks support
-  return new LargeInt(...divMod(n, BigInt(maxLow)).map(Number))
+  return new LargeInt(...divFloorMod(n, BigInt(maxLow)).map(Number))
 }
 
 export function compareLargeInts(a, b) {

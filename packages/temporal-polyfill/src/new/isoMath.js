@@ -10,7 +10,7 @@ import {
   nanoInUtcDay,
   nanoToGivenFields,
 } from './units'
-import { clamp, divMod } from './utils'
+import { clamp, divFloorMod } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ export function isoTimeFieldsToNano(isoTimeFields) {
 }
 
 export function nanoToIsoTimeAndDay(nano) {
-  const [dayDelta, timeNano] = divMod(nano, nanoInUtcDay)
+  const [dayDelta, timeNano] = divFloorMod(nano, nanoInUtcDay)
   const isoTimeFields = nanoToGivenFields(timeNano, hourIndex, isoTimeFieldNamesAsc)
   return [isoTimeFields, dayDelta]
 }
@@ -122,15 +122,15 @@ function epochNanoToMicro(epochNano) {
 // nano -> [micro/milli/sec] (with remainder)
 
 export function epochNanoToSecMod(epochNano) {
-  return epochNano.divMod(nanoInSec)
+  return epochNano.divFloorMod(nanoInSec)
 }
 
 function epochNanoToMilliMod(epochNano) {
-  return epochNano.divMod(nanoInMilli)
+  return epochNano.divFloorMod(nanoInMilli)
 }
 
 function epochNanoToMicroMod(epochNano) {
-  return epochNano.divMod(nanoInMicro)
+  return epochNano.divFloorMod(nanoInMicro)
 }
 
 // [micro/milli/sec] -> nano
@@ -175,7 +175,7 @@ function validateIsoDateTimeInternals(isoDateTimeInternals) { // validateIsoInte
 
   if (nudge) {
     const epochNano = isoToEpochNano(isoDateTimeInternals)
-    validateEpochNano(epochNano && epochNano.add((nanoInUtcDay - 1) * nudge))
+    validateEpochNano(epochNano && epochNano.addNumber((nanoInUtcDay - 1) * nudge))
   }
 
   return isoDateTimeInternals

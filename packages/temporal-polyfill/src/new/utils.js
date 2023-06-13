@@ -102,7 +102,7 @@ export function clamp() {
 /*
 Works with BigInt or Number (as long as the same)
 */
-export function divMod(n, divisor) {
+export function divFloorMod(n, divisor) {
   const remainder = floorMod(n, divisor)
   const quotient = (n - remainder) / divisor
   return [quotient, remainder]

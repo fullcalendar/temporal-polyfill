@@ -147,8 +147,8 @@ export function roundRelativeDuration(
 
 export function roundLargeNano(largeNano, smallestUnitIndex, roundingMode, roundingIncrement) {
   const divisor = unitIndexToNano[smallestUnitIndex] * roundingIncrement
-  const [n, remainder] = largeNano.divModTrunc(divisor)
-  return n.mult(divisor).add(roundWithMode(remainder / divisor, roundingMode))
+  const [fullUnits, remainder] = largeNano.divTruncMod(divisor)
+  return fullUnits.mult(divisor).addNumber(roundWithMode(remainder / divisor, roundingMode))
 }
 
 export function roundNano(nano, smallestUnitIndex, roundingMode, roundingIncrement) {
@@ -175,8 +175,8 @@ export function totalDayTimeDuration( // assumes iso-length days
 ) {
   const largeNano = durationFieldsToNano(durationFields)
   const divisor = unitIndexToNano[totalUnitIndex]
-  const [fullUnit, remainder] = largeNano.divModTrunc(divisor)
-  return fullUnit.toNumber() + (remainder / divisor)
+  const [fullUnits, remainder] = largeNano.divTruncMod(divisor)
+  return fullUnits.toNumber() + (remainder / divisor)
 }
 
 export function totalRelativeDuration(
@@ -229,7 +229,7 @@ function nudgeDurationTime(
 
   return [
     nudgedDurationFields,
-    endEpochNanoseconds.add(roundedTimeNano - timeNano),
+    endEpochNanoseconds.addNumber(roundedTimeNano - timeNano),
     dayDelta,
   ]
 }
@@ -266,9 +266,9 @@ function nudgeRelativeDurationTime(
   if (!beyondDay || Math.sign(beyondDay) === sign) {
     dayDelta++
     roundedTimeNano = roundNano(beyondDay, smallestUnitIndex, roundingMode, roundingIncrement)
-    endEpochNanoseconds = dayEpochNanoseconds1.add(roundedTimeNano)
+    endEpochNanoseconds = dayEpochNanoseconds1.addNumber(roundedTimeNano)
   } else {
-    endEpochNanoseconds = dayEpochNanoseconds0.add(roundedTimeNano)
+    endEpochNanoseconds = dayEpochNanoseconds0.addNumber(roundedTimeNano)
   }
 
   const durationTimeFields = timeNanoToDurationFields(roundedTimeNano)

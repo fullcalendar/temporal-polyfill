@@ -117,7 +117,7 @@ export function durationFieldsToTimeNano(durationFields) {
 
 export function nanoToDurationFields(largeNano, largestUnitIndex = dayIndex) {
   const divisor = unitIndexToNano[largestUnitIndex]
-  const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
+  const [largeUnitNum, remainder] = largeNano.divTruncMod(divisor)
 
   return {
     [durationFieldNamesAsc[largestUnitIndex]]: largeUnitNum.toNumber(),
