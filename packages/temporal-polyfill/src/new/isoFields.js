@@ -23,7 +23,7 @@ export const isoDateInternalRefiners = {
   isoYear: toIntegerWithoutRounding,
 }
 
-// Ordered alphabetically
+// Ordered by ascending size
 export const isoTimeFieldRefiners = {
   isoHour: toIntegerThrowOnInfinity,
   isoMicrosecond: toIntegerThrowOnInfinity,
@@ -42,12 +42,13 @@ export const isoDateTimeInternalRefiners = {
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-export const isoDateInternalNames = Object.keys(isoDateInternalRefiners)
+const isoDateInternalNames = Object.keys(isoDateInternalRefiners)
 export const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort()
 
 export const isoDateFieldNames = isoDateInternalNames.slice(1) // no calendar
 const isoDateTimeFieldNames = isoDateTimeInternalRefiners.slice(1) // no calendar
-export const isoTimeFieldNames = Object.keys(isoTimeFieldRefiners)
+export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners)
+export const isoTimeFieldNames = isoTimeFieldNamesAsc.sort()
 
 // Defaults
 // -------------------------------------------------------------------------------------------------

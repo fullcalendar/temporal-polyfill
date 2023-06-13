@@ -17,10 +17,10 @@ import {
   yearStatNames,
 } from './calendarFields'
 import {
-  calendarImplDateUntil,
   computeIntlMonthsInYearSpan,
   computeIsoMonthsInYearSpan,
-  diffDaysMilli,
+  diffDatesExact,
+  diffEpochMilliByDay,
 } from './diff'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import { isoDateFieldNames, isoTimeFieldDefaults } from './isoFields'
@@ -165,12 +165,12 @@ class IsoCalendarImpl {
   // ------------------------
 
   dayOfYear(isoDateFields) {
-    const dayEpochMilliseconds = isoToEpochMilli({
+    const dayEpochMilli = isoToEpochMilli({
       ...isoDateFields,
       ...isoTimeFieldDefaults,
     })
-    const yearStartEpochMilliseconds = this.queryDateStart(this.year(isoDateFields))
-    return diffDaysMilli(yearStartEpochMilliseconds, dayEpochMilliseconds)
+    const yearStartEpochMilli = this.queryDateStart(this.year(isoDateFields))
+    return diffEpochMilliByDay(yearStartEpochMilli, dayEpochMilli)
   }
 
   dateAdd(isoDateFields, durationFields, overflow) {
@@ -178,7 +178,7 @@ class IsoCalendarImpl {
   }
 
   dateUntil(startIsoDateFields, endIsoDateFields, largestUnit) {
-    return calendarImplDateUntil(this, startIsoDateFields, endIsoDateFields, largestUnit)
+    return diffDatesExact(this, startIsoDateFields, endIsoDateFields, largestUnit)
   }
 
   // Field Refining
@@ -406,7 +406,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
   queryDaysInYear(year) {
     const milli = this.queryDateStart(year)
     const milliNext = this.queryDateStart(year + 1)
-    return diffDaysMilli(milli, milliNext)
+    return diffEpochMilliByDay(milli, milliNext)
   }
 
   queryIsLeapYear(year) {
@@ -460,8 +460,8 @@ class IntlCalendarImpl extends IsoCalendarImpl {
     return monthEpochMilli.length
   }
 
-  queryMonthsInYearSpan(yearStart, yearDelta) {
-    return computeIntlMonthsInYearSpan(yearStart, yearDelta, this)
+  queryMonthsInYearSpan(yearDelta, yearStart) {
+    return computeIntlMonthsInYearSpan(yearDelta, yearStart, this)
   }
 
   queryDaysInMonth(year, month) {
@@ -474,7 +474,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
       nextMonthEpochMilli = this.queryYear(year + 1).monthEpochMilli
     }
 
-    return diffDaysMilli(
+    return diffEpochMilliByDay(
       monthEpochMilli[month - 1],
       nextMonthEpochMilli[nextMonth - 1],
     )

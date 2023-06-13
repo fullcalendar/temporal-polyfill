@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { createTemporalClass, neverValueOf } from './class'
-import { diffEpochNanoseconds } from './diff'
+import { diffEpochNano } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import {
@@ -19,9 +19,9 @@ import {
   validateEpochNano,
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
-import { moveEpochNanoseconds } from './move'
+import { moveEpochNano } from './move'
 import { toEpochNano, toObject } from './options'
-import { roundLargeNanoseconds } from './round'
+import { roundLargeNano } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './util'
 import { createZonedDateTime } from './zonedDateTime'
@@ -84,7 +84,7 @@ export const [
 
     add(epochNanoseconds, durationArg) {
       return createInstant(
-        moveEpochNanoseconds(
+        moveEpochNano(
           epochNanoseconds,
           toDurationInternals(durationArg),
         ),
@@ -93,7 +93,7 @@ export const [
 
     subtract(epochNanoseconds, durationArg) {
       return createInstant(
-        moveEpochNanoseconds(
+        moveEpochNano(
           epochNanoseconds,
           negateDurationFields(toDurationInternals(durationArg)),
         ),
@@ -101,7 +101,7 @@ export const [
     },
 
     until(epochNanoseconds, otherArg, options) {
-      return diffEpochNanoseconds(
+      return diffEpochNano(
         epochNanoseconds,
         toInstantEpochNanoseconds(otherArg),
         options, // TODO: must be given better options???
@@ -109,7 +109,7 @@ export const [
     },
 
     since(epochNanoseconds, otherArg, options) {
-      return diffEpochNanoseconds(
+      return diffEpochNano(
         toInstantEpochNanoseconds(otherArg),
         epochNanoseconds,
         options, // TODO: reverse rounding option
@@ -118,7 +118,7 @@ export const [
 
     round(epochNanoseconds, options) {
       return createInstant(
-        roundLargeNanoseconds(
+        roundLargeNano(
           epochNanoseconds,
           options, // TODO: break apart options
         ),
@@ -139,7 +139,7 @@ export const [
       const calendar = queryCalendarOps(refinedOptions.calendar || isoCalendarId)
       const timeZone = queryTimeZoneOps(refinedOptions.timeZone || utcTimeZoneId)
 
-      epochNanoseconds = roundLargeNanoseconds(
+      epochNanoseconds = roundLargeNano(
         epochNanoseconds,
         refinedOptions, // TODO: break apart options
       )

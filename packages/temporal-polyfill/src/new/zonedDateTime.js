@@ -7,7 +7,7 @@ import {
   mergeZonedDateTimeBag,
   refineZonedDateTimeBag,
 } from './convert'
-import { diffZonedEpochNanoseconds } from './diff'
+import { diffZonedEpochNano } from './diff'
 import { toDurationInternals } from './duration'
 import { negateDurationFields } from './durationFields'
 import { createInstant } from './instant'
@@ -33,7 +33,7 @@ import {
 } from './isoMath'
 import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
-import { moveZonedEpochNanoseconds } from './move'
+import { moveZonedEpochNano } from './move'
 import { optionsToOverflow, toEpochNano } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
@@ -214,7 +214,7 @@ export const [
 
     until(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
-      return diffZonedEpochNanoseconds(
+      return diffZonedEpochNano(
         getCommonCalendarOps(internals, otherInternals),
         getCommonTimeZoneOps(internals, otherInternals),
         internals.epochNanoseconds,
@@ -225,7 +225,7 @@ export const [
 
     since(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
-      return diffZonedEpochNanoseconds(
+      return diffZonedEpochNano(
         getCommonCalendarOps(internals, otherInternals),
         getCommonTimeZoneOps(internals, otherInternals),
         otherInternals.epochNanoseconds,
@@ -393,7 +393,7 @@ export const [
 // -------------------------------------------------------------------------------------------------
 
 function moveZonedDateTimeInternals(internals, durationFields, overflowHandling) {
-  return moveZonedEpochNanoseconds(
+  return moveZonedEpochNano(
     internals.calendar,
     internals.timeZone,
     internals.epochNanoseconds,

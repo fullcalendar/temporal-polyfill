@@ -9,7 +9,7 @@ import {
   isoMonthsInYear,
   isoTimeFieldsToNano,
   isoToEpochMilli,
-  nanoToIsoTimeFields,
+  nanoToIsoTimeAndDay,
 } from './isoMath'
 import { constrainInt } from './options'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
@@ -21,11 +21,11 @@ export function addDaysToIsoFields() {
   // short-circuit if nothing to add
 }
 
-export function moveEpochNanoseconds(epochNanoseconds, durationFields) {
+export function moveEpochNano(epochNanoseconds, durationFields) {
   return epochNanoseconds.add(onlyDurationTimeFieldsToIso(durationFields))
 }
 
-export function moveZonedEpochNanoseconds(
+export function moveZonedEpochNano(
   calendar,
   timeZone,
   epochNanoseconds,
@@ -169,7 +169,7 @@ export function addIntlMonths(year, month, monthDelta, calendarImpl) {
 // -------------------------------------------------------------------------------------------------
 
 function addIsoTimeFields(isoTimeFields0, isoTimeFields1) {
-  return nanoToIsoTimeFields( // returns [movedIsoTimeFields, dayDelta]
+  return nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoTimeFields0) +
     isoTimeFieldsToNano(isoTimeFields1),
   )

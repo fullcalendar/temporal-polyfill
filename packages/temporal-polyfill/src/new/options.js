@@ -1,7 +1,9 @@
+import { durationFieldNamesAsc } from './durationFields'
+import { unitIndexes } from './isoMath'
+import { bigIntToLargeInt } from './largeInt'
+import { mapArrayToProps } from './util'
 
 // TODO: for unit parsing, ensure ceiling and correct increment
-
-import { bigIntToLargeInt } from './largeInt'
 
 export function strictNumber(input) {
 
@@ -220,4 +222,20 @@ export function overflowToOptions(overflow) {
 
 export function largestUnitToOptions(largestUnit) {
   return { largestUnit }
+}
+
+// Units
+// -------------------------------------------------------------------------------------------------
+
+const unitIndexesPlural = mapArrayToProps(durationFieldNamesAsc)
+
+export function toUnit(unitName) {
+  unitName = toString(unitName)
+  const unitIndex = unitIndexes[unitName] ?? unitIndexesPlural[unitName]
+
+  if (unitIndex === undefined) {
+    throw new RangeError('Invalid unit')
+  }
+
+  return unitIndexes[unitName]
 }

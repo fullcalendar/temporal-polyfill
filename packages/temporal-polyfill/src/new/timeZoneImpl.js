@@ -78,7 +78,7 @@ export class IntlTimeZoneImpl {
   getTransition(epochNano, direction) {
     const [epochSec, subsecNano] = epochNanoToSecMod(epochNano)
     const resEpochSec = this.store.getTransition(
-      epochSec + ((direction > 0 || subsecNano) ? 1 : 0),
+      epochSec.toNumber() + ((direction > 0 || subsecNano) ? 1 : 0),
       direction,
     )
     if (resEpochSec !== undefined) {

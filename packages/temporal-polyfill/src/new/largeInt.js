@@ -1,7 +1,6 @@
 import { compareNumbers, divMod } from './util'
 
 const maxLow = 1e8 // exclusive // TODO: explain why
-const maxLowBigInt = typeof BigInt !== 'undefined' && BigInt(maxLow)
 
 export class LargeInt {
   constructor(high, low) {
@@ -9,8 +8,8 @@ export class LargeInt {
     this.low = low
   }
 
-  addLargeInt(n) {
-    return balanceAndCreate(this.high + n.high, this.low + n.low)
+  addLargeInt(n, sign = 1) {
+    return balanceAndCreate(this.high + n.high * sign, this.low + n.low * sign)
   }
 
   add(n) {
@@ -21,17 +20,33 @@ export class LargeInt {
     return balanceAndCreate(this.high * multiplier, this.low * multiplier)
   }
 
-  divMod(divisor, preserveLargeInt) {
+  divMod(divisor) {
     const { high, low } = this
     const [newHigh, highRemainder] = divMod(high, divisor)
     const [newLow, remainder] = divMod(highRemainder * maxLow + low, divisor)
 
     return [
-      preserveLargeInt
-        ? balanceAndCreate(newHigh, newLow)
-        : newHigh * maxLow + newLow,
+      balanceAndCreate(newHigh, newLow),
       remainder,
     ]
+  }
+
+  divModTrunc(divisor) { // TODO: rename a lot of stuff?
+    let [largeInt, remainder] = this.divMod(divisor)
+
+    if (largeInt.computeSign() === -1 && remainder) {
+      largeInt = largeInt.add(1)
+      remainder -= divisor
+    }
+
+    return [largeInt, remainder]
+  }
+
+  /*
+  different than Duration::sign, for minification
+  */
+  computeSign() {
+    return Math.sign(this.high) || Math.sign(this.low)
   }
 
   toNumber() {
@@ -39,7 +54,7 @@ export class LargeInt {
   }
 
   toBigInt() {
-    return BigInt(this.high) * maxLowBigInt + BigInt(this.low)
+    return BigInt(this.high) * BigInt(maxLow) + BigInt(this.low)
   }
 }
 
@@ -53,7 +68,8 @@ export function numberToLargeInt(n) {
 }
 
 export function bigIntToLargeInt(n) {
-  return new LargeInt(...divMod(n, maxLowBigInt).map(Number))
+  // must create BigInt lazily for if browser lacks support
+  return new LargeInt(...divMod(n, BigInt(maxLow)).map(Number))
 }
 
 export function compareLargeInts(a, b) {

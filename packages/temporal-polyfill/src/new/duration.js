@@ -1,9 +1,10 @@
 import { createTemporalClass, neverValueOf } from './class'
 import { mergeDurationBag, refineDurationBag } from './convert'
-import { diffZonedEpochNanoseconds } from './diff'
+import { diffZonedEpochNano } from './diff'
 import {
   absolutizeDurationFields,
   addDurationFields,
+  durationFieldsToNano,
   durationGetters,
   negateDurationFields,
   refineDurationInternals,
@@ -12,7 +13,7 @@ import { formatDurationInternals } from './isoFormat'
 import { isoToEpochNano } from './isoMath'
 import { parseDuration } from './isoParse'
 import { compareLargeInts } from './largeInt'
-import { moveZonedEpochNanoseconds } from './move'
+import { moveZonedEpochNano } from './move'
 import {
   optionsToLargestUnit,
   optionsToRelativeTo,
@@ -114,7 +115,9 @@ export const [
       const roundingMode = optionsToRoundingMode(options)
       const markerInternals = optionsToRelativeTo(options) // optional
 
-      if (largestUnit < 'day' || (largestUnit === 'day' && !markerInternals)) {
+      // TODO: move to round.js?
+
+      if (largestUnit < 'day' || (largestUnit === 'day' && !markerInternals)) { // TODO units
         // TODO: check internals doesn't have large fields
         return roundDayTimeDuration(internals, smallestUnit, roundingMode, roundingIncrement)
       }
@@ -175,10 +178,10 @@ export const [
         getLargestDurationUnit(durationFields1),
       )
 
-      if (largestUnit < 'day' || (largestUnit === 'day' && !markerInternals)) {
+      if (largestUnit < 'day' || (largestUnit === 'day' && !markerInternals)) { // TODO: units
         return compareLargeInts(
-          durationDayTimeToNanoseconds(durationFields0),
-          durationDayTimeToNanoseconds(durationFields1),
+          durationFieldsToNano(durationFields0),
+          durationFieldsToNano(durationFields1),
         )
       }
 
@@ -186,11 +189,11 @@ export const [
         throw new RangeError('need relativeTo')
       }
 
-      const [marker, markerToEpochNanoseconds, moveMarker] = createMarkerSystem(markerInternals)
+      const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals)
 
       return compareLargeInts(
-        markerToEpochNanoseconds(moveMarker(marker, durationFields0)),
-        markerToEpochNanoseconds(moveMarker(marker, durationFields1)),
+        markerToEpochNano(moveMarker(marker, durationFields0)),
+        markerToEpochNano(moveMarker(marker, durationFields1)),
       )
     },
   },
@@ -223,14 +226,14 @@ function createMarkerSystem(markerInternals) {
   if (epochNanoseconds) {
     return [
       epochNanoseconds, // marker
-      identityFunc, // markerToEpochNanoseconds
-      moveZonedEpochNanoseconds.bind(undefined, calendar, timeZone), // moveMarker
-      diffZonedEpochNanoseconds.bind(undefined, calendar, timeZone), // diffMarkers
+      identityFunc, // markerToEpochNano
+      moveZonedEpochNano.bind(undefined, calendar, timeZone), // moveMarker
+      diffZonedEpochNano.bind(undefined, calendar, timeZone), // diffMarkers
     ]
   } else {
     return [
       markerInternals, // marker (IsoDateFields)
-      isoToEpochNano, // markerToEpochNanoseconds
+      isoToEpochNano, // markerToEpochNano
       calendar.dateAdd.bind(calendar), // moveMarker
       calendar.dateUntil.bind(calendar), // diffMarkers
     ]
@@ -242,11 +245,11 @@ function spanDuration(
   largestUnit,
   // marker system...
   marker,
-  markerToEpochNanoseconds,
+  markerToEpochNano,
   moveMarker,
   diffMarkers,
 ) {
-  const endMarker = markerToEpochNanoseconds(moveMarker(marker, durationFields))
+  const endMarker = markerToEpochNano(moveMarker(marker, durationFields))
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, endMarker]
 }
@@ -258,9 +261,4 @@ function balanceDurationDayTime(
 }
 
 function getLargestDurationUnit(durationFields) {
-}
-
-function durationDayTimeToNanoseconds(
-  durationFields, // NOT BALANCED
-) {
 }

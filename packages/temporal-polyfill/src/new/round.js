@@ -1,13 +1,18 @@
-import { durationFieldDefaults, durationTimeFieldDefaults } from './durationFields'
+import {
+  durationFieldDefaults,
+  durationFieldsToNano,
+  durationFieldsToTimeNano,
+  durationTimeFieldDefaults,
+  nanoToDurationFields,
+  timeNanoToDurationFields,
+} from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
-  epochNanoToUtcDaysMod,
   isoTimeFieldsToNano,
+  nanoInUnit,
   nanoInUtcDay,
-  nanoToIsoTimeFields,
-  nanosecondsInUnit,
+  nanoToIsoTimeAndDay,
 } from './isoMath'
-import { numberToLargeInt } from './largeInt'
 import { addDaysToIsoFields } from './move'
 import { computeNanosecondsInDay } from './timeZoneOps'
 import { identityFunc } from './util'
@@ -34,7 +39,7 @@ export function roundIsoDateTimeFields(
       ? computeNanosecondsInDay(timeZoneOps, isoDateTimeFields)
       : nanoInUtcDay
 
-    dayDelta = roundNanoseconds(
+    dayDelta = roundWithDivisor(
       isoTimeFieldsToNano(isoDateTimeFields),
       nanosecondsInDay,
       roundingMode,
@@ -58,16 +63,17 @@ export function roundIsoDateTimeFields(
 
 export function roundIsoTimeFields(
   isoTimeFields,
-  smallestUnit, // time
+  smallestUnit,
   roundingMode,
   roundingIncrement,
 ) {
-  const nanoseconds = roundNanoseconds(
+  const timeNano = roundNano(
     isoTimeFieldsToNano(isoTimeFields),
-    nanosecondsInUnit[smallestUnit] * roundingIncrement,
+    smallestUnit,
     roundingMode,
+    roundingIncrement,
   )
-  return nanoToIsoTimeFields(nanoseconds)
+  return nanoToIsoTimeAndDay(timeNano)
 }
 
 // Rounding Duration
@@ -79,13 +85,17 @@ export function roundDayTimeDuration(
   roundingMode,
   roundingIncrement,
 ) {
-  const largeNanoseconds = durationDayTimeToNanoseconds(durationFields)
-  const r = roundLargeNanoseconds(largeNanoseconds, smallestUnit, roundingMode, roundingIncrement)
-  return nanosecondsToDurationDayTime(r)
+  const largeNano = durationFieldsToNano(durationFields)
+  const r = roundLargeNano(largeNano, smallestUnit, roundingMode, roundingIncrement)
+  return {
+    ...durationFieldDefaults,
+    ...nanoToDurationFields(r),
+  }
 }
 
 export function roundRelativeDuration(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  // ^has sign
   endEpochNanoseconds,
   largestUnit,
   smallestUnit,
@@ -138,28 +148,18 @@ export function roundRelativeDuration(
 // Rounding Numbers
 // -------------------------------------------------------------------------------------------------
 
-export function roundLargeNanoseconds(
-  largeNanoseconds,
-  smallestUnit,
-  roundingMode,
-  roundingIncrement,
-) {
-  let [days, timeNanoseconds] = epochNanoToUtcDaysMod(largeNanoseconds)
-
-  timeNanoseconds = roundNanoseconds(
-    timeNanoseconds,
-    nanosecondsInUnit[smallestUnit] * roundingIncrement,
-    roundingMode,
-  )
-
-  const dayDelta = Math.trunc(timeNanoseconds / nanoInUtcDay)
-  timeNanoseconds %= nanoInUtcDay
-
-  return numberToLargeInt(nanoInUtcDay).mult(days + dayDelta).add(timeNanoseconds)
+export function roundLargeNano(largeNano, smallestUnit, roundingMode, roundingIncrement) {
+  const divisor = nanoInUnit[smallestUnit] * roundingIncrement
+  const [n, remainder] = largeNano.divModTrunc(divisor)
+  return n.mult(divisor).add(roundWithMode(remainder / divisor, roundingMode))
 }
 
-function roundNanoseconds(num, nanoIncrement, roundingMode) {
-  return roundWithMode(num / nanoIncrement, roundingMode) * nanoIncrement
+export function roundNano(nano, smallestUnit, roundingMode, roundingIncrement) {
+  return roundWithDivisor(nano, nanoInUnit[smallestUnit] * roundingIncrement, roundingMode)
+}
+
+function roundWithDivisor(num, divisor, roundingMode) {
+  return roundWithMode(num / divisor, roundingMode) * divisor
 }
 
 function roundWithMode(num, roundingMode) {
@@ -170,10 +170,12 @@ function roundWithMode(num, roundingMode) {
 
 export function totalDayTimeDuration( // assumes iso-length days
   durationFields,
-  unit,
+  unitName,
 ) {
-  const largeNanoseconds = durationDayTimeToNanoseconds(durationFields)
-  return largeNanoseconds.divide(nanosecondsInUnit[unit]).toNumber()
+  const largeNano = durationFieldsToNano(durationFields)
+  const divisor = nanoInUnit[unitName]
+  const [fullUnit, remainder] = largeNano.divModTrunc(divisor)
+  return fullUnit.toNumber() + (remainder / divisor)
 }
 
 export function totalRelativeDuration(
@@ -214,23 +216,19 @@ function nudgeDurationTime(
   roundingMode,
   roundingIncrement,
 ) {
-  const nano = durationTimeToNanoseconds(durationFields)
-  const roundedNano = roundNanoseconds(
-    nano,
-    nanosecondsInUnit[smallestUnit] * roundingIncrement,
-    roundingMode,
-  )
-
-  const [durationTimeFields, dayDelta] = nanosecondsToDurationTime(roundedNano)
-  const nudgedDurationFields = {
+  const timeNano = durationFieldsToTimeNano(durationFields)
+  const roundedTimeNano = roundNano(timeNano, smallestUnit, roundingMode, roundingIncrement)
+  const roundedFields = nanoToDurationFields(roundedTimeNano)
+  const dayDelta = roundedFields.days
+  const nudgedDurationFields = { // TODO: what about sign?
     ...durationFields,
+    ...roundedFields,
     days: durationFields.days + dayDelta,
-    ...durationTimeFields,
   }
 
   return [
     nudgedDurationFields,
-    endEpochNanoseconds.add(roundedNano - nano),
+    endEpochNanoseconds.add(roundedTimeNano - timeNano),
     dayDelta,
   ]
 }
@@ -247,9 +245,8 @@ function nudgeRelativeDurationTime(
   moveMarker,
 ) {
   const { sign } = durationFields
-  const divisor = nanosecondsInUnit[smallestUnit] * roundingIncrement
-  const nano = durationTimeToNanoseconds(durationFields)
-  let roundedNano = roundNanoseconds(nano, divisor, roundingMode)
+  const timeNano = durationFieldsToTimeNano(durationFields)
+  let roundedTimeNano = roundNano(timeNano, smallestUnit, roundingMode, roundingIncrement)
 
   const [dayEpochNanoseconds0, dayEpochNanoseconds1] = clampRelativeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
@@ -262,22 +259,22 @@ function nudgeRelativeDurationTime(
   )
 
   const daySpanEpochNanoseconds = dayEpochNanoseconds1.subtract(dayEpochNanoseconds0).toNumber()
-  const beyondDay = roundedNano - daySpanEpochNanoseconds
+  const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
   let dayDelta = 0
 
   if (!beyondDay || Math.sign(beyondDay) === sign) {
     dayDelta++
-    roundedNano = roundNanoseconds(beyondDay, divisor, roundingMode)
-    endEpochNanoseconds = dayEpochNanoseconds1.add(roundedNano)
+    roundedTimeNano = roundNano(beyondDay, smallestUnit, roundingMode, roundingIncrement)
+    endEpochNanoseconds = dayEpochNanoseconds1.add(roundedTimeNano)
   } else {
-    endEpochNanoseconds = dayEpochNanoseconds0.add(roundedNano)
+    endEpochNanoseconds = dayEpochNanoseconds0.add(roundedTimeNano)
   }
 
-  const [durationTimeFields] = nanosecondsToDurationTime(roundedNano)
+  const durationTimeFields = timeNanoToDurationFields(roundedTimeNano)
   const nudgedDurationFields = {
     ...durationFields,
-    days: durationFields.days + dayDelta,
     ...durationTimeFields,
+    days: durationFields.days + dayDelta,
   }
 
   return [nudgedDurationFields, endEpochNanoseconds, dayDelta]
@@ -380,32 +377,4 @@ function clampRelativeDuration(
 }
 
 function clearDurationFields(durationFields, firstUnit, lastUnit) {
-}
-
-// Duration Time
-// -------------
-
-function durationTimeToNanoseconds(
-  durationTimeFields, // time-fields must be cumulatively less than a day
-) {
-  // returns Number
-}
-
-function nanosecondsToDurationTime(
-  nanoseconds, // can be signed
-) {
-  // returns [durationTimeFields, dayDelta]
-}
-
-// Duration Day-Time
-// -----------------
-
-function durationDayTimeToNanoseconds(
-  durationFields, // NOT BALANCED
-) {
-  // returns LargeInt
-}
-
-function nanosecondsToDurationDayTime(largeNano) {
-  // returns DurationFields (even tho year/week/month will be 0)
 }

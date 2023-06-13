@@ -1,11 +1,28 @@
 import { isoTimeFieldNames } from './isoFields'
+import {
+  arbitraryFieldsToLargeNano,
+  hourIndex,
+  nanoInUnit,
+  nanoToArbitraryFields,
+  unitIndexes,
+} from './isoMath'
 import { toIntegerWithoutRounding } from './options'
 import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './util'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
 
-// Ordered alphabetically
+// Ordered by ascending size
+const durationTimeFieldRefiners = {
+  nanoseconds: toIntegerWithoutRounding,
+  microseconds: toIntegerWithoutRounding,
+  milliseconds: toIntegerWithoutRounding,
+  seconds: toIntegerWithoutRounding,
+  minutes: toIntegerWithoutRounding,
+  hours: toIntegerWithoutRounding,
+}
+
+// Ordered by ascending size
 const durationDateFieldRefiners = {
   days: toIntegerWithoutRounding,
   months: toIntegerWithoutRounding,
@@ -13,29 +30,20 @@ const durationDateFieldRefiners = {
   years: toIntegerWithoutRounding,
 }
 
-// Ordered alphabetically
-const durationTimeFieldRefiners = {
-  hours: toIntegerWithoutRounding,
-  microseconds: toIntegerWithoutRounding,
-  milliseconds: toIntegerWithoutRounding,
-  minutes: toIntegerWithoutRounding,
-  nanoseconds: toIntegerWithoutRounding,
-  seconds: toIntegerWithoutRounding,
-}
-
-// Unordered
+// Ordered by ascending size
 export const durationFieldRefiners = {
-  ...durationDateFieldRefiners,
   ...durationTimeFieldRefiners,
+  ...durationDateFieldRefiners,
 }
 
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-const durationDateFieldNames = Object.keys(durationDateFieldRefiners)
-const durationTimeFieldNames = Object.keys(durationTimeFieldRefiners)
-export const durationFieldNames = Object.keys(durationFieldRefiners).sort()
-const durationInternalNames = [...durationFieldNames, 'sign']
+const durationDateFieldNames = Object.keys(durationDateFieldRefiners).sort()
+const durationTimeFieldNames = Object.keys(durationTimeFieldRefiners).sort()
+export const durationFieldNamesAsc = Object.keys(durationFieldRefiners)
+export const durationFieldNames = durationFieldNamesAsc.sort()
+const durationInternalNames = [...durationFieldNames, 'sign'] // unordered
 
 // Getters
 // -------------------------------------------------------------------------------------------------
@@ -72,7 +80,7 @@ export function durationTimeFieldsToIso(durationTimeFields) {
   return remapProps(durationTimeFields, durationTimeFieldNames, isoTimeFieldNames)
 }
 
-// Math
+// Field Math
 // -------------------------------------------------------------------------------------------------
 
 export function addDurationFields(durationFields0, durationFields1, sign) {
@@ -94,4 +102,29 @@ export function durationHasDateParts(internals) {
 function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
   // should throw error if mismatch
   // TODO: audit repeat uses of this
+}
+
+// Nano Math
+// -------------------------------------------------------------------------------------------------
+
+export function durationFieldsToNano(durationFields, largestUnit = 'day') {
+  return arbitraryFieldsToLargeNano(durationFields, unitIndexes[largestUnit], durationFieldNamesAsc)
+}
+
+export function durationFieldsToTimeNano(durationFields) {
+  return arbitraryFieldsToLargeNano(durationFields, hourIndex, durationFieldNamesAsc).toNumber()
+}
+
+export function nanoToDurationFields(largeNano, largestUnit = 'day') {
+  const divisor = nanoInUnit[largestUnit]
+  const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
+
+  return {
+    ...nanoToArbitraryFields(remainder, unitIndexes[largestUnit] - 1, durationFieldNamesAsc),
+    [largestUnit]: largeUnitNum.toNumber(),
+  }
+}
+
+export function timeNanoToDurationFields(nano) {
+  return nanoToArbitraryFields(nano, hourIndex, durationFieldNamesAsc)
 }
