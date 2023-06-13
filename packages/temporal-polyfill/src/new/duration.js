@@ -28,7 +28,7 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { identityFunc, noop } from './util'
+import { identityFunc, noop } from './utils'
 
 export const [
   Duration,

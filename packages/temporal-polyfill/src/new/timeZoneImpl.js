@@ -9,10 +9,10 @@ import {
   isoArgsToEpochSec,
   isoToEpochNano,
   isoToEpochSec,
-  milliInSec, nanoInSec, secInDay,
 } from './isoMath'
 import { parseOffsetNano } from './isoParse'
-import { clamp, compareNumbers, createLazyMap } from './util'
+import { milliInSec, nanoInSec, secInDay } from './units'
+import { clamp, compareNumbers, createLazyMap } from './utils'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)

@@ -15,7 +15,7 @@ import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { mapArrayToProps, noop, removeUndefines } from './util'
+import { mapArrayToProps, noop, removeUndefines } from './utils'
 
 export const calendarProtocolMethods = {
   ...mapArrayToProps(dateGetterNames, (propName) => {

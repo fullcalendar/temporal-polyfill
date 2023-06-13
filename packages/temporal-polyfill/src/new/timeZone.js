@@ -9,7 +9,7 @@ import { parseTimeZoneId } from './isoParse'
 import { toDisambiguation } from './options'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
-import { noop } from './util'
+import { noop } from './utils'
 
 export const timeZoneProtocolMethods = {
   getPossibleInstantsFor(impl, plainDateTimeArg) {

@@ -8,7 +8,7 @@ import {
   isObjectLike,
   mapProps,
   noop,
-} from './util'
+} from './utils'
 
 // Wrapper Class
 // -------------------------------------------------------------------------------------------------

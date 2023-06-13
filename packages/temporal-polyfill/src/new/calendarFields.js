@@ -1,6 +1,6 @@
 import { isoTimeFieldNames } from './isoFields'
 import { toBoolean, toInteger, toIntegerThrowOnInfinity, toPositiveInteger } from './options'
-import { mapArrayToProps, remapProps, zipSingleValue } from './util'
+import { mapArrayToProps, remapProps, zipSingleValue } from './utils'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------

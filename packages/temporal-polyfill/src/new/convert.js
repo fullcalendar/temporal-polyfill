@@ -36,7 +36,7 @@ import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { isObjectLike, pluckProps, removeDuplicateStrings } from './util'
+import { isObjectLike, pluckProps, removeDuplicateStrings } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
 // ZonedDateTime

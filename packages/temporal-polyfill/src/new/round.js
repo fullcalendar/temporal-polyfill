@@ -9,13 +9,15 @@ import {
 import { isoTimeFieldDefaults } from './isoFields'
 import {
   isoTimeFieldsToNano,
-  nanoInUnit,
-  nanoInUtcDay,
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { addDaysToIsoFields } from './move'
+import {
+  nanoInUnit,
+  nanoInUtcDay,
+} from './units'
 import { computeNanosecondsInDay } from './timeZoneOps'
-import { identityFunc } from './util'
+import { identityFunc } from './utils'
 
 export function roundToMinute(nanoseconds) { // can be positive or negative
 

@@ -10,7 +10,7 @@ import {
   toIntegerWithoutRounding,
   toPositiveInteger,
 } from './options'
-import { mapRefiners, pluckProps, zipSingleValue } from './util'
+import { mapRefiners, pluckProps, zipSingleValue } from './utils'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------

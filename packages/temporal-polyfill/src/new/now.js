@@ -9,7 +9,7 @@ import { createPlainDate } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime } from './plainTime'
 import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
-import { createPropDescriptors, createTemporalNameDescriptors } from './util'
+import { createPropDescriptors, createTemporalNameDescriptors } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const Now = Object.defineProperties({}, {

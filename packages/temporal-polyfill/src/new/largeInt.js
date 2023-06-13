@@ -1,4 +1,4 @@
-import { compareNumbers, divMod } from './util'
+import { compareNumbers, divMod } from './utils'
 
 const maxLow = 1e8 // exclusive // TODO: explain why
 

@@ -11,15 +11,15 @@ import { isoTimeFieldDefaults } from './isoFields'
 import {
   epochNanoToIso,
   isoToEpochNano,
-  nanoInUtcDay,
 } from './isoMath'
 import { addDaysToIsoFields } from './move'
+import { nanoInUtcDay } from './units'
 import { strictArray, strictNumber } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { TimeZone, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
-import { createLazyMap } from './util'
+import { createLazyMap } from './utils'
 
 export const utcTimeZoneId = 'UTC'
 

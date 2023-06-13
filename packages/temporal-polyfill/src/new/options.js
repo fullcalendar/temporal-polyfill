@@ -1,7 +1,7 @@
 import { durationFieldNamesAsc } from './durationFields'
-import { unitIndexes } from './isoMath'
 import { bigIntToLargeInt } from './largeInt'
-import { mapArrayToProps } from './util'
+import { unitIndexes } from './units'
+import { mapArrayToProps } from './utils'
 
 // TODO: for unit parsing, ensure ceiling and correct increment
 

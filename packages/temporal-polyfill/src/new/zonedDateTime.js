@@ -28,12 +28,12 @@ import {
 import {
   epochGetters,
   epochNanoToIso,
-  nanoInHour,
   validateEpochNano,
 } from './isoMath'
 import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
+import { nanoInHour } from './units'
 import { optionsToOverflow, toEpochNano } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
@@ -47,7 +47,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { mapProps } from './util'
+import { mapProps } from './utils'
 
 export const [
   ZonedDateTime,

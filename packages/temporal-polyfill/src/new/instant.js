@@ -23,7 +23,7 @@ import { moveEpochNano } from './move'
 import { toEpochNano, toObject } from './options'
 import { roundLargeNano } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
-import { noop } from './util'
+import { noop } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const [

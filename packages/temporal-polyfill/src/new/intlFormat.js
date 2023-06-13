@@ -9,7 +9,7 @@ import {
   hasAnyMatchingProps,
   identityFunc,
   zipSingleValue,
-} from './util'
+} from './utils'
 
 export const standardCalendarId = 'en-GB' // gives 24-hour clock
 

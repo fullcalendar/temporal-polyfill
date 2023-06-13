@@ -14,7 +14,7 @@ import { strictArray, toObject, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
-import { mapProps } from './util'
+import { mapProps } from './utils'
 
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 

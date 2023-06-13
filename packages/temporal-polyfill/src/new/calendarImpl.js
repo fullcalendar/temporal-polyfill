@@ -40,7 +40,7 @@ import {
 } from './isoMath'
 import { addDaysMilli, addIntlMonths, addIsoMonths, moveDate } from './move'
 import { constrainInt } from './options'
-import { buildWeakMapCache, createLazyMap, mapArrayToProps, twoDigit } from './util'
+import { buildWeakMapCache, createLazyMap, mapArrayToProps, twoDigit } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
