@@ -1,6 +1,6 @@
 import { durationFieldNamesAsc } from './durationFields'
 import { bigIntToLargeInt } from './largeInt'
-import { unitIndexes } from './units'
+import { unitIndexes, unitNamesAsc } from './units'
 import { mapArrayToProps } from './utils'
 
 // TODO: for unit parsing, ensure ceiling and correct increment
@@ -194,6 +194,7 @@ export function validateRoundingOptions(options) {
 }
 
 export function optionsToLargestUnit() {
+  // TODO: rename to optionsToLargestUnitIndex
 }
 
 export function optionsToOverflow(options) {
@@ -201,6 +202,7 @@ export function optionsToOverflow(options) {
 }
 
 export function optionsToTotalUnit() {
+  // TODO: rename to optionsToTotalUnitIndex
 }
 
 export function optionsToRelativeTo() {
@@ -208,6 +210,7 @@ export function optionsToRelativeTo() {
 }
 
 export function optionsToSmallestUnit(options) {
+  // TODO: rename to optionsToSmallestUnitIndex
 }
 
 export function optionsToRoundingIncrement(options) {
@@ -220,8 +223,8 @@ export function overflowToOptions(overflow) {
   return { overflow }
 }
 
-export function largestUnitToOptions(largestUnit) {
-  return { largestUnit }
+export function largestUnitToOptions(largestUnitIndex) {
+  return { largestUnit: unitNamesAsc[largestUnitIndex] }
 }
 
 // Units

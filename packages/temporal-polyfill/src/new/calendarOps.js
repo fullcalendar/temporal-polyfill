@@ -14,6 +14,7 @@ import { strictArray, toObject, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
+import { unitNamesAsc } from './units'
 import { mapProps } from './utils'
 
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
@@ -68,12 +69,12 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
     )
   },
 
-  dateUntil(calendar, isoDateFields0, isoDateFields1, largestUnit) {
+  dateUntil(calendar, isoDateFields0, isoDateFields1, largestUnitIndex) {
     return getPlainDateInternals(
       calendar.dateUntil(
         createPlainDate(isoDateFields0),
         createPlainDate(isoDateFields1),
-        { largestUnit },
+        { largestUnit: unitNamesAsc[largestUnitIndex] },
       ),
     )
   },

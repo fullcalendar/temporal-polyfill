@@ -177,8 +177,8 @@ class IsoCalendarImpl {
     return moveDate(this, isoDateFields, durationFields, overflow)
   }
 
-  dateUntil(startIsoDateFields, endIsoDateFields, largestUnit) {
-    return diffDatesExact(this, startIsoDateFields, endIsoDateFields, largestUnit)
+  dateUntil(startIsoDateFields, endIsoDateFields, largestUnitIndex) {
+    return diffDatesExact(this, startIsoDateFields, endIsoDateFields, largestUnitIndex)
   }
 
   // Field Refining
