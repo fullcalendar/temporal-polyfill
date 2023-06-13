@@ -4,10 +4,8 @@ import {
   dayIndex,
   givenFieldsToLargeNano,
   hourIndex,
-  nanoInUnit,
   nanoToGivenFields,
-  unitIndexes,
-  unitNamesAsc,
+  unitIndexToNano,
 } from './units'
 import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './utils'
 
@@ -118,7 +116,7 @@ export function durationFieldsToTimeNano(durationFields) {
 }
 
 export function nanoToDurationFields(largeNano, largestUnitIndex = dayIndex) {
-  const divisor = nanoInUnit[unitNamesAsc[largestUnitIndex]] // best to use unitNamesAsc?
+  const divisor = unitIndexToNano[largestUnitIndex]
   const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
 
   return {

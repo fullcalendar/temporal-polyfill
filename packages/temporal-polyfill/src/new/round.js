@@ -8,13 +8,10 @@ import {
   timeNanoToDurationFields,
 } from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
-import {
-  isoTimeFieldsToNano,
-  nanoToIsoTimeAndDay,
-} from './isoMath'
+import { isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './isoMath'
 import { addDaysToIsoFields } from './move'
 import { computeNanosecondsInDay } from './timeZoneOps'
-import { dayIndex, nanoInUnit, nanoInUtcDay, nanoIndex, unitNamesAsc, weekIndex } from './units'
+import { dayIndex, nanoInUtcDay, nanoIndex, unitIndexToNano, weekIndex } from './units'
 import { identityFunc } from './utils'
 
 export function roundToMinute(nanoseconds) { // can be positive or negative
@@ -149,7 +146,7 @@ export function roundRelativeDuration(
 // -------------------------------------------------------------------------------------------------
 
 export function roundLargeNano(largeNano, smallestUnitIndex, roundingMode, roundingIncrement) {
-  const divisor = nanoInUnit[unitNamesAsc[smallestUnitIndex]] * roundingIncrement
+  const divisor = unitIndexToNano[smallestUnitIndex] * roundingIncrement
   const [n, remainder] = largeNano.divModTrunc(divisor)
   return n.mult(divisor).add(roundWithMode(remainder / divisor, roundingMode))
 }
@@ -157,7 +154,7 @@ export function roundLargeNano(largeNano, smallestUnitIndex, roundingMode, round
 export function roundNano(nano, smallestUnitIndex, roundingMode, roundingIncrement) {
   return roundWithDivisor(
     nano,
-    nanoInUnit[unitNamesAsc[smallestUnitIndex]] * roundingIncrement,
+    unitIndexToNano[smallestUnitIndex] * roundingIncrement,
     roundingMode,
   )
 }
@@ -174,10 +171,10 @@ function roundWithMode(num, roundingMode) {
 
 export function totalDayTimeDuration( // assumes iso-length days
   durationFields,
-  unitName,
+  totalUnitIndex,
 ) {
   const largeNano = durationFieldsToNano(durationFields)
-  const divisor = nanoInUnit[unitName]
+  const divisor = unitIndexToNano[totalUnitIndex]
   const [fullUnit, remainder] = largeNano.divModTrunc(divisor)
   return fullUnit.toNumber() + (remainder / divisor)
 }
