@@ -15,7 +15,7 @@ import {
 } from './convert'
 import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
-import { negateDurationFields } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import {
   generatePublicIsoDateFields,
   isoTimeFieldDefaults,
@@ -98,7 +98,7 @@ export const [
     subtract(internals, durationArg, options) {
       return internals.calendar.dateAdd(
         internals,
-        negateDurationFields(toDurationInternals(durationArg)),
+        negateDurationInternals(toDurationInternals(durationArg)),
         options,
       )
     },

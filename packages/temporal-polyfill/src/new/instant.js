@@ -3,7 +3,7 @@ import { queryCalendarOps } from './calendarOps'
 import { createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
 import { toDurationInternals } from './duration'
-import { negateDurationFields } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import {
   formatCalendar,
   formatIsoDateTimeFields,
@@ -95,7 +95,7 @@ export const [
       return createInstant(
         moveEpochNano(
           epochNanoseconds,
-          negateDurationFields(toDurationInternals(durationArg)),
+          negateDurationInternals(toDurationInternals(durationArg)),
         ),
       )
     },

@@ -9,7 +9,7 @@ import {
 } from './convert'
 import { diffZonedEpochNano } from './diff'
 import { toDurationInternals } from './duration'
-import { negateDurationFields } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import { createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
 import {
@@ -206,7 +206,7 @@ export const [
       return createZonedDateTime(
         moveZonedDateTimeInternals(
           internals,
-          negateDurationFields(toDurationInternals(durationArg)),
+          negateDurationInternals(toDurationInternals(durationArg)),
           options,
         ),
       )

@@ -10,7 +10,7 @@ import {
 } from './convert'
 import { diffDateTimes } from './diff'
 import { toDurationInternals } from './duration'
-import { negateDurationFields } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import {
   generatePublicIsoDateTimeFields,
   isoTimeFieldDefaults,
@@ -138,7 +138,7 @@ export const [
         moveDateTime(
           internals.calendar,
           internals,
-          negateDurationFields(toDurationInternals(durationArg)),
+          negateDurationInternals(toDurationInternals(durationArg)),
           optionsToOverflow(options),
         ),
       )

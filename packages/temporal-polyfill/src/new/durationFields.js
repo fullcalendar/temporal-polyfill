@@ -49,11 +49,6 @@ export function refineDurationInternals(rawDurationFields) {
   return updateDurationFieldsSign(mapRefiners(rawDurationFields, durationFieldRefiners))
 }
 
-export function updateDurationFieldsSign(fields) {
-  fields.sign = computeDurationFieldsSign(fields)
-  return fields
-}
-
 export function durationTimeFieldsToIso(durationTimeFields) {
   return remapProps(durationTimeFields, durationTimeFieldNames, isoTimeFieldNames)
 }
@@ -93,16 +88,37 @@ export function timeNanoToDurationFields(nano) {
 // Field Math
 // -------------------------------------------------------------------------------------------------
 
-export function addDurationFields(durationFields0, durationFields1, sign) {
-  // recomputes sign
+export function updateDurationFieldsSign(fields) {
+  fields.sign = computeDurationFieldsSign(fields)
+  return fields // returns 'internals'
 }
 
-export function negateDurationFields(internals) {
-  // recomputes sign
+export function addDurationFields(a, b, sign) { // TODO: make version that updates sign?
+  const res = {}
+
+  for (const fieldName in durationFieldNames) {
+    res[fieldName] = a[fieldName] + b[fieldName] * sign
+  }
+
+  return res
 }
 
-export function absolutizeDurationFields(internals) {
-  // recomputes sign
+export function negateDurationInternals(internals) {
+  const res = {}
+
+  for (const fieldName in durationFieldNames) {
+    res[fieldName] = internals[fieldName] * -1 || 0
+  }
+
+  res.sign = -internals.sign || 0
+  return res
+}
+
+export function absDurationInternals(internals) {
+  if (internals.sign === -1) {
+    return negateDurationInternals(internals)
+  }
+  return internals
 }
 
 export function durationHasDateParts(internals) {
@@ -110,6 +126,18 @@ export function durationHasDateParts(internals) {
 }
 
 function computeDurationFieldsSign(internals, fieldNames = durationFieldNames) {
-  // should throw error if mismatch
-  // TODO: audit repeat uses of this
+  let sign = 0
+
+  for (const fieldName in durationFieldNames) {
+    const fieldSign = Math.sign(internals[fieldName])
+
+    if (fieldSign) {
+      if (sign && sign !== fieldSign) {
+        throw new RangeError('Cant have mixed signs')
+      }
+      sign = fieldSign
+    }
+  }
+
+  return sign
 }

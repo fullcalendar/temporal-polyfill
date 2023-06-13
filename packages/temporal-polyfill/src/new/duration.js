@@ -2,11 +2,11 @@ import { createTemporalClass, neverValueOf } from './class'
 import { mergeDurationBag, refineDurationBag } from './convert'
 import { diffZonedEpochNano } from './diff'
 import {
-  absolutizeDurationFields,
+  absDurationInternals,
   addDurationFields,
   durationFieldsToNano,
   durationGetters,
-  negateDurationFields,
+  negateDurationInternals,
   refineDurationInternals,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
@@ -102,11 +102,11 @@ export const [
     subtract: addToDuration.bind(undefined, -1),
 
     negated(internals) {
-      return createDuration(negateDurationFields(internals))
+      return createDuration(negateDurationInternals(internals))
     },
 
     abs(internals) {
-      return createDuration(absolutizeDurationFields(internals))
+      return createDuration(absDurationInternals(internals))
     },
 
     round(internals, options) {

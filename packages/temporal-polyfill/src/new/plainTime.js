@@ -7,7 +7,7 @@ import {
 } from './convert'
 import { diffTimes } from './diff'
 import { createDuration, toDurationInternals } from './duration'
-import { negateDurationFields } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import { pluckIsoTimeFields, refineIsoTimeInternals } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { compareIsoTimeFields } from './isoMath'
@@ -91,7 +91,7 @@ export const [
       return createPlainTime(
         moveTime(
           internals,
-          negateDurationFields(toDurationInternals(durationArg)),
+          negateDurationInternals(toDurationInternals(durationArg)),
         )[0],
       )
     },

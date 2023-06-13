@@ -10,7 +10,7 @@ import {
 } from './convert'
 import { diffDates } from './diff'
 import { toDurationInternals } from './duration'
-import { negateDurationFields } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
@@ -75,7 +75,7 @@ export const [
       return movePlainYearMonth(
         this,
         internals.calendar,
-        negateDurationFields(toDurationInternals(durationArg)),
+        negateDurationInternals(toDurationInternals(durationArg)),
         optionsToOverflow(options),
       )
     },
