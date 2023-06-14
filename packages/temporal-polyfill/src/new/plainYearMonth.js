@@ -15,7 +15,7 @@ import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainYearMonth } from './isoParse'
-import { optionsToOverflow } from './options'
+import { refineOverflowOptions } from './options'
 
 export const [
   PlainYearMonth,
@@ -47,7 +47,7 @@ export const [
   parsePlainYearMonth,
 
   // handleUnusedOptions
-  optionsToOverflow,
+  refineOverflowOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ export const [
         this,
         internals.calendar,
         toDurationInternals(durationArg),
-        optionsToOverflow(options),
+        refineOverflowOptions(options),
       )
     },
 
@@ -76,7 +76,7 @@ export const [
         this,
         internals.calendar,
         negateDurationInternals(toDurationInternals(durationArg)),
-        optionsToOverflow(options),
+        refineOverflowOptions(options),
       )
     },
 

@@ -27,10 +27,10 @@ import {
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
-  optionsToOverflow,
+  normalizeOptions,
+  refineOverflowOptions,
+  refineZonedFieldOptions,
   toObject,
-  toObjectOptional,
-  toZonedRefiningOptions,
 } from './options'
 import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
@@ -51,7 +51,7 @@ export function refineZonedDateTimeBag(bag, options) {
     [...getRequiredDateFields(calendar), 'timeZone'], // requireFields
     ['timeZone', 'offset'], // forcedValidFieldNames
   )
-  const { overflow, offset, disambiguation } = toZonedRefiningOptions(options)
+  const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
 
   const timeZone = queryTimeZoneOps(fields.timeZone)
   const isoDateFields = calendar.dateFromFields(fields, overflow)
@@ -62,8 +62,8 @@ export function refineZonedDateTimeBag(bag, options) {
     { ...isoDateFields, ...isoTimeFields },
     fields.offset !== undefined && parseOffsetNano(fields.offset),
     false, // z?
-    offset,
-    disambiguation,
+    offsetDisambig,
+    epochDisambig,
     false, // fuzzy
   )
 
@@ -83,7 +83,7 @@ export function mergeZonedDateTimeBag(zonedDateTime, bag, options) {
     dateTimeFieldNames, // validFieldNames
     ['offset'], // forcedValidFieldNames
   )
-  const { overflow, offset, disambiguation } = toZonedRefiningOptions(options)
+  const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
 
   const isoDateFields = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeFields(fields, overflow)
@@ -93,8 +93,8 @@ export function mergeZonedDateTimeBag(zonedDateTime, bag, options) {
     { ...isoDateFields, ...isoTimeFields },
     parseOffsetNano(fields.offset),
     false, // z?
-    offset,
-    disambiguation,
+    offsetDisambig,
+    epochDisambig,
     false, // fuzzy
   )
 
@@ -110,7 +110,7 @@ export function createZonedDateTimeConverter(getExtraIsoFields) {
     const { calendar, timeZone } = internals
     const epochNanoseconds = getSingleInstantFor(timeZone, {
       ...internals,
-      ...getExtraIsoFields(toObjectOptional(options)),
+      ...getExtraIsoFields(normalizeOptions(options)),
     })
 
     return createZonedDateTime({
@@ -133,7 +133,7 @@ export function refinePlainDateTimeBag(bag, options) {
     getRequiredDateFields(calendar),
   )
 
-  const overflow = optionsToOverflow(options)
+  const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeFields(fields, overflow)
 
@@ -149,7 +149,7 @@ export function mergePlainDateTimeBag(plainDate, bag, options) {
     dateTimeFieldNames,
   )
 
-  const overflow = optionsToOverflow(options)
+  const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeFields(fields, overflow)
 
@@ -167,7 +167,7 @@ export function refinePlainDateBag(bag, options, calendar = getBagCalendarOps(ba
     getRequiredDateFields(calendar),
   )
 
-  return calendar.dateFromFields(fields, optionsToOverflow(options))
+  return calendar.dateFromFields(fields, refineOverflowOptions(options))
 }
 
 export function mergePlainDateBag(plainDate, bag, options) {
@@ -179,7 +179,7 @@ export function mergePlainDateBag(plainDate, bag, options) {
     dateFieldNames,
   )
 
-  return calendar.dateFromFields(fields, optionsToOverflow(options))
+  return calendar.dateFromFields(fields, refineOverflowOptions(options))
 }
 
 function convertToIso(
@@ -214,7 +214,7 @@ export function refinePlainYearMonthBag(bag, options, calendar = getBagCalendarO
     getRequiredYearMonthFields(calendar),
   )
 
-  return calendar.yearMonthFromFields(fields, optionsToOverflow(options))
+  return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
 }
 
 export function mergePlainYearMonthBag(plainYearMonth, bag, options) {
@@ -226,7 +226,7 @@ export function mergePlainYearMonthBag(plainYearMonth, bag, options) {
     yearMonthFieldNames,
   )
 
-  return calendar.yearMonthFromFields(fields, optionsToOverflow(options))
+  return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
 }
 
 export function convertToPlainYearMonth(
@@ -280,7 +280,7 @@ export function refinePlainMonthDayBag(bag, options, calendar = extractBagCalend
     fields.year = isoEpochFirstLeapYear
   }
 
-  return calendar.monthDayFromFields(calendar, fields, optionsToOverflow(options))
+  return calendar.monthDayFromFields(calendar, fields, refineOverflowOptions(options))
 }
 
 export function mergePlainMonthDayBag(plainMonthDay, bag, options) {
@@ -292,7 +292,7 @@ export function mergePlainMonthDayBag(plainMonthDay, bag, options) {
     dateFieldNames,
   )
 
-  return calendar.monthDayFromFields(fields, optionsToOverflow(options))
+  return calendar.monthDayFromFields(fields, refineOverflowOptions(options))
 }
 
 export function convertToPlainMonthDay(
@@ -323,7 +323,7 @@ export function convertPlainMonthDayToDate(plainMonthDay, bag) {
 export function refinePlainTimeBag(bag, options) {
   const fields = refineFields(bag, timeFieldNames, [])
 
-  return refineTimeFields(fields, optionsToOverflow(options))
+  return refineTimeFields(fields, refineOverflowOptions(options))
 }
 
 export function mergePlainTimeBag(plainTime, bag, options) {
@@ -331,7 +331,7 @@ export function mergePlainTimeBag(plainTime, bag, options) {
   const partialFields = refineFields(bag, timeFieldNames)
   const mergeFields = { ...fields, ...partialFields }
 
-  return refineTimeFields(mergeFields, optionsToOverflow(options))
+  return refineTimeFields(mergeFields, refineOverflowOptions(options))
 }
 
 function refineTimeFields(fields, overflow) {

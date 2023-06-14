@@ -14,7 +14,7 @@ import {
   refinePlainDateBag,
 } from './convert'
 import { diffDates } from './diff'
-import { toDurationInternals } from './duration'
+import { createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import {
   generatePublicIsoDateFields,
@@ -25,10 +25,11 @@ import {
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDate } from './isoParse'
-import { optionsToOverflow } from './options'
+import { invertRoundingMode, refineDiffOptions, refineOverflowOptions } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { zonedInternalsToIso } from './timeZoneOps'
+import { dayIndex, yearIndex } from './units'
 
 export const [
   PlainDate,
@@ -65,7 +66,7 @@ export const [
   parsePlainDate,
 
   // handleUnusedOptions
-  optionsToOverflow,
+  refineOverflowOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
@@ -106,13 +107,22 @@ export const [
     until(internals, otherArg, options) {
       const otherInternals = toPlainDateInternals(otherArg)
       const calendar = getCommonCalendarOps(internals, otherInternals)
-      return diffDates(calendar, internals, otherInternals, options, 1)
+      const optionsTuple = refineDiffOptions(options, dayIndex, yearIndex, dayIndex)
+
+      return createDuration(
+        diffDates(calendar, internals, otherInternals, ...optionsTuple),
+      )
     },
 
     since(internals, otherArg, options) {
       const otherInternals = toPlainDateInternals(otherArg)
       const calendar = getCommonCalendarOps(internals, otherInternals)
-      return diffDates(calendar, internals, otherInternals, options, -1)
+      const optionsTuple = refineDiffOptions(options, dayIndex, yearIndex, dayIndex)
+      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
+
+      return createDuration(
+        diffDates(calendar, otherInternals, internals, ...optionsTuple),
+      )
     },
 
     equals(internals, other) {

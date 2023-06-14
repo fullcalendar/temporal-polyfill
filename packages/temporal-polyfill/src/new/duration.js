@@ -15,12 +15,10 @@ import { parseDuration } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
-  optionsToLargestUnit,
-  optionsToRelativeTo,
-  optionsToRoundingIncrement,
-  optionsToRoundingMode,
-  optionsToSmallestUnit,
-  optionsToTotalUnit,
+  refineDurationRoundOptions,
+  refineRelativeToOptions,
+  refineTimeDisplayOptions,
+  refineTotalOptions,
 } from './options'
 import {
   roundDayTimeDuration,
@@ -110,11 +108,13 @@ export const [
     },
 
     round(internals, options) {
-      const largestUnitIndex = optionsToLargestUnit(options) // accepts auto?
-      const smallestUnitIndex = optionsToSmallestUnit(options)
-      const roundingIncrement = optionsToRoundingIncrement(options)
-      const roundingMode = optionsToRoundingMode(options)
-      const markerInternals = optionsToRelativeTo(options) // optional
+      const [
+        largestUnitIndex,
+        smallestUnitIndex,
+        roundingIncrement,
+        roundingMode,
+        markerInternals,
+      ] = refineDurationRoundOptions(options, getLargestDurationUnit(internals))
 
       // TODO: move to round.js?
 
@@ -140,8 +140,7 @@ export const [
     },
 
     total(internals, options) {
-      const totalUnitIndex = optionsToTotalUnit(options)
-      const markerInternals = optionsToRelativeTo(options) // optional
+      const [totalUnitIndex, markerInternals] = refineTotalOptions(options)
       const largestUnitIndex = getLargestDurationUnit(internals)
 
       if (largestUnitIndex < dayIndex || (largestUnitIndex === dayIndex && !markerInternals)) {
@@ -161,7 +160,9 @@ export const [
       )
     },
 
-    toString: formatDurationInternals,
+    toString(internals, options) {
+      return formatDurationInternals(internals, ...refineTimeDisplayOptions(options))
+    },
 
     valueOf: neverValueOf,
   },
@@ -173,7 +174,7 @@ export const [
     compare(durationArg0, durationArg1, options) {
       const durationFields0 = toDurationInternals(durationArg0)
       const durationFields1 = toDurationInternals(durationArg1)
-      const markerInternals = optionsToRelativeTo(options) // optional
+      const markerInternals = refineRelativeToOptions(options)
       const largestUnitIndex = Math.max(
         getLargestDurationUnit(durationFields0),
         getLargestDurationUnit(durationFields1),
@@ -207,7 +208,7 @@ export const [
 
 function addToDuration(direction, internals, otherArg, options) {
   const otherFields = toDurationInternals(otherArg)
-  const markerInternals = optionsToRelativeTo(options) // optional
+  const markerInternals = refineRelativeToOptions(options) // optional
   const largestUnitIndex = Math.max(
     getLargestDurationUnit(internals),
     getLargestDurationUnit(otherFields),
@@ -265,4 +266,5 @@ function balanceDurationDayTime(
 
 function getLargestDurationUnit(durationFields) {
   // TODO: rename to getLargestDurationUnitIndex
+  // TODO: move to DurationFields math
 }

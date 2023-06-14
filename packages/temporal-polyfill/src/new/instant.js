@@ -20,9 +20,10 @@ import {
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
-import { toEpochNano, toObject } from './options'
+import { refineRoundOptions, toEpochNano, toObject } from './options'
 import { roundLargeNano } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
+import { hourIndex } from './units'
 import { noop } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -120,7 +121,7 @@ export const [
       return createInstant(
         roundLargeNano(
           epochNanoseconds,
-          options, // TODO: break apart options
+          ...refineRoundOptions(options, hourIndex),
         ),
       )
     },

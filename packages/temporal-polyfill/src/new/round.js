@@ -14,7 +14,7 @@ import { computeNanosecondsInDay } from './timeZoneOps'
 import { dayIndex, nanoInUtcDay, nanoIndex, unitIndexToNano, weekIndex } from './units'
 import { identityFunc } from './utils'
 
-export function roundToMinute(nanoseconds) { // can be positive or negative
+export function roundToMinute(epochNano) {
 
 }
 
@@ -32,13 +32,13 @@ export function roundIsoDateTimeFields(
   let dayDelta
 
   if (smallestUnitIndex === dayIndex) {
-    const nanosecondsInDay = timeZoneOps
+    const nanoInDay = timeZoneOps
       ? computeNanosecondsInDay(timeZoneOps, isoDateTimeFields)
       : nanoInUtcDay
 
     dayDelta = roundWithDivisor(
       isoTimeFieldsToNano(isoDateTimeFields),
-      nanosecondsInDay,
+      nanoInDay,
       roundingMode,
     )
 
@@ -209,6 +209,10 @@ export function totalRelativeDuration(
 
 // Nudge
 // -------------------------------------------------------------------------------------------------
+/*
+These functions actually do the heavy-lifting of rounding to a higher/lower marker,
+and return the (day) delta. Also return the (potentially) unbalanced new duration.
+*/
 
 function nudgeDurationTime(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
@@ -377,7 +381,7 @@ function bubbleRelativeDuration(
 
 function clampRelativeDuration(
   durationFields,
-  clampUnit,
+  clampUnit, // baaa
   clampDistance,
   // marker system...
   marker,

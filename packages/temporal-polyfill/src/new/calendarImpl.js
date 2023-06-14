@@ -39,9 +39,9 @@ import {
   isoToEpochMilli,
 } from './isoMath'
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
-import { constrainInt } from './options'
+import { rejectI } from './options'
 import { milliInDay } from './units'
-import { buildWeakMapCache, createLazyMap, mapArrayToProps, twoDigit } from './utils'
+import { buildWeakMapCache, clamp, createLazyMap, mapArrayToProps, twoDigit } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -207,12 +207,12 @@ class IsoCalendarImpl {
   refineMonth(
     fields,
     year, // optional if known that calendar doesn't support leap months
-    overflow = 'reject',
+    overflowI = rejectI,
   ) {
     let { month, monthCode } = fields
 
     if (monthCode !== undefined) {
-      const monthByCode = refineMonthCode(this, monthCode, year, overflow)
+      const monthByCode = refineMonthCode(this, monthCode, year, overflowI)
 
       if (month !== undefined && month !== monthByCode) {
         throw new RangeError('The month and monthCode do not agree')
@@ -223,20 +223,22 @@ class IsoCalendarImpl {
       throw new RangeError('Must specify either month or monthCode')
     }
 
-    return constrainInt(
-      this.readMonth(fields, year, overflow),
+    return clamp(
+      this.readMonth(fields, year, overflowI),
       1,
       this.queryMonthsInYear(year),
-      overflow,
+      overflowI,
+      'month',
     )
   }
 
-  refineDay(fields, month, year, overflow) {
-    return constrainInt(
+  refineDay(fields, month, year, overflowI) {
+    return clamp(
       fields.day, // day guaranteed to exist because of required*Fields
       1,
       this.queryDaysInMonth(year, month),
-      overflow,
+      overflowI,
+      'day',
     )
   }
 }

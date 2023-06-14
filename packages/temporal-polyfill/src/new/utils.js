@@ -1,8 +1,4 @@
 
-// in general, prefer .bind over macro functions
-
-// monitor use of floor/trunc and modding. many are wrong
-
 export function isObjectLike() {
 }
 
@@ -15,6 +11,8 @@ export function mapProps(input, refinerMap) {
 }
 
 export function mapArrayToProps() { // propNameToProps
+  // TODO: auto uses of this because often a {key:value} will take up same minification space
+  // as defining an array of strings and running it through this function
 }
 
 export function remapProps(obj, oldKeys, newKeys) {
@@ -96,7 +94,20 @@ export function twoDigit(num) { // as a string
 export function compareNumbers() {
 }
 
-export function clamp() {
+export function clamp(
+  val,
+  min,
+  max,
+  throwOnOverflow, // 0/1 (matched constrain/reject)
+  noun, // for error message (required if throwOnOverflow given)
+) {
+  const clamped = Math.min(Math.max(val, min), max)
+
+  if (throwOnOverflow && val !== clamped) {
+    throw new RangeError(`${noun} must be between ${min}-${max}`)
+  }
+
+  return clamped
 }
 
 /*

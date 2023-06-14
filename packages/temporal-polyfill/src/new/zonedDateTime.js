@@ -8,7 +8,7 @@ import {
   refineZonedDateTimeBag,
 } from './convert'
 import { diffZonedEpochNano } from './diff'
-import { toDurationInternals } from './duration'
+import { createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import { createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
@@ -33,7 +33,14 @@ import {
 import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
-import { optionsToOverflow, toEpochNano } from './options'
+import {
+  invertRoundingMode,
+  refineDiffOptions,
+  refineOverflowOptions,
+  refineRoundOptions,
+  refineZonedDateTimeDisplayOptions,
+  toEpochNano,
+} from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
@@ -46,7 +53,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { nanoInHour } from './units'
+import { hourIndex, nanoInHour } from './units'
 import { mapProps } from './utils'
 
 export const [
@@ -78,7 +85,7 @@ export const [
   parseZonedDateTime,
 
   // handleUnusedOptions
-  optionsToOverflow,
+  refineOverflowOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
@@ -214,23 +221,36 @@ export const [
 
     until(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
-      return diffZonedEpochNano(
-        getCommonCalendarOps(internals, otherInternals),
-        getCommonTimeZoneOps(internals, otherInternals),
-        internals.epochNanoseconds,
-        otherInternals.epochNanoseconds,
-        options, // TODO: spread out lots of options!!!
+      const calendar = getCommonCalendarOps(internals, otherInternals)
+      const timeZone = getCommonTimeZoneOps(internals, otherInternals)
+      const optionsTuple = refineDiffOptions(options, hourIndex)
+
+      return createDuration(
+        diffZonedEpochNano(
+          calendar,
+          timeZone,
+          internals.epochNanoseconds,
+          otherInternals.epochNanoseconds,
+          ...optionsTuple,
+        ),
       )
     },
 
     since(internals, otherArg, options) {
       const otherInternals = toZonedDateTimeInternals(otherArg)
-      return diffZonedEpochNano(
-        getCommonCalendarOps(internals, otherInternals),
-        getCommonTimeZoneOps(internals, otherInternals),
-        otherInternals.epochNanoseconds,
-        internals.epochNanoseconds,
-        options, // TODO: flip rounding options!!!!!
+      const calendar = getCommonCalendarOps(internals, otherInternals)
+      const timeZone = getCommonTimeZoneOps(internals, otherInternals)
+      const optionsTuple = refineDiffOptions(options, hourIndex)
+      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
+
+      return createDuration(
+        diffZonedEpochNano(
+          calendar,
+          timeZone,
+          otherInternals.epochNanoseconds,
+          internals.epochNanoseconds,
+          ...optionsTuple,
+        ),
       )
     },
 
@@ -242,8 +262,8 @@ export const [
 
       isoDateTimeFields = roundIsoDateTimeFields(
         isoDateTimeFields,
-        options,
-        () => computeNanosecondsInDay(timeZone, isoDateTimeFields),
+        ...refineRoundOptions(options),
+        timeZone,
       )
       epochNanoseconds = getMatchingInstantFor(
         isoDateTimeFields,
@@ -297,16 +317,20 @@ export const [
 
     toString(internals, options) {
       let { epochNanoseconds, timeZone, calendar } = internals
-
-      // TODO: don't let options be accessed twice! once by rounding, twice by formatting
+      const [
+        calendarDisplayI,
+        timeZoneDisplayI,
+        offsetDisplayI,
+        ...timeDisplayTuple
+      ] = refineZonedDateTimeDisplayOptions(options)
 
       let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
       isoDateTimeFields = roundIsoDateTimeFields(
         isoDateTimeFields,
-        options,
-        () => computeNanosecondsInDay(timeZone, isoDateTimeFields),
+        ...timeDisplayTuple,
+        timeZone,
       )
       epochNanoseconds = getMatchingInstantFor(
         isoDateTimeFields,
@@ -322,10 +346,10 @@ export const [
       offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
-      return formatIsoDateTimeFields(isoDateTimeFields, options) +
-        formatOffsetNanoseconds(offsetNanoseconds) +
-        formatTimeZone(timeZone, options) +
-        formatCalendar(calendar, options)
+      return formatIsoDateTimeFields(isoDateTimeFields, ...timeDisplayTuple) +
+        formatOffsetNanoseconds(offsetNanoseconds, offsetDisplayI) +
+        formatTimeZone(timeZone, timeZoneDisplayI) +
+        formatCalendar(calendar, calendarDisplayI)
     },
 
     toLocaleString(internals, locales, options) {

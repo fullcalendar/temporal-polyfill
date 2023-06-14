@@ -10,7 +10,7 @@ import {
 import { createDuration, toDurationInternals } from './duration'
 import { isoDaysInWeek } from './isoMath'
 import { parseCalendarId } from './isoParse'
-import { optionsToOverflow, strictArray, toObject } from './options'
+import { refineOverflowOptions, strictArray, toObject } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
@@ -33,7 +33,7 @@ export const calendarProtocolMethods = {
       impl.dateAdd(
         toPlainDateInternals(plainDateArg),
         toDurationInternals(durationArg),
-        optionsToOverflow(options),
+        refineOverflowOptions(options),
       ),
     )
   },
@@ -43,7 +43,7 @@ export const calendarProtocolMethods = {
       impl.dateUntil(
         toPlainDateInternals(plainDateArg0),
         toPlainDateInternals(plainDateArg1),
-        optionsToOverflow(options),
+        refineOverflowOptions(options),
       ),
     )
   },

@@ -1,22 +1,26 @@
 import { isoCalendarId } from './calendarConfig'
-import { toCalendarNameOption } from './options'
+import { getObjId } from './class'
+import { refineDateDisplayOptions } from './options'
 
 export function formatPossibleDate(internals, options, formatSimple) {
-  const calendarNameOpt = toCalendarNameOption(options)
+  const calendarDisplay = refineDateDisplayOptions(options)
   const showCalendar =
-    calendarNameOpt === 'always' ||
-    calendarNameOpt === 'critical' ||
-    String(internals.calendar) !== isoCalendarId
+    calendarDisplay === 'always' || // TODO: use indexes
+    calendarDisplay === 'critical' ||
+    getObjId(internals.calendar) !== isoCalendarId
 
   if (showCalendar) {
     return formatIsoDateFields(internals) +
-      formatCalendarWithSingleOpt(internals.calendar, calendarNameOpt)
+      formatCalendarWithSingleOpt(internals.calendar, calendarDisplay)
   } else {
     return formatSimple(internals)
   }
 }
 
-export function formatIsoDateTimeFields(isoDateTimeFields, options) {
+export function formatIsoDateTimeFields(
+  isoDateTimeFields,
+  options, // TODO: use spread args
+) {
   return formatIsoDateFields(isoDateTimeFields) +
     'T' + formatIsoTimeFields(isoDateTimeFields, options)
 }
@@ -33,26 +37,41 @@ export function formatIsoMonthDayFields(isoDateFields) {
 
 }
 
-export function formatIsoTimeFields(isoTimeFields, options) {
+export function formatIsoTimeFields(
+  isoTimeFields,
+  options, // TODO: use spread args
+) {
+  // smallestUnit will be <= MINUTE (meaning minute ALWAYS displayed)
+}
+
+export function formatOffsetNanoseconds(
+  offsetNanoseconds,
+  options, // TODO: use spread args
+) {
 
 }
 
-export function formatOffsetNanoseconds(offsetNanoseconds) {
+export function formatTimeZone(
+  timeZoneProtocol,
+  options, // TODO: use spread args
+) {
 
 }
 
-export function formatTimeZone(timeZoneProtocol, options) {
+export function formatCalendar(
+  calendarProtocol,
+  options, // TODO: use spread args
+) {
+  return formatCalendarWithSingleOpt(calendarProtocol, refineDateDisplayOptions(options))
+}
+
+function formatCalendarWithSingleOpt(calendarProtocol, calendarNameOptIndex) {
 
 }
 
-export function formatCalendar(calendarProtocol, options) {
-  return formatCalendarWithSingleOpt(calendarProtocol, toCalendarNameOption(options))
-}
-
-function formatCalendarWithSingleOpt(calendarProtocol, calendarNameOpt) {
-
-}
-
-export function formatDurationInternals(durationInternals, options) {
+export function formatDurationInternals(
+  durationInternals,
+  options, // TODO: use spread args
+) {
 
 }

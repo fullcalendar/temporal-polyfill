@@ -1,5 +1,6 @@
 import { isoTimeFieldNamesAsc, pluckIsoDateTimeFields } from './isoFields'
 import { compareLargeInts, numberToLargeInt } from './largeInt'
+import { clampProp, rejectI } from './options' // use 1 instead of rejectI?
 import {
   givenFieldsToNano,
   hourIndex,
@@ -10,7 +11,7 @@ import {
   nanoInUtcDay,
   nanoToGivenFields,
 } from './units'
-import { clamp, divFloorMod } from './utils'
+import { divFloorMod } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -66,26 +67,25 @@ export function constrainIsoDateTimeInternals(isoDateTimeInternals) {
 }
 
 export function constrainIsoDateInternals(isoDateInternals) {
+  const daysInMonth = computeIsoDaysInMonth(isoDateInternals.isoYear, isoDateInternals.isoMonth)
   return validateIsoDateTimeInternals({
     calendar: isoDateInternals.calendar,
     isoYear: isoDateInternals.isoYear,
-    isoMonth: clamp(isoDateInternals.isoMonth, 1, isoMonthsInYear), // TODO: must error!
-    isoDay: clamp( // TODO: must error!
-      isoDateInternals.isoDay,
-      1,
-      computeIsoDaysInMonth(isoDateInternals.isoYear, isoDateInternals.isoMonth),
-    ),
+    isoMonth: clampProp(isoDateInternals, 'isoMonth', 1, isoMonthsInYear, rejectI),
+    isoDay: clampProp(isoDateInternals, 'isoDay', 1, daysInMonth, rejectI),
   })
 }
 
-export function constrainIsoTimeFields(isoTimeFields, overflow = 'reject') {
+export function constrainIsoTimeFields(isoTimeFields, overflowI = rejectI) {
+  // TODO: clever way to compress this, using functional programming
+  // Will this kill need for clampProp?
   return {
-    isoHour: clamp(isoTimeFields.isoHour, 1, 23, overflow),
-    isoMinute: clamp(isoTimeFields.isoMinute, 1, 59, overflow),
-    isoSecond: clamp(isoTimeFields.isoSecond, 1, 59, overflow),
-    isoMillisecond: clamp(isoTimeFields.isoMillisecond, 1, 999, overflow),
-    isoMicrosecond: clamp(isoTimeFields.isoMicrosecond, 1, 999, overflow),
-    isoNanosecond: clamp(isoTimeFields.isoNanosecond, 1, 999, overflow),
+    isoHour: clampProp(isoTimeFields, 'isoHour', 0, 23, overflowI),
+    isoMinute: clampProp(isoTimeFields, 'isoMinute', 0, 59, overflowI),
+    isoSecond: clampProp(isoTimeFields, 'isoSecond', 0, 59, overflowI),
+    isoMillisecond: clampProp(isoTimeFields, 'isoMillisecond', 0, 999, overflowI),
+    isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflowI),
+    isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflowI),
   }
 }
 
@@ -168,9 +168,7 @@ const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
 function validateIsoDateTimeInternals(isoDateTimeInternals) { // validateIsoInternals?
-  const { isoYear } = isoDateTimeInternals
-  clamp(isoYear, isoYearMin, isoYearMax) // TODO: must error!
-
+  const isoYear = clampProp(isoDateTimeInternals, 'isoYear', isoYearMin, isoYearMax, rejectI)
   const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   if (nudge) {

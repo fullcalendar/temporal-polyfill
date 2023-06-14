@@ -13,9 +13,9 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { constrainInt } from './options'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { hourIndex, milliInDay, nanoInUtcDay } from './units'
+import { clamp } from './utils'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ export function moveDateTime(
   }
 }
 
-export function moveDate(calendar, isoDateFields, durationFields, overflow) {
+export function moveDate(calendar, isoDateFields, durationFields, overflowI) {
   let { years, months, weeks, days } = durationFields
   let epochMilli
 
@@ -96,12 +96,12 @@ export function moveDate(calendar, isoDateFields, durationFields, overflow) {
 
     if (years) {
       year += years
-      month = constrainInt(month, 1, calendar.queryMonthsInYear(year), overflow)
+      month = clamp(month, 1, calendar.queryMonthsInYear(year), overflowI, 'month')
     }
 
     if (months) {
       ([year, month] = calendar.addMonths(year, month, months))
-      day = constrainInt(day, 1, calendar.queryDaysInMonth(year, month), overflow)
+      day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflowI, 'day')
     }
 
     epochMilli = calendar.queryDateStart(year, month, day)

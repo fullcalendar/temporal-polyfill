@@ -6,7 +6,7 @@ import { refineComplexBag } from './convert'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
 import { formatOffsetNanoseconds } from './isoFormat'
 import { parseTimeZoneId } from './isoParse'
-import { toDisambiguation } from './options'
+import { refineEpochDisambigOptions } from './options'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { noop } from './utils'
@@ -69,7 +69,7 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
       return getSingleInstantFor(
         impl,
         toPlainDateTimeInternals(plainDateTimeArg),
-        toDisambiguation(options), // TODO: method w/ whole options object
+        refineEpochDisambigOptions(options),
       )
     },
 

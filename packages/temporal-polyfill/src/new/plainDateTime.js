@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
-import { getPublicCalendar, queryCalendarOps } from './calendarOps'
+import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import { createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertToPlainMonthDay,
@@ -9,7 +9,7 @@ import {
   refinePlainDateTimeBag,
 } from './convert'
 import { diffDateTimes } from './diff'
-import { toDurationInternals } from './duration'
+import { createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import {
   generatePublicIsoDateTimeFields,
@@ -24,14 +24,18 @@ import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'
 import {
-  optionsToOverflow,
-  toDisambiguation,
-  validateRoundingOptions,
+  invertRoundingMode,
+  refineDateTimeDisplayOptions,
+  refineDiffOptions,
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+  refineRoundOptions,
 } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
 import { roundIsoDateTimeFields } from './round'
 import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
+import { dayIndex } from './units'
 import { createZonedDateTime } from './zonedDateTime'
 
 export const [
@@ -86,7 +90,7 @@ export const [
   parsePlainDateTime,
 
   // handleUnusedOptions
-  optionsToOverflow,
+  refineOverflowOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
@@ -128,7 +132,7 @@ export const [
           internals.calendar,
           internals,
           toDurationInternals(durationArg),
-          optionsToOverflow(options),
+          refineOverflowOptions(options),
         ),
       )
     },
@@ -139,31 +143,37 @@ export const [
           internals.calendar,
           internals,
           negateDurationInternals(toDurationInternals(durationArg)),
-          optionsToOverflow(options),
+          refineOverflowOptions(options),
         ),
       )
     },
 
     until(internals, otherArg, options) {
-      return diffDateTimes(
-        // TODO: give calendar arg
-        internals,
-        toPlainDateTimeInternals(otherArg),
-        options, // TODO: spread out lots of options!!!
+      const otherInternals = toPlainDateTimeInternals(otherArg)
+      const calendar = getCommonCalendarOps(internals, otherInternals)
+      const optionsTuple = refineDiffOptions(options, dayIndex)
+
+      return createDuration(
+        diffDateTimes(calendar, internals, otherInternals, ...optionsTuple),
       )
     },
 
     since(internals, otherArg, options) {
-      return diffDateTimes(
-        // TODO: give calendar arg
-        toPlainDateTimeInternals(otherArg),
-        internals,
-        options, // TODO: flip rounding options
+      const otherInternals = toPlainDateTimeInternals(otherArg)
+      const calendar = getCommonCalendarOps(internals, otherInternals)
+      const optionsTuple = refineDiffOptions(options, dayIndex)
+      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
+
+      return createDuration(
+        diffDateTimes(calendar, otherInternals, internals, ...optionsTuple),
       )
     },
 
     round(internals, options) {
-      const isoDateTimeFields = roundIsoDateTimeFields(internals, validateRoundingOptions(options))
+      const isoDateTimeFields = roundIsoDateTimeFields(
+        internals,
+        ...refineRoundOptions(options),
+      )
 
       return createPlainDateTime({
         ...isoDateTimeFields,
@@ -178,9 +188,11 @@ export const [
     },
 
     toString(internals, options) {
-      // TODO: don't let options (smallestUnit/fractionalWhatever) be access twice!!!
-      return formatIsoDateTimeFields(roundIsoDateTimeFields(internals, options), options) +
-        formatCalendar(internals.calendar, options)
+      const [calendarDisplayI, ...timeDisplayTuple] = refineDateTimeDisplayOptions(options)
+      const roundedIsoFields = roundIsoDateTimeFields(internals, ...timeDisplayTuple)
+
+      return formatIsoDateTimeFields(roundedIsoFields, ...timeDisplayTuple) +
+        formatCalendar(internals.calendar, calendarDisplayI)
     },
 
     toLocaleString: toLocaleStringMethod,
@@ -194,7 +206,8 @@ export const [
     ) {
       const { calendar } = internals
       const timeZone = queryTimeZoneOps(timeZoneArg)
-      const epochNanoseconds = getSingleInstantFor(timeZone, internals, toDisambiguation(options))
+      const epochDisambig = refineEpochDisambigOptions(options)
+      const epochNanoseconds = getSingleInstantFor(timeZone, internals, epochDisambig)
 
       return createZonedDateTime({
         epochNanoseconds,

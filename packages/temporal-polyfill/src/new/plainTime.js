@@ -13,11 +13,18 @@ import { formatIsoTimeFields } from './isoFormat'
 import { compareIsoTimeFields } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
-import { optionsToOverflow } from './options'
+import {
+  invertRoundingMode,
+  refineDiffOptions,
+  refineOverflowOptions,
+  refineRoundOptions,
+  refineTimeDisplayOptions,
+} from './options'
 import { toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { roundIsoTimeFields } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
+import { hourIndex } from './units'
 
 export const [
   PlainTime,
@@ -63,7 +70,7 @@ export const [
   parsePlainTime,
 
   // handleUnusedOptions
-  optionsToOverflow,
+  refineOverflowOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
@@ -96,28 +103,27 @@ export const [
       )
     },
 
-    until(internals, options) {
+    until(internals, otherArg, options) {
+      const otherInternals = toPlainTimeInternals(otherArg)
+      const optionsTuple = refineDiffOptions(options, hourIndex, hourIndex)
+
       return createDuration(
-        diffTimes(
-          internals,
-          toPlainTimeInternals(internals),
-          options,
-        ),
+        diffTimes(internals, otherInternals, ...optionsTuple),
       )
     },
 
-    since(internals, options) {
+    since(internals, otherArg, options) {
+      const otherInternals = toPlainTimeInternals(otherArg)
+      const optionsTuple = refineDiffOptions(options, hourIndex, hourIndex)
+      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
+
       return createDuration(
-        diffTimes(
-          toPlainTimeInternals(internals),
-          internals,
-          options, // TODO: reverse rounding
-        ),
+        diffTimes(otherInternals, internals, ...optionsTuple),
       )
     },
 
     round(internals, options) {
-      return roundIsoTimeFields(internals, options)
+      return roundIsoTimeFields(internals, ...refineRoundOptions(options, hourIndex))
     },
 
     equals(internals, other) {
@@ -126,8 +132,11 @@ export const [
     },
 
     toString(internals, options) {
-      // TODO: don't let options (smallestUnit/fractionalWhatever) be access twice!!!
-      return formatIsoTimeFields(roundIsoTimeFields(internals, options), options)
+      const timeDisplayTuple = refineTimeDisplayOptions(options)
+      return formatIsoTimeFields(
+        roundIsoTimeFields(internals, ...timeDisplayTuple),
+        ...timeDisplayTuple,
+      )
     },
 
     toLocaleString: toLocaleStringMethod,

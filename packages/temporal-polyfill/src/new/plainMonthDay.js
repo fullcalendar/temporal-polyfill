@@ -11,7 +11,7 @@ import { generatePublicIsoDateFields, refineIsoDateInternals } from './isoFields
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parsePlainMonthDay } from './isoParse'
-import { optionsToOverflow } from './options'
+import { refineOverflowOptions } from './options'
 
 export const [
   PlainMonthDay,
@@ -43,7 +43,7 @@ export const [
   parsePlainMonthDay,
 
   // handleUnusedOptions
-  optionsToOverflow,
+  refineOverflowOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------

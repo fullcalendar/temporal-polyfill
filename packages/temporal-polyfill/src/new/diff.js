@@ -31,7 +31,7 @@ export function diffDateTimes(
   startIsoFields,
   endIsoFields,
   largestUnitIndex,
-  smallestUnitIndex,
+  smallestUnitIndex, // TODO: nanoDivisor
   roundingMode,
   roundingIncrement,
 ) {
@@ -103,7 +103,7 @@ export function diffDates(
 
   const dateDiff = calendar.dateUntil(startIsoFields, endIsoFields, largestUnitIndex)
 
-  return roundRelativeDuration(
+  return roundRelativeDuration( // TODO: return DurationInternals
     dateDiff,
     isoToEpochNano(endIsoFields),
     largestUnitIndex,
