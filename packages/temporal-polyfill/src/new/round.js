@@ -10,6 +10,7 @@ import {
 import { isoTimeFieldDefaults } from './isoFields'
 import { isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './isoMath'
 import { moveDateByDays } from './move'
+import { roundingModeFuncs } from './options'
 import { computeNanosecondsInDay } from './timeZoneOps'
 import { dayIndex, nanoInUtcDay, nanoIndex, unitIndexToNano, weekIndex } from './units'
 import { identityFunc } from './utils'
@@ -174,10 +175,15 @@ export function roundByInc(num, inc, roundingMode) {
 
 export function roundByIncLarge(largeInt, inc, roundingMode) {
   const [whole, remainder] = largeInt.divTruncMod(inc)
-  return whole.mult(inc).addNumber(roundWithMode(remainder / inc, roundingMode))
+  const mod2 = whole.mod2() // workaround for halfEven
+
+  return whole.mult(inc).addNumber(
+    roundWithMode((remainder / inc) + mod2, roundingMode) - mod2,
+  )
 }
 
 function roundWithMode(num, roundingMode) {
+  return roundingModeFuncs[roundingMode](num)
 }
 
 // Total Duration

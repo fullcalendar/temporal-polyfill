@@ -1,7 +1,16 @@
 import { durationFieldIndexes } from './durationFields'
 import { bigIntToLargeInt } from './largeInt'
 import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearIndex } from './units'
-import { clamp, hasAnyMatchingProps, isObjectLike } from './utils'
+import {
+  clamp,
+  hasAnyMatchingProps,
+  isObjectLike,
+  roundExpand,
+  roundHalfCeil,
+  roundHalfEven,
+  roundHalfFloor,
+  roundHalfTrunc,
+} from './utils'
 
 // TODO: ensure all callers use *INDEXES*
 
@@ -240,6 +249,18 @@ const refineRoundingMode = refineChoiceOption.bind(undefined, 'roundingMode', [
   'halfExpand', // default for date/time::round()
   'halfEven',
 ])
+
+export const roundingModeFuncs = [
+  Math.floor,
+  roundHalfFloor,
+  Math.ceil,
+  roundHalfCeil,
+  Math.trunc,
+  roundHalfTrunc,
+  roundExpand,
+  Math.round,
+  roundHalfEven,
+]
 
 function invertRoundingMode(roundingModeI) {
   if (roundingModeI < 4) {

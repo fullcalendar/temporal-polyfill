@@ -125,3 +125,32 @@ Works with BigInt or Number (as long as the same)
 export function floorMod(n, divisor) {
   return (n % divisor + divisor) % divisor
 }
+
+// rounding
+// --------
+
+export function roundExpand(n) {
+  return n < 0 ? Math.floor(n) : Math.ceil(n)
+}
+
+export function roundHalfFloor(n) {
+  return hasHalf(n) ? Math.floor(n) : Math.round(n)
+}
+
+export function roundHalfCeil(n) {
+  return hasHalf(n) ? Math.ceil(n) : Math.round(n)
+}
+
+export function roundHalfTrunc(n) {
+  return hasHalf(n) ? Math.trunc(n) : Math.round(n)
+}
+
+export function roundHalfEven(n) {
+  return hasHalf(n)
+    ? Math.trunc(n) + (n % 2)
+    : Math.round(n)
+}
+
+function hasHalf(n) {
+  return n % 1 === 0.5
+}
