@@ -43,7 +43,7 @@ export function refineDiffOptions(
 
   const roundingIncrement = refineRoundingInc(options, smallestUnitI)
 
-  let roundingMode = refineRoundingMode(options)
+  let roundingMode = refineRoundingMode(options, truncI)
   if (roundingModeInvert) {
     roundingMode = invertRoundingMode(roundingMode)
   }
@@ -133,7 +133,7 @@ function refineTimeDisplayTuple(options) {
   if (smallestUnitI !== -1) {
     return [
       unitIndexToNano[smallestUnitI],
-      refineRoundingMode(options),
+      refineRoundingMode(options, truncI),
       smallestUnitI < minuteIndex, // showSecond
       9 - (smallestUnitI * 3), // subsecDigits (callers should guard for <0)
     ]
@@ -142,7 +142,7 @@ function refineTimeDisplayTuple(options) {
   const subsecDigits = refineSubsecDigits(options)
   return [
     Math.pow(10, 9 - subsecDigits), // TODO: use 10** notation?
-    refineRoundingMode(options),
+    refineRoundingMode(options, truncI),
     true, // showSecond
     subsecDigits,
   ]
@@ -215,31 +215,37 @@ const refineOffsetDisplay = refineChoiceOption.bind(undefined, 'offset', [
   'never',
 ])
 
-export const truncI = 0
-export const floorI = 1
+export const floorI = 0
+export const halfFloorI = 1
 export const ceilI = 2
-export const expandI = 3
-export const halfCeilI = 4
-export const halfFloorI = 5
-export const halfExpandI = 6
-export const halfTruncI = 7
+export const halfCeilI = 3
+export const truncI = 4
+export const halfTruncI = 5
+export const expandI = 6
+export const halfExpandI = 7
 export const halfEvenI = 8
+/*
+Caller should always supply default
+*/
 const refineRoundingMode = refineChoiceOption.bind(undefined, 'roundingMode', [
-  'trunc',
-  'halfTrunc',
-  'expand',
-  'halfExpand', // round() should override this as default
-  'halfEven',
-  // ones that invert from floor/ceil...
+  // modes that get inverted (see invertRoundingMode)
   'floor',
   'halfFloor',
   'ceil',
   'halfCeil',
+  // other modes
+  'trunc', // default for most things
+  'halfTrunc',
+  'expand',
+  'halfExpand', // default for date/time::round()
+  'halfEven',
 ])
 
 function invertRoundingMode(roundingModeI) {
-  // TODO
-  // use numbers?
+  if (roundingModeI < 4) {
+    return (roundingModeI + 2) % 4
+  }
+  return roundingModeI
 }
 
 function refineRoundingInc(options, validateWithSmallestUnitI) {
@@ -278,7 +284,7 @@ function refineSubsecDigits(options) {
   const subsecDigits = options[subsecDigitsName]
 
   if (typeof subsecDigits === 'number') {
-    return clamp(Math.floor(subsecDigits), 0, 9, 1, subsecDigitsName) // 1=throwOnError
+    return clamp(Math.floor(subsecDigits), 0, 9, 1, subsecDigitsName) // throwOnError=1
   }
 
   if (String(subsecDigits) !== 'auto') {
