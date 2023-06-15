@@ -24,8 +24,8 @@ export function roundToMinute(epochNano) {
 export function roundDateTime(
   isoFields,
   smallestUnitI, // day/time
-  roundingMode,
   roundingInc,
+  roundingMode,
   timeZoneOps = undefined,
 ) {
   if (smallestUnitI === dayIndex) {
@@ -42,8 +42,8 @@ export function roundDateTime(
 export function roundTime(
   isoFields,
   smallestUnitI,
-  roundingMode,
   roundingInc,
+  roundingMode,
 ) {
   return roundTimeToNano(
     isoFields,
@@ -89,8 +89,8 @@ export function roundTimeToNano(isoFields, nanoInc, roundingMode) {
 export function roundDayTimeDuration(
   durationFields,
   smallestUnitI,
-  roundingMode,
   roundingInc,
+  roundingMode,
 ) {
   return roundDurationToNano(
     durationFields,
@@ -115,8 +115,8 @@ export function roundRelativeDuration(
   endEpochNanoseconds,
   largestUnitIndex,
   smallestUnitI,
-  roundingMode,
   roundingInc,
+  roundingMode,
   // marker system...
   marker,
   markerToEpochMilliseconds,
@@ -136,8 +136,8 @@ export function roundRelativeDuration(
     durationFields,
     endEpochNanoseconds,
     smallestUnitI,
-    roundingMode,
     roundingInc,
+    roundingMode,
     // marker system only needed for nudgeRelativeDuration...
     marker,
     moveMarker,
@@ -232,11 +232,11 @@ function nudgeDurationTime(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds, // NOT NEEDED, just for adding result to
   smallestUnitI,
-  roundingMode,
   roundingInc,
+  roundingMode,
 ) {
   const timeNano = durationFieldsToTimeNano(durationFields)
-  const nanoInc = computeNanoInc(smallestUnitI, roundByInc)
+  const nanoInc = computeNanoInc(smallestUnitI, roundingInc)
   const roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
   const roundedFields = nanoToDurationFields(roundedTimeNano)
   const dayDelta = roundedFields.days
@@ -257,8 +257,8 @@ function nudgeRelativeDurationTime(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds, // NOT NEEDED, just for conformance
   smallestUnitI,
-  roundingMode,
   roundingInc,
+  roundingMode,
   // marker system...
   marker,
   markerToEpochMilliseconds,
@@ -305,8 +305,8 @@ function nudgeRelativeDuration(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds,
   smallestUnitI,
-  roundingMode,
   roundingInc,
+  roundingMode,
   // marker system...
   marker,
   markerToEpochMilliseconds,

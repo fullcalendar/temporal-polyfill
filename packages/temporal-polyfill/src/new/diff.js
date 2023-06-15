@@ -32,8 +32,8 @@ export function diffDateTimes(
   endIsoFields,
   largestUnitIndex,
   smallestUnitIndex, // TODO: nanoDivisor
-  roundingMode,
   roundingIncrement,
+  roundingMode,
 ) {
   const startEpochNano = isoToEpochNano(startIsoFields)
   const endEpochNano = isoToEpochNano(endIsoFields)
@@ -44,8 +44,8 @@ export function diffDateTimes(
       endEpochNano,
       largestUnitIndex,
       smallestUnitIndex,
-      roundingMode,
       roundingIncrement,
+      roundingMode,
     )
   }
 
@@ -73,8 +73,8 @@ export function diffDateTimes(
     endEpochNano,
     largestUnitIndex,
     smallestUnitIndex,
-    roundingMode,
     roundingIncrement,
+    roundingMode,
     startIsoFields, // marker
     isoToEpochNano, // markerToEpochNano
     moveDateTime.bind(undefined, calendar), // moveMarker
@@ -87,8 +87,8 @@ export function diffDates(
   endIsoFields,
   largestUnitIndex,
   smallestUnitIndex,
-  roundingMode,
   roundingIncrement,
+  roundingMode,
 ) {
   if (largestUnitIndex < dayIndex) {
     return diffEpochNano(
@@ -96,8 +96,8 @@ export function diffDates(
       isoToEpochNano(endIsoFields),
       largestUnitIndex,
       smallestUnitIndex,
-      roundingMode,
       roundingIncrement,
+      roundingMode,
     )
   }
 
@@ -108,8 +108,8 @@ export function diffDates(
     isoToEpochNano(endIsoFields),
     largestUnitIndex,
     smallestUnitIndex,
-    roundingMode,
     roundingIncrement,
+    roundingMode,
     startIsoFields, // marker
     isoToEpochNano, // markerToEpochNano
     calendar.dateAdd.bind(calendar), // moveMarker
@@ -159,8 +159,8 @@ export function diffTimes(
   endIsoFields,
   largestUnitIndex,
   smallestUnitIndex,
-  roundingMode,
   roundingIncrement,
+  roundingMode,
 ) {
   const startTimeNano = isoTimeFieldsToNano(startIsoFields)
   const endTimeNano = isoTimeFieldsToNano(endIsoFields)
@@ -183,8 +183,8 @@ export function diffZonedEpochNano(
   endEpochNano,
   largestUnitIndex,
   smallestUnitIndex, // optional. internally will default to 'nanoseconds'
-  roundingMode, // optional. internally will default to 'halfExpand'
   roundingIncrement, // optional. internally will default to 1
+  roundingMode, // optional. internally will default to 'halfExpand'
 ) {
   if (largestUnitIndex < dayIndex) {
     return diffEpochNano(
@@ -192,8 +192,8 @@ export function diffZonedEpochNano(
       endEpochNano,
       largestUnitIndex,
       smallestUnitIndex,
-      roundingMode,
       roundingIncrement,
+      roundingMode,
     )
   }
 
@@ -223,8 +223,8 @@ export function diffZonedEpochNano(
     endEpochNano,
     largestUnitIndex,
     smallestUnitIndex,
-    roundingMode,
     roundingIncrement,
+    roundingMode,
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     moveZonedEpochNano.bind(undefined, calendar, timeZone), // moveMarker
@@ -236,8 +236,8 @@ export function diffEpochNano(
   endEpochNano,
   largestUnitIndex,
   smallestUnitIndex,
-  roundingMode,
   roundingIncrement,
+  roundingMode,
 ) {
   return {
     ...durationFieldDefaults,

@@ -122,7 +122,7 @@ export const [
       if (largestUnitIndex < dayIndex || (largestUnitIndex === dayIndex && !markerInternals)) {
         // TODO: check internals doesn't have large fields
         return createDuration(
-          roundDayTimeDuration(internals, smallestUnitIndex, roundingMode, roundingIncrement),
+          roundDayTimeDuration(internals, smallestUnitIndex, roundingIncrement, roundingMode),
         )
       }
 
@@ -137,8 +137,8 @@ export const [
           ...spanDuration(internals, largestUnitIndex, ...markerSystem),
           largestUnitIndex,
           smallestUnitIndex,
-          roundingMode,
           roundingIncrement,
+          roundingMode,
           ...markerSystem,
         ),
       )

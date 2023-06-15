@@ -40,12 +40,15 @@ export function refineDiffOptions(
     Math.max(smallestUnitI, minUnitI),
     Math.max(smallestUnitI, defaultLargestUnitI),
   )
+
+  const roundingIncrement = refineRoundingInc(options, smallestUnitI)
+
   let roundingMode = refineRoundingMode(options)
   if (roundingModeInvert) {
     roundingMode = invertRoundingMode(roundingMode)
   }
-  const roundingIncrement = refineRoundingInc(options, smallestUnitI)
-  return [largestUnitI, smallestUnitI, roundingMode, roundingIncrement]
+
+  return [largestUnitI, smallestUnitI, roundingIncrement, roundingMode]
 }
 
 /*
@@ -56,8 +59,8 @@ export function refineRoundOptions(options, maxUnitI = dayIndex) {
   const smallestUnitI = refineSmallestUnit(options, maxUnitI) // required
   return [
     smallestUnitI,
-    refineRoundingMode(options, halfExpandI), // TODO: switch order of mode/inc EVERYWHERE?
     refineRoundingInc(options, smallestUnitI),
+    refineRoundingMode(options, halfExpandI),
   ]
 }
 
