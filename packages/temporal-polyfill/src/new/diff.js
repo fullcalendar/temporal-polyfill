@@ -103,7 +103,7 @@ export function diffDates(
 
   const dateDiff = calendar.dateUntil(startIsoFields, endIsoFields, largestUnitIndex)
 
-  return roundRelativeDuration( // TODO: return DurationInternals
+  return roundRelativeDuration(
     dateDiff,
     isoToEpochNano(endIsoFields),
     largestUnitIndex,

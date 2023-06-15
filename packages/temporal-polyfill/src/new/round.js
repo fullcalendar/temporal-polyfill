@@ -84,6 +84,7 @@ export function roundDayTimeDuration(
 ) {
   const largeNano = durationFieldsToNano(durationFields)
   const r = roundLargeNano(largeNano, smallestUnitIndex, roundingMode, roundingIncrement)
+
   return {
     ...durationFieldDefaults,
     ...nanoToDurationFields(r),

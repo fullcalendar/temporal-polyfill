@@ -4,7 +4,7 @@ import { mapArrayToProps } from './utils'
 export const nanoIndex = 0
 export const microIndex = 1
 export const milliIndex = 2
-export const secondsIndex = 3
+export const secondsIndex = 3 // secondIndex
 export const minuteIndex = 4
 export const hourIndex = 5
 export const dayIndex = 6

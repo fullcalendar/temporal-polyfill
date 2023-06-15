@@ -2,7 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
-import { toDurationInternals } from './duration'
+import { createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import {
   formatCalendar,
@@ -20,10 +20,10 @@ import {
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
-import { refineRoundOptions, toEpochNano, toObject } from './options'
+import { refineDiffOptions, refineRoundOptions, toEpochNano, toObject } from './options'
 import { roundLargeNano } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
-import { hourIndex } from './units'
+import { hourIndex, secondsIndex } from './units'
 import { noop } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
@@ -102,19 +102,11 @@ export const [
     },
 
     until(epochNanoseconds, otherArg, options) {
-      return diffEpochNano(
-        epochNanoseconds,
-        toInstantEpochNanoseconds(otherArg),
-        options, // TODO: must be given better options???
-      )
+      return diffInstants(epochNanoseconds, toInstantEpochNanoseconds(otherArg), options)
     },
 
     since(epochNanoseconds, otherArg, options) {
-      return diffEpochNano(
-        toInstantEpochNanoseconds(otherArg),
-        epochNanoseconds,
-        options, // TODO: reverse rounding option
-      )
+      return diffInstants(toInstantEpochNanoseconds(otherArg), epochNanoseconds, options, true)
     },
 
     round(epochNanoseconds, options) {
@@ -180,6 +172,16 @@ export const [
 
 function stringToEpochNanoseconds(str) {
   // TODO
+}
+
+function diffInstants(epochNano0, epochNano1, options, roundingModeInvert) {
+  return createDuration(
+    diffEpochNano(
+      epochNano0,
+      epochNano1,
+      ...refineDiffOptions(roundingModeInvert, options, secondsIndex, hourIndex),
+    ),
+  )
 }
 
 // Unit Conversion
