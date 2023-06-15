@@ -13,7 +13,7 @@ import {
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
 import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
-import { roundLargeNano, roundNano, roundRelativeDuration } from './round'
+import { computeNanoInc, roundByInc, roundByIncLarge, roundRelativeDuration } from './round'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
   dayIndex, milliInDay,
@@ -164,12 +164,8 @@ export function diffTimes(
 ) {
   const startTimeNano = isoTimeFieldsToNano(startIsoFields)
   const endTimeNano = isoTimeFieldsToNano(endIsoFields)
-  const timeNano = roundNano(
-    endTimeNano - startTimeNano,
-    smallestUnitIndex,
-    roundingMode,
-    roundingIncrement,
-  )
+  const nanoInc = computeNanoInc(smallestUnitIndex, roundingIncrement)
+  const timeNano = roundByInc(endTimeNano - startTimeNano, nanoInc, roundingMode)
 
   return {
     ...durationFieldDefaults,
@@ -246,11 +242,10 @@ export function diffEpochNano(
   return {
     ...durationFieldDefaults,
     ...nanoToDurationFields(
-      roundLargeNano(
+      roundByIncLarge(
         endEpochNano.addLargeInt(startEpochNano, -1),
-        smallestUnitIndex,
+        computeNanoInc(smallestUnitIndex, roundingIncrement),
         roundingMode,
-        roundingIncrement,
       ),
       largestUnitIndex,
     ),

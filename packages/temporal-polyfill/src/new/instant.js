@@ -4,12 +4,7 @@ import { createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
 import { createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
-import {
-  formatCalendar,
-  formatIsoDateTimeFields,
-  formatOffsetNanoseconds,
-  formatTimeZone,
-} from './isoFormat'
+import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
 import {
   epochGetters,
   epochMicroToNano,
@@ -20,8 +15,14 @@ import {
 } from './isoMath'
 import { compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
-import { refineDiffOptions, refineRoundOptions, toEpochNano, toObject } from './options'
-import { roundLargeNano } from './round'
+import {
+  refineDiffOptions,
+  refineInstantDisplayOptions,
+  refineRoundOptions,
+  toEpochNano,
+  toObject,
+} from './options'
+import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { hourIndex, secondsIndex } from './units'
 import { noop } from './utils'
@@ -109,12 +110,11 @@ export const [
       return diffInstants(toInstantEpochNanoseconds(otherArg), epochNanoseconds, options, true)
     },
 
-    round(epochNanoseconds, options) {
+    round(epochNano, options) {
+      const [smallestUnitI, roundingModeI, roundingInc] = refineRoundOptions(options, hourIndex)
+
       return createInstant(
-        roundLargeNano(
-          epochNanoseconds,
-          ...refineRoundOptions(options, hourIndex),
-        ),
+        roundByIncLarge(epochNano, computeNanoInc(smallestUnitI, roundingInc), roundingModeI),
       )
     },
 
@@ -125,24 +125,22 @@ export const [
       )
     },
 
-    toString(epochNanoseconds, options) { // has rounding options too
-      const refinedOptions = toObject(options) // TODO: make optional
-      // ^important for destructuring options because used once for rounding, second for formatting
+    toString(epochNano, options) {
+      const [
+        timeZoneArg,
+        nanoInc,
+        roundingModeI,
+        showSecond,
+        subsecDigits,
+      ] = refineInstantDisplayOptions(options)
+      const timeZone = queryTimeZoneOps(timeZoneArg || utcTimeZoneId)
 
-      const calendar = queryCalendarOps(refinedOptions.calendar || isoCalendarId)
-      const timeZone = queryTimeZoneOps(refinedOptions.timeZone || utcTimeZoneId)
+      epochNano = roundByIncLarge(epochNano, nanoInc, roundingModeI)
+      const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+      const isoFields = epochNanoToIso(epochNano.addNumber(offsetNano))
 
-      epochNanoseconds = roundLargeNano(
-        epochNanoseconds,
-        refinedOptions, // TODO: break apart options
-      )
-      const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      const isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
-
-      return formatIsoDateTimeFields(isoDateTimeFields, refinedOptions) +
-        formatOffsetNanoseconds(offsetNanoseconds) +
-        formatTimeZone(timeZone, options) +
-        formatCalendar(calendar, options)
+      return formatIsoDateTimeFields(isoFields, showSecond, subsecDigits) +
+        formatOffsetNano(offsetNano)
     },
 
     toLocaleString(epochNanoseconds, locales, options) {

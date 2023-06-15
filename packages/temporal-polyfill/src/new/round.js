@@ -21,56 +21,66 @@ export function roundToMinute(epochNano) {
 // Rounding Dates
 // -------------------------------------------------------------------------------------------------
 
-export function roundIsoDateTimeFields(
-  isoDateTimeFields,
-  smallestUnitIndex, // day/time
+export function roundDateTime(
+  isoFields,
+  smallestUnitI, // day/time
   roundingMode,
-  roundingIncrement,
+  roundingInc,
   timeZoneOps = undefined,
 ) {
-  let isoTimeFields
-  let dayDelta
-
-  if (smallestUnitIndex === dayIndex) {
-    const nanoInDay = timeZoneOps
-      ? computeNanosecondsInDay(timeZoneOps, isoDateTimeFields)
-      : nanoInUtcDay
-
-    dayDelta = roundWithDivisor(
-      isoTimeFieldsToNano(isoDateTimeFields),
-      nanoInDay,
-      roundingMode,
-    )
-
-    isoTimeFields = isoTimeFieldDefaults
-  } else {
-    ([isoTimeFields, dayDelta] = roundIsoTimeFields(
-      isoDateTimeFields,
-      smallestUnitIndex,
-      roundingMode,
-      roundingIncrement,
-    ))
+  if (smallestUnitI === dayIndex) {
+    return roundDateTimeToDay(isoFields, timeZoneOps, roundingMode)
   }
 
+  return roundDateTimeToNano(
+    isoFields,
+    computeNanoInc(smallestUnitI, roundingInc),
+    roundingMode,
+  )
+}
+
+export function roundTime(
+  isoFields,
+  smallestUnitI,
+  roundingMode,
+  roundingInc,
+) {
+  return roundTimeToNano(
+    isoFields,
+    computeNanoInc(smallestUnitI, roundingInc),
+    roundingMode,
+  )
+}
+
+function roundDateTimeToDay(isoFields, timeZoneOps, roundingMode) {
+  const nanoInDay = timeZoneOps
+    ? computeNanosecondsInDay(timeZoneOps, isoFields)
+    : nanoInUtcDay
+
+  const dayDelta = roundByInc(
+    isoTimeFieldsToNano(isoFields),
+    nanoInDay,
+    roundingMode,
+  )
+
   return {
-    ...moveDateByDays(isoDateTimeFields, dayDelta),
-    ...isoTimeFields,
+    ...moveDateByDays(isoFields, dayDelta),
+    ...isoTimeFieldDefaults,
   }
 }
 
-export function roundIsoTimeFields(
-  isoTimeFields,
-  smallestUnitIndex,
-  roundingMode,
-  roundingIncrement,
-) {
-  const timeNano = roundNano(
-    isoTimeFieldsToNano(isoTimeFields),
-    smallestUnitIndex,
-    roundingMode,
-    roundingIncrement,
+export function roundDateTimeToNano(isoFields, nanoInc, roundingMode) {
+  const [roundedIsoFields, dayDelta] = roundTimeToNano(isoFields, nanoInc, roundingMode)
+  return {
+    ...moveDateByDays(roundedIsoFields, dayDelta),
+    ...roundedIsoFields,
+  }
+}
+
+export function roundTimeToNano(isoFields, nanoInc, roundingMode) {
+  return nanoToIsoTimeAndDay(
+    roundByInc(isoTimeFieldsToNano(isoFields), nanoInc, roundingMode),
   )
-  return nanoToIsoTimeAndDay(timeNano)
 }
 
 // Rounding Duration
@@ -78,16 +88,24 @@ export function roundIsoTimeFields(
 
 export function roundDayTimeDuration(
   durationFields,
-  smallestUnitIndex,
+  smallestUnitI,
   roundingMode,
-  roundingIncrement,
+  roundingInc,
 ) {
+  return roundDurationToNano(
+    durationFields,
+    computeNanoInc(smallestUnitI, roundingInc),
+    roundingMode,
+  )
+}
+
+export function roundDurationToNano(durationFields, nanoInc, roundingMode) {
   const largeNano = durationFieldsToNano(durationFields)
-  const r = roundLargeNano(largeNano, smallestUnitIndex, roundingMode, roundingIncrement)
+  const roundedLargeNano = roundByIncLarge(largeNano, nanoInc, roundingMode)
 
   return {
     ...durationFieldDefaults,
-    ...nanoToDurationFields(r),
+    ...nanoToDurationFields(roundedLargeNano),
   }
 }
 
@@ -96,20 +114,20 @@ export function roundRelativeDuration(
   // ^has sign
   endEpochNanoseconds,
   largestUnitIndex,
-  smallestUnitIndex,
+  smallestUnitI,
   roundingMode,
-  roundingIncrement,
+  roundingInc,
   // marker system...
   marker,
   markerToEpochMilliseconds,
   moveMarker,
 ) {
-  if (smallestUnitIndex === nanoIndex && roundingIncrement === 1) {
+  if (smallestUnitI === nanoIndex && roundingInc === 1) {
     return durationFields
   }
 
   let [roundedDurationFields, roundedEpochNanoseconds, grew] = (
-    smallestUnitIndex >= dayIndex
+    smallestUnitI >= dayIndex
       ? nudgeRelativeDuration
       : markerToEpochMilliseconds === identityFunc // marker is ZonedDateTime's epochNanoseconds?
         ? nudgeRelativeDurationTime
@@ -117,9 +135,9 @@ export function roundRelativeDuration(
   )(
     durationFields,
     endEpochNanoseconds,
-    smallestUnitIndex,
+    smallestUnitI,
     roundingMode,
-    roundingIncrement,
+    roundingInc,
     // marker system only needed for nudgeRelativeDuration...
     marker,
     moveMarker,
@@ -132,7 +150,7 @@ export function roundRelativeDuration(
       roundedDurationFields,
       roundedEpochNanoseconds,
       largestUnitIndex,
-      smallestUnitIndex,
+      smallestUnitI,
       // marker system...
       marker,
       moveMarker,
@@ -146,22 +164,17 @@ export function roundRelativeDuration(
 // Rounding Numbers
 // -------------------------------------------------------------------------------------------------
 
-export function roundLargeNano(largeNano, smallestUnitIndex, roundingMode, roundingIncrement) {
-  const divisor = unitIndexToNano[smallestUnitIndex] * roundingIncrement
-  const [fullUnits, remainder] = largeNano.divTruncMod(divisor)
-  return fullUnits.mult(divisor).addNumber(roundWithMode(remainder / divisor, roundingMode))
+export function computeNanoInc(smallestUnitI, roundingInc) {
+  return unitIndexToNano[smallestUnitI] * roundingInc
 }
 
-export function roundNano(nano, smallestUnitIndex, roundingMode, roundingIncrement) {
-  return roundWithDivisor(
-    nano,
-    unitIndexToNano[smallestUnitIndex] * roundingIncrement,
-    roundingMode,
-  )
+export function roundByInc(num, inc, roundingMode) {
+  return roundWithMode(num / inc, roundingMode) * inc
 }
 
-function roundWithDivisor(num, divisor, roundingMode) {
-  return roundWithMode(num / divisor, roundingMode) * divisor
+export function roundByIncLarge(largeInt, inc, roundingMode) {
+  const [whole, remainder] = largeInt.divTruncMod(inc)
+  return whole.mult(inc).addNumber(roundWithMode(remainder / inc, roundingMode))
 }
 
 function roundWithMode(num, roundingMode) {
@@ -218,12 +231,13 @@ and return the (day) delta. Also return the (potentially) unbalanced new duratio
 function nudgeDurationTime(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds, // NOT NEEDED, just for adding result to
-  smallestUnitIndex,
+  smallestUnitI,
   roundingMode,
-  roundingIncrement,
+  roundingInc,
 ) {
   const timeNano = durationFieldsToTimeNano(durationFields)
-  const roundedTimeNano = roundNano(timeNano, smallestUnitIndex, roundingMode, roundingIncrement)
+  const nanoInc = computeNanoInc(smallestUnitI, roundByInc)
+  const roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
   const roundedFields = nanoToDurationFields(roundedTimeNano)
   const dayDelta = roundedFields.days
   const nudgedDurationFields = { // TODO: what about sign?
@@ -242,9 +256,9 @@ function nudgeDurationTime(
 function nudgeRelativeDurationTime(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds, // NOT NEEDED, just for conformance
-  smallestUnitIndex,
+  smallestUnitI,
   roundingMode,
-  roundingIncrement,
+  roundingInc,
   // marker system...
   marker,
   markerToEpochMilliseconds,
@@ -252,7 +266,8 @@ function nudgeRelativeDurationTime(
 ) {
   const { sign } = durationFields
   const timeNano = durationFieldsToTimeNano(durationFields)
-  let roundedTimeNano = roundNano(timeNano, smallestUnitIndex, roundingMode, roundingIncrement)
+  const nanoInc = computeNanoInc(smallestUnitI, roundingInc)
+  let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 
   const [dayEpochNanoseconds0, dayEpochNanoseconds1] = clampRelativeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
@@ -270,7 +285,7 @@ function nudgeRelativeDurationTime(
 
   if (!beyondDay || Math.sign(beyondDay) === sign) {
     dayDelta++
-    roundedTimeNano = roundNano(beyondDay, smallestUnitIndex, roundingMode, roundingIncrement)
+    roundedTimeNano = roundByInc(beyondDay, nanoInc, roundingMode)
     endEpochNanoseconds = dayEpochNanoseconds1.addNumber(roundedTimeNano)
   } else {
     endEpochNanoseconds = dayEpochNanoseconds0.addNumber(roundedTimeNano)
@@ -289,9 +304,9 @@ function nudgeRelativeDurationTime(
 function nudgeRelativeDuration(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds,
-  smallestUnitIndex,
+  smallestUnitI,
   roundingMode,
-  roundingIncrement,
+  roundingInc,
   // marker system...
   marker,
   markerToEpochMilliseconds,
@@ -302,17 +317,17 @@ function nudgeRelativeDuration(
   const baseDurationFields = clearDurationFields(
     durationFields,
     nanoIndex,
-    smallestUnitIndex - 1,
+    smallestUnitI - 1,
   )
 
-  baseDurationFields[smallestUnitIndex] = Math.trunc(
-    durationFields[smallestUnitIndex] / roundingIncrement,
+  baseDurationFields[smallestUnitI] = Math.trunc(
+    durationFields[smallestUnitI] / roundingInc,
   )
 
   const [epochNanoseconds0, epochNanoseconds1] = clampRelativeDuration(
     baseDurationFields,
-    smallestUnitIndex,
-    roundingIncrement * sign,
+    smallestUnitI,
+    roundingInc * sign,
     // marker system...
     marker,
     markerToEpochMilliseconds,
@@ -326,7 +341,7 @@ function nudgeRelativeDuration(
   const roundedPortion = roundWithMode(portion * sign, roundingMode) // -1/0/1
 
   if (roundedPortion) { // enlarged?
-    baseDurationFields[smallestUnitIndex] += roundingIncrement * sign
+    baseDurationFields[smallestUnitI] += roundingInc * sign
 
     return [baseDurationFields, epochNanoseconds1, roundedPortion]
   } else {
@@ -341,7 +356,7 @@ function bubbleRelativeDuration(
   durationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNanoseconds,
   largestUnitIndex,
-  smallestUnitIndex,
+  smallestUnitI,
   // marker system...
   marker,
   markerToEpochMilliseconds,
@@ -350,7 +365,7 @@ function bubbleRelativeDuration(
   const { sign } = durationFields
 
   for (
-    let currentUnitIndex = smallestUnitIndex + 1;
+    let currentUnitIndex = smallestUnitI + 1;
     currentUnitIndex < largestUnitIndex;
     currentUnitIndex++
   ) {

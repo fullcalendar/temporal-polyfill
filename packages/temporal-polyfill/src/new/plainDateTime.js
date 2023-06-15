@@ -32,7 +32,7 @@ import {
 } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
-import { roundIsoDateTimeFields } from './round'
+import { roundDateTime, roundDateTimeToNano } from './round'
 import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { dayIndex } from './units'
 import { createZonedDateTime } from './zonedDateTime'
@@ -150,7 +150,7 @@ export const [
     },
 
     round(internals, options) {
-      const isoDateTimeFields = roundIsoDateTimeFields(
+      const isoDateTimeFields = roundDateTime(
         internals,
         ...refineRoundOptions(options),
       )
@@ -168,10 +168,17 @@ export const [
     },
 
     toString(internals, options) {
-      const [calendarDisplayI, ...timeDisplayTuple] = refineDateTimeDisplayOptions(options)
-      const roundedIsoFields = roundIsoDateTimeFields(internals, ...timeDisplayTuple)
+      const [
+        calendarDisplayI,
+        nanoInc,
+        roundingMode,
+        showSecond,
+        subsecDigits,
+      ] = refineDateTimeDisplayOptions(options)
 
-      return formatIsoDateTimeFields(roundedIsoFields, ...timeDisplayTuple) +
+      const roundedIsoFields = roundDateTimeToNano(internals, nanoInc, roundingMode)
+
+      return formatIsoDateTimeFields(roundedIsoFields, showSecond, subsecDigits) +
         formatCalendar(internals.calendar, calendarDisplayI)
     },
 

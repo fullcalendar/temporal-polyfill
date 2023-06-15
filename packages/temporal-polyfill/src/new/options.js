@@ -1,6 +1,6 @@
 import { durationFieldIndexes } from './durationFields'
 import { bigIntToLargeInt } from './largeInt'
-import { dayIndex, minuteIndex, nanoIndex, unitIndexes, yearIndex } from './units'
+import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearIndex } from './units'
 import { clamp, hasAnyMatchingProps, isObjectLike } from './utils'
 
 // TODO: ensure all callers use *INDEXES*
@@ -48,12 +48,15 @@ export function refineDiffOptions(
   return [largestUnitI, smallestUnitI, roundingMode, roundingIncrement]
 }
 
+/*
+Always related to time
+*/
 export function refineRoundOptions(options, maxUnitI = dayIndex) {
   options = normalizeRequiredOptions(options, smallestUnitStr)
   const smallestUnitI = refineSmallestUnit(options, maxUnitI) // required
   return [
     smallestUnitI,
-    refineRoundingMode(options, halfExpandI),
+    refineRoundingMode(options, halfExpandI), // TODO: switch order of mode/inc EVERYWHERE?
     refineRoundingInc(options, smallestUnitI),
   ]
 }
@@ -71,7 +74,7 @@ export function refineDurationRoundOptions(options, defaultLargestUnitI) {
 export function refineTotalOptions(options) {
   options = normalizeRequiredOptions(options, totalUnitStr)
   return [
-    refineTotalUnit(options),
+    refineTotalUnit(options), // required
     refineRelativeTo(options),
   ]
 }
@@ -80,13 +83,21 @@ export function refineRelativeToOptions(options) {
   return refineRelativeTo(normalizeOptions(options))
 }
 
+export function refineInstantDisplayOptions(options) {
+  options = normalizeOptions(options)
+  return [
+    options.timeZone,
+    ...refineTimeDisplayTuple(options),
+  ]
+}
+
 export function refineZonedDateTimeDisplayOptions(options) {
   options = normalizeOptions(options)
   return [
     refineCalendarDisplay(options),
     refineTimeZoneDisplay(options),
     refineOffsetDisplay(options),
-    ...refineTimeDisplayTuple(options), // BAD: this is being misused
+    ...refineTimeDisplayTuple(options),
   ]
 }
 
@@ -94,7 +105,7 @@ export function refineDateTimeDisplayOptions(options) {
   options = normalizeOptions(options)
   return [
     refineCalendarDisplay(options),
-    ...refineTimeDisplayTuple(options), // BAD: this is being misused
+    ...refineTimeDisplayTuple(options),
   ]
 }
 
@@ -103,20 +114,35 @@ export function refineDateDisplayOptions(options) {
 }
 
 export function refineTimeDisplayOptions(options) {
-  return refineTimeDisplayTuple(normalizeOptions(options)) // BAD: this is being misused
+  return refineTimeDisplayTuple(normalizeOptions(options))
 }
 
+/*
+returns [
+  nanoInc,
+  roundingMode,
+  showSecond,
+  subsecDigits,
+]
+*/
 function refineTimeDisplayTuple(options) {
+  const smallestUnitI = refineSmallestUnit(options, minuteIndex, nanoIndex, -1)
+  if (smallestUnitI !== -1) {
+    return [
+      unitIndexToNano[smallestUnitI],
+      refineRoundingMode(options),
+      smallestUnitI < minuteIndex, // showSecond
+      9 - (smallestUnitI * 3), // subsecDigits (callers should guard for <0)
+    ]
+  }
+
+  const subsecDigits = refineSubsecDigits(options)
   return [
-    refineSubsecDigits(options),
-    refineSmallestUnit(options, minuteIndex),
+    Math.pow(10, 9 - subsecDigits), // TODO: use 10** notation?
     refineRoundingMode(options),
+    true, // showSecond
+    subsecDigits,
   ]
-  /*
-  smallestUnit takes precedence
-  (if smallestUnit not given, treat as nano)
-  will need to conver to an `inc` - search `Math.pow(10, 9`
-  */
 }
 
 // Single Options
@@ -243,10 +269,20 @@ function refineRoundingInc(options, validateWithSmallestUnitI) {
   */
 }
 
+const subsecDigitsName = 'fractionalSecondDigits'
+
 function refineSubsecDigits(options) {
-  // 'fractionalSecondDigits'
-  // 'auto'/0-9
-  // allow undefined
+  const subsecDigits = options[subsecDigitsName]
+
+  if (typeof subsecDigits === 'number') {
+    return clamp(Math.floor(subsecDigits), 0, 9, 1, subsecDigitsName) // 1=throwOnError
+  }
+
+  if (String(subsecDigits) !== 'auto') {
+    throw new RangeError('Must be auto or 0-9')
+  }
+
+  return 9
 }
 
 function refineRelativeTo(options) {
@@ -258,6 +294,9 @@ function refineRelativeTo(options) {
 // Utils
 // -------------------------------------------------------------------------------------------------
 
+/*
+If defaultUnitI is undefined, will throw error if not specified
+*/
 function refineUnitOption(optionName, options, maxUnitI, minUnitI = nanoIndex, defaultUnitI) {
   let unitName = options[optionName]
   if (unitName === undefined) {

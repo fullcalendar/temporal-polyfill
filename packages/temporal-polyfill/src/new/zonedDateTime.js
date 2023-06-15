@@ -22,7 +22,7 @@ import {
 import {
   formatCalendar,
   formatIsoDateTimeFields,
-  formatOffsetNanoseconds,
+  formatOffsetNano,
   formatTimeZone,
 } from './isoFormat'
 import {
@@ -43,7 +43,7 @@ import {
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { createPlainTime, toPlainTimeInternals } from './plainTime'
-import { roundIsoDateTimeFields } from './round'
+import { roundDateTime, roundDateTimeToNano } from './round'
 import {
   computeNanosecondsInDay,
   getCommonTimeZoneOps,
@@ -116,7 +116,7 @@ export const [
     },
 
     offset(internals) {
-      return formatOffsetNanoseconds(
+      return formatOffsetNano(
         // TODO: more DRY
         zonedInternalsToIso(internals).offsetNanoseconds,
       )
@@ -222,13 +222,16 @@ export const [
       return diffZonedDateTimes(toZonedDateTimeInternals(otherArg), internals, options, true)
     },
 
+    /*
+    Do param-list destructuring here and other methods!
+    */
     round(internals, options) {
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
-      isoDateTimeFields = roundIsoDateTimeFields(
+      isoDateTimeFields = roundDateTime(
         isoDateTimeFields,
         ...refineRoundOptions(options),
         timeZone,
@@ -289,17 +292,16 @@ export const [
         calendarDisplayI,
         timeZoneDisplayI,
         offsetDisplayI,
-        ...timeDisplayTuple
+        nanoInc,
+        roundingMode,
+        showSecond,
+        subsecDigits,
       ] = refineZonedDateTimeDisplayOptions(options)
 
       let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
-      isoDateTimeFields = roundIsoDateTimeFields(
-        isoDateTimeFields,
-        ...timeDisplayTuple,
-        timeZone,
-      )
+      isoDateTimeFields = roundDateTimeToNano(isoDateTimeFields, nanoInc, roundingMode)
       epochNanoseconds = getMatchingInstantFor(
         isoDateTimeFields,
         timeZone,
@@ -314,8 +316,8 @@ export const [
       offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
-      return formatIsoDateTimeFields(isoDateTimeFields, ...timeDisplayTuple) +
-        formatOffsetNanoseconds(offsetNanoseconds, offsetDisplayI) +
+      return formatIsoDateTimeFields(isoDateTimeFields, showSecond, subsecDigits) +
+        formatOffsetNano(offsetNanoseconds, offsetDisplayI) +
         formatTimeZone(timeZone, timeZoneDisplayI) +
         formatCalendar(calendar, calendarDisplayI)
     },
@@ -356,7 +358,7 @@ export const [
         // maintain alphabetical order
         calendar: getPublicIdOrObj(internals.calendar),
         ...pluckIsoDateTimeInternals(zonedInternalsToIso(internals)),
-        offset: formatOffsetNanoseconds(
+        offset: formatOffsetNano(
           // TODO: more DRY
           zonedInternalsToIso(internals).offsetNanoseconds,
         ),

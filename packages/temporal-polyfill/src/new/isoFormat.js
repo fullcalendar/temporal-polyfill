@@ -1,77 +1,74 @@
 import { isoCalendarId } from './calendarConfig'
 import { getObjId } from './class'
-import { refineDateDisplayOptions } from './options'
+import { alwaysI, autoI, criticalI, refineDateDisplayOptions } from './options'
 
+/*
+High-level. Refined options
+*/
 export function formatPossibleDate(internals, options, formatSimple) {
-  const calendarDisplay = refineDateDisplayOptions(options)
+  const calendarDisplayI = refineDateDisplayOptions(options)
   const showCalendar =
-    calendarDisplay === 'always' || // TODO: use indexes
-    calendarDisplay === 'critical' ||
+    calendarDisplayI === alwaysI || // TODO: use math >=< comparisons?
+    calendarDisplayI === criticalI ||
     getObjId(internals.calendar) !== isoCalendarId
 
   if (showCalendar) {
-    return formatIsoDateFields(internals) +
-      formatCalendarWithSingleOpt(internals.calendar, calendarDisplay)
+    return formatIsoDateFields(internals) + formatCalendar(internals.calendar, calendarDisplayI)
   } else {
     return formatSimple(internals)
   }
 }
 
-export function formatIsoDateTimeFields(
-  isoDateTimeFields,
-  options, // TODO: use spread args
-) {
-  return formatIsoDateFields(isoDateTimeFields) +
-    'T' + formatIsoTimeFields(isoDateTimeFields, options)
-}
+/*
+Rounding already happened with these...
+*/
 
 export function formatIsoDateFields(isoDateFields) {
-
 }
 
 export function formatIsoYearMonthFields(isoDateFields) {
-
 }
 
 export function formatIsoMonthDayFields(isoDateFields) {
+}
 
+export function formatIsoDateTimeFields(
+  isoDateTimeFields,
+  showSecond,
+  subsecDigits,
+) {
+  return formatIsoDateFields(isoDateTimeFields) +
+    'T' + formatIsoTimeFields(isoDateTimeFields, showSecond, subsecDigits)
 }
 
 export function formatIsoTimeFields(
   isoTimeFields,
-  options, // TODO: use spread args
+  showSecond,
+  subsecDigits,
 ) {
-  // smallestUnit will be <= MINUTE (meaning minute ALWAYS displayed)
-}
-
-export function formatOffsetNanoseconds(
-  offsetNanoseconds,
-  options, // TODO: use spread args
-) {
-
-}
-
-export function formatTimeZone(
-  timeZoneProtocol,
-  options, // TODO: use spread args
-) {
-
-}
-
-export function formatCalendar(
-  calendarProtocol,
-  options, // TODO: use spread args
-) {
-  return formatCalendarWithSingleOpt(calendarProtocol, refineDateDisplayOptions(options))
-}
-
-function formatCalendarWithSingleOpt(calendarProtocol, calendarNameOptIndex) {
-
 }
 
 export function formatDurationInternals(
   durationInternals,
-  options, // TODO: use spread args
+  showSecond,
+  subsecDigits,
 ) {
+}
 
+export function formatOffsetNano(
+  offsetNanoseconds,
+  offsetDisplayI = autoI, // auto/never
+) {
+}
+
+export function formatTimeZone(
+  timeZoneOps,
+  timeZoneDisplayI,
+) {
+}
+
+export function formatCalendar(
+  calendarOps,
+  calendarDisplayI,
+) {
 }

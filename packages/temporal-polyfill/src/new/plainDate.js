@@ -25,7 +25,7 @@ import {
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDate } from './isoParse'
-import { refineDiffOptions, refineOverflowOptions } from './options'
+import { refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { zonedInternalsToIso } from './timeZoneOps'
@@ -120,7 +120,7 @@ export const [
 
     toString(internals, options) {
       return formatIsoDateFields(internals) +
-        formatCalendar(internals.calendar, options)
+        formatCalendar(internals.calendar, refineDateDisplayOptions(options))
     },
 
     toLocaleString: toLocaleStringMethod,

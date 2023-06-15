@@ -22,6 +22,7 @@ import {
 } from './options'
 import {
   roundDayTimeDuration,
+  roundDurationToNano,
   roundRelativeDuration,
   totalDayTimeDuration,
   totalRelativeDuration,
@@ -165,7 +166,13 @@ export const [
     },
 
     toString(internals, options) {
-      return formatDurationInternals(internals, ...refineTimeDisplayOptions(options))
+      const [nanoInc, roundingMode, showSecond, subsecDigits] = refineTimeDisplayOptions(options)
+
+      return formatDurationInternals(
+        roundDurationToNano(internals, nanoInc, roundingMode),
+        showSecond,
+        subsecDigits,
+      )
     },
 
     valueOf: neverValueOf,

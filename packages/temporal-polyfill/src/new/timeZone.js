@@ -4,7 +4,7 @@ import { queryCalendarOps } from './calendarOps'
 import { createTemporalClass, getObjId, idGetters } from './class'
 import { refineComplexBag } from './convert'
 import { createInstant, toInstantEpochNanoseconds } from './instant'
-import { formatOffsetNanoseconds } from './isoFormat'
+import { formatOffsetNano } from './isoFormat'
 import { parseTimeZoneId } from './isoParse'
 import { refineEpochDisambigOptions } from './options'
 import { createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
@@ -53,7 +53,7 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
     ...timeZoneProtocolMethods,
 
     getOffsetStringFor(impl, instantArg) {
-      return formatOffsetNanoseconds(getImplOffsetNanosecondsFor(impl, instantArg))
+      return formatOffsetNano(getImplOffsetNanosecondsFor(impl, instantArg))
     },
 
     getPlainDateTimeFor(impl, instantArg, calendarArg) {

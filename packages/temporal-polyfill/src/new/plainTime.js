@@ -21,7 +21,7 @@ import {
 } from './options'
 import { toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
-import { roundIsoTimeFields } from './round'
+import { roundTime, roundTimeToNano } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { hourIndex } from './units'
 
@@ -102,7 +102,7 @@ export const [
 
     round(internals, options) {
       return createPlainTime(
-        roundIsoTimeFields(internals, ...refineRoundOptions(options, hourIndex)),
+        roundTime(internals, ...refineRoundOptions(options, hourIndex)),
       )
     },
 
@@ -112,10 +112,12 @@ export const [
     },
 
     toString(internals, options) {
-      const timeDisplayTuple = refineTimeDisplayOptions(options)
+      const [nanoInc, roundingMode, showSecond, subsecDigits] = refineTimeDisplayOptions(options)
+
       return formatIsoTimeFields(
-        roundIsoTimeFields(internals, ...timeDisplayTuple),
-        ...timeDisplayTuple,
+        roundTimeToNano(internals, nanoInc, roundingMode),
+        showSecond,
+        subsecDigits,
       )
     },
 
