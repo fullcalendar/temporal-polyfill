@@ -260,7 +260,7 @@ export function diffEpochNano(
 /*
 Must always be given start-of-day
 */
-export function diffEpochMilliByDay(epochMilli0, epochMilli1) {
+export function diffEpochMilliByDay(epochMilli0, epochMilli1) { // diffEpochMilliDays
   return Math.round((epochMilli1 - epochMilli0) / milliInDay)
 }
 

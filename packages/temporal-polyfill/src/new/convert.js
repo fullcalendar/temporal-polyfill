@@ -30,7 +30,7 @@ import {
   normalizeOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
-  toObject,
+  toObject, // TODO: shouldn't we use this all over the place?
 } from './options'
 import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
@@ -38,6 +38,12 @@ import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { isObjectLike, pluckProps, removeDuplicateStrings } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
+
+/*
+Rules:
+- refining/merging return internal object
+- converting returns public object
+*/
 
 // ZonedDateTime
 // -------------------------------------------------------------------------------------------------
@@ -229,6 +235,12 @@ export function mergePlainYearMonthBag(plainYearMonth, bag, options) {
   return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
 }
 
+export function convertPlainYearMonthToDate(plainYearMonth, bag) {
+  return createPlainDate(
+    convertToIso(plainYearMonth, yearMonthBasicNames, toObject(bag), ['day']),
+  )
+}
+
 export function convertToPlainYearMonth(
   input, // PlainDate/PlainDateTime/ZonedDateTime
 ) {
@@ -243,16 +255,6 @@ export function convertToPlainYearMonth(
   return createPlainYearMonth(
     calendar.yearMonthFromFields(fields),
   )
-}
-
-export function convertPlainYearMonthToDate(plainYearMonth, bag) {
-  return createPlainDate(
-    convertPlainYearMonthToIso(plainYearMonth, toObject(bag)),
-  )
-}
-
-export function convertPlainYearMonthToIso(plainYearMonth, bag = { day: 1 }) {
-  return convertToIso(plainYearMonth, yearMonthBasicNames, bag, ['day'])
 }
 
 // PlainMonthDay

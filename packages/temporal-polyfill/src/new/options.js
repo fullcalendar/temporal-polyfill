@@ -26,6 +26,7 @@ export function refineEpochDisambigOptions(options) {
 }
 
 export function refineDiffOptions(
+  roundingModeInvert,
   options,
   defaultLargestUnitI,
   maxUnitI = yearIndex,
@@ -39,7 +40,10 @@ export function refineDiffOptions(
     Math.max(smallestUnitI, minUnitI),
     Math.max(smallestUnitI, defaultLargestUnitI),
   )
-  const roundingMode = refineRoundingMode(options)
+  let roundingMode = refineRoundingMode(options)
+  if (roundingModeInvert) {
+    roundingMode = invertRoundingMode(roundingMode)
+  }
   const roundingIncrement = refineRoundingInc(options, smallestUnitI)
   return [largestUnitI, smallestUnitI, roundingMode, roundingIncrement]
 }
@@ -193,15 +197,21 @@ export const halfTruncI = 7
 export const halfEvenI = 8
 const refineRoundingMode = refineChoiceOption.bind(undefined, 'roundingMode', [
   'trunc',
-  'floor',
-  'ceil',
-  'expand',
-  'halfCeil',
-  'halfFloor',
-  'halfExpand', // round() should override this as default
   'halfTrunc',
+  'expand',
+  'halfExpand', // round() should override this as default
   'halfEven',
+  // ones that invert from floor/ceil...
+  'floor',
+  'halfFloor',
+  'ceil',
+  'halfCeil',
 ])
+
+function invertRoundingMode(roundingModeI) {
+  // TODO
+  // use numbers?
+}
 
 function refineRoundingInc(options, validateWithSmallestUnitI) {
   // default to 1
@@ -316,10 +326,6 @@ export function toEpochNano(input) {
     throw new TypeError('Needs bigint')
   }
   return bigIntToLargeInt(input)
-}
-
-export function invertRoundingMode(roundingModeI) {
-  // TODO
 }
 
 export function clampProp(props, propName, min, max, overflowI) {

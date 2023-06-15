@@ -25,7 +25,7 @@ import {
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDate } from './isoParse'
-import { invertRoundingMode, refineDiffOptions, refineOverflowOptions } from './options'
+import { refineDiffOptions, refineOverflowOptions } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { zonedInternalsToIso } from './timeZoneOps'
@@ -105,24 +105,11 @@ export const [
     },
 
     until(internals, otherArg, options) {
-      const otherInternals = toPlainDateInternals(otherArg)
-      const calendar = getCommonCalendarOps(internals, otherInternals)
-      const optionsTuple = refineDiffOptions(options, dayIndex, yearIndex, dayIndex)
-
-      return createDuration(
-        diffDates(calendar, internals, otherInternals, ...optionsTuple),
-      )
+      return diffPlainDates(internals, toPlainDateInternals(otherArg), options)
     },
 
     since(internals, otherArg, options) {
-      const otherInternals = toPlainDateInternals(otherArg)
-      const calendar = getCommonCalendarOps(internals, otherInternals)
-      const optionsTuple = refineDiffOptions(options, dayIndex, yearIndex, dayIndex)
-      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
-
-      return createDuration(
-        diffDates(calendar, otherInternals, internals, ...optionsTuple),
-      )
+      return diffPlainDates(toPlainDateInternals(otherArg), internals, options, true)
     },
 
     equals(internals, other) {
@@ -180,7 +167,17 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-// move to options file?
+function diffPlainDates(internals0, internals1, options, roundingModeInvert) {
+  return createDuration(
+    diffDates(
+      getCommonCalendarOps(internals0, internals1),
+      internals0,
+      internals1,
+      ...refineDiffOptions(roundingModeInvert, options, dayIndex, yearIndex, dayIndex),
+    ),
+  )
+}
+
 function optionalToPlainTimeInternals(timeArg) {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeInternals(timeArg)
 }

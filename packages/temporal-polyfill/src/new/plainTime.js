@@ -14,7 +14,6 @@ import { compareIsoTimeFields } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {
-  invertRoundingMode,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -86,44 +85,25 @@ export const [
     },
 
     add(internals, durationArg) {
-      return createPlainTime(
-        moveTime(
-          internals,
-          toDurationInternals(durationArg),
-        )[0],
-      )
+      return movePlainTime(internals, toDurationInternals(durationArg))
     },
 
     subtract(internals, durationArg) {
-      return createPlainTime(
-        moveTime(
-          internals,
-          negateDurationInternals(toDurationInternals(durationArg)),
-        )[0],
-      )
+      return movePlainTime(internals, negateDurationInternals(toDurationInternals(durationArg)))
     },
 
     until(internals, otherArg, options) {
-      const otherInternals = toPlainTimeInternals(otherArg)
-      const optionsTuple = refineDiffOptions(options, hourIndex, hourIndex)
-
-      return createDuration(
-        diffTimes(internals, otherInternals, ...optionsTuple),
-      )
+      return diffPlainTimes(internals, toPlainTimeInternals(otherArg), options)
     },
 
     since(internals, otherArg, options) {
-      const otherInternals = toPlainTimeInternals(otherArg)
-      const optionsTuple = refineDiffOptions(options, hourIndex, hourIndex)
-      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
-
-      return createDuration(
-        diffTimes(otherInternals, internals, ...optionsTuple),
-      )
+      return diffPlainTimes(toPlainTimeInternals(otherArg), internals, options, true)
     },
 
     round(internals, options) {
-      return roundIsoTimeFields(internals, ...refineRoundOptions(options, hourIndex))
+      return createPlainTime(
+        roundIsoTimeFields(internals, ...refineRoundOptions(options, hourIndex)),
+      )
     },
 
     equals(internals, other) {
@@ -169,3 +149,20 @@ export const [
     },
   },
 )
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+function movePlainTime(internals, durationInternals) {
+  return createPlainTime(moveTime(internals, durationInternals)[0])
+}
+
+function diffPlainTimes(internals0, internals1, options, roundingModeInvert) {
+  return createDuration(
+    diffTimes(
+      internals0,
+      internals1,
+      ...refineDiffOptions(roundingModeInvert, options, hourIndex, hourIndex),
+    ),
+  )
+}

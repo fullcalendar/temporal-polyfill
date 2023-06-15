@@ -24,7 +24,6 @@ import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'
 import {
-  invertRoundingMode,
   refineDateTimeDisplayOptions,
   refineDiffOptions,
   refineEpochDisambigOptions,
@@ -127,46 +126,27 @@ export const [
     },
 
     add(internals, durationArg, options) {
-      return createPlainDateTime(
-        moveDateTime(
-          internals.calendar,
-          internals,
-          toDurationInternals(durationArg),
-          refineOverflowOptions(options),
-        ),
+      return movePlainDateTime(
+        internals,
+        toDurationInternals(durationArg),
+        options,
       )
     },
 
     subtract(internals, durationArg, options) {
-      return createPlainDateTime(
-        moveDateTime(
-          internals.calendar,
-          internals,
-          negateDurationInternals(toDurationInternals(durationArg)),
-          refineOverflowOptions(options),
-        ),
+      return movePlainDateTime(
+        internals,
+        negateDurationInternals(toDurationInternals(durationArg)),
+        options,
       )
     },
 
     until(internals, otherArg, options) {
-      const otherInternals = toPlainDateTimeInternals(otherArg)
-      const calendar = getCommonCalendarOps(internals, otherInternals)
-      const optionsTuple = refineDiffOptions(options, dayIndex)
-
-      return createDuration(
-        diffDateTimes(calendar, internals, otherInternals, ...optionsTuple),
-      )
+      return diffPlainDateTimes(internals, toPlainDateTimeInternals(otherArg), options)
     },
 
     since(internals, otherArg, options) {
-      const otherInternals = toPlainDateTimeInternals(otherArg)
-      const calendar = getCommonCalendarOps(internals, otherInternals)
-      const optionsTuple = refineDiffOptions(options, dayIndex)
-      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
-
-      return createDuration(
-        diffDateTimes(calendar, otherInternals, internals, ...optionsTuple),
-      )
+      return diffPlainDateTimes(toPlainDateTimeInternals(otherArg), internals, options, true)
     },
 
     round(internals, options) {
@@ -249,3 +229,28 @@ export const [
     },
   },
 )
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+function movePlainDateTime(internals, durationInternals, options) {
+  return createPlainDateTime(
+    moveDateTime(
+      internals.calendar,
+      internals,
+      durationInternals,
+      refineOverflowOptions(options),
+    ),
+  )
+}
+
+function diffPlainDateTimes(internals0, internals1, options, roundingModeInvert) {
+  return createDuration(
+    diffDateTimes(
+      getCommonCalendarOps(internals0, internals1),
+      internals0,
+      internals1,
+      ...refineDiffOptions(roundingModeInvert, options, dayIndex),
+    ),
+  )
+}

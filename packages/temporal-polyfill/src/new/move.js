@@ -119,7 +119,7 @@ export function moveDate(calendar, isoDateFields, durationFields, overflowI) {
   }
 }
 
-export function moveDateByDays(isoDateFields, days) {
+export function moveDateByDays(isoDateFields, days) { // moveDateDays
   if (days) {
     isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields) + days * milliInDay)
   }

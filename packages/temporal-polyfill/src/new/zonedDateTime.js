@@ -34,7 +34,6 @@ import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
-  invertRoundingMode,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -200,58 +199,27 @@ export const [
     },
 
     add(internals, durationArg, options) {
-      return createZonedDateTime(
-        moveZonedDateTimeInternals(
-          internals,
-          toDurationInternals(durationArg),
-          options,
-        ),
+      return moveZonedDateTime(
+        internals,
+        toDurationInternals(durationArg),
+        options,
       )
     },
 
     subtract(internals, durationArg, options) {
-      return createZonedDateTime(
-        moveZonedDateTimeInternals(
-          internals,
-          negateDurationInternals(toDurationInternals(durationArg)),
-          options,
-        ),
+      return moveZonedDateTime(
+        internals,
+        negateDurationInternals(toDurationInternals(durationArg)),
+        options,
       )
     },
 
     until(internals, otherArg, options) {
-      const otherInternals = toZonedDateTimeInternals(otherArg)
-      const calendar = getCommonCalendarOps(internals, otherInternals)
-      const timeZone = getCommonTimeZoneOps(internals, otherInternals)
-      const optionsTuple = refineDiffOptions(options, hourIndex)
-
-      return createDuration(
-        diffZonedEpochNano(
-          calendar,
-          timeZone,
-          internals.epochNanoseconds,
-          otherInternals.epochNanoseconds,
-          ...optionsTuple,
-        ),
-      )
+      return diffZonedDateTimes(internals, toZonedDateTimeInternals(otherArg), options)
     },
 
     since(internals, otherArg, options) {
-      const otherInternals = toZonedDateTimeInternals(otherArg)
-      const calendar = getCommonCalendarOps(internals, otherInternals)
-      const timeZone = getCommonTimeZoneOps(internals, otherInternals)
-      const optionsTuple = refineDiffOptions(options, hourIndex)
-      optionsTuple[2] = invertRoundingMode(optionsTuple[2])
-
-      return createDuration(
-        diffZonedEpochNano(
-          calendar,
-          timeZone,
-          otherInternals.epochNanoseconds,
-          internals.epochNanoseconds,
-          ...optionsTuple,
-        ),
-      )
+      return diffZonedDateTimes(toZonedDateTimeInternals(otherArg), internals, options, true)
     },
 
     round(internals, options) {
@@ -416,12 +384,26 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function moveZonedDateTimeInternals(internals, durationFields, overflowHandling) {
-  return moveZonedEpochNano(
-    internals.calendar,
-    internals.timeZone,
-    internals.epochNanoseconds,
-    durationFields,
-    overflowHandling,
+function moveZonedDateTime(internals, durationFields, overflowHandling) {
+  return createZonedDateTime(
+    moveZonedEpochNano(
+      internals.calendar,
+      internals.timeZone,
+      internals.epochNanoseconds,
+      durationFields,
+      overflowHandling,
+    ),
+  )
+}
+
+function diffZonedDateTimes(internals, otherInternals, options, roundingModeInvert) {
+  return createDuration(
+    diffZonedEpochNano(
+      getCommonCalendarOps(internals, otherInternals),
+      getCommonTimeZoneOps(internals, otherInternals),
+      internals.epochNanoseconds,
+      otherInternals.epochNanoseconds,
+      ...refineDiffOptions(roundingModeInvert, options, hourIndex),
+    ),
   )
 }
