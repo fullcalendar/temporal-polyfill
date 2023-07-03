@@ -13,6 +13,7 @@ import {
   epochSecToNano,
   validateEpochNano,
 } from './isoMath'
+import { parseInstant } from './isoParse'
 import { compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
 import {
@@ -52,7 +53,7 @@ export const [
   noop,
 
   // stringToInternals
-  stringToEpochNanoseconds,
+  parseInstant,
 
   // handleUnusedOptions
   noop,
@@ -166,10 +167,6 @@ export const [
     },
   },
 )
-
-function stringToEpochNanoseconds(str) {
-  // TODO
-}
 
 function diffInstants(epochNano0, epochNano1, options, roundingModeInvert) {
   return createDuration(

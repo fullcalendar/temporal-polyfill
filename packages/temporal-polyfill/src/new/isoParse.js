@@ -8,29 +8,53 @@ import {
   constrainIsoDateInternals,
   constrainIsoDateTimeInternals,
   constrainIsoTimeFields,
+  isoToEpochNano,
 } from './isoMath'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
+
+// TODO: finish isoParse
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
+export function parseInstant(s) {
+  const parsed = parseDateTime(s)
+
+  if (parsed) {
+    let offsetNano
+
+    if (parsed.hasZ) {
+      offsetNano = 0
+    } else if (parsed.offset) {
+      offsetNano = parseOffsetNano(parsed.offset)
+    } else {
+      return new RangeError()
+    }
+
+    return isoToEpochNano(parsed).addNumber(offsetNano)
+  }
+
+  throw new RangeError()
+}
+
 export function parseZonedDateTime(s) {
   const parsed = parseDateTime(s) // TODO: use just 'calendar' and 'timeZone' ?
+
   if (parsed) {
     if (!parsed.timeZone) {
-      throw new Error()
+      throw new RangeError()
     }
     return processZonedDateTimeParse(parsed)
   }
 
-  throw new Error()
+  throw new RangeError()
 }
 
 export function processZonedDateTimeParse(parsed) {
   const epochNanoseconds = getMatchingInstantFor(
     parsed.timeZone,
     parsed,
-    parsed.offset !== undefined ? parseOffsetNano(parsed.offset) : undefined,
+    parsed.offset ? parseOffsetNano(parsed.offset) : undefined,
     parsed.z,
     'reject',
     'compatible',
@@ -50,7 +74,7 @@ export function parsePlainDateTime(s) {
     return pluckIsoDateTimeInternals(parsed)
   }
 
-  throw new Error()
+  throw new RangeError()
 }
 
 export function parsePlainDate(s) {
@@ -59,7 +83,7 @@ export function parsePlainDate(s) {
     return parsed
   }
 
-  throw new Error()
+  throw new RangeError()
 }
 
 export function parsePlainYearMonth(s) {
@@ -75,7 +99,7 @@ export function parsePlainYearMonth(s) {
     return parsed
   }
 
-  throw new Error()
+  throw new RangeError()
 }
 
 export function parsePlainMonthDay(s) {
@@ -91,7 +115,7 @@ export function parsePlainMonthDay(s) {
     return parsed
   }
 
-  throw new Error()
+  throw new RangeError()
 }
 
 export function parsePlainTime(s) {
@@ -101,29 +125,29 @@ export function parsePlainTime(s) {
     parsed = parseDateTime(s)
 
     if (parsed && !parsed.hasTime) {
-      throw new Error()
+      throw new RangeError()
     }
   }
 
   if (parsed) {
     if (parsed.hasZ) {
-      throw new Error()
+      throw new RangeError()
     }
     if (parsed.calendar !== undefined && parsed.calendar !== isoCalendarId) {
-      throw new Error()
+      throw new RangeError()
     }
 
     if (parseMonthDay(s)) {
-      throw new Error()
+      throw new RangeError()
     }
     if (parseYearMonth(s)) {
-      throw new Error()
+      throw new RangeError()
     }
 
     return pluckIsoTimeFields(parsed)
   }
 
-  throw new Error()
+  throw new RangeError()
 }
 
 export function parseCalendarId(s) {
