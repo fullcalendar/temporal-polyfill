@@ -18,6 +18,7 @@ import {
   nanoInUtcDay,
   nanoIndex,
   unitIndexToNano,
+  unitNamesAsc,
   weekIndex,
 } from './units'
 import { identityFunc } from './utils'
@@ -218,7 +219,7 @@ export function totalRelativeDuration(
   const { sign } = durationFields
 
   const [epochNanoseconds0, epochNanoseconds1] = clampRelativeDuration(
-    clearDurationFields(durationFields, nanoIndex, totalUnitIndex - 1),
+    clearDurationFields(durationFields, totalUnitIndex - 1),
     totalUnitIndex,
     sign,
     // marker system...
@@ -327,12 +328,7 @@ function nudgeRelativeDuration(
 ) {
   const { sign } = durationFields
 
-  const baseDurationFields = clearDurationFields(
-    durationFields,
-    nanoIndex,
-    smallestUnitI - 1,
-  )
-
+  const baseDurationFields = clearDurationFields(durationFields, smallestUnitI - 1)
   baseDurationFields[smallestUnitI] = Math.trunc(
     durationFields[smallestUnitI] / roundingInc,
   )
@@ -386,11 +382,7 @@ function bubbleRelativeDuration(
       continue
     }
 
-    const baseDurationFields = clearDurationFields(
-      durationFields,
-      nanoIndex,
-      currentUnitIndex - 1,
-    )
+    const baseDurationFields = clearDurationFields(durationFields, currentUnitIndex - 1)
     baseDurationFields[durationFieldNamesAsc[currentUnitIndex]] += sign
 
     const thresholdEpochNanoseconds = markerToEpochMilliseconds(
@@ -425,6 +417,12 @@ function clampRelativeDuration(
   return [epochNanoseconds0, epochNanoseconds1]
 }
 
-function clearDurationFields(durationFields, firstUnitIndex, lastUnitIndex) {
-  // TODO: always assume `nanoIndex` as firstUnitIndex
+function clearDurationFields(durationFields, lastUnitIndex) {
+  const copy = { ...durationFields }
+
+  for (let unitIndex = nanoIndex; unitIndex <= lastUnitIndex; unitIndex++) {
+    copy[unitNamesAsc[unitIndex]] = 0
+  }
+
+  return copy
 }
