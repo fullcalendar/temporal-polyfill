@@ -109,7 +109,7 @@ export function hasAllPropsByName(props, names) {
   return true
 }
 
-export function createLazyMap(generator, MapClass = Map) {
+export function createLazyGenerator(generator, MapClass = Map) {
   const map = new MapClass()
 
   return (key, ...otherArgs) => {

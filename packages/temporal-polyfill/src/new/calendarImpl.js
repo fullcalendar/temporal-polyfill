@@ -41,7 +41,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { rejectI } from './options'
 import { milliInDay } from './units'
-import { clamp, createLazyMap, mapPropNamesToIndex, twoDigit } from './utils'
+import { clamp, createLazyGenerator, mapPropNamesToIndex, twoDigit } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -512,7 +512,7 @@ const calendarImplClasses = {
   [japaneseCalendarId]: JapaneseCalendarImpl,
 }
 
-const queryCalendarImplWithClass = createLazyMap((calendarId, CalendarImplClass) => {
+const queryCalendarImplWithClass = createLazyGenerator((calendarId, CalendarImplClass) => {
   return new CalendarImplClass(calendarId)
 })
 
@@ -541,7 +541,7 @@ interface IntlFields {
 */
 
 function createIntlFieldCache(epochMilliToIntlFields) {
-  return createLazyMap((isoDateFields) => {
+  return createLazyGenerator((isoDateFields) => {
     const epochMilli = isoToEpochMilli(isoDateFields)
     return epochMilliToIntlFields(epochMilli)
   }, WeakMap)
@@ -551,7 +551,7 @@ function createJapaneseFieldCache() {
   const epochMilliToIntlFields = createEpochMilliToIntlFields(japaneseCalendarId)
   const primaryEraMilli = isoArgsToEpochMilli(1868, 9, 8)
 
-  return createLazyMap((isoDateFields) => {
+  return createLazyGenerator((isoDateFields) => {
     const epochMilli = isoToEpochMilli(isoDateFields)
     const intlFields = epochMilliToIntlFields(epochMilli)
 
@@ -619,7 +619,7 @@ function buildIntlFormat(calendarId) {
 function createIntlMonthCache(epochMilliToIntlFields) {
   const yearAtEpoch = epochMilliToIntlFields(0).year
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
-  const queryYear = createLazyMap(buildYear)
+  const queryYear = createLazyGenerator(buildYear)
 
   function buildYear(year) {
     let epochMilli = isoArgsToEpochMilli(year - yearCorrection)

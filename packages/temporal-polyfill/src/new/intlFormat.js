@@ -4,7 +4,7 @@ import { getInternals, getTemporalName } from './class'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
-  createLazyMap,
+  createLazyGenerator,
   excludePropsByName,
   hasAnyPropsByName,
   identityFunc,
@@ -65,7 +65,7 @@ export class DateTimeFormat extends IntlDateTimeFormat {
 // DateTimeFormat Helpers
 // -------------------------------------------------------------------------------------------------
 
-const getGetSpecificFormat = createLazyMap(() => createLazyMap(createSpecificFormat), WeakMap)
+const getGetSpecificFormat = createLazyGenerator(() => createLazyGenerator(createSpecificFormat), WeakMap)
 
 function createSpecificFormat(transformOptions, resolvedOptions) {
   return new IntlDateTimeFormat(resolvedOptions.locale, transformOptions(resolvedOptions))

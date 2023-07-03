@@ -19,7 +19,7 @@ import { roundToMinute } from './round'
 import { TimeZone, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
-import { createLazyMap } from './utils'
+import { createLazyGenerator } from './utils'
 
 export const utcTimeZoneId = 'UTC'
 
@@ -175,7 +175,7 @@ function computeGapNear(timeZoneOps, zonedEpochNano) {
   return endOffsetNano - startOffsetNano
 }
 
-export const zonedInternalsToIso = createLazyMap((internals) => {
+export const zonedInternalsToIso = createLazyGenerator((internals) => {
   const { timeZone, epochNanoseconds } = internals
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
   const isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))

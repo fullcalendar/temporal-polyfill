@@ -12,7 +12,7 @@ import {
 } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clamp, compareNumbers, createLazyMap } from './utils'
+import { clamp, compareNumbers, createLazyGenerator } from './utils'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
@@ -88,8 +88,8 @@ export class IntlTimeZoneImpl {
 }
 
 function createIntlTimeZoneStore(computeOffsetSec) {
-  const getSample = createLazyMap(computeOffsetSec) // always given startEpochSec/endEpochSec
-  const getSplit = createLazyMap((startEpochSec, endEpochSec) => [startEpochSec, endEpochSec])
+  const getSample = createLazyGenerator(computeOffsetSec) // always given startEpochSec/endEpochSec
+  const getSplit = createLazyGenerator((startEpochSec, endEpochSec) => [startEpochSec, endEpochSec])
   let minTransition = minPossibleTransition
   let maxTransition = maxPossibleTransition
 
