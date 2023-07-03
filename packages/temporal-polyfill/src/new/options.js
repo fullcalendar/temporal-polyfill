@@ -1,4 +1,7 @@
+import { parseDateTime } from '../dateUtils/parse'
 import { durationFieldIndexes } from './durationFields'
+import { pluckIsoDateTimeInternals } from './isoFields'
+import { processZonedDateTimeParse } from './isoParse'
 import { bigIntToLargeInt } from './largeInt'
 import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearIndex } from './units'
 import {
@@ -50,14 +53,14 @@ export function refineDiffOptions(
     Math.max(smallestUnitI, defaultLargestUnitI),
   )
 
-  const roundingIncrement = refineRoundingInc(options, smallestUnitI)
+  const roundingInc = refineRoundingInc(options, smallestUnitI)
 
   let roundingMode = refineRoundingMode(options, truncI)
   if (roundingModeInvert) {
     roundingMode = invertRoundingMode(roundingMode)
   }
 
-  return [largestUnitI, smallestUnitI, roundingIncrement, roundingMode]
+  return [largestUnitI, smallestUnitI, roundingInc, roundingMode]
 }
 
 /*
@@ -285,34 +288,29 @@ function invertRoundingMode(roundingModeI) {
   return roundingModeI
 }
 
-function refineRoundingInc(options, validateWithSmallestUnitI) {
-  // default to 1
-  // with smallestUnit...
-  /*
-    if (roundTo === undefined) throw new TypeError('options parameter is required');
-    if (ES.Type(roundTo) === 'String') {
-      const stringParam = roundTo;
-      roundTo = ObjectCreate(null);
-      roundTo.smallestUnit = stringParam;
-    } else {
-      roundTo = ES.GetOptionsObject(roundTo);
+const roundingIncName = 'roundingIncrement'
+
+function refineRoundingInc(options, smallestUnitI) { // smallestUnit is day/time
+  let roundingInc = options[roundingIncName]
+  if (roundingInc === undefined) {
+    return 1
+  }
+
+  const upUnitNano = unitIndexToNano[smallestUnitI + 1]
+
+  if (upUnitNano) {
+    const unitNano = unitIndexToNano[smallestUnitI]
+    const maxRoundingInc = upUnitNano / unitNano
+    roundingInc = clamp(roundingInc, 1, maxRoundingInc - 1, roundingIncName)
+
+    if (upUnitNano % (roundingInc * unitNano)) {
+      throw new RangeError('Must be even multiple')
     }
-    const roundingIncrement = ES.ToTemporalRoundingIncrement(roundTo);
-    const roundingMode = ES.ToTemporalRoundingMode(roundTo, 'halfExpand');
-    const smallestUnit = ES.GetTemporalUnit(roundTo, 'smallestUnit', 'time', ES.REQUIRED, ['day']);
-    const maximumIncrements = {
-      day: 1,
-      hour: 24,
-      minute: 60,
-      second: 60,
-      millisecond: 1000,
-      microsecond: 1000,
-      nanosecond: 1000
-    };
-    const maximum = maximumIncrements[smallestUnit];
-    const inclusive = maximum === 1;
-    ES.ValidateTemporalRoundingIncrement(roundingIncrement, maximum, inclusive);
-  */
+  } else {
+    roundingInc = clamp(roundingInc, 1, 1, roundingIncName)
+  }
+
+  return roundingInc
 }
 
 const subsecDigitsName = 'fractionalSecondDigits'
@@ -332,9 +330,13 @@ function refineSubsecDigits(options) {
 }
 
 function refineRelativeTo(options) {
-  // TODO
-  // should return ZoneDateTimeINTERNALS or PlainDateINTERNALS
-  // allow undefined
+  const parsed = parseDateTime(options)
+
+  if (parsed.timeZone) {
+    return processZonedDateTimeParse(parsed)
+  }
+
+  return pluckIsoDateTimeInternals(parsed)
 }
 
 // Utils
@@ -450,6 +452,7 @@ export function toInteger(value) {
 export function toStringOrUndefined() {
 }
 
+// used?
 export function toNumberOrUndefined() {
 }
 

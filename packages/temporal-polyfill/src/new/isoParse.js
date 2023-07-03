@@ -1,5 +1,4 @@
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarOps } from './calendarOps'
 import {
   pluckIsoDateInternals,
   pluckIsoDateTimeInternals,
@@ -10,7 +9,7 @@ import {
   constrainIsoDateTimeInternals,
   constrainIsoTimeFields,
 } from './isoMath'
-import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
+import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -18,31 +17,31 @@ import { getMatchingInstantFor, queryTimeZoneOps, utcTimeZoneId } from './timeZo
 export function parseZonedDateTime(s) {
   const parsed = parseDateTime(s) // TODO: use just 'calendar' and 'timeZone' ?
   if (parsed) {
-    if (!parsed.timeZoneId) {
+    if (!parsed.timeZone) {
       throw new Error()
     }
-
-    const calendar = queryCalendarOps(parsed.calendarId || isoCalendarId)
-    const timeZone = queryTimeZoneOps(parsed.timeZoneId)
-
-    const epochNanoseconds = getMatchingInstantFor(
-      timeZone,
-      parsed,
-      parsed.offset !== undefined ? parseOffsetNano(parsed.offset) : undefined,
-      parsed.z,
-      'reject',
-      'compatible',
-      true, // fuzzy
-    )
-
-    return {
-      epochNanoseconds,
-      timeZone,
-      calendar,
-    }
+    return processZonedDateTimeParse(parsed)
   }
 
   throw new Error()
+}
+
+export function processZonedDateTimeParse(parsed) {
+  const epochNanoseconds = getMatchingInstantFor(
+    parsed.timeZone,
+    parsed,
+    parsed.offset !== undefined ? parseOffsetNano(parsed.offset) : undefined,
+    parsed.z,
+    'reject',
+    'compatible',
+    true, // fuzzy
+  )
+
+  return {
+    epochNanoseconds,
+    timeZone: parsed.timeZone,
+    calendar: parsed.calendar,
+  }
 }
 
 export function parsePlainDateTime(s) {
@@ -110,7 +109,7 @@ export function parsePlainTime(s) {
     if (parsed.hasZ) {
       throw new Error()
     }
-    if (parsed.calendarId !== undefined && parsed.calendarId !== isoCalendarId) {
+    if (parsed.calendar !== undefined && parsed.calendar !== isoCalendarId) {
       throw new Error()
     }
 
@@ -131,7 +130,7 @@ export function parseCalendarId(s) {
   if (s !== isoCalendarId) {
     s = (
       parseDateTime(s) || parseYearMonth(s) || parseMonthDay(s)
-    )?.calendarId || isoCalendarId
+    )?.calendar.id || isoCalendarId
   }
 
   return s
@@ -140,8 +139,8 @@ export function parseCalendarId(s) {
 export function parseTimeZoneId(s) {
   const parsed = parseDateTime(s)
   if (parsed !== undefined) {
-    if (parsed.timeZonedId) {
-      return parsed.timeZonedId // TODO: need to canonicalize (run through DateTimeFormat)
+    if (parsed.timeZone) {
+      return parsed.timeZone.id
     }
     if (parsed.hasZ) {
       return utcTimeZoneId
@@ -163,20 +162,27 @@ function parseDateTime(s) {
     //   isoHour, isMinute, isoSecond, etc...
     //   hasTime, hasZ, offset,
     //   calendar, timeZone }
+    //
+    // should use `queryCalendarOps(parsed.calendar || isoCalendarId)`
+    // should use `queryTimeZoneOps(parsed.timeZone)`
   })
 }
 
 function parseYearMonth(s) {
   return constrainIsoDateInternals({
     // { isYear, isoMonth, isoDay
-    //   calendar, timeZone }
+    //   calendar }
+    //
+    // should use `queryCalendarOps(parsed.calendar || isoCalendarId)`
   })
 }
 
 function parseMonthDay(s) {
   return constrainIsoDateInternals({
     // { isYear, isoMonth, isoDay
-    //   calendar, timeZone }
+    //   calendar }
+    //
+    // should use `queryCalendarOps(parsed.calendar || isoCalendarId)`
   })
 }
 
