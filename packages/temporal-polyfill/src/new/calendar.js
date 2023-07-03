@@ -15,14 +15,14 @@ import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { mapArrayToProps, noop, removeUndefines } from './utils'
+import { excludeUndefinedProps, mapPropNames, noop } from './utils'
 
 export const calendarProtocolMethods = {
-  ...mapArrayToProps(dateGetterNames, (propName) => {
+  ...mapPropNames((propName) => {
     return (impl, plainDateArg) => {
       return impl[propName](toPlainDateInternals(plainDateArg))
     }
-  }),
+  }, dateGetterNames),
 
   daysInWeek() {
     return isoDaysInWeek
@@ -66,8 +66,8 @@ export const calendarProtocolMethods = {
 
   mergeFields(impl, fields0, fields1) {
     return impl.mergeFields(
-      removeUndefines(ensureObjectlike(fields0)),
-      removeUndefines(ensureObjectlike(fields1)),
+      excludeUndefinedProps(ensureObjectlike(fields0)),
+      excludeUndefinedProps(ensureObjectlike(fields1)),
     )
   },
 }

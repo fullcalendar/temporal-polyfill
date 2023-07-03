@@ -6,7 +6,7 @@ import { bigIntToLargeInt } from './largeInt'
 import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearIndex } from './units'
 import {
   clamp,
-  hasAnyMatchingProps,
+  hasAnyPropsByName,
   isObjectlike,
   roundExpand,
   roundHalfCeil,
@@ -396,7 +396,7 @@ function normalizeRequiredOptions(options, atomicName) {
 }
 
 function mustHaveMatch(obj, propNames) {
-  if (!hasAnyMatchingProps(obj, propNames)) {
+  if (!hasAnyPropsByName(obj, propNames)) {
     throw new TypeError('Need one: ' + JSON.stringify(propNames))
   }
 }

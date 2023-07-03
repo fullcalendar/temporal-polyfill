@@ -49,14 +49,14 @@ const getPlainYearMonthInternals = getStrictInternals.bind(undefined, PlainYearM
 const getPlainMonthDayInternals = getStrictInternals.bind(undefined, PlainMonthDay)
 
 const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
-  ...mapProps({
-    ...eraYearFieldRefiners,
-    ...dateFieldRefiners,
-    ...dateStatRefiners,
-  }, (refiner, propName) => {
+  ...mapProps((refiner, propName) => {
     return (calendar, isoDateFields) => {
       return refiner(calendar[propName](createPlainDate(isoDateFields)))
     }
+  }, {
+    ...eraYearFieldRefiners,
+    ...dateFieldRefiners,
+    ...dateStatRefiners,
   }),
 
   dateAdd(calendar, isoDateFields, durationInternals, overflow) {

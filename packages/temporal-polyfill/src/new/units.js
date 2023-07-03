@@ -1,5 +1,5 @@
 import { LargeInt, numberToLargeInt } from './largeInt'
-import { mapArrayToProps } from './utils'
+import { mapPropNamesToIndex } from './utils'
 
 export const nanoIndex = 0
 export const microIndex = 1
@@ -25,7 +25,7 @@ export const unitNamesAsc = [
   'year',
 ]
 
-export const unitIndexes = mapArrayToProps(unitNamesAsc)
+export const unitIndexes = mapPropNamesToIndex(unitNamesAsc)
 
 // Nanoseconds
 // -------------------------------------------------------------------------------------------------

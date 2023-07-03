@@ -6,7 +6,7 @@ import {
   constrainIsoTimeFields,
 } from './isoMath'
 import { toInteger } from './options'
-import { mapRefiners, pluckProps, zipSingleValue } from './utils'
+import { mapPropNamesToConstant, mapPropsWithRefiners, pluckProps } from './utils'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
@@ -49,26 +49,26 @@ export const isoTimeFieldNames = isoTimeFieldNamesAsc.sort()
 // Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const isoTimeFieldDefaults = zipSingleValue(isoTimeFieldNames, 0)
+export const isoTimeFieldDefaults = mapPropNamesToConstant(isoTimeFieldNames, 0)
 
 // Refining
 // -------------------------------------------------------------------------------------------------
 
 export function refineIsoTimeInternals(rawIsoTimeInternals) {
   return constrainIsoTimeFields(
-    mapRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
+    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
   )
 }
 
 export function refineIsoDateInternals(rawIsoDateInternals) {
   return constrainIsoDateInternals(
-    mapRefiners(rawIsoDateInternals, isoDateInternalRefiners),
+    mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
   )
 }
 
 export function refineIsoDateTimeInternals(rawIsoDateTimeInternals) {
   return constrainIsoDateTimeInternals(
-    mapRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
+    mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
   )
 }
 

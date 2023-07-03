@@ -1,6 +1,6 @@
 import { isoTimeFieldNames } from './isoFields'
 import { ensureBoolean, ensureInteger, toInteger } from './options'
-import { mapArrayToProps, remapProps, zipSingleValue } from './utils'
+import { mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
@@ -101,23 +101,25 @@ export const dateGetters = createGetters(dateGetterNames)
 export const yearMonthGetters = createGetters(yearMonthGetterNames)
 export const monthDayGetters = createGetters(monthDayGetterNames)
 
-export const timeGetters = mapArrayToProps(timeFieldNames, (timeFieldName, i) => {
+export const timeGetters = mapPropNames((timeFieldName, i) => {
   return (isoTimeFieldsInternals) => {
     return isoTimeFieldsInternals[isoTimeFieldNames[i]]
   }
-})
+}, timeFieldNames)
 
 export const dateTimeGetters = {
   ...dateGetters,
   ...timeGetters,
 }
 
+function createGetter(propName) {
+  return (internals) => {
+    return internals.calendar[propName](internals)
+  }
+}
+
 function createGetters(getterNames) {
-  const getters = mapArrayToProps(getterNames, (propName) => {
-    return (internals) => {
-      return internals.calendar[propName](internals)
-    }
-  })
+  const getters = mapPropNames(createGetter, getterNames)
 
   getters.calendarId = function(internals) {
     return internals.calendar.id // works for either CalendarOpsAdapter or CalendarImpl
@@ -129,11 +131,9 @@ function createGetters(getterNames) {
 // Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const timeFieldDefaults = zipSingleValue(timeFieldNames, 0)
+export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNames, 0)
 
 // Conversion
 // -------------------------------------------------------------------------------------------------
 
-export function timeFieldsToIso(timeFields) {
-  return remapProps(timeFields, timeFieldNames, isoTimeFieldNames)
-}
+export const timeFieldsToIso = remapProps.bind(undefined, timeFieldNames, isoTimeFieldNames)

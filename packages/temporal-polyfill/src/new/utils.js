@@ -1,32 +1,112 @@
 
-export function isObjectlike() {
+// TODO: auto these utils
+
+const objectlikeRE = /object|function/
+
+export function isObjectlike(arg) {
+  return arg !== null && objectlikeRE.test(typeof arg)
 }
 
-export function mapRefiners(input, refinerMap) {
-  // loops get driven props of input
+export function mapProps(transformer, props, extraArg) {
+  const res = {}
+
+  for (const propName in props) {
+    res[propName] = transformer(props[propName], propName, extraArg)
+  }
+
+  return res
 }
 
-export function mapProps(input, refinerMap) {
-  // loops get driven my refinerMap
+export const mapPropsWithRefiners = mapProps.bind(
+  undefined,
+  (propValue, propName, refinerMap) => refinerMap[propName](propValue, propName),
+)
+
+export function mapPropNames(generator, propNames, extraArg) {
+  const res = {}
+
+  for (let i = 0; i < propNames.length; i++) {
+    const propName = propNames[i]
+    res[propName] = generator(propName, i, extraArg)
+  }
+
+  return res
 }
 
-export function mapArrayToProps() { // propNameToProps
-  // TODO: auto uses of this because often a {key:value} will take up same minification space
-  // as defining an array of strings and running it through this function
+export const mapPropNamesToIndex = mapPropNames.bind(
+  undefined,
+  (propName, index) => index,
+)
+
+export const mapPropNamesToConstant = mapPropNames.bind(
+  undefined,
+  (propName, index, extraArg) => extraArg,
+)
+
+export function remapProps(oldKeys, newKeys, props) {
+  const res = {}
+
+  for (let i = 0; i < oldKeys.length; i++) {
+    res[newKeys[i]] = props[oldKeys[i]]
+  }
+
+  return res
 }
 
-export function remapProps(obj, oldKeys, newKeys) {
-  // TODO: put key args in front so can use bind?
+export function pluckProps(propNames, props) {
+  const res = {}
+
+  for (const propName of propNames) {
+    res[propName] = props[propName]
+  }
+
+  return res
 }
 
-export function pluckProps(propNames, obj) {
+export function excludeArrayDuplicates(a) {
+  return [...new Set(a)]
 }
 
-export function removeDuplicateStrings(a0, a1) {
-  // if we use a Set(), can be generalized away from just strings!!!
+function filterProps(filterFunc, props, extraArg) {
+  const res = {}
+
+  for (const propName in props) {
+    const propValue = props[propName]
+
+    if (filterFunc(propValue, propName, extraArg)) {
+      res[propName] = propValue
+    }
+  }
+
+  return res
 }
 
-export function removeUndefines(obj) { // and copy
+export const excludeUndefinedProps = filterProps.bind(
+  undefined,
+  (propValue) => propValue !== undefined,
+)
+
+export const excludePropsByName = filterProps.bind(
+  undefined,
+  (propValue, propName, nameSet) => !nameSet.has(propName),
+)
+
+export function hasAnyPropsByName(props, names) {
+  for (const name of names) {
+    if (props[name] !== undefined) {
+      return true
+    }
+  }
+  return false
+}
+
+export function hasAllPropsByName(props, names) {
+  for (const name of names) {
+    if (props[name] === undefined) {
+      return false
+    }
+  }
+  return true
 }
 
 export function buildWeakMapCache() {
@@ -35,24 +115,12 @@ export function buildWeakMapCache() {
 export function createLazyMap() {
 }
 
-export function excludeProps(options, propNames) {
-}
-
-export function hasAnyMatchingProps(props, propNames) {
-}
-
-export function hasAllMatchingProps(props, propNames) {
-}
-
-export function zipSingleValue() {
-}
+// descriptor stuff
+// ----------------
 
 export function defineProps(target, propVals) {
   return Object.defineProperties(target, createPropDescriptors(propVals))
 }
-
-// descriptor stuff
-// ----------------
 
 export function createPropDescriptors(props) {
   return mapProps(props, (value) => ({

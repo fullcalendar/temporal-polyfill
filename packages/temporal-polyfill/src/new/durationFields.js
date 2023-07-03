@@ -8,13 +8,19 @@ import {
   unitIndexToNano,
   unitNamesAsc,
 } from './units'
-import { mapArrayToProps, mapRefiners, remapProps, zipSingleValue } from './utils'
+import {
+  mapPropNames,
+  mapPropNamesToConstant,
+  mapPropNamesToIndex,
+  mapPropsWithRefiners,
+  remapProps,
+} from './utils'
 
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
 export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + 's') // pluralize
-export const durationFieldIndexes = mapArrayToProps(durationFieldNamesAsc)
+export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 export const durationFieldNames = durationFieldNamesAsc.sort()
 
 // unordered
@@ -25,33 +31,35 @@ const durationInternalNames = [...durationFieldNames, 'sign']
 // Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const durationFieldDefaults = zipSingleValue(durationFieldNames, 0)
-export const durationTimeFieldDefaults = zipSingleValue(durationTimeFieldNames, 0)
+export const durationFieldDefaults = mapPropNamesToConstant(durationFieldNames, 0)
+export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFieldNames, 0)
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
 
-export const durationFieldRefiners = zipSingleValue(durationFieldNames, toIntegerStrict)
+export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNames, toIntegerStrict)
 
 // Getters
 // -------------------------------------------------------------------------------------------------
 
-export const durationGetters = mapArrayToProps(durationInternalNames, (propName) => {
+export const durationGetters = mapPropNames((propName) => {
   return (durationInternals) => {
     return durationInternals[propName]
   }
-})
+}, durationInternalNames)
 
 // Field <-> Field Conversion
 // -------------------------------------------------------------------------------------------------
 
 export function refineDurationInternals(rawDurationFields) {
-  return updateDurationFieldsSign(mapRefiners(rawDurationFields, durationFieldRefiners))
+  return updateDurationFieldsSign(mapPropsWithRefiners(rawDurationFields, durationFieldRefiners))
 }
 
-export function durationTimeFieldsToIso(durationTimeFields) {
-  return remapProps(durationTimeFields, durationTimeFieldNames, isoTimeFieldNames)
-}
+export const durationTimeFieldsToIso = remapProps.bind(
+  undefined,
+  durationTimeFieldNames,
+  isoTimeFieldNames,
+)
 
 export function durationTimeFieldsToIsoStrict(durationFields) {
   if (durationHasDateParts(durationFields)) {

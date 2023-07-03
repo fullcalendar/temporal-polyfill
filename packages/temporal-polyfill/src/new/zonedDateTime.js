@@ -90,17 +90,17 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...mapProps(epochGetters, (getter) => {
+    ...mapProps((getter) => {
       return function(internals) {
         return getter(internals.epochNanoseconds)
       }
-    }),
+    }, epochGetters),
 
-    ...mapProps(dateTimeGetters, (getter) => {
+    ...mapProps((getter) => {
       return function(internals) {
         return getter(zonedInternalsToIso(internals))
       }
-    }),
+    }, dateTimeGetters),
 
     hoursInDay(internals) {
       return computeNanosecondsInDay(

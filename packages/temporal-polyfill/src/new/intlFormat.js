@@ -5,10 +5,10 @@ import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
   createLazyMap,
-  excludeProps,
-  hasAnyMatchingProps,
+  excludePropsByName,
+  hasAnyPropsByName,
   identityFunc,
-  zipSingleValue,
+  mapPropNamesToConstant,
 } from './utils'
 
 export const standardCalendarId = 'en-GB' // gives 24-hour clock
@@ -114,7 +114,7 @@ export function resolveZonedFormattable(
 
   if (
     options.timeZoneName === undefined &&
-    !hasAnyMatchingProps(options, dateTimeOptionNames)
+    !hasAnyPropsByName(options, dateTimeOptionNames)
   ) {
     // The rest of the defaults will be filled in by formatting the Instant
     options.timeZoneName = 'short'
@@ -208,12 +208,13 @@ const optionTransformers = {
 }
 
 function createTransformer(optionNames, basicNames, exclusionNames) {
-  const defaults = zipSingleValue(basicNames, 'numeric')
+  const defaults = mapPropNamesToConstant(basicNames, 'numeric')
+  const exclusionNamesSet = new Set(exclusionNames)
 
   return (options) => {
-    options = excludeProps(options, exclusionNames)
+    options = excludePropsByName(options, exclusionNamesSet)
 
-    if (!hasAnyMatchingProps(options, optionNames)) {
+    if (!hasAnyPropsByName(options, optionNames)) {
       Object.assign(options, defaults)
     }
 

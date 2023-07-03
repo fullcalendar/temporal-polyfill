@@ -41,7 +41,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { rejectI } from './options'
 import { milliInDay } from './units'
-import { buildWeakMapCache, clamp, createLazyMap, mapArrayToProps, twoDigit } from './utils'
+import { buildWeakMapCache, clamp, createLazyMap, mapPropNamesToIndex, twoDigit } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -648,7 +648,7 @@ function createIntlMonthCache(epochMilliToIntlFields) {
 
     return {
       monthEpochMilli: milliReversed.reverse(),
-      monthStrToIndex: mapArrayToProps(monthStrsReversed.reverse()),
+      monthStrToIndex: mapPropNamesToIndex(monthStrsReversed.reverse()),
     }
   }
 

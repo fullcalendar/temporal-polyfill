@@ -36,7 +36,7 @@ import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { isObjectlike, pluckProps, removeDuplicateStrings } from './utils'
+import { excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
 /*
@@ -203,7 +203,7 @@ function convertToIso(
   extra = refineFields(extra, extraFieldNames, getRequiredDateFields(calendar))
 
   let mergedFields = calendar.mergeFields(input, extra)
-  const mergedFieldNames = removeDuplicateStrings([...inputFieldNames, ...extraFieldNames])
+  const mergedFieldNames = excludeArrayDuplicates([...inputFieldNames, ...extraFieldNames])
   mergedFields = refineFields(mergedFields, mergedFieldNames, [])
 
   return calendar.dateFromFields(mergedFields)

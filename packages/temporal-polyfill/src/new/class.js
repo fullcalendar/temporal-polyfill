@@ -3,7 +3,7 @@ import { ensureInstanceOf, toString } from './options'
 import {
   createGetterDescriptors, createPropDescriptors, createTemporalNameDescriptors,
   defineProps,
-  hasAllMatchingProps,
+  hasAllPropsByName,
   identityFunc,
   isObjectlike,
   mapProps,
@@ -39,8 +39,8 @@ export function createWrapperClass(
   }
 
   Object.defineProperties(InternalObj.prototype, {
-    ...createGetterDescriptors(mapProps(getters, curryMethod)),
-    ...createPropDescriptors(mapProps(methods, curryMethod)),
+    ...createGetterDescriptors(mapProps(curryMethod, getters)),
+    ...createPropDescriptors(mapProps(curryMethod, methods)),
     ...extraPrototypeDescriptors,
   })
 
@@ -137,7 +137,7 @@ export function createProtocolChecker(protocolMethods) {
   propNames.sort() // TODO: order matters?
 
   return (obj) => {
-    if (!hasAllMatchingProps(obj, propNames)) {
+    if (!hasAllPropsByName(obj, propNames)) {
       throw new TypeError('Invalid protocol')
     }
   }
