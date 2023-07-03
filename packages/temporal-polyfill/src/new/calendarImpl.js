@@ -41,7 +41,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { rejectI } from './options'
 import { milliInDay } from './units'
-import { buildWeakMapCache, clamp, createLazyMap, mapPropNamesToIndex, twoDigit } from './utils'
+import { clamp, createLazyMap, mapPropNamesToIndex, twoDigit } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -541,17 +541,17 @@ interface IntlFields {
 */
 
 function createIntlFieldCache(epochMilliToIntlFields) {
-  return buildWeakMapCache((isoDateFields) => {
+  return createLazyMap((isoDateFields) => {
     const epochMilli = isoToEpochMilli(isoDateFields)
     return epochMilliToIntlFields(epochMilli)
-  })
+  }, WeakMap)
 }
 
 function createJapaneseFieldCache() {
   const epochMilliToIntlFields = createEpochMilliToIntlFields(japaneseCalendarId)
   const primaryEraMilli = isoArgsToEpochMilli(1868, 9, 8)
 
-  return buildWeakMapCache((isoDateFields) => {
+  return createLazyMap((isoDateFields) => {
     const epochMilli = isoToEpochMilli(isoDateFields)
     const intlFields = epochMilliToIntlFields(epochMilli)
 
@@ -561,7 +561,7 @@ function createJapaneseFieldCache() {
     }
 
     return intlFields
-  })
+  }, WeakMap)
 }
 
 function createEpochMilliToIntlFields(calendarId) {

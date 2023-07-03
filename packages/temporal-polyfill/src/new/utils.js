@@ -109,10 +109,18 @@ export function hasAllPropsByName(props, names) {
   return true
 }
 
-export function buildWeakMapCache() {
-}
+export function createLazyMap(generator, MapClass = Map) {
+  const map = new MapClass()
 
-export function createLazyMap() {
+  return (key, ...otherArgs) => {
+    if (map.has(key)) {
+      return map.get(key)
+    } else {
+      const val = generator(key, ...otherArgs)
+      map.set(key, val)
+      return val
+    }
+  }
 }
 
 // descriptor stuff
