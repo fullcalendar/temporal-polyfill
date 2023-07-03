@@ -10,13 +10,20 @@ import {
 import { isoTimeFieldDefaults } from './isoFields'
 import { isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './isoMath'
 import { moveDateByDays } from './move'
-import { roundingModeFuncs } from './options'
+import { halfEvenI, roundingModeFuncs } from './options'
 import { computeNanosecondsInDay } from './timeZoneOps'
-import { dayIndex, nanoInUtcDay, nanoIndex, unitIndexToNano, weekIndex } from './units'
+import {
+  dayIndex,
+  nanoInMinute,
+  nanoInUtcDay,
+  nanoIndex,
+  unitIndexToNano,
+  weekIndex,
+} from './units'
 import { identityFunc } from './utils'
 
-export function roundToMinute(epochNano) {
-
+export function roundToMinute(offsetNano) {
+  return roundByInc(offsetNano, nanoInMinute, halfEvenI)
 }
 
 // Rounding Dates
