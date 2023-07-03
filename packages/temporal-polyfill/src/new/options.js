@@ -7,7 +7,7 @@ import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearInd
 import {
   clamp,
   hasAnyMatchingProps,
-  isObjectLike,
+  isObjectlike,
   roundExpand,
   roundHalfCeil,
   roundHalfEven,
@@ -384,10 +384,7 @@ export function normalizeOptions(options) {
   if (options === undefined) {
     return {}
   }
-  if (!isObjectLike(options)) {
-    throw new TypeError('Must be object-like')
-  }
-  return options
+  return ensureObjectlike(options)
 }
 
 // will NOT check for atomicName in options
@@ -395,10 +392,7 @@ function normalizeRequiredOptions(options, atomicName) {
   if (typeof options === 'string') {
     return { [atomicName]: options }
   }
-  if (!isObjectLike(options)) {
-    throw new TypeError('Must be object-like')
-  }
-  return options
+  return ensureObjectlike(options)
 }
 
 function mustHaveMatch(obj, propNames) {
@@ -421,39 +415,41 @@ export function clampProp(props, propName, min, max, overflowI) {
 // Primitives
 // -------------------------------------------------------------------------------------------------
 
-export function strictNumber(input) {
-}
-
-export function strictInstanceOf(obj, Class) {
-}
-
-export function strictArray() {
-}
-
-export function toObject() {
-  // ensures a real object. throws error otherwise
-}
-
-export function toNumber(value) {
-  if (typeof value === 'bigint') {
-    throw new TypeError('Cannot convert BigInt to number')
+export function ensureInstanceOf(Class, obj) {
+  if (!(obj instanceof Class)) {
+    throw new TypeError('Must be certain type') // TODO: show Class's symbol?
   }
-  return Number(value)
+  return obj
 }
 
-export function toInteger(value) {
-  const num = toNumber(value)
-  if (isNaN(num)) return 0
-  const integer = Math.trunc(num)
-  if (num === 0) return 0
-  return integer
+function ensureType(typeName, obj) {
+  // eslint-disable-next-line valid-typeof
+  if (typeof obj !== typeName) {
+    throw new TypeError(`Must be certain type ${typeName}`)
+  }
+  return obj
 }
 
-export function toStringOrUndefined() {
+export const ensureBoolean = ensureType.bind(undefined, 'boolean')
+export const ensureString = ensureType.bind(undefined, 'string')
+export const ensureNumber = ensureType.bind(undefined, 'number')
+
+export function ensureInteger(arg) {
+  return ensureNumberIsInteger(ensureNumber(arg))
 }
 
-// used?
-export function toNumberOrUndefined() {
+export function ensureArray(arg) {
+  if (!Array.isArray(arg)) {
+    throw new TypeError('Must be array')
+  }
+  return arg
+}
+
+export function ensureObjectlike(arg) {
+  if (!isObjectlike(arg)) {
+    throw new TypeError('Must be object-like')
+  }
+  return arg
 }
 
 export function toString(value) {
@@ -463,39 +459,31 @@ export function toString(value) {
   return String(value)
 }
 
-export function toIntegerThrowOnInfinity(value) {
-  const integer = toInteger(value)
-  if (!Number.isFinite(integer)) {
-    throw new RangeError('infinity is out of range')
+export function toInteger(value) { // truncates floats
+  return Math.trunc(toNumber(value)) || 0 // ensure no -0
+}
+
+export function toIntegerStrict(value) { // throws error on floats
+  return ensureNumberIsInteger(toNumber(value))
+}
+
+function ensureNumberIsInteger(n) {
+  if (!Number.isInteger(n)) {
+    throw new RangeError('must be integer')
   }
-  return integer
+  return n || 0 // ensure no -0
 }
 
-export function toBoolean() {
-}
-
-export function toPositiveInteger(valueParam, property) {
-  const value = toInteger(valueParam)
+/*
+Caller must ||0 to ensure no -0
+*/
+function toNumber(value) {
+  value = Number(value)
+  if (isNaN(value)) {
+    throw new RangeError('not a number')
+  }
   if (!Number.isFinite(value)) {
-    throw new RangeError('infinity is out of range')
-  }
-  if (value < 1) {
-    if (property !== undefined) {
-      throw new RangeError(`property '${property}' cannot be a a number less than one`)
-    }
-    throw new RangeError('Cannot convert a number less than one to a positive integer')
+    throw new RangeError('must be finite')
   }
   return value
-}
-
-export function toIntegerWithoutRounding(valueParam) {
-  const value = toNumber(valueParam)
-  if (isNaN(value)) return 0
-  if (!Number.isFinite(value)) {
-    throw new RangeError('infinity is out of range')
-  }
-  if (!Number.isInteger(value)) {
-    throw new RangeError(`unsupported fractional value ${value}`)
-  }
-  return toInteger(value) // ℝ(value) in spec text; converts -0 to 0
 }

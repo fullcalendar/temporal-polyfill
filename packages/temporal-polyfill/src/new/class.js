@@ -1,11 +1,11 @@
 import { DateTimeFormat } from './intlFormat'
-import { strictInstanceOf, toString } from './options'
+import { ensureInstanceOf, toString } from './options'
 import {
   createGetterDescriptors, createPropDescriptors, createTemporalNameDescriptors,
   defineProps,
   hasAllMatchingProps,
   identityFunc,
-  isObjectLike,
+  isObjectlike,
   mapProps,
   noop,
 } from './utils'
@@ -49,8 +49,8 @@ export function createWrapperClass(
   return InternalObj
 }
 
-export function getStrictInternals(Class, res) {
-  return getInternals(strictInstanceOf(res, Class))
+export function getStrictInternals(Class, res) { // rename: getInternalsStrict?
+  return getInternals(ensureInstanceOf(Class, res))
 }
 
 // Temporal Class
@@ -101,7 +101,7 @@ export function createTemporalClass(
       argInternals = (internalsConversionMap[argTemporalName] || noop)(argInternals)
     }
 
-    return (!argInternals && isObjectLike(arg) && bagToInternals(arg, options)) ||
+    return (!argInternals && isObjectlike(arg) && bagToInternals(arg, options)) ||
       (handleUnusedOptions(options), argInternals || stringToInternals(toString(arg)))
   }
 

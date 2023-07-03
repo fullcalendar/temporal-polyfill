@@ -1,5 +1,5 @@
 
-export function isObjectLike() {
+export function isObjectlike() {
 }
 
 export function mapRefiners(input, refinerMap) {
@@ -89,9 +89,11 @@ export function noop() {
 }
 
 export function twoDigit(num) { // as a string
+  // TODO
 }
 
-export function compareNumbers() {
+export function compareNumbers(a, b) {
+  return a - b
 }
 
 export function clamp(

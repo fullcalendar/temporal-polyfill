@@ -1,5 +1,5 @@
 import { isoTimeFieldNames } from './isoFields'
-import { toIntegerWithoutRounding } from './options'
+import { toIntegerStrict } from './options'
 import {
   dayIndex,
   givenFieldsToLargeNano,
@@ -31,7 +31,7 @@ export const durationTimeFieldDefaults = zipSingleValue(durationTimeFieldNames, 
 // Refiners
 // -------------------------------------------------------------------------------------------------
 
-export const durationFieldRefiners = zipSingleValue(durationFieldNames, toIntegerWithoutRounding)
+export const durationFieldRefiners = zipSingleValue(durationFieldNames, toIntegerStrict)
 
 // Getters
 // -------------------------------------------------------------------------------------------------

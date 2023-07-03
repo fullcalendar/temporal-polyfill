@@ -27,16 +27,16 @@ import {
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
+  ensureObjectlike,
   normalizeOptions,
   refineOverflowOptions,
-  refineZonedFieldOptions,
-  toObject, // TODO: shouldn't we use this all over the place?
+  refineZonedFieldOptions, // TODO: shouldn't we use this all over the place?
 } from './options'
 import { createPlainDate } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { isObjectLike, pluckProps, removeDuplicateStrings } from './utils'
+import { isObjectlike, pluckProps, removeDuplicateStrings } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
 
 /*
@@ -237,7 +237,7 @@ export function mergePlainYearMonthBag(plainYearMonth, bag, options) {
 
 export function convertPlainYearMonthToDate(plainYearMonth, bag) {
   return createPlainDate(
-    convertToIso(plainYearMonth, yearMonthBasicNames, toObject(bag), ['day']),
+    convertToIso(plainYearMonth, yearMonthBasicNames, ensureObjectlike(bag), ['day']),
   )
 }
 
@@ -475,7 +475,7 @@ export function refineComplexBag(key, ForbiddenClass, bag) {
 
     forbidInstanceClass(bag, ForbiddenClass)
 
-    if (isObjectLike(bag) && !(key in bag)) {
+    if (isObjectlike(bag) && !(key in bag)) {
       return bag
     }
   }

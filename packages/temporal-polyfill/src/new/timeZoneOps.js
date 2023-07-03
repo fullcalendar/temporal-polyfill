@@ -13,7 +13,7 @@ import {
   isoToEpochNano,
 } from './isoMath'
 import { moveDateByDays } from './move'
-import { strictArray, strictNumber } from './options'
+import { ensureArray } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { TimeZone, createTimeZone, timeZoneProtocolMethods } from './timeZone'
@@ -202,13 +202,15 @@ export const TimeZoneOpsAdapter = createWrapperClass(idGettersStrict, {
   },
 
   getPossibleInstantsFor(timeZone, isoDateTimeFields) {
-    return strictArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
+    return ensureArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
       .map(getInstantEpochNano)
   },
 })
 
 function validateOffsetNano(offsetNano) {
-  offsetNano = strictNumber(offsetNano)
+  if (!Number.isInteger(offsetNano)) { // will return false on non-number (good)
+    throw new RangeError('must be integer number')
+  }
 
   if (Math.abs(offsetNano) >= nanoInUtcDay) {
     throw new RangeError('out of range')

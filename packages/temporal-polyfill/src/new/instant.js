@@ -16,11 +16,11 @@ import {
 import { compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
 import {
+  ensureObjectlike,
   refineDiffOptions,
   refineInstantDisplayOptions,
   refineRoundOptions,
   toEpochNano,
-  toObject,
 } from './options'
 import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
@@ -75,7 +75,7 @@ export const [
     },
 
     toZonedDateTime(epochNanoseconds, options) {
-      const refinedObj = toObject(options)
+      const refinedObj = ensureObjectlike(options)
 
       return createZonedDateTime({
         epochNanoseconds,

@@ -10,7 +10,7 @@ import {
   idGettersStrict,
 } from './class'
 import { createDuration } from './duration'
-import { strictArray, toObject, toString } from './options'
+import { ensureArray, ensureObjectlike, ensureString, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
@@ -92,10 +92,10 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
   },
 
   fields(calendar, fieldNames) {
-    return strictArray(calendar.fields(fieldNames)).map(toString)
+    return ensureArray(calendar.fields(fieldNames)).map(ensureString)
   },
 
   mergeFields(calendar, fields0, fields1) {
-    return toObject(calendar.mergeFields(fields0, fields1))
+    return ensureObjectlike(calendar.mergeFields(fields0, fields1))
   },
 })

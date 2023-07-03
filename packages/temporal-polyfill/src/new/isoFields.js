@@ -5,11 +5,7 @@ import {
   constrainIsoDateTimeInternals,
   constrainIsoTimeFields,
 } from './isoMath'
-import {
-  toIntegerThrowOnInfinity,
-  toIntegerWithoutRounding,
-  toPositiveInteger,
-} from './options'
+import { toInteger } from './options'
 import { mapRefiners, pluckProps, zipSingleValue } from './utils'
 
 // Refiners
@@ -18,19 +14,19 @@ import { mapRefiners, pluckProps, zipSingleValue } from './utils'
 // Ordered alphabetically
 export const isoDateInternalRefiners = {
   calendar: queryCalendarOps,
-  isoDay: toPositiveInteger,
-  isoMonth: toPositiveInteger,
-  isoYear: toIntegerWithoutRounding,
+  isoDay: toInteger,
+  isoMonth: toInteger,
+  isoYear: toInteger,
 }
 
 // Ordered by ascending size
 export const isoTimeFieldRefiners = {
-  isoHour: toIntegerThrowOnInfinity,
-  isoMicrosecond: toIntegerThrowOnInfinity,
-  isoMillisecond: toIntegerThrowOnInfinity,
-  isoMinute: toIntegerThrowOnInfinity,
-  isoNanosecond: toPositiveInteger, // why different?
-  isoSecond: toPositiveInteger, // why different?
+  isoHour: toInteger,
+  isoMicrosecond: toInteger,
+  isoMillisecond: toInteger,
+  isoMinute: toInteger,
+  isoNanosecond: toInteger,
+  isoSecond: toInteger,
 }
 
 // Unordered

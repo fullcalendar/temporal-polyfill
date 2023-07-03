@@ -1,11 +1,11 @@
 import { isoTimeFieldNames } from './isoFields'
-import { toBoolean, toInteger, toIntegerThrowOnInfinity, toPositiveInteger } from './options'
+import { ensureBoolean, ensureInteger, toInteger } from './options'
 import { mapArrayToProps, remapProps, zipSingleValue } from './utils'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
 
-const dayFieldRefiners = { day: toPositiveInteger }
+const dayFieldRefiners = { day: toInteger }
 const monthCodeFieldRefiners = { monthCode: toString }
 
 // Ordered alphabetically
@@ -17,9 +17,9 @@ export const eraYearFieldRefiners = {
 // Ordered alphabetically
 // Does not include era/eraYear
 const yearMonthFieldRefiners = {
-  month: toPositiveInteger,
+  month: toInteger,
   ...monthCodeFieldRefiners,
-  year: toIntegerThrowOnInfinity,
+  year: toInteger,
 }
 
 // Ordered alphabetically
@@ -31,12 +31,12 @@ export const dateFieldRefiners = {
 
 // Ordered alphabetically
 const timeFieldRefiners = {
-  hour: toIntegerThrowOnInfinity,
-  microsecond: toIntegerThrowOnInfinity,
-  millisecond: toIntegerThrowOnInfinity,
-  minute: toIntegerThrowOnInfinity,
-  nanosecond: toIntegerThrowOnInfinity,
-  second: toIntegerThrowOnInfinity,
+  hour: toInteger,
+  microsecond: toInteger,
+  millisecond: toInteger,
+  minute: toInteger,
+  nanosecond: toInteger,
+  second: toInteger,
 }
 
 // Unordered
@@ -48,25 +48,25 @@ export const dateTimeFieldRefiners = {
 
 // Ordered alphabetically, for predictable macros
 const yearStatRefiners = {
-  daysInYear: toPositiveInteger,
-  inLeapYear: toBoolean,
-  monthsInYear: toPositiveInteger,
+  daysInYear: ensureInteger,
+  inLeapYear: ensureBoolean,
+  monthsInYear: ensureInteger,
 }
 
 // Unordered
 export const yearMonthStatRefiners = {
   ...yearStatRefiners,
-  daysInMonth: toPositiveInteger,
+  daysInMonth: ensureInteger,
 }
 
 // Unordered
 export const dateStatRefiners = {
   ...yearMonthStatRefiners,
-  dayOfWeek: toPositiveInteger,
-  dayOfYear: toPositiveInteger,
-  weekOfYear: toPositiveInteger,
-  yearOfWeek: toPositiveInteger,
-  daysInWeek: toPositiveInteger,
+  dayOfWeek: ensureInteger,
+  dayOfYear: ensureInteger,
+  weekOfYear: ensureInteger,
+  yearOfWeek: ensureInteger,
+  daysInWeek: ensureInteger,
 }
 
 // Property Names

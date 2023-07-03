@@ -10,7 +10,7 @@ import {
 import { createDuration, toDurationInternals } from './duration'
 import { isoDaysInWeek } from './isoMath'
 import { parseCalendarId } from './isoParse'
-import { refineOverflowOptions, strictArray, toObject } from './options'
+import { ensureArray, ensureObjectlike, ensureString, refineOverflowOptions } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
@@ -61,13 +61,13 @@ export const calendarProtocolMethods = {
   },
 
   fields(impl, fieldNames) {
-    return impl.fields(strictArray(fieldNames).map(toString))
+    return impl.fields(ensureArray(fieldNames).map(ensureString))
   },
 
   mergeFields(impl, fields0, fields1) {
     return impl.mergeFields(
-      removeUndefines(toObject(fields0)),
-      removeUndefines(toObject(fields1)),
+      removeUndefines(ensureObjectlike(fields0)),
+      removeUndefines(ensureObjectlike(fields1)),
     )
   },
 }
