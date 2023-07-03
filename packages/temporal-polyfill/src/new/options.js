@@ -133,32 +133,48 @@ export function refineTimeDisplayOptions(options) {
 returns [
   nanoInc,
   roundingMode,
-  showSecond,
-  subsecDigits,
+  subsecDigits, (undefined = auto-digits, -1 = hide-seconds, >=0 = #-of-digits)
 ]
 */
-function refineTimeDisplayTuple(options) {
+function refineTimeDisplayTuple(options) { // trace callers of this, make sure using right
   const smallestUnitI = refineSmallestUnit(options, minuteIndex, nanoIndex, -1)
   if (smallestUnitI !== -1) {
     return [
       unitIndexToNano[smallestUnitI],
       refineRoundingMode(options, truncI),
-      smallestUnitI < minuteIndex, // showSecond
-      9 - (smallestUnitI * 3), // subsecDigits (callers should guard for <0)
+      (smallestUnitI < minuteIndex)
+        ? 9 - (smallestUnitI * 3)
+        : -1, // hide seconds
     ]
   }
 
   const subsecDigits = refineSubsecDigits(options)
   return [
-    Math.pow(10, 9 - subsecDigits), // TODO: use 10** notation?
+    subsecDigits === undefined ? 1 : Math.pow(10, 9 - subsecDigits), // TODO: use 10** notation?
     refineRoundingMode(options, truncI),
-    true, // showSecond
     subsecDigits,
   ]
 }
 
 // Single Options
 // -------------------------------------------------------------------------------------------------
+
+/*
+TODO: leverage preserveConstEnums:false
+https://www.typescriptlang.org/tsconfig#preserveConstEnums
+
+const enum Album {
+  JimmyEatWorldFutures,
+  TubRingZooHypothesis,
+  DogFashionDiscoAdultery,
+}
+console.log({
+  JimmyEatWorldFutures: Album.JimmyEatWorldFutures,
+  TubRingZooHypothesis: Album.TubRingZooHypothesis,
+  DogFashionDiscoAdultery: Album.DogFashionDiscoAdultery,
+})
+console.log(Album.JimmyEatWorldFutures)
+*/
 
 const smallestUnitStr = 'smallestUnit'
 const largestUnitStr = 'largestUnit'
@@ -312,7 +328,7 @@ function refineSubsecDigits(options) {
     throw new RangeError('Must be auto or 0-9')
   }
 
-  return 9
+  // undefind means 'auto'
 }
 
 function refineRelativeTo(options) {
@@ -349,12 +365,11 @@ function refineUnitOption(optionName, options, maxUnitI, minUnitI = nanoIndex, d
   return unitIndex
 }
 
-// TODO: optimize by using map
-// TODO: keep acceting string arrays. good for accepting default first element
+// TODO: move to accepting maps
 function refineChoiceOption(optionName, choices, options, defaultChoice) {
   const optionValue = options[optionName]
   if (optionValue === undefined) {
-    return defaultChoice ?? choices[0]
+    return defaultChoice ?? 0
   }
   const index = choices.indexOf(optionValue)
   if (index < 0) {

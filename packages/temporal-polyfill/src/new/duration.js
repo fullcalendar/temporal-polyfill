@@ -166,11 +166,10 @@ export const [
     },
 
     toString(internals, options) {
-      const [nanoInc, roundingMode, showSecond, subsecDigits] = refineTimeDisplayOptions(options)
+      const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatDurationInternals(
         roundDurationToNano(internals, nanoInc, roundingMode),
-        showSecond,
         subsecDigits,
       )
     },

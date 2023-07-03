@@ -130,7 +130,6 @@ export const [
         timeZoneArg,
         nanoInc,
         roundingModeI,
-        showSecond,
         subsecDigits,
       ] = refineInstantDisplayOptions(options)
       const timeZone = queryTimeZoneOps(timeZoneArg || utcTimeZoneId)
@@ -139,7 +138,7 @@ export const [
       const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
       const isoFields = epochNanoToIso(epochNano.addNumber(offsetNano))
 
-      return formatIsoDateTimeFields(isoFields, showSecond, subsecDigits) +
+      return formatIsoDateTimeFields(isoFields, subsecDigits) +
         formatOffsetNano(offsetNano)
     },
 

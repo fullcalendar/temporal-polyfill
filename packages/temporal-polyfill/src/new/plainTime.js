@@ -112,11 +112,10 @@ export const [
     },
 
     toString(internals, options) {
-      const [nanoInc, roundingMode, showSecond, subsecDigits] = refineTimeDisplayOptions(options)
+      const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(
         roundTimeToNano(internals, nanoInc, roundingMode),
-        showSecond,
         subsecDigits,
       )
     },

@@ -172,13 +172,12 @@ export const [
         calendarDisplayI,
         nanoInc,
         roundingMode,
-        showSecond,
         subsecDigits,
       ] = refineDateTimeDisplayOptions(options)
 
       const roundedIsoFields = roundDateTimeToNano(internals, nanoInc, roundingMode)
 
-      return formatIsoDateTimeFields(roundedIsoFields, showSecond, subsecDigits) +
+      return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
         formatCalendar(internals.calendar, calendarDisplayI)
     },
 

@@ -96,8 +96,8 @@ export function compareNumbers() {
 
 export function clamp(
   val,
-  min,
-  max,
+  min, // inclusive
+  max, // inclusive
   throwOnOverflow, // 0/1 (matched constrain/reject)
   noun, // for error message (required if throwOnOverflow given)
 ) {
@@ -147,10 +147,10 @@ export function roundHalfTrunc(n) {
 
 export function roundHalfEven(n) {
   return hasHalf(n)
-    ? Math.trunc(n) + (n % 2)
+    ? (n = Math.trunc(n)) + (n % 2)
     : Math.round(n)
 }
 
 function hasHalf(n) {
-  return n % 1 === 0.5
+  return Math.abs(n % 1) === 0.5
 }

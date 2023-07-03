@@ -294,7 +294,6 @@ export const [
         offsetDisplayI,
         nanoInc,
         roundingMode,
-        showSecond,
         subsecDigits,
       ] = refineZonedDateTimeDisplayOptions(options)
 
@@ -316,7 +315,7 @@ export const [
       offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
-      return formatIsoDateTimeFields(isoDateTimeFields, showSecond, subsecDigits) +
+      return formatIsoDateTimeFields(isoDateTimeFields, subsecDigits) +
         formatOffsetNano(offsetNanoseconds, offsetDisplayI) +
         formatTimeZone(timeZone, timeZoneDisplayI) +
         formatCalendar(calendar, calendarDisplayI)
