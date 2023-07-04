@@ -1,6 +1,4 @@
 
-// TODO: auto these utils
-
 const objectlikeRE = /object|function/
 
 export function isObjectlike(arg) {
@@ -164,8 +162,8 @@ export function identityFunc(thing) {
 export function noop() {
 }
 
-export function twoDigit(num) { // as a string
-  // TODO
+export function padNumber(num, digits) {
+  return num.padStart(digits, '0')
 }
 
 export function compareNumbers(a, b) {

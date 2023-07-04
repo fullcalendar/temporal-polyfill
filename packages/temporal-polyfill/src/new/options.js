@@ -153,7 +153,7 @@ function refineTimeDisplayTuple(options) { // trace callers of this, make sure u
 
   const subsecDigits = refineSubsecDigits(options)
   return [
-    subsecDigits === undefined ? 1 : Math.pow(10, 9 - subsecDigits), // TODO: use 10** notation?
+    subsecDigits === undefined ? 1 : 10 ** (9 - subsecDigits),
     refineRoundingMode(options, truncI),
     subsecDigits,
   ]
