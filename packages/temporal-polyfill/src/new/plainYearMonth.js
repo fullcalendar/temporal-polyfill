@@ -93,9 +93,7 @@ export const [
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
-    toString(internals, options) {
-      return formatPossibleDate(internals, options, formatIsoYearMonthFields)
-    },
+    toString: formatPossibleDate.bind(undefined, formatIsoYearMonthFields),
 
     toLocaleString: toLocaleStringMethod,
 

@@ -1,16 +1,15 @@
 import { isoCalendarId } from './calendarConfig'
-import { getObjId } from './class'
 import { alwaysI, autoI, criticalI, refineDateDisplayOptions } from './options'
 
 /*
 High-level. Refined options
 */
-export function formatPossibleDate(internals, options, formatSimple) {
+export function formatPossibleDate(formatSimple, internals, options) {
   const calendarDisplayI = refineDateDisplayOptions(options)
   const showCalendar =
     calendarDisplayI === alwaysI || // TODO: use math >=< comparisons?
     calendarDisplayI === criticalI ||
-    getObjId(internals.calendar) !== isoCalendarId
+    internals.calendar.id !== isoCalendarId
 
   if (showCalendar) {
     return formatIsoDateFields(internals) + formatCalendar(internals.calendar, calendarDisplayI)
@@ -34,24 +33,21 @@ export function formatIsoMonthDayFields(isoDateFields) {
 
 export function formatIsoDateTimeFields(
   isoDateTimeFields,
-  showSecond,
   subsecDigits,
 ) {
   return formatIsoDateFields(isoDateTimeFields) +
-    'T' + formatIsoTimeFields(isoDateTimeFields, showSecond, subsecDigits)
+    'T' + formatIsoTimeFields(isoDateTimeFields, subsecDigits)
 }
 
 export function formatIsoTimeFields(
   isoTimeFields,
-  showSecond,
-  subsecDigits,
+  subsecDigits, // undefined/-1/#
 ) {
 }
 
 export function formatDurationInternals(
   durationInternals,
-  showSecond,
-  subsecDigits,
+  subsecDigits, // undefined/-1/#
 ) {
 }
 
