@@ -144,61 +144,54 @@ export function parseTimeZoneId(s) {
 }
 
 export function parseOffsetNano(s) {
-  const parts = numericOffsetRegExp.exec(normalizeDashes(s))
+  const parts = offsetRegExp.exec(s)
   return parts && parseOffsetParts(parts.slice(1))
 }
 
 export function parseDuration(s) {
-  // includes sign
+  const parts = durationRegExp.exec(s)
+  console.log(parts)
 }
 
 // Low-level
 // -------------------------------------------------------------------------------------------------
 
+const plusOrMinusRegExpStr = '([+-\u2212])'
+const fractionRegExpStr = '([.,](\\d{1,9}))?'
+
 const yearMonthRegExpStr =
-  '([+-]\\d{6}|\\d{4})' + // 0:year
-  '-?(\\d{2})' // 1:month
-  // 2:annotations
+  `(${plusOrMinusRegExpStr}?\\d{6}|\\d{4})` + // 0:yearSign, 1:year
+  '-?(\\d{2})' // 2:month
+  // 3:annotations
 
 const dateRegExpStr =
-  yearMonthRegExpStr + // 0:year, 1:month
-  '-?(\\d{2})' // 2:day
-  // 3:annotations
+  yearMonthRegExpStr + // 0:yearSign, 1:year, 2:month
+  '-?(\\d{2})' // 3:day
+  // 4:annotations
 
 const monthDayRegExpStr =
   '(--)?(\\d{2})' + // 1:month
   '-?(\\d{2})' // 2:day
   // 3:annotations
 
-const numericTimeRegExpStr =
+const timeRegExpStr =
   '(\\d{2})' + // 0:hour
   '(:?(\\d{2})' + // 2:minute (NOTE: ':?' means optional ':')
   '(:?(\\d{2})' + // 4:second
-  '([.,](\\d{1,9}))?' + // 6:afterDecimal
+  fractionRegExpStr + // 6:afterDecimal
   ')?)?'
 
-const numericOffsetRegExpStr =
-  '([+-])' + // 0:plusOrMinus
-  numericTimeRegExpStr // 1:hour, 3:minute, 5:second, 7:afterDecimal
-
 const offsetRegExpStr =
-  '(Z|' + // 0:zOrOffset
-  numericOffsetRegExpStr + // 1:plusOrMinus, 2:hour, 4:minute, 6:second, 8:afterDecimal
-  ')?'
-
-const timeRegExpStr =
-  numericTimeRegExpStr + // 0:hour, 2:minute, 4:second, 6:afterDecimal
-  offsetRegExpStr // 7:zOrOffset, 8:plusOrMinus, 9:hour, 11:minute, 13:second, 15:afterDecimal
-  // 16:annotations
+  plusOrMinusRegExpStr + // 0:plusOrMinus
+  timeRegExpStr // 1:hour, 3:minute, 5:second, 7:afterDecimal
 
 const dateTimeRegExpStr =
-  dateRegExpStr + // 0:year, 1:month, 2:day
-  '([T ]' + // 3:timeEverything
-  timeRegExpStr +
-  // 4:hour, 6:minute, 8:second, 10:afterDecimal
-  // 11:zOrOffset, 12:plusOrMinus, 13:hour, 15:minute, 17:second, 19:afterDecimal
-  ')?'
-  // 20:annotations
+  dateRegExpStr + // 0:yearSign, 1:year, 2:month, 3:day
+  '([T ]' + // 4:timeEverything
+  timeRegExpStr + // 5:hour, 7:minute, 9:second, 11:afterDecimal
+  '(Z|' + // 12:zOrOffset
+  offsetRegExpStr + // 13:plusOrMinus, 14:hour, 16:minute, 18:second, 20:afterDecimal
+  ')?)?'
 
 const annotationRegExpStr = '((\\[[^\\]]*\\])*)'
 
@@ -206,40 +199,59 @@ const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationRegExpStr)
 const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationRegExpStr)
 const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationRegExpStr)
 const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationRegExpStr)
-const numericOffsetRegExp = createRegExp(numericOffsetRegExpStr) // annotations not allowed
+const offsetRegExp = createRegExp(offsetRegExpStr) // annotations not allowed
+
+const durationRegExp = createRegExp(
+  `${plusOrMinusRegExpStr}?P` +
+  '(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?' +
+  '(T' +
+  `((\\d+)${fractionRegExpStr}H)?` +
+  `((\\d+)${fractionRegExpStr}M)?` +
+  `((\\d+)${fractionRegExpStr}S)?` +
+  ')?',
+)
 
 function parseDateTime(s) {
-  const parts = dateTimeRegExp.exec(normalizeDashes(s)) // 0 is whole-match
+  const parts = dateTimeRegExp.exec(s) // 0 is whole-match
   return parts && constrainIsoDateTimeInternals({
-    isoYear: parseInt1(parts[1]),
-    isoMonth: parseInt1(parts[2]),
-    isoDay: parseInt1(parts[3]),
-    ...parseTimeParts(parts.slice(5)), // parses annotations
+    isoYear: parseIsoYearParts(parts),
+    isoMonth: parseInt(parts[3]),
+    isoDay: parseInt(parts[4]),
+    ...parseTimeParts(parts.slice(6)), // parses annotations
   })
 }
 
 function parseYearMonth(s) {
-  const parts = yearMonthRegExp.exec(normalizeDashes(s)) // 0 is whole-match
+  const parts = yearMonthRegExp.exec(s) // 0 is whole-match
+  return {
+    isoYear: parseIsoYearParts(parts),
+    isoMonth: parseInt(parts[3]),
+    isoDay: 1,
+    ...parseAnnotations(parts[3]),
+  }
+}
+
+function parseIsoYearParts(parts) { // 0 is whole-match
+  const yearSign = parseSign(parts[1])
+  const year = parseInt(parts[2])
+  if (yearSign < 0 && !year) {
+    throw new RangeError('Negative zero not allowed')
+  }
+  return yearSign * year
+}
+
+function parseMonthDay(s) {
+  const parts = monthDayRegExp.exec(s) // 0 is whole-match
   return parts && constrainIsoDateInternals({
-    isoYear: parseInt1(parts[1]),
-    isoMonth: parseInt1(parts[2]),
+    isoYear: parseInt(parts[1]),
+    isoMonth: parseInt(parts[2]),
     isoDay: 1,
     ...parseAnnotations(parts[3]),
   })
 }
 
-function parseMonthDay(s) {
-  const parts = monthDayRegExp.exec(normalizeDashes(s)) // 0 is whole-match
-  return parts && constrainIsoDateInternals({
-    isoYear: parseInt1(parts[0]),
-    isoMonth: parseInt1(parts[1]),
-    isoDay: 1,
-    ...parseAnnotations(parts[2]),
-  })
-}
-
 function parseTime(s) {
-  const parts = timeRegExp.exec(normalizeDashes(s)) // 0 is whole-match
+  const parts = timeRegExp.exec(s) // 0 is whole-match
   return constrainIsoTimeFields(parseTimeParts(parts.slice(1)))
 }
 
@@ -255,7 +267,7 @@ function parseTimeParts(parts) { // parses annotations
 }
 
 function parseOffsetParts(parts) {
-  return (parts[0] === '+' ? 1 : -1) * (
+  return parseSign(parts[0]) * (
     parseInt0(parts[0]) * nanoInHour +
     parseInt0(parts[2]) * nanoInMinute +
     parseInt0(parts[4]) * nanoInSecond +
@@ -303,26 +315,14 @@ function parseAnnotations(s) {
   }
 }
 
-const unicodeDashRegExp = /\u2212/g
-
-function normalizeDashes(str) {
-  return str.replace(unicodeDashRegExp, '-')
-}
-
 function createRegExp(meat) {
   return new RegExp(`^${meat}$`, 'i')
 }
 
-function parseIntWithDefault(defaultInt, s) {
-  if (s === undefined) {
-    return defaultInt
-  }
-  const n = parseInt(s)
-  if (Object.is(n, -0)) {
-    throw RangeError('no negative zero')
-  }
-  return n
+function parseSign(s) {
+  return !s || s === '+' ? 1 : -1
 }
 
-const parseInt0 = parseIntWithDefault.bind(undefined, 0)
-const parseInt1 = parseIntWithDefault.bind(undefined, 1)
+function parseInt0(s) {
+  return s === undefined ? 0 : parseInt(s)
+}
