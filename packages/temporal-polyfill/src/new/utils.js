@@ -167,7 +167,17 @@ export function padNumber(num, digits) {
 }
 
 export function compareNumbers(a, b) {
-  return a - b
+  return Math.sign(a - b)
+}
+
+export function compareProps(propNames, props0, props1) {
+  for (const propName of propNames) {
+    const cmp = compareNumbers(props0[propName], props1[propName])
+    if (cmp) {
+      return cmp
+    }
+  }
+  return 0
 }
 
 export function clamp(

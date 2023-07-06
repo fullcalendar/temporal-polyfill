@@ -29,7 +29,7 @@ export const isoTimeFieldRefiners = {
   isoSecond: toInteger,
 }
 
-// Unordered
+// Ordered by ascending size
 export const isoDateTimeInternalRefiners = {
   ...isoDateInternalRefiners,
   ...isoTimeFieldRefiners,
@@ -42,7 +42,7 @@ const isoDateInternalNames = Object.keys(isoDateInternalRefiners)
 export const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort()
 
 export const isoDateFieldNames = isoDateInternalNames.slice(1) // no calendar
-const isoDateTimeFieldNames = isoDateTimeInternalRefiners.slice(1) // no calendar
+export const isoDateTimeFieldNamesAsc = isoDateTimeInternalRefiners.slice(1) // no calendar
 export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners)
 export const isoTimeFieldNames = isoTimeFieldNamesAsc.sort()
 
@@ -77,7 +77,7 @@ export function refineIsoDateTimeInternals(rawIsoDateTimeInternals) {
 
 export const pluckIsoDateInternals = pluckProps.bind(undefined, isoDateInternalNames)
 export const pluckIsoDateTimeInternals = pluckProps.bind(undefined, isoDateTimeInternalNames)
-export const pluckIsoDateTimeFields = pluckProps.bind(undefined, isoDateTimeFieldNames)
+export const pluckIsoDateTimeFields = pluckProps.bind(undefined, isoDateTimeFieldNamesAsc)
 export const pluckIsoTimeFields = pluckProps.bind(undefined, isoTimeFieldNames)
 
 export const generatePublicIsoDateFields =
