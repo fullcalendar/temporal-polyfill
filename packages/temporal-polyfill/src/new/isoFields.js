@@ -14,22 +14,22 @@ import { mapPropNamesToConstant, mapPropsWithRefiners, pluckProps } from './util
 // Ordered alphabetically
 export const isoDateInternalRefiners = {
   calendar: queryCalendarOps,
-  isoDay: toInteger,
-  isoMonth: toInteger,
-  isoYear: toInteger,
+  isoDay: toInteger, // happens to be ascending
+  isoMonth: toInteger, // "
+  isoYear: toInteger, // "
 }
 
 // Ordered by ascending size
 export const isoTimeFieldRefiners = {
-  isoHour: toInteger,
+  isoNanosecond: toInteger,
   isoMicrosecond: toInteger,
   isoMillisecond: toInteger,
-  isoMinute: toInteger,
-  isoNanosecond: toInteger,
   isoSecond: toInteger,
+  isoMinute: toInteger,
+  isoHour: toInteger,
 }
 
-// Ordered by ascending size
+// Unordered
 export const isoDateTimeInternalRefiners = {
   ...isoDateInternalRefiners,
   ...isoTimeFieldRefiners,
@@ -41,10 +41,10 @@ export const isoDateTimeInternalRefiners = {
 const isoDateInternalNames = Object.keys(isoDateInternalRefiners)
 export const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort()
 
-export const isoDateFieldNames = isoDateInternalNames.slice(1) // no calendar
-export const isoDateTimeFieldNamesAsc = isoDateTimeInternalRefiners.slice(1) // no calendar
+export const isoDateFieldNames = isoDateInternalNames.slice(1) // no calendar. ascending
 export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners)
 export const isoTimeFieldNames = isoTimeFieldNamesAsc.sort()
+export const isoDateTimeFieldNamesAsc = [...isoDateFieldNames, ...isoTimeFieldNamesAsc]
 
 // Defaults
 // -------------------------------------------------------------------------------------------------

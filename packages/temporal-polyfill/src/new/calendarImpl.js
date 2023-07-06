@@ -41,7 +41,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { rejectI } from './options'
 import { milliInDay } from './units'
-import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber } from './utils'
+import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber, padNumber2 } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -702,13 +702,12 @@ function refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth) {
 }
 
 function formatMonthCode(month, leapMonth) {
-  return 'M' + padNumber(
+  return 'M' + padNumber2(
     month - (
       (leapMonth && month >= leapMonth)
         ? 1
         : 0
     ),
-    2,
   ) + ((month === leapMonth) ? 'L' : '')
 }
 

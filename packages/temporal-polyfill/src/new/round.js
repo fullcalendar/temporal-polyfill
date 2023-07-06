@@ -108,13 +108,18 @@ export function roundDayTimeDuration(
   )
 }
 
+/*
+Only does day-time rounding
+*/
 export function roundDurationToNano(durationFields, nanoInc, roundingMode) {
   const largeNano = durationFieldsToNano(durationFields)
   const roundedLargeNano = roundByIncLarge(largeNano, nanoInc, roundingMode)
+  const dayTimeFields = nanoToDurationFields(roundedLargeNano)
 
   return {
-    ...durationFieldDefaults,
-    ...nanoToDurationFields(roundedLargeNano),
+    ...durationFields,
+    ...dayTimeFields,
+    days: durationFields.days + dayTimeFields.days,
   }
 }
 

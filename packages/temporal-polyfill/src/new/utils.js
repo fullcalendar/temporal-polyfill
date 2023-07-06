@@ -162,9 +162,11 @@ export function identityFunc(thing) {
 export function noop() {
 }
 
-export function padNumber(num, digits) {
+export function padNumber(digits, num) {
   return num.padStart(digits, '0')
 }
+
+export const padNumber2 = padNumber.bind(undefined, 2)
 
 export function compareNumbers(a, b) {
   return Math.sign(a - b)
