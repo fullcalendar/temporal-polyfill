@@ -278,8 +278,9 @@ const durationRegExp = createRegExp(
 )
 
 function parseDateTimeParts(parts) { // 0 is whole-match
-  const hasTime = Boolean(parts[5])
-  const hasZ = Boolean(parts[13])
+  const hasTime = parts[5] // boolean-like
+  const hasZ = parts[13] // "
+
   return {
     isoYear: parseIsoYearParts(parts),
     isoMonth: parseInt(parts[3]),
@@ -340,42 +341,6 @@ function parseOffsetParts(parts) {
   )
 }
 
-function parseAnnotations(s) {
-  let calendarId
-  let timeZoneId
-
-  for (const chunk of s.split(']')) {
-    if (chunk) { // not the empty end chunk
-      let annotation = chunk.slice(1) // remove leading '['
-      let isCritical = false
-
-      if (annotation.charAt(0) === '!') {
-        isCritical = true
-        annotation = annotation.slice(1)
-      }
-
-      const annotationParts = annotation.split('=')
-      if (annotationParts.length === 1) {
-        if (timeZoneId !== undefined) {
-          throw new RangeError('Cannot specify timeZone multiple times')
-        }
-        timeZoneId = annotation
-      } else if (annotationParts[0] === 'u-ca') {
-        if (calendarId === undefined) { // ignore subsequent calendar annotations
-          calendarId = annotationParts[1]
-        }
-      } else if (isCritical) {
-        throw new RangeError(`Critical annotation '${annotationParts[0]}' not used`)
-      }
-    }
-  }
-
-  return {
-    calendar: queryCalendarImpl(calendarId || isoCalendarId),
-    timeZone: timeZoneId && queryTimeZoneImpl(timeZoneId),
-  }
-}
-
 function parseDurationParts(parts) {
   let hasAny = false
   let hasAnyFrac = false
@@ -428,12 +393,48 @@ function parseDurationParts(parts) {
   }
 }
 
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+function parseAnnotations(s) {
+  let calendarId
+  let timeZoneId
+
+  for (const chunk of s.split(']')) {
+    if (chunk) { // not the empty end chunk
+      let annotation = chunk.slice(1) // remove leading '['
+      let isCritical = false
+
+      if (annotation.charAt(0) === '!') {
+        isCritical = true
+        annotation = annotation.slice(1)
+      }
+
+      const annotationParts = annotation.split('=')
+      if (annotationParts.length === 1) {
+        if (timeZoneId !== undefined) {
+          throw new RangeError('Cannot specify timeZone multiple times')
+        }
+        timeZoneId = annotation
+      } else if (annotationParts[0] === 'u-ca') {
+        if (calendarId === undefined) { // ignore subsequent calendar annotations
+          calendarId = annotationParts[1]
+        }
+      } else if (isCritical) {
+        throw new RangeError(`Critical annotation '${annotationParts[0]}' not used`)
+      }
+    }
+  }
+
+  return {
+    calendar: queryCalendarImpl(calendarId || isoCalendarId),
+    timeZone: timeZoneId && queryTimeZoneImpl(timeZoneId),
+  }
+}
+
 function parseSubsecNano(fracStr) {
   return parseInt(fracStr.padEnd(9, '0'))
 }
-
-// Utils
-// -------------------------------------------------------------------------------------------------
 
 function createRegExp(meat) {
   return new RegExp(`^${meat}$`, 'i')

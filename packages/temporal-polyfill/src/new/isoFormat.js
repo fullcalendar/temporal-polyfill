@@ -205,7 +205,7 @@ function formatSubsecNano(totalNano, subsecDigits) { // subsecDigits can be unde
   let s = padNumber(9, totalNano)
   s = subsecDigits === undefined
     ? s.replace(trailingZerosRE, '')
-    : s.substring(0, subsecDigits)
+    : s.slice(0, subsecDigits)
 
   return s ? '.' + s : ''
 }
