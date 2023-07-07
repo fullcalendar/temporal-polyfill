@@ -1,6 +1,11 @@
-import { nanoInSecond } from '../dateUtils/units'
+import { nanoIn, nanoInSecond } from '../dateUtils/units'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarImpl } from './calendarImpl'
+import {
+  durationFieldNamesAsc,
+  negateDurationFields,
+  updateDurationFieldsSign,
+} from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
   checkIsoDateTimeInternals,
@@ -13,7 +18,16 @@ import {
 import { returnUndefinedI } from './options'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
-import { nanoInHour, nanoInMinute } from './units'
+import {
+  hourIndex,
+  milliIndex,
+  minuteIndex,
+  nanoInHour,
+  nanoInMinute,
+  nanoToGivenFields,
+  secondsIndex,
+} from './units'
+import { divFloorMod } from './utils'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -171,16 +185,6 @@ function processDatelikeParse(parsed) {
 // Low-level
 // -------------------------------------------------------------------------------------------------
 
-export function parseDuration(s) {
-  const parts = durationRegExp.exec(s)
-  console.log(parts) // TODO
-}
-
-export function parseOffsetNano(s) {
-  const parts = offsetRegExp.exec(s)
-  return parts && parseOffsetParts(parts.slice(1))
-}
-
 function parseDateTime(s) {
   const parts = dateTimeRegExp.exec(s)
   return parts && parseDateTimeParts(parts)
@@ -199,6 +203,16 @@ function parseMonthDay(s) {
 function parseTime(s) {
   const parts = timeRegExp.exec(s)
   return parts && parseTimeParts(parts.slice(1))
+}
+
+export function parseOffsetNano(s) {
+  const parts = offsetRegExp.exec(s)
+  return parts && parseOffsetParts(parts.slice(1))
+}
+
+export function parseDuration(s) {
+  const parts = durationRegExp.exec(s)
+  return parts && parseDurationParts(parts)
 }
 
 // RegExp & Parts
@@ -251,12 +265,15 @@ const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationRegExpStr)
 const offsetRegExp = createRegExp(offsetRegExpStr) // annotations not allowed
 
 const durationRegExp = createRegExp(
-  `${plusOrMinusRegExpStr}?P` +
-  '(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?' +
-  '(T' +
-  `((\\d+)${fractionRegExpStr}H)?` +
-  `((\\d+)${fractionRegExpStr}M)?` +
-  `((\\d+)${fractionRegExpStr}S)?` +
+  `${plusOrMinusRegExpStr}?P` + // 0:sign
+  '(\\d+Y)?' + // 1:years
+  '(\\d+M)?' + // 2:months
+  '(\\d+W)?' + // 3:weeks
+  '(\\d+D)?' + // 4:days
+  '(T' + // 5:hasTimes
+  `((\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
+  `((\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
+  `((\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
   ')?',
 )
 
@@ -306,7 +323,7 @@ function parseIsoYearParts(parts) { // 0 is whole-match
 function parseTimeParts(parts) { // parses annotations
   const isoSecond = parseInt0(parts[4])
   return {
-    ...nanoToIsoTimeAndDay(parseNanoAfterDecimal(parts[6] || ''))[0],
+    ...nanoToIsoTimeAndDay(parseSubsecNano(parts[6] || ''))[0],
     isoHour: parseInt0(parts[0]),
     isoMinute: parseInt0(parts[2]),
     isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage leap-second
@@ -319,12 +336,8 @@ function parseOffsetParts(parts) {
     parseInt0(parts[0]) * nanoInHour +
     parseInt0(parts[2]) * nanoInMinute +
     parseInt0(parts[4]) * nanoInSecond +
-    parseNanoAfterDecimal(parts[6] || '')
+    parseSubsecNano(parts[6] || '')
   )
-}
-
-function parseNanoAfterDecimal(s) {
-  return parseInt(s.padEnd(9, '0'))
 }
 
 function parseAnnotations(s) {
@@ -361,6 +374,62 @@ function parseAnnotations(s) {
     calendar: queryCalendarImpl(calendarId || isoCalendarId),
     timeZone: timeZoneId && queryTimeZoneImpl(timeZoneId),
   }
+}
+
+function parseDurationParts(parts) {
+  let hasAny = false
+  let hasAnyFrac = false
+  let leftoverNano = 0
+  let durationFields = {
+    years: parseUnit(parts[2]),
+    months: parseUnit(parts[3]),
+    weeks: parseUnit(parts[4]),
+    days: parseUnit(parts[5]),
+    hours: parseUnit(parts[7], parts[8], hourIndex),
+    minutes: parseUnit(parts[9], parts[10], minuteIndex),
+    seconds: parseUnit(parts[11], parts[12], secondsIndex),
+    ...nanoToGivenFields(leftoverNano, milliIndex, durationFieldNamesAsc),
+  }
+
+  if (!hasAny) {
+    throw new RangeError('Duration string must have at least one field')
+  }
+
+  if (parseSign(parts[1]) < 0) {
+    durationFields = negateDurationFields(durationFields)
+  }
+
+  return updateDurationFieldsSign(durationFields)
+
+  function parseUnit(wholeStr, fracStr, timeUnitI) {
+    let wholeUnits = 0
+    let leftoverUnits = 0 // from previous round
+
+    if (timeUnitI) {
+      [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, nanoIn[timeUnitI])
+    }
+
+    if (wholeStr !== undefined) {
+      if (hasAnyFrac) {
+        throw new RangeError('Fraction must be last one')
+      }
+
+      wholeUnits = parseInt(wholeStr)
+      hasAny = true
+
+      if (fracStr) {
+        // convert seconds to other units, abusing parseSubsecNano
+        leftoverNano = parseSubsecNano(fracStr) * (nanoIn[timeUnitI] / nanoInSecond)
+        hasAnyFrac = true
+      }
+    }
+
+    return wholeUnits + leftoverUnits
+  }
+}
+
+function parseSubsecNano(fracStr) {
+  return parseInt(fracStr.padEnd(9, '0'))
 }
 
 // Utils

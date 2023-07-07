@@ -112,13 +112,18 @@ export function addDurationFields(a, b, sign) { // TODO: make version that updat
 }
 
 export function negateDurationInternals(internals) {
+  const res = negateDurationFields(internals)
+  res.sign = -internals.sign || 0
+  return res
+}
+
+export function negateDurationFields(internals) {
   const res = {}
 
   for (const fieldName in durationFieldNames) {
     res[fieldName] = internals[fieldName] * -1 || 0
   }
 
-  res.sign = -internals.sign || 0
   return res
 }
 
