@@ -367,8 +367,8 @@ function parseDurationParts(parts) {
   return updateDurationFieldsSign(durationFields)
 
   function parseUnit(wholeStr, fracStr, timeUnitI) {
-    let wholeUnits = 0
     let leftoverUnits = 0 // from previous round
+    let wholeUnits = 0
 
     if (timeUnitI) {
       [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, nanoIn[timeUnitI])
@@ -389,7 +389,7 @@ function parseDurationParts(parts) {
       }
     }
 
-    return wholeUnits + leftoverUnits
+    return leftoverUnits + wholeUnits
   }
 }
 
