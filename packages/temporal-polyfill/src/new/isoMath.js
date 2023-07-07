@@ -1,3 +1,5 @@
+import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
+import { diffEpochMilliByDay } from './diff'
 import {
   isoDateInternalRefiners,
   isoDateTimeFieldNamesAsc,
@@ -53,6 +55,13 @@ export function computeIsoIsLeapYear(isoYear) {
   return isoYear % 4 === 0 && (isoYear % 100 !== 0 || isoYear % 400 === 0)
 }
 
+export function computeIsoDayOfYear(isoDateFields) {
+  return diffEpochMilliByDay(
+    isoFieldsToEpochMilli(isoDateMonthStart(isoDateFields)),
+    isoFieldsToEpochMilli(isoDateFields),
+  )
+}
+
 export function computeIsoDayOfWeek(isoDateFields) {
   return isoToLegacyDate(
     isoDateFields.isoYear,
@@ -61,12 +70,41 @@ export function computeIsoDayOfWeek(isoDateFields) {
   ).getDay() + 1
 }
 
-export function computeIsoWeekOfYear(isoDateFields) {
-  // TODO
+export function computeIsoYearOfWeek(isoDateFields) {
+  return computeIsoWeekInfo(isoDateFields).isoYear
 }
 
-export function computeIsoYearOfWeek(isoDateFields) {
-  // TODO
+export function computeIsoWeekOfYear(isoDateFields) {
+  return computeIsoWeekInfo(isoDateFields).isoWeek
+}
+
+function computeIsoWeekInfo(isoDateFields) {
+  const doy = computeIsoDayOfYear(isoDateFields)
+  const dow = computeIsoDayOfWeek(isoDateFields)
+  const doj = computeIsoDayOfWeek(isoDateMonthStart(isoDateFields))
+  const isoWeek = Math.floor((doy - dow + 10) / isoDaysInWeek)
+  const { isoYear } = isoDateFields
+
+  if (isoWeek < 1) {
+    return {
+      isoYear: isoYear - 1,
+      isoWeek: (doj === 5 || (doj === 6 && computeIsoIsLeapYear(isoYear - 1))) ? 53 : 52,
+    }
+  }
+  if (isoWeek === 53) {
+    if (computeIsoDaysInYear(isoYear) - doy < 4 - dow) {
+      return {
+        isoYear: isoYear + 1,
+        isoWeek: 1,
+      }
+    }
+  }
+
+  return { isoYear, isoWeek }
+}
+
+function isoDateMonthStart(isoDateFields) {
+  return { ...isoDateFields, isoMonth: 1, isoDay: 1 }
 }
 
 // Refining

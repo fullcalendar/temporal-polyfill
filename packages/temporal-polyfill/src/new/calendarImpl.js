@@ -41,7 +41,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { rejectI } from './options'
 import { milliInDay } from './units'
-import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber, padNumber2 } from './utils'
+import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 
 // Base ISO Calendar
 // -------------------------------------------------------------------------------------------------
