@@ -1,3 +1,4 @@
+import { returnUndefinedI } from './options'
 
 const objectlikeRE = /object|function/
 
@@ -186,12 +187,15 @@ export function clamp(
   val,
   min, // inclusive
   max, // inclusive
-  throwOnOverflow, // 0/1 (matched constrain/reject)
-  noun, // for error message (required if throwOnOverflow given)
+  overflowBehavior, // 0/1/2 --- overflow enum
+  noun, // for error message (required if overflowBehavior given)
 ) {
   const clamped = Math.min(Math.max(val, min), max)
 
-  if (throwOnOverflow && val !== clamped) {
+  if (overflowBehavior && val !== clamped) {
+    if (overflowBehavior === returnUndefinedI) {
+      return undefined
+    }
     throw new RangeError(`${noun} must be between ${min}-${max}`)
   }
 

@@ -1,12 +1,7 @@
 import { queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
-import {
-  constrainIsoDateInternals,
-  constrainIsoDateTimeInternals,
-  constrainIsoTimeFields,
-} from './isoMath'
 import { toInteger } from './options'
-import { mapPropNamesToConstant, mapPropsWithRefiners, pluckProps } from './utils'
+import { mapPropNamesToConstant, pluckProps } from './utils'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
@@ -50,27 +45,6 @@ export const isoDateTimeFieldNamesAsc = [...isoDateFieldNames, ...isoTimeFieldNa
 // -------------------------------------------------------------------------------------------------
 
 export const isoTimeFieldDefaults = mapPropNamesToConstant(isoTimeFieldNames, 0)
-
-// Refining
-// -------------------------------------------------------------------------------------------------
-
-export function refineIsoTimeInternals(rawIsoTimeInternals) {
-  return constrainIsoTimeFields(
-    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
-  )
-}
-
-export function refineIsoDateInternals(rawIsoDateInternals) {
-  return constrainIsoDateInternals(
-    mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
-  )
-}
-
-export function refineIsoDateTimeInternals(rawIsoDateTimeInternals) {
-  return constrainIsoDateTimeInternals(
-    mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
-  )
-}
 
 // Conversion
 // -------------------------------------------------------------------------------------------------

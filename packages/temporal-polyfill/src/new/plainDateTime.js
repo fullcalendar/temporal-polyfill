@@ -17,10 +17,9 @@ import {
   pluckIsoDateInternals,
   pluckIsoDateTimeInternals,
   pluckIsoTimeFields,
-  refineIsoDateTimeInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
-import { compareIsoDateTimeFields } from './isoMath'
+import { compareIsoDateTimeFields, refineIsoDateTimeInternals } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'
 import {

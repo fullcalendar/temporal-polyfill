@@ -1,18 +1,16 @@
 import { nanoInSecond } from '../dateUtils/units'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarImpl } from './calendarImpl'
+import { isoTimeFieldDefaults } from './isoFields'
 import {
-  pluckIsoDateInternals,
-  pluckIsoDateTimeInternals,
-  pluckIsoTimeFields,
-} from './isoFields'
-import {
+  checkIsoDateTimeInternals,
   constrainIsoDateInternals,
   constrainIsoDateTimeInternals,
   constrainIsoTimeFields,
   isoToEpochNano,
   nanoToIsoTimeAndDay,
 } from './isoMath'
+import { returnUndefinedI } from './options'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import { nanoInHour, nanoInMinute } from './units'
@@ -39,6 +37,17 @@ export function parseInstant(s) {
   return isoToEpochNano(parsed).addNumber(offsetNano)
 }
 
+export function parseMaybeZonedDateTime(s) {
+  const parsed = parseDateTime(s)
+  if (!parsed) {
+    throw new RangeError()
+  }
+  if (parsed.timeZone) {
+    return processZonedDateTimeParse(parsed)
+  }
+  return processDatelikeParse(parsed) // unnecessarily checks for undefined
+}
+
 export function parseZonedDateTime(s) {
   const parsed = parseDateTime(s)
   if (!parsed || !parsed.timeZone) {
@@ -47,45 +56,24 @@ export function parseZonedDateTime(s) {
   return processZonedDateTimeParse(parsed)
 }
 
-export function processZonedDateTimeParse(parsed) {
-  const epochNanoseconds = getMatchingInstantFor(
-    parsed.timeZone,
-    parsed,
-    parsed.offset ? parseOffsetNano(parsed.offset) : undefined,
-    parsed.z,
-    'reject',
-    'compatible',
-    true, // fuzzy
-  )
-  return {
-    epochNanoseconds,
-    timeZone: parsed.timeZone,
-    calendar: parsed.calendar,
-  }
-}
-
 export function parsePlainDateTime(s) {
   const parsed = parseDateTime(s)
   if (!parsed) {
     throw new RangeError()
   }
-  return pluckIsoDateTimeInternals(parsed)
+  return processDateTimeParse(parsed)
 }
 
 export function parsePlainDate(s) {
-  const parsed = parseDateTime(s)
-  if (!parsed) {
-    throw new RangeError()
-  }
-  return pluckIsoDateInternals(parsed)
+  return processDatelikeParse(parseDateTime(s))
 }
 
 export function parsePlainYearMonth(s) {
-  return parseYearMonth(s) || parsePlainDate(s) // parsePlainDate will throw error
+  return processDatelikeParse(parseYearMonth(s) || parseDateTime(s))
 }
 
 export function parsePlainMonthDay(s) {
-  return parseMonthDay(s) || parsePlainDate(s) // parsePlainDate will throw error
+  return processDatelikeParse(parseMonthDay(s) || parseDateTime(s))
 }
 
 export function parsePlainTime(s) {
@@ -104,17 +92,19 @@ export function parsePlainTime(s) {
   if (parsed.hasZ) {
     throw new RangeError()
   }
-  if (parsed.calendar !== undefined && parsed.calendar.id !== isoCalendarId) {
-    throw new RangeError()
-  }
-  if (parseMonthDay(s)) {
-    throw new RangeError()
-  }
-  if (parseYearMonth(s)) {
+  if (parsed.calendar && parsed.calendar.id !== isoCalendarId) {
     throw new RangeError()
   }
 
-  return pluckIsoTimeFields(parsed)
+  let altParsed
+  if ((altParsed = parseYearMonth(s)) && constrainIsoDateInternals(altParsed, returnUndefinedI)) {
+    throw new RangeError()
+  }
+  if ((altParsed = parseMonthDay(s)) && constrainIsoDateInternals(altParsed, returnUndefinedI)) {
+    throw new RangeError()
+  }
+
+  return constrainIsoTimeFields(parsed)
 }
 
 export function parseCalendarId(s) {
@@ -128,6 +118,7 @@ export function parseCalendarId(s) {
 
 export function parseTimeZoneId(s) {
   const parsed = parseDateTime(s)
+
   if (parsed !== undefined) {
     if (parsed.timeZone) {
       return parsed.timeZone.id
@@ -143,17 +134,74 @@ export function parseTimeZoneId(s) {
   return s
 }
 
+// Intermediate
+// -------------------------------------------------------------------------------------------------
+
+function processZonedDateTimeParse(parsed) {
+  const epochNanoseconds = getMatchingInstantFor(
+    parsed.timeZone,
+    parsed,
+    parsed.offset ? parseOffsetNano(parsed.offset) : undefined,
+    parsed.z,
+    'reject',
+    'compatible',
+    true, // fuzzy
+  )
+  return {
+    epochNanoseconds,
+    timeZone: parsed.timeZone,
+    calendar: parsed.calendar,
+  }
+}
+
+function processDateTimeParse(parsed) {
+  return checkIsoDateTimeInternals(constrainIsoDateTimeInternals(parsed))
+}
+
+/*
+Unlike others, throws an error
+*/
+function processDatelikeParse(parsed) {
+  if (!parsed) {
+    throw new RangeError()
+  }
+  return checkIsoDateTimeInternals(constrainIsoDateInternals(parsed))
+}
+
+// Low-level
+// -------------------------------------------------------------------------------------------------
+
+export function parseDuration(s) {
+  const parts = durationRegExp.exec(s)
+  console.log(parts) // TODO
+}
+
 export function parseOffsetNano(s) {
   const parts = offsetRegExp.exec(s)
   return parts && parseOffsetParts(parts.slice(1))
 }
 
-export function parseDuration(s) {
-  const parts = durationRegExp.exec(s)
-  console.log(parts)
+function parseDateTime(s) {
+  const parts = dateTimeRegExp.exec(s)
+  return parts && parseDateTimeParts(parts)
 }
 
-// Low-level
+function parseYearMonth(s) {
+  const parts = yearMonthRegExp.exec(s)
+  return parts && parseYearMonthParts(parts)
+}
+
+function parseMonthDay(s) {
+  const parts = monthDayRegExp.exec(s)
+  return parts && parseMonthDayParts(parts)
+}
+
+function parseTime(s) {
+  const parts = timeRegExp.exec(s)
+  return parts && parseTimeParts(parts.slice(1))
+}
+
+// RegExp & Parts
 // -------------------------------------------------------------------------------------------------
 
 const plusOrMinusRegExpStr = '([+-\u2212])'
@@ -167,7 +215,6 @@ const yearMonthRegExpStr =
 const dateRegExpStr =
   yearMonthRegExpStr + // 0:yearSign, 1:year, 2:month
   '-?(\\d{2})' // 3:day
-  // 4:annotations
 
 const monthDayRegExpStr =
   '(--)?(\\d{2})' + // 1:month
@@ -180,6 +227,7 @@ const timeRegExpStr =
   '(:?(\\d{2})' + // 4:second
   fractionRegExpStr + // 6:afterDecimal
   ')?)?'
+  // 7:annotations
 
 const offsetRegExpStr =
   plusOrMinusRegExpStr + // 0:plusOrMinus
@@ -192,6 +240,7 @@ const dateTimeRegExpStr =
   '(Z|' + // 12:zOrOffset
   offsetRegExpStr + // 13:plusOrMinus, 14:hour, 16:minute, 18:second, 20:afterDecimal
   ')?)?'
+  // 21:annotations
 
 const annotationRegExpStr = '((\\[[^\\]]*\\])*)'
 
@@ -211,21 +260,35 @@ const durationRegExp = createRegExp(
   ')?',
 )
 
-function parseDateTime(s) {
-  const parts = dateTimeRegExp.exec(s) // 0 is whole-match
-  return parts && constrainIsoDateTimeInternals({
-    isoYear: parseIsoYearParts(parts),
-    isoMonth: parseInt(parts[3]),
-    isoDay: parseInt(parts[4]),
-    ...parseTimeParts(parts.slice(6)), // parses annotations
-  })
-}
-
-function parseYearMonth(s) {
-  const parts = yearMonthRegExp.exec(s) // 0 is whole-match
+function parseDateTimeParts(parts) { // 0 is whole-match
+  const hasTime = Boolean(parts[5])
+  const hasZ = Boolean(parts[13])
   return {
     isoYear: parseIsoYearParts(parts),
     isoMonth: parseInt(parts[3]),
+    isoDay: parseInt(parts[4]),
+    ...(hasTime
+      ? parseTimeParts(parts.slice(6)) // parses annotations
+      : { ...isoTimeFieldDefaults, ...parseAnnotations(parts[22]) }
+    ),
+    hasTime,
+    hasZ,
+  }
+}
+
+function parseYearMonthParts(parts) { // 0 is whole-match
+  return {
+    isoYear: parseIsoYearParts(parts),
+    isoMonth: parseInt(parts[3]),
+    isoDay: 1,
+    ...parseAnnotations(parts[4]),
+  }
+}
+
+function parseMonthDayParts(parts) { // 0 is whole-match
+  return {
+    isoYear: parseInt(parts[1]),
+    isoMonth: parseInt(parts[2]),
     isoDay: 1,
     ...parseAnnotations(parts[3]),
   }
@@ -238,21 +301,6 @@ function parseIsoYearParts(parts) { // 0 is whole-match
     throw new RangeError('Negative zero not allowed')
   }
   return yearSign * year
-}
-
-function parseMonthDay(s) {
-  const parts = monthDayRegExp.exec(s) // 0 is whole-match
-  return parts && constrainIsoDateInternals({
-    isoYear: parseInt(parts[1]),
-    isoMonth: parseInt(parts[2]),
-    isoDay: 1,
-    ...parseAnnotations(parts[3]),
-  })
-}
-
-function parseTime(s) {
-  const parts = timeRegExp.exec(s) // 0 is whole-match
-  return constrainIsoTimeFields(parseTimeParts(parts.slice(1)))
 }
 
 function parseTimeParts(parts) { // parses annotations
@@ -275,8 +323,8 @@ function parseOffsetParts(parts) {
   )
 }
 
-function parseNanoAfterDecimal(str) {
-  return parseInt(str.padEnd(9, '0'))
+function parseNanoAfterDecimal(s) {
+  return parseInt(s.padEnd(9, '0'))
 }
 
 function parseAnnotations(s) {
@@ -311,9 +359,12 @@ function parseAnnotations(s) {
 
   return {
     calendar: queryCalendarImpl(calendarId || isoCalendarId),
-    timeZone: timeZoneId ? queryTimeZoneImpl(timeZoneId) : undefined,
+    timeZone: timeZoneId && queryTimeZoneImpl(timeZoneId),
   }
 }
+
+// Utils
+// -------------------------------------------------------------------------------------------------
 
 function createRegExp(meat) {
   return new RegExp(`^${meat}$`, 'i')

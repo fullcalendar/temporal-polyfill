@@ -1,8 +1,10 @@
-import { parseDateTime } from '../dateUtils/parse'
+import { getInternals } from './class'
 import { durationFieldIndexes } from './durationFields'
-import { pluckIsoDateTimeInternals } from './isoFields'
-import { processZonedDateTimeParse } from './isoParse'
+import { pluckIsoDateInternals } from './isoFields'
+import { parseMaybeZonedDateTime } from './isoParse'
 import { bigIntToLargeInt } from './largeInt'
+import { PlainDate } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
 import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearIndex } from './units'
 import {
   clamp,
@@ -14,6 +16,7 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
+import { ZonedDateTime } from './zonedDateTime'
 
 // TODO: ensure all callers use *INDEXES*
 
@@ -189,6 +192,7 @@ const refineTotalUnit = refineUnitOption.bind(undefined, totalUnitStr)
 
 export const constrainI = 0
 export const rejectI = 1 // must be truthy for clamp's throwOnOverflow param
+export const returnUndefinedI = 2 // non-standard
 const refineOverflow = refineChoiceOption.bind(undefined, 'overflow', [
   'constrain',
   'reject',
@@ -330,13 +334,23 @@ function refineSubsecDigits(options) {
 }
 
 function refineRelativeTo(options) {
-  const parsed = parseDateTime(options)
+  const { relativeTo } = options
 
-  if (parsed.timeZone) {
-    return processZonedDateTimeParse(parsed)
+  if (relativeTo) {
+    if (isObjectlike(relativeTo)) {
+      if (
+        relativeTo instanceof ZonedDateTime ||
+        relativeTo instanceof PlainDate
+      ) {
+        return getInternals(relativeTo)
+      } else if (relativeTo instanceof PlainDateTime) {
+        return pluckIsoDateInternals(getInternals(relativeTo))
+      }
+      throw new TypeError()
+    }
+
+    return parseMaybeZonedDateTime(toString(relativeTo))
   }
-
-  return pluckIsoDateTimeInternals(parsed)
 }
 
 // Utils

@@ -28,7 +28,7 @@ import {
 import {
   epochGetters,
   epochNanoToIso,
-  validateEpochNano,
+  checkEpochNano,
 } from './isoMath'
 import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
@@ -68,7 +68,7 @@ export const [
   // constructorToInternals
   (epochNanoseconds, timeZoneArg, calendarArg) => {
     return {
-      epochNanoseconds: validateEpochNano(toEpochNano(epochNanoseconds)),
+      epochNanoseconds: checkEpochNano(toEpochNano(epochNanoseconds)),
       timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
       calendar: queryCalendarOps(calendarArg),
     }

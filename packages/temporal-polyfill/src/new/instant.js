@@ -11,7 +11,7 @@ import {
   epochMilliToNano,
   epochNanoToIso,
   epochSecToNano,
-  validateEpochNano,
+  checkEpochNano,
 } from './isoMath'
 import { parseInstant } from './isoParse'
 import { compareLargeInts } from './largeInt'
@@ -41,7 +41,7 @@ export const [
 
   // constructorToInternals
   (epochNanoseconds) => {
-    return validateEpochNano(toEpochNano(epochNanoseconds))
+    return checkEpochNano(toEpochNano(epochNanoseconds))
   },
 
   // internalsConversionMap

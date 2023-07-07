@@ -8,9 +8,9 @@ import {
 import { diffTimes } from './diff'
 import { createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
-import { pluckIsoTimeFields, refineIsoTimeInternals } from './isoFields'
+import { pluckIsoTimeFields } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
-import { compareIsoTimeFields } from './isoMath'
+import { compareIsoTimeFields, refineIsoTimeInternals } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {

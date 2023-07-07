@@ -1,4 +1,11 @@
-import { isoDateTimeFieldNamesAsc, isoTimeFieldNamesAsc, pluckIsoDateTimeFields } from './isoFields'
+import {
+  isoDateInternalRefiners,
+  isoDateTimeFieldNamesAsc,
+  isoDateTimeInternalRefiners,
+  isoTimeFieldNamesAsc,
+  isoTimeFieldRefiners,
+  pluckIsoDateTimeFields,
+} from './isoFields'
 import { compareLargeInts, numberToLargeInt } from './largeInt'
 import { clampProp, rejectI } from './options' // use 1 instead of rejectI?
 import {
@@ -11,7 +18,7 @@ import {
   nanoInUtcDay,
   nanoToGivenFields,
 } from './units'
-import { compareProps, divFloorMod } from './utils'
+import { compareProps, divFloorMod, mapPropsWithRefiners } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -55,29 +62,65 @@ export function computeIsoDayOfWeek(isoDateFields) {
 }
 
 export function computeIsoWeekOfYear(isoDateFields) {
+  // TODO
 }
 
 export function computeIsoYearOfWeek(isoDateFields) {
+  // TODO
+}
+
+// Refining
+// -------------------------------------------------------------------------------------------------
+
+export function refineIsoDateTimeInternals(rawIsoDateTimeInternals) {
+  return checkIsoDateTimeInternals(
+    constrainIsoDateTimeInternals(
+      mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
+    ),
+  )
+}
+
+export function refineIsoDateInternals(rawIsoDateInternals) {
+  return checkIsoDateTimeInternals(
+    constrainIsoDateInternals(
+      mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
+    ),
+  )
+}
+
+export function refineIsoTimeInternals(rawIsoTimeInternals) {
+  return constrainIsoTimeFields(
+    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
+  )
 }
 
 // Constraining
 // -------------------------------------------------------------------------------------------------
 
-export function constrainIsoDateTimeInternals(isoDateTimeInternals) {
-  return validateIsoDateTimeInternals({
-    ...constrainIsoDateInternals(isoDateTimeInternals),
-    ...constrainIsoTimeFields(isoDateTimeInternals),
-  })
+export function constrainIsoDateTimeInternals(isoDateTimeFields) {
+  return {
+    ...constrainIsoDateInternals(isoDateTimeFields),
+    ...constrainIsoTimeFields(isoDateTimeFields),
+  }
 }
 
-export function constrainIsoDateInternals(isoDateInternals) {
-  const daysInMonth = computeIsoDaysInMonth(isoDateInternals.isoYear, isoDateInternals.isoMonth)
-  return validateIsoDateTimeInternals({
-    calendar: isoDateInternals.calendar,
-    isoYear: isoDateInternals.isoYear,
-    isoMonth: clampProp(isoDateInternals, 'isoMonth', 1, isoMonthsInYear, rejectI),
-    isoDay: clampProp(isoDateInternals, 'isoDay', 1, daysInMonth, rejectI),
-  })
+/*
+accepts iso-date-like fields and will pass all through
+accepts returnUndefinedI
+*/
+export function constrainIsoDateInternals(isoDateFields, overflowI = rejectI) {
+  const isoMonth = clampProp(isoDateFields, 'isoMonth', 1, isoMonthsInYear, overflowI)
+  if (isoMonth) {
+    const daysInMonth = computeIsoDaysInMonth(isoDateFields.isoYear, isoMonth)
+    const isoDay = clampProp(isoDateFields, 'isoDay', 1, daysInMonth, overflowI)
+    if (isoDay) {
+      return {
+        ...isoDateFields, // calendar,(timeZone),isoYear
+        isoMonth,
+        isoDay,
+      }
+    }
+  }
 }
 
 export function constrainIsoTimeFields(isoTimeFields, overflowI = rejectI) {
@@ -91,6 +134,37 @@ export function constrainIsoTimeFields(isoTimeFields, overflowI = rejectI) {
     isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflowI),
     isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflowI),
   }
+}
+
+// Epoch-checking
+// -------------------------------------------------------------------------------------------------
+
+const epochNanoMax = numberToLargeInt(nanoInUtcDay).mult(100000000) // inclusive
+const epochNanoMin = epochNanoMax.mult(-1) // inclusive
+const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
+const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
+
+export function checkIsoDateTimeInternals(isoDateTimeInternals) {
+  const isoYear = clampProp(isoDateTimeInternals, 'isoYear', isoYearMin, isoYearMax, rejectI)
+  const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
+
+  if (nudge) {
+    const epochNano = isoToEpochNano(isoDateTimeInternals)
+    checkEpochNano(epochNano && epochNano.addNumber((nanoInUtcDay - 1) * nudge))
+  }
+
+  return isoDateTimeInternals
+}
+
+export function checkEpochNano(epochNano) {
+  if (
+    epochNano === undefined ||
+    compareLargeInts(epochNano, epochNanoMin) === 1 || // epochNano < epochNanoMin
+    compareLargeInts(epochNanoMax, epochNano) === 1 // epochNanoMax < epochNano
+  ) {
+    throw new RangeError('aahh')
+  }
+  return epochNano
 }
 
 // Field <-> Nanosecond Conversion
@@ -161,37 +235,6 @@ export const epochGetters = {
   epochNanoseconds(epochNano) {
     return epochNano.toBigInt()
   },
-}
-
-// Validation
-// -------------------------------------------------------------------------------------------------
-
-const epochNanoMax = numberToLargeInt(nanoInUtcDay).mult(100000000) // inclusive
-const epochNanoMin = epochNanoMax.mult(-1) // inclusive
-const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
-const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
-
-function validateIsoDateTimeInternals(isoDateTimeInternals) { // validateIsoInternals?
-  const isoYear = clampProp(isoDateTimeInternals, 'isoYear', isoYearMin, isoYearMax, rejectI)
-  const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
-
-  if (nudge) {
-    const epochNano = isoToEpochNano(isoDateTimeInternals)
-    validateEpochNano(epochNano && epochNano.addNumber((nanoInUtcDay - 1) * nudge))
-  }
-
-  return isoDateTimeInternals
-}
-
-export function validateEpochNano(epochNano) {
-  if (
-    epochNano === undefined ||
-    compareLargeInts(epochNano, epochNanoMin) === 1 || // epochNano < epochNanoMin
-    compareLargeInts(epochNanoMax, epochNano) === 1 // epochNanoMax < epochNano
-  ) {
-    throw new RangeError('aahh')
-  }
-  return epochNano
 }
 
 // ISO <-> Epoch Conversion
