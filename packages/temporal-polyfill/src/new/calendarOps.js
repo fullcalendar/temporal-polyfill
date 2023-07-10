@@ -54,6 +54,7 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
       return refiner(calendar[propName](createPlainDate(isoDateFields)))
     }
   }, {
+    // TODO: more DRY with DateGetters or something?
     ...eraYearFieldRefiners,
     ...dateFieldRefiners,
     ...dateStatRefiners,

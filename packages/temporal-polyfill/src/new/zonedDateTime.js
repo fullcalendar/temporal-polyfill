@@ -26,9 +26,9 @@ import {
   formatTimeZone,
 } from './isoFormat'
 import {
+  checkEpochNano,
   epochGetters,
   epochNanoToIso,
-  checkEpochNano,
 } from './isoMath'
 import { parseZonedDateTime } from './isoParse'
 import { compareLargeInts } from './largeInt'
