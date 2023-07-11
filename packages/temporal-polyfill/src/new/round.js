@@ -17,7 +17,7 @@ import {
   nanoInMinute,
   nanoInUtcDay,
   nanoIndex,
-  unitIndexToNano,
+  unitNanoMap,
   unitNamesAsc,
   weekIndex,
 } from './units'
@@ -179,7 +179,7 @@ export function roundRelativeDuration(
 // -------------------------------------------------------------------------------------------------
 
 export function computeNanoInc(smallestUnitI, roundingInc) {
-  return unitIndexToNano[smallestUnitI] * roundingInc
+  return unitNanoMap[smallestUnitI] * roundingInc
 }
 
 export function roundByInc(num, inc, roundingMode) {
@@ -207,7 +207,7 @@ export function totalDayTimeDuration( // assumes iso-length days
   totalUnitIndex,
 ) {
   const largeNano = durationFieldsToNano(durationFields)
-  const divisor = unitIndexToNano[totalUnitIndex]
+  const divisor = unitNanoMap[totalUnitIndex]
   const [fullUnits, remainder] = largeNano.divTruncMod(divisor)
   return fullUnits.toNumber() + (remainder / divisor)
 }

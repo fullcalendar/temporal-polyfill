@@ -5,7 +5,7 @@ import { parseMaybeZonedDateTime } from './isoParse'
 import { bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
-import { dayIndex, minuteIndex, nanoIndex, unitIndexToNano, unitIndexes, yearIndex } from './units'
+import { dayIndex, minuteIndex, nanoIndex, unitNanoMap, unitNameMap, yearIndex } from './units'
 import {
   clamp,
   hasAnyPropsByName,
@@ -146,7 +146,7 @@ function refineTimeDisplayTuple(options) { // trace callers of this, make sure u
   const smallestUnitI = refineSmallestUnit(options, minuteIndex, nanoIndex, -1)
   if (smallestUnitI !== -1) {
     return [
-      unitIndexToNano[smallestUnitI],
+      unitNanoMap[smallestUnitI],
       refineRoundingMode(options, truncI),
       (smallestUnitI < minuteIndex)
         ? 9 - (smallestUnitI * 3)
@@ -300,10 +300,10 @@ function refineRoundingInc(options, smallestUnitI) { // smallestUnit is day/time
     return 1
   }
 
-  const upUnitNano = unitIndexToNano[smallestUnitI + 1]
+  const upUnitNano = unitNanoMap[smallestUnitI + 1]
 
   if (upUnitNano) {
-    const unitNano = unitIndexToNano[smallestUnitI]
+    const unitNano = unitNanoMap[smallestUnitI]
     const maxRoundingInc = upUnitNano / unitNano
     roundingInc = clamp(roundingInc, 1, maxRoundingInc - 1, roundingIncName)
 
@@ -369,7 +369,7 @@ function refineUnitOption(optionName, options, maxUnitI, minUnitI = nanoIndex, d
   }
 
   unitName = toString(unitName)
-  const unitIndex = unitIndexes[unitName] ?? durationFieldIndexes[unitName]
+  const unitIndex = unitNameMap[unitName] ?? durationFieldIndexes[unitName]
 
   if (unitIndex === undefined) {
     throw new RangeError('Invalid unit ' + optionName) // correct error?

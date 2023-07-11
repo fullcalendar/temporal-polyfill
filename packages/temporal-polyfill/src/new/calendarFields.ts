@@ -1,4 +1,10 @@
-import { IsoDateFields, IsoTimeFields, isoTimeFieldNames } from './isoFields'
+import {
+  CalendarOps,
+  IsoDateFields,
+  IsoDateInternals,
+  IsoTimeFields,
+  isoTimeFieldNames,
+} from './isoFields'
 import { ensureBoolean, ensureInteger, toInteger, toString } from './options'
 import { mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
@@ -52,9 +58,11 @@ interface YearStats {
   inLeapYear: boolean
   monthsInYear: number
 }
+
 interface YearMonthStats extends YearStats {
   daysInMonth: number
 }
+
 interface DateStats extends YearMonthStats {
   dayOfWeek: number
   dayOfYear: number
@@ -68,32 +76,10 @@ type FilterPropValues<P, F> = {
   [K in keyof P as P[K] extends F ? K : never]: P[K]
 }
 
-// TODO: temporary
-interface CalendarOps {
-  id: string
-  era(isoFields: IsoDateFields): string | undefined
-  eraYear(isoFields: IsoDateFields): number | undefined
-  year(isoFields: IsoDateFields): number
-  monthCode(isoFields: IsoDateFields): string
-  month(isoFields: IsoDateFields): number
-  day(isoFields: IsoDateFields): number
-  daysInYear(isoFields: IsoDateFields): number
-  inLeapYear(isoFields: IsoDateFields): number
-  monthsInYear(isoFields: IsoDateFields): number
-  daysInMonth(isoFields: IsoDateFields): number
-  dayOfWeek(isoFields: IsoDateFields): number
-  dayOfYear(isoFields: IsoDateFields): number
-  weekOfYear(isoFields: IsoDateFields): number
-  yearOfWeek(isoFields: IsoDateFields): number
-  daysInWeek(isoFields: IsoDateFields): number
-}
-
 type DateMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => any>
 
 type DateGetters = {
-  [K in keyof DateMethods]: (
-    internals: IsoDateFields & { calendar: CalendarOps }
-  ) => ReturnType<DateMethods[K]>
+  [K in keyof DateMethods]: (internals: IsoDateInternals) => ReturnType<DateMethods[K]>
 }
 
 type TimeGetters = {
@@ -236,7 +222,7 @@ export const monthDayGetterNames = monthDayFieldNames // unordered
 function createCalendarGetter<K extends keyof DateGetters>(
   propName: K,
 ) {
-  return (internals: IsoDateFields & { calendar: CalendarOps }) => {
+  return (internals: IsoDateInternals) => {
     return internals.calendar[propName](internals) as ReturnType<DateGetters[K]>
   }
 }
@@ -244,12 +230,12 @@ function createCalendarGetter<K extends keyof DateGetters>(
 function createCalendarGetters<K extends keyof DateGetters>(
   propNames: K[],
 ) {
-  const getters = mapPropNames(
-    createCalendarGetter as any, // trouble merging prop-vals into single type
+  const getters = mapPropNames<Pick<DateGetters, K>>(
+    createCalendarGetter as ((propName: K) => any),
     propNames,
-  ) as (Pick<DateGetters, K> & CalendarIdGetters)
+  ) as Pick<DateGetters, K> & CalendarIdGetters
 
-  getters.calendarId = function(internals) {
+  getters.calendarId = (internals: { calendar: CalendarOps }) => {
     return internals.calendar.id
   }
 

@@ -7,7 +7,7 @@ import {
   durationFieldsToNano,
   durationGetters,
   negateDurationInternals,
-  refineDurationInternals,
+  refineDurationFields,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { isoToEpochNano } from './isoMath'
@@ -53,7 +53,7 @@ export const [
     microseconds = 0,
     nanoseconds = 0,
   ) => {
-    return refineDurationInternals({
+    return refineDurationFields({
       years,
       months,
       weeks,

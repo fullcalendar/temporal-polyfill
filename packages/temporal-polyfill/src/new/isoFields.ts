@@ -18,18 +18,34 @@ export interface IsoTimeFields {
   isoHour: number,
 }
 
-// TODO: move
-interface CalendarOps {
+// TODO: temporary
+export interface CalendarOps {
   id: string
+  era(isoFields: IsoDateFields): string | undefined
+  eraYear(isoFields: IsoDateFields): number | undefined
+  year(isoFields: IsoDateFields): number
+  monthCode(isoFields: IsoDateFields): string
+  month(isoFields: IsoDateFields): number
+  day(isoFields: IsoDateFields): number
+  daysInYear(isoFields: IsoDateFields): number
+  inLeapYear(isoFields: IsoDateFields): number
+  monthsInYear(isoFields: IsoDateFields): number
+  daysInMonth(isoFields: IsoDateFields): number
+  dayOfWeek(isoFields: IsoDateFields): number
+  dayOfYear(isoFields: IsoDateFields): number
+  weekOfYear(isoFields: IsoDateFields): number
+  yearOfWeek(isoFields: IsoDateFields): number
+  daysInWeek(isoFields: IsoDateFields): number
 }
 
 // TODO: move
 type CalendarIdOrObj = string | CalendarOps
 
-interface IsoDateInternals extends IsoDateFields {
+export interface CalendarInternals {
   calendar: CalendarOps
 }
 
+export type IsoDateInternals = IsoDateFields & CalendarInternals
 type IsoDateTimeFields = IsoDateFields & IsoTimeFields
 type IsoDateTimeInternals = IsoDateInternals & IsoTimeFields
 

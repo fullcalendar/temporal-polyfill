@@ -1,29 +1,29 @@
-import { compareNumbers, divFloorMod } from './utils'
+import { NumSign, compareNumbers, divFloorMod } from './utils'
 
 const maxLow = 1e8 // exclusive // TODO: explain why
 
 export class LargeInt {
-  constructor(high, low) {
-    this.high = high
-    this.low = low
-  }
+  constructor(
+    public high: number,
+    public low: number,
+  ) {}
 
-  addLargeInt(n, sign = 1) {
-    return balanceAndCreate(this.high + n.high * sign, this.low + n.low * sign)
+  addLargeInt(num: LargeInt, sign = 1 | -1): LargeInt {
+    return balanceAndCreate(this.high + num.high * sign, this.low + num.low * sign)
   }
 
   /*
   different than PlainTime/Duration::add, for minification
   */
-  addNumber(n) {
-    return balanceAndCreate(this.high, this.low + n)
+  addNumber(num: number): LargeInt {
+    return balanceAndCreate(this.high, this.low + num)
   }
 
-  mult(multiplier) {
+  mult(multiplier: number): LargeInt {
     return balanceAndCreate(this.high * multiplier, this.low * multiplier)
   }
 
-  divFloorMod(divisor) {
+  divFloorMod(divisor: number): [LargeInt, number] {
     const { high, low } = this
     const [newHigh, highRemainder] = divFloorMod(high, divisor)
     const [newLow, remainder] = divFloorMod(highRemainder * maxLow + low, divisor)
@@ -34,7 +34,7 @@ export class LargeInt {
     ]
   }
 
-  divTruncMod(divisor) {
+  divTruncMod(divisor: number): [LargeInt, number] {
     let [whole, remainder] = this.divFloorMod(divisor)
 
     if (whole.computeSign() === -1 && remainder) {
@@ -45,40 +45,42 @@ export class LargeInt {
     return [whole, remainder]
   }
 
-  mod2() {
+  mod2(): number {
     return (this.low % 2) * this.computeSign()
   }
 
   /*
   different than Duration::sign, for minification
   */
-  computeSign() {
-    return Math.sign(this.high) || Math.sign(this.low)
+  computeSign(): NumSign {
+    return (Math.sign(this.high) || Math.sign(this.low)) as NumSign
   }
 
-  toNumber() {
+  toNumber(): number {
     return this.high * maxLow + this.low
   }
 
-  toBigInt() {
+  toBigInt(): bigint {
     return BigInt(this.high) * BigInt(maxLow) + BigInt(this.low)
   }
 }
 
-function balanceAndCreate(high, low) {
+function balanceAndCreate(high: number, low: number) {
   const [extraHigh, newLow] = divFloorMod(low, maxLow)
   return new LargeInt(high + extraHigh, newLow)
 }
 
-export function numberToLargeInt(n) {
-  return new LargeInt(...divFloorMod(n, maxLow))
+export function numberToLargeInt(num: number): LargeInt {
+  return new LargeInt(...divFloorMod(num, maxLow))
 }
 
-export function bigIntToLargeInt(n) {
+export function bigIntToLargeInt(num: bigint): LargeInt {
   // must create BigInt lazily for if browser lacks support
-  return new LargeInt(...divFloorMod(n, BigInt(maxLow)).map(Number))
+  return new LargeInt(
+    ...(divFloorMod(num, BigInt(maxLow)).map(Number) as [number, number]),
+  )
 }
 
-export function compareLargeInts(a, b) {
+export function compareLargeInts(a: LargeInt, b: LargeInt): NumSign {
   return compareNumbers(a.high, b.high) || compareNumbers(a.low, b.low)
 }

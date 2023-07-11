@@ -8,8 +8,8 @@ export function mapProps<P, V, E = undefined>(
   transformer: (propVal: P[keyof P], propName: keyof P, extraArg?: E) => V,
   props: P,
   extraArg?: E,
-): { [PropName in keyof P]: V } {
-  const res = {} as { [PropName in keyof P]: V }
+): { [K in keyof P]: V } {
+  const res = {} as { [K in keyof P]: V }
 
   for (const propName in props) {
     res[propName] = transformer(props[propName], propName, extraArg)
@@ -50,6 +50,7 @@ export function mapPropNames<P, E = never>(
   return props
 }
 
+// TODO: used?
 export const mapPropNamesToIndex: <P>(
   propNames: (keyof P)[],
 ) => {
