@@ -153,13 +153,13 @@ export type TimeDisplayTuple = [
 ]
 
 function refineTimeDisplayTuple(options: Options): TimeDisplayTuple {
-  const smallestUnitI = refineSmallestUnit(options, Unit.Minute, Unit.Nanosecond, -1)
-  if (smallestUnitI !== -1) {
+  const smallestUnit = refineSmallestUnit(options, Unit.Minute, Unit.Nanosecond, -1 as number)
+  if ((smallestUnit as number) !== -1) {
     return [
-      unitNanoMap[smallestUnitI],
+      unitNanoMap[smallestUnit],
       refineRoundingMode(options, RoundingMode.Trunc),
-      (smallestUnitI < Unit.Minute)
-        ? 9 - (smallestUnitI * 3)
+      (smallestUnit < Unit.Minute)
+        ? 9 - (smallestUnit * 3)
         : -1, // hide seconds
     ]
   }
@@ -368,8 +368,8 @@ function refineUnitOption(
   options: Options,
   maxUnit: Unit = Unit.Year,
   minUnit: Unit = Unit.Nanosecond,
-  defaultUnit?: Unit | -1,
-): Unit | -1 {
+  defaultUnit?: Unit,
+): Unit {
   let unitName = options[optionName]
   if (unitName === undefined) {
     if (defaultUnit === undefined) {
