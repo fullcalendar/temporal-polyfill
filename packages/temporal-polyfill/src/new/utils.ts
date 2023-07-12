@@ -2,7 +2,7 @@ import { Overflow } from './options'
 
 const objectlikeRE = /object|function/
 
-export function isObjectlike(arg: unknown): boolean {
+export function isObjectlike(arg: unknown): arg is Record<string, unknown> {
   return arg !== null && objectlikeRE.test(typeof arg)
 }
 
@@ -55,7 +55,7 @@ export const mapPropNamesToIndex = mapPropNames.bind(
 
 export const mapPropNamesToConstant = mapPropNames.bind(
   undefined,
-  (propVal: any, i: number, constant: any) => constant,
+  (propVal: unknown, i: number, constant: unknown) => constant,
 ) as (
   <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
 )
@@ -106,17 +106,23 @@ function filterProps<P, E = undefined>(
   return filteredProps
 }
 
-export const excludePropsByName = filterProps.bind(
-  undefined,
-  (propVal: any, propName: string, nameSet: any) => !nameSet.has(propName)
-) as (
-  <P, K extends keyof P>(props: P, propNames: K[]) => Omit<P, K>
+export const excludePropsByName = filterProps.bind<
+  any, [any], [any, Set<string>], any
+>(undefined, (
+  propVal: unknown,
+  propName: string,
+  nameSet: Set<string>
+) => {
+  return !nameSet.has(propName)
+}) as (
+  <P, K extends keyof P>(props: P, propNames: Set<string>) => Omit<P, K>
 )
 
-export const excludeUndefinedProps = filterProps.bind(
-  undefined,
-  (propVal: any) => propVal !== undefined,
-) as (
+export const excludeUndefinedProps = filterProps.bind(undefined, (
+  propVal: unknown
+) => {
+  return propVal !== undefined
+}) as (
   <P>(props: P) => Partial<P>
 )
 
@@ -192,7 +198,13 @@ export function createGetterDescriptors(
   }), getters)
 }
 
-export function createTemporalNameDescriptors(temporalName: string): PropertyDescriptorMap {
+export function createTemporalNameDescriptors(temporalName: string): {
+  // crazy
+  [Symbol.toStringTag]: {
+    value: string,
+    configurable: true,
+  },
+} {
   return {
     [Symbol.toStringTag]: {
       value: 'Temporal.' + temporalName,
