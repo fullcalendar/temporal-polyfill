@@ -15,7 +15,6 @@ import {
   roundHalfEven,
   roundHalfFloor,
   roundHalfTrunc,
-  Reused,
 } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -71,7 +70,7 @@ export function refineDiffOptions(
 Always related to time
 */
 export function refineRoundOptions(
-  options: Options | undefined | Reused,
+  options: Options | undefined,
   maxUnit: DayTimeUnit = Unit.Day,
 ) {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
@@ -84,7 +83,7 @@ export function refineRoundOptions(
 }
 
 export function refineDurationRoundOptions(
-  options: Options | undefined | Reused,
+  options: Options | undefined,
   defaultLargestUnit: Unit
 ) {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
@@ -98,7 +97,7 @@ export function refineDurationRoundOptions(
 }
 
 export function refineTotalOptions(
-  options: Options | undefined | Reused
+  options: Options | undefined
 ) {
   options = normalizeUnitNameOptions(options, totalUnitStr)
   return [
@@ -112,7 +111,7 @@ export function refineRelativeToOptions(options: Options | undefined) {
 }
 
 export function refineInstantDisplayOptions(
-  options: Options | undefined | Reused
+  options: Options | undefined
 ) {
   options = normalizeOptions(options)
   return [
@@ -299,7 +298,7 @@ function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
 const roundingIncName = 'roundingIncrement'
 
 function refineRoundingInc(options: Options, smallestUnit: DayTimeUnit) {
-  let roundingInc = options[roundingIncName] as Reused
+  let roundingInc = options[roundingIncName] as number
   if (roundingInc === undefined) {
     return 1
   }
@@ -399,10 +398,11 @@ function refineChoiceOption(
   options: Options,
   defaultChoice = 0,
 ) {
-  const enumName = options[optionName] as Reused
+  const enumName = options[optionName] as string
   if (enumName === undefined) {
     return defaultChoice
   }
+
   const enumNum = enumNameMap[enumName]
   if (enumNum < 0) {
     throw new RangeError('Must be one of the choices')

@@ -1,7 +1,5 @@
 import { Overflow } from './options'
 
-export type Reused = any
-
 const objectlikeRE = /object|function/
 
 export function isObjectlike(arg: unknown): boolean {
