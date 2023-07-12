@@ -29,6 +29,8 @@ export const unitNameMap = {
   year: Unit.Year,
 }
 
+export type UnitName = keyof typeof unitNameMap
+
 type TimeUnit =
   Unit.Nanosecond |
   Unit.Microsecond |
@@ -114,7 +116,7 @@ export function nanoToGivenFields<F>(
   for (; unitIndex >= Unit.Nanosecond; unitIndex--) {
     const divisor = unitNanoMap[unitIndex]
 
-    fields[fieldNames[unitIndex]] = Math.trunc(nano / divisor) as any
+    fields[fieldNames[unitIndex]] = Math.trunc(nano / divisor)
     nano %= divisor
   }
 

@@ -34,7 +34,7 @@ interface DurationTimeFields {
   hours: number
 }
 
-type DurationFields = DurationDateFields & DurationTimeFields
+export type DurationFields = DurationDateFields & DurationTimeFields
 
 interface DurationInternals extends DurationFields {
   sign: NumSign
@@ -71,6 +71,7 @@ const durationInternalNames = [...durationFieldNames, 'sign'] as
 // -------------------------------------------------------------------------------------------------
 
 export const durationFieldDefaults = mapPropNamesToConstant(durationFieldNames, 0)
+
 export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFieldNames, 0)
 
 // Refiners
@@ -81,7 +82,7 @@ export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNames, 
 // Getters
 // -------------------------------------------------------------------------------------------------
 
-export const durationGetters = mapPropNames<DurationGetters>((propName) => {
+export const durationGetters = mapPropNames((propName: keyof DurationInternals) => {
   return (internals: DurationInternals) => {
     return internals[propName]
   }
@@ -98,11 +99,11 @@ export function refineDurationFields(
   )
 }
 
-export const durationTimeFieldsToIso: (
-  fields: DurationTimeFields
-) => (
-  IsoTimeFields
-) = (remapProps as any).bind(undefined, durationTimeFieldNames, isoTimeFieldNames)
+export const durationTimeFieldsToIso = remapProps.bind<
+  any, [any, any], // bound
+  [DurationTimeFields], // unbound
+  IsoTimeFields // return
+>(undefined, durationTimeFieldNames, isoTimeFieldNames)
 
 export function durationTimeFieldsToIsoStrict(fields: DurationFields): IsoTimeFields {
   if (durationHasDateParts(fields)) {

@@ -169,13 +169,16 @@ export const allYearFieldNames = [...eraYearFieldNames, 'year'] as
 export const dateFieldNames = Object.keys(dateFieldRefiners) as
   (keyof DateFields)[]
 
-export const yearMonthFieldNames = Object.keys(yearMonthFieldRefiners) as // month/monthCode/year
+// month/monthCode/year
+export const yearMonthFieldNames = Object.keys(yearMonthFieldRefiners) as
   (keyof YearMonthFields)[]
 
-export const monthDayFieldNames = dateFieldNames.slice(0, 3) as // day/month/monthCode
+// day/month/monthCode
+export const monthDayFieldNames = dateFieldNames.slice(0, 3) as
   (keyof MonthDayFields)[]
 
-export const monthFieldNames = monthDayFieldNames.slice(1) as // month/monthCode
+// month/monthCode
+export const monthFieldNames = monthDayFieldNames.slice(1) as
   (keyof MonthDayFields)[]
 
 export const dateTimeFieldNames = Object.keys(dateTimeFieldRefiners).sort() as
@@ -187,7 +190,8 @@ export const timeFieldNames = Object.keys(timeFieldRefiners) as
 export const dateBasicNames = ['day', 'month', 'year'] as
   (keyof DateBasics)[]
 
-export const yearMonthBasicNames = yearMonthFieldNames.slice(1) as // monthCode/year
+// monthCode/year
+export const yearMonthBasicNames = yearMonthFieldNames.slice(1) as
   (keyof YearMonthBasics)[]
 
 export const monthDayBasicNames = ['day', 'monthCode'] as
@@ -196,57 +200,59 @@ export const monthDayBasicNames = ['day', 'monthCode'] as
 export const yearStatNames = Object.keys(yearStatRefiners) as
   (keyof YearStats)[]
 
-export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) as // unordered
+// unordered
+export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) as
   (keyof YearMonthStats)[]
 
-export const dateStatNames = Object.keys(dateStatRefiners) as // unordered
+// unordered
+export const dateStatNames = Object.keys(dateStatRefiners) as
   (keyof DateStats)[]
 
-export const dateGetterNames = [ // unordered
+// unordered
+export const dateGetterNames = [
   ...eraYearFieldNames,
   ...dateFieldNames,
   ...dateStatNames,
 ]
 
-export const yearMonthGetterNames = [ // unordered
+// unordered
+export const yearMonthGetterNames = [
   ...eraYearFieldNames,
   ...yearMonthFieldNames,
   ...yearMonthStatNames,
 ]
 
-export const monthDayGetterNames = monthDayFieldNames // unordered
+// unordered
+export const monthDayGetterNames = monthDayFieldNames
 
 // Getters
 // -------------------------------------------------------------------------------------------------
 
-function createCalendarGetter<K extends keyof DateGetters>(
-  propName: K,
-) {
+function createCalendarGetter<K extends keyof DateGetters>(propName: K) {
   return (internals: IsoDateInternals) => {
     return internals.calendar[propName](internals) as ReturnType<DateGetters[K]>
   }
 }
 
+type CalendarGetters<K extends keyof DateGetters> = Pick<DateGetters, K> & CalendarIdGetters
+
 function createCalendarGetters<K extends keyof DateGetters>(
   propNames: K[],
-) {
-  const getters = mapPropNames<Pick<DateGetters, K>>(
-    createCalendarGetter as ((propName: K) => any),
-    propNames,
-  ) as Pick<DateGetters, K> & CalendarIdGetters
+): CalendarGetters<K> {
+  const getters = mapPropNames(createCalendarGetter, propNames)
 
-  getters.calendarId = (internals: { calendar: CalendarOps }) => {
+  ;(getters as any).calendarId = (internals: { calendar: CalendarOps }) => {
     return internals.calendar.id
   }
 
-  return getters
+  return getters as unknown as CalendarGetters<K>
 }
 
 export const dateGetters = createCalendarGetters(dateGetterNames)
 export const yearMonthGetters = createCalendarGetters(yearMonthGetterNames)
 export const monthDayGetters = createCalendarGetters(monthDayGetterNames)
 
-export const timeGetters = mapPropNames<TimeGetters>((fieldName, i) => {
+export const timeGetters = mapPropNames((fieldName, i) => {
   return (isoTimeFields: IsoTimeFields) => {
     return isoTimeFields[isoTimeFieldNames[i]]
   }
@@ -260,8 +266,11 @@ export const dateTimeGetters = {
 // Conversion
 // -------------------------------------------------------------------------------------------------
 
-export const timeFieldsToIso: (fields: TimeFields) => IsoTimeFields =
-  (remapProps as any).bind(undefined, timeFieldNames, isoTimeFieldNames)
+export const timeFieldsToIso = remapProps.bind<
+  any, [any, any], // bound
+  [IsoTimeFields], // unbound
+  IsoTimeFields // return
+>(undefined, timeFieldNames, isoTimeFieldNames)
 
 // Defaults
 // -------------------------------------------------------------------------------------------------

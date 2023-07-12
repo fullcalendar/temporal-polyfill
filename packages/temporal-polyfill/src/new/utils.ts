@@ -1,15 +1,19 @@
+import { Overflow } from './options'
+
+export type Reused = any
+
 const objectlikeRE = /object|function/
 
 export function isObjectlike(arg: unknown): boolean {
   return arg !== null && objectlikeRE.test(typeof arg)
 }
 
-export function mapProps<P, V, E = undefined>(
-  transformer: (propVal: P[keyof P], propName: keyof P, extraArg?: E) => V,
+export function mapProps<P, R, E = undefined>(
+  transformer: (propVal: P[keyof P], propName: keyof P, extraArg?: E) => R,
   props: P,
-  extraArg?: E,
-): { [K in keyof P]: V } {
-  const res = {} as { [K in keyof P]: V }
+  extraArg?: E
+): { [K in keyof P]: R } {
+  const res = {} as { [K in keyof P]: R }
 
   for (const propName in props) {
     res[propName] = transformer(props[propName], propName, extraArg)
@@ -22,25 +26,19 @@ export type PropsRefinerMap<P, V> = {
   [K in keyof P]: (propVal: P[K], propName: K) => V
 }
 
-export const mapPropsWithRefiners: <P, V>(
-  props: P,
-  refinerMap: PropsRefinerMap<P, V>
-) => {
-  [K in keyof P]: V
-} = (mapProps as any).bind(undefined, <P, V>(
-  propVal: P[keyof P],
-  propName: keyof P,
-  refinerMap: PropsRefinerMap<P, V>,
-) => {
-  return refinerMap[propName](propVal, propName)
-})
+export const mapPropsWithRefiners = mapProps.bind(
+  undefined,
+  (propVal: any, propName: string, refinerMap: any) => refinerMap[propName](propVal, propName),
+) as (
+  <P, V>(props: P, refinerMap: PropsRefinerMap<P, V>) => { [K in keyof P]: V }
+)
 
-export function mapPropNames<P, E = never>(
-  generator: (propName: keyof P, i: number, extraArg?: E) => P[keyof P],
+export function mapPropNames<P, R, E = undefined>(
+  generator: (propName: keyof P, i: number, extraArg?: E) => R,
   propNames: (keyof P)[],
-  extraArg?: E,
-): P {
-  const props = {} as P
+  extraArg?: E
+): { [K in keyof P]: R } {
+  const props = {} as { [K in keyof P]: R }
 
   for (let i = 0; i < propNames.length; i++) {
     const propName = propNames[i]
@@ -50,46 +48,36 @@ export function mapPropNames<P, E = never>(
   return props
 }
 
-// TODO: used?
-export const mapPropNamesToIndex: <P>(
-  propNames: (keyof P)[],
-) => {
-  [K in keyof P]: number
-} = (mapProps as any).bind(undefined, <P>(
-  propName: keyof P,
-  i: number,
-) => i)
+export const mapPropNamesToIndex = mapPropNames.bind(
+  undefined,
+  (propVal: any, i: number) => i,
+) as (
+  <P>(propNames: (keyof P)[]) => { [K in keyof P]: number }
+)
 
-export const mapPropNamesToConstant: <P, V>(
-  propNames: (keyof P)[],
-  val: V
-) => {
-  [K in keyof P]: V
-} = (mapProps as any).bind(undefined, <P, V>(
-  propName: keyof P,
-  i: number,
-  val: V,
-) => val)
+export const mapPropNamesToConstant = mapPropNames.bind(
+  undefined,
+  (propVal: any, i: number, extra: any) => extra,
+) as (
+  <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
+)
 
-export function remapProps<OldProps, NewProps>(
-  oldPropNames: (keyof OldProps)[],
-  newPropNames: (keyof NewProps)[],
-  oldProps: OldProps,
-): NewProps {
-  const newProps = {} as NewProps
+export function remapProps<O, N>(
+  oldNames: (keyof O)[],
+  newNames: (keyof N)[],
+  oldProps: O
+): N {
+  const newProps = {} as N
 
-  for (let i = 0; i < oldPropNames.length; i++) {
-    newProps[newPropNames[i]] = oldProps[oldPropNames[i]] as any
+  for (let i = 0; i < oldNames.length; i++) {
+    newProps[newNames[i]] = oldProps[oldNames[i]] as any
   }
 
   return newProps
 }
 
-export function pluckProps<Props, PropName extends keyof Props>(
-  propNames: PropName[],
-  props: Props,
-): Pick<Props, PropName> {
-  const res = {} as Pick<Props, PropName>
+export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
+  const res = {} as P
 
   for (const propName of propNames) {
     res[propName] = props[propName]
@@ -98,25 +86,21 @@ export function pluckProps<Props, PropName extends keyof Props>(
   return res
 }
 
-export function excludeArrayDuplicates<Item>(a: Item[]): Item[] {
+export function excludeArrayDuplicates<V>(a: V[]): V[] {
   return [...new Set(a)]
 }
 
-function filterProps<Props, ExtraArg>(
-  filterFunc: (
-    propVal: Props[keyof Props],
-    propName: keyof Props,
-    extraArg: ExtraArg
-  ) => boolean,
-  props: Props,
-  extraArg?: ExtraArg,
-) {
-  const filteredProps = {} as Props
+function filterProps<P, E = undefined>(
+  filterFunc: (propVal: P[keyof P], propName: keyof P, extraArg: E) => boolean,
+  props: P,
+  extraArg?: any,
+): Partial<P> {
+  const filteredProps = {} as Partial<P>
 
   for (const propName in props) {
     const propVal = props[propName]
 
-    if (filterFunc(propVal, propName, extraArg as ExtraArg)) {
+    if (filterFunc(propVal, propName, extraArg)) {
       filteredProps[propName] = propVal
     }
   }
@@ -126,20 +110,21 @@ function filterProps<Props, ExtraArg>(
 
 export const excludePropsByName = filterProps.bind(
   undefined,
-  (propVal, propName, nameSet: any) => !nameSet.has(propName),
-) as <Props, PropName extends keyof Props>(
-  props: Props,
-  propNames: Set<PropName>,
-) => Omit<Props, PropName>
+  (propVal: any, propName: string, nameSet: any) => !nameSet.has(propName)
+) as (
+  <P, K extends keyof P>(props: P, propNames: K[]) => Pick<P, K>
+)
 
 export const excludeUndefinedProps = filterProps.bind(
   undefined,
-  (propVal) => propVal !== undefined,
-) as <Props>(props: Props) => Partial<Props>
+  (propVal: any) => propVal !== undefined,
+) as (
+  <P>(props: P) => Partial<P>
+)
 
-export function hasAnyPropsByName<Props>(
-  props: Props,
-  names: (keyof Props)[],
+export function hasAnyPropsByName<P>(
+  props: P,
+  names: (keyof P)[]
 ): boolean {
   for (const name of names) {
     if (props[name] !== undefined) {
@@ -149,9 +134,9 @@ export function hasAnyPropsByName<Props>(
   return false
 }
 
-export function hasAllPropsByName<Props>(
-  props: Props,
-  names: (keyof Props)[],
+export function hasAllPropsByName<P>(
+  props: P,
+  names: (keyof P)[]
 ): boolean {
   for (const name of names) {
     if (props[name] === undefined) {
@@ -253,35 +238,39 @@ export function compareProps<Props extends Record<PropertyKey, number>>(
   return 0
 }
 
+/*
+min/max are inclusive
+*/
 export function clamp(
   num: number,
   min: number,
   max: number,
+  overflow?: Overflow.Constrain,
 ): number
 export function clamp(
   num: number,
   min: number,
   max: number,
-  overflowBehavior: 1,
+  overflow: Overflow | Overflow.Reject,
   noun: string,
 ): number
 export function clamp(
   num: number,
   min: number,
   max: number,
-  overflowBehavior: 2,
+  overflow: -1, // for returning undefined
 ): number | undefined
 export function clamp(
   num: number,
-  min: number, // inclusive
-  max: number, // inclusive
-  overflowBehavior: (0 | 1 | 2) = 0, // TODO: better enum - 0/1/2 --- overflow enum
+  min: number,
+  max: number,
+  overflow?: Overflow | -1,
   noun?: string,
 ): number | undefined {
   const clamped = Math.min(Math.max(num, min), max)
 
-  if (overflowBehavior && num !== clamped) {
-    if (overflowBehavior === 2) {
+  if (overflow && num !== clamped) {
+    if (overflow === -1) {
       return undefined
     }
     throw new RangeError(`${noun!} must be between ${min}-${max}`)
