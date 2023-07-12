@@ -10,6 +10,7 @@ import {
   idGettersStrict,
 } from './class'
 import { createDuration } from './duration'
+import { CalendarInternals, CalendarOps } from './isoFields'
 import { ensureArray, ensureObjectlike, ensureString, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
@@ -39,7 +40,9 @@ export function getPublicCalendar(internals) {
     createCalendar(calendar) // CalendarImpl (create outer Calendar)
 }
 
-export const getCommonCalendarOps = getCommonInnerObj.bind(undefined, 'calendar')
+export const getCommonCalendarOps = getCommonInnerObj.bind<
+  any, [any], [CalendarInternals, CalendarInternals], CalendarOps
+>(undefined, 'calendar')
 
 // Adapter
 // -------------------------------------------------------------------------------------------------

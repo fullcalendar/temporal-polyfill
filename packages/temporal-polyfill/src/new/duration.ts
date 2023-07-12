@@ -83,7 +83,7 @@ export const [Duration, createDuration, toDurationInternals] = createTemporalCla
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...durationGetters,
+    ...durationGetters, // TODO: rename to `durationFieldGetters`
 
     blank(internals: DurationInternals): boolean {
       return !internals.sign

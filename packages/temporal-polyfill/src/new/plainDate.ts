@@ -1,11 +1,11 @@
 import { isoCalendarId } from './calendarConfig'
-import { dateGetters } from './calendarFields'
+import { DateFields, dateGetters } from './calendarFields'
 import {
   getCommonCalendarOps,
   getPublicCalendar,
   queryCalendarOps,
 } from './calendarOps'
-import { createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -14,9 +14,10 @@ import {
   refinePlainDateBag,
 } from './convert'
 import { diffDates } from './diff'
-import { createDuration, toDurationInternals } from './duration'
+import { Duration, createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import {
+  IsoDateInternals,
   generatePublicIsoDateFields,
   isoTimeFieldDefaults,
   pluckIsoDateInternals,
@@ -28,20 +29,25 @@ import { refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } fr
 import { createPlainDateTime } from './plainDateTime'
 import { toPlainTimeInternals } from './plainTime'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { dayIndex, yearIndex } from './units'
+import { Unit } from './units'
+import { NumSign } from './utils'
 
-export const [
-  PlainDate,
-  createPlainDate,
-  toPlainDateInternals,
-] = createTemporalClass(
+export type PlainDate = TemporalInstance<IsoDateInternals>
+export type PlainDateBag = PlainDate | Partial<DateFields>
+export type PlainDateArg = PlainDateBag | string
+export const [PlainDate, createPlainDate, toPlainDateInternals] = createTemporalClass(
   'PlainDate',
 
   // Creation
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (isoYear, isoMonth, isoDay, calendar = isoCalendarId) => {
+  (
+    isoYear: number,
+    isoMonth: number,
+    isoDay: number,
+    calendar: any = isoCalendarId
+  ): IsoDateInternals => {
     return refineIsoDateInternals({
       isoYear,
       isoMonth,
@@ -76,18 +82,18 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals, bag, options) {
+    with(internals: IsoDateInternals, bag: PlainDateBag, options): PlainDate {
       return createPlainDate(mergePlainDateBag(this, bag, options))
     },
 
-    withCalendar(internals, calendarArg) {
+    withCalendar(internals: IsoDateInternals, calendarArg): PlainDate {
       return createPlainDate({
         ...internals,
         calendar: queryCalendarOps(calendarArg),
       })
     },
 
-    add(internals, durationArg, options) {
+    add(internals: IsoDateInternals, durationArg, options): PlainDate {
       return internals.calendar.dateAdd(
         internals,
         toDurationInternals(durationArg),
@@ -95,7 +101,7 @@ export const [
       )
     },
 
-    subtract(internals, durationArg, options) {
+    subtract(internals: IsoDateInternals, durationArg, options): PlainDate {
       return internals.calendar.dateAdd(
         internals,
         negateDurationInternals(toDurationInternals(durationArg)),
@@ -103,21 +109,21 @@ export const [
       )
     },
 
-    until(internals, otherArg, options) {
+    until(internals: IsoDateInternals, otherArg, options): Duration {
       return diffPlainDates(internals, toPlainDateInternals(otherArg), options)
     },
 
-    since(internals, otherArg, options) {
+    since(internals: IsoDateInternals, otherArg, options): Duration {
       return diffPlainDates(toPlainDateInternals(otherArg), internals, options, true)
     },
 
-    equals(internals, other) {
+    equals(internals: IsoDateInternals, other): boolean {
       const otherInternals = toPlainDateInternals(other)
       return !compareIsoDateTimeFields(internals, otherInternals) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
-    toString(internals, options) {
+    toString(internals: IsoDateInternals, options): string {
       return formatIsoDateFields(internals) +
         formatCalendar(internals.calendar, refineDateDisplayOptions(options))
     },
@@ -137,11 +143,11 @@ export const [
       })
     },
 
-    toPlainYearMonth() {
+    toPlainYearMonth(): any { // TODO!!!
       return convertToPlainYearMonth(this)
     },
 
-    toPlainMonthDay() {
+    toPlainMonthDay(): any { // TODO!!!
       return convertToPlainMonthDay(this)
     },
 
@@ -154,7 +160,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(arg0, arg1) {
+    compare(arg0: PlainDateArg, arg1: PlainDateArg): NumSign {
       return compareIsoDateTimeFields(
         toPlainDateInternals(arg0),
         toPlainDateInternals(arg1),
@@ -166,13 +172,18 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function diffPlainDates(internals0, internals1, options, roundingModeInvert) {
+function diffPlainDates(
+  internals0: IsoDateInternals,
+  internals1: IsoDateInternals,
+  options,
+  roundingModeInvert?: boolean,
+) {
   return createDuration(
     diffDates(
       getCommonCalendarOps(internals0, internals1),
       internals0,
       internals1,
-      ...refineDiffOptions(roundingModeInvert, options, dayIndex, yearIndex, dayIndex),
+      ...refineDiffOptions(roundingModeInvert, options, Unit.Day, Unit.Year, Unit.Day),
     ),
   )
 }

@@ -41,7 +41,7 @@ export function refineEpochDisambigOptions(options: Options | undefined) {
 }
 
 export function refineDiffOptions(
-  roundingModeInvert: boolean,
+  roundingModeInvert: boolean | undefined,
   options: Options | undefined,
   defaultLargestUnit: Unit,
   maxUnit = Unit.Year,

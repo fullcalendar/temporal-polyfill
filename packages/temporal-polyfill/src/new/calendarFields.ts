@@ -8,25 +8,25 @@ import {
 import { ensureBoolean, ensureInteger, toInteger, toString } from './options'
 import { mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
-interface EraYearFields {
+export interface EraYearFields {
   era: string
   eraYear: number
 }
 
-interface AllYearFields extends EraYearFields {
+export interface AllYearFields extends EraYearFields {
   year: number
 }
 
-interface MonthFields {
+export interface MonthFields {
   monthCode: string
   month: number
 }
 
 type YearMonthFields = { year: number } & MonthFields
-type DateFields = YearMonthFields & { day: number }
+export type DateFields = YearMonthFields & { day: number }
 type MonthDayFields = MonthFields & { day: number }
 
-interface TimeFields {
+export interface TimeFields {
   hour: number
   microsecond: number
   millisecond: number
@@ -37,33 +37,33 @@ interface TimeFields {
 
 type DateTimeFields = DateFields & TimeFields
 
-interface DateBasics {
+export interface DateBasics {
   year: number
   month: number
   day: number
 }
 
-interface YearMonthBasics {
+export interface YearMonthBasics {
   year: number
   month: number
 }
 
-interface MonthDayBasics {
+export interface MonthDayBasics {
   monthCode: string
   day: number
 }
 
-interface YearStats {
+export interface YearStats {
   daysInYear: number
   inLeapYear: boolean
   monthsInYear: number
 }
 
-interface YearMonthStats extends YearStats {
+export interface YearMonthStats extends YearStats {
   daysInMonth: number
 }
 
-interface DateStats extends YearMonthStats {
+export interface DateStats extends YearMonthStats {
   dayOfWeek: number
   dayOfYear: number
   weekOfYear: number

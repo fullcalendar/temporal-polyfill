@@ -23,7 +23,7 @@ type PropertyDescriptorType<D> =
       : never
 
 type WrapperClass<
-  A extends [unknown],
+  A extends any[],
   I,
   G extends { [propName: string]: (internals: I) => unknown },
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
@@ -50,7 +50,7 @@ export const getInternals = internalsMap.get.bind(internalsMap) as
   <T>(inst: T) => T extends WrapperInstance<infer I> ? I : undefined
 
 export function createWrapperClass<
-  A extends [any], // TODO: rename to C
+  A extends any[], // TODO: rename to C... or just single 'wrapped' value?
   I,
   G extends { [propName: string]: (internals: I) => unknown },
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
@@ -59,9 +59,9 @@ export function createWrapperClass<
 >(
   getters: G,
   methods: M,
-  constructorToInternals: (...args: A) => I = identityFunc,
-  extraPrototypeDescriptors: P | {} = {},
-  staticMembers: S | {} = {},
+  constructorToInternals: (...args: A) => I = (identityFunc as any),
+  extraPrototypeDescriptors: P = {} as any,
+  staticMembers: S = {} as any,
   handleInstance: (inst: WrapperInstance<I, G, M, P>) => void = noop,
 ): (
   WrapperClass<A, I, G, M, P, S>
@@ -109,7 +109,7 @@ export function getStrictInternals<T>( // rename: getInternalsStrict?
 // -------------------------------------------------------------------------------------------------
 
 type TemporalClass<
-  A extends [any],
+  A extends any[],
   I,
   O,
   G extends { [propName: string]: (internals: I) => unknown },
@@ -145,7 +145,7 @@ export const getTemporalName = temporaNameMap.get.bind(temporaNameMap) as
   (arg: unknown) => string | undefined
 
 export function createTemporalClass<
-  A extends [any],
+  A extends any[],
   I,
   O,
   G extends { [propName: string]: (internals: I) => unknown },
@@ -153,14 +153,14 @@ export function createTemporalClass<
   S extends {}
 >(
   temporalName: string,
-  constructorToInternals: (...args: A) => I = identityFunc,
-  internalsConversionMap: { [typeName: string]: (otherInternal: unknown) => I },
+  constructorToInternals: (...args: A) => I = (identityFunc as any),
+  internalsConversionMap: { [typeName: string]: (otherInternal: any) => I },
   bagToInternals: (bag: Record<string, unknown>, options?: O) => I,
   stringToInternals: (str: string) => I,
   handleUnusedOptions: (options?: O) => void,
   getters: G,
   methods: M,
-  staticMembers: S | {} = {},
+  staticMembers: S = {} as any,
 ): [
   Class: TemporalClass<A, I, O, G, M, S>,
   createInstance: (internals: I) => TemporalInstance<I, G, M>,
@@ -170,7 +170,7 @@ export function createTemporalClass<
     return String(this)
   }
 
-  ;(staticMembers as FromMethods<O>).from = function(arg: TemporalArg, options: O) {
+  ;(staticMembers as unknown as FromMethods<O>).from = function(arg: TemporalArg, options: O) {
     return createInstance(toInternals(arg, options))
   }
 
@@ -245,13 +245,17 @@ export function createProtocolChecker(protocolMethods: Record<string, () => unkn
   }
 }
 
-export function getCommonInnerObj(
-  propName: string,
-  obj0: Record<string, unknown>,
-  obj1: Record<string, unknown>,
-) {
-  const internal0 = obj0[propName] as { id: string }
-  const internal1 = obj1[propName] as { id: string }
+export function getCommonInnerObj<
+  P,
+  K extends (keyof P & string),
+  R extends (P[K] & { id: string })
+>(
+  propName: K,
+  obj0: P,
+  obj1: P,
+): R {
+  const internal0 = obj0[propName] as R
+  const internal1 = obj1[propName] as R
 
   if (!isObjIdsEqual(internal0, internal1)) {
     throw new TypeError(`${propName} not equal`)
