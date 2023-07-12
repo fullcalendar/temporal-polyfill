@@ -55,7 +55,7 @@ export const mapPropNamesToIndex = mapPropNames.bind(
 
 export const mapPropNamesToConstant = mapPropNames.bind(
   undefined,
-  (propVal: any, i: number, extra: any) => extra,
+  (propVal: any, i: number, constant: any) => constant,
 ) as (
   <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
 )
@@ -110,7 +110,7 @@ export const excludePropsByName = filterProps.bind(
   undefined,
   (propVal: any, propName: string, nameSet: any) => !nameSet.has(propName)
 ) as (
-  <P, K extends keyof P>(props: P, propNames: K[]) => Pick<P, K>
+  <P, K extends keyof P>(props: P, propNames: K[]) => Omit<P, K>
 )
 
 export const excludeUndefinedProps = filterProps.bind(
@@ -144,15 +144,17 @@ export function hasAllPropsByName<P>(
   return true
 }
 
-export function createLazyGenerator<Key, Val, OtherArgs extends any[]>(
-  generator: (key: Key, ...otherArgs: OtherArgs) => Val,
-  MapClass: { new(): Map<Key, Val> } = Map,
-): (key: Key, ...otherArgs: OtherArgs) => Val {
+export function createLazyGenerator<K, V, A extends any[]>(
+  generator: (key: K, ...otherArgs: A) => V,
+  MapClass: { new(): Map<K, V> } = Map,
+): (
+  (key: K, ...otherArgs: A) => V
+) {
   const map = new MapClass()
 
-  return (key: Key, ...otherArgs: OtherArgs) => {
+  return (key: K, ...otherArgs: A) => {
     if (map.has(key)) {
-      return map.get(key)!
+      return map.get(key) as V
     } else {
       const val = generator(key, ...otherArgs)
       map.set(key, val)

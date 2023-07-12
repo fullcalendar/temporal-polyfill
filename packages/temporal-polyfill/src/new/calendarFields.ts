@@ -268,7 +268,7 @@ export const dateTimeGetters = {
 
 export const timeFieldsToIso = remapProps.bind<
   any, [any, any], // bound
-  [IsoTimeFields], // unbound
+  [TimeFields], // unbound
   IsoTimeFields // return
 >(undefined, timeFieldNames, isoTimeFieldNames)
 
