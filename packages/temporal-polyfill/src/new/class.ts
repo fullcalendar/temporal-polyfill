@@ -33,20 +33,21 @@ type WrapperClass<
 
 type WrapperInstance<
   I,
-  G extends { [propName: string]: (internals: I) => unknown },
-  M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
+  G extends { [propName: string]: (internals: I) => unknown } = {},
+  M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown } = {},
   P extends PropertyDescriptorMap = {},
 > = { [K in keyof G]: ReturnType<G[K]> }
   & { [K in keyof M]: (...args: NonInternalArgs<M[K], I>) => ReturnType<M[K]> }
   & { [K in keyof P]: PropertyDescriptorType<P[K]> }
+  & { __internals__: I } // HACK for inference
 
 // Wrapper Class
 // -------------------------------------------------------------------------------------------------
 
-const internalsMap = new WeakMap<WrapperInstance<unknown, {}, {}, {}>, unknown>()
+const internalsMap = new WeakMap<WrapperInstance<unknown>, unknown>()
 
 export const getInternals = internalsMap.get.bind(internalsMap) as
-  <T>(inst: T) => T extends WrapperInstance<infer I, {}, {}, {}> ? I : undefined
+  <T>(inst: T) => T extends WrapperInstance<infer I> ? I : undefined
 
 export function createWrapperClass<
   A extends [any], // TODO: rename to C
@@ -99,7 +100,7 @@ export function getStrictInternals<T>( // rename: getInternalsStrict?
   Class: { new(): T },
   arg: T
 ): (
-  T extends WrapperInstance<infer I, {}, {}, {}> ? I : undefined
+  T extends WrapperInstance<infer I> ? I : undefined
 ) {
   return getInternals(ensureInstanceOf(Class, arg))
 }
@@ -114,7 +115,7 @@ type TemporalClass<
   G extends { [propName: string]: (internals: I) => unknown },
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
   S extends {},
-> = { new(...args: A): WrapperInstance<I, G, M> }
+> = { new(...args: A): TemporalInstance<I, G, M> }
   & S
   & FromMethods<O>
 
@@ -122,23 +123,23 @@ interface ToJsonMethods {
   toJSON: () => string
 }
 
-type TemporalArg = TemporalInstance<unknown, {}, {}> | Record<string, unknown> | string
+type TemporalArg = TemporalInstance<unknown> | Record<string, unknown> | string
 
-interface FromMethods<O> {
+export interface FromMethods<O> {
   from: (arg: TemporalArg, options: O) => void
 }
 
-type TemporalInstance<
+export type TemporalInstance<
   I,
-  G extends { [propName: string]: (internals: I) => unknown },
-  M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
+  G extends { [propName: string]: (internals: I) => unknown } = {},
+  M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown } = {},
 > = WrapperInstance<
   I,
   G,
   M & ToJsonMethods
 > & { [Symbol.toStringTag]: string }
 
-const temporaNameMap = new WeakMap<TemporalInstance<unknown, {}, {}>, string>()
+const temporaNameMap = new WeakMap<TemporalInstance<unknown>, string>()
 
 export const getTemporalName = temporaNameMap.get.bind(temporaNameMap) as
   (arg: unknown) => string | undefined
@@ -149,21 +150,21 @@ export function createTemporalClass<
   O,
   G extends { [propName: string]: (internals: I) => unknown },
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
-  S extends {},
+  S extends {}
 >(
   temporalName: string,
   constructorToInternals: (...args: A) => I = identityFunc,
   internalsConversionMap: { [typeName: string]: (otherInternal: unknown) => I },
-  bagToInternals: (bag: Record<string, unknown>, options: O) => I,
+  bagToInternals: (bag: Record<string, unknown>, options?: O) => I,
   stringToInternals: (str: string) => I,
-  handleUnusedOptions: (options: O) => void,
+  handleUnusedOptions: (options?: O) => void,
   getters: G,
   methods: M,
   staticMembers: S | {} = {},
 ): [
   Class: TemporalClass<A, I, O, G, M, S>,
   createInstance: (internals: I) => TemporalInstance<I, G, M>,
-  toInternals: (arg: TemporalArg, options: O) => I
+  toInternals: (arg: TemporalArg, options?: O) => I
 ] {
   ;(methods as unknown as ToJsonMethods).toJSON = function() {
     return String(this)
@@ -189,7 +190,7 @@ export function createTemporalClass<
     return instance
   }
 
-  function toInternals(arg: TemporalArg, options: O): I {
+  function toInternals(arg: TemporalArg, options?: O): I {
     let argInternals = getInternals(arg)
     let argTemporalName
 

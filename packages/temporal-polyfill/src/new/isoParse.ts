@@ -2,6 +2,7 @@ import { nanoIn, nanoInSecond } from '../dateUtils/units'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarImpl } from './calendarImpl'
 import {
+  DurationInternals,
   durationFieldNamesAsc,
   negateDurationFields,
   updateDurationFieldsSign,
@@ -210,7 +211,8 @@ export function parseOffsetNano(s) {
   return parts && parseOffsetParts(parts.slice(1))
 }
 
-export function parseDuration(s) {
+// TODO: this should be guaranteed result
+export function parseDuration(s: string): DurationInternals {
   const parts = durationRegExp.exec(s)
   return parts && parseDurationParts(parts)
 }

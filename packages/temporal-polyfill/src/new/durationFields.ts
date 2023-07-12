@@ -36,7 +36,7 @@ interface DurationTimeFields {
 
 export type DurationFields = DurationDateFields & DurationTimeFields
 
-interface DurationInternals extends DurationFields {
+export interface DurationInternals extends DurationFields {
   sign: NumSign
 }
 
@@ -93,7 +93,7 @@ export const durationGetters = mapPropNames((propName: keyof DurationInternals) 
 
 export function refineDurationFields(
   rawFields: DurationFields,
-): DurationFields {
+): DurationInternals {
   return updateDurationFieldsSign(
     mapProps(toIntegerStrict, rawFields),
   )

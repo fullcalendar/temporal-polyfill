@@ -3,7 +3,7 @@ import { Calendar } from './calendar'
 import { queryCalendarOps } from './calendarOps'
 import { createTemporalClass, getObjId, idGetters } from './class'
 import { refineComplexBag } from './convert'
-import { createInstant, toInstantEpochNanoseconds } from './instant'
+import { createInstant, toInstantEpochNano } from './instant'
 import { formatOffsetNano } from './isoFormat'
 import { parseTimeZoneId } from './isoParse'
 import { refineEpochDisambigOptions } from './options'
@@ -57,7 +57,7 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
     },
 
     getPlainDateTimeFor(impl, instantArg, calendarArg) {
-      const epochNanoseconds = toInstantEpochNanoseconds(instantArg)
+      const epochNanoseconds = toInstantEpochNano(instantArg)
 
       return createPlainDateTime({
         calendar: queryCalendarOps(calendarArg),
@@ -82,10 +82,10 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
 )
 
 function getImplOffsetNanosecondsFor(impl, instantArg) {
-  return impl.getOffsetNanosecondsFor(toInstantEpochNanoseconds(instantArg))
+  return impl.getOffsetNanosecondsFor(toInstantEpochNano(instantArg))
 }
 
 function getImplTransition(direction, impl, instantArg) {
-  const epochNano = impl.getTransition(toInstantEpochNanoseconds(instantArg), direction)
+  const epochNano = impl.getTransition(toInstantEpochNano(instantArg), direction)
   return epochNano ? createInstant(epochNano) : null
 }

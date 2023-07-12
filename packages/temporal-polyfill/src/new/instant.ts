@@ -1,8 +1,8 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
-import { createTemporalClass, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
-import { createDuration, toDurationInternals } from './duration'
+import { Duration, createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
 import {
@@ -14,7 +14,7 @@ import {
   checkEpochNano,
 } from './isoMath'
 import { parseInstant } from './isoParse'
-import { compareLargeInts } from './largeInt'
+import { LargeInt, compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
 import {
   ensureObjectlike,
@@ -25,14 +25,15 @@ import {
 } from './options'
 import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
-import { hourIndex, secondsIndex } from './units'
 import { noop } from './utils'
 import { createZonedDateTime } from './zonedDateTime'
+import { Unit } from './units'
 
+export type Instant = TemporalInstance<LargeInt>
 export const [
   Instant,
   createInstant,
-  toInstantEpochNanoseconds,
+  toInstantEpochNano,
 ] = createTemporalClass(
   'Instant',
 
@@ -40,8 +41,8 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (epochNanoseconds) => {
-    return checkEpochNano(toEpochNano(epochNanoseconds))
+  (epochNano: LargeInt) => {
+    return checkEpochNano(toEpochNano(epochNano))
   },
 
   // internalsConversionMap
@@ -67,7 +68,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    toZonedDateTimeISO(epochNanoseconds, timeZoneArg) {
+    toZonedDateTimeISO(epochNanoseconds, timeZoneArg): any { // TODO!!!
       createZonedDateTime({
         epochNanoseconds,
         timeZone: queryTimeZoneOps(timeZoneArg),
@@ -75,7 +76,7 @@ export const [
       })
     },
 
-    toZonedDateTime(epochNanoseconds, options) {
+    toZonedDateTime(epochNanoseconds, options): any { // TODO!!!
       const refinedObj = ensureObjectlike(options)
 
       return createZonedDateTime({
@@ -85,7 +86,7 @@ export const [
       })
     },
 
-    add(epochNanoseconds, durationArg) {
+    add(epochNanoseconds, durationArg): Instant {
       return createInstant(
         moveEpochNano(
           epochNanoseconds,
@@ -94,7 +95,7 @@ export const [
       )
     },
 
-    subtract(epochNanoseconds, durationArg) {
+    subtract(epochNanoseconds, durationArg): Instant {
       return createInstant(
         moveEpochNano(
           epochNanoseconds,
@@ -103,30 +104,30 @@ export const [
       )
     },
 
-    until(epochNanoseconds, otherArg, options) {
-      return diffInstants(epochNanoseconds, toInstantEpochNanoseconds(otherArg), options)
+    until(epochNanoseconds, otherArg, options): Duration {
+      return diffInstants(epochNanoseconds, toInstantEpochNano(otherArg), options)
     },
 
-    since(epochNanoseconds, otherArg, options) {
-      return diffInstants(toInstantEpochNanoseconds(otherArg), epochNanoseconds, options, true)
+    since(epochNanoseconds, otherArg, options): Duration {
+      return diffInstants(toInstantEpochNano(otherArg), epochNanoseconds, options, true)
     },
 
-    round(epochNano, options) {
-      const [smallestUnitI, roundingInc, roundingModeI] = refineRoundOptions(options, hourIndex)
+    round(epochNano, options): Instant {
+      const [smallestUnitI, roundingInc, roundingModeI] = refineRoundOptions(options, Unit.Hour)
 
       return createInstant(
         roundByIncLarge(epochNano, computeNanoInc(smallestUnitI, roundingInc), roundingModeI),
       )
     },
 
-    equals(epochNanoseconds, otherArg) {
+    equals(epochNanoseconds, otherArg): boolean {
       return !compareLargeInts(
         epochNanoseconds,
-        toInstantEpochNanoseconds(otherArg),
+        toInstantEpochNano(otherArg),
       )
     },
 
-    toString(epochNano, options) {
+    toString(epochNano: LargeInt, options): string {
       const [
         timeZoneArg,
         nanoInc,
@@ -143,7 +144,8 @@ export const [
         formatOffsetNano(offsetNano)
     },
 
-    toLocaleString(epochNanoseconds, locales, options) {
+    toLocaleString(epochNano: LargeInt, locales: string | string[], options): string {
+      // TODO
       return ''
     },
 
@@ -158,17 +160,22 @@ export const [
 
     fromEpochMilliseconds: epochMilliToInstant,
 
-    fromEpochMicroseconds(epochMicro) {
+    fromEpochMicroseconds(epochMicro: LargeInt) {
       return epochMicroToInstant(toEpochNano(epochMicro))
     },
 
-    fromEpochNanoseconds(epochNanoseconds) {
-      return createInstant(toEpochNano(epochNanoseconds))
+    fromEpochNanoseconds(epochNano: LargeInt) {
+      return createInstant(toEpochNano(epochNano))
     },
   },
 )
 
-function diffInstants(epochNano0, epochNano1, options, roundingModeInvert) {
+function diffInstants(
+  epochNano0: LargeInt,
+  epochNano1: LargeInt,
+  options,
+  roundingModeInvert?: boolean
+): Duration {
   return createDuration(
     diffEpochNano(
       epochNano0,
@@ -181,21 +188,21 @@ function diffInstants(epochNano0, epochNano1, options, roundingModeInvert) {
 // Unit Conversion
 // -------------------------------------------------------------------------------------------------
 
-function epochSecToInstant(epochSec) {
+function epochSecToInstant(epochSec: number): Instant {
   return createInstant(epochSecToNano(epochSec))
 }
 
-function epochMilliToInstant(epochMilli) {
+function epochMilliToInstant(epochMilli: number): Instant {
   return createInstant(epochMilliToNano(epochMilli))
 }
 
-function epochMicroToInstant(epochMicro) {
+function epochMicroToInstant(epochMicro: LargeInt): Instant {
   return createInstant(epochMicroToNano(epochMicro))
 }
 
 // Legacy Date
 // -------------------------------------------------------------------------------------------------
 
-export function toTemporalInstant() {
+export function toTemporalInstant(this: Date) {
   return epochMilliToInstant(this.valueOf())
 }

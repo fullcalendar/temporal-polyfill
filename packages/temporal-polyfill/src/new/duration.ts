@@ -1,4 +1,4 @@
-import { createTemporalClass, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { mergeDurationBag, refineDurationBag } from './convert'
 import { diffZonedEpochNano } from './diff'
 import {
@@ -8,6 +8,8 @@ import {
   durationGetters,
   negateDurationInternals,
   refineDurationFields,
+  DurationInternals,
+  DurationFields
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { isoToEpochNano } from './isoMath'
@@ -27,14 +29,12 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { dayIndex } from './units'
 import { identityFunc, noop } from './utils'
+import { Unit } from './units'
 
-export const [
-  Duration,
-  createDuration,
-  toDurationInternals,
-] = createTemporalClass(
+export type Duration = TemporalInstance<DurationInternals>
+export type DurationArg = Duration | Partial<DurationFields> | string
+export const [Duration, createDuration, toDurationInternals] = createTemporalClass(
   'Duration',
 
   // Creation
@@ -42,16 +42,16 @@ export const [
 
   // constructorToInternals
   (
-    years = 0,
-    months = 0,
-    weeks = 0,
-    days = 0,
-    hours = 0,
-    minutes = 0,
-    seconds = 0,
-    milliseconds = 0,
-    microseconds = 0,
-    nanoseconds = 0,
+    years: number = 0,
+    months: number = 0,
+    weeks: number = 0,
+    days: number = 0,
+    hours: number = 0,
+    minutes: number = 0,
+    seconds: number = 0,
+    milliseconds: number = 0,
+    microseconds: number = 0,
+    nanoseconds: number = 0,
   ) => {
     return refineDurationFields({
       years,
@@ -85,7 +85,7 @@ export const [
   {
     ...durationGetters,
 
-    blank(internals) {
+    blank(internals: DurationInternals): boolean {
       return !internals.sign
     },
   },
@@ -94,35 +94,35 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with: mergeDurationBag,
+    with: mergeDurationBag, // TODO: wrong type!!!
 
     add: addToDuration.bind(undefined, 1),
 
     subtract: addToDuration.bind(undefined, -1),
 
-    negated(internals) {
+    negated(internals: DurationInternals): Duration {
       return createDuration(negateDurationInternals(internals))
     },
 
-    abs(internals) {
+    abs(internals: DurationInternals): Duration {
       return createDuration(absDurationInternals(internals))
     },
 
-    round(internals, options) {
+    round(internals: DurationInternals, options): Duration {
       const [
-        largestUnitIndex,
-        smallestUnitIndex,
-        roundingIncrement,
+        largestUnit,
+        smallestUnit,
+        roundingInc,
         roundingMode,
         markerInternals,
       ] = refineDurationRoundOptions(options, getLargestDurationUnit(internals))
 
       // TODO: move to round.js?
 
-      if (largestUnitIndex < dayIndex || (largestUnitIndex === dayIndex && !markerInternals)) {
+      if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
         // TODO: check internals doesn't have large fields
         return createDuration(
-          roundDayTimeDuration(internals, smallestUnitIndex, roundingIncrement, roundingMode),
+          roundDayTimeDuration(internals, smallestUnit, roundingInc, roundingMode),
         )
       }
 
@@ -130,25 +130,25 @@ export const [
         throw new RangeError('need relativeTo')
       }
 
-      const markerSystem = createMarkerSystem(markerInternals, internals, largestUnitIndex)
+      const markerSystem = createMarkerSystem(markerInternals, internals, largestUnit)
 
       return createDuration(
         roundRelativeDuration(
-          ...spanDuration(internals, largestUnitIndex, ...markerSystem),
-          largestUnitIndex,
-          smallestUnitIndex,
-          roundingIncrement,
+          ...spanDuration(internals, largestUnit, ...markerSystem),
+          largestUnit,
+          smallestUnit,
+          roundingInc,
           roundingMode,
           ...markerSystem,
         ),
       )
     },
 
-    total(internals, options) {
+    total(internals: DurationInternals, options): number {
       const [totalUnitIndex, markerInternals] = refineTotalOptions(options)
-      const largestUnitIndex = getLargestDurationUnit(internals)
+      const largestUnit = getLargestDurationUnit(internals)
 
-      if (largestUnitIndex < dayIndex || (largestUnitIndex === dayIndex && !markerInternals)) {
+      if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
         return totalDayTimeDuration(internals, totalUnitIndex)
       }
 
@@ -156,16 +156,16 @@ export const [
         throw new RangeError('need relativeTo')
       }
 
-      const markerSystem = createMarkerSystem(markerInternals, internals, largestUnitIndex)
+      const markerSystem = createMarkerSystem(markerInternals, internals, largestUnit)
 
       return totalRelativeDuration(
-        ...spanDuration(internals, largestUnitIndex, ...markerSystem),
+        ...spanDuration(internals, largestUnit, ...markerSystem),
         totalUnitIndex,
         ...markerSystem,
       )
     },
 
-    toString(internals, options) {
+    toString(internals: DurationInternals, options): string {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatDurationInternals(
@@ -181,16 +181,16 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(durationArg0, durationArg1, options) {
+    compare(durationArg0: DurationArg, durationArg1: DurationArg, options) {
       const durationFields0 = toDurationInternals(durationArg0)
       const durationFields1 = toDurationInternals(durationArg1)
       const markerInternals = refineRelativeToOptions(options)
-      const largestUnitIndex = Math.max(
+      const largestUnit = Math.max(
         getLargestDurationUnit(durationFields0),
         getLargestDurationUnit(durationFields1),
       )
 
-      if (largestUnitIndex < dayIndex || (largestUnitIndex === dayIndex && !markerInternals)) {
+      if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
         return compareLargeInts(
           durationFieldsToNano(durationFields0),
           durationFieldsToNano(durationFields1),
@@ -214,22 +214,27 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function addToDuration(direction, internals, otherArg, options) {
+function addToDuration(
+  direction: -1 | 1,
+  internals: DurationInternals,
+  otherArg: DurationArg,
+  options: any, // !!!
+): Duration {
   const otherFields = toDurationInternals(otherArg)
   const markerInternals = refineRelativeToOptions(options) // optional
-  const largestUnitIndex = Math.max(
+  const largestUnit = Math.max(
     getLargestDurationUnit(internals),
     getLargestDurationUnit(otherFields),
-  )
+  ) as Unit
 
   const addedDurationFields = addDurationFields(internals, otherFields, direction)
 
-  if (largestUnitIndex < dayIndex || (largestUnitIndex === dayIndex && !markerInternals)) {
+  if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
     return balanceDurationDayTime(addedDurationFields)
   }
 
-  const markerSystem = createMarkerSystem(markerInternals, internals, largestUnitIndex)
-  return spanDuration(internals, largestUnitIndex, ...markerSystem)[0]
+  const markerSystem = createMarkerSystem(markerInternals, internals, largestUnit)
+  return spanDuration(internals, largestUnit, ...markerSystem)[0]
 }
 
 function createMarkerSystem(markerInternals) {
@@ -253,8 +258,8 @@ function createMarkerSystem(markerInternals) {
 }
 
 function spanDuration(
-  durationFields,
-  largestUnitIndex,
+  durationFields: DurationFields,
+  largestUnit: Unit, // TODO: more descrimination?
   // marker system...
   marker,
   markerToEpochNano,
@@ -262,17 +267,18 @@ function spanDuration(
   diffMarkers,
 ) {
   const endMarker = markerToEpochNano(moveMarker(marker, durationFields))
-  const balancedDuration = diffMarkers(marker, endMarker, largestUnitIndex)
+  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, endMarker]
 }
 
 function balanceDurationDayTime(
   durationFields,
-  largestUnitIndex, // day/time
+  largestUnit, // day/time
 ) {
+  // TODO
 }
 
-function getLargestDurationUnit(durationFields) {
+function getLargestDurationUnit(fields: DurationFields): Unit {
   // TODO: rename to getLargestDurationUnitIndex
   // TODO: move to DurationFields math
 }
