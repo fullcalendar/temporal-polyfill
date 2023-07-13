@@ -27,8 +27,10 @@ import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoDateTimeFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainDate } from './isoParse'
 import { refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
-import { createPlainDateTime } from './plainDateTime'
+import { PlainDateTime, createPlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeFields } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
 import { NumSign } from './utils'
@@ -38,7 +40,11 @@ export type PlainDateBag = DateFields & { calendar?: CalendarArg }
 export type PlainDateMod = Partial<DateFields>
 
 export type PlainDate = TemporalInstance<IsoDateInternals>
-export const [PlainDate, createPlainDate, toPlainDateInternals] = createTemporalClass(
+export const [
+  PlainDate,
+  createPlainDate,
+  toPlainDateInternals
+] = createTemporalClass(
   'PlainDate',
 
   // Creation
@@ -139,7 +145,7 @@ export const [PlainDate, createPlainDate, toPlainDateInternals] = createTemporal
       return optionalToPlainTimeFields(options.time)
     }),
 
-    toPlainDateTime(internals, timeArg) {
+    toPlainDateTime(internals, timeArg): PlainDateTime {
       return createPlainDateTime({
         ...internals,
         ...optionalToPlainTimeFields(timeArg),
@@ -180,7 +186,7 @@ function diffPlainDates(
   internals1: IsoDateInternals,
   options,
   roundingModeInvert?: boolean,
-) {
+): Duration {
   return createDuration(
     diffDates(
       getCommonCalendarOps(internals0, internals1),

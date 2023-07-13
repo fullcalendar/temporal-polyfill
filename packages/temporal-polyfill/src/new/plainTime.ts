@@ -31,7 +31,11 @@ export type PlainTimeBag = Partial<TimeFields>
 export type PlainTimeMod = Partial<TimeFields>
 
 export type PlainTime = TemporalInstance<IsoTimeFields>
-export const [PlainTime, createPlainTime, toPlainTimeFields] = createTemporalClass(
+export const [
+  PlainTime,
+  createPlainTime,
+  toPlainTimeFields
+] = createTemporalClass(
   'PlainTime',
 
   // Creation
@@ -113,7 +117,7 @@ export const [PlainTime, createPlainTime, toPlainTimeFields] = createTemporalCla
       return !compareIsoTimeFields(fields, otherInternals)
     },
 
-    toString(fields: IsoTimeFields, options) {
+    toString(fields: IsoTimeFields, options): string {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(

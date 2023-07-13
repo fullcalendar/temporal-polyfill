@@ -42,7 +42,7 @@ import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
-import { ZonedDateTimeBag, ZonedInternals, createZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 
 /*
 Rules:
@@ -117,7 +117,7 @@ export function mergeZonedDateTimeBag(zonedDateTime, bag, options) {
 }
 
 export function createZonedDateTimeConverter(getExtraIsoFields) {
-  return (internals, options) => {
+  return (internals, options): ZonedDateTime => {
     const { calendar, timeZone } = internals
     const epochNanoseconds = getSingleInstantFor(timeZone, {
       ...internals,

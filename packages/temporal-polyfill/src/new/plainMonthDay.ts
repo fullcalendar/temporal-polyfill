@@ -1,22 +1,28 @@
 import { isoCalendarId } from './calendarConfig'
-import { monthDayGetters } from './calendarFields'
+import { YearMonthFields, monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
-import { createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
 } from './convert'
-import { generatePublicIsoDateFields } from './isoFields'
+import { IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'
 import { parsePlainMonthDay } from './isoParse'
 import { refineOverflowOptions } from './options'
+import { PlainDate } from './plainDate'
 
+export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag | string
+export type PlainMonthDayBag = YearMonthFields & { calendar?: CalendarArg }
+export type PlainMonthDayMod = Partial<YearMonthFields>
+
+export type PlainMonthDay = TemporalInstance<IsoDateInternals>
 export const [
   PlainMonthDay,
   createPlainMonthDay,
-  toPlainMonthDayInternals,
+  toPlainMonthDayInternals
 ] = createTemporalClass(
   'PlainMonthDay',
 
@@ -24,7 +30,12 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (isoMonth, isoDay, calendar = isoCalendarId, referenceIsoYear = isoEpochFirstLeapYear) => {
+  (
+    isoMonth: number,
+    isoDay: number,
+    calendar: CalendarArg = isoCalendarId,
+    referenceIsoYear: number = isoEpochFirstLeapYear
+  ): IsoDateInternals => {
     return refineIsoDateInternals({
       isoYear: referenceIsoYear,
       isoMonth,
@@ -54,11 +65,11 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals, bag, options) {
-      return createPlainMonthDay(mergePlainMonthDayBag(this, bag, options))
+    with(internals: IsoDateInternals, mod: PlainMonthDayMod, options): PlainMonthDay {
+      return createPlainMonthDay(mergePlainMonthDayBag(this, mod, options))
     },
 
-    equals(internals, otherArg) {
+    equals(internals: IsoDateInternals, otherArg: PlainMonthDayArg): boolean {
       const otherInternals = toPlainMonthDayInternals(otherArg)
       return !compareIsoDateTimeFields(internals, otherInternals) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
@@ -70,7 +81,7 @@ export const [
 
     valueOf: neverValueOf,
 
-    toPlainDate(internals, bag) {
+    toPlainDate(internals: IsoDateInternals, bag: { year: number }): PlainDate {
       return convertPlainMonthDayToDate(this, bag)
     },
 

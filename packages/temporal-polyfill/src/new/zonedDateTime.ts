@@ -45,7 +45,9 @@ import {
 } from './options'
 import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
 import {
   computeNanosecondsInDay,
@@ -72,7 +74,11 @@ export interface ZonedInternals {
 }
 
 export type ZonedDateTime = TemporalInstance<ZonedInternals>
-export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemporalClass(
+export const [
+  ZonedDateTime,
+  createZonedDateTime,
+  toZonedInternals
+] = createTemporalClass(
   'ZonedDateTime',
 
   // Creation

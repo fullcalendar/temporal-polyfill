@@ -22,7 +22,7 @@ export interface MonthFields {
   month: number
 }
 
-type YearMonthFields = { year: number } & MonthFields
+export type YearMonthFields = { year: number } & MonthFields
 export type DateFields = YearMonthFields & { day: number }
 type MonthDayFields = MonthFields & { day: number }
 

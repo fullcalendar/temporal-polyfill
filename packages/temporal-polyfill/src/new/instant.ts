@@ -30,8 +30,13 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Unit } from './units'
 
 export type InstantArg = Instant | LargeInt | string
+
 export type Instant = TemporalInstance<LargeInt>
-export const [Instant, createInstant, toInstantEpochNano] = createTemporalClass(
+export const [
+  Instant,
+  createInstant,
+  toInstantEpochNano
+] = createTemporalClass(
   'Instant',
 
   // Creation
