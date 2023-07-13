@@ -5,7 +5,7 @@ import {
   absDurationInternals,
   addDurationFields,
   durationFieldsToNano,
-  durationGetters,
+  durationInternalGetters,
   negateDurationInternals,
   refineDurationFields,
   DurationInternals,
@@ -29,7 +29,7 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { identityFunc, noop } from './utils'
+import { NumSign, identityFunc, noop } from './utils'
 import { Unit } from './units'
 
 export type Duration = TemporalInstance<DurationInternals>
@@ -52,7 +52,7 @@ export const [Duration, createDuration, toDurationInternals] = createTemporalCla
     milliseconds: number = 0,
     microseconds: number = 0,
     nanoseconds: number = 0,
-  ) => {
+  ): DurationInternals => {
     return refineDurationFields({
       years,
       months,
@@ -83,7 +83,7 @@ export const [Duration, createDuration, toDurationInternals] = createTemporalCla
   // -----------------------------------------------------------------------------------------------
 
   {
-    ...durationGetters, // TODO: rename to `durationFieldGetters`
+    ...durationInternalGetters,
 
     blank(internals: DurationInternals): boolean {
       return !internals.sign
@@ -181,7 +181,7 @@ export const [Duration, createDuration, toDurationInternals] = createTemporalCla
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(durationArg0: DurationArg, durationArg1: DurationArg, options) {
+    compare(durationArg0: DurationArg, durationArg1: DurationArg, options): NumSign {
       const durationFields0 = toDurationInternals(durationArg0)
       const durationFields1 = toDurationInternals(durationArg1)
       const markerInternals = refineRelativeToOptions(options)

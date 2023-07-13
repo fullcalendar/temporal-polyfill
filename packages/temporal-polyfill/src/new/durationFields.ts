@@ -82,7 +82,7 @@ export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNames, 
 // Getters
 // -------------------------------------------------------------------------------------------------
 
-export const durationGetters = mapPropNames((propName: keyof DurationInternals) => {
+export const durationInternalGetters = mapPropNames((propName: keyof DurationInternals) => {
   return (internals: DurationInternals) => {
     return internals[propName]
   }
