@@ -2,7 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
-import { Duration, createDuration, toDurationInternals } from './duration'
+import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals } from './durationFields'
 import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
 import {
@@ -26,15 +26,12 @@ import {
 import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './utils'
-import { createZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Unit } from './units'
 
+export type InstantArg = Instant | LargeInt | string
 export type Instant = TemporalInstance<LargeInt>
-export const [
-  Instant,
-  createInstant,
-  toInstantEpochNano,
-] = createTemporalClass(
+export const [Instant, createInstant, toInstantEpochNano] = createTemporalClass(
   'Instant',
 
   // Creation
@@ -68,51 +65,51 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    toZonedDateTimeISO(epochNanoseconds, timeZoneArg): any { // TODO!!!
-      createZonedDateTime({
-        epochNanoseconds,
+    toZonedDateTimeISO(epochNano: LargeInt, timeZoneArg: TimeZoneArg): ZonedDateTime {
+      return createZonedDateTime({
+        epochNanoseconds: epochNano,
         timeZone: queryTimeZoneOps(timeZoneArg),
         calendar: isoCalendarId,
       })
     },
 
-    toZonedDateTime(epochNanoseconds, options): any { // TODO!!!
+    toZonedDateTime(epochNano: LargeInt, options): ZonedDateTime {
       const refinedObj = ensureObjectlike(options)
 
       return createZonedDateTime({
-        epochNanoseconds,
+        epochNanoseconds: epochNano,
         timeZone: queryTimeZoneOps(refinedObj.timeZone),
         calendar: queryCalendarOps(refinedObj.calendar),
       })
     },
 
-    add(epochNanoseconds, durationArg): Instant {
+    add(epochNano: LargeInt, durationArg: DurationArg): Instant {
       return createInstant(
         moveEpochNano(
-          epochNanoseconds,
+          epochNano,
           toDurationInternals(durationArg),
         ),
       )
     },
 
-    subtract(epochNanoseconds, durationArg): Instant {
+    subtract(epochNano: LargeInt, durationArg: DurationArg): Instant {
       return createInstant(
         moveEpochNano(
-          epochNanoseconds,
+          epochNano,
           negateDurationInternals(toDurationInternals(durationArg)),
         ),
       )
     },
 
-    until(epochNanoseconds, otherArg, options): Duration {
-      return diffInstants(epochNanoseconds, toInstantEpochNano(otherArg), options)
+    until(epochNano: LargeInt, otherArg: InstantArg, options): Duration {
+      return diffInstants(epochNano, toInstantEpochNano(otherArg), options)
     },
 
-    since(epochNanoseconds, otherArg, options): Duration {
-      return diffInstants(toInstantEpochNano(otherArg), epochNanoseconds, options, true)
+    since(epochNano: LargeInt, otherArg: InstantArg, options): Duration {
+      return diffInstants(toInstantEpochNano(otherArg), epochNano, options, true)
     },
 
-    round(epochNano, options): Instant {
+    round(epochNano: LargeInt, options): Instant {
       const [smallestUnitI, roundingInc, roundingModeI] = refineRoundOptions(options, Unit.Hour)
 
       return createInstant(
@@ -120,9 +117,9 @@ export const [
       )
     },
 
-    equals(epochNanoseconds, otherArg): boolean {
+    equals(epochNano: LargeInt, otherArg: InstantArg): boolean {
       return !compareLargeInts(
-        epochNanoseconds,
+        epochNano,
         toInstantEpochNano(otherArg),
       )
     },
@@ -160,11 +157,11 @@ export const [
 
     fromEpochMilliseconds: epochMilliToInstant,
 
-    fromEpochMicroseconds(epochMicro: LargeInt) {
+    fromEpochMicroseconds(epochMicro: LargeInt): Instant {
       return epochMicroToInstant(toEpochNano(epochMicro))
     },
 
-    fromEpochNanoseconds(epochNano: LargeInt) {
+    fromEpochNanoseconds(epochNano: LargeInt): Instant {
       return createInstant(toEpochNano(epochNano))
     },
   },
@@ -203,6 +200,6 @@ function epochMicroToInstant(epochMicro: LargeInt): Instant {
 // Legacy Date
 // -------------------------------------------------------------------------------------------------
 
-export function toTemporalInstant(this: Date) {
+export function toTemporalInstant(this: Date): Instant {
   return epochMilliToInstant(this.valueOf())
 }
