@@ -1,6 +1,6 @@
-import { dateTimeGetters } from './calendarFields'
+import { DateFields, dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
-import { createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -8,8 +8,8 @@ import {
   refineZonedDateTimeBag,
 } from './convert'
 import { diffZonedEpochNano } from './diff'
-import { createDuration, toDurationInternals } from './duration'
-import { negateDurationInternals } from './durationFields'
+import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
+import { DurationFields, negateDurationInternals } from './durationFields'
 import { createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
 import {
@@ -31,9 +31,10 @@ import {
   epochNanoToIso,
 } from './isoMath'
 import { parseZonedDateTime } from './isoParse'
-import { compareLargeInts } from './largeInt'
+import { LargeInt, compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
+  Overflow,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -52,23 +53,36 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { hourIndex, nanoInHour } from './units'
+import { Unit, nanoInHour } from './units'
 import { mapProps } from './utils'
 
-export const [
-  ZonedDateTime,
-  createZonedDateTime,
-  toZonedDateTimeInternals,
-] = createTemporalClass(
+export interface ZonedInternals {
+  epochNanoseconds: LargeInt
+  timeZone: TimeZoneOps
+  calendar: CalendarOps
+}
+
+export interface ZonedDateTimeBag extends DateFields {
+  timeZone: TimeZoneArg
+  calendar?: CalendarArg
+}
+
+export type ZonedDateTime = TemporalInstance<ZonedInternals>
+export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
+export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemporalClass(
   'ZonedDateTime',
 
   // Creation
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (epochNanoseconds, timeZoneArg, calendarArg) => {
+  (
+    epochNano: LargeInt,
+    timeZoneArg: TimeZoneArg,
+    calendarArg: CalendarArg,
+  ): ZonedInternals => {
     return {
-      epochNanoseconds: checkEpochNano(toEpochNano(epochNanoseconds)),
+      epochNanoseconds: checkEpochNano(toEpochNano(epochNano)),
       timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
       calendar: queryCalendarOps(calendarArg),
     }
@@ -91,18 +105,18 @@ export const [
 
   {
     ...mapProps((getter) => {
-      return function(internals) {
+      return function(internals: ZonedInternals) {
         return getter(internals.epochNanoseconds)
       }
     }, epochGetters),
 
     ...mapProps((getter) => {
-      return function(internals) {
+      return function(internals: ZonedInternals) {
         return getter(zonedInternalsToIso(internals))
       }
     }, dateTimeGetters),
 
-    hoursInDay(internals) {
+    hoursInDay(internals: ZonedInternals) {
       return computeNanosecondsInDay(
         internals.timeZone,
         zonedInternalsToIso(internals),
@@ -110,19 +124,19 @@ export const [
     },
 
     // TODO: make this a getter?
-    offsetNanoseconds(internals) {
+    offsetNanoseconds(internals: ZonedInternals): LargeInt {
       // TODO: more DRY
       return zonedInternalsToIso(internals).offsetNanoseconds
     },
 
-    offset(internals) {
+    offset(internals): string {
       return formatOffsetNano(
         // TODO: more DRY
         zonedInternalsToIso(internals).offsetNanoseconds,
       )
     },
 
-    timeZoneId(internals) {
+    timeZoneId(internals): string {
       return internals.timeZone.id
     },
   },
@@ -131,11 +145,11 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals, bag, options) {
+    with(internals: ZonedInternals, bag: ZonedBag, options): ZonedDateTime {
       return createZonedDateTime(mergeZonedDateTimeBag(this, bag, options))
     },
 
-    withPlainTime(internals, plainTimeArg) {
+    withPlainTime(internals: ZonedInternals, plainTimeArg): ZonedDateTime {
       const { calendar, timeZone } = internals
       const isoFields = {
         ...zonedInternalsToIso(internals),
@@ -160,7 +174,7 @@ export const [
     },
 
     // TODO: more DRY with withPlainTime and zonedDateTimeWithBag?
-    withPlainDate(internals, plainDateArg) {
+    withPlainDate(internals: ZonedInternals, plainDateArg): ZonedDateTime {
       const { calendar, timeZone } = internals
       const isoFields = {
         ...zonedInternalsToIso(internals),
@@ -184,21 +198,21 @@ export const [
       })
     },
 
-    withTimeZone(internals, timeZoneArg) {
+    withTimeZone(internals: ZonedInternals, timeZoneArg: TimeZoneArg): ZonedDateTime {
       return createZonedDateTime({
         ...internals,
         timeZone: queryTimeZoneOps(timeZoneArg),
       })
     },
 
-    withCalendar(internals, calendarArg) {
+    withCalendar(internals: ZonedInternals, calendarArg: CalendarArg): ZonedDateTime {
       return createZonedDateTime({
         ...internals,
         calendar: queryCalendarOps(calendarArg),
       })
     },
 
-    add(internals, durationArg, options) {
+    add(internals: ZonedInternals, durationArg: DurationArg, options): ZonedDateTime {
       return moveZonedDateTime(
         internals,
         toDurationInternals(durationArg),
@@ -206,7 +220,7 @@ export const [
       )
     },
 
-    subtract(internals, durationArg, options) {
+    subtract(internals: ZonedInternals, durationArg: DurationArg, options): ZonedDateTime {
       return moveZonedDateTime(
         internals,
         negateDurationInternals(toDurationInternals(durationArg)),
@@ -214,18 +228,18 @@ export const [
       )
     },
 
-    until(internals, otherArg, options) {
-      return diffZonedDateTimes(internals, toZonedDateTimeInternals(otherArg), options)
+    until(internals: ZonedInternals, otherArg, options): Duration {
+      return diffZonedDateTimes(internals, toZonedInternals(otherArg), options)
     },
 
-    since(internals, otherArg, options) {
-      return diffZonedDateTimes(toZonedDateTimeInternals(otherArg), internals, options, true)
+    since(internals: ZonedInternals, otherArg, options): Duration {
+      return diffZonedDateTimes(toZonedInternals(otherArg), internals, options, true)
     },
 
     /*
     Do param-list destructuring here and other methods!
     */
-    round(internals, options) {
+    round(internals: ZonedInternals, options): ZonedDateTime {
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
@@ -253,7 +267,7 @@ export const [
       })
     },
 
-    startOfDay(internals) {
+    startOfDay(internals: ZonedInternals): ZonedDateTime {
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const isoFields = {
@@ -278,15 +292,15 @@ export const [
       })
     },
 
-    equals(internals, otherZonedDateTimeArg) {
-      const otherInternals = toZonedDateTimeInternals(otherZonedDateTimeArg)
+    equals(internals: ZonedInternals, otherZonedDateTimeArg): boolean {
+      const otherInternals = toZonedInternals(otherZonedDateTimeArg)
 
       return !compareLargeInts(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar) &&
         isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
     },
 
-    toString(internals, options) {
+    toString(internals: ZonedInternals, options) {
       let { epochNanoseconds, timeZone, calendar } = internals
       const [
         calendarDisplayI,
@@ -321,26 +335,30 @@ export const [
         formatCalendar(calendar, calendarDisplayI)
     },
 
-    toLocaleString(internals, locales, options) {
+    toLocaleString(
+      internals: ZonedInternals,
+      locales: string | string[],
+      options
+    ): string {
       const [epochMilli, format] = resolveZonedFormattable(internals, locales, options)
       return format.format(epochMilli)
     },
 
     valueOf: neverValueOf,
 
-    toInstant(internals) {
+    toInstant(internals: ZonedInternals) {
       return createInstant(internals.epochNanoseconds)
     },
 
-    toPlainDate(internals) {
+    toPlainDate(internals: ZonedInternals) {
       return createPlainDate(pluckIsoDateInternals(zonedInternalsToIso(internals)))
     },
 
-    toPlainTime(internals) {
+    toPlainTime(internals: ZonedInternals) {
       return createPlainTime(pluckIsoTimeFields(zonedInternalsToIso(internals)))
     },
 
-    toPlainDateTime(internals) {
+    toPlainDateTime(internals: ZonedInternals) {
       return createPlainDateTime(pluckIsoDateTimeInternals(zonedInternalsToIso(internals)))
     },
 
@@ -352,11 +370,11 @@ export const [
       return convertToPlainMonthDay(this)
     },
 
-    getISOFields(internals) {
+    getISOFields(internals: ZonedInternals) {
       return {
-        // maintain alphabetical order
-        calendar: getPublicIdOrObj(internals.calendar),
         ...pluckIsoDateTimeInternals(zonedInternalsToIso(internals)),
+        // alphabetical
+        calendar: getPublicIdOrObj(internals.calendar),
         offset: formatOffsetNano(
           // TODO: more DRY
           zonedInternalsToIso(internals).offsetNanoseconds,
@@ -373,10 +391,10 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(arg0, arg1) {
+    compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg) {
       return compareLargeInts(
-        toZonedDateTimeInternals(arg0).epochNanoseconds,
-        toZonedDateTimeInternals(arg1).epochNanoseconds,
+        toZonedInternals(arg0).epochNanoseconds,
+        toZonedInternals(arg1).epochNanoseconds,
       )
     },
   },
@@ -385,7 +403,11 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function moveZonedDateTime(internals, durationFields, overflowHandling) {
+function moveZonedDateTime(
+  internals: ZonedInternals,
+  durationFields: DurationFields,
+  overflowHandling: Overflow
+): ZonedDateTime {
   return createZonedDateTime(
     moveZonedEpochNano(
       internals.calendar,
@@ -397,14 +419,19 @@ function moveZonedDateTime(internals, durationFields, overflowHandling) {
   )
 }
 
-function diffZonedDateTimes(internals, otherInternals, options, roundingModeInvert) {
+function diffZonedDateTimes(
+  internals: ZonedInternals,
+  otherInternals: ZonedInternals,
+  options,
+  roundingModeInvert?: boolean
+): Duration {
   return createDuration(
     diffZonedEpochNano(
       getCommonCalendarOps(internals, otherInternals),
       getCommonTimeZoneOps(internals, otherInternals),
       internals.epochNanoseconds,
       otherInternals.epochNanoseconds,
-      ...refineDiffOptions(roundingModeInvert, options, hourIndex),
+      ...refineDiffOptions(roundingModeInvert, options, Unit.Hour),
     ),
   )
 }

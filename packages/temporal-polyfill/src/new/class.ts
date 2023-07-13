@@ -1,6 +1,7 @@
 import { DateTimeFormat } from './intlFormat'
 import { ensureInstanceOf, ensureString, toString } from './options'
 import {
+  Reused,
   createGetterDescriptors, createPropDescriptors, createTemporalNameDescriptors,
   defineProps,
   hasAllPropsByName,
@@ -109,6 +110,7 @@ export function getStrictInternals<T>( // rename: getInternalsStrict?
 // -------------------------------------------------------------------------------------------------
 
 type TemporalClass<
+  B,
   A extends any[],
   I,
   O,
@@ -117,18 +119,15 @@ type TemporalClass<
   S extends {},
 > = { new(...args: A): TemporalInstance<I, G, M> }
   & S
-  & FromMethods<O>
+  & { from: (arg: TemporalInstance<I> | B | string) => TemporalInstance<I> }
 
 interface ToJsonMethods {
   toJSON: () => string
 }
 
-type TemporalArg = TemporalInstance<unknown> | Record<string, unknown> | string
-
-export interface FromMethods<O> {
-  from: (arg: TemporalArg, options: O) => void
-}
-
+/*
+NOTE: only use G/M generic parameters for new()/::from
+*/
 export type TemporalInstance<
   I,
   G extends { [propName: string]: (internals: I) => unknown } = {},
@@ -145,6 +144,7 @@ export const getTemporalName = temporaNameMap.get.bind(temporaNameMap) as
   (arg: unknown) => string | undefined
 
 export function createTemporalClass<
+  B,
   A extends any[],
   I,
   O,
@@ -155,22 +155,22 @@ export function createTemporalClass<
   temporalName: string,
   constructorToInternals: (...args: A) => I = (identityFunc as any),
   internalsConversionMap: { [typeName: string]: (otherInternal: any) => I },
-  bagToInternals: (bag: Record<string, unknown>, options?: O) => I,
+  bagToInternals: (bag: B, options?: O) => I,
   stringToInternals: (str: string) => I,
   handleUnusedOptions: (options?: O) => void,
   getters: G,
   methods: M,
   staticMembers: S = {} as any,
 ): [
-  Class: TemporalClass<A, I, O, G, M, S>,
-  createInstance: (internals: I) => TemporalInstance<I, G, M>,
-  toInternals: (arg: TemporalArg, options?: O) => I
+  Class: TemporalClass<B, A, I, O, G, M, S>,
+  createInstance: (internals: I) => TemporalInstance<I>,
+  toInternals: (arg: TemporalInstance<I> | B | string, options?: O) => I
 ] {
   ;(methods as unknown as ToJsonMethods).toJSON = function() {
     return String(this)
   }
 
-  ;(staticMembers as unknown as FromMethods<O>).from = function(arg: TemporalArg, options: O) {
+  ;(staticMembers as any).from = function(arg: TemporalInstance<I, G, M> | B | string, options: O) {
     return createInstance(toInternals(arg, options))
   }
 
@@ -190,15 +190,15 @@ export function createTemporalClass<
     return instance
   }
 
-  function toInternals(arg: TemporalArg, options?: O): I {
-    let argInternals = getInternals(arg)
+  function toInternals(arg: TemporalInstance<I, G, M> | B | string, options?: O): I {
+    let argInternals = getInternals(arg) as Reused
     let argTemporalName
 
     if (argInternals && (argTemporalName = getTemporalName(arg)) !== temporalName) {
       argInternals = (internalsConversionMap[argTemporalName!] || noop)(argInternals)
     }
 
-    return (!argInternals && isObjectlike(arg) && bagToInternals(arg, options)) ||
+    return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) ||
       (handleUnusedOptions(options), (argInternals as I) || stringToInternals(toString(arg)))
   }
 

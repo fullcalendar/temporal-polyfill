@@ -32,9 +32,10 @@ import { zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
 import { NumSign } from './utils'
 
+export type PlainDateBag = DateFields
+export type PlainDateArg = PlainDate | PlainDateBag | string
+
 export type PlainDate = TemporalInstance<IsoDateInternals>
-export type PlainDateBag = PlainDate | Partial<DateFields>
-export type PlainDateArg = PlainDateBag | string
 export const [PlainDate, createPlainDate, toPlainDateInternals] = createTemporalClass(
   'PlainDate',
 

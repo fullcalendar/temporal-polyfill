@@ -5,6 +5,7 @@ import {
   isoCalendarId,
 } from './calendarConfig'
 import {
+  DateFields,
   dateFieldNames,
   dateTimeFieldNames,
   dateTimeFieldRefiners,
@@ -26,6 +27,7 @@ import {
   durationFieldRefiners,
   updateDurationFieldsSign,
 } from './durationFields'
+import { IsoDateInternals } from './isoFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
@@ -39,7 +41,7 @@ import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
-import { createZonedDateTime } from './zonedDateTime'
+import { ZonedDateTimeBag, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 
 /*
 Rules:
@@ -50,7 +52,7 @@ Rules:
 // ZonedDateTime
 // -------------------------------------------------------------------------------------------------
 
-export function refineZonedDateTimeBag(bag, options) {
+export function refineZonedDateTimeBag(bag: ZonedDateTimeBag, options): ZonedInternals {
   const calendar = getBagCalendarOps(bag)
   const fields = refineCalendarFields(
     calendar,
@@ -167,7 +169,11 @@ export function mergePlainDateTimeBag(plainDate, bag, options) {
 // PlainDate
 // -------------------------------------------------------------------------------------------------
 
-export function refinePlainDateBag(bag, options, calendar = getBagCalendarOps(bag)) {
+export function refinePlainDateBag(
+  bag: DateFields,
+  options,
+  calendar = getBagCalendarOps(bag)
+): IsoDateInternals {
   const fields = refineCalendarFields(
     calendar,
     bag,
