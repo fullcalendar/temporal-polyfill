@@ -27,7 +27,7 @@ import {
   durationFieldRefiners,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateInternals } from './isoFields'
+import { IsoDateInternals, IsoDateTimeInternals } from './isoFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
@@ -37,6 +37,7 @@ import {
   refineZonedFieldOptions, // TODO: shouldn't we use this all over the place?
 } from './options'
 import { createPlainDate } from './plainDate'
+import { PlainDateTimeBag } from './plainDateTime'
 import { createPlainMonthDay } from './plainMonthDay'
 import { createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
@@ -134,7 +135,7 @@ export function createZonedDateTimeConverter(getExtraIsoFields) {
 // PlainDateTime
 // -------------------------------------------------------------------------------------------------
 
-export function refinePlainDateTimeBag(bag, options) {
+export function refinePlainDateTimeBag(bag: PlainDateTimeBag, options): IsoDateTimeInternals {
   const calendar = getBagCalendarOps(bag)
   const fields = refineCalendarFields(
     calendar,

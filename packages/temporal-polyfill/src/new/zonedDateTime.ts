@@ -1,4 +1,5 @@
-import { DateFields, dateTimeGetters } from './calendarFields'
+import { isoCalendarId } from './calendarConfig'
+import { dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
@@ -10,9 +11,10 @@ import {
 import { diffZonedEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationFields, negateDurationInternals } from './durationFields'
-import { createInstant } from './instant'
+import { Instant, createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
 import {
+  IsoDateTimePublic,
   getPublicIdOrObj,
   isoTimeFieldDefaults,
   pluckIsoDateInternals,
@@ -41,9 +43,9 @@ import {
   refineZonedDateTimeDisplayOptions,
   toEpochNano,
 } from './options'
-import { createPlainDate, toPlainDateInternals } from './plainDate'
-import { createPlainDateTime } from './plainDateTime'
-import { createPlainTime, toPlainTimeInternals } from './plainTime'
+import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
+import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime } from './plainDateTime'
+import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
 import { roundDateTime, roundDateTimeToNano } from './round'
 import {
   computeNanosecondsInDay,
@@ -54,7 +56,14 @@ import {
   zonedInternalsToIso,
 } from './timeZoneOps'
 import { Unit, nanoInHour } from './units'
-import { mapProps } from './utils'
+import { NumSign, mapProps } from './utils'
+
+export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
+export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg }
+export type ZonedDateTimeMod = PlainDateTimeMod
+
+export type TimeZonePublic = TimeZoneProtocol | string
+export type ZonedPublic = IsoDateTimePublic & { timeZone: TimeZonePublic, offset: string }
 
 export interface ZonedInternals {
   epochNanoseconds: LargeInt
@@ -62,13 +71,7 @@ export interface ZonedInternals {
   calendar: CalendarOps
 }
 
-export interface ZonedDateTimeBag extends DateFields {
-  timeZone: TimeZoneArg
-  calendar?: CalendarArg
-}
-
 export type ZonedDateTime = TemporalInstance<ZonedInternals>
-export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
 export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemporalClass(
   'ZonedDateTime',
 
@@ -79,7 +82,7 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
   (
     epochNano: LargeInt,
     timeZoneArg: TimeZoneArg,
-    calendarArg: CalendarArg,
+    calendarArg: CalendarArg = isoCalendarId,
   ): ZonedInternals => {
     return {
       epochNanoseconds: checkEpochNano(toEpochNano(epochNano)),
@@ -116,7 +119,7 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
       }
     }, dateTimeGetters),
 
-    hoursInDay(internals: ZonedInternals) {
+    hoursInDay(internals: ZonedInternals): number {
       return computeNanosecondsInDay(
         internals.timeZone,
         zonedInternalsToIso(internals),
@@ -129,14 +132,14 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
       return zonedInternalsToIso(internals).offsetNanoseconds
     },
 
-    offset(internals): string {
+    offset(internals: ZonedInternals): string {
       return formatOffsetNano(
         // TODO: more DRY
         zonedInternalsToIso(internals).offsetNanoseconds,
       )
     },
 
-    timeZoneId(internals): string {
+    timeZoneId(internals: ZonedInternals): string {
       return internals.timeZone.id
     },
   },
@@ -145,21 +148,21 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals: ZonedInternals, bag: ZonedBag, options): ZonedDateTime {
-      return createZonedDateTime(mergeZonedDateTimeBag(this, bag, options))
+    with(internals: ZonedInternals, mod: ZonedDateTimeMod, options): ZonedDateTime {
+      return createZonedDateTime(mergeZonedDateTimeBag(this, mod, options))
     },
 
     withPlainTime(internals: ZonedInternals, plainTimeArg): ZonedDateTime {
       const { calendar, timeZone } = internals
       const isoFields = {
         ...zonedInternalsToIso(internals),
-        ...toPlainTimeInternals(plainTimeArg),
+        ...toPlainTimeFields(plainTimeArg),
       }
 
       const epochNano = getMatchingInstantFor(
         timeZone,
         isoFields,
-        isoFields.offsetNano,
+        isoFields.offsetNanoseconds,
         false, // hasZ
         undefined, // offsetHandling
         undefined, // disambig
@@ -228,11 +231,11 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
       )
     },
 
-    until(internals: ZonedInternals, otherArg, options): Duration {
+    until(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options): Duration {
       return diffZonedDateTimes(internals, toZonedInternals(otherArg), options)
     },
 
-    since(internals: ZonedInternals, otherArg, options): Duration {
+    since(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options): Duration {
       return diffZonedDateTimes(toZonedInternals(otherArg), internals, options, true)
     },
 
@@ -292,15 +295,15 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
       })
     },
 
-    equals(internals: ZonedInternals, otherZonedDateTimeArg): boolean {
-      const otherInternals = toZonedInternals(otherZonedDateTimeArg)
+    equals(internals: ZonedInternals, otherArg: ZonedDateTimeArg): boolean {
+      const otherInternals = toZonedInternals(otherArg)
 
       return !compareLargeInts(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar) &&
         isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
     },
 
-    toString(internals: ZonedInternals, options) {
+    toString(internals: ZonedInternals, options): string {
       let { epochNanoseconds, timeZone, calendar } = internals
       const [
         calendarDisplayI,
@@ -346,31 +349,31 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
 
     valueOf: neverValueOf,
 
-    toInstant(internals: ZonedInternals) {
+    toInstant(internals: ZonedInternals): Instant {
       return createInstant(internals.epochNanoseconds)
     },
 
-    toPlainDate(internals: ZonedInternals) {
+    toPlainDate(internals: ZonedInternals): PlainDate {
       return createPlainDate(pluckIsoDateInternals(zonedInternalsToIso(internals)))
     },
 
-    toPlainTime(internals: ZonedInternals) {
+    toPlainTime(internals: ZonedInternals): PlainTime {
       return createPlainTime(pluckIsoTimeFields(zonedInternalsToIso(internals)))
     },
 
-    toPlainDateTime(internals: ZonedInternals) {
+    toPlainDateTime(internals: ZonedInternals): PlainDateTime {
       return createPlainDateTime(pluckIsoDateTimeInternals(zonedInternalsToIso(internals)))
     },
 
-    toPlainYearMonth() {
+    toPlainYearMonth(): PlainYearMonth {
       return convertToPlainYearMonth(this)
     },
 
-    toPlainMonthDay() {
+    toPlainMonthDay(): PlainMonthDay {
       return convertToPlainMonthDay(this)
     },
 
-    getISOFields(internals: ZonedInternals) {
+    getISOFields(internals: ZonedInternals): ZonedPublic {
       return {
         ...pluckIsoDateTimeInternals(zonedInternalsToIso(internals)),
         // alphabetical
@@ -391,7 +394,7 @@ export const [ZonedDateTime, createZonedDateTime, toZonedInternals] = createTemp
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg) {
+    compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumSign {
       return compareLargeInts(
         toZonedInternals(arg0).epochNanoseconds,
         toZonedInternals(arg1).epochNanoseconds,

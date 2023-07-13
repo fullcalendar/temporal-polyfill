@@ -19,17 +19,19 @@ import {
   refineRoundOptions,
   refineTimeDisplayOptions,
 } from './options'
-import { toPlainDateInternals } from './plainDate'
-import { createPlainDateTime } from './plainDateTime'
+import { PlainDateArg, toPlainDateInternals } from './plainDate'
+import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { roundTime, roundTimeToNano } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
+import { NumSign } from './utils'
 
-export type PlainTimeBag = Partial<TimeFields>
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
+export type PlainTimeBag = Partial<TimeFields>
+export type PlainTimeMod = Partial<TimeFields>
 
 export type PlainTime = TemporalInstance<IsoTimeFields>
-export const [PlainTime, createPlainTime, toPlainTimeInternals] = createTemporalClass(
+export const [PlainTime, createPlainTime, toPlainTimeFields] = createTemporalClass(
   'PlainTime',
 
   // Creation
@@ -80,42 +82,42 @@ export const [PlainTime, createPlainTime, toPlainTimeInternals] = createTemporal
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals: IsoTimeFields, bag, options): PlainTime {
-      return createPlainTime(mergePlainTimeBag(this, bag, options))
+    with(fields: IsoTimeFields, mod: PlainTimeMod, options): PlainTime {
+      return createPlainTime(mergePlainTimeBag(this, mod, options))
     },
 
-    add(internals: IsoTimeFields, durationArg: DurationArg): PlainTime {
-      return movePlainTime(internals, toDurationInternals(durationArg))
+    add(fields: IsoTimeFields, durationArg: DurationArg): PlainTime {
+      return movePlainTime(fields, toDurationInternals(durationArg))
     },
 
-    subtract(internals: IsoTimeFields, durationArg: DurationArg): PlainTime {
-      return movePlainTime(internals, negateDurationInternals(toDurationInternals(durationArg)))
+    subtract(fields: IsoTimeFields, durationArg: DurationArg): PlainTime {
+      return movePlainTime(fields, negateDurationInternals(toDurationInternals(durationArg)))
     },
 
-    until(internals: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
-      return diffPlainTimes(internals, toPlainTimeInternals(otherArg), options)
+    until(fields: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
+      return diffPlainTimes(fields, toPlainTimeFields(otherArg), options)
     },
 
-    since(internals: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
-      return diffPlainTimes(toPlainTimeInternals(otherArg), internals, options, true)
+    since(fields: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
+      return diffPlainTimes(toPlainTimeFields(otherArg), fields, options, true)
     },
 
-    round(internals: IsoTimeFields, options): PlainTime {
+    round(fields: IsoTimeFields, options): PlainTime {
       return createPlainTime(
-        roundTime(internals, ...refineRoundOptions(options, Unit.Hour)),
+        roundTime(fields, ...refineRoundOptions(options, Unit.Hour)),
       )
     },
 
-    equals(internals: IsoTimeFields, other: PlainTimeArg): boolean {
-      const otherInternals = toPlainTimeInternals(other)
-      return !compareIsoTimeFields(internals, otherInternals)
+    equals(fields: IsoTimeFields, other: PlainTimeArg): boolean {
+      const otherInternals = toPlainTimeFields(other)
+      return !compareIsoTimeFields(fields, otherInternals)
     },
 
-    toString(internals: IsoTimeFields, options) {
+    toString(fields: IsoTimeFields, options) {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(
-        roundTimeToNano(internals, nanoInc, roundingMode),
+        roundTimeToNano(fields, nanoInc, roundingMode),
         subsecDigits,
       )
     },
@@ -128,9 +130,9 @@ export const [PlainTime, createPlainTime, toPlainTimeInternals] = createTemporal
       return toPlainDateInternals(options.plainDate)
     }),
 
-    toPlainDateTime(internals, plainDateArg) {
+    toPlainDateTime(fields: IsoTimeFields, plainDateArg: PlainDateArg): PlainDateTime {
       return createPlainDateTime({
-        ...internals,
+        ...fields,
         ...toPlainDateInternals(plainDateArg),
       })
     },
@@ -142,10 +144,10 @@ export const [PlainTime, createPlainTime, toPlainTimeInternals] = createTemporal
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(arg0: PlainTimeArg, arg1: PlainTimeArg) {
+    compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumSign {
       return compareIsoTimeFields(
-        toPlainTimeInternals(arg0),
-        toPlainTimeInternals(arg1),
+        toPlainTimeFields(arg0),
+        toPlainTimeFields(arg1),
       )
     },
   },
