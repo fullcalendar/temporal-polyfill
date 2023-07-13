@@ -1,14 +1,14 @@
-import { timeGetters } from './calendarFields'
-import { createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
+import { TimeFields, timeGetters } from './calendarFields'
+import { TemporalInstance, createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import {
   createZonedDateTimeConverter,
   mergePlainTimeBag,
   refinePlainTimeBag,
 } from './convert'
 import { diffTimes } from './diff'
-import { createDuration, toDurationInternals } from './duration'
-import { negateDurationInternals } from './durationFields'
-import { pluckIsoTimeFields } from './isoFields'
+import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
+import { DurationInternals, negateDurationInternals } from './durationFields'
+import { IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { compareIsoTimeFields, refineIsoTimeInternals } from './isoMath'
 import { parsePlainTime } from './isoParse'
@@ -23,13 +23,13 @@ import { toPlainDateInternals } from './plainDate'
 import { createPlainDateTime } from './plainDateTime'
 import { roundTime, roundTimeToNano } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { hourIndex } from './units'
+import { Unit } from './units'
 
-export const [
-  PlainTime,
-  createPlainTime,
-  toPlainTimeInternals,
-] = createTemporalClass(
+export type PlainTimeBag = Partial<TimeFields>
+export type PlainTimeArg = PlainTime | PlainTimeBag | string
+
+export type PlainTime = TemporalInstance<IsoTimeFields>
+export const [PlainTime, createPlainTime, toPlainTimeInternals] = createTemporalClass(
   'PlainTime',
 
   // Creation
@@ -37,13 +37,13 @@ export const [
 
   // constructorToInternals
   (
-    isoHour = 0,
-    isoMinute = 0,
-    isoSecond = 0,
-    isoMillisecond = 0,
-    isoMicrosecond = 0,
-    isoNanosecond = 0,
-  ) => {
+    isoHour: number = 0,
+    isoMinute: number = 0,
+    isoSecond: number = 0,
+    isoMillisecond: number = 0,
+    isoMicrosecond: number = 0,
+    isoNanosecond: number = 0,
+  ): IsoTimeFields => {
     return refineIsoTimeInternals({
       isoHour,
       isoMinute,
@@ -80,38 +80,38 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals, bag, options) {
+    with(internals: IsoTimeFields, bag, options): PlainTime {
       return createPlainTime(mergePlainTimeBag(this, bag, options))
     },
 
-    add(internals, durationArg) {
+    add(internals: IsoTimeFields, durationArg: DurationArg): PlainTime {
       return movePlainTime(internals, toDurationInternals(durationArg))
     },
 
-    subtract(internals, durationArg) {
+    subtract(internals: IsoTimeFields, durationArg: DurationArg): PlainTime {
       return movePlainTime(internals, negateDurationInternals(toDurationInternals(durationArg)))
     },
 
-    until(internals, otherArg, options) {
+    until(internals: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
       return diffPlainTimes(internals, toPlainTimeInternals(otherArg), options)
     },
 
-    since(internals, otherArg, options) {
+    since(internals: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
       return diffPlainTimes(toPlainTimeInternals(otherArg), internals, options, true)
     },
 
-    round(internals, options) {
+    round(internals: IsoTimeFields, options): PlainTime {
       return createPlainTime(
-        roundTime(internals, ...refineRoundOptions(options, hourIndex)),
+        roundTime(internals, ...refineRoundOptions(options, Unit.Hour)),
       )
     },
 
-    equals(internals, other) {
+    equals(internals: IsoTimeFields, other: PlainTimeArg): boolean {
       const otherInternals = toPlainTimeInternals(other)
-      return compareIsoTimeFields(internals, otherInternals)
+      return !compareIsoTimeFields(internals, otherInternals)
     },
 
-    toString(internals, options) {
+    toString(internals: IsoTimeFields, options) {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(
@@ -142,7 +142,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(arg0, arg1) {
+    compare(arg0: PlainTimeArg, arg1: PlainTimeArg) {
       return compareIsoTimeFields(
         toPlainTimeInternals(arg0),
         toPlainTimeInternals(arg1),
@@ -154,11 +154,16 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function movePlainTime(internals, durationInternals) {
+function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInternals): PlainTime {
   return createPlainTime(moveTime(internals, durationInternals)[0])
 }
 
-function diffPlainTimes(internals0, internals1, options, roundingModeInvert) {
+function diffPlainTimes(
+  internals0: IsoTimeFields,
+  internals1: IsoTimeFields,
+  options,
+  roundingModeInvert?: boolean
+): Duration {
   return createDuration(
     diffTimes(
       internals0,
