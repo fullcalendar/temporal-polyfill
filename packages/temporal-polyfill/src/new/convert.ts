@@ -20,6 +20,7 @@ import {
 import { queryCalendarImpl } from './calendarImpl'
 import { queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
+import { DurationBag, DurationMod } from './duration'
 import {
   DurationFields,
   DurationInternals,
@@ -352,12 +353,15 @@ function refineTimeFields(fields, overflow) {
 // Duration
 // -------------------------------------------------------------------------------------------------
 
-export function refineDurationBag(bag: Partial<DurationFields>): DurationInternals {
+export function refineDurationBag(bag: DurationBag): DurationInternals {
   const durationFields = refineFields(bag, durationFieldNames, [])
   return updateDurationFieldsSign(durationFields)
 }
 
-export function mergeDurationBag(durationInternals, bag) {
+export function mergeDurationBag(
+  durationInternals: DurationInternals,
+  bag: DurationMod
+): DurationInternals {
   const partialDurationFields = refineFields(bag, durationFieldNames)
   return updateDurationFieldsSign({ ...durationInternals, ...partialDurationFields })
 }

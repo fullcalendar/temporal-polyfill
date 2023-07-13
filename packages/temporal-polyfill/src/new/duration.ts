@@ -30,11 +30,18 @@ import {
   totalRelativeDuration,
 } from './round'
 import { NumSign, identityFunc, noop } from './utils'
-import { Unit } from './units'
+import { DayTimeUnit, Unit } from './units'
+
+export type DurationArg = Duration | DurationBag | string
+export type DurationBag = Partial<DurationFields>
+export type DurationMod = Partial<DurationFields>
 
 export type Duration = TemporalInstance<DurationInternals>
-export type DurationArg = Duration | Partial<DurationFields> | string
-export const [Duration, createDuration, toDurationInternals] = createTemporalClass(
+export const [
+  Duration,
+  createDuration,
+  toDurationInternals
+] = createTemporalClass(
   'Duration',
 
   // Creation
@@ -94,7 +101,9 @@ export const [Duration, createDuration, toDurationInternals] = createTemporalCla
   // -----------------------------------------------------------------------------------------------
 
   {
-    with: mergeDurationBag, // TODO: wrong type!!!
+    with(internals: DurationInternals, mod: DurationMod): Duration {
+      return createDuration(mergeDurationBag(internals, mod))
+    },
 
     add: addToDuration.bind(undefined, 1),
 
@@ -230,7 +239,7 @@ function addToDuration(
   const addedDurationFields = addDurationFields(internals, otherFields, direction)
 
   if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
-    return balanceDurationDayTime(addedDurationFields)
+    return balanceDurationDayTime(addedDurationFields, largestUnit as DayTimeUnit)
   }
 
   const markerSystem = createMarkerSystem(markerInternals, internals, largestUnit)
@@ -272,9 +281,9 @@ function spanDuration(
 }
 
 function balanceDurationDayTime(
-  durationFields,
-  largestUnit, // day/time
-) {
+  durationFields: DurationFields,
+  largestUnit: DayTimeUnit, // day/time
+): Duration {
   // TODO
 }
 
