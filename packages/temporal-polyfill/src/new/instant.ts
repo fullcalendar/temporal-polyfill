@@ -43,7 +43,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   // constructorToInternals
-  (epochNano: LargeInt) => {
+  (epochNano: bigint) => {
     return checkEpochNano(toEpochNano(epochNano))
   },
 

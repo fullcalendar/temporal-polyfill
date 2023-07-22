@@ -9,7 +9,10 @@ import {
   negateDurationInternals,
   refineDurationFields,
   DurationInternals,
-  DurationFields
+  DurationFields,
+  durationFieldNamesAsc,
+  nanoToDurationFields,
+  updateDurationFieldsSign,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { isoToEpochNano } from './isoMath'
@@ -284,10 +287,16 @@ function balanceDurationDayTime(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit, // day/time
 ): Duration {
-  // TODO
+  const nano = durationFieldsToNano(durationFields)
+  return createDuration(
+    updateDurationFieldsSign(nanoToDurationFields(nano, largestUnit))
+  )
 }
 
-function getLargestDurationUnit(fields: DurationFields): Unit {
-  // TODO: rename to getLargestDurationUnitIndex
-  // TODO: move to DurationFields math
+function getLargestDurationUnit(fields: DurationFields): Unit | undefined {
+  for (let unit: Unit = Unit.Year; unit >= Unit.Nanosecond; unit--) {
+    if (fields[durationFieldNamesAsc[unit]]) {
+      return unit
+    }
+  }
 }

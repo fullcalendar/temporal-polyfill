@@ -40,10 +40,6 @@ export interface DurationInternals extends DurationFields {
   sign: NumSign
 }
 
-type DurationGetters = {
-  [K in keyof DurationInternals]: (internals: DurationInternals) => DurationInternals[K]
-}
-
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
