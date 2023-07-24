@@ -1,6 +1,6 @@
-import { Calendar, calendarProtocolMethods, createCalendar } from './calendar'
+import { Calendar, CalendarArg, calendarProtocolMethods, createCalendar } from './calendar'
 import { dateFieldRefiners, dateStatRefiners, eraYearFieldRefiners } from './calendarFields'
-import { queryCalendarImpl } from './calendarImpl'
+import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
   createProtocolChecker,
   createWrapperClass,
@@ -8,8 +8,9 @@ import {
   getInternals,
   getStrictInternals,
   idGettersStrict,
+  WrapperInstance,
 } from './class'
-import { createDuration } from './duration'
+import { Duration, createDuration } from './duration'
 import { DurationInternals } from './durationFields'
 import { CalendarInternals, IsoDateFields, IsoDateInternals } from './isoFields'
 import { Overflow, ensureArray, ensureObjectlike, ensureString, toString } from './options'
@@ -44,7 +45,7 @@ export interface CalendarOps {
 
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 
-export function queryCalendarOps(calendarArg) {
+export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
   if (typeof calendarArg === 'object') {
     if (calendarArg instanceof Calendar) {
       return getInternals(calendarArg)
@@ -57,11 +58,11 @@ export function queryCalendarOps(calendarArg) {
   return queryCalendarImpl(toString(calendarArg))
 }
 
-export function getPublicCalendar(internals) {
+export function getPublicCalendar(internals: { calendar: CalendarOps }): Calendar {
   const { calendar } = internals
 
-  return getInternals(calendar) || // CalendarOpsAdapter (return internal Calendar)
-    createCalendar(calendar) // CalendarImpl (create outer Calendar)
+  return getInternals(calendar as CalendarOpsAdapter) ||
+    createCalendar(calendar as CalendarImpl)
 }
 
 export const getCommonCalendarOps = getCommonInnerObj.bind<
@@ -89,11 +90,17 @@ const getPlainMonthDayInternals = getStrictInternals.bind<
   IsoDateInternals // return
 >(undefined, PlainMonthDay)
 
-const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
+const getDurationInternals = getStrictInternals.bind<
+  any, [any], // bound
+  [Duration], // unbound
+  DurationInternals // return
+>(undefined, Duration)
+
+const calendarOpsAdaptedMethods = {
   ...mapProps((refiner, propName) => {
-    return (calendar: Calendar, isoDateFields: IsoDateInternals) => {
+    return ((calendar: Calendar, isoDateFields: IsoDateInternals) => {
       return refiner(calendar[propName](createPlainDate(isoDateFields)))
-    }
+    }) as any
   }, {
     // TODO: more DRY with DateGetters or something?
     ...eraYearFieldRefiners,
@@ -121,13 +128,13 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
     isoDateFields0: IsoDateFields,
     isoDateFields1: IsoDateFields,
     largestUnit: Unit, // TODO: ensure year/month/week/day???
-  ) {
-    return getPlainDateInternals(
+  ): DurationInternals {
+    return getDurationInternals(
       calendar.dateUntil(
         createPlainDate(isoDateFields0),
         createPlainDate(isoDateFields1),
         { largestUnit: unitNamesAsc[largestUnit] },
-      ),
+      )
     )
   },
 
@@ -150,4 +157,17 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
   mergeFields(calendar: Calendar, fields0: any, fields1: any) {
     return ensureObjectlike(calendar.mergeFields(fields0, fields1))
   },
-})
+}
+
+type CalendarOpsAdapter = WrapperInstance<
+  Calendar, // internals
+  typeof idGettersStrict, // getters
+  typeof calendarOpsAdaptedMethods // methods
+>
+
+const CalendarOpsAdapter = createWrapperClass<
+  [Calendar], // constructor arguments
+  Calendar, // internals
+  typeof idGettersStrict, // getters
+  typeof calendarOpsAdaptedMethods // methods
+>(idGettersStrict, calendarOpsAdaptedMethods)

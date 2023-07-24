@@ -1,3 +1,4 @@
+import { CalendarOps } from "./calendarOps"
 
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
@@ -61,11 +62,11 @@ export const eraRemaps: Record<string, string> = {
   ad: 'ce',
 }
 
-export function getAllowErasInFields(calendarOps) {
+export function getAllowErasInFields(calendarOps: CalendarOps): boolean {
   return calendarOps.id !== isoCalendarId
 }
 
-export function getErasBeginMidYear(calendarOps) {
+export function getErasBeginMidYear(calendarOps: CalendarOps): boolean {
   return calendarOps.id === japaneseCalendarId
 }
 
@@ -81,26 +82,26 @@ export const leapYearMetas: {
 // -------------------------------------------------------------------------------------------------
 
 const defaultRequiredDateFields = ['day']
-const defaultRequiredYearMonthFields = []
+const defaultRequiredYearMonthFields: string[] = []
 const defaultRequiredMonthDayFields = ['day']
 
 const isoRequiredDateFields = [...defaultRequiredDateFields, 'year']
 const isoRequiredYearMonthFields = [...defaultRequiredYearMonthFields, 'year']
 const isoRequiredMonthDayFields = defaultRequiredMonthDayFields
 
-export function getRequiredDateFields(calendarOps) {
+export function getRequiredDateFields(calendarOps: CalendarOps): string[] {
   return calendarOps.id === isoCalendarId
     ? isoRequiredDateFields
     : defaultRequiredDateFields
 }
 
-export function getRequiredYearMonthFields(calendarOps) {
+export function getRequiredYearMonthFields(calendarOps: CalendarOps): string[] {
   return calendarOps.id === isoCalendarId
     ? isoRequiredYearMonthFields
     : defaultRequiredYearMonthFields
 }
 
-export function getRequiredMonthDayFields(calendarOps) {
+export function getRequiredMonthDayFields(calendarOps: CalendarOps): string[] {
   return calendarOps.id === isoCalendarId
     ? isoRequiredMonthDayFields
     : defaultRequiredMonthDayFields

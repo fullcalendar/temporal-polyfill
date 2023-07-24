@@ -32,7 +32,7 @@ type WrapperClass<
   S extends {},
 > = { new(...args: A): WrapperInstance<I, G, M, P> } & S
 
-type WrapperInstance<
+export type WrapperInstance<
   I,
   G extends { [propName: string]: (internals: I) => unknown } = {},
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown } = {},
@@ -55,8 +55,8 @@ export function createWrapperClass<
   I,
   G extends { [propName: string]: (internals: I) => unknown },
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
-  P extends PropertyDescriptorMap,
-  S extends {},
+  P extends PropertyDescriptorMap = {},
+  S extends {} = {},
 >(
   getters: G,
   methods: M,
@@ -233,7 +233,8 @@ export function neverValueOf() {
 // Complex Objects with IDs
 // -------------------------------------------------------------------------------------------------
 
-export function createProtocolChecker(protocolMethods: Record<string, () => unknown>) {
+// any - Record<string, () => unknown>
+export function createProtocolChecker(protocolMethods: any) {
   const propNames = Object.keys(protocolMethods)
   propNames.push('id')
   propNames.sort() // TODO: order matters?

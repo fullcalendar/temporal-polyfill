@@ -24,7 +24,7 @@ type Options = Record<string, unknown>
 // Compound Options
 // -------------------------------------------------------------------------------------------------
 
-export function refineOverflowOptions(options: Options | undefined) {
+export function refineOverflowOptions(options: Options | undefined): Overflow {
   return refineOverflow(normalizeOptions(options))
 }
 
@@ -37,7 +37,7 @@ export function refineZonedFieldOptions(options: Options | undefined) {
   ]
 }
 
-export function refineEpochDisambigOptions(options: Options | undefined) {
+export function refineEpochDisambigOptions(options: Options | undefined): EpochDisambig {
   return refineEpochDisambig(normalizeOptions(options))
 }
 
@@ -65,6 +65,13 @@ export function refineDiffOptions(
   }
 
   return [largestUnit, smallestUnit, roundingInc, roundingMode]
+}
+
+export function refineCalendarDiffOptions(
+  options: Options | undefined,
+): Unit { // TODO: only year/month/week/day???
+  options = normalizeOptions(options)
+  return refineLargestUnit(options, Unit.Year, Unit.Day, Unit.Day)
 }
 
 /*
@@ -372,7 +379,7 @@ function refineUnitOption(
   defaultUnit?: Unit,
 ): Unit {
   let unitName = options[optionName]
-  if (unitName === undefined) {
+  if (unitName === undefined || unitName === 'auto') {
     if (defaultUnit === undefined) {
       throw new RangeError('Must specify' + optionName) // best error?
     }
