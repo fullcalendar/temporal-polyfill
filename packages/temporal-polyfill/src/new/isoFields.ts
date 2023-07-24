@@ -1,7 +1,7 @@
 import { queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
 import { toInteger } from './options'
-import { mapPropNamesToConstant, pluckProps } from './utils'
+import { mapPropNamesToConstant, pluckProps, pluckPropsTuple } from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -114,17 +114,29 @@ export const pluckIsoDateTimeInternals = pluckProps.bind<
   IsoDateTimeInternals // return
 >(undefined, isoDateTimeInternalNames)
 
-export const pluckIsoDateTimeFields = pluckProps.bind<
-  any, [any], // bound
-  [IsoDateTimeFields], // unbound
-  IsoDateTimeFields // return
->(undefined, isoDateTimeFieldNamesAsc)
-
 export const pluckIsoTimeFields = pluckProps.bind<
   any, [any], // bound
   [IsoTimeFields], // unbound
   IsoTimeFields // return
 >(undefined, isoTimeFieldNames)
+
+// TODO: move?
+export type IsoTuple = [
+  isoYear: number,
+  isoMonth?: number,
+  isoDay?: number,
+  isoHour?: number,
+  isoMinute?: number,
+  isoSecond?: number,
+  isoMilli?: number,
+]
+
+// TODO: move?
+export const pluckIsoTuple = pluckPropsTuple.bind<
+  any, [any],
+  [Partial<IsoDateTimeFields> & { isoYear: number }], // unbound
+  IsoTuple // return
+>(undefined, isoDateTimeFieldNamesAsc.reverse())
 
 function generatePublicIsoFields<P>(
   pluckFunc: (internals: P) => P,

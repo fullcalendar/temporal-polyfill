@@ -7,6 +7,7 @@ import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { DayTimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
+  FilterPropValues,
   clamp,
   hasAnyPropsByName,
   isObjectlike,
@@ -443,14 +444,14 @@ export function toEpochNano(arg: any): LargeInt {
   return bigIntToLargeInt(arg)
 }
 
-export function clampProp(
-  props: Record<PropertyKey, number>,
-  propName: string,
+export function clampProp<P>(
+  props: P,
+  propName: keyof FilterPropValues<P, number> & string,
   min: number,
   max: number,
-  overflow: Overflow,
+  overflow: Overflow | -1,
 ): number {
-  return clamp(props[propName], min, max, overflow, propName)
+  return clamp(props[propName] as number, min, max, overflow, propName)
 }
 
 // Primitives

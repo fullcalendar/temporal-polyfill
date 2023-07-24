@@ -6,7 +6,7 @@ import {
   isoTimeFieldNames,
 } from './isoFields'
 import { ensureBoolean, ensureInteger, toInteger, toString } from './options'
-import { mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
+import { FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
 export interface EraYearFields {
   era: string
@@ -71,19 +71,10 @@ export interface DateStats extends YearMonthStats {
   daysInWeek: number
 }
 
-// TODO: move
-type FilterPropValues<P, F> = {
-  [K in keyof P as P[K] extends F ? K : never]: P[K]
-}
-
 type DateMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => any>
 
 type DateGetters = {
   [K in keyof DateMethods]: (internals: IsoDateInternals) => ReturnType<DateMethods[K]>
-}
-
-type TimeGetters = {
-  [K in keyof TimeFields]: (isoFields: IsoTimeFields) => number
 }
 
 type CalendarIdGetters = {

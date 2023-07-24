@@ -16,7 +16,10 @@ export class LargeInt {
   different than PlainTime/Duration::add, for minification
   */
   addNumber(num: number): LargeInt {
-    return balanceAndCreate(this.high, this.low + num)
+    if (num) {
+      return balanceAndCreate(this.high, this.low + num)
+    }
+    return this
   }
 
   mult(multiplier: number): LargeInt {

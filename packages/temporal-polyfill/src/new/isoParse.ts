@@ -9,7 +9,7 @@ import {
 } from './durationFields'
 import { isoTimeFieldDefaults } from './isoFields'
 import {
-  checkIsoDateTimeInternals,
+  checkIso,
   constrainIsoDateInternals,
   constrainIsoDateTimeInternals,
   constrainIsoTimeFields,
@@ -170,7 +170,7 @@ function processZonedDateTimeParse(parsed) {
 }
 
 function processDateTimeParse(parsed) {
-  return checkIsoDateTimeInternals(constrainIsoDateTimeInternals(parsed))
+  return checkIso(constrainIsoDateTimeInternals(parsed))
 }
 
 /*
@@ -180,7 +180,7 @@ function processDatelikeParse(parsed) {
   if (!parsed) {
     throw new RangeError()
   }
-  return checkIsoDateTimeInternals(constrainIsoDateInternals(parsed))
+  return checkIso(constrainIsoDateInternals(parsed))
 }
 
 // Low-level

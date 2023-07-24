@@ -22,15 +22,16 @@ export function mapProps<P, R, E = undefined>(
   return res
 }
 
-export type PropsRefinerMap<P, V> = {
-  [K in keyof P]: (propVal: P[K], propName: K) => V
-}
-
 export const mapPropsWithRefiners = mapProps.bind(
   undefined,
   (propVal: any, propName: string, refinerMap: any) => refinerMap[propName](propVal, propName),
 ) as (
-  <P, V>(props: P, refinerMap: PropsRefinerMap<P, V>) => { [K in keyof P]: V }
+  <P, M extends { [K in keyof P]: (propVal: P[K], propName: K) => any }>(
+    props: P,
+    refinerMap: M,
+  ) => {
+    [K in keyof P]: ReturnType<M[K]>
+  }
 )
 
 export function mapPropNames<P, R, E = undefined>(
@@ -81,6 +82,16 @@ export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
 
   for (const propName of propNames) {
     res[propName] = props[propName]
+  }
+
+  return res
+}
+
+export function pluckPropsTuple<P>(propNames: (keyof P)[], props: P): any {
+  const res = []
+
+  for (const propName of propNames) {
+    res.push(props[propName])
   }
 
   return res
@@ -259,21 +270,15 @@ export function clamp(
   num: number,
   min: number,
   max: number,
-  overflow?: Overflow.Constrain,
+  overflow?: Overflow.Constrain | -1, // -1 for returning undefined
 ): number
 export function clamp(
   num: number,
   min: number,
   max: number,
-  overflow: Overflow | Overflow.Reject,
+  overflow: Overflow | -1, // might be Overflow.Reject, require noun
   noun: string,
 ): number
-export function clamp(
-  num: number,
-  min: number,
-  max: number,
-  overflow: -1, // for returning undefined
-): number | undefined
 export function clamp(
   num: number,
   min: number,
@@ -334,4 +339,10 @@ export function roundHalfEven(num: number): number {
 
 function hasHalf(num: number): boolean {
   return Math.abs(num % 1) === 0.5
+}
+
+// types
+
+export type FilterPropValues<P, F> = {
+  [K in keyof P as P[K] extends F ? K : never]: P[K]
 }
