@@ -1,5 +1,5 @@
+import { CalendarOps } from './calendarOps'
 import {
-  CalendarOps,
   IsoDateFields,
   IsoDateInternals,
   IsoTimeFields,
@@ -126,7 +126,7 @@ export const dateTimeFieldRefiners = {
 }
 
 // Ordered alphabetically, for predictable macros
-const yearStatRefiners = {
+export const yearStatRefiners = {
   daysInYear: ensureInteger,
   inLeapYear: ensureBoolean,
   monthsInYear: ensureInteger,

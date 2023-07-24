@@ -10,13 +10,37 @@ import {
   idGettersStrict,
 } from './class'
 import { createDuration } from './duration'
-import { CalendarInternals, CalendarOps } from './isoFields'
-import { ensureArray, ensureObjectlike, ensureString, toString } from './options'
+import { DurationInternals } from './durationFields'
+import { CalendarInternals, IsoDateFields, IsoDateInternals } from './isoFields'
+import { Overflow, ensureArray, ensureObjectlike, ensureString, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
-import { unitNamesAsc } from './units'
+import { Unit, unitNamesAsc } from './units'
 import { mapProps } from './utils'
+
+// types
+
+export interface CalendarOps {
+  id: string
+  era(isoFields: IsoDateFields): string | undefined
+  eraYear(isoFields: IsoDateFields): number | undefined
+  year(isoFields: IsoDateFields): number
+  monthCode(isoFields: IsoDateFields): string
+  month(isoFields: IsoDateFields): number
+  day(isoFields: IsoDateFields): number
+  daysInYear(isoFields: IsoDateFields): number
+  inLeapYear(isoFields: IsoDateFields): boolean
+  monthsInYear(isoFields: IsoDateFields): number
+  daysInMonth(isoFields: IsoDateFields): number
+  dayOfWeek(isoFields: IsoDateFields): number
+  dayOfYear(isoFields: IsoDateFields): number
+  weekOfYear(isoFields: IsoDateFields): number
+  yearOfWeek(isoFields: IsoDateFields): number
+  daysInWeek(isoFields: IsoDateFields): number
+}
+
+//
 
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 
@@ -47,13 +71,27 @@ export const getCommonCalendarOps = getCommonInnerObj.bind<
 // Adapter
 // -------------------------------------------------------------------------------------------------
 
-const getPlainDateInternals = getStrictInternals.bind(undefined, PlainDate)
-const getPlainYearMonthInternals = getStrictInternals.bind(undefined, PlainYearMonth)
-const getPlainMonthDayInternals = getStrictInternals.bind(undefined, PlainMonthDay)
+const getPlainDateInternals = getStrictInternals.bind<
+  any, [any], // bound
+  [PlainDate], // unbound
+  IsoDateInternals // return
+>(undefined, PlainDate)
+
+const getPlainYearMonthInternals = getStrictInternals.bind<
+  any, [any], // bound
+  [PlainYearMonth], // unbound
+  IsoDateInternals // return
+>(undefined, PlainYearMonth)
+
+const getPlainMonthDayInternals = getStrictInternals.bind<
+  any, [any], // bound
+  [PlainMonthDay], // unbound
+  IsoDateInternals // return
+>(undefined, PlainMonthDay)
 
 const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
   ...mapProps((refiner, propName) => {
-    return (calendar, isoDateFields) => {
+    return (calendar: Calendar, isoDateFields: IsoDateInternals) => {
       return refiner(calendar[propName](createPlainDate(isoDateFields)))
     }
   }, {
@@ -63,7 +101,12 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
     ...dateStatRefiners,
   }),
 
-  dateAdd(calendar, isoDateFields, durationInternals, overflow) {
+  dateAdd(
+    calendar: Calendar,
+    isoDateFields: IsoDateInternals,
+    durationInternals: DurationInternals,
+    overflow: Overflow,
+  ): IsoDateInternals {
     return getPlainDateInternals(
       calendar.dateAdd(
         createPlainDate(isoDateFields),
@@ -73,33 +116,38 @@ const CalendarOpsAdapter = createWrapperClass(idGettersStrict, {
     )
   },
 
-  dateUntil(calendar, isoDateFields0, isoDateFields1, largestUnitIndex) {
+  dateUntil(
+    calendar: Calendar,
+    isoDateFields0: IsoDateFields,
+    isoDateFields1: IsoDateFields,
+    largestUnit: Unit, // TODO: ensure year/month/week/day???
+  ) {
     return getPlainDateInternals(
       calendar.dateUntil(
         createPlainDate(isoDateFields0),
         createPlainDate(isoDateFields1),
-        { largestUnit: unitNamesAsc[largestUnitIndex] },
+        { largestUnit: unitNamesAsc[largestUnit] },
       ),
     )
   },
 
-  dateFromFields(calendar, fields, overflow) {
+  dateFromFields(calendar: Calendar, fields: any, overflow: Overflow): IsoDateInternals {
     return getPlainDateInternals(calendar.dateFromFields(fields, { overflow }))
   },
 
-  yearMonthFromFields(calendar, fields, overflow) {
+  yearMonthFromFields(calendar: Calendar, fields: any, overflow: Overflow): IsoDateInternals {
     return getPlainYearMonthInternals(calendar.yearMonthFromFields(fields, { overflow }))
   },
 
-  monthDayFromFields(calendar, fields, overflow) {
+  monthDayFromFields(calendar: Calendar, fields: any, overflow: Overflow): IsoDateInternals {
     return getPlainMonthDayInternals(calendar.monthDayFromFields(fields, { overflow }))
   },
 
-  fields(calendar, fieldNames) {
+  fields(calendar: Calendar, fieldNames: string[]) {
     return ensureArray(calendar.fields(fieldNames)).map(ensureString)
   },
 
-  mergeFields(calendar, fields0, fields1) {
+  mergeFields(calendar: Calendar, fields0: any, fields1: any) {
     return ensureObjectlike(calendar.mergeFields(fields0, fields1))
   },
 })

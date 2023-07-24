@@ -190,7 +190,7 @@ export function createTemporalClass<
     return instance
   }
 
-  function toInternals(arg: TemporalInstance<I, G, M> | B | string, options?: O): I {
+  function toInternals(arg: TemporalInstance<I> | B | string, options?: O): I {
     let argInternals = getInternals(arg) as Reused
     let argTemporalName
 

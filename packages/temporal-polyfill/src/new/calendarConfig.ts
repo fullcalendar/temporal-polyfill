@@ -11,7 +11,9 @@ if origin is <0, consider the era to be 'reverse' direction
   year = -origin - eraYear
   year = -(origin + eraYear)
 */
-export const eraOriginsByCalendarId = {
+export const eraOriginsByCalendarId: {
+  [calendarId: string]: Record<string, number>
+} = {
   [gregoryCalendarId]: {
     bce: -1,
     ce: 0,
@@ -54,7 +56,7 @@ export const eraOriginsByCalendarId = {
   },
 }
 
-export const eraRemaps = {
+export const eraRemaps: Record<string, string> = {
   bc: 'bce',
   ad: 'ce',
 }
@@ -67,7 +69,9 @@ export function getErasBeginMidYear(calendarOps) {
   return calendarOps.id === japaneseCalendarId
 }
 
-export const leapYearMetas = {
+export const leapYearMetas: {
+  [calendarId: string]: number
+} = {
   chinese: 11, // (positive) max possible leap month
   dangi: 11, // "
   hebrew: -6, // (negative) constant leap month

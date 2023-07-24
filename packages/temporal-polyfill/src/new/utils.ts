@@ -163,9 +163,15 @@ export function hasAllPropsByName<P>(
   return true
 }
 
+// interface MapInterface<K, V> {
+//   has(key: K): boolean
+//   get(key: K): V,
+//   set(key: K, val: V): void
+// }
+
 export function createLazyGenerator<K, V, A extends any[]>(
   generator: (key: K, ...otherArgs: A) => V,
-  MapClass: { new(): Map<K, V> } = Map,
+  MapClass: { new(): any } = Map,
 ): (
   (key: K, ...otherArgs: A) => V
 ) {

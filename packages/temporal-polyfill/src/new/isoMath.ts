@@ -27,7 +27,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { compareProps, divFloorMod, mapPropsWithRefiners, pluckPropsTuple } from './utils'
+import { compareProps, divFloorMod, mapPropsWithRefiners } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -36,6 +36,10 @@ export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
 export const isoMonthsInYear = 12
 export const isoDaysInWeek = 7
+
+export function computeIsoDaysInWeek(isoDateFields: IsoDateFields) {
+  return isoDaysInWeek
+}
 
 export function computeIsoMonthsInYear(isoYear: number): number { // for methods
   return isoMonthsInYear

@@ -8,7 +8,6 @@ import {
   refinePlainYearMonthBag,
 } from './convert'
 import { createDuration, toDurationInternals } from './duration'
-import { isoDaysInWeek } from './isoMath'
 import { parseCalendarId } from './isoParse'
 import { ensureArray, ensureObjectlike, ensureString, refineOverflowOptions } from './options'
 import { createPlainDate, toPlainDateInternals } from './plainDate'
@@ -23,10 +22,6 @@ export const calendarProtocolMethods = {
       return impl[propName](toPlainDateInternals(plainDateArg))
     }
   }, dateGetterNames),
-
-  daysInWeek() {
-    return isoDaysInWeek
-  },
 
   dateAdd(impl, plainDateArg, durationArg, options) {
     return createPlainDate(

@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
-import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
+import { CalendarOps, getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,
