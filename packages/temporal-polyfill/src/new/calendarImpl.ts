@@ -14,7 +14,6 @@ import {
   monthDayFieldNames,
   monthFieldNames,
   yearStatNames,
-  yearStatRefiners,
 } from './calendarFields'
 import {
   computeIntlMonthsInYearSpan,
@@ -46,11 +45,10 @@ import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './u
 import { CalendarOps } from './calendarOps'
 import { DurationFields, DurationInternals } from './durationFields'
 
-// Base ISO Calendar
+// Base Calendar Implementation
 // -------------------------------------------------------------------------------------------------
-// TODO: rename to 'CalendarImpl', since it's a base?
 
-class IsoCalendarImpl implements CalendarOps {
+export class CalendarImpl implements CalendarOps {
   constructor(public id: string) {}
 
   year(isoDateFields: IsoDateFields): number {
@@ -240,7 +238,7 @@ class IsoCalendarImpl implements CalendarOps {
     return clamp(
       month,
       1,
-      this.queryMonthsInYear(year!),
+      this.computeMonthsInYear(year),
       overflow,
       'month',
     )
@@ -257,96 +255,95 @@ class IsoCalendarImpl implements CalendarOps {
   }
 }
 
-// IsoCalendarImpl - Year Query Methods
+// Base Calendar Implementation :: Year Query Methods
 // -------------------------------------------------------------------------------------------------
-// TODO: rename 'query' -> 'compute'
 
-interface IsoYearQueryMethods {
-  queryDaysInYear(year: number): number
-  queryIsLeapYear(year: number): boolean
-  queryMonthsInYear(year: number): number
+interface YearComputeMethods {
+  computeDaysInYear(year: number): number
+  computeIsLeapYear(year: number): boolean
+  computeMonthsInYear(year: number): number
 }
 
 // sorted alphabetically, for predictable macros
-const isoYearQueryMethods: IsoYearQueryMethods = {
-  queryDaysInYear: computeIsoDaysInYear,
-  queryIsLeapYear: computeIsoIsLeapYear,
-  queryMonthsInYear: computeIsoMonthsInYear,
+const yearComputeMethods: YearComputeMethods = {
+  computeDaysInYear: computeIsoDaysInYear,
+  computeIsLeapYear: computeIsoIsLeapYear,
+  computeMonthsInYear: computeIsoMonthsInYear,
 }
 
-// IsoCalendarImpl - Year Methods
+// Base Calendar Implementation :: Year Methods
 // -------------------------------------------------------------------------------------------------
 
-interface IsoYearMethods {
+interface YearMethods {
   daysInYear(isoFields: IsoDateFields): number
   inLeapYear(isoFields: IsoDateFields): boolean
   monthsInYear(isoFields: IsoDateFields): number
 }
 
-const isoYearMethods = {} as IsoYearMethods
+const yearMethods = {} as YearMethods
 
-Object.keys(isoYearQueryMethods).forEach((queryMethodName, i) => {
-  isoYearMethods[yearStatNames[i]] = function(
-    this: IsoCalendarImpl,
+Object.keys(yearComputeMethods).forEach((queryMethodName, i) => {
+  yearMethods[yearStatNames[i]] = function(
+    this: CalendarImpl,
     isoDateFields: IsoDateFields,
   ) {
-    return this[queryMethodName as keyof IsoYearMethods](this.year(isoDateFields))
+    return this[queryMethodName as keyof YearMethods](this.year(isoDateFields))
   } as any
 })
 
-// IsoCalendarImpl - Week Methods
+// Base Calendar Implementation :: Week Methods
 // -------------------------------------------------------------------------------------------------
 
-interface IsoWeekMethods {
+interface WeekMethods {
   daysInWeek(isoFields: IsoDateFields): number
   dayOfWeek(isoFields: IsoDateFields): number
   weekOfYear(isoFields: IsoDateFields): number
   yearOfWeek(isoFields: IsoDateFields): number
 }
 
-const isoWeekMethods: IsoWeekMethods = {
+const weekMethods: WeekMethods = {
   daysInWeek: computeIsoDaysInWeek,
   dayOfWeek: computeIsoDayOfWeek,
   weekOfYear: computeIsoWeekOfYear,
   yearOfWeek: computeIsoYearOfWeek,
 }
 
-// IsoCalendarImpl - Misc Methods
+// Base Calendar Implementation :: Misc Methods
 // -------------------------------------------------------------------------------------------------
 
-interface IsoMiscMethods {
+interface MiscMethods {
   addMonths(year: number, month: number, monthDelta: number): [number, number]
   queryDateStart(year: number, month?: number, day?: number): number
   queryDaysInMonth(year: number, month: number): number
   queryMonthsInYearSpan(yearStart: number, yearEnd: number): number
 }
 
-const isoMiscMethods: IsoMiscMethods = {
+const miscMethods: MiscMethods = {
   addMonths: moveByIsoMonths,
   queryDateStart: isoArgsToEpochMilli as (year: number, month?: number, day?: number) => number,
   queryDaysInMonth: computeIsoDaysInMonth,
   queryMonthsInYearSpan: computeIsoMonthsInYearSpan,
 }
 
-// IsoCalendarImpl - Prototype Extension
+// Base Calendar Implementation :: Prototype Extension
 // -------------------------------------------------------------------------------------------------
 
-interface IsoCalendarImpl extends IsoYearQueryMethods {}
-interface IsoCalendarImpl extends IsoYearMethods {}
-interface IsoCalendarImpl extends IsoWeekMethods {}
-interface IsoCalendarImpl extends IsoMiscMethods {}
+export interface CalendarImpl extends YearComputeMethods {}
+export interface CalendarImpl extends YearMethods {}
+export interface CalendarImpl extends WeekMethods {}
+export interface CalendarImpl extends MiscMethods {}
 
-Object.assign(IsoCalendarImpl.prototype, {
-  ...isoYearQueryMethods,
-  ...isoYearMethods,
-  ...isoWeekMethods,
-  ...isoMiscMethods,
+Object.assign(CalendarImpl.prototype, {
+  ...yearComputeMethods,
+  ...yearMethods,
+  ...weekMethods,
+  ...miscMethods,
 })
 
 // Refining Utils
 // -------------------------------------------------------------------------------------------------
 
-function refineEraYear(calendar: IsoCalendarImpl, era: string, eraYear: number): number {
+function refineEraYear(calendar: CalendarImpl, era: string, eraYear: number): number {
   const eraOrigins = getEraOrigins(calendar.id)
   if (eraOrigins === undefined) {
     throw new RangeError('Does not accept era/eraYear')
@@ -361,7 +358,7 @@ function refineEraYear(calendar: IsoCalendarImpl, era: string, eraYear: number):
 }
 
 function refineMonthCode(
-  calendar: IsoCalendarImpl,
+  calendar: CalendarImpl,
   monthCode: string,
   year: number, // optional if known that calendar doesn't support leap months
   overflow: Overflow = Overflow.Reject,
@@ -395,7 +392,7 @@ function refineMonthCode(
 // Gregory Calendar
 // -------------------------------------------------------------------------------------------------
 
-class GregoryCalendarImpl extends IsoCalendarImpl {
+class GregoryCalendarImpl extends CalendarImpl {
   era(isoDateFields: IsoDateFields): string | undefined {
     return computeGregoryEra(isoDateFields.isoYear)
   }
@@ -431,7 +428,7 @@ class JapaneseCalendarImpl extends GregoryCalendarImpl {
 // Intl Calendar
 // -------------------------------------------------------------------------------------------------
 
-class IntlCalendarImpl extends IsoCalendarImpl {
+class IntlCalendarImpl extends CalendarImpl {
   isoDateFieldsToIntl: (isoDateFields: IsoDateFields) => IntlFields
   queryYear: YearQueryFunc
   yearAtEpoch: number
@@ -478,16 +475,16 @@ class IntlCalendarImpl extends IsoCalendarImpl {
     }
   }
 
-  queryDaysInYear(year: number): number {
+  computeDaysInYear(year: number): number {
     const milli = this.queryDateStart(year)
     const milliNext = this.queryDateStart(year + 1)
     return diffEpochMilliByDay(milli, milliNext)
   }
 
-  queryIsLeapYear(year: number): boolean {
-    const days = this.queryDaysInYear(year)
-    return days > this.queryDaysInYear(year - 1) &&
-      days > this.queryDaysInYear(year + 1)
+  computeIsLeapYear(year: number): boolean {
+    const days = this.computeDaysInYear(year)
+    return days > this.computeDaysInYear(year - 1) &&
+      days > this.computeDaysInYear(year + 1)
   }
 
   queryYearMonthDay(isoDateFields: IsoDateFields): [
@@ -537,7 +534,7 @@ class IntlCalendarImpl extends IsoCalendarImpl {
     }
   }
 
-  queryMonthsInYear(year: number): number {
+  computeMonthsInYear(year: number): number {
     const { monthEpochMilli } = this.queryYear(year)
     return monthEpochMilli.length
   }
@@ -589,9 +586,9 @@ class IntlCalendarImpl extends IsoCalendarImpl {
 // -------------------------------------------------------------------------------------------------
 
 const calendarImplClasses: {
-  [calendarId: string]: { new(calendarId: string): IsoCalendarImpl }
+  [calendarId: string]: { new(calendarId: string): CalendarImpl }
 } = {
-  [isoCalendarId]: IsoCalendarImpl,
+  [isoCalendarId]: CalendarImpl,
   [gregoryCalendarId]: GregoryCalendarImpl,
   [japaneseCalendarId]: JapaneseCalendarImpl,
 }
@@ -600,7 +597,7 @@ const queryCalendarImplWithClass = createLazyGenerator((calendarId, CalendarImpl
   return new CalendarImplClass(calendarId)
 })
 
-export function queryCalendarImpl(calendarId: string): IsoCalendarImpl {
+export function queryCalendarImpl(calendarId: string): CalendarImpl {
   const calendarIdBase = getCalendarIdBase(calendarId)
   const CalendarImplClass = calendarImplClasses[calendarIdBase]
 

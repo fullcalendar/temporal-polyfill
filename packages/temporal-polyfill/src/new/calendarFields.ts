@@ -126,7 +126,7 @@ export const dateTimeFieldRefiners = {
 }
 
 // Ordered alphabetically, for predictable macros
-export const yearStatRefiners = {
+const yearStatRefiners = {
   daysInYear: ensureInteger,
   inLeapYear: ensureBoolean,
   monthsInYear: ensureInteger,
