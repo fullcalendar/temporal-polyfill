@@ -1,5 +1,3 @@
-/* eslint-disable no-return-assign */
-/* eslint-disable no-unmodified-loop-condition */
 import { parseIntlYear } from './calendarImpl'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
@@ -13,6 +11,7 @@ import {
 } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import { LargeInt } from './largeInt'
+import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clamp, compareNumbers, createLazyGenerator } from './utils'
 
@@ -34,9 +33,7 @@ export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
   return queryIntlTimeZoneImpl(timeZoneId)
 }
 
-export interface TimeZoneImpl {
-  getOffsetNanosecondsFor(epochNano: LargeInt): number
-  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[]
+export interface TimeZoneImpl extends TimeZoneOps {
   getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined
 }
 

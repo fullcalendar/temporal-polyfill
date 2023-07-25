@@ -1,3 +1,4 @@
+import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { YearMonthFields, yearMonthGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar } from './calendarOps'

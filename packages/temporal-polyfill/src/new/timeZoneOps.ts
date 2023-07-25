@@ -1,4 +1,5 @@
 import {
+  WrapperInstance,
   createProtocolChecker,
   createWrapperClass,
   getCommonInnerObj,
@@ -7,25 +8,37 @@ import {
   idGettersStrict,
 } from './class'
 import { Instant, createInstant } from './instant'
-import { isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
 import {
   epochNanoToIso,
   isoToEpochNano,
 } from './isoMath'
+import { LargeInt } from './largeInt'
 import { moveDateByDays } from './move'
-import { ensureArray } from './options'
+import { EpochDisambig, OffsetDisambig, ensureArray, toString } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
-import { TimeZone, createTimeZone, timeZoneProtocolMethods } from './timeZone'
-import { queryTimeZoneImpl } from './timeZoneImpl'
+import { TimeZone, TimeZoneArg, createTimeZone, timeZoneProtocolMethods } from './timeZone'
+import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
 import { createLazyGenerator } from './utils'
+import { ZonedInternals } from './zonedDateTime'
+
+export interface TimeZoneOps {
+  getOffsetNanosecondsFor(epochNano: LargeInt): number
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[]
+}
+
+// TODO: best place for this? see CalendarInternals. see ZonedInternals
+export interface TimeZoneInternals {
+  timeZone: TimeZoneOps
+}
 
 export const utcTimeZoneId = 'UTC'
 
 const checkTimeZoneProtocol = createProtocolChecker(timeZoneProtocolMethods)
 
-export function queryTimeZoneOps(timeZoneArg) {
+export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
   if (typeof timeZoneArg === 'object') {
     if (timeZoneArg instanceof TimeZone) {
       return getInternals(timeZoneArg)
@@ -38,42 +51,46 @@ export function queryTimeZoneOps(timeZoneArg) {
   return queryTimeZoneImpl(toString(timeZoneArg))
 }
 
-export function getPublicTimeZone(internals) {
+export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZone {
   const { timeZone } = internals
 
-  return getInternals(timeZone) || // TimeZoneOpsAdapter (return internal TimeZone)
-    createTimeZone(timeZone) // TimeZoneImpl (create outer TimeZone)
+  return getInternals(timeZone as TimeZoneOpsAdapter) ||
+    createTimeZone(timeZone as TimeZoneImpl)
 }
 
-export const getCommonTimeZoneOps = getCommonInnerObj.bind(undefined, 'timeZone')
+export const getCommonTimeZoneOps = getCommonInnerObj.bind<
+  any, [any], // bound
+  [TimeZoneInternals, TimeZoneInternals], // unbound
+  TimeZoneOps // return
+>(undefined, 'timeZone')
 
 // Public Utils
 // ------------
 
 export function computeNanosecondsInDay(
-  timeZoneOps,
-  isoDateFields, // could contain time fields though
-) {
+  timeZoneOps: TimeZoneOps,
+  isoDateFields: IsoDateFields, // could contain time fields though
+): number {
   isoDateFields = { ...isoDateFields, ...isoTimeFieldDefaults }
-  const epochNano0 = getSingleInstantFor(timeZoneOps, isoDateFields)
+  const epochNano0 = getSingleInstantFor(timeZoneOps, { ...isoTimeFieldDefaults, ...isoDateFields })
   const epochNano1 = getSingleInstantFor(timeZoneOps, moveDateByDays(isoDateFields, 1))
-  return epochNano1.sub(epochNano0).toNumber()
+  return epochNano1.addLargeInt(epochNano0, -1).toNumber()
 }
 
 export function getMatchingInstantFor(
-  timeZoneOps,
-  isoDateTimeFields,
-  offsetNano, // optional
-  hasZ,
+  timeZoneOps: TimeZoneOps,
+  isoDateTimeFields: IsoDateTimeFields,
+  offsetNano: number, // optional
+  hasZ: boolean,
   // need these defaults?
-  offsetHandling = 'reject',
-  disambig = 'compatible',
+  offsetHandling: OffsetDisambig = OffsetDisambig.Reject,
+  disambig: EpochDisambig = EpochDisambig.Compat,
   fuzzy = false,
 ) {
-  if (offsetNano !== undefined && offsetHandling !== 'ignore') {
+  if (offsetNano !== undefined && offsetHandling !== OffsetDisambig.Ignore) {
     // we ALWAYS use Z as a zero offset
-    if (offsetHandling === 'use' || hasZ) {
-      return isoToEpochNano(isoDateTimeFields).sub(offsetNano)
+    if (offsetHandling === OffsetDisambig.Use || hasZ) {
+      return isoToEpochNano(isoDateTimeFields)!.addNumber(-offsetNano)
     }
 
     const matchingEpochNano = findMatchingEpochNano(
@@ -87,7 +104,7 @@ export function getMatchingInstantFor(
       return matchingEpochNano
     }
 
-    if (offsetHandling === 'reject') {
+    if (offsetHandling === OffsetDisambig.Reject) {
       throw new RangeError('Mismatching offset/timezone')
     }
     // else (offsetHandling === 'prefer') ...
@@ -96,16 +113,21 @@ export function getMatchingInstantFor(
   return getSingleInstantFor(timeZoneOps, isoDateTimeFields, disambig)
 }
 
-function findMatchingEpochNano(timeZoneOps, isoDateTimeFields, offsetNano, fuzzy) {
+function findMatchingEpochNano(
+  timeZoneOps: TimeZoneOps,
+  isoDateTimeFields: IsoDateTimeFields,
+  offsetNano: number,
+  fuzzy: boolean,
+): LargeInt | undefined {
   const possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
-  const zonedEpochNano = isoToEpochNano(isoDateTimeFields)
+  const zonedEpochNano = isoToEpochNano(isoDateTimeFields)!
 
   if (fuzzy) {
     offsetNano = roundToMinute(offsetNano)
   }
 
   for (const possibleEpochNano of possibleEpochNanos) {
-    let possibleOffsetNano = zonedEpochNano.sub(possibleEpochNano).toNumber()
+    let possibleOffsetNano = zonedEpochNano.addLargeInt(possibleEpochNano, -1).toNumber()
 
     if (fuzzy) {
       possibleOffsetNano = roundToMinute(possibleOffsetNano)
@@ -118,17 +140,17 @@ function findMatchingEpochNano(timeZoneOps, isoDateTimeFields, offsetNano, fuzzy
 }
 
 export function getSingleInstantFor(
-  timeZoneOps,
-  isoDateTimeFields,
-  disambig = 'compatible',
-) {
+  timeZoneOps: TimeZoneOps,
+  isoDateTimeFields: IsoDateTimeFields,
+  disambig: EpochDisambig = EpochDisambig.Compat,
+): LargeInt {
   let epochNanos = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
 
   if (epochNanos.length === 1) {
     return epochNanos[0]
   }
 
-  if (disambig === 'reject') {
+  if (disambig === EpochDisambig.Reject) {
     throw new RangeError('Ambiguous offset')
   }
 
@@ -136,7 +158,7 @@ export function getSingleInstantFor(
   // ('compatible' means 'earlier')
   if (epochNanos.length) {
     return epochNanos[
-      disambig === 'later'
+      disambig === EpochDisambig.Later
         ? 1
         : 0 // 'earlier' and 'compatible'
     ]
@@ -145,13 +167,13 @@ export function getSingleInstantFor(
   // within a transition that jumps forward...
   // ('compatible' means 'later')
 
-  const zonedEpochNano = isoToEpochNano(isoDateTimeFields)
+  const zonedEpochNano = isoToEpochNano(isoDateTimeFields)!
   const gapNano = computeGapNear(timeZoneOps, zonedEpochNano)
 
   epochNanos = timeZoneOps.getPossibleInstantsFor(
     epochNanoToIso(
       zonedEpochNano.addNumber(gapNano * (
-        disambig === 'earlier'
+        disambig === EpochDisambig.Earlier
           ? -1
           : 1 // 'later' or 'compatible'
       )),
@@ -159,13 +181,13 @@ export function getSingleInstantFor(
   )
 
   return epochNanos[
-    disambig === 'earlier'
+    disambig === EpochDisambig.Earlier
       ? 0
       : epochNanos.length - 1 // 'later' or 'compatible'
   ]
 }
 
-function computeGapNear(timeZoneOps, zonedEpochNano) {
+function computeGapNear(timeZoneOps: TimeZoneOps, zonedEpochNano: LargeInt): number {
   const startOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
     zonedEpochNano.addNumber(-nanoInUtcDay),
   )
@@ -175,7 +197,7 @@ function computeGapNear(timeZoneOps, zonedEpochNano) {
   return endOffsetNano - startOffsetNano
 }
 
-export const zonedInternalsToIso = createLazyGenerator((internals) => {
+export const zonedInternalsToIso = createLazyGenerator((internals: ZonedInternals) => {
   const { timeZone, epochNanoseconds } = internals
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
   const isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
@@ -186,7 +208,7 @@ export const zonedInternalsToIso = createLazyGenerator((internals) => {
   }
 })
 
-export function zonedEpochNanoToIso(timeZoneOps, epochNano) {
+export function zonedEpochNanoToIso(timeZoneOps: TimeZoneOps, epochNano: LargeInt): IsoDateTimeFields {
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   return epochNanoToIso(epochNano.addNumber(offsetNano))
 }
@@ -194,20 +216,37 @@ export function zonedEpochNanoToIso(timeZoneOps, epochNano) {
 // Adapter
 // -------
 
-const getInstantEpochNano = getStrictInternals.bind(undefined, Instant)
+const getInstantEpochNano = getStrictInternals.bind<
+  any, [any], // bound
+  [Instant], // unbound
+  LargeInt // return
+>(undefined, Instant)
 
-export const TimeZoneOpsAdapter = createWrapperClass(idGettersStrict, {
-  getOffsetNanosecondsFor(timeZone, epochNano) {
+const timeZoneOpsAdapterMethods = {
+  getOffsetNanosecondsFor(timeZone: TimeZone, epochNano: LargeInt): number {
     return validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
   },
 
-  getPossibleInstantsFor(timeZone, isoDateTimeFields) {
+  getPossibleInstantsFor(timeZone: TimeZone, isoDateTimeFields: IsoDateTimeFields) {
     return ensureArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
       .map(getInstantEpochNano)
   },
-})
+}
 
-function validateOffsetNano(offsetNano) {
+type TimeZoneOpsAdapter = WrapperInstance<
+  TimeZone, // internals
+  typeof idGettersStrict, // getters
+  typeof timeZoneOpsAdapterMethods // methods
+>
+
+const TimeZoneOpsAdapter = createWrapperClass<
+  [TimeZone], // constructor
+  TimeZone, // internals
+  typeof idGettersStrict, // getters
+  typeof timeZoneOpsAdapterMethods // methods
+>(idGettersStrict, timeZoneOpsAdapterMethods)
+
+function validateOffsetNano(offsetNano: number): number {
   if (!Number.isInteger(offsetNano)) { // will return false on non-number (good)
     throw new RangeError('must be integer number')
   }

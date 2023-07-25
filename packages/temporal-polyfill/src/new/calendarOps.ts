@@ -66,7 +66,9 @@ export function getPublicCalendar(internals: { calendar: CalendarOps }): Calenda
 }
 
 export const getCommonCalendarOps = getCommonInnerObj.bind<
-  any, [any], [CalendarInternals, CalendarInternals], CalendarOps
+  any, [any], // bound
+  [CalendarInternals, CalendarInternals], // unbound
+  CalendarOps // return
 >(undefined, 'calendar')
 
 // Adapter
@@ -96,7 +98,7 @@ const getDurationInternals = getStrictInternals.bind<
   DurationInternals // return
 >(undefined, Duration)
 
-const calendarOpsAdaptedMethods = {
+const calendarOpsAdapterMethods = {
   ...mapProps((refiner, propName) => {
     return ((calendar: Calendar, isoDateFields: IsoDateInternals) => {
       return refiner(calendar[propName](createPlainDate(isoDateFields)))
@@ -162,12 +164,12 @@ const calendarOpsAdaptedMethods = {
 type CalendarOpsAdapter = WrapperInstance<
   Calendar, // internals
   typeof idGettersStrict, // getters
-  typeof calendarOpsAdaptedMethods // methods
+  typeof calendarOpsAdapterMethods // methods
 >
 
 const CalendarOpsAdapter = createWrapperClass<
-  [Calendar], // constructor arguments
+  [Calendar], // constructor
   Calendar, // internals
   typeof idGettersStrict, // getters
-  typeof calendarOpsAdaptedMethods // methods
->(idGettersStrict, calendarOpsAdaptedMethods)
+  typeof calendarOpsAdapterMethods // methods
+>(idGettersStrict, calendarOpsAdapterMethods)

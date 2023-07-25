@@ -95,12 +95,18 @@ export const calendarProtocolMethods = {
   },
 }
 
+const calendarMethods = {
+  ...calendarProtocolMethods,
+
+  toString: getObjId,
+}
+
 export type CalendarArg = Calendar | string
 
 export type Calendar = TemporalInstance<
   CalendarImpl, // internals
   typeof idGetters, // getters
-  typeof calendarProtocolMethods // methods
+  typeof calendarMethods // methods
 >
 
 export const [Calendar, createCalendar] = createTemporalClass(
@@ -132,9 +138,5 @@ export const [Calendar, createCalendar] = createTemporalClass(
   // Methods
   // -----------------------------------------------------------------------------------------------
 
-  {
-    ...calendarProtocolMethods,
-
-    toString: getObjId,
-  },
+  calendarMethods,
 )
