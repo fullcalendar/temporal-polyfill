@@ -2,6 +2,7 @@
 /* eslint-disable no-unmodified-loop-condition */
 import { parseIntlYear } from './calendarImpl'
 import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
+import { IsoDateTimeFields } from './isoFields'
 import {
   epochNanoToSec,
   epochNanoToSecMod,
@@ -11,6 +12,7 @@ import {
   isoToEpochSec,
 } from './isoMath'
 import { parseOffsetNano } from './isoParse'
+import { LargeInt } from './largeInt'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clamp, compareNumbers, createLazyGenerator } from './utils'
 
@@ -18,56 +20,73 @@ const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
 const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
 
-const intlTimeZoneImplCache = {}
+const queryIntlTimeZoneImpl = createLazyGenerator((timeZoneId: string) => {
+  return new IntlTimeZoneImpl(timeZoneId)
+})
 
-export function queryTimeZoneImpl(timeZoneId) {
+export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
   const offsetNano = parseOffsetNano(timeZoneId)
 
   if (offsetNano !== undefined) {
     return new FixedTimeZoneImpl(timeZoneId, offsetNano)
   }
 
-  return intlTimeZoneImplCache[timeZoneId] || (
-    intlTimeZoneImplCache[timeZoneId] = new IntlTimeZoneImpl(timeZoneId)
-  )
+  return queryIntlTimeZoneImpl(timeZoneId)
+}
+
+export interface TimeZoneImpl {
+  getOffsetNanosecondsFor(epochNano: LargeInt): number
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[]
+  getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined
 }
 
 // Fixed
 // -------------------------------------------------------------------------------------------------
 
-export class FixedTimeZoneImpl {
-  constructor(id, offetNano) {
-    this.id = id
-    this.offsetNano = offetNano
+export class FixedTimeZoneImpl implements TimeZoneImpl {
+  constructor(
+    public id: string,
+    public offsetNano: number,
+  ) {}
+
+  getOffsetNanosecondsFor(epochNano: LargeInt): number {
+    return this.offsetNano
   }
 
-  getOffsetNanosecondsFor(epochNano) {
-    return [this.offsetNano]
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
+    return [isoToEpochNano(isoDateTimeFields)!.addNumber(this.offsetNano)]
   }
 
-  getPossibleInstantsFor(isoDateTimeFields) {
-    return [isoToEpochNano(isoDateTimeFields).addNumber(this.offsetNano)]
-  }
-
-  getTransition(epochNano, direction) {
+  getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined {
+    return undefined // hopefully minifier will remove
   }
 }
 
 // Intl
 // -------------------------------------------------------------------------------------------------
 
-export class IntlTimeZoneImpl {
-  constructor(id) {
-    this.id = id
+interface IntlTimeZoneStore {
+  getPossibleEpochSec: (zonedEpochSec: number) => number[]
+  getOffsetSec: (epochSec: number) => number
+  getTransition: (epochSec: number, direction: -1 | 1) => number | undefined
+}
+
+export class IntlTimeZoneImpl implements TimeZoneImpl {
+  store: IntlTimeZoneStore
+
+  constructor(
+    public id: string
+  ) {
     this.store = createIntlTimeZoneStore(createComputeOffsetSec(id))
   }
 
-  getOffsetNanosecondsFor(epochNano) {
+  getOffsetNanosecondsFor(epochNano: LargeInt): number {
     return this.store.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
-  getPossibleInstantsFor(isoDateTimeFields) {
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
     const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeFields)
+
     return this.store.getPossibleEpochSec(zonedEpochSec)
       .map((epochSec) => epochSecToNano(epochSec).addNumber(subsecNano))
   }
@@ -75,7 +94,7 @@ export class IntlTimeZoneImpl {
   /*
   exclusive for both directions
   */
-  getTransition(epochNano, direction) {
+  getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined {
     const [epochSec, subsecNano] = epochNanoToSecMod(epochNano)
     const resEpochSec = this.store.getTransition(
       epochSec.toNumber() + ((direction > 0 || subsecNano) ? 1 : 0),
@@ -87,13 +106,15 @@ export class IntlTimeZoneImpl {
   }
 }
 
-function createIntlTimeZoneStore(computeOffsetSec) {
+function createIntlTimeZoneStore(
+  computeOffsetSec: (epochSec: number) => number,
+): IntlTimeZoneStore {
   const getSample = createLazyGenerator(computeOffsetSec) // always given startEpochSec/endEpochSec
-  const getSplit = createLazyGenerator((startEpochSec, endEpochSec) => [startEpochSec, endEpochSec])
+  const getSplit = createLazyGenerator(createSplitTuple)
   let minTransition = minPossibleTransition
   let maxTransition = maxPossibleTransition
 
-  function getPossibleEpochSec(zonedEpochSec) {
+  function getPossibleEpochSec(zonedEpochSec: number): number[] {
     let startOffsetSec = getOffsetSec(zonedEpochSec - secInDay)
     let endOffsetSec = getOffsetSec(zonedEpochSec + secInDay)
     const startUtcEpochSec = zonedEpochSec - startOffsetSec
@@ -117,7 +138,7 @@ function createIntlTimeZoneStore(computeOffsetSec) {
     return []
   }
 
-  function getOffsetSec(epochSec) {
+  function getOffsetSec(epochSec: number): number {
     const clampedEpochSec = clamp(epochSec, minTransition, maxTransition)
     const [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec)
     const startOffsetSec = getSample(startEpochSec)
@@ -134,7 +155,7 @@ function createIntlTimeZoneStore(computeOffsetSec) {
   /*
   inclusive for positive direction, exclusive for negative
   */
-  function getTransition(epochSec, direction) {
+  function getTransition(epochSec: number, direction: -1 | 1): number | undefined {
     const clampedEpochSec = clamp(epochSec, minTransition, maxTransition)
     let [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec)
 
@@ -167,18 +188,35 @@ function createIntlTimeZoneStore(computeOffsetSec) {
   transition is the first reading of a new offset period
   just one isolated sample doesn't make it known
   */
-  function pinch(split, startOffsetSec, endOffsetSec, forEpochSec) {
-    let offsetSec
-    let splitDurSec
+  function pinch(
+    split: [number, number],
+    startOffsetSec: number,
+    endOffsetSec: number,
+  ): undefined
+  function pinch(
+    split: [number, number],
+    startOffsetSec: number,
+    endOffsetSec: number,
+    forEpochSec: number,
+  ): number
+  function pinch(
+    split: [number, number],
+    startOffsetSec: number,
+    endOffsetSec: number,
+    forEpochSec?: number,
+  ): number | undefined {
+    let offsetSec: number | undefined
+    let splitDurSec: number | undefined
 
     while (
       (forEpochSec === undefined ||
-        (forEpochSec < split[0]
-          ? startOffsetSec
-          : forEpochSec >= split[1]
-            ? endOffsetSec
-            : undefined
-        ) === undefined
+        (offsetSec = (
+          forEpochSec < split[0]
+            ? startOffsetSec
+            : forEpochSec >= split[1]
+              ? endOffsetSec
+              : undefined
+        )) === undefined
       ) &&
       (splitDurSec = split[1] - split[0])
     ) {
@@ -198,16 +236,22 @@ function createIntlTimeZoneStore(computeOffsetSec) {
   return { getPossibleEpochSec, getOffsetSec, getTransition }
 }
 
-function computePeriod(epochSec) {
+function createSplitTuple(startEpochSec: number, endEpochSec: number): [number, number] {
+  return [startEpochSec, endEpochSec]
+}
+
+function computePeriod(epochSec: number): [number, number] {
   const startEpochSec = Math.floor(epochSec / periodDur)
   const endEpochSec = startEpochSec + periodDur
   return [startEpochSec, endEpochSec]
 }
 
-function createComputeOffsetSec(timeZoneId) {
+function createComputeOffsetSec(timeZoneId: string): (
+  (epochSec: number) => number
+) {
   const format = buildIntlFormat(timeZoneId)
 
-  return (epochSec) => {
+  return (epochSec: number) => {
     const intlParts = hashIntlFormatParts(format, epochSec * milliInSec)
     const zonedEpochSec = isoArgsToEpochSec(
       parseIntlYear(intlParts).year,
@@ -221,7 +265,7 @@ function createComputeOffsetSec(timeZoneId) {
   }
 }
 
-function buildIntlFormat(timeZoneId) {
+function buildIntlFormat(timeZoneId: string): Intl.DateTimeFormat {
   // format will ALWAYS do gregorian. need to parse year
   return new IntlDateTimeFormat(standardCalendarId, {
     timeZone: timeZoneId,
