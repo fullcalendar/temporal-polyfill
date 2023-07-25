@@ -1,3 +1,4 @@
+import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateFields, dateGetters } from './calendarFields'
 import {
@@ -132,7 +133,7 @@ export const [
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
-    toString(internals: IsoDateInternals, options): string {
+    toString(internals: IsoDateInternals, options: any): string {
       return formatIsoDateFields(internals) +
         formatCalendar(internals.calendar, refineDateDisplayOptions(options))
     },
@@ -141,7 +142,7 @@ export const [
 
     valueOf: neverValueOf,
 
-    toZonedDateTime: createZonedDateTimeConverter((options) => {
+    toZonedDateTime: createZonedDateTimeConverter((options: any) => {
       return optionalToPlainTimeFields(options.time)
     }),
 
@@ -184,7 +185,7 @@ export const [
 function diffPlainDates(
   internals0: IsoDateInternals,
   internals1: IsoDateInternals,
-  options,
+  options: any,
   roundingModeInvert?: boolean,
 ): Duration {
   return createDuration(

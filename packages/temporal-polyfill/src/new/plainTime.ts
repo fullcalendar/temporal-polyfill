@@ -117,7 +117,7 @@ export const [
       return !compareIsoTimeFields(fields, otherInternals)
     },
 
-    toString(fields: IsoTimeFields, options): string {
+    toString(fields: IsoTimeFields, options: any): string {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(
@@ -167,7 +167,7 @@ function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInte
 function diffPlainTimes(
   internals0: IsoTimeFields,
   internals1: IsoTimeFields,
-  options,
+  options: any,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

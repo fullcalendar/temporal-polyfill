@@ -1,3 +1,4 @@
+import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { dateTimeGetters } from './calendarFields'
 import { CalendarOps, getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
@@ -49,7 +50,9 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
+import { TimeZoneArg } from './timeZone'
 import {
+  TimeZoneOps,
   computeNanosecondsInDay,
   getCommonTimeZoneOps,
   getMatchingInstantFor,
@@ -309,7 +312,7 @@ export const [
         isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
     },
 
-    toString(internals: ZonedInternals, options): string {
+    toString(internals: ZonedInternals, options: any): string {
       let { epochNanoseconds, timeZone, calendar } = internals
       const [
         calendarDisplayI,
@@ -431,7 +434,7 @@ function moveZonedDateTime(
 function diffZonedDateTimes(
   internals: ZonedInternals,
   otherInternals: ZonedInternals,
-  options,
+  options: any,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

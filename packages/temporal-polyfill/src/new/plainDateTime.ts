@@ -1,3 +1,4 @@
+import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateFields, TimeFields, dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
@@ -31,8 +32,11 @@ import {
   refineRoundOptions,
 } from './options'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from './plainDate'
+import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
+import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
+import { TimeZoneArg } from './timeZone'
 import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
 import { NumSign } from './utils'
@@ -244,7 +248,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
 function movePlainDateTime(
   internals: IsoDateTimeInternals,
   durationInternals: DurationInternals,
-  options,
+  options: any,
 ): PlainDateTime {
   return createPlainDateTime(
     moveDateTime(
@@ -259,7 +263,7 @@ function movePlainDateTime(
 function diffPlainDateTimes(
   internals0: IsoDateTimeInternals,
   internals1: IsoDateTimeInternals,
-  options,
+  options: any,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
