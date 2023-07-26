@@ -40,7 +40,7 @@ Rounding already happened with these...
 
 export function formatIsoDateTimeFields(
   isoDateTimeFields: IsoDateTimeFields,
-  subsecDigits: SubsecDigits,
+  subsecDigits: SubsecDigits | -1 | undefined,
 ) {
   return formatIsoDateFields(isoDateTimeFields) +
     'T' + formatIsoTimeFields(isoDateTimeFields, subsecDigits)

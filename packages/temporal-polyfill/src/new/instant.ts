@@ -147,7 +147,11 @@ export const [
         formatOffsetNano(offsetNano)
     },
 
-    toLocaleString(epochNano: LargeInt, locales: string | string[], options): string {
+    toLocaleString(
+      epochNano: LargeInt,
+      locales: string | string[],
+      options: any,
+    ): string {
       // TODO
       return ''
     },

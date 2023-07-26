@@ -1,7 +1,7 @@
 import { getInternals } from './class'
 import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { pluckIsoDateInternals } from './isoFields'
+import { IsoDateInternals, pluckIsoDateInternals } from './isoFields'
 import { parseMaybeZonedDateTime } from './isoParse'
 import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
@@ -18,18 +18,25 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
-import { ZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
 type Options = Record<string, unknown>
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
+// TODO: always good to spread options tuples? better to nest?
 
 export function refineOverflowOptions(options: Options | undefined): Overflow {
   return refineOverflow(normalizeOptions(options))
 }
 
-export function refineZonedFieldOptions(options: Options | undefined) {
+export type ZonedFieldTuple = [
+  Overflow,
+  EpochDisambig,
+  OffsetDisambig,
+]
+
+export function refineZonedFieldOptions(options: Options | undefined): ZonedFieldTuple {
   options = normalizeOptions(options)
   return [
     refineOverflow(options),
@@ -42,13 +49,20 @@ export function refineEpochDisambigOptions(options: Options | undefined): EpochD
   return refineEpochDisambig(normalizeOptions(options))
 }
 
+export type DiffTuple = [
+  Unit, // largestUnit
+  Unit, // smallestUnit
+  number,
+  RoundingMode
+]
+
 export function refineDiffOptions(
   roundingModeInvert: boolean | undefined,
   options: Options | undefined,
   defaultLargestUnit: Unit,
   maxUnit = Unit.Year,
   minUnit = Unit.Nanosecond,
-) {
+): DiffTuple {
   options = normalizeOptions(options)
   const smallestUnit = refineSmallestUnit(options, maxUnit, minUnit, minUnit)
   const largestUnit = refineLargestUnit(
@@ -75,13 +89,19 @@ export function refineCalendarDiffOptions(
   return refineLargestUnit(options, Unit.Year, Unit.Day, Unit.Day)
 }
 
+export type RoundTuple = [
+  Unit, // smallestUnit
+  number,
+  RoundingMode,
+]
+
 /*
 Always related to time
 */
 export function refineRoundOptions(
   options: Options | undefined,
   maxUnit: DayTimeUnit = Unit.Day,
-) {
+): RoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
   const smallestUnit = refineSmallestUnit(options, maxUnit) as DayTimeUnit
   return [
@@ -91,10 +111,15 @@ export function refineRoundOptions(
   ]
 }
 
+export type DurationRoundTuple = [
+  ...DiffTuple,
+  RelativeToInternals | undefined,
+]
+
 export function refineDurationRoundOptions(
   options: Options | undefined,
   defaultLargestUnit: Unit
-) {
+): DurationRoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
   mustHaveMatch(options, [largestUnitStr, smallestUnitStr]) // will register unwanted read?
   // ^do a whitelist filter that copies instead?
@@ -107,7 +132,10 @@ export function refineDurationRoundOptions(
 
 export function refineTotalOptions(
   options: Options | undefined
-) {
+): [
+  Unit,
+  RelativeToInternals | undefined,
+] {
   options = normalizeUnitNameOptions(options, totalUnitStr)
   return [
     refineTotalUnit(options), // required
@@ -115,13 +143,16 @@ export function refineTotalOptions(
   ]
 }
 
-export function refineRelativeToOptions(options: Options | undefined) {
+export function refineRelativeToOptions(options: Options | undefined): RelativeToInternals | undefined {
   return refineRelativeTo(normalizeOptions(options))
 }
 
-export function refineInstantDisplayOptions(
-  options: Options | undefined
-) {
+export type InstantDisplayTuple = [
+  string, // TimeZoneArg
+  ...TimeDisplayTuple,
+]
+
+export function refineInstantDisplayOptions(options: Options | undefined): InstantDisplayTuple {
   options = normalizeOptions(options)
   return [
     options.timeZone,
@@ -129,7 +160,14 @@ export function refineInstantDisplayOptions(
   ]
 }
 
-export function refineZonedDateTimeDisplayOptions(options: Options | undefined) {
+export type ZonedDateTimeDisplayTuple = [
+  CalendarDisplay,
+  TimeZoneDisplay,
+  OffsetDisplay,
+  ...TimeDisplayTuple,
+]
+
+export function refineZonedDateTimeDisplayOptions(options: Options | undefined): ZonedDateTimeDisplayTuple {
   options = normalizeOptions(options)
   return [
     refineCalendarDisplay(options),
@@ -139,7 +177,12 @@ export function refineZonedDateTimeDisplayOptions(options: Options | undefined) 
   ]
 }
 
-export function refineDateTimeDisplayOptions(options: Options | undefined) {
+export type DateTimeDisplayTuple = [
+  CalendarDisplay,
+  ...TimeDisplayTuple,
+]
+
+export function refineDateTimeDisplayOptions(options: Options | undefined): DateTimeDisplayTuple {
   options = normalizeOptions(options)
   return [
     refineCalendarDisplay(options),
@@ -150,6 +193,12 @@ export function refineDateTimeDisplayOptions(options: Options | undefined) {
 export function refineDateDisplayOptions(options: Options | undefined): CalendarDisplay {
   return refineCalendarDisplay(normalizeOptions(options))
 }
+
+export type TimeDisplayTuple = [
+  nanoInc: number,
+  roundingMode: RoundingMode,
+  subsecDigits: SubsecDigits | -1 | undefined
+]
 
 export function refineTimeDisplayOptions(
   options: Options | undefined,
@@ -164,12 +213,6 @@ addons:
   undefined means 'auto' (display all digits but no trailing zeros)
 */
 export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
-export type TimeDisplayTuple = [
-  nanoInc: number,
-  roundingMode: RoundingMode,
-  subsecDigits: SubsecDigits | -1 | undefined
-]
 
 function refineTimeDisplayTuple(
   options: Options,
@@ -194,12 +237,6 @@ function refineTimeDisplayTuple(
   ]
 }
 
-// Single Options
-// -------------------------------------------------------------------------------------------------
-
-const smallestUnitStr = 'smallestUnit'
-const largestUnitStr = 'largestUnit'
-const totalUnitStr = 'unit'
 
 const refineSmallestUnit = refineUnitOption.bind(undefined, smallestUnitStr)
 const refineLargestUnit = refineUnitOption.bind(undefined, largestUnitStr)
@@ -359,7 +396,9 @@ function refineSubsecDigits(options: Options): SubsecDigits | undefined {
   // undefind means 'auto'
 }
 
-function refineRelativeTo(options: Options) {
+type RelativeToInternals = ZonedInternals | IsoDateInternals
+
+function refineRelativeTo(options: Options): RelativeToInternals | undefined {
   const { relativeTo } = options
 
   if (relativeTo) {
