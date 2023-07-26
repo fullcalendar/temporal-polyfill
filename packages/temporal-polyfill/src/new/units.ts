@@ -31,7 +31,7 @@ export const unitNameMap = {
 
 export type UnitName = keyof typeof unitNameMap
 
-type TimeUnit =
+export type TimeUnit =
   Unit.Nanosecond |
   Unit.Microsecond |
   Unit.Millisecond |
@@ -108,15 +108,15 @@ export function givenFieldsToNano<K extends string>(
 
 export function nanoToGivenFields<F>(
   nano: number,
-  unitIndex: DayTimeUnit,
+  unit: DayTimeUnit,
   fieldNames: (keyof F)[],
-): { [Key in keyof F]: number } {
+): { [Key in keyof F]?: number } {
   const fields = {} as { [Key in keyof F]: number }
 
-  for (; unitIndex >= Unit.Nanosecond; unitIndex--) {
-    const divisor = unitNanoMap[unitIndex]
+  for (; unit >= Unit.Nanosecond; unit--) {
+    const divisor = unitNanoMap[unit]
 
-    fields[fieldNames[unitIndex]] = Math.trunc(nano / divisor)
+    fields[fieldNames[unit]] = Math.trunc(nano / divisor)
     nano %= divisor
   }
 

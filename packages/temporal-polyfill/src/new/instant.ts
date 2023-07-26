@@ -130,7 +130,7 @@ export const [
       )
     },
 
-    toString(epochNano: LargeInt, options): string {
+    toString(epochNano: LargeInt, options: any): string {
       const [
         timeZoneArg,
         nanoInc,
@@ -176,7 +176,7 @@ export const [
 function diffInstants(
   epochNano0: LargeInt,
   epochNano1: LargeInt,
-  options,
+  options: any,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

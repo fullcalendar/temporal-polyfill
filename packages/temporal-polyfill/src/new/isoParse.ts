@@ -1,13 +1,14 @@
 import { nanoIn, nanoInSecond } from '../dateUtils/units'
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarImpl } from './calendarImpl'
+import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
+  DurationFields,
   DurationInternals,
   durationFieldNamesAsc,
   negateDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { isoTimeFieldDefaults } from './isoFields'
+import { IsoDateInternals, IsoDateTimeInternals, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import {
   checkIso,
   constrainIsoDateInternals,
@@ -16,24 +17,23 @@ import {
   isoToEpochNano,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { returnUndefinedI } from './options'
-import { queryTimeZoneImpl } from './timeZoneImpl'
+import { LargeInt } from './largeInt'
+import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import {
-  hourIndex,
-  milliIndex,
-  minuteIndex,
+  TimeUnit,
+  Unit,
   nanoInHour,
   nanoInMinute,
   nanoToGivenFields,
-  secondsIndex,
 } from './units'
 import { divFloorMod } from './utils'
+import { ZonedInternals } from './zonedDateTime'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
-export function parseInstant(s) {
+export function parseInstant(s: string): LargeInt {
   const parsed = parseDateTime(s)
   if (!parsed) {
     throw new RangeError()
@@ -49,29 +49,29 @@ export function parseInstant(s) {
     throw new RangeError()
   }
 
-  return isoToEpochNano(parsed).addNumber(offsetNano)
+  return isoToEpochNano(parsed)!.addNumber(offsetNano)
 }
 
-export function parseMaybeZonedDateTime(s) {
+export function parseMaybeZonedDateTime(s: string): IsoDateInternals | ZonedInternals {
   const parsed = parseDateTime(s)
   if (!parsed) {
     throw new RangeError()
   }
   if (parsed.timeZone) {
-    return processZonedDateTimeParse(parsed)
+    return processZonedDateTimeParse(parsed as ZonedDateTimeParsed)
   }
   return processDatelikeParse(parsed) // unnecessarily checks for undefined
 }
 
-export function parseZonedDateTime(s) {
+export function parseZonedDateTime(s: string): ZonedInternals {
   const parsed = parseDateTime(s)
   if (!parsed || !parsed.timeZone) {
     throw new RangeError()
   }
-  return processZonedDateTimeParse(parsed)
+  return processZonedDateTimeParse(parsed as ZonedDateTimeParsed)
 }
 
-export function parsePlainDateTime(s) {
+export function parsePlainDateTime(s: string): IsoDateTimeInternals {
   const parsed = parseDateTime(s)
   if (!parsed) {
     throw new RangeError()
@@ -79,24 +79,24 @@ export function parsePlainDateTime(s) {
   return processDateTimeParse(parsed)
 }
 
-export function parsePlainDate(s) {
+export function parsePlainDate(s: string): IsoDateInternals {
   return processDatelikeParse(parseDateTime(s))
 }
 
-export function parsePlainYearMonth(s) {
+export function parsePlainYearMonth(s: string): IsoDateInternals {
   return processDatelikeParse(parseYearMonth(s) || parseDateTime(s))
 }
 
-export function parsePlainMonthDay(s) {
+export function parsePlainMonthDay(s: string): IsoDateInternals {
   return processDatelikeParse(parseMonthDay(s) || parseDateTime(s))
 }
 
-export function parsePlainTime(s) {
-  let parsed = parseTime(s)
+export function parsePlainTime(s: string): IsoTimeFields {
+  let parsed: IsoTimeFields | DateTimeParsed | undefined = parseTime(s)
 
   if (!parsed) {
     parsed = parseDateTime(s)
-    if (parsed && !parsed.hasTime) {
+    if (parsed && !(parsed as DateTimeParsed).hasTime) {
       throw new RangeError()
     }
   }
@@ -104,25 +104,48 @@ export function parsePlainTime(s) {
   if (!parsed) {
     throw new RangeError()
   }
-  if (parsed.hasZ) {
+  if ((parsed as DateTimeParsed).hasZ) {
     throw new RangeError()
   }
-  if (parsed.calendar && parsed.calendar.id !== isoCalendarId) {
+  if (
+    (parsed as DateTimeParsed).calendar &&
+    (parsed as DateTimeParsed).calendar.id !== isoCalendarId
+  ) {
     throw new RangeError()
   }
 
   let altParsed
-  if ((altParsed = parseYearMonth(s)) && constrainIsoDateInternals(altParsed, returnUndefinedI)) {
+  // NOTE: -1 causes returning undefined rather than error
+  if ((altParsed = parseYearMonth(s)) && constrainIsoDateInternals(altParsed, -1)) {
     throw new RangeError()
   }
-  if ((altParsed = parseMonthDay(s)) && constrainIsoDateInternals(altParsed, returnUndefinedI)) {
+  if ((altParsed = parseMonthDay(s)) && constrainIsoDateInternals(altParsed, -1)) {
     throw new RangeError()
   }
 
   return constrainIsoTimeFields(parsed)
 }
 
-export function parseCalendarId(s) {
+export function parseDuration(s: string): DurationInternals {
+  const parsed = parseDurationInternals(s)
+  if (!parsed) {
+    throw new RangeError()
+  }
+  return parsed
+}
+
+export function parseOffsetNano(s: string): number {
+  const parts = offsetRegExp.exec(s)
+  const parsed = parts && parseOffsetParts(parts.slice(1))
+
+  if (!parsed) {
+    throw new RangeError()
+  }
+
+  return parsed
+}
+
+export function parseCalendarId(s: string): string {
   if (s !== isoCalendarId) {
     s = (
       parseDateTime(s) || parseYearMonth(s) || parseMonthDay(s)
@@ -131,12 +154,12 @@ export function parseCalendarId(s) {
   return s
 }
 
-export function parseTimeZoneId(s) {
+export function parseTimeZoneId(s: string): string {
   const parsed = parseDateTime(s)
 
   if (parsed !== undefined) {
     if (parsed.timeZone) {
-      return parsed.timeZone.id
+      return (parsed.timeZone as TimeZoneImpl).id
     }
     if (parsed.hasZ) {
       return utcTimeZoneId
@@ -152,12 +175,12 @@ export function parseTimeZoneId(s) {
 // Intermediate
 // -------------------------------------------------------------------------------------------------
 
-function processZonedDateTimeParse(parsed) {
+function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals {
   const epochNanoseconds = getMatchingInstantFor(
     parsed.timeZone,
     parsed,
     parsed.offset ? parseOffsetNano(parsed.offset) : undefined,
-    parsed.z,
+    parsed.hasZ,
     'reject',
     'compatible',
     true, // fuzzy
@@ -169,14 +192,14 @@ function processZonedDateTimeParse(parsed) {
   }
 }
 
-function processDateTimeParse(parsed) {
+function processDateTimeParse(parsed: DateTimeParsed): IsoDateTimeInternals {
   return checkIso(constrainIsoDateTimeInternals(parsed))
 }
 
 /*
 Unlike others, throws an error
 */
-function processDatelikeParse(parsed) {
+function processDatelikeParse(parsed: IsoDateInternals | undefined): IsoDateInternals {
   if (!parsed) {
     throw new RangeError()
   }
@@ -185,36 +208,31 @@ function processDatelikeParse(parsed) {
 
 // Low-level
 // -------------------------------------------------------------------------------------------------
+// TODO: use new `Falsy` type instead of ternary operator?
 
-function parseDateTime(s) {
+function parseDateTime(s: string): DateTimeParsed | undefined {
   const parts = dateTimeRegExp.exec(s)
-  return parts && parseDateTimeParts(parts)
+  return parts ? parseDateTimeParts(parts) : undefined
 }
 
-function parseYearMonth(s) {
+function parseYearMonth(s: string): IsoDateInternals | undefined {
   const parts = yearMonthRegExp.exec(s)
-  return parts && parseYearMonthParts(parts)
+  return parts ? parseYearMonthParts(parts) : undefined
 }
 
-function parseMonthDay(s) {
+function parseMonthDay(s: string): IsoDateInternals | undefined {
   const parts = monthDayRegExp.exec(s)
-  return parts && parseMonthDayParts(parts)
+  return parts ? parseMonthDayParts(parts) : undefined
 }
 
-function parseTime(s) {
+function parseTime(s: string): IsoTimeFields | undefined {
   const parts = timeRegExp.exec(s)
-  return parts && parseTimeParts(parts.slice(1))
+  return parts ? parseTimeParts(parts.slice(1)) : undefined
 }
 
-export function parseOffsetNano(s) {
-  const parts = offsetRegExp.exec(s)
-  return parts && parseOffsetParts(parts.slice(1))
-}
-
-// TODO: this should be guaranteed result
-export function parseDuration(s: string): DurationInternals {
+function parseDurationInternals(s: string): DurationInternals | undefined {
   const parts = durationRegExp.exec(s)
-  return parts && parseDurationParts(parts)
+  return parts ? parseDurationParts(parts) : undefined
 }
 
 // RegExp & Parts
@@ -279,9 +297,27 @@ const durationRegExp = createRegExp(
   ')?',
 )
 
-function parseDateTimeParts(parts) { // 0 is whole-match
-  const hasTime = parts[5] // boolean-like
-  const hasZ = parts[13] // "
+type DateTimeParsed = IsoDateTimeInternals & AnnotationsParsed & {
+  hasTime: boolean
+  hasZ: boolean
+  offset: string | undefined
+}
+
+type ZonedDateTimeParsed = IsoDateTimeInternals & {
+  calendar: CalendarImpl
+  timeZone: TimeZoneImpl // guaranteed annotation
+  hasTime: boolean
+  hasZ: boolean
+  offset: string | undefined
+}
+
+/*
+0 is whole-match
+*/
+function parseDateTimeParts(parts: string[]): DateTimeParsed {
+  const offsetOrZ = parts[13]
+  const hasZ = offsetOrZ === 'Z'
+  const hasTime = Boolean(parts[5]) // boolean-like
 
   return {
     isoYear: parseIsoYearParts(parts),
@@ -293,10 +329,14 @@ function parseDateTimeParts(parts) { // 0 is whole-match
     ),
     hasTime,
     hasZ,
+    offset: hasZ ? undefined : offsetOrZ,
   }
 }
 
-function parseYearMonthParts(parts) { // 0 is whole-match
+/*
+0 is whole-match
+*/
+function parseYearMonthParts(parts: string[]): IsoDateInternals {
   return {
     isoYear: parseIsoYearParts(parts),
     isoMonth: parseInt(parts[3]),
@@ -305,7 +345,10 @@ function parseYearMonthParts(parts) { // 0 is whole-match
   }
 }
 
-function parseMonthDayParts(parts) { // 0 is whole-match
+/*
+0 is whole-match
+*/
+function parseMonthDayParts(parts: string[]): IsoDateInternals {
   return {
     isoYear: parseInt(parts[1]),
     isoMonth: parseInt(parts[2]),
@@ -314,7 +357,10 @@ function parseMonthDayParts(parts) { // 0 is whole-match
   }
 }
 
-function parseIsoYearParts(parts) { // 0 is whole-match
+/*
+0 is whole-match
+*/
+function parseIsoYearParts(parts: string[]): number {
   const yearSign = parseSign(parts[1])
   const year = parseInt(parts[2])
   if (yearSign < 0 && !year) {
@@ -323,7 +369,10 @@ function parseIsoYearParts(parts) { // 0 is whole-match
   return yearSign * year
 }
 
-function parseTimeParts(parts) { // parses annotations
+/*
+validated annotations as well
+*/
+function parseTimeParts(parts: string[]): IsoTimeFields & AnnotationsParsed {
   const isoSecond = parseInt0(parts[4])
   return {
     ...nanoToIsoTimeAndDay(parseSubsecNano(parts[6] || ''))[0],
@@ -334,7 +383,7 @@ function parseTimeParts(parts) { // parses annotations
   }
 }
 
-function parseOffsetParts(parts) {
+function parseOffsetParts(parts: string[]): number {
   return parseSign(parts[0]) * (
     parseInt0(parts[0]) * nanoInHour +
     parseInt0(parts[2]) * nanoInMinute +
@@ -343,7 +392,7 @@ function parseOffsetParts(parts) {
   )
 }
 
-function parseDurationParts(parts) {
+function parseDurationParts(parts: string[]): DurationInternals {
   let hasAny = false
   let hasAnyFrac = false
   let leftoverNano = 0
@@ -352,11 +401,11 @@ function parseDurationParts(parts) {
     months: parseUnit(parts[3]),
     weeks: parseUnit(parts[4]),
     days: parseUnit(parts[5]),
-    hours: parseUnit(parts[7], parts[8], hourIndex),
-    minutes: parseUnit(parts[9], parts[10], minuteIndex),
-    seconds: parseUnit(parts[11], parts[12], secondsIndex),
-    ...nanoToGivenFields(leftoverNano, milliIndex, durationFieldNamesAsc),
-  }
+    hours: parseUnit(parts[7], parts[8], Unit.Hour),
+    minutes: parseUnit(parts[9], parts[10], Unit.Minute),
+    seconds: parseUnit(parts[11], parts[12], Unit.Second),
+    ...nanoToGivenFields(leftoverNano, Unit.Millisecond, durationFieldNamesAsc),
+  } as DurationFields
 
   if (!hasAny) {
     throw new RangeError('Duration string must have at least one field')
@@ -368,12 +417,14 @@ function parseDurationParts(parts) {
 
   return updateDurationFieldsSign(durationFields)
 
-  function parseUnit(wholeStr, fracStr, timeUnitI) {
+  function parseUnit(wholeStr: string): number
+  function parseUnit(wholeStr: string, fracStr: string, timeUnit: TimeUnit): number
+  function parseUnit(wholeStr: string, fracStr?: string, timeUnit?: TimeUnit): number {
     let leftoverUnits = 0 // from previous round
     let wholeUnits = 0
 
-    if (timeUnitI) {
-      [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, nanoIn[timeUnitI])
+    if (timeUnit) {
+      [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, nanoIn[timeUnit])
     }
 
     if (wholeStr !== undefined) {
@@ -386,7 +437,7 @@ function parseDurationParts(parts) {
 
       if (fracStr) {
         // convert seconds to other units, abusing parseSubsecNano
-        leftoverNano = parseSubsecNano(fracStr) * (nanoIn[timeUnitI] / nanoInSecond)
+        leftoverNano = parseSubsecNano(fracStr) * (nanoIn[timeUnit!] / nanoInSecond)
         hasAnyFrac = true
       }
     }
@@ -398,9 +449,14 @@ function parseDurationParts(parts) {
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function parseAnnotations(s) {
-  let calendarId
-  let timeZoneId
+interface AnnotationsParsed {
+  calendar: CalendarImpl,
+  timeZone: TimeZoneImpl | undefined,
+}
+
+function parseAnnotations(s: string): AnnotationsParsed {
+  let calendarId: string | undefined
+  let timeZoneId: string | undefined
 
   for (const chunk of s.split(']')) {
     if (chunk) { // not the empty end chunk
@@ -430,22 +486,22 @@ function parseAnnotations(s) {
 
   return {
     calendar: queryCalendarImpl(calendarId || isoCalendarId),
-    timeZone: timeZoneId && queryTimeZoneImpl(timeZoneId),
+    timeZone: timeZoneId ? queryTimeZoneImpl(timeZoneId) : undefined,
   }
 }
 
-function parseSubsecNano(fracStr) {
+function parseSubsecNano(fracStr: string): number {
   return parseInt(fracStr.padEnd(9, '0'))
 }
 
-function createRegExp(meat) {
+function createRegExp(meat: string): RegExp {
   return new RegExp(`^${meat}$`, 'i')
 }
 
-function parseSign(s) {
+function parseSign(s: string): number {
   return !s || s === '+' ? 1 : -1
 }
 
-function parseInt0(s) {
+function parseInt0(s: string): number {
   return s === undefined ? 0 : parseInt(s)
 }

@@ -25,6 +25,7 @@ import { createLazyGenerator } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 
 export interface TimeZoneOps {
+  id: string
   getOffsetNanosecondsFor(epochNano: LargeInt): number
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[]
 }
