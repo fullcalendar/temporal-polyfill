@@ -32,6 +32,9 @@ import { IsoDateInternals, IsoDateTimeInternals } from './isoFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
+  EpochDisambig,
+  OffsetDisambig,
+  Overflow,
   ensureObjectlike,
   normalizeOptions,
   refineOverflowOptions,
@@ -50,6 +53,45 @@ Rules:
 - refining/merging return internal object
 - converting returns public object
 */
+
+// TODO: make more DRY with other methods
+export function refineMaybeZonedDateTimeBag(bag: any): ZonedInternals | IsoDateInternals {
+  const calendar = getBagCalendarOps(bag)
+  const fields = refineCalendarFields(
+    calendar,
+    bag,
+    dateTimeFieldNames, // validFieldNames
+    getRequiredDateFields(calendar), // requireFields
+    ['timeZone', 'offset'], // forcedValidFieldNames
+  )
+
+  if (fields.timeZone) {
+    const timeZone = queryTimeZoneOps(fields.timeZone)
+    const isoDateFields = calendar.dateFromFields(fields, Overflow.Constrain)
+    const isoTimeFields = refineTimeFields(fields, Overflow.Constrain)
+
+    const epochNanoseconds = getMatchingInstantFor(
+      timeZone,
+      { ...isoDateFields, ...isoTimeFields },
+      fields.offset !== undefined && parseOffsetNano(fields.offset),
+      false, // z?
+      OffsetDisambig.Use, // TODO: is default already?
+      EpochDisambig.Compat, // TODO: is default already?
+      false, // fuzzy
+    )
+
+    return {
+      calendar,
+      timeZone,
+      epochNanoseconds,
+    }
+  } else {
+    const isoDateInternals = calendar.dateFromFields(fields, Overflow.Constrain)
+    const isoTimeFields = refineTimeFields(fields, Overflow.Constrain)
+
+    return { ...isoDateInternals, ...isoTimeFields }
+  }
+}
 
 // ZonedDateTime
 // -------------------------------------------------------------------------------------------------

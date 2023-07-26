@@ -1,4 +1,5 @@
 import { getInternals } from './class'
+import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
 import { pluckIsoDateInternals } from './isoFields'
 import { parseMaybeZonedDateTime } from './isoParse'
@@ -358,7 +359,8 @@ function refineRelativeTo(options: Options) {
       } else if (relativeTo instanceof PlainDateTime) {
         return pluckIsoDateInternals(getInternals(relativeTo))
       }
-      throw new TypeError()
+
+      return refineMaybeZonedDateTimeBag(relativeTo)
     }
 
     return parseMaybeZonedDateTime(toString(relativeTo))
