@@ -39,8 +39,13 @@ export interface CalendarOps {
   weekOfYear(isoFields: IsoDateFields): number
   yearOfWeek(isoFields: IsoDateFields): number
   daysInWeek(isoFields: IsoDateFields): number
+  dateFromFields(fields: any, overflow: Overflow): IsoDateInternals
+  yearMonthFromFields(fields: any, overflow: Overflow): IsoDateInternals
+  monthDayFromFields(fields: any, overflow: Overflow): IsoDateInternals
   dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow: Overflow): IsoDateFields
   dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, options: any): DurationInternals
+  fields(fieldNames: Iterable<string>): Iterable<string>
+  mergeFields(fields0: any, fields1: any): any
 }
 
 //
