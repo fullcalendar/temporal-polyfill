@@ -18,6 +18,7 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { LargeInt } from './largeInt'
+import { EpochDisambig, OffsetDisambig } from './options'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import {
@@ -181,8 +182,8 @@ function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals 
     parsed,
     parsed.offset ? parseOffsetNano(parsed.offset) : undefined,
     parsed.hasZ,
-    'reject',
-    'compatible',
+    OffsetDisambig.Reject,
+    EpochDisambig.Compat,
     true, // fuzzy
   )
   return {

@@ -37,6 +37,8 @@ import { parseZonedDateTime } from './isoParse'
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
+  EpochDisambig,
+  OffsetDisambig,
   Overflow,
   refineDiffOptions,
   refineOverflowOptions,
@@ -196,7 +198,7 @@ export const [
       const epochNano = getMatchingInstantFor(
         timeZone,
         isoFields,
-        isoFields.offsetNano,
+        isoFields.offsetNanoseconds,
         false, // hasZ
         undefined, // offsetHandling
         undefined, // disambig
@@ -263,12 +265,12 @@ export const [
         timeZone,
       )
       epochNanoseconds = getMatchingInstantFor(
-        isoDateTimeFields,
         timeZone,
+        isoDateTimeFields,
         offsetNanoseconds,
         false, // z
-        'prefer', // keep old offsetNanoseconds if possible
-        'compatible',
+        OffsetDisambig.Prefer, // keep old offsetNanoseconds if possible
+        EpochDisambig.Compat,
         true, // fuzzy
       )
 
@@ -288,12 +290,12 @@ export const [
       }
 
       epochNanoseconds = getMatchingInstantFor(
-        isoFields,
         timeZone,
+        isoFields,
         undefined, // offsetNanoseconds
         false, // z
-        'reject',
-        'compatible',
+        OffsetDisambig.Reject,
+        EpochDisambig.Compat,
         true, // fuzzy
       )
 
@@ -328,12 +330,12 @@ export const [
 
       isoDateTimeFields = roundDateTimeToNano(isoDateTimeFields, nanoInc, roundingMode)
       epochNanoseconds = getMatchingInstantFor(
-        isoDateTimeFields,
         timeZone,
+        isoDateTimeFields,
         offsetNanoseconds,
         false, // z
-        'prefer', // keep old offsetNanoseconds if possible
-        'compatible',
+        OffsetDisambig.Prefer, // keep old offsetNanoseconds if possible
+        EpochDisambig.Compat,
         true, // fuzzy
       )
 
@@ -350,7 +352,7 @@ export const [
     toLocaleString(
       internals: ZonedInternals,
       locales: string | string[],
-      options
+      options: any,
     ): string {
       const [epochMilli, format] = resolveZonedFormattable(internals, locales, options)
       return format.format(epochMilli)

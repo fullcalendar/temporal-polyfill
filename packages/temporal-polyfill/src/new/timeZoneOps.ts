@@ -81,13 +81,13 @@ export function computeNanosecondsInDay(
 export function getMatchingInstantFor(
   timeZoneOps: TimeZoneOps,
   isoDateTimeFields: IsoDateTimeFields,
-  offsetNano: number, // optional
+  offsetNano: number | undefined,
   hasZ: boolean,
   // need these defaults?
   offsetHandling: OffsetDisambig = OffsetDisambig.Reject,
   disambig: EpochDisambig = EpochDisambig.Compat,
   fuzzy = false,
-) {
+): LargeInt {
   if (offsetNano !== undefined && offsetHandling !== OffsetDisambig.Ignore) {
     // we ALWAYS use Z as a zero offset
     if (offsetHandling === OffsetDisambig.Use || hasZ) {
@@ -199,13 +199,14 @@ function computeGapNear(timeZoneOps: TimeZoneOps, zonedEpochNano: LargeInt): num
 }
 
 export const zonedInternalsToIso = createLazyGenerator((internals: ZonedInternals) => {
-  const { timeZone, epochNanoseconds } = internals
+  const { calendar, timeZone, epochNanoseconds } = internals
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
   const isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
   return {
     ...isoDateTimeFields,
     offsetNanoseconds,
+    calendar,
   }
 })
 

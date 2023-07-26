@@ -141,7 +141,7 @@ export const [
 function diffPlainYearMonths(
   internals0: IsoDateInternals,
   internals1: IsoDateInternals,
-  options,
+  options: any,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
@@ -157,7 +157,7 @@ function diffPlainYearMonths(
 function movePlainYearMonth(
   internals: IsoDateInternals,
   durationInternals: DurationInternals,
-  options,
+  options: any,
 ): PlainYearMonth {
   const { calendar } = internals
   const isoDateFields = movePlainYearMonthToDay(

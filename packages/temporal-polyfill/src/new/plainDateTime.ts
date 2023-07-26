@@ -173,7 +173,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
-    toString(internals: IsoDateTimeInternals, options): string {
+    toString(internals: IsoDateTimeInternals, options: any): string {
       const [
         calendarDisplayI,
         nanoInc,

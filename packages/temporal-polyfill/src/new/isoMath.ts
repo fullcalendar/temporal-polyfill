@@ -1,4 +1,5 @@
 import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
+import { CalendarArg } from './calendar'
 import { diffEpochMilliByDay } from './diff'
 import {
   IsoDateFields,
@@ -125,7 +126,7 @@ function isoDateMonthStart(isoDateFields: IsoDateFields): IsoDateFields {
 // -------------------------------------------------------------------------------------------------
 
 export function refineIsoDateTimeInternals(
-  rawIsoDateTimeInternals: IsoDateTimeInternals, // wrong
+  rawIsoDateTimeInternals: IsoDateTimeFields & { calendar: CalendarArg },
 ): IsoDateTimeInternals {
   return checkIso(
     constrainIsoDateTimeInternals(
@@ -135,7 +136,7 @@ export function refineIsoDateTimeInternals(
 }
 
 export function refineIsoDateInternals(
-  rawIsoDateInternals: IsoDateInternals, // wrong
+  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
 ): IsoDateInternals {
   return checkIso(
     constrainIsoDateInternals(
@@ -145,7 +146,7 @@ export function refineIsoDateInternals(
 }
 
 export function refineIsoTimeInternals(
-  rawIsoTimeInternals: IsoTimeFields, // wrong
+  rawIsoTimeInternals: IsoTimeFields,
 ): IsoTimeFields {
   return constrainIsoTimeFields(
     mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
@@ -252,7 +253,7 @@ export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
   const [dayDelta, timeNano] = divFloorMod(nano, nanoInUtcDay)
   const isoTimeFields = nanoToGivenFields(timeNano, Unit.Hour, isoTimeFieldNamesAsc)
-  return [isoTimeFields, dayDelta]
+  return [isoTimeFields as IsoTimeFields, dayDelta]
 }
 
 // Epoch Unit Conversion

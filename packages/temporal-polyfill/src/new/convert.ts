@@ -74,7 +74,7 @@ export function refineMaybeZonedDateTimeBag(bag: any): ZonedInternals | IsoDateI
     const epochNanoseconds = getMatchingInstantFor(
       timeZone,
       { ...isoDateFields, ...isoTimeFields },
-      fields.offset !== undefined && parseOffsetNano(fields.offset),
+      fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
       false, // z?
       OffsetDisambig.Use, // TODO: is default already?
       EpochDisambig.Compat, // TODO: is default already?
@@ -115,7 +115,7 @@ export function refineZonedDateTimeBag(bag: ZonedDateTimeBag, options: any): Zon
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
     { ...isoDateFields, ...isoTimeFields },
-    fields.offset !== undefined && parseOffsetNano(fields.offset),
+    fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
     false, // z?
     offsetDisambig,
     epochDisambig,
