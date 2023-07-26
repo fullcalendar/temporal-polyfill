@@ -43,7 +43,7 @@ import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
 import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { CalendarOps } from './calendarOps'
-import { DurationFields, DurationInternals } from './durationFields'
+import { DurationInternals } from './durationFields'
 
 // Base Calendar Implementation
 // -------------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
-import { DurationInternals, absDurationInternals, durationFieldsToNano, durationFieldsToTimeNano } from './durationFields'
+import { DurationInternals, absDurationInternals, durationFieldsToTimeNano } from './durationFields'
 import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import { CalendarDisplay, OffsetDisplay, refineDateDisplayOptions, SubsecDigits, TimeZoneDisplay } from './options'
 import { TimeZoneOps } from './timeZoneOps'

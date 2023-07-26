@@ -238,9 +238,9 @@ function refineTimeDisplayTuple(
 }
 
 
-const refineSmallestUnit = refineUnitOption.bind(undefined, smallestUnitStr)
-const refineLargestUnit = refineUnitOption.bind(undefined, largestUnitStr)
-const refineTotalUnit = refineUnitOption.bind(undefined, totalUnitStr)
+const refineSmallestUnit = refineUnitOption.bind(undefined, 'smallestUnit')
+const refineLargestUnit = refineUnitOption.bind(undefined, 'largestUnit')
+const refineTotalUnit = refineUnitOption.bind(undefined, 'totalUnit')
 
 export enum Overflow {
   Constrain,

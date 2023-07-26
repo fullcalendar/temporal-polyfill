@@ -1,5 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
-import { dateBasicNames, timeFieldDefaults } from './calendarFields'
+import { dateBasicNames } from './calendarFields'
 import { getInternals, getTemporalName } from './class'
 import { Instant } from './instant'
 import { IsoDateInternals, IsoDateTimeInternals, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
