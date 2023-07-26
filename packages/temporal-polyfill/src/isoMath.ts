@@ -1,4 +1,3 @@
-import { isoFieldsToEpochMilli } from '../dateUtils/epoch'
 import { CalendarArg } from './calendar'
 import { diffEpochMilliByDay } from './diff'
 import {
@@ -69,8 +68,8 @@ export function computeIsoIsLeapYear(isoYear: number): boolean {
 
 export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
   return diffEpochMilliByDay(
-    isoFieldsToEpochMilli(isoDateMonthStart(isoDateFields)),
-    isoFieldsToEpochMilli(isoDateFields),
+    isoToEpochMilli(isoDateMonthStart(isoDateFields))!,
+    isoToEpochMilli(isoDateFields)!,
   )
 }
 

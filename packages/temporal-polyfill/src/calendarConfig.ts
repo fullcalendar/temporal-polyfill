@@ -1,4 +1,4 @@
-import { CalendarOps } from "./calendarOps"
+import { CalendarOps } from './calendarOps'
 
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'

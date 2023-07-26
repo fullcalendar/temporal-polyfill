@@ -25,7 +25,7 @@
     "build": "pnpm run types && pnpm run bundle",
     "build:dev": "pnpm run types && NO_MIN=1 pnpm run bundle",
     "watch": "concurrently npm:types:watch npm:bundle:watch",
-    "types": "tsc --build --preserveWatchOutput",
+    "types": "tsc --build",
     "types:watch": "tsc --build --preserveWatchOutput --watch",
     "bundle": "rollup -c ../../scripts/config/pkgBundle.cjs",
     "bundle:watch": "rollup -c ../../scripts/config/pkgBundle.cjs --watch",

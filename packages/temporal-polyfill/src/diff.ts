@@ -1,4 +1,4 @@
-import { TimeZoneImpl } from '../timeZoneImpl/timeZoneImpl'
+import { TimeZoneImpl } from './timeZoneImpl'
 import { CalendarImpl } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
 import {

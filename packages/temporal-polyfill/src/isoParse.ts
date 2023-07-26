@@ -1,4 +1,4 @@
-import { nanoIn, nanoInSecond } from '../dateUtils/units'
+import { unitNanoMap, nanoInSec } from './units'
 import { isoCalendarId } from './calendarConfig'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
@@ -388,7 +388,7 @@ function parseOffsetParts(parts: string[]): number {
   return parseSign(parts[0]) * (
     parseInt0(parts[0]) * nanoInHour +
     parseInt0(parts[2]) * nanoInMinute +
-    parseInt0(parts[4]) * nanoInSecond +
+    parseInt0(parts[4]) * nanoInSec +
     parseSubsecNano(parts[6] || '')
   )
 }
@@ -425,7 +425,7 @@ function parseDurationParts(parts: string[]): DurationInternals {
     let wholeUnits = 0
 
     if (timeUnit) {
-      [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, nanoIn[timeUnit])
+      [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, unitNanoMap[timeUnit])
     }
 
     if (wholeStr !== undefined) {
@@ -438,7 +438,7 @@ function parseDurationParts(parts: string[]): DurationInternals {
 
       if (fracStr) {
         // convert seconds to other units, abusing parseSubsecNano
-        leftoverNano = parseSubsecNano(fracStr) * (nanoIn[timeUnit!] / nanoInSecond)
+        leftoverNano = parseSubsecNano(fracStr) * (unitNanoMap[timeUnit!] / nanoInSec)
         hasAnyFrac = true
       }
     }
