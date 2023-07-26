@@ -1,6 +1,5 @@
 import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { mergeDurationBag, refineDurationBag } from './convert'
-import { diffZonedEpochNano } from './diff'
 import {
   absDurationInternals,
   addDurationFields,
@@ -15,10 +14,8 @@ import {
   updateDurationFieldsSign,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
-import { isoToEpochNano } from './isoMath'
 import { parseDuration } from './isoParse'
-import { LargeInt, compareLargeInts } from './largeInt'
-import { moveZonedEpochNano } from './move'
+import { compareLargeInts } from './largeInt'
 import {
   SubsecDigits,
   refineDurationRoundOptions,
@@ -33,10 +30,9 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { NumSign, identityFunc, noop } from './utils'
+import { NumSign, noop } from './utils'
 import { DayTimeUnit, Unit } from './units'
-import { ZonedInternals } from './zonedDateTime'
-import { IsoDateFields, IsoDateInternals } from './isoFields'
+import { Marker, MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 
 export type DurationArg = Duration | DurationBag | string
 export type DurationBag = Partial<DurationFields>
@@ -250,39 +246,6 @@ function addToDuration(
 
   const markerSystem = createMarkerSystem(markerInternals)
   return createDuration(spanDuration(internals, largestUnit, ...markerSystem)[0])
-}
-
-type Marker = LargeInt | IsoDateFields
-type MarkerToEpochNano = (marker: Marker) => LargeInt
-type MoveMarker = (marker: Marker, durationInternals: DurationInternals) => Marker
-type DiffMarkers = (marker0: Marker, marker1: Marker, largeUnit: Unit) => DurationInternals
-type MarkerSystem = [
-  Marker,
-  MarkerToEpochNano,
-  MoveMarker,
-  DiffMarkers,
-]
-
-function createMarkerSystem(
-  markerInternals: ZonedInternals | IsoDateInternals
-): MarkerSystem {
-  const { calendar, timeZone, epochNanoseconds } = markerInternals as ZonedInternals
-
-  if (epochNanoseconds) {
-    return [
-      epochNanoseconds, // marker
-      identityFunc, // markerToEpochNano
-      moveZonedEpochNano.bind(undefined, calendar, timeZone), // moveMarker
-      diffZonedEpochNano.bind(undefined, calendar, timeZone), // diffMarkers
-    ]
-  } else {
-    return [
-      markerInternals as IsoDateFields, // marker (IsoDateFields)
-      isoToEpochNano as (marker: Marker) => LargeInt, // markerToEpochNano
-      calendar.dateAdd.bind(calendar), // moveMarker
-      calendar.dateUntil.bind(calendar), // diffMarkers
-    ]
-  }
 }
 
 function spanDuration(
