@@ -142,10 +142,13 @@ export function nanoToDurationFields(
   }
 }
 
-export function timeNanoToDurationFields(nano: number): DurationFields {
+export function timeNanoToDurationFields(
+  nano: number,
+  largestUnit: TimeUnit = Unit.Hour,
+): DurationFields {
   return nanoToGivenFields(
     nano,
-    Unit.Hour,
+    largestUnit,
     durationFieldNamesAsc,
   )
 }

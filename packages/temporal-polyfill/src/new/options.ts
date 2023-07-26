@@ -52,7 +52,7 @@ export function refineEpochDisambigOptions(options: Options | undefined): EpochD
 export type DiffTuple = [
   Unit, // largestUnit
   Unit, // smallestUnit
-  number,
+  number, // roundingInc
   RoundingMode
 ]
 

@@ -108,7 +108,7 @@ export function givenFieldsToNano<K extends string>(
 
 export function nanoToGivenFields<F>(
   nano: number,
-  unit: DayTimeUnit,
+  unit: DayTimeUnit, // largestUnit
   fieldNames: (keyof F)[],
 ): { [Key in keyof F]?: number } {
   const fields = {} as { [Key in keyof F]: number }
