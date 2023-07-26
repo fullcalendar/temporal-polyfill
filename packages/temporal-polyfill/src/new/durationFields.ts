@@ -102,6 +102,9 @@ export const durationTimeFieldsToIso = remapProps.bind<
   IsoTimeFields // return
 >(undefined, durationTimeFieldNames, isoTimeFieldNames)
 
+/*
+TODO: have method directly return nanoseconds. the only use!
+*/
 export function durationTimeFieldsToIsoStrict(fields: DurationFields): IsoTimeFields {
   if (durationHasDateParts(fields)) {
     throw new RangeError('Operation not allowed') // correct error?

@@ -310,6 +310,7 @@ const weekMethods: WeekMethods = {
 
 // Base Calendar Implementation :: Misc Methods
 // -------------------------------------------------------------------------------------------------
+// TODO: what about 'query' -> 'compute' ?
 
 interface MiscMethods {
   addMonths(year: number, month: number, monthDelta: number): [number, number]

@@ -1,10 +1,15 @@
+import { CalendarImpl } from './calendarImpl'
+import { CalendarOps } from './calendarOps'
 import {
+  DurationFields,
   durationFieldsToNano,
   durationHasDateParts,
   durationTimeFieldDefaults,
   durationTimeFieldsToIso,
   durationTimeFieldsToIsoStrict,
+  updateDurationFieldsSign,
 } from './durationFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
   epochMilliToIso,
   isoDaysInWeek,
@@ -13,20 +18,22 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
-import { hourIndex, milliInDay, nanoInUtcDay } from './units'
+import { LargeInt } from './largeInt'
+import { Overflow } from './options'
+import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+import { Unit, milliInDay, nanoInUtcDay } from './units'
 import { clamp } from './utils'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
-  calendar,
-  timeZone,
-  epochNano,
-  durationFields,
-  overflowHandling,
-) {
+  calendar: CalendarOps,
+  timeZone: TimeZoneOps,
+  epochNano: LargeInt,
+  durationFields: DurationFields,
+  overflowHandling: Overflow,
+): LargeInt {
   const durationTimeNano = isoTimeFieldsToNano(durationTimeFieldsToIso(durationFields))
 
   if (!durationHasDateParts(durationFields)) {
@@ -35,10 +42,10 @@ export function moveZonedEpochNano(
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
     const movedIsoDateFields = calendar.dateAdd(
       isoDateTimeFields,
-      {
+      updateDurationFieldsSign({ // does CalendarOps really need sign?
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
-      },
+      }),
       overflowHandling,
     )
     const movedIsoDateTimeFields = {
@@ -52,28 +59,32 @@ export function moveZonedEpochNano(
   return epochNano
 }
 
-export function moveEpochNano(epochNanoseconds, durationFields) {
-  return epochNanoseconds.addNumber(durationTimeFieldsToIsoStrict(durationFields))
+export function moveEpochNano(epochNano: LargeInt, durationFields: DurationFields): LargeInt {
+  return epochNano.addNumber(
+    isoTimeFieldsToNano(
+      durationTimeFieldsToIsoStrict(durationFields)
+    )
+  )
 }
 
 // Date & Time
 // -------------------------------------------------------------------------------------------------
 
 export function moveDateTime(
-  calendar,
-  isoDateTimeFields,
-  durationFields,
-  overflowHandling,
-) {
+  calendar: CalendarOps,
+  isoDateTimeFields: IsoDateTimeFields,
+  durationFields: DurationFields,
+  overflowHandling: Overflow,
+): IsoDateTimeFields {
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
   const movedIsoDateFields = calendar.dateAdd(
     isoDateTimeFields, // only date parts will be used
-    {
+    updateDurationFieldsSign({ // does CalendarOps really need sign?
       ...durationFields, // date parts
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
-    },
+    }),
     overflowHandling,
   )
 
@@ -83,12 +94,17 @@ export function moveDateTime(
   }
 }
 
-export function moveDate(calendar, isoDateFields, durationFields, overflowI) {
+export function moveDate(
+  calendar: CalendarImpl,
+  isoDateFields: IsoDateFields,
+  durationFields: DurationFields,
+  overflowHandling: Overflow,
+) {
   let { years, months, weeks, days } = durationFields
-  let epochMilli
+  let epochMilli: number | undefined
 
   // convert time fields to days
-  days += durationFieldsToNano(durationFields, hourIndex)
+  days += durationFieldsToNano(durationFields, Unit.Hour)
     .divTruncMod(nanoInUtcDay)[0].toNumber()
 
   if (years || months) {
@@ -96,12 +112,12 @@ export function moveDate(calendar, isoDateFields, durationFields, overflowI) {
 
     if (years) {
       year += years
-      month = clamp(month, 1, calendar.queryMonthsInYear(year), overflowI, 'month')
+      month = clamp(month, 1, calendar.computeMonthsInYear(year), overflowHandling, 'month')
     }
 
     if (months) {
       ([year, month] = calendar.addMonths(year, month, months))
-      day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflowI, 'day')
+      day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflowHandling, 'day')
     }
 
     epochMilli = calendar.queryDateStart(year, month, day)
@@ -111,22 +127,28 @@ export function moveDate(calendar, isoDateFields, durationFields, overflowI) {
     return isoDateFields
   }
 
-  epochMilli += (weeks * isoDaysInWeek + days) * milliInDay
+  epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay
 
   return {
     calendar,
-    ...epochMilliToIso(epochMilli),
+    ...epochMilliToIso(epochMilli!),
   }
 }
 
-export function moveDateByDays(isoDateFields, days) { // moveDateDays
+export function moveDateByDays( // TODO: rename moveDateDays?
+  isoDateFields: IsoDateFields,
+  days: number,
+): IsoDateFields {
   if (days) {
-    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields) + days * milliInDay)
+    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields)! + days * milliInDay)
   }
   return isoDateFields
 }
 
-export function moveTime(isoTimeFields, durationFields) {
+export function moveTime(
+  isoTimeFields: IsoTimeFields,
+  durationFields: DurationFields,
+): [IsoTimeFields, number] {
   return nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoTimeFields) +
     isoTimeFieldsToNano(durationTimeFieldsToIsoStrict(durationFields)),
@@ -136,7 +158,10 @@ export function moveTime(isoTimeFields, durationFields) {
 // Calendar-related Utils
 // -------------------------------------------------------------------------------------------------
 
-export function moveByIsoMonths(year, month, monthDelta) {
+export function moveByIsoMonths(year: number, month: number, monthDelta: number): [
+  year: number,
+  month: number,
+] {
   year += Math.trunc(monthDelta / isoMonthsInYear)
   month += monthDelta % isoMonthsInYear
 
@@ -151,7 +176,15 @@ export function moveByIsoMonths(year, month, monthDelta) {
   return [year, month]
 }
 
-export function moveByIntlMonths(year, month, monthDelta, calendarImpl) {
+export function moveByIntlMonths(
+  year: number,
+  month: number,
+  monthDelta: number,
+  calendarImpl: CalendarImpl
+): [
+  year: number,
+  month: number,
+] {
   month += monthDelta
 
   if (monthDelta < 0) {
@@ -159,14 +192,14 @@ export function moveByIntlMonths(year, month, monthDelta, calendarImpl) {
       throw new RangeError('Months out of range')
     }
     while (month < 1) {
-      month += calendarImpl.monthsInYear(--year)
+      month += calendarImpl.computeMonthsInYear(--year)
     }
   } else {
     if (month > Number.MAX_SAFE_INTEGER) {
       throw new RangeError('Months out of range')
     }
     let monthsInYear
-    while (month > (monthsInYear = calendarImpl.monthsInYear(year))) {
+    while (month > (monthsInYear = calendarImpl.computeMonthsInYear(year))) {
       month -= monthsInYear
       year++
     }
