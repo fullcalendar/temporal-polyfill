@@ -50,11 +50,6 @@
       "require": "./dist/impl.cjs",
       "import": "./dist/impl.mjs"
     },
-    "./shim": {
-      "types": "./dist/shim.d.ts",
-      "require": "./dist/shim.cjs",
-      "import": "./dist/shim.mjs"
-    },
     "./global": {
       "types": "./dist/global.d.ts",
       "require": "./dist/global.cjs",

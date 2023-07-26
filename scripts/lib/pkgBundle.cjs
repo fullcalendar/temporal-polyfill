@@ -46,6 +46,7 @@ async function buildPkgBundleConfigs(pkgDir, commandLineArgs) {
     })
   }
 
+  /*
   if (entryPointTypes.length && !watch) {
     configs.push({
       input: createTypeInputHash(entryPointTypes.map((f) => path.join(pkgDir, f))),
@@ -54,6 +55,7 @@ async function buildPkgBundleConfigs(pkgDir, commandLineArgs) {
       plugins: [dts(), typePreparing(pkgDir)],
     })
   }
+  */
 
   return configs
 }
