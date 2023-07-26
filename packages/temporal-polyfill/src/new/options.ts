@@ -6,7 +6,7 @@ import { parseMaybeZonedDateTime } from './isoParse'
 import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
-import { DayTimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
+import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
   FilterPropValues,
   clamp,
@@ -151,25 +151,38 @@ export function refineDateDisplayOptions(options: Options | undefined): Calendar
   return refineCalendarDisplay(normalizeOptions(options))
 }
 
-export function refineTimeDisplayOptions(options: Options | undefined): TimeDisplayTuple {
-  return refineTimeDisplayTuple(normalizeOptions(options))
+export function refineTimeDisplayOptions(
+  options: Options | undefined,
+  maxSmallestUnit?: TimeUnit
+): TimeDisplayTuple {
+  return refineTimeDisplayTuple(normalizeOptions(options), maxSmallestUnit)
 }
+
+/*
+addons:
+  -1 means hide seconds
+  undefined means 'auto' (display all digits but no trailing zeros)
+*/
+export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 export type TimeDisplayTuple = [
   nanoInc: number,
   roundingMode: RoundingMode,
-  subsecDigits: number | undefined // (undefined = auto-digits, -1 = hide-seconds, >=0 = #-of-digits)
+  subsecDigits: SubsecDigits | -1 | undefined
 ]
 
-function refineTimeDisplayTuple(options: Options): TimeDisplayTuple {
-  const smallestUnit = refineSmallestUnit(options, Unit.Minute, Unit.Nanosecond, -1 as number)
+function refineTimeDisplayTuple(
+  options: Options,
+  maxSmallestUnit: TimeUnit = Unit.Minute
+): TimeDisplayTuple {
+  const smallestUnit = refineSmallestUnit(options, maxSmallestUnit, Unit.Nanosecond, -1 as number)
   if ((smallestUnit as number) !== -1) {
     return [
       unitNanoMap[smallestUnit],
       refineRoundingMode(options, RoundingMode.Trunc),
       (smallestUnit < Unit.Minute)
-        ? 9 - (smallestUnit * 3)
-        : -1, // hide seconds
+        ? (9 - (smallestUnit * 3)) as SubsecDigits
+        : -1, // hide seconds --- NOTE: not relevant when maxSmallestUnit is <minute !!!
     ]
   }
 
@@ -332,11 +345,11 @@ function refineRoundingInc(options: Options, smallestUnit: DayTimeUnit) {
 
 const subsecDigitsName = 'fractionalSecondDigits'
 
-function refineSubsecDigits(options: Options): number | undefined {
+function refineSubsecDigits(options: Options): SubsecDigits | undefined {
   const subsecDigits = options[subsecDigitsName]
 
   if (typeof subsecDigits === 'number') {
-    return clamp(Math.floor(subsecDigits), 0, 9, Overflow.Reject, subsecDigitsName)
+    return clamp(Math.floor(subsecDigits), 0, 9, Overflow.Reject, subsecDigitsName) as SubsecDigits
   }
 
   if (String(subsecDigits) !== 'auto') {

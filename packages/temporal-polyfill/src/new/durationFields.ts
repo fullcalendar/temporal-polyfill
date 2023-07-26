@@ -3,6 +3,7 @@ import { LargeInt } from './largeInt'
 import { toIntegerStrict } from './options'
 import {
   DayTimeUnit,
+  TimeUnit,
   Unit,
   givenFieldsToLargeNano,
   nanoToGivenFields,
@@ -118,8 +119,11 @@ export function durationFieldsToNano(
   return givenFieldsToLargeNano(fields, largestUnit, durationFieldNamesAsc)
 }
 
-export function durationFieldsToTimeNano(fields: DurationFields): number {
-  return durationFieldsToNano(fields, Unit.Hour).toNumber()
+export function durationFieldsToTimeNano(
+  fields: DurationFields,
+  largeUnit: TimeUnit = Unit.Hour,
+): number {
+  return durationFieldsToNano(fields, largeUnit).toNumber()
 }
 
 export function nanoToDurationFields(

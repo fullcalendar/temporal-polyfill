@@ -1,27 +1,34 @@
 import { isoCalendarId } from './calendarConfig'
-import { absDurationInternals, durationFieldsToNano } from './durationFields'
-import { autoI, criticalI, neverI, refineDateDisplayOptions } from './options'
+import { CalendarOps } from './calendarOps'
+import { DurationInternals, absDurationInternals, durationFieldsToNano, durationFieldsToTimeNano } from './durationFields'
+import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import { CalendarDisplay, OffsetDisplay, refineDateDisplayOptions, SubsecDigits, TimeZoneDisplay } from './options'
+import { TimeZoneOps } from './timeZoneOps'
 import {
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
   nanoInMinute,
   nanoInSec,
-  secondsIndex,
+  Unit,
 } from './units'
 import { divFloorMod, padNumber, padNumber2 } from './utils'
 
 /*
 High-level. Refined options
 */
-export function formatPossibleDate(formatSimple, internals, options) {
-  const calendarDisplayI = refineDateDisplayOptions(options)
+export function formatPossibleDate(
+  formatSimple: (internals: IsoDateInternals) => string,
+  internals: IsoDateInternals,
+  options: any,
+) {
+  const calendarDisplay = refineDateDisplayOptions(options)
   const showCalendar =
-    calendarDisplayI > neverI || // critical or always
-    (calendarDisplayI === autoI && internals.calendar.id !== isoCalendarId)
+    calendarDisplay > CalendarDisplay.Never || // critical or always
+    (calendarDisplay === CalendarDisplay.Auto && internals.calendar.id !== isoCalendarId)
 
   if (showCalendar) {
-    return formatIsoDateFields(internals) + formatCalendar(internals.calendar, calendarDisplayI)
+    return formatIsoDateFields(internals) + formatCalendar(internals.calendar, calendarDisplay)
   } else {
     return formatSimple(internals)
   }
@@ -32,18 +39,18 @@ Rounding already happened with these...
 */
 
 export function formatIsoDateTimeFields(
-  isoDateTimeFields,
-  subsecDigits,
+  isoDateTimeFields: IsoDateTimeFields,
+  subsecDigits: SubsecDigits,
 ) {
   return formatIsoDateFields(isoDateTimeFields) +
     'T' + formatIsoTimeFields(isoDateTimeFields, subsecDigits)
 }
 
-export function formatIsoDateFields(isoDateFields) {
+export function formatIsoDateFields(isoDateFields: IsoDateFields): string {
   return formatIsoYearMonthFields(isoDateFields) + '-' + padNumber2(isoDateFields.isoDay)
 }
 
-export function formatIsoYearMonthFields(isoDateFields) {
+export function formatIsoYearMonthFields(isoDateFields: IsoDateFields): string {
   const { isoYear } = isoDateFields
   return (
     (isoYear < 0 || isoYear > 9999)
@@ -52,14 +59,14 @@ export function formatIsoYearMonthFields(isoDateFields) {
   ) + '-' + padNumber2(isoDateFields.isoMonth)
 }
 
-export function formatIsoMonthDayFields(isoDateFields) {
+export function formatIsoMonthDayFields(isoDateFields: IsoDateFields): string {
   return padNumber2(isoDateFields.isoMonth) + '-' + padNumber2(isoDateFields.isoDay)
 }
 
 export function formatIsoTimeFields(
-  isoTimeFields,
-  subsecDigits, // undefined/-1/#
-) {
+  isoTimeFields: IsoTimeFields,
+  subsecDigits: SubsecDigits | -1 | undefined,
+): string {
   const parts = [
     padNumber2(isoTimeFields.isoHour),
     padNumber2(isoTimeFields.isoMinute),
@@ -81,10 +88,10 @@ export function formatIsoTimeFields(
 }
 
 export function formatOffsetNano(
-  offsetNano,
-  offsetDisplayI = autoI, // auto/never
-) {
-  if (offsetDisplayI === neverI) {
+  offsetNano: number,
+  offsetDisplay: OffsetDisplay = OffsetDisplay.Auto,
+): string {
+  if (offsetDisplay === OffsetDisplay.Never) {
     return ''
   }
 
@@ -101,17 +108,20 @@ export function formatOffsetNano(
 }
 
 export function formatDurationInternals(
-  durationInternals,
-  subsecDigits, // undefined/-1/#
-) {
+  durationInternals: DurationInternals,
+  subsecDigits: SubsecDigits | undefined,
+): string {
   const { sign } = durationInternals
   const abs = absDurationInternals(durationInternals)
   const { hours, minutes } = abs
-  const secondsNano = durationFieldsToNano(abs, secondsIndex)
+  const secondsNano = durationFieldsToTimeNano(abs, Unit.Second)
   const [wholeSeconds, subsecNano] = divFloorMod(secondsNano, nanoInSec)
   const forceSeconds =
-    subsecDigits > 0 || // # of subsecond digits being forced?
-    !sign // completely empty? display 'PT0S'
+    // at least one subsecond digit being forced?
+    // allow `undefined` in comparison - will evaluate to false
+    (subsecDigits as number) > 0 ||
+    // completely empty? display 'PT0S'
+    !sign
 
   return (sign < 0 ? '-' : '') + 'P' + formatDurationFragments({
     Y: abs.years,
@@ -125,7 +135,9 @@ export function formatDurationInternals(
         M: minutes,
         S: wholeSeconds + (
           formatSubsecNano(subsecNano, subsecDigits) ||
-          (forceSeconds ? '' : 0) // string concatenation will force truthiness
+          (forceSeconds
+            ? '' // will force truthiness ('0')
+            : 0 as unknown as string) // will leave wholeSeconds as number
         ),
       })
       : ''
@@ -135,13 +147,16 @@ export function formatDurationInternals(
 /*
 Values are guaranteed to be non-negative
 */
-function formatDurationFragments(fragObj) {
+function formatDurationFragments(fragObj: Record<string, string | number>): string {
   const parts = []
 
   for (const fragName in fragObj) {
     const fragVal = fragObj[fragName]
     if (fragVal) {
-      parts.push(formatNumberNoSciNot(fragVal) + fragName)
+      parts.push(
+        (typeof fragVal === 'number' ? formatNumberUnscientific(fragVal) : fragVal) +
+        fragName
+      )
     }
   }
 
@@ -153,12 +168,12 @@ function formatDurationFragments(fragObj) {
 //
 
 export function formatTimeZone(
-  timeZoneOps,
-  timeZoneDisplayI,
-) {
-  if (timeZoneDisplayI !== neverI) {
+  timeZoneOps: TimeZoneOps,
+  timeZoneDisplay: TimeZoneDisplay,
+): string {
+  if (timeZoneDisplay !== TimeZoneDisplay.Never) {
     return '[' +
-      (timeZoneDisplayI === criticalI ? '!' : '') +
+      (timeZoneDisplay === TimeZoneDisplay.Critical ? '!' : '') +
       timeZoneOps.id +
       ']'
   }
@@ -166,15 +181,15 @@ export function formatTimeZone(
 }
 
 export function formatCalendar(
-  calendarOps,
-  calendarDisplayI,
-) {
+  calendarOps: CalendarOps,
+  calendarDisplay: CalendarDisplay,
+): string {
   if (
-    calendarDisplayI > neverI || // critical or always
-    (calendarDisplayI === autoI && calendarOps.id !== isoCalendarId)
+    calendarDisplay > CalendarDisplay.Never || // critical or always
+    (calendarDisplay === CalendarDisplay.Auto && calendarOps.id !== isoCalendarId)
   ) {
     return '[' +
-      (calendarDisplayI === criticalI ? '!' : '') +
+      (calendarDisplay === CalendarDisplay.Critical ? '!' : '') +
       calendarOps.id +
       ']'
   }
@@ -185,12 +200,14 @@ export function formatCalendar(
 // utils
 //
 
+
+
 function formatSubsec(
-  isoMillisecond,
-  isoMicrosecond,
-  isoNanosecond,
-  subsecDigits, // undefined/#
-) {
+  isoMillisecond: number,
+  isoMicrosecond: number,
+  isoNanosecond: number,
+  subsecDigits: SubsecDigits | undefined,
+): string {
   return formatSubsecNano(
     isoMillisecond * nanoInMilli +
     isoMicrosecond * nanoInMicro +
@@ -201,8 +218,12 @@ function formatSubsec(
 
 const trailingZerosRE = /0+$/
 
-function formatSubsecNano(totalNano, subsecDigits) { // subsecDigits can be undefined
+function formatSubsecNano(
+  totalNano: number,
+  subsecDigits?: SubsecDigits,
+): string {
   let s = padNumber(9, totalNano)
+
   s = subsecDigits === undefined
     ? s.replace(trailingZerosRE, '')
     : s.slice(0, subsecDigits)
@@ -210,11 +231,11 @@ function formatSubsecNano(totalNano, subsecDigits) { // subsecDigits can be unde
   return s ? '.' + s : ''
 }
 
-function getSignStr(num) {
+function getSignStr(num: number): string {
   return num < 0 ? '-' : '+'
 }
 
-function formatNumberNoSciNot(n) {
+function formatNumberUnscientific(n: number): string {
   // avoid outputting scientific notation
   // https://stackoverflow.com/a/50978675/96342
   return n.toLocaleString('fullwide', { useGrouping: false })

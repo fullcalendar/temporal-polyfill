@@ -20,6 +20,7 @@ import { parseDuration } from './isoParse'
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
+  SubsecDigits,
   refineDurationRoundOptions,
   refineRelativeToOptions,
   refineTimeDisplayOptions,
@@ -180,11 +181,11 @@ export const [
     },
 
     toString(internals: DurationInternals, options: any): string {
-      const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
+      const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
 
       return formatDurationInternals(
         roundDurationToNano(internals, nanoInc, roundingMode),
-        subsecDigits,
+        subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
       )
     },
 
