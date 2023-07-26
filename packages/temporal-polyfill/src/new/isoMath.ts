@@ -124,7 +124,9 @@ function isoDateMonthStart(isoDateFields: IsoDateFields): IsoDateFields {
 // Refining
 // -------------------------------------------------------------------------------------------------
 
-export function refineIsoDateTimeInternals(rawIsoDateTimeInternals: IsoDateTimeInternals): IsoDateTimeInternals {
+export function refineIsoDateTimeInternals(
+  rawIsoDateTimeInternals: IsoDateTimeInternals, // wrong
+): IsoDateTimeInternals {
   return checkIso(
     constrainIsoDateTimeInternals(
       mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
@@ -132,7 +134,9 @@ export function refineIsoDateTimeInternals(rawIsoDateTimeInternals: IsoDateTimeI
   )
 }
 
-export function refineIsoDateInternals(rawIsoDateInternals: IsoDateInternals): IsoDateInternals {
+export function refineIsoDateInternals(
+  rawIsoDateInternals: IsoDateInternals, // wrong
+): IsoDateInternals {
   return checkIso(
     constrainIsoDateInternals(
       mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
@@ -140,10 +144,11 @@ export function refineIsoDateInternals(rawIsoDateInternals: IsoDateInternals): I
   )
 }
 
-export function refineIsoTimeInternals(rawIsoTimeInternals: IsoTimeFields): IsoTimeFields {
-  const asdf = mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners)
+export function refineIsoTimeInternals(
+  rawIsoTimeInternals: IsoTimeFields, // wrong
+): IsoTimeFields {
   return constrainIsoTimeFields(
-    asdf,
+    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
   )
 }
 

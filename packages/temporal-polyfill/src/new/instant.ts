@@ -28,8 +28,9 @@ import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Unit } from './units'
+import { TimeZoneArg } from './timeZone'
 
-export type InstantArg = Instant | LargeInt | string
+export type InstantArg = Instant | string
 
 export type Instant = TemporalInstance<LargeInt>
 export const [

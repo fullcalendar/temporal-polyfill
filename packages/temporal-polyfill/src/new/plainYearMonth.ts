@@ -52,6 +52,7 @@ export const [
   },
 
   // internalsConversionMap
+  // NOTE: PlainDate(Time) is refined as bag
   {},
 
   // bagToInternals

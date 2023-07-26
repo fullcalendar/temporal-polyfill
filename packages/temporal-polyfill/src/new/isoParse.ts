@@ -46,7 +46,7 @@ export function parseInstant(s) {
   } else if (parsed.offset) {
     offsetNano = parseOffsetNano(parsed.offset)
   } else {
-    return new RangeError()
+    throw new RangeError()
   }
 
   return isoToEpochNano(parsed).addNumber(offsetNano)

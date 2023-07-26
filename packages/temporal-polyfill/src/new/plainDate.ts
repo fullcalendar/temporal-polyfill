@@ -96,7 +96,7 @@ export const [
       return createPlainDate(mergePlainDateBag(this, mod, options))
     },
 
-    withCalendar(internals: IsoDateInternals, calendarArg): PlainDate {
+    withCalendar(internals: IsoDateInternals, calendarArg: CalendarArg): PlainDate {
       return createPlainDate({
         ...internals,
         calendar: queryCalendarOps(calendarArg),

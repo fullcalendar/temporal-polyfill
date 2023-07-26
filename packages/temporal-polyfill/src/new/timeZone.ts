@@ -11,7 +11,23 @@ import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeIn
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { noop } from './utils'
 
-// TODO: implements some other interface?
+interface TimeZoneProtocolMethods {
+  getOffsetNanosecondsFor(instant: InstantArg): number
+  getOffsetStringFor?(instant: InstantArg): string
+  getPlainDateTimeFor?(instant: InstantArg, calendar?: CalendarArg): PlainDateTime
+  getInstantFor?(dateTime: PlainDateTimeArg, options?: any): Instant
+  getNextTransition?(startingPoint: InstantArg): Instant | null
+  getPreviousTransition?(startingPoint: InstantArg): Instant | null
+  getPossibleInstantsFor(dateTime: PlainDateTimeArg): Instant[]
+  toString?(): string;
+  toJSON?(): string;
+}
+
+export interface TimeZoneProtocol extends TimeZoneProtocolMethods {
+  id: string;
+}
+
+// the *required* protocol methods
 export const timeZoneProtocolMethods = {
   getPossibleInstantsFor(impl: TimeZoneImpl, plainDateTimeArg: PlainDateTimeArg): Instant[]  {
     return impl.getPossibleInstantsFor(toPlainDateTimeInternals(plainDateTimeArg))
@@ -21,14 +37,22 @@ export const timeZoneProtocolMethods = {
   getOffsetNanosecondsFor: getImplOffsetNanosecondsFor,
 }
 
-const timeZoneMethods = {
+// TODO: move elsewhere
+// TODO: use TS `satisfies` on main class?
+type Unmethodize<F> = F extends ((...args: infer A) => infer R)
+  ? (impl: TimeZoneImpl, ...args: A) => R
+  : never
+
+const timeZoneMethods: {
+  [K in keyof TimeZoneProtocolMethods]: Unmethodize<TimeZoneProtocolMethods[K]>
+} = {
   ...timeZoneProtocolMethods,
 
   getOffsetStringFor(impl: TimeZoneImpl, instantArg: InstantArg): string {
     return formatOffsetNano(getImplOffsetNanosecondsFor(impl, instantArg))
   },
 
-  getPlainDateTimeFor(impl: TimeZoneImpl, instantArg: InstantArg, calendarArg: CalendarArg): PlainDateTime {
+  getPlainDateTimeFor(impl: TimeZoneImpl, instantArg: InstantArg, calendarArg?: CalendarArg): PlainDateTime {
     const epochNanoseconds = toInstantEpochNano(instantArg)
 
     return createPlainDateTime({
@@ -38,10 +62,12 @@ const timeZoneMethods = {
   },
 
   getInstantFor(impl: TimeZoneImpl, plainDateTimeArg: PlainDateTimeArg, options: any): Instant {
-    return getSingleInstantFor(
-      impl,
-      toPlainDateTimeInternals(plainDateTimeArg),
-      refineEpochDisambigOptions(options),
+    return createInstant(
+      getSingleInstantFor(
+        impl,
+        toPlainDateTimeInternals(plainDateTimeArg),
+        refineEpochDisambigOptions(options),
+      )
     )
   },
 
@@ -52,7 +78,7 @@ const timeZoneMethods = {
   toString: getObjId,
 }
 
-export type TimeZoneArg = TimeZone | string
+export type TimeZoneArg = TimeZoneProtocol | string
 
 export type TimeZone = TemporalInstance<
   TimeZoneImpl, // internals

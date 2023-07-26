@@ -180,7 +180,7 @@ export class CalendarImpl implements CalendarOps {
 
   dateAdd(
     isoDateFields: IsoDateFields,
-    durationFields: DurationFields,
+    durationFields: DurationInternals,
     overflow: Overflow,
   ): IsoDateFields  {
     return moveDate(this, isoDateFields, durationFields, overflow)

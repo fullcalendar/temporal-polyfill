@@ -1,4 +1,4 @@
-import { Calendar, CalendarArg, calendarProtocolMethods, createCalendar } from './calendar'
+import { Calendar, CalendarArg, CalendarProtocol, calendarProtocolMethods, createCalendar } from './calendar'
 import { dateFieldRefiners, dateStatRefiners, eraYearFieldRefiners } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
@@ -13,7 +13,7 @@ import {
 import { Duration, createDuration } from './duration'
 import { DurationInternals } from './durationFields'
 import { CalendarInternals, IsoDateFields, IsoDateInternals } from './isoFields'
-import { Overflow, ensureArray, ensureObjectlike, ensureString, toString } from './options'
+import { Overflow, ensureObjectlike, ensureString, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
@@ -39,6 +39,8 @@ export interface CalendarOps {
   weekOfYear(isoFields: IsoDateFields): number
   yearOfWeek(isoFields: IsoDateFields): number
   daysInWeek(isoFields: IsoDateFields): number
+  dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow: Overflow): IsoDateFields
+  dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, options: any): DurationInternals
 }
 
 //
@@ -58,7 +60,7 @@ export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
   return queryCalendarImpl(toString(calendarArg))
 }
 
-export function getPublicCalendar(internals: { calendar: CalendarOps }): Calendar {
+export function getPublicCalendar(internals: { calendar: CalendarOps }): CalendarProtocol {
   const { calendar } = internals
 
   return getInternals(calendar as CalendarOpsAdapter) ||
@@ -100,8 +102,8 @@ const getDurationInternals = getStrictInternals.bind<
 
 const calendarOpsAdapterMethods = {
   ...mapProps((refiner, propName) => {
-    return ((calendar: Calendar, isoDateFields: IsoDateInternals) => {
-      return refiner(calendar[propName](createPlainDate(isoDateFields)))
+    return ((calendar: CalendarProtocol, isoDateFields: IsoDateInternals) => {
+      return refiner(calendar[propName](createPlainDate(isoDateFields)) as any)
     }) as any
   }, {
     // TODO: more DRY with DateGetters or something?
@@ -111,7 +113,7 @@ const calendarOpsAdapterMethods = {
   }),
 
   dateAdd(
-    calendar: Calendar,
+    calendar: CalendarProtocol,
     isoDateFields: IsoDateInternals,
     durationInternals: DurationInternals,
     overflow: Overflow,
@@ -126,7 +128,7 @@ const calendarOpsAdapterMethods = {
   },
 
   dateUntil(
-    calendar: Calendar,
+    calendar: CalendarProtocol,
     isoDateFields0: IsoDateFields,
     isoDateFields1: IsoDateFields,
     largestUnit: Unit, // TODO: ensure year/month/week/day???
@@ -140,36 +142,37 @@ const calendarOpsAdapterMethods = {
     )
   },
 
-  dateFromFields(calendar: Calendar, fields: any, overflow: Overflow): IsoDateInternals {
+  dateFromFields(calendar: CalendarProtocol, fields: any, overflow: Overflow): IsoDateInternals {
     return getPlainDateInternals(calendar.dateFromFields(fields, { overflow }))
   },
 
-  yearMonthFromFields(calendar: Calendar, fields: any, overflow: Overflow): IsoDateInternals {
+  yearMonthFromFields(calendar: CalendarProtocol, fields: any, overflow: Overflow): IsoDateInternals {
     return getPlainYearMonthInternals(calendar.yearMonthFromFields(fields, { overflow }))
   },
 
-  monthDayFromFields(calendar: Calendar, fields: any, overflow: Overflow): IsoDateInternals {
+  monthDayFromFields(calendar: CalendarProtocol, fields: any, overflow: Overflow): IsoDateInternals {
     return getPlainMonthDayInternals(calendar.monthDayFromFields(fields, { overflow }))
   },
 
-  fields(calendar: Calendar, fieldNames: string[]) {
-    return ensureArray(calendar.fields(fieldNames)).map(ensureString)
+  fields(calendar: CalendarProtocol, fieldNames: Iterable<string>): Iterable<string> {
+    return [...calendar.fields(fieldNames)].map(ensureString)
+    // TODO: kill ensureArray elsewhere?
   },
 
-  mergeFields(calendar: Calendar, fields0: any, fields1: any) {
+  mergeFields(calendar: CalendarProtocol, fields0: any, fields1: any): any {
     return ensureObjectlike(calendar.mergeFields(fields0, fields1))
   },
 }
 
 type CalendarOpsAdapter = WrapperInstance<
-  Calendar, // internals
+  CalendarProtocol, // internals
   typeof idGettersStrict, // getters
   typeof calendarOpsAdapterMethods // methods
 >
 
 const CalendarOpsAdapter = createWrapperClass<
-  [Calendar], // constructor
-  Calendar, // internals
+  [CalendarProtocol], // constructor
+  CalendarProtocol, // internals
   typeof idGettersStrict, // getters
   typeof calendarOpsAdapterMethods // methods
 >(idGettersStrict, calendarOpsAdapterMethods)

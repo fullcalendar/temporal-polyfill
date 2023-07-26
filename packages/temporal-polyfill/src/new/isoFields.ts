@@ -1,3 +1,4 @@
+import { CalendarProtocol } from './calendar'
 import { CalendarOps, queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
 import { toInteger } from './options'

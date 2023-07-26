@@ -8,7 +8,7 @@ import {
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
 } from './convert'
-import { IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
+import { IsoDateInternals, generatePublicIsoDateFields, pluckIsoDateInternals } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateTimeFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'
 import { parsePlainMonthDay } from './isoParse'
@@ -46,6 +46,7 @@ export const [
   },
 
   // internalsConversionMap
+  // NOTE: PlainDate(Time) is refined as bag
   {},
 
   // bagToInternals

@@ -50,7 +50,7 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
-import { TimeZoneArg } from './timeZone'
+import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
 import {
   TimeZoneOps,
   computeNanosecondsInDay,

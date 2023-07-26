@@ -18,7 +18,7 @@ import { moveDateByDays } from './move'
 import { EpochDisambig, OffsetDisambig, ensureArray, toString } from './options'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
-import { TimeZone, TimeZoneArg, createTimeZone, timeZoneProtocolMethods } from './timeZone'
+import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
 import { createLazyGenerator } from './utils'
@@ -51,7 +51,7 @@ export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
   return queryTimeZoneImpl(toString(timeZoneArg))
 }
 
-export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZone {
+export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZoneProtocol {
   const { timeZone } = internals
 
   return getInternals(timeZone as TimeZoneOpsAdapter) ||
@@ -223,25 +223,25 @@ const getInstantEpochNano = getStrictInternals.bind<
 >(undefined, Instant)
 
 const timeZoneOpsAdapterMethods = {
-  getOffsetNanosecondsFor(timeZone: TimeZone, epochNano: LargeInt): number {
+  getOffsetNanosecondsFor(timeZone: TimeZoneProtocol, epochNano: LargeInt): number {
     return validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
   },
 
-  getPossibleInstantsFor(timeZone: TimeZone, isoDateTimeFields: IsoDateTimeFields) {
+  getPossibleInstantsFor(timeZone: TimeZoneProtocol, isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
     return ensureArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
       .map(getInstantEpochNano)
   },
 }
 
 type TimeZoneOpsAdapter = WrapperInstance<
-  TimeZone, // internals
+  TimeZoneProtocol, // internals
   typeof idGettersStrict, // getters
   typeof timeZoneOpsAdapterMethods // methods
 >
 
 const TimeZoneOpsAdapter = createWrapperClass<
-  [TimeZone], // constructor
-  TimeZone, // internals
+  [TimeZoneProtocol], // constructor
+  TimeZoneProtocol, // internals
   typeof idGettersStrict, // getters
   typeof timeZoneOpsAdapterMethods // methods
 >(idGettersStrict, timeZoneOpsAdapterMethods)
