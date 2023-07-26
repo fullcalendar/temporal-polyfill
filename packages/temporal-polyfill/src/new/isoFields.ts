@@ -20,6 +20,7 @@ export interface IsoTimeFields {
 }
 
 // TODO: move
+// TODO: same as CalendarArg?
 type CalendarPublic = CalendarProtocol | string
 
 export interface CalendarInternals {
