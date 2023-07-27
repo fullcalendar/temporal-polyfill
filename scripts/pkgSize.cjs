@@ -20,10 +20,12 @@ async function printPkgSize(pkgDir) {
 
   for (const filename of filenames) {
     if (
-      !filename.match(/\.map$/) &&
-      !filename.match(/\.cjs$/)
+      // !filename.match(/\.map$/) &&
+      // !filename.match(/\.cjs$/)
+      filename.match(/\.js$/)
     ) {
       const filePath = path.join(distDir, filename)
+      console.log(filename)
       const { stdout } = await exec(`gzip -c -r ${filePath} | wc -c`)
       const fileBytes = parseInt(stdout.trim())
       bytes = Math.max(bytes, fileBytes)
