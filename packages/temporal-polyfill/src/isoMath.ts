@@ -27,7 +27,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { compareProps, divFloorMod, mapPropsWithRefiners } from './utils'
+import { NumSign, compareNumbers, divFloorMod, mapPropsWithRefiners } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -251,8 +251,8 @@ export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
   const [dayDelta, timeNano] = divFloorMod(nano, nanoInUtcDay)
-  const isoTimeFields = nanoToGivenFields(timeNano, Unit.Hour, isoTimeFieldNamesAsc)
-  return [isoTimeFields as IsoTimeFields, dayDelta]
+  const isoTimeFields = nanoToGivenFields(timeNano, Unit.Hour, isoTimeFieldNamesAsc) as IsoTimeFields
+  return [isoTimeFields, dayDelta]
 }
 
 // Epoch Unit Conversion
@@ -431,5 +431,30 @@ export function epochMilliToIso(epochMilli: number): {
 // Comparison
 // -------------------------------------------------------------------------------------------------
 
-export const compareIsoDateTimeFields = compareProps.bind(undefined, isoDateTimeFieldNamesAsc)
-export const compareIsoTimeFields = compareProps.bind(undefined, isoTimeFieldNamesAsc)
+export function compareIsoDateTimeFields(
+  isoFields0: IsoDateTimeFields,
+  isoFields1: IsoDateTimeFields,
+): NumSign {
+  return compareIsoDateFields(isoFields0, isoFields1) ||
+    compareIsoTimeFields(isoFields0, isoFields1)
+}
+
+export function compareIsoDateFields(
+  isoFields0: IsoDateFields,
+  isoFields1: IsoDateFields,
+): NumSign {
+  return compareNumbers(
+    isoToEpochMilli(isoFields0)!,
+    isoToEpochMilli(isoFields1)!,
+  )
+}
+
+export function compareIsoTimeFields(
+  isoFields0: IsoTimeFields,
+  isoFields1: IsoTimeFields,
+): NumSign {
+  return compareNumbers(
+    isoTimeFieldsToNano(isoFields0),
+    isoTimeFieldsToNano(isoFields1)
+  )
+}

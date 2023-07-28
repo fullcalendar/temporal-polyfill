@@ -106,6 +106,9 @@ export function givenFieldsToNano<K extends string>(
   return nano
 }
 
+/*
+Whatever unit you want, it might not populate all fields
+*/
 export function nanoToGivenFields<F>(
   nano: number,
   unit: DayTimeUnit, // largestUnit

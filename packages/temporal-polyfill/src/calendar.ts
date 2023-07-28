@@ -1,4 +1,4 @@
-import { dateGetterNames } from './calendarFields'
+import { DateGetterFields, dateGetterNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { TemporalInstance, createTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
 import {
@@ -8,6 +8,7 @@ import {
   refinePlainYearMonthBag,
 } from './convert'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
+import { IsoDateFields } from './isoFields'
 import { parseCalendarId } from './isoParse'
 import {
   ensureObjectlike,
@@ -16,6 +17,7 @@ import {
   refineOverflowOptions,
 } from './options'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from './plainDate'
+import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
@@ -53,7 +55,7 @@ export interface CalendarProtocol extends CalendarProtocolMethods{
 }
 
 // TODO: compress this somehow
-const dateArgWhitelist = {
+const dateArgWhitelist: Record<string, string> = {
   era: 'PlainYearMonth',
   eraYear: 'PlainYearMonth',
   year: 'PlainYearMonth',
@@ -66,19 +68,25 @@ const dateArgWhitelist = {
   day: 'PlainMonthDay',
 }
 
-// the *required* protocol methods
-export const calendarProtocolMethods = {
-  ...mapPropNames((propName) => {
-    const whitelistName = dateArgWhitelist[propName as keyof typeof dateArgWhitelist]
+type DateArg = PlainYearMonth | PlainMonthDay | PlainDateTime | PlainDateArg
 
-    return ((impl: CalendarImpl, dateArg: any) => {
-      const isoFields = whitelistName && (getTemporalName(dateArg) || '').includes(whitelistName)
-        ? getInternals(dateArg)
-        : toPlainDateInternals(dateArg)
+/*
+the *required* protocol methods
+*/
+export const calendarProtocolMethods = {
+  ...mapPropNames((propName: keyof DateGetterFields) => {
+    const whitelistName = dateArgWhitelist[propName]
+
+    return (impl: CalendarImpl, dateArg: DateArg) => {
+      const inWhitelist = whitelistName && (getTemporalName(dateArg) || '').includes(whitelistName)
+      const getInternalsFunc = inWhitelist ? getInternals : toPlainDateInternals
+      const isoFields = getInternalsFunc(dateArg) as IsoDateFields
 
       return impl[propName](isoFields)
-    }) as any
-  }, dateGetterNames),
+    }
+  }, dateGetterNames) as {
+    [K in keyof DateGetterFields]: (impl: CalendarImpl, dateArg: any) => DateGetterFields[K]
+  },
 
   dateAdd(
     impl: CalendarImpl,
@@ -147,15 +155,7 @@ export const calendarProtocolMethods = {
   },
 }
 
-// TODO: move elsewhere
-// TODO: use TS `satisfies` on main class?
-type Unmethodize<F> = F extends ((...args: infer A) => infer R)
-  ? (impl: CalendarImpl, ...args: A) => R
-  : never
-
-const calendarMethods: {
-  [K in keyof CalendarProtocolMethods]: Unmethodize<CalendarProtocolMethods[K]>
-} = {
+const calendarMethods = {
   ...calendarProtocolMethods,
   toString: getObjId,
 }

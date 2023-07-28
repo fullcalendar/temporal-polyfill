@@ -148,14 +148,14 @@ export function createTemporalClass<
   A extends any[],
   I,
   O,
-  G extends { [propName: string]: (internals: I) => unknown },
-  M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
+  G extends { [propName: string]: (this: TemporalInstance<I>, internals: I) => unknown },
+  M extends { [methodName: string]: (this: TemporalInstance<I>, internals: I, ...args: any[]) => unknown },
   S extends {}
 >(
   temporalName: string,
   constructorToInternals: (...args: A) => I = (identityFunc as any),
   internalsConversionMap: { [typeName: string]: (otherInternal: any) => I },
-  bagToInternals: (bag: B, options?: O) => I,
+  bagToInternals: (bag: B, options?: O) => I | void, // void opts-out of bag processing
   stringToInternals: (str: string) => I,
   handleUnusedOptions: (options?: O) => void,
   getters: G,
@@ -233,14 +233,17 @@ export function neverValueOf() {
 // Complex Objects with IDs
 // -------------------------------------------------------------------------------------------------
 
-// any - Record<string, () => unknown>
-export function createProtocolChecker(protocolMethods: any) {
-  const propNames = Object.keys(protocolMethods)
+export function createProtocolChecker<P extends {}>(
+  protocolMethods: P
+): (
+  (obj: { [K in keyof P]: any } & { id: string }) => void
+) {
+  const propNames = Object.keys(protocolMethods) as (keyof (P & { id: string }))[]
   propNames.push('id')
   propNames.sort() // TODO: order matters?
 
-  return (obj: Record<string, unknown>) => {
-    if (!hasAllPropsByName(obj, propNames)) {
+  return (obj) => {
+    if (!hasAllPropsByName<P & { id: string }>(obj, propNames)) {
       throw new TypeError('Invalid protocol')
     }
   }

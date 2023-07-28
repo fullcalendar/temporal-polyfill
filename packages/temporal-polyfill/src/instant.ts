@@ -3,7 +3,7 @@ import { queryCalendarOps } from './calendarOps'
 import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { negateDurationInternals } from './durationFields'
+import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
 import {
   epochGetters,
@@ -17,6 +17,7 @@ import { parseInstant } from './isoParse'
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
 import {
+  RoundingMode,
   ensureObjectlike,
   refineDiffOptions,
   refineInstantDisplayOptions,
@@ -27,7 +28,7 @@ import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { Unit } from './units'
+import { TimeUnit, Unit } from './units'
 import { TimeZoneArg } from './timeZone'
 
 export type InstantArg = Instant | string
@@ -75,7 +76,7 @@ export const [
       return createZonedDateTime({
         epochNanoseconds: epochNano,
         timeZone: queryTimeZoneOps(timeZoneArg),
-        calendar: isoCalendarId,
+        calendar: queryCalendarOps(isoCalendarId),
       })
     },
 
@@ -116,10 +117,10 @@ export const [
     },
 
     round(epochNano: LargeInt, options): Instant {
-      const [smallestUnitI, roundingInc, roundingModeI] = refineRoundOptions(options, Unit.Hour)
+      const [smallestUnit, roundingInc, roundingModeI] = refineRoundOptions(options, Unit.Hour)
 
       return createInstant(
-        roundByIncLarge(epochNano, computeNanoInc(smallestUnitI, roundingInc), roundingModeI),
+        roundByIncLarge(epochNano, computeNanoInc(smallestUnit as TimeUnit, roundingInc), roundingModeI),
       )
     },
 
@@ -134,12 +135,12 @@ export const [
       const [
         timeZoneArg,
         nanoInc,
-        roundingModeI,
+        roundingMode,
         subsecDigits,
       ] = refineInstantDisplayOptions(options)
       const timeZone = queryTimeZoneOps(timeZoneArg || utcTimeZoneId)
 
-      epochNano = roundByIncLarge(epochNano, nanoInc, roundingModeI)
+      epochNano = roundByIncLarge(epochNano, nanoInc, roundingMode)
       const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
       const isoFields = epochNanoToIso(epochNano.addNumber(offsetNano))
 
@@ -184,10 +185,15 @@ function diffInstants(
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
-    diffEpochNano(
-      epochNano0,
-      epochNano1,
-      ...refineDiffOptions(roundingModeInvert, options, secondsIndex, hourIndex),
+    updateDurationFieldsSign(
+      diffEpochNano(
+        epochNano0,
+        epochNano1,
+        ...(
+          refineDiffOptions(roundingModeInvert, options, Unit.Second, Unit.Hour) as
+            [TimeUnit, TimeUnit, number, RoundingMode]
+        ),
+      ),
     ),
   )
 }

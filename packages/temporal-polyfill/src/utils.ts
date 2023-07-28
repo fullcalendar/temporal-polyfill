@@ -1,3 +1,4 @@
+import { IsoDateFields, IsoDateInternals } from './isoFields'
 import { Overflow } from './options'
 
 export type Reused = any
@@ -256,20 +257,6 @@ export function compareNumbers(a: number, b: number): NumSign { // TODO: rename 
   return Math.sign(a - b) as NumSign
 }
 
-export function compareProps<Props extends Record<PropertyKey, number>>(
-  propNames: (keyof Props)[],
-  props0: Props,
-  props1: Props,
-): NumSign {
-  for (const propName of propNames) {
-    const cmp = compareNumbers(props0[propName], props1[propName])
-    if (cmp) {
-      return cmp
-    }
-  }
-  return 0
-}
-
 /*
 min/max are inclusive
 */
@@ -351,5 +338,5 @@ function hasHalf(num: number): boolean {
 // types
 
 export type FilterPropValues<P, F> = {
-  [K in keyof P as P[K] extends F ? K : never]: P[K]
+  [K in keyof P as (P[K] extends F ? K : never)]: P[K]
 }

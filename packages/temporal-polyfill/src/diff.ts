@@ -112,13 +112,13 @@ export function diffDates(
 
   return roundRelativeDuration(
     dateDiff,
-    isoToEpochNano(endIsoFields),
+    isoToEpochNano(endIsoFields)!,
     largestUnit,
     smallestUnit,
     roundingInc,
     roundingMode,
     startIsoFields, // marker
-    isoToEpochNano, // markerToEpochNano
+    isoToEpochNano, // markerToEpochNano // TODO --- stop doing isoToEpochNano*!*
     calendar.dateAdd.bind(calendar), // moveMarker
   )
 }

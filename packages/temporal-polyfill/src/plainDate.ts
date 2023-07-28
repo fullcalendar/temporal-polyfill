@@ -16,7 +16,7 @@ import {
 } from './convert'
 import { diffDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { negateDurationInternals } from './durationFields'
+import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import {
   IsoDateInternals,
   IsoTimeFields,
@@ -25,7 +25,7 @@ import {
   pluckIsoDateInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
-import { compareIsoDateTimeFields, refineIsoDateInternals } from './isoMath'
+import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainDate } from './isoParse'
 import { refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -104,18 +104,22 @@ export const [
     },
 
     add(internals: IsoDateInternals, durationArg: DurationArg, options): PlainDate {
-      return internals.calendar.dateAdd(
-        internals,
-        toDurationInternals(durationArg),
-        options,
+      return createPlainDate(
+        internals.calendar.dateAdd(
+          internals,
+          toDurationInternals(durationArg),
+          options,
+        ),
       )
     },
 
     subtract(internals: IsoDateInternals, durationArg: DurationArg, options): PlainDate {
-      return internals.calendar.dateAdd(
-        internals,
-        negateDurationInternals(toDurationInternals(durationArg)),
-        options,
+      return createPlainDate(
+        internals.calendar.dateAdd(
+          internals,
+          negateDurationInternals(toDurationInternals(durationArg)),
+          options,
+        ),
       )
     },
 
@@ -129,7 +133,7 @@ export const [
 
     equals(internals: IsoDateInternals, otherArg: PlainDateArg): boolean {
       const otherInternals = toPlainDateInternals(otherArg)
-      return !compareIsoDateTimeFields(internals, otherInternals) &&
+      return !compareIsoDateFields(internals, otherInternals) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
@@ -171,7 +175,7 @@ export const [
 
   {
     compare(arg0: PlainDateArg, arg1: PlainDateArg): NumSign {
-      return compareIsoDateTimeFields(
+      return compareIsoDateFields(
         toPlainDateInternals(arg0),
         toPlainDateInternals(arg1),
       )

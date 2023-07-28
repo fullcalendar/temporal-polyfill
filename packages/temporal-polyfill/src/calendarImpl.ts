@@ -9,6 +9,7 @@ import {
   leapYearMetas,
 } from './calendarConfig'
 import {
+  AllYearFields,
   allYearFieldNames,
   eraYearFieldNames,
   monthDayFieldNames,
@@ -41,7 +42,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
-import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
+import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2, remapProps } from './utils'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 
@@ -173,7 +174,7 @@ export class CalendarImpl implements CalendarOps {
     const dayEpochMilli = isoToEpochMilli({
       ...isoDateFields,
       ...isoTimeFieldDefaults,
-    })
+    })!
     const yearStartEpochMilli = this.queryDateStart(this.year(isoDateFields))
     return diffEpochMilliByDay(yearStartEpochMilli, dayEpochMilli)
   }
@@ -280,15 +281,19 @@ interface YearMethods {
   monthsInYear(isoFields: IsoDateFields): number
 }
 
+type VeryGeneric = any
+
 const yearMethods = {} as YearMethods
 
-Object.keys(yearComputeMethods).forEach((queryMethodName, i) => {
+(
+  Object.keys(yearComputeMethods) as (keyof YearComputeMethods)[]
+).forEach((computeMethodName, i) => {
   yearMethods[yearStatNames[i]] = function(
     this: CalendarImpl,
     isoDateFields: IsoDateFields,
   ) {
-    return this[queryMethodName as keyof YearMethods](this.year(isoDateFields))
-  } as any
+    return this[computeMethodName](this.year(isoDateFields))
+  } as VeryGeneric
 })
 
 // Base Calendar Implementation :: Week Methods
@@ -573,14 +578,21 @@ class IntlCalendarImpl extends CalendarImpl {
 // IntlCalendarImpl - Prototype Trickery
 // -------------------------------------------------------------------------------------------------
 
-// era/eraYear/year/day
-[...allYearFieldNames, 'day'].forEach((dateFieldName) => {
-  (IntlCalendarImpl as any).prototype[dateFieldName] = function(
+type EasyIntlMethodName = keyof AllYearFields | 'day'
+
+/*
+era/eraYear/year/day
+Fields that are easily-extractable from IntlFields (non-month fields)
+*/
+(
+  [...allYearFieldNames, 'day'] as EasyIntlMethodName[]
+).forEach((dateFieldName) => {
+  IntlCalendarImpl.prototype[dateFieldName] = function(
     this: IntlCalendarImpl,
     isoDateFields: IsoDateFields,
   ) {
-    return (this.isoDateFieldsToIntl(isoDateFields) as any)[dateFieldName]
-  }
+    return this.isoDateFieldsToIntl(isoDateFields)[dateFieldName as EasyIntlMethodName]
+  } as VeryGeneric
 })
 
 // CalendarImpl Querying

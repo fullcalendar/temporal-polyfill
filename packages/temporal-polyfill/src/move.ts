@@ -9,7 +9,7 @@ import {
   durationTimeFieldsToIsoStrict,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
   epochMilliToIso,
   isoDaysInWeek,
@@ -99,7 +99,7 @@ export function moveDate(
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   overflowHandling: Overflow,
-) {
+): IsoDateInternals {
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 
@@ -124,7 +124,10 @@ export function moveDate(
   } else if (weeks || days) {
     epochMilli = isoToEpochMilli(isoDateFields)
   } else {
-    return isoDateFields
+    return { // TODO: not nice
+      calendar,
+      ...isoDateFields
+    }
   }
 
   epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay

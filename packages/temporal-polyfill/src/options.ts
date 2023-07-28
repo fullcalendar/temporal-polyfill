@@ -6,6 +6,7 @@ import { parseMaybeZonedDateTime } from './isoParse'
 import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
+import { TimeZoneArg } from './timeZone'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
   FilterPropValues,
@@ -95,6 +96,10 @@ export type RoundTuple = [
   RoundingMode,
 ]
 
+const smallestUnitStr = 'smallestUnit'
+const largestUnitStr = 'largestUnit'
+const totalUnitStr = 'unit'
+
 /*
 Always related to time
 */
@@ -148,14 +153,14 @@ export function refineRelativeToOptions(options: Options | undefined): RelativeT
 }
 
 export type InstantDisplayTuple = [
-  string, // TimeZoneArg
+  TimeZoneArg,
   ...TimeDisplayTuple,
 ]
 
 export function refineInstantDisplayOptions(options: Options | undefined): InstantDisplayTuple {
   options = normalizeOptions(options)
   return [
-    options.timeZone,
+    options.timeZone as TimeZoneArg, // TODO: possibly not needed after moving away from Record
     ...refineTimeDisplayTuple(options),
   ]
 }
@@ -238,9 +243,9 @@ function refineTimeDisplayTuple(
 }
 
 
-const refineSmallestUnit = refineUnitOption.bind(undefined, 'smallestUnit')
-const refineLargestUnit = refineUnitOption.bind(undefined, 'largestUnit')
-const refineTotalUnit = refineUnitOption.bind(undefined, 'totalUnit')
+const refineSmallestUnit = refineUnitOption.bind(undefined, smallestUnitStr)
+const refineLargestUnit = refineUnitOption.bind(undefined, largestUnitStr)
+const refineTotalUnit = refineUnitOption.bind(undefined, totalUnitStr)
 
 export enum Overflow {
   Constrain,

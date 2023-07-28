@@ -1,5 +1,5 @@
 import { Calendar, CalendarArg, CalendarProtocol, calendarProtocolMethods, createCalendar } from './calendar'
-import { dateFieldRefiners, dateStatRefiners, eraYearFieldRefiners } from './calendarFields'
+import { DateGetterFields, dateFieldRefiners, dateGetterRefiners, dateStatRefiners, eraYearFieldRefiners } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
   createProtocolChecker,
@@ -42,9 +42,9 @@ export interface CalendarOps {
   dateFromFields(fields: any, overflow: Overflow): IsoDateInternals
   yearMonthFromFields(fields: any, overflow: Overflow): IsoDateInternals
   monthDayFromFields(fields: any, overflow: Overflow): IsoDateInternals
-  dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow: Overflow): IsoDateFields
+  dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow: Overflow): IsoDateInternals
   dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, options: any): DurationInternals
-  fields(fieldNames: Iterable<string>): Iterable<string>
+  fields(fieldNames: string[]): string[]
   mergeFields(fields0: any, fields1: any): any
 }
 
@@ -55,7 +55,7 @@ const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
   if (typeof calendarArg === 'object') {
     if (calendarArg instanceof Calendar) {
-      return getInternals(calendarArg)
+      return getInternals(calendarArg as Calendar)
     }
 
     checkCalendarProtocol(calendarArg)
@@ -107,15 +107,13 @@ const getDurationInternals = getStrictInternals.bind<
 
 const calendarOpsAdapterMethods = {
   ...mapProps((refiner, propName) => {
-    return ((calendar: CalendarProtocol, isoDateFields: IsoDateInternals) => {
-      return refiner(calendar[propName](createPlainDate(isoDateFields)) as any)
-    }) as any
-  }, {
-    // TODO: more DRY with DateGetters or something?
-    ...eraYearFieldRefiners,
-    ...dateFieldRefiners,
-    ...dateStatRefiners,
-  }),
+    return ((calendar: CalendarProtocol, isoDateFields: IsoDateFields) => {
+      // TODO: fix type error by having more specific refiner inputs
+      return refiner(calendar[propName](createPlainDate(isoDateFields)))
+    })
+  }, dateGetterRefiners) as {
+    [K in keyof DateGetterFields]: (calendar: CalendarProtocol, isoFields: IsoDateFields) => DateGetterFields[K]
+  },
 
   dateAdd(
     calendar: CalendarProtocol,
@@ -140,8 +138,8 @@ const calendarOpsAdapterMethods = {
   ): DurationInternals {
     return getDurationInternals(
       calendar.dateUntil(
-        createPlainDate(isoDateFields0),
-        createPlainDate(isoDateFields1),
+        createPlainDate(isoDateFields0 as IsoDateInternals), // hopefully internal calendar never used
+        createPlainDate(isoDateFields1 as IsoDateInternals), // "
         { largestUnit: unitNamesAsc[largestUnit] },
       )
     )
@@ -159,7 +157,7 @@ const calendarOpsAdapterMethods = {
     return getPlainMonthDayInternals(calendar.monthDayFromFields(fields, { overflow }))
   },
 
-  fields(calendar: CalendarProtocol, fieldNames: Iterable<string>): Iterable<string> {
+  fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
     return [...calendar.fields(fieldNames)].map(ensureString)
     // TODO: kill ensureArray elsewhere?
   },

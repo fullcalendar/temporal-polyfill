@@ -6,6 +6,7 @@ import {
 } from './calendarConfig'
 import {
   DateFields,
+  TimeFields,
   dateFieldNames,
   dateTimeFieldNames,
   dateTimeFieldRefiners,
@@ -19,7 +20,7 @@ import {
 } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
 import { CalendarOps, queryCalendarOps } from './calendarOps'
-import { getInternals } from './class'
+import { TemporalInstance, getInternals } from './class'
 import { DurationBag, DurationMod } from './duration'
 import {
   DurationInternals,
@@ -27,7 +28,7 @@ import {
   durationFieldRefiners,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateInternals, IsoDateTimeInternals, IsoTimeFields } from './isoFields'
+import { CalendarInternals, IsoDateInternals, IsoDateTimeInternals, IsoTimeFields } from './isoFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
@@ -46,7 +47,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
+import { Reused, excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 
 /*
@@ -258,7 +259,7 @@ export function mergePlainDateBag(
 }
 
 function convertToIso(
-  input: any,
+  input: PlainYearMonth | PlainMonthDay,
   inputFieldNames: string[],
   extra: any,
   extraFieldNames: string[],
@@ -266,7 +267,7 @@ function convertToIso(
   const { calendar } = getInternals(input)
 
   inputFieldNames = calendar.fields(inputFieldNames)
-  input = pluckProps(inputFieldNames, input)
+  input = pluckProps(inputFieldNames, input as Record<string, unknown>) as Reused
 
   extraFieldNames = calendar.fields(extraFieldNames)
   extra = refineFields(extra, extraFieldNames, getRequiredDateFields(calendar))
@@ -275,7 +276,7 @@ function convertToIso(
   const mergedFieldNames = excludeArrayDuplicates([...inputFieldNames, ...extraFieldNames])
   mergedFields = refineFields(mergedFields, mergedFieldNames, [])
 
-  return calendar.dateFromFields(mergedFields)
+  return calendar.dateFromFields(mergedFields, Overflow.Constrain)
 }
 
 // PlainYearMonth
@@ -420,7 +421,7 @@ export function refinePlainTimeBag(bag: any, options: any): IsoTimeFields {
 }
 
 export function mergePlainTimeBag(plainTime: PlainTime, bag: any, options: any): IsoTimeFields {
-  const fields = pluckProps(timeFieldNames, plainTime)
+  const fields = pluckProps(timeFieldNames, plainTime as unknown as TimeFields) // TODO: wish PlainTime had real TS methods
   const partialFields = refineFields(bag, timeFieldNames)
   const mergeFields = { ...fields, ...partialFields }
 
@@ -485,13 +486,16 @@ function getBagCalendarOps(bag: any): CalendarOps {
   return extractBagCalendarOps(bag) || queryCalendarImpl(isoCalendarId)
 }
 
-function extractBagCalendarOps(bag: any): CalendarOps | undefined {
-  let { calendar } = getInternals(bag) || {}
+function extractBagCalendarOps(
+  bag: TemporalInstance<CalendarInternals> | { calendar: string },
+): CalendarOps | undefined {
+  let calendar: CalendarOps | string | undefined = (getInternals(bag) || {}).calendar
+
   if (calendar) {
     return calendar // CalendarOps
   }
 
-  ({ calendar } = bag)
+  calendar = (bag as { calendar: string }).calendar
   if (calendar) {
     return queryCalendarOps(calendar)
   }
@@ -536,8 +540,8 @@ function refineFields(
     if (fieldVal !== undefined) {
       any = true
 
-      if (builtinRefiners[fieldName]) {
-        fieldVal = builtinRefiners[fieldName]
+      if (builtinRefiners[fieldName as keyof typeof builtinRefiners]) {
+        fieldVal = builtinRefiners[fieldName as keyof typeof builtinRefiners](fieldVal)
       }
 
       res[fieldName] = fieldVal
@@ -546,7 +550,7 @@ function refineFields(
         throw new TypeError('Missing required field name')
       }
 
-      res[fieldName] = builtinDefaults[fieldName]
+      res[fieldName] = builtinDefaults[fieldName as keyof typeof builtinDefaults]
     }
   }
 
@@ -557,8 +561,12 @@ function refineFields(
   return res
 }
 
-export function refineComplexBag(key: string, ForbiddenClass: any, bag: any): any {
-  const internalArg = getInternals(bag)?.[key]
+export function refineComplexBag<K extends string>(
+  key: K,
+  ForbiddenClass: unknown,
+  bag: TemporalInstance<Record<K, any>> | Record<K, any>,
+): unknown {
+  const internalArg = getInternals(bag as TemporalInstance<Record<K, any>>)?.[key]
   if (internalArg) {
     return internalArg
   }
@@ -568,7 +576,7 @@ export function refineComplexBag(key: string, ForbiddenClass: any, bag: any): an
   if (!(key in bag)) {
     return bag
   } else {
-    bag = bag[key]
+    bag = (bag as Record<K, any>)[key]
 
     forbidInstanceClass(bag, ForbiddenClass)
 

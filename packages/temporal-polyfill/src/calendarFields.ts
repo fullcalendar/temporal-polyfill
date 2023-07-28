@@ -199,12 +199,17 @@ export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) as
 export const dateStatNames = Object.keys(dateStatRefiners) as
   (keyof DateStats)[]
 
+export type DateGetterFields = EraYearFields & DateFields & DateStats
+
+export const dateGetterRefiners = {
+  ...eraYearFieldRefiners,
+  ...dateFieldRefiners,
+  ...dateStatRefiners,
+}
+
 // unordered
-export const dateGetterNames = [
-  ...eraYearFieldNames,
-  ...dateFieldNames,
-  ...dateStatNames,
-]
+export const dateGetterNames = Object.keys(dateGetterRefiners) as
+  (keyof DateGetterFields)[]
 
 // unordered
 export const yearMonthGetterNames = [

@@ -137,6 +137,7 @@ export function nanoToDurationFields(
   const [largeUnitNum, remainder] = largeNano.divTruncMod(divisor)
 
   return {
+    ...durationFieldDefaults,
     [durationFieldNamesAsc[largestUnit]]: largeUnitNum.toNumber(),
     ...nanoToGivenFields(remainder, largestUnit - 1, durationFieldNamesAsc),
   }
@@ -146,11 +147,14 @@ export function timeNanoToDurationFields(
   nano: number,
   largestUnit: TimeUnit = Unit.Hour,
 ): DurationFields {
-  return nanoToGivenFields(
-    nano,
-    largestUnit,
-    durationFieldNamesAsc,
-  )
+  return {
+    ...durationFieldDefaults,
+    ...nanoToGivenFields(
+      nano,
+      largestUnit,
+      durationFieldNamesAsc,
+    )
+  }
 }
 
 // Field Math
