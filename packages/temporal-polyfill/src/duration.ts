@@ -24,6 +24,8 @@ import {
   refineTotalOptions,
 } from './options'
 import {
+  MarkerSystem,
+  SimpleMarkerSystem,
   roundDayTimeDuration,
   roundDurationToNano,
   roundRelativeDuration,
@@ -32,7 +34,7 @@ import {
 } from './round'
 import { NumSign, noop } from './utils'
 import { DayTimeUnit, Unit } from './units'
-import { Marker, MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
+import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 
 export type DurationArg = Duration | DurationBag | string
 export type DurationBag = Partial<DurationFields>
@@ -143,7 +145,7 @@ export const [
         throw new RangeError('need relativeTo')
       }
 
-      const markerSystem = createMarkerSystem(markerInternals)
+      const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return createDuration(
         updateDurationFieldsSign(
@@ -153,7 +155,7 @@ export const [
             smallestUnit,
             roundingInc,
             roundingMode,
-            ...(markerSystem as unknown as [Marker, MarkerToEpochNano, MoveMarker]),
+            ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
           ),
         ),
       )
@@ -174,12 +176,12 @@ export const [
         throw new RangeError('need relativeTo')
       }
 
-      const markerSystem = createMarkerSystem(markerInternals)
+      const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return totalRelativeDuration(
         ...spanDuration(internals, largestUnit, ...markerSystem),
         totalUnit,
-        ...(markerSystem as unknown as [Marker, MarkerToEpochNano, MoveMarker]),
+        ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
       )
     },
 
@@ -219,7 +221,7 @@ export const [
         throw new RangeError('need relativeTo')
       }
 
-      const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals)
+      const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return compareLargeInts(
         markerToEpochNano(moveMarker(marker, durationFields0)),
@@ -255,18 +257,18 @@ function addToDuration(
     throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
   }
 
-  const markerSystem = createMarkerSystem(markerInternals)
+  const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
   return createDuration(spanDuration(internals, largestUnit, ...markerSystem)[0])
 }
 
-function spanDuration(
+function spanDuration<M>(
   durationFields: DurationFields,
   largestUnit: Unit, // TODO: more descrimination?
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
-  diffMarkers: DiffMarkers,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
+  diffMarkers: DiffMarkers<M>,
 ): [
   DurationInternals,
   LargeInt,

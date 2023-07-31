@@ -192,7 +192,7 @@ export const [Calendar, createCalendar] = createTemporalClass(
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  idGetters,
+  idGetters as { id: (this: Calendar, impl: CalendarImpl) => string },
 
   // Methods
   // -----------------------------------------------------------------------------------------------

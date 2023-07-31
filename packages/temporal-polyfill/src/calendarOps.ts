@@ -13,6 +13,7 @@ import {
 import { Duration, createDuration } from './duration'
 import { DurationInternals } from './durationFields'
 import { CalendarInternals, IsoDateFields, IsoDateInternals } from './isoFields'
+import { LargeInt } from './largeInt'
 import { Overflow, ensureObjectlike, ensureString, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
@@ -43,7 +44,7 @@ export interface CalendarOps {
   yearMonthFromFields(fields: any, overflow: Overflow): IsoDateInternals
   monthDayFromFields(fields: any, overflow: Overflow): IsoDateInternals
   dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow: Overflow): IsoDateInternals
-  dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, options: any): DurationInternals
+  dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit): DurationInternals
   fields(fieldNames: string[]): string[]
   mergeFields(fields0: any, fields1: any): any
 }

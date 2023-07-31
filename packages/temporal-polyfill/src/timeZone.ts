@@ -115,7 +115,7 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  idGetters,
+  idGetters as { id: (this: TimeZone, impl: TimeZoneImpl) => string },
 
   // Methods
   // -----------------------------------------------------------------------------------------------

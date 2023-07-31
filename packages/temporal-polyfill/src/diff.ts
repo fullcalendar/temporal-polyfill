@@ -1,4 +1,3 @@
-import { TimeZoneImpl } from './timeZoneImpl'
 import { CalendarImpl } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
 import {
@@ -7,6 +6,7 @@ import {
   durationFieldDefaults,
   nanoToDurationFields,
   timeNanoToDurationFields,
+  updateDurationFieldsSign,
 } from './durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import {
@@ -18,7 +18,7 @@ import {
 } from './isoMath'
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
-import { RoundingMode } from './options'
+import { Overflow, RoundingMode } from './options'
 import { MarkerToEpochNano, MoveMarker, computeNanoInc, roundByInc, roundByIncLarge, roundRelativeDuration } from './round'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
@@ -83,8 +83,9 @@ export function diffDateTimes(
     roundingInc,
     roundingMode,
     startIsoFields, // marker
-    isoToEpochNano as MarkerToEpochNano, // markerToEpochNano
-    moveDateTime.bind(undefined, calendar) as MoveMarker, // moveMarker
+    isoToEpochNano as (isoFields: IsoDateTimeFields) => LargeInt, // markerToEpochNano -- TODO: better after removing `!`
+    // TODO: better way to bind w/o specifying Overflow
+    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendar, m, d, Overflow.Constrain),
   )
 }
 
@@ -107,8 +108,9 @@ export function diffDates(
     roundingInc,
     roundingMode,
     startIsoFields, // marker
-    isoToEpochNano as MarkerToEpochNano, // markerToEpochNano
-    calendar.dateAdd.bind(calendar), // moveMarker
+    isoToEpochNano as (isoFields: IsoDateFields) => LargeInt, // markerToEpochNano
+    // TODO: better way to bind w/o specifying Overflow
+    (m: IsoDateFields, d: DurationFields) => calendar.dateAdd(m, updateDurationFieldsSign(d), Overflow.Constrain),
   )
 }
 
@@ -225,8 +227,9 @@ export function diffZonedEpochNano(
     roundingInc,
     roundingMode,
     startEpochNano, // marker
-    identityFunc as MarkerToEpochNano, // markerToEpochNano
-    moveZonedEpochNano.bind(undefined, calendar, timeZone), // moveMarker
+    identityFunc, // markerToEpochNano
+    // TODO: better way to bind
+    (m: LargeInt, d: DurationFields) => moveZonedEpochNano(calendar, timeZone, m, d, Overflow.Constrain),
   )
 }
 

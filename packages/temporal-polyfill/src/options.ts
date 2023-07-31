@@ -401,6 +401,7 @@ function refineSubsecDigits(options: Options): SubsecDigits | undefined {
   // undefind means 'auto'
 }
 
+// TODO: use in definition of `createMarkerSystem` ?
 type RelativeToInternals = ZonedInternals | IsoDateInternals
 
 function refineRelativeTo(options: Options): RelativeToInternals | undefined {

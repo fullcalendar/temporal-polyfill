@@ -15,7 +15,7 @@ import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields, isoT
 import { isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay } from './isoMath'
 import { LargeInt } from './largeInt'
 import { moveDateByDays, moveZonedEpochNano } from './move'
-import { RoundingMode, roundingModeFuncs } from './options'
+import { Overflow, RoundingMode, roundingModeFuncs } from './options'
 import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
 import {
   nanoInMinute,
@@ -148,7 +148,7 @@ export function roundDurationToNano(
   }
 }
 
-export function roundRelativeDuration(
+export function roundRelativeDuration<M>(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   // ^has sign
   endEpochNano: LargeInt,
@@ -157,9 +157,9 @@ export function roundRelativeDuration(
   roundingInc: number,
   roundingMode: RoundingMode,
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
 ): DurationFields {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return durationFields
@@ -243,14 +243,14 @@ export function totalDayTimeDuration( // assumes iso-length days
   return fullUnits.toNumber() + (remainder / divisor)
 }
 
-export function totalRelativeDuration(
+export function totalRelativeDuration<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: LargeInt,
   totalUnit: Unit,
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
 ): number {
   const { sign } = durationFields
 
@@ -307,16 +307,16 @@ function nudgeDurationTime(
   ]
 }
 
-function nudgeRelativeDurationTime(
+function nudgeRelativeDurationTime<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: LargeInt, // NOT NEEDED, just for conformance
   smallestUnit: TimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: LargeInt,
@@ -359,16 +359,16 @@ function nudgeRelativeDurationTime(
   return [nudgedDurationFields, endEpochNano, dayDelta]
 }
 
-function nudgeRelativeDuration(
+function nudgeRelativeDuration<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: LargeInt,
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingMode,
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
 ): [
   durationFields: DurationFields,
   movedEpochNano: LargeInt,
@@ -411,35 +411,43 @@ function nudgeRelativeDuration(
 // -------------------------------------------------------------------------------------------------
 // TODO: best place for this?
 
-export type Marker = LargeInt | IsoDateFields
-export type MarkerToEpochNano = (marker: Marker) => LargeInt
-export type MoveMarker = (marker: Marker, durationFields: DurationFields) => Marker
-export type DiffMarkers = (marker0: Marker, marker1: Marker, largeUnit: Unit) => DurationInternals
-export type MarkerSystem = [
-  Marker,
-  MarkerToEpochNano,
-  MoveMarker,
-  DiffMarkers,
+export type MarkerToEpochNano<M> = (marker: M) => LargeInt
+export type MoveMarker<M> = (marker: M, durationFields: DurationFields) => M
+export type DiffMarkers<M> = (marker0: M, marker1: M, largeUnit: Unit) => DurationInternals
+export type MarkerSystem<M> = [
+  M,
+  MarkerToEpochNano<M>,
+  MoveMarker<M>,
+  DiffMarkers<M>,
+]
+export type SimpleMarkerSystem<M> = [
+  M,
+  MarkerToEpochNano<M>,
+  MoveMarker<M>,
 ]
 
+/*
+Okay that callers frequently cast to `unknown`?
+*/
 export function createMarkerSystem(
   markerInternals: ZonedInternals | IsoDateInternals
-): MarkerSystem {
+): MarkerSystem<LargeInt> | MarkerSystem<IsoDateFields> {
   const { calendar, timeZone, epochNanoseconds } = markerInternals as ZonedInternals
 
   if (epochNanoseconds) {
     return [
-      epochNanoseconds, // marker
-      identityFunc as MarkerToEpochNano, // markerToEpochNano
-      moveZonedEpochNano.bind(undefined, calendar, timeZone), // moveMarker
-      diffZonedEpochNano.bind(undefined, calendar, timeZone), // diffMarkers
+      epochNanoseconds,
+      identityFunc as MarkerToEpochNano<LargeInt>,
+      moveZonedEpochNano.bind(undefined, calendar, timeZone) as MoveMarker<LargeInt>,
+      diffZonedEpochNano.bind(undefined, calendar, timeZone) as DiffMarkers<LargeInt>,
     ]
   } else {
     return [
-      markerInternals as IsoDateFields, // marker (IsoDateFields)
-      isoToEpochNano as MarkerToEpochNano,
-      calendar.dateAdd.bind(calendar), // moveMarker
-      calendar.dateUntil.bind(calendar), // diffMarkers
+      markerInternals as IsoDateFields,
+      isoToEpochNano as MarkerToEpochNano<IsoDateFields>,
+      // TODO: better way to .bind to Calendar, without specifying overflow/largeUnit?
+      (m: IsoDateFields, d: DurationFields) => calendar.dateAdd(m, updateDurationFieldsSign(d), Overflow.Constrain),
+      (m0: IsoDateFields, m1: IsoDateFields, largeUnit: Unit) => calendar.dateUntil(m0, m1, largeUnit),
     ]
   }
 }
@@ -447,15 +455,15 @@ export function createMarkerSystem(
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function bubbleRelativeDuration(
+function bubbleRelativeDuration<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: LargeInt,
   largestUnit: Unit,
   smallestUnit: Unit,
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
 ): DurationFields {
   const { sign } = durationFields
 
@@ -486,14 +494,14 @@ function bubbleRelativeDuration(
   return durationFields
 }
 
-function clampRelativeDuration(
+function clampRelativeDuration<M>(
   durationFields: DurationFields,
   clampUnit: Unit,
   clampDistance: number,
   // marker system...
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
 ) {
   const clampDurationFields = {
     ...durationFieldDefaults,
