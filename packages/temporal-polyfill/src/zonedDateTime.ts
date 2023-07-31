@@ -11,7 +11,7 @@ import {
 } from './convert'
 import { diffZonedEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { DurationFields, negateDurationInternals } from './durationFields'
+import { DurationFields, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { Instant, createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
 import {
@@ -40,6 +40,7 @@ import {
   EpochDisambig,
   OffsetDisambig,
   Overflow,
+  RoundingMode,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -62,7 +63,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { Unit, nanoInHour } from './units'
+import { DayTimeUnit, Unit, nanoInHour } from './units'
 import { NumSign, mapProps } from './utils'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
@@ -137,8 +138,7 @@ export const [
       ) / nanoInHour
     },
 
-    // TODO: make this a getter?
-    offsetNanoseconds(internals: ZonedInternals): LargeInt {
+    offsetNanoseconds(internals: ZonedInternals): number {
       // TODO: more DRY
       return zonedInternalsToIso(internals).offsetNanoseconds
     },
@@ -261,7 +261,7 @@ export const [
 
       isoDateTimeFields = roundDateTime(
         isoDateTimeFields,
-        ...refineRoundOptions(options),
+        ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
         timeZone,
       )
       epochNanoseconds = getMatchingInstantFor(
@@ -422,15 +422,17 @@ function moveZonedDateTime(
   durationFields: DurationFields,
   overflowHandling: Overflow
 ): ZonedDateTime {
-  return createZonedDateTime(
-    moveZonedEpochNano(
-      internals.calendar,
-      internals.timeZone,
-      internals.epochNanoseconds,
-      durationFields,
-      overflowHandling,
-    ),
+  const epochNano = moveZonedEpochNano(
+    internals.calendar,
+    internals.timeZone,
+    internals.epochNanoseconds,
+    durationFields,
+    overflowHandling,
   )
+  return createZonedDateTime({
+    ...internals,
+    epochNanoseconds: epochNano,
+  })
 }
 
 function diffZonedDateTimes(
@@ -440,12 +442,14 @@ function diffZonedDateTimes(
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
-    diffZonedEpochNano(
-      getCommonCalendarOps(internals, otherInternals),
-      getCommonTimeZoneOps(internals, otherInternals),
-      internals.epochNanoseconds,
-      otherInternals.epochNanoseconds,
-      ...refineDiffOptions(roundingModeInvert, options, Unit.Hour),
-    ),
+    updateDurationFieldsSign(
+      diffZonedEpochNano(
+        getCommonCalendarOps(internals, otherInternals),
+        getCommonTimeZoneOps(internals, otherInternals),
+        internals.epochNanoseconds,
+        otherInternals.epochNanoseconds,
+        ...refineDiffOptions(roundingModeInvert, options, Unit.Hour),
+      ),
+    )
   )
 }

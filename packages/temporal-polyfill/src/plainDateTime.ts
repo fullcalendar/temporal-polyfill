@@ -11,7 +11,7 @@ import {
 } from './convert'
 import { diffDateTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { DurationInternals, negateDurationInternals } from './durationFields'
+import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import {
   IsoDateTimeInternals,
   generatePublicIsoDateTimeFields,
@@ -25,6 +25,7 @@ import { compareIsoDateTimeFields, refineIsoDateTimeInternals } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'
 import {
+  RoundingMode,
   refineDateTimeDisplayOptions,
   refineDiffOptions,
   refineEpochDisambigOptions,
@@ -38,7 +39,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
 import { TimeZoneArg } from './timeZone'
 import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
-import { Unit } from './units'
+import { DayTimeUnit, Unit } from './units'
 import { NumSign } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
@@ -158,7 +159,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
     round(internals: IsoDateTimeInternals, options): PlainDateTime {
       const isoDateTimeFields = roundDateTime(
         internals,
-        ...refineRoundOptions(options),
+        ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
       )
 
       return createPlainDateTime({
@@ -267,11 +268,13 @@ function diffPlainDateTimes(
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
-    diffDateTimes(
-      getCommonCalendarOps(internals0, internals1),
-      internals0,
-      internals1,
-      ...refineDiffOptions(roundingModeInvert, options, Unit.Day),
-    ),
+    updateDurationFieldsSign(
+      diffDateTimes(
+        getCommonCalendarOps(internals0, internals1),
+        internals0,
+        internals1,
+        ...refineDiffOptions(roundingModeInvert, options, Unit.Day),
+      ),
+    )
   )
 }

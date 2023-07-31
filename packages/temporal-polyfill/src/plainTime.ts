@@ -7,13 +7,14 @@ import {
 } from './convert'
 import { diffTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { DurationInternals, negateDurationInternals } from './durationFields'
+import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { compareIsoTimeFields, refineIsoTimeInternals } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {
+  RoundingMode,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -23,7 +24,7 @@ import { PlainDateArg, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { roundTime, roundTimeToNano } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { Unit } from './units'
+import { TimeUnit, Unit } from './units'
 import { NumSign } from './utils'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
@@ -108,7 +109,10 @@ export const [
 
     round(fields: IsoTimeFields, options): PlainTime {
       return createPlainTime(
-        roundTime(fields, ...refineRoundOptions(options, Unit.Hour)),
+        roundTime(
+          fields,
+          ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
+        ),
       )
     },
 
@@ -121,7 +125,7 @@ export const [
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(
-        roundTimeToNano(fields, nanoInc, roundingMode),
+        roundTimeToNano(fields, nanoInc, roundingMode)[0],
         subsecDigits,
       )
     },
@@ -171,10 +175,12 @@ function diffPlainTimes(
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
-    diffTimes(
-      internals0,
-      internals1,
-      ...refineDiffOptions(roundingModeInvert, options, hourIndex, hourIndex),
-    ),
+    updateDurationFieldsSign(
+      diffTimes(
+        internals0,
+        internals1,
+        ...(refineDiffOptions(roundingModeInvert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
+      ),
+    )
   )
 }

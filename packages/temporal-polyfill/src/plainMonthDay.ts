@@ -10,7 +10,7 @@ import {
 } from './convert'
 import { IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
-import { compareIsoDateTimeFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'
+import { compareIsoDateFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'
 import { parsePlainMonthDay } from './isoParse'
 import { refineOverflowOptions } from './options'
 import { PlainDate } from './plainDate'
@@ -73,7 +73,8 @@ export const [
 
     equals(internals: IsoDateInternals, otherArg: PlainMonthDayArg): boolean {
       const otherInternals = toPlainMonthDayInternals(otherArg)
-      return !compareIsoDateTimeFields(internals, otherInternals) &&
+
+      return !compareIsoDateFields(internals, otherInternals) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 

@@ -42,7 +42,7 @@ const checkTimeZoneProtocol = createProtocolChecker(timeZoneProtocolMethods)
 export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
   if (typeof timeZoneArg === 'object') {
     if (timeZoneArg instanceof TimeZone) {
-      return getInternals(timeZoneArg)
+      return getInternals(timeZoneArg as TimeZone)
     }
 
     checkTimeZoneProtocol(timeZoneArg)
@@ -73,8 +73,11 @@ export function computeNanosecondsInDay(
   isoDateFields: IsoDateFields, // could contain time fields though
 ): number {
   isoDateFields = { ...isoDateFields, ...isoTimeFieldDefaults }
+
+  // TODO: have getSingleInstantFor accept IsoDateFields?
   const epochNano0 = getSingleInstantFor(timeZoneOps, { ...isoTimeFieldDefaults, ...isoDateFields })
-  const epochNano1 = getSingleInstantFor(timeZoneOps, moveDateByDays(isoDateFields, 1))
+  const epochNano1 = getSingleInstantFor(timeZoneOps, { ...isoTimeFieldDefaults, ...moveDateByDays(isoDateFields, 1) })
+
   return epochNano1.addLargeInt(epochNano0, -1).toNumber()
 }
 

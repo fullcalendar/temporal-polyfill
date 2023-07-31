@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
-import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import { diffEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
@@ -72,6 +72,9 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
+    /*
+    TODO: doesn't accept timeZoneArg anymore???
+    */
     toZonedDateTimeISO(epochNano: LargeInt, timeZoneArg: TimeZoneArg): ZonedDateTime {
       return createZonedDateTime({
         epochNanoseconds: epochNano,
@@ -148,14 +151,7 @@ export const [
         formatOffsetNano(offsetNano)
     },
 
-    toLocaleString(
-      epochNano: LargeInt,
-      locales: string | string[],
-      options: any,
-    ): string {
-      // TODO
-      return ''
-    },
+    toLocaleString: toLocaleStringMethod,
 
     valueOf: neverValueOf,
   },

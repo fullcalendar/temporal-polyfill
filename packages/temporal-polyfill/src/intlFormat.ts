@@ -19,7 +19,7 @@ import {
 } from './utils'
 import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
-export const standardCalendarId = 'en-GB' // gives 24-hour clock
+export const standardLocaleId = 'en-GB' // gives 24-hour clock
 
 export function hashIntlFormatParts(
   intlFormat: Intl.DateTimeFormat,

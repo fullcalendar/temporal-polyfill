@@ -162,6 +162,7 @@ export function timeNanoToDurationFields(
 
 /*
 Mutates `fields`
+TODO: crazy-overused
 */
 export function updateDurationFieldsSign(fields: DurationFields): DurationInternals {
   (fields as DurationInternals).sign = computeDurationFieldsSign(fields)

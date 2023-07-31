@@ -171,7 +171,9 @@ export function createZonedDateTimeConverter(
   (internals: any, options: any) => ZonedDateTime
 ) {
   return (internals, options) => {
-    const { calendar, timeZone } = internals
+    const { calendar } = internals
+    const timeZone = queryTimeZoneOps(options.timeZone)
+
     const epochNanoseconds = getSingleInstantFor(timeZone, {
       ...internals,
       ...getExtraIsoFields(normalizeOptions(options)),

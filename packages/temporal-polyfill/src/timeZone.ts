@@ -10,11 +10,12 @@ import { refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { noop } from './utils'
+import { isoCalendarId } from './calendarConfig'
 
 interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number
   getOffsetStringFor?(instant: InstantArg): string
-  getPlainDateTimeFor?(instant: InstantArg, calendar?: CalendarArg): PlainDateTime
+  getPlainDateTimeFor?(instant: InstantArg, calendarArg?: CalendarArg): PlainDateTime
   getInstantFor?(dateTime: PlainDateTimeArg, options?: any): Instant
   getNextTransition?(startingPoint: InstantArg): Instant | null
   getPreviousTransition?(startingPoint: InstantArg): Instant | null
@@ -52,12 +53,16 @@ const timeZoneMethods: {
     return formatOffsetNano(getImplOffsetNanosecondsFor(impl, instantArg))
   },
 
-  getPlainDateTimeFor(impl: TimeZoneImpl, instantArg: InstantArg, calendarArg?: CalendarArg): PlainDateTime {
-    const epochNanoseconds = toInstantEpochNano(instantArg)
+  getPlainDateTimeFor(
+    impl: TimeZoneImpl,
+    instantArg: InstantArg,
+    calendarArg: CalendarArg = isoCalendarId
+  ): PlainDateTime {
+    const epochNano = toInstantEpochNano(instantArg)
 
     return createPlainDateTime({
       calendar: queryCalendarOps(calendarArg),
-      ...zonedEpochNanoToIso(impl, epochNanoseconds),
+      ...zonedEpochNanoToIso(impl, epochNano),
     })
   },
 

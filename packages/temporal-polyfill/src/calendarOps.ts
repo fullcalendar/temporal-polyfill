@@ -1,5 +1,5 @@
 import { Calendar, CalendarArg, CalendarProtocol, calendarProtocolMethods, createCalendar } from './calendar'
-import { DateGetterFields, dateFieldRefiners, dateGetterRefiners, dateStatRefiners, eraYearFieldRefiners } from './calendarFields'
+import { DateGetterFields, dateGetterRefiners } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
   createProtocolChecker,

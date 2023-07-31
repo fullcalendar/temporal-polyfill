@@ -133,6 +133,7 @@ export const [
 
     equals(internals: IsoDateInternals, otherArg: PlainDateArg): boolean {
       const otherInternals = toPlainDateInternals(otherArg)
+
       return !compareIsoDateFields(internals, otherInternals) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
@@ -147,7 +148,7 @@ export const [
     valueOf: neverValueOf,
 
     toZonedDateTime: createZonedDateTimeConverter((options: any) => {
-      return optionalToPlainTimeFields(options.time)
+      return optionalToPlainTimeFields(options.plainTime)
     }),
 
     toPlainDateTime(internals, timeArg): PlainDateTime {
@@ -192,13 +193,17 @@ function diffPlainDates(
   options: any,
   roundingModeInvert?: boolean,
 ): Duration {
+  const calendarOps = getCommonCalendarOps(internals0, internals1)
+
   return createDuration(
-    diffDates(
-      getCommonCalendarOps(internals0, internals1),
-      internals0,
-      internals1,
-      ...refineDiffOptions(roundingModeInvert, options, Unit.Day, Unit.Year, Unit.Day),
-    ),
+    updateDurationFieldsSign(
+      diffDates(
+        calendarOps,
+        internals0,
+        internals1,
+        ...refineDiffOptions(roundingModeInvert, options, Unit.Day, Unit.Year, Unit.Day),
+      )
+    )
   )
 }
 

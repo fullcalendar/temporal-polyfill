@@ -340,6 +340,7 @@ export function isoToEpochMilli(
 
 /*
 If out-of-bounds, returns undefined
+TODO: rethink all this ! bs
 */
 export function isoToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,

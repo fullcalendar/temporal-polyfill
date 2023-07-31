@@ -10,10 +10,10 @@ import {
 } from './convert'
 import { diffDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { DurationInternals, negateDurationInternals } from './durationFields'
+import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { IsoDateFields, IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
-import { compareIsoDateTimeFields, refineIsoDateInternals } from './isoMath'
+import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainYearMonth } from './isoParse'
 import { moveDateByDays } from './move'
 import { refineDiffOptions, refineOverflowOptions } from './options'
@@ -74,7 +74,7 @@ export const [
 
   {
     with(internals: IsoDateInternals, mod: PlainYearMonthMod, options): PlainYearMonth {
-      return createPlainYearMonth(mergePlainYearMonthBag(internals, mod, options))
+      return createPlainYearMonth(mergePlainYearMonthBag(this, mod, options))
     },
 
     add(internals: IsoDateInternals, durationArg: DurationArg, options): PlainYearMonth {
@@ -103,7 +103,8 @@ export const [
 
     equals(internals: IsoDateInternals, otherArg: PlainYearMonthArg): boolean {
       const otherInternals = toPlainYearMonthInternals(otherArg)
-      return !compareIsoDateTimeFields(internals, otherInternals) &&
+
+      return !compareIsoDateFields(internals, otherInternals) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
@@ -127,7 +128,7 @@ export const [
 
   {
     compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumSign {
-      return compareIsoDateTimeFields(
+      return compareIsoDateFields(
         toPlainYearMonthInternals(arg0),
         toPlainYearMonthInternals(arg1),
       )
@@ -145,12 +146,14 @@ function diffPlainYearMonths(
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
-    diffDates(
-      getCommonCalendarOps(internals0, internals1),
-      movePlainYearMonthToDay(internals0),
-      movePlainYearMonthToDay(internals1),
-      ...refineDiffOptions(roundingModeInvert, options, Unit.Year, Unit.Year, Unit.Day),
-    ),
+    updateDurationFieldsSign(
+      diffDates(
+        getCommonCalendarOps(internals0, internals1),
+        movePlainYearMonthToDay(internals0),
+        movePlainYearMonthToDay(internals1),
+        ...refineDiffOptions(roundingModeInvert, options, Unit.Year, Unit.Year, Unit.Day),
+      ),
+    )
   )
 }
 

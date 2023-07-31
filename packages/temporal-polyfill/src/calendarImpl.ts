@@ -22,7 +22,7 @@ import {
   diffDatesExact,
   diffEpochMilliByDay,
 } from './diff'
-import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
+import { IntlDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateFields, IsoDateInternals, isoTimeFieldDefaults } from './isoFields'
 import {
   computeIsoDayOfWeek,
@@ -710,7 +710,7 @@ export function parseIntlYear(
 }
 
 function buildIntlFormat(calendarId: string): Intl.DateTimeFormat {
-  return new IntlDateTimeFormat(standardCalendarId, {
+  return new IntlDateTimeFormat(standardLocaleId, {
     calendar: calendarId,
     timeZone: 'UTC',
     era: 'short', // 'narrow' is too terse for japanese months
@@ -776,7 +776,7 @@ function createIntlMonthCache(
 // Era Utils
 // -------------------------------------------------------------------------------------------------
 
-function getEraOrigins(calendarId: string): Record<string, number> {
+function getEraOrigins(calendarId: string): Record<string, number> | undefined {
   return eraOriginsByCalendarId[getCalendarIdBase(calendarId)]
 }
 

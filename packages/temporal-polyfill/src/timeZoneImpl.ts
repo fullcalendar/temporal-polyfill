@@ -1,5 +1,6 @@
+import { isoCalendarId } from './calendarConfig'
 import { parseIntlYear } from './calendarImpl'
-import { IntlDateTimeFormat, hashIntlFormatParts, standardCalendarId } from './intlFormat'
+import { IntlDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
 import {
   epochNanoToSec,
@@ -251,7 +252,7 @@ function createComputeOffsetSec(timeZoneId: string): (
   return (epochSec: number) => {
     const intlParts = hashIntlFormatParts(format, epochSec * milliInSec)
     const zonedEpochSec = isoArgsToEpochSec(
-      parseIntlYear(intlParts).year,
+      parseIntlYear(intlParts, isoCalendarId).year,
       parseInt(intlParts.month),
       parseInt(intlParts.day),
       parseInt(intlParts.hour),
@@ -264,7 +265,7 @@ function createComputeOffsetSec(timeZoneId: string): (
 
 function buildIntlFormat(timeZoneId: string): Intl.DateTimeFormat {
   // format will ALWAYS do gregorian. need to parse year
-  return new IntlDateTimeFormat(standardCalendarId, {
+  return new IntlDateTimeFormat(standardLocaleId, {
     timeZone: timeZoneId,
     era: 'short',
     year: 'numeric',
