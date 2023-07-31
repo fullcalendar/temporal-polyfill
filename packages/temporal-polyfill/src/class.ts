@@ -143,6 +143,51 @@ const temporaNameMap = new WeakMap<TemporalInstance<unknown>, string>()
 export const getTemporalName = temporaNameMap.get.bind(temporaNameMap) as
   (arg: unknown) => string | undefined
 
+export function createSimpleTemporalClass<
+  B,
+  A extends any[],
+  I,
+  O,
+  G extends { [propName: string]: (this: TemporalInstance<I>, internals: I) => unknown },
+  M extends { [methodName: string]: (this: TemporalInstance<I>, internals: I, ...args: any[]) => unknown },
+  S extends {}
+>(
+  temporalName: string,
+  constructorToInternals: (...args: A) => I = (identityFunc as any),
+  getters: G,
+  methods: M,
+  staticMembers: S = {} as any, // need this to be optional?
+): [
+  Class: TemporalClass<B, A, I, O, G, M, S>,
+  createInstance: (internals: I) => TemporalInstance<I, G, M>,
+] {
+  ;(methods as unknown as ToJsonMethods).toJSON = function() {
+    return String(this)
+  }
+
+  const TemporalClass = createWrapperClass(
+    getters,
+    methods,
+    constructorToInternals,
+    createTemporalNameDescriptors(temporalName), // extraPrototypeDescriptors
+    staticMembers,
+    setTemporalName, // handleInstance
+  )
+
+  function createInstance(internals: I) {
+    const instance: TemporalInstance<I, G, M> = Object.create(TemporalClass.prototype)
+    internalsMap.set(instance, internals)
+    setTemporalName(instance)
+    return instance
+  }
+
+  function setTemporalName(instance: TemporalInstance<I, G, M>) {
+    temporaNameMap.set(instance, temporalName)
+  }
+
+  return [TemporalClass as any, createInstance]
+}
+
 export function createTemporalClass<
   B,
   A extends any[],
@@ -163,32 +208,21 @@ export function createTemporalClass<
   staticMembers: S = {} as any,
 ): [
   Class: TemporalClass<B, A, I, O, G, M, S>,
-  createInstance: (internals: I) => TemporalInstance<I>,
+  createInstance: (internals: I) => TemporalInstance<I, G, M>,
   toInternals: (arg: TemporalInstance<I> | B | string, options?: O) => I
 ] {
-  ;(methods as unknown as ToJsonMethods).toJSON = function() {
-    return String(this)
-  }
-
+  // TODO: cast to better type
   ;(staticMembers as any).from = function(arg: TemporalInstance<I, G, M> | B | string, options: O) {
     return createInstance(toInternals(arg, options))
   }
 
-  const TemporalClass = createWrapperClass(
+  const [TemporalClass, createInstance] = createSimpleTemporalClass(
+    temporalName,
+    constructorToInternals,
     getters,
     methods,
-    constructorToInternals,
-    createTemporalNameDescriptors(temporalName), // extraPrototypeDescriptors
     staticMembers,
-    setTemporalName, // handleInstance
   )
-
-  function createInstance(internals: I) {
-    const instance: TemporalInstance<I, G, M> = Object.create(TemporalClass.prototype)
-    internalsMap.set(instance, internals)
-    setTemporalName(instance)
-    return instance
-  }
 
   function toInternals(arg: TemporalInstance<I> | B | string, options?: O): I {
     let argInternals = getInternals(arg) as Reused
@@ -200,10 +234,6 @@ export function createTemporalClass<
 
     return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) ||
       (handleUnusedOptions(options), (argInternals as I) || stringToInternals(toString(arg)))
-  }
-
-  function setTemporalName(instance: TemporalInstance<I, G, M>) {
-    temporaNameMap.set(instance, temporalName)
   }
 
   return [TemporalClass as any, createInstance, toInternals]

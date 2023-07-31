@@ -1,4 +1,5 @@
 import {
+  TemporalInstance,
   WrapperInstance,
   createProtocolChecker,
   createWrapperClass,
@@ -13,6 +14,7 @@ import {
   epochNanoToIso,
   isoToEpochNano,
 } from './isoMath'
+import { parseTimeZoneId } from './isoParse'
 import { LargeInt } from './largeInt'
 import { moveDateByDays } from './move'
 import { EpochDisambig, OffsetDisambig, ensureArray, toString } from './options'
@@ -21,7 +23,7 @@ import { roundToMinute } from './round'
 import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
-import { createLazyGenerator } from './utils'
+import { createLazyGenerator, isObjectlike } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 
 export interface TimeZoneOps {
@@ -40,23 +42,48 @@ export const utcTimeZoneId = 'UTC'
 const checkTimeZoneProtocol = createProtocolChecker(timeZoneProtocolMethods)
 
 export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
-  if (typeof timeZoneArg === 'object') {
+  if (isObjectlike(timeZoneArg)) {
     if (timeZoneArg instanceof TimeZone) {
       return getInternals(timeZoneArg as TimeZone)
     }
 
-    checkTimeZoneProtocol(timeZoneArg)
-    return new TimeZoneOpsAdapter(timeZoneArg)
+    const { timeZone } = getInternals(timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>) || {}
+
+    return timeZone || (
+      checkTimeZoneProtocol(timeZoneArg as TimeZoneProtocol),
+      new TimeZoneOpsAdapter(timeZoneArg as TimeZoneProtocol)
+    )
   }
 
-  return queryTimeZoneImpl(toString(timeZoneArg))
+  return queryTimeZoneImpl(parseTimeZoneId(toString(timeZoneArg)))
+}
+
+export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol {
+  if (isObjectlike(timeZoneArg)) {
+    if (timeZoneArg instanceof TimeZone) {
+      return timeZoneArg
+    }
+
+    const { timeZone } = getInternals(timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>) || {}
+
+    return timeZone
+      ? timeZoneOpsToPublic(timeZone)
+      : (
+        checkTimeZoneProtocol(timeZoneArg as TimeZoneProtocol),
+        timeZoneArg as TimeZoneProtocol
+      )
+  }
+
+  return createTimeZone(queryTimeZoneImpl(parseTimeZoneId(toString(timeZoneArg))))
 }
 
 export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZoneProtocol {
-  const { timeZone } = internals
+  return timeZoneOpsToPublic(internals.timeZone)
+}
 
-  return getInternals(timeZone as TimeZoneOpsAdapter) ||
-    createTimeZone(timeZone as TimeZoneImpl)
+function timeZoneOpsToPublic(timeZoneOps: TimeZoneOps): TimeZoneProtocol {
+  return getInternals(timeZoneOps as TimeZoneOpsAdapter) ||
+    createTimeZone(timeZoneOps as TimeZoneImpl)
 }
 
 export const getCommonTimeZoneOps = getCommonInnerObj.bind<

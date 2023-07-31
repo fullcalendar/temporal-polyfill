@@ -1,16 +1,14 @@
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
-import { Calendar, CalendarArg } from './calendar'
+import { CalendarArg } from './calendar'
 import { queryCalendarOps } from './calendarOps'
-import { TemporalInstance, createTemporalClass, getObjId, idGetters } from './class'
-import { refineComplexBag } from './convert'
+import { TemporalInstance, createSimpleTemporalClass, getObjId, idGetters } from './class'
 import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instant'
 import { formatOffsetNano } from './isoFormat'
-import { parseTimeZoneId } from './isoParse'
 import { refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
-import { noop } from './utils'
+import { getSingleInstantFor, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
 import { isoCalendarId } from './calendarConfig'
+import { ZonedDateTime } from './zonedDateTime'
 
 interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number
@@ -83,7 +81,7 @@ const timeZoneMethods: {
   toString: getObjId,
 }
 
-export type TimeZoneArg = TimeZoneProtocol | string
+export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
 
 export type TimeZone = TemporalInstance<
   TimeZoneImpl, // internals
@@ -91,7 +89,7 @@ export type TimeZone = TemporalInstance<
   typeof timeZoneMethods // methods
 >
 
-export const [TimeZone, createTimeZone] = createTemporalClass(
+export const [TimeZone, createTimeZone] = createSimpleTemporalClass(
   'TimeZone',
 
   // Creation
@@ -100,27 +98,22 @@ export const [TimeZone, createTimeZone] = createTemporalClass(
   // constructorToInternals
   queryTimeZoneImpl,
 
-  // internalsConversionMap
-  {},
-
-  // bagToInternals
-  refineComplexBag.bind(undefined, 'timeZone', Calendar),
-
-  // stringToInternals
-  (str) => queryTimeZoneImpl(parseTimeZoneId(str)),
-
-  // handleUnusedOptions
-  noop,
-
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  idGetters as { id: (this: TimeZone, impl: TimeZoneImpl) => string },
+  idGetters as { id: (impl: TimeZoneImpl) => string }, // type needed?
 
   // Methods
   // -----------------------------------------------------------------------------------------------
 
   timeZoneMethods,
+
+  // Abstract
+  // -----------------------------------------------------------------------------------------------
+
+  {
+    from: queryTimeZonePublic,
+  }
 )
 
 function getImplOffsetNanosecondsFor(impl: TimeZoneImpl, instantArg: InstantArg): number {

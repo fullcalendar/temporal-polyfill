@@ -6,7 +6,7 @@ export type Reused = any
 const objectlikeRE = /object|function/
 
 // TODO: Record<PropertyKey, unknown>
-export function isObjectlike(arg: unknown): arg is Record<string, unknown> {
+export function isObjectlike(arg: unknown): arg is {} {
   return arg !== null && objectlikeRE.test(typeof arg)
 }
 

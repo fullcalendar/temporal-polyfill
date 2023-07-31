@@ -562,34 +562,3 @@ function refineFields(
 
   return res
 }
-
-export function refineComplexBag<K extends string>(
-  key: K,
-  ForbiddenClass: unknown,
-  bag: TemporalInstance<Record<K, any>> | Record<K, any>,
-): unknown {
-  const internalArg = getInternals(bag as TemporalInstance<Record<K, any>>)?.[key]
-  if (internalArg) {
-    return internalArg
-  }
-
-  forbidInstanceClass(bag, ForbiddenClass)
-
-  if (!(key in bag)) {
-    return bag
-  } else {
-    bag = (bag as Record<K, any>)[key]
-
-    forbidInstanceClass(bag, ForbiddenClass)
-
-    if (isObjectlike(bag) && !(key in bag)) {
-      return bag
-    }
-  }
-}
-
-function forbidInstanceClass(obj: any, Class: any): void {
-  if (obj instanceof Class) {
-    throw new RangeError(`Unexpected ${Class.prototype[Symbol.toStringTag]}`)
-  }
-}

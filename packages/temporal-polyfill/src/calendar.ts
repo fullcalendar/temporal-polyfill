@@ -1,15 +1,14 @@
 import { DateGetterFields, dateGetterNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
-import { TemporalInstance, createTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
+import { queryCalendarPublic } from './calendarOps'
+import { TemporalInstance, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
 import {
-  refineComplexBag,
   refinePlainDateBag,
   refinePlainMonthDayBag,
   refinePlainYearMonthBag,
 } from './convert'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { IsoDateFields } from './isoFields'
-import { parseCalendarId } from './isoParse'
 import {
   ensureObjectlike,
   ensureString,
@@ -20,8 +19,8 @@ import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from '
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { TimeZone } from './timeZone'
-import { excludeUndefinedProps, mapPropNames, noop } from './utils'
+import { excludeUndefinedProps, mapPropNames } from './utils'
+import { ZonedDateTime } from './zonedDateTime'
 
 interface CalendarProtocolMethods {
   year(dateArg: PlainYearMonth | PlainDateArg): number
@@ -160,7 +159,7 @@ const calendarMethods = {
   toString: getObjId,
 }
 
-export type CalendarArg = CalendarProtocol | string
+export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
 
 export type Calendar = TemporalInstance<
   CalendarImpl, // internals
@@ -168,7 +167,7 @@ export type Calendar = TemporalInstance<
   typeof calendarMethods // methods
 >
 
-export const [Calendar, createCalendar] = createTemporalClass(
+export const [Calendar, createCalendar] = createSimpleTemporalClass(
   'Calendar',
 
   // Creation
@@ -177,25 +176,20 @@ export const [Calendar, createCalendar] = createTemporalClass(
   // constructorToInternals
   queryCalendarImpl,
 
-  // internalsConversionMap
-  {},
-
-  // bagToInternals
-  refineComplexBag.bind(undefined, 'calendar', TimeZone),
-
-  // stringToInternals
-  (str) => queryCalendarImpl(parseCalendarId(str)),
-
-  // handleUnusedOptions
-  noop,
-
   // Getters
   // -----------------------------------------------------------------------------------------------
 
-  idGetters as { id: (this: Calendar, impl: CalendarImpl) => string },
+  idGetters,
 
   // Methods
   // -----------------------------------------------------------------------------------------------
 
   calendarMethods,
+
+  // Static
+  // -----------------------------------------------------------------------------------------------
+
+  {
+    from: queryCalendarPublic,
+  }
 )

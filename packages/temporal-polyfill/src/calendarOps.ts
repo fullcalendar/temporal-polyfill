@@ -8,18 +8,19 @@ import {
   getInternals,
   getStrictInternals,
   idGettersStrict,
+  TemporalInstance,
   WrapperInstance,
 } from './class'
 import { Duration, createDuration } from './duration'
 import { DurationInternals } from './durationFields'
 import { CalendarInternals, IsoDateFields, IsoDateInternals } from './isoFields'
-import { LargeInt } from './largeInt'
+import { parseCalendarId } from './isoParse'
 import { Overflow, ensureObjectlike, ensureString, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Unit, unitNamesAsc } from './units'
-import { mapProps } from './utils'
+import { isObjectlike, mapProps } from './utils'
 
 // types
 
@@ -54,23 +55,48 @@ export interface CalendarOps {
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 
 export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
-  if (typeof calendarArg === 'object') {
+  if (isObjectlike(calendarArg)) {
     if (calendarArg instanceof Calendar) {
       return getInternals(calendarArg as Calendar)
     }
 
-    checkCalendarProtocol(calendarArg)
-    return new CalendarOpsAdapter(calendarArg)
+    const { calendar } = getInternals(calendarArg as TemporalInstance<{ calendar: CalendarOps }>) || {}
+
+    return calendar || (
+      checkCalendarProtocol(calendarArg as CalendarProtocol),
+      new CalendarOpsAdapter(calendarArg as CalendarProtocol)
+    )
   }
 
-  return queryCalendarImpl(toString(calendarArg))
+  return queryCalendarImpl(parseCalendarId(toString(calendarArg)))
+}
+
+export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol {
+  if (isObjectlike(calendarArg)) {
+    if (calendarArg instanceof Calendar) {
+      return calendarArg
+    }
+
+    const { calendar } = getInternals(calendarArg as TemporalInstance<{ calendar: CalendarOps }>) || {}
+
+    return calendar
+      ? calendarOpsToPublic(calendar)
+      : (
+        checkCalendarProtocol(calendarArg as CalendarProtocol),
+        calendarArg as CalendarProtocol
+      )
+  }
+
+  return createCalendar(queryCalendarImpl(parseCalendarId(toString(calendarArg))))
 }
 
 export function getPublicCalendar(internals: { calendar: CalendarOps }): CalendarProtocol {
-  const { calendar } = internals
+  return calendarOpsToPublic(internals.calendar)
+}
 
-  return getInternals(calendar as CalendarOpsAdapter) ||
-    createCalendar(calendar as CalendarImpl)
+function calendarOpsToPublic(calendarOps: CalendarOps): CalendarProtocol {
+  return getInternals(calendarOps as CalendarOpsAdapter) ||
+    createCalendar(calendarOps as CalendarImpl)
 }
 
 export const getCommonCalendarOps = getCommonInnerObj.bind<
