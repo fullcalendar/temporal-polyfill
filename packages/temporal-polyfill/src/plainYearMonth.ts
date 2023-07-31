@@ -16,7 +16,7 @@ import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainYearMonth } from './isoParse'
 import { moveDateByDays } from './move'
-import { refineDiffOptions, refineOverflowOptions } from './options'
+import { DiffOptions, OverflowOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { PlainDate } from './plainDate'
 import { Unit } from './units'
 import { NumSign } from './utils'
@@ -73,11 +73,11 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals: IsoDateInternals, mod: PlainYearMonthMod, options): PlainYearMonth {
+    with(internals: IsoDateInternals, mod: PlainYearMonthMod, options?: OverflowOptions): PlainYearMonth {
       return createPlainYearMonth(mergePlainYearMonthBag(this, mod, options))
     },
 
-    add(internals: IsoDateInternals, durationArg: DurationArg, options): PlainYearMonth {
+    add(internals: IsoDateInternals, durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
       return movePlainYearMonth(
         internals,
         toDurationInternals(durationArg),
@@ -85,7 +85,7 @@ export const [
       )
     },
 
-    subtract(internals: IsoDateInternals, durationArg: DurationArg, options): PlainYearMonth {
+    subtract(internals: IsoDateInternals, durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
       return movePlainYearMonth(
         internals,
         negateDurationInternals(toDurationInternals(durationArg)),
@@ -93,11 +93,11 @@ export const [
       )
     },
 
-    until(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options): Duration {
+    until(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
       return diffPlainYearMonths(internals, toPlainYearMonthInternals(otherArg), options)
     },
 
-    since(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options): Duration {
+    since(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
       return diffPlainYearMonths(toPlainYearMonthInternals(otherArg), internals, options, true)
     },
 
@@ -142,7 +142,7 @@ export const [
 function diffPlainYearMonths(
   internals0: IsoDateInternals,
   internals1: IsoDateInternals,
-  options: any,
+  options: DiffOptions | undefined,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(
@@ -160,7 +160,7 @@ function diffPlainYearMonths(
 function movePlainYearMonth(
   internals: IsoDateInternals,
   durationInternals: DurationInternals,
-  options: any,
+  options: OverflowOptions | undefined,
 ): PlainYearMonth {
   const { calendar } = internals
   const isoDateFields = movePlainYearMonthToDay(

@@ -27,7 +27,7 @@ import {
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainDate } from './isoParse'
-import { refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeFields } from './plainTime'
@@ -92,7 +92,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals: IsoDateInternals, mod: PlainDateMod, options): PlainDate {
+    with(internals: IsoDateInternals, mod: PlainDateMod, options?: OverflowOptions): PlainDate {
       return createPlainDate(mergePlainDateBag(this, mod, options))
     },
 
@@ -103,31 +103,31 @@ export const [
       })
     },
 
-    add(internals: IsoDateInternals, durationArg: DurationArg, options): PlainDate {
+    add(internals: IsoDateInternals, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
       return createPlainDate(
         internals.calendar.dateAdd(
           internals,
           toDurationInternals(durationArg),
-          options,
+          refineOverflowOptions(options),
         ),
       )
     },
 
-    subtract(internals: IsoDateInternals, durationArg: DurationArg, options): PlainDate {
+    subtract(internals: IsoDateInternals, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
       return createPlainDate(
         internals.calendar.dateAdd(
           internals,
           negateDurationInternals(toDurationInternals(durationArg)),
-          options,
+          refineOverflowOptions(options),
         ),
       )
     },
 
-    until(internals: IsoDateInternals, otherArg: PlainDateArg, options): Duration {
+    until(internals: IsoDateInternals, otherArg: PlainDateArg, options?: DiffOptions): Duration {
       return diffPlainDates(internals, toPlainDateInternals(otherArg), options)
     },
 
-    since(internals: IsoDateInternals, otherArg: PlainDateArg, options): Duration {
+    since(internals: IsoDateInternals, otherArg: PlainDateArg, options?: DiffOptions): Duration {
       return diffPlainDates(toPlainDateInternals(otherArg), internals, options, true)
     },
 
@@ -138,7 +138,7 @@ export const [
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
-    toString(internals: IsoDateInternals, options: any): string {
+    toString(internals: IsoDateInternals, options?: DateTimeDisplayOptions): string {
       return formatIsoDateFields(internals) +
         formatCalendar(internals.calendar, refineDateDisplayOptions(options))
     },
@@ -190,7 +190,7 @@ export const [
 function diffPlainDates(
   internals0: IsoDateInternals,
   internals1: IsoDateInternals,
-  options: any,
+  options: DiffOptions | undefined,
   roundingModeInvert?: boolean,
 ): Duration {
   const calendarOps = getCommonCalendarOps(internals0, internals1)

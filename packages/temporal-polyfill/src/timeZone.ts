@@ -4,7 +4,7 @@ import { queryCalendarOps } from './calendarOps'
 import { TemporalInstance, createSimpleTemporalClass, getObjId, idGetters } from './class'
 import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instant'
 import { formatOffsetNano } from './isoFormat'
-import { refineEpochDisambigOptions } from './options'
+import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
 import { getSingleInstantFor, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
 import { isoCalendarId } from './calendarConfig'
@@ -64,7 +64,7 @@ const timeZoneMethods: {
     })
   },
 
-  getInstantFor(impl: TimeZoneImpl, plainDateTimeArg: PlainDateTimeArg, options: any): Instant {
+  getInstantFor(impl: TimeZoneImpl, plainDateTimeArg: PlainDateTimeArg, options?: EpochDisambigOptions): Instant {
     return createInstant(
       getSingleInstantFor(
         impl,

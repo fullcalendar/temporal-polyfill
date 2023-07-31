@@ -30,6 +30,7 @@ export const unitNameMap = {
 }
 
 export type UnitName = keyof typeof unitNameMap
+// TODO: more convenient type for OR-ing with DurationFields (for plural?)
 
 export type TimeUnit =
   Unit.Nanosecond |

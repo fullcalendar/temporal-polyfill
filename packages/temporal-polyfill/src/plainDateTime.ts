@@ -25,7 +25,12 @@ import { compareIsoDateTimeFields, refineIsoDateTimeInternals } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'
 import {
+  DateTimeDisplayOptions,
+  DiffOptions,
+  EpochDisambigOptions,
+  OverflowOptions,
   RoundingMode,
+  RoundingOptions,
   refineDateTimeDisplayOptions,
   refineDiffOptions,
   refineEpochDisambigOptions,
@@ -39,7 +44,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
 import { TimeZoneArg } from './timeZone'
 import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
-import { DayTimeUnit, Unit } from './units'
+import { DayTimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
@@ -107,7 +112,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
   // -----------------------------------------------------------------------------------------------
 
   {
-    with(internals: IsoDateTimeInternals, mod: PlainDateTimeMod, options): PlainDateTime {
+    with(internals: IsoDateTimeInternals, mod: PlainDateTimeMod, options?: OverflowOptions): PlainDateTime {
       return createPlainDateTime(mergePlainDateTimeBag(this, mod, options))
     },
 
@@ -132,7 +137,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       })
     },
 
-    add(internals: IsoDateTimeInternals, durationArg: DurationArg, options): PlainDateTime {
+    add(internals: IsoDateTimeInternals, durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
       return movePlainDateTime(
         internals,
         toDurationInternals(durationArg),
@@ -140,7 +145,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       )
     },
 
-    subtract(internals: IsoDateTimeInternals, durationArg: DurationArg, options): PlainDateTime {
+    subtract(internals: IsoDateTimeInternals, durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
       return movePlainDateTime(
         internals,
         negateDurationInternals(toDurationInternals(durationArg)),
@@ -148,15 +153,15 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       )
     },
 
-    until(internals: IsoDateTimeInternals, otherArg: PlainDateTimeArg, options): Duration {
+    until(internals: IsoDateTimeInternals, otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
       return diffPlainDateTimes(internals, toPlainDateTimeInternals(otherArg), options)
     },
 
-    since(internals: IsoDateTimeInternals, otherArg: PlainDateTimeArg, options): Duration {
+    since(internals: IsoDateTimeInternals, otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
       return diffPlainDateTimes(toPlainDateTimeInternals(otherArg), internals, options, true)
     },
 
-    round(internals: IsoDateTimeInternals, options): PlainDateTime {
+    round(internals: IsoDateTimeInternals, options: RoundingOptions | UnitName): PlainDateTime {
       const isoDateTimeFields = roundDateTime(
         internals,
         ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
@@ -174,7 +179,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
-    toString(internals: IsoDateTimeInternals, options: any): string {
+    toString(internals: IsoDateTimeInternals, options?: DateTimeDisplayOptions): string {
       const [
         calendarDisplayI,
         nanoInc,
@@ -195,7 +200,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
     toZonedDateTime(
       internals: IsoDateTimeInternals,
       timeZoneArg: TimeZoneArg,
-      options, // { disambiguation } - optional
+      options?: EpochDisambigOptions,
     ): ZonedDateTime {
       const { calendar } = internals
       const timeZone = queryTimeZoneOps(timeZoneArg)
@@ -249,7 +254,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
 function movePlainDateTime(
   internals: IsoDateTimeInternals,
   durationInternals: DurationInternals,
-  options: any,
+  options: OverflowOptions | undefined,
 ): PlainDateTime {
   return createPlainDateTime(
     moveDateTime(
@@ -264,7 +269,7 @@ function movePlainDateTime(
 function diffPlainDateTimes(
   internals0: IsoDateTimeInternals,
   internals1: IsoDateTimeInternals,
-  options: any,
+  options: DiffOptions | undefined,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

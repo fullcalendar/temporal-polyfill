@@ -14,7 +14,10 @@ import { compareIsoTimeFields, refineIsoTimeInternals } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {
+  DiffOptions,
   RoundingMode,
+  RoundingOptions,
+  TimeDisplayOptions,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -24,7 +27,7 @@ import { PlainDateArg, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { roundTime, roundTimeToNano } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { TimeUnit, Unit } from './units'
+import { TimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
@@ -99,15 +102,15 @@ export const [
       return movePlainTime(fields, negateDurationInternals(toDurationInternals(durationArg)))
     },
 
-    until(fields: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
+    until(fields: IsoTimeFields, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
       return diffPlainTimes(fields, toPlainTimeFields(otherArg), options)
     },
 
-    since(fields: IsoTimeFields, otherArg: PlainTimeArg, options): Duration {
+    since(fields: IsoTimeFields, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
       return diffPlainTimes(toPlainTimeFields(otherArg), fields, options, true)
     },
 
-    round(fields: IsoTimeFields, options): PlainTime {
+    round(fields: IsoTimeFields, options: RoundingOptions | UnitName): PlainTime {
       return createPlainTime(
         roundTime(
           fields,
@@ -121,7 +124,7 @@ export const [
       return !compareIsoTimeFields(fields, otherInternals)
     },
 
-    toString(fields: IsoTimeFields, options: any): string {
+    toString(fields: IsoTimeFields, options?: TimeDisplayOptions): string {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
 
       return formatIsoTimeFields(
@@ -134,7 +137,7 @@ export const [
 
     valueOf: neverValueOf,
 
-    toZonedDateTime: createZonedDateTimeConverter((options) => {
+    toZonedDateTime: createZonedDateTimeConverter((options: any) => {
       return toPlainDateInternals(options.plainDate)
     }),
 
@@ -171,7 +174,7 @@ function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInte
 function diffPlainTimes(
   internals0: IsoTimeFields,
   internals1: IsoTimeFields,
-  options: any,
+  options: DiffOptions | undefined,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

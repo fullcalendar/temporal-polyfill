@@ -37,10 +37,14 @@ import { parseZonedDateTime } from './isoParse'
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
+  DiffOptions,
   EpochDisambig,
   OffsetDisambig,
   Overflow,
+  OverflowOptions,
   RoundingMode,
+  RoundingOptions,
+  ZonedDateTimeDisplayOptions,
   refineDiffOptions,
   refineOverflowOptions,
   refineRoundOptions,
@@ -63,7 +67,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { DayTimeUnit, Unit, nanoInHour } from './units'
+import { DayTimeUnit, Unit, UnitName, nanoInHour } from './units'
 import { NumSign, mapProps } from './utils'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
@@ -226,34 +230,34 @@ export const [
       })
     },
 
-    add(internals: ZonedInternals, durationArg: DurationArg, options): ZonedDateTime {
+    add(internals: ZonedInternals, durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
       return moveZonedDateTime(
         internals,
         toDurationInternals(durationArg),
-        options,
+        refineOverflowOptions(options),
       )
     },
 
-    subtract(internals: ZonedInternals, durationArg: DurationArg, options): ZonedDateTime {
+    subtract(internals: ZonedInternals, durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
       return moveZonedDateTime(
         internals,
         negateDurationInternals(toDurationInternals(durationArg)),
-        options,
+        refineOverflowOptions(options),
       )
     },
 
-    until(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options): Duration {
+    until(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
       return diffZonedDateTimes(internals, toZonedInternals(otherArg), options)
     },
 
-    since(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options): Duration {
+    since(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
       return diffZonedDateTimes(toZonedInternals(otherArg), internals, options, true)
     },
 
     /*
     Do param-list destructuring here and other methods!
     */
-    round(internals: ZonedInternals, options): ZonedDateTime {
+    round(internals: ZonedInternals, options: RoundingOptions | UnitName): ZonedDateTime {
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
@@ -314,7 +318,7 @@ export const [
         isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
     },
 
-    toString(internals: ZonedInternals, options: any): string {
+    toString(internals: ZonedInternals, options?: ZonedDateTimeDisplayOptions): string {
       let { epochNanoseconds, timeZone, calendar } = internals
       const [
         calendarDisplayI,
@@ -351,8 +355,8 @@ export const [
 
     toLocaleString(
       internals: ZonedInternals,
-      locales: string | string[],
-      options: any,
+      locales?: string | string[],
+      options?: Intl.DateTimeFormatOptions,
     ): string {
       const [epochMilli, format] = resolveZonedFormattable(internals, locales, options)
       return format.format(epochMilli)
@@ -438,7 +442,7 @@ function moveZonedDateTime(
 function diffZonedDateTimes(
   internals: ZonedInternals,
   otherInternals: ZonedInternals,
-  options: any,
+  options: DiffOptions | undefined,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

@@ -17,6 +17,8 @@ import { parseInstant } from './isoParse'
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
 import {
+  DiffOptions,
+  InstantDisplayOptions,
   RoundingMode,
   ensureObjectlike,
   refineDiffOptions,
@@ -134,7 +136,10 @@ export const [
       )
     },
 
-    toString(epochNano: LargeInt, options: any): string {
+    toString(
+      epochNano: LargeInt,
+      options?: InstantDisplayOptions
+    ): string {
       const [
         timeZoneArg,
         nanoInc,
@@ -177,7 +182,7 @@ export const [
 function diffInstants(
   epochNano0: LargeInt,
   epochNano1: LargeInt,
-  options: any,
+  options?: DiffOptions,
   roundingModeInvert?: boolean
 ): Duration {
   return createDuration(

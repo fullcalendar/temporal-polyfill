@@ -138,8 +138,8 @@ function resolveRangeFormattables(
 
 export function resolveZonedFormattable(
   internals: ZonedInternals,
-  locales: string | string[],
-  options: Intl.DateTimeFormatOptions, // NOT resolved yet (does not include locale)
+  locales?: string | string[],
+  options?: Intl.DateTimeFormatOptions, // NOT resolved yet (does not include locale)
 ): [
   number,
   Intl.DateTimeFormat,

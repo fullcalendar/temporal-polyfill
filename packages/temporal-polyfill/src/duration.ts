@@ -17,7 +17,10 @@ import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
 import { LargeInt, compareLargeInts } from './largeInt'
 import {
+  RelativeToOptions,
   SubsecDigits,
+  TimeDisplayOptions,
+  TotalUnitOptionsWithRel,
   refineDurationRoundOptions,
   refineRelativeToOptions,
   refineTimeDisplayOptions,
@@ -33,7 +36,7 @@ import {
   totalRelativeDuration,
 } from './round'
 import { NumSign, noop } from './utils'
-import { DayTimeUnit, Unit } from './units'
+import { DayTimeUnit, Unit, UnitName } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 
 export type DurationArg = Duration | DurationBag | string
@@ -161,7 +164,7 @@ export const [
       )
     },
 
-    total(internals: DurationInternals, options): number {
+    total(internals: DurationInternals, options: TotalUnitOptionsWithRel | UnitName): number {
       const [totalUnit, markerInternals] = refineTotalOptions(options)
       const largestUnit = Math.max(
         getLargestDurationUnit(internals),
@@ -185,7 +188,7 @@ export const [
       )
     },
 
-    toString(internals: DurationInternals, options: any): string {
+    toString(internals: DurationInternals, options?: TimeDisplayOptions): string {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
 
       return formatDurationInternals(
@@ -201,7 +204,11 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    compare(durationArg0: DurationArg, durationArg1: DurationArg, options: any): NumSign {
+    compare(
+      durationArg0: DurationArg,
+      durationArg1: DurationArg,
+      options?: RelativeToOptions,
+    ): NumSign {
       const durationFields0 = toDurationInternals(durationArg0)
       const durationFields1 = toDurationInternals(durationArg1)
       const markerInternals = refineRelativeToOptions(options)
@@ -238,7 +245,7 @@ function addToDuration(
   direction: -1 | 1,
   internals: DurationInternals,
   otherArg: DurationArg,
-  options: any, // !!!
+  options: RelativeToOptions | undefined,
 ): Duration {
   const otherFields = toDurationInternals(otherArg)
   const markerInternals = refineRelativeToOptions(options) // optional

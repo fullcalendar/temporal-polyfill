@@ -21,15 +21,15 @@ import {
 } from './utils'
 import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
-type Options = Record<string, unknown>
-
 // Compound Options
 // -------------------------------------------------------------------------------------------------
 // TODO: always good to spread options tuples? better to nest?
 
-export function refineOverflowOptions(options: Options | undefined): Overflow {
+export function refineOverflowOptions(options: OverflowOptions | undefined): Overflow {
   return refineOverflow(normalizeOptions(options))
 }
+
+export type ZonedFieldOptions = OverflowOptions & EpochDisambigOptions & OffsetDisambigOptions
 
 export type ZonedFieldTuple = [
   Overflow,
@@ -37,7 +37,7 @@ export type ZonedFieldTuple = [
   OffsetDisambig,
 ]
 
-export function refineZonedFieldOptions(options: Options | undefined): ZonedFieldTuple {
+export function refineZonedFieldOptions(options: ZonedFieldOptions | undefined): ZonedFieldTuple {
   options = normalizeOptions(options)
   return [
     refineOverflow(options),
@@ -46,9 +46,11 @@ export function refineZonedFieldOptions(options: Options | undefined): ZonedFiel
   ]
 }
 
-export function refineEpochDisambigOptions(options: Options | undefined): EpochDisambig {
+export function refineEpochDisambigOptions(options: EpochDisambigOptions | undefined): EpochDisambig {
   return refineEpochDisambig(normalizeOptions(options))
 }
+
+export type DiffOptions = LargestUnitOptions & SmallestUnitOptions & RoundingIncOptions & RoundingModeOptions
 
 export type DiffTuple = [
   Unit, // largestUnit
@@ -59,7 +61,7 @@ export type DiffTuple = [
 
 export function refineDiffOptions(
   roundingModeInvert: boolean | undefined,
-  options: Options | undefined,
+  options: DiffOptions | undefined,
   defaultLargestUnit: Unit,
   maxUnit = Unit.Year,
   minUnit = Unit.Nanosecond,
@@ -84,7 +86,7 @@ export function refineDiffOptions(
 }
 
 export function refineCalendarDiffOptions(
-  options: Options | undefined,
+  options: LargestUnitOptions | undefined, // TODO: definitely make large-unit type via generics
 ): Unit { // TODO: only year/month/week/day???
   options = normalizeOptions(options)
   return refineLargestUnit(options, Unit.Year, Unit.Day, Unit.Day)
@@ -100,11 +102,14 @@ const smallestUnitStr = 'smallestUnit'
 const largestUnitStr = 'largestUnit'
 const totalUnitStr = 'unit'
 
+// TODO: DRY with DiffOptions?
+export type RoundingOptions = SmallestUnitOptions & RoundingIncOptions & RoundingModeOptions
+
 /*
 Always related to time
 */
 export function refineRoundOptions(
-  options: Options | undefined,
+  options: RoundingOptions | UnitName,
   maxUnit: DayTimeUnit = Unit.Day,
 ): RoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
@@ -116,13 +121,15 @@ export function refineRoundOptions(
   ]
 }
 
+export type DurationRoundOptions = DiffOptions & RelativeToOptions
+
 export type DurationRoundTuple = [
   ...DiffTuple,
-  RelativeToInternals | undefined,
+  RelativeToInternals?,
 ]
 
 export function refineDurationRoundOptions(
-  options: Options | undefined,
+  options: DurationRoundOptions,
   defaultLargestUnit: Unit
 ): DurationRoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
@@ -135,8 +142,10 @@ export function refineDurationRoundOptions(
   ]
 }
 
+export type TotalUnitOptionsWithRel = TotalUnitOptions & RelativeToOptions
+
 export function refineTotalOptions(
-  options: Options | undefined
+  options: TotalUnitOptionsWithRel | UnitName
 ): [
   Unit,
   RelativeToInternals | undefined,
@@ -148,22 +157,32 @@ export function refineTotalOptions(
   ]
 }
 
-export function refineRelativeToOptions(options: Options | undefined): RelativeToInternals | undefined {
+export function refineRelativeToOptions(options: RelativeToOptions | undefined): RelativeToInternals | undefined {
   return refineRelativeTo(normalizeOptions(options))
 }
+
+export type InstantDisplayOptions =
+  { timeZone: TimeZoneArg } &
+  TimeDisplayOptions
 
 export type InstantDisplayTuple = [
   TimeZoneArg,
   ...TimeDisplayTuple,
 ]
 
-export function refineInstantDisplayOptions(options: Options | undefined): InstantDisplayTuple {
+export function refineInstantDisplayOptions(options: InstantDisplayOptions | undefined): InstantDisplayTuple {
   options = normalizeOptions(options)
   return [
     options.timeZone as TimeZoneArg, // TODO: possibly not needed after moving away from Record
     ...refineTimeDisplayTuple(options),
   ]
 }
+
+export type ZonedDateTimeDisplayOptions =
+  & CalendarDisplayOptions
+  & TimeZoneDisplayOptions
+  & OffsetDisplayOptions
+  & TimeDisplayOptions
 
 export type ZonedDateTimeDisplayTuple = [
   CalendarDisplay,
@@ -172,7 +191,7 @@ export type ZonedDateTimeDisplayTuple = [
   ...TimeDisplayTuple,
 ]
 
-export function refineZonedDateTimeDisplayOptions(options: Options | undefined): ZonedDateTimeDisplayTuple {
+export function refineZonedDateTimeDisplayOptions(options: ZonedDateTimeDisplayOptions | undefined): ZonedDateTimeDisplayTuple {
   options = normalizeOptions(options)
   return [
     refineCalendarDisplay(options),
@@ -182,12 +201,14 @@ export function refineZonedDateTimeDisplayOptions(options: Options | undefined):
   ]
 }
 
+export type DateTimeDisplayOptions = CalendarDisplayOptions & TimeDisplayOptions
+
 export type DateTimeDisplayTuple = [
   CalendarDisplay,
   ...TimeDisplayTuple,
 ]
 
-export function refineDateTimeDisplayOptions(options: Options | undefined): DateTimeDisplayTuple {
+export function refineDateTimeDisplayOptions(options: DateTimeDisplayOptions | undefined): DateTimeDisplayTuple {
   options = normalizeOptions(options)
   return [
     refineCalendarDisplay(options),
@@ -195,7 +216,7 @@ export function refineDateTimeDisplayOptions(options: Options | undefined): Date
   ]
 }
 
-export function refineDateDisplayOptions(options: Options | undefined): CalendarDisplay {
+export function refineDateDisplayOptions(options: CalendarDisplayOptions | undefined): CalendarDisplay {
   return refineCalendarDisplay(normalizeOptions(options))
 }
 
@@ -205,22 +226,18 @@ export type TimeDisplayTuple = [
   subsecDigits: SubsecDigits | -1 | undefined
 ]
 
+// TODO: lock-down subset of Unit here?
+export type TimeDisplayOptions = SmallestUnitOptions & RoundingModeOptions & SubsecDigitsOptions
+
 export function refineTimeDisplayOptions(
-  options: Options | undefined,
+  options: TimeDisplayOptions | undefined,
   maxSmallestUnit?: TimeUnit
 ): TimeDisplayTuple {
   return refineTimeDisplayTuple(normalizeOptions(options), maxSmallestUnit)
 }
 
-/*
-addons:
-  -1 means hide seconds
-  undefined means 'auto' (display all digits but no trailing zeros)
-*/
-export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
 function refineTimeDisplayTuple(
-  options: Options,
+  options: TimeDisplayOptions,
   maxSmallestUnit: TimeUnit = Unit.Minute
 ): TimeDisplayTuple {
   const smallestUnit = refineSmallestUnit(options, maxSmallestUnit, Unit.Nanosecond, -1 as number)
@@ -242,19 +259,67 @@ function refineTimeDisplayTuple(
   ]
 }
 
+//
+// TODO: generic for DayTimeUnit/TimeUnit?
 
-const refineSmallestUnit = refineUnitOption.bind(undefined, smallestUnitStr)
-const refineLargestUnit = refineUnitOption.bind(undefined, largestUnitStr)
-const refineTotalUnit = refineUnitOption.bind(undefined, totalUnitStr)
+interface SmallestUnitOptions {
+  smallestUnit?: UnitName | keyof DurationFields
+}
+
+interface LargestUnitOptions {
+  largestUnit?: UnitName | keyof DurationFields
+}
+
+interface TotalUnitOptions {
+  unit: UnitName | keyof DurationFields
+}
+
+//
+
+const refineSmallestUnit = refineUnitOption.bind<
+  any, [any], // bound
+  [SmallestUnitOptions, Unit?, Unit?, Unit?], // unbound
+  Unit // return
+>(undefined, smallestUnitStr)
+
+const refineLargestUnit = refineUnitOption.bind<
+  any, [any], // bound
+  [LargestUnitOptions, Unit?, Unit?, Unit?], // unbound
+  Unit
+>(undefined, largestUnitStr)
+
+// TODO: get totalUnitStr closer to this! etc
+const refineTotalUnit = refineUnitOption.bind<
+  any, [any], // bound
+  [TotalUnitOptions, Unit?, Unit?, Unit?], // unbound
+  Unit
+>(undefined, totalUnitStr)
+
+// Overflow
+// -------------------------------------------------------------------------------------------------
 
 export enum Overflow {
   Constrain,
   Reject,
 }
-const refineOverflow = refineChoiceOption.bind(undefined, 'overflow', {
+
+export interface OverflowOptions {
+  overflow?: keyof typeof overflowMap
+}
+
+const overflowMap = {
   constrain: Overflow.Constrain,
   reject: Overflow.Reject,
-}) as (options: Options) => Overflow
+}
+
+const refineOverflow = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [OverflowOptions, Overflow?], // unbound
+  Overflow // return
+>(undefined, 'overflow', overflowMap)
+
+// Epoch Disambig
+// -------------------------------------------------------------------------------------------------
 
 export enum EpochDisambig {
   Compat,
@@ -262,12 +327,26 @@ export enum EpochDisambig {
   Earlier,
   Later,
 }
-const refineEpochDisambig = refineChoiceOption.bind(undefined, 'disambiguation', {
+
+export interface EpochDisambigOptions {
+  disambiguation?: keyof typeof epochDisambigMap
+}
+
+const epochDisambigMap = {
   compatible: EpochDisambig.Compat,
   reject: EpochDisambig.Reject,
   earlier: EpochDisambig.Earlier,
   later: EpochDisambig.Later,
-}) as (options: Options) => EpochDisambig
+}
+
+const refineEpochDisambig = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [EpochDisambigOptions, EpochDisambig?], // unbound
+  EpochDisambig // return
+>(undefined, 'disambiguation', epochDisambigMap)
+
+// Offset Disambig
+// -------------------------------------------------------------------------------------------------
 
 export enum OffsetDisambig {
   Use,
@@ -275,12 +354,26 @@ export enum OffsetDisambig {
   Prefer,
   Ignore,
 }
-const refineOffsetDisambig = refineChoiceOption.bind(undefined, 'offset', {
+
+export interface OffsetDisambigOptions {
+  offset?: keyof typeof offsetDisambigMap
+}
+
+const offsetDisambigMap = {
   use: OffsetDisambig.Use,
   reject: OffsetDisambig.Reject,
   prefer: OffsetDisambig.Prefer,
   ignore: OffsetDisambig.Ignore,
-}) as (options: Options) => OffsetDisambig
+}
+
+const refineOffsetDisambig = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [OffsetDisambigOptions, OffsetDisambig?], // unbound
+  OffsetDisambig // return
+>(undefined, 'offset', offsetDisambigMap)
+
+// Calendar Display
+// -------------------------------------------------------------------------------------------------
 
 export enum CalendarDisplay {
   Auto,
@@ -288,32 +381,74 @@ export enum CalendarDisplay {
   Critical,
   Always,
 }
-const refineCalendarDisplay = refineChoiceOption.bind(undefined, 'calendarName', {
+
+export interface CalendarDisplayOptions {
+  calendarName?: keyof typeof calendarDisplayMap
+}
+
+const calendarDisplayMap = {
   auto: CalendarDisplay.Auto,
   never: CalendarDisplay.Never,
   critical: CalendarDisplay.Critical,
   always: CalendarDisplay.Always,
-}) as (options: Options) => CalendarDisplay
+}
+
+const refineCalendarDisplay = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [CalendarDisplayOptions, CalendarDisplay?], // unbound
+  CalendarDisplay // return
+>(undefined, 'calendarName', calendarDisplayMap)
+
+// TimeZone Display
+// -------------------------------------------------------------------------------------------------
 
 export enum TimeZoneDisplay {
   Auto,
   Never,
   Critical,
 }
-const refineTimeZoneDisplay = refineChoiceOption.bind(undefined, 'timeZoneName', {
+
+export interface TimeZoneDisplayOptions {
+  timeZoneName?: keyof typeof timeZoneDisplayMap
+}
+
+const timeZoneDisplayMap = {
   auto: TimeZoneDisplay.Auto,
   never: TimeZoneDisplay.Never,
   critical: TimeZoneDisplay.Critical,
-}) as (options: Options) => TimeZoneDisplay
+}
+
+const refineTimeZoneDisplay = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [TimeZoneDisplayOptions, TimeZoneDisplay?], // unbound
+  TimeZoneDisplay // return
+>(undefined, 'timeZoneName', timeZoneDisplayMap)
+
+// Offset Display
+// -------------------------------------------------------------------------------------------------
 
 export enum OffsetDisplay {
   Auto,
   Never,
 }
-const refineOffsetDisplay = refineChoiceOption.bind(undefined, 'offset', {
+
+export interface OffsetDisplayOptions {
+  offset?: keyof typeof offsetDisplayMap
+}
+
+const offsetDisplayMap = {
   auto: OffsetDisplay.Auto,
   never: OffsetDisplay.Never,
-}) as (options: Options) => OffsetDisplay
+}
+
+const refineOffsetDisplay = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [OffsetDisplayOptions, OffsetDisplay?], // unbound
+  OffsetDisplay // return
+>(undefined, 'offset', offsetDisplayMap)
+
+// Rounding Mode
+// -------------------------------------------------------------------------------------------------
 
 export enum RoundingMode {
   // modes that get inverted (see invertRoundingMode)
@@ -328,8 +463,12 @@ export enum RoundingMode {
   HalfExpand, // default for date/time::round()
   HalfEven,
 }
-// Caller should always supply default
-const refineRoundingMode = refineChoiceOption.bind(undefined, 'roundingMode', {
+
+export interface RoundingModeOptions {
+  roundingMode?: keyof typeof roundingModeMap
+}
+
+const roundingModeMap = {
   floor: RoundingMode.Floor,
   halfFloor: RoundingMode.HalfFloor,
   ceil: RoundingMode.Ceil,
@@ -339,7 +478,15 @@ const refineRoundingMode = refineChoiceOption.bind(undefined, 'roundingMode', {
   expand: RoundingMode.Expand,
   halfExpand: RoundingMode.HalfExpand,
   halfEven: RoundingMode.HalfEven,
-})
+}
+
+// Caller should always supply default
+const refineRoundingMode = refineChoiceOption.bind<
+  any, [any, any], // bound
+  [RoundingModeOptions, RoundingMode?], // unbound
+  RoundingMode // return
+>(undefined, 'roundingMode', roundingModeMap)
+
 export const roundingModeFuncs = [
   Math.floor,
   roundHalfFloor,
@@ -359,10 +506,18 @@ function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
   return roundingMode
 }
 
+// Rounding Increment
+// -------------------------------------------------------------------------------------------------
+
+export interface RoundingIncOptions {
+  roundingIncrement?: number
+}
+
 const roundingIncName = 'roundingIncrement'
 
-function refineRoundingInc(options: Options, smallestUnit: DayTimeUnit) {
-  let roundingInc = options[roundingIncName] as number
+function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUnit) {
+  let roundingInc = options[roundingIncName]
+
   if (roundingInc === undefined) {
     return 1
   }
@@ -385,9 +540,23 @@ function refineRoundingInc(options: Options, smallestUnit: DayTimeUnit) {
   return roundingInc
 }
 
+// Subsec Digits
+// -------------------------------------------------------------------------------------------------
+
+/*
+addons:
+  -1 means hide seconds
+  undefined means 'auto' (display all digits but no trailing zeros)
+*/
+export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+export interface SubsecDigitsOptions {
+  fractionalSecondDigits?: SubsecDigits
+}
+
 const subsecDigitsName = 'fractionalSecondDigits'
 
-function refineSubsecDigits(options: Options): SubsecDigits | undefined {
+function refineSubsecDigits(options: SubsecDigitsOptions): SubsecDigits | undefined {
   const subsecDigits = options[subsecDigitsName]
 
   if (typeof subsecDigits === 'number') {
@@ -401,10 +570,17 @@ function refineSubsecDigits(options: Options): SubsecDigits | undefined {
   // undefind means 'auto'
 }
 
+// Relative-To
+// -------------------------------------------------------------------------------------------------
+
+export interface RelativeToOptions {
+  relativeTo?: ZonedDateTime | PlainDate | string // TODO: include 'bag' in here
+}
+
 // TODO: use in definition of `createMarkerSystem` ?
 type RelativeToInternals = ZonedInternals | IsoDateInternals
 
-function refineRelativeTo(options: Options): RelativeToInternals | undefined {
+function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | undefined {
   const { relativeTo } = options
 
   if (relativeTo) {
@@ -431,14 +607,15 @@ function refineRelativeTo(options: Options): RelativeToInternals | undefined {
 /*
 If defaultUnit is undefined, will throw error if not specified
 */
-function refineUnitOption(
-  optionName: string,
-  options: Options,
+function refineUnitOption<O>(
+  optionName: (keyof O) & string,
+  options: O,
   maxUnit: Unit = Unit.Year,
   minUnit: Unit = Unit.Nanosecond,
   defaultUnit?: Unit,
 ): Unit {
-  let unitName = options[optionName]
+  let unitName = options[optionName] as (string | undefined)
+
   if (unitName === undefined || unitName === 'auto') {
     if (defaultUnit === undefined) {
       throw new RangeError('Must specify' + optionName) // best error?
@@ -460,13 +637,13 @@ function refineUnitOption(
   return unit
 }
 
-function refineChoiceOption(
-  optionName: string,
+function refineChoiceOption<O>(
+  optionName: keyof O,
   enumNameMap: Record<string, number>,
-  options: Options,
+  options: O,
   defaultChoice = 0,
-) {
-  const enumName = options[optionName] as string
+): number {
+  const enumName = options[optionName] as (string | undefined)
   if (enumName === undefined) {
     return defaultChoice
   }
@@ -478,27 +655,27 @@ function refineChoiceOption(
   return enumNum
 }
 
-export function normalizeOptions(options: Options | undefined) {
+export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
-    return {}
+    return {} as O
   }
   return ensureObjectlike(options)
 }
 
-function normalizeUnitNameOptions(
-  options: Options | undefined,
-  optionName: string,
-) {
+function normalizeUnitNameOptions<O extends {}>(
+  options: O | UnitName,
+  optionName: keyof O,
+): O {
   if (typeof options === 'string') {
-    return { [optionName]: options }
+    return { [optionName]: options } as O
   }
-  return ensureObjectlike(options as Options)
+  return ensureObjectlike(options)
 }
 
-function mustHaveMatch(
-  props: Options,
-  propNames: string[],
-) {
+function mustHaveMatch<O>(
+  props: O,
+  propNames: (keyof O)[],
+): void {
   if (!hasAnyPropsByName(props, propNames)) {
     throw new TypeError('Need one: ' + JSON.stringify(propNames))
   }
@@ -558,7 +735,7 @@ export function ensureArray<A extends any[]>(arg: A): A {
   return arg
 }
 
-export function ensureObjectlike<O extends Options>(arg: O): O {
+export function ensureObjectlike<O extends {}>(arg: O): O {
   if (!isObjectlike(arg)) {
     throw new TypeError('Must be object-like')
   }

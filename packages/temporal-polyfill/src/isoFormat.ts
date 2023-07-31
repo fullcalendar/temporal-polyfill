@@ -2,7 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals, absDurationInternals, durationFieldsToTimeNano } from './durationFields'
 import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields } from './isoFields'
-import { CalendarDisplay, OffsetDisplay, refineDateDisplayOptions, SubsecDigits, TimeZoneDisplay } from './options'
+import { CalendarDisplay, DateTimeDisplayOptions, OffsetDisplay, refineDateDisplayOptions, SubsecDigits, TimeZoneDisplay } from './options'
 import { TimeZoneOps } from './timeZoneOps'
 import {
   nanoInHour,
@@ -20,7 +20,7 @@ High-level. Refined options
 export function formatPossibleDate(
   formatSimple: (internals: IsoDateInternals) => string,
   internals: IsoDateInternals,
-  options: any,
+  options?: DateTimeDisplayOptions,
 ) {
   const calendarDisplay = refineDateDisplayOptions(options)
   const showCalendar =
