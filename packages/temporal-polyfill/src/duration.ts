@@ -273,9 +273,9 @@ function spanDuration<M>(
   DurationInternals,
   LargeInt,
 ] {
-  const endMarker = markerToEpochNano(moveMarker(marker, durationFields))
+  const endMarker = moveMarker(marker, durationFields)
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
-  return [balancedDuration, endMarker]
+  return [balancedDuration, markerToEpochNano(endMarker)]
 }
 
 function balanceDurationDayTime(
