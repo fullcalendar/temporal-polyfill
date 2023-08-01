@@ -49,7 +49,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { Reused, excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
+import { Callable, Reused, excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 
 /*
@@ -555,7 +555,7 @@ function refineFields(
       any = true
 
       if (builtinRefiners[fieldName as keyof typeof builtinRefiners]) {
-        fieldVal = builtinRefiners[fieldName as keyof typeof builtinRefiners](fieldVal)
+        fieldVal = (builtinRefiners[fieldName as keyof typeof builtinRefiners] as Callable)(fieldVal)
       }
 
       res[fieldName] = fieldVal

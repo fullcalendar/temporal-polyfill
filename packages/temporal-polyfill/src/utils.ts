@@ -1,7 +1,7 @@
-import { IsoDateFields, IsoDateInternals } from './isoFields'
 import { Overflow } from './options'
 
 export type Reused = any
+export type Callable = (...args: any[]) => any
 
 const objectlikeRE = /object|function/
 

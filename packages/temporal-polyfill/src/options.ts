@@ -681,7 +681,7 @@ function mustHaveMatch<O>(
   }
 }
 
-export function toEpochNano(arg: any): LargeInt {
+export function toEpochNano(arg: bigint): LargeInt {
   if (typeof arg !== 'bigint') {
     throw new TypeError('Needs bigint')
   }
@@ -700,6 +700,7 @@ export function clampProp<P>(
 
 // Primitives
 // -------------------------------------------------------------------------------------------------
+// NOTE: even though these accept 'any', strictly type so TS interface is more strict
 
 export function ensureInstanceOf<T>(Class: { new(): T }, obj: T): T {
   if (!(obj instanceof Class)) {
@@ -716,13 +717,13 @@ function ensureType<A>(typeName: string, arg: A): A {
 }
 
 export const ensureString = ensureType.bind(undefined, 'string') as
-  (arg: unknown) => string
+  (arg: string) => string
 
 export const ensureNumber = ensureType.bind(undefined, 'number') as
-  (arg: unknown) => number
+  (arg: number) => number
 
 export const ensureBoolean = ensureType.bind(undefined, 'boolean') as
-  (arg: unknown) => boolean
+  (arg: boolean) => boolean
 
 export function ensureInteger(arg: number): number {
   return ensureNumberIsInteger(ensureNumber(arg))
@@ -742,7 +743,7 @@ export function ensureObjectlike<O extends {}>(arg: O): O {
   return arg
 }
 
-export function toString(arg: any): string {
+export function toString(arg: string): string {
   if (typeof arg === 'symbol') {
     throw new TypeError('Cannot convert a Symbol to a String')
   }
@@ -752,14 +753,14 @@ export function toString(arg: any): string {
 /*
 truncates floats
 */
-export function toInteger(arg: any): number {
+export function toInteger(arg: number): number {
   return Math.trunc(toNumber(arg)) || 0 // ensure no -0
 }
 
 /*
 throws error on floats
 */
-export function toIntegerStrict(arg: any): number {
+export function toIntegerStrict(arg: number): number {
   return ensureNumberIsInteger(toNumber(arg))
 }
 
@@ -773,7 +774,7 @@ function ensureNumberIsInteger(num: number): number {
 /*
 Caller must do ||0 to ensure no -0
 */
-function toNumber(arg: any): number {
+function toNumber(arg: number): number {
   arg = Number(arg)
   if (isNaN(arg)) {
     throw new RangeError('not a number')

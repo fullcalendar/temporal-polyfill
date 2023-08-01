@@ -96,7 +96,7 @@ export const [
 
   // constructorToInternals
   (
-    epochNano: LargeInt,
+    epochNano: bigint,
     timeZoneArg: TimeZoneArg,
     calendarArg: CalendarArg = isoCalendarId,
   ): ZonedInternals => {

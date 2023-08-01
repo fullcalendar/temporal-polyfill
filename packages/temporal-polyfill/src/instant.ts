@@ -169,11 +169,11 @@ export const [
 
     fromEpochMilliseconds: epochMilliToInstant,
 
-    fromEpochMicroseconds(epochMicro: LargeInt): Instant {
+    fromEpochMicroseconds(epochMicro: bigint): Instant {
       return epochMicroToInstant(toEpochNano(epochMicro))
     },
 
-    fromEpochNanoseconds(epochNano: LargeInt): Instant {
+    fromEpochNanoseconds(epochNano: bigint): Instant {
       return createInstant(toEpochNano(epochNano))
     },
   },

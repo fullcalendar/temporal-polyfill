@@ -233,7 +233,7 @@ export function createTemporalClass<
     }
 
     return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) ||
-      (handleUnusedOptions(options), (argInternals as I) || stringToInternals(toString(arg)))
+      (handleUnusedOptions(options), (argInternals as I) || stringToInternals(toString(arg as string)))
   }
 
   return [TemporalClass as any, createInstance, toInternals]

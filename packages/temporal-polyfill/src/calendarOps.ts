@@ -20,7 +20,7 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Unit, unitNamesAsc } from './units'
-import { isObjectlike, mapProps } from './utils'
+import { Callable, isObjectlike, mapProps } from './utils'
 
 // types
 
@@ -133,10 +133,11 @@ const getDurationInternals = getStrictInternals.bind<
 >(undefined, Duration)
 
 const calendarOpsAdapterMethods = {
-  ...mapProps((refiner, propName) => {
+  ...mapProps((refiner: Callable, propName) => {
     return ((calendar: CalendarProtocol, isoDateFields: IsoDateFields) => {
-      // TODO: fix type error by having more specific refiner inputs
-      return refiner(calendar[propName](createPlainDate(isoDateFields)))
+      // HACK: hopefully `calendar` not accessed
+      const pd = createPlainDate(isoDateFields as IsoDateInternals)
+      return refiner(calendar[propName](pd))
     })
   }, dateGetterRefiners) as {
     [K in keyof DateGetterFields]: (calendar: CalendarProtocol, isoFields: IsoDateFields) => DateGetterFields[K]
