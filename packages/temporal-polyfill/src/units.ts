@@ -3,7 +3,7 @@ import { LargeInt, numberToLargeInt } from './largeInt'
 /*
 TODO: use short names?
 */
-export enum Unit {
+export const enum Unit {
   Nanosecond,
   Microsecond,
   Millisecond,

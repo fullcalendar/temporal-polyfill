@@ -298,7 +298,7 @@ const refineTotalUnit = refineUnitOption.bind<
 // Overflow
 // -------------------------------------------------------------------------------------------------
 
-export enum Overflow {
+export const enum Overflow {
   Constrain,
   Reject,
 }
@@ -321,7 +321,7 @@ const refineOverflow = refineChoiceOption.bind<
 // Epoch Disambig
 // -------------------------------------------------------------------------------------------------
 
-export enum EpochDisambig {
+export const enum EpochDisambig {
   Compat,
   Reject,
   Earlier,
@@ -348,7 +348,7 @@ const refineEpochDisambig = refineChoiceOption.bind<
 // Offset Disambig
 // -------------------------------------------------------------------------------------------------
 
-export enum OffsetDisambig {
+export const enum OffsetDisambig {
   Use,
   Reject,
   Prefer,
@@ -375,7 +375,7 @@ const refineOffsetDisambig = refineChoiceOption.bind<
 // Calendar Display
 // -------------------------------------------------------------------------------------------------
 
-export enum CalendarDisplay {
+export const enum CalendarDisplay {
   Auto,
   Never,
   Critical,
@@ -402,7 +402,7 @@ const refineCalendarDisplay = refineChoiceOption.bind<
 // TimeZone Display
 // -------------------------------------------------------------------------------------------------
 
-export enum TimeZoneDisplay {
+export const enum TimeZoneDisplay {
   Auto,
   Never,
   Critical,
@@ -427,7 +427,7 @@ const refineTimeZoneDisplay = refineChoiceOption.bind<
 // Offset Display
 // -------------------------------------------------------------------------------------------------
 
-export enum OffsetDisplay {
+export const enum OffsetDisplay {
   Auto,
   Never,
 }
@@ -450,7 +450,7 @@ const refineOffsetDisplay = refineChoiceOption.bind<
 // Rounding Mode
 // -------------------------------------------------------------------------------------------------
 
-export enum RoundingMode {
+export const enum RoundingMode {
   // modes that get inverted (see invertRoundingMode)
   Floor,
   HalfFloor,
