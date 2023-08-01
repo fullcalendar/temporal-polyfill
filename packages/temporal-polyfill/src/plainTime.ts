@@ -29,6 +29,7 @@ import { roundTime, roundTimeToNano } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { TimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
+import { ZonedInternals } from './zonedDateTime'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 export type PlainTimeBag = TimeBag
@@ -67,7 +68,7 @@ export const [
   // internalsConversionMap
   {
     PlainDateTime: pluckIsoTimeFields,
-    ZonedDateTime(argInternals) {
+    ZonedDateTime(argInternals: ZonedInternals) {
       return pluckIsoTimeFields(zonedInternalsToIso(argInternals))
     },
   },

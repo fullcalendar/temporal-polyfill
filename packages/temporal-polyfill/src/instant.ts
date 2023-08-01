@@ -29,7 +29,7 @@ import {
 import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { noop } from './utils'
-import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 import { TimeUnit, Unit } from './units'
 import { TimeZoneArg } from './timeZone'
 
@@ -53,7 +53,7 @@ export const [
 
   // internalsConversionMap
   {
-    ZonedDateTime: (argInternals) => argInternals.epochNanoseconds,
+    ZonedDateTime: (argInternals: ZonedInternals) => argInternals.epochNanoseconds,
   },
 
   // bagToInternals

@@ -9,7 +9,7 @@ import {
   idGettersStrict,
 } from './class'
 import { Instant, createInstant } from './instant'
-import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoDateTimeInternals, isoTimeFieldDefaults } from './isoFields'
 import {
   epochNanoToIso,
   isoToEpochNano,
@@ -260,8 +260,11 @@ const timeZoneOpsAdapterMethods = {
   },
 
   getPossibleInstantsFor(timeZone: TimeZoneProtocol, isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
-    return ensureArray(timeZone.getPossibleInstantsFor(createPlainDateTime(isoDateTimeFields)))
-      .map(getInstantEpochNano)
+    return ensureArray(
+      timeZone.getPossibleInstantsFor(
+        createPlainDateTime(isoDateTimeFields as IsoDateTimeInternals) // HACK: hope Calendar isn't needed
+      )
+    ).map(getInstantEpochNano)
   },
 }
 

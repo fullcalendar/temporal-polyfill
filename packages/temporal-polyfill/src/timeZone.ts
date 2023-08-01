@@ -18,12 +18,12 @@ interface TimeZoneProtocolMethods {
   getNextTransition?(startingPoint: InstantArg): Instant | null
   getPreviousTransition?(startingPoint: InstantArg): Instant | null
   getPossibleInstantsFor(dateTime: PlainDateTimeArg): Instant[]
-  toString?(): string;
-  toJSON?(): string;
+  toString?(): string
+  toJSON?(): string
 }
 
 export interface TimeZoneProtocol extends TimeZoneProtocolMethods {
-  id: string;
+  id: string
 }
 
 // the *required* protocol methods

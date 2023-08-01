@@ -1,6 +1,8 @@
-import { DateTimeFormat } from './intlFormat'
+import { DateTimeFormat, Formattable } from './intlFormat'
 import { ensureInstanceOf, ensureString, toString } from './options'
 import {
+  Callable,
+  Classlike,
   Reused,
   createGetterDescriptors, createPropDescriptors, createTemporalNameDescriptors,
   defineProps,
@@ -60,9 +62,9 @@ export function createWrapperClass<
 >(
   getters: G,
   methods: M,
-  constructorToInternals: (...args: A) => I = (identityFunc as any),
-  extraPrototypeDescriptors: P = {} as any,
-  staticMembers: S = {} as any,
+  constructorToInternals: (...args: A) => I = (identityFunc as Callable),
+  extraPrototypeDescriptors: P | {} = {},
+  staticMembers: S | {} = {},
   handleInstance: (inst: WrapperInstance<I, G, M, P>) => void = noop,
 ): (
   WrapperClass<A, I, G, M, P, S>
@@ -94,7 +96,7 @@ export function createWrapperClass<
 
   defineProps(InternalObj, staticMembers)
 
-  return InternalObj as any
+  return InternalObj as Classlike
 }
 
 export function getStrictInternals<T>( // rename: getInternalsStrict?
@@ -113,7 +115,6 @@ type TemporalClass<
   B,
   A extends any[],
   I,
-  O,
   G extends { [propName: string]: (internals: I) => unknown },
   M extends { [methodName: string]: (internals: I, ...args: any[]) => unknown },
   S extends {},
@@ -147,18 +148,17 @@ export function createSimpleTemporalClass<
   B,
   A extends any[],
   I,
-  O,
   G extends { [propName: string]: (this: TemporalInstance<I>, internals: I) => unknown },
   M extends { [methodName: string]: (this: TemporalInstance<I>, internals: I, ...args: any[]) => unknown },
   S extends {}
 >(
   temporalName: string,
-  constructorToInternals: (...args: A) => I = (identityFunc as any),
+  constructorToInternals: ((...args: A) => I) = (identityFunc as Callable),
   getters: G,
   methods: M,
-  staticMembers: S = {} as any, // need this to be optional?
+  staticMembers: S | {} = {}, // need this to be optional?
 ): [
-  Class: TemporalClass<B, A, I, O, G, M, S>,
+  Class: TemporalClass<B, A, I, G, M, S>,
   createInstance: (internals: I) => TemporalInstance<I, G, M>,
 ] {
   ;(methods as unknown as ToJsonMethods).toJSON = function() {
@@ -185,7 +185,10 @@ export function createSimpleTemporalClass<
     temporaNameMap.set(instance, temporalName)
   }
 
-  return [TemporalClass as any, createInstance]
+  return [
+    TemporalClass as Classlike,
+    createInstance
+  ]
 }
 
 export function createTemporalClass<
@@ -198,21 +201,20 @@ export function createTemporalClass<
   S extends {}
 >(
   temporalName: string,
-  constructorToInternals: (...args: A) => I = (identityFunc as any),
+  constructorToInternals: ((...args: A) => I) = (identityFunc as Callable),
   internalsConversionMap: { [typeName: string]: (otherInternal: any) => I },
   bagToInternals: (bag: B, options?: O) => I | void, // void opts-out of bag processing
   stringToInternals: (str: string) => I,
   handleUnusedOptions: (options?: O) => void,
   getters: G,
   methods: M,
-  staticMembers: S = {} as any,
+  staticMembers: S | {} = {},
 ): [
-  Class: TemporalClass<B, A, I, O, G, M, S>,
+  Class: TemporalClass<B, A, I, G, M, S>,
   createInstance: (internals: I) => TemporalInstance<I, G, M>,
   toInternals: (arg: TemporalInstance<I> | B | string, options?: O) => I
 ] {
-  // TODO: cast to better type
-  ;(staticMembers as any).from = function(arg: TemporalInstance<I, G, M> | B | string, options: O) {
+  ;(staticMembers as { from: Callable }).from = function(arg: TemporalInstance<I, G, M> | B | string, options: O) {
     return createInstance(toInternals(arg, options))
   }
 
@@ -236,14 +238,18 @@ export function createTemporalClass<
       (handleUnusedOptions(options), (argInternals as I) || stringToInternals(toString(arg as string)))
   }
 
-  return [TemporalClass as any, createInstance, toInternals]
+  return [
+    TemporalClass as Classlike,
+    createInstance,
+    toInternals,
+  ]
 }
 
 // Utils for Specific Classes
 // -------------------------------------------------------------------------------------------------
 
 export function toLocaleStringMethod(
-  this: any, // !!!
+  this: Formattable,
   internals: unknown,
   locales: string | string[],
   options: Intl.DateTimeFormatOptions,
@@ -263,17 +269,19 @@ export function neverValueOf() {
 // Complex Objects with IDs
 // -------------------------------------------------------------------------------------------------
 
-export function createProtocolChecker<P extends {}>(
-  protocolMethods: P
+type ProtocolMembers<Methods> = { [K in keyof Methods]: unknown } & { id: string }
+
+export function createProtocolChecker<M extends {}>(
+  protocolMethods: M
 ): (
-  (obj: { [K in keyof P]: any } & { id: string }) => void
+  (obj: ProtocolMembers<M>) => void
 ) {
-  const propNames = Object.keys(protocolMethods) as (keyof (P & { id: string }))[]
+  const propNames = Object.keys(protocolMethods) as (keyof ProtocolMembers<M>)[]
   propNames.push('id')
   propNames.sort() // TODO: order matters?
 
   return (obj) => {
-    if (!hasAllPropsByName<P & { id: string }>(obj, propNames)) {
+    if (!hasAllPropsByName<ProtocolMembers<M>>(obj, propNames)) {
       throw new TypeError('Invalid protocol')
     }
   }

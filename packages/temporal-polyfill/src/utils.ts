@@ -15,6 +15,8 @@ For programmatically-generated functions that have overly-complex inferred types
 */
 export type Callable = (...args: any[]) => any
 
+export type Classlike = any
+
 const objectlikeRE = /object|function/
 
 // TODO: Record<PropertyKey, unknown>

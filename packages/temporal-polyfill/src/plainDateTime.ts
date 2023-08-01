@@ -13,6 +13,7 @@ import { diffDateTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import {
+  IsoDateInternals,
   IsoDateTimeInternals,
   generatePublicIsoDateTimeFields,
   isoTimeFieldDefaults,
@@ -46,7 +47,7 @@ import { TimeZoneArg } from './timeZone'
 import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
-import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
@@ -83,13 +84,17 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       isoMicrosecond,
       isoNanosecond,
       calendar,
-    })
+    }) as unknown as bigint[] as unknown as IsoDateTimeInternals
   },
 
   // internalsConversionMap
+  // TODO: add types to other conversion maps
+  // Important that return types exactly match, because affects inferenced Internals
   {
-    PlainDate: (argInternals) => ({ ...argInternals, ...isoTimeFieldDefaults }),
-    ZonedDateTime: (argInternals) => {
+    PlainDate: (argInternals: IsoDateInternals) => {
+      return { ...argInternals, ...isoTimeFieldDefaults }
+    },
+    ZonedDateTime: (argInternals: ZonedInternals) => {
       return pluckIsoDateTimeInternals(zonedInternalsToIso(argInternals))
     },
   },
@@ -256,14 +261,15 @@ function movePlainDateTime(
   durationInternals: DurationInternals,
   options: OverflowOptions | undefined,
 ): PlainDateTime {
-  return createPlainDateTime(
-    moveDateTime(
+  return createPlainDateTime({
+    calendar: internals.calendar, // TODO: make this nicer
+    ...moveDateTime(
       internals.calendar,
       internals,
       durationInternals,
       refineOverflowOptions(options),
     ),
-  )
+  })
 }
 
 function diffPlainDateTimes(

@@ -8,6 +8,7 @@ import { LargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
@@ -173,7 +174,7 @@ export function resolveZonedFormattable(
 }
 
 type OrigFormattable = number | Date
-type Formattable = Instant | PlainDate | PlainDateTime | ZonedDateTime | PlainYearMonth | PlainMonthDay | OrigFormattable
+export type Formattable = Instant | PlainDate | PlainDateTime | ZonedDateTime | PlainYearMonth | PlainMonthDay | PlainTime | OrigFormattable
 
 function resolveFormattable(
   arg: Formattable,
