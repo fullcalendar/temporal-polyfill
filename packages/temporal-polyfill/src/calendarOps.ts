@@ -20,7 +20,7 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Unit, unitNamesAsc } from './units'
-import { Callable, isObjectlike, mapProps } from './utils'
+import { BoundArg, Callable, isObjectlike, mapProps } from './utils'
 
 // types
 
@@ -100,7 +100,7 @@ function calendarOpsToPublic(calendarOps: CalendarOps): CalendarProtocol {
 }
 
 export const getCommonCalendarOps = getCommonInnerObj.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [CalendarInternals, CalendarInternals], // unbound
   CalendarOps // return
 >(undefined, 'calendar')
@@ -109,25 +109,25 @@ export const getCommonCalendarOps = getCommonInnerObj.bind<
 // -------------------------------------------------------------------------------------------------
 
 const getPlainDateInternals = getStrictInternals.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [PlainDate], // unbound
   IsoDateInternals // return
 >(undefined, PlainDate)
 
 const getPlainYearMonthInternals = getStrictInternals.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [PlainYearMonth], // unbound
   IsoDateInternals // return
 >(undefined, PlainYearMonth)
 
 const getPlainMonthDayInternals = getStrictInternals.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [PlainMonthDay], // unbound
   IsoDateInternals // return
 >(undefined, PlainMonthDay)
 
 const getDurationInternals = getStrictInternals.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [Duration], // unbound
   DurationInternals // return
 >(undefined, Duration)

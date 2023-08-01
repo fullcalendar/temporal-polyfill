@@ -6,7 +6,7 @@ import {
   isoTimeFieldNames,
 } from './isoFields'
 import { ensureBoolean, ensureInteger, toInteger, toString } from './options'
-import { FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
+import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
 // Year/Month/Day (no era/eraYear)
 // -------------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ export interface DateStats extends YearMonthStats {
   daysInWeek: number
 }
 
-type DateMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => any>
+type DateMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => unknown>
 
 type DateGetters = {
   [K in keyof DateMethods]: (internals: IsoDateInternals) => ReturnType<DateMethods[K]>
@@ -276,7 +276,7 @@ function createCalendarGetters<K extends keyof DateGetters>(
 ): CalendarGetters<K> {
   const getters = mapPropNames(createCalendarGetter, propNames)
 
-  ;(getters as any).calendarId = (internals: { calendar: CalendarOps }) => {
+  ;(getters as unknown as CalendarIdGetters).calendarId = (internals: { calendar: CalendarOps }) => {
     return internals.calendar.id
   }
 
@@ -302,7 +302,7 @@ export const dateTimeGetters = {
 // -------------------------------------------------------------------------------------------------
 
 export const timeFieldsToIso = remapProps.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [TimeFields], // unbound
   IsoTimeFields // return
 >(undefined, timeFieldNames, isoTimeFieldNames)

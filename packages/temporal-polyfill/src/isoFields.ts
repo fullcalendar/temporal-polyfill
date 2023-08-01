@@ -2,7 +2,7 @@ import { CalendarProtocol } from './calendar'
 import { CalendarOps, queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
 import { toInteger } from './options'
-import { mapPropNamesToConstant, pluckProps, pluckPropsTuple } from './utils'
+import { BoundArg, mapPropNamesToConstant, pluckProps, pluckPropsTuple } from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -21,7 +21,7 @@ export interface IsoTimeFields {
 
 // TODO: move
 // TODO: same as CalendarArg?
-type CalendarPublic = CalendarProtocol | string
+export type CalendarPublic = CalendarProtocol | string
 
 export interface CalendarInternals {
   calendar: CalendarOps
@@ -85,19 +85,19 @@ export const isoTimeFieldDefaults = mapPropNamesToConstant(isoTimeFieldNames, 0)
 // -------------------------------------------------------------------------------------------------
 
 export const pluckIsoDateInternals = pluckProps.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [IsoDateInternals], // unbound
   IsoDateInternals // return
 >(undefined, isoDateInternalNames) // bound
 
 export const pluckIsoDateTimeInternals = pluckProps.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [IsoDateTimeInternals], // unbound
   IsoDateTimeInternals // return
 >(undefined, isoDateTimeInternalNames)
 
 export const pluckIsoTimeFields = pluckProps.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [IsoTimeFields], // unbound
   IsoTimeFields // return
 >(undefined, isoTimeFieldNames)
@@ -115,7 +115,7 @@ export type IsoTuple = [
 
 // TODO: move?
 export const pluckIsoTuple = pluckPropsTuple.bind<
-  any, [any],
+  undefined, [BoundArg],
   [Partial<IsoDateTimeFields> & { isoYear: number }], // unbound
   IsoTuple // return
 >(undefined, isoDateTimeFieldNamesAsc.reverse())
@@ -125,7 +125,7 @@ function generatePublicIsoFields<P>(
   internals: P & { calendar: CalendarOps },
 ): P & { calendar: CalendarPublic } {
   const publicFields = pluckFunc(internals) as P & { calendar: CalendarPublic }
-  publicFields.calendar = getPublicIdOrObj(internals.calendar)
+  publicFields.calendar = getPublicIdOrObj(internals.calendar) as CalendarPublic
   return publicFields
 }
 
@@ -133,13 +133,13 @@ export type IsoDatePublic = IsoDateFields & { calendar: CalendarPublic }
 export type IsoDateTimePublic = IsoDateTimeFields & { calendar: CalendarPublic }
 
 export const generatePublicIsoDateFields = generatePublicIsoFields.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [IsoDateInternals], // unbound
   IsoDatePublic // return
 >(undefined, pluckIsoDateInternals)
 
 export const generatePublicIsoDateTimeFields = generatePublicIsoFields.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [IsoDateTimeInternals], // unbound
   IsoDateTimePublic // return
 >(undefined, pluckIsoDateTimeInternals)
@@ -149,7 +149,7 @@ Similar to getPublicCalendar and getPublicTimeZone
 */
 export function getPublicIdOrObj(
   ops: { id: string },
-): { id: string } | any {
+): unknown {
   return getInternals(ops) || // adapter (return internal object)
     ops.id // impl (return id)
 }

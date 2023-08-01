@@ -49,7 +49,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
-import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
+import { Callable, clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 
@@ -296,8 +296,6 @@ interface YearMethods {
   monthsInYear(isoFields: IsoDateFields): number
 }
 
-type VeryGeneric = any
-
 const yearMethods = {} as YearMethods
 
 (
@@ -308,7 +306,7 @@ const yearMethods = {} as YearMethods
     isoDateFields: IsoDateFields,
   ) {
     return this[computeMethodName](this.year(isoDateFields))
-  } as VeryGeneric
+  } as Callable
 })
 
 // Base Calendar Implementation :: Week Methods
@@ -607,7 +605,7 @@ Fields that are easily-extractable from IntlFields (non-month fields)
     isoDateFields: IsoDateFields,
   ) {
     return this.isoDateFieldsToIntl(isoDateFields)[dateFieldName as EasyIntlMethodName]
-  } as VeryGeneric
+  } as Callable
 })
 
 // CalendarImpl Querying

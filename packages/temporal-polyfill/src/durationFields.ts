@@ -17,6 +17,7 @@ import {
   mapPropNamesToIndex,
   mapProps,
   remapProps,
+  BoundArg,
 } from './utils'
 
 interface DurationDateFields {
@@ -97,7 +98,7 @@ export function refineDurationFields(
 }
 
 export const durationTimeFieldsToIso = remapProps.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [DurationTimeFields], // unbound
   IsoTimeFields // return
 >(undefined, durationTimeFieldNames, isoTimeFieldNames)

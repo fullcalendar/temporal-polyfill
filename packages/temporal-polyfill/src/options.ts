@@ -9,6 +9,7 @@ import { PlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
+  BoundArg,
   FilterPropValues,
   clamp,
   hasAnyPropsByName,
@@ -278,20 +279,20 @@ interface TotalUnitOptions {
 //
 
 const refineSmallestUnit = refineUnitOption.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [SmallestUnitOptions, Unit?, Unit?, Unit?], // unbound
   Unit // return
 >(undefined, smallestUnitStr)
 
 const refineLargestUnit = refineUnitOption.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [LargestUnitOptions, Unit?, Unit?, Unit?], // unbound
   Unit
 >(undefined, largestUnitStr)
 
 // TODO: get totalUnitStr closer to this! etc
 const refineTotalUnit = refineUnitOption.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [TotalUnitOptions, Unit?, Unit?, Unit?], // unbound
   Unit
 >(undefined, totalUnitStr)
@@ -316,7 +317,7 @@ const overflowMap = {
 export const overflowMapNames = Object.keys(overflowMap) as (keyof typeof overflowMap)[]
 
 const refineOverflow = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [OverflowOptions, Overflow?], // unbound
   Overflow // return
 >(undefined, 'overflow', overflowMap)
@@ -343,7 +344,7 @@ const epochDisambigMap = {
 }
 
 const refineEpochDisambig = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [EpochDisambigOptions, EpochDisambig?], // unbound
   EpochDisambig // return
 >(undefined, 'disambiguation', epochDisambigMap)
@@ -370,7 +371,7 @@ const offsetDisambigMap = {
 }
 
 const refineOffsetDisambig = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [OffsetDisambigOptions, OffsetDisambig?], // unbound
   OffsetDisambig // return
 >(undefined, 'offset', offsetDisambigMap)
@@ -397,7 +398,7 @@ const calendarDisplayMap = {
 }
 
 const refineCalendarDisplay = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [CalendarDisplayOptions, CalendarDisplay?], // unbound
   CalendarDisplay // return
 >(undefined, 'calendarName', calendarDisplayMap)
@@ -422,7 +423,7 @@ const timeZoneDisplayMap = {
 }
 
 const refineTimeZoneDisplay = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [TimeZoneDisplayOptions, TimeZoneDisplay?], // unbound
   TimeZoneDisplay // return
 >(undefined, 'timeZoneName', timeZoneDisplayMap)
@@ -445,7 +446,7 @@ const offsetDisplayMap = {
 }
 
 const refineOffsetDisplay = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [OffsetDisplayOptions, OffsetDisplay?], // unbound
   OffsetDisplay // return
 >(undefined, 'offset', offsetDisplayMap)
@@ -485,7 +486,7 @@ const roundingModeMap = {
 
 // Caller should always supply default
 const refineRoundingMode = refineChoiceOption.bind<
-  any, [any, any], // bound
+  undefined, [BoundArg, BoundArg], // bound
   [RoundingModeOptions, RoundingMode?], // unbound
   RoundingMode // return
 >(undefined, 'roundingMode', roundingModeMap)

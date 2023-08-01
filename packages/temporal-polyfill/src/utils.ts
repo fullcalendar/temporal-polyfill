@@ -5,6 +5,14 @@ Is this making this more complex at cost of no lower min size?
 */
 export type Reused = any
 
+/*
+Will linter make [any] for bind okay? If so, this is unnecessary
+*/
+export type BoundArg = any
+
+/*
+For programmatically-generated functions that have overly-complex inferred types
+*/
 export type Callable = (...args: any[]) => any
 
 const objectlikeRE = /object|function/

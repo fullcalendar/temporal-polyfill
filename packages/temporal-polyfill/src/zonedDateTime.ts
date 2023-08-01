@@ -15,6 +15,7 @@ import { DurationFields, negateDurationInternals, updateDurationFieldsSign } fro
 import { Instant, createInstant } from './instant'
 import { resolveZonedFormattable } from './intlFormat'
 import {
+  CalendarPublic,
   IsoDateTimePublic,
   getPublicIdOrObj,
   isoTimeFieldDefaults,
@@ -392,12 +393,12 @@ export const [
       return {
         ...pluckIsoDateTimeInternals(zonedInternalsToIso(internals)),
         // alphabetical
-        calendar: getPublicIdOrObj(internals.calendar),
+        calendar: getPublicIdOrObj(internals.calendar) as CalendarPublic,
         offset: formatOffsetNano(
           // TODO: more DRY
           zonedInternalsToIso(internals).offsetNanoseconds,
         ),
-        timeZone: getPublicIdOrObj(internals.timeZone),
+        timeZone: getPublicIdOrObj(internals.timeZone) as TimeZonePublic,
       }
     },
 
