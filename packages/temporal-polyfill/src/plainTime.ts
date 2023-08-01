@@ -138,7 +138,7 @@ export const [
 
     valueOf: neverValueOf,
 
-    toZonedDateTime: createZonedDateTimeConverter((options: any) => {
+    toZonedDateTime: createZonedDateTimeConverter((options: { plainDate: PlainDateArg }) => {
       return toPlainDateInternals(options.plainDate)
     }),
 

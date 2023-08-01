@@ -6,9 +6,6 @@ import {
   isoCalendarId,
 } from './calendarConfig'
 import {
-  DateBag,
-  DateBagStrict,
-  DateTimeBag,
   DayFields,
   TimeFields,
   YearFields,
@@ -183,19 +180,23 @@ export function mergeZonedDateTimeBag(
   }
 }
 
-export function createZonedDateTimeConverter(
-  getExtraIsoFields: (options: any) => any,
+export function createZonedDateTimeConverter<
+  Internals extends Partial<IsoDateTimeInternals>,
+  NarrowOptions
+>(
+  getMoreInternals: (options: NarrowOptions) => Partial<IsoDateTimeInternals>,
 ): (
-  (internals: any, options: any) => ZonedDateTime
+  (internals: Internals, options: NarrowOptions & { timeZone: TimeZoneArg }) => ZonedDateTime
 ) {
   return (internals, options) => {
-    const { calendar } = internals
-    const timeZone = queryTimeZoneOps(options.timeZone)
-
-    const epochNanoseconds = getSingleInstantFor(timeZone, {
+    const finalInternals = {
       ...internals,
-      ...getExtraIsoFields(normalizeOptions(options)),
-    })
+      ...getMoreInternals(normalizeOptions(options))
+    } as IsoDateTimeInternals
+
+    const { calendar } = finalInternals
+    const timeZone = queryTimeZoneOps(options.timeZone)
+    const epochNanoseconds = getSingleInstantFor(timeZone, finalInternals)
 
     return createZonedDateTime({
       calendar,

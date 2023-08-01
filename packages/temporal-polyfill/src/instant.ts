@@ -74,9 +74,6 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    /*
-    TODO: doesn't accept timeZoneArg anymore???
-    */
     toZonedDateTimeISO(epochNano: LargeInt, timeZoneArg: TimeZoneArg): ZonedDateTime {
       return createZonedDateTime({
         epochNanoseconds: epochNano,
