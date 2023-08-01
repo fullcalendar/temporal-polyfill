@@ -26,13 +26,14 @@ async function buildPkgBundleConfigs(pkgDir, commandLineArgs) {
   const { entryPoints, entryPointTypes, globalEntryPoints, dependencyNames } = pkgAnalysis
 
   const configs = globalEntryPoints.map((globalEntryPoint) => ({
-    input: path.join(pkgDir, globalEntryPoint),
+    input: path.join(pkgDir, globalEntryPoint.replace('/src/', '/dist/.tsc/').replace(/\.ts$/, '.js')),
     external: dependencyNames,
     output: buildGlobalOutputConfig(pkgDir),
     watch: watchOptions,
     plugins: buildPlugins(watch),
   }))
 
+  /*
   if (entryPoints.length) {
     configs.push({
       input: entryPoints.map((f) => path.join(pkgDir, f)),
@@ -45,6 +46,7 @@ async function buildPkgBundleConfigs(pkgDir, commandLineArgs) {
       plugins: buildPlugins(watch),
     })
   }
+  */
 
   /*
   if (entryPointTypes.length && !watch) {
@@ -90,14 +92,14 @@ function buildGlobalOutputConfig(pkgDir) {
 function buildPlugins(watch) {
   return [
     resolve({
-      extensions: ['.js', '.ts'],
+      extensions: ['.js', /* '.ts' */],
     }),
-    esbuild({
-      // TODO: this is a bad technique because it has the potential to inject multiple
-      // helper-functions in the same output. Luckily it doesn't for this target.
-      target: 'es2018',
-    }),
-    tsFileOverriding('.build.ts'),
+    // esbuild({
+    //   // TODO: this is a bad technique because it has the potential to inject multiple
+    //   // helper-functions in the same output. Luckily it doesn't for this target.
+    //   target: 'es2018',
+    // }),
+    // tsFileOverriding('.build.ts'),
     !watch && !noMin && terser(terserConfig),
   ]
 }
