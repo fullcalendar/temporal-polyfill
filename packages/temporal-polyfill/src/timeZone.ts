@@ -14,7 +14,7 @@ interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number
   getOffsetStringFor?(instant: InstantArg): string
   getPlainDateTimeFor?(instant: InstantArg, calendarArg?: CalendarArg): PlainDateTime
-  getInstantFor?(dateTime: PlainDateTimeArg, options?: any): Instant
+  getInstantFor?(dateTime: PlainDateTimeArg, options?: EpochDisambigOptions): Instant
   getNextTransition?(startingPoint: InstantArg): Instant | null
   getPreviousTransition?(startingPoint: InstantArg): Instant | null
   getPossibleInstantsFor(dateTime: PlainDateTimeArg): Instant[]

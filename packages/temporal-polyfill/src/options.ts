@@ -704,7 +704,6 @@ export function clampProp<P>(
 
 // Primitives
 // -------------------------------------------------------------------------------------------------
-// NOTE: even though these accept 'any', strictly type so TS interface is more strict
 
 export function ensureInstanceOf<T>(Class: { new(): T }, obj: T): T {
   if (!(obj instanceof Class)) {

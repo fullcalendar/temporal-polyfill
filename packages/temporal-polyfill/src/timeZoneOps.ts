@@ -23,7 +23,7 @@ import { roundToMinute } from './round'
 import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
-import { createLazyGenerator, isObjectlike } from './utils'
+import { BoundArg, createLazyGenerator, isObjectlike } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 
 export interface TimeZoneOps {
@@ -87,7 +87,7 @@ function timeZoneOpsToPublic(timeZoneOps: TimeZoneOps): TimeZoneProtocol {
 }
 
 export const getCommonTimeZoneOps = getCommonInnerObj.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [TimeZoneInternals, TimeZoneInternals], // unbound
   TimeZoneOps // return
 >(undefined, 'timeZone')
@@ -249,7 +249,7 @@ export function zonedEpochNanoToIso(timeZoneOps: TimeZoneOps, epochNano: LargeIn
 // -------
 
 const getInstantEpochNano = getStrictInternals.bind<
-  any, [any], // bound
+  undefined, [BoundArg], // bound
   [Instant], // unbound
   LargeInt // return
 >(undefined, Instant)

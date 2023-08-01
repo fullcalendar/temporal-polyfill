@@ -12,7 +12,9 @@ import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
+  Classlike,
   createLazyGenerator,
+  defineProps,
   excludePropsByName,
   hasAnyPropsByName,
   identityFunc,
@@ -41,6 +43,7 @@ export function hashIntlFormatParts(
 
 // AHHH... problem with resolvedOptions... need to whitelist original
 // PERFORMANCE: avoid using our DateTimeFormat for toLocaleString, because creates two objects
+// TODOOOOO: this needs to be rewritten. who cares about `any` for now
 
 export const IntlDateTimeFormat = Intl.DateTimeFormat
 
@@ -63,17 +66,19 @@ export class DateTimeFormat extends IntlDateTimeFormat {
 }
 
 ['formatRange', 'formatRangeToParts'].forEach((methodName) => {
-  const origMethod = (IntlDateTimeFormat as any).prototype[methodName]
+  const origMethod = (IntlDateTimeFormat as Classlike).prototype[methodName]
 
   if (origMethod) {
-    // TODO: not sufficient for defining method. Use defineProperty!
-    (DateTimeFormat as any).prototype[methodName] = function(
-      arg0: Formattable,
-      arg1: Formattable,
-    ) {
-      const [formattable0, formattable1, format] = resolveRangeFormattables(this, arg0, arg1)
-      return origMethod.call(format, formattable0, formattable1)
-    }
+    defineProps(DateTimeFormat.prototype, {
+      [methodName]: function(
+        this: Intl.DateTimeFormat,
+        arg0: Formattable,
+        arg1: Formattable,
+      ) {
+        const [formattable0, formattable1, format] = resolveRangeFormattables(this, arg0, arg1)
+        return origMethod.call(format, formattable0, formattable1)
+      }
+    })
   }
 })
 

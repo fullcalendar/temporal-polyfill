@@ -136,7 +136,9 @@ function filterProps<P, E = undefined>(
 }
 
 export const excludePropsByName = filterProps.bind<
-  any, [any], [any, Set<string>], any
+  undefined, [BoundArg], // bound
+  [any, Set<string>], // unbound
+  any // return
 >(undefined, (
   propVal: unknown,
   propName: string,
