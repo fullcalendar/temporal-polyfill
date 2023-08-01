@@ -19,7 +19,7 @@ import {
 import { LargeInt, compareLargeInts } from './largeInt'
 import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
 import { Overflow, RoundingMode } from './options'
-import { MarkerToEpochNano, MoveMarker, computeNanoInc, roundByInc, roundByIncLarge, roundRelativeDuration } from './round'
+import { computeNanoInc, roundByInc, roundByIncLarge, roundRelativeDuration } from './round'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
   DayTimeUnit,

@@ -6,7 +6,9 @@ import {
   isoCalendarId,
 } from './calendarConfig'
 import {
+  DateTimeBag,
   DayFields,
+  TimeBag,
   TimeFields,
   YearFields,
   dateFieldNames,
@@ -80,7 +82,7 @@ export function refineMaybeZonedDateTimeBag(
   if (fields.timeZone) {
     const timeZone = queryTimeZoneOps(fields.timeZone)
     const isoDateFields = calendar.dateFromFields(fields, Overflow.Constrain)
-    const isoTimeFields = refineTimeFields(fields, Overflow.Constrain)
+    const isoTimeFields = refineTimeBag(fields, Overflow.Constrain)
 
     const epochNanoseconds = getMatchingInstantFor(
       timeZone,
@@ -99,7 +101,7 @@ export function refineMaybeZonedDateTimeBag(
     }
   } else {
     const isoDateInternals = calendar.dateFromFields(fields, Overflow.Constrain)
-    const isoTimeFields = refineTimeFields(fields, Overflow.Constrain)
+    const isoTimeFields = refineTimeBag(fields, Overflow.Constrain)
 
     return { ...isoDateInternals, ...isoTimeFields }
   }
@@ -125,7 +127,7 @@ export function refineZonedDateTimeBag(
 
   const timeZone = queryTimeZoneOps(fields.timeZone!) // guaranteed via refineCalendarFields
   const isoDateFields = calendar.dateFromFields(fields, overflow)
-  const isoTimeFields = refineTimeFields(fields, overflow)
+  const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
@@ -161,7 +163,7 @@ export function mergeZonedDateTimeBag(
   const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
 
   const isoDateFields = calendar.dateFromFields(fields, overflow)
-  const isoTimeFields = refineTimeFields(fields, overflow)
+  const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
@@ -219,11 +221,11 @@ export function refinePlainDateTimeBag(
     bag,
     dateTimeFieldNames,
     getRequiredDateFields(calendar),
-  )
+  ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendar.dateFromFields(fields, overflow)
-  const isoTimeFields = refineTimeFields(fields, overflow)
+  const isoTimeFields = refineTimeBag(fields, overflow)
 
   return { ...isoDateInternals, ...isoTimeFields }
 }
@@ -239,11 +241,11 @@ export function mergePlainDateTimeBag(
     plainDateTime,
     mod,
     dateTimeFieldNames,
-  )
+  ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendar.dateFromFields(fields, overflow)
-  const isoTimeFields = refineTimeFields(fields, overflow)
+  const isoTimeFields = refineTimeBag(fields, overflow)
 
   return { ...isoDateInternals, ...isoTimeFields }
 }
@@ -445,9 +447,9 @@ export function refinePlainTimeBag(
   bag: PlainTimeBag,
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
-  const fields = refineFields(bag, timeFieldNames, [])
+  const fields = refineFields(bag, timeFieldNames, []) as TimeBag
 
-  return refineTimeFields(fields, refineOverflowOptions(options))
+  return refineTimeBag(fields, refineOverflowOptions(options))
 }
 
 export function mergePlainTimeBag(
@@ -459,11 +461,11 @@ export function mergePlainTimeBag(
   const partialFields = refineFields(bag, timeFieldNames)
   const mergeFields = { ...fields, ...partialFields }
 
-  return refineTimeFields(mergeFields, refineOverflowOptions(options))
+  return refineTimeBag(mergeFields, refineOverflowOptions(options))
 }
 
-function refineTimeFields(fields: any, overflow: any): IsoTimeFields {
-  return constrainIsoTimeFields(timeFieldsToIso(fields), overflow)
+function refineTimeBag(fields: TimeBag, overflow: Overflow): IsoTimeFields {
+  return constrainIsoTimeFields(timeFieldsToIso({ ...timeFieldDefaults, ...fields }), overflow)
 }
 
 // Duration
@@ -540,7 +542,7 @@ function extractBagCalendarOps(
 
 function rejectInvalidBag(bag: { calendar?: unknown, timeZone?: unknown }): void {
   if (getInternals(bag)) {
-    throw new TypeError('Cant pass any Temporal object')
+    throw new TypeError('Cant pass a Temporal object')
   }
   if (bag.calendar !== undefined) {
     throw new TypeError('Ah')
@@ -569,13 +571,13 @@ function refineFields(
   // if not given, then assumed to be 'partial' (defaults won't be applied)
 ): Record<string, unknown> {
   const res: Record<string, unknown> = {}
-  let any = false
+  let anyMatching = false
 
   for (const fieldName of validFieldNames) {
     let fieldVal = bag[fieldName]
 
     if (fieldVal !== undefined) {
-      any = true
+      anyMatching = true
 
       if (builtinRefiners[fieldName as keyof typeof builtinRefiners]) {
         fieldVal = (builtinRefiners[fieldName as keyof typeof builtinRefiners] as Callable)(fieldVal)
@@ -591,7 +593,7 @@ function refineFields(
     }
   }
 
-  if (!any) {
+  if (!anyMatching) {
     throw new TypeError('No valid fields')
   }
 
