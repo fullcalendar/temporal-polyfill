@@ -1,6 +1,10 @@
 import { Overflow } from './options'
 
+/*
+Is this making this more complex at cost of no lower min size?
+*/
 export type Reused = any
+
 export type Callable = (...args: any[]) => any
 
 const objectlikeRE = /object|function/

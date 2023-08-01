@@ -1,6 +1,6 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { DateFields, dateGetters } from './calendarFields'
+import { DateBag, dateGetters } from './calendarFields'
 import {
   getCommonCalendarOps,
   getPublicCalendar,
@@ -37,8 +37,8 @@ import { Unit } from './units'
 import { NumSign } from './utils'
 
 export type PlainDateArg = PlainDate | PlainDateBag | string
-export type PlainDateBag = DateFields & { calendar?: CalendarArg }
-export type PlainDateMod = Partial<DateFields>
+export type PlainDateBag = DateBag & { calendar?: CalendarArg }
+export type PlainDateMod = DateBag
 
 export type PlainDate = TemporalInstance<IsoDateInternals>
 export const [

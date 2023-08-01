@@ -1,4 +1,4 @@
-import { TimeFields, timeGetters } from './calendarFields'
+import { TimeBag, timeGetters } from './calendarFields'
 import { TemporalInstance, createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
 import {
   createZonedDateTimeConverter,
@@ -31,8 +31,8 @@ import { TimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
-export type PlainTimeBag = Partial<TimeFields>
-export type PlainTimeMod = Partial<TimeFields>
+export type PlainTimeBag = TimeBag
+export type PlainTimeMod = TimeBag
 
 export type PlainTime = TemporalInstance<IsoTimeFields>
 export const [

@@ -1,5 +1,5 @@
 import { Calendar, CalendarArg, CalendarProtocol, calendarProtocolMethods, createCalendar } from './calendar'
-import { DateGetterFields, dateGetterRefiners } from './calendarFields'
+import { DateBag, DateBagStrict, DateGetterFields, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateGetterRefiners } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
   createProtocolChecker,
@@ -15,7 +15,7 @@ import { Duration, createDuration } from './duration'
 import { DurationInternals } from './durationFields'
 import { CalendarInternals, IsoDateFields, IsoDateInternals } from './isoFields'
 import { parseCalendarId } from './isoParse'
-import { Overflow, ensureObjectlike, ensureString, toString } from './options'
+import { Overflow, ensureObjectlike, ensureString, overflowMapNames, toString } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
@@ -41,13 +41,13 @@ export interface CalendarOps {
   weekOfYear(isoFields: IsoDateFields): number
   yearOfWeek(isoFields: IsoDateFields): number
   daysInWeek(isoFields: IsoDateFields): number
-  dateFromFields(fields: any, overflow: Overflow): IsoDateInternals
-  yearMonthFromFields(fields: any, overflow: Overflow): IsoDateInternals
-  monthDayFromFields(fields: any, overflow: Overflow): IsoDateInternals
+  dateFromFields(fields: DateBag, overflow: Overflow): IsoDateInternals
+  yearMonthFromFields(fields: YearMonthBag, overflow: Overflow): IsoDateInternals
+  monthDayFromFields(fields: MonthDayBag, overflow: Overflow): IsoDateInternals
   dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow: Overflow): IsoDateInternals
   dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit): DurationInternals
   fields(fieldNames: string[]): string[]
-  mergeFields(fields0: any, fields1: any): any
+  mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
 }
 
 //
@@ -153,7 +153,7 @@ const calendarOpsAdapterMethods = {
       calendar.dateAdd(
         createPlainDate(isoDateFields),
         createDuration(durationInternals),
-        { overflow },
+        { overflow: overflowMapNames[overflow] },
       ),
     )
   },
@@ -173,16 +173,43 @@ const calendarOpsAdapterMethods = {
     )
   },
 
-  dateFromFields(calendar: CalendarProtocol, fields: any, overflow: Overflow): IsoDateInternals {
-    return getPlainDateInternals(calendar.dateFromFields(fields, { overflow }))
+  dateFromFields(
+    calendar: CalendarProtocol,
+    fields: DateBag,
+    overflow: Overflow,
+  ): IsoDateInternals {
+    return getPlainDateInternals(
+      calendar.dateFromFields(
+        fields as DateBagStrict,
+        { overflow: overflowMapNames[overflow] },
+      )
+    )
   },
 
-  yearMonthFromFields(calendar: CalendarProtocol, fields: any, overflow: Overflow): IsoDateInternals {
-    return getPlainYearMonthInternals(calendar.yearMonthFromFields(fields, { overflow }))
+  yearMonthFromFields(
+    calendar: CalendarProtocol,
+    fields: YearMonthBag,
+    overflow: Overflow,
+  ): IsoDateInternals {
+    return getPlainYearMonthInternals(
+      calendar.yearMonthFromFields(
+        fields as YearMonthBagStrict,
+        { overflow: overflowMapNames[overflow] },
+      )
+    )
   },
 
-  monthDayFromFields(calendar: CalendarProtocol, fields: any, overflow: Overflow): IsoDateInternals {
-    return getPlainMonthDayInternals(calendar.monthDayFromFields(fields, { overflow }))
+  monthDayFromFields(
+    calendar: CalendarProtocol,
+    fields: MonthDayBag,
+    overflow: Overflow,
+  ): IsoDateInternals {
+    return getPlainMonthDayInternals(
+      calendar.monthDayFromFields(
+        fields as MonthDayBagStrict,
+        { overflow: overflowMapNames[overflow] },
+      )
+    )
   },
 
   fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
@@ -190,7 +217,11 @@ const calendarOpsAdapterMethods = {
     // TODO: kill ensureArray elsewhere?
   },
 
-  mergeFields(calendar: CalendarProtocol, fields0: any, fields1: any): any {
+  mergeFields(
+    calendar: CalendarProtocol,
+    fields0: Record<string, unknown>,
+    fields1: Record<string, unknown>,
+  ): Record<string, unknown> {
     return ensureObjectlike(calendar.mergeFields(fields0, fields1))
   },
 }

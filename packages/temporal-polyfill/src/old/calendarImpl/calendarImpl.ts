@@ -13,8 +13,8 @@ export interface CalendarImplFields { // like DateFields, but without monthCode
 export interface CalendarImplFieldsDumb { // like CalendarImplFields, but with month string
   era: string | undefined
   eraYear: number | undefined
-  year: number,
-  month: string,
+  year: number
+  month: string
   day: number
 }
 

@@ -9,12 +9,19 @@ import {
   leapYearMetas,
 } from './calendarConfig'
 import {
-  AllYearFields,
-  allYearFieldNames,
+  EraYearOrYear,
+  MonthFields,
+  YearFieldsIntl,
+  intlYearFieldNames,
   eraYearFieldNames,
   monthDayFieldNames,
   monthFieldNames,
   yearStatNames,
+  DayFields,
+  DateBag,
+  YearMonthBag,
+  MonthDayBag,
+  DateFields,
 } from './calendarFields'
 import {
   computeIntlMonthsInYearSpan,
@@ -42,7 +49,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
-import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2, remapProps } from './utils'
+import { clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 
@@ -82,23 +89,23 @@ export class CalendarImpl implements CalendarOps {
     )
   }
 
-  dateFromFields(fields: any, overflow: Overflow): IsoDateInternals {
+  dateFromFields(fields: DateBag, overflow: Overflow): IsoDateInternals {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
-    const day = this.refineDay(fields, month, year, overflow)
+    const day = this.refineDay(fields as DateFields, month, year, overflow)
 
     return this.queryIsoFields(year, month, day)
   }
 
-  yearMonthFromFields(fields: any, overflow: Overflow): IsoDateInternals {
+  yearMonthFromFields(fields: YearMonthBag, overflow: Overflow): IsoDateInternals {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
 
     return this.queryIsoFields(year, month, 1)
   }
 
-  monthDayFromFields(fields: any, overflow: Overflow): IsoDateInternals {
-    let { month, monthCode, day } = fields
+  monthDayFromFields(fields: MonthDayBag, overflow: Overflow): IsoDateInternals {
+    let { month, monthCode, day } = fields as (Partial<MonthFields> & DayFields)
     let year
 
     if (monthCode !== undefined) {
@@ -107,7 +114,7 @@ export class CalendarImpl implements CalendarOps {
       ;([year, month] = this.queryYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day))
     } else {
       // year is required
-      year = this.refineYear(fields)
+      year = this.refineYear(fields as EraYearOrYear)
       month = this.refineMonth(fields, year, overflow)
     }
 
@@ -122,13 +129,16 @@ export class CalendarImpl implements CalendarOps {
     return fieldNames
   }
 
-  mergeFields(baseFields: any, additionalFields: any): any {
+  mergeFields(
+    baseFields: Record<string, unknown>,
+    additionalFields: Record<string, unknown>
+  ): Record<string, unknown> {
     const merged = { ...baseFields }
 
     removeIfAnyProps(merged, additionalFields, monthFieldNames)
 
     if (getAllowErasInFields(this)) {
-      removeIfAnyProps(merged, additionalFields, allYearFieldNames)
+      removeIfAnyProps(merged, additionalFields, intlYearFieldNames)
     }
 
     if (getErasBeginMidYear(this)) {
@@ -198,7 +208,7 @@ export class CalendarImpl implements CalendarOps {
   // Field Refining
   // --------------
 
-  refineYear(fields: any): number {
+  refineYear(fields: Partial<YearFieldsIntl>): number {
     let { era, eraYear, year } = fields
     const allowEras = getAllowErasInFields(this)
 
@@ -218,9 +228,9 @@ export class CalendarImpl implements CalendarOps {
   }
 
   refineMonth(
-    fields: any,
+    fields: Partial<MonthFields>,
     year: number, // optional if known that calendar doesn't support leap months
-    overflow: Overflow = Overflow.Reject,
+    overflow: Overflow = Overflow.Reject, // TODO: do this elsewhere?
   ): number {
     let { month, monthCode } = fields
 
@@ -245,9 +255,14 @@ export class CalendarImpl implements CalendarOps {
     )
   }
 
-  refineDay(fields: any, month: number, year: number, overflow: Overflow) {
+  refineDay(
+    fields: DayFields, // day guaranteed to exist because of required*Fields
+    month: number,
+    year: number,
+    overflow: Overflow
+  ): number {
     return clamp(
-      fields.day, // day guaranteed to exist because of required*Fields
+      fields.day,
       1,
       this.queryDaysInMonth(year, month),
       overflow,
@@ -578,14 +593,14 @@ class IntlCalendarImpl extends CalendarImpl {
 // IntlCalendarImpl - Prototype Trickery
 // -------------------------------------------------------------------------------------------------
 
-type EasyIntlMethodName = keyof AllYearFields | 'day'
+type EasyIntlMethodName = (keyof YearFieldsIntl) | 'day'
 
 /*
 era/eraYear/year/day
 Fields that are easily-extractable from IntlFields (non-month fields)
 */
 (
-  [...allYearFieldNames, 'day'] as EasyIntlMethodName[]
+  [...intlYearFieldNames, 'day'] as EasyIntlMethodName[]
 ).forEach((dateFieldName) => {
   IntlCalendarImpl.prototype[dateFieldName] = function(
     this: IntlCalendarImpl,
@@ -851,8 +866,8 @@ function getCalendarIdBase(calendarId: string): string {
 // -------------------------------------------------------------------------------------------------
 
 function removeIfAnyProps(
-  targetObj: any,
-  testObj: any,
+  targetObj: Record<string, unknown>,
+  testObj: Record<string, unknown>,
   testPropNames: string[],
   deletablePropNames: string[] = testPropNames,
 ): void {

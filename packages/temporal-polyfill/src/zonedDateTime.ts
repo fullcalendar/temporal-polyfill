@@ -71,7 +71,7 @@ import { DayTimeUnit, Unit, UnitName, nanoInHour } from './units'
 import { NumSign, mapProps } from './utils'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
-export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg }
+export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
 
 export type TimeZonePublic = TimeZoneProtocol | string

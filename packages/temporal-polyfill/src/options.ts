@@ -19,7 +19,7 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
-import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
+import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals } from './zonedDateTime'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -266,7 +266,8 @@ interface SmallestUnitOptions {
   smallestUnit?: UnitName | keyof DurationFields
 }
 
-interface LargestUnitOptions {
+// TODO: rename to CalendarDiffOptions?
+export interface LargestUnitOptions {
   largestUnit?: UnitName | keyof DurationFields
 }
 
@@ -311,6 +312,8 @@ const overflowMap = {
   constrain: Overflow.Constrain,
   reject: Overflow.Reject,
 }
+
+export const overflowMapNames = Object.keys(overflowMap) as (keyof typeof overflowMap)[]
 
 const refineOverflow = refineChoiceOption.bind<
   any, [any, any], // bound
@@ -594,7 +597,7 @@ function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | und
         return pluckIsoDateInternals(getInternals(relativeTo))
       }
 
-      return refineMaybeZonedDateTimeBag(relativeTo)
+      return refineMaybeZonedDateTimeBag(relativeTo as unknown as ZonedDateTimeBag)
     }
 
     return parseMaybeZonedDateTime(toString(relativeTo))

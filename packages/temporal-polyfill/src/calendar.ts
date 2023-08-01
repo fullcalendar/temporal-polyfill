@@ -1,4 +1,4 @@
-import { DateGetterFields, dateGetterNames } from './calendarFields'
+import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { queryCalendarPublic } from './calendarOps'
 import { TemporalInstance, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
@@ -10,6 +10,8 @@ import {
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { IsoDateFields } from './isoFields'
 import {
+  LargestUnitOptions,
+  OverflowOptions,
   ensureObjectlike,
   ensureString,
   refineCalendarDiffOptions,
@@ -38,13 +40,13 @@ interface CalendarProtocolMethods {
   daysInYear(dateArg: PlainYearMonth | PlainDateArg): number
   monthsInYear(dateArg: PlainYearMonth | PlainDateArg): number
   inLeapYear(dateArg: PlainYearMonth | PlainDateArg): boolean
-  dateFromFields(fields: any, options: any): PlainDate
-  yearMonthFromFields(fields: any, options: any): PlainYearMonth
-  monthDayFromFields(fields: any, options: any): PlainMonthDay
-  dateAdd(dateArg: PlainDateArg, duration: DurationArg, options: any): PlainDate
-  dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options: any): Duration
+  dateFromFields(fields: DateBagStrict, options: OverflowOptions): PlainDate
+  yearMonthFromFields(fields: YearMonthBagStrict, options: OverflowOptions): PlainYearMonth
+  monthDayFromFields(fields: MonthDayBagStrict, options: OverflowOptions): PlainMonthDay
+  dateAdd(dateArg: PlainDateArg, duration: DurationArg, options: OverflowOptions): PlainDate
+  dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options: LargestUnitOptions): Duration
   fields(fieldNames: Iterable<string>): Iterable<string>
-  mergeFields(fields0: any, fields1: any): any
+  mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
   toString?(): string;
   toJSON?(): string;
 }
@@ -84,14 +86,14 @@ export const calendarProtocolMethods = {
       return impl[propName](isoFields)
     }
   }, dateGetterNames) as {
-    [K in keyof DateGetterFields]: (impl: CalendarImpl, dateArg: any) => DateGetterFields[K]
+    [K in keyof DateGetterFields]: (impl: CalendarImpl, dateArg: DateArg) => DateGetterFields[K]
   },
 
   dateAdd(
     impl: CalendarImpl,
     plainDateArg: PlainDateArg,
     durationArg: DurationArg,
-    options?: any,
+    options?: OverflowOptions,
   ): PlainDate {
     return createPlainDate(
       impl.dateAdd(
@@ -106,7 +108,7 @@ export const calendarProtocolMethods = {
     impl: CalendarImpl,
     plainDateArg0: PlainDateArg,
     plainDateArg1: PlainDateArg,
-    options?: any,
+    options?: LargestUnitOptions,
   ): Duration {
     return createDuration(
       impl.dateUntil(
@@ -119,24 +121,24 @@ export const calendarProtocolMethods = {
 
   dateFromFields(
     impl: CalendarImpl,
-    fields: any,
-    options?: any,
+    fields: DateBagStrict,
+    options?: OverflowOptions,
   ): PlainDate {
     return createPlainDate(refinePlainDateBag(fields, options, impl))
   },
 
   yearMonthFromFields(
     impl: CalendarImpl,
-    fields: any,
-    options?: any,
+    fields: YearMonthBagStrict,
+    options?: OverflowOptions,
   ): PlainYearMonth {
     return createPlainYearMonth(refinePlainYearMonthBag(fields, options, impl))
   },
 
   monthDayFromFields(
     impl: CalendarImpl,
-    fields: any,
-    options?: any,
+    fields: MonthDayBagStrict,
+    options?: OverflowOptions,
   ): PlainMonthDay {
     return createPlainMonthDay(refinePlainMonthDayBag(fields, options, impl))
   },
@@ -146,7 +148,11 @@ export const calendarProtocolMethods = {
     // TODO: kill ensureArray everywhere? use [...] technique?
   },
 
-  mergeFields(impl: CalendarImpl, fields0: any, fields1: any): any {
+  mergeFields(
+    impl: CalendarImpl,
+    fields0: Record<string, unknown>,
+    fields1: Record<string, unknown>
+  ): Record<string, unknown> {
     return impl.mergeFields(
       excludeUndefinedProps(ensureObjectlike(fields0)),
       excludeUndefinedProps(ensureObjectlike(fields1)),

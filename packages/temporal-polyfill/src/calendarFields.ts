@@ -8,12 +8,10 @@ import {
 import { ensureBoolean, ensureInteger, toInteger, toString } from './options'
 import { FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
-export interface EraYearFields {
-  era: string
-  eraYear: number
-}
+// Year/Month/Day (no era/eraYear)
+// -------------------------------------------------------------------------------------------------
 
-export interface AllYearFields extends EraYearFields {
+export interface YearFields {
   year: number
 }
 
@@ -22,9 +20,46 @@ export interface MonthFields {
   month: number
 }
 
-export type YearMonthFields = { year: number } & MonthFields
-export type DateFields = YearMonthFields & { day: number }
-type MonthDayFields = MonthFields & { day: number }
+export interface DayFields {
+  day: number
+}
+
+export type YearMonthFields = YearFields & MonthFields
+export type DateFields = YearMonthFields & DayFields
+export type MonthDayFields = MonthFields & DayFields
+
+// Fields with era/eraYear
+// -------------------------------------------------------------------------------------------------
+
+export interface EraYearFields {
+  era: string
+  eraYear: number
+}
+
+export type YearFieldsIntl = EraYearFields & YearFields
+export type YearMonthFieldsIntl = EraYearFields & YearMonthFields
+export type DateFieldsIntl = EraYearFields & DateFields
+export type MonthDayFieldsIntl = EraYearFields & MonthDayFields
+
+// Simple Bag (all props optional)
+// -------------------------------------------------------------------------------------------------
+
+export type YearMonthBag = Partial<YearMonthFieldsIntl>
+export type DateBag = Partial<DateFieldsIntl>
+export type MonthDayBag = Partial<MonthDayFieldsIntl>
+
+// Strict Bag (with complex expressions)
+// -------------------------------------------------------------------------------------------------
+
+export type EraYearOrYear = EraYearFields | YearFields
+export type MonthCodeOrMonthAndYear = { monthCode: string } | ({ month: number } & EraYearOrYear)
+export type MonthCodeOrMonth = { monthCode: string } | { month: number }
+
+export type YearMonthBagStrict = EraYearOrYear & MonthCodeOrMonth
+export type DateBagStrict = EraYearOrYear & MonthCodeOrMonth & DayFields
+export type MonthDayBagStrict = MonthCodeOrMonthAndYear & DayFields
+
+// -------------------------------------------------------------------------------------------------
 
 export interface TimeFields {
   hour: number
@@ -34,6 +69,9 @@ export interface TimeFields {
   nanosecond: number
   second: number
 }
+
+export type TimeBag = Partial<TimeFields>
+export type DateTimeBag = DateBag & TimeBag // TODO: use for PlainDateTime?
 
 type DateTimeFields = DateFields & TimeFields
 
@@ -154,8 +192,9 @@ export const dateStatRefiners = {
 export const eraYearFieldNames = Object.keys(eraYearFieldRefiners) as
   (keyof EraYearFields)[]
 
-export const allYearFieldNames = [...eraYearFieldNames, 'year'] as
-  (keyof AllYearFields)[]
+// eraYearAndYearFieldNames
+export const intlYearFieldNames = [...eraYearFieldNames, 'year'] as
+  (keyof YearFieldsIntl)[]
 
 export const dateFieldNames = Object.keys(dateFieldRefiners) as
   (keyof DateFields)[]
@@ -199,7 +238,7 @@ export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) as
 export const dateStatNames = Object.keys(dateStatRefiners) as
   (keyof DateStats)[]
 
-export type DateGetterFields = EraYearFields & DateFields & DateStats
+export type DateGetterFields = DateFieldsIntl & DateStats
 
 export const dateGetterRefiners = {
   ...eraYearFieldRefiners,

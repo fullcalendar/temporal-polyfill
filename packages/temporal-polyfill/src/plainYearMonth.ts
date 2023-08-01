@@ -1,6 +1,6 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { YearMonthFields, yearMonthGetters } from './calendarFields'
+import { YearMonthBag, yearMonthGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar } from './calendarOps'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
@@ -22,8 +22,8 @@ import { Unit } from './units'
 import { NumSign } from './utils'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
-export type PlainYearMonthBag = YearMonthFields & { calendar?: CalendarArg }
-export type PlainYearMonthMod = Partial<YearMonthFields>
+export type PlainYearMonthBag = YearMonthBag & { calendar?: CalendarArg }
+export type PlainYearMonthMod = YearMonthBag
 
 export type PlainYearMonth = TemporalInstance<IsoDateInternals>
 export const [

@@ -1,6 +1,6 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { YearMonthFields, monthDayGetters } from './calendarFields'
+import { MonthDayBag, YearFields, monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
@@ -16,8 +16,8 @@ import { refineOverflowOptions } from './options'
 import { PlainDate } from './plainDate'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag | string
-export type PlainMonthDayBag = YearMonthFields & { calendar?: CalendarArg }
-export type PlainMonthDayMod = Partial<YearMonthFields>
+export type PlainMonthDayBag = MonthDayBag & { calendar?: CalendarArg }
+export type PlainMonthDayMod = MonthDayBag
 
 export type PlainMonthDay = TemporalInstance<IsoDateInternals>
 export const [
@@ -84,7 +84,7 @@ export const [
 
     valueOf: neverValueOf,
 
-    toPlainDate(internals: IsoDateInternals, bag: { year: number }): PlainDate {
+    toPlainDate(internals: IsoDateInternals, bag: YearFields): PlainDate {
       return convertPlainMonthDayToDate(this, bag)
     },
 

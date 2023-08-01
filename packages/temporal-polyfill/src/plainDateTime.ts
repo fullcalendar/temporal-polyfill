@@ -1,6 +1,6 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { DateFields, TimeFields, dateTimeGetters } from './calendarFields'
+import { DateBag, TimeBag, dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
 import {
@@ -49,8 +49,8 @@ import { NumSign } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
-export type PlainDateTimeBag = DateFields & Partial<TimeFields> & { calendar?: CalendarArg }
-export type PlainDateTimeMod = Partial<DateFields> & Partial<TimeFields>
+export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
+export type PlainDateTimeMod = DateBag & TimeBag
 
 export type PlainDateTime = TemporalInstance<IsoDateTimeInternals>
 export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = createTemporalClass(
