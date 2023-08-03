@@ -13,6 +13,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import {
   Classlike,
+  Reused,
   createLazyGenerator,
   defineProps,
   excludePropsByName,
@@ -41,13 +42,9 @@ export function hashIntlFormatParts(
 // Stuff
 // -------------------------------------------------------------------------------------------------
 
-// AHHH... problem with resolvedOptions... need to whitelist original
-// PERFORMANCE: avoid using our DateTimeFormat for toLocaleString, because creates two objects
-// TODOOOOO: this needs to be rewritten. who cares about `any` for now
+export const OrigDateTimeFormat = Intl.DateTimeFormat
 
-export const IntlDateTimeFormat = Intl.DateTimeFormat
-
-export class DateTimeFormat extends IntlDateTimeFormat {
+export class DateTimeFormat extends OrigDateTimeFormat {
   format(arg?: Formattable): string {
     const [formattable, format] = resolveSingleFormattable(this as Intl.DateTimeFormat, arg)
     return format
@@ -66,7 +63,7 @@ export class DateTimeFormat extends IntlDateTimeFormat {
 }
 
 ['formatRange', 'formatRangeToParts'].forEach((methodName) => {
-  const origMethod = (IntlDateTimeFormat as Classlike).prototype[methodName]
+  const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
 
   if (origMethod) {
     defineProps(DateTimeFormat.prototype, {
@@ -85,7 +82,7 @@ export class DateTimeFormat extends IntlDateTimeFormat {
 // DateTimeFormat Helpers
 // -------------------------------------------------------------------------------------------------
 
-const getGetSpecificFormat = createLazyGenerator((dtf: Intl.DateTimeFormat) => {
+const getSpecificFormatStore = createLazyGenerator((origFormat: Intl.DateTimeFormat) => {
   return createLazyGenerator(createSpecificFormat)
 }, WeakMap)
 
@@ -93,28 +90,28 @@ function createSpecificFormat(
   transformOptions: OptionsTransformer,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): Intl.DateTimeFormat {
-  return new IntlDateTimeFormat(resolvedOptions.locale, transformOptions(resolvedOptions))
+  return new OrigDateTimeFormat(resolvedOptions.locale, transformOptions(resolvedOptions))
 }
 
 function resolveSingleFormattable(
-  format: Intl.DateTimeFormat,
+  origFormat: Intl.DateTimeFormat,
   arg: Formattable | undefined,
 ): [
   OrigFormattable | undefined,
   Intl.DateTimeFormat | undefined
 ] {
   if (arg === undefined) {
-    return [arg, format]
+    return [arg, origFormat]
   }
 
-  const getSpecificFormat = getGetSpecificFormat(format)
-  const resolvedOptions = format.resolvedOptions()
+  const specificFormatStore = getSpecificFormatStore(origFormat)
+  const resolvedOptions = origFormat.resolvedOptions()
 
-  return resolveFormattable(arg, getSpecificFormat, resolvedOptions)
+  return resolveFormattable(arg, specificFormatStore, resolvedOptions)
 }
 
 function resolveRangeFormattables(
-  format: Intl.DateTimeFormat,
+  origFormat: Intl.DateTimeFormat,
   arg0: Formattable,
   arg1: Formattable,
 ): [
@@ -122,21 +119,21 @@ function resolveRangeFormattables(
   OrigFormattable,
   Intl.DateTimeFormat,
 ] {
-  const getSpecificFormat = getGetSpecificFormat(format)
-  const resolvedOptions = format.resolvedOptions()
+  const specificFormatStore = getSpecificFormatStore(origFormat)
+  const resolvedOptions = origFormat.resolvedOptions()
 
-  const [formattable0, format0] = resolveFormattable(arg0, getSpecificFormat, resolvedOptions)
-  const [formattable1, format1] = resolveFormattable(arg1, getSpecificFormat, resolvedOptions)
+  const [formattable0, format0] = resolveFormattable(arg0, specificFormatStore, resolvedOptions)
+  const [formattable1, format1] = resolveFormattable(arg1, specificFormatStore, resolvedOptions)
 
   if (format0 && format1) {
     if (format0 !== format1) {
       throw new TypeError('Accepts two Temporal values of same type')
     }
-    format = format0
+    origFormat = format0
   }
 
   // always returns a format
-  return [formattable0, formattable1, format]
+  return [formattable0, formattable1, origFormat]
 }
 
 // Resolving Formattable Objects (and Format)
@@ -165,7 +162,7 @@ export function resolveZonedFormattable(
     options.timeZoneName = 'short'
   }
 
-  const format = new IntlDateTimeFormat(locales, options)
+  const format = new OrigDateTimeFormat(locales, options)
 
   checkCalendarsCompatible(
     internals.calendar.id,
@@ -181,9 +178,14 @@ export function resolveZonedFormattable(
 type OrigFormattable = number | Date
 export type Formattable = Instant | PlainDate | PlainDateTime | ZonedDateTime | PlainYearMonth | PlainMonthDay | PlainTime | OrigFormattable
 
+type SpecificFormatStore = (
+  optionsTransformer: OptionsTransformer, // a proxy for the Temporal type
+  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
+) => Intl.DateTimeFormat
+
 function resolveFormattable(
   arg: Formattable,
-  getSpecificFormat: (optionsTransformer: OptionsTransformer, resolvedOptions: Intl.ResolvedDateTimeFormatOptions) => Intl.DateTimeFormat,
+  specificFormatStore: SpecificFormatStore,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): [
   OrigFormattable,
@@ -198,7 +200,7 @@ function resolveFormattable(
 
     return [
       epochNanoToMilli(epochNano),
-      getSpecificFormat(transformOptions, resolvedOptions),
+      specificFormatStore(transformOptions, resolvedOptions),
     ]
   }
 
@@ -259,21 +261,22 @@ const optionTransformers: Record<string, OptionsTransformer> = {
   },
 }
 
-// TODO: use Intl.DateTimeFormatOptions?
-type OptionsTransformer = (options: any) => any
+type OptionsTransformer = (options: Intl.ResolvedDateTimeFormatOptions) => Intl.DateTimeFormatOptions
 
 function createTransformer(
-  optionNames: string[],
-  basicNames: string[],
-  exclusionNames: string[],
+  validNames: string[],
+  implicitNames: string[],
+  excludedNames: string[],
 ): OptionsTransformer {
-  const defaults = mapPropNamesToConstant(basicNames, 'numeric')
-  const exclusionNamesSet = new Set(exclusionNames)
+  const defaults = mapPropNamesToConstant(implicitNames, 'numeric')
+  const excludedNameSet = new Set(excludedNames)
 
-  return (options: any) => {
-    options = excludePropsByName(options, exclusionNamesSet)
+  return (
+    options: Intl.ResolvedDateTimeFormatOptions | Reused
+  ) => {
+    options = excludePropsByName(options, excludedNameSet)
 
-    if (!hasAnyPropsByName(options, optionNames)) {
+    if (!hasAnyPropsByName(options, validNames)) {
       Object.assign(options, defaults)
     }
 
@@ -335,24 +338,20 @@ function dateInternalsToEpochNano(
 // Calendar Check
 // -------------------------------------------------------------------------------------------------
 
-// TODO: simply check for absense of 'Date' in name?
 const strictCalendarCheck: Record<string, boolean> = {
   PlainYearMonth: true,
   PlainMonthDay: true,
 }
 
 function checkCalendarsCompatible(
-  calendarId: string,
+  internalCalendarId: string,
   resolveCalendarId: string,
   strict?: boolean,
 ): void {
-  if (!(
-    calendarId === resolveCalendarId ||
-    (!strict && (
-      calendarId === isoCalendarId ||
-      resolveCalendarId === isoCalendarId
-    ))
-  )) {
+  if (
+    (!strict || internalCalendarId !== isoCalendarId) &&
+    (internalCalendarId !== resolveCalendarId)
+  ) {
     throw new RangeError('Mismatching calendars')
   }
 }

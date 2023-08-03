@@ -3,7 +3,7 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
 import { Instant, createInstant } from './instant'
-import { IntlDateTimeFormat } from './intlFormat'
+import { OrigDateTimeFormat } from './intlFormat'
 import { IsoDateTimeInternals, pluckIsoDateInternals, pluckIsoDateTimeInternals, pluckIsoTimeFields } from './isoFields'
 import { LargeInt, numberToLargeInt } from './largeInt'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -106,5 +106,5 @@ function getCurrentTimeZoneId(): string {
 }
 
 function queryCurrentTimeZoneId(): string {
-  return new IntlDateTimeFormat().resolvedOptions().timeZone
+  return new OrigDateTimeFormat().resolvedOptions().timeZone
 }

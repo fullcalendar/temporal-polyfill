@@ -29,7 +29,7 @@ import {
   diffDatesExact,
   diffEpochMilliByDay,
 } from './diff'
-import { IntlDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
+import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateFields, IsoDateInternals, isoTimeFieldDefaults } from './isoFields'
 import {
   computeIsoDayOfWeek,
@@ -723,7 +723,7 @@ export function parseIntlYear(
 }
 
 function buildIntlFormat(calendarId: string): Intl.DateTimeFormat {
-  return new IntlDateTimeFormat(standardLocaleId, {
+  return new OrigDateTimeFormat(standardLocaleId, {
     calendar: calendarId,
     timeZone: 'UTC',
     era: 'short', // 'narrow' is too terse for japanese months

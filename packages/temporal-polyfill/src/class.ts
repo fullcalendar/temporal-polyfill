@@ -254,10 +254,6 @@ export function toLocaleStringMethod(
   locales: string | string[],
   options: Intl.DateTimeFormatOptions,
 ) {
-  /*
-  Will create two internal Intl.DateTimeFormats :(
-  Create just one instead
-  */
   const format = new DateTimeFormat(locales, options)
   return format.format(this)
 }
