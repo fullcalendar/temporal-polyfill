@@ -13,7 +13,7 @@ import { diffZonedEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationFields, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { Instant, createInstant } from './instant'
-import { resolveZonedFormattable } from './intlFormat'
+import { LocalesArg, resolveZonedFormattable } from './intlFormat'
 import {
   CalendarPublic,
   IsoDateTimePublic,
@@ -356,7 +356,7 @@ export const [
 
     toLocaleString(
       internals: ZonedInternals,
-      locales?: string | string[],
+      locales?: LocalesArg,
       options?: Intl.DateTimeFormatOptions,
     ): string {
       const [epochMilli, format] = resolveZonedFormattable(internals, locales, options)

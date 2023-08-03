@@ -1,4 +1,4 @@
-import { DateTimeFormat, Formattable } from './intlFormat'
+import { DateTimeFormat, Formattable, LocalesArg } from './intlFormat'
 import { ensureInstanceOf, ensureString, toString } from './options'
 import {
   Callable,
@@ -251,7 +251,7 @@ export function createTemporalClass<
 export function toLocaleStringMethod(
   this: Formattable,
   internals: unknown,
-  locales: string | string[],
+  locales: LocalesArg,
   options: Intl.DateTimeFormatOptions,
 ) {
   const format = new DateTimeFormat(locales, options)

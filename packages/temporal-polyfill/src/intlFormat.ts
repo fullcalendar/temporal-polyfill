@@ -23,6 +23,8 @@ import {
 } from './utils'
 import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
+export type LocalesArg = string | string[]
+
 export const standardLocaleId = 'en-GB' // gives 24-hour clock
 
 export function hashIntlFormatParts(
@@ -148,9 +150,12 @@ function resolveRangeFormattables(
 // Resolving Formattable Objects (and Format)
 // -------------------------------------------------------------------------------------------------
 
+/*
+ZonedDateTime call this directly. Doesn't leverage our DateTimeFormat
+*/
 export function resolveZonedFormattable(
   internals: ZonedInternals,
-  locales?: string | string[],
+  locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions, // NOT resolved yet (does not include locale)
 ): [
   number,
@@ -167,25 +172,34 @@ export function resolveZonedFormattable(
     options.timeZoneName === undefined &&
     !hasAnyPropsByName(options as Record<string, string>, dateTimeOptionNames)
   ) {
-    // The rest of the defaults will be filled in by formatting the Instant
     options.timeZoneName = 'short'
   }
 
-  const format = new OrigDateTimeFormat(locales, options)
+  const origFormat = new OrigDateTimeFormat(locales, options)
+  const resolvedOptions = origFormat.resolvedOptions()
+  const transformedOptions = instantOptionsTransformer(resolvedOptions)
+  const specificFormat = new OrigDateTimeFormat(resolvedOptions.locale, transformedOptions)
+  const epochMilli = epochNanoToMilli(internals.epochNanoseconds)
 
   checkCalendarsCompatible(
     internals.calendar.id,
-    format.resolvedOptions().calendar,
+    resolvedOptions.calendar,
   )
 
-  return [
-    epochNanoToMilli(internals.epochNanoseconds),
-    format,
-  ]
+  return [epochMilli, specificFormat]
 }
 
 type OrigFormattable = number | Date
-export type Formattable = Instant | PlainDate | PlainDateTime | ZonedDateTime | PlainYearMonth | PlainMonthDay | PlainTime | OrigFormattable
+
+export type Formattable =
+  | Instant
+  | PlainDate
+  | PlainDateTime
+  | ZonedDateTime
+  | PlainYearMonth
+  | PlainMonthDay
+  | PlainTime
+  | OrigFormattable
 
 type SpecificFormatStore = (
   optionsTransformer: OptionsTransformer, // a proxy for the Temporal type
@@ -257,13 +271,15 @@ const monthDayExclusions = [
   ...timeOptionNames,
 ]
 
+const instantOptionsTransformer = createTransformer(dateTimeOptionNames, dateTimeBasicNames, [])
+
 const optionTransformers: Record<string, OptionsTransformer> = {
   PlainTime: createTransformer(timeOptionNames, timeBasicNames, timeExclusions),
   PlainDateTime: createTransformer(dateTimeOptionNames, dateTimeBasicNames, dateTimeExclusions),
   PlainDate: createTransformer(dateOptionNames, dateBasicNames, dateExclusions),
   PlainYearMonth: createTransformer(yearMonthBasicNames, yearMonthBasicNames, yearMonthExclusions),
   PlainMonthDay: createTransformer(monthDayBasicNames, monthDayBasicNames, monthDayExclusions),
-  Instant: createTransformer(dateTimeOptionNames, dateTimeBasicNames, []),
+  Instant: instantOptionsTransformer,
   ZonedDateTime: () => {
     throw new TypeError('Cant do on ZonedDateTime')
   },
