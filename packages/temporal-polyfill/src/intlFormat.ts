@@ -46,7 +46,7 @@ export const OrigDateTimeFormat = Intl.DateTimeFormat
 
 export class DateTimeFormat extends OrigDateTimeFormat {
   format(arg?: Formattable): string {
-    const [formattable, format] = resolveSingleFormattable(this as Intl.DateTimeFormat, arg)
+    const [formattable, format] = resolveSingleFormattable(this, arg)
     return format
       ? format.format(formattable)
       : super.format(formattable)
@@ -55,11 +55,16 @@ export class DateTimeFormat extends OrigDateTimeFormat {
   }
 
   formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
-    const [formattable, format] = resolveSingleFormattable(this as Intl.DateTimeFormat, arg)
+    const [formattable, format] = resolveSingleFormattable(this, arg)
     return format
       ? format.formatToParts(formattable)
       : super.formatToParts(formattable)
   }
+}
+
+export interface DateTimeFormat {
+  formatRange(arg0: Formattable, arg1: Formattable): string
+  formatRangeToParts(arg0: Formattable, arg1: Formattable): Intl.DateTimeFormatPart[]
 }
 
 ['formatRange', 'formatRangeToParts'].forEach((methodName) => {
@@ -82,6 +87,9 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 // DateTimeFormat Helpers
 // -------------------------------------------------------------------------------------------------
 
+/*
+Returns a unique store for each original DateTimeFormat
+*/
 const getSpecificFormatStore = createLazyGenerator((origFormat: Intl.DateTimeFormat) => {
   return createLazyGenerator(createSpecificFormat)
 }, WeakMap)
@@ -126,13 +134,14 @@ function resolveRangeFormattables(
   const [formattable1, format1] = resolveFormattable(arg1, specificFormatStore, resolvedOptions)
 
   if (format0 && format1) {
+    // the returned DateTimeFormats are idempotent per Temporal type,
+    // so testing inequality is a way to test mismatching Temporal types.
     if (format0 !== format1) {
       throw new TypeError('Accepts two Temporal values of same type')
     }
-    origFormat = format0
+    origFormat = format0 // reused
   }
 
-  // always returns a format
   return [formattable0, formattable1, origFormat]
 }
 
@@ -197,15 +206,14 @@ function resolveFormattable(
   if (transformOptions) {
     const internalsToEpochNano = epochNanoConverters[temporalName] || dateInternalsToEpochNano
     const epochNano = internalsToEpochNano(getInternals(arg), resolvedOptions, temporalName)
+    const epochMilli = epochNanoToMilli(epochNano)
+    const format = specificFormatStore(transformOptions, resolvedOptions)
 
-    return [
-      epochNanoToMilli(epochNano),
-      specificFormatStore(transformOptions, resolvedOptions),
-    ]
+    return [epochMilli, format]
   }
 
-  return [arg as number] as
-    unknown as [number, undefined]
+  return [arg as number] as unknown as
+    [number, undefined]
 }
 
 // Format Option Massagers
