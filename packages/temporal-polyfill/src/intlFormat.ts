@@ -49,22 +49,16 @@ export function toLocaleStringMethod(
   this: TemporalFormattable,
   internals: unknown,
   locales: LocalesArg,
-  options: Intl.DateTimeFormatOptions,
+  options: Intl.DateTimeFormatOptions = {},
 ) {
   const temporalName = getTemporalName(this)!
-  const origFormat = new OrigDateTimeFormat(locales, options)
 
-  // copy options
-  const resolvedOptions = origFormat.resolvedOptions()
-  const { locale } = resolvedOptions
-  options = pluckProps(
-    Object.keys(options) as OptionNames,
-    resolvedOptions as Intl.DateTimeFormatOptions
-  )
+  // Copy options so accessing doesn't cause side-effects
+  options = { ...options }
 
   options = optionsTransformers[temporalName](options, internals)
-  const subformat = new OrigDateTimeFormat(locale, options)
-  const epochMilli = toEpochMilli(temporalName, internals, resolvedOptions)
+  const subformat = new OrigDateTimeFormat(locales, options)
+  const epochMilli = toEpochMilli(temporalName, internals, subformat.resolvedOptions())
 
   return subformat.format(epochMilli)
 }
@@ -87,7 +81,9 @@ export class DateTimeFormat extends OrigDateTimeFormat {
   constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
     super(locales, options)
 
-    // copy options
+    // Copy options so accessing doesn't cause side-effects
+    // Must store recursively flattened options because given `options` could mutate in future
+    // Algorithm: whitelist against resolved options
     const resolvedOptions = this.resolvedOptions()
     const { locale } = resolvedOptions
     options = pluckProps(
@@ -278,7 +274,7 @@ const monthDayExclusions: OptionNames = [
 
 type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
-  subjectInternals?: any, // `this` object for toLocaleString
+  subjectInternals?: any, // `this` object during toLocaleString
 ) => Intl.DateTimeFormatOptions
 
 const zonedOptionsTransformer = createTransformer(zonedValidNames, zonedFallbacks, [])
