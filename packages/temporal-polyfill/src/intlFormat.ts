@@ -2,7 +2,12 @@ import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
 import { getInternals, getTemporalName } from './class'
 import { Instant } from './instant'
-import { IsoDateInternals, IsoDateTimeInternals, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import {
+  IsoDateInternals,
+  IsoDateTimeInternals,
+  IsoTimeFields,
+  isoTimeFieldDefaults,
+} from './isoFields'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { LargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
@@ -12,7 +17,15 @@ import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor } from './timeZoneOps'
-import { Classlike, createLazyGenerator, defineProps, excludePropsByName, hasAnyPropsByName, identityFunc, pluckProps } from './utils'
+import {
+  Classlike,
+  createLazyGenerator,
+  defineProps,
+  excludePropsByName,
+  hasAnyPropsByName,
+  identityFunc,
+  pluckProps,
+} from './utils'
 import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
 export type LocalesArg = string | string[]
@@ -50,10 +63,10 @@ export function toLocaleStringMethod(
   )
 
   options = optionsTransformers[temporalName](options, internals)
-  const format = new OrigDateTimeFormat(locale, options)
+  const subformat = new OrigDateTimeFormat(locale, options)
   const epochMilli = toEpochMilli(temporalName, internals, resolvedOptions)
 
-  return format.format(epochMilli)
+  return subformat.format(epochMilli)
 }
 
 // Temporal-aware Intl.DateTimeFormat
@@ -143,7 +156,7 @@ function resolveSingleFormattable(
   arg: Formattable | undefined,
 ): [
   OrigFormattable | undefined,
-  Intl.DateTimeFormat | undefined
+  Intl.DateTimeFormat | undefined // undefined if should use orig method
 ] {
   if (arg !== undefined) {
     return resolveFormattable(arg, ...formatInternalsMap.get(format)!)
@@ -161,19 +174,19 @@ function resolveRangeFormattables(
 ): [
   OrigFormattable,
   OrigFormattable,
-  Intl.DateTimeFormat,
+  Intl.DateTimeFormat, // always defined
 ] {
   const formatInternals = formatInternalsMap.get(format)!
   const [formattable0, format0] = resolveFormattable(arg0, ...formatInternals)
   const [formattable1, format1] = resolveFormattable(arg1, ...formatInternals)
 
-  if (format0 && format1) {
+  if (format0 || format1) {
     // the returned DateTimeFormats are idempotent per Temporal type,
     // so testing inequality is a way to test mismatching Temporal types.
     if (format0 !== format1) {
       throw new TypeError('Accepts two Temporal values of same type')
     }
-    format = format0
+    format = format0! // guaranteed to be truthy and equal
   }
 
   return [formattable0, formattable1, format]
@@ -185,7 +198,7 @@ function resolveFormattable(
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): [
   OrigFormattable,
-  Intl.DateTimeFormat | undefined
+  Intl.DateTimeFormat | undefined // undefined if should use orig method
 ] {
   const temporalName = getTemporalName(arg)
   const format = temporalName && subformatFactory(temporalName)
@@ -200,44 +213,68 @@ function resolveFormattable(
     [OrigFormattable, undefined]
 }
 
-// Format Option Massagers
+// Option Transformers
 // -------------------------------------------------------------------------------------------------
 
 type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
 
 const numericStr = 'numeric'
+const timeZoneNameStrs: OptionNames = ['timeZoneName']
+
+// Fallbacks
+// ---------
+
 const monthDayFallbacks: Intl.DateTimeFormatOptions = { month: numericStr, day: numericStr }
 const yearMonthFallbacks: Intl.DateTimeFormatOptions = { year: numericStr, month: numericStr }
 const dateFallbacks: Intl.DateTimeFormatOptions = { ...yearMonthFallbacks, day: numericStr }
-const timeFallbacks: Intl.DateTimeFormatOptions = { hour: numericStr, minute: numericStr, second: numericStr }
+const timeFallbacks: Intl.DateTimeFormatOptions = {
+  hour: numericStr,
+  minute: numericStr,
+  second: numericStr,
+}
 const dateTimeFallbacks: Intl.DateTimeFormatOptions = { ...dateFallbacks, ...timeFallbacks }
 const zonedFallbacks: Intl.DateTimeFormatOptions = { ...dateTimeFallbacks, timeZoneName: 'short' }
 
-const dateTimeExclusions: OptionNames = ['timeZoneName']
+// Valid Names
+// -----------
 
 const monthDayValidNames = Object.keys(monthDayFallbacks) as OptionNames
 const yearMonthValidNames = Object.keys(yearMonthFallbacks) as OptionNames
-const dateValidNames: OptionNames = [...(Object.keys(dateFallbacks) as OptionNames), 'weekday', 'dateStyle']
-const timeValidNames: OptionNames = [...(Object.keys(timeFallbacks) as OptionNames), 'dayPeriod', 'timeStyle']
+const dateValidNames: OptionNames = [
+  ...(Object.keys(dateFallbacks) as OptionNames),
+  'weekday',
+  'dateStyle',
+]
+const timeValidNames: OptionNames = [
+  ...(Object.keys(timeFallbacks) as OptionNames),
+  'dayPeriod',
+  'timeStyle',
+]
 const dateTimeValidNames: OptionNames = [...dateValidNames, ...timeValidNames]
-const zonedValidNames: OptionNames = [...dateTimeValidNames, ...dateTimeExclusions]
+const zonedValidNames: OptionNames = [...dateTimeValidNames, ...timeZoneNameStrs]
 
-const dateExclusions: OptionNames = [...dateTimeExclusions, ...timeValidNames]
-const timeExclusions: OptionNames = [...dateTimeExclusions, ...dateValidNames]
+// Exclusions
+// ----------
+
+const dateExclusions: OptionNames = [...timeZoneNameStrs, ...timeValidNames]
+const timeExclusions: OptionNames = [...timeZoneNameStrs, ...dateValidNames]
 const yearMonthExclusions: OptionNames = [
-  ...dateTimeExclusions,
+  ...timeZoneNameStrs,
   'day',
   'weekday',
   'dateStyle',
   ...timeValidNames,
 ]
 const monthDayExclusions: OptionNames = [
-  ...dateTimeExclusions,
+  ...timeZoneNameStrs,
   'year',
   'weekday',
   'dateStyle',
   ...timeValidNames,
 ]
+
+// Options Transformer Config
+// --------------------------
 
 type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
@@ -250,11 +287,11 @@ const optionsTransformers: Record<string, OptionsTransformer> = {
   PlainMonthDay: createTransformer(monthDayValidNames, monthDayFallbacks, monthDayExclusions),
   PlainYearMonth: createTransformer(yearMonthValidNames, yearMonthFallbacks, yearMonthExclusions),
   PlainDate: createTransformer(dateValidNames, dateFallbacks, dateExclusions),
-  PlainDateTime: createTransformer(dateTimeValidNames, dateTimeFallbacks, dateTimeExclusions),
+  PlainDateTime: createTransformer(dateTimeValidNames, dateTimeFallbacks, timeZoneNameStrs),
   PlainTime: createTransformer(timeValidNames, timeFallbacks, timeExclusions),
   Instant: createTransformer(dateTimeValidNames, dateTimeFallbacks, []),
 
-  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals: ZonedInternals) {
+  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: ZonedInternals) {
     if (!subjectInternals) {
       throw new TypeError('Cant do on ZonedDateTime')
     }
@@ -287,16 +324,16 @@ function createTransformer(
 // Epoch Conversions
 // -------------------------------------------------------------------------------------------------
 
-type MaybeHasCalendar = { calendar?: CalendarOps }
+type MaybeWithCalendar = { calendar?: CalendarOps }
 
 function toEpochMilli(
   temporalName: string,
-  internals: unknown | MaybeHasCalendar,
+  internals: unknown | MaybeWithCalendar,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ) {
-  if ((internals as MaybeHasCalendar).calendar) {
+  if ((internals as MaybeWithCalendar).calendar) {
     checkCalendarsCompatible(
-      (internals as MaybeHasCalendar).calendar!.id,
+      (internals as MaybeWithCalendar).calendar!.id,
       resolvedOptions.calendar,
       strictCalendarCheck[temporalName],
     )
