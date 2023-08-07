@@ -289,10 +289,10 @@ const optionsTransformers: Record<string, OptionsTransformer> = {
 
   ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: ZonedInternals) {
     if (!subjectInternals) {
-      throw new TypeError('Cant do on ZonedDateTime')
+      throw new TypeError('DateTimeFormat does not accept ZonedDateTime')
     }
     if (options.timeZone !== undefined) {
-      throw new RangeError('Cannot specify timeZone')
+      throw new RangeError('Cannot specify timeZone') // for ZonedDateTime::toLocaleString
     }
     options.timeZone = subjectInternals.timeZone.id
     return zonedOptionsTransformer(options)
@@ -329,9 +329,9 @@ function toEpochMilli(
 ) {
   if ((internals as MaybeWithCalendar).calendar) {
     checkCalendarsCompatible(
+      temporalName,
       (internals as MaybeWithCalendar).calendar!.id,
       resolvedOptions.calendar,
-      strictCalendarCheck[temporalName],
     )
   }
 
@@ -390,12 +390,12 @@ const strictCalendarCheck: Record<string, boolean> = {
 }
 
 function checkCalendarsCompatible(
+  temporalName: string,
   internalCalendarId: string,
   resolveCalendarId: string,
-  strict?: boolean,
 ): void {
   if (
-    (!strict || internalCalendarId !== isoCalendarId) &&
+    (!strictCalendarCheck[temporalName] || internalCalendarId !== isoCalendarId) &&
     (internalCalendarId !== resolveCalendarId)
   ) {
     throw new RangeError('Mismatching calendars')
