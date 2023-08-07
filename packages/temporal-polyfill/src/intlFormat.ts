@@ -9,7 +9,8 @@ import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { queryTimeZoneImpl } from './timeZoneImpl'
+import { getSingleInstantFor } from './timeZoneOps'
 import { Classlike, createLazyGenerator, defineProps, excludePropsByName, hasAnyPropsByName, identityFunc } from './utils'
 import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
@@ -302,7 +303,7 @@ function timeFieldsToEpochNano(
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): LargeInt {
   return getSingleInstantFor(
-    queryTimeZoneOps(resolvedOptions.timeZone),
+    queryTimeZoneImpl(resolvedOptions.timeZone),
     {
       isoYear: isoEpochOriginYear,
       isoMonth: 1,
@@ -324,7 +325,7 @@ function dateInternalsToEpochNano(
   )
 
   return getSingleInstantFor(
-    queryTimeZoneOps(resolvedOptions.timeZone),
+    queryTimeZoneImpl(resolvedOptions.timeZone),
     {
       ...isoTimeFieldDefaults,
       isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day
