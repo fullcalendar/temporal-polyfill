@@ -1,5 +1,5 @@
 import { TimeBag, timeGetters } from './calendarFields'
-import { TemporalInstance, createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import {
   createZonedDateTimeConverter,
   mergePlainTimeBag,
@@ -10,6 +10,7 @@ import { Duration, DurationArg, createDuration, toDurationInternals } from './du
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoTimeFields, refineIsoTimeInternals } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'

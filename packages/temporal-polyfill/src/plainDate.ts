@@ -6,7 +6,7 @@ import {
   getPublicCalendar,
   queryCalendarOps,
 } from './calendarOps'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -25,6 +25,7 @@ import {
   pluckIsoDateInternals,
 } from './isoFields'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainDate } from './isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'

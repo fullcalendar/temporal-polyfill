@@ -2,7 +2,7 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { YearMonthBag, yearMonthGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar } from './calendarOps'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertPlainYearMonthToDate,
   mergePlainYearMonthBag,
@@ -13,6 +13,7 @@ import { Duration, DurationArg, createDuration, toDurationInternals } from './du
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { IsoDateFields, IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
 import { parsePlainYearMonth } from './isoParse'
 import { moveDateByDays } from './move'

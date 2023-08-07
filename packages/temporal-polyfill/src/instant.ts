@@ -1,10 +1,11 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOps'
-import { TemporalInstance, createTemporalClass, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import {
   epochGetters,
   epochMicroToNano,

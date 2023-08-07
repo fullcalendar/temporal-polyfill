@@ -248,16 +248,6 @@ export function createTemporalClass<
 // Utils for Specific Classes
 // -------------------------------------------------------------------------------------------------
 
-export function toLocaleStringMethod(
-  this: Formattable,
-  internals: unknown,
-  locales: LocalesArg,
-  options: Intl.DateTimeFormatOptions,
-) {
-  const format = new DateTimeFormat(locales, options)
-  return format.format(this)
-}
-
 export function neverValueOf() {
   throw new TypeError('Cannot convert object using valueOf')
 }

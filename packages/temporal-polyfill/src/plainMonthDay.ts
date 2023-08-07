@@ -2,7 +2,7 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarOps'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
@@ -10,6 +10,7 @@ import {
 } from './convert'
 import { IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'
 import { parsePlainMonthDay } from './isoParse'
 import { refineOverflowOptions } from './options'

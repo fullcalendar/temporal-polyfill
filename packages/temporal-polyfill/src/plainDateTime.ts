@@ -2,7 +2,7 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, TimeBag, dateTimeGetters } from './calendarFields'
 import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf, toLocaleStringMethod } from './class'
+import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -22,6 +22,7 @@ import {
   pluckIsoTimeFields,
 } from './isoFields'
 import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateTimeFields, refineIsoDateTimeInternals } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'

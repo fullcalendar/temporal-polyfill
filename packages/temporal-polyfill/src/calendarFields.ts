@@ -74,12 +74,6 @@ export type TimeBag = Partial<TimeFields>
 export type DateTimeBag = DateBag & TimeBag // TODO: use for PlainDateTime?
 type DateTimeFields = DateFields & TimeFields
 
-export interface DateBasics {
-  year: number
-  month: number
-  day: number
-}
-
 export interface YearMonthBasics {
   year: number
   month: number
@@ -215,9 +209,6 @@ export const dateTimeFieldNames = Object.keys(dateTimeFieldRefiners).sort() as
 
 export const timeFieldNames = Object.keys(timeFieldRefiners) as
   (keyof TimeFields)[]
-
-export const dateBasicNames = ['day', 'month', 'year'] as
-  (keyof DateBasics)[]
 
 // monthCode/year
 export const yearMonthBasicNames = yearMonthFieldNames.slice(1) as
