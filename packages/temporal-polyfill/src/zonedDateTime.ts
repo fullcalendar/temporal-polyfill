@@ -13,7 +13,7 @@ import { diffZonedEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationFields, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { Instant, createInstant } from './instant'
-import { LocalesArg, zonedDateTimeToLocaleString } from './intlFormat'
+import { toLocaleStringMethod } from './intlFormat'
 import {
   CalendarPublic,
   IsoDateTimePublic,
@@ -354,7 +354,7 @@ export const [
         formatCalendar(calendar, calendarDisplayI)
     },
 
-    toLocaleString: zonedDateTimeToLocaleString,
+    toLocaleString: toLocaleStringMethod,
 
     valueOf: neverValueOf,
 

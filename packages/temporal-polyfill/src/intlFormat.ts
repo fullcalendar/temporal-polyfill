@@ -1,4 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
+import { CalendarOps } from './calendarOps'
 import { getInternals, getTemporalName } from './class'
 import { Instant } from './instant'
 import { IsoDateInternals, IsoDateTimeInternals, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
@@ -11,14 +12,13 @@ import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor } from './timeZoneOps'
-import { Classlike, createLazyGenerator, defineProps, excludePropsByName, hasAnyPropsByName, identityFunc } from './utils'
+import { Classlike, createLazyGenerator, defineProps, excludePropsByName, hasAnyPropsByName, identityFunc, pluckProps } from './utils'
 import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
 
 export type LocalesArg = string | string[]
 
 type OrigFormattable = number | Date
-
-export type Formattable =
+type TemporalFormattable =
   | Instant
   | PlainDate
   | PlainDateTime
@@ -26,7 +26,35 @@ export type Formattable =
   | PlainYearMonth
   | PlainMonthDay
   | PlainTime
-  | OrigFormattable
+
+export type Formattable = TemporalFormattable | OrigFormattable
+
+// toLocaleString
+// -------------------------------------------------------------------------------------------------
+
+export function toLocaleStringMethod(
+  this: TemporalFormattable,
+  internals: unknown,
+  locales: LocalesArg,
+  options: Intl.DateTimeFormatOptions,
+) {
+  const temporalName = getTemporalName(this)!
+  const origFormat = new OrigDateTimeFormat(locales, options)
+
+  // copy options
+  const resolvedOptions = origFormat.resolvedOptions()
+  const { locale } = resolvedOptions
+  options = pluckProps(
+    Object.keys(options) as OptionNames,
+    resolvedOptions as Intl.DateTimeFormatOptions
+  )
+
+  options = optionsTransformers[temporalName](options, internals)
+  const format = new OrigDateTimeFormat(locale, options)
+  const epochMilli = toEpochMilli(temporalName, internals, resolvedOptions)
+
+  return format.format(epochMilli)
+}
 
 // Temporal-aware Intl.DateTimeFormat
 // -------------------------------------------------------------------------------------------------
@@ -49,7 +77,10 @@ export class DateTimeFormat extends OrigDateTimeFormat {
     // copy options
     const resolvedOptions = this.resolvedOptions()
     const { locale } = resolvedOptions
-    options = whitelistOptions(resolvedOptions, options)
+    options = pluckProps(
+      Object.keys(options) as OptionNames,
+      resolvedOptions as Intl.DateTimeFormatOptions
+    )
 
     const subformatFactory = createLazyGenerator((temporalName: string) => {
       if (optionsTransformers[temporalName]) {
@@ -65,6 +96,7 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
   format(arg?: Formattable): string {
     const [formattable, format] = resolveSingleFormattable(this, arg)
+
     return format
       ? format.format(formattable)
       : super.format(formattable)
@@ -74,6 +106,7 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
   formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
     const [formattable, format] = resolveSingleFormattable(this, arg)
+
     return format
       ? format.formatToParts(formattable)
       : super.formatToParts(formattable)
@@ -102,47 +135,7 @@ export interface DateTimeFormat {
   }
 })
 
-// toLocaleString
-// -------------------------------------------------------------------------------------------------
-
-export function toLocaleStringMethod(
-  this: Formattable,
-  internals: unknown,
-  locales: LocalesArg,
-  options: Intl.DateTimeFormatOptions,
-) {
-  const format = new DateTimeFormat(locales, options)
-  return format.format(this)
-}
-
-export function zonedDateTimeToLocaleString(
-  internals: ZonedInternals,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions, // reused
-): string {
-  const origFormat = new OrigDateTimeFormat(locales, options)
-
-  // copy options
-  const resolvedOptions = origFormat.resolvedOptions()
-  const { locale } = resolvedOptions
-  options = whitelistOptions(resolvedOptions, options!)
-
-  if (options!.timeZone !== undefined) {
-    throw new RangeError('Cannot specify timeZone')
-  }
-  options!.timeZone = internals.timeZone.id
-
-  checkCalendarsCompatible(
-    internals.calendar.id,
-    resolvedOptions.calendar,
-  )
-
-  options = zonedOptionsTransformer(options!)
-  const format = new OrigDateTimeFormat(locale, options)
-  return format.format(epochNanoToMilli(internals.epochNanoseconds))
-}
-
-// Format-method Utils
+// Intl.DateTimeFormat Arg-normalization Utils
 // -------------------------------------------------------------------------------------------------
 
 function resolveSingleFormattable(
@@ -156,7 +149,9 @@ function resolveSingleFormattable(
     return resolveFormattable(arg, ...formatInternalsMap.get(format)!)
   }
 
-  return [arg, format]
+  // arg was not specified (current datetime)
+  return [arg] as unknown as
+    [OrigFormattable | undefined, undefined]
 }
 
 function resolveRangeFormattables(
@@ -196,25 +191,18 @@ function resolveFormattable(
   const format = temporalName && subformatFactory(temporalName)
 
   if (format) {
-    const internalsToEpochNano = epochNanoConverters[temporalName] || dateInternalsToEpochNano
-    const epochNano = internalsToEpochNano(getInternals(arg), resolvedOptions, temporalName)
-    const epochMilli = epochNanoToMilli(epochNano)
-
+    const epochMilli = toEpochMilli(temporalName, getInternals(arg)!, resolvedOptions)
     return [epochMilli, format]
   }
 
-  return [arg as OrigFormattable] as unknown as
-    [number, undefined]
+  // arg is an OrigFormattable
+  return [arg] as unknown as
+    [OrigFormattable, undefined]
 }
 
 // Format Option Massagers
 // -------------------------------------------------------------------------------------------------
 
-/*
-For transformer: give specific instance if doing toLocaleString?
-*/
-
-type OptionsTransformer = (options: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions
 type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
 
 const numericStr = 'numeric'
@@ -251,6 +239,13 @@ const monthDayExclusions: OptionNames = [
   ...timeValidNames,
 ]
 
+type OptionsTransformer = (
+  options: Intl.DateTimeFormatOptions,
+  subjectInternals?: any, // `this` object for toLocaleString
+) => Intl.DateTimeFormatOptions
+
+const zonedOptionsTransformer = createTransformer(zonedValidNames, zonedFallbacks, [])
+
 const optionsTransformers: Record<string, OptionsTransformer> = {
   PlainMonthDay: createTransformer(monthDayValidNames, monthDayFallbacks, monthDayExclusions),
   PlainYearMonth: createTransformer(yearMonthValidNames, yearMonthFallbacks, yearMonthExclusions),
@@ -258,12 +253,18 @@ const optionsTransformers: Record<string, OptionsTransformer> = {
   PlainDateTime: createTransformer(dateTimeValidNames, dateTimeFallbacks, dateTimeExclusions),
   PlainTime: createTransformer(timeValidNames, timeFallbacks, timeExclusions),
   Instant: createTransformer(dateTimeValidNames, dateTimeFallbacks, []),
-  // Intl.DateTimeFormat can't be given a ZonedDateTime. for zonedDateTimeToLocaleString
-  ZonedDateTime: () => { throw new TypeError('Cant do on ZonedDateTime') },
-}
 
-// for zonedDateTimeToLocaleString
-const zonedOptionsTransformer = createTransformer(zonedValidNames, zonedFallbacks, [])
+  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals: ZonedInternals) {
+    if (!subjectInternals) {
+      throw new TypeError('Cant do on ZonedDateTime')
+    }
+    if (options.timeZone !== undefined) {
+      throw new RangeError('Cannot specify timeZone')
+    }
+    options.timeZone = subjectInternals.timeZone.id
+    return zonedOptionsTransformer(options)
+  }
+}
 
 function createTransformer(
   validNames: OptionNames,
@@ -286,14 +287,34 @@ function createTransformer(
 // Epoch Conversions
 // -------------------------------------------------------------------------------------------------
 
+type MaybeHasCalendar = { calendar?: CalendarOps }
+
+function toEpochMilli(
+  temporalName: string,
+  internals: unknown | MaybeHasCalendar,
+  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
+) {
+  if ((internals as MaybeHasCalendar).calendar) {
+    checkCalendarsCompatible(
+      (internals as MaybeHasCalendar).calendar!.id,
+      resolvedOptions.calendar,
+      strictCalendarCheck[temporalName],
+    )
+  }
+
+  const internalsToEpochNano = epochNanoConverters[temporalName] || dateInternalsToEpochNano
+  const epochNano = internalsToEpochNano(internals, resolvedOptions)
+  return epochNanoToMilli(epochNano)
+}
+
 type EpochNanoConverter = (
   internals: any,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-  temporalName: string,
 ) => LargeInt
 
 const epochNanoConverters: Record<string, EpochNanoConverter> = {
   Instant: identityFunc,
+  ZonedDateTime: (internals: ZonedInternals) => internals.epochNanoseconds,
   PlainTime: timeFieldsToEpochNano,
   // otherwise, use dateInternalsToEpochNano
 }
@@ -316,14 +337,7 @@ function timeFieldsToEpochNano(
 function dateInternalsToEpochNano(
   internals: IsoDateTimeInternals | IsoDateInternals,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-  temporalName: string,
 ): LargeInt {
-  checkCalendarsCompatible(
-    internals.calendar.id,
-    resolvedOptions.calendar,
-    strictCalendarCheck[temporalName],
-  )
-
   return getSingleInstantFor(
     queryTimeZoneImpl(resolvedOptions.timeZone),
     {
