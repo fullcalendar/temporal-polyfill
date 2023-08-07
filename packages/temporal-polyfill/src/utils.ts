@@ -208,15 +208,18 @@ export function createLazyGenerator<K, V, A extends any[]>(
 // descriptor stuff
 // ----------------
 
-export function defineProps<Target, PropVals>(
+export function defineProps<Target, NewProps extends { [propName: string]: unknown }>(
   target: Target,
-  propVals: Record<PropertyKey, unknown>,
-): Target & PropVals {
-  return Object.defineProperties(target, createPropDescriptors(propVals)) as (Target & PropVals)
+  propVals: NewProps,
+): Target & NewProps {
+  return Object.defineProperties(
+    target,
+    createPropDescriptors(propVals),
+  ) as (Target & NewProps)
 }
 
 export function createPropDescriptors(
-  propVals: Record<PropertyKey, unknown>,
+  propVals: { [propName: string]: unknown },
 ): PropertyDescriptorMap {
   return mapProps((value) => ({
     value,
@@ -226,7 +229,7 @@ export function createPropDescriptors(
 }
 
 export function createGetterDescriptors(
-  getters: Record<PropertyKey, () => unknown>,
+  getters: { [propName: string]: () => unknown },
 ): PropertyDescriptorMap {
   return mapProps((getter) => ({
     get: getter,

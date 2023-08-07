@@ -212,7 +212,7 @@ export function createTemporalClass<
 ): [
   Class: TemporalClass<B, A, I, G, M, S>,
   createInstance: (internals: I) => TemporalInstance<I, G, M>,
-  toInternals: (arg: TemporalInstance<I> | B | string, options?: O) => I
+  toInternals: (arg: TemporalInstance<I> | B | string) => I
 ] {
   ;(staticMembers as { from: Callable }).from = function(arg: TemporalInstance<I, G, M> | B | string, options: O) {
     return createInstance(toInternals(arg, options))

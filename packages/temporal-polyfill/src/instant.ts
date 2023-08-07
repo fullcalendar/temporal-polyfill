@@ -21,6 +21,7 @@ import {
   DiffOptions,
   InstantDisplayOptions,
   RoundingMode,
+  RoundingOptions,
   ensureObjectlike,
   refineDiffOptions,
   refineInstantDisplayOptions,
@@ -29,10 +30,11 @@ import {
 } from './options'
 import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
-import { noop } from './utils'
+import { NumSign, noop } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { TimeUnit, Unit } from './units'
+import { TimeUnit, Unit, UnitName } from './units'
 import { TimeZoneArg } from './timeZone'
+import { CalendarArg } from './calendar'
 
 export type InstantArg = Instant | string
 
@@ -83,7 +85,10 @@ export const [
       })
     },
 
-    toZonedDateTime(epochNano: LargeInt, options): ZonedDateTime {
+    toZonedDateTime(
+      epochNano: LargeInt,
+      options: { timeZone: TimeZoneArg, calendar: CalendarArg },
+    ): ZonedDateTime {
       const refinedObj = ensureObjectlike(options)
 
       return createZonedDateTime({
@@ -111,15 +116,15 @@ export const [
       )
     },
 
-    until(epochNano: LargeInt, otherArg: InstantArg, options): Duration {
+    until(epochNano: LargeInt, otherArg: InstantArg, options?: DiffOptions): Duration {
       return diffInstants(epochNano, toInstantEpochNano(otherArg), options)
     },
 
-    since(epochNano: LargeInt, otherArg: InstantArg, options): Duration {
+    since(epochNano: LargeInt, otherArg: InstantArg, options?: DiffOptions): Duration {
       return diffInstants(toInstantEpochNano(otherArg), epochNano, options, true)
     },
 
-    round(epochNano: LargeInt, options): Instant {
+    round(epochNano: LargeInt, options: RoundingOptions | UnitName): Instant {
       const [smallestUnit, roundingInc, roundingModeI] = refineRoundOptions(options, Unit.Hour)
 
       return createInstant(
@@ -174,6 +179,13 @@ export const [
     fromEpochNanoseconds(epochNano: bigint): Instant {
       return createInstant(toEpochNano(epochNano))
     },
+
+    compare(a: InstantArg, b: InstantArg): NumSign {
+      return compareLargeInts(
+        toInstantEpochNano(a),
+        toInstantEpochNano(b),
+      )
+    }
   },
 )
 
