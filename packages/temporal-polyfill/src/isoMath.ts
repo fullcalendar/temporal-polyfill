@@ -1,4 +1,5 @@
 import { CalendarArg } from './calendar'
+import { Overflow } from './options'
 import { diffEpochMilliByDay } from './diff'
 import {
   IsoDateTimeFields,
@@ -11,11 +12,11 @@ import {
 } from './isoFields'
 import {
   IsoDateInternals,
-  IsoDateTimeInternals, isoDateInternalRefiners,
+  IsoDateTimeInternals,
+  isoDateInternalRefiners,
   isoDateTimeInternalRefiners
 } from './isoInternals'
 import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
-import { Overflow } from './options'
 import {
   Unit,
   givenFieldsToNano,
@@ -351,8 +352,8 @@ export function isoToEpochNano(
     return numberToLargeInt(epochMilli)
       .mult(nanoInMilli)
       .addNumber(
-        ((isoFields as IsoDateTimeInternals).isoMicrosecond || 0) * nanoInMicro +
-        ((isoFields as IsoDateTimeInternals).isoNanosecond || 0),
+        ((isoFields as IsoDateTimeFields).isoMicrosecond || 0) * nanoInMicro +
+        ((isoFields as IsoDateTimeFields).isoNanosecond || 0),
       )
   }
 }

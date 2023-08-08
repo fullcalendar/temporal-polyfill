@@ -11,7 +11,6 @@ import { toNumber, toString, ensureObjectlike } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
-  FilterPropValues,
   clamp,
   hasAnyPropsByName,
   isObjectlike,
