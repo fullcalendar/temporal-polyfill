@@ -33,8 +33,6 @@
     "locales-compile": "pnpm compile-firstDays && pnpm compile-minimalDays"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.23",
-    "locale-data": "workspace:*",
-    "jest": "^27.0.4"
+    "locale-data": "workspace:*"
   }
 }
