@@ -1,54 +1,54 @@
-import { CalendarProtocol } from './calendar';
-import { DateBag, DateBagStrict, DateGetterFields, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateGetterRefiners } from './calendarFields';
+import { CalendarProtocol } from './calendar'
+import { DateBag, DateBagStrict, DateGetterFields, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateGetterRefiners } from './calendarFields'
 import {
   createWrapperClass, getStrictInternals,
   idGettersStrict, WrapperInstance
-} from './class';
-import { Duration, createDuration } from './duration';
-import { DurationInternals } from './durationFields';
-import { IsoDateFields } from './isoFields';
-import { IsoDateInternals } from './isoInternals';
-import { Overflow, overflowMapNames } from './options';
-import { ensureObjectlike, ensureString } from './cast';
-import { PlainDate, createPlainDate } from './plainDate';
-import { PlainMonthDay } from './plainMonthDay';
-import { PlainYearMonth } from './plainYearMonth';
-import { Unit, unitNamesAsc } from './units';
-import { BoundArg, Callable, mapProps } from './utils';
+} from './class'
+import { Duration, createDuration } from './duration'
+import { DurationInternals } from './durationFields'
+import { IsoDateFields } from './isoFields'
+import { IsoDateInternals } from './isoInternals'
+import { Overflow, overflowMapNames } from './options'
+import { ensureObjectlike, ensureString } from './cast'
+import { PlainDate, createPlainDate } from './plainDate'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainYearMonth } from './plainYearMonth'
+import { Unit, unitNamesAsc } from './units'
+import { BoundArg, Callable, mapProps } from './utils'
 
 const getPlainDateInternals = getStrictInternals.bind<
   undefined, [BoundArg],
   [PlainDate],
   IsoDateInternals // return
->(undefined, PlainDate);
+>(undefined, PlainDate)
 
 const getPlainYearMonthInternals = getStrictInternals.bind<
   undefined, [BoundArg],
   [PlainYearMonth],
   IsoDateInternals // return
->(undefined, PlainYearMonth);
+>(undefined, PlainYearMonth)
 
 const getPlainMonthDayInternals = getStrictInternals.bind<
   undefined, [BoundArg],
   [PlainMonthDay],
   IsoDateInternals // return
->(undefined, PlainMonthDay);
+>(undefined, PlainMonthDay)
 
 const getDurationInternals = getStrictInternals.bind<
   undefined, [BoundArg],
   [Duration],
   DurationInternals // return
->(undefined, Duration);
+>(undefined, Duration)
 
 const calendarOpsAdapterMethods = {
   ...mapProps((refiner: Callable, propName) => {
     return ((calendar: CalendarProtocol, isoDateFields: IsoDateFields) => {
       // HACK: hopefully `calendar` not accessed
-      const pd = createPlainDate(isoDateFields as IsoDateInternals);
-      return refiner(calendar[propName](pd));
-    });
+      const pd = createPlainDate(isoDateFields as IsoDateInternals)
+      return refiner(calendar[propName](pd))
+    })
   }, dateGetterRefiners) as {
-    [K in keyof DateGetterFields]: (calendar: CalendarProtocol, isoFields: IsoDateFields) => DateGetterFields[K];
+    [K in keyof DateGetterFields]: (calendar: CalendarProtocol, isoFields: IsoDateFields) => DateGetterFields[K]
   },
 
   dateAdd(
@@ -63,7 +63,7 @@ const calendarOpsAdapterMethods = {
         createDuration(durationInternals),
         { overflow: overflowMapNames[overflow] }
       )
-    );
+    )
   },
 
   dateUntil(
@@ -78,7 +78,7 @@ const calendarOpsAdapterMethods = {
         createPlainDate(isoDateFields1 as IsoDateInternals),
         { largestUnit: unitNamesAsc[largestUnit] }
       )
-    );
+    )
   },
 
   dateFromFields(
@@ -91,7 +91,7 @@ const calendarOpsAdapterMethods = {
         fields as DateBagStrict,
         { overflow: overflowMapNames[overflow] }
       )
-    );
+    )
   },
 
   yearMonthFromFields(
@@ -104,7 +104,7 @@ const calendarOpsAdapterMethods = {
         fields as YearMonthBagStrict,
         { overflow: overflowMapNames[overflow] }
       )
-    );
+    )
   },
 
   monthDayFromFields(
@@ -117,11 +117,11 @@ const calendarOpsAdapterMethods = {
         fields as MonthDayBagStrict,
         { overflow: overflowMapNames[overflow] }
       )
-    );
+    )
   },
 
   fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
-    return [...calendar.fields(fieldNames)].map(ensureString);
+    return [...calendar.fields(fieldNames)].map(ensureString)
     // TODO: kill ensureArray elsewhere?
   },
 
@@ -130,19 +130,19 @@ const calendarOpsAdapterMethods = {
     fields0: Record<string, unknown>,
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
-    return ensureObjectlike(calendar.mergeFields(fields0, fields1));
+    return ensureObjectlike(calendar.mergeFields(fields0, fields1))
   },
-};
+}
 
 export type CalendarOpsAdapter = WrapperInstance<
   CalendarProtocol, // internals
   typeof idGettersStrict, // getters
   typeof calendarOpsAdapterMethods // methods
->;
+>
 
 export const CalendarOpsAdapter = createWrapperClass<
   [CalendarProtocol],
   CalendarProtocol,
   typeof idGettersStrict,
   typeof calendarOpsAdapterMethods // methods
->(idGettersStrict, calendarOpsAdapterMethods);
+>(idGettersStrict, calendarOpsAdapterMethods)
