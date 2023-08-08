@@ -22,6 +22,7 @@
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
     "build": "cd ./packages/temporal-polyfill && pnpm run build",
+    "dev": "cd ./packages/temporal-polyfill && pnpm run dev",
     "test": "cd ./packages/temporal-polyfill && pnpm run test",
     "lint": "cd ./packages/temporal-polyfill && pnpm run lint",
     "clean": "cd ./packages/temporal-polyfill && pnpm run clean"

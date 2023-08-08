@@ -22,11 +22,14 @@
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
-    "build": "pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && pnpm run bundle && pnpm run minify",
+    "build": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && pnpm run bundle && pnpm run minify",
+    "dev": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build",
+    "tsc:dev": "tsc --build --watch --preserveWatchOutput --pretty",
     "tsc:clean": "rm -rf dist/.tsc dist/tsconfig.tsbuildinfo",
     "type-overrides": "cp src/type-overrides/*.d.ts dist",
     "bundle": "./scripts/bundle.js",
+    "bundle:dev": "./scripts/bundle.js --dev",
     "bundle:clean": "rm -rf dist/*.js dist/*.cjs dist/*.map dist/*.d.ts",
     "minify": "terser --config-file terser.json -o dist/global.min.js -- dist/global.js",
     "pkg-json": "./scripts/pkg-json.js",
@@ -41,9 +44,7 @@
     "exports": {
       ".": {},
       "./impl": {},
-      "./global": {
-        "iife": true
-      }
+      "./global": { "iife": true }
     }
   },
   "publishConfig": {
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@js-temporal/temporal-test262-runner": "^0.9.0",
     "@types/node": "^16.9.1",
+    "concurrently": "^8.2.0",
     "eslint": "^7.25.0",
     "rollup": "^3.27.2",
     "rollup-plugin-sourcemaps": "^0.6.3",
