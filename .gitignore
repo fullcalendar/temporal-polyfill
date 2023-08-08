@@ -1,11 +1,4 @@
-
 node_modules
 
-/coverage
-tsconfig.tsbuildinfo
-dist
-
-# see pkgExportsFix
-/packages/*/*.d.ts
-# hack
-!/packages/temporal-spec/*.d.ts
+packages/*/dist/*
+!packages/*/dist/.npmignore
