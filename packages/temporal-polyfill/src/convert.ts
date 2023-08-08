@@ -42,12 +42,14 @@ import {
   Overflow,
   OverflowOptions,
   ZonedFieldOptions,
-  ensureObjectlike,
   normalizeOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
-  toString, // TODO: shouldn't we use this all over the place?
 } from './options'
+import {
+  ensureObjectlike,
+  toString, // TODO: shouldn't we use this all over the place?
+} from './cast'
 import { PlainDate, PlainDateBag, PlainDateMod, createPlainDate } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod } from './plainDateTime'
 import { PlainMonthDay, PlainMonthDayBag, PlainMonthDayMod, createPlainMonthDay } from './plainMonthDay'

@@ -1,7 +1,7 @@
 import { CalendarProtocol } from './calendar'
 import { CalendarOps, queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
-import { toInteger } from './options'
+import { toInteger } from './cast'
 import { BoundArg, mapPropNamesToConstant, pluckProps, pluckPropsTuple } from './utils'
 
 export interface IsoDateFields {

@@ -22,12 +22,12 @@ import {
   InstantDisplayOptions,
   RoundingMode,
   RoundingOptions,
-  ensureObjectlike,
   refineDiffOptions,
   refineInstantDisplayOptions,
   refineRoundOptions,
   toEpochNano,
 } from './options'
+import { ensureObjectlike } from './cast'
 import { computeNanoInc, roundByIncLarge } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { NumSign, noop } from './utils'

@@ -1,6 +1,6 @@
 import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
 import { LargeInt } from './largeInt'
-import { toIntegerStrict } from './options'
+import { toIntegerStrict } from './cast'
 import {
   DayTimeUnit,
   TimeUnit,

@@ -5,7 +5,7 @@ import {
   IsoTimeFields,
   isoTimeFieldNames,
 } from './isoFields'
-import { ensureBoolean, ensureInteger, toInteger, toString } from './options'
+import { ensureBoolean, ensureInteger, toInteger, toString } from './cast'
 import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
 // Year/Month/Day (no era/eraYear)

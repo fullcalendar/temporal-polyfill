@@ -1,4 +1,4 @@
-import { ensureInstanceOf, ensureString, toString } from './options'
+import { ensureInstanceOf, ensureString, toString } from './cast'
 import {
   Callable,
   Classlike,

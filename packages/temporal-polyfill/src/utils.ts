@@ -310,6 +310,16 @@ export function clamp(
   return clamped
 }
 
+export function clampProp<P>(
+  props: P,
+  propName: keyof FilterPropValues<P, number> & string,
+  min: number,
+  max: number,
+  overflow: Overflow | -1,
+): number {
+  return clamp(props[propName] as number, min, max, overflow, propName)
+}
+
 export function divFloorMod(num: number, divisor: number): [number, number]
 export function divFloorMod(num: bigint, divisor: bigint): [bigint, bigint]
 export function divFloorMod(num: any, divisor: any): [any, any] {

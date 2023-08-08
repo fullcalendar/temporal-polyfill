@@ -14,7 +14,7 @@ import {
   pluckIsoTuple,
 } from './isoFields'
 import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
-import { Overflow, clampProp } from './options'
+import { Overflow } from './options'
 import {
   Unit,
   givenFieldsToNano,
@@ -26,7 +26,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, compareNumbers, divFloorMod, mapPropsWithRefiners } from './utils'
+import { NumSign, compareNumbers, divFloorMod, mapPropsWithRefiners, clampProp } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
