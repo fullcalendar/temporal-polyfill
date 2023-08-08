@@ -1,5 +1,6 @@
 import { toInteger } from './cast'
-import { BoundArg, mapPropNamesToConstant, pluckProps, pluckPropsTuple } from './utils'
+import { Overflow } from './options'
+import { BoundArg, clampProp, mapPropNamesToConstant, mapPropsWithRefiners, pluckProps, pluckPropsTuple } from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -85,3 +86,27 @@ export const pluckIsoTuple = pluckPropsTuple.bind<
   [Partial<IsoDateTimeFields> & { isoYear: number }], // unbound
   IsoTuple // return
 >(undefined, isoDateTimeFieldNamesAsc.reverse())
+
+// Advanced
+// -------------------------------------------------------------------------------------------------
+
+export function refineIsoTimeFields(
+  rawIsoTimeInternals: IsoTimeFields,
+): IsoTimeFields {
+  return constrainIsoTimeFields(
+    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
+  )
+}
+
+export function constrainIsoTimeFields(isoTimeFields: IsoTimeFields, overflow: Overflow = Overflow.Reject) {
+  // TODO: clever way to compress this, using functional programming
+  // Will this kill need for clampProp?
+  return {
+    isoHour: clampProp(isoTimeFields, 'isoHour', 0, 23, overflow),
+    isoMinute: clampProp(isoTimeFields, 'isoMinute', 0, 59, overflow),
+    isoSecond: clampProp(isoTimeFields, 'isoSecond', 0, 59, overflow),
+    isoMillisecond: clampProp(isoTimeFields, 'isoMillisecond', 0, 999, overflow),
+    isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflow),
+    isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflow),
+  }
+}

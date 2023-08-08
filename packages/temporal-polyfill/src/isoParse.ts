@@ -8,13 +8,15 @@ import {
   negateDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
-import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
+import { IsoTimeFields, isoTimeFieldDefaults, constrainIsoTimeFields } from './isoFields'
 import {
-  checkIso,
+  IsoDateInternals,
+  IsoDateTimeInternals,
   constrainIsoDateInternals,
   constrainIsoDateTimeInternals,
-  constrainIsoTimeFields,
+} from './isoInternals'
+import {
+  checkIsoInBounds,
   isoToEpochNano,
   nanoToIsoTimeAndDay,
 } from './isoMath'
@@ -195,7 +197,7 @@ function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals 
 }
 
 function processDateTimeParse(parsed: DateTimeParsed): IsoDateTimeInternals {
-  return checkIso(constrainIsoDateTimeInternals(parsed))
+  return checkIsoInBounds(constrainIsoDateTimeInternals(parsed))
 }
 
 /*
@@ -205,7 +207,7 @@ function processDatelikeParse(parsed: IsoDateInternals | undefined): IsoDateInte
   if (!parsed) {
     throw new RangeError()
   }
-  return checkIso(constrainIsoDateInternals(parsed))
+  return checkIsoInBounds(constrainIsoDateInternals(parsed))
 }
 
 // Low-level

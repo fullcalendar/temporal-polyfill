@@ -1,14 +1,17 @@
-import { CalendarProtocol } from './calendar'
+import { CalendarArg, CalendarProtocol } from './calendar'
 import { CalendarOps, queryCalendarOps } from './calendarOps'
 import { getInternals } from './class'
-import { BoundArg, pluckProps } from './utils'
+import { BoundArg, clampProp, mapPropsWithRefiners, pluckProps } from './utils'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
+  constrainIsoTimeFields,
   isoDateFieldRefiners,
   isoTimeFieldRefiners,
 } from './isoFields'
+import { checkIsoInBounds, computeIsoDaysInMonth, isoMonthsInYear } from './isoMath'
+import { Overflow } from './options'
 
 export interface CalendarInternals {
   calendar: CalendarOps
@@ -94,4 +97,76 @@ export function getPublicIdOrObj(
 ): unknown {
   return getInternals(ops) || // adapter (return internal object)
     ops.id // impl (return id)
+}
+
+// Advanced Refining
+// -------------------------------------------------------------------------------------------------
+
+export function refineIsoDateTimeInternals(
+  rawIsoDateTimeInternals: IsoDateTimeFields & { calendar: CalendarArg },
+): IsoDateTimeInternals {
+  return checkIsoInBounds(
+    constrainIsoDateTimeInternals(
+      mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
+    ),
+  )
+}
+
+export function refineIsoDateInternals(
+  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
+): IsoDateInternals {
+  return checkIsoInBounds(
+    constrainIsoDateInternals(
+      mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
+    ),
+  )
+}
+
+// Constraining
+// -------------------------------------------------------------------------------------------------
+
+export function constrainIsoDateTimeInternals(
+  isoDateTimeFields: IsoDateTimeInternals,
+): IsoDateTimeInternals {
+  return {
+    ...constrainIsoDateInternals(isoDateTimeFields),
+    ...constrainIsoTimeFields(isoDateTimeFields),
+  }
+}
+
+/*
+accepts iso-date-like fields and will pass all through
+*/
+export function constrainIsoDateInternals<P extends IsoDateFields>(
+  isoInternals: P,
+  overflow?: Overflow,
+): P
+export function constrainIsoDateInternals<P extends IsoDateFields>(
+  isoInternals: P,
+  overflow: Overflow | -1,
+): P | undefined
+export function constrainIsoDateInternals<P extends IsoDateFields>(
+  isoInternals: P,
+  overflow: Overflow | -1 = Overflow.Reject,
+): P | undefined {
+  const isoMonth = clampProp(
+    isoInternals as IsoDateFields,
+    'isoMonth',
+    1,
+    isoMonthsInYear,
+    overflow,
+  )
+
+  if (isoMonth) {
+    const daysInMonth = computeIsoDaysInMonth(isoInternals.isoYear, isoMonth)
+    const isoDay = clampProp(isoInternals as IsoDateFields, 'isoDay', 1, daysInMonth, overflow)
+
+    if (isoDay) {
+      return {
+        ...isoInternals,
+        isoMonth,
+        isoDay,
+      }
+    }
+  }
 }

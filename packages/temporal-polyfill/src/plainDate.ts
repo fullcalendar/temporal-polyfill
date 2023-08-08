@@ -21,10 +21,10 @@ import {
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
-import { IsoDateInternals, generatePublicIsoDateFields, pluckIsoDateInternals } from './isoInternals'
+import { IsoDateInternals, generatePublicIsoDateFields, pluckIsoDateInternals, refineIsoDateInternals } from './isoInternals'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoDateFields, refineIsoDateInternals } from './isoMath'
+import { compareIsoDateFields } from './isoMath'
 import { parsePlainDate } from './isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'

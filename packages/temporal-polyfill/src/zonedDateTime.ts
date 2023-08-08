@@ -31,7 +31,7 @@ import {
   formatTimeZone,
 } from './isoFormat'
 import {
-  checkEpochNano,
+  checkEpochNanoInBounds,
   epochGetters,
   epochNanoToIso,
 } from './isoMath'
@@ -104,7 +104,7 @@ export const [
     calendarArg: CalendarArg = isoCalendarId,
   ): ZonedInternals => {
     return {
-      epochNanoseconds: checkEpochNano(toEpochNano(epochNano)),
+      epochNanoseconds: checkEpochNanoInBounds(toEpochNano(epochNano)),
       timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
       calendar: queryCalendarOps(calendarArg),
     }

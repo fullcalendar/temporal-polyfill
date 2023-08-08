@@ -8,10 +8,10 @@ import {
 import { diffTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
-import { IsoTimeFields, pluckIsoTimeFields } from './isoFields'
+import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoTimeFields, refineIsoTimeInternals } from './isoMath'
+import { compareIsoTimeFields } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {
@@ -56,7 +56,7 @@ export const [
     isoMicrosecond: number = 0,
     isoNanosecond: number = 0,
   ): IsoTimeFields => {
-    return refineIsoTimeInternals({
+    return refineIsoTimeFields({
       isoHour,
       isoMinute,
       isoSecond,

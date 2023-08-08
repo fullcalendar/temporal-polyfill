@@ -1,4 +1,3 @@
-import { CalendarArg } from './calendar'
 import { Overflow } from './options'
 import { diffEpochMilliByDay } from './diff'
 import {
@@ -7,15 +6,8 @@ import {
   IsoTimeFields,
   IsoTuple,
   isoTimeFieldNamesAsc,
-  isoTimeFieldRefiners,
   pluckIsoTuple,
 } from './isoFields'
-import {
-  IsoDateInternals,
-  IsoDateTimeInternals,
-  isoDateInternalRefiners,
-  isoDateTimeInternalRefiners
-} from './isoInternals'
 import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
 import {
   Unit,
@@ -28,7 +20,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, compareNumbers, divFloorMod, mapPropsWithRefiners, clampProp } from './utils'
+import { NumSign, compareNumbers, divFloorMod, clampProp } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -122,117 +114,24 @@ function isoDateMonthStart(isoDateFields: IsoDateFields): IsoDateFields {
   return { ...isoDateFields, isoMonth: 1, isoDay: 1 }
 }
 
-// Refining
-// -------------------------------------------------------------------------------------------------
-
-export function refineIsoDateTimeInternals(
-  rawIsoDateTimeInternals: IsoDateTimeFields & { calendar: CalendarArg },
-): IsoDateTimeInternals {
-  return checkIso(
-    constrainIsoDateTimeInternals(
-      mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
-    ),
-  )
-}
-
-export function refineIsoDateInternals(
-  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
-): IsoDateInternals {
-  return checkIso(
-    constrainIsoDateInternals(
-      mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
-    ),
-  )
-}
-
-export function refineIsoTimeInternals(
-  rawIsoTimeInternals: IsoTimeFields,
-): IsoTimeFields {
-  return constrainIsoTimeFields(
-    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
-  )
-}
-
-// Constraining
-// -------------------------------------------------------------------------------------------------
-
-export function constrainIsoDateTimeInternals(
-  isoDateTimeFields: IsoDateTimeInternals,
-): IsoDateTimeInternals {
-  return {
-    ...constrainIsoDateInternals(isoDateTimeFields),
-    ...constrainIsoTimeFields(isoDateTimeFields),
-  }
-}
-
-/*
-accepts iso-date-like fields and will pass all through
-*/
-export function constrainIsoDateInternals<P extends IsoDateFields>(
-  isoInternals: P,
-  overflow?: Overflow,
-): P
-export function constrainIsoDateInternals<P extends IsoDateFields>(
-  isoInternals: P,
-  overflow: Overflow | -1,
-): P | undefined
-export function constrainIsoDateInternals<P extends IsoDateFields>(
-  isoInternals: P,
-  overflow: Overflow | -1 = Overflow.Reject,
-): P | undefined {
-  const isoMonth = clampProp(
-    isoInternals as IsoDateFields,
-    'isoMonth',
-    1,
-    isoMonthsInYear,
-    overflow,
-  )
-
-  if (isoMonth) {
-    const daysInMonth = computeIsoDaysInMonth(isoInternals.isoYear, isoMonth)
-    const isoDay = clampProp(isoInternals as IsoDateFields, 'isoDay', 1, daysInMonth, overflow)
-
-    if (isoDay) {
-      return {
-        ...isoInternals,
-        isoMonth,
-        isoDay,
-      }
-    }
-  }
-}
-
-export function constrainIsoTimeFields(isoTimeFields: IsoTimeFields, overflow: Overflow = Overflow.Reject) {
-  // TODO: clever way to compress this, using functional programming
-  // Will this kill need for clampProp?
-  return {
-    isoHour: clampProp(isoTimeFields, 'isoHour', 0, 23, overflow),
-    isoMinute: clampProp(isoTimeFields, 'isoMinute', 0, 59, overflow),
-    isoSecond: clampProp(isoTimeFields, 'isoSecond', 0, 59, overflow),
-    isoMillisecond: clampProp(isoTimeFields, 'isoMillisecond', 0, 999, overflow),
-    isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflow),
-    isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflow),
-  }
-}
-
 const epochNanoMax = numberToLargeInt(secInDay).mult(1e17) // TODO: define this better
 const epochNanoMin = epochNanoMax.mult(-1) // inclusive
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
-export function checkIso<T extends IsoDateFields>(isoFields: T): T {
+export function checkIsoInBounds<T extends IsoDateFields>(isoFields: T): T {
   const isoYear = clampProp(isoFields as IsoDateFields, 'isoYear', isoYearMin, isoYearMax, Overflow.Reject)
   const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   if (nudge) {
     const epochNano = isoToEpochNano(isoFields)
-    checkEpochNano(epochNano && epochNano.addNumber((nanoInUtcDay - 1) * nudge))
+    checkEpochNanoInBounds(epochNano && epochNano.addNumber((nanoInUtcDay - 1) * nudge))
   }
 
   return isoFields
 }
 
-export function checkEpochNano(epochNano: LargeInt | undefined): LargeInt {
+export function checkEpochNanoInBounds(epochNano: LargeInt | undefined): LargeInt {
   if (
     epochNano === undefined ||
     compareLargeInts(epochNano, epochNanoMin) === 1 || // epochNano < epochNanoMin

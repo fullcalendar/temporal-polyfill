@@ -8,10 +8,10 @@ import {
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
 } from './convert'
-import { IsoDateInternals, generatePublicIsoDateFields } from './isoInternals'
+import { IsoDateInternals, generatePublicIsoDateFields, refineIsoDateInternals } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoDateFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'
+import { compareIsoDateFields, isoEpochFirstLeapYear } from './isoMath'
 import { parsePlainMonthDay } from './isoParse'
 import { refineOverflowOptions } from './options'
 import { PlainDate } from './plainDate'

@@ -33,9 +33,9 @@ import {
   durationFieldRefiners,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoTimeFields } from './isoFields'
+import { IsoTimeFields, constrainIsoTimeFields } from './isoFields'
 import { CalendarInternals, IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
-import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
+import { isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
   EpochDisambig,
