@@ -19,8 +19,7 @@ export interface IsoTimeFields {
   isoHour: number,
 }
 
-// TODO: move
-// TODO: same as CalendarArg?
+// TODO: make DRY with CalendarArg (it's a subset)
 export type CalendarPublic = CalendarProtocol | string
 
 export interface CalendarInternals {
@@ -115,7 +114,7 @@ export type IsoTuple = [
 
 // TODO: move?
 export const pluckIsoTuple = pluckPropsTuple.bind<
-  undefined, [BoundArg],
+  undefined, [BoundArg], // bound
   [Partial<IsoDateTimeFields> & { isoYear: number }], // unbound
   IsoTuple // return
 >(undefined, isoDateTimeFieldNamesAsc.reverse())

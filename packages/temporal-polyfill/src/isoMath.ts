@@ -8,7 +8,6 @@ import {
   IsoTimeFields,
   IsoTuple,
   isoDateInternalRefiners,
-  isoDateTimeFieldNamesAsc,
   isoDateTimeInternalRefiners,
   isoTimeFieldNamesAsc,
   isoTimeFieldRefiners,

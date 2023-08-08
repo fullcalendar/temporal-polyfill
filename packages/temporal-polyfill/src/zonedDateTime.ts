@@ -75,6 +75,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
 
+// TODO: make DRY with TimeZoneArg (it's a subset)
 export type TimeZonePublic = TimeZoneProtocol | string
 export type ZonedPublic = IsoDateTimePublic & { timeZone: TimeZonePublic, offset: string }
 

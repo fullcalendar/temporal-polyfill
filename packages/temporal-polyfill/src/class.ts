@@ -1,4 +1,3 @@
-import { DateTimeFormat, Formattable, LocalesArg } from './intlFormat'
 import { ensureInstanceOf, ensureString, toString } from './options'
 import {
   Callable,
