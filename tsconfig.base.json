@@ -6,6 +6,7 @@
     "lib": ["ES2020"],
     "moduleResolution": "Node",
     "composite": true,
+    "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "importHelpers": true,

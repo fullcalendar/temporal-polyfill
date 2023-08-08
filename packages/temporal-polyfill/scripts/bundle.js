@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { join as joinPaths, dirname } from 'path'
+import { join as joinPaths, dirname, basename } from 'path'
 import { readFile } from 'fs/promises'
-import { rollup } from 'rollup'
+import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
+import sourcemaps from 'rollup-plugin-sourcemaps'
 
 // TODO: make DRY with pkg-json.js
 const extensions = {
@@ -12,10 +13,17 @@ const extensions = {
 }
 
 writeBundles(
-  joinPaths(dirname(process.argv[1]), '..')
+  joinPaths(dirname(process.argv[1]), '..'),
+  process.argv.slice(2).includes('--dev'),
 )
 
-async function writeBundles(pkgDir) {
+async function writeBundles(pkgDir, isDev) {
+  const configs = await buildConfigs(pkgDir, isDev)
+
+  await (isDev ? watchWithConfigs : buildWithConfigs)(configs)
+}
+
+async function buildConfigs(pkgDir, isDev) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const exportMap = pkgJson.buildConfig.exports
@@ -36,12 +44,18 @@ async function writeBundles(pkgDir) {
         output: {
           format: 'iife',
           file: joinPaths('dist', shortName + extensions.iife),
-        }
+          sourcemap: isDev,
+          sourcemapExcludeSources: true
+        },
+        plugins: [
+          // for reading sourcemaps from tsc
+          isDev && sourcemaps(),
+        ]
       })
     }
   }
 
-  const configs = [
+  return [
     {
       input: moduleInputs,
       onwarn,
@@ -62,10 +76,12 @@ async function writeBundles(pkgDir) {
     },
     ...iifeConfigs,
   ]
+}
 
-  await Promise.all(
+function buildWithConfigs(configs) {
+  return Promise.all(
     configs.map(async (config) => {
-      const bundle = await rollup(config)
+      const bundle = await rollupBuild(config)
 
       return Promise.all(
         arrayify(config.output).map((outputConfig) => {
@@ -74,6 +90,33 @@ async function writeBundles(pkgDir) {
       )
     })
   )
+}
+
+async function watchWithConfigs(configs) {
+  const rollupWatcher = rollupWatch(configs)
+
+  return new Promise((resolve) => {
+    rollupWatcher.on('event', (ev) => {
+      switch (ev.code) {
+        case 'ERROR':
+          console.error(ev.error)
+          break
+        case 'BUNDLE_END':
+          console.log(formatWriteMessage(ev.input))
+          break
+        case 'END':
+          resolve()
+          break
+      }
+    })
+  })
+}
+
+function formatWriteMessage(input) {
+  const inputPaths = typeof input === 'object' ? Object.values(input) : [input]
+  const inputNames = inputPaths.map((inputPath) => basename(inputPath))
+
+  return `Bundled ${inputNames.join(', ')}`
 }
 
 function onwarn(warning) {

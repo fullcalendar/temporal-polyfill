@@ -41,7 +41,9 @@
     "exports": {
       ".": {},
       "./impl": {},
-      "./global": { "iife": true }
+      "./global": {
+        "iife": true
+      }
     }
   },
   "publishConfig": {
@@ -56,6 +58,7 @@
     "@types/node": "^16.9.1",
     "eslint": "^7.25.0",
     "rollup": "^3.27.2",
+    "rollup-plugin-sourcemaps": "^0.6.3",
     "terser": "^5.19.2",
     "typescript": "^5.1.6"
   }
