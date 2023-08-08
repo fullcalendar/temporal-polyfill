@@ -1,6 +1,6 @@
 import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
-import { queryCalendarPublic } from './calendarOps'
+import { queryCalendarPublic } from './calendarPublic'
 import { TemporalInstance, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
 import {
   refinePlainDateBag,

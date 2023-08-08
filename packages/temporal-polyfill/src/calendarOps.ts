@@ -1,6 +1,6 @@
-import { Calendar, CalendarArg, CalendarProtocol, calendarProtocolMethods, createCalendar } from './calendar'
+import { Calendar, CalendarArg, CalendarProtocol, calendarProtocolMethods } from './calendar'
 import { DateBag, DateBagStrict, DateGetterFields, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateGetterRefiners } from './calendarFields'
-import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
+import { queryCalendarImpl } from './calendarImpl'
 import {
   createProtocolChecker,
   createWrapperClass,
@@ -54,7 +54,7 @@ export interface CalendarOps {
 
 //
 
-const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
+export const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 
 export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
   if (isObjectlike(calendarArg)) {
@@ -71,34 +71,6 @@ export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
   }
 
   return queryCalendarImpl(parseCalendarId(toString(calendarArg)))
-}
-
-export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol {
-  if (isObjectlike(calendarArg)) {
-    if (calendarArg instanceof Calendar) {
-      return calendarArg
-    }
-
-    const { calendar } = getInternals(calendarArg as TemporalInstance<{ calendar: CalendarOps }>) || {}
-
-    return calendar
-      ? calendarOpsToPublic(calendar)
-      : (
-        checkCalendarProtocol(calendarArg as CalendarProtocol),
-        calendarArg as CalendarProtocol
-      )
-  }
-
-  return createCalendar(queryCalendarImpl(parseCalendarId(toString(calendarArg))))
-}
-
-export function getPublicCalendar(internals: { calendar: CalendarOps }): CalendarProtocol {
-  return calendarOpsToPublic(internals.calendar)
-}
-
-function calendarOpsToPublic(calendarOps: CalendarOps): CalendarProtocol {
-  return getInternals(calendarOps as CalendarOpsAdapter) ||
-    createCalendar(calendarOps as CalendarImpl)
 }
 
 export const getCommonCalendarOps = getCommonInnerObj.bind<
@@ -228,13 +200,13 @@ const calendarOpsAdapterMethods = {
   },
 }
 
-type CalendarOpsAdapter = WrapperInstance<
+export type CalendarOpsAdapter = WrapperInstance<
   CalendarProtocol, // internals
   typeof idGettersStrict, // getters
   typeof calendarOpsAdapterMethods // methods
 >
 
-const CalendarOpsAdapter = createWrapperClass<
+export const CalendarOpsAdapter = createWrapperClass<
   [CalendarProtocol], // constructor
   CalendarProtocol, // internals
   typeof idGettersStrict, // getters

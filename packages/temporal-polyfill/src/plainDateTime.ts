@@ -1,7 +1,8 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, TimeBag, dateTimeGetters } from './calendarFields'
-import { getCommonCalendarOps, getPublicCalendar, queryCalendarOps } from './calendarOps'
+import { getCommonCalendarOps, queryCalendarOps } from './calendarOps'
+import { getPublicCalendar } from './calendarPublic'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,

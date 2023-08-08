@@ -1,7 +1,7 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetters } from './calendarFields'
-import { getPublicCalendar } from './calendarOps'
+import { getPublicCalendar } from './calendarPublic'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertPlainMonthDayToDate,
