@@ -139,14 +139,11 @@ export function parseDuration(s: string): DurationInternals {
 }
 
 export function parseOffsetNano(s: string): number {
-  const parts = offsetRegExp.exec(s)
-  const parsed = parts && parseOffsetParts(parts.slice(1))
-
-  if (!parsed) {
+  const offsetNano = maybeParseOffsetNano(s)
+  if (offsetNano === undefined) {
     throw new RangeError()
   }
-
-  return parsed
+  return offsetNano
 }
 
 export function parseCalendarId(s: string): string {
@@ -237,6 +234,11 @@ function parseTime(s: string): IsoTimeFields | undefined {
 function parseDurationInternals(s: string): DurationInternals | undefined {
   const parts = durationRegExp.exec(s)
   return parts ? parseDurationParts(parts) : undefined
+}
+
+export function maybeParseOffsetNano(s: string): number | undefined {
+  const parts = offsetRegExp.exec(s)
+  return parts ?  parseOffsetParts(parts.slice(1)) : undefined
 }
 
 // RegExp & Parts

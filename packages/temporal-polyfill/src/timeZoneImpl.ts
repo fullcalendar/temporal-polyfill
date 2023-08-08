@@ -10,7 +10,7 @@ import {
   isoToEpochNano,
   isoToEpochSec,
 } from './isoMath'
-import { parseOffsetNano } from './isoParse'
+import { maybeParseOffsetNano } from './isoParse'
 import { LargeInt } from './largeInt'
 import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
@@ -25,7 +25,7 @@ const queryIntlTimeZoneImpl = createLazyGenerator((timeZoneId: string) => {
 })
 
 export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
-  const offsetNano = parseOffsetNano(timeZoneId)
+  const offsetNano = maybeParseOffsetNano(timeZoneId)
 
   if (offsetNano !== undefined) {
     return new FixedTimeZoneImpl(timeZoneId, offsetNano)

@@ -397,7 +397,7 @@ function checkCalendarsCompatible(
   resolveCalendarId: string,
 ): void {
   if (
-    (!strictCalendarCheck[temporalName] || internalCalendarId !== isoCalendarId) &&
+    (strictCalendarCheck[temporalName] || internalCalendarId !== isoCalendarId) &&
     (internalCalendarId !== resolveCalendarId)
   ) {
     throw new RangeError('Mismatching calendars')
