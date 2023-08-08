@@ -4,6 +4,7 @@ import { join as joinPaths, dirname } from 'path'
 import { readFile } from 'fs/promises'
 import { rollup } from 'rollup'
 
+// TODO: make DRY with pkg-json.js
 const extensions = {
   esm: '.esm.js',
   cjs: '.cjs',
@@ -17,12 +18,12 @@ writeBundles(
 async function writeBundles(pkgDir) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
-  const exportsMap = pkgJson.buildConfig.exports
+  const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
   const iifeConfigs = []
 
-  for (const exportPath in exportsMap) {
-    const exportConfig = exportsMap[exportPath]
+  for (const exportPath in exportMap) {
+    const exportConfig = exportMap[exportPath]
     const shortName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
     const inputPath = joinPaths(pkgDir, 'dist', '.tsc', shortName + '.js')
 
