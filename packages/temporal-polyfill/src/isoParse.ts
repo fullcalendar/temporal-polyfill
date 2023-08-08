@@ -8,7 +8,8 @@ import {
   negateDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateInternals, IsoDateTimeInternals, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import {
   checkIso,
   constrainIsoDateInternals,

@@ -11,7 +11,8 @@ import {
   timeNanoToDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
+import { IsoDateInternals } from './isoInternals'
 import { isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay } from './isoMath'
 import { LargeInt } from './largeInt'
 import { moveDateByDays, moveZonedEpochNano } from './move'

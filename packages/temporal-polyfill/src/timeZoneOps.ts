@@ -9,7 +9,8 @@ import {
   idGettersStrict,
 } from './class'
 import { Instant, createInstant } from './instant'
-import { IsoDateFields, IsoDateTimeFields, IsoDateTimeInternals, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
+import { IsoDateTimeInternals } from './isoInternals'
 import {
   epochNanoToIso,
   isoToEpochNano,

@@ -30,7 +30,8 @@ import {
   diffEpochMilliByDay,
 } from './diff'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
-import { IsoDateFields, IsoDateInternals, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateInternals } from './isoInternals'
 import {
   computeIsoDayOfWeek,
   computeIsoDaysInMonth,

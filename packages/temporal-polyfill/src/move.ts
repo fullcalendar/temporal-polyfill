@@ -9,7 +9,8 @@ import {
   durationTimeFieldsToIsoStrict,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoDateInternals, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import { IsoDateTimeFields, IsoDateFields, IsoTimeFields } from './isoFields'
+import { IsoDateInternals } from './isoInternals'
 import {
   epochMilliToIso,
   isoDaysInWeek,

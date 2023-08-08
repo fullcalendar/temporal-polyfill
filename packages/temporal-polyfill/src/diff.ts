@@ -8,7 +8,7 @@ import {
   timeNanoToDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
+import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields } from './isoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,

@@ -1,7 +1,7 @@
 import { getInternals } from './class'
 import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { IsoDateInternals, pluckIsoDateInternals } from './isoFields'
+import { IsoDateInternals, pluckIsoDateInternals } from './isoInternals'
 import { parseMaybeZonedDateTime } from './isoParse'
 import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'

@@ -3,11 +3,13 @@ import { CalendarOps } from './calendarOps'
 import { getInternals, getTemporalName } from './class'
 import { Instant } from './instant'
 import {
-  IsoDateInternals,
-  IsoDateTimeInternals,
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
+import {
+  IsoDateInternals,
+  IsoDateTimeInternals
+} from './isoInternals'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { LargeInt } from './largeInt'
 import { PlainDate } from './plainDate'

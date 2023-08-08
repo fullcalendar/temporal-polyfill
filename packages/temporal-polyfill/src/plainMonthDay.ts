@@ -8,7 +8,7 @@ import {
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
 } from './convert'
-import { IsoDateInternals, generatePublicIsoDateFields } from './isoFields'
+import { IsoDateInternals, generatePublicIsoDateFields } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateFields, isoEpochFirstLeapYear, refineIsoDateInternals } from './isoMath'

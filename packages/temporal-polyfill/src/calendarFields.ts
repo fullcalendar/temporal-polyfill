@@ -1,10 +1,10 @@
 import { CalendarOps } from './calendarOps'
 import {
   IsoDateFields,
-  IsoDateInternals,
   IsoTimeFields,
   isoTimeFieldNames,
 } from './isoFields'
+import { IsoDateInternals } from './isoInternals'
 import { ensureBoolean, ensureInteger, toInteger, toString } from './cast'
 import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
