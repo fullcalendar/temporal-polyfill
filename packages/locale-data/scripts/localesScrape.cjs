@@ -8,12 +8,8 @@ const { hideBin } = require('yargs/helpers')
 require('colors')
 const args = yargs(hideBin(process.argv)).boolean('v').argv
 
-const momentLocaleRoot = resolve(args.$0, '..', 'data/moment/locale')
-const fullcalendarLocaleRoot = resolve(
-  args.$0,
-  '..',
-  'data/fullcalendar/packages/core/src/locales',
-)
+const momentLocaleRoot = resolve(args.$0, '../data/moment/locale')
+const fullcalendarLocaleRoot = resolve(args.$0, '../data/fullcalendar/packages/core/src/locales')
 
 async function writeLocale(localeStr) {
   // Used for specific parsing nuances, intlStr represents the locale with the suffix capitalized
@@ -89,7 +85,7 @@ async function writeLocale(localeStr) {
 
   const workspaceLocalePath = resolve(
     args.$0,
-    '../../locales',
+    '../locales',
     `${intlStr}.json`,
   )
 
@@ -118,7 +114,7 @@ async function writeLocale(localeStr) {
 
   // Write to file
   await writeFile(
-    resolve(args.$0, '../../locales', `${intlStr}.json`),
+    resolve(args.$0, '../locales', `${intlStr}.json`),
     JSON.stringify(localeData, null, 2),
     { encoding: 'utf8', flag: 'w' },
   )
