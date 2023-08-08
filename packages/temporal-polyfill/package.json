@@ -79,6 +79,7 @@
     "jest": "^27.0.6",
     "jest-date-mock": "^1.0.8",
     "js-yaml": "^4.1.0",
+    "minimatch": "^5.0.1",
     "progress": "^2.0.3",
     "rollup": "^2.55.1",
     "tiny-glob": "^0.2.9",

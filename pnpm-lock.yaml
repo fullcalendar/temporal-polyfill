@@ -61,9 +61,6 @@ importers:
       jest:
         specifier: ^27.0.4
         version: 27.5.1
-      minimatch:
-        specifier: ^5.0.1
-        version: 5.1.6
       rollup:
         specifier: ^2.55.1
         version: 2.79.1
@@ -190,6 +187,9 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
+      minimatch:
+        specifier: ^5.0.1
+        version: 5.1.6
       progress:
         specifier: ^2.0.3
         version: 2.0.3
