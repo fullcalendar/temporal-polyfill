@@ -33,7 +33,7 @@
     "pkg-json:clean": "rm -rf dist/package.json",
     "test": "./scripts/test.js",
     "lint": "eslint .",
-    "size": "./scripts/size.cjs",
+    "size": "./scripts/size.js",
     "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean"
   },
   "type": "module",
@@ -54,7 +54,6 @@
   "devDependencies": {
     "@js-temporal/temporal-test262-runner": "^0.9.0",
     "@types/node": "^16.9.1",
-    "colors": "^1.4.0",
     "eslint": "^7.25.0",
     "rollup": "^3.27.2",
     "terser": "^5.19.2",
