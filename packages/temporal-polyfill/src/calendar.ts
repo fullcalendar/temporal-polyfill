@@ -1,7 +1,7 @@
 import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { queryCalendarPublic } from './calendarPublic'
-import { TemporalInstance, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
+import { TemporalInstance, createProtocolChecker, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
 import {
   refinePlainDateBag,
   refinePlainMonthDayBag,
@@ -76,7 +76,7 @@ type DateArg = PlainYearMonth | PlainMonthDay | PlainDateTime | PlainDateArg
 /*
 the *required* protocol methods
 */
-export const calendarProtocolMethods = {
+const calendarProtocolMethods = {
   ...mapPropNames((propName: keyof DateGetterFields) => {
     const whitelistName = dateArgWhitelist[propName]
 
@@ -161,6 +161,8 @@ export const calendarProtocolMethods = {
     )
   },
 }
+
+export const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
 
 const calendarMethods = {
   ...calendarProtocolMethods,

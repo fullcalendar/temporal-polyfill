@@ -1,5 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarOps } from './calendarOps'
+import { queryCalendarOps } from './calendarOpsQuery'
 import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { diffEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'

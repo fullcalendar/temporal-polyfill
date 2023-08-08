@@ -1,5 +1,6 @@
 import { CalendarArg, CalendarProtocol } from './calendar'
-import { CalendarOps, queryCalendarOps } from './calendarOps'
+import { queryCalendarOps } from './calendarOpsQuery'
+import { CalendarOps } from './calendarOps'
 import { getInternals } from './class'
 import { BoundArg, clampProp, mapPropsWithRefiners, pluckProps } from './utils'
 import {

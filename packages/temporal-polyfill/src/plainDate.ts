@@ -2,9 +2,8 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, dateGetters } from './calendarFields'
 import {
-  getCommonCalendarOps,
   queryCalendarOps,
-} from './calendarOps'
+} from './calendarOpsQuery'
 import { getPublicCalendar } from './calendarPublic'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
@@ -34,6 +33,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
 import { NumSign } from './utils'
+import { getCommonCalendarOps } from './calendarOps'
 
 export type PlainDateArg = PlainDate | PlainDateBag | string
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }

@@ -1,7 +1,7 @@
 import { nanoInMilli } from './units'
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarOps } from './calendarOps'
+import { queryCalendarOps } from './calendarOpsQuery'
 import { Instant, createInstant } from './instant'
 import { OrigDateTimeFormat } from './intlFormat'
 import { pluckIsoTimeFields } from './isoFields'

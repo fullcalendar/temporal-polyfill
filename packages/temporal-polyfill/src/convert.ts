@@ -23,7 +23,8 @@ import {
   yearMonthFieldNames,
 } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
-import { CalendarOps, queryCalendarOps } from './calendarOps'
+import { queryCalendarOps } from './calendarOpsQuery'
+import { CalendarOps } from './calendarOps'
 import { TemporalInstance, getInternals } from './class'
 import { DurationBag, DurationMod } from './duration'
 import {

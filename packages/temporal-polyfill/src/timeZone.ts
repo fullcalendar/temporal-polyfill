@@ -1,6 +1,6 @@
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { CalendarArg } from './calendar'
-import { queryCalendarOps } from './calendarOps'
+import { queryCalendarOps } from './calendarOpsQuery'
 import { TemporalInstance, createSimpleTemporalClass, getObjId, idGetters } from './class'
 import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instant'
 import { formatOffsetNano } from './isoFormat'

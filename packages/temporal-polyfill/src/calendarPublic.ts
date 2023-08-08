@@ -1,10 +1,11 @@
-import { Calendar, CalendarArg, CalendarProtocol, createCalendar } from './calendar'
+import { Calendar, CalendarArg, CalendarProtocol, checkCalendarProtocol, createCalendar } from './calendar'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { getInternals, TemporalInstance } from './class'
 import { parseCalendarId } from './isoParse'
 import { toString } from './cast'
 import { isObjectlike } from './utils'
-import { CalendarOps, checkCalendarProtocol, CalendarOpsAdapter } from './calendarOps'
+import { CalendarOpsAdapter } from './calendarOpsAdapter'
+import { CalendarOps } from './calendarOps'
 
 export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol {
   if (isObjectlike(calendarArg)) {

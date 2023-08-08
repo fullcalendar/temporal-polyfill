@@ -1,7 +1,6 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { YearMonthBag, yearMonthGetters } from './calendarFields'
-import { getCommonCalendarOps } from './calendarOps'
 import { getPublicCalendar } from './calendarPublic'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
@@ -23,6 +22,7 @@ import { DiffOptions, OverflowOptions, refineDiffOptions, refineOverflowOptions 
 import { PlainDate } from './plainDate'
 import { Unit } from './units'
 import { NumSign } from './utils'
+import { getCommonCalendarOps } from './calendarOps'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
 export type PlainYearMonthBag = YearMonthBag & { calendar?: CalendarArg }

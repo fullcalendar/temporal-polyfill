@@ -1,7 +1,7 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, TimeBag, dateTimeGetters } from './calendarFields'
-import { getCommonCalendarOps, queryCalendarOps } from './calendarOps'
+import { queryCalendarOps } from './calendarOpsQuery'
 import { getPublicCalendar } from './calendarPublic'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
@@ -53,6 +53,7 @@ import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './ti
 import { DayTimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
+import { getCommonCalendarOps } from './calendarOps'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
