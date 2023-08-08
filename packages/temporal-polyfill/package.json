@@ -22,47 +22,31 @@
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
-    "build": "pnpm run tsc && pnpm run bundle",
+    "build": "pnpm run tsc && pnpm run type-overrides && pnpm run bundle",
     "tsc": "tsc --build",
     "tsc:clean": "rm -rf dist/.tsc dist/tsconfig.tsbuildinfo",
+    "type-overrides": "cp src/type-overrides/*.d.ts dist",
     "bundle": "./scripts/bundle.js",
-    "bundle:clean": "rm -rf dist/*.js dist/*.cjs dist/*.map",
+    "bundle:clean": "rm -rf dist/*.js dist/*.cjs dist/*.map dist/*.d.ts",
     "meta": "./scripts/meta.js",
     "meta:clean": "rm -rf dist/package.json",
-    "test": "./test.js",
+    "test": "./scripts/test.js",
     "lint": "eslint .",
     "size": "./scripts/size.cjs",
     "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run meta:clean"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./impl": {
-      "types": "./dist/impl.d.ts",
-      "require": "./dist/impl.cjs",
-      "import": "./dist/impl.mjs"
-    },
-    "./global": {
-      "types": "./dist/global.d.ts",
-      "require": "./dist/global.cjs",
-      "import": "./dist/global.mjs"
+  "buildConfig": {
+    "exports": {
+      ".": {},
+      "./impl": {},
+      "./global": { "iife": true }
     }
   },
-  "sideEffects": [
-    "./dist/global.*"
-  ],
-  "files": [
-    "/src",
-    "/dist",
-    "/*.d.ts"
-  ],
+  "publishConfig": {
+    "directory": "./dist",
+    "linkDirectory": true
+  },
   "dependencies": {
     "temporal-spec": "~0.1.0"
   },

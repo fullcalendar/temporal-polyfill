@@ -6,15 +6,9 @@
     "lib": ["ES2020"],
     "moduleResolution": "Node",
     "composite": true,
-    "allowJs": true,
-    "isolatedModules": false,
-    "emitDeclarationOnly": false,
-    "esModuleInterop": true,
-    "importHelpers": true,
-    "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "skipLibCheck": false,
-    "checkJs": false
+    "importHelpers": true,
+    "resolveJsonModule": true
   }
 }

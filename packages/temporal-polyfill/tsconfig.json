@@ -15,6 +15,7 @@
     "src/**/*"
   ],
   "exclude": [
+    "src/type-overrides/**",
     "src/old/**/*"
   ]
 }

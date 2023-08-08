@@ -1,4 +1,4 @@
 node_modules
 
-packages/*/dist/*
-!packages/*/dist/.npmignore
+/packages/*/dist/*
+/!packages/*/dist/.npmignore
