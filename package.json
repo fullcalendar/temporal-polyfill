@@ -22,32 +22,19 @@
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
     "build": "cd ./packages/temporal-polyfill && pnpm run build",
-    "build:dev": "cd ./packages/temporal-polyfill && pnpm run build:dev",
-    "watch": "cd ./packages/temporal-polyfill && pnpm run watch",
     "test": "cd ./packages/temporal-polyfill && pnpm run test",
-    "test262": "cd ./packages/temporal-polyfill && pnpm run test262",
     "lint": "cd ./packages/temporal-polyfill && pnpm run lint",
-    "size": "cd ./packages/temporal-polyfill && pnpm run size",
-    "clean": "cd ./packages/temporal-polyfill && pnpm run clean",
-    "locales-scrape": "node ./scripts/localesScrape.cjs",
-    "locales-compile": "echo 'TODO: recursively execute locales-compile'"
+    "clean": "cd ./packages/temporal-polyfill && pnpm run clean"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^13.3.0",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
-    "colors": "^1.4.0",
-    "esbuild": "^0.18.17",
     "eslint": "^7.25.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-import-resolver-node": "^0.3.6",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "rollup": "^2.55.1",
-    "rollup-plugin-dts": "^3.0.2",
-    "rollup-plugin-esbuild": "^4.9.1",
-    "rollup-plugin-terser": "^7.0.2",
     "typescript": "^5.1.6"
   },
   "pnpm": {

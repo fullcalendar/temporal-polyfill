@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import runTest262 from '@js-temporal/temporal-test262-runner'
 
 const testGlobs = process.argv.slice(2)
