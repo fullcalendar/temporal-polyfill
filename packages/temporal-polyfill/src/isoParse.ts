@@ -150,7 +150,7 @@ export function parseDuration(s: string): DurationInternals {
 }
 
 export function parseOffsetNano(s: string): number {
-  const offsetNano = maybeParseOffsetNano(s)
+  const offsetNano = parseMaybeOffsetNano(s)
   if (offsetNano === undefined) {
     throw new RangeError()
   }
@@ -247,9 +247,9 @@ function parseDurationInternals(s: string): DurationInternals | undefined {
   return parts ? parseDurationParts(parts) : undefined
 }
 
-export function maybeParseOffsetNano(s: string): number | undefined {
+export function parseMaybeOffsetNano(s: string): number | undefined {
   const parts = offsetRegExp.exec(s)
-  return parts ?  parseOffsetParts(parts) : undefined
+  return parts ? parseOffsetParts(parts) : undefined
 }
 
 // RegExp & Parts
@@ -291,13 +291,15 @@ const dateTimeRegExpStr =
   ')?' +
   ')?'
 
-const annotationRegExpStr = '((?:\\[[^\\]]*\\])*)'
+const annotationRegExpStr = '\\[(!?)([^\\]]*)\\]' // critical:1, annotation:2
+const annotationsRegExpStr = `((?:${annotationRegExpStr})*)` // multiple
 
-const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationRegExpStr)
-const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationRegExpStr)
-const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationRegExpStr)
-const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationRegExpStr)
-const offsetRegExp = createRegExp(offsetRegExpStr) // annotations not allowed
+const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationsRegExpStr)
+const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
+const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
+const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationsRegExpStr)
+const offsetRegExp = createRegExp(offsetRegExpStr)
+const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
 
 const durationRegExp = createRegExp(
   `${signRegExpStr}?P` + // 1:sign
@@ -339,6 +341,8 @@ function parseDateTimeParts(parts: string[]): DateTimeParsed {
     ...parseAnnotations(parts[16]),
     hasTime,
     hasZ,
+    // TODO: figure out a way to pre-process into a number
+    // (problems with TimeZone needing the full string?)
     offset: hasZ ? undefined : zOrOffset,
   }
 }
@@ -455,38 +459,37 @@ interface AnnotationsParsed {
 }
 
 function parseAnnotations(s: string): AnnotationsParsed {
-  let calendarId: string | undefined
+  let calendarIsCritical: boolean | undefined
   let timeZoneId: string | undefined
+  const calendarIds: string[] = []
 
-  for (const chunk of s.split(']')) {
-    if (chunk) { // not the empty end chunk
-      let annotation = chunk.slice(1) // remove leading '['
-      let isCritical = false
+  // iterate through matches
+  s.replace(annotationRegExp, (whole, criticalStr, mainStr) => {
+    const isCritical = Boolean(criticalStr)
+    const [val, name] = mainStr.split('=').reverse() as [string, string?]
 
-      if (annotation.charAt(0) === '!') {
-        isCritical = true
-        annotation = annotation.slice(1)
+    if (!name) {
+      if (timeZoneId) {
+        throw new RangeError('Cannot specify timeZone multiple times')
       }
-
-      const annotationParts = annotation.split('=')
-      if (annotationParts.length === 1) {
-        if (timeZoneId !== undefined) {
-          throw new RangeError('Cannot specify timeZone multiple times')
-        }
-        timeZoneId = annotation
-      } else if (annotationParts[0] === 'u-ca') {
-        if (calendarId === undefined) { // ignore subsequent calendar annotations
-          calendarId = annotationParts[1]
-        }
-      } else if (isCritical) {
-        throw new RangeError(`Critical annotation '${annotationParts[0]}' not used`)
-      }
+      timeZoneId = val
+    } else if (name === 'u-ca') {
+      calendarIds.push(val)
+      calendarIsCritical ||= isCritical
+    } else if (isCritical) {
+      throw new RangeError(`Critical annotation '${name}' not used`)
     }
+
+    return ''
+  })
+
+  if (calendarIds.length > 1 && calendarIsCritical) {
+    throw new RangeError('Multiple calendar when one is critical')
   }
 
   return {
-    calendar: queryCalendarImpl(calendarId || isoCalendarId),
     timeZone: timeZoneId ? queryTimeZoneImpl(timeZoneId) : undefined,
+    calendar: queryCalendarImpl(calendarIds[0] || isoCalendarId),
   }
 }
 

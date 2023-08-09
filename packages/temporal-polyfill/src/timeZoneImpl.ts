@@ -11,7 +11,7 @@ import {
   isoToEpochNano,
   isoToEpochSec,
 } from './isoMath'
-import { maybeParseOffsetNano } from './isoParse'
+import { parseMaybeOffsetNano } from './isoParse'
 import { LargeInt } from './largeInt'
 import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
@@ -31,7 +31,7 @@ export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
   // TODO: fix double-call of ensureString
   timeZoneId = ensureString(timeZoneId).toLowerCase()
 
-  const offsetNano = maybeParseOffsetNano(timeZoneId)
+  const offsetNano = parseMaybeOffsetNano(timeZoneId)
   if (offsetNano !== undefined) {
     return new FixedTimeZoneImpl(timeZoneId, offsetNano)
   }
