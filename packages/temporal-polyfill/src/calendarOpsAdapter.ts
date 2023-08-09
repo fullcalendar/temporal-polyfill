@@ -127,8 +127,18 @@ const calendarOpsAdapterMethods = {
   },
 
   fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
-    return [...calendar.fields(fieldNames)].map(ensureString)
-    // TODO: kill ensureArray elsewhere?
+    fieldNames = [...calendar.fields(fieldNames)] // TODO: kill ensureArray elsewhere?
+    fieldNames = fieldNames.map(ensureString)
+
+    const fieldNameSet = new Set(fieldNames)
+    if (fieldNameSet.size !== fieldNames.length) {
+      throw new RangeError('Duplicate fields')
+    }
+    if (fieldNameSet.has('constructor')) {
+      throw new RangeError('Cant have constructor field')
+    }
+
+    return fieldNames
   },
 
   mergeFields(
