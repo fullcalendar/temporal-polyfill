@@ -8,7 +8,7 @@ export class LargeInt {
     public low: number,
   ) {}
 
-  addLargeInt(num: LargeInt, sign = 1 | -1): LargeInt {
+  addLargeInt(num: LargeInt, sign: 1 | -1 = 1): LargeInt {
     return balanceAndCreate(this.high + num.high * sign, this.low + num.low * sign)
   }
 

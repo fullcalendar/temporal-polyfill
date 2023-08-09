@@ -30,6 +30,7 @@ import { DurationBag, DurationMod } from './duration'
 import {
   DurationFields,
   DurationInternals,
+  durationFieldDefaults,
   durationFieldNames,
   durationFieldRefiners,
   updateDurationFieldsSign,
@@ -476,8 +477,13 @@ function refineTimeBag(fields: TimeBag, overflow: Overflow): IsoTimeFields {
 // -------------------------------------------------------------------------------------------------
 
 export function refineDurationBag(bag: DurationBag): DurationInternals {
-  const durationFields = refineFields(bag, durationFieldNames, []) as DurationBag
-  return updateDurationFieldsSign(durationFields as DurationFields)
+  // refine in 'partial' mode
+  const durationFields = refineFields(bag, durationFieldNames) as DurationBag
+
+  return updateDurationFieldsSign({
+    ...durationFieldDefaults,
+    ...durationFields
+  })
 }
 
 export function mergeDurationBag(
