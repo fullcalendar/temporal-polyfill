@@ -91,7 +91,8 @@ const calendarOpsAdapterMethods = {
   ): IsoDateInternals {
     return getPlainDateInternals(
       calendar.dateFromFields(
-        fields as DateBagStrict,
+        // TODO: make util
+        Object.assign(Object.create(null), fields) as DateBagStrict,
         { overflow: overflowMapNames[overflow] }
       )
     )
@@ -104,7 +105,8 @@ const calendarOpsAdapterMethods = {
   ): IsoDateInternals {
     return getPlainYearMonthInternals(
       calendar.yearMonthFromFields(
-        fields as YearMonthBagStrict,
+        // TODO: make util
+        Object.assign(Object.create(null), fields) as YearMonthBagStrict,
         { overflow: overflowMapNames[overflow] }
       )
     )
@@ -117,7 +119,8 @@ const calendarOpsAdapterMethods = {
   ): IsoDateInternals {
     return getPlainMonthDayInternals(
       calendar.monthDayFromFields(
-        fields as MonthDayBagStrict,
+        // TODO: make util
+        Object.assign(Object.create(null), fields) as MonthDayBagStrict,
         { overflow: overflowMapNames[overflow] }
       )
     )
