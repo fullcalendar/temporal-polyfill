@@ -31,6 +31,7 @@ yargs(hideBin(process.argv))
       })
       builder.option('max', {
         requiresArg: false,
+        default: 10,
         type: 'number',
         description: 'Maxiumum allowed number of failures before aborting'
       })
@@ -59,7 +60,8 @@ yargs(hideBin(process.argv))
         testGlobs: parsedArgv._,
         timeoutMsecs: parsedArgv.timeout,
         updateExpectedFailureFiles: parsedArgv.updateExpectedFailureFiles,
-        maxFailures: parsedArgv.max
+        maxFailures: parsedArgv.max,
+        fullPath: true
       });
 
       process.exit(result ? 0 : 1);
