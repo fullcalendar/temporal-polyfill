@@ -27,7 +27,7 @@ yargs(hideBin(process.argv))
         requiresArg: false,
         default: 30000,
         type: 'number',
-        description: 'Milliseconds allowance for a single test file to run'
+        description: 'Millisecond allowance for a single test file to run'
       })
       builder.option('max', {
         requiresArg: false,
