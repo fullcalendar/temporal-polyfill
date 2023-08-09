@@ -41,6 +41,9 @@ const getDurationInternals = getStrictInternals.bind<
 >(undefined, Duration)
 
 const calendarOpsAdapterMethods = {
+  /*
+  TODO: due to era/eraYear-related 'crap' hack, ensure not accessed?
+  */
   ...mapProps((refiner: Callable, propName) => {
     return ((calendar: CalendarProtocol, isoDateFields: IsoDateFields) => {
       // HACK: hopefully `calendar` not accessed

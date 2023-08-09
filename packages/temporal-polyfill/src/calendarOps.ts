@@ -9,6 +9,9 @@ import { CalendarInternals } from './isoInternals'
 import { BoundArg } from './utils'
 
 export interface CalendarOps {
+  /*
+  TODO: due to era/eraYear-related 'crap' hack, make optional?
+  */
   id: string
   era(isoFields: IsoDateFields): string | undefined
   eraYear(isoFields: IsoDateFields): number | undefined

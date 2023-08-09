@@ -162,7 +162,12 @@ const calendarProtocolMethods = {
   },
 }
 
-export const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethods)
+// HACK to not require era-related methods
+const crap = { ...calendarProtocolMethods } as any
+delete crap.era
+delete crap.eraYear
+
+export const checkCalendarProtocol = createProtocolChecker(crap as typeof calendarProtocolMethods)
 
 const calendarMethods = {
   ...calendarProtocolMethods,
