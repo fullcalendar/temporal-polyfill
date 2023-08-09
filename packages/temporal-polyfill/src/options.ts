@@ -663,7 +663,7 @@ function refineChoiceOption<O>(
   }
 
   const enumNum = enumNameMap[enumName]
-  if (enumNum < 0) {
+  if (enumNum === undefined) {
     throw new RangeError('Must be one of the choices')
   }
   return enumNum
