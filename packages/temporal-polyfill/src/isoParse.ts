@@ -8,7 +8,7 @@ import {
   negateDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoTimeFields, isoTimeFieldDefaults, constrainIsoTimeFields } from './isoFields'
+import { IsoTimeFields, constrainIsoTimeFields } from './isoFields'
 import {
   IsoDateInternals,
   IsoDateTimeInternals,
@@ -17,6 +17,7 @@ import {
 } from './isoInternals'
 import {
   checkIsoInBounds,
+  isoEpochFirstLeapYear,
   isoToEpochNano,
   nanoToIsoTimeAndDay,
 } from './isoMath'
@@ -186,6 +187,7 @@ function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals 
     EpochDisambig.Compat,
     true, // fuzzy
   )
+
   return {
     epochNanoseconds,
     timeZone: parsed.timeZone,
@@ -228,7 +230,9 @@ function parseMonthDay(s: string): IsoDateInternals | undefined {
 
 function parseTime(s: string): IsoTimeFields | undefined {
   const parts = timeRegExp.exec(s)
-  return parts ? parseTimeParts(parts.slice(1)) : undefined
+  return parts
+    ? (parseAnnotations(parts[5]), parseTimeParts(parts)) // validate annotations
+    : undefined
 }
 
 function parseDurationInternals(s: string): DurationInternals | undefined {
@@ -238,51 +242,49 @@ function parseDurationInternals(s: string): DurationInternals | undefined {
 
 export function maybeParseOffsetNano(s: string): number | undefined {
   const parts = offsetRegExp.exec(s)
-  return parts ?  parseOffsetParts(parts.slice(1)) : undefined
+  return parts ?  parseOffsetParts(parts) : undefined
 }
 
 // RegExp & Parts
 // -------------------------------------------------------------------------------------------------
 
-const plusOrMinusRegExpStr = '([+-\u2212])'
-const fractionRegExpStr = '([.,](\\d{1,9}))?'
+const signRegExpStr = '([+-\u2212])' // outer captures
+const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
 
 const yearMonthRegExpStr =
-  `(${plusOrMinusRegExpStr}?\\d{6}|\\d{4})` + // 0:yearSign, 1:year
-  '-?(\\d{2})' // 2:month
-  // 3:annotations
+  `(?:${signRegExpStr}?(\\d{6})|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
+  '-?(\\d{2})' // 4:month
 
 const dateRegExpStr =
-  yearMonthRegExpStr + // 0:yearSign, 1:year, 2:month
-  '-?(\\d{2})' // 3:day
+  yearMonthRegExpStr + // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:month
+  '-?(\\d{2})' // 5:day
 
 const monthDayRegExpStr =
   '(--)?(\\d{2})' + // 1:month
   '-?(\\d{2})' // 2:day
-  // 3:annotations
 
 const timeRegExpStr =
-  '(\\d{2})' + // 0:hour
-  '(:?(\\d{2})' + // 2:minute (NOTE: ':?' means optional ':')
-  '(:?(\\d{2})' + // 4:second
-  fractionRegExpStr + // 6:afterDecimal
-  ')?)?'
-  // 7:annotations
+  '(\\d{2})' + // 1:hour
+  '(?::?(\\d{2})' + // 2:minute
+  '(?::?(\\d{2})' + // 3:second
+  fractionRegExpStr + // 4:afterDecimal
+  ')?' +
+  ')?'
 
 const offsetRegExpStr =
-  plusOrMinusRegExpStr + // 0:plusOrMinus
-  timeRegExpStr // 1:hour, 3:minute, 5:second, 7:afterDecimal
+  signRegExpStr + // 1:offsetSign
+  timeRegExpStr // 2:hour, 3:minute, 4:second, 5:afterDecimal
 
 const dateTimeRegExpStr =
-  dateRegExpStr + // 0:yearSign, 1:year, 2:month, 3:day
-  '([T ]' + // 4:timeEverything
-  timeRegExpStr + // 5:hour, 7:minute, 9:second, 11:afterDecimal
-  '(Z|' + // 12:zOrOffset
-  offsetRegExpStr + // 13:plusOrMinus, 14:hour, 16:minute, 18:second, 20:afterDecimal
-  ')?)?'
-  // 21:annotations
+  dateRegExpStr + // // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:month, 5:day
+  '(?:[T ]' +
+  timeRegExpStr + // 6:hour, 7:minute, 8:second, 9:afterDecimal
+  '(Z|' + // 10:zOrOffset
+  offsetRegExpStr + // 11:offsetSign, 12:hour, 13:minute, 14:second, 15:afterDecimal
+  ')?' +
+  ')?'
 
-const annotationRegExpStr = '((\\[[^\\]]*\\])*)'
+const annotationRegExpStr = '((?:\\[[^\\]]*\\])*)'
 
 const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationRegExpStr)
 const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationRegExpStr)
@@ -291,15 +293,15 @@ const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationRegExpStr)
 const offsetRegExp = createRegExp(offsetRegExpStr) // annotations not allowed
 
 const durationRegExp = createRegExp(
-  `${plusOrMinusRegExpStr}?P` + // 0:sign
-  '(\\d+Y)?' + // 1:years
-  '(\\d+M)?' + // 2:months
-  '(\\d+W)?' + // 3:weeks
-  '(\\d+D)?' + // 4:days
-  '(T' + // 5:hasTimes
-  `((\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
-  `((\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
-  `((\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
+  `${signRegExpStr}?P` + // 1:sign
+  '(\\d+Y)?' + // 2:years
+  '(\\d+M)?' + // 3:months
+  '(\\d+W)?' + // 4:weeks
+  '(\\d+D)?' + // 5:days
+  '(?:T' +
+  `(?:(\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
+  `(?:(\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
+  `(?:(\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
   ')?',
 )
 
@@ -317,84 +319,69 @@ type ZonedDateTimeParsed = IsoDateTimeInternals & {
   offset: string | undefined
 }
 
-/*
-0 is whole-match
-*/
 function parseDateTimeParts(parts: string[]): DateTimeParsed {
-  const offsetOrZ = parts[13]
-  const hasZ = offsetOrZ === 'Z'
-  const hasTime = Boolean(parts[5]) // boolean-like
+  const hasTime = Boolean(parts[6])
+  const zOrOffset = parts[10]
+  const hasZ = zOrOffset === 'Z'
 
   return {
     isoYear: parseIsoYearParts(parts),
-    isoMonth: parseInt(parts[3]),
-    isoDay: parseInt(parts[4]),
-    ...(hasTime
-      ? parseTimeParts(parts.slice(6)) // parses annotations
-      : { ...isoTimeFieldDefaults, ...parseAnnotations(parts[22]) }
-    ),
+    isoMonth: parseInt(parts[4]),
+    isoDay: parseInt(parts[5]),
+    ...parseTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
+    ...parseAnnotations(parts[16]),
     hasTime,
     hasZ,
-    offset: hasZ ? undefined : offsetOrZ,
+    offset: hasZ ? undefined : zOrOffset,
   }
 }
 
-/*
-0 is whole-match
-*/
 function parseYearMonthParts(parts: string[]): IsoDateInternals {
   return {
     isoYear: parseIsoYearParts(parts),
-    isoMonth: parseInt(parts[3]),
+    isoMonth: parseInt(parts[4]),
     isoDay: 1,
-    ...parseAnnotations(parts[4]),
+    ...parseAnnotations(parts[5]),
   }
 }
 
-/*
-0 is whole-match
-*/
 function parseMonthDayParts(parts: string[]): IsoDateInternals {
   return {
-    isoYear: parseInt(parts[1]),
-    isoMonth: parseInt(parts[2]),
-    isoDay: 1,
+    isoYear: isoEpochFirstLeapYear,
+    isoMonth: parseInt(parts[1]),
+    isoDay: parseInt(parts[2]),
     ...parseAnnotations(parts[3]),
   }
 }
 
-/*
-0 is whole-match
-*/
 function parseIsoYearParts(parts: string[]): number {
   const yearSign = parseSign(parts[1])
-  const year = parseInt(parts[2])
+  const year = parseInt(parts[2] || parts[3])
+
   if (yearSign < 0 && !year) {
     throw new RangeError('Negative zero not allowed')
   }
+
   return yearSign * year
 }
 
-/*
-validated annotations as well
-*/
-function parseTimeParts(parts: string[]): IsoTimeFields & AnnotationsParsed {
-  const isoSecond = parseInt0(parts[4])
+function parseTimeParts(parts: string[]): IsoTimeFields {
+  const isoSecond = parseInt0(parts[3])
+
   return {
-    ...nanoToIsoTimeAndDay(parseSubsecNano(parts[6] || ''))[0],
-    isoHour: parseInt0(parts[0]),
+    ...nanoToIsoTimeAndDay(parseSubsecNano(parts[4] || ''))[0],
+    isoHour: parseInt0(parts[1]),
     isoMinute: parseInt0(parts[2]),
     isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage leap-second
-    ...parseAnnotations(parts[16]),
   }
 }
 
 function parseOffsetParts(parts: string[]): number {
-  return parseSign(parts[0]) * (
-    parseInt0(parts[0]) * nanoInHour +
-    parseInt0(parts[2]) * nanoInMinute +
+  return parseSign(parts[1]) * (
+    parseInt0(parts[2]) * nanoInHour +
+    parseInt0(parts[3]) * nanoInMinute +
     parseInt0(parts[4]) * nanoInSec +
-    parseSubsecNano(parts[6] || '')
+    parseSubsecNano(parts[5] || '')
   )
 }
 
@@ -407,9 +394,9 @@ function parseDurationParts(parts: string[]): DurationInternals {
     months: parseUnit(parts[3]),
     weeks: parseUnit(parts[4]),
     days: parseUnit(parts[5]),
-    hours: parseUnit(parts[7], parts[8], Unit.Hour),
-    minutes: parseUnit(parts[9], parts[10], Unit.Minute),
-    seconds: parseUnit(parts[11], parts[12], Unit.Second),
+    hours: parseUnit(parts[6], parts[7], Unit.Hour),
+    minutes: parseUnit(parts[8], parts[9], Unit.Minute),
+    seconds: parseUnit(parts[10], parts[11], Unit.Second),
     ...nanoToGivenFields(leftoverNano, Unit.Millisecond, durationFieldNamesAsc),
   } as DurationFields
 
@@ -504,10 +491,10 @@ function createRegExp(meat: string): RegExp {
   return new RegExp(`^${meat}$`, 'i')
 }
 
-function parseSign(s: string): number {
+function parseSign(s: string | undefined): number {
   return !s || s === '+' ? 1 : -1
 }
 
-function parseInt0(s: string): number {
+function parseInt0(s: string | undefined): number {
   return s === undefined ? 0 : parseInt(s)
 }

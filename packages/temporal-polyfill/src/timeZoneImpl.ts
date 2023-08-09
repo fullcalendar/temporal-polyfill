@@ -20,18 +20,21 @@ const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
 const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
 
-const queryIntlTimeZoneImpl = createLazyGenerator((timeZoneId: string) => {
-  return new IntlTimeZoneImpl(timeZoneId)
+const queryCacheableTimeZoneImpl = createLazyGenerator((timeZoneId: string): TimeZoneImpl => {
+  return timeZoneId === 'utc'
+    ? new FixedTimeZoneImpl(timeZoneId, 0)
+    : new IntlTimeZoneImpl(timeZoneId)
 })
 
 export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
-  const offsetNano = maybeParseOffsetNano(timeZoneId)
+  timeZoneId = timeZoneId.toLowerCase()
 
+  const offsetNano = maybeParseOffsetNano(timeZoneId)
   if (offsetNano !== undefined) {
     return new FixedTimeZoneImpl(timeZoneId, offsetNano)
   }
 
-  return queryIntlTimeZoneImpl(timeZoneId)
+  return queryCacheableTimeZoneImpl(timeZoneId)
 }
 
 export interface TimeZoneImpl extends TimeZoneOps {

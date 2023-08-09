@@ -620,11 +620,13 @@ const calendarImplClasses: {
   [japaneseCalendarId]: JapaneseCalendarImpl,
 }
 
-const queryCalendarImplWithClass = createLazyGenerator((calendarId, CalendarImplClass) => {
+const queryCacheableCalendarImpl = createLazyGenerator((calendarId, CalendarImplClass) => {
   return new CalendarImplClass(calendarId)
 })
 
 export function queryCalendarImpl(calendarId: string): CalendarImpl {
+  calendarId = calendarId.toLowerCase()
+
   const calendarIdBase = getCalendarIdBase(calendarId)
   const CalendarImplClass = calendarImplClasses[calendarIdBase]
 
@@ -632,7 +634,7 @@ export function queryCalendarImpl(calendarId: string): CalendarImpl {
     calendarId = calendarIdBase
   }
 
-  return queryCalendarImplWithClass(calendarId, CalendarImplClass || IntlCalendarImpl)
+  return queryCacheableCalendarImpl(calendarId, CalendarImplClass || IntlCalendarImpl)
 }
 
 // IntlFields Querying
