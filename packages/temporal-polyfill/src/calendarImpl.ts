@@ -244,8 +244,14 @@ export class CalendarImpl implements CalendarOps {
       }
 
       month = monthByCode
+      overflow = Overflow.Reject // monthCode parsing doesn't constrain
     } else if (month === undefined) {
       throw new TypeError('Must specify either month or monthCode')
+    }
+
+    // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
+    if (month <= 0) {
+      throw new RangeError('Below zero')
     }
 
     return clamp(
@@ -263,6 +269,11 @@ export class CalendarImpl implements CalendarOps {
     year: number,
     overflow?: Overflow
   ): number {
+    // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
+    if (fields.day <= 0) {
+      throw new RangeError('Below zero')
+    }
+
     return clamp(
       fields.day,
       1,
