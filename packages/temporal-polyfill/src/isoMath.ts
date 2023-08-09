@@ -134,10 +134,10 @@ export function checkIsoInBounds<T extends IsoDateFields>(isoFields: T): T {
 export function checkEpochNanoInBounds(epochNano: LargeInt | undefined): LargeInt {
   if (
     epochNano === undefined ||
-    compareLargeInts(epochNano, epochNanoMin) === 1 || // epochNano < epochNanoMin
-    compareLargeInts(epochNanoMax, epochNano) === 1 // epochNanoMax < epochNano
+    compareLargeInts(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
+    compareLargeInts(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {
-    throw new RangeError('aahh')
+    throw new RangeError('epochNanoseconds out of range')
   }
   return epochNano
 }
