@@ -156,24 +156,24 @@ export const excludeUndefinedProps = filterProps.bind(undefined, (
   <P>(props: P) => Partial<P>
 )
 
-export function hasAnyPropsByName<P>(
+export function hasAnyPropsByName<P extends {}>(
   props: P,
   names: (keyof P)[]
 ): boolean {
   for (const name of names) {
-    if (props[name] !== undefined) {
+    if (name in props) {
       return true
     }
   }
   return false
 }
 
-export function hasAllPropsByName<P>(
+export function hasAllPropsByName<P extends {}>(
   props: P,
   names: (keyof P)[]
 ): boolean {
   for (const name of names) {
-    if (props[name] === undefined) {
+    if (!(name in props)) {
       return false
     }
   }

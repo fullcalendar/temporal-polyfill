@@ -1,8 +1,8 @@
 import { CalendarArg, CalendarProtocol } from './calendar'
 import {
-  getRequiredDateFields,
-  getRequiredMonthDayFields,
-  getRequiredYearMonthFields,
+  requiredDateFields,
+  requiredMonthDayFields,
+  requiredYearMonthFields,
   isoCalendarId,
 } from './calendarConfig'
 import {
@@ -28,7 +28,6 @@ import { CalendarOps } from './calendarOps'
 import { TemporalInstance, getInternals } from './class'
 import { DurationBag, DurationMod } from './duration'
 import {
-  DurationFields,
   DurationInternals,
   durationFieldDefaults,
   durationFieldNames,
@@ -80,7 +79,7 @@ export function refineMaybeZonedDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames, // validFieldNames
-    getRequiredDateFields(calendar), // requireFields
+    requiredDateFields, // requireFields
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
@@ -124,7 +123,7 @@ export function refineZonedDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames, // validFieldNames
-    [...getRequiredDateFields(calendar), 'timeZone'], // requireFields
+    [...requiredDateFields, 'timeZone'], // requireFields
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
@@ -225,7 +224,7 @@ export function refinePlainDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames,
-    getRequiredDateFields(calendar),
+    requiredDateFields,
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
@@ -267,7 +266,7 @@ export function refinePlainDateBag(
     calendar,
     bag,
     dateFieldNames,
-    getRequiredDateFields(calendar),
+    requiredDateFields,
   )
 
   return calendar.dateFromFields(fields, refineOverflowOptions(options))
@@ -301,7 +300,7 @@ function convertToIso(
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
   extraFieldNames = calendar.fields(extraFieldNames)
-  extra = refineFields(extra, extraFieldNames, getRequiredDateFields(calendar))
+  extra = refineFields(extra, extraFieldNames, requiredDateFields)
 
   let mergedFields = calendar.mergeFields(input, extra)
   const mergedFieldNames = excludeArrayDuplicates([...inputFieldNames, ...extraFieldNames])
@@ -322,7 +321,7 @@ export function refinePlainYearMonthBag(
     calendar,
     bag,
     yearMonthFieldNames,
-    getRequiredYearMonthFields(calendar),
+    requiredYearMonthFields,
   )
 
   return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
@@ -364,7 +363,7 @@ export function convertToPlainYearMonth(
     calendar,
     input,
     yearMonthBasicNames,
-    getRequiredYearMonthFields(calendar),
+    requiredYearMonthFields,
   )
 
   return createPlainYearMonth(
@@ -425,7 +424,7 @@ export function convertToPlainMonthDay(
     calendar,
     input,
     monthDayBasicNames,
-    getRequiredMonthDayFields(calendar),
+    requiredMonthDayFields,
   )
 
   return createPlainMonthDay(

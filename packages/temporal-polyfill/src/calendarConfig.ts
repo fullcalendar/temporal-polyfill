@@ -1,4 +1,4 @@
-import { CalendarOps } from './calendarOps'
+import { CalendarImpl } from './calendarImpl'
 
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
@@ -62,12 +62,12 @@ export const eraRemaps: Record<string, string> = {
   ad: 'ce',
 }
 
-export function getAllowErasInFields(calendarOps: CalendarOps): boolean {
-  return calendarOps.id !== isoCalendarId
+export function getAllowErasInFields(calendarImpl: CalendarImpl): boolean {
+  return calendarImpl.id !== isoCalendarId
 }
 
-export function getErasBeginMidYear(calendarOps: CalendarOps): boolean {
-  return calendarOps.id === japaneseCalendarId
+export function getErasBeginMidYear(calendarImpl: CalendarImpl): boolean {
+  return calendarImpl.id === japaneseCalendarId
 }
 
 export const leapYearMetas: {
@@ -81,28 +81,6 @@ export const leapYearMetas: {
 // Required Fields
 // -------------------------------------------------------------------------------------------------
 
-const defaultRequiredDateFields = ['day']
-const defaultRequiredYearMonthFields: string[] = []
-const defaultRequiredMonthDayFields = ['day']
-
-const isoRequiredDateFields = [...defaultRequiredDateFields, 'year']
-const isoRequiredYearMonthFields = [...defaultRequiredYearMonthFields, 'year']
-const isoRequiredMonthDayFields = defaultRequiredMonthDayFields
-
-export function getRequiredDateFields(calendarOps: CalendarOps): string[] {
-  return calendarOps.id === isoCalendarId
-    ? isoRequiredDateFields
-    : defaultRequiredDateFields
-}
-
-export function getRequiredYearMonthFields(calendarOps: CalendarOps): string[] {
-  return calendarOps.id === isoCalendarId
-    ? isoRequiredYearMonthFields
-    : defaultRequiredYearMonthFields
-}
-
-export function getRequiredMonthDayFields(calendarOps: CalendarOps): string[] {
-  return calendarOps.id === isoCalendarId
-    ? isoRequiredMonthDayFields
-    : defaultRequiredMonthDayFields
-}
+export const requiredDateFields: string[] = ['day']
+export const requiredYearMonthFields: string[] = []
+export const requiredMonthDayFields: string[] = ['day'] // TODO: same as date. DRY

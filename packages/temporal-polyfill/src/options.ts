@@ -686,7 +686,7 @@ function normalizeUnitNameOptions<O extends {}>(
   return ensureObjectlike(options)
 }
 
-function mustHaveMatch<O>(
+function mustHaveMatch<O extends {}>(
   props: O,
   propNames: (keyof O)[],
 ): void {
