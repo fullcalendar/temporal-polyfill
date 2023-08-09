@@ -69,6 +69,9 @@ export function createWrapperClass<
   WrapperClass<A, I, G, M, P, S>
 ) {
   function InternalObj(this: WrapperInstance<I, G, M, P>, ...args: A) {
+    if (!new.target) {
+      throw new TypeError('Must be called with new')
+    }
     internalsMap.set(this, constructorToInternals(...args))
     handleInstance(this)
   }
