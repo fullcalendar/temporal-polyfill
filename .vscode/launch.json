@@ -15,7 +15,7 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test262", "--no-timeout", "${file}"],
+      "runtimeArgs": ["run", "test", "--timeout", "1000000", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true
