@@ -19,7 +19,7 @@ import { parseTimeZoneId } from './isoParse'
 import { LargeInt } from './largeInt'
 import { moveDateByDays } from './move'
 import { EpochDisambig, OffsetDisambig } from './options'
-import { ensureArray, ensureString } from './cast'
+import { ensureNumber, ensureString } from './cast'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone, timeZoneProtocolMethods } from './timeZone'
@@ -254,11 +254,9 @@ const timeZoneOpsAdapterMethods = {
   },
 
   getPossibleInstantsFor(timeZone: TimeZoneProtocol, isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
-    return ensureArray(
-      timeZone.getPossibleInstantsFor(
-        createPlainDateTime(isoDateTimeFields as IsoDateTimeInternals) // HACK: hope Calendar isn't needed
-      )
-    ).map(getInstantEpochNano)
+    return [...timeZone.getPossibleInstantsFor(
+      createPlainDateTime(isoDateTimeFields as IsoDateTimeInternals) // HACK: hope Calendar isn't needed
+    )].map(getInstantEpochNano)
   },
 }
 
@@ -276,7 +274,7 @@ const TimeZoneOpsAdapter = createWrapperClass<
 >(idGettersStrict, timeZoneOpsAdapterMethods)
 
 function validateOffsetNano(offsetNano: number): number {
-  if (!Number.isInteger(offsetNano)) { // will return false on non-number (good)
+  if (!Number.isInteger(ensureNumber(offsetNano))) {
     throw new RangeError('must be integer number')
   }
 

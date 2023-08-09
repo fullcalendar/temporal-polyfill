@@ -128,7 +128,7 @@ const calendarOpsAdapterMethods = {
 
   fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
     fieldNames = [...calendar.fields(fieldNames)] // TODO: kill ensureArray elsewhere?
-    fieldNames = fieldNames.map(ensureString)
+      .map(ensureString)
 
     const fieldNameSet = new Set(fieldNames)
     if (fieldNameSet.size !== fieldNames.length) {
