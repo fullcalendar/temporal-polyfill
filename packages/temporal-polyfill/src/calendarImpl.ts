@@ -341,7 +341,13 @@ interface MiscMethods {
 
 const miscMethods: MiscMethods = {
   addMonths: moveByIsoMonths,
-  queryDateStart: isoArgsToEpochMilli as (year: number, month?: number, day?: number) => number,
+  queryDateStart(year: number, month?: number, day?: number) {
+    const epochMilli = isoArgsToEpochMilli(year, month, day)
+    if (epochMilli === undefined) { // YUCK
+      throw new RangeError('Out of range')
+    }
+    return epochMilli
+  },
   queryDaysInMonth: computeIsoDaysInMonth,
   queryMonthsInYearSpan: computeIsoMonthsInYearSpan,
 }
