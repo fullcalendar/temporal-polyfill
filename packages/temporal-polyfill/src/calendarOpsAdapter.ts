@@ -137,6 +137,9 @@ const calendarOpsAdapterMethods = {
     if (fieldNameSet.has('constructor')) {
       throw new RangeError('Cant have constructor field')
     }
+    if (fieldNameSet.has('__proto__')) {
+      throw new RangeError('Cant have __proto__ field')
+    }
 
     return fieldNames
   },
