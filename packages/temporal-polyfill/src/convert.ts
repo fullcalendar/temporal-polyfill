@@ -596,7 +596,7 @@ function refineFields(
 
       res[fieldName] = fieldVal
     } else if (requiredFieldNames) {
-      if (requiredFieldNames.includes(fieldName)) {
+      if (requiredFieldNames.includes(fieldName)) { // TODO: have caller use a Set
         throw new TypeError('Missing required field name')
       }
 

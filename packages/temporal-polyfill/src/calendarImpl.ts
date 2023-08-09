@@ -223,7 +223,7 @@ export class CalendarImpl implements CalendarOps {
 
       year = yearByEra
     } else if (year === undefined) {
-      throw new RangeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
+      throw new TypeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
     }
 
     return year
@@ -245,7 +245,7 @@ export class CalendarImpl implements CalendarOps {
 
       month = monthByCode
     } else if (month === undefined) {
-      throw new RangeError('Must specify either month or monthCode')
+      throw new TypeError('Must specify either month or monthCode')
     }
 
     return clamp(

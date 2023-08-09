@@ -8,3 +8,5 @@ built-ins/Temporal/Calendar/length.js
 built-ins/Temporal/Calendar/name.js
 built-ins/Temporal/Calendar/prototype/dateAdd/length.js
 built-ins/Temporal/Calendar/prototype/dateAdd/name.js
+built-ins/Temporal/Calendar/prototype/dateFromFields/length.js
+built-ins/Temporal/Calendar/prototype/dateFromFields/name.js
