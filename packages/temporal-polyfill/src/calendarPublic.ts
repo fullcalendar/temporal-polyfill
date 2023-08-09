@@ -2,7 +2,7 @@ import { Calendar, CalendarArg, CalendarProtocol, checkCalendarProtocol, createC
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { getInternals, TemporalInstance } from './class'
 import { parseCalendarId } from './isoParse'
-import { toString } from './cast'
+import { ensureString } from './cast'
 import { isObjectlike } from './utils'
 import { CalendarOpsAdapter } from './calendarOpsAdapter'
 import { CalendarOps } from './calendarOps'
@@ -23,7 +23,7 @@ export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol 
       )
   }
 
-  return createCalendar(queryCalendarImpl(parseCalendarId(toString(calendarArg))))
+  return createCalendar(queryCalendarImpl(parseCalendarId(ensureString(calendarArg))))
 }
 
 export function getPublicCalendar(internals: { calendar: CalendarOps }): CalendarProtocol {

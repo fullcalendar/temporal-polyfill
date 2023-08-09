@@ -1,5 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { parseIntlYear } from './calendarImpl'
+import { ensureString } from './cast'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
 import {
@@ -27,7 +28,8 @@ const queryCacheableTimeZoneImpl = createLazyGenerator((timeZoneId: string): Tim
 })
 
 export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
-  timeZoneId = timeZoneId.toLowerCase()
+  // TODO: fix double-call of ensureString
+  timeZoneId = ensureString(timeZoneId).toLowerCase()
 
   const offsetNano = maybeParseOffsetNano(timeZoneId)
   if (offsetNano !== undefined) {

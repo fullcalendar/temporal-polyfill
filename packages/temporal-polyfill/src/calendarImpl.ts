@@ -53,6 +53,7 @@ import { Unit, milliInDay } from './units'
 import { Callable, clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
+import { ensureString } from './cast'
 
 // Base Calendar Implementation
 // -------------------------------------------------------------------------------------------------
@@ -625,7 +626,8 @@ const queryCacheableCalendarImpl = createLazyGenerator((calendarId, CalendarImpl
 })
 
 export function queryCalendarImpl(calendarId: string): CalendarImpl {
-  calendarId = calendarId.toLowerCase()
+  // TODO: fix double-call of ensureString
+  calendarId = ensureString(calendarId).toLowerCase()
 
   const calendarIdBase = getCalendarIdBase(calendarId)
   const CalendarImplClass = calendarImplClasses[calendarIdBase]

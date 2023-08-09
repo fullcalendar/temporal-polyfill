@@ -19,7 +19,7 @@ import { parseTimeZoneId } from './isoParse'
 import { LargeInt } from './largeInt'
 import { moveDateByDays } from './move'
 import { EpochDisambig, OffsetDisambig } from './options'
-import { ensureArray, toString } from './cast'
+import { ensureArray, ensureString } from './cast'
 import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
 import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone, timeZoneProtocolMethods } from './timeZone'
@@ -57,7 +57,7 @@ export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
     )
   }
 
-  return queryTimeZoneImpl(parseTimeZoneId(toString(timeZoneArg)))
+  return queryTimeZoneImpl(parseTimeZoneId(ensureString(timeZoneArg)))
 }
 
 export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol {
@@ -76,7 +76,7 @@ export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol 
       )
   }
 
-  return createTimeZone(queryTimeZoneImpl(parseTimeZoneId(toString(timeZoneArg))))
+  return createTimeZone(queryTimeZoneImpl(parseTimeZoneId(ensureString(timeZoneArg))))
 }
 
 export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZoneProtocol {

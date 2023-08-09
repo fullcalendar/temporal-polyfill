@@ -2,7 +2,7 @@ import { Calendar, CalendarArg, CalendarProtocol, checkCalendarProtocol } from '
 import { queryCalendarImpl } from './calendarImpl'
 import { getInternals, TemporalInstance } from './class'
 import { parseCalendarId } from './isoParse'
-import { toString } from './cast'
+import { ensureString } from './cast'
 import { isObjectlike } from './utils'
 import { CalendarOps } from './calendarOps'
 import { CalendarOpsAdapter } from './calendarOpsAdapter'
@@ -21,5 +21,5 @@ export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
     )
   }
 
-  return queryCalendarImpl(parseCalendarId(toString(calendarArg)))
+  return queryCalendarImpl(parseCalendarId(ensureString(calendarArg)))
 }
