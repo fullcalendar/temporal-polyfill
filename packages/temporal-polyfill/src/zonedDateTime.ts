@@ -422,14 +422,14 @@ export const [
 function moveZonedDateTime(
   internals: ZonedInternals,
   durationFields: DurationFields,
-  overflowHandling: Overflow
+  overflow?: Overflow
 ): ZonedDateTime {
   const epochNano = moveZonedEpochNano(
     internals.calendar,
     internals.timeZone,
     internals.epochNanoseconds,
     durationFields,
-    overflowHandling,
+    overflow,
   )
   return createZonedDateTime({
     ...internals,

@@ -469,7 +469,7 @@ export function mergePlainTimeBag(
   return refineTimeBag(mergeFields, refineOverflowOptions(options))
 }
 
-function refineTimeBag(fields: TimeBag, overflow: Overflow): IsoTimeFields {
+function refineTimeBag(fields: TimeBag, overflow?: Overflow): IsoTimeFields {
   return constrainIsoTimeFields(timeFieldsToIso({ ...timeFieldDefaults, ...fields }), overflow)
 }
 

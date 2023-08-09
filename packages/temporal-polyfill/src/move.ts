@@ -33,7 +33,7 @@ export function moveZonedEpochNano(
   timeZone: TimeZoneOps,
   epochNano: LargeInt,
   durationFields: DurationFields,
-  overflowHandling: Overflow,
+  overflow?: Overflow,
 ): LargeInt {
   const durationTimeNano = isoTimeFieldsToNano(durationTimeFieldsToIso(durationFields))
 
@@ -47,7 +47,7 @@ export function moveZonedEpochNano(
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
       }),
-      overflowHandling,
+      overflow,
     )
     const movedIsoDateTimeFields = {
       ...isoDateTimeFields, // time parts
@@ -75,7 +75,7 @@ export function moveDateTime(
   calendar: CalendarOps,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
-  overflowHandling: Overflow,
+  overflow?: Overflow,
 ): IsoDateTimeFields {
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
@@ -86,7 +86,7 @@ export function moveDateTime(
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
     }),
-    overflowHandling,
+    overflow,
   )
 
   return {
@@ -99,7 +99,7 @@ export function moveDate(
   calendar: CalendarImpl,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
-  overflowHandling: Overflow,
+  overflow?: Overflow,
 ): IsoDateInternals {
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
@@ -113,14 +113,14 @@ export function moveDate(
 
     if (years) {
       year += years
-      month = clamp(month, 1, calendar.computeMonthsInYear(year), overflowHandling, 'month')
+      month = clamp(month, 1, calendar.computeMonthsInYear(year), overflow, 'month')
     }
 
     if (months) {
       ([year, month] = calendar.addMonths(year, month, months))
     }
 
-    day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflowHandling, 'day')
+    day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflow, 'day')
 
     epochMilli = calendar.queryDateStart(year, month, day)
   } else if (weeks || days) {

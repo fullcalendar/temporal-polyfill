@@ -23,7 +23,7 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { LargeInt } from './largeInt'
-import { EpochDisambig, OffsetDisambig } from './options'
+import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import {
@@ -141,7 +141,7 @@ export function parsePlainTime(s: string): IsoTimeFields {
     throw new RangeError()
   }
 
-  return constrainIsoTimeFields(parsed)
+  return constrainIsoTimeFields(parsed, Overflow.Reject)
 }
 
 export function parseDuration(s: string): DurationInternals {
@@ -206,7 +206,7 @@ function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals 
 }
 
 function processDateTimeParse(parsed: DateTimeParsed): IsoDateTimeInternals {
-  return checkIsoInBounds(constrainIsoDateTimeInternals(parsed))
+  return checkIsoInBounds(constrainIsoDateTimeInternals(parsed, Overflow.Reject))
 }
 
 /*
@@ -216,7 +216,7 @@ function processDatelikeParse(parsed: IsoDateInternals | undefined): IsoDateInte
   if (!parsed) {
     throw new RangeError()
   }
-  return checkIsoInBounds(constrainIsoDateInternals(parsed))
+  return checkIsoInBounds(constrainIsoDateInternals(parsed, Overflow.Reject))
 }
 
 // Low-level

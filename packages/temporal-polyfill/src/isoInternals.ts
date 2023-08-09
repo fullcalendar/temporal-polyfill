@@ -128,10 +128,11 @@ export function refineIsoDateInternals(
 
 export function constrainIsoDateTimeInternals(
   isoDateTimeFields: IsoDateTimeInternals,
+  overflow?: Overflow,
 ): IsoDateTimeInternals {
   return {
-    ...constrainIsoDateInternals(isoDateTimeFields),
-    ...constrainIsoTimeFields(isoDateTimeFields),
+    ...constrainIsoDateInternals(isoDateTimeFields, overflow),
+    ...constrainIsoTimeFields(isoDateTimeFields, overflow),
   }
 }
 
@@ -148,7 +149,7 @@ export function constrainIsoDateInternals<P extends IsoDateFields>(
 ): P | undefined
 export function constrainIsoDateInternals<P extends IsoDateFields>(
   isoInternals: P,
-  overflow: Overflow | -1 = Overflow.Reject,
+  overflow?: Overflow | -1,
 ): P | undefined {
   const isoMonth = clampProp(
     isoInternals as IsoDateFields,

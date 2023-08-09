@@ -288,7 +288,7 @@ export function clamp(
   num: number,
   min: number,
   max: number,
-  overflow: Overflow | -1, // might be Overflow.Reject, require noun
+  overflow: Overflow | -1 | undefined, // might be Overflow.Reject, require noun
   noun: string,
 ): number
 export function clamp(
@@ -315,7 +315,7 @@ export function clampProp<P>(
   propName: keyof FilterPropValues<P, number> & string,
   min: number,
   max: number,
-  overflow: Overflow | -1,
+  overflow?: Overflow | -1,
 ): number {
   return clamp(props[propName] as number, min, max, overflow, propName)
 }

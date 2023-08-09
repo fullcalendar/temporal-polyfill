@@ -58,13 +58,13 @@ const calendarOpsAdapterMethods = {
     calendar: CalendarProtocol,
     isoDateFields: IsoDateInternals,
     durationInternals: DurationInternals,
-    overflow: Overflow
+    overflow?: Overflow
   ): IsoDateInternals {
     return getPlainDateInternals(
       calendar.dateAdd(
         createPlainDate(isoDateFields),
         createDuration(durationInternals),
-        { overflow: overflowMapNames[overflow] }
+        overflow === undefined ? undefined : { overflow: overflowMapNames[overflow] }
       )
     )
   },
@@ -87,13 +87,13 @@ const calendarOpsAdapterMethods = {
   dateFromFields(
     calendar: CalendarProtocol,
     fields: DateBag,
-    overflow: Overflow
+    overflow?: Overflow
   ): IsoDateInternals {
     return getPlainDateInternals(
       calendar.dateFromFields(
         // TODO: make util
         Object.assign(Object.create(null), fields) as DateBagStrict,
-        { overflow: overflowMapNames[overflow] }
+        overflow === undefined ? undefined : { overflow: overflowMapNames[overflow] }
       )
     )
   },
@@ -101,13 +101,13 @@ const calendarOpsAdapterMethods = {
   yearMonthFromFields(
     calendar: CalendarProtocol,
     fields: YearMonthBag,
-    overflow: Overflow
+    overflow?: Overflow
   ): IsoDateInternals {
     return getPlainYearMonthInternals(
       calendar.yearMonthFromFields(
         // TODO: make util
         Object.assign(Object.create(null), fields) as YearMonthBagStrict,
-        { overflow: overflowMapNames[overflow] }
+        overflow === undefined ? undefined : { overflow: overflowMapNames[overflow] }
       )
     )
   },
@@ -115,13 +115,13 @@ const calendarOpsAdapterMethods = {
   monthDayFromFields(
     calendar: CalendarProtocol,
     fields: MonthDayBag,
-    overflow: Overflow
+    overflow?: Overflow
   ): IsoDateInternals {
     return getPlainMonthDayInternals(
       calendar.monthDayFromFields(
         // TODO: make util
         Object.assign(Object.create(null), fields) as MonthDayBagStrict,
-        { overflow: overflowMapNames[overflow] }
+        overflow === undefined ? undefined : { overflow: overflowMapNames[overflow] }
       )
     )
   },

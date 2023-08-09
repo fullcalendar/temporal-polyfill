@@ -42,10 +42,10 @@ interface CalendarProtocolMethods {
   daysInYear(dateArg: PlainYearMonth | PlainDateArg): number
   monthsInYear(dateArg: PlainYearMonth | PlainDateArg): number
   inLeapYear(dateArg: PlainYearMonth | PlainDateArg): boolean
-  dateFromFields(fields: DateBagStrict, options: OverflowOptions): PlainDate
-  yearMonthFromFields(fields: YearMonthBagStrict, options: OverflowOptions): PlainYearMonth
-  monthDayFromFields(fields: MonthDayBagStrict, options: OverflowOptions): PlainMonthDay
-  dateAdd(dateArg: PlainDateArg, duration: DurationArg, options: OverflowOptions): PlainDate
+  dateFromFields(fields: DateBagStrict, options?: OverflowOptions): PlainDate
+  yearMonthFromFields(fields: YearMonthBagStrict, options?: OverflowOptions): PlainYearMonth
+  monthDayFromFields(fields: MonthDayBagStrict, options?: OverflowOptions): PlainMonthDay
+  dateAdd(dateArg: PlainDateArg, duration: DurationArg, options?: OverflowOptions): PlainDate
   dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options: LargestUnitOptions): Duration
   fields(fieldNames: Iterable<string>): Iterable<string>
   mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>

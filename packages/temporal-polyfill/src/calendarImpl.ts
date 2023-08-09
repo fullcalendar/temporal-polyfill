@@ -91,7 +91,7 @@ export class CalendarImpl implements CalendarOps {
     )
   }
 
-  dateFromFields(fields: DateBag, overflow: Overflow): IsoDateInternals {
+  dateFromFields(fields: DateBag, overflow?: Overflow): IsoDateInternals {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
     const day = this.refineDay(fields as DateFields, month, year, overflow)
@@ -99,14 +99,14 @@ export class CalendarImpl implements CalendarOps {
     return this.queryIsoFields(year, month, day)
   }
 
-  yearMonthFromFields(fields: YearMonthBag, overflow: Overflow): IsoDateInternals {
+  yearMonthFromFields(fields: YearMonthBag, overflow?: Overflow): IsoDateInternals {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
 
     return this.queryIsoFields(year, month, 1)
   }
 
-  monthDayFromFields(fields: MonthDayBag, overflow: Overflow): IsoDateInternals {
+  monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateInternals {
     let { month, monthCode, day } = fields as (Partial<MonthFields> & DayFields)
     let year
 
@@ -194,7 +194,7 @@ export class CalendarImpl implements CalendarOps {
   dateAdd(
     isoDateFields: IsoDateFields,
     durationFields: DurationInternals,
-    overflow: Overflow,
+    overflow?: Overflow,
   ): IsoDateInternals  {
     return moveDate(this, isoDateFields, durationFields, overflow)
   }
@@ -232,12 +232,12 @@ export class CalendarImpl implements CalendarOps {
   refineMonth(
     fields: Partial<MonthFields>,
     year: number, // optional if known that calendar doesn't support leap months
-    overflow: Overflow = Overflow.Reject, // TODO: do this elsewhere?
+    overflow?: Overflow,
   ): number {
     let { month, monthCode } = fields
 
     if (monthCode !== undefined) {
-      const monthByCode = refineMonthCode(this, monthCode, year, overflow)
+      const monthByCode = refineMonthCode(this, monthCode, year)
 
       if (month !== undefined && month !== monthByCode) {
         throw new RangeError('The month and monthCode do not agree')
@@ -261,7 +261,7 @@ export class CalendarImpl implements CalendarOps {
     fields: DayFields, // day guaranteed to exist because of required*Fields
     month: number,
     year: number,
-    overflow: Overflow
+    overflow?: Overflow
   ): number {
     return clamp(
       fields.day,
@@ -388,7 +388,6 @@ function refineMonthCode(
   calendar: CalendarImpl,
   monthCode: string,
   year: number, // optional if known that calendar doesn't support leap months
-  overflow: Overflow = Overflow.Reject,
 ) {
   const leapMonth = calendar.queryLeapMonth(year)
   const [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
@@ -408,7 +407,7 @@ function refineMonthCode(
       throw new RangeError('Invalid leap-month month code')
     }
 
-    if (overflow === Overflow.Reject && month !== leapMonth) {
+    if (month !== leapMonth) {
       throw new RangeError('Invalid leap-month month code')
     }
   }

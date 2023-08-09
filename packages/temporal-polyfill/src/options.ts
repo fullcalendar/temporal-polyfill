@@ -26,8 +26,8 @@ import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals } from './zonedDateTime
 // -------------------------------------------------------------------------------------------------
 // TODO: always good to spread options tuples? better to nest?
 
-export function refineOverflowOptions(options: OverflowOptions | undefined): Overflow {
-  return refineOverflow(normalizeOptions(options))
+export function refineOverflowOptions(options: OverflowOptions | undefined): Overflow | undefined {
+  return options === undefined ? undefined : refineOverflow(options)
 }
 
 export type ZonedFieldOptions = OverflowOptions & EpochDisambigOptions & OffsetDisambigOptions
