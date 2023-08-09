@@ -40,7 +40,7 @@ import { ZonedInternals } from './zonedDateTime'
 // -------------------------------------------------------------------------------------------------
 
 export function parseInstant(s: string): LargeInt {
-  const parsed = parseDateTime(s)
+  const parsed = parseMaybeDateTime(s)
   if (!parsed) {
     throw new RangeError()
   }
@@ -58,8 +58,8 @@ export function parseInstant(s: string): LargeInt {
   return isoToEpochNano(parsed)!.addNumber(offsetNano)
 }
 
-export function parseMaybeZonedDateTime(s: string): IsoDateInternals | ZonedInternals {
-  const parsed = parseDateTime(s)
+export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedInternals {
+  const parsed = parseMaybeDateTime(s)
   if (!parsed) {
     throw new RangeError()
   }
@@ -70,7 +70,7 @@ export function parseMaybeZonedDateTime(s: string): IsoDateInternals | ZonedInte
 }
 
 export function parseZonedDateTime(s: string): ZonedInternals {
-  const parsed = parseDateTime(s)
+  const parsed = parseMaybeDateTime(s)
   if (!parsed || !parsed.timeZone) {
     throw new RangeError()
   }
@@ -78,21 +78,24 @@ export function parseZonedDateTime(s: string): ZonedInternals {
 }
 
 export function parsePlainDateTime(s: string): IsoDateTimeInternals {
-  const parsed = parseDateTime(s)
-  if (!parsed) {
+  const parsed = parseMaybeDateTime(s)
+  if (!parsed || parsed.hasZ) {
     throw new RangeError()
   }
   return processDateTimeParse(parsed)
 }
 
 export function parsePlainDate(s: string): IsoDateInternals {
-  // must do time-validation, even though fields not used
-  return pluckIsoDateInternals(parsePlainDateTime(s))
+  const parsed = parseMaybeDateTime(s)
+  if (!parsed || parsed.hasZ) {
+    throw new RangeError()
+  }
+  return pluckIsoDateInternals(processDateTimeParse(parsed))
 }
 
 export function parsePlainYearMonth(s: string): IsoDateInternals {
   // hacky
-  const ymres = parseYearMonth(s)
+  const ymres = parseMaybeYearMonth(s)
   return ymres
     ? processDatelikeParse(ymres)
     : parsePlainDate(s)
@@ -100,17 +103,17 @@ export function parsePlainYearMonth(s: string): IsoDateInternals {
 
 export function parsePlainMonthDay(s: string): IsoDateInternals {
   // hacky
-  const mdres = parseMonthDay(s)
+  const mdres = parseMaybeMonthDay(s)
   return mdres
     ? processDatelikeParse(mdres)
     : parsePlainDate(s)
 }
 
 export function parsePlainTime(s: string): IsoTimeFields {
-  let parsed: IsoTimeFields | DateTimeParsed | undefined = parseTime(s)
+  let parsed: IsoTimeFields | DateTimeParsed | undefined = parseMaybeTime(s)
 
   if (!parsed) {
-    parsed = parseDateTime(s)
+    parsed = parseMaybeDateTime(s)
     if (parsed && !(parsed as DateTimeParsed).hasTime) {
       throw new RangeError()
     }
@@ -131,10 +134,10 @@ export function parsePlainTime(s: string): IsoTimeFields {
 
   let altParsed
   // NOTE: -1 causes returning undefined rather than error
-  if ((altParsed = parseYearMonth(s)) && constrainIsoDateInternals(altParsed, -1)) {
+  if ((altParsed = parseMaybeYearMonth(s)) && constrainIsoDateInternals(altParsed, -1)) {
     throw new RangeError()
   }
-  if ((altParsed = parseMonthDay(s)) && constrainIsoDateInternals(altParsed, -1)) {
+  if ((altParsed = parseMaybeMonthDay(s)) && constrainIsoDateInternals(altParsed, -1)) {
     throw new RangeError()
   }
 
@@ -142,7 +145,7 @@ export function parsePlainTime(s: string): IsoTimeFields {
 }
 
 export function parseDuration(s: string): DurationInternals {
-  const parsed = parseDurationInternals(s)
+  const parsed = parseMaybeDurationInternals(s)
   if (!parsed) {
     throw new RangeError()
   }
@@ -159,12 +162,12 @@ export function parseOffsetNano(s: string): number {
 
 export function parseCalendarId(s: string): string {
   return (
-    (parseDateTime(s) || parseYearMonth(s) || parseMonthDay(s))?.calendar.id
+    (parseMaybeDateTime(s) || parseMaybeYearMonth(s) || parseMaybeMonthDay(s))?.calendar.id
   ) || s
 }
 
 export function parseTimeZoneId(s: string): string {
-  const parsed = parseDateTime(s)
+  const parsed = parseMaybeDateTime(s)
 
   if (parsed !== undefined) {
     if (parsed.timeZone) {
@@ -220,29 +223,29 @@ function processDatelikeParse(parsed: IsoDateInternals | undefined): IsoDateInte
 // -------------------------------------------------------------------------------------------------
 // TODO: use new `Falsy` type instead of ternary operator?
 
-function parseDateTime(s: string): DateTimeParsed | undefined {
+function parseMaybeDateTime(s: string): DateTimeParsed | undefined {
   const parts = dateTimeRegExp.exec(s)
   return parts ? parseDateTimeParts(parts) : undefined
 }
 
-function parseYearMonth(s: string): IsoDateInternals | undefined {
+function parseMaybeYearMonth(s: string): IsoDateInternals | undefined {
   const parts = yearMonthRegExp.exec(s)
   return parts ? parseYearMonthParts(parts) : undefined
 }
 
-function parseMonthDay(s: string): IsoDateInternals | undefined {
+function parseMaybeMonthDay(s: string): IsoDateInternals | undefined {
   const parts = monthDayRegExp.exec(s)
   return parts ? parseMonthDayParts(parts) : undefined
 }
 
-function parseTime(s: string): IsoTimeFields | undefined {
+function parseMaybeTime(s: string): IsoTimeFields | undefined {
   const parts = timeRegExp.exec(s)
   return parts
     ? (parseAnnotations(parts[5]), parseTimeParts(parts)) // validate annotations
     : undefined
 }
 
-function parseDurationInternals(s: string): DurationInternals | undefined {
+function parseMaybeDurationInternals(s: string): DurationInternals | undefined {
   const parts = durationRegExp.exec(s)
   return parts ? parseDurationParts(parts) : undefined
 }
@@ -331,7 +334,7 @@ type ZonedDateTimeParsed = IsoDateTimeInternals & {
 function parseDateTimeParts(parts: string[]): DateTimeParsed {
   const hasTime = Boolean(parts[6])
   const zOrOffset = parts[10]
-  const hasZ = zOrOffset === 'Z'
+  const hasZ = zOrOffset === 'Z' // TODO: need case-insensitive test?
 
   return {
     isoYear: parseIsoYearParts(parts),

@@ -2,7 +2,7 @@ import { getInternals } from './class'
 import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
 import { IsoDateInternals, pluckIsoDateInternals } from './isoInternals'
-import { parseMaybeZonedDateTime } from './isoParse'
+import { parseZonedOrPlainDateTime } from './isoParse'
 import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
@@ -601,7 +601,7 @@ function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | und
       return refineMaybeZonedDateTimeBag(relativeTo as unknown as ZonedDateTimeBag)
     }
 
-    return parseMaybeZonedDateTime(toString(relativeTo))
+    return parseZonedOrPlainDateTime(toString(relativeTo))
   }
 }
 
