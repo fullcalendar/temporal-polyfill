@@ -618,6 +618,11 @@ function refineUnitOption<O>(
   minUnit: Unit = Unit.Nanosecond,
   defaultUnit?: Unit,
 ): Unit {
+  // TODO: more DRY
+  if (!isObjectlike(options)) {
+    throw TypeError('Options must be object')
+  }
+
   let unitName = options[optionName] as (string | undefined)
 
   if (unitName === undefined || unitName === 'auto') {
@@ -647,6 +652,11 @@ function refineChoiceOption<O>(
   options: O,
   defaultChoice = 0,
 ): number {
+  // TODO: more DRY
+  if (!isObjectlike(options)) {
+    throw TypeError('Options must be object')
+  }
+
   const enumName = options[optionName] as (string | undefined)
   if (enumName === undefined) {
     return defaultChoice
