@@ -1,4 +1,4 @@
-import { ensureInstanceOf, ensureString, toString } from './cast'
+import { ensureInstanceOf, ensureString } from './cast'
 import {
   Callable,
   Classlike,
@@ -237,7 +237,7 @@ export function createTemporalClass<
     }
 
     return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) ||
-      (handleUnusedOptions(options), (argInternals as I) || stringToInternals(toString(arg as string)))
+      (handleUnusedOptions(options), (argInternals as I) || stringToInternals(ensureString(arg as string)))
   }
 
   return [
