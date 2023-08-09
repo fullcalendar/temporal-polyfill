@@ -1,3 +1,8 @@
 # Failures in this file are expected to fail for all Test262 tests. To record
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
+
+# b/c of fullcalendar/temporal weird class-construction
+built-ins/Temporal/Calendar/from/name.js
+built-ins/Temporal/Calendar/length.js
+built-ins/Temporal/Calendar/name.js

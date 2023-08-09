@@ -54,8 +54,8 @@ export const isoDateFieldNames = Object.keys(isoDateFieldRefiners) as
 export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners) as
   (keyof IsoTimeFields)[]
 
-export const isoTimeFieldNames = isoTimeFieldNamesAsc.sort()
-export const isoDateTimeFieldNamesAsc = [...isoDateFieldNames, ...isoTimeFieldNamesAsc]
+export const isoTimeFieldNames = isoTimeFieldNamesAsc.slice().sort()
+export const isoDateTimeFieldNamesAsc = [...isoTimeFieldNamesAsc, ...isoDateFieldNames]
 
 // Defaults
 // -------------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ export const pluckIsoTuple = pluckPropsTuple.bind<
   undefined, [BoundArg], // bound
   [Partial<IsoDateTimeFields> & { isoYear: number }], // unbound
   IsoTuple // return
->(undefined, isoDateTimeFieldNamesAsc.reverse())
+>(undefined, isoDateTimeFieldNamesAsc.slice().reverse())
 
 // Advanced
 // -------------------------------------------------------------------------------------------------

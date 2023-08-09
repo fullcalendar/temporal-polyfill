@@ -51,7 +51,7 @@ export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + '
 
 export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 
-export const durationFieldNames = durationFieldNamesAsc.sort()
+export const durationFieldNames = durationFieldNamesAsc.slice().sort()
 
 // unordered
 const durationTimeFieldNames = durationFieldNamesAsc.slice(0, Unit.Day) as
