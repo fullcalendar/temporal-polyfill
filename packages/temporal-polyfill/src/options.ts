@@ -657,12 +657,12 @@ function refineChoiceOption<O>(
     throw TypeError('Options must be object')
   }
 
-  const enumName = options[optionName] as (string | undefined)
+  const enumName = options[optionName]
   if (enumName === undefined) {
     return defaultChoice
   }
 
-  const enumNum = enumNameMap[enumName]
+  const enumNum = enumNameMap[toString(enumName as string)]
   if (enumNum === undefined) {
     throw new RangeError('Must be one of the choices')
   }
