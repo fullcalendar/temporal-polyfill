@@ -14,6 +14,7 @@ import {
   IsoDateTimeInternals,
   constrainIsoDateInternals,
   constrainIsoDateTimeInternals,
+  pluckIsoDateInternals,
 } from './isoInternals'
 import {
   checkIsoInBounds,
@@ -85,15 +86,24 @@ export function parsePlainDateTime(s: string): IsoDateTimeInternals {
 }
 
 export function parsePlainDate(s: string): IsoDateInternals {
-  return processDatelikeParse(parseDateTime(s))
+  // must do time-validation, even though fields not used
+  return pluckIsoDateInternals(parsePlainDateTime(s))
 }
 
 export function parsePlainYearMonth(s: string): IsoDateInternals {
-  return processDatelikeParse(parseYearMonth(s) || parseDateTime(s))
+  // hacky
+  const ymres = parseYearMonth(s)
+  return ymres
+    ? processDatelikeParse(ymres)
+    : parsePlainDate(s)
 }
 
 export function parsePlainMonthDay(s: string): IsoDateInternals {
-  return processDatelikeParse(parseMonthDay(s) || parseDateTime(s))
+  // hacky
+  const mdres = parseMonthDay(s)
+  return mdres
+    ? processDatelikeParse(mdres)
+    : parsePlainDate(s)
 }
 
 export function parsePlainTime(s: string): IsoTimeFields {
