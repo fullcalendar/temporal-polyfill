@@ -545,8 +545,10 @@ function extractBagCalendarOps(
   }
 
   calendar = (bag as { calendar: CalendarProtocol | string }).calendar
+
   if (calendar !== undefined) {
-    return queryCalendarOps(calendar)
+    return (getInternals(calendar) as any || {}).calendar ||
+      queryCalendarOps(calendar)
   }
 }
 
