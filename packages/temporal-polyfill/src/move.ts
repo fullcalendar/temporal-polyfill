@@ -118,8 +118,9 @@ export function moveDate(
 
     if (months) {
       ([year, month] = calendar.addMonths(year, month, months))
-      day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflowHandling, 'day')
     }
+
+    day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflowHandling, 'day')
 
     epochMilli = calendar.queryDateStart(year, month, day)
   } else if (weeks || days) {
