@@ -29,6 +29,11 @@ yargs(hideBin(process.argv))
         type: 'number',
         description: 'Milliseconds allowance for a single test file to run'
       })
+      builder.option('max', {
+        requiresArg: false,
+        type: 'number',
+        description: 'Maxiumum allowed number of failures before aborting'
+      })
     },
     (parsedArgv) => {
       const expectedFailureFiles = [
@@ -53,7 +58,8 @@ yargs(hideBin(process.argv))
         )),
         testGlobs: parsedArgv._,
         timeoutMsecs: parsedArgv.timeout,
-        updateExpectedFailureFiles: parsedArgv.updateExpectedFailureFiles
+        updateExpectedFailureFiles: parsedArgv.updateExpectedFailureFiles,
+        maxFailures: parsedArgv.max
       });
 
       process.exit(result ? 0 : 1);
