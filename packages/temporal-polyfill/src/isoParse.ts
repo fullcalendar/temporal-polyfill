@@ -148,12 +148,9 @@ export function parseOffsetNano(s: string): number {
 }
 
 export function parseCalendarId(s: string): string {
-  if (s !== isoCalendarId) {
-    s = (
-      parseDateTime(s) || parseYearMonth(s) || parseMonthDay(s)
-    )?.calendar.id || isoCalendarId
-  }
-  return s
+  return (
+    (parseDateTime(s) || parseYearMonth(s) || parseMonthDay(s))?.calendar.id
+  ) || s
 }
 
 export function parseTimeZoneId(s: string): string {
