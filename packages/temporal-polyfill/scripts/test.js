@@ -45,17 +45,6 @@ yargs(hideBin(process.argv))
       // As we migrate commits from proposal-temporal, remove expected failures from here.
       expectedFailureFiles.push('expected-failures-todo-migrated-code.txt');
 
-      console.log({
-        test262Dir: joinPaths(monorepoDir, 'test262'),
-        polyfillCodeFile: joinPaths(pkgDir, 'dist/global.js'),
-        expectedFailureFiles: expectedFailureFiles.map((filename) => (
-          joinPaths(scriptsDir, 'test-config', filename)
-        )),
-        testGlobs: parsedArgv._,
-        timeoutMsecs: parsedArgv.timeout,
-        updateExpectedFailureFiles: parsedArgv.updateExpectedFailureFiles
-      })
-
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
         polyfillCodeFile: joinPaths(pkgDir, 'dist/global.js'),
