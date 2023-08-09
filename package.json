@@ -37,10 +37,5 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "typescript": "^5.1.6"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "@js-temporal/temporal-test262-runner@0.9.0": "patches/@js-temporal__temporal-test262-runner@0.9.0.patch"
-    }
   }
 }

@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import { join as joinPaths, dirname } from 'path'
+import { join as joinPaths } from 'path'
 import { readFile, writeFile } from 'fs/promises'
 
 writePkgJson(
-  joinPaths(dirname(process.argv[1]), '..')
+  joinPaths(process.argv[1], '../..')
 )
 
 async function writePkgJson(pkgDir) {
   const srcPkgJsonPath = joinPaths(pkgDir, 'package.json')
-  const distPkgJsonPath = joinPaths(pkgDir, 'dist', 'package.json')
+  const distPkgJsonPath = joinPaths(pkgDir, 'dist/package.json')
 
   const srcPkgJson = JSON.parse(await readFile(srcPkgJsonPath))
   const distPkgJson = { ...srcPkgJson }

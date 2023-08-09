@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { join as joinPaths, dirname } from 'path'
+import { join as joinPaths } from 'path'
 import { readdir } from 'fs/promises'
 import { exec as execCb } from 'child_process'
 import { promisify } from 'util'
@@ -8,7 +8,7 @@ import { promisify } from 'util'
 const exec = promisify(execCb)
 
 printSizes(
-  joinPaths(dirname(process.argv[1]), '..')
+  joinPaths(process.argv[1], '../..')
 )
 
 async function printSizes(pkgDir) {

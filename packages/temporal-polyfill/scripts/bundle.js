@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { join as joinPaths, dirname, basename } from 'path'
+import { join as joinPaths, basename } from 'path'
 import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import sourcemaps from 'rollup-plugin-sourcemaps'
@@ -13,7 +13,7 @@ const extensions = {
 }
 
 writeBundles(
-  joinPaths(dirname(process.argv[1]), '..'),
+  joinPaths(process.argv[1], '../..'),
   process.argv.slice(2).includes('--dev'),
 )
 
@@ -33,7 +33,7 @@ async function buildConfigs(pkgDir, isDev) {
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
     const shortName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
-    const inputPath = joinPaths(pkgDir, 'dist', '.tsc', shortName + '.js')
+    const inputPath = joinPaths(pkgDir, 'dist/.tsc', shortName + '.js')
 
     moduleInputs[shortName] = inputPath
 

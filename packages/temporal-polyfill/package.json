@@ -55,13 +55,14 @@
     "temporal-spec": "~0.1.0"
   },
   "devDependencies": {
-    "@js-temporal/temporal-test262-runner": "^0.9.0",
+    "@js-temporal/temporal-test262-runner": "workspace:*",
     "@types/node": "^16.9.1",
     "concurrently": "^8.2.0",
     "eslint": "^7.25.0",
     "rollup": "^3.27.2",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "terser": "^5.19.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "yargs": "^17.7.2"
   }
 }
