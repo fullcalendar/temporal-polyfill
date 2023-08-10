@@ -15,6 +15,7 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Unit, unitNamesAsc } from './units'
 import { BoundArg, Callable, mapProps } from './utils'
+import { validateFieldNames } from './calendarOps'
 
 const getPlainDateInternals = getStrictInternals.bind<
   undefined, [BoundArg],
@@ -127,21 +128,7 @@ const calendarOpsAdapterMethods = {
   },
 
   fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
-    fieldNames = [...calendar.fields(fieldNames)]
-      .map(ensureString)
-
-    const fieldNameSet = new Set(fieldNames)
-    if (fieldNameSet.size !== fieldNames.length) {
-      throw new RangeError('Duplicate fields')
-    }
-    if (fieldNameSet.has('constructor')) {
-      throw new RangeError('Cant have constructor field')
-    }
-    if (fieldNameSet.has('__proto__')) {
-      throw new RangeError('Cant have __proto__ field')
-    }
-
-    return fieldNames
+    return validateFieldNames(calendar.fields(fieldNames))
   },
 
   mergeFields(

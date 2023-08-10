@@ -42,3 +42,20 @@ export const getCommonCalendarOps = getCommonInnerObj.bind<
   [CalendarInternals, CalendarInternals],
   CalendarOps // return
 >(undefined, 'calendar')
+
+export function validateFieldNames(fieldNames: Iterable<string>): string[] {
+  const fieldNameSet = new Set<string>()
+
+  for (const fieldName of fieldNames) {
+    if (fieldNameSet.has(fieldName)) {
+      throw new RangeError('Duplicate fields')
+    }
+    if (fieldName === 'constructor' || fieldName === '__proto__') {
+      throw new RangeError('Invalid field name')
+    }
+
+    fieldNameSet.add(fieldName)
+  }
+
+  return [...fieldNameSet.values()]
+}
