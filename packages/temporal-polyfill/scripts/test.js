@@ -58,7 +58,7 @@ yargs(hideBin(process.argv))
           joinPaths(scriptsDir, 'test-config', filename)
         )),
         testGlobs: parsedArgv._,
-        timeoutMsecs: parsedArgv.timeout,
+        timeoutMsecs: parsedArgv.timeout || 86400000,
         updateExpectedFailureFiles: parsedArgv.updateExpectedFailureFiles,
         maxFailures: parsedArgv.max,
         fullPath: true
