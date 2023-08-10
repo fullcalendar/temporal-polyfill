@@ -132,8 +132,8 @@ export function diffDatesExact(
     const sign = Math.sign(days) as NumSign
 
     if (largestUnit === Unit.Week) {
-      weeks = Math.trunc(days / isoDaysInWeek)
-      days %= isoDaysInWeek
+      weeks = Math.trunc(days / isoDaysInWeek) || 0 // ensure no -0
+      days = (days % isoDaysInWeek) || 0 // ensure no -0
     }
 
     return { ...durationFieldDefaults, weeks, days, sign }

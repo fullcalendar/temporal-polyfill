@@ -120,8 +120,8 @@ export function nanoToGivenFields<F>(
   for (; unit >= Unit.Nanosecond; unit--) {
     const divisor = unitNanoMap[unit]
 
-    fields[fieldNames[unit]] = Math.trunc(nano / divisor)
-    nano %= divisor
+    fields[fieldNames[unit]] = Math.trunc(nano / divisor) || 0 // ensure no -0
+    nano = (nano % divisor) || 0 // ensure no -0
   }
 
   return fields

@@ -381,7 +381,7 @@ function nudgeRelativeDuration<M>(
   const baseDurationFields = clearDurationFields(durationFields, smallestUnit - 1)
   baseDurationFields[smallestUnitFieldName] = Math.trunc(
     durationFields[smallestUnitFieldName] / roundingInc,
-  )
+  ) || 0 // ensure no -0
 
   const [epochNano0, epochNano1] = clampRelativeDuration(
     baseDurationFields,
