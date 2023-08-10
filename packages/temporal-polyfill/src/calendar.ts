@@ -156,10 +156,18 @@ const calendarProtocolMethods = {
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
     return impl.mergeFields(
-      excludeUndefinedProps(ensureObjectlike(fields0)),
-      excludeUndefinedProps(ensureObjectlike(fields1)),
+      excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),
+      excludeUndefinedProps(ensureNotNullOrUndefined(fields1)),
     )
   },
+}
+
+// HACK
+function ensureNotNullOrUndefined<T>(o: T): T {
+  if (o == null) { // null or undefined
+    throw TypeError('Cannot be null or undefined')
+  }
+  return o
 }
 
 // HACK to not require era-related methods

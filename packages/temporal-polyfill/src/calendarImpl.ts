@@ -152,7 +152,7 @@ export class CalendarImpl implements CalendarOps {
       )
     }
 
-    return Object.assign(merged, additionalFields)
+    return Object.assign(Object.create(null), merged, additionalFields)
   }
 
   // Internal Querying
