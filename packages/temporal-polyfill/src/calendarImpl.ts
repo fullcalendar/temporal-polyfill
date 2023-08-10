@@ -153,6 +153,19 @@ export class CalendarImpl implements CalendarOps {
     }
 
     [year, month] = this.queryYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+
+    // TODO: only do this if not also calling refineDay
+    if (this.id === isoCalendarId) {
+      // TODO: more DRY with refineDay
+      day = clamp(
+        day,
+        1,
+        this.queryDaysInMonth(year, month),
+        overflow,
+        'day',
+      )
+    }
+
     return this.queryIsoFields(year, month, day)
   }
 
