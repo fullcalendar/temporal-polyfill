@@ -377,27 +377,16 @@ export function convertToPlainYearMonth(
 export function refinePlainMonthDayBag(
   bag: PlainMonthDayBag,
   options: OverflowOptions | undefined,
-  calendar?: CalendarOps,
+  calendar: CalendarOps = getBagCalendarOps(bag),
 ): IsoDateInternals {
-  const calendarAbsent = !calendar
-  calendar ||= getBagCalendarOps(bag)
+  const fields = refineCalendarFields(
+    calendar,
+    bag,
+    dateFieldNames,
+    requiredMonthDayFields,
+  )
 
-  const fieldNames = calendar.fields(dateFieldNames) as (keyof PlainMonthDayBag)[]
-  const fields = refineFields(bag, fieldNames, [])
-
-  // Callers who omit the calendar are not writing calendar-independent
-  // code. In that case, `monthCode`/`year` can be omitted; `month` and
-  // `day` are sufficient. Add a `year` to satisfy calendar validation.
-  if (
-    calendarAbsent &&
-    fields.month !== undefined &&
-    fields.monthCode === undefined &&
-    fields.year === undefined
-  ) {
-    fields.year = isoEpochFirstLeapYear
-  }
-
-  return calendar!.monthDayFromFields(fields, refineOverflowOptions(options))
+  return calendar.monthDayFromFields(fields, refineOverflowOptions(options))
 }
 
 export function mergePlainMonthDayBag(

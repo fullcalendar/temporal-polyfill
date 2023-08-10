@@ -94,7 +94,7 @@ export class CalendarImpl implements CalendarOps {
   dateFromFields(fields: DateBag, overflow?: Overflow): IsoDateInternals {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
-    const day = this.refineDay(fields as DateFields, month, year, overflow)
+    const day = this.refineDay(fields as DayFields, month, year, overflow)
 
     return this.queryIsoFields(year, month, day)
   }
@@ -107,19 +107,30 @@ export class CalendarImpl implements CalendarOps {
   }
 
   monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateInternals {
-    let { month, monthCode, day } = fields as (Partial<MonthFields> & DayFields)
+    let { month, monthCode } = fields as Partial<MonthFields>
     let year
+    let isLeapMonth
+    let monthCodeNumber
+    let day
 
     if (monthCode !== undefined) {
-      // year is guessed
-      const [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-      ;([year, month] = this.queryYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day))
+      [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
+      day = fields.day! // guaranteed
     } else {
-      // year is required
+      // derive monthCodeNumber/isLeapMonth from year/month, then discard year
       year = this.refineYear(fields as EraYearOrYear)
       month = this.refineMonth(fields, year, overflow)
+      day = this.refineDay(fields as DayFields, month, year, overflow)
+
+      const leapMonth = this.queryLeapMonth(year)
+      isLeapMonth = month === leapMonth
+      monthCodeNumber = month - ( // TODO: more DRY with formatMonthCode
+        (leapMonth && month >= leapMonth)
+          ? 1
+          : 0)
     }
 
+    [year, month] = this.queryYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
     return this.queryIsoFields(year, month, day)
   }
 
@@ -269,13 +280,15 @@ export class CalendarImpl implements CalendarOps {
     year: number,
     overflow?: Overflow
   ): number {
+    const { day } = fields
+
     // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
-    if (fields.day <= 0) {
+    if (day <= 0) {
       throw new RangeError('Below zero')
     }
 
     return clamp(
-      fields.day,
+      day,
       1,
       this.queryDaysInMonth(year, month),
       overflow,
@@ -544,6 +557,8 @@ class IntlCalendarImpl extends CalendarImpl {
 
     for (; year < endYear; year++) {
       const leapMonth = this.queryLeapMonth(year)
+
+      // TODO: don't repeatedly refine
       const month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth)
 
       if (
