@@ -270,7 +270,7 @@ const dateRegExpStr =
   '-?(\\d{2})' // 5:day
 
 const monthDayRegExpStr =
-  '(--)?(\\d{2})' + // 1:month
+  '(?:--)?(\\d{2})' + // 1:month
   '-?(\\d{2})' // 2:day
 
 const timeRegExpStr =
