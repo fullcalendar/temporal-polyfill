@@ -39,7 +39,7 @@ export interface EraYearFields {
 export type YearFieldsIntl = EraYearFields & YearFields
 export type YearMonthFieldsIntl = EraYearFields & YearMonthFields
 export type DateFieldsIntl = EraYearFields & DateFields
-export type MonthDayFieldsIntl = EraYearFields & MonthDayFields
+export type MonthDayFieldsIntl = YearFieldsIntl & MonthDayFields
 
 // Simple Bag (all props optional)
 // -------------------------------------------------------------------------------------------------

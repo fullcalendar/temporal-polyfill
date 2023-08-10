@@ -115,7 +115,29 @@ export class CalendarImpl implements CalendarOps {
 
     if (monthCode !== undefined) {
       [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-      day = fields.day! // guaranteed
+      year = fields.year
+
+      if (year !== undefined || this.id === isoCalendarId) {
+        // just for validation
+        // year can be undefined
+        month = this.refineMonth(fields, year!, overflow)
+      } else {
+        month = fields.month
+
+        // without year, half-ass our validation...
+        // TODO: improve
+
+        if (monthCodeNumber <= 0) {
+          throw new RangeError('Below zero')
+        }
+
+        // TODO: should be smarter for Intl calendars with leap-months? (use year if available?)
+        if (month !== undefined && month !== monthCodeNumber) {
+          throw new RangeError('Inconsistent month/monthCode')
+        }
+      }
+
+      day = fields.day! // guaranteed because of required*Fields
     } else {
       // derive monthCodeNumber/isLeapMonth from year/month, then discard year
       year = this.refineYear(fields as EraYearOrYear)
