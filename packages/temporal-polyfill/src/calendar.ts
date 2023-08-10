@@ -147,7 +147,6 @@ const calendarProtocolMethods = {
 
   fields(impl: CalendarImpl, fieldNames: Iterable<string>): Iterable<string> {
     return impl.fields([...fieldNames].map(ensureString))
-    // TODO: kill ensureArray everywhere? use [...] technique?
   },
 
   mergeFields(

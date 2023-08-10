@@ -25,13 +25,6 @@ export function ensureInteger(arg: number): number {
   return ensureNumberIsInteger(ensureNumber(arg));
 }
 
-export function ensureArray<A extends any[]>(arg: A): A {
-  if (!Array.isArray(arg)) {
-    throw new TypeError('Must be array');
-  }
-  return arg;
-}
-
 export function ensureObjectlike<O extends {}>(arg: O): O {
   if (!isObjectlike(arg)) {
     throw new TypeError('Must be object-like');
