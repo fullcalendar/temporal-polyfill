@@ -4,7 +4,7 @@
 
 # b/c of fullcalendar/temporal weird class-construction
 #
-# cd test262
+# cd test262/tests
 # find built-ins/Temporal -name 'name.js' -o -name 'length.js'
 #
 built-ins/Temporal/PlainMonthDay/length.js
@@ -379,3 +379,19 @@ built-ins/Temporal/Duration/prototype/negated/name.js
 built-ins/Temporal/Duration/name.js
 built-ins/Temporal/Duration/compare/length.js
 built-ins/Temporal/Duration/compare/name.js
+
+# on .prototype, real classes have writable:false, whereas function(){} has writable:true
+#
+# cd test262/tests
+# find built-ins/Temporal -name 'prop-desc.js'
+#
+built-ins/Temporal/PlainMonthDay/prototype/prop-desc.js
+built-ins/Temporal/PlainDateTime/prototype/prop-desc.js
+built-ins/Temporal/PlainYearMonth/prototype/prop-desc.js
+built-ins/Temporal/Calendar/prototype/prop-desc.js
+built-ins/Temporal/TimeZone/prototype/prop-desc.js
+built-ins/Temporal/ZonedDateTime/prototype/prop-desc.js
+built-ins/Temporal/Instant/prototype/prop-desc.js
+built-ins/Temporal/PlainTime/prototype/prop-desc.js
+built-ins/Temporal/PlainDate/prototype/prop-desc.js
+built-ins/Temporal/Duration/prototype/prop-desc.js
