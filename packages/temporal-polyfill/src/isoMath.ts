@@ -63,7 +63,7 @@ export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
   return diffEpochMilliByDay(
     isoToEpochMilli(isoDateMonthStart(isoDateFields))!,
     isoToEpochMilli(isoDateFields)!,
-  )
+  ) + 1
 }
 
 export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
