@@ -10,7 +10,6 @@
 built-ins/Temporal/PlainMonthDay/length.js
 built-ins/Temporal/PlainMonthDay/from/length.js
 built-ins/Temporal/PlainMonthDay/from/name.js
-built-ins/Temporal/PlainMonthDay/prototype/toJSON/length.js
 built-ins/Temporal/PlainMonthDay/prototype/toJSON/name.js
 built-ins/Temporal/PlainMonthDay/prototype/with/length.js
 built-ins/Temporal/PlainMonthDay/prototype/with/name.js
@@ -32,7 +31,6 @@ built-ins/Temporal/PlainMonthDay/name.js
 built-ins/Temporal/PlainDateTime/length.js
 built-ins/Temporal/PlainDateTime/from/length.js
 built-ins/Temporal/PlainDateTime/from/name.js
-built-ins/Temporal/PlainDateTime/prototype/toJSON/length.js
 built-ins/Temporal/PlainDateTime/prototype/toJSON/name.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/length.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/name.js
@@ -80,7 +78,6 @@ built-ins/Temporal/PlainDateTime/compare/name.js
 built-ins/Temporal/PlainYearMonth/length.js
 built-ins/Temporal/PlainYearMonth/from/length.js
 built-ins/Temporal/PlainYearMonth/from/name.js
-built-ins/Temporal/PlainYearMonth/prototype/toJSON/length.js
 built-ins/Temporal/PlainYearMonth/prototype/toJSON/name.js
 built-ins/Temporal/PlainYearMonth/prototype/with/length.js
 built-ins/Temporal/PlainYearMonth/prototype/with/name.js
@@ -110,9 +107,7 @@ built-ins/Temporal/PlainYearMonth/name.js
 built-ins/Temporal/PlainYearMonth/compare/length.js
 built-ins/Temporal/PlainYearMonth/compare/name.js
 built-ins/Temporal/Calendar/length.js
-# built-ins/Temporal/Calendar/from/length.js
 built-ins/Temporal/Calendar/from/name.js
-built-ins/Temporal/Calendar/prototype/toJSON/length.js
 built-ins/Temporal/Calendar/prototype/toJSON/name.js
 built-ins/Temporal/Calendar/prototype/dayOfYear/length.js
 built-ins/Temporal/Calendar/prototype/dayOfYear/name.js
@@ -144,7 +139,6 @@ built-ins/Temporal/Calendar/prototype/dayOfWeek/length.js
 built-ins/Temporal/Calendar/prototype/dayOfWeek/name.js
 built-ins/Temporal/Calendar/prototype/fields/length.js
 built-ins/Temporal/Calendar/prototype/fields/name.js
-built-ins/Temporal/Calendar/prototype/toString/length.js
 built-ins/Temporal/Calendar/prototype/toString/name.js
 built-ins/Temporal/Calendar/prototype/weekOfYear/length.js
 built-ins/Temporal/Calendar/prototype/weekOfYear/name.js
@@ -160,7 +154,6 @@ built-ins/Temporal/Calendar/name.js
 built-ins/Temporal/TimeZone/length.js
 built-ins/Temporal/TimeZone/from/length.js
 built-ins/Temporal/TimeZone/from/name.js
-built-ins/Temporal/TimeZone/prototype/toJSON/length.js
 built-ins/Temporal/TimeZone/prototype/toJSON/name.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/length.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/name.js
@@ -172,7 +165,6 @@ built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/length.js
 built-ins/Temporal/TimeZone/prototype/getOffsetStringFor/name.js
 built-ins/Temporal/TimeZone/prototype/equals/length.js
 built-ins/Temporal/TimeZone/prototype/equals/name.js
-built-ins/Temporal/TimeZone/prototype/toString/length.js
 built-ins/Temporal/TimeZone/prototype/toString/name.js
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/length.js
 built-ins/Temporal/TimeZone/prototype/getPossibleInstantsFor/name.js
@@ -184,7 +176,6 @@ built-ins/Temporal/TimeZone/name.js
 built-ins/Temporal/ZonedDateTime/length.js
 built-ins/Temporal/ZonedDateTime/from/length.js
 built-ins/Temporal/ZonedDateTime/from/name.js
-built-ins/Temporal/ZonedDateTime/prototype/toJSON/length.js
 built-ins/Temporal/ZonedDateTime/prototype/toJSON/name.js
 built-ins/Temporal/ZonedDateTime/prototype/startOfDay/length.js
 built-ins/Temporal/ZonedDateTime/prototype/startOfDay/name.js
@@ -242,7 +233,6 @@ built-ins/Temporal/Instant/fromEpochMicroseconds/name.js
 built-ins/Temporal/Instant/length.js
 built-ins/Temporal/Instant/from/length.js
 built-ins/Temporal/Instant/from/name.js
-built-ins/Temporal/Instant/prototype/toJSON/length.js
 built-ins/Temporal/Instant/prototype/toJSON/name.js
 built-ins/Temporal/Instant/prototype/toZonedDateTime/length.js
 built-ins/Temporal/Instant/prototype/toZonedDateTime/name.js
@@ -278,7 +268,6 @@ built-ins/Temporal/Instant/fromEpochNanoseconds/name.js
 built-ins/Temporal/PlainTime/length.js
 built-ins/Temporal/PlainTime/from/length.js
 built-ins/Temporal/PlainTime/from/name.js
-built-ins/Temporal/PlainTime/prototype/toJSON/length.js
 built-ins/Temporal/PlainTime/prototype/toJSON/name.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/length.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/name.js
@@ -312,7 +301,6 @@ built-ins/Temporal/PlainTime/compare/name.js
 built-ins/Temporal/PlainDate/length.js
 built-ins/Temporal/PlainDate/from/length.js
 built-ins/Temporal/PlainDate/from/name.js
-built-ins/Temporal/PlainDate/prototype/toJSON/length.js
 built-ins/Temporal/PlainDate/prototype/toJSON/name.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/length.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/name.js
@@ -367,7 +355,6 @@ built-ins/Temporal/Now/zonedDateTimeISO/name.js
 built-ins/Temporal/Duration/length.js
 built-ins/Temporal/Duration/from/length.js
 built-ins/Temporal/Duration/from/name.js
-built-ins/Temporal/Duration/prototype/toJSON/length.js
 built-ins/Temporal/Duration/prototype/toJSON/name.js
 built-ins/Temporal/Duration/prototype/with/length.js
 built-ins/Temporal/Duration/prototype/with/name.js
