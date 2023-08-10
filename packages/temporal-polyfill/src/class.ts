@@ -163,8 +163,10 @@ export function createSimpleTemporalClass<
   Class: TemporalClass<B, A, I, G, M, S>,
   createInstance: (internals: I) => TemporalInstance<I, G, M>,
 ] {
-  ;(methods as unknown as ToJsonMethods).toJSON = function() {
-    return String(this)
+  // HACK
+  const toStringMethod = methods.toString as any
+  ;(methods as any).toJSON = function(internals: I) {
+    return toStringMethod.call(this, internals as any)
   }
 
   const TemporalClass = createWrapperClass(
