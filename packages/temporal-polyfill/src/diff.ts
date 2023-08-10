@@ -310,7 +310,7 @@ function diffYearMonthDay(
       ;([year1, month1] = calendarImpl.addMonths(year1, month1, -sign))
       updateYearMonthDay()
       dayDiff += sign < 0 // correct with days-in-month further in past
-        ? oldDaysInMonth1 // correcting from past -> future
+        ? -oldDaysInMonth1 // correcting from past -> future
         : daysInMonth1 // correcting from future -> past
     }
 
@@ -321,7 +321,7 @@ function diffYearMonthDay(
       year1 -= sign
       updateYearMonth()
       monthDiff += sign < 0 // correct with months-in-year further in past
-        ? oldMonthsInYear1 // correcting from past -> future
+        ? -oldMonthsInYear1 // correcting from past -> future
         : monthsInYear1 // correcting from future -> past
     }
   }
