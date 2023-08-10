@@ -148,13 +148,21 @@ export const excludePropsByName = filterProps.bind<
   <P, K extends keyof P>(props: P, propNames: Set<string>) => Omit<P, K>
 )
 
-export const excludeUndefinedProps = filterProps.bind(undefined, (
-  propVal: unknown
-) => {
-  return propVal !== undefined
-}) as (
-  <P>(props: P) => Partial<P>
-)
+/*
+Maintains Symbols keys
+*/
+export function excludeUndefinedProps<P extends {}>(props: P): Partial<P> {
+  props = { ...props }
+  const propNames = Object.keys(props) as (keyof P)[]
+
+  for (const propName of propNames) {
+    if (props[propName] === undefined) {
+      delete props[propName]
+    }
+  }
+
+  return props
+}
 
 export function hasAnyPropsByName<P extends {}>(
   props: P,
