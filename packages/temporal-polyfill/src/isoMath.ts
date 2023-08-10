@@ -52,7 +52,7 @@ export function computeIsoDaysInMonth(isoYear: number, isoMonth: number): number
 }
 
 export function computeIsoDaysInYear(isoYear: number): number {
-  return computeIsoIsLeapYear(isoYear) ? 365 : 366
+  return computeIsoIsLeapYear(isoYear) ? 366 : 365
 }
 
 export function computeIsoIsLeapYear(isoYear: number): boolean {
