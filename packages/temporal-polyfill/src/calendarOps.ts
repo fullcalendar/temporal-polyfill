@@ -1,4 +1,4 @@
-import { DateBag, MonthDayBag, YearMonthBag } from './calendarFields'
+import { DateBag, MonthDayBag, YearMonthBag, dateTimeNormalRefiners } from './calendarFields'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
@@ -7,6 +7,7 @@ import { Unit } from './units'
 import { getCommonInnerObj } from './class'
 import { CalendarInternals } from './isoInternals'
 import { BoundArg } from './utils'
+import { ensureString } from './cast'
 
 export interface CalendarOps {
   /*
@@ -47,6 +48,11 @@ export function validateFieldNames(fieldNames: Iterable<string>): string[] {
   const fieldNameSet = new Set<string>()
 
   for (const fieldName of fieldNames) {
+    ensureString(fieldName)
+
+    if (!(fieldName in dateTimeNormalRefiners)) {
+      throw new RangeError('Must be singular unit name')
+    }
     if (fieldNameSet.has(fieldName)) {
       throw new RangeError('Duplicate fields')
     }
