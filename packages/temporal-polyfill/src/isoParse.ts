@@ -241,7 +241,7 @@ function parseMaybeMonthDay(s: string): IsoDateInternals | undefined {
 function parseMaybeTime(s: string): IsoTimeFields | undefined {
   const parts = timeRegExp.exec(s)
   return parts
-    ? (parseAnnotations(parts[5]), parseTimeParts(parts)) // validate annotations
+    ? (parseAnnotations(parts[10]), parseTimeParts(parts)) // validate annotations
     : undefined
 }
 
@@ -300,7 +300,12 @@ const annotationsRegExpStr = `((?:${annotationRegExpStr})*)` // multiple
 const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationsRegExpStr)
 const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
 const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
-const timeRegExp = createRegExp('T?' + timeRegExpStr + annotationsRegExpStr)
+const timeRegExp = createRegExp(
+  'T?' +
+  timeRegExpStr + // 1-4
+  '(?:' + offsetRegExpStr + ')?' + // 5-9
+  annotationsRegExpStr, // 10
+)
 const offsetRegExp = createRegExp(offsetRegExpStr)
 const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
 
