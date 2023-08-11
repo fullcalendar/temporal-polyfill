@@ -262,7 +262,7 @@ const signRegExpStr = '([+-\u2212])' // outer captures
 const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
 
 const yearMonthRegExpStr =
-  `(?:${signRegExpStr}?(\\d{6})|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
+  `(?:(?:${signRegExpStr}(\\d{6}))|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
   '-?(\\d{2})' // 4:month
 
 const dateRegExpStr =
@@ -322,7 +322,7 @@ const durationRegExp = createRegExp(
   ')?',
 )
 
-type DateTimeParsed = IsoDateTimeInternals & AnnotationsParsed & {
+type DateTimeParsed = IsoDateTimeInternals & AnnotationsParsedObj & {
   hasTime: boolean
   hasZ: boolean
   offset: string | undefined
@@ -346,7 +346,7 @@ function parseDateTimeParts(parts: string[]): DateTimeParsed {
     isoMonth: parseInt(parts[4]),
     isoDay: parseInt(parts[5]),
     ...parseTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
-    ...parseAnnotations(parts[16]),
+    ...processAnnotations(parseAnnotations(parts[16])),
     hasTime,
     hasZ,
     // TODO: figure out a way to pre-process into a number
@@ -360,7 +360,7 @@ function parseYearMonthParts(parts: string[]): IsoDateInternals {
     isoYear: parseIsoYearParts(parts),
     isoMonth: parseInt(parts[4]),
     isoDay: 1,
-    ...parseAnnotations(parts[5]),
+    ...processAnnotations(parseAnnotations(parts[5])),
   }
 }
 
@@ -369,7 +369,7 @@ function parseMonthDayParts(parts: string[]): IsoDateInternals {
     isoYear: isoEpochFirstLeapYear,
     isoMonth: parseInt(parts[1]),
     isoDay: parseInt(parts[2]),
-    ...parseAnnotations(parts[3]),
+    ...processAnnotations(parseAnnotations(parts[3])),
   }
 }
 
@@ -471,12 +471,17 @@ function parseDurationParts(parts: string[]): DurationInternals {
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-interface AnnotationsParsed {
+interface AnnotationsParsedObj {
   calendar: CalendarImpl,
   timeZone: TimeZoneImpl | undefined,
 }
 
-function parseAnnotations(s: string): AnnotationsParsed {
+interface AnnotationsParsedStr {
+  calendar: string,
+  timeZone: string | undefined,
+}
+
+function parseAnnotations(s: string): AnnotationsParsedStr {
   let calendarIsCritical: boolean | undefined
   let timeZoneId: string | undefined
   const calendarIds: string[] = []
@@ -506,8 +511,15 @@ function parseAnnotations(s: string): AnnotationsParsed {
   }
 
   return {
-    timeZone: timeZoneId ? queryTimeZoneImpl(timeZoneId) : undefined,
-    calendar: queryCalendarImpl(calendarIds[0] || isoCalendarId),
+    timeZone: timeZoneId,
+    calendar: calendarIds[0],
+  }
+}
+
+function processAnnotations(p: AnnotationsParsedStr): AnnotationsParsedObj {
+  return {
+    timeZone: p.timeZone ? queryTimeZoneImpl(p.timeZone) : undefined,
+    calendar: queryCalendarImpl(p.calendar || isoCalendarId),
   }
 }
 
