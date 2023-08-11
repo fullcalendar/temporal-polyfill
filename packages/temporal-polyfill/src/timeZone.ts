@@ -1,14 +1,15 @@
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { CalendarArg } from './calendar'
 import { queryCalendarOps } from './calendarOpsQuery'
-import { TemporalInstance, createSimpleTemporalClass, getObjId, idGetters } from './class'
+import { TemporalInstance, createSimpleTemporalClass, getInternals, getObjId, idGetters } from './class'
 import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instant'
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { getSingleInstantFor, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
+import { getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
+import { parseMaybeOffsetNano } from './isoParse'
 
 interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number
@@ -20,6 +21,7 @@ interface TimeZoneProtocolMethods {
   getPossibleInstantsFor(dateTime: PlainDateTimeArg): Instant[]
   toString?(): string
   toJSON?(): string
+  equals?(otherArg: TimeZoneArg): boolean
 }
 
 export interface TimeZoneProtocol extends TimeZoneProtocolMethods {
@@ -79,6 +81,17 @@ const timeZoneMethods: {
   getPreviousTransition: getImplTransition.bind(undefined, -1),
 
   toString: getObjId,
+
+  equals(this: TimeZone, impl: TimeZoneImpl, otherArg: TimeZoneArg): boolean {
+    let a: string | number | undefined
+    let b: string | number | undefined
+
+    return this === otherArg ||
+      ((a = this.id) === (b = queryTimeZoneOps(otherArg).id)) || (
+        (a = parseMaybeOffsetNano(a, true)) !== undefined &&
+        (b = parseMaybeOffsetNano(b, true)) === a
+      )
+  }
 }
 
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime

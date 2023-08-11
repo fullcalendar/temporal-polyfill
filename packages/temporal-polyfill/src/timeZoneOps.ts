@@ -45,6 +45,14 @@ const checkTimeZoneProtocol = createProtocolChecker(timeZoneProtocolMethods)
 
 export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
   if (isObjectlike(timeZoneArg)) {
+    const { timeZone } = getInternals(
+      timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>
+    ) || {}
+
+    if (timeZone) {
+      return timeZone // TimeZoneOps
+    }
+
     checkTimeZoneProtocol(timeZoneArg as TimeZoneProtocol)
     return new TimeZoneOpsAdapter(timeZoneArg as TimeZoneProtocol)
   }
@@ -58,7 +66,9 @@ export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol 
       return timeZoneArg
     }
 
-    const { timeZone } = getInternals(timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>) || {}
+    const { timeZone } = getInternals(
+      timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>
+    ) || {}
 
     return timeZone
       ? timeZoneOpsToPublic(timeZone)

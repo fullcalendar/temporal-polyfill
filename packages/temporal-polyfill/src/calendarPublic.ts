@@ -13,7 +13,9 @@ export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol 
       return calendarArg
     }
 
-    const { calendar } = getInternals(calendarArg as TemporalInstance<{ calendar: CalendarOps }>) || {}
+    const { calendar } = getInternals(
+      calendarArg as TemporalInstance<{ calendar: CalendarOps }>
+    ) || {}
 
     return calendar
       ? calendarOpsToPublic(calendar)
