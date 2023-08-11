@@ -441,9 +441,10 @@ export function refinePlainTimeBag(
   bag: PlainTimeBag,
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
+  const overflow = refineOverflowOptions(options) // parse before fields (what!?)
   const fields = refineFields(bag, timeFieldNames, []) as TimeBag
 
-  return refineTimeBag(fields, refineOverflowOptions(options))
+  return refineTimeBag(fields, overflow)
 }
 
 export function mergePlainTimeBag(

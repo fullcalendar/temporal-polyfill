@@ -1,4 +1,4 @@
-import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
+import { IsoTimeFields, isoTimeFieldNames, isoTimeFieldNamesAsc } from './isoFields'
 import { LargeInt } from './largeInt'
 import { toIntegerStrict } from './cast'
 import {
@@ -53,12 +53,10 @@ export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 
 export const durationFieldNames = durationFieldNamesAsc.slice().sort()
 
-// unordered
-const durationTimeFieldNames = durationFieldNamesAsc.slice(0, Unit.Day) as
+const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(0, Unit.Day) as
   (keyof DurationTimeFields)[]
 
-// unordered
-const durationDateFieldNames = durationFieldNamesAsc.slice(Unit.Day) as
+const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day) as
   (keyof DurationDateFields)[]
 
 // unordered
@@ -70,7 +68,7 @@ const durationInternalNames = [...durationFieldNames, 'sign'] as
 
 export const durationFieldDefaults = mapPropNamesToConstant(durationFieldNames, 0)
 
-export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFieldNames, 0)
+export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFieldNamesAsc, 0)
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
@@ -101,7 +99,7 @@ export const durationTimeFieldsToIso = remapProps.bind<
   undefined, [BoundArg, BoundArg], // bound
   [DurationTimeFields], // unbound
   IsoTimeFields // return
->(undefined, durationTimeFieldNames, isoTimeFieldNames)
+>(undefined, durationTimeFieldNamesAsc, isoTimeFieldNamesAsc)
 
 /*
 TODO: have method directly return nanoseconds. the only use!
@@ -208,7 +206,7 @@ export function absDurationInternals(internals: DurationInternals): DurationInte
 }
 
 export function durationHasDateParts(fields: DurationFields): boolean {
-  return Boolean(computeDurationFieldsSign(fields, durationDateFieldNames))
+  return Boolean(computeDurationFieldsSign(fields, durationDateFieldNamesAsc))
 }
 
 function computeDurationFieldsSign(
