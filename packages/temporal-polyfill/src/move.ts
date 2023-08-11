@@ -153,16 +153,10 @@ export function moveDateByDays( // TODO: rename moveDateDays?
 export function moveTime(
   isoTimeFields: IsoTimeFields,
   durationFields: DurationFields,
-  strict?: boolean,
 ): [IsoTimeFields, number] {
   return nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoTimeFields) +
-    isoTimeFieldsToNano(
-      // TODO: less hacky
-      strict
-        ? durationTimeFieldsToIsoStrict(durationFields)
-        : durationTimeFieldsToIso(durationFields)
-    ),
+    isoTimeFieldsToNano(durationTimeFieldsToIso(durationFields)),
   )
 }
 
