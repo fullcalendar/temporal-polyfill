@@ -250,9 +250,9 @@ function parseMaybeDurationInternals(s: string): DurationInternals | undefined {
   return parts ? parseDurationParts(parts) : undefined
 }
 
-export function parseMaybeOffsetNano(s: string): number | undefined {
+export function parseMaybeOffsetNano(s: string, onlyHourMinute?: boolean): number | undefined {
   const parts = offsetRegExp.exec(s)
-  return parts ? parseOffsetParts(parts) : undefined
+  return parts ? parseOffsetParts(parts, onlyHourMinute) : undefined
 }
 
 // RegExp & Parts
@@ -390,7 +390,11 @@ function parseTimeParts(parts: string[]): IsoTimeFields {
   }
 }
 
-function parseOffsetParts(parts: string[]): number {
+function parseOffsetParts(parts: string[], onlyHourMinute?: boolean): number {
+  if (onlyHourMinute && (parts[4] || parts[5])) {
+    throw new RangeError('Does not accept sub-minute')
+  }
+
   return parseSign(parts[1]) * (
     parseInt0(parts[2]) * nanoInHour +
     parseInt0(parts[3]) * nanoInMinute +

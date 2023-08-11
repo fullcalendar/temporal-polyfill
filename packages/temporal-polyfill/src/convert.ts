@@ -36,7 +36,6 @@ import {
 } from './durationFields'
 import { IsoTimeFields, constrainIsoTimeFields } from './isoFields'
 import { CalendarInternals, IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
-import { isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import {
   EpochDisambig,

@@ -101,7 +101,7 @@ export function formatOffsetNano(
   const [second, nanoRemainder2] = divFloorMod(nanoRemainder1, nanoInSec)
 
   return getSignStr(offsetNano) +
-    padNumber2(hour) +
+    padNumber2(hour) + ':' +
     padNumber2(minute) +
     ((second || nanoRemainder2)
       ? ':' + padNumber2(second) + formatSubsecNano(nanoRemainder2)

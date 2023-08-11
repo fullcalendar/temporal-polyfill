@@ -3,6 +3,7 @@ import { parseIntlYear } from './calendarImpl'
 import { ensureString } from './cast'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
+import { formatOffsetNano } from './isoFormat'
 import {
   epochNanoToSec,
   epochNanoToSecMod,
@@ -22,8 +23,8 @@ const minPossibleTransition = isoArgsToEpochSec(1847)
 const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
 
 const queryCacheableTimeZoneImpl = createLazyGenerator((timeZoneId: string): TimeZoneImpl => {
-  return timeZoneId === 'utc'
-    ? new FixedTimeZoneImpl(timeZoneId, 0)
+  return timeZoneId === 'UTC'
+    ? new FixedTimeZoneImpl(0, timeZoneId) // override ID
     : new IntlTimeZoneImpl(timeZoneId)
 })
 
@@ -31,12 +32,14 @@ export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
   // TODO: fix double-call of ensureString
   timeZoneId = ensureString(timeZoneId).toLowerCase()
 
-  const offsetNano = parseMaybeOffsetNano(timeZoneId)
+  const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
-    return new FixedTimeZoneImpl(timeZoneId, offsetNano)
+    return new FixedTimeZoneImpl(offsetNano)
   }
 
-  return queryCacheableTimeZoneImpl(timeZoneId)
+  return queryCacheableTimeZoneImpl(
+    timeZoneId.toUpperCase() // normalize IANA string using uppercase so 'UTC'
+  )
 }
 
 export interface TimeZoneImpl extends TimeZoneOps {
@@ -48,8 +51,8 @@ export interface TimeZoneImpl extends TimeZoneOps {
 
 export class FixedTimeZoneImpl implements TimeZoneImpl {
   constructor(
-    public id: string,
     public offsetNano: number,
+    public id: string = formatOffsetNano(offsetNano)
   ) {}
 
   getOffsetNanosecondsFor(epochNano: LargeInt): number {
@@ -75,12 +78,13 @@ interface IntlTimeZoneStore {
 }
 
 export class IntlTimeZoneImpl implements TimeZoneImpl {
+  id: string
   store: IntlTimeZoneStore
 
-  constructor(
-    public id: string
-  ) {
-    this.store = createIntlTimeZoneStore(createComputeOffsetSec(id))
+  constructor(id: string) {
+    const format = buildIntlFormat(id)
+    this.id = format.resolvedOptions().timeZone // TODO: less calling of .resolvedOptions()
+    this.store = createIntlTimeZoneStore(createComputeOffsetSec(format))
   }
 
   getOffsetNanosecondsFor(epochNano: LargeInt): number {
@@ -249,11 +253,9 @@ function computePeriod(epochSec: number): [number, number] {
   return [startEpochSec, endEpochSec]
 }
 
-function createComputeOffsetSec(timeZoneId: string): (
+function createComputeOffsetSec(format: Intl.DateTimeFormat): (
   (epochSec: number) => number
 ) {
-  const format = buildIntlFormat(timeZoneId)
-
   return (epochSec: number) => {
     const intlParts = hashIntlFormatParts(format, epochSec * milliInSec)
     const zonedEpochSec = isoArgsToEpochSec(
