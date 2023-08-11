@@ -454,7 +454,7 @@ function parseDurationParts(parts: string[]): DurationInternals {
         throw new RangeError('Fraction must be last one')
       }
 
-      wholeUnits = parseInt(wholeStr)
+      wholeUnits = parseIntSafe(wholeStr)
       hasAny = true
 
       if (fracStr) {
@@ -537,4 +537,18 @@ function parseSign(s: string | undefined): number {
 
 function parseInt0(s: string | undefined): number {
   return s === undefined ? 0 : parseInt(s)
+}
+
+/*
+Guaranteed to be non-Infinity (which can happen if number beyond maxint I think)
+Only needs to be called when we know RegExp allows infinite repeating character
+*/
+function parseIntSafe(s: string): number {
+  const n = parseInt(s)
+
+  if (!Number.isFinite(n)) {
+    throw new RangeError('Number out of range')
+  }
+
+  return n
 }
