@@ -38,9 +38,9 @@ export function diffDateTimes(
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
   largestUnit: Unit,
-  smallestUnit: Unit,
-  roundingInc: number,
-  roundingMode: RoundingMode,
+  smallestUnit: Unit = Unit.Nanosecond,
+  roundingInc: number = 1,
+  roundingMode: RoundingMode = RoundingMode.HalfExpand,
 ): DurationFields {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!

@@ -314,3 +314,6 @@ built-ins/Temporal/Instant/prototype/prop-desc.js
 built-ins/Temporal/PlainTime/prototype/prop-desc.js
 built-ins/Temporal/PlainDate/prototype/prop-desc.js
 built-ins/Temporal/Duration/prototype/prop-desc.js
+
+# don't prohibit newer utilities
+built-ins/Temporal/Duration/call-builtin.js

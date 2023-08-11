@@ -1,4 +1,4 @@
-import { diffZonedEpochNano } from './diff'
+import { diffDateTimes, diffZonedEpochNano } from './diff'
 import {
   DurationFields,
   DurationInternals,
@@ -15,7 +15,7 @@ import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields }
 import { IsoDateInternals } from './isoInternals'
 import { isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay } from './isoMath'
 import { LargeInt } from './largeInt'
-import { moveDateByDays, moveZonedEpochNano } from './move'
+import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
 import { Overflow, RoundingMode, roundingModeFuncs } from './options'
 import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
 import {
@@ -429,10 +429,11 @@ export type SimpleMarkerSystem<M> = [
 
 /*
 Okay that callers frequently cast to `unknown`?
+FYI: input can be a PlainDate's internals (IsoDateInternals), but marker has time
 */
 export function createMarkerSystem(
   markerInternals: ZonedInternals | IsoDateInternals
-): MarkerSystem<LargeInt> | MarkerSystem<IsoDateFields> {
+): MarkerSystem<LargeInt> | MarkerSystem<IsoDateTimeFields> {
   const { calendar, timeZone, epochNanoseconds } = markerInternals as ZonedInternals
 
   if (epochNanoseconds) {
@@ -444,11 +445,15 @@ export function createMarkerSystem(
     ]
   } else {
     return [
-      markerInternals as IsoDateFields,
-      isoToEpochNano as MarkerToEpochNano<IsoDateFields>,
-      // TODO: better way to .bind to Calendar, without specifying overflow/largeUnit?
-      (m: IsoDateFields, d: DurationFields) => calendar.dateAdd(m, updateDurationFieldsSign(d), Overflow.Constrain),
-      (m0: IsoDateFields, m1: IsoDateFields, largeUnit: Unit) => calendar.dateUntil(m0, m1, largeUnit),
+      { ...markerInternals, ...isoTimeFieldDefaults } as IsoDateTimeFields,
+      isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
+      // TODO: better way to .bind to Calendar
+      (m: IsoDateTimeFields, d: DurationFields) => {
+        return moveDateTime(calendar, m, d)
+      },
+      (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
+        return updateDurationFieldsSign(diffDateTimes(calendar, m0, m1, largeUnit))
+      },
     ]
   }
 }

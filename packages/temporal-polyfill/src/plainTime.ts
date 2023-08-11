@@ -170,7 +170,7 @@ export const [
 // -------------------------------------------------------------------------------------------------
 
 function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInternals): PlainTime {
-  return createPlainTime(moveTime(internals, durationInternals)[0])
+  return createPlainTime(moveTime(internals, durationInternals, true)[0])
 }
 
 function diffPlainTimes(
