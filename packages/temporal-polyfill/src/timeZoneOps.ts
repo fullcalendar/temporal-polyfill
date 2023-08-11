@@ -27,6 +27,8 @@ import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
 import { BoundArg, createLazyGenerator, isObjectlike } from './utils'
 import { ZonedInternals } from './zonedDateTime'
+import { queryCalendarImpl } from './calendarImpl'
+import { isoCalendarId } from './calendarConfig'
 
 export interface TimeZoneOps {
   id: string
@@ -265,7 +267,10 @@ const timeZoneOpsAdapterMethods = {
 
   getPossibleInstantsFor(timeZone: TimeZoneProtocol, isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
     return [...timeZone.getPossibleInstantsFor(
-      createPlainDateTime(isoDateTimeFields as IsoDateTimeInternals) // HACK: hope Calendar isn't needed
+      createPlainDateTime({
+        ...isoDateTimeFields,
+        calendar: queryCalendarImpl(isoCalendarId),
+      })
     )].map(getInstantEpochNano)
   },
 }
@@ -276,7 +281,7 @@ type TimeZoneOpsAdapter = WrapperInstance<
   typeof timeZoneOpsAdapterMethods // methods
 >
 
-const TimeZoneOpsAdapter = createWrapperClass<
+export const TimeZoneOpsAdapter = createWrapperClass<
   [TimeZoneProtocol], // constructor
   TimeZoneProtocol, // internals
   typeof idGettersStrict, // getters

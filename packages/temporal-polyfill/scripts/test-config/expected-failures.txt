@@ -326,3 +326,6 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-insta
 
 # methods can't have prototype
 built-ins/Temporal/TimeZone/prototype/equals/builtin.js
+
+# methods shouldn't be constructors
+built-ins/Temporal/TimeZone/prototype/equals/not-a-constructor.js

@@ -6,7 +6,7 @@ import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instan
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
+import { TimeZoneOpsAdapter, getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
 import { parseMaybeOffsetNano } from './isoParse'
@@ -67,10 +67,15 @@ const timeZoneMethods: {
     })
   },
 
-  getInstantFor(impl: TimeZoneImpl, plainDateTimeArg: PlainDateTimeArg, options?: EpochDisambigOptions): Instant {
+  getInstantFor(
+    this: TimeZone,
+    impl: TimeZoneImpl,
+    plainDateTimeArg: PlainDateTimeArg,
+    options?: EpochDisambigOptions
+  ): Instant {
     return createInstant(
       getSingleInstantFor(
-        impl,
+        new TimeZoneOpsAdapter(this), // needed for internal call to getPossibleInstantsFor
         toPlainDateTimeInternals(plainDateTimeArg),
         refineEpochDisambigOptions(options),
       )

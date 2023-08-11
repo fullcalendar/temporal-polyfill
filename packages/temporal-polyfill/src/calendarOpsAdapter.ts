@@ -16,6 +16,8 @@ import { PlainYearMonth } from './plainYearMonth'
 import { Unit, unitNamesAsc } from './units'
 import { BoundArg, Callable, mapProps } from './utils'
 import { validateFieldNames } from './calendarOps'
+import { isoCalendarId } from './calendarConfig'
+import { queryCalendarImpl } from './calendarImpl'
 
 const getPlainDateInternals = getStrictInternals.bind<
   undefined, [BoundArg],
@@ -47,8 +49,10 @@ const calendarOpsAdapterMethods = {
   */
   ...mapProps((refiner: Callable, propName) => {
     return ((calendar: CalendarProtocol, isoDateFields: IsoDateFields) => {
-      // HACK: hopefully `calendar` not accessed
-      const pd = createPlainDate(isoDateFields as IsoDateInternals)
+      const pd = createPlainDate({
+        ...isoDateFields,
+        calendar: queryCalendarImpl(isoCalendarId),
+      })
       return refiner(calendar[propName](pd))
     })
   }, dateGetterRefiners) as {
