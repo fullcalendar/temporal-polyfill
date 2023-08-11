@@ -45,7 +45,7 @@ export function diffDateTimes(
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
 
-  if (largestUnit < Unit.Day) {
+  if (largestUnit <= Unit.Day) {
     return diffEpochNano(
       startEpochNano,
       endEpochNano,

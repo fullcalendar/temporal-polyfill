@@ -84,9 +84,9 @@ export function refineMaybeZonedDateTimeBag(
   ) as ZonedDateTimeBag
 
   if (fields.timeZone) {
-    const timeZone = queryTimeZoneOps(fields.timeZone)
     const isoDateFields = calendar.dateFromFields(fields, Overflow.Constrain)
     const isoTimeFields = refineTimeBag(fields, Overflow.Constrain)
+    const timeZone = queryTimeZoneOps(fields.timeZone) // must happen after datetime fields
 
     const epochNanoseconds = getMatchingInstantFor(
       timeZone,
@@ -129,9 +129,11 @@ export function refineZonedDateTimeBag(
 
   const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
 
-  const timeZone = queryTimeZoneOps(fields.timeZone!) // guaranteed via refineCalendarFields
   const isoDateFields = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
+  // guaranteed via refineCalendarFields
+  // must happen after datetime fields
+  const timeZone = queryTimeZoneOps(fields.timeZone!)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
@@ -492,7 +494,11 @@ function refineCalendarFields(
   requiredFieldNames: string[] = [], // a subset of validFieldNames
   forcedValidFieldNames: string[] = [],
 ): Record<string, unknown> {
-  const fieldNames = [...calendar.fields(validFieldNames), ...forcedValidFieldNames]
+  const fieldNames = [
+    ...calendar.fields(validFieldNames),
+    ...forcedValidFieldNames,
+  ].sort() // inefficient!
+
   return refineFields(bag, fieldNames, requiredFieldNames)
 }
 
@@ -505,7 +511,11 @@ function mergeCalendarFields(
 ): Record<string, unknown> {
   rejectInvalidBag(bag)
 
-  const fieldNames = [...calendar.fields(validFieldNames), ...forcedValidFieldNames]
+  const fieldNames = [
+    ...calendar.fields(validFieldNames),
+    ...forcedValidFieldNames
+  ].sort() // inefficient!
+
   let fields = refineFields(obj, fieldNames, [])
   const partialFields = refineFields(bag, fieldNames)
 

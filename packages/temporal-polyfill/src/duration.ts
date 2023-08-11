@@ -135,7 +135,13 @@ export const [
 
       // TODO: move to round.js?
 
-      if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
+      if (
+        largestUnit < Unit.Day || (
+          largestUnit === Unit.Day &&
+          // has uniform days?
+          !(markerInternals && (markerInternals as any).epochNanoseconds)
+        )
+      ) {
         // TODO: check internals doesn't have large fields
         return createDuration(
           updateDurationFieldsSign(
@@ -171,7 +177,13 @@ export const [
         totalUnit,
       ) as Unit
 
-      if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
+      if (
+        largestUnit < Unit.Day || (
+          largestUnit === Unit.Day &&
+          // has uniform days?
+          !(markerInternals && (markerInternals as any).epochNanoseconds)
+        )
+      ) {
         return totalDayTimeDuration(internals, totalUnit as DayTimeUnit)
       }
 
@@ -217,7 +229,13 @@ export const [
         getLargestDurationUnit(durationFields1),
       ) as Unit
 
-      if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
+      if (
+        largestUnit < Unit.Day || (
+          largestUnit === Unit.Day &&
+          // has uniform days?
+          !(markerInternals && (markerInternals as any).epochNanoseconds)
+        )
+      ) {
         return compareLargeInts(
           durationFieldsToNano(durationFields0),
           durationFieldsToNano(durationFields1),
@@ -256,7 +274,13 @@ function addToDuration(
 
   const addedDurationFields = addDurationFields(internals, otherFields, direction)
 
-  if (largestUnit < Unit.Day || (largestUnit === Unit.Day && !markerInternals)) {
+  if (
+    largestUnit < Unit.Day || (
+      largestUnit === Unit.Day &&
+      // has uniform days?
+      !(markerInternals && (markerInternals as any).epochNanoseconds)
+    )
+  ) {
     return balanceDurationDayTime(addedDurationFields, largestUnit as DayTimeUnit)
   }
 

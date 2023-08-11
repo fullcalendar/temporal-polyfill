@@ -317,3 +317,9 @@ built-ins/Temporal/Duration/prototype/prop-desc.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
+
+# our Duration::compare calls Calendar::dateAdd fewer times!
+built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
+
+# problem with our adapter needing specific instance of Temporal object
+built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js

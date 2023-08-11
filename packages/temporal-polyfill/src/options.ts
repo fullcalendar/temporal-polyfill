@@ -563,12 +563,14 @@ const subsecDigitsName = 'fractionalSecondDigits'
 function refineSubsecDigits(options: SubsecDigitsOptions): SubsecDigits | undefined {
   const subsecDigits = options[subsecDigitsName]
 
-  if (typeof subsecDigits === 'number') {
-    return clamp(Math.floor(subsecDigits), 0, 9, Overflow.Reject, subsecDigitsName) as SubsecDigits
-  }
+  if (subsecDigits !== undefined) {
+    if (typeof subsecDigits === 'number') {
+      return clamp(Math.floor(subsecDigits), 0, 9, Overflow.Reject, subsecDigitsName) as SubsecDigits
+    }
 
-  if (String(subsecDigits) !== 'auto') {
-    throw new RangeError('Must be auto or 0-9')
+    if (String(subsecDigits) !== 'auto') {
+      throw new RangeError('Must be auto or 0-9')
+    }
   }
 
   // undefind means 'auto'
