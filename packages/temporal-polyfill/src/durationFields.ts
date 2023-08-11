@@ -1,4 +1,3 @@
-import { IsoTimeFields, isoTimeFieldNames, isoTimeFieldNamesAsc } from './isoFields'
 import { LargeInt } from './largeInt'
 import { toIntegerStrict } from './cast'
 import {
@@ -6,6 +5,7 @@ import {
   TimeUnit,
   Unit,
   givenFieldsToLargeNano,
+  nanoInUtcDay,
   nanoToGivenFields,
   unitNamesAsc,
   unitNanoMap,
@@ -16,8 +16,6 @@ import {
   mapPropNamesToConstant,
   mapPropNamesToIndex,
   mapProps,
-  remapProps,
-  BoundArg,
 } from './utils'
 
 interface DurationDateFields {
@@ -95,20 +93,16 @@ export function refineDurationFields(
   )
 }
 
-export const durationTimeFieldsToIso = remapProps.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [DurationTimeFields], // unbound
-  IsoTimeFields // return
->(undefined, durationTimeFieldNamesAsc, isoTimeFieldNamesAsc)
+export function durationTimeFieldsToLargeNano(fields: DurationFields): LargeInt {
+  // TODO: do bind? or have durationFieldsToNano to better default?
+  return durationFieldsToNano(fields, Unit.Hour)
+}
 
-/*
-TODO: have method directly return nanoseconds. the only use!
-*/
-export function durationTimeFieldsToIsoStrict(fields: DurationFields): IsoTimeFields {
+export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): LargeInt {
   if (durationHasDateParts(fields)) {
     throw new RangeError('Operation not allowed') // correct error?
   }
-  return durationTimeFieldsToIso(fields)
+  return durationTimeFieldsToLargeNano(fields)
 }
 
 // Field <-> Nanosecond Conversion
@@ -125,7 +119,7 @@ export function durationFieldsToTimeNano(
   fields: DurationFields,
   largeUnit: TimeUnit = Unit.Hour,
 ): number {
-  return durationFieldsToNano(fields, largeUnit).toNumber()
+  return durationFieldsToNano(fields, largeUnit).divTruncMod(nanoInUtcDay)[1]
 }
 
 export function nanoToDurationFields(
