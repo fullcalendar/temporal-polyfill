@@ -1,4 +1,4 @@
-import { unitNanoMap, nanoInSec } from './units'
+import { unitNanoMap, nanoInSec, nanoInUtcDay } from './units'
 import { isoCalendarId } from './calendarConfig'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import {
@@ -395,12 +395,18 @@ function parseOffsetParts(parts: string[], onlyHourMinute?: boolean): number {
     throw new RangeError('Does not accept sub-minute')
   }
 
-  return parseSign(parts[1]) * (
+  const offsetNanoPos = (
     parseInt0(parts[2]) * nanoInHour +
     parseInt0(parts[3]) * nanoInMinute +
     parseInt0(parts[4]) * nanoInSec +
     parseSubsecNano(parts[5] || '')
   )
+
+  if (offsetNanoPos > nanoInUtcDay) {
+    throw new RangeError('Offset too large')
+  }
+
+  return parseSign(parts[1]) * offsetNanoPos
 }
 
 function parseDurationParts(parts: string[]): DurationInternals {
