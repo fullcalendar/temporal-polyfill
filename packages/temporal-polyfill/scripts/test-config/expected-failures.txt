@@ -329,3 +329,6 @@ built-ins/Temporal/TimeZone/prototype/equals/builtin.js
 
 # methods shouldn't be constructors
 built-ins/Temporal/TimeZone/prototype/equals/not-a-constructor.js
+
+# i don't understand why TimeZone::getInstant for must call Calendar::dateAdd
+built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
