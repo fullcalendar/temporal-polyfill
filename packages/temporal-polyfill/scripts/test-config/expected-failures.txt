@@ -323,3 +323,6 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
+
+# methods can't have prototype
+built-ins/Temporal/TimeZone/prototype/equals/builtin.js

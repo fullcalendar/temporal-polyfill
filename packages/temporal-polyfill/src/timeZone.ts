@@ -10,6 +10,7 @@ import { getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochN
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
 import { parseMaybeOffsetNano } from './isoParse'
+import { ensureString } from './cast'
 
 interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number
@@ -87,7 +88,7 @@ const timeZoneMethods: {
     let b: string | number | undefined
 
     return this === otherArg ||
-      ((a = this.id) === (b = queryTimeZoneOps(otherArg).id)) || (
+      ((a = ensureString(this.id)) === (b = queryTimeZoneOps(otherArg).id)) || (
         (a = parseMaybeOffsetNano(a, true)) !== undefined &&
         (b = parseMaybeOffsetNano(b, true)) === a
       )
