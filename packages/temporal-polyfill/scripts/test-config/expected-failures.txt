@@ -6,6 +6,8 @@
 # TODO: once we see non-PlainTime, determine what to do
 built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-2.js
 built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-3.js
+built-ins/Temporal/PlainTime/prototype/subtract/precision-exact-mathematical-values-2.js
+built-ins/Temporal/PlainTime/prototype/subtract/precision-exact-mathematical-values-3.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
