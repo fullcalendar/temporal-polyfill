@@ -1,9 +1,22 @@
 import { NumSign, compareNumbers, divModFloor, divModTrunc } from './utils'
 
-const maxLow = 1e8 // exclusive // TODO: explain why
+/*
+The multiplier for the `high` value. Max value for the stored `low` value.
+Roughly half the number of sigfigs as Number.MAX_SAFE_INTEGER
+so that Number arithmetic on the `low` value has plenty of space to overflow
+before being transplanted to the `high` value.
+*/
+const maxLow = 1e8
 const maxLowBigInt = typeof BigInt === undefined ? undefined! : BigInt(maxLow)
 
 export class LargeInt {
+  /*
+  How these internal numbers are derived:
+    [high, low] = divModTrunc(input, maxLow)
+    (Using `trunc` results in fewer sigfigs and more precise division later)
+  How these internal numbers generate real numbers:
+    output = high * maxLow + low
+  */
   constructor(
     public high: number,
     public low: number,
@@ -25,28 +38,11 @@ export class LargeInt {
   }
 
   divModFloor(divisor: number): [LargeInt, number] {
-    const { high, low } = this
-    const [newHigh, highRemainder] = divModFloor(high, divisor)
-    const [newLow, remainder] = divModFloor(highRemainder * maxLow + low, divisor)
-
-    return [
-      balanceAndCreate(newHigh, newLow),
-      remainder,
-    ]
+    return divModLarge(divModFloor, this, divisor)
   }
 
-  /*
-  TODO: DRY with divModFloor
-  */
   divModTrunc(divisor: number): [LargeInt, number] {
-    const { high, low } = this
-    const [newHigh, highRemainder] = divModTrunc(high, divisor)
-    const [newLow, remainder] = divModTrunc(highRemainder * maxLow + low, divisor)
-
-    return [
-      balanceAndCreate(newHigh, newLow),
-      remainder,
-    ]
+    return divModLarge(divModTrunc, this, divisor)
   }
 
   toNumber(): number {
@@ -63,14 +59,36 @@ function balanceAndCreate(high: number, low: number) {
   return new LargeInt(high + extraHigh, newLow)
 }
 
+/*
+Large divisors are only allowed if few sigfigs at a high power,
+otherwise `highRemainder * maxLow + low` could loose precision
+*/
+function divModLarge(
+  divModFunc: (smallNum: number, divisor: number) => [number, number],
+  num: LargeInt,
+  divisor: number,
+): [
+  LargeInt,
+  number,
+] {
+  const { high, low } = num
+  const [newHigh, highRemainder] = divModFunc(high, divisor)
+  const [newLow, remainder] = divModFunc(highRemainder * maxLow + low, divisor)
+
+  return [
+    balanceAndCreate(newHigh, newLow),
+    remainder,
+  ]
+}
+
 export function numberToLargeInt(num: number): LargeInt {
   return new LargeInt(...divModTrunc(num, maxLow))
 }
 
 export function bigIntToLargeInt(num: bigint): LargeInt {
   return new LargeInt(
-    Number(num / maxLowBigInt),
-    Number(num % maxLowBigInt)
+    Number(num / maxLowBigInt), // BigInt does trunc
+    Number(num % maxLowBigInt) // "
   )
 }
 
