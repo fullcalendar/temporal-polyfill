@@ -56,12 +56,16 @@ function ensureNumberIsInteger(num: number): number {
   if (!Number.isInteger(num)) {
     throw new RangeError('must be integer');
   }
-  return num || 0; // ensure no -0
+  return num || 0; // ensure no -0... TODO: why???
 }
 /*
 Caller must do ||0 to ensure no -0
 */
 export function toNumber(arg: number): number {
+  if (typeof arg === 'bigint') {
+    throw new TypeError('Cannot convert bigint to number') // ...in this case
+  }
+
   arg = Number(arg);
   if (isNaN(arg)) {
     throw new RangeError('not a number');
