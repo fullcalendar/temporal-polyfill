@@ -343,7 +343,10 @@ export function modFloor(num: any, divisor: any): any {
 }
 
 export function divModTrunc(num: number, divisor: number): [number, number] {
-  return [Math.trunc(num / divisor), num % divisor]
+  return [
+    divTrunc(num, divisor),
+    modTrunc(num, divisor),
+  ]
 }
 
 /*
