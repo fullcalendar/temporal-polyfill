@@ -105,7 +105,7 @@ export function moveDate(
 
   // convert time fields to days
   days += durationFieldsToNano(durationFields, Unit.Hour)
-    .divTruncMod(nanoInUtcDay)[0].toNumber()
+    .divModTrunc(nanoInUtcDay)[0].toNumber()
 
   if (years || months) {
     let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)

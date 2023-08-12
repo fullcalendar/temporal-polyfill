@@ -113,7 +113,7 @@ export function durationFieldsToTimeNano(
   largeUnit: TimeUnit = Unit.Hour,
 ): number {
   return durationFieldsToNano(fields, largeUnit)
-    .divTruncMod(nanoInUtcDay)[1] // wrap around 24 hours. returns number
+    .divModTrunc(nanoInUtcDay)[1] // wrap around 24 hours. returns number
 }
 
 export function durationFieldsToNano(
@@ -128,7 +128,7 @@ export function nanoToDurationFields(
   largestUnit: DayTimeUnit = Unit.Day,
 ): DurationFields {
   const divisor = unitNanoMap[largestUnit]
-  const [largeUnitNum, remainder] = largeNano.divTruncMod(divisor)
+  const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
 
   return {
     ...durationFieldDefaults,

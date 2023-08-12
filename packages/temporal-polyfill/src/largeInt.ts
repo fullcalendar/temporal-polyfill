@@ -1,4 +1,4 @@
-import { NumSign, compareNumbers, divModFloor } from './utils'
+import { NumSign, compareNumbers, divModFloor, divModTrunc } from './utils'
 
 const maxLow = 1e8 // exclusive // TODO: explain why
 
@@ -26,7 +26,7 @@ export class LargeInt {
     return balanceAndCreate(this.high * multiplier, this.low * multiplier)
   }
 
-  divFloorMod(divisor: number): [LargeInt, number] {
+  divModFloor(divisor: number): [LargeInt, number] {
     const { high, low } = this
     const [newHigh, highRemainder] = divModFloor(high, divisor)
     const [newLow, remainder] = divModFloor(highRemainder * maxLow + low, divisor)
@@ -37,26 +37,15 @@ export class LargeInt {
     ]
   }
 
-  divTruncMod(divisor: number): [LargeInt, number] {
-    let [whole, remainder] = this.divFloorMod(divisor)
+  divModTrunc(divisor: number): [LargeInt, number] {
+    const { high, low } = this
+    const [newHigh, highRemainder] = divModTrunc(high, divisor)
+    const [newLow, remainder] = divModTrunc(highRemainder * maxLow + low, divisor)
 
-    if (whole.computeSign() === -1 && remainder) {
-      whole = whole.addNumber(1)
-      remainder -= divisor
-    }
-
-    return [whole, remainder]
-  }
-
-  mod2(): number {
-    return (this.low % 2) * this.computeSign()
-  }
-
-  /*
-  different than Duration::sign, for minification
-  */
-  computeSign(): NumSign {
-    return (Math.sign(this.high) || Math.sign(this.low)) as NumSign
+    return [
+      balanceAndCreate(newHigh, newLow),
+      remainder,
+    ]
   }
 
   toNumber(): number {

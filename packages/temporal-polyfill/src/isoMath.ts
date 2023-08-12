@@ -175,15 +175,15 @@ function epochNanoToMicro(epochNano: LargeInt): bigint {
 // nano -> [micro/milli/sec] (with remainder)
 
 export function epochNanoToSecMod(epochNano: LargeInt): [LargeInt, number] {
-  return epochNano.divFloorMod(nanoInSec)
+  return epochNano.divModFloor(nanoInSec)
 }
 
 function epochNanoToMilliMod(epochNano: LargeInt): [LargeInt, number] {
-  return epochNano.divFloorMod(nanoInMilli)
+  return epochNano.divModFloor(nanoInMilli)
 }
 
 function epochNanoToMicroMod(epochNano: LargeInt): [LargeInt, number] {
-  return epochNano.divFloorMod(nanoInMicro)
+  return epochNano.divModFloor(nanoInMicro)
 }
 
 // [micro/milli/sec] -> nano
@@ -298,7 +298,7 @@ function isoToLegacyDate(
 // Epoch -> ISO Fields
 
 export function epochNanoToIso(epochNano: LargeInt): IsoDateTimeFields {
-  const [epochMilli, nanoRemainder] = epochNano.divFloorMod(nanoInMilli)
+  const [epochMilli, nanoRemainder] = epochNano.divModFloor(nanoInMilli)
   const [isoMicrosecond, isoNanosecond] = divModFloor(nanoRemainder, nanoInMicro)
   return {
     ...epochMilliToIso(epochMilli.toNumber()),

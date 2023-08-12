@@ -219,8 +219,8 @@ export function roundByIncLarge(
   inc: number,
   roundingMode: RoundingMode,
 ): LargeInt {
-  const [whole, remainder] = num.divTruncMod(inc)
-  const mod2 = whole.mod2() // workaround for halfEven
+  const [whole, remainder] = num.divModTrunc(inc)
+  const mod2 = whole.low % 2 // workaround for halfEven
 
   return whole.mult(inc).addNumber(
     roundWithMode((remainder / inc) + mod2, roundingMode) - mod2,
@@ -240,7 +240,7 @@ export function totalDayTimeDuration( // assumes iso-length days
 ): number {
   const largeNano = durationFieldsToNano(durationFields)
   const divisor = unitNanoMap[totalUnit]
-  const [fullUnits, remainder] = largeNano.divTruncMod(divisor)
+  const [fullUnits, remainder] = largeNano.divModTrunc(divisor)
   return fullUnits.toNumber() + (remainder / divisor)
 }
 
