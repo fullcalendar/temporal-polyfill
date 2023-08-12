@@ -326,9 +326,9 @@ export const [
     toString(internals: ZonedInternals, options?: ZonedDateTimeDisplayOptions): string {
       let { epochNanoseconds, timeZone, calendar } = internals
       const [
-        calendarDisplayI,
-        timeZoneDisplayI,
-        offsetDisplayI,
+        calendarDisplay,
+        timeZoneDisplay,
+        offsetDisplay,
         nanoInc,
         roundingMode,
         subsecDigits,
@@ -353,9 +353,9 @@ export const [
       isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
 
       return formatIsoDateTimeFields(isoDateTimeFields, subsecDigits) +
-        formatOffsetNano(offsetNanoseconds, offsetDisplayI) +
-        formatTimeZone(timeZone, timeZoneDisplayI) +
-        formatCalendar(calendar, calendarDisplayI)
+        formatOffsetNano(offsetNanoseconds, offsetDisplay) +
+        formatTimeZone(timeZone, timeZoneDisplay) +
+        formatCalendar(calendar, calendarDisplay)
     },
 
     toLocaleString: toLocaleStringMethod,

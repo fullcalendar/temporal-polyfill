@@ -90,7 +90,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       isoMicrosecond,
       isoNanosecond,
       calendar,
-    }) as unknown as bigint[] as unknown as IsoDateTimeInternals
+    })
   },
 
   // internalsConversionMap
@@ -192,7 +192,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
 
     toString(internals: IsoDateTimeInternals, options?: DateTimeDisplayOptions): string {
       const [
-        calendarDisplayI,
+        calendarDisplay,
         nanoInc,
         roundingMode,
         subsecDigits,
@@ -201,7 +201,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       const roundedIsoFields = roundDateTimeToNano(internals, nanoInc, roundingMode)
 
       return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
-        formatCalendar(internals.calendar, calendarDisplayI)
+        formatCalendar(internals.calendar, calendarDisplay)
     },
 
     toLocaleString: toLocaleStringMethod,

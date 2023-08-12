@@ -114,7 +114,7 @@ function isoDateMonthStart(isoDateFields: IsoDateFields): IsoDateFields {
   return { ...isoDateFields, isoMonth: 1, isoDay: 1 }
 }
 
-const epochNanoMax = numberToLargeInt(secInDay).mult(1e17) // TODO: define this better
+const epochNanoMax = numberToLargeInt(1e17).mult(secInDay) // TODO: define this better
 const epochNanoMin = epochNanoMax.mult(-1) // inclusive
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin

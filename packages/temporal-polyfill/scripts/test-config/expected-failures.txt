@@ -325,9 +325,11 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
 
 # methods can't have prototype
+# NOTE!!! will go away when we update tests
 built-ins/Temporal/TimeZone/prototype/equals/builtin.js
 
 # methods shouldn't be constructors
+# NOTE!!! will go away when we update tests
 built-ins/Temporal/TimeZone/prototype/equals/not-a-constructor.js
 
 # i don't understand why TimeZone::getInstant for must call Calendar::dateAdd

@@ -108,18 +108,19 @@ export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): Lar
 // Field <-> Nanosecond Conversion
 // -------------------------------------------------------------------------------------------------
 
+export function durationFieldsToTimeNano(
+  fields: DurationFields,
+  largeUnit: TimeUnit = Unit.Hour,
+): number {
+  return durationFieldsToNano(fields, largeUnit)
+    .divTruncMod(nanoInUtcDay)[1] // wrap around 24 hours. returns number
+}
+
 export function durationFieldsToNano(
   fields: DurationFields,
   largestUnit: DayTimeUnit = Unit.Day,
 ): LargeInt {
   return givenFieldsToLargeNano(fields, largestUnit, durationFieldNamesAsc)
-}
-
-export function durationFieldsToTimeNano(
-  fields: DurationFields,
-  largeUnit: TimeUnit = Unit.Hour,
-): number {
-  return durationFieldsToNano(fields, largeUnit).divTruncMod(nanoInUtcDay)[1]
 }
 
 export function nanoToDurationFields(
