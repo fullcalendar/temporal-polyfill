@@ -7,7 +7,7 @@ import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
-import { toNumber, toString, ensureObjectlike } from './cast'
+import { toString, ensureObjectlike, toInteger } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
@@ -526,7 +526,7 @@ function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUni
     return 1
   }
 
-  roundingInc = toNumber(roundingInc)
+  roundingInc = toInteger(roundingInc)
   const upUnitNano = unitNanoMap[smallestUnit + 1]
 
   if (upUnitNano) {
