@@ -13,7 +13,7 @@ import {
   nanoInSec,
   Unit,
 } from './units'
-import { divFloorMod, padNumber, padNumber2 } from './utils'
+import { divModFloor, padNumber, padNumber2 } from './utils'
 
 /*
 High-level. Refined options
@@ -96,9 +96,9 @@ export function formatOffsetNano(
     return ''
   }
 
-  const [hour, nanoRemainder0] = divFloorMod(Math.abs(offsetNano), nanoInHour)
-  const [minute, nanoRemainder1] = divFloorMod(nanoRemainder0, nanoInMinute)
-  const [second, nanoRemainder2] = divFloorMod(nanoRemainder1, nanoInSec)
+  const [hour, nanoRemainder0] = divModFloor(Math.abs(offsetNano), nanoInHour)
+  const [minute, nanoRemainder1] = divModFloor(nanoRemainder0, nanoInMinute)
+  const [second, nanoRemainder2] = divModFloor(nanoRemainder1, nanoInSec)
 
   return getSignStr(offsetNano) +
     padNumber2(hour) + ':' +
@@ -116,7 +116,7 @@ export function formatDurationInternals(
   const abs = absDurationInternals(durationInternals)
   const { hours, minutes } = abs
   const secondsNano = durationFieldsToTimeNano(abs, Unit.Second)
-  const [wholeSeconds, subsecNano] = divFloorMod(secondsNano, nanoInSec)
+  const [wholeSeconds, subsecNano] = divModFloor(secondsNano, nanoInSec)
   const forceSeconds =
     // at least one subsecond digit being forced?
     // allow `undefined` in comparison - will evaluate to false

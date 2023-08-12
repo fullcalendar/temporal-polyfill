@@ -328,21 +328,21 @@ export function clampProp<P>(
   return clamp(props[propName] as number, min, max, overflow, propName)
 }
 
-export function divFloorMod(num: number, divisor: number): [number, number]
-export function divFloorMod(num: bigint, divisor: bigint): [bigint, bigint]
-export function divFloorMod(num: any, divisor: any): [any, any] {
-  const remainder = floorMod(num, divisor)
+export function divModFloor(num: number, divisor: number): [number, number]
+export function divModFloor(num: bigint, divisor: bigint): [bigint, bigint]
+export function divModFloor(num: any, divisor: any): [any, any] {
+  const remainder = modFloor(num, divisor)
   const quotient = (num - remainder) / divisor
   return [quotient, remainder]
 }
 
-export function floorMod(num: number, divisor: number): number
-export function floorMod(num: bigint, divisor: bigint): bigint
-export function floorMod(num: any, divisor: any): any {
+export function modFloor(num: number, divisor: number): number
+export function modFloor(num: bigint, divisor: bigint): bigint
+export function modFloor(num: any, divisor: any): any {
   return (num % divisor + divisor) % divisor
 }
 
-export function divTruncMod(num: number, divisor: number): [number, number] {
+export function divModTrunc(num: number, divisor: number): [number, number] {
   return [Math.trunc(num / divisor), num % divisor]
 }
 
@@ -354,7 +354,6 @@ export function divTrunc(num: number, divisor: number): number {
   return Math.trunc(num / divisor) || 0 // ensures no -0
 }
 
-// rename?
 export function modTrunc(num: number, divisor: number): number {
   return (num % divisor) || 0 // ensures no -0
 }

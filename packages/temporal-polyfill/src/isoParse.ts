@@ -33,7 +33,7 @@ import {
   nanoInMinute,
   nanoToGivenFields,
 } from './units'
-import { divFloorMod } from './utils'
+import { divModFloor } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 
 // High-level
@@ -446,7 +446,7 @@ function parseDurationParts(parts: string[]): DurationInternals {
     let wholeUnits = 0
 
     if (timeUnit) {
-      [leftoverUnits, leftoverNano] = divFloorMod(leftoverNano, unitNanoMap[timeUnit])
+      [leftoverUnits, leftoverNano] = divModFloor(leftoverNano, unitNanoMap[timeUnit])
     }
 
     if (wholeStr !== undefined) {

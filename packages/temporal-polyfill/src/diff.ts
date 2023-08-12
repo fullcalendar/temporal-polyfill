@@ -28,7 +28,7 @@ import {
   milliInDay,
   nanoInUtcDay,
 } from './units'
-import { NumSign, divTruncMod, identityFunc } from './utils'
+import { NumSign, divModTrunc, identityFunc } from './utils'
 
 // Dates & Times
 // -------------------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ export function diffDatesExact(
     const sign = Math.sign(days) as NumSign
 
     if (largestUnit === Unit.Week) {
-      [weeks, days] = divTruncMod(days, isoDaysInWeek)
+      [weeks, days] = divModTrunc(days, isoDaysInWeek)
     }
 
     return { ...durationFieldDefaults, weeks, days, sign }

@@ -20,7 +20,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, compareNumbers, divFloorMod, clampProp } from './utils'
+import { NumSign, compareNumbers, divModFloor, clampProp } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
-  const [dayDelta, timeNano] = divFloorMod(nano, nanoInUtcDay)
+  const [dayDelta, timeNano] = divModFloor(nano, nanoInUtcDay)
   const isoTimeFields = nanoToGivenFields(timeNano, Unit.Hour, isoTimeFieldNamesAsc) as IsoTimeFields
   return [isoTimeFields, dayDelta]
 }
@@ -299,7 +299,7 @@ function isoToLegacyDate(
 
 export function epochNanoToIso(epochNano: LargeInt): IsoDateTimeFields {
   const [epochMilli, nanoRemainder] = epochNano.divFloorMod(nanoInMilli)
-  const [isoMicrosecond, isoNanosecond] = divFloorMod(nanoRemainder, nanoInMicro)
+  const [isoMicrosecond, isoNanosecond] = divModFloor(nanoRemainder, nanoInMicro)
   return {
     ...epochMilliToIso(epochMilli.toNumber()),
     isoMicrosecond,

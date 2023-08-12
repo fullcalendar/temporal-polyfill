@@ -1,4 +1,4 @@
-import { NumSign, compareNumbers, divFloorMod } from './utils'
+import { NumSign, compareNumbers, divModFloor } from './utils'
 
 const maxLow = 1e8 // exclusive // TODO: explain why
 
@@ -28,8 +28,8 @@ export class LargeInt {
 
   divFloorMod(divisor: number): [LargeInt, number] {
     const { high, low } = this
-    const [newHigh, highRemainder] = divFloorMod(high, divisor)
-    const [newLow, remainder] = divFloorMod(highRemainder * maxLow + low, divisor)
+    const [newHigh, highRemainder] = divModFloor(high, divisor)
+    const [newLow, remainder] = divModFloor(highRemainder * maxLow + low, divisor)
 
     return [
       balanceAndCreate(newHigh, newLow),
@@ -69,18 +69,18 @@ export class LargeInt {
 }
 
 function balanceAndCreate(high: number, low: number) {
-  const [extraHigh, newLow] = divFloorMod(low, maxLow)
+  const [extraHigh, newLow] = divModFloor(low, maxLow)
   return new LargeInt(high + extraHigh, newLow)
 }
 
 export function numberToLargeInt(num: number): LargeInt {
-  return new LargeInt(...divFloorMod(num, maxLow))
+  return new LargeInt(...divModFloor(num, maxLow))
 }
 
 export function bigIntToLargeInt(num: bigint): LargeInt {
   // must create BigInt lazily for if browser lacks support
   return new LargeInt(
-    ...(divFloorMod(num, BigInt(maxLow)).map(Number) as [number, number]),
+    ...(divModFloor(num, BigInt(maxLow)).map(Number) as [number, number]),
   )
 }
 
