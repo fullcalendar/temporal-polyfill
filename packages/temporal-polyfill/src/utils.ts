@@ -348,14 +348,20 @@ export function divModTrunc(num: number, divisor: number): [number, number] {
 
 /*
 FIX-FOR: using Math.trunc often results in -0
+Only useful for Numbers. BigInts don't have this problem
 NOTE: anywhere else Math.trunc is directly used, do ||0
 */
 export function divTrunc(num: number, divisor: number): number {
-  return Math.trunc(num / divisor) || 0 // ensures no -0
+  return Math.trunc(num / divisor) || 0
 }
 
+/*
+FIX-FOR: using % often results in -0
+Only useful for Numbers. BigInts don't have this problem
+NOTE: anywhere else % is directly used, do ||0
+*/
 export function modTrunc(num: number, divisor: number): number {
-  return (num % divisor) || 0 // ensures no -0
+  return (num % divisor) || 0
 }
 
 // rounding
