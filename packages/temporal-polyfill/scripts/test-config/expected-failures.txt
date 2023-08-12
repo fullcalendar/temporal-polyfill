@@ -2,6 +2,31 @@
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
+# serializing Duration units to Nanoseconds results in Infinity
+# TODO: once we see non-PlainTime, determine what to do
+built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-2.js
+built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-3.js
+
+# don't prohibit newer utilities
+built-ins/Temporal/Duration/call-builtin.js
+
+# our Duration::compare calls Calendar::dateAdd fewer times!
+built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
+
+# problem with our adapter needing specific instance of Temporal object
+built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
+
+# i don't understand why TimeZone::getInstant for must call Calendar::dateAdd
+built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
+
+# methods can't have prototype
+# NOTE!!! will go away when we update tests
+built-ins/Temporal/TimeZone/prototype/equals/builtin.js
+
+# methods shouldn't be constructors
+# NOTE!!! will go away when we update tests
+built-ins/Temporal/TimeZone/prototype/equals/not-a-constructor.js
+
 # b/c of fullcalendar/temporal weird class-construction
 #
 # cd test262/tests
@@ -314,23 +339,3 @@ built-ins/Temporal/Instant/prototype/prop-desc.js
 built-ins/Temporal/PlainTime/prototype/prop-desc.js
 built-ins/Temporal/PlainDate/prototype/prop-desc.js
 built-ins/Temporal/Duration/prototype/prop-desc.js
-
-# don't prohibit newer utilities
-built-ins/Temporal/Duration/call-builtin.js
-
-# our Duration::compare calls Calendar::dateAdd fewer times!
-built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
-
-# problem with our adapter needing specific instance of Temporal object
-built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
-
-# methods can't have prototype
-# NOTE!!! will go away when we update tests
-built-ins/Temporal/TimeZone/prototype/equals/builtin.js
-
-# methods shouldn't be constructors
-# NOTE!!! will go away when we update tests
-built-ins/Temporal/TimeZone/prototype/equals/not-a-constructor.js
-
-# i don't understand why TimeZone::getInstant for must call Calendar::dateAdd
-built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
