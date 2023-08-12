@@ -342,6 +342,23 @@ export function floorMod(num: any, divisor: any): any {
   return (num % divisor + divisor) % divisor
 }
 
+export function divTruncMod(num: number, divisor: number): [number, number] {
+  return [Math.trunc(num / divisor), num % divisor]
+}
+
+/*
+FIX-FOR: using Math.trunc often results in -0
+NOTE: anywhere else Math.trunc is directly used, do ||0
+*/
+export function divTrunc(num: number, divisor: number): number {
+  return Math.trunc(num / divisor) || 0 // ensures no -0
+}
+
+// rename?
+export function modTrunc(num: number, divisor: number): number {
+  return (num % divisor) || 0 // ensures no -0
+}
+
 // rounding
 // --------
 
@@ -358,12 +375,12 @@ export function roundHalfCeil(num: number): number {
 }
 
 export function roundHalfTrunc(num: number): number {
-  return hasHalf(num) ? Math.trunc(num) : Math.round(num)
+  return hasHalf(num) ? (Math.trunc(num) || 0) : Math.round(num)
 }
 
 export function roundHalfEven(num: number): number {
   return hasHalf(num)
-    ? (num = Math.trunc(num)) + (num % 2)
+    ? (num = Math.trunc(num) || 0) + (num % 2)
     : Math.round(num)
 }
 

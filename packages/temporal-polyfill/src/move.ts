@@ -24,7 +24,7 @@ import { LargeInt } from './largeInt'
 import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, milliInDay, nanoInUtcDay } from './units'
-import { clamp } from './utils'
+import { clamp, divTrunc, modTrunc } from './utils'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
@@ -166,8 +166,8 @@ export function moveByIsoMonths(year: number, month: number, monthDelta: number)
   year: number,
   month: number,
 ] {
-  year += Math.trunc(monthDelta / isoMonthsInYear)
-  month += monthDelta % isoMonthsInYear
+  year += divTrunc(monthDelta, isoMonthsInYear)
+  month += modTrunc(monthDelta, isoMonthsInYear)
 
   if (month < 1) {
     year--

@@ -1,4 +1,5 @@
 import { LargeInt, numberToLargeInt } from './largeInt'
+import { divTrunc, modTrunc } from './utils'
 
 /*
 TODO: use short names?
@@ -120,8 +121,8 @@ export function nanoToGivenFields<F>(
   for (; unit >= Unit.Nanosecond; unit--) {
     const divisor = unitNanoMap[unit]
 
-    fields[fieldNames[unit]] = Math.trunc(nano / divisor) || 0 // ensure no -0
-    nano = (nano % divisor) || 0 // ensure no -0
+    fields[fieldNames[unit]] = divTrunc(nano, divisor)
+    nano = modTrunc(nano, divisor)
   }
 
   return fields

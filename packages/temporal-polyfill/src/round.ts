@@ -26,7 +26,7 @@ import {
   DayTimeUnit,
   TimeUnit,
 } from './units'
-import { NumSign, identityFunc } from './utils'
+import { NumSign, divTrunc, identityFunc } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 
 export function roundToMinute(offsetNano: number): number {
@@ -379,9 +379,10 @@ function nudgeRelativeDuration<M>(
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
 
   const baseDurationFields = clearDurationFields(durationFields, smallestUnit - 1)
-  baseDurationFields[smallestUnitFieldName] = Math.trunc(
-    durationFields[smallestUnitFieldName] / roundingInc,
-  ) || 0 // ensure no -0
+  baseDurationFields[smallestUnitFieldName] = divTrunc(
+    durationFields[smallestUnitFieldName],
+    roundingInc,
+  )
 
   const [epochNano0, epochNano1] = clampRelativeDuration(
     baseDurationFields,
