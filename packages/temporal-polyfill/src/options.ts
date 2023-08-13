@@ -68,6 +68,8 @@ export function refineDiffOptions(
   minUnit = Unit.Nanosecond,
 ): DiffTuple {
   options = normalizeOptions(options)
+  options = { ...options } // spec needs is to copy
+
   const smallestUnit = refineSmallestUnit(options, maxUnit, minUnit, minUnit)
   const largestUnit = refineLargestUnit(
     options,
