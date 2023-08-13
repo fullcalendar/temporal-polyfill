@@ -113,7 +113,7 @@ export function durationFieldsToNano(fields: DurationFields, largestUnit: DayTim
 }
 
 export function durationFieldsToTimeOfDayNano(fields: DurationFields): number {
-  const balancedFields = balanceUpTimeFields(fields, Unit.Hour, durationFieldNamesAsc)
+  const balancedFields = balanceUpTimeFields(fields, Unit.Day, durationFieldNamesAsc)
 
   return givenFieldsToNano(balancedFields, Unit.Hour, durationFieldNamesAsc)
 }

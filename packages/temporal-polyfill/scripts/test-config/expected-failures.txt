@@ -3,7 +3,7 @@
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
 # serializing Duration units to Nanoseconds results in Infinity
-# TODO: once we see non-PlainTime, determine what to do
+# Only affects PlainTime. Duration time-units with values beyond Number.MAX_VALUE
 built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-2.js
 built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-3.js
 built-ins/Temporal/PlainTime/prototype/subtract/precision-exact-mathematical-values-2.js
