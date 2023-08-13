@@ -125,10 +125,10 @@ export const [
     },
 
     round(epochNano: LargeInt, options: RoundingOptions | UnitName): Instant {
-      const [smallestUnit, roundingInc, roundingModeI] = refineRoundOptions(options, Unit.Hour)
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options, Unit.Hour)
 
       return createInstant(
-        roundByIncLarge(epochNano, computeNanoInc(smallestUnit as TimeUnit, roundingInc), roundingModeI),
+        roundByIncLarge(epochNano, computeNanoInc(smallestUnit as TimeUnit, roundingInc), roundingMode),
       )
     },
 

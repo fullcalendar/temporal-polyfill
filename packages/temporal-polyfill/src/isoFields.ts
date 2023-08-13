@@ -49,7 +49,7 @@ export const isoDateTimeFieldRefiners = {
 // -------------------------------------------------------------------------------------------------
 
 export const isoDateFieldNames = Object.keys(isoDateFieldRefiners) as
-  (keyof IsoDateTimeFields)[]
+  (keyof IsoDateFields)[]
 
 export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners) as
   (keyof IsoTimeFields)[]

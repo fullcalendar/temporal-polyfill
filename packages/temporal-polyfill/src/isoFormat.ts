@@ -1,11 +1,12 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
-import { DurationInternals, absDurationInternals, durationFieldsToTimeNano } from './durationFields'
+import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import { CalendarDisplay, DateTimeDisplayOptions, OffsetDisplay, refineDateDisplayOptions, SubsecDigits, TimeZoneDisplay } from './options'
 import { TimeZoneOps } from './timeZoneOps'
 import {
+  givenFieldsToNano,
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
@@ -109,13 +110,13 @@ export function formatOffsetNano(
 }
 
 export function formatDurationInternals(
-  durationInternals: DurationInternals,
+  durationInternals: DurationInternals, // already balanced
   subsecDigits: SubsecDigits | undefined,
 ): string {
   const { sign } = durationInternals
   const abs = absDurationInternals(durationInternals)
   const { hours, minutes } = abs
-  const secondsNano = durationFieldsToTimeNano(abs, Unit.Second)
+  const secondsNano = givenFieldsToNano(abs, Unit.Second, durationFieldNamesAsc)
   const [wholeSeconds, subsecNano] = divModFloor(secondsNano, nanoInSec)
   const forceSeconds =
     // at least one subsecond digit being forced?

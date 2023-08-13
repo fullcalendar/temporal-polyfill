@@ -7,10 +7,12 @@ import {
   IsoTuple,
   isoTimeFieldNamesAsc,
   pluckIsoTuple,
+  isoDateFieldNames,
 } from './isoFields'
 import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
 import {
   Unit,
+  compareGivenFields,
   givenFieldsToNano,
   milliInSec,
   nanoInMicro,
@@ -344,9 +346,10 @@ export function compareIsoDateFields(
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
 ): NumSign {
-  return compareNumbers(
-    isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields1)!,
+  return compareGivenFields(
+    isoFields0,
+    isoFields1,
+    isoDateFieldNames, // ASC
   )
 }
 
@@ -354,8 +357,9 @@ export function compareIsoTimeFields(
   isoFields0: IsoTimeFields,
   isoFields1: IsoTimeFields,
 ): NumSign {
-  return compareNumbers(
-    isoTimeFieldsToNano(isoFields0),
-    isoTimeFieldsToNano(isoFields1)
+  return compareGivenFields(
+    isoFields0,
+    isoFields1,
+    isoTimeFieldNamesAsc,
   )
 }

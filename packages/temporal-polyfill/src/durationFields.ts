@@ -1,10 +1,11 @@
-import { LargeInt } from './largeInt'
+import { LargeInt, numberToLargeInt } from './largeInt'
 import { toIntegerStrict } from './cast'
 import {
   DayTimeUnit,
   TimeUnit,
   Unit,
-  givenFieldsToLargeNano,
+  balanceUpTimeFields,
+  givenFieldsToNano,
   nanoInUtcDay,
   nanoToGivenFields,
   unitNamesAsc,
@@ -93,34 +94,28 @@ export function refineDurationFields(
   )
 }
 
-export function durationTimeFieldsToLargeNano(fields: DurationFields): LargeInt {
-  // TODO: do bind? or have durationFieldsToNano to better default?
-  return durationFieldsToNano(fields, Unit.Hour)
-}
+// Field <-> Nanosecond Conversion
+// -------------------------------------------------------------------------------------------------
 
 export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): LargeInt {
   if (durationHasDateParts(fields)) {
     throw new RangeError('Operation not allowed') // correct error?
   }
-  return durationTimeFieldsToLargeNano(fields)
+
+  return durationFieldsToNano(fields, Unit.Hour)
 }
 
-// Field <-> Nanosecond Conversion
-// -------------------------------------------------------------------------------------------------
+export function durationFieldsToNano(fields: DurationFields, largestUnit: DayTimeUnit): LargeInt {
+  const balancedFields = balanceUpTimeFields(fields, largestUnit, durationFieldNamesAsc)
 
-export function durationFieldsToTimeNano(
-  fields: DurationFields,
-  largeUnit: TimeUnit = Unit.Hour,
-): number {
-  return durationFieldsToNano(fields, largeUnit)
-    .divModTrunc(nanoInUtcDay)[1] // wrap around 24 hours. returns number
+  return numberToLargeInt(nanoInUtcDay).mult(balancedFields.days)
+    .addNumber(givenFieldsToNano(balancedFields, largestUnit, durationFieldNamesAsc))
 }
 
-export function durationFieldsToNano(
-  fields: DurationFields,
-  largestUnit: DayTimeUnit = Unit.Day,
-): LargeInt {
-  return givenFieldsToLargeNano(fields, largestUnit, durationFieldNamesAsc)
+export function durationFieldsToTimeOfDayNano(fields: DurationFields): number {
+  const balancedFields = balanceUpTimeFields(fields, Unit.Hour, durationFieldNamesAsc)
+
+  return givenFieldsToNano(balancedFields, Unit.Hour, durationFieldNamesAsc)
 }
 
 export function nanoToDurationFields(
@@ -142,7 +137,7 @@ export function timeNanoToDurationFields(
   largestUnit: TimeUnit = Unit.Hour,
 ): DurationFields {
   return {
-    ...durationFieldDefaults,
+    ...durationFieldDefaults, // TODO: make nanoToGivenFields do this?
     ...nanoToGivenFields(
       nano,
       largestUnit,

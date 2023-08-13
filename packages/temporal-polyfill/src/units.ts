@@ -1,5 +1,5 @@
 import { LargeInt, numberToLargeInt } from './largeInt'
-import { divTrunc, modTrunc } from './utils'
+import { NumSign, compareNumbers, divModTrunc, divTrunc, modTrunc } from './utils'
 
 /*
 TODO: use short names?
@@ -72,23 +72,27 @@ export const unitNanoMap = [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export function givenFieldsToLargeNano<K extends string>(
-  fields: Record<K, number>,
-  unit: DayTimeUnit,
-  fieldNames: K[],
-): LargeInt {
-  let largeNano = new LargeInt(0, 0)
+export function balanceUpTimeFields<F>(
+  fields: F,
+  largestUnit: DayTimeUnit,
+  fieldNamesAsc: (keyof F)[]
+): F {
+  const balancedFields: any = {}
+  let fieldName: keyof F
+  let leftoverWhole = 0
 
-  for (; unit >= Unit.Nanosecond; unit--) {
-    const divisor = unitNanoMap[unit]
-    const fieldVal = fields[fieldNames[unit]]
-
-    if (fieldVal) {
-      largeNano = largeNano.addLargeInt(numberToLargeInt(fieldVal).mult(divisor))
-    }
+  for (let unit = Unit.Nanosecond; fieldName = fieldNamesAsc[unit], unit < largestUnit; unit++) {
+    [leftoverWhole, balancedFields[fieldName]] = divModTrunc(
+      leftoverWhole + (fields[fieldName] as number),
+      unitNanoMap[unit + 1],
+    )
   }
 
-  return largeNano
+  return {
+    ...fields,
+    [fieldName]: leftoverWhole + (fields[fieldName] as number),
+    ...balancedFields
+  }
 }
 
 export function givenFieldsToNano<K extends string>(
@@ -126,4 +130,23 @@ export function nanoToGivenFields<F>(
   }
 
   return fields
+}
+
+export function compareGivenFields<F>(
+  fields0: F,
+  fields1: F,
+  fieldNames: (keyof F)[], // ASC
+): NumSign {
+  for (let i = fieldNames.length - 1; i >= 0; i--) {
+    const res = compareNumbers(
+      fields0[fieldNames[i]] as number,
+      fields1[fieldNames[i]] as number,
+    )
+
+    if (res) {
+      return res
+    }
+  }
+
+  return 0
 }

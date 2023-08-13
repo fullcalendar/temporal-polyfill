@@ -3,15 +3,14 @@ import { mergeDurationBag, refineDurationBag } from './convert'
 import {
   absDurationInternals,
   addDurationFields,
-  durationFieldsToNano,
   durationInternalGetters,
   negateDurationInternals,
   refineDurationFields,
   DurationInternals,
   DurationFields,
   durationFieldNamesAsc,
-  nanoToDurationFields,
   updateDurationFieldsSign,
+  durationFieldsToNano,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
@@ -36,7 +35,7 @@ import {
   totalRelativeDuration,
 } from './round'
 import { NumSign, noop } from './utils'
-import { DayTimeUnit, Unit, UnitName } from './units'
+import { DayTimeUnit, Unit, UnitName, balanceUpTimeFields, compareGivenFields } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 
 export type DurationArg = Duration | DurationBag | string
@@ -236,9 +235,10 @@ export const [
           !(markerInternals && (markerInternals as any).epochNanoseconds)
         )
       ) {
-        return compareLargeInts(
-          durationFieldsToNano(durationFields0),
-          durationFieldsToNano(durationFields1),
+        return compareGivenFields(
+          durationFields0,
+          durationFields1,
+          durationFieldNamesAsc,
         )
       }
 
@@ -281,7 +281,11 @@ function addToDuration(
       !(markerInternals && (markerInternals as any).epochNanoseconds)
     )
   ) {
-    return balanceDurationDayTime(addedDurationFields, largestUnit as DayTimeUnit)
+    return createDuration(
+      updateDurationFieldsSign(
+        balanceUpTimeFields(addedDurationFields, largestUnit as DayTimeUnit, durationFieldNamesAsc)
+      )
+    )
   }
 
   if (!markerInternals) {
@@ -307,16 +311,6 @@ function spanDuration<M>(
   const endMarker = moveMarker(marker, durationFields)
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, markerToEpochNano(endMarker)]
-}
-
-function balanceDurationDayTime(
-  durationFields: DurationFields,
-  largestUnit: DayTimeUnit, // day/time
-): Duration {
-  const nano = durationFieldsToNano(durationFields)
-  return createDuration(
-    updateDurationFieldsSign(nanoToDurationFields(nano, largestUnit))
-  )
 }
 
 function getLargestDurationUnit(fields: DurationFields): Unit {

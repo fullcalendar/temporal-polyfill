@@ -4,14 +4,14 @@ import {
   DurationInternals,
   durationFieldDefaults,
   durationFieldNamesAsc,
-  durationFieldsToNano,
-  durationFieldsToTimeNano,
   durationTimeFieldDefaults,
+  durationFieldsToTimeOfDayNano,
+  updateDurationFieldsSign,
+  durationFieldsToNano,
   nanoToDurationFields,
   timeNanoToDurationFields,
-  updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
+import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import { isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay } from './isoMath'
 import { LargeInt } from './largeInt'
@@ -138,7 +138,7 @@ export function roundDurationToNano(
   nanoInc: number,
   roundingMode: RoundingMode,
 ): DurationFields {
-  const largeNano = durationFieldsToNano(durationFields)
+  const largeNano = durationFieldsToNano(durationFields, Unit.Day)
   const roundedLargeNano = roundByIncLarge(largeNano, nanoInc, roundingMode)
   const dayTimeFields = nanoToDurationFields(roundedLargeNano)
 
@@ -238,7 +238,7 @@ export function totalDayTimeDuration( // assumes iso-length days
   durationFields: DurationFields,
   totalUnit: DayTimeUnit,
 ): number {
-  const largeNano = durationFieldsToNano(durationFields)
+  const largeNano = durationFieldsToNano(durationFields, Unit.Day)
   const divisor = unitNanoMap[totalUnit]
   const [fullUnits, remainder] = largeNano.divModTrunc(divisor)
   return fullUnits.toNumber() + (remainder / divisor)
@@ -290,7 +290,7 @@ function nudgeDurationTime(
   nudgedEpochNano: LargeInt,
   dayDelta: number,
 ] {
-  const timeNano = durationFieldsToTimeNano(durationFields)
+  const timeNano = durationFieldsToTimeOfDayNano(durationFields)
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   const roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
   const roundedFields = timeNanoToDurationFields(roundedTimeNano)
@@ -324,7 +324,7 @@ function nudgeRelativeDurationTime<M>(
   dayDelta: number,
 ] {
   const { sign } = durationFields
-  const timeNano = durationFieldsToTimeNano(durationFields)
+  const timeNano = durationFieldsToTimeOfDayNano(durationFields)
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 

@@ -2,13 +2,13 @@ import { CalendarImpl } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
 import {
   DurationFields,
-  durationFieldsToNano,
-  durationFieldsToTimeNano,
+  durationFieldNamesAsc,
   durationHasDateParts,
   durationTimeFieldDefaults,
-  durationTimeFieldsToLargeNano,
   durationTimeFieldsToLargeNanoStrict,
+  durationFieldsToTimeOfDayNano,
   updateDurationFieldsSign,
+  durationFieldsToNano,
 } from './durationFields'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
@@ -23,7 +23,7 @@ import {
 import { LargeInt } from './largeInt'
 import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
-import { Unit, milliInDay, nanoInUtcDay } from './units'
+import { Unit, balanceUpTimeFields, milliInDay, nanoInUtcDay } from './units'
 import { clamp, divTrunc, modTrunc } from './utils'
 
 // Epoch
@@ -36,7 +36,7 @@ export function moveZonedEpochNano(
   durationFields: DurationFields,
   overflow?: Overflow,
 ): LargeInt {
-  const durationTimeLargeNano = durationTimeFieldsToLargeNano(durationFields)
+  const durationTimeLargeNano = durationFieldsToNano(durationFields, Unit.Hour)
 
   if (!durationHasDateParts(durationFields)) {
     epochNano = epochNano.addLargeInt(durationTimeLargeNano)
@@ -104,8 +104,7 @@ export function moveDate(
   let epochMilli: number | undefined
 
   // convert time fields to days
-  days += durationFieldsToNano(durationFields, Unit.Hour)
-    .divModTrunc(nanoInUtcDay)[0].toNumber()
+  days += balanceUpTimeFields(durationFields, Unit.Day, durationFieldNamesAsc).days
 
   if (years || months) {
     let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)
@@ -155,7 +154,7 @@ export function moveTime(
 ): [IsoTimeFields, number] {
   return nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoTimeFields) +
-    durationFieldsToTimeNano(durationFields)
+    durationFieldsToTimeOfDayNano(durationFields)
   )
 }
 
