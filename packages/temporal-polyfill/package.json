@@ -25,7 +25,7 @@
     "build": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && pnpm run bundle && pnpm run minify",
     "dev": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build",
-    "tsc:dev": "tsc --build --watch --preserveWatchOutput --pretty",
+    "tsc:dev": "tsc --build --watch --pretty",
     "tsc:clean": "rm -rf dist/.tsc dist/tsconfig.tsbuildinfo",
     "type-overrides": "cp src/type-overrides/*.d.ts dist",
     "bundle": "./scripts/bundle.js",
