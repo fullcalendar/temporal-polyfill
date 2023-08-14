@@ -1,4 +1,3 @@
-import { nanoInMilli } from './units'
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOpsQuery'
@@ -6,7 +5,7 @@ import { Instant, createInstant } from './instant'
 import { OrigDateTimeFormat } from './intlFormat'
 import { pluckIsoTimeFields } from './isoFields'
 import { IsoDateTimeInternals, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './isoInternals'
-import { LargeInt, numberToLargeInt } from './largeInt'
+import { LargeInt } from './largeInt'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainTime, createPlainTime } from './plainTime'
@@ -14,6 +13,7 @@ import { TimeZoneArg } from './timeZone'
 import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { createPropDescriptors, createTemporalNameDescriptors } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
+import { epochMilliToNano } from './isoMath'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -94,7 +94,7 @@ function getCurrentZonedDateTimeSlots(
 }
 
 function getCurrentEpochNanoseconds(): LargeInt {
-  return numberToLargeInt(Date.now()).mult(nanoInMilli)
+  return epochMilliToNano(Date.now())
 }
 
 // TimeZone

@@ -328,17 +328,13 @@ export function clampProp<P>(
   return clamp(props[propName] as number, min, max, overflow, propName)
 }
 
-export function divModFloor(num: number, divisor: number): [number, number]
-export function divModFloor(num: bigint, divisor: bigint): [bigint, bigint]
-export function divModFloor(num: any, divisor: any): [any, any] {
+export function divModFloor(num: number, divisor: number): [number, number] {
+  const quotient = Math.floor(num / divisor)
   const remainder = modFloor(num, divisor)
-  const quotient = (num - remainder) / divisor
   return [quotient, remainder]
 }
 
-export function modFloor(num: number, divisor: number): number
-export function modFloor(num: bigint, divisor: bigint): bigint
-export function modFloor(num: any, divisor: any): any {
+export function modFloor(num: number, divisor: number): number {
   return (num % divisor + divisor) % divisor
 }
 

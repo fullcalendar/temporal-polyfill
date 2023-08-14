@@ -1,5 +1,4 @@
-import { LargeInt, numberToLargeInt } from './largeInt'
-import { NumSign, compareNumbers, divModTrunc, divTrunc, modTrunc } from './utils'
+import { divModTrunc, divTrunc, modTrunc } from './utils'
 
 /*
 TODO: use short names?

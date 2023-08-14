@@ -536,6 +536,7 @@ function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUni
     const maxRoundingInc = upUnitNano / unitNano
     roundingInc = clamp(roundingInc, 1, maxRoundingInc - 1, Overflow.Reject, roundingIncName)
 
+    // % is dangerous, but -0 will be falsy just like 0
     if (upUnitNano % (roundingInc * unitNano)) {
       throw new RangeError('Must be even multiple')
     }

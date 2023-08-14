@@ -56,6 +56,7 @@ export function computeIsoDaysInYear(isoYear: number): number {
 }
 
 export function computeIsoIsLeapYear(isoYear: number): boolean {
+  // % is dangerous, but comparing 0 with -0 is fine
   return isoYear % 4 === 0 && (isoYear % 100 !== 0 || isoYear % 400 === 0)
 }
 

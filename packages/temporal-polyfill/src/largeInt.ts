@@ -5,6 +5,11 @@ The multiplier for the `high` value. Max value for the stored `low` value.
 Roughly half the number of sigfigs as Number.MAX_SAFE_INTEGER
 so that Number arithmetic on the `low` value has plenty of space to overflow
 before being transplanted to the `high` value.
+
+TODO: dry DayTimeNano:
+  [days, timeNano]
+Should be convient for operations that need time
+Should get rid of roundByIncLarge
 */
 const maxLow = 1e8
 const maxLowBigInt = typeof BigInt === undefined ? undefined! : BigInt(maxLow)
@@ -34,6 +39,8 @@ export class LargeInt {
   }
 
   mult(multiplier: number): LargeInt {
+    // Will never conflicting newHighSign/newLowSign
+    // but use balanceAndCreate anyway because it's convenient
     return balanceAndCreate(this.high * multiplier, this.low * multiplier)
   }
 
@@ -55,8 +62,17 @@ export class LargeInt {
 }
 
 function balanceAndCreate(high: number, low: number) {
-  const [extraHigh, newLow] = divModTrunc(low, maxLow)
-  return new LargeInt(high + extraHigh, newLow)
+  let [extraHigh, newLow] = divModTrunc(low, maxLow)
+  let newHigh = high + extraHigh
+  const newHighSign = Math.sign(newHigh)
+
+  // ensure nonconflicting signs
+  if (newHighSign && newHighSign === -Math.sign(newLow)) {
+    newHigh -= newHighSign
+    newLow += newHighSign * maxLow
+  }
+
+  return new LargeInt(newHigh, newLow)
 }
 
 /*
@@ -88,7 +104,7 @@ export function numberToLargeInt(num: number): LargeInt {
 export function bigIntToLargeInt(num: bigint): LargeInt {
   return new LargeInt(
     Number(num / maxLowBigInt), // BigInt does trunc
-    Number(num % maxLowBigInt) // "
+    Number(num % maxLowBigInt), // "
   )
 }
 
