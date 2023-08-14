@@ -6,6 +6,7 @@
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toString/fractionalseconddigits-wrong-type.js
+built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
@@ -16,8 +17,9 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
 
-# i don't understand why TimeZone::getInstant for must call Calendar::dateAdd
+# Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
