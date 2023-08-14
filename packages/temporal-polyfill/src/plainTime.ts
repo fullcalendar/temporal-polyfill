@@ -109,7 +109,7 @@ export const [
     },
 
     since(fields: IsoTimeFields, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-      return diffPlainTimes(toPlainTimeFields(otherArg), fields, options, true)
+      return diffPlainTimes(fields, toPlainTimeFields(otherArg), options, true)
     },
 
     round(fields: IsoTimeFields, options: RoundingOptions | UnitName): PlainTime {
@@ -177,15 +177,19 @@ function diffPlainTimes(
   internals0: IsoTimeFields,
   internals1: IsoTimeFields,
   options: DiffOptions | undefined,
-  roundingModeInvert?: boolean
+  invert?: boolean
 ): Duration {
-  return createDuration(
-    updateDurationFieldsSign(
-      diffTimes(
-        internals0,
-        internals1,
-        ...(refineDiffOptions(roundingModeInvert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
-      ),
-    )
+  let durationInternals = updateDurationFieldsSign(
+    diffTimes(
+      internals0,
+      internals1,
+      ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
+    ),
   )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return createDuration(durationInternals)
 }

@@ -121,7 +121,7 @@ export const [
     },
 
     since(epochNano: LargeInt, otherArg: InstantArg, options?: DiffOptions): Duration {
-      return diffInstants(toInstantEpochNano(otherArg), epochNano, options, true)
+      return diffInstants(epochNano, toInstantEpochNano(otherArg), options, true)
     },
 
     round(epochNano: LargeInt, options: RoundingOptions | UnitName): Instant {
@@ -193,20 +193,24 @@ function diffInstants(
   epochNano0: LargeInt,
   epochNano1: LargeInt,
   options?: DiffOptions,
-  roundingModeInvert?: boolean
+  invert?: boolean
 ): Duration {
-  return createDuration(
-    updateDurationFieldsSign(
-      diffEpochNano(
-        epochNano0,
-        epochNano1,
-        ...(
-          refineDiffOptions(roundingModeInvert, options, Unit.Second, Unit.Hour) as
-            [TimeUnit, TimeUnit, number, RoundingMode]
-        ),
+  let durationInternals = updateDurationFieldsSign(
+    diffEpochNano(
+      epochNano0,
+      epochNano1,
+      ...(
+        refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as
+          [TimeUnit, TimeUnit, number, RoundingMode]
       ),
     ),
   )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return createDuration(durationInternals)
 }
 
 // Unit Conversion

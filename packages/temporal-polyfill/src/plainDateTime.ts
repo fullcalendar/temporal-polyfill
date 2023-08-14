@@ -169,7 +169,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
     },
 
     since(internals: IsoDateTimeInternals, otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
-      return diffPlainDateTimes(toPlainDateTimeInternals(otherArg), internals, options, true)
+      return diffPlainDateTimes(internals, toPlainDateTimeInternals(otherArg), options, true)
     },
 
     round(internals: IsoDateTimeInternals, options: RoundingOptions | UnitName): PlainDateTime {
@@ -282,16 +282,20 @@ function diffPlainDateTimes(
   internals0: IsoDateTimeInternals,
   internals1: IsoDateTimeInternals,
   options: DiffOptions | undefined,
-  roundingModeInvert?: boolean
+  invert?: boolean
 ): Duration {
-  return createDuration(
-    updateDurationFieldsSign(
-      diffDateTimes(
-        getCommonCalendarOps(internals0, internals1),
-        internals0,
-        internals1,
-        ...refineDiffOptions(roundingModeInvert, options, Unit.Day),
-      ),
-    )
+  let durationInternals = updateDurationFieldsSign(
+    diffDateTimes(
+      getCommonCalendarOps(internals0, internals1),
+      internals0,
+      internals1,
+      ...refineDiffOptions(invert, options, Unit.Day),
+    ),
   )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return createDuration(durationInternals)
 }

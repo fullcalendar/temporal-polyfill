@@ -256,7 +256,7 @@ export const [
     },
 
     since(internals: ZonedInternals, otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
-      return diffZonedDateTimes(toZonedInternals(otherArg), internals, options, true)
+      return diffZonedDateTimes(internals, toZonedInternals(otherArg), options, true)
     },
 
     /*
@@ -441,17 +441,21 @@ function diffZonedDateTimes(
   internals: ZonedInternals,
   otherInternals: ZonedInternals,
   options: DiffOptions | undefined,
-  roundingModeInvert?: boolean
+  invert?: boolean
 ): Duration {
-  return createDuration(
-    updateDurationFieldsSign(
-      diffZonedEpochNano(
-        getCommonCalendarOps(internals, otherInternals),
-        getCommonTimeZoneOps(internals, otherInternals),
-        internals.epochNanoseconds,
-        otherInternals.epochNanoseconds,
-        ...refineDiffOptions(roundingModeInvert, options, Unit.Hour),
-      ),
-    )
+  let durationInternals = updateDurationFieldsSign(
+    diffZonedEpochNano(
+      getCommonCalendarOps(internals, otherInternals),
+      getCommonTimeZoneOps(internals, otherInternals),
+      internals.epochNanoseconds,
+      otherInternals.epochNanoseconds,
+      ...refineDiffOptions(invert, options, Unit.Hour),
+    ),
   )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return createDuration(durationInternals)
 }

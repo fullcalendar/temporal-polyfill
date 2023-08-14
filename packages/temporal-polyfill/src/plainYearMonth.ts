@@ -101,7 +101,7 @@ export const [
     },
 
     since(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
-      return diffPlainYearMonths(toPlainYearMonthInternals(otherArg), internals, options, true)
+      return diffPlainYearMonths(internals, toPlainYearMonthInternals(otherArg), options, true)
     },
 
     equals(internals: IsoDateInternals, otherArg: PlainYearMonthArg): boolean {
@@ -146,18 +146,22 @@ function diffPlainYearMonths(
   internals0: IsoDateInternals,
   internals1: IsoDateInternals,
   options: DiffOptions | undefined,
-  roundingModeInvert?: boolean
+  invert?: boolean
 ): Duration {
-  return createDuration(
-    updateDurationFieldsSign(
-      diffDates(
-        getCommonCalendarOps(internals0, internals1),
-        movePlainYearMonthToDay(internals0),
-        movePlainYearMonthToDay(internals1),
-        ...refineDiffOptions(roundingModeInvert, options, Unit.Year, Unit.Year, Unit.Day),
-      ),
-    )
+  let durationInternals = updateDurationFieldsSign(
+    diffDates(
+      getCommonCalendarOps(internals0, internals1),
+      movePlainYearMonthToDay(internals0),
+      movePlainYearMonthToDay(internals1),
+      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Day),
+    ),
   )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return createDuration(durationInternals)
 }
 
 function movePlainYearMonth(
