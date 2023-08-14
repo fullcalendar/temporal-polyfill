@@ -23,7 +23,7 @@ import {
 import { IsoDateInternals, generatePublicIsoDateFields, pluckIsoDateInternals, refineIsoDateInternals } from './isoInternals'
 import { formatCalendar, formatIsoDateFields } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoDateFields } from './isoMath'
+import { checkIsoInBounds, compareIsoDateFields } from './isoMath'
 import { parsePlainDate } from './isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -151,10 +151,12 @@ export const [
     }),
 
     toPlainDateTime(internals, timeArg): PlainDateTime {
-      return createPlainDateTime({
-        ...internals,
-        ...optionalToPlainTimeFields(timeArg),
-      })
+      return createPlainDateTime(
+        checkIsoInBounds({
+          ...internals,
+          ...optionalToPlainTimeFields(timeArg),
+        }),
+      )
     },
 
     toPlainYearMonth(): PlainYearMonth {

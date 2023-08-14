@@ -120,13 +120,21 @@ const epochNanoMin = epochNanoMax.mult(-1) // inclusive
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
-export function checkIsoInBounds<T extends IsoDateFields>(isoFields: T): T {
+export function checkIsoInBounds<T extends IsoDateFields | IsoDateTimeFields>(isoFields: T): T {
   const isoYear = clampProp(isoFields as IsoDateFields, 'isoYear', isoYearMin, isoYearMax, Overflow.Reject)
   const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   if (nudge) {
-    const epochNano = isoToEpochNano(isoFields)
-    checkEpochNanoInBounds(epochNano && epochNano.addNumber((nanoInUtcDay - 1) * nudge))
+    // for DateTime: needs to be within 23:59:59.999 of min/max epochNano
+    // for Date: at least one DateTime within the day needs to be within 23:59:59.999
+    checkEpochNanoInBounds(
+      isoToEpochNano({
+        isoHour: 12, // waa? how does this make the above true?
+        ...isoFields,
+        isoDay: isoFields.isoDay + nudge,
+        isoNanosecond: ((isoFields as IsoDateTimeFields).isoNanosecond || 0) - nudge
+      })
+    )
   }
 
   return isoFields
