@@ -454,11 +454,12 @@ export function mergePlainTimeBag(
 ): IsoTimeFields {
   rejectInvalidBag(bag as any)
 
+  const overflow = refineOverflowOptions(options)
   const fields = pluckProps(timeFieldNames, plainTime as unknown as TimeFields) // TODO: wish PlainTime had real TS methods
   const partialFields = refineFields(bag, timeFieldNames)
   const mergeFields = { ...fields, ...partialFields }
 
-  return refineTimeBag(mergeFields, refineOverflowOptions(options))
+  return refineTimeBag(mergeFields, overflow)
 }
 
 function refineTimeBag(fields: TimeBag, overflow?: Overflow): IsoTimeFields {
