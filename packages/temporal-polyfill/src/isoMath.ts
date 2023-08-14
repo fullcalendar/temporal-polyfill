@@ -7,13 +7,11 @@ import {
   IsoTuple,
   isoTimeFieldNamesAsc,
   pluckIsoTuple,
-  isoDateFieldNames,
 } from './isoFields'
 import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
 import {
   Unit,
-  compareGivenFields,
-  givenFieldsToNano,
+  givenFieldsToTimeNano,
   milliInSec,
   nanoInMicro,
   nanoInMilli,
@@ -22,7 +20,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, compareNumbers, divModFloor, clampProp } from './utils'
+import { NumSign, divModFloor, clampProp, compareNumbers } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -148,7 +146,7 @@ export function checkEpochNanoInBounds(epochNano: LargeInt | undefined): LargeIn
 // -------------------------------------------------------------------------------------------------
 
 export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
-  return givenFieldsToNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)
+  return givenFieldsToTimeNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[0]
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
@@ -346,10 +344,9 @@ export function compareIsoDateFields(
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
 ): NumSign {
-  return compareGivenFields(
-    isoFields0,
-    isoFields1,
-    isoDateFieldNames, // ASC
+  return compareNumbers(
+    isoToEpochMilli(isoFields0)!,
+    isoToEpochMilli(isoFields0)!,
   )
 }
 
@@ -357,9 +354,8 @@ export function compareIsoTimeFields(
   isoFields0: IsoTimeFields,
   isoFields1: IsoTimeFields,
 ): NumSign {
-  return compareGivenFields(
-    isoFields0,
-    isoFields1,
-    isoTimeFieldNamesAsc,
+  return compareNumbers(
+    isoTimeFieldsToNano(isoFields0),
+    isoTimeFieldsToNano(isoFields1),
   )
 }

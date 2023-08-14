@@ -4,8 +4,7 @@ import {
   DayTimeUnit,
   TimeUnit,
   Unit,
-  balanceUpTimeFields,
-  givenFieldsToNano,
+  givenFieldsToTimeNano,
   nanoInUtcDay,
   nanoToGivenFields,
   unitNamesAsc,
@@ -106,16 +105,14 @@ export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): Lar
 }
 
 export function durationFieldsToNano(fields: DurationFields, largestUnit: DayTimeUnit): LargeInt {
-  const balancedFields = balanceUpTimeFields(fields, largestUnit, durationFieldNamesAsc)
+  const [timeNano, dayCnt] = givenFieldsToTimeNano(fields, largestUnit, durationFieldNamesAsc)
 
-  return numberToLargeInt(nanoInUtcDay).mult(balancedFields.days)
-    .addNumber(givenFieldsToNano(balancedFields, largestUnit, durationFieldNamesAsc))
+  return numberToLargeInt(nanoInUtcDay).mult(dayCnt)
+    .addNumber(timeNano)
 }
 
 export function durationFieldsToTimeOfDayNano(fields: DurationFields): number {
-  const balancedFields = balanceUpTimeFields(fields, Unit.Day, durationFieldNamesAsc)
-
-  return givenFieldsToNano(balancedFields, Unit.Hour, durationFieldNamesAsc)
+  return givenFieldsToTimeNano(fields, Unit.Hour, durationFieldNamesAsc)[0]
 }
 
 export function nanoToDurationFields(
@@ -137,12 +134,8 @@ export function timeNanoToDurationFields(
   largestUnit: TimeUnit = Unit.Hour,
 ): DurationFields {
   return {
-    ...durationFieldDefaults, // TODO: make nanoToGivenFields do this?
-    ...nanoToGivenFields(
-      nano,
-      largestUnit,
-      durationFieldNamesAsc,
-    )
+    ...durationFieldDefaults,
+    ...nanoToGivenFields(nano, largestUnit, durationFieldNamesAsc),
   }
 }
 

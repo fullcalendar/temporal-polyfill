@@ -72,57 +72,39 @@ export const unitNanoMap = [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export function balanceUpTimeFields<F>(
-  fields: F,
-  largestUnit: DayTimeUnit,
-  fieldNamesAsc: (keyof F)[]
-): F {
-  const balancedFields: any = {}
-  let fieldName: keyof F
-  let leftoverWhole = 0
-
-  for (let unit = Unit.Nanosecond; fieldName = fieldNamesAsc[unit], unit < largestUnit; unit++) {
-    [leftoverWhole, balancedFields[fieldName]] = divModTrunc(
-      leftoverWhole + (fields[fieldName] as number),
-      unitNanoMap[unit + 1],
-    )
-  }
-
-  return {
-    ...fields,
-    [fieldName]: leftoverWhole + (fields[fieldName] as number),
-    ...balancedFields
-  }
-}
-
-export function givenFieldsToNano<K extends string>(
+export function givenFieldsToTimeNano<K extends string>(
   fields: Record<K, number>,
-  unit: DayTimeUnit,
+  largestUnit: DayTimeUnit,
   fieldNames: K[],
-): number {
-  let nano = 0
+): [
+  timeNano: number,
+  dayCnt: number,
+] {
+  let timeNano = 0
+  let dayCnt = 0
 
-  for (; unit >= Unit.Nanosecond; unit--) {
-    const divisor = unitNanoMap[unit]
+  for (let unit = Unit.Nanosecond; unit <= largestUnit; unit++) {
     const fieldVal = fields[fieldNames[unit]]
+    const unitNano = unitNanoMap[unit]
 
-    nano += fieldVal * divisor
+    const unitInDay = nanoInUtcDay / unitNano
+    const [currentDayCnt, leftoverUnits] = divModTrunc(fieldVal, unitInDay)
+
+    timeNano += leftoverUnits * unitNano
+    dayCnt += currentDayCnt
   }
 
-  return nano
+  return [timeNano, dayCnt]
 }
 
-/*
-Whatever unit you want, it might not populate all fields
-*/
 export function nanoToGivenFields<F>(
   nano: number,
-  unit: DayTimeUnit, // largestUnit
+  largeUnit: DayTimeUnit, // stops populating at this unit
   fieldNames: (keyof F)[],
 ): { [Key in keyof F]?: number } {
   const fields = {} as { [Key in keyof F]: number }
 
-  for (; unit >= Unit.Nanosecond; unit--) {
+  for (let unit = largeUnit; unit >= Unit.Nanosecond; unit--) {
     const divisor = unitNanoMap[unit]
 
     fields[fieldNames[unit]] = divTrunc(nano, divisor)
@@ -130,23 +112,4 @@ export function nanoToGivenFields<F>(
   }
 
   return fields
-}
-
-export function compareGivenFields<F>(
-  fields0: F,
-  fields1: F,
-  fieldNames: (keyof F)[], // ASC
-): NumSign {
-  for (let i = fieldNames.length - 1; i >= 0; i--) {
-    const res = compareNumbers(
-      fields0[fieldNames[i]] as number,
-      fields1[fieldNames[i]] as number,
-    )
-
-    if (res) {
-      return res
-    }
-  }
-
-  return 0
 }

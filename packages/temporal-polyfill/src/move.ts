@@ -23,7 +23,7 @@ import {
 import { LargeInt } from './largeInt'
 import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
-import { Unit, balanceUpTimeFields, milliInDay, nanoInUtcDay } from './units'
+import { Unit, givenFieldsToTimeNano, milliInDay } from './units'
 import { clamp, divTrunc, modTrunc } from './utils'
 
 // Epoch
@@ -104,7 +104,7 @@ export function moveDate(
   let epochMilli: number | undefined
 
   // convert time fields to days
-  days += balanceUpTimeFields(durationFields, Unit.Day, durationFieldNamesAsc).days
+  days += givenFieldsToTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[1]
 
   if (years || months) {
     let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)

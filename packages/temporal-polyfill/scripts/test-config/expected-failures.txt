@@ -2,13 +2,6 @@
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
-# serializing Duration units to Nanoseconds results in Infinity
-# Only affects PlainTime. Duration time-units with values beyond Number.MAX_VALUE
-built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-2.js
-built-ins/Temporal/PlainTime/prototype/add/precision-exact-mathematical-values-3.js
-built-ins/Temporal/PlainTime/prototype/subtract/precision-exact-mathematical-values-2.js
-built-ins/Temporal/PlainTime/prototype/subtract/precision-exact-mathematical-values-3.js
-
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
 
