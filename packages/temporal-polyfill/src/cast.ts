@@ -75,3 +75,15 @@ export function toNumber(arg: number): number {
   }
   return arg;
 }
+
+export function toStringOrUndefined(input: string | undefined): string | undefined {
+  if (input !== undefined) {
+    return toString(input)
+  }
+}
+
+export function toIntegerOrUndefined(input: number | undefined): number | undefined {
+  if (input !== undefined) {
+    return toInteger(input)
+  }
+}

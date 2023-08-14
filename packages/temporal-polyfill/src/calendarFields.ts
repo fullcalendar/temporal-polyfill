@@ -5,7 +5,7 @@ import {
   isoTimeFieldNames,
 } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
-import { ensureBoolean, ensureInteger, toInteger, toString } from './cast'
+import { ensureBoolean, ensureInteger, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
 import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
 // Year/Month/Day (no era/eraYear)
@@ -120,8 +120,8 @@ const monthCodeFieldRefiners = { monthCode: toString }
 
 // Ordered alphabetically
 export const eraYearFieldRefiners = {
-  era: toString,
-  eraYear: toInteger,
+  era: toStringOrUndefined,
+  eraYear: toIntegerOrUndefined,
 }
 
 // Ordered alphabetically
