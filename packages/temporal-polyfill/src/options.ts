@@ -17,6 +17,7 @@ import {
   roundExpand,
   roundHalfCeil,
   roundHalfEven,
+  roundHalfExpand,
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
@@ -501,7 +502,7 @@ export const roundingModeFuncs = [
   Math.trunc,
   roundHalfTrunc,
   roundExpand,
-  Math.round,
+  roundHalfExpand,
   roundHalfEven,
 ]
 

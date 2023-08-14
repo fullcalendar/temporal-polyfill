@@ -370,6 +370,13 @@ export function roundExpand(num: number): number {
   return num < 0 ? Math.floor(num) : Math.ceil(num)
 }
 
+/*
+Similar to Math.round, but rounds negative half-numbers to floor (-1.5 => -2)
+*/
+export function roundHalfExpand(num: number): number {
+  return Math.sign(num) * Math.round(Math.abs(num)) || 0 // prevent -0
+}
+
 export function roundHalfFloor(num: number): number {
   return hasHalf(num) ? Math.floor(num) : Math.round(num)
 }

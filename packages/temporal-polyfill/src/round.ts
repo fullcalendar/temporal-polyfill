@@ -16,7 +16,7 @@ import { IsoDateInternals } from './isoInternals'
 import { isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay } from './isoMath'
 import { LargeInt } from './largeInt'
 import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
-import { Overflow, RoundingMode, roundingModeFuncs } from './options'
+import { RoundingMode, roundingModeFuncs } from './options'
 import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
 import {
   nanoInMinute,
