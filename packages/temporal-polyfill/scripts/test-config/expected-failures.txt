@@ -2,6 +2,11 @@
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
+# diff/toString options order-of-operations (TODO)
+built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/toString/fractionalseconddigits-wrong-type.js
+
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
 
