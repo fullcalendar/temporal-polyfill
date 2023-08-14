@@ -452,6 +452,8 @@ export function mergePlainTimeBag(
   bag: PlainTimeMod,
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
+  rejectInvalidBag(bag as any)
+
   const fields = pluckProps(timeFieldNames, plainTime as unknown as TimeFields) // TODO: wish PlainTime had real TS methods
   const partialFields = refineFields(bag, timeFieldNames)
   const mergeFields = { ...fields, ...partialFields }
