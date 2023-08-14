@@ -60,7 +60,7 @@ export class FixedTimeZoneImpl implements TimeZoneImpl {
   }
 
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
-    return [isoToEpochNano(isoDateTimeFields)!.addNumber(this.offsetNano)]
+    return [isoToEpochNano(isoDateTimeFields)!.addNumber(-this.offsetNano)]
   }
 
   getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined {
