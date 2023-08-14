@@ -81,20 +81,23 @@ export function givenFieldsToTimeNano<K extends string>(
   dayCnt: number,
 ] {
   let timeNano = 0
-  let dayCnt = 0
+  let days = 0
 
   for (let unit = Unit.Nanosecond; unit <= largestUnit; unit++) {
     const fieldVal = fields[fieldNames[unit]]
     const unitNano = unitNanoMap[unit]
 
+    // absorb whole-days from current unit, to prevent overflow
     const unitInDay = nanoInUtcDay / unitNano
-    const [currentDayCnt, leftoverUnits] = divModTrunc(fieldVal, unitInDay)
+    const [unitDays, leftoverUnits] = divModTrunc(fieldVal, unitInDay)
 
     timeNano += leftoverUnits * unitNano
-    dayCnt += currentDayCnt
+    days += unitDays
   }
 
-  return [timeNano, dayCnt]
+  // absorb whole-days from timeNano
+  const [timeDays, leftoverNano] = divModTrunc(timeNano, nanoInUtcDay)
+  return [leftoverNano, days + timeDays]
 }
 
 export function nanoToGivenFields<F>(

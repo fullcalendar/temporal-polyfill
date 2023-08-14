@@ -116,7 +116,7 @@ export function formatDurationInternals(
   const { sign } = durationInternals
   const abs = absDurationInternals(durationInternals)
   const { hours, minutes } = abs
-  const secondsNano = givenFieldsToTimeNano(abs, Unit.Second, durationFieldNamesAsc)[0]
+  const [secondsNano] = givenFieldsToTimeNano(abs, Unit.Second, durationFieldNamesAsc)
   const [wholeSeconds, subsecNano] = divModFloor(secondsNano, nanoInSec)
   const forceSeconds =
     // at least one subsecond digit being forced?
