@@ -11,7 +11,7 @@ import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } 
 import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from './isoFields'
 import { formatIsoTimeFields } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { checkIsoInBounds, compareIsoTimeFields } from './isoMath'
+import { checkIsoDateTimeInBounds, compareIsoTimeFields } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {
@@ -145,7 +145,7 @@ export const [
 
     toPlainDateTime(fields: IsoTimeFields, plainDateArg: PlainDateArg): PlainDateTime {
       return createPlainDateTime(
-        checkIsoInBounds({
+        checkIsoDateTimeInBounds({
           ...fields,
           ...toPlainDateInternals(plainDateArg),
         }),

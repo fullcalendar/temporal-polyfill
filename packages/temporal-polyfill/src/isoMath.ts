@@ -7,6 +7,7 @@ import {
   IsoTuple,
   isoTimeFieldNamesAsc,
   pluckIsoTuple,
+  isoTimeFieldDefaults,
 } from './isoFields'
 import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
 import {
@@ -120,19 +121,26 @@ const epochNanoMin = epochNanoMax.mult(-1) // inclusive
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
-export function checkIsoInBounds<T extends IsoDateFields | IsoDateTimeFields>(isoFields: T): T {
+export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
+  checkIsoDateTimeInBounds({
+    ...isoFields,
+    ...isoTimeFieldDefaults,
+    isoHour: 12, // Noon avoids trouble at edges of DateTime range (excludes midnight) ???
+  })
+  return isoFields
+}
+
+export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(isoFields: T): T {
   const isoYear = clampProp(isoFields as IsoDateFields, 'isoYear', isoYearMin, isoYearMax, Overflow.Reject)
   const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   if (nudge) {
-    // for DateTime: needs to be within 23:59:59.999 of min/max epochNano
-    // for Date: at least one DateTime within the day needs to be within 23:59:59.999
+    // needs to be within 23:59:59.999 of min/max epochNano
     checkEpochNanoInBounds(
       isoToEpochNano({
-        isoHour: 12, // waa? how does this make the above true?
         ...isoFields,
         isoDay: isoFields.isoDay + nudge,
-        isoNanosecond: ((isoFields as IsoDateTimeFields).isoNanosecond || 0) - nudge
+        isoNanosecond: isoFields.isoNanosecond - nudge
       })
     )
   }
@@ -298,7 +306,7 @@ function isoToLegacyDate(
 ) {
   // Note: Date.UTC() interprets one and two-digit years as being in the
   // 20th century, so don't use it
-  const legacyDate = new Date()
+  const legacyDate = new Date() // should throw out-of-range error here?
   legacyDate.setUTCHours(isoHour, isoMinute, isoSec, isoMilli)
   legacyDate.setUTCFullYear(isoYear, isoMonth - 1, isoDay)
   return legacyDate
@@ -326,7 +334,7 @@ export function epochMilliToIso(epochMilli: number): {
   isoSecond: number,
   isoMillisecond: number,
 } {
-  const legacyDate = new Date(epochMilli)
+  const legacyDate = new Date(epochMilli) // TODO: what if out of bounds?
   return {
     isoYear: legacyDate.getUTCFullYear(),
     isoMonth: legacyDate.getUTCMonth() + 1,

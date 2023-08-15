@@ -32,6 +32,7 @@ import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './int
 import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import {
+  checkIsoDateInBounds,
   computeIsoDayOfWeek,
   computeIsoDaysInMonth,
   computeIsoDaysInWeek,
@@ -211,12 +212,12 @@ export class CalendarImpl implements CalendarOps {
   // -----------------
 
   queryIsoFields(year: number, month: number, day: number): IsoDateInternals {
-    return {
+    return checkIsoDateInBounds({
       calendar: this,
       isoYear: year,
       isoMonth: month,
       isoDay: day,
-    }
+    })
   }
 
   queryYearMonthDay(isoDateFields: IsoDateFields): [number, number, number] {
@@ -564,10 +565,10 @@ class IntlCalendarImpl extends CalendarImpl {
   // -----------------
 
   queryIsoFields(year: number, month: number, day: number): IsoDateInternals {
-    return {
+    return checkIsoDateInBounds({ // check might be redundant if happens in epochMilliToIso/queryDateStart
       calendar: this,
       ...epochMilliToIso(this.queryDateStart(year, month, day)),
-    }
+    })
   }
 
   computeDaysInYear(year: number): number {

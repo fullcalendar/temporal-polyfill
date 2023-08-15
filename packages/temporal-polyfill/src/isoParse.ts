@@ -18,7 +18,8 @@ import {
   pluckIsoDateInternals,
 } from './isoInternals'
 import {
-  checkIsoInBounds,
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
   isoEpochFirstLeapYear,
   isoToEpochNano,
   nanoToIsoTimeAndDay,
@@ -91,7 +92,9 @@ export function parsePlainDate(s: string): IsoDateInternals {
   if (!parsed || parsed.hasZ) {
     throw new RangeError()
   }
-  return pluckIsoDateInternals(processDateTimeParse(parsed))
+  return pluckIsoDateInternals(
+    processDateParse(parsed)
+  )
 }
 
 export function parsePlainYearMonth(s: string): IsoDateInternals {
@@ -206,8 +209,12 @@ function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals 
   }
 }
 
+function processDateParse(parsed: DateTimeParsed): IsoDateInternals {
+  return checkIsoDateInBounds(constrainIsoDateInternals(parsed))
+}
+
 function processDateTimeParse(parsed: DateTimeParsed): IsoDateTimeInternals {
-  return checkIsoInBounds(constrainIsoDateTimeInternals(parsed))
+  return checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(parsed))
 }
 
 /*
@@ -217,7 +224,7 @@ function processDatelikeParse(parsed: IsoDateInternals | undefined): IsoDateInte
   if (!parsed) {
     throw new RangeError()
   }
-  return checkIsoInBounds(constrainIsoDateInternals(parsed))
+  return checkIsoDateInBounds(constrainIsoDateInternals(parsed))
 }
 
 // Low-level
