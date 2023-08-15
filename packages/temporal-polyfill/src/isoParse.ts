@@ -93,7 +93,9 @@ export function parsePlainDate(s: string): IsoDateInternals {
     throw new RangeError()
   }
   return pluckIsoDateInternals(
-    processDateParse(parsed)
+    parsed.hasTime
+      ? processDateTimeParse(parsed)
+      : processDateParse(parsed)
   )
 }
 

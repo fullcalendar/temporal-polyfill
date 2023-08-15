@@ -5,6 +5,7 @@
 # Calendar::from bag field querying order
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
+built-ins/Temporal/PlainDate/from/order-of-operations.js
 
 # diff/toString options order-of-operations (TODO)
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
