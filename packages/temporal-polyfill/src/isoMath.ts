@@ -355,7 +355,7 @@ export function compareIsoDateFields(
 ): NumSign {
   return compareNumbers(
     isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields0)!,
+    isoToEpochMilli(isoFields1)!,
   )
 }
 
