@@ -21,7 +21,6 @@ import {
   DateBag,
   YearMonthBag,
   MonthDayBag,
-  DateFields,
 } from './calendarFields'
 import {
   computeIntlMonthsInYearSpan,
@@ -51,7 +50,7 @@ import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
 import { Callable, clampEntity, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
-import { CalendarOps } from './calendarOps'
+import { CalendarOps, validateFieldNames } from './calendarOps'
 import { DurationInternals } from './durationFields'
 import { ensureString } from './cast'
 
@@ -137,7 +136,12 @@ export class CalendarImpl implements CalendarOps {
         }
       }
 
-      day = fields.day! // guaranteed because of required*Fields
+      const maybeDay = fields.day
+      if (maybeDay === undefined) {
+        throw new TypeError('Must specify day')
+      }
+
+      day = maybeDay
     } else {
       // derive monthCodeNumber/isLeapMonth from year/month, then discard year
       year = this.refineYear(fields as EraYearOrYear)
@@ -169,12 +173,14 @@ export class CalendarImpl implements CalendarOps {
     return this.queryIsoFields(year, month, day)
   }
 
-  fields(fieldNames: string[]): string[] {
-    if (getAllowErasInFields(this) && fieldNames.includes('year')) {
-      return [...fieldNames, ...eraYearFieldNames]
+  fields(fieldNames: Iterable<string>): string[] {
+    const fieldNameSet = validateFieldNames(fieldNames, true)
+
+    if (getAllowErasInFields(this) && fieldNameSet.has('year')) {
+      return [...fieldNameSet.values(), ...eraYearFieldNames]
     }
 
-    return fieldNames
+    return [...fieldNameSet.values()]
   }
 
   mergeFields(
@@ -310,12 +316,16 @@ export class CalendarImpl implements CalendarOps {
   }
 
   refineDay(
-    fields: DayFields, // day guaranteed to exist because of required*Fields
+    fields: DayFields,
     month: number,
     year: number,
     overflow?: Overflow
   ): number {
     const { day } = fields
+
+    if (day === undefined) {
+      throw new TypeError('Must specify day')
+    }
 
     // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
     if (day <= 0) {

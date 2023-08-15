@@ -77,10 +77,3 @@ export const leapYearMetas: {
   dangi: 11, // "
   hebrew: -6, // (negative) constant leap month
 }
-
-// Required Fields
-// -------------------------------------------------------------------------------------------------
-
-export const requiredDateFields: string[] = ['day']
-export const requiredYearMonthFields: string[] = []
-export const requiredMonthDayFields: string[] = ['day'] // TODO: same as date. DRY

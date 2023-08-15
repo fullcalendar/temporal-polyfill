@@ -1,10 +1,5 @@
 import { CalendarArg, CalendarProtocol } from './calendar'
-import {
-  requiredDateFields,
-  requiredMonthDayFields,
-  requiredYearMonthFields,
-  isoCalendarId,
-} from './calendarConfig'
+import { isoCalendarId } from './calendarConfig'
 import {
   DateTimeBag,
   DayFields,
@@ -78,7 +73,7 @@ export function refineMaybeZonedDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames, // validFieldNames
-    requiredDateFields, // requireFields
+    [], // requireFields
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
@@ -122,7 +117,7 @@ export function refineZonedDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames, // validFieldNames
-    [...requiredDateFields, 'timeZone'], // requireFields
+    ['timeZone'], // requireFields
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
@@ -225,7 +220,7 @@ export function refinePlainDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames,
-    requiredDateFields,
+    [], // requiredFields
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
@@ -267,7 +262,7 @@ export function refinePlainDateBag(
     calendar,
     bag,
     dateFieldNames,
-    requiredDateFields,
+    [], // requiredFields
   )
 
   return calendar.dateFromFields(fields, refineOverflowOptions(options))
@@ -301,7 +296,7 @@ function convertToIso(
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
   extraFieldNames = calendar.fields(extraFieldNames)
-  extra = refineFields(extra, extraFieldNames, requiredDateFields)
+  extra = refineFields(extra, extraFieldNames, [])
 
   let mergedFields = calendar.mergeFields(input, extra)
   const mergedFieldNames = excludeArrayDuplicates([...inputFieldNames, ...extraFieldNames])
@@ -322,7 +317,7 @@ export function refinePlainYearMonthBag(
     calendar,
     bag,
     yearMonthFieldNames,
-    requiredYearMonthFields,
+    [], // requiredFields
   )
 
   return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
@@ -364,7 +359,7 @@ export function convertToPlainYearMonth(
     calendar,
     input,
     yearMonthBasicNames,
-    requiredYearMonthFields,
+    [], // requiredFields
   )
 
   return createPlainYearMonth(
@@ -384,7 +379,7 @@ export function refinePlainMonthDayBag(
     calendar,
     bag,
     dateFieldNames,
-    requiredMonthDayFields,
+    [], // requiredFields
   )
 
   return calendar.monthDayFromFields(fields, refineOverflowOptions(options))
@@ -414,7 +409,7 @@ export function convertToPlainMonthDay(
     calendar,
     input,
     monthDayBasicNames,
-    requiredMonthDayFields,
+    [], // requiredFields
   )
 
   return createPlainMonthDay(
@@ -442,7 +437,7 @@ export function refinePlainTimeBag(
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
   const overflow = refineOverflowOptions(options) // parse before fields (what!?)
-  const fields = refineFields(bag, timeFieldNames, []) as TimeBag
+  const fields = refineFields(bag, timeFieldNames, [], true) as TimeBag // disallowEmpty
 
   return refineTimeBag(fields, overflow)
 }
@@ -577,11 +572,14 @@ const builtinRefiners = {
 
 const builtinDefaults = timeFieldDefaults
 
+/*
+If `requiredFieldNames` is undefined, assume 'partial' mode where defaults don't apply
+*/
 function refineFields(
   bag: Record<string, unknown>,
   validFieldNames: string[],
-  requiredFieldNames?: string[], // a subset of fieldNames
-  // if not given, then assumed to be 'partial' (defaults won't be applied)
+  requiredFieldNames?: string[],
+  disallowEmpty: boolean = !requiredFieldNames,
 ): Record<string, unknown> {
   const res: Record<string, unknown> = {}
   let anyMatching = false
@@ -606,7 +604,9 @@ function refineFields(
     }
   }
 
-  if (!anyMatching) {
+  // only check zero fields during .with() calls
+  // for .from() calls, empty-bag-checking will happen within the CalendarImpl
+  if (disallowEmpty && !anyMatching) {
     throw new TypeError('No valid fields')
   }
 

@@ -2,6 +2,10 @@
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
+# Calendar::from bag field querying order
+built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
+built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
+
 # diff/toString options order-of-operations (TODO)
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js

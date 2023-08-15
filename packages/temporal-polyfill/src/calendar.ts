@@ -21,7 +21,6 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { excludeUndefinedProps, mapPropNames } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
-import { validateFieldNames } from './calendarOps'
 
 interface CalendarProtocolMethods {
   year(dateArg: PlainYearMonth | PlainDateArg): number
@@ -143,7 +142,7 @@ const calendarProtocolMethods = {
   },
 
   fields(impl: CalendarImpl, fieldNames: Iterable<string>): Iterable<string> {
-    return impl.fields(validateFieldNames(fieldNames))
+    return impl.fields(fieldNames)
   },
 
   mergeFields(

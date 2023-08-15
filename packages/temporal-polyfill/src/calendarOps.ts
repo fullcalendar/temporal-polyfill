@@ -34,7 +34,10 @@ export interface CalendarOps {
   monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateInternals
   dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow?: Overflow): IsoDateInternals
   dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit): DurationInternals
-  fields(fieldNames: string[]): string[]
+  // It'd be nice to have fieldNames input value be a string[],
+  // but unfortunately accessing of array element could have side effects,
+  // so pass all the way down to the CalendarImpl to do it
+  fields(fieldNames: Iterable<string>): string[]
   mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
 }
 
@@ -44,14 +47,17 @@ export const getCommonCalendarOps = getCommonInnerObj.bind<
   CalendarOps // return
 >(undefined, 'calendar')
 
-export function validateFieldNames(fieldNames: Iterable<string>): string[] {
+export function validateFieldNames(
+  fieldNames: Iterable<string>,
+  isInputForIsoCalendar?: boolean,
+): Set<string> {
   const fieldNameSet = new Set<string>()
 
   for (const fieldName of fieldNames) {
     ensureString(fieldName)
 
-    if (!(fieldName in dateTimeNormalRefiners)) {
-      throw new RangeError('Must be singular unit name')
+    if (isInputForIsoCalendar && !(fieldName in dateTimeNormalRefiners)) {
+      throw new RangeError(`Invalid field '${fieldName}'`)
     }
     if (fieldNameSet.has(fieldName)) {
       throw new RangeError('Duplicate fields')
@@ -63,5 +69,5 @@ export function validateFieldNames(fieldNames: Iterable<string>): string[] {
     fieldNameSet.add(fieldName)
   }
 
-  return [...fieldNameSet.values()]
+  return fieldNameSet
 }

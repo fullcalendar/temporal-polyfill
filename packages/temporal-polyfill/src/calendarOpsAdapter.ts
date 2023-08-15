@@ -9,15 +9,15 @@ import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import { Overflow, overflowMapNames } from './options'
-import { ensureObjectlike, ensureString } from './cast'
+import { ensureObjectlike } from './cast'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Unit, unitNamesAsc } from './units'
 import { BoundArg, Callable, mapProps } from './utils'
-import { validateFieldNames } from './calendarOps'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarImpl } from './calendarImpl'
+import { validateFieldNames } from './calendarOps'
 
 const getPlainDateInternals = getStrictInternals.bind<
   undefined, [BoundArg],
@@ -131,8 +131,10 @@ const calendarOpsAdapterMethods = {
     )
   },
 
-  fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
-    return validateFieldNames(calendar.fields(fieldNames))
+  fields(calendar: CalendarProtocol, fieldNames: Iterable<string>): string[] {
+    const out = calendar.fields(fieldNames)
+    validateFieldNames(out) // TODO: use the fieldNameSet to avoid reading twice?
+    return [...out]
   },
 
   mergeFields(
