@@ -50,7 +50,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
-import { Callable, clamp, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
+import { Callable, clampEntity, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 import { ensureString } from './cast'
@@ -157,12 +157,12 @@ export class CalendarImpl implements CalendarOps {
     // TODO: only do this if not also calling refineDay
     if (this.id === isoCalendarId) {
       // TODO: more DRY with refineDay
-      day = clamp(
+      day = clampEntity(
+        'day',
         day,
         1,
         this.queryDaysInMonth(year, month),
         overflow,
-        'day',
       )
     }
 
@@ -300,12 +300,12 @@ export class CalendarImpl implements CalendarOps {
       throw new RangeError('Below zero')
     }
 
-    return clamp(
+    return clampEntity(
+      'month',
       month,
       1,
       this.computeMonthsInYear(year),
       overflow,
-      'month',
     )
   }
 
@@ -322,12 +322,12 @@ export class CalendarImpl implements CalendarOps {
       throw new RangeError('Below zero')
     }
 
-    return clamp(
+    return clampEntity(
+      'day',
       day,
       1,
       this.queryDaysInMonth(year, month),
       overflow,
-      'day',
     )
   }
 }

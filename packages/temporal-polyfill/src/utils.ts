@@ -286,33 +286,25 @@ export function compareNumbers(a: number, b: number): NumSign { // TODO: rename 
 /*
 min/max are inclusive
 */
-export function clamp(
+export function clampNumber(num: number, min: number, max: number): number {
+  return Math.min(Math.max(num, min), max)
+}
+
+export function isClamped(num: number, min: number, max: number): boolean {
+  return num === clampNumber(num, min, max)
+}
+
+export function clampEntity(
+  entityName: string,
   num: number,
   min: number,
   max: number,
-  overflow?: Overflow.Constrain | -1, // -1 for returning undefined
-): number
-export function clamp(
-  num: number,
-  min: number,
-  max: number,
-  overflow: Overflow | -1 | undefined, // might be Overflow.Reject, require noun
-  noun: string,
-): number
-export function clamp(
-  num: number,
-  min: number,
-  max: number,
-  overflow?: Overflow | -1,
-  noun?: string,
-): number | undefined {
-  const clamped = Math.min(Math.max(num, min), max)
+  overflow?: Overflow,
+): number {
+  const clamped = clampNumber(num, min, max)
 
   if (overflow && num !== clamped) {
-    if (overflow === -1) {
-      return undefined
-    }
-    throw new RangeError(`${noun!} must be between ${min}-${max}`)
+    throw new RangeError(`${entityName} must be between ${min}-${max}`)
   }
 
   return clamped
@@ -323,9 +315,9 @@ export function clampProp<P>(
   propName: keyof FilterPropValues<P, number> & string,
   min: number,
   max: number,
-  overflow?: Overflow | -1,
+  overflow?: Overflow,
 ): number {
-  return clamp(props[propName] as number, min, max, overflow, propName)
+  return clampEntity(propName, props[propName] as number, min, max, overflow)
 }
 
 export function divModFloor(num: number, divisor: number): [number, number] {

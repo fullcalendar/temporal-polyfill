@@ -24,7 +24,7 @@ import { LargeInt } from './largeInt'
 import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToTimeNano, milliInDay } from './units'
-import { clamp, divTrunc, modTrunc } from './utils'
+import { clampEntity, divTrunc, modTrunc } from './utils'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
@@ -111,14 +111,14 @@ export function moveDate(
 
     if (years) {
       year += years
-      month = clamp(month, 1, calendar.computeMonthsInYear(year), overflow, 'month')
+      month = clampEntity('month', month, 1, calendar.computeMonthsInYear(year), overflow)
     }
 
     if (months) {
       ([year, month] = calendar.addMonths(year, month, months))
     }
 
-    day = clamp(day, 1, calendar.queryDaysInMonth(year, month), overflow, 'day')
+    day = clampEntity('day', day, 1, calendar.queryDaysInMonth(year, month), overflow)
 
     epochMilli = calendar.queryDateStart(year, month, day)
   } else if (weeks || days) {

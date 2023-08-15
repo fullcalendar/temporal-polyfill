@@ -11,7 +11,7 @@ import { toString, ensureObjectlike, toInteger } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
-  clamp,
+  clampEntity,
   hasAnyPropsByName,
   isObjectlike,
   roundExpand,
@@ -535,14 +535,14 @@ function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUni
   if (upUnitNano) {
     const unitNano = unitNanoMap[smallestUnit]
     const maxRoundingInc = upUnitNano / unitNano
-    roundingInc = clamp(roundingInc, 1, maxRoundingInc - 1, Overflow.Reject, roundingIncName)
+    roundingInc = clampEntity(roundingIncName, roundingInc, 1, maxRoundingInc - 1, Overflow.Reject)
 
     // % is dangerous, but -0 will be falsy just like 0
     if (upUnitNano % (roundingInc * unitNano)) {
       throw new RangeError('Must be even multiple')
     }
   } else {
-    roundingInc = clamp(roundingInc, 1, 1, Overflow.Reject, roundingIncName)
+    roundingInc = clampEntity(roundingIncName, roundingInc, 1, 1, Overflow.Reject)
   }
 
   return roundingInc
@@ -569,7 +569,7 @@ function refineSubsecDigits(options: SubsecDigitsOptions): SubsecDigits | undefi
 
   if (subsecDigits !== undefined) {
     if (typeof subsecDigits === 'number') {
-      return clamp(Math.floor(subsecDigits), 0, 9, Overflow.Reject, subsecDigitsName) as SubsecDigits
+      return clampEntity(subsecDigitsName, Math.floor(subsecDigits), 0, 9, Overflow.Reject) as SubsecDigits
     }
 
     if (String(subsecDigits) !== 'auto') {

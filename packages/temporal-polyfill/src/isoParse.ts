@@ -14,6 +14,7 @@ import {
   IsoDateTimeInternals,
   constrainIsoDateInternals,
   constrainIsoDateTimeInternals,
+  isIsoDateFieldsValid,
   pluckIsoDateInternals,
 } from './isoInternals'
 import {
@@ -134,10 +135,10 @@ export function parsePlainTime(s: string): IsoTimeFields {
 
   let altParsed
   // NOTE: -1 causes returning undefined rather than error
-  if ((altParsed = parseMaybeYearMonth(s)) && constrainIsoDateInternals(altParsed, -1)) {
+  if ((altParsed = parseMaybeYearMonth(s)) && isIsoDateFieldsValid(altParsed)) {
     throw new RangeError()
   }
-  if ((altParsed = parseMaybeMonthDay(s)) && constrainIsoDateInternals(altParsed, -1)) {
+  if ((altParsed = parseMaybeMonthDay(s)) && isIsoDateFieldsValid(altParsed)) {
     throw new RangeError()
   }
 
@@ -206,7 +207,7 @@ function processZonedDateTimeParse(parsed: ZonedDateTimeParsed): ZonedInternals 
 }
 
 function processDateTimeParse(parsed: DateTimeParsed): IsoDateTimeInternals {
-  return checkIsoInBounds(constrainIsoDateTimeInternals(parsed, Overflow.Reject))
+  return checkIsoInBounds(constrainIsoDateTimeInternals(parsed))
 }
 
 /*
@@ -216,7 +217,7 @@ function processDatelikeParse(parsed: IsoDateInternals | undefined): IsoDateInte
   if (!parsed) {
     throw new RangeError()
   }
-  return checkIsoInBounds(constrainIsoDateInternals(parsed, Overflow.Reject))
+  return checkIsoInBounds(constrainIsoDateInternals(parsed))
 }
 
 // Low-level

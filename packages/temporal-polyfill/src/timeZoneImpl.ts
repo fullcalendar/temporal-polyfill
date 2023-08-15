@@ -16,7 +16,7 @@ import { parseMaybeOffsetNano } from './isoParse'
 import { LargeInt } from './largeInt'
 import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clamp, compareNumbers, createLazyGenerator } from './utils'
+import { clampEntity, clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
@@ -146,7 +146,7 @@ function createIntlTimeZoneStore(
   }
 
   function getOffsetSec(epochSec: number): number {
-    const clampedEpochSec = clamp(epochSec, minTransition, maxTransition)
+    const clampedEpochSec = clampNumber(epochSec, minTransition, maxTransition)
     const [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec)
     const startOffsetSec = getSample(startEpochSec)
     const endOffsetSec = getSample(endEpochSec)
@@ -163,7 +163,7 @@ function createIntlTimeZoneStore(
   inclusive for positive direction, exclusive for negative
   */
   function getTransition(epochSec: number, direction: -1 | 1): number | undefined {
-    const clampedEpochSec = clamp(epochSec, minTransition, maxTransition)
+    const clampedEpochSec = clampNumber(epochSec, minTransition, maxTransition)
     let [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec)
 
     const inc = periodDur * direction
