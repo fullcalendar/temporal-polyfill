@@ -633,7 +633,7 @@ function refineUnitOption<O>(
 
   let unitName = options[optionName] as (string | undefined)
 
-  if (unitName === undefined || unitName === 'auto') {
+  if (unitName === undefined) {
     if (defaultUnit === undefined) {
       throw new RangeError('Must specify' + optionName) // best error?
     }
@@ -641,6 +641,15 @@ function refineUnitOption<O>(
   }
 
   unitName = toString(unitName)
+
+  // TODO: more DRY with above block, but need to work with toString'd value
+  if (unitName === 'auto') {
+    if (defaultUnit === undefined) {
+      throw new RangeError('Must specify' + optionName) // best error?
+    }
+    return defaultUnit
+  }
+
   const unit = unitNameMap[unitName as UnitName] ??
     durationFieldIndexes[unitName as (keyof DurationFields)]
 

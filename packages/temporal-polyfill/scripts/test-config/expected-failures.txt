@@ -12,6 +12,7 @@ built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toString/fractionalseconddigits-wrong-type.js
 built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
