@@ -158,25 +158,25 @@ export const dateTimeFieldRefiners = {
 
 // Ordered alphabetically, for predictable macros
 const yearStatRefiners = {
-  daysInYear: ensureInteger,
+  daysInYear: ensurePositiveInteger,
   inLeapYear: ensureBoolean,
-  monthsInYear: ensureInteger,
+  monthsInYear: ensurePositiveInteger,
 }
 
 // Unordered
 export const yearMonthStatRefiners = {
   ...yearStatRefiners,
-  daysInMonth: ensureInteger,
+  daysInMonth: ensurePositiveInteger,
 }
 
 // Unordered
 export const dateStatRefiners = {
   ...yearMonthStatRefiners,
-  dayOfWeek: ensureInteger,
-  dayOfYear: ensureInteger,
-  weekOfYear: ensureInteger,
-  yearOfWeek: ensureInteger,
-  daysInWeek: ensureInteger,
+  dayOfWeek: ensurePositiveInteger,
+  dayOfYear: ensurePositiveInteger,
+  weekOfYear: ensurePositiveInteger,
+  yearOfWeek: ensurePositiveInteger,
+  daysInWeek: ensurePositiveInteger,
 }
 
 // Property Names
