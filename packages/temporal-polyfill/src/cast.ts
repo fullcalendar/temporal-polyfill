@@ -87,3 +87,40 @@ export function toIntegerOrUndefined(input: number | undefined): number | undefi
     return toInteger(input)
   }
 }
+
+export function ensureStringOrUndefined(input: string | undefined): string | undefined {
+  if (input !== undefined && typeof input !== 'string') {
+    throw new TypeError('Must be string or undefined')
+  }
+  return input
+}
+
+export function ensureIntegerOrUndefined(input: number | undefined): number | undefined {
+  if (input === undefined) {
+    // good
+  } else if (typeof input === 'number') {
+    if (!Number.isInteger(input)) {
+      throw new RangeError('Cannot accept non-integer')
+    }
+  } else {
+    throw new TypeError('Invalid type. Expected integer or undefined')
+  }
+  return input
+}
+
+/*
+Non-zero
+*/
+export function ensurePositiveInteger(input: number): number {
+  if (typeof input === 'number') {
+    if (!Number.isInteger(input)) {
+      throw new RangeError('Cannot accept non-integer')
+    }
+    if (input <= 0) {
+      throw new RangeError('Must be positive')
+    }
+  } else {
+    throw new TypeError('Invalid type. Expected integer or undefined')
+  }
+  return input
+}

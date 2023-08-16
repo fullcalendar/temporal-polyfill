@@ -5,7 +5,7 @@ import {
   isoTimeFieldNames,
 } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
-import { ensureBoolean, ensureInteger, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
+import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
 import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
 
 // Year/Month/Day (no era/eraYear)
@@ -238,9 +238,19 @@ export const dateTimeNormalRefiners = {
 }
 
 export const dateGetterRefiners = {
-  ...eraYearFieldRefiners,
-  ...dateFieldRefiners,
-  ...dateStatRefiners,
+  // ...eraYearFieldRefiners,
+  // HACK: use strict instead...
+  era: ensureStringOrUndefined,
+  eraYear: ensureIntegerOrUndefined,
+
+  // ...dateFieldRefiners,
+  // HACK: use strict instead...
+  year: ensureInteger,
+  monthCode: ensureString,
+  month: ensurePositiveInteger,
+  day: ensurePositiveInteger,
+
+  ...dateStatRefiners, // already strict
 }
 
 // unordered
