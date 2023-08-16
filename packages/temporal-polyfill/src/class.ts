@@ -290,7 +290,7 @@ export function getCommonInnerObj<
   const internal1 = obj1[propName] as R
 
   if (!isObjIdsEqual(internal0, internal1)) {
-    throw new TypeError(`${propName} not equal`)
+    throw new RangeError(`${propName} not equal`)
   }
 
   return internal0

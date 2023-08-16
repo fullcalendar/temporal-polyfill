@@ -88,7 +88,10 @@ const calendarOpsAdapterMethods = {
       calendar.dateUntil(
         createPlainDate(isoDateFields0 as IsoDateInternals),
         createPlainDate(isoDateFields1 as IsoDateInternals),
-        { largestUnit: unitNamesAsc[largestUnit] }
+        Object.assign(
+          Object.create(null),
+          { largestUnit: unitNamesAsc[largestUnit] },
+        )
       )
     )
   },
