@@ -162,6 +162,7 @@ export function roundRelativeDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
 ): DurationFields {
+  // fast path, no rounding
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return durationFields
   }

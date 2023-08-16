@@ -100,6 +100,12 @@ export function diffDates(
 ): DurationFields {
   const dateDiff = calendar.dateUntil(startIsoFields, endIsoFields, largestUnit)
 
+  // fast path, no rounding
+  // important for tests and custom calendars
+  if (smallestUnit === Unit.Day && roundingInc === 1) {
+    return dateDiff
+  }
+
   return roundRelativeDuration(
     dateDiff,
     isoToEpochNano(endIsoFields)!,

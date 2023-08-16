@@ -5,7 +5,7 @@ import {
   idGettersStrict, WrapperInstance
 } from './class'
 import { Duration, createDuration } from './duration'
-import { DurationInternals } from './durationFields'
+import { DurationInternals, durationTimeFieldDefaults } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import { Overflow, overflowMapNames } from './options'
@@ -84,7 +84,7 @@ const calendarOpsAdapterMethods = {
     isoDateFields1: IsoDateFields,
     largestUnit: Unit
   ): DurationInternals {
-    return getDurationInternals(
+    const durationInternals = getDurationInternals(
       calendar.dateUntil(
         createPlainDate(isoDateFields0 as IsoDateInternals),
         createPlainDate(isoDateFields1 as IsoDateInternals),
@@ -94,6 +94,11 @@ const calendarOpsAdapterMethods = {
         )
       )
     )
+
+    return {
+      ...durationInternals,
+      ...durationTimeFieldDefaults, // erase custom calendar's returned time fields
+    }
   },
 
   dateFromFields(

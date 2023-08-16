@@ -37,6 +37,8 @@ built-ins/Temporal/PlainDate/prototype/month/custom.js
 built-ins/Temporal/PlainDate/prototype/monthCode/custom.js
 built-ins/Temporal/PlainDate/prototype/monthsInYear/custom.js
 built-ins/Temporal/PlainDate/prototype/since/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainDate/prototype/subtract/custom.js
+built-ins/Temporal/PlainDate/prototype/since/custom.js
 
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
