@@ -69,7 +69,11 @@ const calendarOpsAdapterMethods = {
       calendar.dateAdd(
         createPlainDate(isoDateFields),
         createDuration(durationInternals),
-        overflow === undefined ? undefined : { overflow: overflowMapNames[overflow] }
+        Object.assign(
+          Object.create(null),
+          // guarantee an object. weird how dateFromFields passes through undefined
+          overflow === undefined ? {} : { overflow: overflowMapNames[overflow] }
+        )
       )
     )
   },

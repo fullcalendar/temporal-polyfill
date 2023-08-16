@@ -13,6 +13,7 @@ import {
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import {
+  checkIsoDateInBounds,
   epochMilliToIso,
   isoDaysInWeek,
   isoMonthsInYear,
@@ -132,10 +133,10 @@ export function moveDate(
 
   epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay
 
-  return {
+  return checkIsoDateInBounds({ // TODO: use epochMilli for in-bounds-ness instead?
     calendar,
     ...epochMilliToIso(epochMilli!),
-  }
+  })
 }
 
 export function moveDateByDays( // TODO: rename moveDateDays?

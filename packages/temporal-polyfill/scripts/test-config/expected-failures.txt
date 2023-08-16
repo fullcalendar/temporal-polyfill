@@ -2,7 +2,7 @@
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
-# Calendar::from bag field querying order
+# Calendar::from bag properties order-of-query
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -13,6 +13,9 @@ built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toString/fractionalseconddigits-wrong-type.js
 built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
 
+# overflow options should be parsed WITHIN CalendarOpsAdapter, not before
+built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
+
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
 
@@ -21,6 +24,19 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainDate/prototype/add/balance-smaller-units.js
+built-ins/Temporal/PlainDate/prototype/add/custom.js
+built-ins/Temporal/PlainDate/prototype/day/custom.js
+built-ins/Temporal/PlainDate/prototype/dayOfWeek/custom.js
+built-ins/Temporal/PlainDate/prototype/dayOfYear/custom.js
+built-ins/Temporal/PlainDate/prototype/daysInMonth/custom.js
+built-ins/Temporal/PlainDate/prototype/daysInWeek/custom.js
+built-ins/Temporal/PlainDate/prototype/daysInYear/custom.js
+built-ins/Temporal/PlainDate/prototype/inLeapYear/custom.js
+built-ins/Temporal/PlainDate/prototype/month/custom.js
+built-ins/Temporal/PlainDate/prototype/monthCode/custom.js
+built-ins/Temporal/PlainDate/prototype/monthsInYear/custom.js
+built-ins/Temporal/PlainDate/prototype/since/calendar-dateadd-called-with-plaindate-instance.js
 
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js

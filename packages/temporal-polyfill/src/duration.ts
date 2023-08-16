@@ -238,7 +238,7 @@ export const [
         )
       ) {
         const [timeNano0, dayCnt0] = givenFieldsToTimeNano(durationFields0, Unit.Day, durationFieldNamesAsc)
-        const [timeNano1, dayCnt1] = givenFieldsToTimeNano(durationFields0, Unit.Day, durationFieldNamesAsc)
+        const [timeNano1, dayCnt1] = givenFieldsToTimeNano(durationFields1, Unit.Day, durationFieldNamesAsc)
 
         return compareNumbers(dayCnt0, dayCnt1) || compareNumbers(timeNano0, timeNano1)
       }
