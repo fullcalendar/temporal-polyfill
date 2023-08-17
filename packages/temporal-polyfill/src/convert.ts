@@ -78,8 +78,8 @@ export function refineMaybeZonedDateTimeBag(
   ) as ZonedDateTimeBag
 
   if (fields.timeZone) {
-    const isoDateFields = calendar.dateFromFields(fields, Overflow.Constrain)
-    const isoTimeFields = refineTimeBag(fields, Overflow.Constrain)
+    const isoDateFields = calendar.dateFromFields(fields)
+    const isoTimeFields = refineTimeBag(fields)
     const timeZone = queryTimeZoneOps(fields.timeZone) // must happen after datetime fields
 
     const epochNanoseconds = getMatchingInstantFor(
@@ -98,8 +98,8 @@ export function refineMaybeZonedDateTimeBag(
       epochNanoseconds,
     }
   } else {
-    const isoDateInternals = calendar.dateFromFields(fields, Overflow.Constrain)
-    const isoTimeFields = refineTimeBag(fields, Overflow.Constrain)
+    const isoDateInternals = calendar.dateFromFields(fields)
+    const isoTimeFields = refineTimeBag(fields)
 
     return { ...isoDateInternals, ...isoTimeFields }
   }
@@ -302,7 +302,7 @@ function convertToIso(
   const mergedFieldNames = excludeArrayDuplicates([...inputFieldNames, ...extraFieldNames])
   mergedFields = refineFields(mergedFields, mergedFieldNames, [])
 
-  return calendar.dateFromFields(mergedFields, Overflow.Constrain)
+  return calendar.dateFromFields(mergedFields)
 }
 
 // PlainYearMonth
@@ -363,7 +363,7 @@ export function convertToPlainYearMonth(
   )
 
   return createPlainYearMonth(
-    calendar.yearMonthFromFields(fields, Overflow.Constrain), // TODO: make default?
+    calendar.yearMonthFromFields(fields),
   )
 }
 
@@ -413,7 +413,7 @@ export function convertToPlainMonthDay(
   )
 
   return createPlainMonthDay(
-    calendar.monthDayFromFields(fields, Overflow.Constrain), // TODO: default Constrain?
+    calendar.monthDayFromFields(fields),
   )
 }
 
