@@ -154,7 +154,12 @@ const calendarOpsAdapterMethods = {
     fields0: Record<string, unknown>,
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
-    return ensureObjectlike(calendar.mergeFields(fields0, fields1))
+    return ensureObjectlike(
+      calendar.mergeFields(
+        Object.assign(Object.create(null), fields0),
+        Object.assign(Object.create(null), fields1),
+      ),
+    )
   },
 }
 

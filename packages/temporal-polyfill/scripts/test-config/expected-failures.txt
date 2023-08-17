@@ -41,10 +41,20 @@ built-ins/Temporal/PlainDate/prototype/monthsInYear/custom.js
 built-ins/Temporal/PlainDate/prototype/since/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainDate/prototype/subtract/custom.js
 built-ins/Temporal/PlainDate/prototype/since/custom.js
+built-ins/Temporal/PlainDate/prototype/until/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainDate/prototype/until/custom.js
+built-ins/Temporal/PlainDate/prototype/weekOfYear/custom.js
+built-ins/Temporal/PlainDate/prototype/with/custom.js
+built-ins/Temporal/PlainDate/prototype/year/custom.js
+built-ins/Temporal/PlainDate/prototype/yearOfWeek/custom.js
+
+# tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
 
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
