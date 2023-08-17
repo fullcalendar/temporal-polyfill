@@ -33,6 +33,7 @@ import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import {
   checkIsoDateInBounds,
+  checkIsoYearMonthInBounds,
   computeIsoDayOfWeek,
   computeIsoDaysInMonth,
   computeIsoDaysInWeek,
@@ -96,14 +97,14 @@ export class CalendarImpl implements CalendarOps {
     const month = this.refineMonth(fields, year, overflow)
     const day = this.refineDay(fields as DayFields, month, year, overflow)
 
-    return this.queryIsoFields(year, month, day)
+    return checkIsoDateInBounds(this.queryIsoFields(year, month, day))
   }
 
   yearMonthFromFields(fields: YearMonthBag, overflow?: Overflow): IsoDateInternals {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
 
-    return this.queryIsoFields(year, month, 1)
+    return checkIsoYearMonthInBounds(this.queryIsoFields(year, month, 1))
   }
 
   monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateInternals {
@@ -212,12 +213,12 @@ export class CalendarImpl implements CalendarOps {
   // -----------------
 
   queryIsoFields(year: number, month: number, day: number): IsoDateInternals {
-    return checkIsoDateInBounds({
+    return {
       calendar: this,
       isoYear: year,
       isoMonth: month,
       isoDay: day,
-    })
+    }
   }
 
   queryYearMonthDay(isoDateFields: IsoDateFields): [number, number, number] {

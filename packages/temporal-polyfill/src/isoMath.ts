@@ -21,7 +21,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, divModFloor, clampProp, compareNumbers } from './utils'
+import { NumSign, divModFloor, clampProp, compareNumbers, clampNumber, clampEntity } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -120,6 +120,17 @@ const epochNanoMax = numberToLargeInt(1e17).mult(secInDay) // TODO: define this 
 const epochNanoMin = epochNanoMax.mult(-1) // inclusive
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
+
+export function checkIsoYearMonthInBounds<T extends IsoDateFields>(isoFields: T): T {
+  // TODO: just authenticate based on hardcoded min/max isoYear/Month/Day. for other types too
+  clampProp(isoFields, 'isoYear' as any,  -271821, 275760, Overflow.Reject)
+  if (isoFields.isoYear === isoYearMin) {
+    clampProp(isoFields, 'isoMonth' as any, 4, 12)
+  } else if (isoFields.isoYear === isoYearMax) {
+    clampProp(isoFields, 'isoDay' as any, 1, 9)
+  }
+  return isoFields
+}
 
 export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
   checkIsoDateTimeInBounds({
