@@ -32,12 +32,19 @@ import { PlainTimeArg, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
-import { NumSign } from './utils'
+import { NumSign, isObjectlike } from './utils'
 import { getCommonCalendarOps } from './calendarOps'
+import { TimeZone, TimeZoneArg } from './timeZone'
+import { ZonedDateTime } from './zonedDateTime'
 
 export type PlainDateArg = PlainDate | PlainDateBag | string
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
 export type PlainDateMod = DateBag
+
+// only works with options object, not string timeZone name
+const plainDateToZonedDateTimeConvert = createZonedDateTimeConverter((options: { plainTime?: PlainTimeArg }) => {
+  return optionalToPlainTimeFields(options.plainTime)
+})
 
 export type PlainDate = TemporalInstance<IsoDateInternals>
 export const [
@@ -146,9 +153,17 @@ export const [
 
     valueOf: neverValueOf,
 
-    toZonedDateTime: createZonedDateTimeConverter((options: { plainTime: PlainTimeArg }) => {
-      return optionalToPlainTimeFields(options.plainTime)
-    }),
+    toZonedDateTime(
+      internals: IsoDateInternals,
+      options: TimeZoneArg | { timeZone: TimeZoneArg, plainTime?: PlainTimeArg },
+    ): ZonedDateTime {
+      return plainDateToZonedDateTimeConvert(
+        internals,
+        isObjectlike(options) && !(options instanceof TimeZone)
+          ? options as { timeZone: TimeZoneArg, plainTime?: PlainTimeArg }
+          : { timeZone: options as TimeZoneArg }
+      )
+    },
 
     toPlainDateTime(internals, timeArg): PlainDateTime {
       return createPlainDateTime(
@@ -210,6 +225,6 @@ function diffPlainDates(
   return createDuration(durationInternals)
 }
 
-function optionalToPlainTimeFields(timeArg: PlainTimeArg): IsoTimeFields {
+function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
 }

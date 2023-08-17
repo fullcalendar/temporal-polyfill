@@ -190,31 +190,20 @@ export function createZonedDateTimeConverter<
 ): (
   (
     internals: Internals,
-    options: TimeZoneArg | (NarrowOptions & { timeZone: TimeZoneArg }),
+    options: NarrowOptions & { timeZone: TimeZoneArg },
   ) => ZonedDateTime
 ) {
   return (internals, options) => {
-    let timeZoneOps: TimeZoneOps
-    let extraInternals: Partial<IsoDateTimeInternals> = {}
-
-    if (isObjectlike(options)) {
-      if (options instanceof TimeZone) {
-        timeZoneOps = new TimeZoneOpsAdapter(options as TimeZone)
-      } else {
-        extraInternals = getMoreInternals(normalizeOptions(options as NarrowOptions))
-        timeZoneOps = queryTimeZoneOps((options as { timeZone: TimeZoneArg }).timeZone)
-      }
-    } else {
-      timeZoneOps = queryTimeZoneOps(options)
-    }
+    const timeZone = queryTimeZoneOps((options as { timeZone: TimeZoneArg }).timeZone)
+    const extraInternals = getMoreInternals(normalizeOptions(options as NarrowOptions))
 
     const finalInternals = { ...internals, ...extraInternals } as IsoDateTimeInternals
     const { calendar } = finalInternals
-    const epochNanoseconds = getSingleInstantFor(timeZoneOps, finalInternals)
+    const epochNanoseconds = getSingleInstantFor(timeZone, finalInternals)
 
     return createZonedDateTime({
       calendar,
-      timeZone: timeZoneOps,
+      timeZone: timeZone,
       epochNanoseconds,
     })
   }
