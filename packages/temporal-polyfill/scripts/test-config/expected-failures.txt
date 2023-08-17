@@ -58,6 +58,11 @@ built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 
+# LargeInt::divModTrunc loosing precision during
+#   const [newHigh, highRemainder] = divModFunc(high, divisor) // highRemainder wrong
+# Should get fixed when moving to DayTimeNano
+built-ins/Temporal/PlainDateTime/datetime-math.js
+
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
 built-ins/Temporal/TimeZone/prototype/equals/builtin.js

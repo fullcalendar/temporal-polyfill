@@ -279,7 +279,12 @@ export const padNumber2 = padNumber.bind(undefined, 2)
 
 export type NumSign = -1 | 0 | 1
 
-export function compareNumbers(a: number, b: number): NumSign { // TODO: rename `compareNums`
+/*
+-1 if a comes before b
+ 0 if equal
+ 1 if a comes after b
+*/
+export function compareNumbers(a: number, b: number): NumSign {
   return Math.sign(a - b) as NumSign
 }
 

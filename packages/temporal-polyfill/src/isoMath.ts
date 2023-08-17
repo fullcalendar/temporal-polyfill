@@ -21,7 +21,7 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, divModFloor, clampProp, compareNumbers, clampNumber, clampEntity } from './utils'
+import { NumSign, divModFloor, clampProp, compareNumbers } from './utils'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------

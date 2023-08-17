@@ -145,7 +145,6 @@ export function roundDurationToNano(
   return {
     ...durationFields,
     ...dayTimeFields,
-    days: durationFields.days + dayTimeFields.days,
   }
 }
 
