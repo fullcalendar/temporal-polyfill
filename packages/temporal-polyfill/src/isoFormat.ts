@@ -186,15 +186,20 @@ export function formatCalendar(
   calendarOps: CalendarOps,
   calendarDisplay: CalendarDisplay,
 ): string {
-  if (
-    calendarDisplay > CalendarDisplay.Never || // critical or always
-    (calendarDisplay === CalendarDisplay.Auto && calendarOps.id !== isoCalendarId)
-  ) {
-    return '[' +
-      (calendarDisplay === CalendarDisplay.Critical ? '!' : '') +
-      calendarOps.id +
-      ']'
+  if (calendarDisplay !== CalendarDisplay.Never) {
+    const calendarId = calendarOps.id // cache result for CalendarOpsAdapter
+
+    if (
+      calendarDisplay > CalendarDisplay.Never || // critical or always
+      (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
+    ) {
+      return '[' +
+        (calendarDisplay === CalendarDisplay.Critical ? '!' : '') +
+        'u-ca=' + calendarId +
+        ']'
+    }
   }
+
   return ''
 }
 

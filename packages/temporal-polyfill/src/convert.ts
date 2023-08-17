@@ -51,9 +51,9 @@ import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod } from './plainDateTi
 import { PlainMonthDay, PlainMonthDayBag, PlainMonthDayMod, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
 import { PlainYearMonth, PlainYearMonthBag, PlainYearMonthMod, createPlainYearMonth } from './plainYearMonth'
-import { TimeZoneArg } from './timeZone'
-import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { Callable, Reused, excludeArrayDuplicates, pluckProps } from './utils'
+import { TimeZone, TimeZoneArg } from './timeZone'
+import { TimeZoneOps, TimeZoneOpsAdapter, getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { Callable, Reused, excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedDateTimeMod, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 
 /*
@@ -184,25 +184,37 @@ export function mergeZonedDateTimeBag(
 
 export function createZonedDateTimeConverter<
   Internals extends Partial<IsoDateTimeInternals>,
-  NarrowOptions
+  NarrowOptions extends {}
 >(
   getMoreInternals: (options: NarrowOptions) => Partial<IsoDateTimeInternals>,
 ): (
-  (internals: Internals, options: NarrowOptions & { timeZone: TimeZoneArg }) => ZonedDateTime
+  (
+    internals: Internals,
+    options: TimeZoneArg | (NarrowOptions & { timeZone: TimeZoneArg }),
+  ) => ZonedDateTime
 ) {
   return (internals, options) => {
-    const finalInternals = {
-      ...internals,
-      ...getMoreInternals(normalizeOptions(options))
-    } as IsoDateTimeInternals
+    let timeZoneOps: TimeZoneOps
+    let extraInternals: Partial<IsoDateTimeInternals> = {}
 
+    if (isObjectlike(options)) {
+      if (options instanceof TimeZone) {
+        timeZoneOps = new TimeZoneOpsAdapter(options as TimeZone)
+      } else {
+        extraInternals = getMoreInternals(normalizeOptions(options as NarrowOptions))
+        timeZoneOps = queryTimeZoneOps((options as { timeZone: TimeZoneArg }).timeZone)
+      }
+    } else {
+      timeZoneOps = queryTimeZoneOps(options)
+    }
+
+    const finalInternals = { ...internals, ...extraInternals } as IsoDateTimeInternals
     const { calendar } = finalInternals
-    const timeZone = queryTimeZoneOps(options.timeZone)
-    const epochNanoseconds = getSingleInstantFor(timeZone, finalInternals)
+    const epochNanoseconds = getSingleInstantFor(timeZoneOps, finalInternals)
 
     return createZonedDateTime({
       calendar,
-      timeZone,
+      timeZone: timeZoneOps,
       epochNanoseconds,
     })
   }
