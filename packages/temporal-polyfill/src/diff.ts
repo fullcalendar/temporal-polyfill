@@ -4,8 +4,8 @@ import {
   DurationFields,
   DurationInternals,
   durationFieldDefaults,
-  nanoToDurationFields,
-  timeNanoToDurationFields,
+  nanoToDurationDayTimeFields,
+  nanoToDurationTimeFields,
   updateDurationFieldsSign,
 } from './durationFields'
 import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields } from './isoFields'
@@ -73,7 +73,7 @@ export function diffDateTimes(
   }
 
   const dateDiff = calendar.dateUntil(midIsoFields, endIsoFields, largestUnit)
-  const timeDiff = timeNanoToDurationFields(timeNano)
+  const timeDiff = nanoToDurationTimeFields(timeNano)
 
   return roundRelativeDuration(
     { ...dateDiff, ...timeDiff },
@@ -175,7 +175,7 @@ export function diffTimes(
 
   return {
     ...durationFieldDefaults,
-    ...timeNanoToDurationFields(timeNano, largestUnit),
+    ...nanoToDurationTimeFields(timeNano, largestUnit),
   }
 }
 
@@ -222,7 +222,7 @@ export function diffZonedEpochNano(
 
   const dateDiff = calendar.dateUntil(startIsoFields, midIsoFields, largestUnit)
   const timeDiffNano = endEpochNano.addLargeInt(midEpochNano, -1).toNumber()
-  const timeDiff = timeNanoToDurationFields(timeDiffNano)
+  const timeDiff = nanoToDurationTimeFields(timeDiffNano)
 
   return roundRelativeDuration(
     { ...dateDiff, ...timeDiff },
@@ -248,7 +248,7 @@ export function diffEpochNano(
 ): DurationFields {
   return {
     ...durationFieldDefaults,
-    ...nanoToDurationFields(
+    ...nanoToDurationDayTimeFields(
       roundByIncLarge(
         endEpochNano.addLargeInt(startEpochNano, -1),
         computeNanoInc(smallestUnit, roundingInc),

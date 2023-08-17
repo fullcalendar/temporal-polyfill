@@ -11,7 +11,7 @@ import {
   durationFieldNamesAsc,
   updateDurationFieldsSign,
   durationFieldsToNano,
-  nanoToDurationFields,
+  nanoToDurationDayTimeFields,
   durationFieldDefaults,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
@@ -317,7 +317,10 @@ function balanceDurationDayTime(
   const largeNano = durationFieldsToNano(durationFields, Unit.Day)
 
   return createDuration(
-    updateDurationFieldsSign(nanoToDurationFields(largeNano, largestUnit))
+    updateDurationFieldsSign({
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(largeNano, largestUnit)
+    })
   )
 }
 

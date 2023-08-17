@@ -44,6 +44,10 @@ export class LargeInt {
     return balanceAndCreate(this.high * multiplier, this.low * multiplier)
   }
 
+  sign(): NumSign {
+    return (Math.sign(this.high) || Math.sign(this.low)) as NumSign
+  }
+
   divModFloor(divisor: number): [LargeInt, number] {
     return divModLarge(divModFloor, this, divisor)
   }

@@ -115,28 +115,29 @@ export function durationFieldsToTimeOfDayNano(fields: DurationFields): number {
   return givenFieldsToTimeNano(fields, Unit.Hour, durationFieldNamesAsc)[0]
 }
 
-export function nanoToDurationFields(
+export function nanoToDurationDayTimeFields(largeNano: LargeInt): { days: number } & DurationTimeFields
+export function nanoToDurationDayTimeFields(largeNano: LargeInt, largestUnit?: DayTimeUnit): Partial<DurationFields>
+export function nanoToDurationDayTimeFields(
   largeNano: LargeInt,
   largestUnit: DayTimeUnit = Unit.Day,
-): DurationFields {
+): Partial<DurationFields> {
   const divisor = unitNanoMap[largestUnit]
   const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
 
   return {
-    ...durationFieldDefaults,
     [durationFieldNamesAsc[largestUnit]]: largeUnitNum.toNumber(),
     ...nanoToGivenFields(remainder, largestUnit - 1, durationFieldNamesAsc),
   }
 }
 
-export function timeNanoToDurationFields(
+// audit
+export function nanoToDurationTimeFields(nano: number): DurationTimeFields
+export function nanoToDurationTimeFields(nano: number, largestUnit: TimeUnit): Partial<DurationTimeFields>
+export function nanoToDurationTimeFields(
   nano: number,
   largestUnit: TimeUnit = Unit.Hour,
-): DurationFields {
-  return {
-    ...durationFieldDefaults,
-    ...nanoToGivenFields(nano, largestUnit, durationFieldNamesAsc),
-  }
+): Partial<DurationTimeFields> {
+  return nanoToGivenFields(nano, largestUnit, durationFieldNamesAsc as (keyof DurationTimeFields)[])
 }
 
 // Field Math

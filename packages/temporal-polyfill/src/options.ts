@@ -544,7 +544,7 @@ function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUni
       throw new RangeError('Must be even multiple')
     }
   } else {
-    roundingInc = clampEntity(roundingIncName, roundingInc, 1, 1, Overflow.Reject)
+    roundingInc = clampEntity(roundingIncName, roundingInc, 1, 10 ** 9, Overflow.Reject)
   }
 
   return roundingInc
