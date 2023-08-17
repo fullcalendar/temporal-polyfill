@@ -16,7 +16,7 @@ import { parseMaybeOffsetNano } from './isoParse'
 import { LargeInt } from './largeInt'
 import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clampEntity, clampNumber, compareNumbers, createLazyGenerator } from './utils'
+import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
@@ -248,7 +248,7 @@ function createSplitTuple(startEpochSec: number, endEpochSec: number): [number, 
 }
 
 function computePeriod(epochSec: number): [number, number] {
-  const startEpochSec = Math.floor(epochSec / periodDur)
+  const startEpochSec = Math.floor(epochSec / periodDur) * epochSec
   const endEpochSec = startEpochSec + periodDur
   return [startEpochSec, endEpochSec]
 }

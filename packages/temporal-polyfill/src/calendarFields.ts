@@ -175,7 +175,7 @@ export const dateStatRefiners = {
   dayOfWeek: ensurePositiveInteger,
   dayOfYear: ensurePositiveInteger,
   weekOfYear: ensurePositiveInteger,
-  yearOfWeek: ensurePositiveInteger,
+  yearOfWeek: ensureInteger, // allows negative
   daysInWeek: ensurePositiveInteger,
 }
 
