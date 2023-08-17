@@ -246,8 +246,16 @@ export const epochGetters = {
 // ISO Fields -> Epoch
 
 export function isoToEpochSec(isoDateTimeFields: IsoDateTimeFields): [number, number] {
-  const epochSec = isoArgsToEpochSec(...pluckIsoTuple(isoDateTimeFields))
-  // ^assume valid
+  // assume valid
+  // TODO: nicer way to splice this (while still excluding subsec)
+  const epochSec = isoArgsToEpochSec(
+    isoDateTimeFields.isoYear,
+    isoDateTimeFields.isoMonth,
+    isoDateTimeFields.isoDay,
+    isoDateTimeFields.isoHour,
+    isoDateTimeFields.isoMinute,
+    isoDateTimeFields.isoSecond,
+  )
 
   const subsecNano =
     isoDateTimeFields.isoMillisecond * nanoInMilli +
