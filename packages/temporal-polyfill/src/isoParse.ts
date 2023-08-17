@@ -268,7 +268,7 @@ export function parseMaybeOffsetNano(s: string, onlyHourMinute?: boolean): numbe
 // RegExp & Parts
 // -------------------------------------------------------------------------------------------------
 
-const signRegExpStr = '([+-\u2212])' // outer captures
+const signRegExpStr = '([+\u2212-])' // outer captures
 const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
 
 const yearMonthRegExpStr =
