@@ -490,7 +490,8 @@ function organizeDurationParts(parts: string[]): DurationInternals {
       hasAny = true
 
       if (fracStr) {
-        // convert seconds to other units, abusing parseSubsecNano
+        // convert seconds to other units
+        // more precise version of `frac / nanoInSec * nanoInUnit`
         leftoverNano = parseSubsecNano(fracStr) * (unitNanoMap[timeUnit!] / nanoInSec)
         hasAnyFrac = true
       }

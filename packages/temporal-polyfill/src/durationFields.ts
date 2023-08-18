@@ -111,10 +111,6 @@ export function durationFieldsToNano(fields: DurationFields, largestUnit: DayTim
     .addNumber(timeNano)
 }
 
-export function durationFieldsToTimeOfDayNano(fields: DurationFields): number {
-  return givenFieldsToTimeNano(fields, Unit.Hour, durationFieldNamesAsc)[0]
-}
-
 export function nanoToDurationDayTimeFields(largeNano: LargeInt): { days: number } & DurationTimeFields
 export function nanoToDurationDayTimeFields(largeNano: LargeInt, largestUnit?: DayTimeUnit): Partial<DurationFields>
 export function nanoToDurationDayTimeFields(

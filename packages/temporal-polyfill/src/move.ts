@@ -6,7 +6,6 @@ import {
   durationHasDateParts,
   durationTimeFieldDefaults,
   durationTimeFieldsToLargeNanoStrict,
-  durationFieldsToTimeOfDayNano,
   updateDurationFieldsSign,
   durationFieldsToNano,
 } from './durationFields'
@@ -14,6 +13,7 @@ import { IsoDateTimeFields, IsoDateFields, IsoTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import {
   checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
   epochMilliToIso,
   isoDaysInWeek,
   isoMonthsInYear,
@@ -77,6 +77,7 @@ export function moveDateTime(
   durationFields: DurationFields,
   overflow?: Overflow,
 ): IsoDateTimeFields {
+  // could have over 24 hours!!!
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
   const movedIsoDateFields = calendar.dateAdd(
@@ -89,10 +90,10 @@ export function moveDateTime(
     overflow,
   )
 
-  return {
+  return checkIsoDateTimeInBounds({
     ...movedIsoDateFields,
     ...movedIsoTimeFields,
-  }
+  })
 }
 
 export function moveDate(
@@ -133,7 +134,9 @@ export function moveDate(
 
   epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay
 
-  return checkIsoDateInBounds({ // TODO: use epochMilli for in-bounds-ness instead?
+  // TODO: use epochMilli for in-bounds-ness instead?
+  // TODO: inefficient that PlainDateTime will call in-bounds twice?
+  return checkIsoDateInBounds({
     calendar,
     ...epochMilliToIso(epochMilli!),
   })
@@ -150,13 +153,16 @@ export function moveDateByDays( // TODO: rename moveDateDays?
 }
 
 export function moveTime(
-  isoTimeFields: IsoTimeFields,
+  isoFields: IsoTimeFields,
   durationFields: DurationFields,
 ): [IsoTimeFields, number] {
-  return nanoToIsoTimeAndDay(
-    isoTimeFieldsToNano(isoTimeFields) +
-    durationFieldsToTimeOfDayNano(durationFields)
-  )
+  const [durTimeNano, durDays] = givenFieldsToTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
+  const [newIsoFields, overflowDays] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(isoFields) + durTimeNano)
+
+  return [
+    newIsoFields,
+    durDays + overflowDays,
+  ]
 }
 
 // Calendar-related Utils

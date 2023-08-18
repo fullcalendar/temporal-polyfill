@@ -5,7 +5,6 @@ import {
   durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
-  durationFieldsToTimeOfDayNano,
   updateDurationFieldsSign,
   durationFieldsToNano,
   nanoToDurationDayTimeFields,
@@ -25,6 +24,7 @@ import {
   Unit,
   DayTimeUnit,
   TimeUnit,
+  givenFieldsToTimeNano,
 } from './units'
 import { divTrunc, identityFunc } from './utils'
 import { ZonedInternals } from './zonedDateTime'
@@ -333,7 +333,7 @@ function nudgeRelativeDurationTime<M>(
   expanded: boolean,
 ] {
   const { sign } = durationFields
-  const timeNano = durationFieldsToTimeOfDayNano(durationFields)
+  let [timeNano, dayDelta] = givenFieldsToTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 
@@ -349,7 +349,6 @@ function nudgeRelativeDurationTime<M>(
 
   const daySpanEpochNanoseconds = dayEpochNano1.addLargeInt(dayEpochNano0, -1).toNumber()
   const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
-  let dayDelta = 0
 
   if (!beyondDay || Math.sign(beyondDay) === sign) {
     dayDelta += sign
