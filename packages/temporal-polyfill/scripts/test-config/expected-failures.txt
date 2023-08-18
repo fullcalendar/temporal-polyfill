@@ -20,6 +20,9 @@ built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js
 built-ins/Temporal/PlainDateTime/from/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
@@ -53,6 +56,16 @@ built-ins/Temporal/PlainDate/prototype/weekOfYear/custom.js
 built-ins/Temporal/PlainDate/prototype/with/custom.js
 built-ins/Temporal/PlainDate/prototype/year/custom.js
 built-ins/Temporal/PlainDate/prototype/yearOfWeek/custom.js
+built-ins/Temporal/PlainDateTime/prototype/day/custom.js
+built-ins/Temporal/PlainDateTime/prototype/dayOfWeek/custom.js
+built-ins/Temporal/PlainDateTime/prototype/dayOfYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/daysInMonth/custom.js
+built-ins/Temporal/PlainDateTime/prototype/daysInWeek/custom.js
+built-ins/Temporal/PlainDateTime/prototype/daysInYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/inLeapYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/month/custom.js
+built-ins/Temporal/PlainDateTime/prototype/monthCode/custom.js
+built-ins/Temporal/PlainDateTime/prototype/monthsInYear/custom.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
