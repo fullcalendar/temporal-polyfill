@@ -76,16 +76,7 @@ function roundDateTimeToDay(
     ? computeNanosecondsInDay(timeZoneOps, isoFields)
     : nanoInUtcDay
 
-  const dayDelta = roundByInc(
-    isoTimeFieldsToNano(isoFields),
-    nanoInDay,
-    roundingMode,
-  )
-
-  return {
-    ...moveDateByDays(isoFields, dayDelta),
-    ...isoTimeFieldDefaults,
-  }
+  return roundDateTimeToNano(isoFields, nanoInDay, roundingMode)
 }
 
 export function roundDateTimeToNano(

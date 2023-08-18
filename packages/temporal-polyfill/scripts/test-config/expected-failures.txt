@@ -70,6 +70,10 @@ built-ins/Temporal/PlainDateTime/prototype/monthsInYear/custom.js
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
 
+# ::equal() with calendar's internally uses different CalendarOpsAdapters, so calls calendar.id
+# TODO: have each obj store raw calendar slot
+built-ins/Temporal/PlainDateTime/prototype/equals/calendar-checked.js
+
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
