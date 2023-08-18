@@ -5,7 +5,6 @@
 # Calendar::from bag properties order-of-query
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
-built-ins/Temporal/PlainDate/from/order-of-operations.js
 
 # diff/toString options order-of-operations (TODO)
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
@@ -16,15 +15,20 @@ built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
+built-ins/Temporal/PlainDate/from/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainDateTime/from/order-of-operations.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
 
 # our Duration::compare calls Calendar::dateAdd fewer times!
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
+
+# we parse overflow options fewer times!
+built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js

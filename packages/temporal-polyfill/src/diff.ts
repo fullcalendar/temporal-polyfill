@@ -307,22 +307,11 @@ function diffYearMonthDay(
   }
 
   updateYearMonthDay()
-  const monthSign = Math.sign(monthDiff) as NumSign
-  const sign = (Math.sign(yearDiff) || monthSign || Math.sign(dayDiff)) as NumSign
+  const daySign = Math.sign(dayDiff) as NumSign
+  const sign = (Math.sign(yearDiff) || Math.sign(monthDiff) || daySign) as NumSign
 
   if (sign) {
-    // overshooting month? correct by moving to penultimate year
-    if (monthSign === -sign) {
-      const oldMonthsInYear1 = monthsInYear1
-      year1 -= sign
-      updateYearMonth()
-      monthDiff += sign < 0 // correct with months-in-year further in past
-        ? -oldMonthsInYear1 // correcting from past -> future
-        : monthsInYear1 // correcting from future -> past
-    }
-
     // overshooting day? correct by moving to penultimate month
-    const daySign = Math.sign(dayDiff) as NumSign
     if (daySign === -sign) {
       const oldDaysInMonth1 = daysInMonth1
       ;([year1, month1] = calendarImpl.addMonths(year1, month1, -sign))
@@ -330,6 +319,17 @@ function diffYearMonthDay(
       dayDiff += sign < 0 // correct with days-in-month further in past
         ? -oldDaysInMonth1 // correcting from past -> future
         : daysInMonth1 // correcting from future -> past
+    }
+
+    // overshooting month? correct by moving to penultimate year
+    const monthSign = Math.sign(monthDiff) as NumSign
+    if (monthSign === -sign) {
+      const oldMonthsInYear1 = monthsInYear1
+      year1 -= sign
+      updateYearMonth()
+      monthDiff += sign < 0 // correct with months-in-year further in past
+        ? -oldMonthsInYear1 // correcting from past -> future
+        : monthsInYear1 // correcting from future -> past
     }
   }
 

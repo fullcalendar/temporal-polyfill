@@ -99,7 +99,7 @@ export function refineIsoTimeFields(
   )
 }
 
-export function constrainIsoTimeFields(isoTimeFields: IsoTimeFields, overflow: Overflow | undefined) {
+export function constrainIsoTimeFields(isoTimeFields: IsoTimeFields, overflow: Overflow | undefined): IsoTimeFields {
   // TODO: clever way to compress this, using functional programming
   // Will this kill need for clampProp?
   return {

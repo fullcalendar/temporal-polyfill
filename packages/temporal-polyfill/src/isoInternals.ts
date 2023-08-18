@@ -128,8 +128,9 @@ export function refineIsoDateInternals(
 
 /*
 TODO: rename, because either passes or fails (does not clamp)
+TODO: dont accept/return anything
 */
-export function constrainIsoDateTimeInternals(isoDateTimeFields: IsoDateTimeInternals): IsoDateTimeInternals {
+export function constrainIsoDateTimeInternals<P extends IsoDateTimeFields>(isoDateTimeFields: P): P {
   return {
     ...constrainIsoDateInternals(isoDateTimeFields),
     ...constrainIsoTimeFields(isoDateTimeFields, Overflow.Reject),
@@ -140,6 +141,7 @@ export function constrainIsoDateTimeInternals(isoDateTimeFields: IsoDateTimeInte
 TODO: rename, because either passes or fails (does not clamp)
 TODO: does this need to use 'internals'?
 NOTE: accepts iso-date-like fields and will pass all through
+TODO: dont accept/return anything
 */
 export function constrainIsoDateInternals<P extends IsoDateFields>(isoInternals: P): P {
   if (!isIsoDateFieldsValid(isoInternals)) {
