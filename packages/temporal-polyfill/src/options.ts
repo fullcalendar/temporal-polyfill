@@ -81,7 +81,7 @@ export function refineDiffOptions(
     Math.max(smallestUnit, defaultLargestUnit),
   )
 
-  const roundingInc = refineRoundingInc(options, smallestUnit as DayTimeUnit)
+  const roundingInc = refineRoundingInc(options, smallestUnit as DayTimeUnit, true)
 
   let roundingMode = refineRoundingMode(options, RoundingMode.Trunc)
   if (roundingModeInvert) {
@@ -524,7 +524,11 @@ export interface RoundingIncOptions {
 
 const roundingIncName = 'roundingIncrement'
 
-function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUnit) {
+function refineRoundingInc(
+  options: RoundingIncOptions,
+  smallestUnit: DayTimeUnit,
+  allowManyLargeUnits?: boolean,
+) {
   let roundingInc = options[roundingIncName]
 
   if (roundingInc === undefined) {
@@ -544,7 +548,13 @@ function refineRoundingInc(options: RoundingIncOptions, smallestUnit: DayTimeUni
       throw new RangeError('Must be even multiple')
     }
   } else {
-    roundingInc = clampEntity(roundingIncName, roundingInc, 1, 10 ** 9, Overflow.Reject)
+    roundingInc = clampEntity(
+      roundingIncName,
+      roundingInc,
+      1,
+      allowManyLargeUnits ? 10 ** 9 : 1,
+      Overflow.Reject
+    )
   }
 
   return roundingInc
