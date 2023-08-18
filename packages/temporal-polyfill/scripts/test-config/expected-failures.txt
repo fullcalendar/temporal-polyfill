@@ -24,6 +24,10 @@ built-ins/Temporal/PlainDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
+# overflow options should be passed from PlainDateTime::since to Calendar::dateUntil
+# (though it should be a shallow-copied)
+built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
+
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
 
@@ -79,10 +83,21 @@ built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 
-# LargeInt::divModTrunc loosing precision during
-#   const [newHigh, highRemainder] = divModFunc(high, divisor) // highRemainder wrong
-# Should get fixed when moving to DayTimeNano
+# Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
+built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js
+built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
+built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+# vvv also does diffing option keys in wrong order
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+
+# LargeInt::divModTrunc loosing precision during (Should get fixed when moving to DayTimeNano)
+# const [newHigh, highRemainder] = divModFunc(high, divisor) // highRemainder wrong
 built-ins/Temporal/PlainDateTime/datetime-math.js
+# const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
+built-ins/Temporal/PlainDateTime/prototype/since/argument-object.js
+built-ins/Temporal/PlainDateTime/prototype/since/argument-string.js
+built-ins/Temporal/PlainDateTime/prototype/since/argument-zoneddatetime-negative-epochnanoseconds.js
+built-ins/Temporal/PlainDateTime/prototype/since/largestunit-undefined.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
