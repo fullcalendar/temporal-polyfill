@@ -55,6 +55,7 @@ import { TimeZone, TimeZoneArg } from './timeZone'
 import { TimeZoneOps, TimeZoneOpsAdapter, getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { Callable, Reused, excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedDateTimeMod, ZonedInternals, createZonedDateTime } from './zonedDateTime'
+import { checkIsoDateTimeInBounds } from './isoMath'
 
 /*
 Rules:
@@ -228,7 +229,10 @@ export function refinePlainDateTimeBag(
   const isoDateInternals = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
-  return { ...isoDateInternals, ...isoTimeFields }
+  return checkIsoDateTimeInBounds({
+    ...isoDateInternals,
+    ...isoTimeFields,
+  })
 }
 
 export function mergePlainDateTimeBag(
@@ -248,7 +252,10 @@ export function mergePlainDateTimeBag(
   const isoDateInternals = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
-  return { ...isoDateInternals, ...isoTimeFields }
+  return checkIsoDateTimeInBounds({
+    ...isoDateInternals,
+    ...isoTimeFields,
+  })
 }
 
 // PlainDate
