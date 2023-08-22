@@ -90,15 +90,6 @@ built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-
 # vvv also does diffing option keys in wrong order
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 
-# LargeInt::divModTrunc loosing precision during (Should get fixed when moving to DayTimeNano)
-# const [newHigh, highRemainder] = divModFunc(high, divisor) // highRemainder wrong
-built-ins/Temporal/PlainDateTime/datetime-math.js
-# const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
-built-ins/Temporal/PlainDateTime/prototype/since/argument-object.js
-built-ins/Temporal/PlainDateTime/prototype/since/argument-string.js
-built-ins/Temporal/PlainDateTime/prototype/since/argument-zoneddatetime-negative-epochnanoseconds.js
-built-ins/Temporal/PlainDateTime/prototype/since/largestunit-undefined.js
-
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
 built-ins/Temporal/TimeZone/prototype/equals/builtin.js
