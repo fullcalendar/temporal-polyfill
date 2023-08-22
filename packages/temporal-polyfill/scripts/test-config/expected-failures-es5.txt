@@ -7,10 +7,6 @@ built-ins/Temporal/Duration/from/builtin.js
 built-ins/Temporal/Duration/from/not-a-constructor.js
 built-ins/Temporal/Instant/from/builtin.js
 built-ins/Temporal/Instant/from/not-a-constructor.js
-built-ins/Temporal/Instant/fromEpochMilliseconds/builtin.js
-built-ins/Temporal/Instant/fromEpochMilliseconds/not-a-constructor.js
-built-ins/Temporal/Instant/fromEpochSeconds/builtin.js
-built-ins/Temporal/Instant/fromEpochSeconds/not-a-constructor.js
 built-ins/Temporal/Now/instant/not-a-constructor.js
 built-ins/Temporal/Now/plainDateTime/not-a-constructor.js
 built-ins/Temporal/Now/timeZone/not-a-constructor.js

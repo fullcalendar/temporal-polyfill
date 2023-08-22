@@ -307,8 +307,6 @@ built-ins/Temporal/Instant/prototype/toString/name.js
 built-ins/Temporal/Instant/prototype/round/length.js
 built-ins/Temporal/Instant/prototype/round/name.js
 built-ins/Temporal/Instant/name.js
-built-ins/Temporal/Instant/fromEpochSeconds/name.js
-built-ins/Temporal/Instant/fromEpochMilliseconds/name.js
 built-ins/Temporal/PlainTime/from/length.js
 built-ins/Temporal/PlainTime/from/name.js
 built-ins/Temporal/PlainTime/prototype/toJSON/name.js
