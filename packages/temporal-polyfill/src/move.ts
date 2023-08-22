@@ -1,5 +1,6 @@
 import { CalendarImpl } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
+import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
   durationFieldNamesAsc,
@@ -7,7 +8,7 @@ import {
   durationTimeFieldDefaults,
   durationTimeFieldsToLargeNanoStrict,
   updateDurationFieldsSign,
-  durationFieldsToNano,
+  durationFieldsToDayTimeNano,
 } from './durationFields'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
@@ -21,10 +22,9 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { LargeInt } from './largeInt'
 import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
-import { Unit, givenFieldsToTimeNano, milliInDay } from './units'
+import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
 
 // Epoch
@@ -33,14 +33,14 @@ import { clampEntity, divTrunc, modTrunc } from './utils'
 export function moveZonedEpochNano(
   calendar: CalendarOps,
   timeZone: TimeZoneOps,
-  epochNano: LargeInt,
+  epochNano: DayTimeNano,
   durationFields: DurationFields,
   overflow?: Overflow,
-): LargeInt {
-  const durationTimeLargeNano = durationFieldsToNano(durationFields, Unit.Hour)
+): DayTimeNano {
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour)
 
   if (!durationHasDateParts(durationFields)) {
-    epochNano = epochNano.addLargeInt(durationTimeLargeNano)
+    epochNano = addDayTimeNanos(epochNano, dayTimeNano)
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
     const movedIsoDateFields = calendar.dateAdd(
@@ -55,16 +55,19 @@ export function moveZonedEpochNano(
       ...isoDateTimeFields, // time parts
       ...movedIsoDateFields, // date parts
     }
-    epochNano = getSingleInstantFor(timeZone, movedIsoDateTimeFields)
-      .addLargeInt(durationTimeLargeNano)
+    epochNano = addDayTimeNanos(
+      getSingleInstantFor(timeZone, movedIsoDateTimeFields),
+      dayTimeNano
+    )
   }
 
   return epochNano
 }
 
-export function moveEpochNano(epochNano: LargeInt, durationFields: DurationFields): LargeInt {
-  return epochNano.addLargeInt(
-    durationTimeFieldsToLargeNanoStrict(durationFields)
+export function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFields): DayTimeNano {
+  return addDayTimeNanos(
+    epochNano,
+    durationTimeFieldsToLargeNanoStrict(durationFields),
   )
 }
 
@@ -106,7 +109,7 @@ export function moveDate(
   let epochMilli: number | undefined
 
   // convert time fields to days
-  days += givenFieldsToTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[1]
+  days += givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
 
   if (years || months) {
     let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)
@@ -156,7 +159,7 @@ export function moveTime(
   isoFields: IsoTimeFields,
   durationFields: DurationFields,
 ): [IsoTimeFields, number] {
-  const [durTimeNano, durDays] = givenFieldsToTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
+  const [durDays, durTimeNano] = givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
   const [newIsoFields, overflowDays] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(isoFields) + durTimeNano)
 
   return [

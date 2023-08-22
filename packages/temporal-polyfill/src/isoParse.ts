@@ -24,9 +24,8 @@ import {
   isoToEpochNano,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { LargeInt } from './largeInt'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
+import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import {
   TimeUnit,
@@ -37,11 +36,12 @@ import {
 } from './units'
 import { divModFloor } from './utils'
 import { ZonedInternals } from './zonedDateTime'
+import { DayTimeNano, addDayTimeNanoAndNumber } from './dayTimeNano'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
-export function parseInstant(s: string): LargeInt {
+export function parseInstant(s: string): DayTimeNano {
   const parsed = parseMaybeGenericDateTime(s)
   if (!parsed) {
     throw new RangeError()
@@ -57,7 +57,7 @@ export function parseInstant(s: string): LargeInt {
     throw new RangeError()
   }
 
-  return isoToEpochNano(parsed)!.addNumber(offsetNano)
+  return addDayTimeNanoAndNumber(isoToEpochNano(parsed)!, offsetNano)
 }
 
 export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedInternals {

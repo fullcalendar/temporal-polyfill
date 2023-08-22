@@ -19,6 +19,9 @@ export const ensureString = ensureType.bind(undefined, 'string') as (arg: string
 
 export const ensureNumber = ensureType.bind(undefined, 'number') as (arg: number) => number;
 
+// TODO: provide entity like 'epochNanoseconds' or 'epochMicroseconds'
+export const ensureBigInt = ensureType.bind(undefined, 'bigint') as (arg: bigint) => bigint;
+
 export const ensureBoolean = ensureType.bind(undefined, 'boolean') as (arg: boolean) => boolean;
 
 export function ensureInteger(arg: number): number {

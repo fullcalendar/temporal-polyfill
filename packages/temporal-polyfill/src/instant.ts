@@ -6,16 +6,8 @@ import { Duration, DurationArg, createDuration, toDurationInternals } from './du
 import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import {
-  epochGetters,
-  epochMicroToNano,
-  epochMilliToNano,
-  epochNanoToIso,
-  epochSecToNano,
-  checkEpochNanoInBounds,
-} from './isoMath'
+import { epochGetters, epochNanoToIso, checkEpochNanoInBounds } from './isoMath'
 import { parseInstant } from './isoParse'
-import { LargeInt, compareLargeInts } from './largeInt'
 import { moveEpochNano } from './move'
 import {
   DiffOptions,
@@ -25,20 +17,20 @@ import {
   refineDiffOptions,
   refineInstantDisplayOptions,
   refineRoundOptions,
-  toEpochNano,
 } from './options'
-import { ensureObjectlike } from './cast'
-import { computeNanoInc, roundByIncLarge } from './round'
+import { ensureBigInt, ensureObjectlike } from './cast'
+import { roundDayTimeNano, roundDayTimeNanoByInc } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { NumSign, noop } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { TimeUnit, Unit, UnitName } from './units'
+import { TimeUnit, Unit, UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
+import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
 
 export type InstantArg = Instant | string
 
-export type Instant = TemporalInstance<LargeInt>
+export type Instant = TemporalInstance<DayTimeNano>
 export const [
   Instant,
   createInstant,
@@ -51,7 +43,7 @@ export const [
 
   // constructorToInternals
   (epochNano: bigint) => {
-    return checkEpochNanoInBounds(toEpochNano(epochNano))
+    return checkEpochNanoInBounds(bigIntToDayTimeNano(ensureBigInt(epochNano)))
   },
 
   // internalsConversionMap
@@ -77,7 +69,7 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    toZonedDateTimeISO(epochNano: LargeInt, timeZoneArg: TimeZoneArg): ZonedDateTime {
+    toZonedDateTimeISO(epochNano: DayTimeNano, timeZoneArg: TimeZoneArg): ZonedDateTime {
       return createZonedDateTime({
         epochNanoseconds: epochNano,
         timeZone: queryTimeZoneOps(timeZoneArg),
@@ -86,7 +78,7 @@ export const [
     },
 
     toZonedDateTime(
-      epochNano: LargeInt,
+      epochNano: DayTimeNano,
       options: { timeZone: TimeZoneArg, calendar: CalendarArg },
     ): ZonedDateTime {
       const refinedObj = ensureObjectlike(options)
@@ -98,7 +90,7 @@ export const [
       })
     },
 
-    add(epochNano: LargeInt, durationArg: DurationArg): Instant {
+    add(epochNano: DayTimeNano, durationArg: DurationArg): Instant {
       return createInstant(
         moveEpochNano(
           epochNano,
@@ -107,7 +99,7 @@ export const [
       )
     },
 
-    subtract(epochNano: LargeInt, durationArg: DurationArg): Instant {
+    subtract(epochNano: DayTimeNano, durationArg: DurationArg): Instant {
       return createInstant(
         moveEpochNano(
           epochNano,
@@ -116,31 +108,31 @@ export const [
       )
     },
 
-    until(epochNano: LargeInt, otherArg: InstantArg, options?: DiffOptions): Duration {
+    until(epochNano: DayTimeNano, otherArg: InstantArg, options?: DiffOptions): Duration {
       return diffInstants(epochNano, toInstantEpochNano(otherArg), options)
     },
 
-    since(epochNano: LargeInt, otherArg: InstantArg, options?: DiffOptions): Duration {
+    since(epochNano: DayTimeNano, otherArg: InstantArg, options?: DiffOptions): Duration {
       return diffInstants(epochNano, toInstantEpochNano(otherArg), options, true)
     },
 
-    round(epochNano: LargeInt, options: RoundingOptions | UnitName): Instant {
+    round(epochNano: DayTimeNano, options: RoundingOptions | UnitName): Instant {
       const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options, Unit.Hour)
 
       return createInstant(
-        roundByIncLarge(epochNano, computeNanoInc(smallestUnit as TimeUnit, roundingInc), roundingMode),
+        roundDayTimeNano(epochNano, smallestUnit as TimeUnit, roundingInc, roundingMode),
       )
     },
 
-    equals(epochNano: LargeInt, otherArg: InstantArg): boolean {
-      return !compareLargeInts(
+    equals(epochNano: DayTimeNano, otherArg: InstantArg): boolean {
+      return !compareDayTimeNanos(
         epochNano,
         toInstantEpochNano(otherArg),
       )
     },
 
     toString(
-      epochNano: LargeInt,
+      epochNano: DayTimeNano,
       options?: InstantDisplayOptions
     ): string {
       const [
@@ -151,9 +143,11 @@ export const [
       ] = refineInstantDisplayOptions(options)
       const timeZone = queryTimeZoneOps(timeZoneArg || utcTimeZoneId)
 
-      epochNano = roundByIncLarge(epochNano, nanoInc, roundingMode)
+      epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode)
       const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-      const isoFields = epochNanoToIso(epochNano.addNumber(offsetNano))
+      const isoFields = epochNanoToIso(
+        addDayTimeNanoAndNumber(epochNano, offsetNano),
+      )
 
       return formatIsoDateTimeFields(isoFields, subsecDigits) +
         formatOffsetNano(offsetNano)
@@ -168,20 +162,24 @@ export const [
   // -----------------------------------------------------------------------------------------------
 
   {
-    fromEpochSeconds: epochSecToInstant,
+    fromEpochSeconds(epochSec: number): Instant {
+      return createInstant(numberToDayTimeNano(epochSec, nanoInSec))
+    },
 
-    fromEpochMilliseconds: epochMilliToInstant,
+    fromEpochMilliseconds(epochMilli: number): Instant {
+      return createInstant(numberToDayTimeNano(epochMilli, nanoInMilli))
+    },
 
     fromEpochMicroseconds(epochMicro: bigint): Instant {
-      return epochMicroToInstant(toEpochNano(epochMicro))
+      return createInstant(bigIntToDayTimeNano(ensureBigInt(epochMicro), nanoInMicro))
     },
 
     fromEpochNanoseconds(epochNano: bigint): Instant {
-      return createInstant(toEpochNano(epochNano))
+      return createInstant(bigIntToDayTimeNano(ensureBigInt(epochNano)))
     },
 
     compare(a: InstantArg, b: InstantArg): NumSign {
-      return compareLargeInts(
+      return compareDayTimeNanos(
         toInstantEpochNano(a),
         toInstantEpochNano(b),
       )
@@ -190,8 +188,8 @@ export const [
 )
 
 function diffInstants(
-  epochNano0: LargeInt,
-  epochNano1: LargeInt,
+  epochNano0: DayTimeNano,
+  epochNano1: DayTimeNano,
   options?: DiffOptions,
   invert?: boolean
 ): Duration {
@@ -213,24 +211,10 @@ function diffInstants(
   return createDuration(durationInternals)
 }
 
-// Unit Conversion
-// -------------------------------------------------------------------------------------------------
-
-function epochSecToInstant(epochSec: number): Instant {
-  return createInstant(epochSecToNano(epochSec))
-}
-
-function epochMilliToInstant(epochMilli: number): Instant {
-  return createInstant(epochMilliToNano(epochMilli))
-}
-
-function epochMicroToInstant(epochMicro: LargeInt): Instant {
-  return createInstant(epochMicroToNano(epochMicro))
-}
-
 // Legacy Date
 // -------------------------------------------------------------------------------------------------
 
 export function toTemporalInstant(this: Date): Instant {
-  return epochMilliToInstant(this.valueOf())
+  // TODO: more DRY
+  return createInstant(numberToDayTimeNano(this.valueOf(), nanoInMilli))
 }

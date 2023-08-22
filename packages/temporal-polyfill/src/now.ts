@@ -5,7 +5,6 @@ import { Instant, createInstant } from './instant'
 import { OrigDateTimeFormat } from './intlFormat'
 import { pluckIsoTimeFields } from './isoFields'
 import { IsoDateTimeInternals, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './isoInternals'
-import { LargeInt } from './largeInt'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainTime, createPlainTime } from './plainTime'
@@ -14,6 +13,7 @@ import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { createPropDescriptors, createTemporalNameDescriptors } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 import { epochMilliToNano } from './isoMath'
+import { DayTimeNano } from './dayTimeNano'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -93,7 +93,7 @@ function getCurrentZonedDateTimeSlots(
   }
 }
 
-function getCurrentEpochNanoseconds(): LargeInt {
+function getCurrentEpochNanoseconds(): DayTimeNano {
   return epochMilliToNano(Date.now())
 }
 

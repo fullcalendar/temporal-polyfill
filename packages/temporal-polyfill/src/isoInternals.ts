@@ -11,7 +11,7 @@ import {
   isoDateFieldRefiners,
   isoTimeFieldRefiners,
 } from './isoFields'
-import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear, isoMonthsInYear } from './isoMath'
+import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
 
 export interface CalendarInternals {

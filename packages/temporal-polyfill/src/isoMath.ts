@@ -9,10 +9,10 @@ import {
   pluckIsoTuple,
   isoTimeFieldDefaults,
 } from './isoFields'
-import { LargeInt, compareLargeInts, numberToLargeInt } from './largeInt'
 import {
   Unit,
-  givenFieldsToTimeNano,
+  givenFieldsToDayTimeNano,
+  milliInDay,
   milliInSec,
   nanoInMicro,
   nanoInMilli,
@@ -21,7 +21,8 @@ import {
   nanoToGivenFields,
   secInDay,
 } from './units'
-import { NumSign, divModFloor, clampProp, compareNumbers } from './utils'
+import { NumSign, divModFloor, clampProp, compareNumbers, divModTrunc } from './utils'
+import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToBigInt, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, numberToDayTimeNano } from './dayTimeNano'
 
 // ISO Calendar
 // -------------------------------------------------------------------------------------------------
@@ -116,8 +117,8 @@ function isoDateMonthStart(isoDateFields: IsoDateFields): IsoDateFields {
   return { ...isoDateFields, isoMonth: 1, isoDay: 1 }
 }
 
-const epochNanoMax = numberToLargeInt(1e17).mult(secInDay) // TODO: define this better
-const epochNanoMin = epochNanoMax.mult(-1) // inclusive
+const epochNanoMax: DayTimeNano = [1e8, 0]
+const epochNanoMin: DayTimeNano = [-1e8, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
@@ -159,11 +160,11 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(isoFields:
   return isoFields
 }
 
-export function checkEpochNanoInBounds(epochNano: LargeInt | undefined): LargeInt {
+export function checkEpochNanoInBounds(epochNano: DayTimeNano | undefined): DayTimeNano {
   if (
     epochNano === undefined ||
-    compareLargeInts(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
-    compareLargeInts(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
+    compareDayTimeNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
+    compareDayTimeNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {
     throw new RangeError('epochNanoseconds out of range')
   }
@@ -174,58 +175,41 @@ export function checkEpochNanoInBounds(epochNano: LargeInt | undefined): LargeIn
 // -------------------------------------------------------------------------------------------------
 
 export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
-  return givenFieldsToTimeNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[0]
+  return givenFieldsToDayTimeNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[1]
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
   const [dayDelta, timeNano] = divModFloor(nano, nanoInUtcDay)
   const isoTimeFields = nanoToGivenFields(timeNano, Unit.Hour, isoTimeFieldNamesAsc) as IsoTimeFields
+
   return [isoTimeFields, dayDelta]
 }
 
 // Epoch Unit Conversion
 // -------------------------------------------------------------------------------------------------
 
-// nano -> [micro/milli/sec] (with floor)
+// nano -> [micro/milli/sec]
 
-export function epochNanoToSec(epochNano: LargeInt): number {
-  return epochNanoToSecMod(epochNano)[0].toNumber()
+export function epochNanoToSec(epochNano: DayTimeNano): number {
+  return dayTimeNanoToNumber(epochNano, nanoInSec)
 }
 
-export function epochNanoToMilli(epochNano: LargeInt): number {
-  return epochNanoToMilliMod(epochNano)[0].toNumber()
+export function epochNanoToSecRemainder(epochNano: DayTimeNano): [number, number] {
+  return dayTimeNanoToNumberRemainder(epochNano, nanoInSec)
 }
 
-function epochNanoToMicro(epochNano: LargeInt): bigint {
-  return epochNanoToMicroMod(epochNano)[0].toBigInt()
+export function epochNanoToMilli(epochNano: DayTimeNano): number {
+  return dayTimeNanoToNumber(epochNano, nanoInMilli)
 }
 
-// nano -> [micro/milli/sec] (with remainder)
-
-export function epochNanoToSecMod(epochNano: LargeInt): [LargeInt, number] {
-  return epochNano.divModFloor(nanoInSec)
-}
-
-function epochNanoToMilliMod(epochNano: LargeInt): [LargeInt, number] {
-  return epochNano.divModFloor(nanoInMilli)
-}
-
-function epochNanoToMicroMod(epochNano: LargeInt): [LargeInt, number] {
-  return epochNano.divModFloor(nanoInMicro)
+function epochNanoToMicro(epochNano: DayTimeNano): bigint {
+  return dayTimeNanoToBigInt(epochNano, nanoInMicro)
 }
 
 // [micro/milli/sec] -> nano
 
-export function epochSecToNano(epochSec: number): LargeInt {
-  return numberToLargeInt(epochSec).mult(nanoInSec)
-}
-
-export function epochMilliToNano(epochMilli: number): LargeInt {
-  return numberToLargeInt(epochMilli).mult(nanoInMilli)
-}
-
-export function epochMicroToNano(epochMicro: LargeInt): LargeInt {
-  return epochMicro.mult(nanoInMicro)
+export function epochMilliToNano(epochMilli: number): DayTimeNano {
+  return numberToDayTimeNano(epochMilli, nanoInMilli)
 }
 
 // Epoch Getters
@@ -235,9 +219,7 @@ export const epochGetters = {
   epochSeconds: epochNanoToSec,
   epochMilliseconds: epochNanoToMilli,
   epochMicroseconds: epochNanoToMicro,
-  epochNanoseconds(epochNano: LargeInt): bigint {
-    return epochNano.toBigInt()
-  },
+  epochNanoseconds: dayTimeNanoToBigInt,
 }
 
 // ISO <-> Epoch Conversion
@@ -280,16 +262,17 @@ TODO: rethink all this ! bs
 */
 export function isoToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
-): LargeInt | undefined {
+): DayTimeNano | undefined {
   const epochMilli = isoToEpochMilli(isoFields)
 
   if (epochMilli !== undefined) {
-    return numberToLargeInt(epochMilli)
-      .mult(nanoInMilli)
-      .addNumber(
-        ((isoFields as IsoDateTimeFields).isoMicrosecond || 0) * nanoInMicro +
-        ((isoFields as IsoDateTimeFields).isoNanosecond || 0),
-      )
+    const [days, milliRemainder] = divModTrunc(epochMilli, milliInDay)
+    const timeNano =
+      milliRemainder * nanoInMilli +
+      ((isoFields as IsoDateTimeFields).isoMicrosecond || 0) * nanoInMicro +
+      ((isoFields as IsoDateTimeFields).isoNanosecond || 0)
+
+    return [days, timeNano]
   }
 }
 
@@ -333,11 +316,20 @@ function isoToLegacyDate(
 
 // Epoch -> ISO Fields
 
-export function epochNanoToIso(epochNano: LargeInt): IsoDateTimeFields {
-  const [epochMilli, nanoRemainder] = epochNano.divModFloor(nanoInMilli)
+export function epochNanoToIso(epochNano: DayTimeNano): IsoDateTimeFields {
+  let [days, timeNano] = epochNano
+
+  if (timeNano < 0) {
+    timeNano += nanoInUtcDay
+    days -= 1
+  }
+
+  const [timeMilli, nanoRemainder] = divModFloor(timeNano, nanoInMilli)
   const [isoMicrosecond, isoNanosecond] = divModFloor(nanoRemainder, nanoInMicro)
+  const epochMilli = days * milliInDay + timeMilli
+
   return {
-    ...epochMilliToIso(epochMilli.toNumber()),
+    ...epochMilliToIso(epochMilli),
     isoMicrosecond,
     isoNanosecond,
   }

@@ -1,3 +1,4 @@
+import { DayTimeNano } from './dayTimeNano'
 import { divModTrunc, divTrunc, modTrunc } from './utils'
 
 /*
@@ -48,7 +49,7 @@ export const unitNamesAsc = Object.keys(unitNameMap) as (keyof typeof unitNameMa
 // -------------------------------------------------------------------------------------------------
 
 export const secInDay = 86400
-export const milliInDay = 86400000 // TODO: not DRY
+export const milliInDay = 86400000 // TODO: not DRY... milliInUtcDay?
 export const milliInSec = 1000
 
 export const nanoInMicro = 1000 // consolidate with other 1000 units
@@ -71,14 +72,11 @@ export const unitNanoMap = [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export function givenFieldsToTimeNano<K extends string>(
+export function givenFieldsToDayTimeNano<K extends string>(
   fields: Record<K, number>,
   largestUnit: DayTimeUnit,
   fieldNames: K[],
-): [
-  timeNano: number,
-  dayCnt: number,
-] {
+): DayTimeNano {
   let timeNano = 0
   let days = 0
 
@@ -96,17 +94,17 @@ export function givenFieldsToTimeNano<K extends string>(
 
   // absorb whole-days from timeNano
   const [timeDays, leftoverNano] = divModTrunc(timeNano, nanoInUtcDay)
-  return [leftoverNano, days + timeDays]
+  return [days + timeDays, leftoverNano]
 }
 
 export function nanoToGivenFields<F>(
   nano: number,
-  largeUnit: DayTimeUnit, // stops populating at this unit
+  largestUnit: DayTimeUnit, // stops populating at this unit
   fieldNames: (keyof F)[],
 ): { [Key in keyof F]?: number } {
   const fields = {} as { [Key in keyof F]: number }
 
-  for (let unit = largeUnit; unit >= Unit.Nanosecond; unit--) {
+  for (let unit = largestUnit; unit >= Unit.Nanosecond; unit--) {
     const divisor = unitNanoMap[unit]
 
     fields[fieldNames[unit]] = divTrunc(nano, divisor)

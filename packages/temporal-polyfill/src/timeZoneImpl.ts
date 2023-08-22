@@ -1,19 +1,18 @@
 import { isoCalendarId } from './calendarConfig'
 import { parseIntlYear } from './calendarImpl'
 import { ensureString } from './cast'
+import { DayTimeNano, addDayTimeNanoAndNumber, numberToDayTimeNano } from './dayTimeNano'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
 import {
   epochNanoToSec,
-  epochNanoToSecMod,
-  epochSecToNano,
+  epochNanoToSecRemainder,
   isoArgsToEpochSec,
   isoToEpochNano,
   isoToEpochSec,
 } from './isoMath'
 import { parseMaybeOffsetNano } from './isoParse'
-import { LargeInt } from './largeInt'
 import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
@@ -43,7 +42,7 @@ export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
 }
 
 export interface TimeZoneImpl extends TimeZoneOps {
-  getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined
+  getTransition(epochNano: DayTimeNano, direction: -1 | 1): DayTimeNano | undefined
 }
 
 // Fixed
@@ -55,15 +54,20 @@ export class FixedTimeZoneImpl implements TimeZoneImpl {
     public id: string = formatOffsetNano(offsetNano)
   ) {}
 
-  getOffsetNanosecondsFor(epochNano: LargeInt): number {
+  getOffsetNanosecondsFor(epochNano: DayTimeNano): number {
     return this.offsetNano
   }
 
-  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
-    return [isoToEpochNano(isoDateTimeFields)!.addNumber(-this.offsetNano)]
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
+    return [
+      addDayTimeNanoAndNumber(
+        isoToEpochNano(isoDateTimeFields)!,
+        -this.offsetNano,
+      )
+    ]
   }
 
-  getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined {
+  getTransition(epochNano: DayTimeNano, direction: -1 | 1): DayTimeNano | undefined {
     return undefined // hopefully minifier will remove
   }
 }
@@ -87,28 +91,30 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
     this.store = createIntlTimeZoneStore(createComputeOffsetSec(format))
   }
 
-  getOffsetNanosecondsFor(epochNano: LargeInt): number {
+  getOffsetNanosecondsFor(epochNano: DayTimeNano): number {
     return this.store.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
-  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): LargeInt[] {
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
     const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeFields)
 
-    return this.store.getPossibleEpochSec(zonedEpochSec)
-      .map((epochSec) => epochSecToNano(epochSec).addNumber(subsecNano))
+    return this.store.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
+      return addDayTimeNanoAndNumber(numberToDayTimeNano(epochSec, nanoInSec), subsecNano)
+    })
   }
 
   /*
   exclusive for both directions
   */
-  getTransition(epochNano: LargeInt, direction: -1 | 1): LargeInt | undefined {
-    const [epochSec, subsecNano] = epochNanoToSecMod(epochNano)
+  getTransition(epochNano: DayTimeNano, direction: -1 | 1): DayTimeNano | undefined {
+    const [epochSec, subsecNano] = epochNanoToSecRemainder(epochNano)
     const resEpochSec = this.store.getTransition(
-      epochSec.toNumber() + ((direction > 0 || subsecNano) ? 1 : 0),
+      epochSec + ((direction > 0 || subsecNano) ? 1 : 0),
       direction,
     )
+
     if (resEpochSec !== undefined) {
-      return epochSecToNano(resEpochSec)
+      return numberToDayTimeNano(resEpochSec, nanoInSec)
     }
   }
 }

@@ -38,7 +38,6 @@ import {
   epochNanoToIso,
 } from './isoMath'
 import { parseZonedDateTime } from './isoParse'
-import { LargeInt, compareLargeInts } from './largeInt'
 import { moveZonedEpochNano } from './move'
 import {
   DiffOptions,
@@ -53,7 +52,6 @@ import {
   refineOverflowOptions,
   refineRoundOptions,
   refineZonedDateTimeDisplayOptions,
-  toEpochNano,
 } from './options'
 import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime } from './plainDateTime'
@@ -73,6 +71,8 @@ import {
 } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, nanoInHour } from './units'
 import { NumSign, mapProps } from './utils'
+import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
+import { ensureBigInt } from './cast'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
@@ -83,7 +83,7 @@ export type TimeZonePublic = TimeZoneProtocol | string
 export type ZonedPublic = IsoDateTimePublic & { timeZone: TimeZonePublic, offset: string }
 
 export interface ZonedInternals {
-  epochNanoseconds: LargeInt
+  epochNanoseconds: DayTimeNano
   timeZone: TimeZoneOps
   calendar: CalendarOps
 }
@@ -106,7 +106,7 @@ export const [
     calendarArg: CalendarArg = isoCalendarId,
   ): ZonedInternals => {
     return {
-      epochNanoseconds: checkEpochNanoInBounds(toEpochNano(epochNano)),
+      epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(ensureBigInt(epochNano))),
       timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
       calendar: queryCalendarOps(calendarArg),
     }
@@ -266,7 +266,9 @@ export const [
       let { epochNanoseconds, timeZone, calendar } = internals
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
+      let isoDateTimeFields = epochNanoToIso(
+        addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
+      )
 
       isoDateTimeFields = roundDateTime(
         isoDateTimeFields,
@@ -318,7 +320,7 @@ export const [
     equals(internals: ZonedInternals, otherArg: ZonedDateTimeArg): boolean {
       const otherInternals = toZonedInternals(otherArg)
 
-      return !compareLargeInts(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
+      return !compareDayTimeNanos(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar) &&
         isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
     },
@@ -335,7 +337,9 @@ export const [
       ] = refineZonedDateTimeDisplayOptions(options)
 
       let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
+      let isoDateTimeFields = epochNanoToIso(
+        addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
+      )
 
       isoDateTimeFields = roundDateTimeToNano(isoDateTimeFields, nanoInc, roundingMode)
       epochNanoseconds = getMatchingInstantFor(
@@ -350,7 +354,9 @@ export const [
 
       // waa? non-dry code?
       offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      isoDateTimeFields = epochNanoToIso(epochNanoseconds.addNumber(offsetNanoseconds))
+      isoDateTimeFields = epochNanoToIso(
+        addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
+      )
 
       return formatIsoDateTimeFields(isoDateTimeFields, subsecDigits) +
         formatOffsetNano(offsetNanoseconds, offsetDisplay) +
@@ -408,7 +414,7 @@ export const [
 
   {
     compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumSign {
-      return compareLargeInts(
+      return compareDayTimeNanos(
         toZonedInternals(arg0).epochNanoseconds,
         toZonedInternals(arg1).epochNanoseconds,
       )

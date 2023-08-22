@@ -3,7 +3,6 @@ import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
 import { IsoDateInternals, pluckIsoDateInternals } from './isoInternals'
 import { parseZonedOrPlainDateTime } from './isoParse'
-import { LargeInt, bigIntToLargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
@@ -22,6 +21,7 @@ import {
   roundHalfTrunc,
 } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals } from './zonedDateTime'
+import { DayTimeNano, bigIntToDayTimeNano } from './dayTimeNano'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -720,11 +720,4 @@ function mustHaveMatch<O extends {}>(
   if (!hasAnyPropsByName(props, propNames)) {
     throw new TypeError('Need one: ' + JSON.stringify(propNames))
   }
-}
-
-export function toEpochNano(arg: bigint): LargeInt {
-  if (typeof arg !== 'bigint') {
-    throw new TypeError('Needs bigint')
-  }
-  return bigIntToLargeInt(arg)
 }

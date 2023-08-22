@@ -1,10 +1,10 @@
-import { LargeInt, numberToLargeInt } from './largeInt'
 import { toIntegerStrict } from './cast'
+import { DayTimeNano } from './dayTimeNano'
 import {
   DayTimeUnit,
   TimeUnit,
   Unit,
-  givenFieldsToTimeNano,
+  givenFieldsToDayTimeNano,
   nanoInUtcDay,
   nanoToGivenFields,
   unitNamesAsc,
@@ -96,34 +96,31 @@ export function refineDurationFields(
 // Field <-> Nanosecond Conversion
 // -------------------------------------------------------------------------------------------------
 
-export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): LargeInt {
+export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): DayTimeNano {
   if (durationHasDateParts(fields)) {
     throw new RangeError('Operation not allowed') // correct error?
   }
 
-  return durationFieldsToNano(fields, Unit.Hour)
+  return durationFieldsToDayTimeNano(fields, Unit.Hour)
 }
 
-export function durationFieldsToNano(fields: DurationFields, largestUnit: DayTimeUnit): LargeInt {
-  const [timeNano, dayCnt] = givenFieldsToTimeNano(fields, largestUnit, durationFieldNamesAsc)
-
-  return numberToLargeInt(nanoInUtcDay).mult(dayCnt)
-    .addNumber(timeNano)
+export function durationFieldsToDayTimeNano(fields: DurationFields, largestUnit: DayTimeUnit): DayTimeNano {
+  return givenFieldsToDayTimeNano(fields, largestUnit, durationFieldNamesAsc)
 }
 
-export function nanoToDurationDayTimeFields(largeNano: LargeInt): { days: number } & DurationTimeFields
-export function nanoToDurationDayTimeFields(largeNano: LargeInt, largestUnit?: DayTimeUnit): Partial<DurationFields>
+export function nanoToDurationDayTimeFields(largeNano: DayTimeNano): { days: number } & DurationTimeFields
+export function nanoToDurationDayTimeFields(largeNano: DayTimeNano, largestUnit?: DayTimeUnit): Partial<DurationFields>
 export function nanoToDurationDayTimeFields(
-  largeNano: LargeInt,
+  dayTimeNano: DayTimeNano,
   largestUnit: DayTimeUnit = Unit.Day,
 ): Partial<DurationFields> {
-  const divisor = unitNanoMap[largestUnit]
-  const [largeUnitNum, remainder] = largeNano.divModTrunc(divisor)
+  const [days, timeNano] = dayTimeNano
+  const dayTimeFields = nanoToGivenFields(timeNano, largestUnit, durationFieldNamesAsc)
 
-  return {
-    [durationFieldNamesAsc[largestUnit]]: largeUnitNum.toNumber(),
-    ...nanoToGivenFields(remainder, largestUnit - 1, durationFieldNamesAsc),
-  }
+  dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
+    days * (nanoInUtcDay / unitNanoMap[largestUnit])
+
+  return dayTimeFields
 }
 
 // audit

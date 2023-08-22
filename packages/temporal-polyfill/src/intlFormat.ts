@@ -1,6 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
 import { getInternals, getTemporalName } from './class'
+import { DayTimeNano } from './dayTimeNano'
 import { Instant } from './instant'
 import {
   IsoTimeFields,
@@ -11,7 +12,6 @@ import {
   IsoDateTimeInternals
 } from './isoInternals'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
-import { LargeInt } from './largeInt'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
@@ -345,7 +345,7 @@ function toEpochMilli(
 type EpochNanoConverter = (
   internals: any,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-) => LargeInt
+) => DayTimeNano
 
 const epochNanoConverters: Record<string, EpochNanoConverter> = {
   Instant: identityFunc,
@@ -357,7 +357,7 @@ const epochNanoConverters: Record<string, EpochNanoConverter> = {
 function timeFieldsToEpochNano(
   internals: IsoTimeFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): LargeInt {
+): DayTimeNano {
   return getSingleInstantFor(
     queryTimeZoneImpl(resolvedOptions.timeZone),
     {
@@ -372,7 +372,7 @@ function timeFieldsToEpochNano(
 function dateInternalsToEpochNano(
   internals: IsoDateTimeInternals | IsoDateInternals,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): LargeInt {
+): DayTimeNano {
   return getSingleInstantFor(
     queryTimeZoneImpl(resolvedOptions.timeZone),
     {

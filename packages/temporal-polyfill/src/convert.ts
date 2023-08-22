@@ -51,9 +51,9 @@ import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod } from './plainDateTi
 import { PlainMonthDay, PlainMonthDayBag, PlainMonthDayMod, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
 import { PlainYearMonth, PlainYearMonthBag, PlainYearMonthMod, createPlainYearMonth } from './plainYearMonth'
-import { TimeZone, TimeZoneArg } from './timeZone'
-import { TimeZoneOps, TimeZoneOpsAdapter, getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { Callable, Reused, excludeArrayDuplicates, isObjectlike, pluckProps } from './utils'
+import { TimeZoneArg } from './timeZone'
+import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { Callable, Reused, excludeArrayDuplicates, pluckProps } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedDateTimeMod, ZonedInternals, createZonedDateTime } from './zonedDateTime'
 import { checkIsoDateTimeInBounds } from './isoMath'
 

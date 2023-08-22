@@ -10,13 +10,12 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
-  durationFieldsToNano,
+  durationFieldsToDayTimeNano,
   nanoToDurationDayTimeFields,
   durationFieldDefaults,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
-import { LargeInt, compareLargeInts } from './largeInt'
 import {
   RelativeToOptions,
   SubsecDigits,
@@ -37,8 +36,9 @@ import {
   totalRelativeDuration,
 } from './round'
 import { NumSign, compareNumbers, noop } from './utils'
-import { DayTimeUnit, Unit, UnitName, givenFieldsToTimeNano } from './units'
+import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
+import { DayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 
 export type DurationArg = Duration | DurationBag | string
 export type DurationBag = Partial<DurationFields>
@@ -237,10 +237,10 @@ export const [
           !(markerInternals && (markerInternals as any).epochNanoseconds)
         )
       ) {
-        const [timeNano0, dayCnt0] = givenFieldsToTimeNano(durationFields0, Unit.Day, durationFieldNamesAsc)
-        const [timeNano1, dayCnt1] = givenFieldsToTimeNano(durationFields1, Unit.Day, durationFieldNamesAsc)
-
-        return compareNumbers(dayCnt0, dayCnt1) || compareNumbers(timeNano0, timeNano1)
+        return compareDayTimeNanos(
+          givenFieldsToDayTimeNano(durationFields0, Unit.Day, durationFieldNamesAsc),
+          givenFieldsToDayTimeNano(durationFields1, Unit.Day, durationFieldNamesAsc)
+        )
       }
 
       if (!markerInternals) {
@@ -249,7 +249,7 @@ export const [
 
       const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
-      return compareLargeInts(
+      return compareDayTimeNanos(
         markerToEpochNano(moveMarker(marker, durationFields0)),
         markerToEpochNano(moveMarker(marker, durationFields1)),
       )
@@ -303,7 +303,7 @@ function spanDuration<M>(
   diffMarkers: DiffMarkers<M>,
 ): [
   DurationInternals,
-  LargeInt,
+  DayTimeNano,
 ] {
   const endMarker = moveMarker(marker, durationFields)
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
@@ -314,12 +314,12 @@ function balanceDurationDayTime(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit, // day/time
 ): Duration {
-  const largeNano = durationFieldsToNano(durationFields, Unit.Day)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
 
   return createDuration(
     updateDurationFieldsSign({
       ...durationFieldDefaults,
-      ...nanoToDurationDayTimeFields(largeNano, largestUnit)
+      ...nanoToDurationDayTimeFields(dayTimeNano, largestUnit)
     })
   )
 }
