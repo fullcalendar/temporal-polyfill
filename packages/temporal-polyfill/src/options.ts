@@ -246,6 +246,9 @@ function refineTimeDisplayTuple(
   options: TimeDisplayOptions,
   maxSmallestUnit: TimeUnit = Unit.Minute
 ): TimeDisplayTuple {
+  // need to refine, even if not used
+  const subsecDigits = refineSubsecDigits(options)
+
   const smallestUnit = refineSmallestUnit(options, maxSmallestUnit, Unit.Nanosecond, -1 as number)
   if ((smallestUnit as number) !== -1) {
     return [
@@ -257,7 +260,6 @@ function refineTimeDisplayTuple(
     ]
   }
 
-  const subsecDigits = refineSubsecDigits(options)
   return [
     subsecDigits === undefined ? 1 : 10 ** (9 - subsecDigits),
     refineRoundingMode(options, RoundingMode.Trunc),

@@ -13,6 +13,7 @@ built-ins/Temporal/PlainTime/prototype/toString/fractionalseconddigits-wrong-typ
 built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -89,6 +90,8 @@ built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
 # vvv also does diffing option keys in wrong order
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+# vvv also does diffing option keys in wrong order
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
