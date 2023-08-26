@@ -577,19 +577,21 @@ export interface SubsecDigitsOptions {
 const subsecDigitsName = 'fractionalSecondDigits'
 
 function refineSubsecDigits(options: SubsecDigitsOptions): SubsecDigits | undefined {
-  const subsecDigits = options[subsecDigitsName]
+  let subsecDigits = options[subsecDigitsName]
 
   if (subsecDigits !== undefined) {
-    if (typeof subsecDigits === 'number') {
-      return clampEntity(subsecDigitsName, Math.floor(subsecDigits), 0, 9, Overflow.Reject) as SubsecDigits
+    if (typeof subsecDigits !== 'number') {
+      if (toString(subsecDigits) === 'auto') {
+        return
+      }
+
+      throw new RangeError(`fractionalSecondDigits must be 'auto' or 0 through 9`)
     }
 
-    if (String(subsecDigits) !== 'auto') {
-      throw new RangeError('Must be auto or 0-9')
-    }
+    subsecDigits = clampEntity(subsecDigitsName, Math.floor(subsecDigits), 0, 9, Overflow.Reject) as SubsecDigits
   }
 
-  // undefind means 'auto'
+  return subsecDigits
 }
 
 // Relative-To

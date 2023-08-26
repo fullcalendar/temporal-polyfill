@@ -49,7 +49,7 @@ interface CalendarProtocolMethods {
   toJSON?(): string;
 }
 
-export interface CalendarProtocol extends CalendarProtocolMethods{
+export interface CalendarProtocol extends CalendarProtocolMethods {
   id: string
 }
 
