@@ -45,6 +45,7 @@ import {
 import {
   ensureObjectlike,
   ensureString,
+  ensureStringViaPrimitive,
   toString, // TODO: shouldn't we use this all over the place?
 } from './cast'
 import { PlainDate, PlainDateBag, PlainDateMod, createPlainDate } from './plainDate'
@@ -125,11 +126,12 @@ export function refineZonedDateTimeBag(
 
   const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
 
+  // guaranteed via refineCalendarFields
+  // must happen before Calendar::dateFromFields
+  const timeZone = queryTimeZoneOps(fields.timeZone!)
+
   const isoDateFields = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
-  // guaranteed via refineCalendarFields
-  // must happen after datetime fields
-  const timeZone = queryTimeZoneOps(fields.timeZone!)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
@@ -576,7 +578,7 @@ const builtinRefiners = {
   ...eraYearFieldRefiners,
   ...dateTimeFieldRefiners,
   ...durationFieldRefiners,
-  offset: ensureString,
+  offset: ensureStringViaPrimitive,
 }
 
 const builtinDefaults = timeFieldDefaults

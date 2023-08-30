@@ -40,6 +40,10 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
 built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
 
+# our bag->ZonedDateTime doesn't need to call TimeZone::getOffsetNanosecondsFor
+# (it uses nanosecond diffing against UTC)
+built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
+
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainDate/prototype/add/balance-smaller-units.js

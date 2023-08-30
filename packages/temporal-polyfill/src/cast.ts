@@ -17,6 +17,16 @@ function ensureType<A>(typeName: string, arg: A): A {
 
 export const ensureString = ensureType.bind(undefined, 'string') as (arg: string) => string;
 
+/*
+TODO: use else where (monthCode, era, offset)
+*/
+export function ensureStringViaPrimitive(s: string): string {
+  if (isObjectlike(s)) {
+    return toString(s)
+  }
+  return ensureString(s)
+}
+
 export const ensureNumber = ensureType.bind(undefined, 'number') as (arg: number) => number;
 
 // TODO: provide entity like 'epochNanoseconds' or 'epochMicroseconds'
