@@ -44,9 +44,7 @@ import {
 } from './options'
 import {
   ensureObjectlike,
-  ensureString,
   ensureStringViaPrimitive,
-  toString, // TODO: shouldn't we use this all over the place?
 } from './cast'
 import { PlainDate, PlainDateBag, PlainDateMod, createPlainDate } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod } from './plainDateTime'
@@ -124,11 +122,11 @@ export function refineZonedDateTimeBag(
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
-  const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
-
   // guaranteed via refineCalendarFields
-  // must happen before Calendar::dateFromFields
+  // must happen before Calendar::dateFromFields and parsing `options`
   const timeZone = queryTimeZoneOps(fields.timeZone!)
+
+  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
   const isoDateFields = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
@@ -164,7 +162,7 @@ export function mergeZonedDateTimeBag(
     ['offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
-  const [overflow, epochDisambig, offsetDisambig] = refineZonedFieldOptions(options)
+  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
   const isoDateFields = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)

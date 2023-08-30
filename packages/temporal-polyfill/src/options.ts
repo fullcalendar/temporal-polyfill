@@ -37,16 +37,16 @@ export type ZonedFieldOptions = OverflowOptions & EpochDisambigOptions & OffsetD
 
 export type ZonedFieldTuple = [
   Overflow,
-  EpochDisambig,
   OffsetDisambig,
+  EpochDisambig,
 ]
 
 export function refineZonedFieldOptions(options: ZonedFieldOptions | undefined): ZonedFieldTuple {
   options = normalizeOptions(options)
   return [
     refineOverflow(options),
-    refineEpochDisambig(options),
     refineOffsetDisambig(options),
+    refineEpochDisambig(options),
   ]
 }
 

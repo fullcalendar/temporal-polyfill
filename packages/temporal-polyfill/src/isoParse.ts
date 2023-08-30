@@ -24,7 +24,7 @@ import {
   isoToEpochNano,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { EpochDisambig, OffsetDisambig, Overflow } from './options'
+import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import {
@@ -73,16 +73,23 @@ export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedIn
   return postProcessDateTime(parsed)
 }
 
-export function parseZonedDateTime(s: string): ZonedInternals {
+/*
+NOTE: one of the only string-parsing methods that accepts options
+*/
+export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): ZonedInternals {
+  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
+
   const organized = parseMaybeGenericDateTime(s)
 
   if (!organized || !organized.timeZone) {
     throw new RangeError()
   }
 
-  return postProcessZonedDateTime(organized as ZonedDateTimeOrganized)
-
+  return postProcessZonedDateTime(organized as ZonedDateTimeOrganized, offsetDisambig, epochDisambig)
 }
+
+// HACK
+;(parseZonedDateTime as any).usesOptions = true
 
 export function parsePlainDateTime(s: string): IsoDateTimeInternals {
   const organized = parseMaybeGenericDateTime(s)
@@ -205,7 +212,11 @@ export function parseTimeZoneId(s: string): string {
 // Post-processing organized result
 // -------------------------------------------------------------------------------------------------
 
-function postProcessZonedDateTime(organized: ZonedDateTimeOrganized): ZonedInternals {
+function postProcessZonedDateTime(
+  organized: ZonedDateTimeOrganized,
+  offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
+  epochDisambig: EpochDisambig = EpochDisambig.Compat,
+): ZonedInternals {
   const calendar = queryCalendarImpl(organized.calendar)
   const timeZone = queryTimeZoneImpl(organized.timeZone)
 
@@ -214,8 +225,8 @@ function postProcessZonedDateTime(organized: ZonedDateTimeOrganized): ZonedInter
     organized,
     organized.offset ? parseOffsetNano(organized.offset) : undefined,
     organized.hasZ,
-    OffsetDisambig.Reject,
-    EpochDisambig.Compat,
+    offsetDisambig,
+    epochDisambig,
     true, // fuzzy
   )
 

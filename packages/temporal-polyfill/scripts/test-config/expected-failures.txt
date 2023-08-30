@@ -6,13 +6,14 @@
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
 
-# diff/toString options order-of-operations (TODO)
+# options parsing order-of-operations (TODO: alphabetical)
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -37,12 +38,18 @@ built-ins/Temporal/Duration/call-builtin.js
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
 
 # we parse overflow options fewer times!
+# // toString property is read once by Calendar.dateFromFields() in the builtin
+# // calendars, to get the option value for the date part, and then once again
+# // internally to get the option value for the time part.
 built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
 built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
+built-ins/Temporal/ZonedDateTime/from/overflow-wrong-type.js
 
 # our bag->ZonedDateTime doesn't need to call TimeZone::getOffsetNanosecondsFor
 # (it uses nanosecond diffing against UTC)
 built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/from/argument-propertybag-timezone-getoffsetnanosecondsfor-not-callable.js
+built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js

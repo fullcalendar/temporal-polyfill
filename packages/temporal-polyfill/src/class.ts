@@ -208,7 +208,7 @@ export function createTemporalClass<
   constructorToInternals: ((...args: A) => I) = (identityFunc as Callable),
   internalsConversionMap: { [typeName: string]: (otherInternal: any) => I },
   bagToInternals: (bag: B, options?: O) => I | void, // void opts-out of bag processing
-  stringToInternals: (str: string) => I,
+  stringToInternals: (str: string, options?: O) => I,
   handleUnusedOptions: (options?: O) => void,
   getters: G,
   methods: M,
@@ -238,8 +238,13 @@ export function createTemporalClass<
       argInternals = (internalsConversionMap[argTemporalName!] || noop)(argInternals)
     }
 
-    return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) ||
-      (handleUnusedOptions(options), (argInternals as I) || stringToInternals(ensureString(arg as string)))
+    return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) || (
+      argInternals
+        ? (handleUnusedOptions(options), argInternals)
+        : (stringToInternals as any).usesOptions // HACK for ZonedDateTime
+          ? stringToInternals(ensureString(arg as string), options)
+          : (handleUnusedOptions(options), stringToInternals(ensureString(arg as string)))
+    )
   }
 
   return [

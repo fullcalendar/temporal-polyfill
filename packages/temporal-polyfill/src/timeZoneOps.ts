@@ -152,6 +152,10 @@ export function getMatchingInstantFor(
     // else (offsetDisambig === 'prefer') ...
   }
 
+  if (hasZ) {
+    return isoToEpochNano(isoDateTimeFields)!
+  }
+
   return getSingleInstantFor(timeZoneOps, isoDateTimeFields, epochDisambig)
 }
 

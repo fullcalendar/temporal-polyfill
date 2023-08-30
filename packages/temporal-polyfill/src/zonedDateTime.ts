@@ -52,6 +52,7 @@ import {
   refineOverflowOptions,
   refineRoundOptions,
   refineZonedDateTimeDisplayOptions,
+  refineZonedFieldOptions,
 } from './options'
 import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime } from './plainDateTime'
@@ -70,7 +71,7 @@ import {
   zonedInternalsToIso,
 } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, nanoInHour } from './units'
-import { NumSign, mapProps } from './utils'
+import { NumSign, mapProps, noop } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureBigInt } from './cast'
 
@@ -122,7 +123,7 @@ export const [
   parseZonedDateTime,
 
   // handleUnusedOptions
-  refineOverflowOptions,
+  refineZonedFieldOptions,
 
   // Getters
   // -----------------------------------------------------------------------------------------------
