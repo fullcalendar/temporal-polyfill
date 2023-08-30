@@ -1,4 +1,4 @@
-import { DateBag, MonthDayBag, YearMonthBag, dateTimeNormalRefiners } from './calendarFields'
+import { DateBag, MonthDayBag, YearMonthBag } from './calendarFields'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
@@ -7,7 +7,6 @@ import { Unit } from './units'
 import { getCommonInnerObj } from './class'
 import { CalendarInternals } from './isoInternals'
 import { BoundArg } from './utils'
-import { ensureString } from './cast'
 
 export interface CalendarOps {
   /*
@@ -37,7 +36,7 @@ export interface CalendarOps {
   // It'd be nice to have fieldNames input value be a string[],
   // but unfortunately accessing of array element could have side effects,
   // so pass all the way down to the CalendarImpl to do it
-  fields(fieldNames: Iterable<string>): string[]
+  fields(fieldNames: string[]): string[]
   mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
 }
 
@@ -46,28 +45,3 @@ export const getCommonCalendarOps = getCommonInnerObj.bind<
   [CalendarInternals, CalendarInternals],
   CalendarOps // return
 >(undefined, 'calendar')
-
-export function validateFieldNames(
-  fieldNames: Iterable<string>,
-  isInputForIsoCalendar?: boolean,
-): Set<string> {
-  const fieldNameSet = new Set<string>()
-
-  for (const fieldName of fieldNames) {
-    ensureString(fieldName)
-
-    if (isInputForIsoCalendar && !(fieldName in dateTimeNormalRefiners)) {
-      throw new RangeError(`Invalid field '${fieldName}'`)
-    }
-    if (fieldNameSet.has(fieldName)) {
-      throw new RangeError('Duplicate fields')
-    }
-    if (fieldName === 'constructor' || fieldName === '__proto__') {
-      throw new RangeError('Invalid field name')
-    }
-
-    fieldNameSet.add(fieldName)
-  }
-
-  return fieldNameSet
-}

@@ -17,7 +17,6 @@ import { Unit, unitNamesAsc } from './units'
 import { BoundArg, Callable, mapProps } from './utils'
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarImpl } from './calendarImpl'
-import { validateFieldNames } from './calendarOps'
 
 const getPlainDateInternals = getStrictInternals.bind<
   undefined, [BoundArg],
@@ -143,10 +142,8 @@ const calendarOpsAdapterMethods = {
     )
   },
 
-  fields(calendar: CalendarProtocol, fieldNames: Iterable<string>): string[] {
-    const out = calendar.fields(fieldNames)
-    validateFieldNames(out) // TODO: use the fieldNameSet to avoid reading twice?
-    return [...out]
+  fields(calendar: CalendarProtocol, fieldNames: string[]): string[] {
+    return [...calendar.fields(fieldNames)]
   },
 
   mergeFields(

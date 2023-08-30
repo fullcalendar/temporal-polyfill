@@ -52,7 +52,7 @@ import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
 import { Callable, clampEntity, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
-import { CalendarOps, validateFieldNames } from './calendarOps'
+import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 import { ensureString } from './cast'
 
@@ -175,14 +175,12 @@ export class CalendarImpl implements CalendarOps {
     return this.queryIsoFields(year, month, day)
   }
 
-  fields(fieldNames: Iterable<string>): string[] {
-    const fieldNameSet = validateFieldNames(fieldNames, true)
-
-    if (getAllowErasInFields(this) && fieldNameSet.has('year')) {
-      return [...fieldNameSet.values(), ...eraYearFieldNames]
+  fields(fieldNames: string[]): string[] {
+    if (getAllowErasInFields(this) && fieldNames.includes('year')) {
+      return [...fieldNames, ...eraYearFieldNames]
     }
 
-    return [...fieldNameSet.values()]
+    return fieldNames
   }
 
   mergeFields(

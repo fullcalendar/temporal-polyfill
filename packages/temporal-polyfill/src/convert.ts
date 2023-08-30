@@ -504,7 +504,7 @@ function refineCalendarFields(
   const fieldNames = [
     ...calendar.fields(validFieldNames),
     ...forcedValidFieldNames,
-  ].sort() // inefficient!
+  ]
 
   return refineFields(bag, fieldNames, requiredFieldNames)
 }
@@ -521,7 +521,7 @@ function mergeCalendarFields(
   const fieldNames = [
     ...calendar.fields(validFieldNames),
     ...forcedValidFieldNames
-  ].sort() // inefficient!
+  ]
 
   let fields = refineFields(obj, fieldNames, [])
   const partialFields = refineFields(bag, fieldNames)
@@ -592,8 +592,19 @@ function refineFields(
 ): Record<string, unknown> {
   const res: Record<string, unknown> = {}
   let anyMatching = false
+  let prevFieldName: undefined | string
+
+  // sort alphabetically
+  validFieldNames.sort()
 
   for (const fieldName of validFieldNames) {
+    if (fieldName === prevFieldName) {
+      throw new RangeError('Duplicate field names')
+    }
+    if (fieldName === 'constructor' || fieldName === '__proto__') {
+      throw new RangeError('Invalid field name')
+    }
+
     let fieldVal = bag[fieldName]
 
     if (fieldVal !== undefined) {
@@ -611,6 +622,8 @@ function refineFields(
 
       res[fieldName] = builtinDefaults[fieldName as keyof typeof builtinDefaults]
     }
+
+    prevFieldName = fieldName
   }
 
   // only check zero fields during .with() calls

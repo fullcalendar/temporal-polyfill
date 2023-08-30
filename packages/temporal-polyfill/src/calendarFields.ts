@@ -230,13 +230,6 @@ export const dateStatNames = Object.keys(dateStatRefiners) as
 
 export type DateGetterFields = DateFieldsIntl & DateStats
 
-// hack
-export const dateTimeNormalRefiners = {
-  ...eraYearFieldRefiners,
-  ...dateFieldRefiners,
-  ...timeFieldRefiners,
-}
-
 export const dateGetterRefiners = {
   // ...eraYearFieldRefiners,
   // HACK: use strict instead...

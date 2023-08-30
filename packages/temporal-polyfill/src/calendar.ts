@@ -1,6 +1,7 @@
-import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames } from './calendarFields'
+import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames, dateTimeFieldNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { queryCalendarPublic } from './calendarPublic'
+import { ensureString } from './cast'
 import { TemporalInstance, createProtocolChecker, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
 import {
   refinePlainDateBag,
@@ -142,7 +143,24 @@ const calendarProtocolMethods = {
   },
 
   fields(impl: CalendarImpl, fieldNames: Iterable<string>): Iterable<string> {
-    return impl.fields(fieldNames)
+    /*
+    Bespoke logic for converting Iterable to string[], while doing some validation
+    */
+    const allowed = new Set<string>(dateTimeFieldNames)
+    const fieldNamesArray: string[] = []
+
+    for (const fieldName of fieldNames) {
+      ensureString(fieldName)
+
+      if (!allowed.has(fieldName)) {
+        throw new RangeError('Invalid field name')
+      }
+
+      allowed.delete(fieldName) // prevents duplicates! can this be done somewhere else?
+      fieldNamesArray.push(fieldName)
+    }
+
+    return impl.fields(fieldNamesArray)
   },
 
   mergeFields(
