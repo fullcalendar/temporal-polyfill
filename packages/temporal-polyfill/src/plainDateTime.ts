@@ -14,6 +14,7 @@ import { diffDateTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import {
+  IsoTimeFields,
   isoTimeFieldDefaults,
   pluckIsoTimeFields,
 } from './isoFields'
@@ -45,7 +46,7 @@ import {
 } from './options'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
+import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { roundDateTime, roundDateTimeToNano } from './round'
 import { TimeZoneArg } from './timeZone'
@@ -127,10 +128,10 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       return createPlainDateTime(mergePlainDateTimeBag(this, mod, options))
     },
 
-    withPlainTime(internals: IsoDateTimeInternals, plainTimeArg: PlainDateTimeArg): PlainDateTime {
+    withPlainTime(internals: IsoDateTimeInternals, plainTimeArg?: PlainTimeArg): PlainDateTime {
       return createPlainDateTime({
         ...internals,
-        ...toPlainTimeFields(plainTimeArg),
+        ...optionalToPlainTimeFields(plainTimeArg),
       })
     },
 
@@ -300,4 +301,9 @@ function diffPlainDateTimes(
   }
 
   return createDuration(durationInternals)
+}
+
+// TODO: DRY
+function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
+  return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
 }

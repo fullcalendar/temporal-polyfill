@@ -29,6 +29,7 @@ built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 # (though it should be a shallow-copied)
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
+built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
@@ -38,6 +39,7 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 
 # we parse overflow options fewer times!
 built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
+built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
@@ -73,6 +75,9 @@ built-ins/Temporal/PlainDateTime/prototype/month/custom.js
 built-ins/Temporal/PlainDateTime/prototype/monthCode/custom.js
 built-ins/Temporal/PlainDateTime/prototype/monthsInYear/custom.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
+built-ins/Temporal/PlainDateTime/prototype/weekOfYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/year/custom.js
+built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/custom.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
@@ -96,6 +101,9 @@ built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 # vvv also does diffing option keys in wrong order
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
+built-ins/Temporal/PlainDateTime/prototype/until/balance-infinite-nanoseconds-duration.js
+built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
+built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests

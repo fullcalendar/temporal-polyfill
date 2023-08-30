@@ -225,6 +225,7 @@ function diffPlainDates(
   return createDuration(durationInternals)
 }
 
+// TODO: DRY
 function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
 }
