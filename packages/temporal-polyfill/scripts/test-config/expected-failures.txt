@@ -9,7 +9,6 @@ built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
 # diff/toString options order-of-operations (TODO)
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/toString/fractionalseconddigits-wrong-type.js
 built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
@@ -82,9 +81,11 @@ built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/custom.js
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
 
-# ::equal() with calendar's internally uses different CalendarOpsAdapters, so calls calendar.id
+# calendar comparisons internally uses different CalendarOpsAdapters, so object comparison fails
 # TODO: have each obj store raw calendar slot
 built-ins/Temporal/PlainDateTime/prototype/equals/calendar-checked.js
+intl402/Temporal/PlainDateTime/prototype/withPlainDate/argument-plaindate-calendar-same-object.js
+built-ins/Temporal/PlainDateTime/prototype/withPlainDate/calendar-temporal-object.js
 
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js

@@ -54,7 +54,7 @@ import { getSingleInstantFor, queryTimeZoneOps, zonedInternalsToIso } from './ti
 import { DayTimeUnit, Unit, UnitName } from './units'
 import { NumSign } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { getCommonCalendarOps } from './calendarOps'
+import { CalendarOps, getCommonCalendarOps } from './calendarOps'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
@@ -136,9 +136,11 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
     },
 
     withPlainDate(internals: IsoDateTimeInternals, plainDateArg: PlainDateArg): PlainDateTime {
+      const plainDateInternals = toPlainDateInternals(plainDateArg)
       return createPlainDateTime({
         ...internals,
-        ...toPlainDateInternals(plainDateArg),
+        ...plainDateInternals,
+        calendar: getPreferredCalendar(plainDateInternals.calendar, internals.calendar),
       })
     },
 
@@ -306,4 +308,26 @@ function diffPlainDateTimes(
 // TODO: DRY
 function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
+}
+
+// similar to checkCalendarsCompatible
+// `a` takes precedence if both the same ID
+function getPreferredCalendar(a: CalendarOps, b: CalendarOps): CalendarOps {
+  // fast path. doesn't read IDs
+  if (a === b) {
+    return a
+  }
+
+  const aId = a.id
+  const bId = b.id
+
+  if (aId !== isoCalendarId) {
+    if (aId !== bId && bId !== isoCalendarId) {
+      throw new RangeError('Incompatible calendars')
+    }
+
+    return a
+  }
+
+  return b
 }
