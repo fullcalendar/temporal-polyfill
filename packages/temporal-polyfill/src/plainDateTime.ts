@@ -27,7 +27,7 @@ import {
 } from './isoInternals'
 import { formatCalendar, formatIsoDateTimeFields } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoDateTimeFields } from './isoMath'
+import { checkEpochNanoInBounds, compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { moveDateTime } from './move'
 import {
@@ -216,7 +216,9 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       const { calendar } = internals
       const timeZone = queryTimeZoneOps(timeZoneArg)
       const epochDisambig = refineEpochDisambigOptions(options)
-      const epochNanoseconds = getSingleInstantFor(timeZone, internals, epochDisambig)
+      const epochNanoseconds = checkEpochNanoInBounds(
+        getSingleInstantFor(timeZone, internals, epochDisambig),
+      )
 
       return createZonedDateTime({
         epochNanoseconds,

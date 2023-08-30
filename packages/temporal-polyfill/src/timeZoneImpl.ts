@@ -6,6 +6,7 @@ import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './int
 import { IsoDateTimeFields } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
 import {
+  checkEpochNanoInBounds,
   epochNanoToSec,
   epochNanoToSecRemainder,
   isoArgsToEpochSec,
@@ -61,7 +62,7 @@ export class FixedTimeZoneImpl implements TimeZoneImpl {
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
     return [
       addDayTimeNanoAndNumber(
-        isoToEpochNano(isoDateTimeFields)!,
+        checkEpochNanoInBounds(isoToEpochNano(isoDateTimeFields)),
         -this.offsetNano,
       )
     ]

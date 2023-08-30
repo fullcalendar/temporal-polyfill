@@ -28,6 +28,7 @@ built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 # overflow options should be passed from PlainDateTime::since to Calendar::dateUntil
 # (though it should be a shallow-copied)
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
+built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
@@ -71,6 +72,7 @@ built-ins/Temporal/PlainDateTime/prototype/inLeapYear/custom.js
 built-ins/Temporal/PlainDateTime/prototype/month/custom.js
 built-ins/Temporal/PlainDateTime/prototype/monthCode/custom.js
 built-ins/Temporal/PlainDateTime/prototype/monthsInYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
@@ -83,6 +85,7 @@ built-ins/Temporal/PlainDateTime/prototype/equals/calendar-checked.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 
 # Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js
@@ -92,6 +95,7 @@ built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 # vvv also does diffing option keys in wrong order
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
