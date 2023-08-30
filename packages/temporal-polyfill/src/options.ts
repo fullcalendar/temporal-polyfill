@@ -360,8 +360,8 @@ const refineEpochDisambig = refineChoiceOption.bind<
 // -------------------------------------------------------------------------------------------------
 
 export const enum OffsetDisambig {
-  Use,
   Reject,
+  Use,
   Prefer,
   Ignore,
 }
@@ -371,8 +371,8 @@ export interface OffsetDisambigOptions {
 }
 
 const offsetDisambigMap = {
-  use: OffsetDisambig.Use,
   reject: OffsetDisambig.Reject,
+  use: OffsetDisambig.Use,
   prefer: OffsetDisambig.Prefer,
   ignore: OffsetDisambig.Ignore,
 }

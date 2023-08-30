@@ -44,6 +44,7 @@ import {
 } from './options'
 import {
   ensureObjectlike,
+  ensureString,
   toString, // TODO: shouldn't we use this all over the place?
 } from './cast'
 import { PlainDate, PlainDateBag, PlainDateMod, createPlainDate } from './plainDate'
@@ -575,7 +576,7 @@ const builtinRefiners = {
   ...eraYearFieldRefiners,
   ...dateTimeFieldRefiners,
   ...durationFieldRefiners,
-  offset: toString,
+  offset: ensureString,
 }
 
 const builtinDefaults = timeFieldDefaults

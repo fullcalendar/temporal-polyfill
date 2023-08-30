@@ -122,13 +122,13 @@ export function getMatchingInstantFor(
   offsetNano: number | undefined,
   hasZ: boolean,
   // need these defaults?
-  offsetHandling: OffsetDisambig = OffsetDisambig.Reject,
-  disambig: EpochDisambig = EpochDisambig.Compat,
-  fuzzy = false,
+  offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
+  epochDisambig: EpochDisambig = EpochDisambig.Compat,
+  epochFuzzy = false,
 ): DayTimeNano {
-  if (offsetNano !== undefined && offsetHandling !== OffsetDisambig.Ignore) {
+  if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
     // we ALWAYS use Z as a zero offset
-    if (offsetHandling === OffsetDisambig.Use || hasZ) {
+    if (offsetDisambig === OffsetDisambig.Use || hasZ) {
       return addDayTimeNanoAndNumber(
         isoToEpochNano(isoDateTimeFields)!,
         -offsetNano,
@@ -139,20 +139,20 @@ export function getMatchingInstantFor(
       timeZoneOps,
       isoDateTimeFields,
       offsetNano,
-      fuzzy,
+      epochFuzzy,
     )
 
     if (matchingEpochNano !== undefined) {
       return matchingEpochNano
     }
 
-    if (offsetHandling === OffsetDisambig.Reject) {
+    if (offsetDisambig === OffsetDisambig.Reject) {
       throw new RangeError('Mismatching offset/timezone')
     }
-    // else (offsetHandling === 'prefer') ...
+    // else (offsetDisambig === 'prefer') ...
   }
 
-  return getSingleInstantFor(timeZoneOps, isoDateTimeFields, disambig)
+  return getSingleInstantFor(timeZoneOps, isoDateTimeFields, epochDisambig)
 }
 
 function findMatchingEpochNano(
