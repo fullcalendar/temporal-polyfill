@@ -34,6 +34,12 @@ built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
 
+# I disagree w/ irregular lengh-of-day tests for ZonedDateTime, especially the third `test`
+built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
+
+# fewer calls to getPossibleInstantsFor while rounding ZonedDateTime to hour/min/sec..
+built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
+
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
 

@@ -107,8 +107,8 @@ export function computeNanosecondsInDay(
   isoDateFields = { ...isoDateFields, ...isoTimeFieldDefaults }
 
   // TODO: have getSingleInstantFor accept IsoDateFields?
-  const epochNano0 = getSingleInstantFor(timeZoneOps, { ...isoTimeFieldDefaults, ...isoDateFields })
-  const epochNano1 = getSingleInstantFor(timeZoneOps, { ...isoTimeFieldDefaults, ...moveDateByDays(isoDateFields, 1) })
+  const epochNano0 = getSingleInstantFor(timeZoneOps, { ...isoDateFields, ...isoTimeFieldDefaults, })
+  const epochNano1 = getSingleInstantFor(timeZoneOps, { ...moveDateByDays(isoDateFields, 1), ...isoTimeFieldDefaults })
 
   return dayTimeNanoToNumber(
     diffDayTimeNanos(epochNano0, epochNano1)
