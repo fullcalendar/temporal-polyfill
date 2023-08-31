@@ -91,11 +91,21 @@ function timeZoneOpsToPublic(timeZoneOps: TimeZoneOps): TimeZoneProtocol {
     createTimeZone(timeZoneOps as TimeZoneImpl)
 }
 
-export const getCommonTimeZoneOps = getCommonInnerObj.bind<
-  undefined, [BoundArg], // bound
-  [TimeZoneInternals, TimeZoneInternals], // unbound
-  TimeZoneOps // return
->(undefined, 'timeZone')
+// TODO: cleanup. previously used getCommonInnerObj
+export function getCommonTimeZoneOps(internals0: TimeZoneInternals, internals1: TimeZoneInternals): TimeZoneOps {
+  const internal0 = internals0.timeZone
+  const internal1 = internals1.timeZone
+
+  if (!isTimeZonesEqual(internal0, internal1)) {
+    throw new RangeError(`TimeZones not equal`)
+  }
+
+  return internal0
+}
+
+export function isTimeZonesEqual(a: TimeZoneOps, b: TimeZoneOps) {
+  return a === b || normalizeTimeZoneId(a.id) === normalizeTimeZoneId(b.id)
+}
 
 // Public Utils
 // ------------
@@ -301,16 +311,19 @@ const timeZoneOpsAdapterMethods = {
 
 const timeZoneOpsAdapterGetters = {
   id(timeZone: TimeZoneProtocol): string {
-    let id = ensureString(timeZone.id)
-
-    // normalize offset nano strings like '+0000'
-    const offsetNano = parseMaybeOffsetNano(id)
-    if (offsetNano !== undefined) {
-      id = formatOffsetNano(offsetNano)
-    }
-
-    return id
+    return normalizeTimeZoneId(ensureString(timeZone.id))
   }
+}
+
+export function normalizeTimeZoneId(id: string): string {
+  const offsetNano = parseMaybeOffsetNano(id)
+  if (offsetNano !== undefined) {
+    if (!offsetNano) {
+      return 'UTC'
+    }
+    id = formatOffsetNano(offsetNano)
+  }
+  return id
 }
 
 type TimeZoneOpsAdapter = WrapperInstance<

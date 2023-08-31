@@ -34,11 +34,7 @@ export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
 
   const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
-    if (!offsetNano) { // normalize zero offset to UTC
-      timeZoneId = 'UTC'
-    } else {
-      return new FixedTimeZoneImpl(offsetNano)
-    }
+    return new FixedTimeZoneImpl(offsetNano)
   }
 
   return queryCacheableTimeZoneImpl(

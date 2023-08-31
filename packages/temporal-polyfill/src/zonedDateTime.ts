@@ -67,6 +67,8 @@ import {
   getCommonTimeZoneOps,
   getMatchingInstantFor,
   getPublicTimeZone,
+  isTimeZonesEqual,
+  normalizeTimeZoneId,
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
@@ -325,7 +327,7 @@ export const [
       const otherInternals = toZonedInternals(otherArg)
 
       return !compareDayTimeNanos(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
-        isObjIdsEqual(internals.timeZone, otherInternals.timeZone) &&
+        isTimeZonesEqual(internals.timeZone, otherInternals.timeZone) &&
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
