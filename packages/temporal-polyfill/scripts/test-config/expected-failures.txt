@@ -33,9 +33,14 @@ built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 
 # I disagree w/ irregular lengh-of-day tests for ZonedDateTime, especially the third `test`
 built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
+
+# we should only query common-timezone if diffing actually needs it
+built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 
 # fewer calls to getPossibleInstantsFor while rounding ZonedDateTime to hour/min/sec..
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
@@ -134,6 +139,7 @@ built-ins/Temporal/ZonedDateTime/prototype/round/calendar-dateadd-called-with-op
 built-ins/Temporal/ZonedDateTime/prototype/round/dateadd-options.js
 # vvv -- for nanoseconds-in-day (afterwards.. check dividing by zero throws error)
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-options-undefined.js
 
 # Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js
@@ -147,6 +153,16 @@ built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone
 built-ins/Temporal/PlainDateTime/prototype/until/balance-infinite-nanoseconds-duration.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
+
+# when diffing, we do not walk days one-by-one
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely-1.js
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely-2.js
+
+# our diffing algorithm calls dateUntil fewer times
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests

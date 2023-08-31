@@ -45,7 +45,6 @@ import {
   OffsetDisambig,
   Overflow,
   OverflowOptions,
-  RoundingMode,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   refineDiffOptions,
@@ -68,7 +67,6 @@ import {
   getMatchingInstantFor,
   getPublicTimeZone,
   isTimeZonesEqual,
-  normalizeTimeZoneId,
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'

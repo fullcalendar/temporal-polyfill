@@ -195,6 +195,8 @@ export function diffZonedEpochNano(
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
 ): DurationFields {
   if (largestUnit < Unit.Day) {
+    // doesn't need timeZone
+    // TODO: only get it from getCommonTimeZoneOps if actually needed (makes tests conform)
     return diffEpochNano(
       startEpochNano,
       endEpochNano,
