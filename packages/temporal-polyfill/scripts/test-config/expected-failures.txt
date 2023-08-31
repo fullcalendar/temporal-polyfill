@@ -24,6 +24,7 @@ built-ins/Temporal/PlainDateTime/from/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
 
 # overflow options should be passed from PlainDateTime::since to Calendar::dateUntil
 # (though it should be a shallow-copied)
@@ -50,6 +51,19 @@ built-ins/Temporal/ZonedDateTime/from/overflow-wrong-type.js
 built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
+
+# when ZonedDateTime needs to query Calendar, should give PlainDateTime instead of PlainDate (i disagree)
+built-ins/Temporal/ZonedDateTime/prototype/day/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/dayOfYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/daysInMonth/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/daysInWeek/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/daysInYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/inLeapYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/month/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/monthCode/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/custom.js
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js

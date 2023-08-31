@@ -6,16 +6,14 @@ import {
   getCommonInnerObj,
   getInternals,
   getStrictInternals,
-  idGettersStrict,
 } from './class'
 import { Instant, createInstant } from './instant'
 import { IsoDateFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
-import { IsoDateTimeInternals } from './isoInternals'
 import {
   epochNanoToIso,
   isoToEpochNano,
 } from './isoMath'
-import { parseTimeZoneId } from './isoParse'
+import { parseMaybeOffsetNano, parseTimeZoneId } from './isoParse'
 import { moveDateByDays } from './move'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { ensureNumber, ensureString } from './cast'
@@ -28,7 +26,8 @@ import { BoundArg, createLazyGenerator, isObjectlike } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 import { queryCalendarImpl } from './calendarImpl'
 import { isoCalendarId } from './calendarConfig'
-import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
+import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
+import { formatOffsetNano } from './isoFormat'
 
 export interface TimeZoneOps {
   id: string
@@ -300,18 +299,32 @@ const timeZoneOpsAdapterMethods = {
   },
 }
 
+const timeZoneOpsAdapterGetters = {
+  id(timeZone: TimeZoneProtocol): string {
+    let id = ensureString(timeZone.id)
+
+    // normalize offset nano strings like '+0000'
+    const offsetNano = parseMaybeOffsetNano(id)
+    if (offsetNano !== undefined) {
+      id = formatOffsetNano(offsetNano)
+    }
+
+    return id
+  }
+}
+
 type TimeZoneOpsAdapter = WrapperInstance<
   TimeZoneProtocol, // internals
-  typeof idGettersStrict, // getters
+  typeof timeZoneOpsAdapterGetters, // getters
   typeof timeZoneOpsAdapterMethods // methods
 >
 
 export const TimeZoneOpsAdapter = createWrapperClass<
   [TimeZoneProtocol], // constructor
   TimeZoneProtocol, // internals
-  typeof idGettersStrict, // getters
+  typeof timeZoneOpsAdapterGetters, // getters
   typeof timeZoneOpsAdapterMethods // methods
->(idGettersStrict, timeZoneOpsAdapterMethods)
+>(timeZoneOpsAdapterGetters, timeZoneOpsAdapterMethods)
 
 function validateOffsetNano(offsetNano: number): number {
   if (!Number.isInteger(ensureNumber(offsetNano))) {

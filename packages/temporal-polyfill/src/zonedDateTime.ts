@@ -322,8 +322,8 @@ export const [
       const otherInternals = toZonedInternals(otherArg)
 
       return !compareDayTimeNanos(internals.epochNanoseconds, otherInternals.epochNanoseconds) &&
-        isObjIdsEqual(internals.calendar, otherInternals.calendar) &&
-        isObjIdsEqual(internals.timeZone, otherInternals.timeZone)
+        isObjIdsEqual(internals.timeZone, otherInternals.timeZone) &&
+        isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
     toString(internals: ZonedInternals, options?: ZonedDateTimeDisplayOptions): string {
