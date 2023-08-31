@@ -59,14 +59,18 @@ const calendarOpsAdapterMethods = {
   },
 
   dateAdd(
+    this: any, // CalendarOpsAdapter
     calendar: CalendarProtocol,
-    isoDateFields: IsoDateInternals,
+    isoDateFields: IsoDateFields,
     durationInternals: DurationInternals,
     overflow?: Overflow
   ): IsoDateInternals {
     return getPlainDateInternals(
       calendar.dateAdd(
-        createPlainDate(isoDateFields),
+        createPlainDate({
+          ...isoDateFields,
+          calendar: this,
+        }),
         createDuration(durationInternals),
         Object.assign(
           Object.create(null),
@@ -78,6 +82,7 @@ const calendarOpsAdapterMethods = {
   },
 
   dateUntil(
+    this: any, // CalendarOpsAdapter
     calendar: CalendarProtocol,
     isoDateFields0: IsoDateFields,
     isoDateFields1: IsoDateFields,
@@ -85,8 +90,14 @@ const calendarOpsAdapterMethods = {
   ): DurationInternals {
     const durationInternals = getDurationInternals(
       calendar.dateUntil(
-        createPlainDate(isoDateFields0 as IsoDateInternals),
-        createPlainDate(isoDateFields1 as IsoDateInternals),
+        createPlainDate({
+          ...isoDateFields0,
+          calendar: this,
+        }),
+        createPlainDate({
+          ...isoDateFields1,
+          calendar: this,
+        }),
         Object.assign(
           Object.create(null),
           { largestUnit: unitNamesAsc[largestUnit] },

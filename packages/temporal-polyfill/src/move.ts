@@ -10,7 +10,7 @@ import {
   updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
 } from './durationFields'
-import { IsoDateTimeFields, IsoDateFields, IsoTimeFields } from './isoFields'
+import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import {
   checkIsoDateInBounds,
@@ -52,8 +52,8 @@ export function moveZonedEpochNano(
       overflow,
     )
     const movedIsoDateTimeFields = {
-      ...isoDateTimeFields, // time parts
-      ...movedIsoDateFields, // date parts
+      ...movedIsoDateFields, // date parts (could be a superset)
+      ...pluckIsoTimeFields(isoDateTimeFields), // time parts
     }
     epochNano = addDayTimeNanos(
       getSingleInstantFor(timeZone, movedIsoDateTimeFields),
