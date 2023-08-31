@@ -530,7 +530,7 @@ function refineRoundingInc(
   options: RoundingIncOptions,
   smallestUnit: DayTimeUnit,
   allowManyLargeUnits?: boolean,
-) {
+): number {
   let roundingInc = options[roundingIncName]
 
   if (roundingInc === undefined) {

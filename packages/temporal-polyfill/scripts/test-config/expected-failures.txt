@@ -14,6 +14,8 @@ built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
+# vvv -- also, our algorithm for rounding calls Calendar/TimeZone WAY fewer times
+built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -52,6 +54,11 @@ built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/getISOFields/order-of-operations.js
+
+# we don't support hours-in-day great than 10000000xxx
+# (would require us to use DayTimeNano for simple operations)
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
 # when ZonedDateTime needs to query Calendar, should give PlainDateTime instead of PlainDate (i disagree)
 built-ins/Temporal/ZonedDateTime/prototype/day/custom.js
@@ -117,6 +124,10 @@ built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/round/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/round/dateadd-options.js
+# vvv -- for nanoseconds-in-day (afterwards.. check dividing by zero throws error)
+built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
 # Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js

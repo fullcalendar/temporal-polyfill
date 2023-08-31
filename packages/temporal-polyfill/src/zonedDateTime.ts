@@ -265,6 +265,7 @@ export const [
     */
     round(internals: ZonedInternals, options: RoundingOptions | UnitName): ZonedDateTime {
       let { epochNanoseconds, timeZone, calendar } = internals
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
       const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
       let isoDateTimeFields = epochNanoToIso(
@@ -273,7 +274,9 @@ export const [
 
       isoDateTimeFields = roundDateTime(
         isoDateTimeFields,
-        ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
+        smallestUnit as DayTimeUnit,
+        roundingInc,
+        roundingMode,
         timeZone,
       )
       epochNanoseconds = getMatchingInstantFor(

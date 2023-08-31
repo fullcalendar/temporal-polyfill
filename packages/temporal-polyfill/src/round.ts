@@ -76,6 +76,10 @@ function roundDateTimeToDay(
     ? computeNanosecondsInDay(timeZoneOps, isoFields)
     : nanoInUtcDay
 
+  if (nanoInDay <= 0) {
+    throw new RangeError('Bad nanoseconds in day')
+  }
+
   return roundDateTimeToNano(isoFields, nanoInDay, roundingMode)
 }
 
