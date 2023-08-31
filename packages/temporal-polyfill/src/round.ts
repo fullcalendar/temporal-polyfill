@@ -176,9 +176,11 @@ export function roundRelativeDuration<M>(
 
   const nudgeFunc = (
     (markerToEpochNano === identityFunc) // is zoned?
-      ? smallestUnit >= Unit.Day
+      ? smallestUnit > Unit.Day
         ? nudgeRelativeDuration
-        : nudgeRelativeDurationTime // handles DST
+        : smallestUnit === Unit.Day
+          ? nudgeDurationDayTime // doesn't worry about DST
+          : nudgeRelativeDurationTime // handles DST
       : smallestUnit > Unit.Day
         ? nudgeRelativeDuration
         : nudgeDurationDayTime // doesn't worry about DST
