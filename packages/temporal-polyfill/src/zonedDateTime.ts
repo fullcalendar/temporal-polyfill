@@ -59,7 +59,7 @@ import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime 
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { roundByInc, roundDateTime, roundDateTimeToNano } from './round'
+import { roundByInc, roundDateTime, roundDayTimeNanoByInc } from './round'
 import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
 import {
   TimeZoneOps,
@@ -72,7 +72,7 @@ import {
   zonedInternalsToIso,
 } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, nanoInHour, nanoInSec } from './units'
-import { NumSign, mapProps, noop } from './utils'
+import { NumSign, mapProps } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureBigInt } from './cast'
 
@@ -330,8 +330,11 @@ export const [
         isObjIdsEqual(internals.calendar, otherInternals.calendar)
     },
 
+    /*
+    TODO: more DRY with Instant::toString
+    */
     toString(internals: ZonedInternals, options?: ZonedDateTimeDisplayOptions): string {
-      let { epochNanoseconds, timeZone, calendar } = internals
+      let { epochNanoseconds: epochNano, timeZone, calendar } = internals
       const [
         calendarDisplay,
         timeZoneDisplay,
@@ -341,33 +344,18 @@ export const [
         subsecDigits,
       ] = refineZonedDateTimeDisplayOptions(options)
 
-      let offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoDateTimeFields = epochNanoToIso(
-        addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
-      )
-
-      isoDateTimeFields = roundDateTimeToNano(isoDateTimeFields, nanoInc, roundingMode)
-      epochNanoseconds = getMatchingInstantFor(
-        timeZone,
-        isoDateTimeFields,
-        offsetNanoseconds,
-        false, // z
-        OffsetDisambig.Prefer, // keep old offsetNanoseconds if possible
-        EpochDisambig.Compat,
-        true, // fuzzy
-      )
-
-      // waa? non-dry code?
-      offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      isoDateTimeFields = epochNanoToIso(
-        addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
+      epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
+      let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+      const isoFields = epochNanoToIso(
+        addDayTimeNanoAndNumber(epochNano, offsetNano),
       )
 
       // always round offset nano for ZonedDateTime
-      offsetNanoseconds = roundByInc(offsetNanoseconds, nanoInSec, RoundingMode.HalfExpand)
+      // TODO: do for Instant?
+      offsetNano = roundByInc(offsetNano, nanoInSec, RoundingMode.HalfExpand)
 
-      return formatIsoDateTimeFields(isoDateTimeFields, subsecDigits) +
-        formatOffsetNano(offsetNanoseconds, offsetDisplay) +
+      return formatIsoDateTimeFields(isoFields, subsecDigits) +
+        formatOffsetNano(offsetNano, offsetDisplay) +
         formatTimeZone(timeZone, timeZoneDisplay) +
         formatCalendar(calendar, calendarDisplay)
     },

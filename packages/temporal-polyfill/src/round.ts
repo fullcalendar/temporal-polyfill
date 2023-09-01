@@ -247,8 +247,15 @@ export function roundDayTimeNanoByInc(
   dayTimeNano: DayTimeNano,
   nanoInc: number, // REQUIRED: not larger than a day
   roundingMode: RoundingMode,
+  useDayOrigin?: boolean
 ): DayTimeNano {
-  const [days, timeNano] = dayTimeNano
+  let [days, timeNano] = dayTimeNano
+
+  if (useDayOrigin && timeNano < 0) {
+    timeNano += nanoInUtcDay
+    days -= 1
+  }
+
   const [dayDelta, roundedTimeNano] = divModFloor(
     roundByInc(timeNano, nanoInc, roundingMode),
     nanoInUtcDay,

@@ -16,6 +16,8 @@ built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 # vvv -- also, our algorithm for rounding calls Calendar/TimeZone WAY fewer times
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
+# vvv -- also, our algorithm calls TimeZone::getOffsetNanosecondsFor fewer times
+built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
