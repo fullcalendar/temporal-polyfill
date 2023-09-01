@@ -9,6 +9,7 @@ import {
 import { Instant, createInstant } from './instant'
 import { IsoDateFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import {
+  checkEpochNanoInBounds,
   epochNanoToIso,
   isoToEpochNano,
 } from './isoMath'
@@ -139,9 +140,11 @@ export function getMatchingInstantFor(
   if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
     // we ALWAYS use Z as a zero offset
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
-      return addDayTimeNanoAndNumber(
-        isoToEpochNano(isoDateTimeFields)!,
-        -offsetNano,
+      return checkEpochNanoInBounds(
+        addDayTimeNanoAndNumber(
+          isoToEpochNano(isoDateTimeFields)!,
+          -offsetNano,
+        )
       )
     }
 
