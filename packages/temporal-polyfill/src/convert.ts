@@ -160,6 +160,7 @@ export function mergeZonedDateTimeBag(
     mod,
     dateTimeFieldNames, // validFieldNames
     ['offset'], // forcedValidFieldNames
+    ['offset'], // requiredObjFieldNames
   ) as ZonedDateTimeBag
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
@@ -515,6 +516,7 @@ function mergeCalendarFields(
   bag: Record<string, unknown>,
   validFieldNames: string[],
   forcedValidFieldNames: string[] = [],
+  requiredObjFieldNames: string[] = [],
 ): Record<string, unknown> {
   rejectInvalidBag(bag)
 
@@ -523,7 +525,7 @@ function mergeCalendarFields(
     ...forcedValidFieldNames
   ]
 
-  let fields = refineFields(obj, fieldNames, [])
+  let fields = refineFields(obj, fieldNames, requiredObjFieldNames)
   const partialFields = refineFields(bag, fieldNames)
 
   fields = calendar.mergeFields(fields, partialFields)

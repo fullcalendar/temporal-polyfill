@@ -16,8 +16,10 @@ built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 # vvv -- also, our algorithm for rounding calls Calendar/TimeZone WAY fewer times
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
-# vvv -- also, our algorithm calls TimeZone::getOffsetNanosecondsFor fewer times
+# vvv -- also, our algorithm calls TimeZone::getOffsetNanosecondsFor fewer time
 built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
+# vvv -- also, our algorithm calls getOffsetNanosecondsFor WAAAAY fewer times
+built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -66,6 +68,7 @@ built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefin
 built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
 built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
 built-ins/Temporal/ZonedDateTime/from/overflow-wrong-type.js
+built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
 
 # our bag->ZonedDateTime doesn't need to call TimeZone::getOffsetNanosecondsFor
 # (it uses nanosecond diffing against UTC)
