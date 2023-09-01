@@ -27,6 +27,7 @@ built-ins/Temporal/PlainDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
 
 # overflow options should be passed from PlainDateTime::since to Calendar::dateUntil
 # (though it should be a shallow-copied)
@@ -146,6 +147,8 @@ built-ins/Temporal/ZonedDateTime/prototype/round/dateadd-options.js
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-options-undefined.js
+# other unnecessasry dateAdd calls from zdt:
+built-ins/Temporal/ZonedDateTime/prototype/startOfDay/calendar-dateadd-called-with-options-undefined.js
 
 # Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js

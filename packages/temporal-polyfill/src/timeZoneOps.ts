@@ -3,7 +3,6 @@ import {
   WrapperInstance,
   createProtocolChecker,
   createWrapperClass,
-  getCommonInnerObj,
   getInternals,
   getStrictInternals,
 } from './class'

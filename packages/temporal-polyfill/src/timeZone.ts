@@ -50,8 +50,10 @@ const timeZoneMethods: {
 } = {
   ...timeZoneProtocolMethods,
 
-  getOffsetStringFor(impl: TimeZoneImpl, instantArg: InstantArg): string {
-    return formatOffsetNano(getImplOffsetNanosecondsFor(impl, instantArg))
+  getOffsetStringFor(this: TimeZone, impl: TimeZoneImpl, instantArg: InstantArg): string {
+    return formatOffsetNano(
+      this.getOffsetNanosecondsFor(instantArg) // strange we leverage the TimeZone here, but necessary for TimeZone subclasses
+    )
   },
 
   getPlainDateTimeFor(

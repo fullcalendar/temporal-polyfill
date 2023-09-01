@@ -45,6 +45,7 @@ import {
   OffsetDisambig,
   Overflow,
   OverflowOptions,
+  RoundingMode,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   refineDiffOptions,
@@ -58,7 +59,7 @@ import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime 
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { roundDateTime, roundDateTimeToNano } from './round'
+import { roundByInc, roundDateTime, roundDateTimeToNano } from './round'
 import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
 import {
   TimeZoneOps,
@@ -70,7 +71,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { DayTimeUnit, Unit, UnitName, nanoInHour } from './units'
+import { DayTimeUnit, Unit, UnitName, nanoInHour, nanoInSec } from './units'
 import { NumSign, mapProps, noop } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureBigInt } from './cast'
@@ -361,6 +362,9 @@ export const [
       isoDateTimeFields = epochNanoToIso(
         addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
       )
+
+      // always round offset nano for ZonedDateTime
+      offsetNanoseconds = roundByInc(offsetNanoseconds, nanoInSec, RoundingMode.HalfExpand)
 
       return formatIsoDateTimeFields(isoDateTimeFields, subsecDigits) +
         formatOffsetNano(offsetNanoseconds, offsetDisplay) +
