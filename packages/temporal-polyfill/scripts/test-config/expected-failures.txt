@@ -128,6 +128,7 @@ built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone
 built-ins/Temporal/PlainDateTime/prototype/weekOfYear/custom.js
 built-ins/Temporal/PlainDateTime/prototype/year/custom.js
 built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/custom.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js

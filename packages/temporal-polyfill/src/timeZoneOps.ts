@@ -134,6 +134,8 @@ export function getMatchingInstantFor(
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
   epochFuzzy = false,
 ): DayTimeNano {
+  const possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
+
   if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
     // we ALWAYS use Z as a zero offset
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
@@ -144,7 +146,7 @@ export function getMatchingInstantFor(
     }
 
     const matchingEpochNano = findMatchingEpochNano(
-      timeZoneOps,
+      possibleEpochNanos,
       isoDateTimeFields,
       offsetNano,
       epochFuzzy,
@@ -164,16 +166,15 @@ export function getMatchingInstantFor(
     return isoToEpochNano(isoDateTimeFields)!
   }
 
-  return getSingleInstantFor(timeZoneOps, isoDateTimeFields, epochDisambig)
+  return getSingleInstantFor(timeZoneOps, isoDateTimeFields, epochDisambig, possibleEpochNanos)
 }
 
 function findMatchingEpochNano(
-  timeZoneOps: TimeZoneOps,
+  possibleEpochNanos: DayTimeNano[],
   isoDateTimeFields: IsoDateTimeFields,
   offsetNano: number,
   fuzzy: boolean,
 ): DayTimeNano | undefined {
-  const possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
   const zonedEpochNano = isoToEpochNano(isoDateTimeFields)!
 
   if (fuzzy) {
@@ -199,11 +200,10 @@ export function getSingleInstantFor(
   timeZoneOps: TimeZoneOps,
   isoDateTimeFields: IsoDateTimeFields,
   disambig: EpochDisambig = EpochDisambig.Compat,
+  possibleEpochNanos: DayTimeNano[] = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
 ): DayTimeNano {
-  let epochNanos = timeZoneOps.getPossibleInstantsFor(isoDateTimeFields)
-
-  if (epochNanos.length === 1) {
-    return epochNanos[0]
+  if (possibleEpochNanos.length === 1) {
+    return possibleEpochNanos[0]
   }
 
   if (disambig === EpochDisambig.Reject) {
@@ -212,8 +212,8 @@ export function getSingleInstantFor(
 
   // within a transition that jumps back
   // ('compatible' means 'earlier')
-  if (epochNanos.length) {
-    return epochNanos[
+  if (possibleEpochNanos.length) {
+    return possibleEpochNanos[
       disambig === EpochDisambig.Later
         ? 1
         : 0 // 'earlier' and 'compatible'
@@ -226,7 +226,7 @@ export function getSingleInstantFor(
   const zonedEpochNano = isoToEpochNano(isoDateTimeFields)!
   const gapNano = computeGapNear(timeZoneOps, zonedEpochNano)
 
-  epochNanos = timeZoneOps.getPossibleInstantsFor(
+  possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(
     epochNanoToIso(
       addDayTimeNanoAndNumber(
         zonedEpochNano,
@@ -239,10 +239,10 @@ export function getSingleInstantFor(
     ),
   )
 
-  return epochNanos[
+  return possibleEpochNanos[
     disambig === EpochDisambig.Earlier
       ? 0
-      : epochNanos.length - 1 // 'later' or 'compatible'
+      : possibleEpochNanos.length - 1 // 'later' or 'compatible'
   ]
 }
 
