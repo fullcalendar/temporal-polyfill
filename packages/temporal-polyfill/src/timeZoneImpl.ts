@@ -30,7 +30,8 @@ const queryCacheableTimeZoneImpl = createLazyGenerator((timeZoneId: string): Tim
 
 export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
   // TODO: fix double-call of ensureString
-  timeZoneId = ensureString(timeZoneId).toLowerCase()
+  timeZoneId = ensureString(timeZoneId)
+    .toLowerCase() // whaaa... lower-then-upper?
 
   const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {

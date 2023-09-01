@@ -82,6 +82,13 @@ built-ins/Temporal/ZonedDateTime/prototype/getISOFields/order-of-operations.js
 # (would require us to use DayTimeNano for simple operations)
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
+# Asia/Kolkata should not get normalized to Asia/Calcutta
+intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
+
+# Reenable when we upgrade to Node 18
+# (for Intl.supportedValuesOf)
+intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
+
 # when ZonedDateTime needs to query Calendar, should give PlainDateTime instead of PlainDate (i disagree)
 built-ins/Temporal/ZonedDateTime/prototype/day/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/custom.js
@@ -93,6 +100,8 @@ built-ins/Temporal/ZonedDateTime/prototype/inLeapYear/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/month/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/monthCode/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/year/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/custom.js
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
@@ -141,6 +150,7 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 built-ins/Temporal/PlainDateTime/prototype/equals/calendar-checked.js
 intl402/Temporal/PlainDateTime/prototype/withPlainDate/argument-plaindate-calendar-same-object.js
 built-ins/Temporal/PlainDateTime/prototype/withPlainDate/calendar-temporal-object.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/calendar-temporal-object.js
 
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
@@ -155,6 +165,8 @@ built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-op
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-options-undefined.js
 # other unnecessasry dateAdd calls from zdt:
 built-ins/Temporal/ZonedDateTime/prototype/startOfDay/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/calendar-dateadd-called-with-options-undefined.js
 
 # Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js

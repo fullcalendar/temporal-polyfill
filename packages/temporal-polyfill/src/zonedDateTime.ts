@@ -15,8 +15,9 @@ import { diffZonedEpochNano } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationFields, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { Instant, createInstant } from './instant'
-import { toLocaleStringMethod } from './intlFormat'
+import { LocalesArg, toLocaleStringMethod } from './intlFormat'
 import {
+  IsoTimeFields,
   isoTimeFieldDefaults,
   pluckIsoTimeFields,
 } from './isoFields'
@@ -57,7 +58,7 @@ import {
 import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime, createPlainTime, toPlainTimeFields } from './plainTime'
+import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { roundByInc, roundDateTime, roundDayTimeNanoByInc } from './round'
 import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
@@ -174,11 +175,11 @@ export const [
       return createZonedDateTime(mergeZonedDateTimeBag(this, mod, options))
     },
 
-    withPlainTime(internals: ZonedInternals, plainTimeArg): ZonedDateTime {
+    withPlainTime(internals: ZonedInternals, plainTimeArg?: PlainTimeArg): ZonedDateTime {
       const { calendar, timeZone } = internals
       const isoFields = {
         ...zonedInternalsToIso(internals),
-        ...toPlainTimeFields(plainTimeArg),
+        ...optionalToPlainTimeFields(plainTimeArg),
       }
 
       const epochNano = getMatchingInstantFor(
@@ -186,8 +187,8 @@ export const [
         isoFields,
         isoFields.offsetNanoseconds,
         false, // hasZ
-        undefined, // offsetHandling
-        undefined, // disambig
+        OffsetDisambig.Prefer, // OffsetDisambig
+        undefined, // EpochDisambig
         false, // fuzzy
       )
 
@@ -211,8 +212,8 @@ export const [
         isoFields,
         isoFields.offsetNanoseconds,
         false, // hasZ
-        undefined, // offsetHandling
-        undefined, // disambig
+        OffsetDisambig.Prefer, // OffsetDisambig
+        undefined, // EpochDisambig
         false, // fuzzy
       )
 
@@ -360,7 +361,18 @@ export const [
         formatCalendar(calendar, calendarDisplay)
     },
 
-    toLocaleString: toLocaleStringMethod,
+    toLocaleString(this: ZonedDateTime, internals: ZonedInternals, locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
+
+      // Copy options so accessing doesn't cause side-effects
+      // TODO: stop this from happening twice, in toLocaleStringMethod too
+      options = { ...options }
+
+      if ('timeZone' in options) {
+        throw new TypeError('Cannot specify TimeZone')
+      }
+
+      return toLocaleStringMethod.call(this, internals, locales, options)
+    },
 
     valueOf: neverValueOf,
 
@@ -420,6 +432,12 @@ export const [
 
 // Utils
 // -------------------------------------------------------------------------------------------------
+
+// TODO: DRY
+function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
+  return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
+}
+
 
 function moveZonedDateTime(
   internals: ZonedInternals,

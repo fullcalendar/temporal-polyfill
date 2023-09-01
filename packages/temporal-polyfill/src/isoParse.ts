@@ -25,7 +25,7 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
-import { queryTimeZoneImpl } from './timeZoneImpl'
+import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
 import {
   TimeUnit,
@@ -227,7 +227,8 @@ function postProcessZonedDateTime(
     organized.hasZ,
     offsetDisambig,
     epochDisambig,
-    true, // fuzzy
+    !(timeZone instanceof FixedTimeZoneImpl), // only allow fuzzy minute-rounding matching if named-timezone
+      // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
   )
 
   return {
