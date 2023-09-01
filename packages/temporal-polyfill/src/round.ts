@@ -146,9 +146,9 @@ export function roundDurationToNano(
   nanoInc: number, // REQUIRED: not larger than a day
   roundingMode: RoundingMode,
 ): DurationFields {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour)
   const roundedLargeNano = roundDayTimeNanoByInc(dayTimeNano, nanoInc, roundingMode)
-  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano)
+  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano, Unit.Hour)
 
   return {
     ...durationFields,

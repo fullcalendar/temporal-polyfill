@@ -1,6 +1,6 @@
 import { CalendarImpl } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
-import { DayTimeNano, compareDayTimeNanos, diffDayTimeNanos } from './dayTimeNano'
+import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
   DurationInternals,
@@ -208,24 +208,32 @@ export function diffZonedEpochNano(
   }
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+
+  if (!sign) {
+    return durationFieldDefaults
+  }
+
   const startIsoFields = zonedEpochNanoToIso(timeZone, startEpochNano)
   const startIsoTimeFields = pluckIsoTimeFields(startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZone, endEpochNano)
-  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZone)
+  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZone) // necessary to bind?
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
   let midEpochNano = isoToZonedEpochNano(midIsoFields)
-  const midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
+  let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
 
-  if (midSign === -sign) {
+  // Might need multiple backoffs: one for simple time overage, other for end being in DST gap
+  // TODO: use a do-while loop?
+  while (midSign === -sign) {
     midIsoFields = {
-      ...moveDateByDays(endIsoFields, -sign),
+      ...moveDateByDays(midIsoFields, -sign),
       ...startIsoTimeFields,
     }
     midEpochNano = isoToZonedEpochNano(midIsoFields)
+    midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
   }
 
   const dateDiff = calendar.dateUntil(startIsoFields, midIsoFields, largestUnit)
-  const timeDiffNano = diffDayTimeNanos(midEpochNano, endEpochNano)[1]
+  const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
 
   return roundRelativeDuration(
