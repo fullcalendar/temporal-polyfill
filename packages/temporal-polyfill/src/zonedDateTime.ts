@@ -55,7 +55,7 @@ import {
   refineZonedDateTimeDisplayOptions,
   refineZonedFieldOptions,
 } from './options'
-import { PlainDate, createPlainDate, toPlainDateInternals } from './plainDate'
+import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeFields } from './plainTime'
@@ -200,11 +200,13 @@ export const [
     },
 
     // TODO: more DRY with withPlainTime and zonedDateTimeWithBag?
-    withPlainDate(internals: ZonedInternals, plainDateArg): ZonedDateTime {
-      const { calendar, timeZone } = internals
+    withPlainDate(internals: ZonedInternals, plainDateArg: PlainDateArg): ZonedDateTime {
+      const { timeZone } = internals
+      const plainDateInternals = toPlainDateInternals(plainDateArg)
+
       const isoFields = {
         ...zonedInternalsToIso(internals),
-        ...toPlainDateInternals(plainDateArg),
+        ...plainDateInternals,
       }
 
       const epochNano = getMatchingInstantFor(
@@ -220,7 +222,8 @@ export const [
       return createZonedDateTime({
         epochNanoseconds: epochNano,
         timeZone,
-        calendar,
+        // TODO: more DRY with other datetime types
+        calendar: getPreferredCalendar(plainDateInternals.calendar, internals.calendar),
       })
     },
 
@@ -438,6 +441,28 @@ function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFi
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
 }
 
+// TODO: DRY
+// similar to checkCalendarsCompatible
+// `a` takes precedence if both the same ID
+function getPreferredCalendar(a: CalendarOps, b: CalendarOps): CalendarOps {
+  // fast path. doesn't read IDs
+  if (a === b) {
+    return a
+  }
+
+  const aId = a.id
+  const bId = b.id
+
+  if (aId !== isoCalendarId) {
+    if (aId !== bId && bId !== isoCalendarId) {
+      throw new RangeError('Incompatible calendars')
+    }
+
+    return a
+  }
+
+  return b
+}
 
 function moveZonedDateTime(
   internals: ZonedInternals,

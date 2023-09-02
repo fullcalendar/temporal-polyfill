@@ -140,6 +140,7 @@ export const [PlainDateTime, createPlainDateTime, toPlainDateTimeInternals] = cr
       return createPlainDateTime({
         ...internals,
         ...plainDateInternals,
+        // TODO: more DRY with other datetime types
         calendar: getPreferredCalendar(plainDateInternals.calendar, internals.calendar),
       })
     },
@@ -310,6 +311,7 @@ function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFi
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeFields(timeArg)
 }
 
+// TODO: DRY
 // similar to checkCalendarsCompatible
 // `a` takes precedence if both the same ID
 function getPreferredCalendar(a: CalendarOps, b: CalendarOps): CalendarOps {
