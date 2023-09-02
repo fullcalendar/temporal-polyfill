@@ -42,35 +42,38 @@ import { DayTimeNano, addDayTimeNanoAndNumber } from './dayTimeNano'
 // -------------------------------------------------------------------------------------------------
 
 export function parseInstant(s: string): DayTimeNano {
-  const parsed = parseMaybeGenericDateTime(s)
-  if (!parsed) {
+  const organized = parseMaybeGenericDateTime(s)
+  if (!organized) {
     throw new RangeError()
+  }
+  if (!organized.hasSeconds) {
+    throw new RangeError('Must have seconds')
   }
 
   let offsetNano
 
-  if (parsed.hasZ) {
+  if (organized.hasZ) {
     offsetNano = 0
-  } else if (parsed.offset) {
-    offsetNano = parseOffsetNano(parsed.offset)
+  } else if (organized.offset) {
+    offsetNano = parseOffsetNano(organized.offset)
   } else {
     throw new RangeError()
   }
 
-  return addDayTimeNanoAndNumber(isoToEpochNano(parsed)!, -offsetNano)
+  return addDayTimeNanoAndNumber(isoToEpochNano(postProcessDateTime(organized))!, -offsetNano)
 }
 
 export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedInternals {
-  const parsed = parseMaybeGenericDateTime(s)
+  const organized = parseMaybeGenericDateTime(s)
 
-  if (!parsed) {
+  if (!organized) {
     throw new RangeError()
   }
-  if (parsed.timeZone) {
-    return postProcessZonedDateTime(parsed as ZonedDateTimeOrganized)
+  if (organized.timeZone) {
+    return postProcessZonedDateTime(organized as ZonedDateTimeOrganized)
   }
 
-  return postProcessDateTime(parsed)
+  return postProcessDateTime(organized)
 }
 
 /*
@@ -362,6 +365,7 @@ export function parseMaybeOffsetNano(s: string, onlyHourMinute?: boolean): numbe
 // -------------------------------------------------------------------------------------------------
 
 type GenericDateTimeOrganized = IsoDateTimeFields & {
+  hasSeconds: boolean
   hasTime: boolean
   hasZ: boolean
   offset: string | undefined
@@ -381,7 +385,6 @@ type WithCalendarStr = { calendar: string }
 type DateOrganized = IsoDateFields & WithCalendarStr
 
 function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized {
-  const hasTime = Boolean(parts[6])
   const zOrOffset = parts[10]
   const hasZ = zOrOffset === 'Z' // TODO: need case-insensitive test?
 
@@ -391,7 +394,8 @@ function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized
     isoDay: parseInt(parts[5]),
     ...organizeTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
     ...organizeAnnotationParts(parts[16]),
-    hasTime,
+    hasTime: Boolean(parts[6]),
+    hasSeconds: Boolean(parts[8]),
     hasZ,
     // TODO: figure out a way to pre-process into a number
     // (problems with TimeZone needing the full string?)
