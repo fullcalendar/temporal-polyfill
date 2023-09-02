@@ -58,26 +58,28 @@ export function toString(arg: string): string {
   }
   return String(arg);
 }
+
 /*
 truncates floats
 */
-
 export function toInteger(arg: number): number {
   return Math.trunc(toNumber(arg)) || 0; // ensure no -0
 }
+
 /*
 throws error on floats
 */
-
 export function toIntegerStrict(arg: number): number {
   return ensureNumberIsInteger(toNumber(arg));
 }
+
 function ensureNumberIsInteger(num: number): number {
   if (!Number.isInteger(num)) {
     throw new RangeError('must be integer');
   }
   return num || 0; // ensure no -0... TODO: why???
 }
+
 /*
 Caller must do ||0 to ensure no -0
 */

@@ -18,6 +18,7 @@ import {
   pluckIsoDateInternals,
 } from './isoInternals'
 import {
+  checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   isoEpochFirstLeapYear,
@@ -46,9 +47,6 @@ export function parseInstant(s: string): DayTimeNano {
   if (!organized) {
     throw new RangeError()
   }
-  if (!organized.hasSeconds) {
-    throw new RangeError('Must have seconds')
-  }
 
   let offsetNano
 
@@ -60,7 +58,9 @@ export function parseInstant(s: string): DayTimeNano {
     throw new RangeError()
   }
 
-  return addDayTimeNanoAndNumber(isoToEpochNano(postProcessDateTime(organized))!, -offsetNano)
+  return checkEpochNanoInBounds(
+    addDayTimeNanoAndNumber(isoToEpochNano(postProcessForInstant(organized))!, -offsetNano)
+  )
 }
 
 export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedInternals {
@@ -241,6 +241,11 @@ function postProcessZonedDateTime(
   }
 }
 
+function postProcessForInstant(organized: GenericDateTimeOrganized): IsoDateTimeFields {
+  // TODO: more DRY with other
+  return checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized))
+}
+
 function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeInternals {
   return giveRealCalendar(checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized)))
 }
@@ -365,7 +370,6 @@ export function parseMaybeOffsetNano(s: string, onlyHourMinute?: boolean): numbe
 // -------------------------------------------------------------------------------------------------
 
 type GenericDateTimeOrganized = IsoDateTimeFields & {
-  hasSeconds: boolean
   hasTime: boolean
   hasZ: boolean
   offset: string | undefined
@@ -395,7 +399,6 @@ function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized
     ...organizeTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
     ...organizeAnnotationParts(parts[16]),
     hasTime: Boolean(parts[6]),
-    hasSeconds: Boolean(parts[8]),
     hasZ,
     // TODO: figure out a way to pre-process into a number
     // (problems with TimeZone needing the full string?)

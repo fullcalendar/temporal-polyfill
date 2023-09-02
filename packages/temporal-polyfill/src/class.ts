@@ -1,4 +1,4 @@
-import { ensureInstanceOf, ensureString, toString } from './cast'
+import { ensureInstanceOf, ensureString, ensureStringViaPrimitive } from './cast'
 import {
   Callable,
   Classlike,
@@ -250,7 +250,7 @@ export function createTemporalClass<
             handleUnusedOptions(options), // do this first
             stringToInternals(
               temporalName === 'Instant' // HACK
-                ? toString(arg as string)
+                ? ensureStringViaPrimitive(arg as string)
                 : ensureString(arg as string)
             )
           )
