@@ -36,7 +36,7 @@ import {
 } from './units'
 import { divModFloor } from './utils'
 import { ZonedInternals } from './zonedDateTime'
-import { DayTimeNano, addDayTimeNanoAndNumber } from './dayTimeNano'
+import { DayTimeNano } from './dayTimeNano'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -55,6 +55,11 @@ export function parseInstant(s: string): DayTimeNano {
     offsetNano = parseOffsetNano(organized.offset)
   } else {
     throw new RangeError()
+  }
+
+  // validate timezone
+  if (organized.timeZone) {
+    parseMaybeOffsetNano(organized.timeZone, true) // onlyHourMinute=true
   }
 
   return isoToEpochNanoWithOffset(
@@ -390,7 +395,7 @@ type DateOrganized = IsoDateFields & WithCalendarStr
 
 function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized {
   const zOrOffset = parts[10]
-  const hasZ = zOrOffset === 'Z' // TODO: need case-insensitive test?
+  const hasZ = (zOrOffset || '').toUpperCase() === 'Z'
 
   return {
     isoYear: organizeIsoYearParts(parts),

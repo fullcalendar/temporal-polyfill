@@ -60,7 +60,7 @@ import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod, createPlainDateTime 
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { roundByInc, roundDateTime, roundDayTimeNanoByInc } from './round'
+import { roundByInc, roundDateTime, roundDayTimeNanoByInc, roundToMinute } from './round'
 import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
 import {
   TimeZoneOps,
@@ -72,7 +72,7 @@ import {
   queryTimeZoneOps,
   zonedInternalsToIso,
 } from './timeZoneOps'
-import { DayTimeUnit, Unit, UnitName, nanoInHour, nanoInSec } from './units'
+import { DayTimeUnit, Unit, UnitName, nanoInHour, nanoInMinute, nanoInSec } from './units'
 import { NumSign, mapProps } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { toBigInt } from './cast'
@@ -354,12 +354,8 @@ export const [
         addDayTimeNanoAndNumber(epochNano, offsetNano),
       )
 
-      // always round offset nano for ZonedDateTime
-      // TODO: make DRY across other types
-      offsetNano = roundByInc(offsetNano, nanoInSec, RoundingMode.HalfExpand)
-
       return formatIsoDateTimeFields(isoFields, subsecDigits) +
-        formatOffsetNano(offsetNano, offsetDisplay) +
+        formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
         formatTimeZone(timeZone, timeZoneDisplay) +
         formatCalendar(calendar, calendarDisplay)
     },

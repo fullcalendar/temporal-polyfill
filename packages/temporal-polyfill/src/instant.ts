@@ -19,11 +19,11 @@ import {
   refineRoundOptions,
 } from './options'
 import { toBigInt, ensureObjectlike } from './cast'
-import { roundByInc, roundDayTimeNano, roundDayTimeNanoByInc } from './round'
+import { roundByInc, roundDayTimeNano, roundDayTimeNanoByInc, roundToMinute } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { NumSign, noop } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { TimeUnit, Unit, UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
+import { TimeUnit, Unit, UnitName, nanoInMicro, nanoInMilli, nanoInMinute, nanoInSec } from './units'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
@@ -117,10 +117,20 @@ export const [
     },
 
     round(epochNano: DayTimeNano, options: RoundingOptions | UnitName): Instant {
-      const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options, Unit.Hour)
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
+        options,
+        Unit.Hour,
+        true, // solarMode
+      )
 
       return createInstant(
-        roundDayTimeNano(epochNano, smallestUnit as TimeUnit, roundingInc, roundingMode),
+        roundDayTimeNano(
+          epochNano,
+          smallestUnit as TimeUnit,
+          roundingInc,
+          roundingMode,
+          true, // useDayOrigin
+        ),
       )
     },
 
@@ -141,9 +151,14 @@ export const [
         roundingMode,
         subsecDigits,
       ] = refineInstantDisplayOptions(options)
-      const timeZone = queryTimeZoneOps(timeZoneArg || utcTimeZoneId)
+      const timeZone = queryTimeZoneOps(timeZoneArg !== undefined ? timeZoneArg : utcTimeZoneId)
 
-      epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode)
+      epochNano = roundDayTimeNanoByInc(
+        epochNano,
+        nanoInc,
+        roundingMode,
+        true, // useDayOrigin
+      )
 
       let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
       const isoFields = epochNanoToIso(
@@ -152,10 +167,7 @@ export const [
 
       return formatIsoDateTimeFields(isoFields, subsecDigits) +
         (timeZoneArg
-          ? formatOffsetNano(
-              // TODO: make DRY across other types
-              roundByInc(offsetNano, nanoInSec, RoundingMode.HalfExpand)
-            )
+          ? formatOffsetNano(roundToMinute(offsetNano))
           : 'Z'
         )
     },
@@ -170,19 +182,19 @@ export const [
 
   {
     fromEpochSeconds(epochSec: number): Instant {
-      return createInstant(numberToDayTimeNano(epochSec, nanoInSec))
+      return createInstant(checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec)))
     },
 
     fromEpochMilliseconds(epochMilli: number): Instant {
-      return createInstant(numberToDayTimeNano(epochMilli, nanoInMilli))
+      return createInstant(checkEpochNanoInBounds(numberToDayTimeNano(epochMilli, nanoInMilli)))
     },
 
     fromEpochMicroseconds(epochMicro: bigint): Instant {
-      return createInstant(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro))
+      return createInstant(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro)))
     },
 
     fromEpochNanoseconds(epochNano: bigint): Instant {
-      return createInstant(bigIntToDayTimeNano(toBigInt(epochNano)))
+      return createInstant(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))))
     },
 
     compare(a: InstantArg, b: InstantArg): NumSign {

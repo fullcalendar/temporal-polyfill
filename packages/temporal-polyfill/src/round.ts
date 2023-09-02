@@ -226,6 +226,7 @@ export function roundDayTimeNano(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
+  useDayOrigin?: boolean
 ): DayTimeNano {
   if (smallestUnit === Unit.Day) {
     return [roundByInc(totalDayTimeNano(dayTimeNano, Unit.Day), roundingInc, roundingMode), 0]
@@ -235,6 +236,7 @@ export function roundDayTimeNano(
     dayTimeNano,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
+    useDayOrigin
   )
 }
 

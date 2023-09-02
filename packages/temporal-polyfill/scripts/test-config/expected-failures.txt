@@ -20,6 +20,9 @@ built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
 # vvv -- also, our algorithm calls getOffsetNanosecondsFor WAAAAY fewer times
 built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
+built-ins/Temporal/Instant/prototype/since/order-of-operations.js
+built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
+built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -77,6 +80,9 @@ built-ins/Temporal/ZonedDateTime/from/argument-propertybag-timezone-getoffsetnan
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/getISOFields/order-of-operations.js
+
+# fewer getOffsetNanosecondsFor calls
+built-ins/Temporal/Instant/prototype/toString/timezone.js
 
 # we don't support hours-in-day great than 10000000xxx
 # (would require us to use DayTimeNano for simple operations)

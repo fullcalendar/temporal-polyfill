@@ -7,7 +7,7 @@ import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
 import { toString, ensureObjectlike, toInteger } from './cast'
-import { DayTimeUnit, TimeUnit, Unit, UnitName, unitNameMap, unitNanoMap } from './units'
+import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
   clampEntity,
@@ -117,12 +117,13 @@ Always related to time
 export function refineRoundOptions(
   options: RoundingOptions | UnitName,
   maxUnit: DayTimeUnit = Unit.Day,
+  solarMode?: boolean,
 ): RoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
   const smallestUnit = refineSmallestUnit(options, maxUnit) as DayTimeUnit
   return [
     smallestUnit,
-    refineRoundingInc(options, smallestUnit),
+    refineRoundingInc(options, smallestUnit, undefined, solarMode),
     refineRoundingMode(options, RoundingMode.HalfExpand),
   ]
 }
@@ -530,6 +531,7 @@ function refineRoundingInc(
   options: RoundingIncOptions,
   smallestUnit: DayTimeUnit,
   allowManyLargeUnits?: boolean,
+  solarMode?: boolean,
 ): number {
   let roundingInc = options[roundingIncName]
 
@@ -538,25 +540,36 @@ function refineRoundingInc(
   }
 
   roundingInc = toInteger(roundingInc)
-  const upUnitNano = unitNanoMap[smallestUnit + 1]
 
-  if (upUnitNano) {
+  if (solarMode) {
     const unitNano = unitNanoMap[smallestUnit]
-    const maxRoundingInc = upUnitNano / unitNano
-    roundingInc = clampEntity(roundingIncName, roundingInc, 1, maxRoundingInc - 1, Overflow.Reject)
 
     // % is dangerous, but -0 will be falsy just like 0
-    if (upUnitNano % (roundingInc * unitNano)) {
-      throw new RangeError('Must be even multiple')
+    if (nanoInUtcDay % (roundingInc * unitNano)) {
+      throw new RangeError('Must be multiple in day')
     }
+
   } else {
-    roundingInc = clampEntity(
-      roundingIncName,
-      roundingInc,
-      1,
-      allowManyLargeUnits ? 10 ** 9 : 1,
-      Overflow.Reject
-    )
+    const upUnitNano = unitNanoMap[smallestUnit + 1]
+
+    if (upUnitNano) {
+      const unitNano = unitNanoMap[smallestUnit]
+      const maxRoundingInc = upUnitNano / unitNano
+      roundingInc = clampEntity(roundingIncName, roundingInc, 1, maxRoundingInc, Overflow.Reject)
+
+      // % is dangerous, but -0 will be falsy just like 0
+      if (upUnitNano % (roundingInc * unitNano)) {
+        throw new RangeError('Must be multiple')
+      }
+    } else {
+      roundingInc = clampEntity(
+        roundingIncName,
+        roundingInc,
+        1,
+        allowManyLargeUnits ? 10 ** 9 : 1,
+        Overflow.Reject
+      )
+    }
   }
 
   return roundingInc

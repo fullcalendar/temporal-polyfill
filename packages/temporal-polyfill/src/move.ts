@@ -13,6 +13,7 @@ import {
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
 import {
+  checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   epochMilliToIso,
@@ -65,9 +66,11 @@ export function moveZonedEpochNano(
 }
 
 export function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFields): DayTimeNano {
-  return addDayTimeNanos(
-    epochNano,
-    durationTimeFieldsToLargeNanoStrict(durationFields),
+  return checkEpochNanoInBounds(
+    addDayTimeNanos(
+      epochNano,
+      durationTimeFieldsToLargeNanoStrict(durationFields),
+    ),
   )
 }
 
