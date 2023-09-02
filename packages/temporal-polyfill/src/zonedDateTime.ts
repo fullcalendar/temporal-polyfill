@@ -352,7 +352,7 @@ export const [
       )
 
       // always round offset nano for ZonedDateTime
-      // TODO: do for Instant?
+      // TODO: make DRY across other types
       offsetNano = roundByInc(offsetNano, nanoInSec, RoundingMode.HalfExpand)
 
       return formatIsoDateTimeFields(isoFields, subsecDigits) +

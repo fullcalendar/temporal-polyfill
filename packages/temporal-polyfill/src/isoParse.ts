@@ -57,7 +57,7 @@ export function parseInstant(s: string): DayTimeNano {
     throw new RangeError()
   }
 
-  return addDayTimeNanoAndNumber(isoToEpochNano(parsed)!, offsetNano)
+  return addDayTimeNanoAndNumber(isoToEpochNano(parsed)!, -offsetNano)
 }
 
 export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedInternals {
@@ -222,7 +222,7 @@ function postProcessZonedDateTime(
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    organized,
+    constrainIsoDateTimeInternals(organized),
     organized.offset ? parseOffsetNano(organized.offset) : undefined,
     organized.hasZ,
     offsetDisambig,

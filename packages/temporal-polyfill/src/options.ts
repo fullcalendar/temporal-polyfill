@@ -41,11 +41,11 @@ export type ZonedFieldTuple = [
   EpochDisambig,
 ]
 
-export function refineZonedFieldOptions(options: ZonedFieldOptions | undefined): ZonedFieldTuple {
+export function refineZonedFieldOptions(options: ZonedFieldOptions | undefined, isMerge?: boolean): ZonedFieldTuple {
   options = normalizeOptions(options)
   return [
     refineOverflow(options),
-    refineOffsetDisambig(options),
+    refineOffsetDisambig(options, isMerge ?  OffsetDisambig.Prefer : OffsetDisambig.Reject),
     refineEpochDisambig(options),
   ]
 }

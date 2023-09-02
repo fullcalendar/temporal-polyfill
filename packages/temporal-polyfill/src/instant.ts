@@ -19,7 +19,7 @@ import {
   refineRoundOptions,
 } from './options'
 import { ensureBigInt, ensureObjectlike } from './cast'
-import { roundDayTimeNano, roundDayTimeNanoByInc } from './round'
+import { roundByInc, roundDayTimeNano, roundDayTimeNanoByInc } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { NumSign, noop } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
@@ -144,13 +144,20 @@ export const [
       const timeZone = queryTimeZoneOps(timeZoneArg || utcTimeZoneId)
 
       epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode)
-      const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+
+      let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
       const isoFields = epochNanoToIso(
         addDayTimeNanoAndNumber(epochNano, offsetNano),
       )
 
       return formatIsoDateTimeFields(isoFields, subsecDigits) +
-        formatOffsetNano(offsetNano)
+        (timeZoneArg
+          ? formatOffsetNano(
+              // TODO: make DRY across other types
+              roundByInc(offsetNano, nanoInSec, RoundingMode.HalfExpand)
+            )
+          : 'Z'
+        )
     },
 
     toLocaleString: toLocaleStringMethod,

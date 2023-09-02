@@ -163,7 +163,7 @@ export function mergeZonedDateTimeBag(
     ['offset'], // requiredObjFieldNames
   ) as ZonedDateTimeBag
 
-  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
+  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options, true)
 
   const isoDateFields = calendar.dateFromFields(fields, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
