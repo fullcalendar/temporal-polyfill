@@ -12,6 +12,7 @@ import {
   checkEpochNanoInBounds,
   epochNanoToIso,
   isoToEpochNano,
+  isoToEpochNanoWithOffset,
 } from './isoMath'
 import { parseMaybeOffsetNano, parseTimeZoneId } from './isoParse'
 import { moveDateByDays } from './move'
@@ -146,12 +147,7 @@ export function getMatchingInstantFor(
   if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
     // we ALWAYS use Z as a zero offset
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
-      return checkEpochNanoInBounds(
-        addDayTimeNanoAndNumber(
-          isoToEpochNano(isoDateTimeFields)!,
-          -offsetNano,
-        )
-      )
+      return isoToEpochNanoWithOffset(isoDateTimeFields, offsetNano)
     }
 
     const matchingEpochNano = findMatchingEpochNano(

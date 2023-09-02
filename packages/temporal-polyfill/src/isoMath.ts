@@ -276,6 +276,17 @@ export function isoToEpochNano(
   }
 }
 
+export function isoToEpochNanoWithOffset(isoFields: IsoDateTimeFields, offsetNano: number): DayTimeNano {
+  const [newIsoTimeFields, dayDelta] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(isoFields) - offsetNano)
+  const epochNano = isoToEpochNano({
+    ...isoFields,
+    isoDay: isoFields.isoDay + dayDelta,
+    ...newIsoTimeFields,
+  })
+
+  return checkEpochNanoInBounds(epochNano) // do the checking here?
+}
+
 // ISO Arguments -> Epoch
 
 /*

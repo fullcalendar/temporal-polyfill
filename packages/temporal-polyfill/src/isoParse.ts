@@ -18,11 +18,10 @@ import {
   pluckIsoDateInternals,
 } from './isoInternals'
 import {
-  checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   isoEpochFirstLeapYear,
-  isoToEpochNano,
+  isoToEpochNanoWithOffset,
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
@@ -58,8 +57,9 @@ export function parseInstant(s: string): DayTimeNano {
     throw new RangeError()
   }
 
-  return checkEpochNanoInBounds(
-    addDayTimeNanoAndNumber(isoToEpochNano(postProcessForInstant(organized))!, -offsetNano)
+  return isoToEpochNanoWithOffset(
+    constrainIsoDateTimeInternals(organized),
+    offsetNano,
   )
 }
 
@@ -458,7 +458,7 @@ function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number 
     parseSubsecNano(parts[5] || '')
   )
 
-  if (offsetNanoPos > nanoInUtcDay) {
+  if (offsetNanoPos >= nanoInUtcDay) {
     throw new RangeError('Offset too large')
   }
 
