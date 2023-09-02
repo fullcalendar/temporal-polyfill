@@ -120,9 +120,15 @@ export function computeNanosecondsInDay(
   const epochNano0 = getSingleInstantFor(timeZoneOps, { ...isoDateFields, ...isoTimeFieldDefaults, })
   const epochNano1 = getSingleInstantFor(timeZoneOps, { ...moveDateByDays(isoDateFields, 1), ...isoTimeFieldDefaults })
 
-  return dayTimeNanoToNumber(
+  const nanoInDay = dayTimeNanoToNumber(
     diffDayTimeNanos(epochNano0, epochNano1)
   )
+
+  if (nanoInDay <= 0) {
+    throw new RangeError('Bad nanoseconds in day')
+  }
+
+  return nanoInDay
 }
 
 export function getMatchingInstantFor(

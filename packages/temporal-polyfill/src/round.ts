@@ -67,33 +67,24 @@ export function roundTime(
   )[0]
 }
 
+// TODO: break into two separate functions?
 function roundDateTimeToDay(
   isoFields: IsoDateTimeFields,
   timeZoneOps: TimeZoneOps | undefined,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
-  const nanoInDay = timeZoneOps
-    ? computeNanosecondsInDay(timeZoneOps, isoFields)
-    : nanoInUtcDay
+  if (timeZoneOps) {
+    const nanoInDay = computeNanosecondsInDay(timeZoneOps, isoFields)
+    const roundedTimeNano = roundByInc(isoTimeFieldsToNano(isoFields), nanoInDay, roundingMode)
+    const dayDelta = roundedTimeNano ? 1 : 0
 
-  // TODO: validate elsewhere?
-  if (nanoInDay <= 0) {
-    throw new RangeError('Bad nanoseconds in day')
+    return checkIsoDateTimeInBounds({
+      ...moveDateByDays(isoFields, dayDelta),
+      ...isoTimeFieldDefaults,
+    })
+  } else {
+    return roundDateTimeToNano(isoFields, nanoInUtcDay, roundingMode)
   }
-
-  // Special TimeZone algorithm
-  //
-  // if (timeZoneOps) {
-  //   const roundedTimeNano = roundByInc(isoTimeFieldsToNano(isoFields), nanoInDay, roundingMode)
-  //   const dayDelta = roundedTimeNano ? 1 : 0
-  //
-  //   return checkIsoDateTimeInBounds({
-  //     ...moveDateByDays(isoFields, dayDelta),
-  //     ...isoTimeFieldDefaults,
-  //   })
-  // }
-
-  return roundDateTimeToNano(isoFields, nanoInDay, roundingMode)
 }
 
 export function roundDateTimeToNano(
