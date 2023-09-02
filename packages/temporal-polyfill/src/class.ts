@@ -1,4 +1,4 @@
-import { ensureInstanceOf, ensureString } from './cast'
+import { ensureInstanceOf, ensureString, toString } from './cast'
 import {
   Callable,
   Classlike,
@@ -141,9 +141,9 @@ export type TemporalInstance<
   M & ToJsonMethods
 > & { [Symbol.toStringTag]: string }
 
-const temporaNameMap = new WeakMap<TemporalInstance<unknown>, string>()
+const temporalNameMap = new WeakMap<TemporalInstance<unknown>, string>()
 
-export const getTemporalName = temporaNameMap.get.bind(temporaNameMap) as
+export const getTemporalName = temporalNameMap.get.bind(temporalNameMap) as
   (arg: unknown) => string | undefined
 
 export function createSimpleTemporalClass<
@@ -186,7 +186,7 @@ export function createSimpleTemporalClass<
   }
 
   function setTemporalName(instance: TemporalInstance<I, G, M>) {
-    temporaNameMap.set(instance, temporalName)
+    temporalNameMap.set(instance, temporalName)
   }
 
   return [
@@ -242,8 +242,18 @@ export function createTemporalClass<
       argInternals
         ? (handleUnusedOptions(options), argInternals)
         : (stringToInternals as any).usesOptions // HACK for ZonedDateTime
-          ? stringToInternals(ensureString(arg as string), options)
-          : (handleUnusedOptions(options), stringToInternals(ensureString(arg as string)))
+          ? stringToInternals(
+              ensureString(arg as string),
+              options,
+            )
+          : (
+            handleUnusedOptions(options), // do this first
+            stringToInternals(
+              temporalName === 'Instant' // HACK
+                ? toString(arg as string)
+                : ensureString(arg as string)
+            )
+          )
     )
   }
 
