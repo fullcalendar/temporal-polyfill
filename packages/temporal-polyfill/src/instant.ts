@@ -18,7 +18,7 @@ import {
   refineInstantDisplayOptions,
   refineRoundOptions,
 } from './options'
-import { ensureBigInt, ensureObjectlike } from './cast'
+import { toBigInt, ensureObjectlike } from './cast'
 import { roundByInc, roundDayTimeNano, roundDayTimeNanoByInc } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { NumSign, noop } from './utils'
@@ -43,7 +43,7 @@ export const [
 
   // constructorToInternals
   (epochNano: bigint) => {
-    return checkEpochNanoInBounds(bigIntToDayTimeNano(ensureBigInt(epochNano)))
+    return checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano)))
   },
 
   // internalsConversionMap
@@ -178,11 +178,11 @@ export const [
     },
 
     fromEpochMicroseconds(epochMicro: bigint): Instant {
-      return createInstant(bigIntToDayTimeNano(ensureBigInt(epochMicro), nanoInMicro))
+      return createInstant(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro))
     },
 
     fromEpochNanoseconds(epochNano: bigint): Instant {
-      return createInstant(bigIntToDayTimeNano(ensureBigInt(epochNano)))
+      return createInstant(bigIntToDayTimeNano(toBigInt(epochNano)))
     },
 
     compare(a: InstantArg, b: InstantArg): NumSign {

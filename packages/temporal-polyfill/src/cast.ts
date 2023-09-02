@@ -29,8 +29,15 @@ export function ensureStringViaPrimitive(s: string): string {
 
 export const ensureNumber = ensureType.bind(undefined, 'number') as (arg: number) => number;
 
-// TODO: provide entity like 'epochNanoseconds' or 'epochMicroseconds'
-export const ensureBigInt = ensureType.bind(undefined, 'bigint') as (arg: bigint) => bigint;
+export function toBigInt(bi: bigint): bigint {
+  if (typeof bi === 'string') {
+    return BigInt(bi)
+  }
+  if (typeof bi !== 'bigint') {
+    throw new TypeError('Invalid bigint')
+  }
+  return bi
+}
 
 export const ensureBoolean = ensureType.bind(undefined, 'boolean') as (arg: boolean) => boolean;
 

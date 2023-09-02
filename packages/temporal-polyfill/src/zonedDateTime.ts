@@ -75,7 +75,7 @@ import {
 import { DayTimeUnit, Unit, UnitName, nanoInHour, nanoInSec } from './units'
 import { NumSign, mapProps } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
-import { ensureBigInt } from './cast'
+import { toBigInt } from './cast'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
@@ -109,7 +109,7 @@ export const [
     calendarArg: CalendarArg = isoCalendarId,
   ): ZonedInternals => {
     return {
-      epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(ensureBigInt(epochNano))),
+      epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
       timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
       calendar: queryCalendarOps(calendarArg),
     }
