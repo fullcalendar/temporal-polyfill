@@ -541,35 +541,31 @@ function refineRoundingInc(
 
   roundingInc = toInteger(roundingInc)
 
-  if (solarMode) {
+  const upUnitNano = solarMode ? nanoInUtcDay : unitNanoMap[smallestUnit + 1]
+
+  if (upUnitNano) {
     const unitNano = unitNanoMap[smallestUnit]
+    const maxRoundingInc = upUnitNano / unitNano
+    roundingInc = clampEntity(
+      roundingIncName,
+      roundingInc,
+      1,
+      maxRoundingInc - (solarMode ? 0 : 1),
+      Overflow.Reject
+    )
 
     // % is dangerous, but -0 will be falsy just like 0
-    if (nanoInUtcDay % (roundingInc * unitNano)) {
-      throw new RangeError('Must be multiple in day')
+    if (upUnitNano % (roundingInc * unitNano)) {
+      throw new RangeError('Must be multiple')
     }
-
   } else {
-    const upUnitNano = unitNanoMap[smallestUnit + 1]
-
-    if (upUnitNano) {
-      const unitNano = unitNanoMap[smallestUnit]
-      const maxRoundingInc = upUnitNano / unitNano
-      roundingInc = clampEntity(roundingIncName, roundingInc, 1, maxRoundingInc, Overflow.Reject)
-
-      // % is dangerous, but -0 will be falsy just like 0
-      if (upUnitNano % (roundingInc * unitNano)) {
-        throw new RangeError('Must be multiple')
-      }
-    } else {
-      roundingInc = clampEntity(
-        roundingIncName,
-        roundingInc,
-        1,
-        allowManyLargeUnits ? 10 ** 9 : 1,
-        Overflow.Reject
-      )
-    }
+    roundingInc = clampEntity(
+      roundingIncName,
+      roundingInc,
+      1,
+      allowManyLargeUnits ? 10 ** 9 : 1,
+      Overflow.Reject
+    )
   }
 
   return roundingInc
