@@ -118,12 +118,14 @@ export function roundTimeToNano(
 
 export function roundDayTimeDuration(
   durationFields: DurationFields,
+  largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
 ): DurationFields {
   return roundDurationToNano(
     durationFields,
+    largestUnit,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )
@@ -131,15 +133,17 @@ export function roundDayTimeDuration(
 
 /*
 Only does day-time rounding
+Busted: does not consider largestUnit
 */
 export function roundDurationToNano(
   durationFields: DurationFields,
+  largestUnit: DayTimeUnit,
   nanoInc: number, // REQUIRED: not larger than a day
   roundingMode: RoundingMode,
 ): DurationFields {
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour)
   const roundedLargeNano = roundDayTimeNanoByInc(dayTimeNano, nanoInc, roundingMode)
-  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano, Unit.Hour)
+  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
 
   return {
     ...durationFields,

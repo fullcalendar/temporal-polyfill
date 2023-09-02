@@ -35,7 +35,7 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { NumSign, compareNumbers, noop } from './utils'
+import { NumSign, noop } from './utils'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 import { DayTimeNano, compareDayTimeNanos } from './dayTimeNano'
@@ -146,7 +146,13 @@ export const [
         // TODO: check internals doesn't have large fields
         return createDuration(
           updateDurationFieldsSign(
-            roundDayTimeDuration(internals, smallestUnit as DayTimeUnit, roundingInc, roundingMode),
+            roundDayTimeDuration(
+              internals,
+              largestUnit as DayTimeUnit,
+              smallestUnit as DayTimeUnit,
+              roundingInc,
+              roundingMode
+            ),
           )
         )
       }
@@ -205,7 +211,14 @@ export const [
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
 
       return formatDurationInternals(
-        updateDurationFieldsSign(roundDurationToNano(internals, nanoInc, roundingMode)),
+        updateDurationFieldsSign(
+          roundDurationToNano(
+            internals,
+            Math.min(getLargestDurationUnit(internals), Unit.Hour),
+            nanoInc,
+            roundingMode,
+          )
+        ),
         subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
       )
     },

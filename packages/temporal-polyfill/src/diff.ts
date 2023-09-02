@@ -208,7 +208,6 @@ export function diffZonedEpochNano(
   }
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
-
   if (!sign) {
     return durationFieldDefaults
   }

@@ -1,5 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
+import { dayTimeNanoToNumber } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
@@ -116,7 +117,7 @@ export function formatDurationInternals(
   const { sign } = durationInternals
   const abs = absDurationInternals(durationInternals)
   const { hours, minutes } = abs
-  const [, secondsNano] = givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc)
+  const secondsNano = dayTimeNanoToNumber(givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc))
   const [wholeSeconds, subsecNano] = divModFloor(secondsNano, nanoInSec)
   const forceSeconds =
     // at least one subsecond digit being forced?
