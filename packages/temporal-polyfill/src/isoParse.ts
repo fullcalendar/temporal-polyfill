@@ -37,6 +37,7 @@ import {
 import { divModFloor } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
+import { moveDateByDays } from './move'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -126,8 +127,17 @@ export function parsePlainDate(s: string): IsoDateInternals {
 export function parsePlainYearMonth(s: string): IsoDateInternals {
   const organized = parseMaybeYearMonth(s)
   return organized
-    ? postProcessDate(organized) // TODO: specific for YEAR-MONTH
-    : parsePlainDate(s)
+    ? postProcessDate(organized) // definitly iso. `organized` is already start of iso month
+    : resetStartOfMonth(parsePlainDate(s))
+}
+
+function resetStartOfMonth(isoInternals: IsoDateInternals): IsoDateInternals {
+  const { calendar } = isoInternals
+
+  return {
+    calendar,
+    ...moveDateByDays(isoInternals, 1 - calendar.day(isoInternals))
+  }
 }
 
 export function parsePlainMonthDay(s: string): IsoDateInternals {
@@ -244,11 +254,6 @@ function postProcessZonedDateTime(
     timeZone,
     calendar,
   }
-}
-
-function postProcessForInstant(organized: GenericDateTimeOrganized): IsoDateTimeFields {
-  // TODO: more DRY with other
-  return checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized))
 }
 
 function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeInternals {
@@ -411,6 +416,9 @@ function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized
   }
 }
 
+/*
+Result assumed to be ISO
+*/
 function organizeYearMonthParts(parts: string[]): IsoDateFields & { calendar: string } {
   return {
     isoYear: organizeIsoYearParts(parts),
