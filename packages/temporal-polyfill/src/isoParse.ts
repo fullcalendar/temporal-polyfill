@@ -98,9 +98,6 @@ export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): Zone
   return postProcessZonedDateTime(organized as ZonedDateTimeOrganized, offsetDisambig, epochDisambig)
 }
 
-// HACK
-;(parseZonedDateTime as any).usesOptions = true
-
 export function parsePlainDateTime(s: string): IsoDateTimeInternals {
   const organized = parseMaybeGenericDateTime(s)
 

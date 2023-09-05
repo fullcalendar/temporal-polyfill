@@ -241,7 +241,7 @@ export function createTemporalClass<
     return (!argInternals && isObjectlike(arg) && bagToInternals(arg as B, options)) || (
       argInternals
         ? (handleUnusedOptions(options), argInternals)
-        : (stringToInternals as any).usesOptions // HACK for ZonedDateTime
+        : temporalName === 'ZonedDateTime' // HACK
           ? stringToInternals(
               ensureString(arg as string),
               options,
