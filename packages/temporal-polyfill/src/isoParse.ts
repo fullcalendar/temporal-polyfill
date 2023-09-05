@@ -420,11 +420,17 @@ function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized
 Result assumed to be ISO
 */
 function organizeYearMonthParts(parts: string[]): IsoDateFields & { calendar: string } {
+  const annotationOrganized = organizeAnnotationParts(parts[5])
+
+  if (annotationOrganized.calendar && annotationOrganized.calendar !== isoCalendarId) {
+    throw new RangeError('Calendar not allowed: ' + annotationOrganized.calendar)
+  }
+
   return {
     isoYear: organizeIsoYearParts(parts),
     isoMonth: parseInt(parts[4]),
     isoDay: 1,
-    ...organizeAnnotationParts(parts[5]),
+    ...annotationOrganized,
   }
 }
 

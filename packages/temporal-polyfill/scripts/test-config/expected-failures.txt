@@ -24,6 +24,9 @@ built-ins/Temporal/Instant/prototype/since/order-of-operations.js
 built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
 built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 
+# constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
+built-ins/Temporal/PlainYearMonth/calendar-invalid.js
+
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
