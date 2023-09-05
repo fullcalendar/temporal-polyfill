@@ -38,6 +38,7 @@ built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/from/order-of-operations.js
 
 # overflow options should be passed from PlainDateTime::since to Calendar::dateUntil
 # (though it should be a shallow-copied)
