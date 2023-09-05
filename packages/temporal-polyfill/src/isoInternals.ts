@@ -11,7 +11,7 @@ import {
   isoDateFieldRefiners,
   isoTimeFieldRefiners,
 } from './isoFields'
-import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
+import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
 
 export interface CalendarInternals {
@@ -117,6 +117,16 @@ export function refineIsoDateInternals(
   rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
 ): IsoDateInternals {
   return checkIsoDateInBounds(
+    constrainIsoDateInternals(
+      mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
+    ),
+  )
+}
+
+export function refineIsoYearMonthInternals(
+  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
+): IsoDateInternals {
+  return checkIsoYearMonthInBounds(
     constrainIsoDateInternals(
       mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
     ),

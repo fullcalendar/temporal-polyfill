@@ -12,7 +12,7 @@ import { diffDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import { IsoDateFields } from './isoFields'
-import { IsoDateInternals, generatePublicIsoDateFields, refineIsoDateInternals } from './isoInternals'
+import { IsoDateInternals, generatePublicIsoDateFields, refineIsoDateInternals, refineIsoYearMonthInternals } from './isoInternals'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateFields } from './isoMath'
@@ -46,7 +46,7 @@ export const [
     calendar: CalendarArg = isoCalendarId,
     referenceIsoDay: number = 1
   ): IsoDateInternals => {
-    return refineIsoDateInternals({
+    return refineIsoYearMonthInternals({
       isoYear,
       isoMonth,
       isoDay: referenceIsoDay,

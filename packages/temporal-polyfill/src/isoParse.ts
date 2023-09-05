@@ -20,6 +20,7 @@ import {
 import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
+  checkIsoYearMonthInBounds,
   isoEpochFirstLeapYear,
   isoToEpochNanoWithOffset,
   nanoToIsoTimeAndDay,
@@ -125,18 +126,34 @@ export function parsePlainDate(s: string): IsoDateInternals {
 }
 
 export function parsePlainYearMonth(s: string): IsoDateInternals {
-  const organized = parseMaybeYearMonth(s)
-  return organized
-    ? postProcessDate(organized) // definitly iso. `organized` is already start of iso month
-    : resetStartOfMonth(parsePlainDate(s))
+  let organized = parseMaybeYearMonth(s)
+
+  if (organized) {
+    if (organized.calendar !== isoCalendarId) {
+      throw new RangeError('Invalid calendar')
+    }
+
+    return postProcessYearMonthOnly(organized)
+  }
+
+  return resetToMonthStart(parsePlainDate(s))
 }
 
-function resetStartOfMonth(isoInternals: IsoDateInternals): IsoDateInternals {
+function postProcessYearMonthOnly(organized: DateOrganized): IsoDateInternals {
+  return giveRealCalendar(checkIsoYearMonthInBounds(constrainIsoDateInternals(organized)))
+}
+
+function resetToMonthStart(isoInternals: IsoDateInternals): IsoDateInternals {
   const { calendar } = isoInternals
 
+  // TODO: don't check yearmonth inbounds AND date inbounds (via parsePlainDate > postProcessDate)
+  const isoFields = checkIsoYearMonthInBounds(
+    moveDateByDays(isoInternals, 1 - calendar.day(isoInternals))
+  )
+
   return {
+    ...isoFields,
     calendar,
-    ...moveDateByDays(isoInternals, 1 - calendar.day(isoInternals))
   }
 }
 
@@ -420,17 +437,11 @@ function organizeGenericDateTimeParts(parts: string[]): GenericDateTimeOrganized
 Result assumed to be ISO
 */
 function organizeYearMonthParts(parts: string[]): IsoDateFields & { calendar: string } {
-  const annotationOrganized = organizeAnnotationParts(parts[5])
-
-  if (annotationOrganized.calendar && annotationOrganized.calendar !== isoCalendarId) {
-    throw new RangeError('Calendar not allowed: ' + annotationOrganized.calendar)
-  }
-
   return {
     isoYear: organizeIsoYearParts(parts),
     isoMonth: parseInt(parts[4]),
     isoDay: 1,
-    ...annotationOrganized,
+    ...organizeAnnotationParts(parts[5]),
   }
 }
 
