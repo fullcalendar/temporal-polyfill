@@ -147,7 +147,7 @@ function diffPlainYearMonths(
   internals0: IsoDateInternals,
   internals1: IsoDateInternals,
   options: DiffOptions | undefined,
-  invert?: boolean
+  invert?: boolean,
 ): Duration {
   let durationInternals = updateDurationFieldsSign(
     diffDates(

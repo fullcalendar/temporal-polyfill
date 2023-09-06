@@ -164,8 +164,15 @@ export function roundRelativeDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
 ): DurationFields {
+  const durationInternals = updateDurationFieldsSign(durationFields)
+
   // fast path, no rounding
-  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
+  if (
+    !durationInternals.sign || (
+      smallestUnit === Unit.Nanosecond &&
+      roundingInc === 1
+    )
+  ) {
     return durationFields
   }
 
@@ -182,7 +189,7 @@ export function roundRelativeDuration<M>(
   ) as typeof nudgeRelativeDuration // accepts all units
 
   let [roundedDurationFields, roundedEpochNano, grew] = nudgeFunc(
-    updateDurationFieldsSign(durationFields),
+    durationInternals,
     endEpochNano,
     smallestUnit,
     roundingInc,
