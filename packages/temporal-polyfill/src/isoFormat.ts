@@ -18,7 +18,8 @@ import {
 import { divModFloor, padNumber, padNumber2 } from './utils'
 
 /*
-High-level. Refined options
+High-level. Refined options.
+TODO: possible to simplify this function
 */
 export function formatPossibleDate(
   formatSimple: (internals: IsoDateInternals) => string,
@@ -32,7 +33,11 @@ export function formatPossibleDate(
     (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
 
   if (calendarDisplay === CalendarDisplay.Never) {
-    return formatIsoDateFields(internals)
+    if (calendarId === isoCalendarId) {
+      return formatSimple(internals)
+    } else {
+      return formatIsoDateFields(internals)
+    }
   } else if (showCalendar) {
     return formatIsoDateFields(internals) + formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
   } else {
