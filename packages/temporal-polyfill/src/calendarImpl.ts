@@ -266,7 +266,11 @@ export class CalendarImpl implements CalendarOps {
     let { era, eraYear, year } = fields
     const allowEras = getAllowErasInFields(this)
 
-    if (allowEras && era !== undefined && eraYear !== undefined) {
+    if (allowEras && (era !== undefined || eraYear !== undefined)) {
+      if (era === undefined || eraYear === undefined) {
+        throw new RangeError('Must define both era and eraYear')
+      }
+
       const yearByEra = refineEraYear(this, era, eraYear)
 
       if (year !== undefined && year !== yearByEra) {

@@ -577,6 +577,10 @@ built-ins/Temporal/Duration/prototype/round/name.js
 built-ins/Temporal/Duration/prototype/negated/name.js
 built-ins/Temporal/Duration/name.js
 built-ins/Temporal/Duration/compare/length.js
+intl402/Temporal/Calendar/prototype/era/length.js
+intl402/Temporal/Calendar/prototype/era/name.js
+intl402/Temporal/Calendar/prototype/eraYear/length.js
+intl402/Temporal/Calendar/prototype/eraYear/name.js
 
 # on .prototype, real classes have writable:false, whereas function(){} has writable:true
 #

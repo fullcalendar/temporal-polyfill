@@ -360,7 +360,7 @@ export function computeIntlMonthsInYearSpan(
   const yearCorrection = yearSign < 0 ? -1 : 0
   let months = 0
 
-  for (let year = 0; year !== yearEnd; year += yearSign) {
+  for (let year = yearStart; year !== yearEnd; year += yearSign) {
     months += calendarImpl.computeMonthsInYear(year + yearCorrection)
   }
 
