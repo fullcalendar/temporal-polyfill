@@ -40,13 +40,23 @@ built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainYearMonth/from/order-of-operations.js
 
-# overflow options should be passed from PlainDateTime::since to Calendar::dateUntil
+# overflow options should be passed through to Calendar::dateUntil
 # (though it should be a shallow-copied)
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
+
+# similar to above
+# PlainYearMonth should copy options object before giving it to Calendar::dateAdd
+# (it does this because overflow is used for add and then also plaindate->yearmonth conversion)
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 # I disagree w/ irregular lengh-of-day tests for ZonedDateTime, especially the third `test`
 built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
@@ -67,6 +77,47 @@ built-ins/Temporal/Duration/call-builtin.js
 
 # our Duration::compare calls Calendar::dateAdd fewer times!
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
+
+# our PlainYearMonth::add (with negative) calls Calendar::dateAdd fewer times!
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
+
+# PlainYearMonth, ignore wasteful date<->yearmonth internal conversions for `add`
+# (uses dateAdd/fields/dateFromFields instead of just daysInMonth)
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/custom-daysInMonth-irrelevant.js
+built-ins/Temporal/PlainYearMonth/prototype/add/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/add/proto-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/custom-daysInMonth-irrelevant.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/proto-in-calendar-fields.js
+
+# PlainYearMonth, wasteful `since`
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/until/order-of-operations.js
+
+# PlainYearMonth can't handle super big roundingIncrement
+built-ins/Temporal/PlainYearMonth/prototype/since/roundingincrement-non-integer.js
+built-ins/Temporal/PlainYearMonth/prototype/until/roundingincrement-non-integer.js
 
 # we parse overflow options fewer times!
 # // toString property is read once by Calendar.dateFromFields() in the builtin
@@ -151,9 +202,16 @@ built-ins/Temporal/PlainDateTime/prototype/weekOfYear/custom.js
 built-ins/Temporal/PlainDateTime/prototype/year/custom.js
 built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/daysInMonth/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/daysInYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/inLeapYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/month/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/monthCode/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/monthsInYear/custom.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
+built-ins/Temporal/PlainYearMonth/prototype/equals/compare-calendar.js
 
 # calendar comparisons internally uses different CalendarOpsAdapters, so object comparison fails
 # TODO: have each obj store raw calendar slot

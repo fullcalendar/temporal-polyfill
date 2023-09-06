@@ -309,8 +309,7 @@ function convertToIso(
   extra = refineFields(extra, extraFieldNames, [])
 
   let mergedFields = calendar.mergeFields(input, extra)
-  const mergedFieldNames = excludeArrayDuplicates([...inputFieldNames, ...extraFieldNames])
-  mergedFields = refineFields(mergedFields, mergedFieldNames, [])
+  mergedFields = refineFields(mergedFields, [...inputFieldNames, ...extraFieldNames], [])
 
   return calendar.dateFromFields(mergedFields)
 }
@@ -362,7 +361,8 @@ export function convertPlainYearMonthToDate(
 }
 
 export function convertToPlainYearMonth(
-  input: PlainDate | PlainDateTime | ZonedDateTime // TODO: more generic type
+  input: PlainDate | PlainDateTime | ZonedDateTime, // TODO: more generic type
+  overflow?: Overflow,
 ) {
   const { calendar } = getInternals(input)
   const fields = refineCalendarFields(
@@ -373,7 +373,7 @@ export function convertToPlainYearMonth(
   )
 
   return createPlainYearMonth(
-    calendar.yearMonthFromFields(fields),
+    calendar.yearMonthFromFields(fields, overflow),
   )
 }
 

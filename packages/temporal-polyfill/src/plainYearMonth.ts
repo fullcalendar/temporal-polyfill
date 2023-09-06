@@ -154,7 +154,7 @@ function diffPlainYearMonths(
       getCommonCalendarOps(internals0, internals1),
       movePlainYearMonthToDay(internals0),
       movePlainYearMonthToDay(internals1),
-      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Day),
+      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
     ),
   )
 
@@ -177,14 +177,14 @@ function movePlainYearMonth(
       ? calendar.daysInMonth(internals)
       : 1,
   )
+  const overflow = refineOverflowOptions(options)
 
   /*
   TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
   */
   return convertToPlainYearMonth(
-    createPlainDate(
-      calendar.dateAdd(isoDateFields, durationInternals, refineOverflowOptions(options))
-    )
+    createPlainDate(calendar.dateAdd(isoDateFields, durationInternals, overflow)),
+    overflow,
   )
 }
 
