@@ -26,12 +26,15 @@ export function formatPossibleDate(
   options?: DateTimeDisplayOptions,
 ) {
   const calendarDisplay = refineDateDisplayOptions(options)
+  const calendarId = internals.calendar.id
   const showCalendar =
     calendarDisplay > CalendarDisplay.Never || // critical or always
-    (calendarDisplay === CalendarDisplay.Auto && internals.calendar.id !== isoCalendarId)
+    (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
 
-  if (showCalendar) {
-    return formatIsoDateFields(internals) + formatCalendar(internals.calendar, calendarDisplay)
+  if (calendarDisplay === CalendarDisplay.Never) {
+    return formatIsoDateFields(internals)
+  } else if (showCalendar) {
+    return formatIsoDateFields(internals) + formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
   } else {
     return formatSimple(internals)
   }
@@ -194,21 +197,23 @@ export function formatCalendar(
       calendarDisplay > CalendarDisplay.Never || // critical or always
       (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
     ) {
-      return '[' +
-        (calendarDisplay === CalendarDisplay.Critical ? '!' : '') +
-        'u-ca=' + calendarId +
-        ']'
+      return formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
     }
   }
 
   return ''
 }
 
+function formatCalendarId(calendarId: string, isCritical: boolean): string {
+  return '[' +
+    (isCritical ? '!' : '') +
+    'u-ca=' + calendarId +
+    ']'
+}
+
 //
 // utils
 //
-
-
 
 function formatSubsec(
   isoMillisecond: number,
