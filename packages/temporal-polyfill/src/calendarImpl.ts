@@ -51,7 +51,7 @@ import {
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
-import { Callable, clampEntity, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
+import { Callable, clampEntity, compareNumbers, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 import { ensureString } from './cast'
@@ -597,11 +597,44 @@ class IntlCalendarImpl extends CalendarImpl {
     return [year, monthStrToIndex[month] + 1, day]
   }
 
+  queryYearMonthCodeDay(isoDateFields: IsoDateFields): [
+    year: number,
+    monthCodeNumber: number,
+    monthIsLeap: boolean,
+    day: number
+  ] {
+    const [year, month, day] = this.queryYearMonthDay(isoDateFields)
+    const leapMonth = this.queryLeapMonth(year)
+
+    return [
+      year,
+      monthToMonthCode(month, leapMonth),
+      month === leapMonth,
+      day,
+    ]
+  }
+
   queryYearMonthForMonthDay(monthCodeNumber: number, isLeapMonth: boolean, day: number): [
     year: number,
     month: number,
   ] {
-    let startYear = this.yearAtEpoch + 3 // year-at-end-of-1972
+    let [startYear, startMonthCodeNumber, startMonthIsLeap, startDay] = this.queryYearMonthCodeDay({
+      isoYear: isoEpochFirstLeapYear,
+      isoMonth: 12,
+      isoDay: 31,
+    })
+
+    // ensure monthCodeNumber/isLeapMonth/day is within `isoEpochFirstLeapYear`
+    // TODO: use general-purpose array-comparison util later
+    if (
+      (
+        compareNumbers(monthCodeNumber, startMonthCodeNumber) ||
+        compareNumbers(Number(isLeapMonth), Number(startMonthIsLeap)) ||
+        compareNumbers(day, startDay)
+      ) === 1
+    ) {
+      startYear--
+    }
 
     for (let yearMove = 0; yearMove < 100; yearMove++) {
       const year = startYear - yearMove // move backwards
@@ -624,9 +657,15 @@ class IntlCalendarImpl extends CalendarImpl {
   queryLeapMonth(year: number): number | undefined {
     const currentMonthStrs = this.queryMonthStrs(year)
     const prevMonthStrs = this.queryMonthStrs(year - 1)
-    const prevLength = currentMonthStrs.length
+    const prevLength = prevMonthStrs.length
 
     if (currentMonthStrs.length > prevLength) {
+      // hardcoded leap month. usually means complex month-code schemes
+      const leapMonthMeta = leapYearMetas[this.id]
+      if (leapMonthMeta < 0) {
+        return -leapMonthMeta
+      }
+
       for (let i = 0; i < prevLength; i++) {
         if (prevMonthStrs[i] !== currentMonthStrs[i]) {
           return i + 1 // convert to 1-based
@@ -925,13 +964,15 @@ function refineMonthCodeNumber(
 }
 
 function formatMonthCode(month: number, leapMonth?: number): string {
-  return 'M' + padNumber2(
-    month - (
-      (leapMonth && month >= leapMonth)
-        ? 1
-        : 0
-    ),
-  ) + ((month === leapMonth) ? 'L' : '')
+  return 'M' + padNumber2(monthToMonthCode(month, leapMonth)) + ((month === leapMonth) ? 'L' : '')
+}
+
+function monthToMonthCode(month: number, leapMonth?: number): number {
+  return month - (
+    (leapMonth && month >= leapMonth)
+      ? 1
+      : 0
+  )
 }
 
 // Calendar ID Utils
