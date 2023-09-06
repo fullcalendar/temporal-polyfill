@@ -27,6 +27,8 @@ built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 # constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
 built-ins/Temporal/PlainYearMonth/calendar-invalid.js
 built-ins/Temporal/PlainMonthDay/calendar-invalid.js
+built-ins/Temporal/PlainMonthDay/infinity-throws-rangeerror.js
+built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
 
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -41,6 +43,8 @@ built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/PlainYearMonth/from/order-of-operations.js
 built-ins/Temporal/PlainYearMonth/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainMonthDay/from/order-of-operations.js
+built-ins/Temporal/PlainMonthDay/prototype/with/order-of-operations.js
 
 # overflow options should be passed through to Calendar::dateUntil
 # (though it should be a shallow-copied)
@@ -61,8 +65,9 @@ built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 # similar to above
-# PlainYearMonth::with should pass options through to calendar
+# PlainYearMonth/PlainMonthDay::with should pass options through to calendar
 built-ins/Temporal/PlainYearMonth/prototype/with/calendar-arguments.js
+built-ins/Temporal/PlainMonthDay/prototype/with/calendar-arguments.js
 
 # I disagree w/ irregular lengh-of-day tests for ZonedDateTime, especially the third `test`
 built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
@@ -215,6 +220,8 @@ built-ins/Temporal/PlainYearMonth/prototype/month/custom.js
 built-ins/Temporal/PlainYearMonth/prototype/monthCode/custom.js
 built-ins/Temporal/PlainYearMonth/prototype/monthsInYear/custom.js
 built-ins/Temporal/PlainYearMonth/prototype/year/custom.js
+built-ins/Temporal/PlainMonthDay/prototype/day/custom.js
+built-ins/Temporal/PlainMonthDay/prototype/monthCode/custom.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js

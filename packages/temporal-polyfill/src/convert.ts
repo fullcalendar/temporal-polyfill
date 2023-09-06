@@ -55,7 +55,7 @@ import { TimeZoneArg } from './timeZone'
 import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { Callable, Reused, excludeArrayDuplicates, pluckProps } from './utils'
 import { ZonedDateTime, ZonedDateTimeBag, ZonedDateTimeMod, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { checkIsoDateTimeInBounds } from './isoMath'
+import { checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
 
 /*
 Rules:
@@ -299,6 +299,7 @@ function convertToIso(
   inputFieldNames: string[],
   extra: {},
   extraFieldNames: string[],
+  overflow?: Overflow,
 ): IsoDateInternals {
   const { calendar } = getInternals(input as TemporalInstance<{ calendar: CalendarOps }>)
 
@@ -311,7 +312,7 @@ function convertToIso(
   let mergedFields = calendar.mergeFields(input, extra)
   mergedFields = refineFields(mergedFields, [...inputFieldNames, ...extraFieldNames], [])
 
-  return calendar.dateFromFields(mergedFields)
+  return calendar.dateFromFields(mergedFields, overflow)
 }
 
 // PlainYearMonth
@@ -383,16 +384,34 @@ export function convertToPlainYearMonth(
 export function refinePlainMonthDayBag(
   bag: PlainMonthDayBag,
   options: OverflowOptions | undefined,
-  calendar: CalendarOps = getBagCalendarOps(bag),
+  calendar?: CalendarOps,
 ): IsoDateInternals {
+  let calendarAbsent = !calendar
+
+  if (calendarAbsent) {
+    calendar = extractBagCalendarOps(bag)
+    calendarAbsent = !calendar
+
+    if (calendarAbsent) {
+      calendar = queryCalendarImpl(isoCalendarId)
+    }
+  }
+
   const fields = refineCalendarFields(
-    calendar,
+    calendar!,
     bag,
     dateFieldNames,
     [], // requiredFields
   )
 
-  return calendar.monthDayFromFields(fields, refineOverflowOptions(options))
+  // Callers who omit the calendar are not writing calendar-independent
+  // code. In that case, `monthCode`/`year` can be omitted; `month` and
+  // `day` are sufficient. Add a `year` to satisfy calendar validation.
+  if (calendarAbsent && fields.month !== undefined && fields.monthCode === undefined && fields.year === undefined) {
+    fields.year = isoEpochFirstLeapYear
+  }
+
+  return calendar!.monthDayFromFields(fields, refineOverflowOptions(options))
 }
 
 export function mergePlainMonthDayBag(
@@ -435,7 +454,13 @@ export function convertPlainMonthDayToDate(
   bag: YearFields,
 ): PlainDate {
   return createPlainDate(
-    convertToIso(plainMonthDay, monthDayBasicNames, ensureObjectlike(bag), ['year']),
+    convertToIso(
+      plainMonthDay,
+      monthDayBasicNames,
+      ensureObjectlike(bag),
+      ['year'],
+      Overflow.Reject, // unlike others. correct
+    ),
   )
 }
 

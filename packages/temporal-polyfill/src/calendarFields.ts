@@ -285,7 +285,9 @@ function createCalendarGetters<K extends keyof DateGetters>(
 
 export const dateGetters = createCalendarGetters(dateGetterNames)
 export const yearMonthGetters = createCalendarGetters(yearMonthGetterNames)
+
 export const monthDayGetters = createCalendarGetters(monthDayGetterNames)
+delete (monthDayGetters as any).month // HACK
 
 export const timeGetters = mapPropNames((fieldName, i) => {
   return (isoTimeFields: IsoTimeFields) => {

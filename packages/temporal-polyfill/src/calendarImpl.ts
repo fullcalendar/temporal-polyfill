@@ -275,11 +275,7 @@ export class CalendarImpl implements CalendarOps {
 
       year = yearByEra
     } else if (year === undefined) {
-      if (this.id === isoCalendarId) {
-        year = isoEpochFirstLeapYear // HACK
-      } else {
-        throw new TypeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
-      }
+      throw new TypeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
     }
 
     return year
@@ -601,10 +597,10 @@ class IntlCalendarImpl extends CalendarImpl {
     year: number,
     month: number,
   ] {
-    let year = this.yearAtEpoch
-    const endYear = year + 100
+    let startYear = this.yearAtEpoch + 3 // year-at-end-of-1972
 
-    for (; year < endYear; year++) {
+    for (let yearMove = 0; yearMove < 100; yearMove++) {
+      const year = startYear - yearMove // move backwards
       const leapMonth = this.queryLeapMonth(year)
 
       // TODO: don't repeatedly refine
