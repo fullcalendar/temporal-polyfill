@@ -142,16 +142,20 @@ function postProcessYearMonthOnly(organized: DateOrganized): IsoDateInternals {
 
 function resetToMonthStart(isoInternals: IsoDateInternals): IsoDateInternals {
   const { calendar } = isoInternals
-
-  // TODO: don't check yearmonth inbounds AND date inbounds (via parsePlainDate > postProcessDate)
-  const isoFields = checkIsoYearMonthInBounds(
-    moveDateByDays(isoInternals, 1 - calendar.day(isoInternals))
-  )
+  const isoFields = movePlainYearMonthToDay(isoInternals)
 
   return {
     ...isoFields,
     calendar,
   }
+}
+
+// TODO: DRY
+function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
+  return moveDateByDays(
+    internals,
+    day - internals.calendar.day(internals),
+  )
 }
 
 export function parsePlainMonthDay(s: string): IsoDateInternals {

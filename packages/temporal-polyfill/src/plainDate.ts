@@ -17,6 +17,7 @@ import { diffDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
 import {
+  IsoDateFields,
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
@@ -29,13 +30,14 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplay
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeFields } from './plainTime'
-import { PlainYearMonth } from './plainYearMonth'
+import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { zonedInternalsToIso } from './timeZoneOps'
 import { Unit } from './units'
 import { NumSign, isObjectlike } from './utils'
 import { getCommonCalendarOps } from './calendarOps'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
+import { moveDateByDays } from './move'
 
 export type PlainDateArg = PlainDate | PlainDateBag | string
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
@@ -175,6 +177,9 @@ export const [
     },
 
     toPlainYearMonth(): PlainYearMonth {
+      /*
+      TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
+      */
       return convertToPlainYearMonth(this)
     },
 

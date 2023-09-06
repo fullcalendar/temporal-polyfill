@@ -5,6 +5,7 @@ import { getPublicCalendar } from './calendarPublic'
 import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
 import {
   convertPlainYearMonthToDate,
+  convertToPlainYearMonth,
   mergePlainYearMonthBag,
   refinePlainYearMonthBag,
 } from './convert'
@@ -19,7 +20,7 @@ import { compareIsoDateFields } from './isoMath'
 import { parsePlainYearMonth } from './isoParse'
 import { moveDateByDays } from './move'
 import { DiffOptions, OverflowOptions, refineDiffOptions, refineOverflowOptions } from './options'
-import { PlainDate } from './plainDate'
+import { PlainDate, createPlainDate } from './plainDate'
 import { Unit } from './units'
 import { NumSign } from './utils'
 import { getCommonCalendarOps } from './calendarOps'
@@ -177,11 +178,17 @@ function movePlainYearMonth(
       : 1,
   )
 
-  return createPlainYearMonth(
-    calendar.dateAdd(isoDateFields, durationInternals, refineOverflowOptions(options)),
+  /*
+  TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
+  */
+  return convertToPlainYearMonth(
+    createPlainDate(
+      calendar.dateAdd(isoDateFields, durationInternals, refineOverflowOptions(options))
+    )
   )
 }
 
+// TODO: DRY
 function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
   return moveDateByDays(
     internals,
