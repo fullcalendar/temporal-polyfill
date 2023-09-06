@@ -39,6 +39,7 @@ import { divModFloor } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
 import { moveDateByDays } from './move'
+import { createPlainDate } from './plainDate'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -154,15 +155,37 @@ function resetToMonthStart(isoInternals: IsoDateInternals): IsoDateInternals {
 function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
   return moveDateByDays(
     internals,
-    day - internals.calendar.day(internals),
+    day - internals.calendar.day(internals), // NOTE: non-compliant algorithm
   )
 }
 
 export function parsePlainMonthDay(s: string): IsoDateInternals {
   const organized = parseMaybeMonthDay(s)
-  return organized
-    ? postProcessDate(organized) // TODO: specific for MONTH-DAY
-    : parsePlainDate(s)
+
+  if (organized) {
+    if (organized.calendar !== isoCalendarId) {
+      throw new RangeError('Invalid calendar')
+    }
+
+    return postProcessMonthDayOnly(organized)
+  }
+
+  return findBestYear(parsePlainDate(s))
+}
+
+function postProcessMonthDayOnly(organized: DateOrganized): IsoDateInternals {
+  const isoFields = constrainIsoDateInternals(organized)
+  const calendar = queryCalendarImpl(organized.calendar)
+  const plainDate = createPlainDate({ ...isoFields, calendar }) // YUCK
+
+  return calendar.monthDayFromFields(plainDate)
+}
+
+function findBestYear(isoInternals: IsoDateInternals): IsoDateInternals {
+  const calendar = isoInternals.calendar as CalendarImpl
+  const plainDate = createPlainDate(isoInternals) // YUCK
+
+  return calendar.monthDayFromFields(plainDate)
 }
 
 export function parsePlainTime(s: string): IsoTimeFields {

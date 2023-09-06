@@ -275,7 +275,11 @@ export class CalendarImpl implements CalendarOps {
 
       year = yearByEra
     } else if (year === undefined) {
-      throw new TypeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
+      if (this.id === isoCalendarId) {
+        year = isoEpochFirstLeapYear // HACK
+      } else {
+        throw new TypeError('Must specify year' + (allowEras ? ' or era/eraYear' : ''))
+      }
     }
 
     return year
