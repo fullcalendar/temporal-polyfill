@@ -73,7 +73,7 @@ export function getErasBeginMidYear(calendarImpl: CalendarImpl): boolean {
 export const leapYearMetas: {
   [calendarId: string]: number
 } = {
-  chinese: 11, // (positive) max possible leap month
-  dangi: 11, // "
+  chinese: 13, // (positive) max possible leap month
+  dangi: 13, // "
   hebrew: -6, // (negative) constant leap month
 }

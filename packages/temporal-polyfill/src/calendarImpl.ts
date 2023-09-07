@@ -293,7 +293,7 @@ export class CalendarImpl implements CalendarOps {
     let { month, monthCode } = fields
 
     if (monthCode !== undefined) {
-      const monthByCode = refineMonthCode(this, monthCode, year)
+      const monthByCode = refineMonthCode(this, monthCode, year, overflow)
 
       if (month !== undefined && month !== monthByCode) {
         throw new RangeError('The month and monthCode do not agree')
@@ -461,27 +461,44 @@ function refineMonthCode(
   calendar: CalendarImpl,
   monthCode: string,
   year: number, // optional if known that calendar doesn't support leap months
+  overflow: Overflow | undefined,
 ) {
   const leapMonth = calendar.queryLeapMonth(year)
-  const [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-  const month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, leapMonth)
+  const [monthCodeNumber, wantsLeapMonth] = parseMonthCode(monthCode)
+  let month = refineMonthCodeNumber(monthCodeNumber, wantsLeapMonth, leapMonth)
 
-  if (isLeapMonth) {
+  if (wantsLeapMonth) {
     const leapYearMeta = leapYearMetas[getCalendarIdBase(calendar.id)]
+
+    // calendar does not support leap years
     if (leapYearMeta === undefined) {
       throw new RangeError('Calendar system doesnt support leap months')
     }
-
-    if (
-      leapYearMeta > 0
-        ? month > leapYearMeta // max possible leap month
-        : month !== -leapYearMeta // (negative) constant leap month
-    ) {
-      throw new RangeError('Invalid leap-month month code')
+    // leap year has a maximum
+    else if (leapYearMeta > 0) {
+      if (month > leapYearMeta) {
+        throw new RangeError('Invalid leap-month month code')
+      }
+      if (leapMonth === undefined) {
+        if (overflow === Overflow.Reject) {
+          throw new RangeError('Invalid leap-month month code')
+        } else {
+          month-- // M05L -> M05
+        }
+      }
     }
-
-    if (month !== leapMonth) {
-      throw new RangeError('Invalid leap-month month code')
+    // leap year is constant
+    else {
+      if (month !== -leapYearMeta) {
+        throw new RangeError('Invalid leap-month month code')
+      }
+      if (leapMonth === undefined) {
+        if (overflow === Overflow.Reject) {
+          throw new RangeError('Invalid leap-month month code')
+        } else {
+          ; // M05L -> M06
+        }
+      }
     }
   }
 
@@ -657,17 +674,17 @@ class IntlCalendarImpl extends CalendarImpl {
   queryLeapMonth(year: number): number | undefined {
     const currentMonthStrs = this.queryMonthStrs(year)
     const prevMonthStrs = this.queryMonthStrs(year - 1)
-    const prevLength = prevMonthStrs.length
+    const currentLength = currentMonthStrs.length
 
-    if (currentMonthStrs.length > prevLength) {
+    if (currentLength > prevMonthStrs.length) {
       // hardcoded leap month. usually means complex month-code schemes
       const leapMonthMeta = leapYearMetas[this.id]
       if (leapMonthMeta < 0) {
         return -leapMonthMeta
       }
 
-      for (let i = 0; i < prevLength; i++) {
-        if (prevMonthStrs[i] !== currentMonthStrs[i]) {
+      for (let i = 0; i < currentLength; i++) {
+        if (currentMonthStrs[i] !== prevMonthStrs[i]) {
           return i + 1 // convert to 1-based
         }
       }
