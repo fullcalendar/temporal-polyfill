@@ -315,9 +315,9 @@ const timeZoneOpsAdapterGetters = {
   }
 }
 
-// YUCK a
+// YUCK!: we're using Calendar object directly here. check type in case of subclass
 export function isTimeZonesEqual(a: { id: string }, b: TimeZoneOps, loose?: boolean) {
-  return a === b || getTimeZoneRawValue(a.id, loose) === getTimeZoneRawValue(b.id, loose)
+  return a === b || getTimeZoneRawValue(ensureString(a.id), loose) === getTimeZoneRawValue(b.id, loose)
 }
 
 // normalized
