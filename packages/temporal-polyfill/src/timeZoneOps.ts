@@ -276,7 +276,8 @@ export function zonedEpochNanoToIsoWithTZObj(
   timeZone: TimeZone,
   epochNano: DayTimeNano,
 ): IsoDateTimeFields {
-  const offsetNano = timeZone.getOffsetNanosecondsFor(createInstant(epochNano))
+  // emulate what TimeZone::getOffsetNanosecondsFor does
+  const offsetNano = validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
   return epochNanoToIso(epochNano, offsetNano)
 }
 
