@@ -561,17 +561,14 @@ class JapaneseCalendarImpl extends GregoryCalendarImpl {
 class IntlCalendarImpl extends CalendarImpl {
   isoDateFieldsToIntl: (isoDateFields: IsoDateFields) => IntlFields
   queryYear: YearQueryFunc
-  yearAtEpoch: number
 
   constructor(id: string) {
     super(id)
 
     const epochMilliToIntlFields = createEpochMilliToIntlFields(id)
-    const [queryYear, yearAtEpoch] = createIntlMonthCache(epochMilliToIntlFields)
 
     this.isoDateFieldsToIntl = createIntlFieldCache(epochMilliToIntlFields)
-    this.queryYear = queryYear
-    this.yearAtEpoch = yearAtEpoch
+    this.queryYear = createIntlMonthCache(epochMilliToIntlFields)
   }
 
   year(isoDateFields: IsoDateFields): number {
@@ -900,10 +897,7 @@ type YearQueryFunc = (year: number) => {
 
 function createIntlMonthCache(
   epochMilliToIntlFields: (epochMilli: number) => IntlFields,
-): [
-  queryYear: YearQueryFunc,
-  yearAtEpoch: number,
-] {
+): YearQueryFunc {
   const yearAtEpoch = epochMilliToIntlFields(0).year
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
   const queryYear = createLazyGenerator(buildYear)
@@ -939,7 +933,7 @@ function createIntlMonthCache(
     }
   }
 
-  return [queryYear, yearAtEpoch]
+  return queryYear
 }
 
 // Era Utils

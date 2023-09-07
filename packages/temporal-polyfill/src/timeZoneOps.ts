@@ -28,7 +28,6 @@ import { ZonedInternals } from './zonedDateTime'
 import { queryCalendarImpl } from './calendarImpl'
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
-import { formatOffsetNano } from './isoFormat'
 
 export interface TimeZoneOps {
   id: string
@@ -347,7 +346,7 @@ export const TimeZoneOpsAdapter = createWrapperClass<
   typeof timeZoneOpsAdapterMethods // methods
 >(timeZoneOpsAdapterGetters, timeZoneOpsAdapterMethods)
 
-function validateOffsetNano(offsetNano: number): number {
+export function validateOffsetNano(offsetNano: number): number {
   if (!Number.isInteger(ensureNumber(offsetNano))) {
     throw new RangeError('must be integer number')
   }
