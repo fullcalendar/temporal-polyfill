@@ -344,6 +344,20 @@ export class CalendarImpl implements CalendarOps {
       overflow,
     )
   }
+
+  /*
+  TODO: this seems reused a lot
+  */
+  queryMonthCode(year: number, month: number): [
+    monthCodeNumber: number,
+    isLeapMonth: boolean,
+  ] {
+    const leapMonth = this.queryLeapMonth(year)
+    return [
+      monthToMonthCode(month, leapMonth),
+      month === leapMonth,
+    ]
+  }
 }
 
 // Base Calendar Implementation :: Year Query Methods
@@ -614,6 +628,7 @@ class IntlCalendarImpl extends CalendarImpl {
     return [year, monthStrToIndex[month] + 1, day]
   }
 
+  // needed?
   queryYearMonthCodeDay(isoDateFields: IsoDateFields): [
     year: number,
     monthCodeNumber: number,

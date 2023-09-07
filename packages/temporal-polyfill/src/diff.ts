@@ -305,9 +305,16 @@ function diffYearMonthDay(
   let dayDiff!: number
 
   function updateYearMonth() {
+    let [monthCodeNumber0, isLeapYear0] = calendarImpl.queryMonthCode(year0, month0)
+    let [monthCodeNumber1, isLeapYear1] = calendarImpl.queryMonthCode(year1, month1)
+
     yearDiff = year1 - year0
     monthsInYear1 = calendarImpl.computeMonthsInYear(year1)
-    monthDiff = month1 - Math.min(month0, monthsInYear1)
+    monthDiff = yearDiff
+      // crossing years
+      ? (monthCodeNumber1 - monthCodeNumber0) || (Number(isLeapYear1) - Number(isLeapYear0))
+      // same year
+      : month1 - Math.min(month0, monthsInYear1)
   }
 
   function updateYearMonthDay() {
