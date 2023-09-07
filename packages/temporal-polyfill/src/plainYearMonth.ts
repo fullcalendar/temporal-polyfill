@@ -16,9 +16,8 @@ import { IsoDateFields } from './isoFields'
 import { IsoDateInternals, generatePublicIsoDateFields, refineIsoYearMonthInternals } from './isoInternals'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoDateFields } from './isoMath'
+import { compareIsoDateFields, moveByIsoDays } from './isoMath'
 import { parsePlainYearMonth } from './isoParse'
-import { moveDateByDays } from './move'
 import { DiffOptions, OverflowOptions, refineDiffOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { Unit } from './units'
@@ -190,7 +189,7 @@ function movePlainYearMonth(
 
 // TODO: DRY
 function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
-  return moveDateByDays(
+  return moveByIsoDays(
     internals,
     day - internals.calendar.day(internals),
   )

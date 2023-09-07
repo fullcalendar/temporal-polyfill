@@ -13,8 +13,8 @@ import {
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
-import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay } from './isoMath'
-import { moveDateByDays, moveDateTime, moveZonedEpochNano } from './move'
+import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
+import { moveDateTime, moveZonedEpochNano } from './move'
 import { RoundingMode, roundingModeFuncs } from './options'
 import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
 import {
@@ -79,7 +79,7 @@ function roundDateTimeToDay(
     const dayDelta = roundedTimeNano ? 1 : 0
 
     return checkIsoDateTimeInBounds({
-      ...moveDateByDays(isoFields, dayDelta),
+      ...moveByIsoDays(isoFields, dayDelta),
       ...isoTimeFieldDefaults,
     })
   } else {
@@ -95,7 +95,7 @@ export function roundDateTimeToNano(
   const [roundedIsoFields, dayDelta] = roundTimeToNano(isoFields, nanoInc, roundingMode)
 
   return checkIsoDateTimeInBounds({
-    ...moveDateByDays(isoFields, dayDelta),
+    ...moveByIsoDays(isoFields, dayDelta),
     ...roundedIsoFields,
   })
 }

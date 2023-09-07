@@ -62,7 +62,7 @@ export function moveZonedEpochNano(
     )
   }
 
-  return epochNano
+  return checkEpochNanoInBounds(epochNano)
 }
 
 export function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFields): DayTimeNano {
@@ -148,16 +148,6 @@ export function moveDate(
   })
 }
 
-export function moveDateByDays( // TODO: rename moveDateDays?
-  isoDateFields: IsoDateFields,
-  days: number,
-): IsoDateFields {
-  if (days) {
-    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields)! + days * milliInDay)
-  }
-  return isoDateFields
-}
-
 export function moveTime(
   isoFields: IsoTimeFields,
   durationFields: DurationFields,
@@ -201,23 +191,25 @@ export function moveByIntlMonths(
   year: number,
   month: number,
 ] {
-  month += monthDelta
+  if (monthDelta) {
+    month += monthDelta
 
-  if (monthDelta < 0) {
-    if (month < Number.MIN_SAFE_INTEGER) {
-      throw new RangeError('Months out of range')
-    }
-    while (month < 1) {
-      month += calendarImpl.computeMonthsInYear(--year)
-    }
-  } else {
-    if (month > Number.MAX_SAFE_INTEGER) {
-      throw new RangeError('Months out of range')
-    }
-    let monthsInYear
-    while (month > (monthsInYear = calendarImpl.computeMonthsInYear(year))) {
-      month -= monthsInYear
-      year++
+    if (monthDelta < 0) {
+      if (month < Number.MIN_SAFE_INTEGER) {
+        throw new RangeError('Months out of range')
+      }
+      while (month < 1) {
+        month += calendarImpl.computeMonthsInYear(--year)
+      }
+    } else {
+      if (month > Number.MAX_SAFE_INTEGER) {
+        throw new RangeError('Months out of range')
+      }
+      let monthsInYear
+      while (month > (monthsInYear = calendarImpl.computeMonthsInYear(year))) {
+        month -= monthsInYear
+        year++
+      }
     }
   }
 

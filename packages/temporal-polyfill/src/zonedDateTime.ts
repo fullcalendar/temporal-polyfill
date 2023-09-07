@@ -272,10 +272,8 @@ export const [
       let { epochNanoseconds, timeZone, calendar } = internals
       const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
-      const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-      let isoDateTimeFields = epochNanoToIso(
-        addDayTimeNanoAndNumber(epochNanoseconds, offsetNanoseconds),
-      )
+      const offsetNano = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+      let isoDateTimeFields = epochNanoToIso(epochNanoseconds, offsetNano)
 
       isoDateTimeFields = roundDateTime(
         isoDateTimeFields,
@@ -287,9 +285,9 @@ export const [
       epochNanoseconds = getMatchingInstantFor(
         timeZone,
         isoDateTimeFields,
-        offsetNanoseconds,
+        offsetNano,
         false, // z
-        OffsetDisambig.Prefer, // keep old offsetNanoseconds if possible
+        OffsetDisambig.Prefer, // keep old offsetNano if possible
         EpochDisambig.Compat,
         true, // fuzzy
       )
@@ -349,10 +347,8 @@ export const [
       ] = refineZonedDateTimeDisplayOptions(options)
 
       epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
-      let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-      const isoFields = epochNanoToIso(
-        addDayTimeNanoAndNumber(epochNano, offsetNano),
-      )
+      const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+      const isoFields = epochNanoToIso(epochNano, offsetNano)
 
       return formatIsoDateTimeFields(isoFields, subsecDigits) +
         formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +

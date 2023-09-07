@@ -24,6 +24,7 @@ import {
   isoEpochFirstLeapYear,
   isoToEpochNanoWithOffset,
   nanoToIsoTimeAndDay,
+  moveByIsoDays,
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
 import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
@@ -38,7 +39,6 @@ import {
 import { divModFloor } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
-import { moveDateByDays } from './move'
 import { createPlainDate } from './plainDate'
 
 // High-level
@@ -153,7 +153,7 @@ function resetToMonthStart(isoInternals: IsoDateInternals): IsoDateInternals {
 
 // TODO: DRY
 function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
-  return moveDateByDays(
+  return moveByIsoDays(
     internals,
     day - internals.calendar.day(internals), // NOTE: non-compliant algorithm
   )

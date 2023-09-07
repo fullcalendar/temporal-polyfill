@@ -37,7 +37,6 @@ import { NumSign, isObjectlike } from './utils'
 import { getCommonCalendarOps } from './calendarOps'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
-import { moveDateByDays } from './move'
 
 export type PlainDateArg = PlainDate | PlainDateBag | string
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }

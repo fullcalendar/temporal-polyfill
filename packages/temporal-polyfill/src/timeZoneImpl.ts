@@ -11,6 +11,7 @@ import {
   epochNanoToSecRemainder,
   isoArgsToEpochSec,
   isoToEpochNano,
+  isoToEpochNanoWithOffset,
   isoToEpochSec,
 } from './isoMath'
 import { parseMaybeOffsetNano } from './isoParse'
@@ -62,10 +63,7 @@ export class FixedTimeZoneImpl implements TimeZoneImpl {
 
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
     return [
-      addDayTimeNanoAndNumber(
-        checkEpochNanoInBounds(isoToEpochNano(isoDateTimeFields)),
-        -this.offsetNano,
-      )
+      isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)
     ]
   }
 

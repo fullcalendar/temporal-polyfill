@@ -19,7 +19,7 @@ import {
   refineRoundOptions,
 } from './options'
 import { toBigInt, ensureObjectlike } from './cast'
-import { roundByInc, roundDayTimeNano, roundDayTimeNanoByInc, roundToMinute } from './round'
+import { roundDayTimeNano, roundDayTimeNanoByInc, roundToMinute } from './round'
 import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import { NumSign, noop } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
@@ -161,9 +161,7 @@ export const [
       )
 
       let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-      const isoFields = epochNanoToIso(
-        addDayTimeNanoAndNumber(epochNano, offsetNano),
-      )
+      const isoFields = epochNanoToIso(epochNano, offsetNano)
 
       return formatIsoDateTimeFields(isoFields, subsecDigits) +
         (timeZoneArg
