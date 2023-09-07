@@ -6,7 +6,7 @@ import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instan
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { TimeZoneOpsAdapter, getSingleInstantFor, isTimeZonesEqual, queryTimeZoneOps, queryTimeZonePublic, validateOffsetNano, zonedEpochNanoToIso } from './timeZoneOps'
+import { TimeZoneOpsAdapter, getSingleInstantFor, isTimeZonesEqual, queryTimeZoneOps, queryTimeZonePublic, validateOffsetNano, zonedEpochNanoToIso, zonedEpochNanoToIsoWithTZObj } from './timeZoneOps'
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
 import { parseMaybeOffsetNano } from './isoParse'
@@ -59,6 +59,7 @@ const timeZoneMethods: {
   },
 
   getPlainDateTimeFor(
+    this: TimeZone,
     impl: TimeZoneImpl,
     instantArg: InstantArg,
     calendarArg: CalendarArg = isoCalendarId
@@ -67,7 +68,7 @@ const timeZoneMethods: {
 
     return createPlainDateTime({
       calendar: queryCalendarOps(calendarArg),
-      ...zonedEpochNanoToIso(impl, epochNano),
+      ...zonedEpochNanoToIsoWithTZObj(this, epochNano),
     })
   },
 

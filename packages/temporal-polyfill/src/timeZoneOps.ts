@@ -281,6 +281,18 @@ export function zonedEpochNanoToIso(
   )
 }
 
+// YUCK
+export function zonedEpochNanoToIsoWithTZObj(
+  timeZone: TimeZone,
+  epochNano: DayTimeNano,
+): IsoDateTimeFields {
+  const offsetNano = timeZone.getOffsetNanosecondsFor(createInstant(epochNano))
+
+  return epochNanoToIso(
+    addDayTimeNanoAndNumber(epochNano, offsetNano),
+  )
+}
+
 // Adapter
 // -------
 
