@@ -187,24 +187,24 @@ export class CalendarImpl implements CalendarOps {
     baseFields: Record<string, unknown>,
     additionalFields: Record<string, unknown>
   ): Record<string, unknown> {
-    const merged = { ...baseFields }
+    const merged = Object.assign(Object.create(null), baseFields)
 
-    removeIfAnyProps(merged, additionalFields, monthFieldNames)
+    spliceFields(merged, additionalFields, monthFieldNames)
 
     if (getAllowErasInFields(this)) {
-      removeIfAnyProps(merged, additionalFields, intlYearFieldNames)
+      spliceFields(merged, additionalFields, intlYearFieldNames)
     }
 
     if (getErasBeginMidYear(this)) {
-      removeIfAnyProps(
+      spliceFields(
         merged,
         additionalFields,
-        monthDayFieldNames,
-        eraYearFieldNames,
+        monthDayFieldNames, // any found?
+        eraYearFieldNames, // then, delete these
       )
     }
 
-    return Object.assign(Object.create(null), merged, additionalFields)
+    return merged
   }
 
   // Internal Querying
@@ -1006,18 +1006,28 @@ function getCalendarIdBase(calendarId: string): string {
 // General Utils
 // -------------------------------------------------------------------------------------------------
 
-function removeIfAnyProps(
-  targetObj: Record<string, unknown>,
-  testObj: Record<string, unknown>,
-  testPropNames: string[],
-  deletablePropNames: string[] = testPropNames,
+function spliceFields(
+  dest: any,
+  additional: any,
+  allPropNames: string[],
+  deletablePropNames?: string[],
 ): void {
-  for (const testPropName of testPropNames) {
-    if (testObj[testPropName] !== undefined) {
-      for (const deletablePropName of deletablePropNames) {
-        delete targetObj[deletablePropName]
-      }
-      break
+  let anyMatching = false
+  const nonMatchingPropNames: string[] = []
+
+  for (const propName of allPropNames) {
+    if (additional[propName] !== undefined) {
+      anyMatching = true
+    } else {
+      nonMatchingPropNames.push(propName)
+    }
+  }
+
+  Object.assign(dest, additional)
+
+  if (anyMatching) {
+    for (const deletablePropName of (deletablePropNames || nonMatchingPropNames)) {
+      delete dest[deletablePropName]
     }
   }
 }

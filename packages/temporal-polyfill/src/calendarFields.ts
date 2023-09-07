@@ -202,7 +202,7 @@ export const monthDayFieldNames = dateFieldNames.slice(0, 3) as
 
 // month/monthCode
 export const monthFieldNames = monthDayFieldNames.slice(1) as
-  (keyof MonthDayFields)[]
+  (keyof MonthFields)[]
 
 export const dateTimeFieldNames = Object.keys(dateTimeFieldRefiners).sort() as
   (keyof DateTimeFields)[]
