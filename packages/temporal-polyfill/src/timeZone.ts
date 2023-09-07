@@ -6,7 +6,7 @@ import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instan
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { TimeZoneOpsAdapter, getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
+import { TimeZoneOpsAdapter, getSingleInstantFor, isTimeZonesEqual, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIso } from './timeZoneOps'
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
 import { parseMaybeOffsetNano } from './isoParse'
@@ -91,14 +91,7 @@ const timeZoneMethods: {
   toString: getObjId,
 
   equals(this: TimeZone, impl: TimeZoneImpl, otherArg: TimeZoneArg): boolean {
-    let a: string | number | undefined
-    let b: string | number | undefined
-
-    return this === otherArg ||
-      ((a = ensureString(this.id)) === (b = queryTimeZoneOps(otherArg).id)) || (
-        (a = parseMaybeOffsetNano(a, true)) !== undefined &&
-        (b = parseMaybeOffsetNano(b, true)) === a
-      )
+    return isTimeZonesEqual(this, queryTimeZoneOps(otherArg))
   }
 }
 

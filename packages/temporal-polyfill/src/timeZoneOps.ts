@@ -97,15 +97,11 @@ export function getCommonTimeZoneOps(internals0: TimeZoneInternals, internals1: 
   const internal0 = internals0.timeZone
   const internal1 = internals1.timeZone
 
-  if (!isTimeZonesEqual(internal0, internal1)) {
+  if (!isTimeZonesEqual(internal0, internal1, true)) {
     throw new RangeError(`TimeZones not equal`)
   }
 
   return internal0
-}
-
-export function isTimeZonesEqual(a: TimeZoneOps, b: TimeZoneOps) {
-  return a === b || normalizeTimeZoneId(a.id) === normalizeTimeZoneId(b.id)
 }
 
 // Public Utils
@@ -315,18 +311,26 @@ const timeZoneOpsAdapterMethods = {
 
 const timeZoneOpsAdapterGetters = {
   id(timeZone: TimeZoneProtocol): string {
-    return normalizeTimeZoneId(ensureString(timeZone.id))
+    return ensureString(timeZone.id)
   }
 }
 
-export function normalizeTimeZoneId(id: string): string {
+// YUCK a
+export function isTimeZonesEqual(a: { id: string }, b: TimeZoneOps, loose?: boolean) {
+  return a === b || getTimeZoneRawValue(a.id, loose) === getTimeZoneRawValue(b.id, loose)
+}
+
+// normalized
+function getTimeZoneRawValue(id: string, loose?: boolean): string | number {
+  if (loose && id === 'UTC') {
+    return 0
+  }
+
   const offsetNano = parseMaybeOffsetNano(id)
   if (offsetNano !== undefined) {
-    if (!offsetNano) {
-      return 'UTC'
-    }
-    id = formatOffsetNano(offsetNano)
+    return offsetNano
   }
+
   return id
 }
 
