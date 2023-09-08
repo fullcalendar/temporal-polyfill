@@ -10,7 +10,6 @@ import {
   epochNanoToSec,
   epochNanoToSecRemainder,
   isoArgsToEpochSec,
-  isoToEpochNano,
   isoToEpochNanoWithOffset,
   isoToEpochSec,
 } from './isoMath'
@@ -99,7 +98,9 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
     const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeFields)
 
     return this.store.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
-      return addDayTimeNanoAndNumber(numberToDayTimeNano(epochSec, nanoInSec), subsecNano)
+      return checkEpochNanoInBounds(
+        addDayTimeNanoAndNumber(numberToDayTimeNano(epochSec, nanoInSec), subsecNano)
+      )
     })
   }
 
