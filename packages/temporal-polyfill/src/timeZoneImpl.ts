@@ -186,7 +186,7 @@ function createIntlTimeZoneStore(
         pinch(split, startOffsetSec, endOffsetSec)
         const transitionEpochSec = split[0]
 
-        if ((compareNumbers(epochSec, transitionEpochSec) || 1) === direction) {
+        if ((compareNumbers(transitionEpochSec, epochSec) || 1) === direction) {
           return transitionEpochSec
         }
       }
@@ -254,7 +254,7 @@ function createSplitTuple(startEpochSec: number, endEpochSec: number): [number, 
 }
 
 function computePeriod(epochSec: number): [number, number] {
-  const startEpochSec = Math.floor(epochSec / periodDur) * epochSec
+  const startEpochSec = Math.floor(epochSec / periodDur) * periodDur
   const endEpochSec = startEpochSec + periodDur
   return [startEpochSec, endEpochSec]
 }
