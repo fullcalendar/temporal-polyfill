@@ -154,12 +154,37 @@ built-ins/Temporal/Instant/prototype/toString/timezone.js
 # (would require us to use DayTimeNano for simple operations)
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
+# Node16-specific bugs with timezone normalization
 # Asia/Kolkata should not get normalized to Asia/Calcutta
 intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
+intl402/Temporal/TimeZone/prototype/equals/argument-object.js
+# Asia/Ulan_Bator should not get normalized to Asia/Ulaanbaatar
+intl402/Temporal/TimeZone/basic.js
+intl402/Temporal/TimeZone/from/argument-valid.js
+# "Etc/GMT-0" should not be normalized to "UTC"
+intl402/Temporal/TimeZone/etc-timezone.js
+intl402/Temporal/TimeZone/from/etc-timezone.js
+# "Etc/GMT0" should not be normalized to "UTC"
+intl402/Temporal/TimeZone/from/iana-legacy-names.js
+intl402/Temporal/TimeZone/iana-legacy-names.js
+# "Etc/GMT" should not be normalized to "UTC"
+intl402/Temporal/TimeZone/non-canonical-utc.js
+# "GMT" should not be normalized to "UTC"
+intl402/Temporal/TimeZone/links-etcetera.js
+# more...
+intl402/Temporal/TimeZone/links-northamerica.js
+intl402/Temporal/TimeZone/links-europe.js
+intl402/Temporal/TimeZone/links-backzone.js
+intl402/Temporal/TimeZone/links-backward.js
+intl402/Temporal/TimeZone/links-asia.js
+intl402/Temporal/TimeZone/links-africa.js
 
 # Reenable when we upgrade to Node 18
 # (for Intl.supportedValuesOf)
 intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
+intl402/Temporal/TimeZone/from/timezone-case-insensitive.js
+intl402/Temporal/TimeZone/prototype/equals/canonical-not-equal.js
+intl402/Temporal/TimeZone/prototype/equals/timezone-case-insensitive.js
 
 # when ZonedDateTime needs to query Calendar, should give PlainDateTime instead of PlainDate (i disagree)
 built-ins/Temporal/ZonedDateTime/prototype/day/custom.js
