@@ -147,7 +147,8 @@ export function roundDurationToNano(
 
   return {
     ...durationFields,
-    ...dayTimeFields,
+    ...durationTimeFieldDefaults, // HACK for smaller largestUnits
+    ...dayTimeFields, // QUESTION: does this contain valuable information?
   }
 }
 
