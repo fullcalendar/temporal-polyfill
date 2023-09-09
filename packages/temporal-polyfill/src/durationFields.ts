@@ -120,6 +120,10 @@ export function nanoToDurationDayTimeFields(
   dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
     days * (nanoInUtcDay / unitNanoMap[largestUnit])
 
+  if (!Number.isFinite(dayTimeFields[durationFieldNamesAsc[largestUnit]]!)) {
+    throw new RangeError('Too big')
+  }
+
   return dayTimeFields
 }
 
