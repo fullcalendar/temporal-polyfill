@@ -166,7 +166,7 @@ export const [
       return createDuration(
         updateDurationFieldsSign(
           roundRelativeDuration(
-            ...spanDuration(internals, largestUnit, ...markerSystem),
+            ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
             largestUnit,
             smallestUnit,
             roundingInc,
@@ -201,7 +201,7 @@ export const [
       const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return totalRelativeDuration(
-        ...spanDuration(internals, largestUnit, ...markerSystem),
+        ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
         totalUnit,
         ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
       )
@@ -305,11 +305,19 @@ function addToDuration(
   }
 
   const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
-  return createDuration(spanDuration(internals, largestUnit, ...markerSystem)[0])
+  return createDuration(
+    spanDuration(
+      internals,
+      otherFields,
+      largestUnit,
+      ...markerSystem,
+    )[0]
+  )
 }
 
 function spanDuration<M>(
-  durationFields: DurationFields,
+  durationFields0: DurationFields,
+  durationFields1: DurationFields | undefined,
   largestUnit: Unit, // TODO: more descrimination?
   // marker system...
   marker: M,
@@ -320,7 +328,12 @@ function spanDuration<M>(
   DurationInternals,
   DayTimeNano,
 ] {
-  const endMarker = moveMarker(marker, durationFields)
+  let endMarker = moveMarker(marker, durationFields0)
+
+  if (durationFields1) {
+    endMarker = moveMarker(endMarker, durationFields1)
+  }
+
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, markerToEpochNano(endMarker)]
 }
