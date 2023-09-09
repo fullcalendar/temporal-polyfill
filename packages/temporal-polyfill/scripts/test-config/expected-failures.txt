@@ -333,6 +333,8 @@ built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefi
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely-2.js
 built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-1.js
 built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-2.js
+built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-1.js
+built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-2.js
 
 # when diffing, we do not walk year/months one-by-one
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
