@@ -309,10 +309,13 @@ built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefi
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely-2.js
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely-1.js
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely-2.js
+built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-1.js
+built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-2.js
 
-# our diffing algorithm calls dateUntil fewer times
+# our diffing algorithm calls dateAdd/dateUntil fewer times
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests

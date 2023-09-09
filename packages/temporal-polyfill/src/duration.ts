@@ -10,9 +10,7 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
-  durationFieldsToDayTimeNano,
-  nanoToDurationDayTimeFields,
-  durationFieldDefaults,
+  addAllDurationFields,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
@@ -166,7 +164,7 @@ export const [
       return createDuration(
         updateDurationFieldsSign(
           roundRelativeDuration(
-            ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
+            ...spanDuration(internals, largestUnit, ...markerSystem),
             largestUnit,
             smallestUnit,
             roundingInc,
@@ -201,7 +199,7 @@ export const [
       const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return totalRelativeDuration(
-        ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
+        ...spanDuration(internals, largestUnit, ...markerSystem),
         totalUnit,
         ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
       )
@@ -307,8 +305,7 @@ function addToDuration(
   const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
   return createDuration(
     spanDuration(
-      internals,
-      otherFields,
+      updateDurationFieldsSign(addAllDurationFields(internals, otherFields, direction)),
       largestUnit,
       ...markerSystem,
     )[0]
@@ -316,8 +313,7 @@ function addToDuration(
 }
 
 function spanDuration<M>(
-  durationFields0: DurationFields,
-  durationFields1: DurationFields | undefined,
+  durationFields: DurationFields,
   largestUnit: Unit, // TODO: more descrimination?
   // marker system...
   marker: M,
@@ -328,12 +324,7 @@ function spanDuration<M>(
   DurationInternals,
   DayTimeNano,
 ] {
-  let endMarker = moveMarker(marker, durationFields0)
-
-  if (durationFields1) {
-    endMarker = moveMarker(endMarker, durationFields1)
-  }
-
+  const endMarker = moveMarker(marker, durationFields)
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, markerToEpochNano(endMarker)]
 }
