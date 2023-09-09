@@ -35,6 +35,7 @@
     "pkg-json": "./scripts/pkg-json.js",
     "pkg-json:clean": "rm -rf dist/package.json",
     "test": "./scripts/test.js",
+    "test:safe": "pnpm run test -- 'PlainTime/**' && pnpm run test -- 'PlainDate/**' && pnpm run test -- 'PlainDateTime/**' && pnpm run test -- 'ZonedDateTime/**' && pnpm run test -- 'Calendar/**' && pnpm run test -- 'TimeZone/**'",
     "lint": "eslint .",
     "size": "./scripts/size.js",
     "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean"
