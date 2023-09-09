@@ -69,6 +69,7 @@ export function refineDiffOptions(
   defaultLargestUnit: Unit,
   maxUnit = Unit.Year,
   minUnit = Unit.Nanosecond,
+  defaultRoundingMode: RoundingMode = RoundingMode.Trunc,
 ): DiffTuple {
   options = normalizeOptions(options)
   options = { ...options } // spec needs is to copy
@@ -83,7 +84,7 @@ export function refineDiffOptions(
 
   const roundingInc = refineRoundingInc(options, smallestUnit as DayTimeUnit, true)
 
-  let roundingMode = refineRoundingMode(options, RoundingMode.Trunc)
+  let roundingMode = refineRoundingMode(options, defaultRoundingMode)
   if (roundingModeInvert) {
     roundingMode = invertRoundingMode(roundingMode)
   }
@@ -144,7 +145,14 @@ export function refineDurationRoundOptions(
   // ^do a whitelist filter that copies instead?
 
   return [
-    ...refineDiffOptions(false, options, defaultLargestUnit), // double-refined. oh well
+    ...refineDiffOptions( // double-refined. oh well
+      false,
+      options,
+      defaultLargestUnit,
+      undefined,
+      undefined,
+      RoundingMode.HalfExpand, // yuck
+    ),
     refineRelativeTo(options),
   ]
 }
@@ -469,10 +477,10 @@ export const enum RoundingMode {
   Ceil,
   HalfCeil,
   // other modes
-  Trunc, // default for most things
+  Trunc, // default for most things (still true??)
   HalfTrunc,
   Expand,
-  HalfExpand, // default for date/time::round()
+  HalfExpand, // default for date/time/duration::round() (lots of things!)
   HalfEven,
 }
 

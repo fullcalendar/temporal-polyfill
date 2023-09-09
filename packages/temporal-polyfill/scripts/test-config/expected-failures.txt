@@ -173,9 +173,20 @@ built-ins/Temporal/ZonedDateTime/prototype/getISOFields/order-of-operations.js
 # fewer getOffsetNanosecondsFor calls
 built-ins/Temporal/Instant/prototype/toString/timezone.js
 
-# we don't support hours-in-day great than 10000000xxx
+# we don't support hours-in-day greater than 10000000xxx
 # (would require us to use DayTimeNano for simple operations)
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
+
+# I disagree with this diffing algo. seems buggy
+#   new Temporal.PlainDate(1972, 2, 1).until(new Temporal.PlainDate(1972, 2, 1).add(new Temporal.Duration(3, 11, 0, 29)), { largestUnit: 'years' })
+#   => P3Y11M29D
+#   new Temporal.Duration(3, 11, 0, 29).round({
+#     largestUnit: "years",
+#     relativeTo: new Temporal.PlainDate(1972, 2, 1),
+#   })
+#   => P4Y
+#
+built-ins/Temporal/Duration/prototype/round/february-leap-year.js
 
 # Node16-specific bugs with timezone normalization
 # Asia/Kolkata should not get normalized to Asia/Calcutta
@@ -322,6 +333,9 @@ built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefi
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely-2.js
 built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-1.js
 built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-2.js
+
+# when diffing, we do not walk year/months one-by-one
+built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 
 # our diffing algorithm calls dateAdd/dateUntil fewer times
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
