@@ -1,5 +1,5 @@
 import { toIntegerStrict } from './cast'
-import { DayTimeNano } from './dayTimeNano'
+import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -145,18 +145,24 @@ export function updateDurationFieldsSign(fields: DurationFields): DurationIntern
   return (fields as DurationInternals)
 }
 
-export function addDurationFields(
+export function addDayTimeDurationFields(
   a: DurationFields,
   b: DurationFields,
   sign: NumSign,
+  largestUnit: DayTimeUnit
 ): DurationFields {
-  const res = {} as DurationFields
+  const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
+  const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
+  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, sign)
 
-  for (const fieldName of durationFieldNames) {
-    res[fieldName] = a[fieldName] + b[fieldName] * sign
+  if (!Number.isFinite(combined[0])) {
+    throw new RangeError('Too much')
   }
 
-  return res
+  return {
+    ...durationFieldDefaults,
+    ...nanoToDurationDayTimeFields(combined, largestUnit)
+  }
 }
 
 export function negateDurationInternals(internals: DurationInternals): DurationInternals {

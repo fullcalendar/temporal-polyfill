@@ -72,6 +72,9 @@ export const unitNanoMap = [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
+/*
+When largestUnit=hour, returned `Day` value is "days worth of hours"
+*/
 export function givenFieldsToDayTimeNano<K extends string>(
   fields: Record<K, number>,
   largestUnit: DayTimeUnit,

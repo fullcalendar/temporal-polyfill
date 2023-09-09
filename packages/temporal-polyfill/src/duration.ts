@@ -2,7 +2,7 @@ import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { mergeDurationBag, refineDurationBag } from './convert'
 import {
   absDurationInternals,
-  addDurationFields,
+  addDayTimeDurationFields,
   durationInternalGetters,
   negateDurationInternals,
   refineDurationFields,
@@ -286,8 +286,6 @@ function addToDuration(
     getLargestDurationUnit(otherFields),
   ) as Unit
 
-  const addedDurationFields = addDurationFields(internals, otherFields, direction)
-
   if (
     largestUnit < Unit.Day || (
       largestUnit === Unit.Day &&
@@ -295,7 +293,11 @@ function addToDuration(
       !(markerInternals && (markerInternals as any).epochNanoseconds)
     )
   ) {
-    return balanceDurationDayTime(addedDurationFields, largestUnit as DayTimeUnit)
+    return createDuration(
+      updateDurationFieldsSign(
+        addDayTimeDurationFields(internals, otherFields, direction, largestUnit as DayTimeUnit)
+      )
+    )
   }
 
   if (!markerInternals) {
@@ -321,20 +323,6 @@ function spanDuration<M>(
   const endMarker = moveMarker(marker, durationFields)
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, markerToEpochNano(endMarker)]
-}
-
-function balanceDurationDayTime(
-  durationFields: DurationFields,
-  largestUnit: DayTimeUnit, // day/time
-): Duration {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
-
-  return createDuration(
-    updateDurationFieldsSign({
-      ...durationFieldDefaults,
-      ...nanoToDurationDayTimeFields(dayTimeNano, largestUnit)
-    })
-  )
 }
 
 function getLargestDurationUnit(fields: DurationFields): Unit {

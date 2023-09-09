@@ -27,8 +27,9 @@ export function addDayTimeNanoAndNumber(a: DayTimeNano, b: number): DayTimeNano 
   return createDayTimeNano(a[0], a[1] + b)
 }
 
-export function addDayTimeNanos(a: DayTimeNano, b: DayTimeNano): DayTimeNano {
-  return createDayTimeNano(a[0] + b[0], a[1] + b[1])
+// TODO: converge with diffDayTimeNanos
+export function addDayTimeNanos(a: DayTimeNano, b: DayTimeNano, sign: NumSign = 1): DayTimeNano {
+  return createDayTimeNano(a[0] + b[0] * sign, a[1] + b[1] * sign)
 }
 
 export function diffDayTimeNanos(a: DayTimeNano, b: DayTimeNano): DayTimeNano {
