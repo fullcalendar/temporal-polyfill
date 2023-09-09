@@ -78,7 +78,7 @@ export function refineMaybeZonedDateTimeBag(
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
-  if (fields.timeZone) {
+  if (fields.timeZone !== undefined) {
     const isoDateFields = calendar.dateFromFields(fields)
     const isoTimeFields = refineTimeBag(fields)
     const timeZone = queryTimeZoneOps(fields.timeZone) // must happen after datetime fields

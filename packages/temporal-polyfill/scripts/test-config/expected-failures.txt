@@ -24,6 +24,11 @@ built-ins/Temporal/Instant/prototype/since/order-of-operations.js
 built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
 built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 
+# relative Duration fewer dateAdd calls
+built-ins/Temporal/Duration/compare/order-of-operations.js
+# SIMILARLY, dateAdd called with different arguments
+built-ins/Temporal/Duration/compare/precision-exact-mathematical-values-1.js
+
 # constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
 built-ins/Temporal/PlainYearMonth/calendar-invalid.js
 built-ins/Temporal/PlainMonthDay/calendar-invalid.js
