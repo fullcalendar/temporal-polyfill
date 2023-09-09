@@ -6,7 +6,7 @@ import { parseZonedOrPlainDateTime } from './isoParse'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
-import { toString, ensureObjectlike, toInteger } from './cast'
+import { toString, ensureObjectlike, toInteger, ensureString } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
@@ -618,7 +618,7 @@ type RelativeToInternals = ZonedInternals | IsoDateInternals
 function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | undefined {
   const { relativeTo } = options
 
-  if (relativeTo) {
+  if (relativeTo !== undefined) {
     if (isObjectlike(relativeTo)) {
       if (
         relativeTo instanceof ZonedDateTime ||
@@ -632,7 +632,7 @@ function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | und
       return refineMaybeZonedDateTimeBag(relativeTo as unknown as ZonedDateTimeBag)
     }
 
-    return parseZonedOrPlainDateTime(toString(relativeTo))
+    return parseZonedOrPlainDateTime(ensureString(relativeTo))
   }
 }
 
@@ -731,6 +731,6 @@ function mustHaveMatch<O extends {}>(
   propNames: (keyof O)[],
 ): void {
   if (!hasAnyPropsByName(props, propNames)) {
-    throw new TypeError('Need one: ' + JSON.stringify(propNames))
+    throw new RangeError('Need one: ' + JSON.stringify(propNames))
   }
 }

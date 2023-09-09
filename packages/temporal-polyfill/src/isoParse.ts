@@ -80,6 +80,9 @@ export function parseZonedOrPlainDateTime(s: string): IsoDateInternals | ZonedIn
   if (organized.timeZone) {
     return postProcessZonedDateTime(organized as ZonedDateTimeOrganized)
   }
+  if (organized.hasZ) {
+    throw new RangeError('Only Z cannot be parsed for this') // PlainDate doesn't accept it
+  }
 
   return postProcessDateTime(organized)
 }

@@ -26,15 +26,22 @@ built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 
 # relative Duration fewer dateAdd calls
 built-ins/Temporal/Duration/compare/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
 # SIMILARLY, dateAdd called with different arguments
 built-ins/Temporal/Duration/compare/precision-exact-mathematical-values-1.js
 
 # really unclear to me when internal calls to dateAdd should provide undefined options or not
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
 
 # why does Duration 'day' operations need to consult calendar?
 built-ins/Temporal/Duration/prototype/add/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
+
+# BUG with Duration rounding
+# We're not handling 'week' rounding well. should use `UnbalanceDateDurationRelative` algo
+built-ins/Temporal/Duration/prototype/round/calendar-possibly-required.js
 
 # constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
 built-ins/Temporal/PlainYearMonth/calendar-invalid.js
@@ -85,6 +92,10 @@ built-ins/Temporal/PlainMonthDay/prototype/with/calendar-arguments.js
 built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+
+# Duration calling getPossibleInstantsFor fewer times
+built-ins/Temporal/Duration/prototype/add/timezone-getpossibleinstantsfor-iterable.js
 
 # we should only query common-timezone if diffing w/ smallestUnit >DAY
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js

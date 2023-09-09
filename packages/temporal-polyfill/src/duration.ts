@@ -124,19 +124,21 @@ export const [
     },
 
     round(internals: DurationInternals, options): Duration {
+      const durationLargestUnit = getLargestDurationUnit(internals)
       const [
         largestUnit,
         smallestUnit,
         roundingInc,
         roundingMode,
         markerInternals,
-      ] = refineDurationRoundOptions(options, getLargestDurationUnit(internals))
+      ] = refineDurationRoundOptions(options, durationLargestUnit)
+      const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
       // TODO: move to round.js?
 
       if (
-        largestUnit < Unit.Day || (
-          largestUnit === Unit.Day &&
+        maxLargestUnit < Unit.Day || (
+          maxLargestUnit === Unit.Day &&
           // has uniform days?
           !(markerInternals && (markerInternals as any).epochNanoseconds)
         )
@@ -215,6 +217,7 @@ export const [
             Math.min(getLargestDurationUnit(internals), Unit.Hour),
             nanoInc,
             roundingMode,
+            true, // timeOnly
           )
         ),
         subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
