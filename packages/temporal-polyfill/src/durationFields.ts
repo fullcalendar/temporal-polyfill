@@ -149,19 +149,6 @@ export function updateDurationFieldsSign(fields: DurationFields): DurationIntern
   return (fields as DurationInternals)
 }
 
-export function addAllDurationFields(
-  a: DurationFields,
-  b: DurationFields,
-  sign: NumSign,
-): DurationFields {
-  return {
-    ...addDayTimeDurationFields(a, b, sign, Unit.Day), // inefficient spread
-    years: a.years + b.years,
-    months: a.months + b.months,
-    weeks: a.weeks + b.weeks,
-  }
-}
-
 export function addDayTimeDurationFields(
   a: DurationFields,
   b: DurationFields,

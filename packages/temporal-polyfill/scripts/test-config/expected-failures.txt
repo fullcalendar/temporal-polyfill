@@ -134,10 +134,6 @@ built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-error
 built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 
-# Duration calling getPossibleInstantsFor fewer times
-built-ins/Temporal/Duration/prototype/add/timezone-getpossibleinstantsfor-iterable.js
-built-ins/Temporal/Duration/prototype/subtract/timezone-getpossibleinstantsfor-iterable.js
-
 # we should only query common-timezone if diffing w/ smallestUnit >DAY
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/since/zoneddatetime-string.js

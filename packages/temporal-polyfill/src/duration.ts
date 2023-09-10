@@ -10,7 +10,6 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
-  addAllDurationFields,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
@@ -167,7 +166,7 @@ export const [
       return createDuration(
         updateDurationFieldsSign(
           roundRelativeDuration(
-            ...spanDuration(internals, largestUnit, ...markerSystem),
+            ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
             largestUnit,
             smallestUnit,
             roundingInc,
@@ -202,7 +201,7 @@ export const [
       const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return totalRelativeDuration(
-        ...spanDuration(internals, largestUnit, ...markerSystem),
+        ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
         totalUnit,
         ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
       )
@@ -281,7 +280,7 @@ function addToDuration(
   otherArg: DurationArg,
   options: RelativeToOptions | undefined,
 ): Duration {
-  const otherFields = toDurationInternals(otherArg)
+  let otherFields = toDurationInternals(otherArg)
   const markerInternals = refineRelativeToOptions(options) // optional
   const largestUnit = Math.max(
     getLargestDurationUnit(internals),
@@ -306,10 +305,15 @@ function addToDuration(
     throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
   }
 
+  if (direction === -1) {
+    otherFields = negateDurationInternals(otherFields)
+  }
+
   const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
   return createDuration(
     spanDuration(
-      updateDurationFieldsSign(addAllDurationFields(internals, otherFields, direction)),
+      internals,
+      otherFields,
       largestUnit,
       ...markerSystem,
     )[0]
@@ -317,7 +321,8 @@ function addToDuration(
 }
 
 function spanDuration<M>(
-  durationFields: DurationFields,
+  durationFields0: DurationFields,
+  durationFields1: DurationFields | undefined,
   largestUnit: Unit, // TODO: more descrimination?
   // marker system...
   marker: M,
@@ -328,7 +333,12 @@ function spanDuration<M>(
   DurationInternals,
   DayTimeNano,
 ] {
-  const endMarker = moveMarker(marker, durationFields)
+  let endMarker = moveMarker(marker, durationFields0)
+
+  if (durationFields1) {
+    endMarker = moveMarker(endMarker, durationFields1)
+  }
+
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, markerToEpochNano(endMarker)]
 }
