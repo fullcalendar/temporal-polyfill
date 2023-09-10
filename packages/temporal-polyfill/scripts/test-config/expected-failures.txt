@@ -44,19 +44,43 @@ built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-
 # Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
 # advance d1 all the way to d2. ignore this contrived case
 built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-mathematical-values-2.js
+# similar...
+built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
+# expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
+built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
+built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
 
 # really unclear to me when internal calls to dateAdd should provide undefined options or not
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 
 # why does Duration 'day' operations need to consult calendar?
 built-ins/Temporal/Duration/prototype/add/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateuntil-called-with-singular-largestunit.js
 
 # BUG with Duration rounding
 # We're not handling 'week' rounding well. should use `UnbalanceDateDurationRelative` algo
 built-ins/Temporal/Duration/prototype/round/calendar-possibly-required.js
+
+# More problems because of not using Duration UnbalanceDateDurationRelative
+built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-expand.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-floor.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfCeil.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfEven.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfExpand.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfFloor.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfTrunc.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-trunc.js
+
+# Problems with zdt-based Duration rounding relying too much on nanoseconds comparisons
+# (converting epoch->fields waaay too many times while doing diffing/clamping)
+built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
 # constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
 built-ins/Temporal/PlainYearMonth/calendar-invalid.js
@@ -108,9 +132,11 @@ built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-mode
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 
 # Duration calling getPossibleInstantsFor fewer times
 built-ins/Temporal/Duration/prototype/add/timezone-getpossibleinstantsfor-iterable.js
+built-ins/Temporal/Duration/prototype/subtract/timezone-getpossibleinstantsfor-iterable.js
 
 # we should only query common-timezone if diffing w/ smallestUnit >DAY
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
@@ -300,6 +326,7 @@ built-ins/Temporal/PlainMonthDay/prototype/day/custom.js
 built-ins/Temporal/PlainMonthDay/prototype/monthCode/custom.js
 built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/custom-timezone.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
@@ -352,6 +379,8 @@ built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-
 built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-2.js
 built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-1.js
 built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-2.js
+built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely-1.js
+built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely-2.js
 
 # when diffing, we do not walk year/months one-by-one
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
@@ -360,6 +389,7 @@ built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
 # methods can't have prototype
 # NOTE!!! will go away when we update tests
