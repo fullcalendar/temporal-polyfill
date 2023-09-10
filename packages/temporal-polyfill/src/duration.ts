@@ -27,7 +27,7 @@ import {
   MarkerSystem,
   SimpleMarkerSystem,
   roundDayTimeDuration,
-  roundDurationToNano,
+  balanceDayTimeDuration,
   roundRelativeDuration,
   totalDayTimeDuration,
   totalRelativeDuration,
@@ -151,7 +151,8 @@ export const [
               largestUnit as DayTimeUnit,
               smallestUnit as DayTimeUnit,
               roundingInc,
-              roundingMode
+              roundingMode,
+              Unit.Day,
             ),
           )
         )
@@ -212,12 +213,11 @@ export const [
 
       return formatDurationInternals(
         updateDurationFieldsSign(
-          roundDurationToNano(
+          balanceDayTimeDuration(
             internals,
-            Math.min(getLargestDurationUnit(internals), Unit.Hour),
+            Math.min(getLargestDurationUnit(internals), Unit.Second),
             nanoInc,
             roundingMode,
-            true, // timeOnly
           )
         ),
         subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)

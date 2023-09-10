@@ -26,7 +26,7 @@ import {
   TimeUnit,
   givenFieldsToDayTimeNano,
 } from './units'
-import { divModFloor, divTrunc, identityFunc } from './utils'
+import { divModFloor, divTrunc, identityFunc, mapPropNamesToConstant } from './utils'
 import { ZonedInternals } from './zonedDateTime'
 
 export function roundToMinute(offsetNano: number): number {
@@ -122,33 +122,32 @@ export function roundDayTimeDuration(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
+  largestRewriteUnit?: DayTimeUnit,
 ): DurationFields {
-  return roundDurationToNano(
+  return balanceDayTimeDuration(
     durationFields,
     largestUnit,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
+    largestRewriteUnit,
   )
 }
 
-/*
-Only does day-time rounding
-*/
-export function roundDurationToNano(
+export function balanceDayTimeDuration(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit,
   nanoInc: number, // REQUIRED: not larger than a day
   roundingMode: RoundingMode,
-  timeOnly?: boolean // HACK
+  largestRewriteUnit: DayTimeUnit = largestUnit,
 ): DurationFields {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, timeOnly ? Unit.Hour : Unit.Day)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestRewriteUnit)
   const roundedLargeNano = roundDayTimeNanoByInc(dayTimeNano, nanoInc, roundingMode)
-  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
+  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit) // Partial
 
   return {
     ...durationFields,
-    ...durationTimeFieldDefaults, // HACK for smaller largestUnits
-    ...dayTimeFields, // QUESTION: does this contain valuable information?
+    ...mapPropNamesToConstant(durationFieldNamesAsc.slice(0, largestRewriteUnit + 1), 0),
+    ...dayTimeFields,
   }
 }
 
