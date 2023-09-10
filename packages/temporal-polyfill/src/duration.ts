@@ -132,6 +132,7 @@ export const [
         roundingMode,
         markerInternals,
       ] = refineDurationRoundOptions(options, durationLargestUnit)
+
       const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
       // TODO: move to round.js?

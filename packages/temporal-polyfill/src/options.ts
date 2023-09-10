@@ -136,25 +136,36 @@ export type DurationRoundTuple = [
   RelativeToInternals?,
 ]
 
+/*
+TODO: much more DRY with refineDiffOptions
+This function is YUCK
+*/
 export function refineDurationRoundOptions(
   options: DurationRoundOptions,
   defaultLargestUnit: Unit
 ): DurationRoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
-  mustHaveMatch(options, [largestUnitStr, smallestUnitStr]) // will register unwanted read?
-  // ^do a whitelist filter that copies instead?
 
-  return [
-    ...refineDiffOptions( // double-refined. oh well
-      false,
-      options,
-      defaultLargestUnit,
-      undefined,
-      undefined,
-      RoundingMode.HalfExpand, // yuck
-    ),
-    refineRelativeTo(options),
-  ]
+  let smallestUnit: any = refineSmallestUnit(options, undefined, undefined, -1 as any)
+  let largestUnit: any = refineLargestUnit(options, undefined, undefined, -1 as any)
+
+  if (smallestUnit === -1 && largestUnit === -1) {
+    throw new RangeError('Must have either smallestUnit or largestUnit')
+  }
+  if (smallestUnit === -1) {
+    smallestUnit = Unit.Nanosecond
+  }
+  if (largestUnit === -1) {
+    largestUnit = Math.max(smallestUnit, defaultLargestUnit)
+  }
+  if (smallestUnit !== -1 && smallestUnit > largestUnit) {
+    throw new RangeError('SmallestUnit cant be bigger than largestUnit')
+  }
+
+  const roundingInc = refineRoundingInc(options, smallestUnit as DayTimeUnit, true)
+  const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
+
+  return [largestUnit, smallestUnit, roundingInc, roundingMode, refineRelativeTo(options)]
 }
 
 export type TotalUnitOptionsWithRel = TotalUnitOptions & RelativeToOptions
@@ -732,13 +743,4 @@ function normalizeUnitNameOptions<O extends {}>(
     return { [optionName]: options } as O
   }
   return ensureObjectlike(options)
-}
-
-function mustHaveMatch<O extends {}>(
-  props: O,
-  propNames: (keyof O)[],
-): void {
-  if (!hasAnyPropsByName(props, propNames)) {
-    throw new RangeError('Need one: ' + JSON.stringify(propNames))
-  }
 }
