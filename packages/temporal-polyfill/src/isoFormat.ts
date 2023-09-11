@@ -128,9 +128,9 @@ export function formatDurationInternals(
   const secondsNano = dayTimeNanoToNumber(givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc))
   const [wholeSeconds, subsecNano] = divModFloor(secondsNano, nanoInSec)
   const forceSeconds =
-    // at least one subsecond digit being forced?
+    // a numeric subsecDigits specified?
     // allow `undefined` in comparison - will evaluate to false
-    (subsecDigits as number) > 0 ||
+    (subsecDigits as number) >= 0 ||
     // completely empty? display 'PT0S'
     !sign
 

@@ -134,6 +134,10 @@ built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-error
 built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 
+# no Duration::toLocaleString yet
+built-ins/Temporal/Duration/prototype/toLocaleString/branding.js
+built-ins/Temporal/Duration/prototype/toLocaleString/prop-desc.js
+
 # we should only query common-timezone if diffing w/ smallestUnit >DAY
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/since/zoneddatetime-string.js
