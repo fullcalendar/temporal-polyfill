@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
-import { dayTimeNanoToNumber } from './dayTimeNano'
+import { dayTimeNanoToNumber, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { IsoDateInternals } from './isoInternals'
@@ -15,7 +15,7 @@ import {
   nanoInSec,
   Unit,
 } from './units'
-import { divModFloor, padNumber, padNumber2 } from './utils'
+import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
 
 /*
 High-level. Refined options.
@@ -125,14 +125,21 @@ export function formatDurationInternals(
   const { sign } = durationInternals
   const abs = absDurationInternals(durationInternals)
   const { hours, minutes } = abs
-  const secondsNano = dayTimeNanoToNumber(givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc))
-  const [wholeSeconds, subsecNano] = divModFloor(secondsNano, nanoInSec)
+
+  const [wholeSeconds, subsecNano] = dayTimeNanoToNumberRemainder(
+    givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc),
+    nanoInSec,
+  )
+
+  const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)
+
   const forceSeconds =
     // a numeric subsecDigits specified?
     // allow `undefined` in comparison - will evaluate to false
     (subsecDigits as number) >= 0 ||
     // completely empty? display 'PT0S'
-    !sign
+    !sign ||
+    subsecNanoString
 
   return (sign < 0 ? '-' : '') + 'P' + formatDurationFragments({
     Y: abs.years,
@@ -140,16 +147,11 @@ export function formatDurationInternals(
     W: abs.weeks,
     D: abs.days,
   }) + (
-    (hours || minutes || wholeSeconds || subsecNano || forceSeconds)
+    (hours || minutes || wholeSeconds || forceSeconds)
       ? 'T' + formatDurationFragments({
-        H: hours,
-        M: minutes,
-        S: wholeSeconds + (
-          formatSubsecNano(subsecNano, subsecDigits) ||
-          (forceSeconds
-            ? '' // will force truthiness ('0')
-            : 0 as unknown as string) // will leave wholeSeconds as number
-        ),
+        H: formatNumberUnscientific(hours),
+        M: formatNumberUnscientific(minutes),
+        S: formatNumberUnscientific(wholeSeconds, forceSeconds) + subsecNanoString
       })
       : ''
   )
@@ -165,6 +167,7 @@ function formatDurationFragments(fragObj: Record<string, string | number>): stri
     const fragVal = fragObj[fragName]
     if (fragVal) {
       parts.push(
+        // not nice
         (typeof fragVal === 'number' ? formatNumberUnscientific(fragVal) : fragVal) +
         fragName
       )
@@ -253,7 +256,20 @@ function getSignStr(num: number): string {
   return num < 0 ? '-' : '+'
 }
 
-function formatNumberUnscientific(n: number): string {
+/*
+Only good at non-negative numbers, because of HACK
+*/
+function formatNumberUnscientific(n: number, force?: any): string {
+  if (!n && !force) {
+    return '' // TODO: rename this whole func
+  }
+
+  // HACK for displaying huge numbers as a BigInt would
+  if (n > 1e15) {
+    const [a, b] = divModTrunc(Math.trunc(n), 1e15)
+    return a + padNumber(15, b)
+  }
+
   // avoid outputting scientific notation
   // https://stackoverflow.com/a/50978675/96342
   return n.toLocaleString('fullwide', { useGrouping: false })

@@ -24,6 +24,7 @@ built-ins/Temporal/Instant/prototype/since/order-of-operations.js
 built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
 built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/toString/order-of-operations.js
 
 # Duration BAD!!! Can't do rel-rounding with big Durations because outside of range
 # should do UnbalanceDateDurationRelative instead :(

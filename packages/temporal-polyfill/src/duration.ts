@@ -26,8 +26,8 @@ import {
 import {
   MarkerSystem,
   SimpleMarkerSystem,
-  roundDayTimeDuration,
   balanceDayTimeDuration,
+  roundDayTimeDuration,
   roundRelativeDuration,
   totalDayTimeDuration,
   totalRelativeDuration,
@@ -211,15 +211,20 @@ export const [
     toString(internals: DurationInternals, options?: TimeDisplayOptions): string {
       const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
 
-      return formatDurationInternals(
-        updateDurationFieldsSign(
+      // for performance AND for not losing precision when no rounding
+      if (nanoInc > 1) {
+        internals = updateDurationFieldsSign(
           balanceDayTimeDuration(
             internals,
             Math.min(getLargestDurationUnit(internals), Unit.Second),
             nanoInc,
             roundingMode,
           )
-        ),
+        )
+      }
+
+      return formatDurationInternals(
+        internals,
         subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
       )
     },
