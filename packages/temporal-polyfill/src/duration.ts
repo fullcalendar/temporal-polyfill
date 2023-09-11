@@ -179,15 +179,13 @@ export const [
     },
 
     total(internals: DurationInternals, options: TotalUnitOptionsWithRel | UnitName): number {
+      const durationLargestUnit = getLargestDurationUnit(internals)
       const [totalUnit, markerInternals] = refineTotalOptions(options)
-      const largestUnit = Math.max(
-        getLargestDurationUnit(internals),
-        totalUnit,
-      ) as Unit
+      const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
 
       if (
-        largestUnit < Unit.Day || (
-          largestUnit === Unit.Day &&
+        maxLargestUnit < Unit.Day || (
+          maxLargestUnit === Unit.Day &&
           // has uniform days?
           !(markerInternals && (markerInternals as any).epochNanoseconds)
         )
@@ -202,7 +200,7 @@ export const [
       const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
       return totalRelativeDuration(
-        ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
+        ...spanDuration(internals, undefined, totalUnit, ...markerSystem),
         totalUnit,
         ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
       )

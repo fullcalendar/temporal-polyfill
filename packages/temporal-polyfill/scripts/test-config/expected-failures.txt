@@ -25,6 +25,7 @@ built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
 built-ins/Temporal/Instant/prototype/until/order-of-operations.js
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/toString/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
 # Duration BAD!!! Can't do rel-rounding with big Durations because outside of range
 # should do UnbalanceDateDurationRelative instead :(
@@ -33,6 +34,10 @@ built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
+
+# Large Duration units prefer to be displayed as janky BigInt-converted numbers
+# TODO: do formatNumberUnscientific hack but in a loop
+built-ins/Temporal/Duration/prototype/toString/precision-formatted-as-decimal-number.js
 
 # relative Duration fewer dateAdd calls
 built-ins/Temporal/Duration/compare/order-of-operations.js
@@ -58,15 +63,20 @@ built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
+built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-options-undefined.js
 
 # why does Duration 'day' operations need to consult calendar?
 built-ins/Temporal/Duration/prototype/add/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
 
 # BUG with Duration rounding
 # We're not handling 'week' rounding well. should use `UnbalanceDateDurationRelative` algo
 built-ins/Temporal/Duration/prototype/round/calendar-possibly-required.js
+
+# Duration::total should leverage UnbalanceDateDurationRelative
+built-ins/Temporal/Duration/prototype/total/dateuntil-field.js
 
 # More problems because of not using Duration UnbalanceDateDurationRelative
 built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
@@ -328,6 +338,7 @@ built-ins/Temporal/PlainMonthDay/prototype/monthCode/custom.js
 built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/custom-timezone.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-plaindate-instance.js
 
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
@@ -382,6 +393,8 @@ built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitel
 built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-2.js
 built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely-1.js
 built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely-2.js
+built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely-1.js
+built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely-2.js
 
 # when diffing, we do not walk year/months one-by-one
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
