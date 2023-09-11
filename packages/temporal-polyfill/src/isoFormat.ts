@@ -142,10 +142,10 @@ export function formatDurationInternals(
     subsecNanoString
 
   return (sign < 0 ? '-' : '') + 'P' + formatDurationFragments({
-    Y: abs.years,
-    M: abs.months,
-    W: abs.weeks,
-    D: abs.days,
+    Y: formatNumberUnscientific(abs.years),
+    M: formatNumberUnscientific(abs.months),
+    W: formatNumberUnscientific(abs.weeks),
+    D: formatNumberUnscientific(abs.days),
   }) + (
     (hours || minutes || wholeSeconds || forceSeconds)
       ? 'T' + formatDurationFragments({
@@ -160,17 +160,13 @@ export function formatDurationInternals(
 /*
 Values are guaranteed to be non-negative
 */
-function formatDurationFragments(fragObj: Record<string, string | number>): string {
+function formatDurationFragments(fragObj: Record<string, string>): string {
   const parts = []
 
   for (const fragName in fragObj) {
     const fragVal = fragObj[fragName]
     if (fragVal) {
-      parts.push(
-        // not nice
-        (typeof fragVal === 'number' ? formatNumberUnscientific(fragVal) : fragVal) +
-        fragName
-      )
+      parts.push(fragVal, fragName)
     }
   }
 
