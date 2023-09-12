@@ -129,30 +129,30 @@ function createIntlTimeZoneStore(
   let maxTransition = maxPossibleTransition
 
   function getPossibleEpochSec(zonedEpochSec: number): number[] {
-    let startOffsetSec = getOffsetSec(zonedEpochSec - secInDay)
-    let endOffsetSec = getOffsetSec(zonedEpochSec + secInDay)
+    const wideOffsetSec0 = getOffsetSec(zonedEpochSec - secInDay)
+    const wideOffsetSec1 = getOffsetSec(zonedEpochSec + secInDay)
 
-    let startUtcEpochSec = zonedEpochSec - startOffsetSec
-    let endUtcEpochSec = zonedEpochSec - endOffsetSec // could move below
+    const wideUtcEpochSec0 = zonedEpochSec - wideOffsetSec0
+    const wideUtcEpochSec1 = zonedEpochSec - wideOffsetSec1 // could move below
 
-    if (startOffsetSec === endOffsetSec) {
-      return [startUtcEpochSec]
+    if (wideOffsetSec0 === wideOffsetSec1) {
+      return [wideUtcEpochSec0]
     }
 
-    startOffsetSec = getOffsetSec(startUtcEpochSec)
-    endOffsetSec = getOffsetSec(endUtcEpochSec)
-    startUtcEpochSec = zonedEpochSec - startOffsetSec
-    endUtcEpochSec = zonedEpochSec - endOffsetSec // could move below
+    const narrowOffsetSec0 = getOffsetSec(wideUtcEpochSec0)
+    const narrowOffsetSec1 = getOffsetSec(wideUtcEpochSec1)
 
-    if (startOffsetSec === endOffsetSec) {
-      return [startUtcEpochSec]
+    if (narrowOffsetSec0 === narrowOffsetSec1) {
+      return [zonedEpochSec - narrowOffsetSec0]
     }
 
-    if (startUtcEpochSec > endUtcEpochSec) {
-      return [startUtcEpochSec, endUtcEpochSec]
+    // narrow could be too narrow
+    if (wideOffsetSec0 > wideOffsetSec1) {
+      return [wideUtcEpochSec0, wideUtcEpochSec1]
     }
 
     return []
+
   }
 
   function getOffsetSec(epochSec: number): number {

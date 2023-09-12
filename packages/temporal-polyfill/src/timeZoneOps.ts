@@ -231,7 +231,7 @@ export function getSingleInstantFor(
       : 1) // 'later' or 'compatible'
 
   possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(
-    epochNanoToIso(zonedEpochNano, shiftNano),
+    epochNanoToIso(zonedEpochNano, shiftNano), // abuse of offsetNano!
   )
 
   return possibleEpochNanos[
