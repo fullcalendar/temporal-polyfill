@@ -233,6 +233,8 @@ built-ins/Temporal/Instant/prototype/toString/timezone.js
 # (would require us to use DayTimeNano for simple operations)
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
+# TODO: order of adding large/small units is probably wrong in move versus diff
+#
 # I disagree with this diffing algo. seems buggy
 #   new Temporal.PlainDate(1972, 2, 1).until(new Temporal.PlainDate(1972, 2, 1).add(new Temporal.Duration(3, 11, 0, 29)), { largestUnit: 'years' })
 #   => P3Y11M29D
@@ -243,6 +245,15 @@ built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematic
 #   => P4Y
 #
 built-ins/Temporal/Duration/prototype/round/february-leap-year.js
+#
+# same:
+# Temporal.ZonedDateTime.from("2019-11-01T00:00[America/Vancouver]").until(
+#   Temporal.ZonedDateTime.from("2019-11-01T00:00[America/Vancouver]").add(
+#     new Temporal.Duration(1, 0, 0, 0, 24)
+#   ), { largestUnit: 'year' })
+# => P1YT24H
+#
+intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 
 # Node16-specific bugs with timezone normalization
 # Asia/Kolkata should not get normalized to Asia/Calcutta
