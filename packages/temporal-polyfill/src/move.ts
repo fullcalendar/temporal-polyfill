@@ -1,4 +1,4 @@
-import { CalendarImpl } from './calendarImpl'
+import { CalendarImpl, monthToMonthCode, refineMonthCodeNumber } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
@@ -118,7 +118,9 @@ export function moveDate(
     let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)
 
     if (years) {
+      const [monthCodeNumber, isLeapMonth] = calendar.queryMonthCode(year, month)
       year += years
+      month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, calendar.queryLeapMonth(year))
       month = clampEntity('month', month, 1, calendar.computeMonthsInYear(year), overflow)
     }
 

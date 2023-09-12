@@ -977,7 +977,7 @@ function parseMonthCode(monthCode: string): [
   ]
 }
 
-function refineMonthCodeNumber(
+export function refineMonthCodeNumber(
   monthCodeNumber: number,
   isLeapMonth: boolean,
   leapMonth: number | undefined,
@@ -993,7 +993,7 @@ function formatMonthCode(month: number, leapMonth?: number): string {
   return 'M' + padNumber2(monthToMonthCode(month, leapMonth)) + ((month === leapMonth) ? 'L' : '')
 }
 
-function monthToMonthCode(month: number, leapMonth?: number): number {
+export function monthToMonthCode(month: number, leapMonth?: number): number {
   return month - (
     (leapMonth && month >= leapMonth)
       ? 1
