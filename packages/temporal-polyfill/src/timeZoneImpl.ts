@@ -148,7 +148,7 @@ function createIntlTimeZoneStore(
       return [startUtcEpochSec]
     }
 
-    if (startUtcEpochSec < endUtcEpochSec) {
+    if (startUtcEpochSec > endUtcEpochSec) {
       return [startUtcEpochSec, endUtcEpochSec]
     }
 
