@@ -39,6 +39,15 @@ built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-with-fracti
 # Large Duration units prefer to be displayed as janky BigInt-converted numbers
 # TODO: do formatNumberUnscientific hack but in a loop
 built-ins/Temporal/Duration/prototype/toString/precision-formatted-as-decimal-number.js
+#
+# related:
+# 1e+26 milliseconds internally gets converted to 1e+23 seconds
+# unfortunately BigInt(1e+26) => '100000000000000004764729344n'
+# but BigInt(1e+23) => '99999999999999991611392n'
+#
+# TODO: just remove formatNumberUnscientific HACK and document noncompliance?
+#
+staging/Temporal/Duration/old/limits.js
 
 # relative Duration fewer dateAdd calls
 built-ins/Temporal/Duration/compare/order-of-operations.js
