@@ -777,6 +777,12 @@ export function queryCalendarImpl(calendarId: string): CalendarImpl {
   // TODO: fix double-call of ensureString
   calendarId = ensureString(calendarId).toLowerCase()
 
+  // explicitly deprecated calendars
+  // TODO: use faster map?
+  if (calendarId === 'islamicc') {
+    calendarId = 'islamic-civil'
+  }
+
   const calendarIdBase = getCalendarIdBase(calendarId)
   const CalendarImplClass = calendarImplClasses[calendarIdBase]
 
