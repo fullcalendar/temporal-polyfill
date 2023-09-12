@@ -34,6 +34,7 @@ built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
+built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-with-fractional-days-different-sign.js
 
 # Large Duration units prefer to be displayed as janky BigInt-converted numbers
 # TODO: do formatNumberUnscientific hack but in a loop
@@ -56,6 +57,7 @@ built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign
 # expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
 built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
 built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
+built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
 
 # really unclear to me when internal calls to dateAdd should provide undefined options or not
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js

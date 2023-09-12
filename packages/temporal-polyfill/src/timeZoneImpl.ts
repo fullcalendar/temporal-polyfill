@@ -131,15 +131,18 @@ function createIntlTimeZoneStore(
   function getPossibleEpochSec(zonedEpochSec: number): number[] {
     let startOffsetSec = getOffsetSec(zonedEpochSec - secInDay)
     let endOffsetSec = getOffsetSec(zonedEpochSec + secInDay)
-    const startUtcEpochSec = zonedEpochSec - startOffsetSec
+
+    let startUtcEpochSec = zonedEpochSec - startOffsetSec
+    let endUtcEpochSec = zonedEpochSec - endOffsetSec // could move below
 
     if (startOffsetSec === endOffsetSec) {
       return [startUtcEpochSec]
     }
 
-    const endUtcEpochSec = zonedEpochSec - endOffsetSec
     startOffsetSec = getOffsetSec(startUtcEpochSec)
     endOffsetSec = getOffsetSec(endUtcEpochSec)
+    startUtcEpochSec = zonedEpochSec - startOffsetSec
+    endUtcEpochSec = zonedEpochSec - endOffsetSec // could move below
 
     if (startOffsetSec === endOffsetSec) {
       return [startUtcEpochSec]
