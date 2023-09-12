@@ -957,8 +957,8 @@ function eraYearToYear(eraYear: number, eraOrigin: number): number {
 function normalizeShortEra(formattedEra: string): string {
   formattedEra = formattedEra
     .normalize('NFD') // 'Shōwa' -> 'Showa'
-    .replace(/[^a-z0-9]/g, '') // 'Before R.O.C.' -> 'BeforeROC'
-    .toLowerCase() // 'BeforeROC' -> 'beforeroc'
+    .toLowerCase() // 'Before R.O.C.' -> 'before r.o.c.'
+    .replace(/[^a-z0-9]/g, '') // 'before r.o.c.' -> 'beforeroc'
 
   return eraRemaps[formattedEra] || formattedEra
 }
