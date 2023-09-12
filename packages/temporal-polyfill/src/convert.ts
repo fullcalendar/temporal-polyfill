@@ -88,7 +88,7 @@ export function refineMaybeZonedDateTimeBag(
       { ...isoDateFields, ...isoTimeFields },
       fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
       false, // z?
-      OffsetDisambig.Use, // TODO: is default already?
+      OffsetDisambig.Reject, // TODO: is default already?
       EpochDisambig.Compat, // TODO: is default already?
       false, // fuzzy
     )
