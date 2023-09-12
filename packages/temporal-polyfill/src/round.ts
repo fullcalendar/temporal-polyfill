@@ -318,7 +318,7 @@ export function totalRelativeDuration<M>(
     dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) /
     dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
 
-  return durationFields[durationFieldNamesAsc[totalUnit]] + portion
+  return durationFields[durationFieldNamesAsc[totalUnit]] + portion * sign
 }
 
 // Nudge

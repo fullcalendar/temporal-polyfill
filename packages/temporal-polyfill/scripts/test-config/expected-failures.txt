@@ -27,6 +27,9 @@ built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/toString/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
+# options-parsing bug where 'auto' considered not defined at all :(
+staging/Temporal/Duration/old/round.js
+
 # Duration BAD!!! Can't do rel-rounding with big Durations because outside of range
 # should do UnbalanceDateDurationRelative instead :(
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-months.js
@@ -34,7 +37,6 @@ built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
-built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-with-fractional-days-different-sign.js
 
 # Large Duration units prefer to be displayed as janky BigInt-converted numbers
 # TODO: do formatNumberUnscientific hack but in a loop

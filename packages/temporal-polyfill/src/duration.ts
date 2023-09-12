@@ -342,7 +342,9 @@ function spanDuration<M>(
     endMarker = moveMarker(endMarker, durationFields1)
   }
 
-  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+  const balancedDuration = updateDurationFieldsSign( // yuck
+    diffMarkers(marker, endMarker, largestUnit)
+  )
   return [balancedDuration, markerToEpochNano(endMarker)]
 }
 
