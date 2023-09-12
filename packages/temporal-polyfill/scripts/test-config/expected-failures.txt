@@ -27,6 +27,10 @@ built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/toString/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
+# define Temporal[Symbol.toStringTag] even though official polyfill doesn't, hmmm
+built-ins/Temporal/toStringTag/prop-desc.js
+built-ins/Temporal/toStringTag/string.js
+
 # options-parsing bug where 'auto' considered not defined at all :(
 staging/Temporal/Duration/old/round.js
 
@@ -266,10 +270,16 @@ built-ins/Temporal/Duration/prototype/round/february-leap-year.js
 #
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 
+# for Intl.DateTimeFormat::formatRange,
+# should throw TypeError on Temporal-obj mismatch before RangeError about invalid gregory/iso calendars
+intl402/Intl/DateTimeFormat/prototype/formatRange/fails-on-distinct-temporal-types.js
+intl402/Intl/DateTimeFormat/prototype/formatRangeToParts/fails-on-distinct-temporal-types.js
+
 # Node16-specific bugs with timezone normalization
 # Asia/Kolkata should not get normalized to Asia/Calcutta
 intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
 intl402/Temporal/TimeZone/prototype/equals/argument-object.js
+intl402/DateTimeFormat/timezone-not-canonicalized.js
 # Asia/Ulan_Bator should not get normalized to Asia/Ulaanbaatar
 intl402/Temporal/TimeZone/basic.js
 intl402/Temporal/TimeZone/from/argument-valid.js
@@ -297,6 +307,7 @@ intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
 intl402/Temporal/TimeZone/from/timezone-case-insensitive.js
 intl402/Temporal/TimeZone/prototype/equals/canonical-not-equal.js
 intl402/Temporal/TimeZone/prototype/equals/timezone-case-insensitive.js
+intl402/DateTimeFormat/timezone-case-insensitive.js
 
 # when ZonedDateTime needs to query Calendar, should give PlainDateTime instead of PlainDate (i disagree)
 built-ins/Temporal/ZonedDateTime/prototype/day/custom.js
