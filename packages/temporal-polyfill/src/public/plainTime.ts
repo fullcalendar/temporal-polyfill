@@ -166,18 +166,25 @@ function createPlainTimeFormatFactory(
 ): FormatFactory<PlainTime> {
   return {
     buildKey: () => ['', ''],
-    buildFormat: () => new OrigDateTimeFormat(locales, {
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      ...options,
-      timeZone: 'UTC', // options can't override
-      timeZoneName: undefined,
-      year: undefined,
-      month: undefined,
-      day: undefined,
-      weekday: undefined,
-    }),
+    buildFormat: () => {
+      const defaultOptions: Intl.DateTimeFormatOptions | undefined = options?.timeStyle == null
+        ? {
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+          }
+        : undefined
+      return new OrigDateTimeFormat(locales, {
+        ...defaultOptions,
+        ...options,
+        timeZone: 'UTC', // options can't override
+        timeZoneName: undefined,
+        year: undefined,
+        month: undefined,
+        day: undefined,
+        weekday: undefined,
+      })
+    },
     buildEpochMilli: (plainTime: PlainTime) => (
       Math.trunc(isoTimeToNano(plainTime.getISOFields()) / nanoInMilli)
     ),

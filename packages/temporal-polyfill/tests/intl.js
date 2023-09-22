@@ -126,6 +126,8 @@ describe('Intl', () => {
       equal(time.toLocaleString('en', { day: 'numeric' }), '3:23:30 PM');
       equal(time.toLocaleString('en', { weekday: 'long' }), '3:23:30 PM');
     });
+    it(`(${time.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', timeStyle: 'short' })`, () =>
+      equal(`${time.toLocaleString('fr', { timeZone: 'Europe/Paris', timeStyle: 'short' })}`, '15:23'));
   });
   describe('date.toLocaleString()', () => {
     const date = Temporal.PlainDate.from('1976-11-18T15:23:30');
