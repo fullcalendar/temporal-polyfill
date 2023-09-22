@@ -157,6 +157,8 @@ describe('Intl', () => {
       const d = Temporal.PlainDate.from({ year: 1976, month: 11, day: 18, calendar: 'gregory' });
       throws(() => d.toLocaleString('en-US-u-ca-japanese'));
     });
+    it(`(${date.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium' })`, () =>
+      equal(`${date.toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium' })}`, '18 nov. 1976'));
   });
   describe('yearmonth.toLocaleString()', () => {
     const calendar = new Intl.DateTimeFormat('en').resolvedOptions().calendar;

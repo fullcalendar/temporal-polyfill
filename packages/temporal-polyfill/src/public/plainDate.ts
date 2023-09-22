@@ -184,6 +184,7 @@ mixinLocaleStringMethods(PlainDate, createPlainFormatFactoryFactory({
   month: 'numeric',
   day: 'numeric',
   weekday: undefined,
+  dateStyle: undefined,
 }, {
   hour: undefined,
   minute: undefined,
