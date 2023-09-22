@@ -32,6 +32,12 @@ describe('Intl', () => {
       const str = instant.toLocaleString('en', { timeZone: 'America/New_York', timeZoneName: 'short' });
       assert(str.includes('EST'));
     });
+    it(`(${instant.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium', timeStyle: 'short' })`, () =>
+      equal(`${instant.toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium', timeStyle: 'short' })}`, '18 nov. 1976, 15:23'));
+    it(`(${instant.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium' })`, () =>
+      equal(`${instant.toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium' })}`, '18 nov. 1976'));
+    it(`(${instant.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', timeStyle: 'short' })`, () =>
+      equal(`${instant.toLocaleString('fr', { timeZone: 'Europe/Paris', timeStyle: 'short' })}`, '15:23'));
   });
   describe('zoneddatetime.toLocaleString()', () => {
     const zdt = Temporal.ZonedDateTime.from('1976-11-18T15:23:30+01:00[Europe/Vienna]');

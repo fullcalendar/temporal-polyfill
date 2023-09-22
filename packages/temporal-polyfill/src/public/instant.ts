@@ -179,9 +179,11 @@ mixinLocaleStringMethods(Instant, createZonedFormatFactoryFactory({
   month: 'numeric',
   day: 'numeric',
   weekday: undefined,
+  dateStyle: undefined,
   hour: 'numeric',
   minute: '2-digit',
   second: '2-digit',
+  timeStyle: undefined,
 }, {
   timeZoneName: undefined,
 }, {}))
