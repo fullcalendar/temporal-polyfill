@@ -124,6 +124,12 @@ describe('Intl', () => {
       });
       throws(() => dt.toLocaleString('en-US-u-ca-japanese'));
     });
+    it(`(${datetime.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium', timeStyle: 'short' })`, () =>
+      equal(`${datetime.toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium', timeStyle: 'short' })}`, '18 nov. 1976, 15:23'));
+    it(`(${datetime.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium' })`, () =>
+      equal(`${datetime.toLocaleString('fr', { timeZone: 'Europe/Paris', dateStyle: 'medium' })}`, '18 nov. 1976'));
+    it(`(${datetime.toString()}).toLocaleString('fr', { timeZone: 'Europe/Paris', timeStyle: 'short' })`, () =>
+      equal(`${datetime.toLocaleString('fr', { timeZone: 'Europe/Paris', timeStyle: 'short' })}`, '15:23'));
   });
   describe('time.toLocaleString()', () => {
     const time = Temporal.PlainTime.from('1976-11-18T15:23:30');
