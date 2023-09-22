@@ -71,6 +71,12 @@ describe('Intl', () => {
       const zdt = new Temporal.ZonedDateTime(0n, 'UTC', 'gregory');
       throws(() => zdt.toLocaleString('en-US-u-ca-japanese'));
     });
+    it(`(${zdt}).toLocaleString('fr', { dateStyle: 'medium', timeStyle: 'short' })`, () =>
+      equal(zdt.toLocaleString('fr', { dateStyle: 'medium', timeStyle: 'short' }), '18 nov. 1976, 15:23'));
+    it(`(${zdt}).toLocaleString('fr', { dateStyle: 'medium' })`, () =>
+      equal(zdt.toLocaleString('fr', { dateStyle: 'medium' }), '18 nov. 1976'));
+    it(`(${zdt}).toLocaleString('fr', { timeStyle: 'short' })`, () =>
+      equal(zdt.toLocaleString('fr', { timeStyle: 'short' }), '15:23'));
   });
   describe('datetime.toLocaleString()', () => {
     const datetime = Temporal.PlainDateTime.from('1976-11-18T15:23:30');
