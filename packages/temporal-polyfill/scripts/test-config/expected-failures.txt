@@ -6,26 +6,19 @@
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
 
-# options parsing order-of-operations (TODO: alphabetical)
-built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js
-built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
-# vvv -- also, our algorithm for rounding calls Calendar/TimeZone WAY fewer times
+# internal TimeZone::getOffsetNanosecondsFor called fewer times
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
-# vvv -- also, our algorithm calls TimeZone::getOffsetNanosecondsFor fewer time
 built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
-# vvv -- also, our algorithm calls getOffsetNanosecondsFor WAAAAY fewer times
 built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
-built-ins/Temporal/Instant/prototype/since/order-of-operations.js
 built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
-built-ins/Temporal/Instant/prototype/until/order-of-operations.js
+# (also, `overflow options should be parsed WITHIN CalendarOpsAdapter, not before`...)
+built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
+
+# rounding, calling dateUntil/dateAdd in different order
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/toString/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+# (and fewer times...)
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 
 # define Temporal[Symbol.toStringTag] even though official polyfill doesn't, hmmm
 built-ins/Temporal/toStringTag/prop-desc.js
@@ -62,6 +55,7 @@ built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plainda
 built-ins/Temporal/Duration/compare/precision-exact-mathematical-values-1.js
 # fewer dateUntil calls here too...
 built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-mathematical-values-1.js
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 
 # Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
 # advance d1 all the way to d2. ignore this contrived case
