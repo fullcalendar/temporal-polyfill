@@ -37,9 +37,11 @@ import {
   nanoToGivenFields,
 } from './units'
 import { divModFloor } from './utils'
-import { ZonedInternals } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
+
+// public
 import { createPlainDate } from './plainDate'
+import type { ZonedInternals } from './zonedDateTime'
 
 // High-level
 // -------------------------------------------------------------------------------------------------

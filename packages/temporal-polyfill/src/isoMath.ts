@@ -392,7 +392,7 @@ export function epochMilliToIso(epochMilli: number): {
   }
 }
 
-// Comparison
+// Comparison (low-level)
 // -------------------------------------------------------------------------------------------------
 
 export function compareIsoDateTimeFields(

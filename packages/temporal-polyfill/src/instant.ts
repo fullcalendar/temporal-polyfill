@@ -1,32 +1,28 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOpsQuery'
 import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
-import { diffEpochNano } from './diff'
+import { diffInstants } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
-import { formatIsoDateTimeFields, formatOffsetNano } from './isoFormat'
+import { negateDurationInternals } from './durationFields'
+import { formatInstantIso } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { epochGetters, epochNanoToIso, checkEpochNanoInBounds } from './isoMath'
+import { epochGetters, checkEpochNanoInBounds } from './isoMath'
 import { parseInstant } from './isoParse'
 import { moveEpochNano } from './move'
 import {
   DiffOptions,
   InstantDisplayOptions,
-  RoundingMode,
   RoundingOptions,
-  refineDiffOptions,
-  refineInstantDisplayOptions,
-  refineRoundOptions,
 } from './options'
 import { toBigInt, ensureObjectlike } from './cast'
-import { roundDayTimeNano, roundDayTimeNanoByInc, roundToMinute } from './round'
-import { queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
+import { roundInstant } from './round'
+import { queryTimeZoneOps } from './timeZoneOps'
 import { NumSign, noop } from './utils'
 import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { TimeUnit, Unit, UnitName, nanoInMicro, nanoInMilli, nanoInMinute, nanoInSec } from './units'
+import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
-import { DayTimeNano, addDayTimeNanoAndNumber, bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
+import { DayTimeNano, bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
 
 export type InstantArg = Instant | string
 
@@ -109,29 +105,15 @@ export const [
     },
 
     until(epochNano: DayTimeNano, otherArg: InstantArg, options?: DiffOptions): Duration {
-      return diffInstants(epochNano, toInstantEpochNano(otherArg), options)
+      return createDuration(diffInstants(epochNano, toInstantEpochNano(otherArg), options))
     },
 
     since(epochNano: DayTimeNano, otherArg: InstantArg, options?: DiffOptions): Duration {
-      return diffInstants(epochNano, toInstantEpochNano(otherArg), options, true)
+      return createDuration(diffInstants(epochNano, toInstantEpochNano(otherArg), options, true))
     },
 
     round(epochNano: DayTimeNano, options: RoundingOptions | UnitName): Instant {
-      const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
-        options,
-        Unit.Hour,
-        true, // solarMode
-      )
-
-      return createInstant(
-        roundDayTimeNano(
-          epochNano,
-          smallestUnit as TimeUnit,
-          roundingInc,
-          roundingMode,
-          true, // useDayOrigin
-        ),
-      )
+      return createInstant(roundInstant(epochNano, options))
     },
 
     equals(epochNano: DayTimeNano, otherArg: InstantArg): boolean {
@@ -145,29 +127,7 @@ export const [
       epochNano: DayTimeNano,
       options?: InstantDisplayOptions
     ): string {
-      const [
-        timeZoneArg,
-        nanoInc,
-        roundingMode,
-        subsecDigits,
-      ] = refineInstantDisplayOptions(options)
-      const timeZone = queryTimeZoneOps(timeZoneArg !== undefined ? timeZoneArg : utcTimeZoneId)
-
-      epochNano = roundDayTimeNanoByInc(
-        epochNano,
-        nanoInc,
-        roundingMode,
-        true, // useDayOrigin
-      )
-
-      let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-      const isoFields = epochNanoToIso(epochNano, offsetNano)
-
-      return formatIsoDateTimeFields(isoFields, subsecDigits) +
-        (timeZoneArg
-          ? formatOffsetNano(roundToMinute(offsetNano))
-          : 'Z'
-        )
+      return formatInstantIso(epochNano, options)
     },
 
     toLocaleString: toLocaleStringMethod,
@@ -203,30 +163,6 @@ export const [
     }
   },
 )
-
-function diffInstants(
-  epochNano0: DayTimeNano,
-  epochNano1: DayTimeNano,
-  options?: DiffOptions,
-  invert?: boolean
-): Duration {
-  let durationInternals = updateDurationFieldsSign(
-    diffEpochNano(
-      epochNano0,
-      epochNano1,
-      ...(
-        refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as
-          [TimeUnit, TimeUnit, number, RoundingMode]
-      ),
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return createDuration(durationInternals)
-}
 
 // Legacy Date
 // -------------------------------------------------------------------------------------------------

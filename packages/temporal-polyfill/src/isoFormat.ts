@@ -1,11 +1,13 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
-import { dayTimeNanoToNumber, dayTimeNanoToNumberRemainder } from './dayTimeNano'
+import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
-import { IsoDateInternals } from './isoInternals'
-import { CalendarDisplay, DateTimeDisplayOptions, OffsetDisplay, refineDateDisplayOptions, SubsecDigits, TimeZoneDisplay } from './options'
-import { TimeZoneOps } from './timeZoneOps'
+import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
+import { epochNanoToIso } from './isoMath'
+import { CalendarDisplay, DateTimeDisplayOptions, InstantDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
+import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
+import { TimeZoneOps, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import {
   givenFieldsToDayTimeNano,
   nanoInHour,
@@ -16,6 +18,100 @@ import {
   Unit,
 } from './units'
 import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
+import type { ZonedInternals } from './zonedDateTime'
+
+// High-level
+// -------------------------------------------------------------------------------------------------
+
+export function formatPlainDateTimeIso(
+  internals: IsoDateTimeInternals,
+  options?: DateTimeDisplayOptions,
+): string {
+  const [
+    calendarDisplay,
+    nanoInc,
+    roundingMode,
+    subsecDigits,
+  ] = refineDateTimeDisplayOptions(options)
+
+  const roundedIsoFields = roundDateTimeToNano(internals, nanoInc, roundingMode)
+
+  return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
+    formatCalendar(internals.calendar, calendarDisplay)
+}
+
+export function formatPlainDateIso(
+  internals: IsoDateInternals,
+  options?: DateTimeDisplayOptions
+): string {
+  return formatIsoDateFields(internals) +
+    formatCalendar(internals.calendar, refineDateDisplayOptions(options))
+}
+
+export function formatZonedDateTimeIso(
+  internals: ZonedInternals,
+  options?: ZonedDateTimeDisplayOptions,
+): string {
+  let { epochNanoseconds: epochNano, timeZone, calendar } = internals
+  const [
+    calendarDisplay,
+    timeZoneDisplay,
+    offsetDisplay,
+    nanoInc,
+    roundingMode,
+    subsecDigits,
+  ] = refineZonedDateTimeDisplayOptions(options)
+
+  epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
+  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+  const isoFields = epochNanoToIso(epochNano, offsetNano)
+
+  return formatIsoDateTimeFields(isoFields, subsecDigits) +
+    formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
+    formatTimeZone(timeZone, timeZoneDisplay) +
+    formatCalendar(calendar, calendarDisplay)
+}
+
+export function formatInstantIso(
+  epochNano: DayTimeNano,
+  options?: InstantDisplayOptions,
+): string {
+  const [
+    timeZoneArg,
+    nanoInc,
+    roundingMode,
+    subsecDigits,
+  ] = refineInstantDisplayOptions(options)
+  const timeZone = queryTimeZoneOps(timeZoneArg !== undefined ? timeZoneArg : utcTimeZoneId)
+
+  epochNano = roundDayTimeNanoByInc(
+    epochNano,
+    nanoInc,
+    roundingMode,
+    true, // useDayOrigin
+  )
+
+  let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+  const isoFields = epochNanoToIso(epochNano, offsetNano)
+
+  return formatIsoDateTimeFields(isoFields, subsecDigits) +
+    (timeZoneArg
+      ? formatOffsetNano(roundToMinute(offsetNano))
+      : 'Z'
+    )
+}
+
+export function formatPlainTimeIso(fields: IsoTimeFields, options?: TimeDisplayOptions): string {
+  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
+
+  return formatIsoTimeFields(
+    roundTimeToNano(fields, nanoInc, roundingMode)[0],
+    subsecDigits,
+  )
+}
+
+// Other Stuff
+// -------------------------------------------------------------------------------------------------
 
 /*
 High-level. Refined options.

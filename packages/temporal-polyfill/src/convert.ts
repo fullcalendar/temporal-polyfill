@@ -1,4 +1,3 @@
-import { CalendarArg, CalendarProtocol } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import {
   DateTimeBag,
@@ -21,7 +20,6 @@ import { queryCalendarImpl } from './calendarImpl'
 import { queryCalendarOps } from './calendarOpsQuery'
 import { CalendarOps } from './calendarOps'
 import { TemporalInstance, getInternals } from './class'
-import { DurationBag, DurationMod } from './duration'
 import {
   DurationInternals,
   durationFieldDefaults,
@@ -34,11 +32,13 @@ import { CalendarInternals, IsoDateInternals, IsoDateTimeInternals } from './iso
 import { parseOffsetNano } from './isoParse'
 import {
   EpochDisambig,
+  EpochDisambigOptions,
   OffsetDisambig,
   Overflow,
   OverflowOptions,
   ZonedFieldOptions,
   normalizeOptions,
+  refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './options'
@@ -46,16 +46,44 @@ import {
   ensureObjectlike,
   ensureStringViaPrimitive,
 } from './cast'
-import { PlainDate, PlainDateBag, PlainDateMod, createPlainDate } from './plainDate'
-import { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod } from './plainDateTime'
-import { PlainMonthDay, PlainMonthDayBag, PlainMonthDayMod, createPlainMonthDay } from './plainMonthDay'
-import { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
-import { PlainYearMonth, PlainYearMonthBag, PlainYearMonthMod, createPlainYearMonth } from './plainYearMonth'
-import { TimeZoneArg } from './timeZone'
-import { getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { Callable, Reused, excludeArrayDuplicates, pluckProps } from './utils'
-import { ZonedDateTime, ZonedDateTimeBag, ZonedDateTimeMod, ZonedInternals, createZonedDateTime } from './zonedDateTime'
-import { checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
+import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
+import { Callable, Reused, pluckProps } from './utils'
+import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
+
+// public
+import type { CalendarArg, CalendarProtocol } from './calendar'
+import type { TimeZoneArg } from './timeZone'
+import type { ZonedDateTime, ZonedDateTimeBag, ZonedDateTimeMod, ZonedInternals } from './zonedDateTime'
+import type { PlainDate, PlainDateBag, PlainDateMod } from './plainDate'
+import type { PlainDateTime, PlainDateTimeBag, PlainDateTimeMod } from './plainDateTime'
+import type { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
+import type { PlainYearMonth, PlainYearMonthBag, PlainYearMonthMod } from './plainYearMonth'
+import type { PlainMonthDay, PlainMonthDayBag, PlainMonthDayMod } from './plainMonthDay'
+import type { DurationBag, DurationMod } from './duration'
+
+// High-level to* methods
+// -------------------------------------------------------------------------------------------------
+
+export function convertPlainDateTimeToZoned(
+  internals: IsoDateTimeInternals,
+  timeZone: TimeZoneOps,
+  options?: EpochDisambigOptions,
+): ZonedInternals {
+  const { calendar } = internals
+  const epochDisambig = refineEpochDisambigOptions(options)
+  const epochNanoseconds = checkEpochNanoInBounds(
+    getSingleInstantFor(timeZone, internals, epochDisambig),
+  )
+
+  return {
+    epochNanoseconds,
+    timeZone,
+    calendar,
+  }
+}
+
+// Other Stuff
+// -------------------------------------------------------------------------------------------------
 
 /*
 Rules:
@@ -194,7 +222,7 @@ export function createZonedDateTimeConverter<
   (
     internals: Internals,
     options: NarrowOptions & { timeZone: TimeZoneArg },
-  ) => ZonedDateTime
+  ) => ZonedInternals
 ) {
   return (internals, options) => {
     const timeZone = queryTimeZoneOps((options as { timeZone: TimeZoneArg }).timeZone)
@@ -204,11 +232,11 @@ export function createZonedDateTimeConverter<
     const { calendar } = finalInternals
     const epochNanoseconds = getSingleInstantFor(timeZone, finalInternals)
 
-    return createZonedDateTime({
+    return {
       calendar,
       timeZone: timeZone,
       epochNanoseconds,
-    })
+    }
   }
 }
 
@@ -355,16 +383,14 @@ Responsible for ensuring bag is an object. Best place?
 export function convertPlainYearMonthToDate(
   plainYearMonth: PlainYearMonth,
   bag: DayFields,
-): PlainYearMonth {
-  return createPlainDate(
-    convertToIso(plainYearMonth, yearMonthBasicNames, ensureObjectlike(bag), ['day']),
-  )
+): IsoDateInternals {
+  return convertToIso(plainYearMonth, yearMonthBasicNames, ensureObjectlike(bag), ['day'])
 }
 
 export function convertToPlainYearMonth(
   input: PlainDate | PlainDateTime | ZonedDateTime, // TODO: more generic type
   overflow?: Overflow,
-) {
+): IsoDateInternals {
   const { calendar } = getInternals(input)
   const fields = refineCalendarFields(
     calendar,
@@ -373,9 +399,7 @@ export function convertToPlainYearMonth(
     [], // requiredFields
   )
 
-  return createPlainYearMonth(
-    calendar.yearMonthFromFields(fields, overflow),
-  )
+  return calendar.yearMonthFromFields(fields, overflow)
 }
 
 // PlainMonthDay
@@ -432,7 +456,7 @@ export function mergePlainMonthDayBag(
 
 export function convertToPlainMonthDay(
   input: PlainDate | PlainDateTime | ZonedDateTime, // TODO: make more general?
-): PlainMonthDay {
+): IsoDateInternals {
   const { calendar } = getInternals(input)
   const fields = refineCalendarFields(
     calendar,
@@ -441,9 +465,7 @@ export function convertToPlainMonthDay(
     [], // requiredFields
   )
 
-  return createPlainMonthDay(
-    calendar.monthDayFromFields(fields),
-  )
+  return calendar.monthDayFromFields(fields)
 }
 
 /*
@@ -452,15 +474,13 @@ Responsible for ensuring bag is an object. Best place?
 export function convertPlainMonthDayToDate(
   plainMonthDay: PlainMonthDay,
   bag: YearFields,
-): PlainDate {
-  return createPlainDate(
-    convertToIso(
-      plainMonthDay,
-      monthDayBasicNames,
-      ensureObjectlike(bag),
-      ['year'],
-      Overflow.Reject, // unlike others. correct
-    ),
+): IsoDateInternals {
+  return convertToIso(
+    plainMonthDay,
+    monthDayBasicNames,
+    ensureObjectlike(bag),
+    ['year'],
+    Overflow.Reject, // unlike others. correct
   )
 }
 

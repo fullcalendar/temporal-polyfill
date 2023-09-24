@@ -1,17 +1,13 @@
-import { getInternals } from './class'
+import { getInternals, getTemporalName } from './class'
 import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
 import { IsoDateInternals, pluckIsoDateInternals } from './isoInternals'
 import { parseZonedOrPlainDateTime } from './isoParse'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { TimeZoneArg } from './timeZone'
 import { toString, ensureObjectlike, toInteger, ensureString } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
   clampEntity,
-  hasAnyPropsByName,
   isObjectlike,
   roundExpand,
   roundHalfCeil,
@@ -20,8 +16,11 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
-import { ZonedDateTime, ZonedDateTimeBag, ZonedInternals } from './zonedDateTime'
-import { DayTimeNano, bigIntToDayTimeNano } from './dayTimeNano'
+
+// public
+import type { TimeZoneArg } from './timeZone'
+import type { PlainDate } from './plainDate'
+import type { ZonedDateTime, ZonedDateTimeBag, ZonedInternals } from './zonedDateTime'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -640,12 +639,12 @@ function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | und
   if (relativeTo !== undefined) {
     if (isObjectlike(relativeTo)) {
       if (
-        relativeTo instanceof ZonedDateTime ||
-        relativeTo instanceof PlainDate
+        getTemporalName(relativeTo) === 'ZonedDateTime' ||
+        getTemporalName(relativeTo) === 'PlainDate'
       ) {
         return getInternals(relativeTo)
-      } else if (relativeTo instanceof PlainDateTime) {
-        return pluckIsoDateInternals(getInternals(relativeTo))
+      } else if (getTemporalName(relativeTo) === 'PlainDateTime') {
+        return pluckIsoDateInternals(getInternals(relativeTo) as any)
       }
 
       return refineMaybeZonedDateTimeBag(relativeTo as unknown as ZonedDateTimeBag)

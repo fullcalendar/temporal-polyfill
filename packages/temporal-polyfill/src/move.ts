@@ -1,4 +1,4 @@
-import { CalendarImpl, monthToMonthCode, refineMonthCodeNumber } from './calendarImpl'
+import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
 import { CalendarOps } from './calendarOps'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
@@ -9,9 +9,10 @@ import {
   durationTimeFieldsToLargeNanoStrict,
   updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
+  DurationInternals,
 } from './durationFields'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
-import { IsoDateInternals } from './isoInternals'
+import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
@@ -23,10 +24,48 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { Overflow } from './options'
+import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
+import type { ZonedInternals } from './zonedDateTime'
+
+// High-level
+// -------------------------------------------------------------------------------------------------
+
+export function movePlainDateTime(
+  internals: IsoDateTimeInternals,
+  durationInternals: DurationInternals,
+  options: OverflowOptions | undefined,
+): IsoDateTimeInternals {
+  return {
+    calendar: internals.calendar, // TODO: make this nicer
+    ...moveDateTime(
+      internals.calendar,
+      internals,
+      durationInternals,
+      refineOverflowOptions(options),
+    ),
+  }
+}
+
+export function moveZonedDateTime(
+  internals: ZonedInternals,
+  durationFields: DurationFields,
+  overflow?: Overflow
+): ZonedInternals {
+  const epochNano = moveZonedEpochNano(
+    internals.calendar,
+    internals.timeZone,
+    internals.epochNanoseconds,
+    durationFields,
+    overflow,
+  )
+  return {
+    ...internals,
+    epochNanoseconds: epochNano,
+  }
+}
 
 // Epoch
 // -------------------------------------------------------------------------------------------------

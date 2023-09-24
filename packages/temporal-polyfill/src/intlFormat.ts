@@ -2,7 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
 import { getInternals, getTemporalName } from './class'
 import { DayTimeNano } from './dayTimeNano'
-import { Instant } from './instant'
+import type { Instant } from './instant'
 import {
   IsoTimeFields,
   isoTimeFieldDefaults,
@@ -12,11 +12,6 @@ import {
   IsoDateTimeInternals
 } from './isoInternals'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime } from './plainTime'
-import { PlainYearMonth } from './plainYearMonth'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor } from './timeZoneOps'
 import {
@@ -28,7 +23,14 @@ import {
   identityFunc,
   pluckProps,
 } from './utils'
-import { ZonedDateTime, ZonedInternals } from './zonedDateTime'
+
+// public
+import type { ZonedDateTime, ZonedInternals } from './zonedDateTime'
+import type { PlainDate } from './plainDate'
+import type { PlainTime } from './plainTime'
+import type { PlainDateTime } from './plainDateTime'
+import type { PlainMonthDay } from './plainMonthDay'
+import type { PlainYearMonth } from './plainYearMonth'
 
 export type LocalesArg = string | string[]
 

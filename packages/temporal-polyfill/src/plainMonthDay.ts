@@ -2,7 +2,7 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarPublic'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
@@ -11,10 +11,11 @@ import {
 import { IsoDateInternals, generatePublicIsoDateFields, refineIsoDateInternals } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
-import { compareIsoDateFields, isoEpochFirstLeapYear } from './isoMath'
+import { isoEpochFirstLeapYear } from './isoMath'
+import { isPlainMonthDaysEqual } from './equality'
 import { parsePlainMonthDay } from './isoParse'
 import { refineOverflowOptions } from './options'
-import { PlainDate } from './plainDate'
+import { PlainDate, createPlainDate } from './plainDate'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag | string
 export type PlainMonthDayBag = MonthDayBag & { calendar?: CalendarArg }
@@ -73,10 +74,7 @@ export const [
     },
 
     equals(internals: IsoDateInternals, otherArg: PlainMonthDayArg): boolean {
-      const otherInternals = toPlainMonthDayInternals(otherArg)
-
-      return !compareIsoDateFields(internals, otherInternals) &&
-        isObjIdsEqual(internals.calendar, otherInternals.calendar)
+      return isPlainMonthDaysEqual(internals, toPlainMonthDayInternals(otherArg))
     },
 
     toString: formatPossibleDate.bind(undefined, formatIsoMonthDayFields),
@@ -86,7 +84,7 @@ export const [
     valueOf: neverValueOf,
 
     toPlainDate(internals: IsoDateInternals, bag: YearFields): PlainDate {
-      return convertPlainMonthDayToDate(this, bag)
+      return createPlainDate(convertPlainMonthDayToDate(this, bag))
     },
 
     getISOFields: generatePublicIsoDateFields,

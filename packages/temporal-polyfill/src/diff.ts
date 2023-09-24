@@ -1,5 +1,5 @@
 import { CalendarImpl } from './calendarImpl'
-import { CalendarOps } from './calendarOps'
+import { CalendarOps, getCommonCalendarOps } from './calendarOps'
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -7,9 +7,11 @@ import {
   durationFieldDefaults,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
+  negateDurationInternals,
   updateDurationFieldsSign,
 } from './durationFields'
 import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields } from './isoFields'
+import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
@@ -19,9 +21,9 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { Overflow, RoundingMode } from './options'
+import { DiffOptions, Overflow, RoundingMode, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
-import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+import { TimeZoneOps, getCommonTimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -30,6 +32,152 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc } from './utils'
+import type { ZonedInternals } from './zonedDateTime'
+
+// High-Level
+// -------------------------------------------------------------------------------------------------
+
+export function diffPlainDateTimes(
+  internals0: IsoDateTimeInternals,
+  internals1: IsoDateTimeInternals,
+  options: DiffOptions | undefined,
+  invert?: boolean
+): DurationInternals {
+  let durationInternals = updateDurationFieldsSign(
+    diffDateTimes(
+      getCommonCalendarOps(internals0, internals1),
+      internals0,
+      internals1,
+      ...refineDiffOptions(invert, options, Unit.Day),
+    ),
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+export function diffPlainDates(
+  internals0: IsoDateInternals,
+  internals1: IsoDateInternals,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationInternals {
+  let durationInternals = updateDurationFieldsSign(
+    diffDates(
+      getCommonCalendarOps(internals0, internals1),
+      internals0,
+      internals1,
+      ...refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day),
+    )
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+export function diffPlainYearMonths(
+  internals0: IsoDateInternals,
+  internals1: IsoDateInternals,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationInternals {
+  let durationInternals = updateDurationFieldsSign(
+    diffDates(
+      getCommonCalendarOps(internals0, internals1),
+      movePlainYearMonthToDay(internals0),
+      movePlainYearMonthToDay(internals1),
+      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
+    ),
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+// TODO: DRY
+function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
+  return moveByIsoDays(
+    internals,
+    day - internals.calendar.day(internals),
+  )
+}
+
+export function diffPlainTimes(
+  internals0: IsoTimeFields,
+  internals1: IsoTimeFields,
+  options: DiffOptions | undefined,
+  invert?: boolean
+): DurationInternals {
+  let durationInternals = updateDurationFieldsSign(
+    diffTimes(
+      internals0,
+      internals1,
+      ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
+    ),
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+export function diffZonedDateTimes(
+  internals: ZonedInternals,
+  otherInternals: ZonedInternals,
+  options: DiffOptions | undefined,
+  invert?: boolean
+): DurationInternals {
+  let durationInternals = updateDurationFieldsSign(
+    diffZonedEpochNano(
+      getCommonCalendarOps(internals, otherInternals),
+      getCommonTimeZoneOps(internals, otherInternals),
+      internals.epochNanoseconds,
+      otherInternals.epochNanoseconds,
+      ...refineDiffOptions(invert, options, Unit.Hour),
+    ),
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+export function diffInstants(
+  epochNano0: DayTimeNano,
+  epochNano1: DayTimeNano,
+  options?: DiffOptions,
+  invert?: boolean
+): DurationInternals {
+  let durationInternals = updateDurationFieldsSign(
+    diffEpochNano(
+      epochNano0,
+      epochNano1,
+      ...(
+        refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as
+          [TimeUnit, TimeUnit, number, RoundingMode]
+      ),
+    ),
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
 
 // Dates & Times
 // -------------------------------------------------------------------------------------------------

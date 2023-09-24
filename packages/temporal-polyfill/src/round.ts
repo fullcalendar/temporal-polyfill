@@ -12,11 +12,11 @@ import {
   nanoToDurationTimeFields,
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
-import { IsoDateInternals } from './isoInternals'
-import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
+import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
+import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay, moveByIsoDays, epochNanoToIso } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { RoundingMode, roundingModeFuncs } from './options'
-import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
+import { EpochDisambig, OffsetDisambig, RoundingMode, RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
+import { TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneOps'
 import {
   nanoInMinute,
   nanoInUtcDay,
@@ -25,9 +25,91 @@ import {
   DayTimeUnit,
   TimeUnit,
   givenFieldsToDayTimeNano,
+  UnitName,
 } from './units'
 import { divModFloor, divTrunc, identityFunc, mapPropNamesToConstant } from './utils'
-import { ZonedInternals } from './zonedDateTime'
+import type { ZonedInternals } from './zonedDateTime'
+
+export function roundPlainDateTime(
+  internals: IsoDateTimeInternals,
+  options: RoundingOptions | UnitName,
+): IsoDateTimeInternals {
+  const isoDateTimeFields = roundDateTime(
+    internals,
+    ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
+  )
+
+  return {
+    ...isoDateTimeFields,
+    calendar: internals.calendar,
+  }
+}
+
+export function roundZonedDateTime(
+  internals: ZonedInternals,
+  options: RoundingOptions | UnitName,
+): ZonedInternals {
+  let { epochNanoseconds, timeZone, calendar } = internals
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
+
+  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+  let isoDateTimeFields = epochNanoToIso(epochNanoseconds, offsetNano)
+
+  isoDateTimeFields = roundDateTime(
+    isoDateTimeFields,
+    smallestUnit as DayTimeUnit,
+    roundingInc,
+    roundingMode,
+    timeZone,
+  )
+  epochNanoseconds = getMatchingInstantFor(
+    timeZone,
+    isoDateTimeFields,
+    offsetNano,
+    false, // z
+    OffsetDisambig.Prefer, // keep old offsetNano if possible
+    EpochDisambig.Compat,
+    true, // fuzzy
+  )
+
+  return {
+    epochNanoseconds,
+    timeZone,
+    calendar,
+  }
+}
+
+export function roundInstant(
+  epochNano: DayTimeNano,
+  options: RoundingOptions | UnitName,
+): DayTimeNano {
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
+    options,
+    Unit.Hour,
+    true, // solarMode
+  )
+
+  return roundDayTimeNano(
+    epochNano,
+    smallestUnit as TimeUnit,
+    roundingInc,
+    roundingMode,
+    true, // useDayOrigin
+  )
+}
+
+export function roundPlainTime(
+  fields: IsoTimeFields,
+  options: RoundingOptions | UnitName
+): IsoTimeFields {
+  return roundTime(
+    fields,
+    ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
+  )
+}
+
+// Misc
+// -------------------------------------------------------------------------------------------------
 
 export function roundToMinute(offsetNano: number): number {
   return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)

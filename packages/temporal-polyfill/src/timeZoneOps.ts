@@ -1,12 +1,9 @@
 import {
   TemporalInstance,
-  WrapperInstance,
   createProtocolChecker,
-  createWrapperClass,
   getInternals,
-  getStrictInternals,
+  getTemporalName,
 } from './class'
-import { Instant, createInstant } from './instant'
 import { IsoDateFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import {
   epochNanoToIso,
@@ -17,16 +14,17 @@ import {
 import { parseMaybeOffsetNano, parseTimeZoneId } from './isoParse'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { ensureNumber, ensureString } from './cast'
-import { createPlainDateTime } from './plainDateTime'
 import { roundToMinute } from './round'
-import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone, timeZoneProtocolMethods } from './timeZone'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
-import { BoundArg, createLazyGenerator, isObjectlike } from './utils'
-import { ZonedInternals } from './zonedDateTime'
-import { queryCalendarImpl } from './calendarImpl'
-import { isoCalendarId } from './calendarConfig'
+import { createLazyGenerator, isObjectlike } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
+import { TimeZoneOpsAdapter } from './timeZoneOpsAdapter'
+
+// public
+import type { ZonedInternals } from './zonedDateTime'
+import { TimeZone, TimeZoneArg, TimeZoneProtocol, timeZoneProtocolMethods, createTimeZone } from './timeZone'
+import { createInstant } from './instant'
 
 export interface TimeZoneOps {
   id: string
@@ -62,8 +60,8 @@ export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
 
 export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol {
   if (isObjectlike(timeZoneArg)) {
-    if (timeZoneArg instanceof TimeZone) {
-      return timeZoneArg
+    if (getTemporalName(timeZoneArg) === 'TimeZone') {
+      return timeZoneArg as any
     }
 
     const { timeZone } = getInternals(
@@ -281,39 +279,6 @@ export function zonedEpochNanoToIsoWithTZObj(
   return epochNanoToIso(epochNano, offsetNano)
 }
 
-// Adapter
-// -------
-
-const getInstantEpochNano = getStrictInternals.bind<
-  undefined, [BoundArg], // bound
-  [Instant], // unbound
-  DayTimeNano // return
->(undefined, Instant)
-
-const timeZoneOpsAdapterMethods = {
-  getOffsetNanosecondsFor(timeZone: TimeZoneProtocol, epochNano: DayTimeNano): number {
-    return validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
-  },
-
-  getPossibleInstantsFor(
-    timeZone: TimeZoneProtocol,
-    isoDateTimeFields: IsoDateTimeFields,
-  ): DayTimeNano[] {
-    return [...timeZone.getPossibleInstantsFor(
-      createPlainDateTime({
-        ...isoDateTimeFields,
-        calendar: queryCalendarImpl(isoCalendarId),
-      })
-    )].map(getInstantEpochNano)
-  },
-}
-
-const timeZoneOpsAdapterGetters = {
-  id(timeZone: TimeZoneProtocol): string {
-    return ensureString(timeZone.id)
-  }
-}
-
 // YUCK!: we're using Calendar object directly here. check type in case of subclass
 export function isTimeZonesEqual(a: { id: string }, b: TimeZoneOps, loose?: boolean) {
   return a === b || getTimeZoneRawValue(ensureString(a.id), loose) === getTimeZoneRawValue(b.id, loose)
@@ -332,19 +297,6 @@ function getTimeZoneRawValue(id: string, loose?: boolean): string | number {
 
   return id
 }
-
-type TimeZoneOpsAdapter = WrapperInstance<
-  TimeZoneProtocol, // internals
-  typeof timeZoneOpsAdapterGetters, // getters
-  typeof timeZoneOpsAdapterMethods // methods
->
-
-export const TimeZoneOpsAdapter = createWrapperClass<
-  [TimeZoneProtocol], // constructor
-  TimeZoneProtocol, // internals
-  typeof timeZoneOpsAdapterGetters, // getters
-  typeof timeZoneOpsAdapterMethods // methods
->(timeZoneOpsAdapterGetters, timeZoneOpsAdapterMethods)
 
 export function validateOffsetNano(offsetNano: number): number {
   if (!Number.isInteger(ensureNumber(offsetNano))) {

@@ -17,11 +17,13 @@ import {
   refineOverflowOptions,
 } from './options'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { excludeUndefinedProps, mapPropNames } from './utils'
-import { ZonedDateTime } from './zonedDateTime'
+
+// public
+import type { PlainDateTime } from './plainDateTime'
+import type { ZonedDateTime } from './zonedDateTime'
 
 interface CalendarProtocolMethods {
   year(dateArg: PlainYearMonth | PlainDateArg): number

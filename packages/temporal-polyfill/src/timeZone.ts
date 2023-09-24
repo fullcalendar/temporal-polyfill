@@ -1,16 +1,16 @@
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { CalendarArg } from './calendar'
 import { queryCalendarOps } from './calendarOpsQuery'
-import { TemporalInstance, createSimpleTemporalClass, getInternals, getObjId, idGetters } from './class'
+import { TemporalInstance, createSimpleTemporalClass, getObjId, idGetters } from './class'
 import { Instant, InstantArg, createInstant, toInstantEpochNano } from './instant'
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeInternals } from './plainDateTime'
-import { TimeZoneOpsAdapter, getSingleInstantFor, isTimeZonesEqual, queryTimeZoneOps, queryTimeZonePublic, validateOffsetNano, zonedEpochNanoToIso, zonedEpochNanoToIsoWithTZObj } from './timeZoneOps'
+import { getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIsoWithTZObj } from './timeZoneOps'
+import { isTimeZonesEqual, validateOffsetNano } from './timeZoneOps'
+import { TimeZoneOpsAdapter } from './timeZoneOpsAdapter'
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
-import { parseMaybeOffsetNano } from './isoParse'
-import { ensureString } from './cast'
 
 interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number

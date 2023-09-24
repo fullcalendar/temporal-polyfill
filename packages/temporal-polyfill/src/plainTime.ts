@@ -5,36 +5,37 @@ import {
   mergePlainTimeBag,
   refinePlainTimeBag,
 } from './convert'
-import { diffTimes } from './diff'
+import { diffPlainTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
+import { DurationInternals, negateDurationInternals } from './durationFields'
 import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from './isoFields'
-import { formatIsoTimeFields } from './isoFormat'
+import { formatPlainTimeIso } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
 import {
   DiffOptions,
-  RoundingMode,
   RoundingOptions,
   TimeDisplayOptions,
-  refineDiffOptions,
   refineOverflowOptions,
-  refineRoundOptions,
-  refineTimeDisplayOptions,
 } from './options'
 import { PlainDateArg, toPlainDateInternals } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
-import { roundTime, roundTimeToNano } from './round'
+import { roundPlainTime } from './round'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { TimeUnit, Unit, UnitName } from './units'
+import { UnitName } from './units'
 import { NumSign } from './utils'
-import { ZonedInternals } from './zonedDateTime'
+import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
+import { TimeZoneArg } from './timeZone'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 export type PlainTimeBag = TimeBag
 export type PlainTimeMod = TimeBag
+
+const zonedDateTimeConverter = createZonedDateTimeConverter((options: { plainDate: PlainDateArg }) => {
+  return toPlainDateInternals(options.plainDate)
+})
 
 export type PlainTime = TemporalInstance<IsoTimeFields>
 export const [
@@ -105,20 +106,15 @@ export const [
     },
 
     until(fields: IsoTimeFields, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-      return diffPlainTimes(fields, toPlainTimeFields(otherArg), options)
+      return createDuration(diffPlainTimes(fields, toPlainTimeFields(otherArg), options))
     },
 
     since(fields: IsoTimeFields, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-      return diffPlainTimes(fields, toPlainTimeFields(otherArg), options, true)
+      return createDuration(diffPlainTimes(fields, toPlainTimeFields(otherArg), options, true))
     },
 
     round(fields: IsoTimeFields, options: RoundingOptions | UnitName): PlainTime {
-      return createPlainTime(
-        roundTime(
-          fields,
-          ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
-        ),
-      )
+      return createPlainTime(roundPlainTime(fields, options))
     },
 
     equals(fields: IsoTimeFields, other: PlainTimeArg): boolean {
@@ -127,21 +123,21 @@ export const [
     },
 
     toString(fields: IsoTimeFields, options?: TimeDisplayOptions): string {
-      const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
-
-      return formatIsoTimeFields(
-        roundTimeToNano(fields, nanoInc, roundingMode)[0],
-        subsecDigits,
-      )
+      return formatPlainTimeIso(fields, options)
     },
 
     toLocaleString: toLocaleStringMethod,
 
     valueOf: neverValueOf,
 
-    toZonedDateTime: createZonedDateTimeConverter((options: { plainDate: PlainDateArg }) => {
-      return toPlainDateInternals(options.plainDate)
-    }),
+    toZonedDateTime(
+      internals: IsoTimeFields,
+      options: { timeZone: TimeZoneArg, plainDate: PlainDateArg },
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        zonedDateTimeConverter(internals, options)
+      )
+    },
 
     toPlainDateTime(fields: IsoTimeFields, plainDateArg: PlainDateArg): PlainDateTime {
       return createPlainDateTime(
@@ -173,25 +169,4 @@ export const [
 
 function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInternals): PlainTime {
   return createPlainTime(moveTime(internals, durationInternals)[0])
-}
-
-function diffPlainTimes(
-  internals0: IsoTimeFields,
-  internals1: IsoTimeFields,
-  options: DiffOptions | undefined,
-  invert?: boolean
-): Duration {
-  let durationInternals = updateDurationFieldsSign(
-    diffTimes(
-      internals0,
-      internals1,
-      ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return createDuration(durationInternals)
 }

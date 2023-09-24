@@ -2,27 +2,26 @@ import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { YearMonthBag, yearMonthGetters } from './calendarFields'
 import { getPublicCalendar } from './calendarPublic'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import {
   convertPlainYearMonthToDate,
   convertToPlainYearMonth,
   mergePlainYearMonthBag,
   refinePlainYearMonthBag,
 } from './convert'
-import { diffDates } from './diff'
+import {  diffPlainYearMonths } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from './durationFields'
+import { DurationInternals, negateDurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { IsoDateInternals, generatePublicIsoDateFields, refineIsoYearMonthInternals } from './isoInternals'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
 import { compareIsoDateFields, moveByIsoDays } from './isoMath'
+import { isPlainYearMonthsEqual } from './equality'
 import { parsePlainYearMonth } from './isoParse'
-import { DiffOptions, OverflowOptions, refineDiffOptions, refineOverflowOptions } from './options'
+import { DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
-import { Unit } from './units'
 import { NumSign } from './utils'
-import { getCommonCalendarOps } from './calendarOps'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
 export type PlainYearMonthBag = YearMonthBag & { calendar?: CalendarArg }
@@ -97,18 +96,19 @@ export const [
     },
 
     until(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
-      return diffPlainYearMonths(internals, toPlainYearMonthInternals(otherArg), options)
+      return createDuration(
+        diffPlainYearMonths(internals, toPlainYearMonthInternals(otherArg), options)
+      )
     },
 
     since(internals: IsoDateInternals, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
-      return diffPlainYearMonths(internals, toPlainYearMonthInternals(otherArg), options, true)
+      return createDuration(
+        diffPlainYearMonths(internals, toPlainYearMonthInternals(otherArg), options, true)
+      )
     },
 
     equals(internals: IsoDateInternals, otherArg: PlainYearMonthArg): boolean {
-      const otherInternals = toPlainYearMonthInternals(otherArg)
-
-      return !compareIsoDateFields(internals, otherInternals) &&
-        isObjIdsEqual(internals.calendar, otherInternals.calendar)
+      return isPlainYearMonthsEqual(internals, toPlainYearMonthInternals(otherArg))
     },
 
     toString: formatPossibleDate.bind(undefined, formatIsoYearMonthFields),
@@ -118,7 +118,7 @@ export const [
     valueOf: neverValueOf,
 
     toPlainDate(internals: IsoDateInternals, bag: { day: number }): PlainDate {
-      return convertPlainYearMonthToDate(this, bag)
+      return createPlainDate(convertPlainYearMonthToDate(this, bag))
     },
 
     getISOFields: generatePublicIsoDateFields,
@@ -142,28 +142,7 @@ export const [
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function diffPlainYearMonths(
-  internals0: IsoDateInternals,
-  internals1: IsoDateInternals,
-  options: DiffOptions | undefined,
-  invert?: boolean,
-): Duration {
-  let durationInternals = updateDurationFieldsSign(
-    diffDates(
-      getCommonCalendarOps(internals0, internals1),
-      movePlainYearMonthToDay(internals0),
-      movePlainYearMonthToDay(internals1),
-      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return createDuration(durationInternals)
-}
-
+// HARD to convert to new-style
 function movePlainYearMonth(
   internals: IsoDateInternals,
   durationInternals: DurationInternals,
@@ -181,9 +160,11 @@ function movePlainYearMonth(
   /*
   TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
   */
-  return convertToPlainYearMonth(
-    createPlainDate(calendar.dateAdd(isoDateFields, durationInternals, overflow)),
-    overflow,
+  return createPlainYearMonth(
+    convertToPlainYearMonth(
+      createPlainDate(calendar.dateAdd(isoDateFields, durationInternals, overflow)),
+      overflow,
+    )
   )
 }
 

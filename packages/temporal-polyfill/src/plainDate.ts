@@ -5,7 +5,7 @@ import {
   queryCalendarOps,
 } from './calendarOpsQuery'
 import { getPublicCalendar } from './calendarPublic'
-import { TemporalInstance, createTemporalClass, isObjIdsEqual, neverValueOf } from './class'
+import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -13,30 +13,28 @@ import {
   mergePlainDateBag,
   refinePlainDateBag,
 } from './convert'
-import { diffDates } from './diff'
+import { diffPlainDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
-import { negateDurationInternals, updateDurationFieldsSign } from './durationFields'
+import { negateDurationInternals } from './durationFields'
 import {
-  IsoDateFields,
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
 import { IsoDateInternals, generatePublicIsoDateFields, pluckIsoDateInternals, refineIsoDateInternals } from './isoInternals'
-import { formatCalendar, formatIsoDateFields } from './isoFormat'
+import { formatPlainDateIso } from './isoFormat'
 import { toLocaleStringMethod } from './intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from './isoMath'
+import { isPlainDatesEqual } from './equality'
 import { parsePlainDate } from './isoParse'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
-import { PlainMonthDay } from './plainMonthDay'
+import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeFields } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { Unit } from './units'
 import { NumSign, isObjectlike } from './utils'
-import { getCommonCalendarOps } from './calendarOps'
 import { TimeZone, TimeZoneArg } from './timeZone'
-import { ZonedDateTime } from './zonedDateTime'
+import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateArg = PlainDate | PlainDateBag | string
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
@@ -100,7 +98,9 @@ export const [
 
   {
     with(internals: IsoDateInternals, mod: PlainDateMod, options?: OverflowOptions): PlainDate {
-      return createPlainDate(mergePlainDateBag(this, mod, options))
+      return createPlainDate(
+        mergePlainDateBag(this, mod, options)
+      )
     },
 
     withCalendar(internals: IsoDateInternals, calendarArg: CalendarArg): PlainDate {
@@ -131,23 +131,19 @@ export const [
     },
 
     until(internals: IsoDateInternals, otherArg: PlainDateArg, options?: DiffOptions): Duration {
-      return diffPlainDates(internals, toPlainDateInternals(otherArg), options)
+      return createDuration(diffPlainDates(internals, toPlainDateInternals(otherArg), options))
     },
 
     since(internals: IsoDateInternals, otherArg: PlainDateArg, options?: DiffOptions): Duration {
-      return diffPlainDates(internals, toPlainDateInternals(otherArg), options, true)
+      return createDuration(diffPlainDates(internals, toPlainDateInternals(otherArg), options, true))
     },
 
     equals(internals: IsoDateInternals, otherArg: PlainDateArg): boolean {
-      const otherInternals = toPlainDateInternals(otherArg)
-
-      return !compareIsoDateFields(internals, otherInternals) &&
-        isObjIdsEqual(internals.calendar, otherInternals.calendar)
+      return isPlainDatesEqual(internals, toPlainDateInternals(otherArg))
     },
 
     toString(internals: IsoDateInternals, options?: DateTimeDisplayOptions): string {
-      return formatIsoDateFields(internals) +
-        formatCalendar(internals.calendar, refineDateDisplayOptions(options))
+      return formatPlainDateIso(internals, options)
     },
 
     toLocaleString: toLocaleStringMethod,
@@ -158,15 +154,17 @@ export const [
       internals: IsoDateInternals,
       options: TimeZoneArg | { timeZone: TimeZoneArg, plainTime?: PlainTimeArg },
     ): ZonedDateTime {
-      return plainDateToZonedDateTimeConvert(
-        internals,
-        isObjectlike(options) && !(options instanceof TimeZone)
-          ? options as { timeZone: TimeZoneArg, plainTime?: PlainTimeArg }
-          : { timeZone: options as TimeZoneArg }
+      return createZonedDateTime(
+        plainDateToZonedDateTimeConvert(
+          internals,
+          isObjectlike(options) && !(options instanceof TimeZone)
+            ? options as { timeZone: TimeZoneArg, plainTime?: PlainTimeArg }
+            : { timeZone: options as TimeZoneArg }
+        )
       )
     },
 
-    toPlainDateTime(internals, timeArg): PlainDateTime {
+    toPlainDateTime(internals: IsoDateInternals, timeArg: PlainTimeArg): PlainDateTime {
       return createPlainDateTime(
         checkIsoDateTimeInBounds({
           ...internals,
@@ -179,11 +177,11 @@ export const [
       /*
       TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
       */
-      return convertToPlainYearMonth(this)
+      return createPlainYearMonth(convertToPlainYearMonth(this))
     },
 
     toPlainMonthDay(): PlainMonthDay {
-      return convertToPlainMonthDay(this)
+      return createPlainMonthDay(convertToPlainMonthDay(this))
     },
 
     getISOFields: generatePublicIsoDateFields,
@@ -206,28 +204,6 @@ export const [
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-function diffPlainDates(
-  internals0: IsoDateInternals,
-  internals1: IsoDateInternals,
-  options: DiffOptions | undefined,
-  invert?: boolean,
-): Duration {
-  let durationInternals = updateDurationFieldsSign(
-    diffDates(
-      getCommonCalendarOps(internals0, internals1),
-      internals0,
-      internals1,
-      ...refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day),
-    )
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return createDuration(durationInternals)
-}
 
 // TODO: DRY
 function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
