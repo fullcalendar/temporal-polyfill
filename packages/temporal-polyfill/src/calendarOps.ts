@@ -1,12 +1,11 @@
 import { DateBag, MonthDayBag, YearMonthBag } from './calendarFields'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
-import { IsoDateInternals } from './isoInternals'
 import { Overflow } from './options'
 import { Unit } from './units'
-import { getCommonInnerObj } from './class'
-import { CalendarInternals } from './isoInternals'
+import { getCommonInnerObj } from './complexObjUtils'
 import { BoundArg } from './utils'
+import { CalendarSlots, IsoDateSlots } from './slots'
 
 export interface CalendarOps {
   /*
@@ -28,10 +27,10 @@ export interface CalendarOps {
   weekOfYear(isoFields: IsoDateFields): number
   yearOfWeek(isoFields: IsoDateFields): number
   daysInWeek(isoFields: IsoDateFields): number
-  dateFromFields(fields: DateBag, overflow?: Overflow): IsoDateInternals
-  yearMonthFromFields(fields: YearMonthBag, overflow?: Overflow): IsoDateInternals
-  monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateInternals
-  dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow?: Overflow): IsoDateInternals
+  dateFromFields(fields: DateBag, overflow?: Overflow): IsoDateSlots
+  yearMonthFromFields(fields: YearMonthBag, overflow?: Overflow): IsoDateSlots
+  monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateSlots
+  dateAdd(isoFields: IsoDateFields, durationInternals: DurationInternals, overflow?: Overflow): IsoDateSlots
   dateUntil(isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit): DurationInternals
   // It'd be nice to have fieldNames input value be a string[],
   // but unfortunately accessing of array element could have side effects,
@@ -42,6 +41,6 @@ export interface CalendarOps {
 
 export const getCommonCalendarOps = getCommonInnerObj.bind<
   undefined, [BoundArg],
-  [CalendarInternals, CalendarInternals],
+  [CalendarSlots, CalendarSlots],
   CalendarOps // return
 >(undefined, 'calendar')

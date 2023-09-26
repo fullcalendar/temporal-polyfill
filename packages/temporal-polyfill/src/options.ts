@@ -1,7 +1,6 @@
-import { getInternals, getTemporalName } from './class'
 import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { IsoDateInternals, pluckIsoDateInternals } from './isoInternals'
+import { pluckIsoDateInternals } from './isoInternals'
 import { parseZonedOrPlainDateTime } from './isoParse'
 import { toString, ensureObjectlike, toInteger, ensureString } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
@@ -20,7 +19,8 @@ import {
 // public
 import type { TimeZoneArg } from './timeZone'
 import type { PlainDate } from './plainDate'
-import type { ZonedDateTime, ZonedDateTimeBag, ZonedInternals } from './zonedDateTime'
+import type { ZonedDateTime, ZonedDateTimeBag } from './zonedDateTime'
+import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -662,20 +662,23 @@ export interface RelativeToOptions {
 }
 
 // TODO: use in definition of `createMarkerSystem` ?
-type RelativeToInternals = ZonedInternals | IsoDateInternals
+type RelativeToInternals = ZonedEpochSlots | IsoDateSlots
 
 function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | undefined {
   const { relativeTo } = options
 
   if (relativeTo !== undefined) {
     if (isObjectlike(relativeTo)) {
+      const slots = getSlots(relativeTo)
+      const { branding } = slots || {}
+
       if (
-        getTemporalName(relativeTo) === 'ZonedDateTime' ||
-        getTemporalName(relativeTo) === 'PlainDate'
+        branding === 'ZonedDateTime' ||
+        branding === 'PlainDate'
       ) {
-        return getInternals(relativeTo)
-      } else if (getTemporalName(relativeTo) === 'PlainDateTime') {
-        return pluckIsoDateInternals(getInternals(relativeTo) as any)
+        return slots as (ZonedDateTimeSlots | PlainDateSlots)
+      } else if (branding === 'PlainDateTime') {
+        return pluckIsoDateInternals(slots as any)
       }
 
       return refineMaybeZonedDateTimeBag(relativeTo as unknown as ZonedDateTimeBag)

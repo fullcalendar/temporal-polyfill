@@ -11,7 +11,6 @@ import {
   updateDurationFieldsSign,
 } from './durationFields'
 import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields } from './isoFields'
-import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
@@ -23,6 +22,7 @@ import {
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { DiffOptions, Overflow, RoundingMode, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, getCommonTimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
   DayTimeUnit,
@@ -32,14 +32,13 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc } from './utils'
-import type { ZonedInternals } from './zonedDateTime'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
 
 export function diffPlainDateTimes(
-  internals0: IsoDateTimeInternals,
-  internals1: IsoDateTimeInternals,
+  internals0: IsoDateTimeSlots,
+  internals1: IsoDateTimeSlots,
   options: DiffOptions | undefined,
   invert?: boolean
 ): DurationInternals {
@@ -60,8 +59,8 @@ export function diffPlainDateTimes(
 }
 
 export function diffPlainDates(
-  internals0: IsoDateInternals,
-  internals1: IsoDateInternals,
+  internals0: IsoDateSlots,
+  internals1: IsoDateSlots,
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationInternals {
@@ -82,8 +81,8 @@ export function diffPlainDates(
 }
 
 export function diffPlainYearMonths(
-  internals0: IsoDateInternals,
-  internals1: IsoDateInternals,
+  internals0: IsoDateSlots,
+  internals1: IsoDateSlots,
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationInternals {
@@ -104,7 +103,7 @@ export function diffPlainYearMonths(
 }
 
 // TODO: DRY
-function movePlainYearMonthToDay(internals: IsoDateInternals, day = 1): IsoDateFields {
+function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
   return moveByIsoDays(
     internals,
     day - internals.calendar.day(internals),
@@ -133,8 +132,8 @@ export function diffPlainTimes(
 }
 
 export function diffZonedDateTimes(
-  internals: ZonedInternals,
-  otherInternals: ZonedInternals,
+  internals: ZonedEpochSlots,
+  otherInternals: ZonedEpochSlots,
   options: DiffOptions | undefined,
   invert?: boolean
 ): DurationInternals {

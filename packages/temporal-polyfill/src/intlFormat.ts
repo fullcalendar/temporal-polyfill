@@ -1,16 +1,10 @@
 import { isoCalendarId } from './calendarConfig'
 import { CalendarOps } from './calendarOps'
-import { getInternals, getTemporalName } from './class'
 import { DayTimeNano } from './dayTimeNano'
-import type { Instant } from './instant'
 import {
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
-import {
-  IsoDateInternals,
-  IsoDateTimeInternals
-} from './isoInternals'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor } from './timeZoneOps'
@@ -23,14 +17,16 @@ import {
   identityFunc,
   pluckProps,
 } from './utils'
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
 
 // public
-import type { ZonedDateTime, ZonedInternals } from './zonedDateTime'
+import type { ZonedDateTime } from './zonedDateTime'
 import type { PlainDate } from './plainDate'
 import type { PlainTime } from './plainTime'
 import type { PlainDateTime } from './plainDateTime'
 import type { PlainMonthDay } from './plainMonthDay'
 import type { PlainYearMonth } from './plainYearMonth'
+import type { Instant } from './instant'
 
 export type LocalesArg = string | string[]
 
@@ -49,20 +45,23 @@ export type Formattable = TemporalFormattable | OrigFormattable
 // toLocaleString
 // -------------------------------------------------------------------------------------------------
 
-export function toLocaleStringMethod(
-  this: TemporalFormattable,
-  internals: unknown,
-  locales: LocalesArg,
-  options: Intl.DateTimeFormatOptions = {},
-) {
-  const temporalName = getTemporalName(this)!
+export function createToLocaleStringMethod(branding: string) {
+  return {
+    toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
+      return slotsToLocaleString(getSpecificSlots(branding, this), locales, options)
+    }
+  }
+}
+
+export function slotsToLocaleString(slots: any, locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
+  const { branding } = slots
 
   // Copy options so accessing doesn't cause side-effects
   options = { ...options }
 
-  options = optionsTransformers[temporalName](options, internals)
+  options = optionsTransformers[branding](options, slots)
   const subformat = new OrigDateTimeFormat(locales, options)
-  const epochMilli = toEpochMilli(temporalName, internals, subformat.resolvedOptions())
+  const epochMilli = toEpochMilli(branding, slots, subformat.resolvedOptions())
 
   return subformat.format(epochMilli)
 }
@@ -200,11 +199,12 @@ function resolveFormattable(
   OrigFormattable,
   Intl.DateTimeFormat | undefined // undefined if should use orig method
 ] {
-  const temporalName = getTemporalName(arg)
-  const format = temporalName && subformatFactory(temporalName)
+  const slots = getSlots(arg)
+  const { branding } = slots || {}
+  const format = branding && subformatFactory(branding)
 
   if (format) {
-    const epochMilli = toEpochMilli(temporalName, getInternals(arg)!, resolvedOptions)
+    const epochMilli = toEpochMilli(branding, slots!, resolvedOptions)
     return [epochMilli, format]
   }
 
@@ -291,7 +291,7 @@ const optionsTransformers: Record<string, OptionsTransformer> = {
   PlainTime: createTransformer(timeValidNames, timeFallbacks, timeExclusions),
   Instant: createTransformer(dateTimeValidNames, dateTimeFallbacks, []),
 
-  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: ZonedInternals) {
+  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: ZonedEpochSlots) {
     if (!subjectInternals) {
       throw new TypeError('DateTimeFormat does not accept ZonedDateTime')
     }
@@ -351,7 +351,7 @@ type EpochNanoConverter = (
 
 const epochNanoConverters: Record<string, EpochNanoConverter> = {
   Instant: identityFunc,
-  ZonedDateTime: (internals: ZonedInternals) => internals.epochNanoseconds,
+  ZonedDateTime: (internals: ZonedEpochSlots) => internals.epochNanoseconds,
   PlainTime: timeFieldsToEpochNano,
   // otherwise, use dateInternalsToEpochNano
 }
@@ -372,7 +372,7 @@ function timeFieldsToEpochNano(
 }
 
 function dateInternalsToEpochNano(
-  internals: IsoDateTimeInternals | IsoDateInternals,
+  internals: IsoDateTimeSlots | IsoDateSlots,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
   return getSingleInstantFor(

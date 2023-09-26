@@ -5,13 +5,11 @@ import { ensureString } from './cast'
 import { isObjectlike } from './utils'
 import { CalendarOps } from './calendarOps'
 import { CalendarOpsAdapter } from './calendarOpsAdapter'
-import { TemporalInstance, getInternals } from './class'
+import { getSlots } from './slots'
 
 export function queryCalendarOps(calendarArg: CalendarArg): CalendarOps {
   if (isObjectlike(calendarArg)) {
-    const { calendar } = getInternals(
-      calendarArg as TemporalInstance<{ calendar: CalendarOps }>
-    ) || {}
+    const { calendar } = (getSlots(calendarArg) || {}) as { calendar?: CalendarOps }
 
     if (calendar) {
       return calendar // CalendarOps

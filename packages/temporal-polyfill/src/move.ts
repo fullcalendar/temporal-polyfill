@@ -12,7 +12,6 @@ import {
   DurationInternals,
 } from './durationFields'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
-import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
@@ -25,19 +24,19 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
-import type { ZonedInternals } from './zonedDateTime'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
 export function movePlainDateTime(
-  internals: IsoDateTimeInternals,
+  internals: IsoDateTimeSlots,
   durationInternals: DurationInternals,
   options: OverflowOptions | undefined,
-): IsoDateTimeInternals {
+): IsoDateTimeSlots {
   return {
     calendar: internals.calendar, // TODO: make this nicer
     ...moveDateTime(
@@ -50,10 +49,10 @@ export function movePlainDateTime(
 }
 
 export function moveZonedDateTime(
-  internals: ZonedInternals,
+  internals: ZonedEpochSlots,
   durationFields: DurationFields,
   overflow?: Overflow
-): ZonedInternals {
+): ZonedEpochSlots {
   const epochNano = moveZonedEpochNano(
     internals.calendar,
     internals.timeZone,
@@ -146,7 +145,7 @@ export function moveDate(
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   overflow?: Overflow,
-): IsoDateInternals {
+): IsoDateSlots {
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 

@@ -1,9 +1,7 @@
-import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { mergeDurationBag, refineDurationBag } from './convert'
 import {
   absDurationInternals,
   addDayTimeDurationFields,
-  durationInternalGetters,
   negateDurationInternals,
   refineDurationFields,
   DurationInternals,
@@ -14,6 +12,7 @@ import {
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
 import {
+  DurationRoundOptions,
   RelativeToOptions,
   SubsecDigits,
   TimeDisplayOptions,
@@ -32,28 +31,19 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { NumSign, noop } from './utils'
+import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 import { DayTimeNano, compareDayTimeNanos } from './dayTimeNano'
+import { DurationBranding, DurationSlots, createViaSlots, durationGettersMethods, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { ensureString } from './cast'
 
-export type DurationArg = Duration | DurationBag | string
 export type DurationBag = Partial<DurationFields>
 export type DurationMod = Partial<DurationFields>
+export type DurationArg = Duration | DurationBag | string
 
-export type Duration = TemporalInstance<DurationInternals>
-export const [
-  Duration,
-  createDuration,
-  toDurationInternals
-] = createTemporalClass(
-  'Duration',
-
-  // Creation
-  // -----------------------------------------------------------------------------------------------
-
-  // constructorToInternals
-  (
+export class Duration {
+  constructor(
     years: number = 0,
     months: number = 0,
     weeks: number = 0,
@@ -64,218 +54,227 @@ export const [
     milliseconds: number = 0,
     microseconds: number = 0,
     nanoseconds: number = 0,
-  ): DurationInternals => {
-    return refineDurationFields({
-      years,
-      months,
-      weeks,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds,
-      microseconds,
-      nanoseconds,
+  ) {
+    setSlots(this, {
+      branding: DurationBranding,
+      ...refineDurationFields({
+        years,
+        months,
+        weeks,
+        days,
+        hours,
+        minutes,
+        seconds,
+        milliseconds,
+        microseconds,
+        nanoseconds,
+      }),
     })
-  },
+  }
 
-  // internalsConversionMap
-  {},
+  with(mod: DurationMod): Duration {
+    return createDuration({
+      branding: DurationBranding,
+      ...mergeDurationBag(getDurationSlots(this), mod)
+    })
+  }
 
-  // bagToInternals
-  refineDurationBag,
+  add(otherArg: DurationArg, options?: RelativeToOptions) {
+    return addToDuration(1, getDurationSlots(this), otherArg, options)
+  }
 
-  // stringToInternals
-  parseDuration,
+  subtract(otherArg: DurationArg, options?: RelativeToOptions) {
+    return addToDuration(-1, getDurationSlots(this), otherArg, options)
+  }
 
-  // handleUnusedOptions
-  noop,
+  negated(): Duration {
+    return createDuration({
+      branding: DurationBranding,
+      ...negateDurationInternals(getDurationSlots(this))
+    })
+  }
 
-  // Getters
-  // -----------------------------------------------------------------------------------------------
+  abs(): Duration {
+    return createDuration({
+      branding: DurationBranding,
+      ...absDurationInternals(getDurationSlots(this))
+    })
+  }
 
-  {
-    ...durationInternalGetters,
+  round(options: DurationRoundOptions): Duration {
+    const slots = getDurationSlots(this)
+    const durationLargestUnit = getLargestDurationUnit(slots)
+    const [
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      markerInternals,
+    ] = refineDurationRoundOptions(options, durationLargestUnit)
 
-    blank(internals: DurationInternals): boolean {
-      return !internals.sign
-    },
-  },
+    const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
-  // Methods
-  // -----------------------------------------------------------------------------------------------
+    // TODO: move to round.js?
 
-  {
-    with(internals: DurationInternals, mod: DurationMod): Duration {
-      return createDuration(mergeDurationBag(internals, mod))
-    },
-
-    add: addToDuration.bind(undefined, 1),
-
-    subtract: addToDuration.bind(undefined, -1),
-
-    negated(internals: DurationInternals): Duration {
-      return createDuration(negateDurationInternals(internals))
-    },
-
-    abs(internals: DurationInternals): Duration {
-      return createDuration(absDurationInternals(internals))
-    },
-
-    round(internals: DurationInternals, options): Duration {
-      const durationLargestUnit = getLargestDurationUnit(internals)
-      const [
-        largestUnit,
-        smallestUnit,
-        roundingInc,
-        roundingMode,
-        markerInternals,
-      ] = refineDurationRoundOptions(options, durationLargestUnit)
-
-      const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
-
-      // TODO: move to round.js?
-
-      if (
-        maxLargestUnit < Unit.Day || (
-          maxLargestUnit === Unit.Day &&
-          // has uniform days?
-          !(markerInternals && (markerInternals as any).epochNanoseconds)
-        )
-      ) {
-        // TODO: check internals doesn't have large fields
-        return createDuration(
-          updateDurationFieldsSign(
-            roundDayTimeDuration(
-              internals,
-              largestUnit as DayTimeUnit,
-              smallestUnit as DayTimeUnit,
-              roundingInc,
-              roundingMode,
-              Unit.Day,
-            ),
-          )
-        )
-      }
-
-      if (!markerInternals) {
-        throw new RangeError('need relativeTo')
-      }
-
-      const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
-
-      return createDuration(
-        updateDurationFieldsSign(
-          roundRelativeDuration(
-            ...spanDuration(internals, undefined, largestUnit, ...markerSystem),
-            largestUnit,
-            smallestUnit,
+    if (
+      maxLargestUnit < Unit.Day || (
+        maxLargestUnit === Unit.Day &&
+        // has uniform days?
+        !(markerInternals && (markerInternals as any).epochNanoseconds)
+      )
+    ) {
+      // TODO: check internals doesn't have large fields
+      return createDuration({
+        branding: DurationBranding,
+        ...updateDurationFieldsSign(
+          roundDayTimeDuration(
+            slots,
+            largestUnit as DayTimeUnit,
+            smallestUnit as DayTimeUnit,
             roundingInc,
             roundingMode,
-            ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
+            Unit.Day,
           ),
+        )
+      })
+    }
+
+    if (!markerInternals) {
+      throw new RangeError('need relativeTo')
+    }
+
+    const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+
+    return createDuration({
+      branding: DurationBranding,
+      ...updateDurationFieldsSign(
+        roundRelativeDuration(
+          ...spanDuration(slots, undefined, largestUnit, ...markerSystem),
+          largestUnit,
+          smallestUnit,
+          roundingInc,
+          roundingMode,
+          ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
         ),
+      ),
+    })
+  }
+
+  total(options: TotalUnitOptionsWithRel | UnitName): number {
+    const slots = getDurationSlots(this)
+    const durationLargestUnit = getLargestDurationUnit(slots)
+    const [totalUnit, markerInternals] = refineTotalOptions(options)
+    const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
+
+    if (
+      maxLargestUnit < Unit.Day || (
+        maxLargestUnit === Unit.Day &&
+        // has uniform days?
+        !(markerInternals && (markerInternals as any).epochNanoseconds)
       )
-    },
+    ) {
+      return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
+    }
 
-    total(internals: DurationInternals, options: TotalUnitOptionsWithRel | UnitName): number {
-      const durationLargestUnit = getLargestDurationUnit(internals)
-      const [totalUnit, markerInternals] = refineTotalOptions(options)
-      const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
+    if (!markerInternals) {
+      throw new RangeError('need relativeTo')
+    }
 
-      if (
-        maxLargestUnit < Unit.Day || (
-          maxLargestUnit === Unit.Day &&
-          // has uniform days?
-          !(markerInternals && (markerInternals as any).epochNanoseconds)
-        )
-      ) {
-        return totalDayTimeDuration(internals, totalUnit as DayTimeUnit)
-      }
+    const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
-      if (!markerInternals) {
-        throw new RangeError('need relativeTo')
-      }
+    return totalRelativeDuration(
+      ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
+      totalUnit,
+      ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
+    )
+  }
 
-      const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+  toString(options?: TimeDisplayOptions): string {
+    return durationToString(getDurationSlots(this), options)
+  }
 
-      return totalRelativeDuration(
-        ...spanDuration(internals, undefined, totalUnit, ...markerSystem),
-        totalUnit,
-        ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
+  toJSON(): string {
+    return durationToString(getDurationSlots(this))
+  }
+
+  get blank(): boolean {
+    return !getDurationSlots(this).sign
+  }
+
+  static from(arg: DurationArg): Duration {
+    return createDuration(toDurationSlots(arg))
+  }
+
+  static compare(
+    durationArg0: DurationArg,
+    durationArg1: DurationArg,
+    options?: RelativeToOptions,
+  ): NumSign {
+    const durationFields0 = toDurationSlots(durationArg0)
+    const durationFields1 = toDurationSlots(durationArg1)
+    const markerInternals = refineRelativeToOptions(options)
+    const largestUnit = Math.max(
+      getLargestDurationUnit(durationFields0),
+      getLargestDurationUnit(durationFields1),
+    ) as Unit
+
+    if (
+      largestUnit < Unit.Day || (
+        largestUnit === Unit.Day &&
+        // has uniform days?
+        !(markerInternals && (markerInternals as any).epochNanoseconds)
       )
-    },
-
-    toString(internals: DurationInternals, options?: TimeDisplayOptions): string {
-      const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
-
-      // for performance AND for not losing precision when no rounding
-      if (nanoInc > 1) {
-        internals = updateDurationFieldsSign(
-          balanceDayTimeDuration(
-            internals,
-            Math.min(getLargestDurationUnit(internals), Unit.Second),
-            nanoInc,
-            roundingMode,
-          )
-        )
-      }
-
-      return formatDurationInternals(
-        internals,
-        subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
-      )
-    },
-
-    valueOf: neverValueOf,
-  },
-
-  // Static
-  // -----------------------------------------------------------------------------------------------
-
-  {
-    compare(
-      durationArg0: DurationArg,
-      durationArg1: DurationArg,
-      options?: RelativeToOptions,
-    ): NumSign {
-      const durationFields0 = toDurationInternals(durationArg0)
-      const durationFields1 = toDurationInternals(durationArg1)
-      const markerInternals = refineRelativeToOptions(options)
-      const largestUnit = Math.max(
-        getLargestDurationUnit(durationFields0),
-        getLargestDurationUnit(durationFields1),
-      ) as Unit
-
-      if (
-        largestUnit < Unit.Day || (
-          largestUnit === Unit.Day &&
-          // has uniform days?
-          !(markerInternals && (markerInternals as any).epochNanoseconds)
-        )
-      ) {
-        return compareDayTimeNanos(
-          givenFieldsToDayTimeNano(durationFields0, Unit.Day, durationFieldNamesAsc),
-          givenFieldsToDayTimeNano(durationFields1, Unit.Day, durationFieldNamesAsc)
-        )
-      }
-
-      if (!markerInternals) {
-        throw new RangeError('need relativeTo')
-      }
-
-      const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
-
+    ) {
       return compareDayTimeNanos(
-        markerToEpochNano(moveMarker(marker, durationFields0)),
-        markerToEpochNano(moveMarker(marker, durationFields1)),
+        givenFieldsToDayTimeNano(durationFields0, Unit.Day, durationFieldNamesAsc),
+        givenFieldsToDayTimeNano(durationFields1, Unit.Day, durationFieldNamesAsc)
       )
-    },
-  },
+    }
+
+    if (!markerInternals) {
+      throw new RangeError('need relativeTo')
+    }
+
+    const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+
+    return compareDayTimeNanos(
+      markerToEpochNano(moveMarker(marker, durationFields0)),
+      markerToEpochNano(moveMarker(marker, durationFields1)),
+    )
+  }
+}
+
+defineProps(Duration.prototype, {
+  [Symbol.toStringTag]: 'Temporal.' + DurationBranding,
+  valueOf: neverValueOf,
+})
+
+defineGetters(
+  Duration.prototype,
+  durationGettersMethods,
 )
 
 // Utils
 // -------------------------------------------------------------------------------------------------
+
+export function createDuration(slots: DurationSlots): Duration {
+  return createViaSlots(Duration, slots)
+}
+
+export function getDurationSlots(duration: Duration): DurationSlots {
+  return getSpecificSlots(DurationBranding, duration) as DurationSlots
+}
+
+export function toDurationSlots(arg: DurationArg): DurationSlots {
+  if (isObjectlike(arg)) {
+    const slots = getSlots(arg)
+    if (slots && slots.branding === DurationBranding) {
+      return slots as DurationSlots
+    }
+    return { ...refineDurationBag(arg as DurationBag), branding: DurationBranding }
+  }
+  return { ...parseDuration(ensureString(arg)), branding: DurationBranding }
+}
 
 function addToDuration(
   direction: -1 | 1,
@@ -283,7 +282,7 @@ function addToDuration(
   otherArg: DurationArg,
   options: RelativeToOptions | undefined,
 ): Duration {
-  let otherFields = toDurationInternals(otherArg)
+  let otherFields = toDurationSlots(otherArg) as DurationInternals
   const markerInternals = refineRelativeToOptions(options) // optional
   const largestUnit = Math.max(
     getLargestDurationUnit(internals),
@@ -297,11 +296,12 @@ function addToDuration(
       !(markerInternals && (markerInternals as any).epochNanoseconds)
     )
   ) {
-    return createDuration(
-      updateDurationFieldsSign(
+    return createDuration({
+      branding: DurationBranding,
+      ...updateDurationFieldsSign(
         addDayTimeDurationFields(internals, otherFields, direction, largestUnit as DayTimeUnit)
       )
-    )
+    })
   }
 
   if (!markerInternals) {
@@ -313,14 +313,15 @@ function addToDuration(
   }
 
   const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
-  return createDuration(
-    spanDuration(
+  return createDuration({
+    branding: DurationBranding,
+    ...spanDuration(
       internals,
       otherFields,
       largestUnit,
       ...markerSystem,
     )[0]
-  )
+  })
 }
 
 function spanDuration<M>(
@@ -358,4 +359,25 @@ function getLargestDurationUnit(fields: DurationFields): Unit {
   }
 
   return unit
+}
+
+function durationToString(slots: DurationInternals, options?: TimeDisplayOptions): string {
+  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
+
+  // for performance AND for not losing precision when no rounding
+  if (nanoInc > 1) {
+    slots = updateDurationFieldsSign(
+      balanceDayTimeDuration(
+        slots,
+        Math.min(getLargestDurationUnit(slots), Unit.Second),
+        nanoInc,
+        roundingMode,
+      )
+    )
+  }
+
+  return formatDurationInternals(
+    slots,
+    subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
+  )
 }

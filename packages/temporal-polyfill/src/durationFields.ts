@@ -58,7 +58,7 @@ const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day) as
   (keyof DurationDateFields)[]
 
 // unordered
-const durationInternalNames = [...durationFieldNames, 'sign'] as
+export const durationInternalNames = [...durationFieldNames, 'sign'] as
   (keyof DurationInternals)[]
 
 // Defaults
@@ -72,15 +72,6 @@ export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFiel
 // -------------------------------------------------------------------------------------------------
 
 export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNames, toIntegerStrict)
-
-// Getters
-// -------------------------------------------------------------------------------------------------
-
-export const durationInternalGetters = mapPropNames((propName: keyof DurationInternals) => {
-  return (internals: DurationInternals) => {
-    return internals[propName]
-  }
-}, durationInternalNames)
 
 // Field <-> Field Conversion
 // -------------------------------------------------------------------------------------------------

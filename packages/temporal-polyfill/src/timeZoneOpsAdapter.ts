@@ -1,55 +1,41 @@
-import { WrapperInstance, createWrapperClass, getStrictInternals } from './class'
-import { Instant, createInstant } from './instant'
+import { Instant, createInstant, getInstantSlots } from './instant'
 import { IsoDateTimeFields } from './isoFields'
 import { ensureString } from './cast'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZone'
-import { BoundArg } from './utils'
 import { queryCalendarImpl } from './calendarImpl'
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
 import { validateOffsetNano } from './timeZoneOps'
+import { InstantBranding, PlainDateTimeBranding } from './slots'
 
-const getInstantEpochNano = getStrictInternals.bind<
-  undefined, [BoundArg],
-  [Instant],
-  DayTimeNano // return
->(undefined, Instant)
+export class TimeZoneOpsAdapter {
+  constructor(public t: TimeZoneProtocol) {}
 
-const timeZoneOpsAdapterMethods = {
-  getOffsetNanosecondsFor(timeZone: TimeZoneProtocol, epochNano: DayTimeNano): number {
-    return validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
-  },
+  getOffsetNanosecondsFor(epochNano: DayTimeNano): number {
+    return validateOffsetNano(
+      this.t.getOffsetNanosecondsFor(
+        createInstant({
+          branding: InstantBranding,
+          epochNanoseconds: epochNano
+        })
+      )
+    )
+  }
 
-  getPossibleInstantsFor(
-    timeZone: TimeZoneProtocol,
-    isoDateTimeFields: IsoDateTimeFields
-  ): DayTimeNano[] {
-    return [...timeZone.getPossibleInstantsFor(
+  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
+    return [...this.t.getPossibleInstantsFor(
       createPlainDateTime({
         ...isoDateTimeFields,
         calendar: queryCalendarImpl(isoCalendarId),
+        branding: PlainDateTimeBranding,
       })
-    )].map(getInstantEpochNano)
-  },
-}
+    )].map((instant: Instant) => {
+      return getInstantSlots(instant).epochNanoseconds
+    })
+  }
 
-const timeZoneOpsAdapterGetters = {
-  id(timeZone: TimeZoneProtocol): string {
-    return ensureString(timeZone.id)
+  get id(): string {
+    return ensureString(this.t.id)
   }
 }
-
-export type TimeZoneOpsAdapter = WrapperInstance<
-  TimeZoneProtocol, // internals
-  typeof timeZoneOpsAdapterGetters, // getters
-  typeof timeZoneOpsAdapterMethods // methods
->
-
-export const TimeZoneOpsAdapter = createWrapperClass<
-  [TimeZoneProtocol],
-  TimeZoneProtocol,
-  typeof timeZoneOpsAdapterGetters,
-  typeof timeZoneOpsAdapterMethods // methods
->(timeZoneOpsAdapterGetters, timeZoneOpsAdapterMethods)
-

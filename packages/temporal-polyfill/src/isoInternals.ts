@@ -1,25 +1,17 @@
 import { CalendarArg, CalendarProtocol } from './calendar'
 import { queryCalendarOps } from './calendarOpsQuery'
 import { CalendarOps } from './calendarOps'
-import { getInternals } from './class'
-import { BoundArg, clampProp, isClamped, mapPropsWithRefiners, pluckProps } from './utils'
+import { BoundArg, isClamped, mapPropsWithRefiners, pluckProps } from './utils'
 import {
   IsoDateFields,
   IsoDateTimeFields,
-  IsoTimeFields,
   constrainIsoTimeFields,
   isoDateFieldRefiners,
   isoTimeFieldRefiners,
 } from './isoFields'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
-
-export interface CalendarInternals {
-  calendar: CalendarOps
-}
-
-export type IsoDateInternals = IsoDateFields & CalendarInternals
-export type IsoDateTimeInternals = IsoDateInternals & IsoTimeFields
+import { IsoDateSlots, IsoDateTimeSlots } from './slots'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
@@ -40,25 +32,26 @@ export const isoDateTimeInternalRefiners = {
 // -------------------------------------------------------------------------------------------------
 
 export const isoDateInternalNames = Object.keys(isoDateInternalRefiners) as
-  (keyof IsoDateInternals)[]
+  (keyof IsoDateSlots)[]
 
 export const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort() as
-  (keyof IsoDateTimeInternals)[]
+  (keyof IsoDateTimeSlots)[]
 
 // Conversion
 // -------------------------------------------------------------------------------------------------
 
 export const pluckIsoDateInternals = pluckProps.bind<
   undefined, [BoundArg],
-  [IsoDateInternals],
-  IsoDateInternals // return
+  [IsoDateSlots],
+  IsoDateSlots // return
 >(undefined, isoDateInternalNames) // bound
 
 export const pluckIsoDateTimeInternals = pluckProps.bind<
   undefined, [BoundArg],
-  [IsoDateTimeInternals],
-  IsoDateTimeInternals // return
+  [IsoDateTimeSlots],
+  IsoDateTimeSlots // return
 >(undefined, isoDateTimeInternalNames)
+
 function generatePublicIsoFields<P>(
   pluckFunc: (internals: P) => P,
   internals: P & { calendar: CalendarOps }
@@ -80,23 +73,24 @@ export type IsoDateTimePublic = IsoDateTimeFields & { calendar: CalendarPublic }
 
 export const generatePublicIsoDateFields = generatePublicIsoFields.bind<
   undefined, [BoundArg],
-  [IsoDateInternals],
+  [IsoDateSlots],
   IsoDatePublic // return
 >(undefined, pluckIsoDateInternals)
 
 export const generatePublicIsoDateTimeFields = generatePublicIsoFields.bind<
   undefined, [BoundArg],
-  [IsoDateTimeInternals],
+  [IsoDateTimeSlots],
   IsoDateTimePublic // return
 >(undefined, pluckIsoDateTimeInternals)
-/*
-Similar to getPublicCalendar and getPublicTimeZone
-*/
 
+
+// Similar to getPublicCalendar and getPublicTimeZone
+// HACKY!!!
 export function getPublicIdOrObj(
   ops: { id: string }
 ): unknown {
-  return getInternals(ops) || // adapter (return internal object)
+  return (ops as any).c || // CalendarOpsAdapter
+    (ops as any).t || // TimeZoneOpsAdapter
     ops.id // impl (return id)
 }
 
@@ -105,7 +99,7 @@ export function getPublicIdOrObj(
 
 export function refineIsoDateTimeInternals(
   rawIsoDateTimeInternals: IsoDateTimeFields & { calendar: CalendarArg },
-): IsoDateTimeInternals {
+): IsoDateTimeSlots {
   return checkIsoDateTimeInBounds(
     constrainIsoDateTimeInternals(
       mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners),
@@ -115,7 +109,7 @@ export function refineIsoDateTimeInternals(
 
 export function refineIsoDateInternals(
   rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
-): IsoDateInternals {
+): IsoDateSlots {
   return checkIsoDateInBounds(
     constrainIsoDateInternals(
       mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
@@ -125,7 +119,7 @@ export function refineIsoDateInternals(
 
 export function refineIsoYearMonthInternals(
   rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
-): IsoDateInternals {
+): IsoDateSlots {
   return checkIsoYearMonthInBounds(
     constrainIsoDateInternals(
       mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),

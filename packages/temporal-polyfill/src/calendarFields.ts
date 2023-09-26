@@ -4,9 +4,9 @@ import {
   IsoTimeFields,
   isoTimeFieldNames,
 } from './isoFields'
-import { IsoDateInternals } from './isoInternals'
 import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
 import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
+import { IsoDateSlots } from './slots'
 
 // Year/Month/Day (no era/eraYear)
 // -------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ export interface DateStats extends YearMonthStats {
 type DateMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => unknown>
 
 type DateGetters = {
-  [K in keyof DateMethods]: (internals: IsoDateInternals) => ReturnType<DateMethods[K]>
+  [K in keyof DateMethods]: (internals: IsoDateSlots) => ReturnType<DateMethods[K]>
 }
 
 type CalendarIdGetters = {
@@ -247,8 +247,20 @@ export const dateGetterRefiners = {
 }
 
 // unordered
+// HACK: IMPORTANT that first two props are era/eraYear for slicing in calendarProtocolMethodNames...
 export const dateGetterNames = Object.keys(dateGetterRefiners) as
   (keyof DateGetterFields)[]
+
+export const calendarProtocolMethodNames: string[] = [
+  ...dateGetterNames.slice(2), // remove era/eraYear. HACKY
+  'dateAdd',
+  'dateUntil',
+  'dateFromFields',
+  'yearMonthFromFields',
+  'monthDayFromFields',
+  'fields',
+  'mergeFields'
+]
 
 // unordered
 export const yearMonthGetterNames = [
@@ -259,46 +271,6 @@ export const yearMonthGetterNames = [
 
 // unordered
 export const monthDayGetterNames = monthDayFieldNames
-
-// Getters
-// -------------------------------------------------------------------------------------------------
-
-function createCalendarGetter<K extends keyof DateGetters>(propName: K) {
-  return (internals: IsoDateInternals) => {
-    return internals.calendar[propName](internals) as ReturnType<DateGetters[K]>
-  }
-}
-
-type CalendarGetters<K extends keyof DateGetters> = Pick<DateGetters, K> & CalendarIdGetters
-
-function createCalendarGetters<K extends keyof DateGetters>(
-  propNames: K[],
-): CalendarGetters<K> {
-  const getters = mapPropNames(createCalendarGetter, propNames)
-
-  ;(getters as unknown as CalendarIdGetters).calendarId = (internals: { calendar: CalendarOps }) => {
-    return internals.calendar.id
-  }
-
-  return getters as unknown as CalendarGetters<K>
-}
-
-export const dateGetters = createCalendarGetters(dateGetterNames)
-export const yearMonthGetters = createCalendarGetters(yearMonthGetterNames)
-
-export const monthDayGetters = createCalendarGetters(monthDayGetterNames)
-delete (monthDayGetters as any).month // HACK
-
-export const timeGetters = mapPropNames((fieldName, i) => {
-  return (isoTimeFields: IsoTimeFields) => {
-    return isoTimeFields[isoTimeFieldNames[i]]
-  }
-}, timeFieldNames)
-
-export const dateTimeGetters = {
-  ...dateGetters,
-  ...timeGetters,
-}
 
 // Conversion
 // -------------------------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 import { Calendar, CalendarArg, CalendarProtocol, checkCalendarProtocol, createCalendar } from './calendar'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
-import { getInternals, TemporalInstance } from './class'
 import { parseCalendarId } from './isoParse'
 import { ensureString } from './cast'
 import { isObjectlike } from './utils'
 import { CalendarOpsAdapter } from './calendarOpsAdapter'
 import { CalendarOps } from './calendarOps'
+import { CalendarBranding, getSlots } from './slots'
 
 export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol {
   if (isObjectlike(calendarArg)) {
@@ -13,9 +13,7 @@ export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol 
       return calendarArg
     }
 
-    const { calendar } = getInternals(
-      calendarArg as TemporalInstance<{ calendar: CalendarOps }>
-    ) || {}
+    const { calendar } = (getSlots(calendarArg) || {}) as { calendar?: CalendarOps }
 
     return calendar
       ? calendarOpsToPublic(calendar)
@@ -25,13 +23,21 @@ export function queryCalendarPublic(calendarArg: CalendarArg): CalendarProtocol 
       )
   }
 
-  return createCalendar(queryCalendarImpl(parseCalendarId(ensureString(calendarArg))))
+  return createCalendar({
+    branding: CalendarBranding,
+    impl: queryCalendarImpl(parseCalendarId(ensureString(calendarArg)))
+  })
 }
 
 export function getPublicCalendar(internals: { calendar: CalendarOps }): CalendarProtocol {
   return calendarOpsToPublic(internals.calendar)
 }
+
 function calendarOpsToPublic(calendarOps: CalendarOps): CalendarProtocol {
-  return getInternals(calendarOps as CalendarOpsAdapter) ||
-    createCalendar(calendarOps as CalendarImpl)
+  return (calendarOps instanceof CalendarOpsAdapter)
+    ? calendarOps.c
+    : createCalendar({
+        branding: CalendarBranding,
+        impl: calendarOps as CalendarImpl,
+      })
 }

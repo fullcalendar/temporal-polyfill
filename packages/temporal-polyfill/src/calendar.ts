@@ -1,14 +1,13 @@
-import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames, dateTimeFieldNames } from './calendarFields'
+import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, calendarProtocolMethodNames, dateGetterNames, dateTimeFieldNames } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { queryCalendarPublic } from './calendarPublic'
 import { ensureString } from './cast'
-import { TemporalInstance, createProtocolChecker, createSimpleTemporalClass, getInternals, getObjId, getTemporalName, idGetters } from './class'
+import { createProtocolChecker } from './complexObjUtils'
 import {
   refinePlainDateBag,
   refinePlainMonthDayBag,
   refinePlainYearMonthBag,
 } from './convert'
-import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
 import { IsoDateFields } from './isoFields'
 import {
   LargestUnitOptions,
@@ -16,14 +15,19 @@ import {
   refineCalendarDiffOptions,
   refineOverflowOptions,
 } from './options'
-import { PlainDate, PlainDateArg, createPlainDate, toPlainDateInternals } from './plainDate'
-import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
-import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { excludeUndefinedProps, mapPropNames } from './utils'
+import { defineProps, excludeUndefinedProps, mapPropNames } from './utils'
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, setSlots } from './slots'
 
 // public
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'
+import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
+import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
+import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
+import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
+
+// Calendar Protocol
+// -------------------------------------------------------------------------------------------------
 
 interface CalendarProtocolMethods {
   year(dateArg: PlainYearMonth | PlainDateArg): number
@@ -56,95 +60,89 @@ export interface CalendarProtocol extends CalendarProtocolMethods {
   id: string
 }
 
-// TODO: compress this somehow
-const dateArgWhitelist: Record<string, string> = {
-  era: 'PlainYearMonth',
-  eraYear: 'PlainYearMonth',
-  year: 'PlainYearMonth',
-  daysInYear: 'PlainYearMonth',
-  monthsInYear: 'PlainYearMonth',
-  inLeapYear: 'PlainYearMonth',
-  daysInMonth: 'PlainYearMonth',
-  month: 'PlainYearMonth',
-  monthCode: 'Month', // PlainYearMonth or PlainMonthDay
-  day: 'PlainMonthDay',
-}
+export const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethodNames)
 
-type DateArg = PlainYearMonth | PlainMonthDay | PlainDateTime | PlainDateArg
+// Calendar Class
+// -------------------------------------------------------------------------------------------------
 
-/*
-the *required* protocol methods
-*/
-const calendarProtocolMethods = {
-  ...mapPropNames((propName: keyof DateGetterFields) => {
-    const whitelistName = dateArgWhitelist[propName]
+export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
 
-    return (impl: CalendarImpl, dateArg: DateArg) => {
-      const inWhitelist = whitelistName && (getTemporalName(dateArg) || '').includes(whitelistName)
-      const getInternalsFunc = inWhitelist ? getInternals : toPlainDateInternals
-      const isoFields = getInternalsFunc(dateArg) as IsoDateFields
-
-      return impl[propName](isoFields)
-    }
-  }, dateGetterNames) as {
-    [K in keyof DateGetterFields]: (impl: CalendarImpl, dateArg: DateArg) => DateGetterFields[K]
-  },
+export class Calendar implements CalendarProtocol {
+  constructor(calendarId: string) {
+    setSlots(this, {
+      branding: CalendarBranding,
+      impl: queryCalendarImpl(calendarId),
+    } as CalendarSlots)
+  }
 
   dateAdd(
-    impl: CalendarImpl,
     plainDateArg: PlainDateArg,
     durationArg: DurationArg,
     options?: OverflowOptions,
   ): PlainDate {
-    return createPlainDate(
-      impl.dateAdd(
-        toPlainDateInternals(plainDateArg),
-        toDurationInternals(durationArg),
+    const { impl } = getCalendarSlots(this)
+    return createPlainDate({
+      branding: PlainDateBranding,
+      ...impl.dateAdd(
+        toPlainDateSlots(plainDateArg),
+        toDurationSlots(durationArg),
         refineOverflowOptions(options),
       ),
-    )
-  },
+    })
+  }
 
   dateUntil(
-    impl: CalendarImpl,
     plainDateArg0: PlainDateArg,
     plainDateArg1: PlainDateArg,
     options?: LargestUnitOptions,
   ): Duration {
-    return createDuration(
-      impl.dateUntil(
-        toPlainDateInternals(plainDateArg0),
-        toPlainDateInternals(plainDateArg1),
+    const { impl } = getCalendarSlots(this)
+    return createDuration({
+      branding: DurationBranding,
+      ...impl.dateUntil(
+        toPlainDateSlots(plainDateArg0),
+        toPlainDateSlots(plainDateArg1),
         refineCalendarDiffOptions(options),
       ),
-    )
-  },
+    })
+  }
 
   dateFromFields(
-    impl: CalendarImpl,
     fields: DateBagStrict,
     options?: OverflowOptions,
   ): PlainDate {
-    return createPlainDate(refinePlainDateBag(fields, options, impl))
-  },
+    const { impl } = getCalendarSlots(this)
+    return createPlainDate({
+      branding: PlainDateBranding,
+      ...refinePlainDateBag(fields, options, impl),
+    })
+  }
 
   yearMonthFromFields(
-    impl: CalendarImpl,
     fields: YearMonthBagStrict,
     options?: OverflowOptions,
   ): PlainYearMonth {
-    return createPlainYearMonth(refinePlainYearMonthBag(fields, options, impl))
-  },
+    const { impl } = getCalendarSlots(this)
+    return createPlainYearMonth({
+      branding: PlainYearMonthBranding,
+      ...refinePlainYearMonthBag(fields, options, impl)
+    })
+  }
 
   monthDayFromFields(
-    impl: CalendarImpl,
     fields: MonthDayBagStrict,
     options?: OverflowOptions,
   ): PlainMonthDay {
-    return createPlainMonthDay(refinePlainMonthDayBag(fields, options, impl))
-  },
+    const { impl } = getCalendarSlots(this)
+    return createPlainMonthDay({
+      branding: PlainMonthDayBranding,
+      ...refinePlainMonthDayBag(fields, options, impl)
+    })
+  }
 
-  fields(impl: CalendarImpl, fieldNames: Iterable<string>): Iterable<string> {
+  fields(fieldNames: Iterable<string>): Iterable<string> {
+    const { impl } = getCalendarSlots(this)
+
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
     */
@@ -163,18 +161,94 @@ const calendarProtocolMethods = {
     }
 
     return impl.fields(fieldNamesArray)
-  },
+  }
 
   mergeFields(
-    impl: CalendarImpl,
     fields0: Record<string, unknown>,
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
+    const { impl } = getCalendarSlots(this)
     return impl.mergeFields(
       excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),
       excludeUndefinedProps(ensureNotNullOrUndefined(fields1)),
     )
-  },
+  }
+
+  // TODO: more DRY
+  toString(): string {
+    return getCalendarSlots(this).impl.id
+  }
+
+  // TODO: more DRY
+  toJSON(): string {
+    return getCalendarSlots(this).impl.id
+  }
+
+  // TODO: more DRY
+  get id(): string {
+    return getCalendarSlots(this).impl.id
+  }
+
+  static from(arg: CalendarArg): CalendarProtocol {
+    return queryCalendarPublic(arg)
+  }
+}
+
+// Mixin
+// -------------------------------------------------------------------------------------------------
+
+type DateArg = PlainYearMonth | PlainMonthDay | PlainDateTime | PlainDateArg
+
+type DateGetterFieldMethods = {
+  [K in keyof DateGetterFields]: (dateArg: DateArg) => DateGetterFields[K]
+}
+
+export interface Calendar extends DateGetterFieldMethods {}
+
+// TODO: compress this somehow
+const dateArgWhitelist: Record<string, string> = {
+  era: 'PlainYearMonth',
+  eraYear: 'PlainYearMonth',
+  year: 'PlainYearMonth',
+  daysInYear: 'PlainYearMonth',
+  monthsInYear: 'PlainYearMonth',
+  inLeapYear: 'PlainYearMonth',
+  daysInMonth: 'PlainYearMonth',
+  month: 'PlainYearMonth',
+  monthCode: 'Month', // PlainYearMonth or PlainMonthDay
+  day: 'PlainMonthDay',
+}
+
+defineProps(Calendar.prototype, {
+  [Symbol.toStringTag]: 'Temporal.' + CalendarBranding,
+
+  ...mapPropNames((propName: keyof DateGetterFields) => {
+    const whitelistName = dateArgWhitelist[propName]
+
+    return function(this: Calendar, dateArg: DateArg) {
+      const { impl } = getCalendarSlots(this)
+      const slots = getSlots(dateArg)
+      const inWhitelist = whitelistName && ((slots && slots.branding) || '').includes(whitelistName)
+      const isoFields = inWhitelist
+        ? slots as unknown as IsoDateFields
+        : toPlainDateSlots(dateArg as PlainDateArg)
+
+      return impl[propName](isoFields)
+    }
+  }, dateGetterNames) as DateGetterFieldMethods,
+})
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+export type CalendarSlots = BrandingSlots & { impl: CalendarImpl }
+
+export function createCalendar(slots: CalendarSlots): Calendar {
+  return createViaSlots(Calendar, slots)
+}
+
+export function getCalendarSlots(calendar: Calendar): CalendarSlots {
+  return getSlots(calendar) as CalendarSlots
 }
 
 // HACK
@@ -184,50 +258,3 @@ function ensureNotNullOrUndefined<T>(o: T): T {
   }
   return o
 }
-
-// HACK to not require era-related methods
-const crap = { ...calendarProtocolMethods } as any
-delete crap.era
-delete crap.eraYear
-
-export const checkCalendarProtocol = createProtocolChecker(crap as typeof calendarProtocolMethods)
-
-const calendarMethods = {
-  ...calendarProtocolMethods,
-  toString: getObjId,
-}
-
-export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
-
-export type Calendar = TemporalInstance<
-  CalendarImpl, // internals
-  typeof idGetters, // getters
-  typeof calendarMethods // methods
->
-
-export const [Calendar, createCalendar] = createSimpleTemporalClass(
-  'Calendar',
-
-  // Creation
-  // -----------------------------------------------------------------------------------------------
-
-  // constructorToInternals
-  queryCalendarImpl,
-
-  // Getters
-  // -----------------------------------------------------------------------------------------------
-
-  idGetters,
-
-  // Methods
-  // -----------------------------------------------------------------------------------------------
-
-  calendarMethods,
-
-  // Static
-  // -----------------------------------------------------------------------------------------------
-
-  {
-    from: queryCalendarPublic,
-  }
-)

@@ -30,7 +30,6 @@ import {
 } from './diff'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
-import { IsoDateInternals } from './isoInternals'
 import {
   checkIsoDateInBounds,
   checkIsoYearMonthInBounds,
@@ -55,6 +54,7 @@ import { Callable, clampEntity, compareNumbers, createLazyGenerator, mapPropName
 import { CalendarOps } from './calendarOps'
 import { DurationInternals } from './durationFields'
 import { ensureString } from './cast'
+import { IsoDateSlots } from './slots'
 
 // Base Calendar Implementation
 // -------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ export class CalendarImpl implements CalendarOps {
     )
   }
 
-  dateFromFields(fields: DateBag, overflow?: Overflow): IsoDateInternals {
+  dateFromFields(fields: DateBag, overflow?: Overflow): IsoDateSlots {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
     const day = this.refineDay(fields as DayFields, month, year, overflow)
@@ -100,14 +100,14 @@ export class CalendarImpl implements CalendarOps {
     return checkIsoDateInBounds(this.queryIsoFields(year, month, day))
   }
 
-  yearMonthFromFields(fields: YearMonthBag, overflow?: Overflow): IsoDateInternals {
+  yearMonthFromFields(fields: YearMonthBag, overflow?: Overflow): IsoDateSlots {
     const year = this.refineYear(fields)
     const month = this.refineMonth(fields, year, overflow)
 
     return checkIsoYearMonthInBounds(this.queryIsoFields(year, month, 1))
   }
 
-  monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateInternals {
+  monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateSlots {
     let { month, monthCode } = fields as Partial<MonthFields>
     let year
     let isLeapMonth
@@ -210,7 +210,7 @@ export class CalendarImpl implements CalendarOps {
   // Internal Querying
   // -----------------
 
-  queryIsoFields(year: number, month: number, day: number): IsoDateInternals {
+  queryIsoFields(year: number, month: number, day: number): IsoDateSlots {
     return {
       calendar: this,
       isoYear: year,
@@ -247,7 +247,7 @@ export class CalendarImpl implements CalendarOps {
     isoDateFields: IsoDateFields,
     durationFields: DurationInternals,
     overflow?: Overflow,
-  ): IsoDateInternals  {
+  ): IsoDateSlots  {
     return moveDate(this, isoDateFields, durationFields, overflow)
   }
 
@@ -595,7 +595,7 @@ class IntlCalendarImpl extends CalendarImpl {
   // Internal Querying
   // -----------------
 
-  queryIsoFields(year: number, month: number, day: number): IsoDateInternals {
+  queryIsoFields(year: number, month: number, day: number): IsoDateSlots {
     return checkIsoDateInBounds({ // check might be redundant if happens in epochMilliToIso/queryDateStart
       calendar: this,
       ...epochMilliToIso(this.queryDateStart(year, month, day)),

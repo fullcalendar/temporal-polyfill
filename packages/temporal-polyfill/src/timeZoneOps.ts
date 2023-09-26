@@ -1,9 +1,4 @@
-import {
-  TemporalInstance,
-  createProtocolChecker,
-  getInternals,
-  getTemporalName,
-} from './class'
+import { createProtocolChecker } from './complexObjUtils'
 import { IsoDateFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import {
   epochNanoToIso,
@@ -20,10 +15,10 @@ import { nanoInUtcDay } from './units'
 import { createLazyGenerator, isObjectlike } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { TimeZoneOpsAdapter } from './timeZoneOpsAdapter'
+import { InstantBranding, TimeZoneBranding, ZonedEpochSlots, getSlots } from './slots'
 
 // public
-import type { ZonedInternals } from './zonedDateTime'
-import { TimeZone, TimeZoneArg, TimeZoneProtocol, timeZoneProtocolMethods, createTimeZone } from './timeZone'
+import { TimeZone, TimeZoneArg, TimeZoneProtocol, createTimeZone } from './timeZone'
 import { createInstant } from './instant'
 
 export interface TimeZoneOps {
@@ -32,20 +27,21 @@ export interface TimeZoneOps {
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[]
 }
 
-// TODO: best place for this? see CalendarInternals. see ZonedInternals
+// TODO: best place for this? see CalendarSlots. see ZonedEpochSlots
 export interface TimeZoneInternals {
   timeZone: TimeZoneOps
 }
 
 export const utcTimeZoneId = 'UTC'
 
-const checkTimeZoneProtocol = createProtocolChecker(timeZoneProtocolMethods)
+const checkTimeZoneProtocol = createProtocolChecker([
+  'getPossibleInstantsFor',
+  'getOffsetNanosecondsFor',
+])
 
 export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
   if (isObjectlike(timeZoneArg)) {
-    const { timeZone } = getInternals(
-      timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>
-    ) || {}
+    const { timeZone } = (getSlots(timeZoneArg) || {}) as { timeZone?: TimeZoneOps }
 
     if (timeZone) {
       return timeZone // TimeZoneOps
@@ -60,13 +56,14 @@ export function queryTimeZoneOps(timeZoneArg: TimeZoneArg): TimeZoneOps {
 
 export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol {
   if (isObjectlike(timeZoneArg)) {
-    if (getTemporalName(timeZoneArg) === 'TimeZone') {
+    const slots = getSlots(timeZoneArg)
+    const { branding } = slots || {}
+
+    if (branding === TimeZoneBranding) {
       return timeZoneArg as any
     }
 
-    const { timeZone } = getInternals(
-      timeZoneArg as TemporalInstance<{ timeZone: TimeZoneOps }>
-    ) || {}
+    const { timeZone } = (getSlots(timeZoneArg) || {}) as { timeZone?: TimeZoneOps }
 
     return timeZone
       ? timeZoneOpsToPublic(timeZone)
@@ -76,7 +73,10 @@ export function queryTimeZonePublic(timeZoneArg: TimeZoneArg): TimeZoneProtocol 
       )
   }
 
-  return createTimeZone(queryTimeZoneImpl(parseTimeZoneId(ensureString(timeZoneArg))))
+  return createTimeZone({
+    branding: TimeZoneBranding,
+    impl: queryTimeZoneImpl(parseTimeZoneId(ensureString(timeZoneArg)))
+  })
 }
 
 export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZoneProtocol {
@@ -84,8 +84,12 @@ export function getPublicTimeZone(internals: { timeZone: TimeZoneOps }): TimeZon
 }
 
 function timeZoneOpsToPublic(timeZoneOps: TimeZoneOps): TimeZoneProtocol {
-  return getInternals(timeZoneOps as TimeZoneOpsAdapter) ||
-    createTimeZone(timeZoneOps as TimeZoneImpl)
+  return timeZoneOps instanceof TimeZoneOpsAdapter
+    ? timeZoneOps.t
+    : createTimeZone({
+        branding: TimeZoneBranding,
+        impl: timeZoneOps as TimeZoneImpl
+      })
 }
 
 // TODO: cleanup. previously used getCommonInnerObj
@@ -249,7 +253,7 @@ function computeGapNear(timeZoneOps: TimeZoneOps, zonedEpochNano: DayTimeNano): 
   return endOffsetNano - startOffsetNano
 }
 
-export const zonedInternalsToIso = createLazyGenerator((internals: ZonedInternals) => {
+export const zonedInternalsToIso = createLazyGenerator((internals: ZonedEpochSlots) => {
   const { calendar, timeZone, epochNanoseconds } = internals
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
   const isoDateTimeFields = epochNanoToIso(epochNanoseconds, offsetNanoseconds)
@@ -275,7 +279,14 @@ export function zonedEpochNanoToIsoWithTZObj(
   epochNano: DayTimeNano,
 ): IsoDateTimeFields {
   // emulate what TimeZone::getOffsetNanosecondsFor does
-  const offsetNano = validateOffsetNano(timeZone.getOffsetNanosecondsFor(createInstant(epochNano)))
+  const offsetNano = validateOffsetNano(
+    timeZone.getOffsetNanosecondsFor(
+      createInstant({
+        branding: InstantBranding,
+        epochNanoseconds: epochNano
+      })
+    )
+  )
   return epochNanoToIso(epochNano, offsetNano)
 }
 

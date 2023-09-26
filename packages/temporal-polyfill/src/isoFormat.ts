@@ -3,10 +3,10 @@ import { CalendarOps } from './calendarOps'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
-import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import { epochNanoToIso } from './isoMath'
 import { CalendarDisplay, DateTimeDisplayOptions, InstantDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
 import {
   givenFieldsToDayTimeNano,
@@ -18,13 +18,12 @@ import {
   Unit,
 } from './units'
 import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
-import type { ZonedInternals } from './zonedDateTime'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
 export function formatPlainDateTimeIso(
-  internals: IsoDateTimeInternals,
+  internals: IsoDateTimeSlots,
   options?: DateTimeDisplayOptions,
 ): string {
   const [
@@ -41,7 +40,7 @@ export function formatPlainDateTimeIso(
 }
 
 export function formatPlainDateIso(
-  internals: IsoDateInternals,
+  internals: IsoDateSlots,
   options?: DateTimeDisplayOptions
 ): string {
   return formatIsoDateFields(internals) +
@@ -49,7 +48,7 @@ export function formatPlainDateIso(
 }
 
 export function formatZonedDateTimeIso(
-  internals: ZonedInternals,
+  internals: ZonedEpochSlots,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   let { epochNanoseconds: epochNano, timeZone, calendar } = internals
@@ -118,8 +117,8 @@ High-level. Refined options.
 TODO: possible to simplify this function
 */
 export function formatPossibleDate(
-  formatSimple: (internals: IsoDateInternals) => string,
-  internals: IsoDateInternals,
+  formatSimple: (internals: IsoDateSlots) => string,
+  internals: IsoDateSlots,
   options?: DateTimeDisplayOptions,
 ) {
   const calendarDisplay = refineDateDisplayOptions(options)

@@ -1,12 +1,11 @@
 import { isoCalendarId } from './calendarConfig'
 import { queryCalendarOps } from './calendarOpsQuery'
-import { TemporalInstance, createTemporalClass, neverValueOf } from './class'
 import { diffInstants } from './diff'
-import { Duration, DurationArg, createDuration, toDurationInternals } from './duration'
+import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { negateDurationInternals } from './durationFields'
 import { formatInstantIso } from './isoFormat'
-import { toLocaleStringMethod } from './intlFormat'
-import { epochGetters, checkEpochNanoInBounds } from './isoMath'
+import { createToLocaleStringMethod } from './intlFormat'
+import { checkEpochNanoInBounds } from './isoMath'
 import { parseInstant } from './isoParse'
 import { moveEpochNano } from './move'
 import {
@@ -14,160 +13,200 @@ import {
   InstantDisplayOptions,
   RoundingOptions,
 } from './options'
-import { toBigInt, ensureObjectlike } from './cast'
+import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from './cast'
 import { roundInstant } from './round'
 import { queryTimeZoneOps } from './timeZoneOps'
-import { NumSign, noop } from './utils'
-import { ZonedDateTime, ZonedInternals, createZonedDateTime } from './zonedDateTime'
+import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
+import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
-import { DayTimeNano, bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
+import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
+import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createEpochGetterMethods, createViaSlots, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
 
 export type InstantArg = Instant | string
 
-export type Instant = TemporalInstance<DayTimeNano>
-export const [
-  Instant,
-  createInstant,
-  toInstantEpochNano
-] = createTemporalClass(
-  'Instant',
+export class Instant {
+  constructor(epochNano: bigint) {
+    setSlots(this, {
+      branding: InstantBranding,
+      epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
+    } as InstantSlots)
+  }
 
-  // Creation
-  // -----------------------------------------------------------------------------------------------
+  add(durationArg: DurationArg): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: moveEpochNano(
+        toInstantSlots(this).epochNanoseconds,
+        toDurationSlots(durationArg),
+      ),
+    })
+  }
 
-  // constructorToInternals
-  (epochNano: bigint) => {
-    return checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano)))
-  },
+  subtract(durationArg: DurationArg): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: moveEpochNano(
+        toInstantSlots(this).epochNanoseconds,
+        negateDurationInternals(toDurationSlots(durationArg)),
+      ),
+    })
+  }
 
-  // internalsConversionMap
-  {
-    ZonedDateTime: (argInternals: ZonedInternals) => argInternals.epochNanoseconds,
-  },
+  until(otherArg: InstantArg, options?: DiffOptions): Duration {
+    return createDuration({
+      branding: DurationBranding,
+      ...diffInstants(
+        getInstantSlots(this).epochNanoseconds,
+        toInstantSlots(otherArg).epochNanoseconds,
+        options,
+      ),
+    })
+  }
 
-  // bagToInternals
-  noop,
-
-  // stringToInternals
-  parseInstant,
-
-  // handleUnusedOptions
-  noop,
-
-  // Getters
-  // -----------------------------------------------------------------------------------------------
-
-  epochGetters,
-
-  // Methods
-  // -----------------------------------------------------------------------------------------------
-
-  {
-    toZonedDateTimeISO(epochNano: DayTimeNano, timeZoneArg: TimeZoneArg): ZonedDateTime {
-      return createZonedDateTime({
-        epochNanoseconds: epochNano,
-        timeZone: queryTimeZoneOps(timeZoneArg),
-        calendar: queryCalendarOps(isoCalendarId),
-      })
-    },
-
-    toZonedDateTime(
-      epochNano: DayTimeNano,
-      options: { timeZone: TimeZoneArg, calendar: CalendarArg },
-    ): ZonedDateTime {
-      const refinedObj = ensureObjectlike(options)
-
-      return createZonedDateTime({
-        epochNanoseconds: epochNano,
-        timeZone: queryTimeZoneOps(refinedObj.timeZone),
-        calendar: queryCalendarOps(refinedObj.calendar),
-      })
-    },
-
-    add(epochNano: DayTimeNano, durationArg: DurationArg): Instant {
-      return createInstant(
-        moveEpochNano(
-          epochNano,
-          toDurationInternals(durationArg),
-        ),
+  since(otherArg: InstantArg, options?: DiffOptions): Duration {
+    return createDuration({
+      branding: DurationBranding,
+      ...diffInstants(
+        getInstantSlots(this).epochNanoseconds,
+        toInstantSlots(otherArg).epochNanoseconds,
+        options,
+        true,
       )
-    },
+    })
+  }
 
-    subtract(epochNano: DayTimeNano, durationArg: DurationArg): Instant {
-      return createInstant(
-        moveEpochNano(
-          epochNano,
-          negateDurationInternals(toDurationInternals(durationArg)),
-        ),
-      )
-    },
+  round(options: RoundingOptions | UnitName): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: roundInstant(getInstantSlots(this).epochNanoseconds, options),
+    })
+  }
 
-    until(epochNano: DayTimeNano, otherArg: InstantArg, options?: DiffOptions): Duration {
-      return createDuration(diffInstants(epochNano, toInstantEpochNano(otherArg), options))
-    },
+  equals(otherArg: InstantArg): boolean {
+    return !compareDayTimeNanos(
+      getInstantSlots(this).epochNanoseconds,
+      toInstantSlots(otherArg).epochNanoseconds,
+    )
+  }
 
-    since(epochNano: DayTimeNano, otherArg: InstantArg, options?: DiffOptions): Duration {
-      return createDuration(diffInstants(epochNano, toInstantEpochNano(otherArg), options, true))
-    },
+  toString(options?: InstantDisplayOptions): string {
+    return formatInstantIso(getInstantSlots(this).epochNanoseconds, options)
+  }
 
-    round(epochNano: DayTimeNano, options: RoundingOptions | UnitName): Instant {
-      return createInstant(roundInstant(epochNano, options))
-    },
+  toJSON(): string {
+    return formatInstantIso(getInstantSlots(this).epochNanoseconds)
+  }
 
-    equals(epochNano: DayTimeNano, otherArg: InstantArg): boolean {
-      return !compareDayTimeNanos(
-        epochNano,
-        toInstantEpochNano(otherArg),
-      )
-    },
+  toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
+    return createZonedDateTime({
+      branding: ZonedDateTimeBranding,
+      epochNanoseconds: getInstantSlots(this).epochNanoseconds,
+      timeZone: queryTimeZoneOps(timeZoneArg),
+      calendar: queryCalendarOps(isoCalendarId),
+    })
+  }
 
-    toString(
-      epochNano: DayTimeNano,
-      options?: InstantDisplayOptions
-    ): string {
-      return formatInstantIso(epochNano, options)
-    },
+  toZonedDateTime(options: { timeZone: TimeZoneArg, calendar: CalendarArg }): ZonedDateTime {
+    const slots = getInstantSlots(this)
+    const refinedObj = ensureObjectlike(options)
 
-    toLocaleString: toLocaleStringMethod,
+    return createZonedDateTime({
+      branding: ZonedDateTimeBranding,
+      epochNanoseconds: slots.epochNanoseconds,
+      timeZone: queryTimeZoneOps(refinedObj.timeZone),
+      calendar: queryCalendarOps(refinedObj.calendar),
+    })
+  }
 
-    valueOf: neverValueOf,
-  },
+  static from(arg: InstantArg) {
+    return createInstant(toInstantSlots(arg))
+  }
 
-  // Static
-  // -----------------------------------------------------------------------------------------------
+  static fromEpochSeconds(epochSec: number): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec))
+    })
+  }
 
-  {
-    fromEpochSeconds(epochSec: number): Instant {
-      return createInstant(checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec)))
-    },
+  static fromEpochMilliseconds(epochMilli: number): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: checkEpochNanoInBounds(numberToDayTimeNano(epochMilli, nanoInMilli)),
+    })
+  }
 
-    fromEpochMilliseconds(epochMilli: number): Instant {
-      return createInstant(checkEpochNanoInBounds(numberToDayTimeNano(epochMilli, nanoInMilli)))
-    },
+  static fromEpochMicroseconds(epochMicro: bigint): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro))
+    })
+  }
 
-    fromEpochMicroseconds(epochMicro: bigint): Instant {
-      return createInstant(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro)))
-    },
+  static fromEpochNanoseconds(epochNano: bigint): Instant {
+    return createInstant({
+      branding: InstantBranding,
+      epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
+    })
+  }
 
-    fromEpochNanoseconds(epochNano: bigint): Instant {
-      return createInstant(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))))
-    },
+  static compare(a: InstantArg, b: InstantArg): NumSign {
+    return compareDayTimeNanos(
+      toInstantSlots(a).epochNanoseconds,
+      toInstantSlots(b).epochNanoseconds,
+    )
+  }
+}
 
-    compare(a: InstantArg, b: InstantArg): NumSign {
-      return compareDayTimeNanos(
-        toInstantEpochNano(a),
-        toInstantEpochNano(b),
-      )
-    }
-  },
+defineProps(Instant.prototype, {
+  [Symbol.toStringTag]: 'Temporal.' + InstantBranding,
+  toLocaleString: createToLocaleStringMethod(InstantBranding),
+  valueOf: neverValueOf,
+})
+
+defineGetters(
+  Instant.prototype,
+  createEpochGetterMethods(InstantBranding),
 )
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+export function createInstant(slots: InstantSlots): Instant {
+  return createViaSlots(Instant, slots)
+}
+
+export function getInstantSlots(instant: Instant): InstantSlots {
+  return getSpecificSlots(InstantBranding, instant) as InstantSlots
+}
+
+export function toInstantSlots(arg: InstantArg): InstantSlots {
+  if (isObjectlike(arg)) {
+    const slots = getSlots(arg)
+    if (slots) {
+      switch (slots.branding) {
+        case InstantBranding:
+          return slots as InstantSlots
+        case ZonedDateTimeBranding:
+          return { epochNanoseconds: (slots as ZonedDateTimeSlots).epochNanoseconds, branding: InstantBranding }
+      }
+    }
+  }
+  return {
+    branding: InstantBranding,
+    epochNanoseconds: parseInstant(ensureStringViaPrimitive(arg as any)),
+  }
+}
 
 // Legacy Date
 // -------------------------------------------------------------------------------------------------
 
+// TODO: more DRY
 export function toTemporalInstant(this: Date): Instant {
-  // TODO: more DRY
-  return createInstant(numberToDayTimeNano(this.valueOf(), nanoInMilli))
+  return createInstant({
+    branding: InstantBranding,
+    epochNanoseconds: numberToDayTimeNano(this.valueOf(), nanoInMilli),
+  })
 }

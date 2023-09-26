@@ -12,10 +12,10 @@ import {
   nanoToDurationTimeFields,
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
-import { IsoDateInternals, IsoDateTimeInternals } from './isoInternals'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay, moveByIsoDays, epochNanoToIso } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { EpochDisambig, OffsetDisambig, RoundingMode, RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneOps'
 import {
   nanoInMinute,
@@ -28,12 +28,11 @@ import {
   UnitName,
 } from './units'
 import { divModFloor, divTrunc, identityFunc, mapPropNamesToConstant } from './utils'
-import type { ZonedInternals } from './zonedDateTime'
 
 export function roundPlainDateTime(
-  internals: IsoDateTimeInternals,
+  internals: IsoDateTimeSlots,
   options: RoundingOptions | UnitName,
-): IsoDateTimeInternals {
+): IsoDateTimeSlots {
   const isoDateTimeFields = roundDateTime(
     internals,
     ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
@@ -46,9 +45,9 @@ export function roundPlainDateTime(
 }
 
 export function roundZonedDateTime(
-  internals: ZonedInternals,
+  internals: ZonedEpochSlots,
   options: RoundingOptions | UnitName,
-): ZonedInternals {
+): ZonedEpochSlots {
   let { epochNanoseconds, timeZone, calendar } = internals
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
@@ -568,12 +567,12 @@ export type SimpleMarkerSystem<M> = [
 
 /*
 Okay that callers frequently cast to `unknown`?
-FYI: input can be a PlainDate's internals (IsoDateInternals), but marker has time
+FYI: input can be a PlainDate's internals (IsoDateSlots), but marker has time
 */
 export function createMarkerSystem(
-  markerInternals: ZonedInternals | IsoDateInternals
+  markerInternals: ZonedEpochSlots | IsoDateSlots
 ): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
-  const { calendar, timeZone, epochNanoseconds } = markerInternals as ZonedInternals
+  const { calendar, timeZone, epochNanoseconds } = markerInternals as ZonedEpochSlots
 
   if (epochNanoseconds) {
     return [

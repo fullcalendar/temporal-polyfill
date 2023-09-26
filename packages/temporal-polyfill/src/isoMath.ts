@@ -208,7 +208,7 @@ export function epochNanoToMilli(epochNano: DayTimeNano): number {
   return dayTimeNanoToNumber(epochNano, nanoInMilli)
 }
 
-function epochNanoToMicro(epochNano: DayTimeNano): bigint {
+export function epochNanoToMicro(epochNano: DayTimeNano): bigint {
   return dayTimeNanoToBigInt(epochNano, nanoInMicro)
 }
 

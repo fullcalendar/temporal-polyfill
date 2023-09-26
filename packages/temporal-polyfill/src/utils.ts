@@ -226,6 +226,13 @@ export function defineProps<Target, NewProps extends { [propName: string]: unkno
   ) as (Target & NewProps)
 }
 
+export function defineGetters(target: any, getters: any) { // TODO: better type
+  return Object.defineProperties(
+    target,
+    createGetterDescriptors(getters),
+  )
+}
+
 export function createPropDescriptors(
   propVals: { [propName: string]: unknown },
 ): PropertyDescriptorMap {
