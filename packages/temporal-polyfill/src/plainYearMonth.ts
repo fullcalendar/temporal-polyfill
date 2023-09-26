@@ -21,7 +21,8 @@ import { parsePlainYearMonth } from './isoParse'
 import { DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { NumSign, defineGetters, defineProps, isObjectlike, pluckProps } from './utils'
-import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createCalendarGetterMethods, createCalendarIdGetterMethods, createViaSlots, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
 
 export type PlainYearMonthBag = YearMonthBag & { calendar?: CalendarArg }

@@ -35,7 +35,8 @@ import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 import { DayTimeNano, compareDayTimeNanos } from './dayTimeNano'
-import { DurationBranding, DurationSlots, createViaSlots, durationGettersMethods, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
 
 export type DurationBag = Partial<DurationFields>

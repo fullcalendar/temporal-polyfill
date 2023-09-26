@@ -28,7 +28,8 @@ import { UnitName } from './units'
 import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { TimeZoneArg } from './timeZone'
-import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createTimeGetterMethods, createViaSlots, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 
 export type PlainTimeBag = TimeBag
 export type PlainTimeMod = TimeBag

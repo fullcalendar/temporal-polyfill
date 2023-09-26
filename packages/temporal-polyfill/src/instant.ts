@@ -22,7 +22,8 @@ import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
-import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createEpochGetterMethods, createViaSlots, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createEpochGetterMethods, neverValueOf } from './publicMixins'
 
 export type InstantArg = Instant | string
 

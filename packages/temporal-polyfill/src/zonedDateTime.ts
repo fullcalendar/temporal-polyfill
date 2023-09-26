@@ -65,7 +65,8 @@ import { UnitName, nanoInHour } from './units'
 import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureString, toBigInt } from './cast'
-import { DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createCalendarIdGetterMethods, createEpochGetterMethods, createViaSlots, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, neverValueOf } from './publicMixins'
 
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod

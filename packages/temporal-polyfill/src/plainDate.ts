@@ -36,7 +36,8 @@ import { zonedInternalsToIso } from './timeZoneOps'
 import { NumSign, defineGetters, defineProps, isObjectlike, pluckProps } from './utils'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createCalendarGetterMethods, createCalendarIdGetterMethods, createViaSlots, getSlots, getSpecificSlots, neverValueOf, setSlots } from './slots'
+import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
 
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
