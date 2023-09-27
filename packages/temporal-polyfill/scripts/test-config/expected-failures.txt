@@ -2,6 +2,7 @@
 # expected test failures for the transpiled or optimized builds of the polyfill,
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
+# [slot-refactor]
 # Calendar::from bag properties order-of-query
 built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
 built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
@@ -20,6 +21,7 @@ built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 # (and fewer times...)
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 
+# [slot-refactor]
 # define Temporal[Symbol.toStringTag] even though official polyfill doesn't, hmmm
 built-ins/Temporal/toStringTag/prop-desc.js
 built-ins/Temporal/toStringTag/string.js
@@ -110,6 +112,7 @@ built-ins/Temporal/PlainMonthDay/calendar-invalid.js
 built-ins/Temporal/PlainMonthDay/infinity-throws-rangeerror.js
 built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
 
+# [slot-refactor]
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
 built-ins/Temporal/PlainDate/from/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
@@ -126,6 +129,7 @@ built-ins/Temporal/PlainYearMonth/prototype/with/order-of-operations.js
 built-ins/Temporal/PlainMonthDay/from/order-of-operations.js
 built-ins/Temporal/PlainMonthDay/prototype/with/order-of-operations.js
 
+# [slot-refactor]
 # overflow options should be passed through to Calendar::dateUntil
 # (though it should be a shallow-copied)
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
@@ -134,6 +138,7 @@ built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 
+# [slot-refactor]
 # similar to above
 # PlainYearMonth should copy options object before giving it to Calendar::dateAdd
 # (it does this because overflow is used for add and then also plaindate->yearmonth conversion)
@@ -144,6 +149,7 @@ built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-op
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
+# [slot-refactor]
 # similar to above
 # PlainYearMonth/PlainMonthDay::with should pass options through to calendar
 built-ins/Temporal/PlainYearMonth/prototype/with/calendar-arguments.js
@@ -317,6 +323,7 @@ built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/year/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/custom.js
 
+# [slot-refactor]
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainDate/prototype/add/balance-smaller-units.js
@@ -369,10 +376,12 @@ built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-plaindate
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-plaindate-instance.js
 
+# [slot-refactor]
 # tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
 built-ins/Temporal/PlainYearMonth/prototype/equals/compare-calendar.js
 
+# [slot-refactor]
 # calendar comparisons internally uses different CalendarOpsAdapters, so object comparison fails
 # TODO: have each obj store raw calendar slot
 built-ins/Temporal/PlainDateTime/prototype/equals/calendar-checked.js
