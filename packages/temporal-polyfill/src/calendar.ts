@@ -82,12 +82,12 @@ export class Calendar implements CalendarProtocol {
   ): PlainDate {
     const { impl } = getCalendarSlots(this)
     return createPlainDate({
-      branding: PlainDateBranding,
       ...impl.dateAdd(
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
         refineOverflowOptions(options),
       ),
+      branding: PlainDateBranding,
     })
   }
 
@@ -113,8 +113,8 @@ export class Calendar implements CalendarProtocol {
   ): PlainDate {
     const { impl } = getCalendarSlots(this)
     return createPlainDate({
-      branding: PlainDateBranding,
       ...refinePlainDateBag(fields, options, impl),
+      branding: PlainDateBranding,
     })
   }
 

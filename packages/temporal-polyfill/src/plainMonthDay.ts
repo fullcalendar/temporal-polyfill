@@ -9,11 +9,11 @@ import {
 } from './convert'
 import { IsoDatePublic, getPublicIdOrObj, refineIsoDateInternals } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
-import { createToLocaleStringMethod } from './intlFormat'
+import { createToLocaleStringMethods } from './intlFormat'
 import { isoEpochFirstLeapYear } from './isoMath'
 import { isPlainMonthDaysEqual } from './equality'
 import { parsePlainMonthDay } from './isoParse'
-import { OverflowOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
@@ -55,14 +55,18 @@ export class PlainMonthDay {
     return isPlainMonthDaysEqual(getPlainMonthDaySlots(this), toPlainMonthDaySlots(otherArg))
   }
 
-  toString(): string {
+  toString(options?: DateTimeDisplayOptions): string {
+    return formatPossibleDate(formatIsoMonthDayFields, getPlainMonthDaySlots(this), options)
+  }
+
+  toJSON(): string {
     return formatPossibleDate(formatIsoMonthDayFields, getPlainMonthDaySlots(this))
   }
 
   toPlainDate(bag: YearFields): PlainDate {
     return createPlainDate({
-      branding: PlainDateBranding,
       ...convertPlainMonthDayToDate(this, bag),
+      branding: PlainDateBranding,
     })
   }
 
@@ -88,13 +92,16 @@ export class PlainMonthDay {
 defineStringTag(PlainMonthDay.prototype, PlainMonthDayBranding)
 
 defineProps(PlainMonthDay.prototype, {
-  toLocaleString: createToLocaleStringMethod(PlainMonthDayBranding),
+  ...createToLocaleStringMethods(PlainMonthDayBranding),
   valueOf: neverValueOf,
 })
 
+const cdm = createCalendarGetterMethods(PlainMonthDayBranding, monthDayGetterNames)
+delete (cdm as any).month // hack
+
 defineGetters(PlainMonthDay.prototype, {
   ...createCalendarIdGetterMethods(PlainMonthDayBranding),
-  ...createCalendarGetterMethods(PlainMonthDayBranding, monthDayGetterNames),
+  ...cdm,
 })
 
 // Utils

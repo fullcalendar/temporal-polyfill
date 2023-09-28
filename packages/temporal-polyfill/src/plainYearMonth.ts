@@ -14,11 +14,11 @@ import { DurationInternals, negateDurationInternals } from './durationFields'
 import { IsoDateFields, isoDateFieldNames } from './isoFields'
 import { IsoDatePublic, getPublicIdOrObj, refineIsoYearMonthInternals } from './isoInternals'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
-import { createToLocaleStringMethod } from './intlFormat'
+import { createToLocaleStringMethods } from './intlFormat'
 import { compareIsoDateFields, moveByIsoDays } from './isoMath'
 import { isPlainYearMonthsEqual } from './equality'
 import { parsePlainYearMonth } from './isoParse'
-import { DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -89,8 +89,8 @@ export class PlainYearMonth {
     return isPlainYearMonthsEqual(getPlainYearMonthSlots(this), toPlainYearMonthSlots(otherArg))
   }
 
-  toString() {
-    return formatPossibleDate(formatIsoYearMonthFields, getPlainYearMonthSlots(this))
+  toString(options?: DateTimeDisplayOptions) {
+    return formatPossibleDate(formatIsoYearMonthFields, getPlainYearMonthSlots(this), options)
   }
 
   toJSON() { // not DRY
@@ -100,8 +100,8 @@ export class PlainYearMonth {
   toPlainDate(bag: { day: number }): PlainDate {
     getPlainYearMonthSlots(this) // validate `this`
     return createPlainDate({
+      ...convertPlainYearMonthToDate(this, bag),
       branding: PlainDateBranding,
-      ...convertPlainYearMonthToDate(this, bag)
     })
   }
 
@@ -134,7 +134,7 @@ export class PlainYearMonth {
 defineStringTag(PlainYearMonth.prototype, PlainYearMonthBranding)
 
 defineProps(PlainYearMonth.prototype, {
-  toLocaleString: createToLocaleStringMethod(PlainYearMonthBranding),
+  ...createToLocaleStringMethods(PlainYearMonthBranding),
   valueOf: neverValueOf,
 })
 
@@ -187,8 +187,8 @@ function movePlainYearMonth(
     branding: PlainYearMonthBranding,
     ...convertToPlainYearMonth(
       createPlainDate({
+        ...calendar.dateAdd(isoDateFields, durationInternals, overflow),
         branding: PlainDateBranding,
-        ...calendar.dateAdd(isoDateFields, durationInternals, overflow)
       }),
       overflow,
     )

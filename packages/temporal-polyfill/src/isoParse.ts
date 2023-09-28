@@ -180,9 +180,9 @@ function postProcessMonthDayOnly(organized: DateOrganized): IsoDateSlots {
   const isoFields = constrainIsoDateInternals(organized)
   const calendar = queryCalendarImpl(organized.calendar)
   const plainDate = createPlainDate({ // YUCK
-    branding: PlainDateBranding,
     ...isoFields,
     calendar,
+    branding: PlainDateBranding,
   })
   return calendar.monthDayFromFields(plainDate)
 }
@@ -190,8 +190,8 @@ function postProcessMonthDayOnly(organized: DateOrganized): IsoDateSlots {
 function findBestYear(isoInternals: IsoDateSlots): IsoDateSlots {
   const calendar = isoInternals.calendar as CalendarImpl
   const plainDate = createPlainDate({ // YUCK
+    ...isoInternals,
     branding: PlainDateBranding,
-    ...isoInternals
   })
   return calendar.monthDayFromFields(plainDate)
 }

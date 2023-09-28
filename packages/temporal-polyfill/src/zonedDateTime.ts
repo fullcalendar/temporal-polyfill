@@ -276,22 +276,22 @@ export class ZonedDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate({
+      ...pluckIsoDateInternals(zonedInternalsToIso(getZonedDateTimeSlots(this))),
       branding: PlainDateBranding,
-      ...pluckIsoDateInternals(zonedInternalsToIso(getZonedDateTimeSlots(this)))
     })
   }
 
   toPlainTime(): PlainTime {
     return createPlainTime({
+      ...pluckIsoTimeFields(zonedInternalsToIso(getZonedDateTimeSlots(this))),
       branding: PlainTimeBranding,
-      ...pluckIsoTimeFields(zonedInternalsToIso(getZonedDateTimeSlots(this)))
     })
   }
 
   toPlainDateTime(): PlainDateTime {
     return createPlainDateTime({
-      branding: PlainDateTimeBranding,
       ...pluckIsoDateTimeInternals(zonedInternalsToIso(getZonedDateTimeSlots(this))),
+      branding: PlainDateTimeBranding,
     })
   }
 

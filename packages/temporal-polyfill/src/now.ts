@@ -52,8 +52,8 @@ function getCurrentPlainDateTime(
   timeZoneArg: TimeZoneArg,
 ): PlainDateTime {
   return createPlainDateTime({
-    branding: PlainDateTimeBranding,
     ...getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg),
+    branding: PlainDateTimeBranding,
   })
 }
 
@@ -62,15 +62,15 @@ function getCurrentPlainDate(
   timeZoneArg: TimeZoneArg,
 ): PlainDate {
   return createPlainDate({
-    branding: PlainDateBranding,
     ...pluckIsoDateInternals(getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg)),
+    branding: PlainDateBranding,
   })
 }
 
 function getCurrentPlainTime(timeZoneArg: TimeZoneArg): PlainTime {
   return createPlainTime({
-    branding: PlainTimeBranding,
     ...pluckIsoTimeFields(getCurrentPlainDateTimeSlots(isoCalendarId, timeZoneArg)),
+    branding: PlainTimeBranding,
   })
 }
 

@@ -26,13 +26,13 @@ export class CalendarOpsAdapter implements CalendarOps {
     return getPlainDateSlots(
       this.c.dateAdd(
         createPlainDate({
-          branding: PlainDateBranding,
           ...isoDateFields,
           calendar: this,
+          branding: PlainDateBranding, // go at to override what isoDateFields might provide!
         }),
         createDuration({
-          branding: DurationBranding,
           ...durationInternals,
+          branding: DurationBranding,
         }),
         Object.assign(
           Object.create(null),
@@ -51,14 +51,14 @@ export class CalendarOpsAdapter implements CalendarOps {
     const durationInternals = getDurationSlots(
       this.c.dateUntil(
         createPlainDate({
-          branding: PlainDateBranding,
           ...isoDateFields0,
           calendar: this,
+          branding: PlainDateBranding,
         }),
         createPlainDate({
-          branding: PlainDateBranding,
           ...isoDateFields1,
           calendar: this,
+          branding: PlainDateBranding,
         }),
         Object.assign(
           Object.create(null),
@@ -145,9 +145,9 @@ defineProps(
   mapProps((refiner: Callable, propName) => {
     return function(this: CalendarOpsAdapter, isoDateFields: IsoDateFields) {
       const pd = createPlainDate({
-        branding: PlainDateBranding,
         ...isoDateFields,
         calendar: queryCalendarImpl(isoCalendarId),
+        branding: PlainDateBranding,
       })
       return refiner(this.c[propName](pd))
     }

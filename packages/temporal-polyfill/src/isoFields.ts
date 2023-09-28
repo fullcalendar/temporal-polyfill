@@ -54,7 +54,7 @@ export const isoDateFieldNames = Object.keys(isoDateFieldRefiners) as
 export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners) as
   (keyof IsoTimeFields)[]
 
-export const isoDateTimeFieldNames = Object.keys(isoDateTimeFieldRefiners) as
+export const isoDateTimeFieldNames = Object.keys(isoDateTimeFieldRefiners).sort() as
   (keyof IsoDateTimeFields)[]
 
 export const isoTimeFieldNames = isoTimeFieldNamesAsc.slice().sort()

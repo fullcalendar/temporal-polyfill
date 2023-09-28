@@ -4,7 +4,7 @@ import { diffInstants } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { negateDurationInternals } from './durationFields'
 import { formatInstantIso } from './isoFormat'
-import { createToLocaleStringMethod } from './intlFormat'
+import { createToLocaleStringMethods } from './intlFormat'
 import { checkEpochNanoInBounds } from './isoMath'
 import { parseInstant } from './isoParse'
 import { moveEpochNano } from './move'
@@ -39,7 +39,7 @@ export class Instant {
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: moveEpochNano(
-        toInstantSlots(this).epochNanoseconds,
+        getInstantSlots(this).epochNanoseconds,
         toDurationSlots(durationArg),
       ),
     })
@@ -49,7 +49,7 @@ export class Instant {
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: moveEpochNano(
-        toInstantSlots(this).epochNanoseconds,
+        getInstantSlots(this).epochNanoseconds,
         negateDurationInternals(toDurationSlots(durationArg)),
       ),
     })
@@ -164,7 +164,7 @@ export class Instant {
 defineStringTag(Instant.prototype, InstantBranding)
 
 defineProps(Instant.prototype, {
-  toLocaleString: createToLocaleStringMethod(InstantBranding),
+  ...createToLocaleStringMethods(InstantBranding),
   valueOf: neverValueOf,
 })
 

@@ -9,7 +9,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { DurationInternals, negateDurationInternals } from './durationFields'
 import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from './isoFields'
 import { formatPlainTimeIso } from './isoFormat'
-import { createToLocaleStringMethod } from './intlFormat'
+import { createToLocaleStringMethods } from './intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from './isoMath'
 import { parsePlainTime } from './isoParse'
 import { moveTime } from './move'
@@ -30,6 +30,7 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { TimeZoneArg } from './timeZone'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
+import { ensureString } from './cast'
 
 export type PlainTimeBag = TimeBag
 export type PlainTimeMod = TimeBag
@@ -64,8 +65,8 @@ export class PlainTime {
   with(mod: PlainTimeMod, options?: OverflowOptions): PlainTime {
     getPlainTimeSlots(this) // validate `this`
     return createPlainTime({
+      ...mergePlainTimeBag(this, mod, options),
       branding: PlainTimeBranding,
-      ...mergePlainTimeBag(this, mod, options)
     })
   }
 
@@ -93,8 +94,8 @@ export class PlainTime {
 
   round(options: RoundingOptions | UnitName): PlainTime {
     return createPlainTime({
-      branding: PlainTimeBranding,
       ...roundPlainTime(getPlainTimeSlots(this), options),
+      branding: PlainTimeBranding,
     })
   }
 
@@ -146,7 +147,7 @@ export class PlainTime {
 defineStringTag(PlainTime.prototype, PlainTimeBranding)
 
 defineProps(PlainTime.prototype, {
-  toLocaleString: createToLocaleStringMethod(PlainTimeBranding),
+  ...createToLocaleStringMethods(PlainTimeBranding),
   valueOf: neverValueOf,
 })
 
@@ -163,7 +164,7 @@ export function createPlainTime(slots: PlainTimeSlots): PlainTime {
 }
 
 export function getPlainTimeSlots(plainTime: PlainTime): PlainTimeSlots {
-  return getSpecificSlots(PlainDateBranding, plainTime) as PlainTimeSlots
+  return getSpecificSlots(PlainTimeBranding, plainTime) as PlainTimeSlots
 }
 
 export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): PlainTimeSlots {
@@ -171,7 +172,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
     const slots = getSlots(arg)
     if (slots) {
       switch(slots.branding) {
-        case PlainDateBranding:
+        case PlainTimeBranding:
           refineOverflowOptions(options) // parse unused options
           return slots as PlainTimeSlots
         case PlainDateTimeBranding:
@@ -179,18 +180,18 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
           return { ...pluckIsoTimeFields(slots as PlainDateTimeSlots), branding: PlainTimeBranding }
         case ZonedDateTimeBranding:
           refineOverflowOptions(options) // parse unused options
-          return { ...pluckIsoTimeFields(zonedInternalsToIso(arg as ZonedDateTimeSlots)), branding: PlainTimeBranding }
+          return { ...pluckIsoTimeFields(zonedInternalsToIso(slots as ZonedDateTimeSlots)), branding: PlainTimeBranding }
       }
     }
     return { ...refinePlainTimeBag(arg as PlainTimeBag, options), branding: PlainTimeBranding }
   }
   refineOverflowOptions(options) // parse unused options
-  return { ...parsePlainTime(arg), branding: PlainTimeBranding }
+  return { ...parsePlainTime(ensureString(arg)), branding: PlainTimeBranding }
 }
 
 function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInternals): PlainTime {
   return createPlainTime({
+    ...moveTime(internals, durationInternals)[0],
     branding: PlainTimeBranding,
-    ...moveTime(internals, durationInternals)[0]
   })
 }

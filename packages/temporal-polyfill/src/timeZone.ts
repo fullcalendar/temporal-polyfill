@@ -126,6 +126,10 @@ export class TimeZone { // implements TimeZoneProtocol
   get id(): string {
     return getTimeZoneSlots(this).impl.id
   }
+
+  static from(arg: TimeZoneArg): TimeZoneProtocol {
+    return queryTimeZonePublic(arg)
+  }
 }
 
 defineStringTag(TimeZone.prototype, TimeZoneBranding)
@@ -140,7 +144,7 @@ export function createTimeZone(slots: TimeZoneSlots): TimeZone {
 }
 
 export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneSlots {
-  return getSpecificSlots(CalendarBranding, timeZone) as TimeZoneSlots
+  return getSpecificSlots(TimeZoneBranding, timeZone) as TimeZoneSlots
 }
 
 function getImplTransition(direction: -1 | 1, impl: TimeZoneImpl, instantArg: InstantArg): Instant | null {

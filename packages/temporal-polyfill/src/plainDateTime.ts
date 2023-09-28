@@ -10,7 +10,7 @@ import { diffPlainDateTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { negateDurationInternals } from './durationFields'
 import { isPlainDateTimesEqual } from './equality'
-import { createToLocaleStringMethod } from './intlFormat'
+import { createToLocaleStringMethods } from './intlFormat'
 import { IsoDateTimeFields, IsoTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from './isoFields'
 import { formatPlainDateTimeIso } from './isoFormat'
 import { IsoDateTimePublic, getPublicIdOrObj, pluckIsoDateInternals, pluckIsoDateTimeInternals, refineIsoDateTimeInternals } from './isoInternals'
@@ -68,8 +68,8 @@ export class PlainDateTime {
   with(mod: PlainDateTimeMod, options?: OverflowOptions): PlainDateTime {
     getPlainDateTimeSlots(this) // validate `this`
     return createPlainDateTime({
-      branding: PlainDateTimeBranding,
       ...mergePlainDateTimeBag(this, mod, options),
+      branding: PlainDateTimeBranding,
     })
   }
 
@@ -77,6 +77,7 @@ export class PlainDateTime {
     return createPlainDateTime({
       ...getPlainDateTimeSlots(this),
       ...optionalToPlainTimeFields(plainTimeArg),
+      branding: PlainDateTimeBranding,
     })
   }
 
@@ -101,23 +102,23 @@ export class PlainDateTime {
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime({
-      branding: PlainDateTimeBranding,
       ...movePlainDateTime(
         getPlainDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
       ),
+      branding: PlainDateTimeBranding,
     })
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime({
-      branding: PlainDateTimeBranding,
       ...movePlainDateTime(
         getPlainDateTimeSlots(this),
         negateDurationInternals(toDurationSlots(durationArg)),
         options,
       ),
+      branding: PlainDateTimeBranding,
     })
   }
 
@@ -137,8 +138,8 @@ export class PlainDateTime {
 
   round(options: RoundingOptions | UnitName): PlainDateTime {
     return createPlainDateTime({
+      ...roundPlainDateTime(getPlainDateTimeSlots(this), options),
       branding: PlainDateTimeBranding,
-      ...roundPlainDateTime(getPlainDateTimeSlots(this), options)
     })
   }
 
@@ -170,31 +171,31 @@ export class PlainDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate({
+      ...pluckIsoDateInternals(getPlainDateTimeSlots(this)),
       branding: PlainDateBranding,
-      ...pluckIsoDateInternals(getPlainDateTimeSlots(this))
     })
   }
 
   toPlainYearMonth(): PlainYearMonth {
     getPlainDateTimeSlots(this) // validate `this`
     return createPlainYearMonth({
-      branding: PlainYearMonthBranding,
       ...convertToPlainYearMonth(this),
+      branding: PlainYearMonthBranding,
     })
   }
 
   toPlainMonthDay(): PlainMonthDay {
     getPlainDateTimeSlots(this) // validate `this`
     return createPlainMonthDay({
+      ...convertToPlainMonthDay(this),
       branding: PlainMonthDayBranding,
-      ...convertToPlainMonthDay(this)
     })
   }
 
   toPlainTime(): PlainTime {
     return createPlainTime({
-      branding: PlainTimeBranding,
       ...pluckIsoTimeFields(getPlainDateTimeSlots(this)),
+      branding: PlainTimeBranding,
     })
   }
 
@@ -225,7 +226,7 @@ export class PlainDateTime {
 defineStringTag(PlainDateTime.prototype, PlainDateTimeBranding)
 
 defineProps(PlainDateTime.prototype, {
-  toLocaleString: createToLocaleStringMethod(PlainDateTimeBranding),
+  ...createToLocaleStringMethods(PlainDateTimeBranding),
   valueOf: neverValueOf,
 })
 

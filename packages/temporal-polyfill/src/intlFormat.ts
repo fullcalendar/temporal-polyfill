@@ -45,7 +45,7 @@ export type Formattable = TemporalFormattable | OrigFormattable
 // toLocaleString
 // -------------------------------------------------------------------------------------------------
 
-export function createToLocaleStringMethod(branding: string) {
+export function createToLocaleStringMethods(branding: string) {
   return {
     toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
       return slotsToLocaleString(getSpecificSlots(branding, this), locales, options)
@@ -350,7 +350,7 @@ type EpochNanoConverter = (
 ) => DayTimeNano
 
 const epochNanoConverters: Record<string, EpochNanoConverter> = {
-  Instant: identityFunc,
+  Instant: (internals: ZonedEpochSlots) => internals.epochNanoseconds,
   ZonedDateTime: (internals: ZonedEpochSlots) => internals.epochNanoseconds,
   PlainTime: timeFieldsToEpochNano,
   // otherwise, use dateInternalsToEpochNano

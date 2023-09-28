@@ -23,7 +23,7 @@ import {
 } from './isoFields'
 import { IsoDatePublic, getPublicIdOrObj, pluckIsoDateInternals, refineIsoDateInternals } from './isoInternals'
 import { formatPlainDateIso } from './isoFormat'
-import { createToLocaleStringMethod } from './intlFormat'
+import { createToLocaleStringMethods } from './intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from './isoMath'
 import { isPlainDatesEqual } from './equality'
 import { parsePlainDate } from './isoParse'
@@ -70,8 +70,8 @@ export class PlainDate {
   with(mod: PlainDateMod, options?: OverflowOptions): PlainDate {
     getPlainDateSlots(this) // validate `this`
     return createPlainDate({
+      ...mergePlainDateBag(this, mod, options),
       branding: PlainDateBranding,
-      ...mergePlainDateBag(this, mod, options)
     })
   }
 
@@ -85,24 +85,24 @@ export class PlainDate {
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
     const slots = getPlainDateSlots(this)
     return createPlainDate({
-      branding: PlainDateBranding,
       ...slots.calendar.dateAdd(
         slots,
         toDurationSlots(durationArg),
         refineOverflowOptions(options),
       ),
+      branding: PlainDateBranding,
     })
   }
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
     const slots = getPlainDateSlots(this)
     return createPlainDate({
-      branding: PlainDateBranding,
       ...slots.calendar.dateAdd(
         slots,
         negateDurationInternals(toDurationSlots(durationArg)),
         refineOverflowOptions(options),
       ),
+      branding: PlainDateBranding,
     })
   }
 
@@ -204,7 +204,7 @@ export interface PlainDate extends DateFields {}
 defineStringTag(PlainDate.prototype, PlainDateBranding)
 
 defineProps(PlainDate.prototype, {
-  toLocaleString: createToLocaleStringMethod(PlainDateTimeBranding),
+  ...createToLocaleStringMethods(PlainDateBranding),
   valueOf: neverValueOf,
 })
 

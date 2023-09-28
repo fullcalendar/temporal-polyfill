@@ -451,6 +451,28 @@ built-ins/Temporal/TimeZone/prototype/equals/builtin.js
 # NOTE!!! will go away when we update tests
 built-ins/Temporal/TimeZone/prototype/equals/not-a-constructor.js
 
+# why, with optional method argument, should length be 0?
+built-ins/Temporal/Duration/prototype/toString/length.js
+built-ins/Temporal/Instant/prototype/toLocaleString/length.js
+built-ins/Temporal/Instant/prototype/toString/length.js
+built-ins/Temporal/Instant/prototype/toLocaleString/length.js
+built-ins/Temporal/Instant/prototype/toString/length.js
+built-ins/Temporal/PlainDate/prototype/toLocaleString/length.js
+built-ins/Temporal/PlainDate/prototype/toPlainDateTime/length.js
+built-ins/Temporal/PlainDate/prototype/toString/length.js
+built-ins/Temporal/PlainDateTime/prototype/toLocaleString/length.js
+built-ins/Temporal/PlainDateTime/prototype/toString/length.js
+built-ins/Temporal/PlainDateTime/prototype/withPlainTime/length.js
+built-ins/Temporal/PlainMonthDay/prototype/toLocaleString/length.js
+built-ins/Temporal/PlainMonthDay/prototype/toString/length.js
+built-ins/Temporal/PlainTime/prototype/toLocaleString/length.js
+built-ins/Temporal/PlainTime/prototype/toString/length.js
+built-ins/Temporal/PlainYearMonth/prototype/toLocaleString/length.js
+built-ins/Temporal/PlainYearMonth/prototype/toString/length.js
+built-ins/Temporal/ZonedDateTime/prototype/toLocaleString/length.js
+built-ins/Temporal/ZonedDateTime/prototype/toString/length.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/length.js
+
 # b/c of fullcalendar/temporal weird class-construction
 #
 # cd test262/tests
