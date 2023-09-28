@@ -8,7 +8,7 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { defineProps } from './utils'
+import { defineProps, defineStringTag } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export const Temporal = defineProps({}, {
@@ -24,3 +24,5 @@ export const Temporal = defineProps({}, {
   Duration,
   Now,
 })
+
+defineStringTag(Temporal, 'Temporal')

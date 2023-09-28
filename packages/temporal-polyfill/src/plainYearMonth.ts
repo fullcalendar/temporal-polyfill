@@ -20,7 +20,7 @@ import { isPlainYearMonthsEqual } from './equality'
 import { parsePlainYearMonth } from './isoParse'
 import { DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
-import { NumSign, defineGetters, defineProps, isObjectlike, pluckProps } from './utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
@@ -131,8 +131,9 @@ export class PlainYearMonth {
   }
 }
 
+defineStringTag(PlainYearMonth.prototype, PlainYearMonthBranding)
+
 defineProps(PlainYearMonth.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + PlainYearMonthBranding,
   toLocaleString: createToLocaleStringMethod(PlainYearMonthBranding),
   valueOf: neverValueOf,
 })

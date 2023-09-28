@@ -28,7 +28,7 @@ import { createCalendarGetterMethods, createCalendarIdGetterMethods, createTimeG
 import { TimeZoneArg } from './timeZone'
 import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { UnitName } from './units'
-import { NumSign, defineGetters, defineProps, isObjectlike, pluckProps } from './utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
@@ -222,8 +222,9 @@ export class PlainDateTime {
   }
 }
 
+defineStringTag(PlainDateTime.prototype, PlainDateTimeBranding)
+
 defineProps(PlainDateTime.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + PlainDateTimeBranding,
   toLocaleString: createToLocaleStringMethod(PlainDateTimeBranding),
   valueOf: neverValueOf,
 })

@@ -62,7 +62,7 @@ import {
   zonedInternalsToIso,
 } from './timeZoneOps'
 import { UnitName, nanoInHour } from './units'
-import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureString, toBigInt } from './cast'
 import { DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -369,8 +369,9 @@ export class ZonedDateTime {
   }
 }
 
+defineStringTag(ZonedDateTime.prototype, ZonedDateTimeBranding)
+
 defineProps(ZonedDateTime.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + ZonedDateTimeBranding,
   valueOf: neverValueOf,
 })
 

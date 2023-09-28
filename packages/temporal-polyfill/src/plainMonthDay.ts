@@ -17,7 +17,7 @@ import { OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
-import { defineGetters, defineProps, isObjectlike, pluckProps } from './utils'
+import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { ensureString } from './cast'
 import { IsoDateFields, isoDateFieldNames } from './isoFields'
 
@@ -85,8 +85,9 @@ export class PlainMonthDay {
   }
 }
 
+defineStringTag(PlainMonthDay.prototype, PlainMonthDayBranding)
+
 defineProps(PlainMonthDay.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + PlainMonthDayBranding,
   toLocaleString: createToLocaleStringMethod(PlainMonthDayBranding),
   valueOf: neverValueOf,
 })

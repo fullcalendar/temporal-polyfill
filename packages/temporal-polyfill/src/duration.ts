@@ -31,7 +31,7 @@ import {
   totalDayTimeDuration,
   totalRelativeDuration,
 } from './round'
-import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from './units'
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
 import { DayTimeNano, compareDayTimeNanos } from './dayTimeNano'
@@ -245,8 +245,9 @@ export class Duration {
   }
 }
 
+defineStringTag(Duration.prototype, DurationBranding)
+
 defineProps(Duration.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + DurationBranding,
   valueOf: neverValueOf,
 })
 

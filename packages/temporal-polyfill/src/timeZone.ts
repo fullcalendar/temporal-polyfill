@@ -12,7 +12,7 @@ import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
 import { BrandingSlots, CalendarBranding, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createViaSlots, getSpecificSlots, setSlots } from './slots'
-import { defineProps } from './utils'
+import { defineProps, defineStringTag } from './utils'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------
@@ -128,9 +128,7 @@ export class TimeZone { // implements TimeZoneProtocol
   }
 }
 
-defineProps(TimeZone.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + TimeZoneBranding,
-})
+defineStringTag(TimeZone.prototype, TimeZoneBranding)
 
 // Utils
 // -------------------------------------------------------------------------------------------------

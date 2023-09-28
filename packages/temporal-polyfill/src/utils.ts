@@ -233,6 +233,13 @@ export function defineGetters(target: any, getters: any) { // TODO: better type
   )
 }
 
+export function defineStringTag(target: any, temporalName: string) {
+  return Object.defineProperties(
+    target,
+    createTemporalNameDescriptors(temporalName),
+  )
+}
+
 export function createPropDescriptors(
   propVals: { [propName: string]: unknown },
 ): PropertyDescriptorMap {

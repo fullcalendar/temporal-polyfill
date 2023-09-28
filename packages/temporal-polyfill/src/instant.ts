@@ -16,7 +16,7 @@ import {
 import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from './cast'
 import { roundInstant } from './round'
 import { queryTimeZoneOps } from './timeZoneOps'
-import { NumSign, defineGetters, defineProps, isObjectlike } from './utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { TimeZoneArg } from './timeZone'
@@ -161,8 +161,9 @@ export class Instant {
   }
 }
 
+defineStringTag(Instant.prototype, InstantBranding)
+
 defineProps(Instant.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + InstantBranding,
   toLocaleString: createToLocaleStringMethod(InstantBranding),
   valueOf: neverValueOf,
 })

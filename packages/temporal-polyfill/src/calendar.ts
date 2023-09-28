@@ -15,7 +15,7 @@ import {
   refineCalendarDiffOptions,
   refineOverflowOptions,
 } from './options'
-import { defineProps, excludeUndefinedProps, mapPropNames } from './utils'
+import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from './utils'
 import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, setSlots } from './slots'
 
 // public
@@ -219,10 +219,11 @@ const dateArgWhitelist: Record<string, string> = {
   day: 'PlainMonthDay',
 }
 
-defineProps(Calendar.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + CalendarBranding,
+defineStringTag(Calendar.prototype, CalendarBranding)
 
-  ...mapPropNames((propName: keyof DateGetterFields) => {
+defineProps(
+  Calendar.prototype,
+  mapPropNames((propName: keyof DateGetterFields) => {
     const whitelistName = dateArgWhitelist[propName]
 
     return function(this: Calendar, dateArg: DateArg) {
@@ -236,7 +237,7 @@ defineProps(Calendar.prototype, {
       return impl[propName](isoFields)
     }
   }, dateGetterNames) as DateGetterFieldMethods,
-})
+)
 
 // Utils
 // -------------------------------------------------------------------------------------------------

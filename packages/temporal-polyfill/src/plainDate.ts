@@ -33,7 +33,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { NumSign, defineGetters, defineProps, isObjectlike, pluckProps } from './utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -201,8 +201,9 @@ export class PlainDate {
 
 export interface PlainDate extends DateFields {}
 
+defineStringTag(PlainDate.prototype, PlainDateBranding)
+
 defineProps(PlainDate.prototype, {
-  [Symbol.toStringTag]: 'Temporal.' + PlainDateBranding,
   toLocaleString: createToLocaleStringMethod(PlainDateTimeBranding),
   valueOf: neverValueOf,
 })
