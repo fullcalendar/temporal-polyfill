@@ -23,11 +23,6 @@ built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 # (and fewer times...)
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 
-# [slot-refactor]
-# define Temporal[Symbol.toStringTag] even though official polyfill doesn't, hmmm
-built-ins/Temporal/toStringTag/prop-desc.js
-built-ins/Temporal/toStringTag/string.js
-
 # options-parsing bug where 'auto' considered not defined at all :(
 staging/Temporal/Duration/old/round.js
 

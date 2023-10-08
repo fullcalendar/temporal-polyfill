@@ -268,7 +268,7 @@ export function createTemporalNameDescriptors(temporalName: string): {
 } {
   return {
     [Symbol.toStringTag]: {
-      value: 'Temporal.' + temporalName,
+      value: 'Temporal' + (temporalName ? '.' + temporalName : ''),
       configurable: true,
     },
   }

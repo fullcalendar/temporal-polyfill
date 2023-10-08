@@ -25,4 +25,4 @@ export const Temporal = defineProps({}, {
   Now,
 })
 
-defineStringTag(Temporal, 'Temporal')
+defineStringTag(Temporal, '') // results in 'Temporal'. weird
