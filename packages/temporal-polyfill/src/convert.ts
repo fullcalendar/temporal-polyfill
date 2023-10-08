@@ -251,7 +251,8 @@ export function refinePlainDateTimeBag(
     calendar,
     bag,
     dateTimeFieldNames,
-    [], // requiredFields
+    // requiredFields. HACK
+    calendar.id === isoCalendarId ? ['year', 'day'] : [],
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
@@ -299,7 +300,8 @@ export function refinePlainDateBag(
     calendar,
     bag,
     dateFieldNames,
-    [], // requiredFields
+    // requiredFields. HACK
+    calendar.id === isoCalendarId ? ['year', 'day'] : [],
   )
 
   return calendar.dateFromFields(fields, refineOverflowOptions(options))
@@ -354,7 +356,8 @@ export function refinePlainYearMonthBag(
     calendar,
     bag,
     yearMonthFieldNames,
-    [], // requiredFields
+    // requiredFields. HACK
+    calendar.id === isoCalendarId ? ['year'] : [],
   )
 
   return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
@@ -395,7 +398,8 @@ export function convertToPlainYearMonth(
     calendar,
     input as any,
     yearMonthBasicNames,
-    [], // requiredFields
+    // requiredFields. HACK
+    calendar.id === isoCalendarId ? ['year'] : [],
   )
 
   return calendar.yearMonthFromFields(fields, overflow)
@@ -424,7 +428,8 @@ export function refinePlainMonthDayBag(
     calendar!,
     bag,
     dateFieldNames,
-    [], // requiredFields
+    // requiredFields. HACK
+    calendar!.id === isoCalendarId ? ['day'] : [],
   )
 
   // Callers who omit the calendar are not writing calendar-independent

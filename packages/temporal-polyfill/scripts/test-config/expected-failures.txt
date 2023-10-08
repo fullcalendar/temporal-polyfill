@@ -3,9 +3,11 @@
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
 # [slot-refactor]
-# Calendar::from bag properties order-of-query
-built-ins/Temporal/Calendar/prototype/dateFromFields/missing-properties.js
-built-ins/Temporal/Calendar/prototype/monthDayFromFields/missing-properties.js
+# Unwanted calendar.id access to determine requireFields
+# should happen WITHIN the calendar
+built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
+built-ins/Temporal/Calendar/prototype/dateUntil/order-of-operations.js
+built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
 
 # internal TimeZone::getOffsetNanosecondsFor called fewer times
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
