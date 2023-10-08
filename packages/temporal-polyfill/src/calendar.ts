@@ -1,20 +1,8 @@
 import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, calendarProtocolMethodNames, dateGetterNames, dateTimeFieldNames } from './calendarFields'
-import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
-import { queryCalendarPublic } from './calendarPublic'
 import { ensureString } from './cast'
 import { createProtocolChecker } from './complexObjUtils'
-import {
-  refinePlainDateBag,
-  refinePlainMonthDayBag,
-  refinePlainYearMonthBag,
-} from './convert'
 import { IsoDateFields } from './isoFields'
-import {
-  LargestUnitOptions,
-  OverflowOptions,
-  refineCalendarDiffOptions,
-  refineOverflowOptions,
-} from './options'
+import { LargestUnitOptions, OverflowOptions } from './options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from './utils'
 import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, setSlots } from './slots'
 
@@ -25,6 +13,8 @@ import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './pl
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
+import { CalendarSlot, calendarDateAdd, calendarDateFromFields, calendarDateUntil, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, getCalendarSlotId, refineCalendarSlot } from './calendarSlot'
+import { queryCalendarImpl } from './calendarImpl'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------
@@ -49,7 +39,7 @@ interface CalendarProtocolMethods {
   yearMonthFromFields(fields: YearMonthBagStrict, options?: OverflowOptions): PlainYearMonth
   monthDayFromFields(fields: MonthDayBagStrict, options?: OverflowOptions): PlainMonthDay
   dateAdd(dateArg: PlainDateArg, duration: DurationArg, options?: OverflowOptions): PlainDate
-  dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options: LargestUnitOptions): Duration
+  dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options?: LargestUnitOptions): Duration
   fields(fieldNames: Iterable<string>): Iterable<string>
   mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
   toString?(): string;
@@ -71,7 +61,7 @@ export class Calendar implements CalendarProtocol {
   constructor(calendarId: string) {
     setSlots(this, {
       branding: CalendarBranding,
-      impl: queryCalendarImpl(calendarId),
+      calendar: refineCalendarSlot(calendarId),
     } as CalendarSlots)
   }
 
@@ -80,13 +70,15 @@ export class Calendar implements CalendarProtocol {
     durationArg: DurationArg,
     options?: OverflowOptions,
   ): PlainDate {
-    const { impl } = getCalendarSlots(this)
+    const { calendar } = getCalendarSlots(this)
     return createPlainDate({
-      ...impl.dateAdd(
+      ...calendarDateAdd(
+        calendar,
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
-        refineOverflowOptions(options),
+        options,
       ),
+      calendar,
       branding: PlainDateBranding,
     })
   }
@@ -96,14 +88,15 @@ export class Calendar implements CalendarProtocol {
     plainDateArg1: PlainDateArg,
     options?: LargestUnitOptions,
   ): Duration {
-    const { impl } = getCalendarSlots(this)
+    const { calendar } = getCalendarSlots(this)
     return createDuration({
       branding: DurationBranding,
-      ...impl.dateUntil(
+      ...calendarDateUntil(
+        calendar,
         toPlainDateSlots(plainDateArg0),
         toPlainDateSlots(plainDateArg1),
-        refineCalendarDiffOptions(options),
-      ),
+        options,
+      )
     })
   }
 
@@ -111,9 +104,10 @@ export class Calendar implements CalendarProtocol {
     fields: DateBagStrict,
     options?: OverflowOptions,
   ): PlainDate {
-    const { impl } = getCalendarSlots(this)
+    const { calendar } = getCalendarSlots(this)
     return createPlainDate({
-      ...refinePlainDateBag(fields, options, impl),
+      ...calendarDateFromFields(calendar, fields, options),
+      calendar,
       branding: PlainDateBranding,
     })
   }
@@ -122,10 +116,11 @@ export class Calendar implements CalendarProtocol {
     fields: YearMonthBagStrict,
     options?: OverflowOptions,
   ): PlainYearMonth {
-    const { impl } = getCalendarSlots(this)
+    const { calendar } = getCalendarSlots(this)
     return createPlainYearMonth({
+      ...calendarYearMonthFromFields(calendar, fields, options),
+      calendar,
       branding: PlainYearMonthBranding,
-      ...refinePlainYearMonthBag(fields, options, impl)
     })
   }
 
@@ -133,15 +128,16 @@ export class Calendar implements CalendarProtocol {
     fields: MonthDayBagStrict,
     options?: OverflowOptions,
   ): PlainMonthDay {
-    const { impl } = getCalendarSlots(this)
+    const { calendar } = getCalendarSlots(this)
     return createPlainMonthDay({
+      ...calendarMonthDayFromFields(calendar, fields, options),
+      calendar,
       branding: PlainMonthDayBranding,
-      ...refinePlainMonthDayBag(fields, options, impl)
     })
   }
 
   fields(fieldNames: Iterable<string>): Iterable<string> {
-    const { impl } = getCalendarSlots(this)
+    const { calendar } = getCalendarSlots(this)
 
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
@@ -160,15 +156,16 @@ export class Calendar implements CalendarProtocol {
       fieldNamesArray.push(fieldName)
     }
 
-    return impl.fields(fieldNamesArray)
+    return calendarFields(calendar, fieldNamesArray)
   }
 
   mergeFields(
     fields0: Record<string, unknown>,
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
-    const { impl } = getCalendarSlots(this)
-    return impl.mergeFields(
+    const { calendar } = getCalendarSlots(this)
+    return calendarMergeFields(
+      calendar,
       excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),
       excludeUndefinedProps(ensureNotNullOrUndefined(fields1)),
     )
@@ -176,21 +173,29 @@ export class Calendar implements CalendarProtocol {
 
   // TODO: more DRY
   toString(): string {
-    return getCalendarSlots(this).impl.id
+    const { calendar } = getCalendarSlots(this)
+    return getCalendarSlotId(calendar)
   }
 
   // TODO: more DRY
   toJSON(): string {
-    return getCalendarSlots(this).impl.id
+    const { calendar } = getCalendarSlots(this)
+    return getCalendarSlotId(calendar)
   }
 
   // TODO: more DRY
   get id(): string {
-    return getCalendarSlots(this).impl.id
+    const { calendar } = getCalendarSlots(this)
+    return getCalendarSlotId(calendar)
   }
 
+  // TODO: more DRY with constructor
   static from(arg: CalendarArg): CalendarProtocol {
-    return queryCalendarPublic(arg)
+    const calendarSlot = refineCalendarSlot(arg)
+    return createCalendar({
+      branding: CalendarBranding,
+      calendar: calendarSlot,
+    })
   }
 }
 
@@ -227,14 +232,23 @@ defineProps(
     const whitelistName = dateArgWhitelist[propName]
 
     return function(this: Calendar, dateArg: DateArg) {
-      const { impl } = getCalendarSlots(this)
+      const { calendar } = getCalendarSlots(this)
       const slots = getSlots(dateArg)
       const inWhitelist = whitelistName && ((slots && slots.branding) || '').includes(whitelistName)
       const isoFields = inWhitelist
         ? slots as unknown as IsoDateFields
         : toPlainDateSlots(dateArg as PlainDateArg)
 
-      return impl[propName](isoFields)
+      // TODO: DRY with calendarFieldFuncs
+      return typeof calendar === 'string'
+        ? queryCalendarImpl(calendar)[propName](isoFields)
+        : calendar[propName](
+            createPlainDate({
+              ...isoFields,
+              calendar,
+              branding: PlainDateBranding,
+            })
+          )
     }
   }, dateGetterNames) as DateGetterFieldMethods,
 )
@@ -242,7 +256,7 @@ defineProps(
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export type CalendarSlots = BrandingSlots & { impl: CalendarImpl }
+export type CalendarSlots = BrandingSlots & { calendar: CalendarSlot }
 
 export function createCalendar(slots: CalendarSlots): Calendar {
   return createViaSlots(Calendar, slots)

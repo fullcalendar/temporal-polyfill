@@ -1,46 +1,69 @@
 import { timeFieldNames } from './calendarFields'
-import { CalendarOps } from './calendarOps'
 import { dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationInternals, durationInternalNames } from './durationFields'
-import { IsoDateFields, IsoTimeFields, isoTimeFieldNames } from './isoFields'
+import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './isoMath'
 import { zonedInternalsToIso } from './timeZoneOps'
-import { FilterPropValues, mapPropNames } from './utils'
-import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, DurationBranding, DurationSlots } from './slots'
+import { mapPropNames } from './utils'
+import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateTimeBranding } from './slots'
+import { getCalendarSlotId } from './calendarSlot'
+import { queryCalendarImpl } from './calendarImpl'
+import { createPlainDate } from './plainDate'
+import { pluckIsoDateInternals } from './isoInternals'
+import { CalendarProtocol } from './calendar'
 
 // TODO: better types
 export function createCalendarIdGetterMethods(branding: string): { calendarId(): string } {
   return {
     calendarId() {
       const slots = getSpecificSlots(branding, this) as (BrandingSlots & CalendarSlots)
-      return slots.calendar.id
+      return getCalendarSlotId(slots.calendar)
     }
   }
 }
 
-type AllCalendarGetterMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => unknown>
-
-export function createCalendarGetterMethods<M, K extends keyof AllCalendarGetterMethods>(
+export function createCalendarGetterMethods(
   branding: string,
-  names: K[]
+  names: string[]
 ) {
   return mapPropNames((name, i) => {
     return function (this: any) {
       const slots = getSpecificSlots(branding, this) as (BrandingSlots & IsoDateSlots)
-      return slots.calendar[name as K](slots)
+      const { calendar } = slots
+
+      // TODO: make DRY
+      return typeof calendar === 'string'
+        ? (queryCalendarImpl(calendar) as any)[name](slots)
+        : (calendar[name as keyof CalendarProtocol] as any)(
+            createPlainDate({
+              ...slots,
+              branding: PlainDateBranding,
+            })
+          )
     }
   }, names)
 }
 
 // YUCK
-export function createZonedCalendarGetterMethods<M, K extends keyof AllCalendarGetterMethods>(
+export function createZonedCalendarGetterMethods(
   branding: string,
-  names: K[]
+  names: string[]
 ) {
   return mapPropNames((name, i) => {
     return function (this: any) {
       const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots
-      return slots.calendar[name as K](zonedInternalsToIso(slots))
+      const { calendar } = slots
+      const isoFields = zonedInternalsToIso(slots)
+
+      // TODO: make DRY
+      return typeof calendar === 'string'
+        ? (queryCalendarImpl(calendar) as any)[name](isoFields)
+        : (calendar[name as keyof CalendarProtocol] as any)(
+            createPlainDate({
+              ...pluckIsoDateInternals(isoFields),
+              branding: PlainDateBranding,
+            })
+          )
     }
   }, names)
 }

@@ -1,15 +1,15 @@
 import { compareDayTimeNanos } from './dayTimeNano'
-import { isObjIdsEqual } from './complexObjUtils'
 import { isTimeZonesEqual } from './timeZoneOps'
 import { compareIsoDateTimeFields, compareIsoDateFields } from './isoMath'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
+import { isCalendarSlotsEqual } from './calendarSlot'
 
 export function isPlainDateTimesEqual(
   a: IsoDateTimeSlots,
   b: IsoDateTimeSlots
 ): boolean {
   return !compareIsoDateTimeFields(a, b) &&
-    isObjIdsEqual(a.calendar, b.calendar)
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }
 
 export function isPlainDatesEqual(
@@ -17,7 +17,7 @@ export function isPlainDatesEqual(
   b: IsoDateSlots
 ): boolean {
   return !compareIsoDateFields(a, b) &&
-    isObjIdsEqual(a.calendar, b.calendar)
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }
 
 export function isPlainMonthDaysEqual(
@@ -25,7 +25,7 @@ export function isPlainMonthDaysEqual(
   b: IsoDateSlots
 ): boolean {
   return !compareIsoDateFields(a, b) &&
-    isObjIdsEqual(a.calendar, b.calendar)
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }
 
 export function isPlainYearMonthsEqual(
@@ -33,7 +33,7 @@ export function isPlainYearMonthsEqual(
   b: IsoDateSlots
 ): boolean {
   return !compareIsoDateFields(a, b) &&
-    isObjIdsEqual(a.calendar, b.calendar)
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }
 
 export function isZonedDateTimesEqual(
@@ -42,5 +42,5 @@ export function isZonedDateTimesEqual(
 ): boolean {
   return !compareDayTimeNanos(a.epochNanoseconds, b.epochNanoseconds) &&
     isTimeZonesEqual(a.timeZone, b.timeZone) &&
-    isObjIdsEqual(a.calendar, b.calendar)
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }

@@ -1,9 +1,6 @@
-import { CalendarArg, CalendarProtocol } from './calendar'
+import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { dateGetterNames } from './calendarFields'
-import { queryCalendarOps } from './calendarOpsQuery'
-import { CalendarOps } from './calendarOps'
-import { getPublicCalendar } from './calendarPublic'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -21,9 +18,8 @@ import {
   pluckIsoTimeFields,
 } from './isoFields'
 import {
-  CalendarPublic,
   IsoDateTimePublic,
-  getPublicIdOrObj, pluckIsoDateInternals,
+  pluckIsoDateInternals,
   pluckIsoDateTimeInternals
 } from './isoInternals'
 import {
@@ -65,8 +61,9 @@ import { UnitName, nanoInHour } from './units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureString, toBigInt } from './cast'
-import { DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, neverValueOf } from './publicMixins'
+import { getPreferredCalendarSlot, refineCalendarSlot } from './calendarSlot'
 
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
@@ -86,7 +83,7 @@ export class ZonedDateTime {
       branding: ZonedDateTimeBranding,
       epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
       timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
-      calendar: queryCalendarOps(calendarArg),
+      calendar: refineCalendarSlot(calendarArg),
     } as ZonedDateTimeSlots)
   }
 
@@ -149,7 +146,7 @@ export class ZonedDateTime {
       epochNanoseconds: epochNano,
       timeZone,
       // TODO: more DRY with other datetime types
-      calendar: getPreferredCalendar(plainDateSlots.calendar, slots.calendar),
+      calendar: getPreferredCalendarSlot(plainDateSlots.calendar, slots.calendar),
     })
   }
 
@@ -163,7 +160,7 @@ export class ZonedDateTime {
   withCalendar(calendarArg: CalendarArg): ZonedDateTime {
     return createZonedDateTime({
       ...getZonedDateTimeSlots(this),
-      calendar: queryCalendarOps(calendarArg),
+      calendar: refineCalendarSlot(calendarArg),
     })
   }
 
@@ -316,7 +313,7 @@ export class ZonedDateTime {
     return {
       ...pluckIsoDateTimeInternals(zonedInternalsToIso(slots)),
       // alphabetical
-      calendar: getPublicIdOrObj(slots.calendar) as CalendarPublic,
+      calendar: slots.calendar,
       offset: formatOffsetNano(
         // TODO: more DRY
         zonedInternalsToIso(slots).offsetNanoseconds,
@@ -326,7 +323,10 @@ export class ZonedDateTime {
   }
 
   getCalendar(): CalendarProtocol {
-    return getPublicCalendar(getZonedDateTimeSlots(this))
+    const { calendar } = getZonedDateTimeSlots(this)
+    return typeof calendar === 'string'
+      ? createCalendar({ branding: CalendarBranding, calendar })
+      : calendar
   }
 
   getTimeZone(): TimeZoneProtocol {
@@ -411,25 +411,10 @@ function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFi
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
 }
 
-// TODO: DRY
-// similar to checkCalendarsCompatible
-// `a` takes precedence if both the same ID
-function getPreferredCalendar(a: CalendarOps, b: CalendarOps): CalendarOps {
-  // fast path. doesn't read IDs
-  if (a === b) {
-    return a
-  }
-
-  const aId = a.id
-  const bId = b.id
-
-  if (aId !== isoCalendarId) {
-    if (aId !== bId && bId !== isoCalendarId) {
-      throw new RangeError('Incompatible calendars')
-    }
-
-    return a
-  }
-
-  return b
+// HACKY!!!
+function getPublicIdOrObj(
+  ops: { id: string }
+): unknown {
+  return (ops as any).t || // TimeZoneOpsAdapter
+    ops.id // impl (return id)
 }

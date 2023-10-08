@@ -1,5 +1,5 @@
 import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
-import { CalendarOps } from './calendarOps'
+import { CalendarSlot, calendarDateAdd } from './calendarSlot'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -24,7 +24,7 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
-import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
+import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
@@ -70,7 +70,7 @@ export function moveZonedDateTime(
 // -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
-  calendar: CalendarOps,
+  calendar: CalendarSlot,
   timeZone: TimeZoneOps,
   epochNano: DayTimeNano,
   durationFields: DurationFields,
@@ -82,9 +82,10 @@ export function moveZonedEpochNano(
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
-    const movedIsoDateFields = calendar.dateAdd(
+    const movedIsoDateFields = calendarDateAdd(
+      calendar,
       isoDateTimeFields,
-      updateDurationFieldsSign({ // does CalendarOps really need sign?
+      updateDurationFieldsSign({
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
       }),
@@ -116,7 +117,7 @@ export function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFi
 // -------------------------------------------------------------------------------------------------
 
 export function moveDateTime(
-  calendar: CalendarOps,
+  calendar: CalendarSlot,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
   overflow?: Overflow,
@@ -124,9 +125,10 @@ export function moveDateTime(
   // could have over 24 hours!!!
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
-  const movedIsoDateFields = calendar.dateAdd(
+  const movedIsoDateFields = calendarDateAdd(
+    calendar,
     isoDateTimeFields, // only date parts will be used
-    updateDurationFieldsSign({ // does CalendarOps really need sign?
+    updateDurationFieldsSign({
       ...durationFields, // date parts
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
@@ -145,7 +147,7 @@ export function moveDate(
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   overflow?: Overflow,
-): IsoDateSlots {
+): IsoDateFields {
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 
@@ -172,20 +174,14 @@ export function moveDate(
   } else if (weeks || days) {
     epochMilli = isoToEpochMilli(isoDateFields)
   } else {
-    return { // TODO: not nice
-      calendar,
-      ...isoDateFields
-    }
+    return isoDateFields
   }
 
   epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay
 
   // TODO: use epochMilli for in-bounds-ness instead?
   // TODO: inefficient that PlainDateTime will call in-bounds twice?
-  return checkIsoDateInBounds({
-    calendar,
-    ...epochMilliToIso(epochMilli!),
-  })
+  return checkIsoDateInBounds(epochMilliToIso(epochMilli!))
 }
 
 export function moveTime(

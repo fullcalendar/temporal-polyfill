@@ -16,9 +16,6 @@ import {
   yearMonthBasicNames,
   yearMonthFieldNames,
 } from './calendarFields'
-import { queryCalendarImpl } from './calendarImpl'
-import { queryCalendarOps } from './calendarOpsQuery'
-import { CalendarOps } from './calendarOps'
 import {
   DurationInternals,
   durationFieldDefaults,
@@ -26,7 +23,7 @@ import {
   durationFieldRefiners,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoTimeFields, constrainIsoTimeFields } from './isoFields'
+import { IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './isoFields'
 import { parseOffsetNano } from './isoParse'
 import {
   EpochDisambig,
@@ -36,6 +33,7 @@ import {
   OverflowOptions,
   ZonedFieldOptions,
   normalizeOptions,
+  overflowMapNames,
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -45,12 +43,11 @@ import {
   ensureStringViaPrimitive,
 } from './cast'
 import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
-import { Callable, Reused, pluckProps } from './utils'
+import { Callable, pluckProps } from './utils'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
-import { CalendarSlots, IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // public
-import type { CalendarArg, CalendarProtocol } from './calendar'
 import type { TimeZoneArg } from './timeZone'
 import { getZonedDateTimeSlots, type ZonedDateTime, type ZonedDateTimeBag, type ZonedDateTimeMod } from './zonedDateTime'
 import { getPlainDateSlots, type PlainDate, type PlainDateBag, type PlainDateMod } from './plainDate'
@@ -59,6 +56,7 @@ import type { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
 import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from './plainYearMonth'
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from './plainMonthDay'
 import type { DurationBag, DurationMod } from './duration'
+import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, getCalendarSlotId } from './calendarSlot'
 
 // High-level to* methods
 // -------------------------------------------------------------------------------------------------
@@ -96,7 +94,7 @@ TODO: make more DRY with other methods
 export function refineMaybeZonedDateTimeBag(
   bag: ZonedDateTimeBag,
 ): ZonedEpochSlots | IsoDateSlots {
-  const calendar = getBagCalendarOps(bag)
+  const calendar = getBagCalendarSlot(bag)
   const fields = refineCalendarFields(
     calendar,
     bag,
@@ -106,7 +104,7 @@ export function refineMaybeZonedDateTimeBag(
   ) as ZonedDateTimeBag
 
   if (fields.timeZone !== undefined) {
-    const isoDateFields = calendar.dateFromFields(fields)
+    const isoDateFields = calendarDateFromFields(calendar, fields as any)
     const isoTimeFields = refineTimeBag(fields)
     const timeZone = queryTimeZoneOps(fields.timeZone) // must happen after datetime fields
 
@@ -126,10 +124,10 @@ export function refineMaybeZonedDateTimeBag(
       epochNanoseconds,
     }
   } else {
-    const isoDateInternals = calendar.dateFromFields(fields)
+    const isoDateInternals = calendarDateFromFields(calendar, fields as any)
     const isoTimeFields = refineTimeBag(fields)
 
-    return { ...isoDateInternals, ...isoTimeFields }
+    return { ...isoDateInternals, ...isoTimeFields, calendar }
   }
 }
 
@@ -140,7 +138,7 @@ export function refineZonedDateTimeBag(
   bag: ZonedDateTimeBag,
   options: ZonedFieldOptions | undefined,
 ): ZonedEpochSlots {
-  const calendar = getBagCalendarOps(bag)
+  const calendar = getBagCalendarSlot(bag)
   const fields = refineCalendarFields(
     calendar,
     bag,
@@ -155,7 +153,7 @@ export function refineZonedDateTimeBag(
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
-  const isoDateFields = calendar.dateFromFields(fields, overflow)
+  const isoDateFields = calendarDateFromFields(calendar, fields as any, options)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
@@ -192,7 +190,7 @@ export function mergeZonedDateTimeBag(
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options, true)
 
-  const isoDateFields = calendar.dateFromFields(fields, overflow)
+  const isoDateFields = calendarDateFromFields(calendar, fields as any, options)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
@@ -246,22 +244,24 @@ export function refinePlainDateTimeBag(
   bag: PlainDateTimeBag,
   options: OverflowOptions | undefined,
 ): IsoDateTimeSlots {
-  const calendar = getBagCalendarOps(bag)
+  const calendar = getBagCalendarSlot(bag)
+
+  const calendarId = getCalendarSlotId(calendar!)
   const fields = refineCalendarFields(
     calendar,
     bag,
     dateTimeFieldNames,
-    // requiredFields. HACK
-    calendar.id === isoCalendarId ? ['year', 'day'] : [],
+    calendarId === isoCalendarId ? ['year', 'day'] : [], // requiredFields. HACK
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
-  const isoDateInternals = calendar.dateFromFields(fields, overflow)
+  const isoDateInternals = calendarDateFromFields(calendar, fields as any, options)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   return checkIsoDateTimeInBounds({
     ...isoDateInternals,
     ...isoTimeFields,
+    calendar,
   })
 }
 
@@ -279,12 +279,13 @@ export function mergePlainDateTimeBag(
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
-  const isoDateInternals = calendar.dateFromFields(fields, overflow)
+  const isoDateInternals = calendarDateFromFields(calendar, fields as any, options)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   return checkIsoDateTimeInBounds({
     ...isoDateInternals,
     ...isoTimeFields,
+    calendar,
   })
 }
 
@@ -294,17 +295,20 @@ export function mergePlainDateTimeBag(
 export function refinePlainDateBag(
   bag: PlainDateBag,
   options: OverflowOptions | undefined,
-  calendar: CalendarOps = getBagCalendarOps(bag)
+  calendar: CalendarSlot = getBagCalendarSlot(bag)
 ): IsoDateSlots {
+  const calendarId = getCalendarSlotId(calendar)
   const fields = refineCalendarFields(
     calendar,
     bag,
     dateFieldNames,
-    // requiredFields. HACK
-    calendar.id === isoCalendarId ? ['year', 'day'] : [],
+    calendarId === isoCalendarId ? ['year', 'day'] : [], // requiredFields. HACK
   )
 
-  return calendar.dateFromFields(fields, refineOverflowOptions(options))
+  return {
+    ...calendarDateFromFields(calendar, fields as any, options),
+    calendar,
+  }
 }
 
 export function mergePlainDateBag(
@@ -320,7 +324,10 @@ export function mergePlainDateBag(
     dateFieldNames,
   )
 
-  return calendar.dateFromFields(fields, refineOverflowOptions(options))
+  return {
+    ...calendarDateFromFields(calendar, fields as any, options),
+    calendar,
+  }
 }
 
 function convertToIso(
@@ -330,18 +337,21 @@ function convertToIso(
   extraFieldNames: string[],
   overflow?: Overflow,
 ): IsoDateSlots {
-  const { calendar } = getSlots(input) as { branding: string, calendar: CalendarOps }
+  const { calendar } = getSlots(input) as { branding: string, calendar: CalendarSlot }
 
-  inputFieldNames = calendar.fields(inputFieldNames)
+  inputFieldNames = calendarFields(calendar, inputFieldNames)
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
-  extraFieldNames = calendar.fields(extraFieldNames)
+  extraFieldNames = calendarFields(calendar, extraFieldNames)
   extra = refineFields(extra, extraFieldNames, [])
 
-  let mergedFields = calendar.mergeFields(input, extra)
+  let mergedFields = calendarMergeFields(calendar, input, extra)
   mergedFields = refineFields(mergedFields, [...inputFieldNames, ...extraFieldNames], [])
 
-  return calendar.dateFromFields(mergedFields, overflow)
+  return {
+    ...calendarDateFromFields(calendar, mergedFields as any, overflow),
+    calendar,
+  }
 }
 
 // PlainYearMonth
@@ -350,17 +360,20 @@ function convertToIso(
 export function refinePlainYearMonthBag(
   bag: PlainYearMonthBag,
   options: OverflowOptions | undefined,
-  calendar: CalendarOps = getBagCalendarOps(bag)
+  calendar: CalendarSlot = getBagCalendarSlot(bag)
 ): IsoDateSlots {
+  const calendarId = getCalendarSlotId(calendar)
   const fields = refineCalendarFields(
     calendar,
     bag,
     yearMonthFieldNames,
-    // requiredFields. HACK
-    calendar.id === isoCalendarId ? ['year'] : [],
+    calendarId === isoCalendarId ? ['year'] : [], // requiredFields. HACK
   )
 
-  return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
+  return {
+    ...calendarYearMonthFromFields(calendar, fields, options),
+    calendar,
+  }
 }
 
 export function mergePlainYearMonthBag(
@@ -376,7 +389,10 @@ export function mergePlainYearMonthBag(
     yearMonthFieldNames,
   )
 
-  return calendar.yearMonthFromFields(fields, refineOverflowOptions(options))
+  return {
+    ...calendarYearMonthFromFields(calendar, fields, options),
+    calendar,
+  }
 }
 
 /*
@@ -391,18 +407,22 @@ export function convertPlainYearMonthToDate(
 
 export function convertToPlainYearMonth(
   input: PlainDate | PlainDateTime | ZonedDateTime, // TODO: more generic type
-  overflow?: Overflow,
+  options?: OverflowOptions,
 ): IsoDateSlots {
-  const { calendar } = getSlots(input) as { branding: string, calendar: CalendarOps }
+  const { calendar } = getSlots(input) as { branding: string, calendar: CalendarSlot }
+
+  const calendarId = getCalendarSlotId(calendar)
   const fields = refineCalendarFields(
     calendar,
     input as any,
     yearMonthBasicNames,
-    // requiredFields. HACK
-    calendar.id === isoCalendarId ? ['year'] : [],
+    calendarId === isoCalendarId ? ['year'] : [], // requiredFields. HACK
   )
 
-  return calendar.yearMonthFromFields(fields, overflow)
+  return {
+    ...calendarYearMonthFromFields(calendar, fields, options),
+    calendar,
+  }
 }
 
 // PlainMonthDay
@@ -411,25 +431,25 @@ export function convertToPlainYearMonth(
 export function refinePlainMonthDayBag(
   bag: PlainMonthDayBag,
   options: OverflowOptions | undefined,
-  calendar?: CalendarOps,
+  calendar?: CalendarSlot,
 ): IsoDateSlots {
   let calendarAbsent = !calendar
 
   if (calendarAbsent) {
-    calendar = extractBagCalendarOps(bag)
+    calendar = extractBagCalendarSlot(bag)
     calendarAbsent = !calendar
 
     if (calendarAbsent) {
-      calendar = queryCalendarImpl(isoCalendarId)
+      calendar = isoCalendarId
     }
   }
 
+  const calendarId = getCalendarSlotId(calendar!)
   const fields = refineCalendarFields(
     calendar!,
     bag,
     dateFieldNames,
-    // requiredFields. HACK
-    calendar!.id === isoCalendarId ? ['day'] : [],
+    calendarId === isoCalendarId ? ['day'] : [], // requiredFields. HACK
   )
 
   // Callers who omit the calendar are not writing calendar-independent
@@ -439,7 +459,10 @@ export function refinePlainMonthDayBag(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return calendar!.monthDayFromFields(fields, refineOverflowOptions(options))
+  return {
+    ...calendarMonthDayFromFields(calendar!, fields, options),
+    calendar: calendar!,
+  }
 }
 
 export function mergePlainMonthDayBag(
@@ -455,13 +478,16 @@ export function mergePlainMonthDayBag(
     dateFieldNames,
   )
 
-  return calendar.monthDayFromFields(fields, refineOverflowOptions(options))
+  return {
+    ...calendarMonthDayFromFields(calendar, fields, options),
+    calendar,
+  }
 }
 
 export function convertToPlainMonthDay(
   input: PlainDate | PlainDateTime | ZonedDateTime, // TODO: make more general?
 ): IsoDateSlots {
-  const { calendar } = getSlots(input) as { branding: string, calendar: CalendarOps }
+  const { calendar } = getSlots(input) as { branding: string, calendar: CalendarSlot }
   const fields = refineCalendarFields(
     calendar,
     input as any,
@@ -469,7 +495,10 @@ export function convertToPlainMonthDay(
     [], // requiredFields
   )
 
-  return calendar.monthDayFromFields(fields)
+  return {
+    ...calendarMonthDayFromFields(calendar, fields),
+    calendar,
+  }
 }
 
 /*
@@ -545,14 +574,14 @@ export function mergeDurationBag(
 // -------------------------------------------------------------------------------------------------
 
 function refineCalendarFields(
-  calendar: CalendarOps,
+  calendar: CalendarSlot,
   bag: Record<string, unknown>,
   validFieldNames: string[],
   requiredFieldNames: string[] = [], // a subset of validFieldNames
   forcedValidFieldNames: string[] = [],
 ): Record<string, unknown> {
   const fieldNames = [
-    ...calendar.fields(validFieldNames),
+    ...calendarFields(calendar, validFieldNames),
     ...forcedValidFieldNames,
   ]
 
@@ -560,7 +589,7 @@ function refineCalendarFields(
 }
 
 function mergeCalendarFields(
-  calendar: CalendarOps,
+  calendar: CalendarSlot,
   obj: Record<string, unknown>,
   bag: Record<string, unknown>,
   validFieldNames: string[],
@@ -570,38 +599,26 @@ function mergeCalendarFields(
   rejectInvalidBag(bag)
 
   const fieldNames = [
-    ...calendar.fields(validFieldNames),
+    ...calendarFields(calendar, validFieldNames),
     ...forcedValidFieldNames
   ]
 
   let fields = refineFields(obj, fieldNames, requiredObjFieldNames)
   const partialFields = refineFields(bag, fieldNames)
 
-  fields = calendar.mergeFields(fields, partialFields)
+  fields = calendarMergeFields(calendar, fields, partialFields)
   return refineFields(fields, fieldNames, []) // guard against ridiculous .mergeField results
 }
 
 /*
 defaults to ISO
 */
-function getBagCalendarOps(bag: any): CalendarOps {
-  return extractBagCalendarOps(bag) || queryCalendarImpl(isoCalendarId)
+function getBagCalendarSlot(bag: any): CalendarSlot {
+  return extractBagCalendarSlot(bag) || isoCalendarId
 }
 
-function extractBagCalendarOps(bag: any): CalendarOps | undefined {
-  let calendar: CalendarOps | CalendarProtocol | string | undefined =
-    ((getSlots(bag) || {}) as { calendar?: CalendarOps }).calendar
-
-  if (calendar) {
-    return calendar // CalendarOps
-  }
-
-  calendar = (bag as { calendar: CalendarProtocol | string }).calendar
-
-  if (calendar !== undefined) {
-    return ((getSlots(calendar) || {}) as { calendar?: CalendarOps }).calendar ||
-      queryCalendarOps(calendar)
-  }
+function extractBagCalendarSlot(bag: any): CalendarSlot | undefined {
+  return ((getSlots(bag) || {}) as { calendar?: CalendarSlot }).calendar
 }
 
 function rejectInvalidBag(bag: { calendar?: unknown, timeZone?: unknown }): void {

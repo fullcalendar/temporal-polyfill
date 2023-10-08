@@ -1,6 +1,5 @@
 import { CalendarArg } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarOps } from './calendarOpsQuery'
 import { Instant, createInstant } from './instant'
 import { OrigDateTimeFormat } from './intlFormat'
 import { pluckIsoTimeFields } from './isoFields'
@@ -15,6 +14,7 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { epochMilliToNano } from './isoMath'
 import { DayTimeNano } from './dayTimeNano'
 import { InstantBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, ZonedEpochSlots } from './slots'
+import { refineCalendarSlot } from './calendarSlot'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -96,7 +96,7 @@ function getCurrentZonedDateTimeSlots(
 ): ZonedEpochSlots {
   return {
     epochNanoseconds: getCurrentEpochNanoseconds(),
-    calendar: queryCalendarOps(calendarArg),
+    calendar: refineCalendarSlot(calendarArg),
     timeZone: queryTimeZoneOps(timeZoneArg),
   }
 }

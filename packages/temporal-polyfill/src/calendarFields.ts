@@ -1,12 +1,6 @@
-import { CalendarOps } from './calendarOps'
-import {
-  IsoDateFields,
-  IsoTimeFields,
-  isoTimeFieldNames,
-} from './isoFields'
+import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
 import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
-import { BoundArg, FilterPropValues, mapPropNames, mapPropNamesToConstant, remapProps } from './utils'
-import { IsoDateSlots } from './slots'
+import { BoundArg, mapPropNamesToConstant, remapProps } from './utils'
 
 // Year/Month/Day (no era/eraYear)
 // -------------------------------------------------------------------------------------------------
@@ -100,16 +94,6 @@ export interface DateStats extends YearMonthStats {
   weekOfYear: number
   yearOfWeek: number
   daysInWeek: number
-}
-
-type DateMethods = FilterPropValues<CalendarOps, (isoFields: IsoDateFields) => unknown>
-
-type DateGetters = {
-  [K in keyof DateMethods]: (internals: IsoDateSlots) => ReturnType<DateMethods[K]>
-}
-
-type CalendarIdGetters = {
-  calendarId: (internals: { calendar: CalendarOps }) => string
 }
 
 // Refiners
@@ -230,7 +214,7 @@ export const dateStatNames = Object.keys(dateStatRefiners) as
 
 export type DateGetterFields = DateFieldsIntl & DateStats
 
-export const dateGetterRefiners = {
+export const dateFieldOnlyRefiners = {
   // ...eraYearFieldRefiners,
   // HACK: use strict instead...
   era: ensureStringOrUndefined,
@@ -242,7 +226,10 @@ export const dateGetterRefiners = {
   monthCode: ensureString,
   month: ensurePositiveInteger,
   day: ensurePositiveInteger,
+}
 
+export const dateGetterRefiners = {
+  ...dateFieldOnlyRefiners,
   ...dateStatRefiners, // already strict
 }
 

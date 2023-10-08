@@ -1,7 +1,6 @@
-import { CalendarArg, CalendarProtocol } from './calendar'
+import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { YearMonthBag, yearMonthGetterNames } from './calendarFields'
-import { getPublicCalendar } from './calendarPublic'
 import {
   convertPlainYearMonthToDate,
   convertToPlainYearMonth,
@@ -12,7 +11,7 @@ import {  diffPlainYearMonths } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { DurationInternals, negateDurationInternals } from './durationFields'
 import { IsoDateFields, isoDateFieldNames } from './isoFields'
-import { IsoDatePublic, getPublicIdOrObj, refineIsoYearMonthInternals } from './isoInternals'
+import { IsoDatePublic, refineIsoYearMonthInternals } from './isoInternals'
 import { formatIsoYearMonthFields, formatPossibleDate } from './isoFormat'
 import { createToLocaleStringMethods } from './intlFormat'
 import { compareIsoDateFields, moveByIsoDays } from './isoMath'
@@ -21,9 +20,10 @@ import { parsePlainYearMonth } from './isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
-import { DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
+import { calendarDateAdd, calendarDaysInMonth, calendarFieldFuncs } from './calendarSlot'
 
 export type PlainYearMonthBag = YearMonthBag & { calendar?: CalendarArg }
 export type PlainYearMonthMod = YearMonthBag
@@ -108,15 +108,18 @@ export class PlainYearMonth {
   // not DRY
   getISOFields(): IsoDatePublic {
     const slots = getPlainYearMonthSlots(this)
-    return {
-      calendar: getPublicIdOrObj(slots.calendar) as any, // !!!
-      ...pluckProps<IsoDateFields>(isoDateFieldNames, slots), // !!!
+    return { // !!!
+      calendar: slots.calendar,
+      ...pluckProps<IsoDateFields>(isoDateFieldNames, slots),
     }
   }
 
   // not DRY
   getCalendar(): CalendarProtocol {
-    return getPublicCalendar(getPlainYearMonthSlots(this))
+    const { calendar } = getPlainYearMonthSlots(this)
+    return typeof calendar === 'string'
+      ? createCalendar({ branding: CalendarBranding, calendar })
+      : calendar
   }
 
   static from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {
@@ -177,20 +180,20 @@ function movePlainYearMonth(
   const isoDateFields = movePlainYearMonthToDay(
     internals,
     durationInternals.sign < 0
-      ? calendar.daysInMonth(internals)
+      ? calendarDaysInMonth(calendar, internals)
       : 1,
   )
-  const overflow = refineOverflowOptions(options)
 
   // TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
   return createPlainYearMonth({
     branding: PlainYearMonthBranding,
     ...convertToPlainYearMonth(
       createPlainDate({
-        ...calendar.dateAdd(isoDateFields, durationInternals, overflow),
+        ...calendarDateAdd(calendar, isoDateFields, durationInternals, options),
+        calendar,
         branding: PlainDateBranding,
       }),
-      overflow,
+      options,
     )
   })
 }
@@ -199,6 +202,6 @@ function movePlainYearMonth(
 function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
   return moveByIsoDays(
     internals,
-    day - internals.calendar.day(internals),
+    day - calendarFieldFuncs.day(internals.calendar, internals),
   )
 }

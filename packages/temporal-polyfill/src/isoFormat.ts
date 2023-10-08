@@ -1,5 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
-import { CalendarOps } from './calendarOps'
+import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
@@ -122,7 +122,7 @@ export function formatPossibleDate(
   options?: DateTimeDisplayOptions,
 ) {
   const calendarDisplay = refineDateDisplayOptions(options)
-  const calendarId = internals.calendar.id
+  const calendarId = getCalendarSlotId(internals.calendar)
   const showCalendar =
     calendarDisplay > CalendarDisplay.Never || // critical or always
     (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
@@ -286,11 +286,11 @@ export function formatTimeZone(
 }
 
 export function formatCalendar(
-  calendarOps: CalendarOps,
+  calendar: CalendarSlot,
   calendarDisplay: CalendarDisplay,
 ): string {
   if (calendarDisplay !== CalendarDisplay.Never) {
-    const calendarId = calendarOps.id // cache result for CalendarOpsAdapter
+    const calendarId = getCalendarSlotId(calendar)
 
     if (
       calendarDisplay > CalendarDisplay.Never || // critical or always

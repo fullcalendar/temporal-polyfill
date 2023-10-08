@@ -1,9 +1,6 @@
-import { CalendarArg, CalendarProtocol } from './calendar'
+import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, TimeBag, dateGetterNames } from './calendarFields'
-import { CalendarOps } from './calendarOps'
-import { queryCalendarOps } from './calendarOpsQuery'
-import { getPublicCalendar } from './calendarPublic'
 import { ensureString } from './cast'
 import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from './convert'
 import { diffPlainDateTimes } from './diff'
@@ -13,23 +10,24 @@ import { isPlainDateTimesEqual } from './equality'
 import { createToLocaleStringMethods } from './intlFormat'
 import { IsoDateTimeFields, IsoTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from './isoFields'
 import { formatPlainDateTimeIso } from './isoFormat'
-import { IsoDateTimePublic, getPublicIdOrObj, pluckIsoDateInternals, pluckIsoDateTimeInternals, refineIsoDateTimeInternals } from './isoInternals'
+import { IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals, refineIsoDateTimeInternals } from './isoInternals'
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { movePlainDateTime } from './move'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineOverflowOptions } from './options'
-import { PlainDate, PlainDateArg, PlainDateBag, createPlainDate, toPlainDateSlots } from './plainDate'
+import { PlainDate, PlainDateArg, PlainDateBag, createPlainDate, getPlainDateSlots, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { roundPlainDateTime } from './round'
-import { DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { TimeZoneArg } from './timeZone'
 import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { UnitName } from './units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
+import { getPreferredCalendarSlot, refineCalendarSlot } from './calendarSlot'
 
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
 export type PlainDateTimeMod = DateBag & TimeBag
@@ -88,7 +86,7 @@ export class PlainDateTime {
       ...slots,
       ...plainDateSlots,
       // TODO: more DRY with other datetime types
-      calendar: getPreferredCalendar(plainDateSlots.calendar, slots.calendar),
+      calendar: getPreferredCalendarSlot(plainDateSlots.calendar, slots.calendar),
       branding: PlainDateTimeBranding,
     })
   }
@@ -96,7 +94,7 @@ export class PlainDateTime {
   withCalendar(calendarArg: CalendarArg): PlainDateTime {
     return createPlainDateTime({
       ...getPlainDateTimeSlots(this),
-      calendar: queryCalendarOps(calendarArg),
+      calendar: refineCalendarSlot(calendarArg),
     })
   }
 
@@ -201,14 +199,17 @@ export class PlainDateTime {
 
   getISOFields(): IsoDateTimePublic {
     const slots = getPlainDateTimeSlots(this)
-    return {
-      calendar: getPublicIdOrObj(slots.calendar) as any, // !!!
-      ...pluckProps<IsoDateTimeFields>(isoDateTimeFieldNames, slots), // !!!
+    return { // !!!
+      calendar: slots.calendar,
+      ...pluckProps<IsoDateTimeFields>(isoDateTimeFieldNames, slots),
     }
   }
 
   getCalendar(): CalendarProtocol {
-    return getPublicCalendar(getPlainDateTimeSlots(this))
+    const { calendar } = getPlainDateTimeSlots(this)
+    return typeof calendar === 'string'
+      ? createCalendar({ branding: CalendarBranding, calendar })
+      : calendar
   }
 
   static from(arg: PlainDateTimeArg, options: OverflowOptions): PlainDateTime {
@@ -272,27 +273,4 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
 // TODO: DRY
 function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
-}
-
-// TODO: DRY
-// similar to checkCalendarsCompatible
-// `a` takes precedence if both the same ID
-function getPreferredCalendar(a: CalendarOps, b: CalendarOps): CalendarOps {
-  // fast path. doesn't read IDs
-  if (a === b) {
-    return a
-  }
-
-  const aId = a.id
-  const bId = b.id
-
-  if (aId !== isoCalendarId) {
-    if (aId !== bId && bId !== isoCalendarId) {
-      throw new RangeError('Incompatible calendars')
-    }
-
-    return a
-  }
-
-  return b
 }

@@ -1,13 +1,12 @@
-import { CalendarArg, CalendarProtocol } from './calendar'
+import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetterNames } from './calendarFields'
-import { getPublicCalendar } from './calendarPublic'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
 } from './convert'
-import { IsoDatePublic, getPublicIdOrObj, refineIsoDateInternals } from './isoInternals'
+import { IsoDatePublic, refineIsoDateInternals } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { createToLocaleStringMethods } from './intlFormat'
 import { isoEpochFirstLeapYear } from './isoMath'
@@ -15,7 +14,7 @@ import { isPlainMonthDaysEqual } from './equality'
 import { parsePlainMonthDay } from './isoParse'
 import { DateTimeDisplayOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
-import { PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { CalendarBranding, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { ensureString } from './cast'
@@ -73,15 +72,18 @@ export class PlainMonthDay {
   // not DRY
   getISOFields(): IsoDatePublic {
     const slots = getPlainMonthDaySlots(this)
-    return {
-      calendar: getPublicIdOrObj(slots.calendar) as any, // !!!
-      ...pluckProps<IsoDateFields>(isoDateFieldNames, slots), // !!!
+    return { // !!!
+      calendar: slots.calendar,
+      ...pluckProps<IsoDateFields>(isoDateFieldNames, slots),
     }
   }
 
   // not DRY
   getCalendar(): CalendarProtocol {
-    return getPublicCalendar(getPlainMonthDaySlots(this))
+    const { calendar } = getPlainMonthDaySlots(this)
+    return typeof calendar === 'string'
+      ? createCalendar({ branding: CalendarBranding, calendar })
+      : calendar
   }
 
   static from(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDay {

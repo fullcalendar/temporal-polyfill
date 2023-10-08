@@ -1,4 +1,4 @@
-import { CalendarOps } from './calendarOps'
+import { CalendarSlot } from './calendarSlot'
 import { DayTimeNano } from './dayTimeNano'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields, IsoTimeFields } from './isoFields'
@@ -9,7 +9,7 @@ export interface BrandingSlots {
 }
 
 export interface CalendarSlots {
-  calendar: CalendarOps
+  calendar: CalendarSlot
 }
 
 export interface EpochSlots {
@@ -18,7 +18,7 @@ export interface EpochSlots {
 
 export interface ZonedEpochSlots extends EpochSlots {
   timeZone: TimeZoneOps
-  calendar: CalendarOps
+  calendar: CalendarSlot
 }
 
 export type IsoDateSlots = IsoDateFields & CalendarSlots

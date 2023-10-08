@@ -1,6 +1,4 @@
-import { CalendarArg, CalendarProtocol } from './calendar'
-import { queryCalendarOps } from './calendarOpsQuery'
-import { CalendarOps } from './calendarOps'
+import { CalendarArg } from './calendar'
 import { BoundArg, isClamped, mapPropsWithRefiners, pluckProps } from './utils'
 import {
   IsoDateFields,
@@ -12,13 +10,14 @@ import {
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
 import { IsoDateSlots, IsoDateTimeSlots } from './slots'
+import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
 
 // Ordered alphabetically
 export const isoDateInternalRefiners = {
-  calendar: queryCalendarOps,
+  calendar: refineCalendarSlot,
   ...isoDateFieldRefiners,
 }
 
@@ -54,10 +53,10 @@ export const pluckIsoDateTimeInternals = pluckProps.bind<
 
 function generatePublicIsoFields<P>(
   pluckFunc: (internals: P) => P,
-  internals: P & { calendar: CalendarOps }
-): P & { calendar: CalendarPublic } {
-  const publicFields = pluckFunc(internals) as P & { calendar: CalendarPublic }
-  publicFields.calendar = getPublicIdOrObj(internals.calendar) as CalendarPublic
+  internals: P & { calendar: CalendarSlot }
+): P & { calendar: CalendarSlot } {
+  const publicFields = pluckFunc(internals) as P & { calendar: CalendarSlot }
+  publicFields.calendar = internals.calendar // !!!
   return publicFields
 }
 
@@ -65,11 +64,8 @@ function generatePublicIsoFields<P>(
 // -------------------------------------------------------------------------------------------------
 // TODO: move?
 
-// TODO: make DRY with CalendarArg (it's a subset)
-export type CalendarPublic = CalendarProtocol | string
-
-export type IsoDatePublic = IsoDateFields & { calendar: CalendarPublic }
-export type IsoDateTimePublic = IsoDateTimeFields & { calendar: CalendarPublic }
+export type IsoDatePublic = IsoDateFields & { calendar: CalendarSlot }
+export type IsoDateTimePublic = IsoDateTimeFields & { calendar: CalendarSlot }
 
 export const generatePublicIsoDateFields = generatePublicIsoFields.bind<
   undefined, [BoundArg],
@@ -82,17 +78,6 @@ export const generatePublicIsoDateTimeFields = generatePublicIsoFields.bind<
   [IsoDateTimeSlots],
   IsoDateTimePublic // return
 >(undefined, pluckIsoDateTimeInternals)
-
-
-// Similar to getPublicCalendar and getPublicTimeZone
-// HACKY!!!
-export function getPublicIdOrObj(
-  ops: { id: string }
-): unknown {
-  return (ops as any).c || // CalendarOpsAdapter
-    (ops as any).t || // TimeZoneOpsAdapter
-    ops.id // impl (return id)
-}
 
 // Advanced Refining
 // -------------------------------------------------------------------------------------------------

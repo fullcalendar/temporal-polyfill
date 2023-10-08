@@ -92,7 +92,6 @@ function timeZoneOpsToPublic(timeZoneOps: TimeZoneOps): TimeZoneProtocol {
       })
 }
 
-// TODO: cleanup. previously used getCommonInnerObj
 export function getCommonTimeZoneOps(internals0: TimeZoneInternals, internals1: TimeZoneInternals): TimeZoneOps {
   const internal0 = internals0.timeZone
   const internal1 = internals1.timeZone

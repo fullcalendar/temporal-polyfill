@@ -1,5 +1,4 @@
 import { isoCalendarId } from './calendarConfig'
-import { CalendarOps } from './calendarOps'
 import { DayTimeNano } from './dayTimeNano'
 import {
   IsoTimeFields,
@@ -27,6 +26,7 @@ import type { PlainDateTime } from './plainDateTime'
 import type { PlainMonthDay } from './plainMonthDay'
 import type { PlainYearMonth } from './plainYearMonth'
 import type { Instant } from './instant'
+import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
 
 export type LocalesArg = string | string[]
 
@@ -324,7 +324,7 @@ function createTransformer(
 // Epoch Conversions
 // -------------------------------------------------------------------------------------------------
 
-type MaybeWithCalendar = { calendar?: CalendarOps }
+type MaybeWithCalendar = { calendar?: CalendarSlot }
 
 function toEpochMilli(
   temporalName: string,
@@ -334,7 +334,7 @@ function toEpochMilli(
   if ((internals as MaybeWithCalendar).calendar) {
     checkCalendarsCompatible(
       temporalName,
-      (internals as MaybeWithCalendar).calendar!.id,
+      getCalendarSlotId((internals as MaybeWithCalendar).calendar!),
       resolvedOptions.calendar,
     )
   }

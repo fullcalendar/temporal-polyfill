@@ -1,5 +1,4 @@
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarOps } from './calendarOpsQuery'
 import { diffInstants } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { negateDurationInternals } from './durationFields'
@@ -24,6 +23,7 @@ import { CalendarArg } from './calendar'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
 import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createEpochGetterMethods, neverValueOf } from './publicMixins'
+import { refineCalendarSlot } from './calendarSlot'
 
 export type InstantArg = Instant | string
 
@@ -105,7 +105,7 @@ export class Instant {
       branding: ZonedDateTimeBranding,
       epochNanoseconds: getInstantSlots(this).epochNanoseconds,
       timeZone: queryTimeZoneOps(timeZoneArg),
-      calendar: queryCalendarOps(isoCalendarId),
+      calendar: isoCalendarId,
     })
   }
 
@@ -117,7 +117,7 @@ export class Instant {
       branding: ZonedDateTimeBranding,
       epochNanoseconds: slots.epochNanoseconds,
       timeZone: queryTimeZoneOps(refinedObj.timeZone),
-      calendar: queryCalendarOps(refinedObj.calendar),
+      calendar: refineCalendarSlot(refinedObj.calendar),
     })
   }
 

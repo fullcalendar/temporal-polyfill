@@ -1,6 +1,5 @@
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { CalendarArg } from './calendar'
-import { queryCalendarOps } from './calendarOpsQuery'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
@@ -13,6 +12,7 @@ import { ZonedDateTime } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
 import { BrandingSlots, CalendarBranding, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createViaSlots, getSpecificSlots, setSlots } from './slots'
 import { defineProps, defineStringTag } from './utils'
+import { refineCalendarSlot } from './calendarSlot'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ export class TimeZone { // implements TimeZoneProtocol
     getTimeZoneSlots(this) // validate `this`
     const epochNano = toInstantSlots(instantArg).epochNanoseconds
     return createPlainDateTime({
-      calendar: queryCalendarOps(calendarArg),
+      calendar: refineCalendarSlot(calendarArg),
       ...zonedEpochNanoToIsoWithTZObj(this, epochNano),
       branding: PlainDateTimeBranding,
     })
@@ -93,7 +93,7 @@ export class TimeZone { // implements TimeZoneProtocol
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: getSingleInstantFor(
-        new TimeZoneOpsAdapter(this), // needed for internal call to getPossibleInstantsFor
+        new TimeZoneOpsAdapter(this), // needed for internal call to getPossibleInstantsFor!!!
         toPlainDateTimeSlots(plainDateTimeArg),
         refineEpochDisambigOptions(options),
       )

@@ -27,7 +27,7 @@ export class TimeZoneOpsAdapter {
     return [...this.t.getPossibleInstantsFor(
       createPlainDateTime({
         ...isoDateTimeFields,
-        calendar: queryCalendarImpl(isoCalendarId),
+        calendar: isoCalendarId,
         branding: PlainDateTimeBranding,
       })
     )].map((instant: Instant) => {
