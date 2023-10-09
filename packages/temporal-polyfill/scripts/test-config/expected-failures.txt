@@ -326,10 +326,6 @@ built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-plaindate
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-plaindate-instance.js
 
-# [slot-refactor]
-# tz internal method call needs specific Temporal Calendar from given PlainDate, not one we forced
-built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
-
 # Why does converting epoch<->isoFields with a TimeZone need to call Calendar::dateAdd?
 built-ins/Temporal/TimeZone/prototype/getInstantFor/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/calendar-dateadd-called-with-options-undefined.js

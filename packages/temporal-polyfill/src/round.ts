@@ -52,18 +52,25 @@ export function roundZonedDateTime(
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
   const offsetNano = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-  let isoDateTimeFields = epochNanoToIso(epochNanoseconds, offsetNano)
+  let isoDateTimeFields = {
+    ...epochNanoToIso(epochNanoseconds, offsetNano),
+    calendar,
+  }
 
-  isoDateTimeFields = roundDateTime(
-    isoDateTimeFields,
-    smallestUnit as DayTimeUnit,
-    roundingInc,
-    roundingMode,
-    timeZone,
-  )
+  isoDateTimeFields = {
+    calendar,
+    ...roundDateTime(
+      isoDateTimeFields,
+      smallestUnit as DayTimeUnit,
+      roundingInc,
+      roundingMode,
+      timeZone,
+    )
+  }
+
   epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    isoDateTimeFields,
+    { ...isoDateTimeFields, calendar },
     offsetNano,
     false, // z
     OffsetDisambig.Prefer, // keep old offsetNano if possible
@@ -118,7 +125,7 @@ export function roundToMinute(offsetNano: number): number {
 // -------------------------------------------------------------------------------------------------
 
 export function roundDateTime(
-  isoFields: IsoDateTimeFields,
+  isoFields: IsoDateTimeSlots,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
@@ -150,7 +157,7 @@ export function roundTime(
 
 // TODO: break into two separate functions?
 function roundDateTimeToDay(
-  isoFields: IsoDateTimeFields,
+  isoFields: IsoDateTimeSlots,
   timeZoneOps: TimeZoneOps | undefined,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {

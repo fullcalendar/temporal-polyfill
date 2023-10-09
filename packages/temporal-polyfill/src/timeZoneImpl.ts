@@ -14,6 +14,7 @@ import {
   isoToEpochSec,
 } from './isoMath'
 import { parseMaybeOffsetNano } from './isoParse'
+import { IsoDateTimeSlots } from './slots'
 import { TimeZoneOps } from './timeZoneOps'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
@@ -94,8 +95,8 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
     return this.store.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
-  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
-    const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeFields)
+  getPossibleInstantsFor(isoDateTimeSlots: IsoDateTimeSlots): DayTimeNano[] {
+    const [zonedEpochSec, subsecNano] = isoToEpochSec(isoDateTimeSlots)
 
     return this.store.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
       return checkEpochNanoInBounds(

@@ -13,7 +13,6 @@ import {
   defineProps,
   excludePropsByName,
   hasAnyPropsByName,
-  identityFunc,
   pluckProps,
 } from './utils'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
@@ -363,6 +362,7 @@ function timeFieldsToEpochNano(
   return getSingleInstantFor(
     queryTimeZoneImpl(resolvedOptions.timeZone),
     {
+      calendar: isoCalendarId,
       isoYear: isoEpochOriginYear,
       isoMonth: 1,
       isoDay: 1,

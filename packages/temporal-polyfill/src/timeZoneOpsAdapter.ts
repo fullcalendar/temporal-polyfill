@@ -3,11 +3,10 @@ import { IsoDateTimeFields } from './isoFields'
 import { ensureString } from './cast'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZone'
-import { queryCalendarImpl } from './calendarImpl'
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
 import { validateOffsetNano } from './timeZoneOps'
-import { InstantBranding, PlainDateTimeBranding } from './slots'
+import { InstantBranding, IsoDateTimeSlots, PlainDateTimeBranding } from './slots'
 
 export class TimeZoneOpsAdapter {
   constructor(public t: TimeZoneProtocol) {}
@@ -23,11 +22,10 @@ export class TimeZoneOpsAdapter {
     )
   }
 
-  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): DayTimeNano[] {
+  getPossibleInstantsFor(isoDateTimeSlots: IsoDateTimeSlots): DayTimeNano[] {
     return [...this.t.getPossibleInstantsFor(
       createPlainDateTime({
-        ...isoDateTimeFields,
-        calendar: isoCalendarId,
+        ...isoDateTimeSlots,
         branding: PlainDateTimeBranding,
       })
     )].map((instant: Instant) => {
