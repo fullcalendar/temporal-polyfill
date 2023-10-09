@@ -1,4 +1,4 @@
-import { timeFieldNames } from './calendarFields'
+import { dateGetterRefiners, timeFieldNames } from './calendarFields'
 import { dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationInternals, durationInternalNames } from './durationFields'
 import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
@@ -34,11 +34,13 @@ export function createCalendarGetterMethods(
       // TODO: make DRY
       return typeof calendar === 'string'
         ? (queryCalendarImpl(calendar) as any)[name](slots)
-        : (calendar[name as keyof CalendarProtocol] as any)(
-            createPlainDate({
-              ...slots,
-              branding: PlainDateBranding,
-            })
+        : (dateGetterRefiners as any)[name](
+            (calendar[name as keyof CalendarProtocol] as any)(
+              createPlainDate({
+                ...slots,
+                branding: PlainDateBranding,
+              })
+            )
           )
     }
   }, names)

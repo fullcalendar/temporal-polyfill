@@ -11,7 +11,7 @@ import { OverflowOptions, refineOverflowOptions } from './options'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { CalendarBranding, DurationBranding, PlainDateBranding, getSlots } from './slots'
+import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, getSlots } from './slots'
 import { Unit, unitNamesAsc } from './units'
 import { isObjectlike, mapProps } from './utils'
 
@@ -20,6 +20,7 @@ export type CalendarSlot = CalendarProtocol | string
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectlike(calendarArg)) {
     // look at other date-like objects
+    // (reference implementation uses CALENDAR_ID instead)
     const slots = getSlots(calendarArg)
     if (slots && slots.branding !== CalendarBranding && (slots as any).calendar) {
       return (slots as any).calendar
@@ -151,12 +152,15 @@ export function calendarDateFromFields(
   calendarSlot: CalendarSlot,
   fields: DateBagStrict,
   options?: OverflowOptions,
-): IsoDateFields {
+): IsoDateSlots {
   if (typeof calendarSlot === 'string') {
-    return queryCalendarImpl(calendarSlot).dateFromFields(
-      fields,
-      refineOverflowOptions(options),
-    )
+    return {
+      calendar: calendarSlot,
+      ...queryCalendarImpl(calendarSlot).dateFromFields(
+        fields,
+        refineOverflowOptions(options),
+      )
+    }
   }
   return getPlainDateSlots(
     calendarSlot.dateFromFields(
@@ -175,12 +179,15 @@ export function calendarYearMonthFromFields(
   calendarSlot: CalendarSlot,
   fields: YearMonthBag,
   options?: OverflowOptions,
-): IsoDateFields {
+): IsoDateSlots {
   if (typeof calendarSlot === 'string') {
-    return queryCalendarImpl(calendarSlot).yearMonthFromFields(
-      fields,
-      refineOverflowOptions(options),
-    )
+    return {
+      calendar: calendarSlot,
+      ...queryCalendarImpl(calendarSlot).yearMonthFromFields(
+        fields,
+        refineOverflowOptions(options),
+      )
+    }
   }
   return getPlainYearMonthSlots(
     calendarSlot.yearMonthFromFields(
@@ -199,12 +206,15 @@ export function calendarMonthDayFromFields(
   calendarSlot: CalendarSlot,
   fields: MonthDayBag,
   options?: OverflowOptions,
-): IsoDateFields {
+): IsoDateSlots {
   if (typeof calendarSlot === 'string') {
-    return queryCalendarImpl(calendarSlot).monthDayFromFields(
-      fields,
-      refineOverflowOptions(options),
-    )
+    return {
+      calendar: calendarSlot,
+      ...queryCalendarImpl(calendarSlot).monthDayFromFields(
+        fields,
+        refineOverflowOptions(options),
+      )
+    }
   }
   return getPlainMonthDaySlots(
     calendarSlot.monthDayFromFields(

@@ -3,8 +3,10 @@
 # see expected-failures-es5.txt and expected-failures-opt.txt respectively.
 
 # [slot-refactor]
+#
 # Unwanted calendar.id access to determine requireFields
 # should happen WITHIN the calendar
+#
 built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
 built-ins/Temporal/Calendar/prototype/dateUntil/order-of-operations.js
 built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
@@ -111,6 +113,12 @@ built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
 
 # [slot-refactor]
 # overflow options should be parsed WITHIN CalendarOpsAdapter, not before
+#
+# CURRENTLY:
+# -> refinePlainDateBag (pre-parses fields & parses options)
+# -> CalendarOps (either CalendarImpl/CalendarOpsAdapter)
+# (if CalendarOpsAdapter, recreates options)
+#
 built-ins/Temporal/PlainDate/from/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js

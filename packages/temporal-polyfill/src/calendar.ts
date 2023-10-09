@@ -4,7 +4,7 @@ import { createProtocolChecker } from './complexObjUtils'
 import { IsoDateFields } from './isoFields'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from './options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from './utils'
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, setSlots } from './slots'
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 
 // public
 import type { PlainDateTime } from './plainDateTime'
@@ -105,8 +105,9 @@ export class Calendar implements CalendarProtocol {
     fields: DateBagStrict,
     options?: OverflowOptions,
   ): PlainDate {
+    const { calendar } = getCalendarSlots(this)
     return createPlainDate({
-      ...refinePlainDateBag(fields, options),
+      ...refinePlainDateBag(fields, options, calendar),
       branding: PlainDateBranding,
     })
   }
@@ -115,8 +116,9 @@ export class Calendar implements CalendarProtocol {
     fields: YearMonthBagStrict,
     options?: OverflowOptions,
   ): PlainYearMonth {
+    const { calendar } = getCalendarSlots(this)
     return createPlainYearMonth({
-      ...refinePlainYearMonthBag(fields, options),
+      ...refinePlainYearMonthBag(fields, options, calendar),
       branding: PlainYearMonthBranding,
     })
   }
@@ -125,8 +127,9 @@ export class Calendar implements CalendarProtocol {
     fields: MonthDayBagStrict,
     options?: OverflowOptions,
   ): PlainMonthDay {
+    const { calendar } = getCalendarSlots(this)
     return createPlainMonthDay({
-      ...refinePlainMonthDayBag(fields, options),
+      ...refinePlainMonthDayBag(fields, options, calendar),
       branding: PlainMonthDayBranding,
     })
   }
@@ -246,7 +249,7 @@ export function createCalendar(slots: CalendarSlots): Calendar {
 }
 
 export function getCalendarSlots(calendar: Calendar): CalendarSlots {
-  return getSlots(calendar) as CalendarSlots
+  return getSpecificSlots(CalendarBranding, calendar) as CalendarSlots
 }
 
 // HACK

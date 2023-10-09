@@ -304,10 +304,7 @@ export function refinePlainDateBag(
     calendarId === isoCalendarId ? ['year', 'day'] : [], // requiredFields. HACK
   )
 
-  return {
-    ...calendarDateFromFields(calendar, fields as any, options),
-    calendar,
-  }
+  return calendarDateFromFields(calendar, fields as any, options)
 }
 
 export function mergePlainDateBag(
@@ -323,10 +320,7 @@ export function mergePlainDateBag(
     dateFieldNames,
   )
 
-  return {
-    ...calendarDateFromFields(calendar, fields as any, options),
-    calendar,
-  }
+  return calendarDateFromFields(calendar, fields as any, options)
 }
 
 function convertToIso(
@@ -369,10 +363,7 @@ export function refinePlainYearMonthBag(
     calendarId === isoCalendarId ? ['year'] : [], // requiredFields. HACK
   )
 
-  return {
-    ...calendarYearMonthFromFields(calendar, fields, options),
-    calendar,
-  }
+  return calendarYearMonthFromFields(calendar, fields, options)
 }
 
 export function mergePlainYearMonthBag(
@@ -388,10 +379,7 @@ export function mergePlainYearMonthBag(
     yearMonthFieldNames,
   )
 
-  return {
-    ...calendarYearMonthFromFields(calendar, fields, options),
-    calendar,
-  }
+  return calendarYearMonthFromFields(calendar, fields, options)
 }
 
 /*
@@ -418,10 +406,7 @@ export function convertToPlainYearMonth(
     calendarId === isoCalendarId ? ['year'] : [], // requiredFields. HACK
   )
 
-  return {
-    ...calendarYearMonthFromFields(calendar, fields, options),
-    calendar,
-  }
+  return calendarYearMonthFromFields(calendar, fields, options)
 }
 
 // PlainMonthDay
@@ -458,10 +443,7 @@ export function refinePlainMonthDayBag(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return {
-    ...calendarMonthDayFromFields(calendar!, fields, options),
-    calendar: calendar!,
-  }
+  return calendarMonthDayFromFields(calendar!, fields, options)
 }
 
 export function mergePlainMonthDayBag(
@@ -477,10 +459,7 @@ export function mergePlainMonthDayBag(
     dateFieldNames,
   )
 
-  return {
-    ...calendarMonthDayFromFields(calendar, fields, options),
-    calendar,
-  }
+  return calendarMonthDayFromFields(calendar, fields, options)
 }
 
 export function convertToPlainMonthDay(
@@ -494,10 +473,7 @@ export function convertToPlainMonthDay(
     [], // requiredFields
   )
 
-  return {
-    ...calendarMonthDayFromFields(calendar, fields),
-    calendar,
-  }
+  return calendarMonthDayFromFields(calendar, fields)
 }
 
 /*
