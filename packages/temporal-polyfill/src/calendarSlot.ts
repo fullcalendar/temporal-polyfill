@@ -1,8 +1,9 @@
 import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateFieldOnlyRefiners } from './calendarFields'
+import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateFieldNames, dateFieldOnlyRefiners, yearMonthFieldNames } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
 import { ensureBoolean, ensureInteger, ensureObjectlike, ensurePositiveInteger, ensureString } from './cast'
+import { refineCalendarFields } from './convert'
 import { createDuration, getDurationSlots } from './duration'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
@@ -11,7 +12,7 @@ import { Overflow, OverflowOptions, overflowMapNames, refineOverflowOptions } fr
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { DurationBranding, PlainDateBranding, getSlots } from './slots'
+import { CalendarBranding, DurationBranding, PlainDateBranding, getSlots } from './slots'
 import { Unit, unitNamesAsc } from './units'
 import { isObjectlike, mapProps } from './utils'
 
@@ -19,10 +20,10 @@ export type CalendarSlot = CalendarProtocol | string
 
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectlike(calendarArg)) {
-    const { calendar } = (getSlots(calendarArg) || {}) as { calendar?: CalendarSlot }
-
-    if (calendar) {
-      return calendar
+    // look at other date-like objects
+    const slots = getSlots(calendarArg)
+    if (slots && slots.branding !== CalendarBranding && (slots as any).calendar) {
+      return (slots as any).calendar
     }
 
     checkCalendarProtocol(calendarArg as CalendarProtocol)
@@ -32,9 +33,7 @@ export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
 }
 
 export function refineCalendarSlotString(calendarArg: string): string {
-  const str = parseCalendarId(ensureString(calendarArg))
-  queryCalendarImpl(str)
-  return str
+  return parseCalendarId(ensureString(calendarArg)) // ensures its real calendar via queryCalendarImpl
 }
 
 export function getCommonCalendarSlot(a: CalendarSlot, b: CalendarSlot): CalendarSlot {

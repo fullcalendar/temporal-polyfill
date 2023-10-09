@@ -262,7 +262,7 @@ export function parseCalendarId(s: string): string {
     return queryCalendarImpl(res.calendar).id // normalize
   }
 
-  return s
+  return queryCalendarImpl(s).id // normalize
 }
 
 export function parseTimeZoneId(s: string): string {
@@ -312,11 +312,16 @@ function postProcessZonedDateTime(
 }
 
 function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeSlots {
-  return checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized))
+  return validateCalendar(checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized)))
 }
 
 function postProcessDate(organized: DateOrganized): IsoDateSlots {
-  return checkIsoDateInBounds(constrainIsoDateInternals(organized))
+  return validateCalendar(checkIsoDateInBounds(constrainIsoDateInternals(organized)))
+}
+
+function validateCalendar<T extends { calendar: string }>(organized: T): T {
+  queryCalendarImpl(organized.calendar)
+  return organized
 }
 
 // RegExp

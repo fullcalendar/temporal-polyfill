@@ -613,12 +613,22 @@ function mergeCalendarFields(
 /*
 defaults to ISO
 */
-function getBagCalendarSlot(bag: any): CalendarSlot {
+export function getBagCalendarSlot(bag: any): CalendarSlot {
   return extractBagCalendarSlot(bag) || isoCalendarId
 }
 
 function extractBagCalendarSlot(bag: any): CalendarSlot | undefined {
-  return ((getSlots(bag) || {}) as { calendar?: CalendarSlot }).calendar
+  const slots = getSlots(bag)
+  const { calendar } = (slots || {}) as { calendar?: CalendarSlot }
+
+  if (calendar) {
+    return calendar
+  }
+
+  const bagCalendar = bag.calendar
+  if (bagCalendar !== undefined) {
+    return refineCalendarSlot(bagCalendar)
+  }
 }
 
 function rejectInvalidBag(bag: { calendar?: unknown, timeZone?: unknown }): void {
