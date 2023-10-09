@@ -145,7 +145,7 @@ export class ZonedDateTime {
       epochNanoseconds: epochNano,
       timeZone,
       // TODO: more DRY with other datetime types
-      calendar: getPreferredCalendarSlot(plainDateSlots.calendar, slots.calendar),
+      calendar: getPreferredCalendarSlot(slots.calendar, plainDateSlots.calendar),
     })
   }
 

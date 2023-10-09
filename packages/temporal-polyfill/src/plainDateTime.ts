@@ -86,7 +86,7 @@ export class PlainDateTime {
       ...slots,
       ...plainDateSlots,
       // TODO: more DRY with other datetime types
-      calendar: getPreferredCalendarSlot(plainDateSlots.calendar, slots.calendar),
+      calendar: getPreferredCalendarSlot(slots.calendar, plainDateSlots.calendar),
       branding: PlainDateTimeBranding,
     })
   }

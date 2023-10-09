@@ -65,15 +65,13 @@ export function getPreferredCalendarSlot(a: CalendarSlot, b: CalendarSlot): Cale
   const aId = getCalendarSlotId(a)
   const bId = getCalendarSlotId(b)
 
-  if (aId !== isoCalendarId) {
-    if (aId !== bId && bId !== isoCalendarId) {
-      throw new RangeError('Incompatible calendars')
-    }
-
+  if (aId === bId || aId === isoCalendarId) {
+    return b
+  } else if (bId === isoCalendarId) {
     return a
   }
 
-  return b
+  throw new RangeError('Incompatible calendars')
 }
 
 // TODO: use elsewhere too!!!
