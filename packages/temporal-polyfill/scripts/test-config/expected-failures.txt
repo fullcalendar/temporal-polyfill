@@ -114,15 +114,6 @@ built-ins/Temporal/PlainMonthDay/calendar-invalid.js
 built-ins/Temporal/PlainMonthDay/infinity-throws-rangeerror.js
 built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
 
-# [slot-refactor]
-# similar to above
-# PlainYearMonth should copy options object before giving it to Calendar::dateAdd
-# (it does this because overflow is used for add and then also plaindate->yearmonth conversion)
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
-
 # I disagree w/ irregular lengh-of-day tests for ZonedDateTime, especially the third `test`
 built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
@@ -149,11 +140,13 @@ built-ins/Temporal/Duration/call-builtin.js
 # our Duration::compare calls Calendar::dateAdd fewer times!
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
 
-# our PlainYearMonth::add (with negative) calls Calendar::dateAdd fewer times!
+# our PlainYearMonth::add/subtract calls Calendar::dateAdd fewer times!
 built-ins/Temporal/PlainYearMonth/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
 
 # PlainYearMonth, ignore wasteful date<->yearmonth internal conversions for `add`
 # (uses dateAdd/fields/dateFromFields instead of just daysInMonth)

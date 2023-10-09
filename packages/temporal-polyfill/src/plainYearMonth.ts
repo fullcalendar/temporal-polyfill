@@ -187,6 +187,8 @@ function movePlainYearMonth(
       : 1,
   )
 
+  const optionsCopy = { ...options } // safeguard against dateAdd mutation
+
   // TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
   return createPlainYearMonth({
     branding: PlainYearMonthBranding,
@@ -196,7 +198,7 @@ function movePlainYearMonth(
         calendar,
         branding: PlainDateBranding,
       }),
-      options,
+      optionsCopy,
     )
   })
 }
