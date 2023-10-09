@@ -2,7 +2,7 @@ import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict,
 import { ensureString } from './cast'
 import { createProtocolChecker } from './complexObjUtils'
 import { IsoDateFields } from './isoFields'
-import { LargestUnitOptions, OverflowOptions } from './options'
+import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from './options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from './utils'
 import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, setSlots } from './slots'
 
@@ -95,7 +95,7 @@ export class Calendar implements CalendarProtocol {
         calendar,
         toPlainDateSlots(plainDateArg0),
         toPlainDateSlots(plainDateArg1),
-        options,
+        refineCalendarDiffOptions(options),
       )
     })
   }

@@ -35,7 +35,7 @@ import { clampEntity, divTrunc, modTrunc } from './utils'
 export function movePlainDateTime(
   internals: IsoDateTimeSlots,
   durationInternals: DurationInternals,
-  options: OverflowOptions | undefined,
+  options?: OverflowOptions,
 ): IsoDateTimeSlots {
   return {
     calendar: internals.calendar, // TODO: make this nicer
@@ -43,7 +43,7 @@ export function movePlainDateTime(
       internals.calendar,
       internals,
       durationInternals,
-      refineOverflowOptions(options),
+      options,
     ),
   }
 }
@@ -51,14 +51,14 @@ export function movePlainDateTime(
 export function moveZonedDateTime(
   internals: ZonedEpochSlots,
   durationFields: DurationFields,
-  overflow?: Overflow
+  options?: OverflowOptions,
 ): ZonedEpochSlots {
   const epochNano = moveZonedEpochNano(
     internals.calendar,
     internals.timeZone,
     internals.epochNanoseconds,
     durationFields,
-    overflow,
+    options,
   )
   return {
     ...internals,
@@ -74,7 +74,7 @@ export function moveZonedEpochNano(
   timeZone: TimeZoneOps,
   epochNano: DayTimeNano,
   durationFields: DurationFields,
-  overflow?: Overflow,
+  options?: OverflowOptions,
 ): DayTimeNano {
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour)
 
@@ -89,7 +89,7 @@ export function moveZonedEpochNano(
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
       }),
-      overflow,
+      options,
     )
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
@@ -120,7 +120,7 @@ export function moveDateTime(
   calendar: CalendarSlot,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
-  overflow?: Overflow,
+  options?: OverflowOptions,
 ): IsoDateTimeFields {
   // could have over 24 hours!!!
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
@@ -133,7 +133,7 @@ export function moveDateTime(
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
     }),
-    overflow,
+    options,
   )
 
   return checkIsoDateTimeInBounds({
@@ -142,6 +142,9 @@ export function moveDateTime(
   })
 }
 
+/*
+Called by CalendarImpl, that's why it accepts refined overflow
+*/
 export function moveDate(
   calendar: CalendarImpl,
   isoDateFields: IsoDateFields,

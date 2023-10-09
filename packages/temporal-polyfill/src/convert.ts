@@ -335,7 +335,7 @@ function convertToIso(
   inputFieldNames: string[],
   extra: {},
   extraFieldNames: string[],
-  overflow?: Overflow,
+  options?: OverflowOptions,
 ): IsoDateSlots {
   const { calendar } = getSlots(input) as { branding: string, calendar: CalendarSlot }
 
@@ -349,7 +349,7 @@ function convertToIso(
   mergedFields = refineFields(mergedFields, [...inputFieldNames, ...extraFieldNames], [])
 
   return {
-    ...calendarDateFromFields(calendar, mergedFields as any, overflow),
+    ...calendarDateFromFields(calendar, mergedFields as any, options),
     calendar,
   }
 }
@@ -513,7 +513,7 @@ export function convertPlainMonthDayToDate(
     monthDayBasicNames,
     ensureObjectlike(bag),
     ['year'],
-    Overflow.Reject, // unlike others. correct
+    { overflow: 'reject' }, // unlike others. correct. unforunately needs to parse
   )
 }
 

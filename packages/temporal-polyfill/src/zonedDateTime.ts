@@ -170,7 +170,7 @@ export class ZonedDateTime {
       ...moveZonedDateTime(
         getZonedDateTimeSlots(this),
         toDurationSlots(durationArg),
-        refineOverflowOptions(options),
+        options,
       ),
     })
   }
@@ -181,7 +181,7 @@ export class ZonedDateTime {
       ...moveZonedDateTime(
         getZonedDateTimeSlots(this),
         negateDurationInternals(toDurationSlots(durationArg)),
-        refineOverflowOptions(options),
+        options,
       ),
     })
   }

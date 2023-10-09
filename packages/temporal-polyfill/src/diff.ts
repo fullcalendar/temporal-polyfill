@@ -20,7 +20,7 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { DiffOptions, Overflow, RoundingMode, refineDiffOptions } from './options'
+import { DiffOptions, RoundingMode, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, getCommonTimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
@@ -234,8 +234,7 @@ export function diffDateTimes(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateTimeFields) => DayTimeNano, // markerToEpochNano -- TODO: better after removing `!`
-    // TODO: better way to bind w/o specifying Overflow
-    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarSlot, m, d, Overflow.Constrain),
+    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarSlot, m, d),
   )
 }
 
@@ -265,8 +264,7 @@ export function diffDates(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateFields) => DayTimeNano, // markerToEpochNano
-    // TODO: better way to bind w/o specifying Overflow
-    (m: IsoDateFields, d: DurationFields) => calendarDateAdd(calendarSlot, m, updateDurationFieldsSign(d), Overflow.Constrain),
+    (m: IsoDateFields, d: DurationFields) => calendarDateAdd(calendarSlot, m, updateDurationFieldsSign(d)),
   )
 }
 
@@ -393,7 +391,7 @@ export function diffZonedEpochNano(
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
-    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarSlot, timeZone, m, d, Overflow.Constrain),
+    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarSlot, timeZone, m, d),
   )
 }
 

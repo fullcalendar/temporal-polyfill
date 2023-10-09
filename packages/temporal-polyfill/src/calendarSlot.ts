@@ -7,11 +7,12 @@ import { createDuration, getDurationSlots } from './duration'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { parseCalendarId } from './isoParse'
-import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from './options'
+import { Overflow, OverflowOptions, overflowMapNames, refineOverflowOptions } from './options'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { DurationBranding, IsoDateSlots, PlainDateBranding, getSlots } from './slots'
+import { DurationBranding, PlainDateBranding, getSlots } from './slots'
+import { Unit, unitNamesAsc } from './units'
 import { isObjectlike, mapProps } from './utils'
 
 export type CalendarSlot = CalendarProtocol | string
@@ -112,13 +113,13 @@ export function calendarDateUntil(
   calendarSlot: CalendarSlot,
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
-  options?: LargestUnitOptions,
+  largestUnit: Unit,
 ): DurationInternals {
   if (typeof calendarSlot === 'string') {
     return queryCalendarImpl(calendarSlot).dateUntil(
       isoDateFields0,
       isoDateFields1,
-      refineCalendarDiffOptions(options),
+      largestUnit,
     )
   }
   return getDurationSlots(
@@ -133,7 +134,10 @@ export function calendarDateUntil(
         calendar: calendarSlot,
         branding: PlainDateBranding,
       }),
-      options,
+      Object.assign(
+        Object.create(null),
+        { largestUnit: unitNamesAsc[largestUnit] },
+      )
     ),
   )
 }
