@@ -7,7 +7,7 @@ import { createDuration, getDurationSlots } from './duration'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { parseCalendarId } from './isoParse'
-import { OverflowOptions, refineOverflowOptions } from './options'
+import { LargestUnitOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
@@ -117,6 +117,7 @@ export function calendarDateUntil(
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit,
+  origOptions?: LargestUnitOptions,
 ): DurationInternals {
   if (typeof calendarSlot === 'string') {
     return queryCalendarImpl(calendarSlot).dateUntil(
@@ -139,7 +140,7 @@ export function calendarDateUntil(
       }),
       Object.assign(
         Object.create(null),
-        { largestUnit: unitNamesAsc[largestUnit] },
+        { ...origOptions, largestUnit: unitNamesAsc[largestUnit] },
       )
     ),
   )

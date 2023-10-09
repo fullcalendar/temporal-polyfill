@@ -115,14 +115,6 @@ built-ins/Temporal/PlainMonthDay/infinity-throws-rangeerror.js
 built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
 
 # [slot-refactor]
-# overflow options should be passed through to Calendar::dateUntil
-# (though it should be a shallow-copied)
-built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
-
-# [slot-refactor]
 # similar to above
 # PlainYearMonth should copy options object before giving it to Calendar::dateAdd
 # (it does this because overflow is used for add and then also plaindate->yearmonth conversion)
