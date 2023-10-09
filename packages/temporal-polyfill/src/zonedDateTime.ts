@@ -40,7 +40,6 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-  refineOverflowOptions,
   refineZonedFieldOptions,
 } from './options'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'

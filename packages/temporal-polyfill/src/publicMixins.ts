@@ -60,11 +60,13 @@ export function createZonedCalendarGetterMethods(
       // TODO: make DRY
       return typeof calendar === 'string'
         ? (queryCalendarImpl(calendar) as any)[name](isoFields)
-        : (calendar[name as keyof CalendarProtocol] as any)(
-            createPlainDate({
-              ...pluckIsoDateInternals(isoFields),
-              branding: PlainDateBranding,
-            })
+        : (dateGetterRefiners as any)[name](
+            (calendar[name as keyof CalendarProtocol] as any)(
+              createPlainDate({
+                ...pluckIsoDateInternals(isoFields),
+                branding: PlainDateBranding,
+              })
+            )
           )
     }
   }, names)

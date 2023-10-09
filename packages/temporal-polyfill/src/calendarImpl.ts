@@ -595,7 +595,6 @@ class IntlCalendarImpl extends CalendarImpl {
 
   queryIsoFields(year: number, month: number, day: number): IsoDateFields {
     return checkIsoDateInBounds({ // check might be redundant if happens in epochMilliToIso/queryDateStart
-      calendar: this,
       ...epochMilliToIso(this.queryDateStart(year, month, day)),
     })
   }

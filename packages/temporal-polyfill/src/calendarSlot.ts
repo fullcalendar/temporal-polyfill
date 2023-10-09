@@ -87,7 +87,7 @@ export function calendarDateAdd(
   calendarSlot: CalendarSlot,
   isoDateFields: IsoDateFields,
   durationInternals: DurationInternals,
-  options?: OverflowOptions,
+  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): IsoDateFields {
   if (typeof calendarSlot === 'string') {
     return queryCalendarImpl(calendarSlot).dateAdd(
