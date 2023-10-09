@@ -13,7 +13,7 @@ import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './pl
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { CalendarSlot, calendarDateAdd, calendarDateFromFields, calendarDateUntil, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, getCalendarSlotId, refineCalendarSlot } from './calendarSlot'
+import { calendarDateAdd, calendarDateFromFields, calendarDateUntil, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
 import { queryCalendarImpl } from './calendarImpl'
 
 // Calendar Protocol
@@ -61,7 +61,7 @@ export class Calendar implements CalendarProtocol {
   constructor(calendarId: string) {
     setSlots(this, {
       branding: CalendarBranding,
-      calendar: refineCalendarSlot(calendarId),
+      calendar: refineCalendarSlotString(calendarId),
     } as CalendarSlots)
   }
 
@@ -173,29 +173,25 @@ export class Calendar implements CalendarProtocol {
 
   // TODO: more DRY
   toString(): string {
-    const { calendar } = getCalendarSlots(this)
-    return getCalendarSlotId(calendar)
+    return getCalendarSlots(this).calendar
   }
 
   // TODO: more DRY
   toJSON(): string {
-    const { calendar } = getCalendarSlots(this)
-    return getCalendarSlotId(calendar)
+    return getCalendarSlots(this).calendar
   }
 
   // TODO: more DRY
   get id(): string {
-    const { calendar } = getCalendarSlots(this)
-    return getCalendarSlotId(calendar)
+    return getCalendarSlots(this).calendar
   }
 
   // TODO: more DRY with constructor
   static from(arg: CalendarArg): CalendarProtocol {
-    const calendarSlot = refineCalendarSlot(arg)
-    return createCalendar({
-      branding: CalendarBranding,
-      calendar: calendarSlot,
-    })
+    const calendarSlot = refineCalendarSlot(arg) // either string or CalendarProtocol
+    return typeof calendarSlot === 'string'
+      ? createCalendar({ branding: CalendarBranding, calendar: calendarSlot })
+      : calendarSlot
   }
 }
 
@@ -240,15 +236,7 @@ defineProps(
         : toPlainDateSlots(dateArg as PlainDateArg)
 
       // TODO: DRY with calendarFieldFuncs
-      return typeof calendar === 'string'
-        ? queryCalendarImpl(calendar)[propName](isoFields)
-        : calendar[propName](
-            createPlainDate({
-              ...isoFields,
-              calendar,
-              branding: PlainDateBranding,
-            })
-          )
+      return queryCalendarImpl(calendar)[propName](isoFields)
     }
   }, dateGetterNames) as DateGetterFieldMethods,
 )
@@ -256,7 +244,7 @@ defineProps(
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export type CalendarSlots = BrandingSlots & { calendar: CalendarSlot }
+export type CalendarSlots = BrandingSlots & { calendar: string }
 
 export function createCalendar(slots: CalendarSlots): Calendar {
   return createViaSlots(Calendar, slots)

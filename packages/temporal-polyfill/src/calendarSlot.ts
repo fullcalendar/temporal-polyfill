@@ -28,6 +28,10 @@ export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
     checkCalendarProtocol(calendarArg as CalendarProtocol)
     return calendarArg as CalendarProtocol
   }
+  return refineCalendarSlotString(calendarArg)
+}
+
+export function refineCalendarSlotString(calendarArg: string): string {
   const str = parseCalendarId(ensureString(calendarArg))
   queryCalendarImpl(str)
   return str
