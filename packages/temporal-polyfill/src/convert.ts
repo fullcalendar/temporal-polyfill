@@ -23,7 +23,7 @@ import {
   durationFieldRefiners,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './isoFields'
+import { IsoTimeFields, constrainIsoTimeFields } from './isoFields'
 import { parseOffsetNano } from './isoParse'
 import {
   EpochDisambig,
@@ -33,7 +33,6 @@ import {
   OverflowOptions,
   ZonedFieldOptions,
   normalizeOptions,
-  overflowMapNames,
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -56,7 +55,7 @@ import type { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
 import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from './plainYearMonth'
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from './plainMonthDay'
 import type { DurationBag, DurationMod } from './duration'
-import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, getCalendarSlotId } from './calendarSlot'
+import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, getCalendarSlotId, refineCalendarSlot } from './calendarSlot'
 
 // High-level to* methods
 // -------------------------------------------------------------------------------------------------
@@ -430,7 +429,7 @@ export function convertToPlainYearMonth(
 
 export function refinePlainMonthDayBag(
   bag: PlainMonthDayBag,
-  options: OverflowOptions | undefined,
+  options?: OverflowOptions,
   calendar?: CalendarSlot,
 ): IsoDateSlots {
   let calendarAbsent = !calendar
@@ -573,7 +572,7 @@ export function mergeDurationBag(
 // Calendar-field processing
 // -------------------------------------------------------------------------------------------------
 
-function refineCalendarFields(
+export function refineCalendarFields(
   calendar: CalendarSlot,
   bag: Record<string, unknown>,
   validFieldNames: string[],

@@ -234,7 +234,10 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
           return { ...pluckIsoDateInternals(zonedInternalsToIso(slots as ZonedDateTimeSlots)), branding: PlainDateBranding }
       }
     }
-    return { ...refinePlainDateBag(arg as PlainDateBag, options), branding: PlainDateBranding }
+    return {
+      ...refinePlainDateBag(arg as any, options),
+      branding: PlainDateBranding,
+    }
   }
   refineOverflowOptions(options) // parse unused options
   return { ...parsePlainDate(ensureString(arg)), branding: PlainDateBranding }

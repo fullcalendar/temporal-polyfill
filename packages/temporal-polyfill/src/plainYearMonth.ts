@@ -164,7 +164,10 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
       refineOverflowOptions(options) // parse unused options
       return slots as PlainYearMonthSlots
     }
-    return { ...refinePlainYearMonthBag(arg as PlainYearMonthBag, options), branding: PlainYearMonthBranding }
+    return {
+      ...refinePlainYearMonthBag(arg as PlainYearMonthBag, options),
+      branding: PlainYearMonthBranding,
+    }
   }
   refineOverflowOptions(options) // parse unused options
   return { ...parsePlainYearMonth(ensureString(arg)), branding: PlainYearMonthBranding }

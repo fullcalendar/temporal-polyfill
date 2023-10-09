@@ -13,8 +13,9 @@ import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './pl
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { calendarDateAdd, calendarDateFromFields, calendarDateUntil, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
+import { calendarDateAdd, calendarDateUntil, calendarFields, calendarMergeFields, refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
 import { queryCalendarImpl } from './calendarImpl'
+import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from './convert'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------
@@ -104,10 +105,8 @@ export class Calendar implements CalendarProtocol {
     fields: DateBagStrict,
     options?: OverflowOptions,
   ): PlainDate {
-    const { calendar } = getCalendarSlots(this)
     return createPlainDate({
-      ...calendarDateFromFields(calendar, fields, options),
-      calendar,
+      ...refinePlainDateBag(fields, options),
       branding: PlainDateBranding,
     })
   }
@@ -116,10 +115,8 @@ export class Calendar implements CalendarProtocol {
     fields: YearMonthBagStrict,
     options?: OverflowOptions,
   ): PlainYearMonth {
-    const { calendar } = getCalendarSlots(this)
     return createPlainYearMonth({
-      ...calendarYearMonthFromFields(calendar, fields, options),
-      calendar,
+      ...refinePlainYearMonthBag(fields, options),
       branding: PlainYearMonthBranding,
     })
   }
@@ -128,10 +125,8 @@ export class Calendar implements CalendarProtocol {
     fields: MonthDayBagStrict,
     options?: OverflowOptions,
   ): PlainMonthDay {
-    const { calendar } = getCalendarSlots(this)
     return createPlainMonthDay({
-      ...calendarMonthDayFromFields(calendar, fields, options),
-      calendar,
+      ...refinePlainMonthDayBag(fields, options),
       branding: PlainMonthDayBranding,
     })
   }

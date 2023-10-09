@@ -40,7 +40,8 @@ import { DayTimeNano } from './dayTimeNano'
 // public
 import { createPlainDate } from './plainDate'
 import { IsoDateSlots, IsoDateTimeSlots, PlainDateBranding, ZonedEpochSlots } from './slots'
-import { calendarFieldFuncs, calendarMonthDayFromFields } from './calendarSlot'
+import { calendarFieldFuncs } from './calendarSlot'
+import { refinePlainMonthDayBag } from './convert'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -198,7 +199,7 @@ function findBestYear(isoInternals: IsoDateSlots): IsoDateSlots {
     branding: PlainDateBranding,
   })
   return {
-    ...calendarMonthDayFromFields(calendar, plainDate),
+    ...refinePlainMonthDayBag(plainDate),
     calendar,
   }
 }

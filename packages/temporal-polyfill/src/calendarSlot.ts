@@ -1,14 +1,13 @@
 import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateFieldNames, dateFieldOnlyRefiners, yearMonthFieldNames } from './calendarFields'
+import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateFieldOnlyRefiners } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
 import { ensureBoolean, ensureInteger, ensureObjectlike, ensurePositiveInteger, ensureString } from './cast'
-import { refineCalendarFields } from './convert'
 import { createDuration, getDurationSlots } from './duration'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { parseCalendarId } from './isoParse'
-import { Overflow, OverflowOptions, overflowMapNames, refineOverflowOptions } from './options'
+import { OverflowOptions, refineOverflowOptions } from './options'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
@@ -145,6 +144,9 @@ export function calendarDateUntil(
   )
 }
 
+/*
+Expects pre-parsed fields
+*/
 export function calendarDateFromFields(
   calendarSlot: CalendarSlot,
   fields: DateBagStrict,
@@ -166,6 +168,9 @@ export function calendarDateFromFields(
   )
 }
 
+/*
+Expects pre-parsed fields
+*/
 export function calendarYearMonthFromFields(
   calendarSlot: CalendarSlot,
   fields: YearMonthBag,
@@ -187,6 +192,9 @@ export function calendarYearMonthFromFields(
   )
 }
 
+/*
+Expects pre-parsed fields
+*/
 export function calendarMonthDayFromFields(
   calendarSlot: CalendarSlot,
   fields: MonthDayBag,
