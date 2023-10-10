@@ -21,6 +21,20 @@ built-ins/Temporal/Duration/prototype/round/roundingmode-halfFloor.js
 built-ins/Temporal/Duration/prototype/round/roundingmode-halfTrunc.js
 built-ins/Temporal/Duration/prototype/round/roundingmode-trunc.js
 
+# Duration BAD!!! Can't do rel-rounding with big Durations because outside of range
+# should do UnbalanceDateDurationRelative instead :(
+built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-months.js
+built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-weeks.js
+built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
+built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
+built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
+
+# PlainYearMonth can't handle super big roundingIncrement
+# TODO: move to UnbalanceDateDurationRelative
+built-ins/Temporal/PlainYearMonth/prototype/since/roundingincrement-non-integer.js
+built-ins/Temporal/PlainYearMonth/prototype/until/roundingincrement-non-integer.js
+built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
+
 ####################################################################################################
 # we know what to do
 ####################################################################################################
@@ -42,14 +56,6 @@ built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-
-# Duration BAD!!! Can't do rel-rounding with big Durations because outside of range
-# should do UnbalanceDateDurationRelative instead :(
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-months.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-weeks.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
 
 # Large Duration units prefer to be displayed as janky BigInt-converted numbers
 # TODO: do formatNumberUnscientific hack but in a loop
@@ -100,12 +106,6 @@ built-ins/Temporal/ZonedDateTime/prototype/since/zoneddatetime-string.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/zoneddatetime-string.js
 
-# PlainYearMonth can't handle super big roundingIncrement
-# TODO: move to UnbalanceDateDurationRelative
-built-ins/Temporal/PlainYearMonth/prototype/since/roundingincrement-non-integer.js
-built-ins/Temporal/PlainYearMonth/prototype/until/roundingincrement-non-integer.js
-built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
-
 # we don't support hours-in-day greater than 10000000xxx
 # (would require us to use DayTimeNano for simple operations)
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
@@ -133,7 +133,7 @@ built-ins/Temporal/Duration/prototype/round/february-leap-year.js
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 
 ####################################################################################################
-# avoid wastefulness
+# avoid wastefulness (break spec or become conformant?)
 ####################################################################################################
 
 # PlainYearMonth, ignore wasteful date<->yearmonth internal conversions for `add`

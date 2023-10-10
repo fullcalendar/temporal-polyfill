@@ -23,7 +23,7 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
+import { Overflow, OverflowOptions } from './options'
 import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
