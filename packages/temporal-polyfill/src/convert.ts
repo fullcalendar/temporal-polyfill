@@ -55,7 +55,7 @@ import type { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
 import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from './plainYearMonth'
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from './plainMonthDay'
 import type { DurationBag, DurationMod } from './duration'
-import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, getCalendarSlotId, refineCalendarSlot } from './calendarSlot'
+import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot } from './calendarSlot'
 
 // High-level to* methods
 // -------------------------------------------------------------------------------------------------
@@ -244,13 +244,11 @@ export function refinePlainDateTimeBag(
   options: OverflowOptions | undefined,
 ): IsoDateTimeSlots {
   const calendar = getBagCalendarSlot(bag)
-
-  const calendarId = getCalendarSlotId(calendar!)
   const fields = refineCalendarFields(
     calendar,
     bag,
     dateTimeFieldNames,
-    calendarId === isoCalendarId ? ['year', 'day'] : [], // requiredFields. HACK
+    [],
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
@@ -294,14 +292,14 @@ export function mergePlainDateTimeBag(
 export function refinePlainDateBag(
   bag: PlainDateBag,
   options: OverflowOptions | undefined,
-  calendar: CalendarSlot = getBagCalendarSlot(bag)
+  calendar: CalendarSlot = getBagCalendarSlot(bag),
+  requireFields: string[] = [], // when called from Calendar
 ): IsoDateSlots {
-  const calendarId = getCalendarSlotId(calendar)
   const fields = refineCalendarFields(
     calendar,
     bag,
     dateFieldNames,
-    calendarId === isoCalendarId ? ['year', 'day'] : [], // requiredFields. HACK
+    requireFields,
   )
 
   return calendarDateFromFields(calendar, fields as any, options)
@@ -353,14 +351,14 @@ function convertToIso(
 export function refinePlainYearMonthBag(
   bag: PlainYearMonthBag,
   options: OverflowOptions | undefined,
-  calendar: CalendarSlot = getBagCalendarSlot(bag)
+  calendar: CalendarSlot = getBagCalendarSlot(bag),
+  requireFields: string[] = [], // when called from Calendar
 ): IsoDateSlots {
-  const calendarId = getCalendarSlotId(calendar)
   const fields = refineCalendarFields(
     calendar,
     bag,
     yearMonthFieldNames,
-    calendarId === isoCalendarId ? ['year'] : [], // requiredFields. HACK
+    requireFields,
   )
 
   return calendarYearMonthFromFields(calendar, fields, options)
@@ -397,13 +395,11 @@ export function convertToPlainYearMonth(
   options?: OverflowOptions,
 ): IsoDateSlots {
   const { calendar } = getSlots(input) as { branding: string, calendar: CalendarSlot }
-
-  const calendarId = getCalendarSlotId(calendar)
   const fields = refineCalendarFields(
     calendar,
     input as any,
     yearMonthBasicNames,
-    calendarId === isoCalendarId ? ['year'] : [], // requiredFields. HACK
+    [],
   )
 
   return calendarYearMonthFromFields(calendar, fields, options)
@@ -416,6 +412,7 @@ export function refinePlainMonthDayBag(
   bag: PlainMonthDayBag,
   options?: OverflowOptions,
   calendar?: CalendarSlot,
+  requireFields: string[] = [], // when called from Calendar
 ): IsoDateSlots {
   let calendarAbsent = !calendar
 
@@ -428,12 +425,11 @@ export function refinePlainMonthDayBag(
     }
   }
 
-  const calendarId = getCalendarSlotId(calendar!)
   const fields = refineCalendarFields(
     calendar!,
     bag,
     dateFieldNames,
-    calendarId === isoCalendarId ? ['day'] : [], // requiredFields. HACK
+    requireFields,
   )
 
   // Callers who omit the calendar are not writing calendar-independent

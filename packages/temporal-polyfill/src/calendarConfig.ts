@@ -77,3 +77,18 @@ export const leapYearMetas: {
   dangi: 13, // "
   hebrew: -6, // (negative) constant leap month
 }
+
+// only used by calendar
+// ---------------------
+
+export function getRequiredYearMonthFields(calendarId: string): string[] {
+  return calendarId === isoCalendarId ? ['year'] : []
+}
+
+export function getRequiredMonthDayFields(calendarId: string): string[] {
+  return calendarId === isoCalendarId ? ['day'] : []
+}
+
+export function getRequiredDateFields(calendarId: string): string[] {
+  return calendarId === isoCalendarId ? ['year', 'day'] : []
+}

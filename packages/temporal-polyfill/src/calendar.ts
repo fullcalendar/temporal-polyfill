@@ -16,6 +16,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { calendarDateAdd, calendarDateUntil, calendarFields, calendarMergeFields, refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
 import { queryCalendarImpl } from './calendarImpl'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from './convert'
+import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from './calendarConfig'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ export class Calendar implements CalendarProtocol {
   ): PlainDate {
     const { calendar } = getCalendarSlots(this)
     return createPlainDate({
-      ...refinePlainDateBag(fields, options, calendar),
+      ...refinePlainDateBag(fields, options, calendar, getRequiredDateFields(calendar)),
       branding: PlainDateBranding,
     })
   }
@@ -119,7 +120,7 @@ export class Calendar implements CalendarProtocol {
   ): PlainYearMonth {
     const { calendar } = getCalendarSlots(this)
     return createPlainYearMonth({
-      ...refinePlainYearMonthBag(fields, options, calendar),
+      ...refinePlainYearMonthBag(fields, options, calendar, getRequiredYearMonthFields(calendar)),
       branding: PlainYearMonthBranding,
     })
   }
@@ -130,7 +131,7 @@ export class Calendar implements CalendarProtocol {
   ): PlainMonthDay {
     const { calendar } = getCalendarSlots(this)
     return createPlainMonthDay({
-      ...refinePlainMonthDayBag(fields, options, calendar),
+      ...refinePlainMonthDayBag(fields, options, calendar, getRequiredMonthDayFields(calendar)),
       branding: PlainMonthDayBranding,
     })
   }
