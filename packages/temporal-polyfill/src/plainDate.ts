@@ -177,7 +177,7 @@ export class PlainDate {
   getCalendar(): CalendarProtocol {
     const { calendar } = getPlainDateSlots(this)
     return typeof calendar === 'string'
-      ? createCalendar({ branding: CalendarBranding, calendar })
+      ? createCalendar({ branding: CalendarBranding, id: calendar })
       : calendar
   }
 

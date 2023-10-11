@@ -324,7 +324,7 @@ export class ZonedDateTime {
   getCalendar(): CalendarProtocol {
     const { calendar } = getZonedDateTimeSlots(this)
     return typeof calendar === 'string'
-      ? createCalendar({ branding: CalendarBranding, calendar })
+      ? createCalendar({ branding: CalendarBranding, id: calendar })
       : calendar
   }
 

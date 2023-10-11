@@ -20,10 +20,9 @@ export type CalendarSlot = CalendarProtocol | string
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectlike(calendarArg)) {
     // look at other date-like objects
-    // (reference implementation uses CALENDAR_ID instead)
-    const slots = getSlots(calendarArg)
-    if (slots && slots.branding !== CalendarBranding && (slots as any).calendar) {
-      return (slots as any).calendar
+    const { calendar } = (getSlots(calendarArg) || {}) as { calendar?: CalendarSlot }
+    if (calendar) {
+      return calendar
     }
 
     checkCalendarProtocol(calendarArg as CalendarProtocol)

@@ -118,7 +118,7 @@ export class PlainYearMonth {
   getCalendar(): CalendarProtocol {
     const { calendar } = getPlainYearMonthSlots(this)
     return typeof calendar === 'string'
-      ? createCalendar({ branding: CalendarBranding, calendar })
+      ? createCalendar({ branding: CalendarBranding, id: calendar })
       : calendar
   }
 
