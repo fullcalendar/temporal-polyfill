@@ -56,15 +56,14 @@ import { ensureString, toBigInt } from './cast'
 import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, neverValueOf } from './publicMixins'
 import { getPreferredCalendarSlot, refineCalendarSlot } from './calendarSlot'
-import { computeNanosecondsInDay, getMatchingInstantFor, getTimeZoneSlotId, refineTimeZoneSlot, zonedInternalsToIso } from './timeZoneSlot'
+import { TimeZoneSlot, computeNanosecondsInDay, getMatchingInstantFor, getTimeZoneSlotId, refineTimeZoneSlot, zonedInternalsToIso } from './timeZoneSlot'
 
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
 
 // TODO: make DRY with TimeZoneArg (it's a subset)
-export type TimeZonePublic = TimeZoneProtocol | string
-export type ZonedPublic = IsoDateTimePublic & { timeZone: TimeZonePublic, offset: string }
+export type ZonedPublic = IsoDateTimePublic & { timeZone: TimeZoneSlot, offset: string }
 
 export class ZonedDateTime {
   constructor(
@@ -406,12 +405,4 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
 // TODO: DRY
 function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
-}
-
-// HACKY!!!
-function getPublicIdOrObj(
-  ops: { id: string }
-): unknown {
-  return (ops as any).t || // TimeZoneOpsAdapter
-    ops.id // impl (return id)
 }
