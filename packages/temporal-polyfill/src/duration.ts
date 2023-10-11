@@ -219,6 +219,22 @@ export class Duration {
       getLargestDurationUnit(durationFields1),
     ) as Unit
 
+    // fast-path if fields identical
+    if (
+      durationFields0.years === durationFields1.years &&
+      durationFields0.months === durationFields1.months &&
+      durationFields0.weeks === durationFields1.weeks &&
+      durationFields0.days === durationFields1.days &&
+      durationFields0.hours === durationFields1.hours &&
+      durationFields0.minutes === durationFields1.minutes &&
+      durationFields0.seconds === durationFields1.seconds &&
+      durationFields0.milliseconds === durationFields1.milliseconds &&
+      durationFields0.microseconds === durationFields1.microseconds &&
+      durationFields0.nanoseconds === durationFields1.nanoseconds
+    ) {
+      return 0
+    }
+
     if (
       largestUnit < Unit.Day || (
         largestUnit === Unit.Day &&

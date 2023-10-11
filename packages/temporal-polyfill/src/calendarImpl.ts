@@ -143,6 +143,22 @@ export class CalendarImpl {
       }
 
       day = maybeDay
+
+      // half-ass validation
+      if (year !== undefined && month !== undefined) {
+        // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
+        if (day <= 0) {
+          throw new RangeError('Below zero')
+        }
+
+        day = clampEntity(
+          'day',
+          day,
+          1,
+          this.queryDaysInMonth(year, month),
+          overflow,
+        )
+      }
     } else {
       // derive monthCodeNumber/isLeapMonth from year/month, then discard year
       year = this.refineYear(fields as EraYearOrYear)

@@ -97,7 +97,7 @@ export function refineMaybeZonedDateTimeBag(
   const fields = refineCalendarFields(
     calendar,
     bag,
-    dateTimeFieldNames, // validFieldNames
+    dateFieldNames, // validFieldNames
     [], // requireFields
     ['timeZone', 'offset'], // forcedValidFieldNames
   ) as ZonedDateTimeBag
