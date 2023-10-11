@@ -1,5 +1,5 @@
 import { ensureNumber, ensureString } from './cast'
-import { createProtocolChecker } from './complexObjUtils'
+import { createProtocolChecker } from './publicUtils'
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'

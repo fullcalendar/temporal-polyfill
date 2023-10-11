@@ -8,16 +8,16 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { negateDurationInternals } from './durationFields'
 import { isPlainDateTimesEqual } from './equality'
 import { createToLocaleStringMethods } from './intlFormat'
-import { IsoDateTimeFields, IsoTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from './isoFields'
+import { IsoDateTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from './isoFields'
 import { formatPlainDateTimeIso } from './isoFormat'
 import { IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals, refineIsoDateTimeInternals } from './isoInternals'
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { movePlainDateTime } from './move'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineOverflowOptions } from './options'
-import { PlainDate, PlainDateArg, PlainDateBag, createPlainDate, getPlainDateSlots, toPlainDateSlots } from './plainDate'
+import { PlainDate, PlainDateArg, PlainDateBag, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
-import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeSlots } from './plainTime'
+import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { roundPlainDateTime } from './round'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -28,6 +28,7 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, plu
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { getPreferredCalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot, zonedInternalsToIso } from './timeZoneSlot'
+import { optionalToPlainTimeFields } from './publicUtils'
 
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
 export type PlainDateTimeMod = DateBag & TimeBag
@@ -268,9 +269,4 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
   }
   refineOverflowOptions(options) // parse unused options
   return { ...parsePlainDateTime(ensureString(arg)), branding: PlainDateTimeBranding }
-}
-
-// TODO: DRY
-function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
-  return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
 }

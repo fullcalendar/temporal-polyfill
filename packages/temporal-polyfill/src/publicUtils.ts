@@ -1,7 +1,6 @@
+import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { hasAllPropsByName } from './utils'
-
-// Complex Objects with IDs
-// -------------------------------------------------------------------------------------------------
 
 export function createProtocolChecker(
   propNames: string[]
@@ -14,4 +13,8 @@ export function createProtocolChecker(
       throw new TypeError('Invalid protocol')
     }
   }
+}
+
+export function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
+  return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
 }

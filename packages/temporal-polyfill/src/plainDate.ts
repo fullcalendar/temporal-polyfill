@@ -11,12 +11,7 @@ import {
 import { diffPlainDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { negateDurationInternals } from './durationFields'
-import {
-  IsoDateFields,
-  IsoTimeFields,
-  isoDateFieldNames,
-  isoTimeFieldDefaults,
-} from './isoFields'
+import { IsoDateFields, isoDateFieldNames } from './isoFields'
 import { IsoDatePublic, pluckIsoDateInternals, refineIsoDateInternals } from './isoInternals'
 import { formatPlainDateIso } from './isoFormat'
 import { createToLocaleStringMethods } from './intlFormat'
@@ -26,7 +21,7 @@ import { parsePlainDate } from './isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
-import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
+import { PlainTimeArg } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { TimeZone, TimeZoneArg } from './timeZone'
@@ -36,6 +31,7 @@ import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueO
 import { ensureString } from './cast'
 import { calendarDateAdd, refineCalendarSlot } from './calendarSlot'
 import { zonedInternalsToIso } from './timeZoneSlot'
+import { optionalToPlainTimeFields } from './publicUtils'
 
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
 export type PlainDateMod = DateBag
@@ -241,9 +237,4 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
   }
   refineOverflowOptions(options) // parse unused options
   return { ...parsePlainDate(ensureString(arg)), branding: PlainDateBranding }
-}
-
-// TODO: DRY
-function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
-  return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
 }
