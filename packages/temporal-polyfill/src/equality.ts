@@ -1,8 +1,8 @@
 import { compareDayTimeNanos } from './dayTimeNano'
-import { isTimeZonesEqual } from './timeZoneOps'
 import { compareIsoDateTimeFields, compareIsoDateFields } from './isoMath'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { isCalendarSlotsEqual } from './calendarSlot'
+import { isTimeZoneSlotsEqual } from './timeZoneSlot'
 
 export function isPlainDateTimesEqual(
   a: IsoDateTimeSlots,
@@ -41,6 +41,6 @@ export function isZonedDateTimesEqual(
   b: ZonedEpochSlots
 ): boolean {
   return !compareDayTimeNanos(a.epochNanoseconds, b.epochNanoseconds) &&
-    isTimeZonesEqual(a.timeZone, b.timeZone) &&
+    isTimeZoneSlotsEqual(a.timeZone, b.timeZone) &&
     isCalendarSlotsEqual(a.calendar, b.calendar)
 }

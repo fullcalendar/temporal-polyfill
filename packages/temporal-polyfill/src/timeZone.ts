@@ -4,15 +4,15 @@ import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './options'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
-import { getSingleInstantFor, queryTimeZoneOps, queryTimeZonePublic, zonedEpochNanoToIsoWithTZObj } from './timeZoneOps'
-import { isTimeZonesEqual, validateOffsetNano } from './timeZoneOps'
-import { TimeZoneOpsAdapter } from './timeZoneOpsAdapter'
 import { isoCalendarId } from './calendarConfig'
 import { ZonedDateTime } from './zonedDateTime'
 import { DayTimeNano } from './dayTimeNano'
-import { BrandingSlots, CalendarBranding, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createViaSlots, getSpecificSlots, setSlots } from './slots'
-import { defineProps, defineStringTag } from './utils'
+import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createViaSlots, getSpecificSlots, setSlots } from './slots'
+import { defineStringTag } from './utils'
 import { refineCalendarSlot } from './calendarSlot'
+import { getSingleInstantFor, isTimeZoneSlotsEqual, refineTimeZoneSlot, refineTimeZoneSlotString, validateOffsetNano } from './timeZoneSlot'
+import { IsoDateTimeFields } from './isoFields'
+import { epochNanoToIso } from './isoMath'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------
@@ -43,13 +43,13 @@ export class TimeZone { // implements TimeZoneProtocol
   constructor(timeZoneId: string) {
     setSlots(this, {
       branding: TimeZoneBranding,
-      impl: queryTimeZoneImpl(timeZoneId),
+      id: refineTimeZoneSlotString(timeZoneId),
     } as TimeZoneSlots)
   }
 
   getPossibleInstantsFor(plainDateTimeArg: PlainDateTimeArg): Instant[]  {
-    const { impl } = getTimeZoneSlots(this)
-    return impl.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
+    const { id } = getTimeZoneSlots(this)
+    return queryTimeZoneImpl(id).getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
       .map((epochNano: DayTimeNano) => {
         return createInstant({
           branding: InstantBranding,
@@ -59,8 +59,8 @@ export class TimeZone { // implements TimeZoneProtocol
   }
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
-    const { impl } = getTimeZoneSlots(this)
-    return impl.getOffsetNanosecondsFor(toInstantSlots(instantArg).epochNanoseconds)
+    const { id } = getTimeZoneSlots(this)
+    return queryTimeZoneImpl(id).getOffsetNanosecondsFor(toInstantSlots(instantArg).epochNanoseconds)
   }
 
   getOffsetStringFor(instantArg: InstantArg): string {
@@ -93,7 +93,7 @@ export class TimeZone { // implements TimeZoneProtocol
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: getSingleInstantFor(
-        new TimeZoneOpsAdapter(this), // needed for internal call to getPossibleInstantsFor!!!
+        this,
         toPlainDateTimeSlots(plainDateTimeArg),
         refineEpochDisambigOptions(options),
       )
@@ -101,34 +101,42 @@ export class TimeZone { // implements TimeZoneProtocol
   }
 
   getNextTransition(instantArg: InstantArg): Instant | null {
-    const { impl } = getTimeZoneSlots(this)
-    return getImplTransition(1, impl, instantArg)
+    const { id } = getTimeZoneSlots(this)
+    return getImplTransition(1, queryTimeZoneImpl(id), instantArg)
   }
 
   getPreviousTransition(instantArg: InstantArg): Instant | null {
-    const { impl } = getTimeZoneSlots(this)
-    return getImplTransition(-1, impl, instantArg)
+    const { id } = getTimeZoneSlots(this)
+    return getImplTransition(-1, queryTimeZoneImpl(id), instantArg)
   }
 
   equals(otherArg: TimeZoneArg): boolean {
     getTimeZoneSlots(this) // validate `this`
-    return isTimeZonesEqual(this, queryTimeZoneOps(otherArg))
+    // weird: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
+    return isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
   }
 
+  // TODO: more DRY
   toString(): string {
-    return getTimeZoneSlots(this).impl.id
+    return getTimeZoneSlots(this).id
   }
 
+  // TODO: more DRY
   toJSON(): string {
-    return getTimeZoneSlots(this).impl.id
+    return getTimeZoneSlots(this).id
   }
 
+  // TODO: more DRY
   get id(): string {
-    return getTimeZoneSlots(this).impl.id
+    return getTimeZoneSlots(this).id
   }
 
+  // TODO: more DRY with constructor, Calendar
   static from(arg: TimeZoneArg): TimeZoneProtocol {
-    return queryTimeZonePublic(arg)
+    const timeZoneSlot = refineTimeZoneSlot(arg)
+    return typeof timeZoneSlot === 'string'
+      ? createTimeZone({ branding: TimeZoneBranding, id: timeZoneSlot })
+      : timeZoneSlot
   }
 }
 
@@ -137,7 +145,7 @@ defineStringTag(TimeZone.prototype, TimeZoneBranding)
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export type TimeZoneSlots = BrandingSlots & { impl: TimeZoneImpl }
+export type TimeZoneSlots = BrandingSlots & { id: string }
 
 export function createTimeZone(slots: TimeZoneSlots): TimeZone {
   return createViaSlots(TimeZone, slots)
@@ -155,4 +163,21 @@ function getImplTransition(direction: -1 | 1, impl: TimeZoneImpl, instantArg: In
       epochNanoseconds: epochNano,
     }) :
     null
+}
+
+// YUCK
+function zonedEpochNanoToIsoWithTZObj(
+  timeZone: TimeZone,
+  epochNano: DayTimeNano,
+): IsoDateTimeFields {
+  // emulate what TimeZone::getOffsetNanosecondsFor does
+  const offsetNano = validateOffsetNano(
+    timeZone.getOffsetNanosecondsFor(
+      createInstant({
+        branding: InstantBranding,
+        epochNanoseconds: epochNano
+      })
+    )
+  )
+  return epochNanoToIso(epochNano, offsetNano)
 }

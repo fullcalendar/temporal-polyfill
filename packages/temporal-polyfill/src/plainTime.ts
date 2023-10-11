@@ -23,7 +23,6 @@ import {
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { roundPlainTime } from './round'
-import { zonedInternalsToIso } from './timeZoneOps'
 import { UnitName } from './units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -31,6 +30,7 @@ import { TimeZoneArg } from './timeZone'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
+import { zonedInternalsToIso } from './timeZoneSlot'
 
 export type PlainTimeBag = TimeBag
 export type PlainTimeMod = TimeBag

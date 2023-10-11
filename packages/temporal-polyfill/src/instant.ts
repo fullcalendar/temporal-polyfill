@@ -14,7 +14,6 @@ import {
 } from './options'
 import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from './cast'
 import { roundInstant } from './round'
-import { queryTimeZoneOps } from './timeZoneOps'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
@@ -24,6 +23,7 @@ import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '.
 import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createEpochGetterMethods, neverValueOf } from './publicMixins'
 import { refineCalendarSlot } from './calendarSlot'
+import { refineTimeZoneSlot } from './timeZoneSlot'
 
 export type InstantArg = Instant | string
 
@@ -104,7 +104,7 @@ export class Instant {
     return createZonedDateTime({
       branding: ZonedDateTimeBranding,
       epochNanoseconds: getInstantSlots(this).epochNanoseconds,
-      timeZone: queryTimeZoneOps(timeZoneArg),
+      timeZone: refineTimeZoneSlot(timeZoneArg),
       calendar: isoCalendarId,
     })
   }
@@ -116,7 +116,7 @@ export class Instant {
     return createZonedDateTime({
       branding: ZonedDateTimeBranding,
       epochNanoseconds: slots.epochNanoseconds,
-      timeZone: queryTimeZoneOps(refinedObj.timeZone),
+      timeZone: refineTimeZoneSlot(refinedObj.timeZone),
       calendar: refineCalendarSlot(refinedObj.calendar),
     })
   }

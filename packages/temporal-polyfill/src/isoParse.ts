@@ -26,7 +26,7 @@ import {
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
 import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
-import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneOps'
+import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneSlot'
 import {
   TimeUnit,
   Unit,
@@ -256,32 +256,40 @@ export function parseOffsetNano(s: string): number {
   return offsetNano
 }
 
+/*
+Validates whether it's a supported id
+*/
 export function parseCalendarId(s: string): string {
   const res = parseMaybeGenericDateTime(s) || parseMaybeYearMonth(s) || parseMaybeMonthDay(s)
 
   if (res) {
-    return queryCalendarImpl(res.calendar).id // normalize
+    return queryCalendarImpl(res.calendar).id // normalize (not DRY)
   }
 
-  return queryCalendarImpl(s).id // normalize
+  return queryCalendarImpl(s).id // normalize (not DRY)
 }
 
+/*
+Validates whether it's a supported id
+*/
 export function parseTimeZoneId(s: string): string {
   const parsed = parseMaybeGenericDateTime(s)
 
   if (parsed !== undefined) {
     if (parsed.timeZone) {
-      return queryTimeZoneImpl(parsed.timeZone).id // normalize
+      return queryTimeZoneImpl(parsed.timeZone).id // normalize (not DRY)
     }
     if (parsed.hasZ) {
       return utcTimeZoneId
     }
     if (parsed.offset) {
-      return parsed.offset
+      // normalize (not DRY)
+      // important for prevent sub-second offset values. inefficient
+      return queryTimeZoneImpl(parsed.offset).id
     }
   }
 
-  return s
+  return queryTimeZoneImpl(s).id // normalize (not DRY)
 }
 
 // Post-processing organized result
@@ -292,37 +300,40 @@ function postProcessZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedEpochSlots {
-  const timeZone = queryTimeZoneImpl(organized.timeZone)
+  const calendarImpl = queryCalendarImpl(organized.calendar)
+  const timeZoneImpl = queryTimeZoneImpl(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
-    timeZone,
+    organized.timeZone,
     constrainIsoDateTimeInternals(organized),
     organized.offset ? parseOffsetNano(organized.offset) : undefined,
     organized.hasZ,
     offsetDisambig,
     epochDisambig,
-    !(timeZone instanceof FixedTimeZoneImpl), // only allow fuzzy minute-rounding matching if named-timezone
+    !(timeZoneImpl instanceof FixedTimeZoneImpl), // only allow fuzzy minute-rounding matching if named-timezone
       // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
   )
 
   return {
     epochNanoseconds,
-    timeZone,
-    calendar: organized.calendar,
+    timeZone: timeZoneImpl.id, // normalized
+    calendar: calendarImpl.id, // normalized
   }
 }
 
 function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeSlots {
-  return validateCalendar(checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized)))
+  return normalizeCalendarStr(checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized)))
 }
 
 function postProcessDate(organized: DateOrganized): IsoDateSlots {
-  return validateCalendar(checkIsoDateInBounds(constrainIsoDateInternals(organized)))
+  return normalizeCalendarStr(checkIsoDateInBounds(constrainIsoDateInternals(organized)))
 }
 
-function validateCalendar<T extends { calendar: string }>(organized: T): T {
-  queryCalendarImpl(organized.calendar)
-  return organized
+function normalizeCalendarStr<T extends { calendar: string }>(organized: T): T {
+  return {
+    ...organized,
+    calendar: queryCalendarImpl(organized.calendar).id, // normalize
+  }
 }
 
 // RegExp

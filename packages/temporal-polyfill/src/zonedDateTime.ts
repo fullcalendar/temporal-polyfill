@@ -48,21 +48,15 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { roundZonedDateTime } from './round'
-import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
-import {
-  computeNanosecondsInDay,
-  getMatchingInstantFor,
-  getPublicTimeZone,
-  queryTimeZoneOps,
-  zonedInternalsToIso,
-} from './timeZoneOps'
+import { TimeZoneArg, TimeZoneProtocol, createTimeZone } from './timeZone'
 import { UnitName, nanoInHour } from './units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from './dayTimeNano'
 import { ensureString, toBigInt } from './cast'
-import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, neverValueOf } from './publicMixins'
 import { getPreferredCalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { computeNanosecondsInDay, getMatchingInstantFor, getTimeZoneSlotId, refineTimeZoneSlot, zonedInternalsToIso } from './timeZoneSlot'
 
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
@@ -81,7 +75,7 @@ export class ZonedDateTime {
     setSlots(this, {
       branding: ZonedDateTimeBranding,
       epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
-      timeZone: queryTimeZoneOps(timeZoneArg), // TODO: validate string/object somehow?
+      timeZone: refineTimeZoneSlot(timeZoneArg), // TODO: validate string/object somehow?
       calendar: refineCalendarSlot(calendarArg),
     } as ZonedDateTimeSlots)
   }
@@ -152,7 +146,7 @@ export class ZonedDateTime {
   withTimeZone(timeZoneArg: TimeZoneArg): ZonedDateTime {
     return createZonedDateTime({
       ...getZonedDateTimeSlots(this),
-      timeZone: queryTimeZoneOps(timeZoneArg),
+      timeZone: refineTimeZoneSlot(timeZoneArg),
     })
   }
 
@@ -317,7 +311,7 @@ export class ZonedDateTime {
         // TODO: more DRY
         zonedInternalsToIso(slots).offsetNanoseconds,
       ),
-      timeZone: getPublicIdOrObj(slots.timeZone) as TimeZonePublic,
+      timeZone: slots.timeZone,
     }
   }
 
@@ -328,8 +322,12 @@ export class ZonedDateTime {
       : calendar
   }
 
+  // not DRY?
   getTimeZone(): TimeZoneProtocol {
-    return getPublicTimeZone(getZonedDateTimeSlots(this))
+    const { timeZone } = getZonedDateTimeSlots(this)
+    return typeof timeZone === 'string'
+      ? createTimeZone({ branding: TimeZoneBranding, id: timeZone })
+      : timeZone
   }
 
   get hoursInDay(): number {
@@ -353,7 +351,7 @@ export class ZonedDateTime {
   }
 
   get timeZoneId(): string {
-    return getZonedDateTimeSlots(this).timeZone.id
+    return getTimeZoneSlotId(getZonedDateTimeSlots(this).timeZone)
   }
 
   static from(arg: any, options?: ZonedFieldOptions) {

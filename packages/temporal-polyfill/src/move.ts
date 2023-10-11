@@ -25,7 +25,7 @@ import {
 } from './isoMath'
 import { Overflow, OverflowOptions } from './options'
 import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+import { TimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
 
@@ -71,7 +71,7 @@ export function moveZonedDateTime(
 
 export function moveZonedEpochNano(
   calendar: CalendarSlot,
-  timeZone: TimeZoneOps,
+  timeZone: TimeZoneSlot,
   epochNano: DayTimeNano,
   durationFields: DurationFields,
   options?: OverflowOptions,

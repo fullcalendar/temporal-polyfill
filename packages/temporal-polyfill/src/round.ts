@@ -16,7 +16,7 @@ import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIs
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { EpochDisambig, OffsetDisambig, RoundingMode, RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneOps'
+import { TimeZoneSlot, computeNanosecondsInDay, getMatchingInstantFor, timeZoneGetOffsetNanosecondsFor } from './timeZoneSlot'
 import {
   nanoInMinute,
   nanoInUtcDay,
@@ -51,7 +51,7 @@ export function roundZonedDateTime(
   let { epochNanoseconds, timeZone, calendar } = internals
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
-  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
+  const offsetNano = timeZoneGetOffsetNanosecondsFor(timeZone, epochNanoseconds)
   let isoDateTimeFields = {
     ...epochNanoToIso(epochNanoseconds, offsetNano),
     calendar,
@@ -129,10 +129,10 @@ export function roundDateTime(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  timeZoneOps?: TimeZoneOps | undefined,
+  timeZoneSlot?: TimeZoneSlot | undefined,
 ): IsoDateTimeFields {
   if (smallestUnit === Unit.Day) {
-    return roundDateTimeToDay(isoFields, timeZoneOps, roundingMode)
+    return roundDateTimeToDay(isoFields, timeZoneSlot, roundingMode)
   }
 
   return roundDateTimeToNano(
@@ -158,11 +158,11 @@ export function roundTime(
 // TODO: break into two separate functions?
 function roundDateTimeToDay(
   isoFields: IsoDateTimeSlots,
-  timeZoneOps: TimeZoneOps | undefined,
+  timeZoneSlot: TimeZoneSlot | undefined,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
-  if (timeZoneOps) {
-    const nanoInDay = computeNanosecondsInDay(timeZoneOps, isoFields)
+  if (timeZoneSlot) {
+    const nanoInDay = computeNanosecondsInDay(timeZoneSlot, isoFields)
     const roundedTimeNano = roundByInc(isoTimeFieldsToNano(isoFields), nanoInDay, roundingMode)
     const dayDelta = roundedTimeNano ? 1 : 0
 

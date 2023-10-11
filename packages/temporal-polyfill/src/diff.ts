@@ -23,7 +23,7 @@ import { moveDateTime, moveZonedEpochNano } from './move'
 import { DiffOptions, LargestUnitOptions, RoundingMode, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { TimeZoneOps, getCommonTimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+import { TimeZoneSlot, getCommonTimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -142,7 +142,7 @@ export function diffZonedDateTimes(
   let durationInternals = updateDurationFieldsSign(
     diffZonedEpochNano(
       getCommonCalendarSlot(internals.calendar, otherInternals.calendar),
-      getCommonTimeZoneOps(internals, otherInternals),
+      getCommonTimeZoneSlot(internals.timeZone, otherInternals.timeZone),
       internals.epochNanoseconds,
       otherInternals.epochNanoseconds,
       ...refineDiffOptions(invert, options, Unit.Hour),
@@ -337,7 +337,7 @@ export function diffTimes(
 
 export function diffZonedEpochNano(
   calendarSlot: CalendarSlot,
-  timeZone: TimeZoneOps,
+  timeZone: TimeZoneSlot,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -348,7 +348,6 @@ export function diffZonedEpochNano(
 ): DurationFields {
   if (largestUnit < Unit.Day) {
     // doesn't need timeZone
-    // TODO: only get it from getCommonTimeZoneOps if actually needed (makes tests conform)
     return diffEpochNano(
       startEpochNano,
       endEpochNano,

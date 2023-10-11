@@ -28,7 +28,6 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { zonedInternalsToIso } from './timeZoneOps'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -36,6 +35,7 @@ import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, 
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
 import { calendarDateAdd, refineCalendarSlot } from './calendarSlot'
+import { zonedInternalsToIso } from './timeZoneSlot'
 
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
 export type PlainDateMod = DateBag

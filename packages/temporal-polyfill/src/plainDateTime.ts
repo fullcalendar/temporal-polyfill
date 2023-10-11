@@ -23,11 +23,11 @@ import { roundPlainDateTime } from './round'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { TimeZoneArg } from './timeZone'
-import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { UnitName } from './units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { getPreferredCalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { refineTimeZoneSlot, zonedInternalsToIso } from './timeZoneSlot'
 
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
 export type PlainDateTimeMod = DateBag & TimeBag
@@ -161,7 +161,7 @@ export class PlainDateTime {
       branding: ZonedDateTimeBranding,
       ...convertPlainDateTimeToZoned(
         getPlainDateTimeSlots(this),
-        queryTimeZoneOps(timeZoneArg),
+        refineTimeZoneSlot(timeZoneArg),
         options,
       ),
     })

@@ -41,7 +41,6 @@ import {
   ensureObjectlike,
   ensureStringViaPrimitive,
 } from './cast'
-import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor, queryTimeZoneOps } from './timeZoneOps'
 import { Callable, pluckProps } from './utils'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
@@ -56,13 +55,14 @@ import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, ty
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from './plainMonthDay'
 import type { DurationBag, DurationMod } from './duration'
 import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot } from './calendarSlot'
+import { TimeZoneSlot, getMatchingInstantFor, getSingleInstantFor, refineTimeZoneSlot } from './timeZoneSlot'
 
 // High-level to* methods
 // -------------------------------------------------------------------------------------------------
 
 export function convertPlainDateTimeToZoned(
   internals: IsoDateTimeSlots,
-  timeZone: TimeZoneOps,
+  timeZone: TimeZoneSlot,
   options?: EpochDisambigOptions,
 ): ZonedEpochSlots {
   const { calendar } = internals
@@ -105,7 +105,7 @@ export function refineMaybeZonedDateTimeBag(
   if (fields.timeZone !== undefined) {
     const isoDateFields = calendarDateFromFields(calendar, fields as any)
     const isoTimeFields = refineTimeBag(fields)
-    const timeZone = queryTimeZoneOps(fields.timeZone) // must happen after datetime fields
+    const timeZone = refineTimeZoneSlot(fields.timeZone) // must happen after datetime fields
 
     const epochNanoseconds = getMatchingInstantFor(
       timeZone,
@@ -148,7 +148,7 @@ export function refineZonedDateTimeBag(
 
   // guaranteed via refineCalendarFields
   // must happen before Calendar::dateFromFields and parsing `options`
-  const timeZone = queryTimeZoneOps(fields.timeZone!)
+  const timeZone = refineTimeZoneSlot(fields.timeZone!)
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
@@ -221,7 +221,7 @@ export function createZonedDateTimeConverter<
   ) => ZonedEpochSlots
 ) {
   return (internals, options) => {
-    const timeZone = queryTimeZoneOps((options as { timeZone: TimeZoneArg }).timeZone)
+    const timeZone = refineTimeZoneSlot((options as { timeZone: TimeZoneArg }).timeZone)
     const extraInternals = getMoreInternals(normalizeOptions(options as NarrowOptions))
 
     const finalInternals = { ...internals, ...extraInternals } as IsoDateTimeSlots

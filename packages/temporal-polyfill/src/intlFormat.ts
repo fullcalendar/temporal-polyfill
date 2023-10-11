@@ -5,8 +5,6 @@ import {
   isoTimeFieldDefaults,
 } from './isoFields'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
-import { queryTimeZoneImpl } from './timeZoneImpl'
-import { getSingleInstantFor } from './timeZoneOps'
 import {
   Classlike,
   createLazyGenerator,
@@ -26,6 +24,7 @@ import type { PlainMonthDay } from './plainMonthDay'
 import type { PlainYearMonth } from './plainYearMonth'
 import type { Instant } from './instant'
 import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
+import { getSingleInstantFor, getTimeZoneSlotId } from './timeZoneSlot'
 
 export type LocalesArg = string | string[]
 
@@ -297,7 +296,7 @@ const optionsTransformers: Record<string, OptionsTransformer> = {
     if (options.timeZone !== undefined) {
       throw new RangeError('Cannot specify timeZone') // for ZonedDateTime::toLocaleString
     }
-    options.timeZone = subjectInternals.timeZone.id
+    options.timeZone = getTimeZoneSlotId(subjectInternals.timeZone)
     return zonedOptionsTransformer(options)
   }
 }
@@ -360,7 +359,7 @@ function timeFieldsToEpochNano(
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
   return getSingleInstantFor(
-    queryTimeZoneImpl(resolvedOptions.timeZone),
+    resolvedOptions.timeZone,
     {
       calendar: isoCalendarId,
       isoYear: isoEpochOriginYear,
@@ -376,7 +375,7 @@ function dateInternalsToEpochNano(
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
   return getSingleInstantFor(
-    queryTimeZoneImpl(resolvedOptions.timeZone),
+    resolvedOptions.timeZone,
     {
       ...isoTimeFieldDefaults,
       isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day

@@ -1,6 +1,5 @@
-import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, calendarProtocolMethodNames, dateGetterNames, dateTimeFieldNames } from './calendarFields'
+import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateGetterNames, dateTimeFieldNames } from './calendarFields'
 import { ensureString } from './cast'
-import { createProtocolChecker } from './complexObjUtils'
 import { IsoDateFields } from './isoFields'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from './options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from './utils'
@@ -51,8 +50,6 @@ interface CalendarProtocolMethods {
 export interface CalendarProtocol extends CalendarProtocolMethods {
   id: string
 }
-
-export const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethodNames)
 
 // Calendar Class
 // -------------------------------------------------------------------------------------------------
@@ -186,7 +183,7 @@ export class Calendar implements CalendarProtocol {
     return getCalendarSlots(this).id
   }
 
-  // TODO: more DRY with constructor
+  // TODO: more DRY with constructor, TimeZone
   static from(arg: CalendarArg): CalendarProtocol {
     const calendarSlot = refineCalendarSlot(arg) // either string or CalendarProtocol
     return typeof calendarSlot === 'string'

@@ -3,7 +3,6 @@ import { dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationInternals, durationInternalNames } from './durationFields'
 import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './isoMath'
-import { zonedInternalsToIso } from './timeZoneOps'
 import { mapPropNames } from './utils'
 import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateTimeBranding } from './slots'
 import { getCalendarSlotId } from './calendarSlot'
@@ -11,6 +10,7 @@ import { queryCalendarImpl } from './calendarImpl'
 import { createPlainDate } from './plainDate'
 import { pluckIsoDateInternals } from './isoInternals'
 import { CalendarProtocol } from './calendar'
+import { zonedInternalsToIso } from './timeZoneSlot'
 
 // TODO: better types
 export function createCalendarIdGetterMethods(branding: string): { calendarId(): string } {

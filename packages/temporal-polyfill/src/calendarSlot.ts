@@ -1,8 +1,9 @@
-import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'
+import { CalendarArg, CalendarProtocol } from './calendar'
 import { isoCalendarId } from './calendarConfig'
-import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, dateFieldOnlyRefiners } from './calendarFields'
+import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict, calendarProtocolMethodNames, dateFieldOnlyRefiners } from './calendarFields'
 import { queryCalendarImpl } from './calendarImpl'
 import { ensureBoolean, ensureInteger, ensureObjectlike, ensurePositiveInteger, ensureString } from './cast'
+import { createProtocolChecker } from './complexObjUtils'
 import { createDuration, getDurationSlots } from './duration'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields } from './isoFields'
@@ -11,11 +12,13 @@ import { LargestUnitOptions, OverflowOptions, refineOverflowOptions } from './op
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, getSlots } from './slots'
+import { DurationBranding, IsoDateSlots, PlainDateBranding, getSlots } from './slots'
 import { Unit, unitNamesAsc } from './units'
 import { isObjectlike, mapProps } from './utils'
 
 export type CalendarSlot = CalendarProtocol | string
+
+export const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethodNames)
 
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectlike(calendarArg)) {
@@ -44,15 +47,7 @@ export function getCommonCalendarSlot(a: CalendarSlot, b: CalendarSlot): Calenda
 }
 
 export function isCalendarSlotsEqual(a: CalendarSlot, b: CalendarSlot): boolean {
-  // fast path. doesn't read IDs
-  if (a === b) {
-    return true
-  }
-
-  const aId = getCalendarSlotId(a)
-  const bId = getCalendarSlotId(b)
-
-  return aId === bId
+  return a === b || getCalendarSlotId(a) === getCalendarSlotId(b)
 }
 
 export function getPreferredCalendarSlot(a: CalendarSlot, b: CalendarSlot): CalendarSlot {

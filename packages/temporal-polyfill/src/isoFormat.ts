@@ -7,7 +7,7 @@ import { epochNanoToIso } from './isoMath'
 import { CalendarDisplay, DateTimeDisplayOptions, InstantDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { TimeZoneOps, queryTimeZoneOps, utcTimeZoneId } from './timeZoneOps'
+import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot, timeZoneGetOffsetNanosecondsFor, utcTimeZoneId } from './timeZoneSlot'
 import {
   givenFieldsToDayTimeNano,
   nanoInHour,
@@ -62,7 +62,7 @@ export function formatZonedDateTimeIso(
   ] = refineZonedDateTimeDisplayOptions(options)
 
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+  const offsetNano = timeZoneGetOffsetNanosecondsFor(timeZone, epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
@@ -81,7 +81,7 @@ export function formatInstantIso(
     roundingMode,
     subsecDigits,
   ] = refineInstantDisplayOptions(options)
-  const timeZone = queryTimeZoneOps(timeZoneArg !== undefined ? timeZoneArg : utcTimeZoneId)
+  const timeZone = timeZoneArg !== undefined ? refineTimeZoneSlot(timeZoneArg) : utcTimeZoneId
 
   epochNano = roundDayTimeNanoByInc(
     epochNano,
@@ -90,7 +90,7 @@ export function formatInstantIso(
     true, // useDayOrigin
   )
 
-  let offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+  let offsetNano = timeZoneGetOffsetNanosecondsFor(timeZone, epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
@@ -273,13 +273,13 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
 //
 
 export function formatTimeZone(
-  timeZoneOps: TimeZoneOps,
+  timeZoneSlot: TimeZoneSlot,
   timeZoneDisplay: TimeZoneDisplay,
 ): string {
   if (timeZoneDisplay !== TimeZoneDisplay.Never) {
     return '[' +
       (timeZoneDisplay === TimeZoneDisplay.Critical ? '!' : '') +
-      timeZoneOps.id +
+      getTimeZoneSlotId(timeZoneSlot) +
       ']'
   }
   return ''

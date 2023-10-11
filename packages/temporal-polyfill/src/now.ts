@@ -8,13 +8,13 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainTime, createPlainTime } from './plainTime'
 import { TimeZoneArg } from './timeZone'
-import { queryTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
 import { createPropDescriptors, createTemporalNameDescriptors } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { epochMilliToNano } from './isoMath'
 import { DayTimeNano } from './dayTimeNano'
 import { InstantBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, ZonedEpochSlots } from './slots'
 import { refineCalendarSlot } from './calendarSlot'
+import { refineTimeZoneSlot, zonedInternalsToIso } from './timeZoneSlot'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -97,7 +97,7 @@ function getCurrentZonedDateTimeSlots(
   return {
     epochNanoseconds: getCurrentEpochNanoseconds(),
     calendar: refineCalendarSlot(calendarArg),
-    timeZone: queryTimeZoneOps(timeZoneArg),
+    timeZone: refineTimeZoneSlot(timeZoneArg),
   }
 }
 
