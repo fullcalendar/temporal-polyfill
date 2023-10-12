@@ -68,7 +68,6 @@ export function getPreferredCalendarSlot(a: CalendarSlot, b: CalendarSlot): Cale
   throw new RangeError('Incompatible calendars')
 }
 
-// TODO: use elsewhere too!!!
 export function getCalendarSlotId(calendarSlot: CalendarSlot): string {
   return typeof calendarSlot === 'string'
     ? calendarSlot
@@ -79,7 +78,7 @@ export function calendarDateAdd(
   calendarSlot: CalendarSlot,
   isoDateFields: IsoDateFields,
   durationInternals: DurationInternals,
-  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
+  options?: OverflowOptions,
 ): IsoDateFields {
   if (typeof calendarSlot === 'string') {
     return queryCalendarImpl(calendarSlot).dateAdd(

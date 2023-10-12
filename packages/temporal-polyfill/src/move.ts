@@ -35,7 +35,7 @@ import { clampEntity, divTrunc, modTrunc } from './utils'
 export function movePlainDateTime(
   internals: IsoDateTimeSlots,
   durationInternals: DurationInternals,
-  options?: OverflowOptions,
+  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): IsoDateTimeSlots {
   return {
     calendar: internals.calendar, // TODO: make this nicer
@@ -51,7 +51,7 @@ export function movePlainDateTime(
 export function moveZonedDateTime(
   internals: ZonedEpochSlots,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): ZonedEpochSlots {
   const epochNano = moveZonedEpochNano(
     internals.calendar,

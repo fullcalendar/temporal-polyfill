@@ -81,13 +81,9 @@ built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relativ
 built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
 built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
 
-# really unclear to me when internal calls to dateAdd should provide undefined options or not
-built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
-built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
-built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
-built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
+# Duration adding w/ negative values internally coalesces date+time differently than i'd expect,
+# calling dateAdd w/ a negative value
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
-built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-options-undefined.js
 
 # Problems with zdt-based Duration rounding relying too much on nanoseconds comparisons
 # (converting epoch->fields waaay too many times while doing diffing/clamping)
@@ -250,6 +246,12 @@ built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singu
 # Ours is better
 ####################################################################################################
 
+# dateAdd called fewer times
+built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-options-undefined.js
+
 # internal TimeZone::getOffsetNanosecondsFor called fewer times
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
@@ -302,9 +304,6 @@ built-ins/Temporal/ZonedDateTime/from/overflow-wrong-type.js
 
 # fewer calls to getPossibleInstantsFor while rounding ZonedDateTime to hour/min/sec..
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
-
-# our Duration::compare calls Calendar::dateAdd fewer times!
-built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
 
 # our PlainYearMonth::add/subtract calls Calendar::dateAdd fewer times!
 built-ins/Temporal/PlainYearMonth/prototype/add/calendar-dateadd-called-with-plaindate-instance.js

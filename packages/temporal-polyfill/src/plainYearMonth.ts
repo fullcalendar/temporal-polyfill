@@ -178,11 +178,13 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
   return res
 }
 
-// HARD to convert to new-style
+/*
+TODO: move to move.ts
+*/
 function movePlainYearMonth(
   internals: IsoDateSlots,
   durationInternals: DurationInternals,
-  options: OverflowOptions | undefined,
+  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): PlainYearMonth {
   const { calendar } = internals
   const isoDateFields = movePlainYearMonthToDay(
@@ -208,7 +210,10 @@ function movePlainYearMonth(
   })
 }
 
-// TODO: DRY
+/*
+TODO: move to move.ts
+TODO: DRY
+*/
 function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
   return moveByIsoDays(
     internals,
