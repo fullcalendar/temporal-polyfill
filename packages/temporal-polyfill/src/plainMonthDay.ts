@@ -7,7 +7,7 @@ import {
   refinePlainMonthDayBag,
   rejectInvalidBag,
 } from './convert'
-import { IsoDatePublic, refineIsoDateInternals } from './isoInternals'
+import { IsoDatePublic, refineIsoDateInternals, refineIsoMonthDayInternals } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
 import { createToLocaleStringMethods } from './intlFormat'
 import { isoEpochFirstLeapYear } from './isoMath'
@@ -34,7 +34,7 @@ export class PlainMonthDay {
   ) {
     setSlots(this, {
       branding: PlainMonthDayBranding,
-      ...refineIsoDateInternals({
+      ...refineIsoMonthDayInternals({
         isoYear: referenceIsoYear,
         isoMonth,
         isoDay,

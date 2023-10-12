@@ -37,16 +37,6 @@ built-ins/Temporal/PlainYearMonth/prototype/until/roundingincrement-non-integer.
 built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
 
 ####################################################################################################
-# we know what to do
-####################################################################################################
-
-# constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
-built-ins/Temporal/PlainYearMonth/calendar-invalid.js
-built-ins/Temporal/PlainMonthDay/calendar-invalid.js
-built-ins/Temporal/PlainMonthDay/infinity-throws-rangeerror.js
-built-ins/Temporal/PlainMonthDay/negative-infinity-throws-rangeerror.js
-
-####################################################################################################
 # unsure of what to do
 ####################################################################################################
 

@@ -11,6 +11,7 @@ import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBoun
 import { Overflow } from './options'
 import { IsoDateSlots, IsoDateTimeSlots } from './slots'
 import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { toInteger } from './cast'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------
@@ -106,9 +107,29 @@ export function refineIsoYearMonthInternals(
   rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
 ): IsoDateSlots {
   return checkIsoYearMonthInBounds(
-    constrainIsoDateInternals(
-      mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners),
-    ),
+    constrainIsoDateInternals({
+      // do in order of PlainYearMonth constructor... WEIRD
+      // ALSO: was having weird issue with ordering of prop access with mapPropsWithRefiners
+      isoYear: toInteger(rawIsoDateInternals.isoYear),
+      isoMonth: toInteger(rawIsoDateInternals.isoMonth),
+      calendar: refineCalendarSlot(rawIsoDateInternals.calendar),
+      isoDay: toInteger(rawIsoDateInternals.isoDay),
+    }),
+  )
+}
+
+export function refineIsoMonthDayInternals(
+  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg },
+): IsoDateSlots {
+  return checkIsoDateInBounds(
+    constrainIsoDateInternals({
+      // do in order of PlainMonthDay constructor... WEIRD
+      // ALSO: was having weird issue with ordering of prop access with mapPropsWithRefiners
+      isoMonth: toInteger(rawIsoDateInternals.isoMonth),
+      isoDay: toInteger(rawIsoDateInternals.isoDay),
+      calendar: refineCalendarSlot(rawIsoDateInternals.calendar),
+      isoYear: toInteger(rawIsoDateInternals.isoYear),
+    }),
   )
 }
 
