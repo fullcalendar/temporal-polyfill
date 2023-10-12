@@ -93,9 +93,8 @@ export function parseZonedOrPlainDateTime(s: string): IsoDateSlots | ZonedEpochS
 NOTE: one of the only string-parsing methods that accepts options
 */
 export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): ZonedEpochSlots {
-  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
-
   const organized = parseMaybeGenericDateTime(s)
+  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
   if (!organized || !organized.timeZone) {
     throw new RangeError()

@@ -6,6 +6,7 @@ import {
   convertToPlainYearMonth,
   mergePlainYearMonthBag,
   refinePlainYearMonthBag,
+  rejectInvalidBag,
 } from './convert'
 import {  diffPlainYearMonths } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
@@ -17,7 +18,7 @@ import { createToLocaleStringMethods } from './intlFormat'
 import { compareIsoDateFields, moveByIsoDays } from './isoMath'
 import { isPlainYearMonthsEqual } from './equality'
 import { parsePlainYearMonth } from './isoParse'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from './utils'
 import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -51,7 +52,7 @@ export class PlainYearMonth {
     getPlainYearMonthSlots(this) // validate `this`
     return createPlainYearMonth({
       branding: PlainYearMonthBranding,
-      ...mergePlainYearMonthBag(this, mod, options)
+      ...mergePlainYearMonthBag(this, rejectInvalidBag(mod), prepareOptions(options))
     })
   }
 
@@ -158,6 +159,8 @@ export function getPlainYearMonthSlots(plainYearMonth: PlainYearMonth): PlainYea
 }
 
 export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: OverflowOptions) {
+  options = prepareOptions(options)
+
   if (isObjectlike(arg)) {
     const slots = getSlots(arg)
     if (slots && slots.branding === PlainYearMonthBranding) {
@@ -169,8 +172,10 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
       branding: PlainYearMonthBranding,
     }
   }
+
+  const res = { ...parsePlainYearMonth(ensureString(arg)), branding: PlainYearMonthBranding }
   refineOverflowOptions(options) // parse unused options
-  return { ...parsePlainYearMonth(ensureString(arg)), branding: PlainYearMonthBranding }
+  return res
 }
 
 // HARD to convert to new-style

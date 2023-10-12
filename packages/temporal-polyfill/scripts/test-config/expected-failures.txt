@@ -132,8 +132,61 @@ built-ins/Temporal/Duration/prototype/round/february-leap-year.js
 #
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 
-# Duration::compare with relativeTo calls getPossibleInstantsFor/dateAdd differently
+# ..similar.. but calling getOffsetNanosecondsFor/getPossibleInstantsFor differently
+built-ins/Temporal/Duration/prototype/add/relativeto-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/Duration/prototype/subtract/relativeto-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-ambiguous-wall-clock-time.js
+
+# zdt-based diffing should call getPossibleInstantsFor more times?
+built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
+
+# zdt-based diffing should replace a `getPossibleInstantsFor` call with `getOffsetNanosecondsFor`
 built-ins/Temporal/Duration/compare/relativeto-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/round/rounding-is-noop.js
+built-ins/Temporal/ZonedDateTime/prototype/since/argument-propertybag-ambiguous-wall-clock-time.js
+built-ins/Temporal/ZonedDateTime/prototype/startOfDay/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-ambiguous-wall-clock-time.js
+
+# too many `getPossibleInstantsFor` calls
+built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
+
+# extra getOffsetNanosecondsFor call
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/toZonedDateTime/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/order-of-operations.js
+
+# expecting to sanitycheck timezones that report 0-day-length
+built-ins/Temporal/Duration/prototype/round/zero-day-length.js
+built-ins/Temporal/Duration/prototype/total/zero-day-length.js
+
+# ..further sanitychecking Timezone..
+built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+
+# accessing options multiple times. this is why CopyDataProperties exists
+# ALSO, diff options should be snapshotted probably
+built-ins/Temporal/PlainDateTime/from/order-of-operations.js
+built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
+
+# when parsing zdt string, if string fails, should not parse disambig/offset/overflow
+built-ins/Temporal/ZonedDateTime/from/observable-get-overflow-argument-string-invalid.js
 
 ####################################################################################################
 # avoid wastefulness (break spec or become conformant?)
@@ -186,10 +239,6 @@ built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/calendar-dateadd-called
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
-# vvv also does diffing option keys in wrong order
-built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
-# vvv also does diffing option keys in wrong order
-built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
 built-ins/Temporal/PlainDateTime/prototype/until/balance-infinite-nanoseconds-duration.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
@@ -312,6 +361,12 @@ intl402/Temporal/TimeZone/links-backzone.js
 intl402/Temporal/TimeZone/links-backward.js
 intl402/Temporal/TimeZone/links-asia.js
 intl402/Temporal/TimeZone/links-africa.js
+
+# Intl.DateTimeFormat should more liberally accept timeZones?
+intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
+intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
 
 # Reenable when we upgrade to Node 18
 # (for Intl.supportedValuesOf)
@@ -568,3 +623,5 @@ built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-builtin-calen
 built-ins/Temporal/Duration/prototype/add/relativeto-propertybag-builtin-calendar-no-array-iteration.js
 built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-builtin-calendar-no-array-iteration.js
 built-ins/Temporal/Duration/compare/relativeto-propertybag-builtin-calendar-no-array-iteration.js
+intl402/Temporal/Calendar/prototype/era/argument-builtin-calendar-no-array-iteration.js
+intl402/Temporal/Calendar/prototype/eraYear/argument-builtin-calendar-no-array-iteration.js

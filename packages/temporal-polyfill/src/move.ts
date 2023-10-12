@@ -23,7 +23,7 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { Overflow, OverflowOptions } from './options'
+import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
 import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
@@ -82,13 +82,13 @@ export function moveZonedEpochNano(
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
-    const movedIsoDateFields = calendarDateAdd(
+    const movedIsoDateFields = moveDateEasy(
       calendar,
       isoDateTimeFields,
-      updateDurationFieldsSign({
+      {
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
-      }),
+      },
       options,
     )
     const movedIsoDateTimeFields = {
@@ -126,14 +126,14 @@ export function moveDateTime(
   // could have over 24 hours!!!
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
-  const movedIsoDateFields = calendarDateAdd(
+  const movedIsoDateFields = moveDateEasy(
     calendar,
     isoDateTimeFields, // only date parts will be used
-    updateDurationFieldsSign({
+    {
       ...durationFields, // date parts
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
-    }),
+    },
     options,
   )
 
@@ -141,6 +141,36 @@ export function moveDateTime(
     ...movedIsoDateFields,
     ...movedIsoTimeFields,
   })
+}
+
+export function moveDateEasy(
+  calendar: CalendarSlot,
+  isoDateFields: IsoDateFields,
+  durationFields: DurationFields,
+  options?: OverflowOptions,
+): IsoDateFields {
+  if (durationFields.years || durationFields.months || durationFields.weeks) {
+    return calendarDateAdd(
+      calendar,
+      isoDateFields,
+      updateDurationFieldsSign(durationFields),
+      options
+    )
+  }
+
+  refineOverflowOptions(options)
+
+  // TODO: DRY
+  const days = durationFields.days + givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
+
+  // TODO: better utility for adding days
+  if (days) {
+    let epochMilli = isoToEpochMilli(isoDateFields)!
+    epochMilli += days * milliInDay
+    return checkIsoDateInBounds(epochMilliToIso(epochMilli!))
+  }
+
+  return isoDateFields
 }
 
 /*

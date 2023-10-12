@@ -3,6 +3,7 @@ import {
   createZonedDateTimeConverter,
   mergePlainTimeBag,
   refinePlainTimeBag,
+  rejectInvalidBag,
 } from './convert'
 import { diffPlainTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
@@ -18,6 +19,7 @@ import {
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
+  prepareOptions,
   refineOverflowOptions,
 } from './options'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
@@ -65,7 +67,7 @@ export class PlainTime {
   with(mod: PlainTimeMod, options?: OverflowOptions): PlainTime {
     getPlainTimeSlots(this) // validate `this`
     return createPlainTime({
-      ...mergePlainTimeBag(this, mod, options),
+      ...mergePlainTimeBag(this, rejectInvalidBag(mod), options), // it's crazy we don't do prepareOptions
       branding: PlainTimeBranding,
     })
   }

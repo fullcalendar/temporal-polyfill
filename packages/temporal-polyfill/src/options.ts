@@ -20,7 +20,7 @@ import {
 import type { TimeZoneArg } from './timeZone'
 import type { PlainDate } from './plainDate'
 import type { ZonedDateTime, ZonedDateTimeBag } from './zonedDateTime'
-import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
+import { IsoDateSlots, PlainDateSlots, PlainTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -77,7 +77,6 @@ export function refineDiffOptions(
   defaultRoundingMode: RoundingMode = RoundingMode.Trunc,
 ): DiffTuple {
   options = normalizeOptions(options)
-  options = { ...options } // spec needs is to copy
 
   // alphabetical
   let largestUnit: any = refineLargestUnit(options, maxUnit, minUnit, -1 as any)
@@ -761,6 +760,8 @@ function refineChoiceOption<O>(
   return enumNum
 }
 
+// ---
+
 export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
     return {} as O
@@ -776,4 +777,17 @@ function normalizeUnitNameOptions<O extends {}>(
     return { [optionName]: options } as O
   }
   return ensureObjectlike(options)
+}
+
+/*
+Used for to* and diff* functions
+*/
+export function prepareOptions<O>(options: O): O {
+  if (options === undefined) {
+    return undefined as any
+  }
+  if (isObjectlike(options)) {
+    return Object.assign(Object.create(null), options)
+  }
+  throw new TypeError('Options must be object')
 }

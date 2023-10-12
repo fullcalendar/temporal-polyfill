@@ -16,6 +16,7 @@ import { calendarDateAdd, calendarDateUntil, calendarFields, calendarMergeFields
 import { queryCalendarImpl } from './calendarImpl'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from './convert'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from './calendarConfig'
+import { calendarDateUntilEasy } from './diff'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ export class Calendar implements CalendarProtocol {
     const { id } = getCalendarSlots(this)
     return createDuration({
       branding: DurationBranding,
-      ...calendarDateUntil(
+      ...calendarDateUntilEasy(
         id,
         toPlainDateSlots(plainDateArg0),
         toPlainDateSlots(plainDateArg1),

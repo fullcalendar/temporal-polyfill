@@ -2,7 +2,7 @@ import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, TimeBag, dateGetterNames } from './calendarFields'
 import { ensureString } from './cast'
-import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from './convert'
+import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag, rejectInvalidBag } from './convert'
 import { diffPlainDateTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { negateDurationInternals } from './durationFields'
@@ -14,7 +14,7 @@ import { IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals, re
 import { compareIsoDateTimeFields } from './isoMath'
 import { parsePlainDateTime } from './isoParse'
 import { movePlainDateTime } from './move'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from './options'
 import { PlainDate, PlainDateArg, PlainDateBag, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
@@ -67,7 +67,7 @@ export class PlainDateTime {
   with(mod: PlainDateTimeMod, options?: OverflowOptions): PlainDateTime {
     getPlainDateTimeSlots(this) // validate `this`
     return createPlainDateTime({
-      ...mergePlainDateTimeBag(this, mod, options),
+      ...mergePlainDateTimeBag(this, rejectInvalidBag(mod), prepareOptions(options)),
       branding: PlainDateTimeBranding,
     })
   }
@@ -250,6 +250,8 @@ export function getPlainDateTimeSlots(plainDateTime: PlainDateTime): PlainDateTi
 }
 
 export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOptions): PlainDateTimeSlots {
+  options = prepareOptions(options)
+
   if (isObjectlike(arg)) {
     const slots = getSlots(arg)
     if (slots) {
@@ -267,6 +269,8 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
     }
     return { ...refinePlainDateTimeBag(arg as PlainDateBag, options), branding: PlainDateTimeBranding }
   }
+
+  const res = { ...parsePlainDateTime(ensureString(arg)), branding: PlainDateTimeBranding } // will validate arg
   refineOverflowOptions(options) // parse unused options
-  return { ...parsePlainDateTime(ensureString(arg)), branding: PlainDateTimeBranding }
+  return res
 }

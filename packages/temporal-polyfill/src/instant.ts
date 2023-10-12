@@ -11,6 +11,7 @@ import {
   DiffOptions,
   InstantDisplayOptions,
   RoundingOptions,
+  prepareOptions,
 } from './options'
 import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from './cast'
 import { roundInstant } from './round'
@@ -61,7 +62,7 @@ export class Instant {
       ...diffInstants(
         getInstantSlots(this).epochNanoseconds,
         toInstantSlots(otherArg).epochNanoseconds,
-        options,
+        prepareOptions(options),
       ),
     })
   }
@@ -72,7 +73,7 @@ export class Instant {
       ...diffInstants(
         getInstantSlots(this).epochNanoseconds,
         toInstantSlots(otherArg).epochNanoseconds,
-        options,
+        prepareOptions(options),
         true,
       )
     })

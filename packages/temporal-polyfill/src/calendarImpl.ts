@@ -145,7 +145,11 @@ export class CalendarImpl {
       day = maybeDay
 
       // half-ass validation
-      if (year !== undefined && month !== undefined) {
+      if (
+        overflow !== undefined &&
+        year !== undefined &&
+        month !== undefined
+      ) {
         // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
         if (day <= 0) {
           throw new RangeError('Below zero')

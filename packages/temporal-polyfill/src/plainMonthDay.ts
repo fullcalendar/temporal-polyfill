@@ -5,6 +5,7 @@ import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
+  rejectInvalidBag,
 } from './convert'
 import { IsoDatePublic, refineIsoDateInternals } from './isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from './isoFormat'
@@ -12,7 +13,7 @@ import { createToLocaleStringMethods } from './intlFormat'
 import { isoEpochFirstLeapYear } from './isoMath'
 import { isPlainMonthDaysEqual } from './equality'
 import { parsePlainMonthDay } from './isoParse'
-import { DateTimeDisplayOptions, OverflowOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from './options'
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarBranding, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
@@ -46,7 +47,7 @@ export class PlainMonthDay {
     getPlainMonthDaySlots(this) // validate `this`
     return createPlainMonthDay({
       branding: PlainMonthDayBranding,
-      ...mergePlainMonthDayBag(this, mod, options)
+      ...mergePlainMonthDayBag(this, rejectInvalidBag(mod), prepareOptions(options))
     })
   }
 
@@ -118,6 +119,8 @@ export function getPlainMonthDaySlots(plainMonthDay: PlainMonthDay): PlainMonthD
 }
 
 export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDaySlots {
+  options = prepareOptions(options)
+
   if (isObjectlike(arg)) {
     const slots = getSlots(arg)
     if (slots && slots.branding === PlainMonthDayBranding) {
@@ -126,6 +129,8 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
     }
     return { ...refinePlainMonthDayBag(arg as PlainMonthDayBag, options), branding: PlainMonthDayBranding }
   }
+
+  const res = { ...parsePlainMonthDay(ensureString(arg)), branding: PlainMonthDayBranding }
   refineOverflowOptions(options) // parse unused options
-  return { ...parsePlainMonthDay(ensureString(arg)), branding: PlainMonthDayBranding }
+  return res
 }

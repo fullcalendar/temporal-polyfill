@@ -7,6 +7,7 @@ import {
   createZonedDateTimeConverter,
   mergePlainDateBag,
   refinePlainDateBag,
+  rejectInvalidBag,
 } from './convert'
 import { diffPlainDates } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
@@ -18,7 +19,7 @@ import { createToLocaleStringMethods } from './intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from './isoMath'
 import { isPlainDatesEqual } from './equality'
 import { parsePlainDate } from './isoParse'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineOverflowOptions } from './options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from './options'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg } from './plainTime'
@@ -29,9 +30,10 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { ensureString } from './cast'
-import { calendarDateAdd, refineCalendarSlot } from './calendarSlot'
+import { refineCalendarSlot } from './calendarSlot'
 import { zonedInternalsToIso } from './timeZoneSlot'
 import { optionalToPlainTimeFields } from './publicUtils'
+import { moveDateEasy } from './move'
 
 export type PlainDateBag = DateBag & { calendar?: CalendarArg }
 export type PlainDateMod = DateBag
@@ -63,7 +65,7 @@ export class PlainDate {
   with(mod: PlainDateMod, options?: OverflowOptions): PlainDate {
     getPlainDateSlots(this) // validate `this`
     return createPlainDate({
-      ...mergePlainDateBag(this, mod, options),
+      ...mergePlainDateBag(this, rejectInvalidBag(mod), prepareOptions(options)),
       branding: PlainDateBranding,
     })
   }
@@ -78,7 +80,12 @@ export class PlainDate {
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
     const slots = getPlainDateSlots(this)
     return createPlainDate({
-      ...calendarDateAdd(slots.calendar, slots, toDurationSlots(durationArg), options),
+      ...moveDateEasy(
+        slots.calendar,
+        slots,
+        toDurationSlots(durationArg),
+        options,
+      ),
       calendar: slots.calendar,
       branding: PlainDateBranding,
     })
@@ -87,7 +94,12 @@ export class PlainDate {
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
     const slots = getPlainDateSlots(this)
     return createPlainDate({
-      ...calendarDateAdd(slots.calendar, slots, negateDurationInternals(toDurationSlots(durationArg)), options),
+      ...moveDateEasy(
+        slots.calendar,
+        slots,
+        negateDurationInternals(toDurationSlots(durationArg)),
+        options,
+      ),
       calendar: slots.calendar,
       branding: PlainDateBranding,
     })
@@ -215,6 +227,8 @@ export function getPlainDateSlots(plainDate: PlainDate): PlainDateSlots {
 }
 
 export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): PlainDateSlots {
+  options = prepareOptions(options)
+
   if (isObjectlike(arg)) {
     const slots = getSlots(arg)
     if (slots) {
@@ -235,6 +249,8 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
       branding: PlainDateBranding,
     }
   }
+
+  const res = { ...parsePlainDate(ensureString(arg)), branding: PlainDateBranding } // will validate arg
   refineOverflowOptions(options) // parse unused options
-  return { ...parsePlainDate(ensureString(arg)), branding: PlainDateBranding }
+  return res
 }

@@ -99,7 +99,8 @@ export function refineMaybeZonedDateTimeBag(
     bag,
     dateFieldNames, // validFieldNames
     [], // requireFields
-    ['timeZone', 'offset'], // forcedValidFieldNames
+    // forcedValidFieldNames (TODO: more compressed)
+    ['hour', 'microsecond', 'millisecond', 'minute', 'nanosecond', 'offset', 'second', 'timeZone'],
   ) as ZonedDateTimeBag
 
   if (fields.timeZone !== undefined) {
@@ -141,9 +142,10 @@ export function refineZonedDateTimeBag(
   const fields = refineCalendarFields(
     calendar,
     bag,
-    dateTimeFieldNames, // validFieldNames
+    dateFieldNames, // validFieldNames
     ['timeZone'], // requireFields
-    ['timeZone', 'offset'], // forcedValidFieldNames
+    // forcedValidFieldNames (TODO: more compressed)
+    ['hour', 'microsecond', 'millisecond', 'minute', 'nanosecond', 'offset', 'second', 'timeZone'],
   ) as ZonedDateTimeBag
 
   // guaranteed via refineCalendarFields
@@ -182,8 +184,8 @@ export function mergeZonedDateTimeBag(
     calendar,
     zonedDateTime as any,
     mod,
-    dateTimeFieldNames, // validFieldNames
-    ['offset'], // forcedValidFieldNames
+    dateFieldNames, // validFieldNames
+    ['hour', 'microsecond', 'millisecond', 'minute', 'nanosecond', 'offset', 'second'], // forcedValidFieldNames -- no timeZone!
     ['offset'], // requiredObjFieldNames
   ) as ZonedDateTimeBag
 
@@ -247,8 +249,9 @@ export function refinePlainDateTimeBag(
   const fields = refineCalendarFields(
     calendar,
     bag,
-    dateTimeFieldNames,
-    [],
+    dateFieldNames,
+    [], // requiredFields
+    timeFieldNames, // forcedValidFieldNames
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
@@ -272,7 +275,8 @@ export function mergePlainDateTimeBag(
     calendar,
     plainDateTime as any,
     mod,
-    dateTimeFieldNames,
+    dateFieldNames,
+    timeFieldNames, // forcedValidFieldNames
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
@@ -506,8 +510,6 @@ export function mergePlainTimeBag(
   bag: PlainTimeMod,
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
-  rejectInvalidBag(bag as any)
-
   const overflow = refineOverflowOptions(options)
   const fields = pluckProps(timeFieldNames, plainTime as unknown as TimeFields) // TODO: wish PlainTime had real TS methods
   const partialFields = refineFields(bag, timeFieldNames)
@@ -567,8 +569,6 @@ function mergeCalendarFields(
   forcedValidFieldNames: string[] = [],
   requiredObjFieldNames: string[] = [],
 ): Record<string, unknown> {
-  rejectInvalidBag(bag)
-
   const fieldNames = [
     ...calendarFields(calendar, validFieldNames),
     ...forcedValidFieldNames
@@ -602,16 +602,17 @@ function extractBagCalendarSlot(bag: any): CalendarSlot | undefined {
   }
 }
 
-function rejectInvalidBag(bag: { calendar?: unknown, timeZone?: unknown }): void {
+export function rejectInvalidBag<B>(bag: B): B {
   if (getSlots(bag)) {
     throw new TypeError('Cant pass a Temporal object')
   }
-  if (bag.calendar !== undefined) {
+  if ((bag as any).calendar !== undefined) {
     throw new TypeError('Ah')
   }
-  if (bag.timeZone !== undefined) {
+  if ((bag as any).timeZone !== undefined) {
     throw new TypeError('Ah')
   }
+  return bag
 }
 
 // Generic Refining

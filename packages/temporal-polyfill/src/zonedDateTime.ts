@@ -6,6 +6,7 @@ import {
   convertToPlainYearMonth,
   mergeZonedDateTimeBag,
   refineZonedDateTimeBag,
+  rejectInvalidBag,
 } from './convert'
 import { diffZonedDateTimes } from './diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
@@ -39,6 +40,7 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
+  prepareOptions,
   refineZonedFieldOptions,
 } from './options'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
@@ -83,16 +85,17 @@ export class ZonedDateTime {
     getZonedDateTimeSlots(this) // validate `this`
     return createZonedDateTime({
       branding: ZonedDateTimeBranding,
-      ...mergeZonedDateTimeBag(this, mod, options)
+      ...mergeZonedDateTimeBag(this, rejectInvalidBag(mod), prepareOptions(options))
     })
   }
 
   withPlainTime( plainTimeArg?: PlainTimeArg): ZonedDateTime {
+    const isoTimeFields = optionalToPlainTimeFields(plainTimeArg) // must be parsed first
     const slots = getZonedDateTimeSlots(this)
     const { calendar, timeZone } = slots
     const isoFields = {
       ...zonedInternalsToIso(slots),
-      ...optionalToPlainTimeFields(plainTimeArg),
+      ...isoTimeFields,
     }
 
     const epochNano = getMatchingInstantFor(
@@ -122,6 +125,7 @@ export class ZonedDateTime {
       ...zonedInternalsToIso(slots),
       ...plainDateSlots,
     }
+    const calendar = getPreferredCalendarSlot(slots.calendar, plainDateSlots.calendar)
 
     const epochNano = getMatchingInstantFor(
       timeZone,
@@ -137,8 +141,7 @@ export class ZonedDateTime {
       branding: ZonedDateTimeBranding,
       epochNanoseconds: epochNano,
       timeZone,
-      // TODO: more DRY with other datetime types
-      calendar: getPreferredCalendarSlot(slots.calendar, plainDateSlots.calendar),
+      calendar,
     })
   }
 
@@ -390,6 +393,8 @@ export function getZonedDateTimeSlots(zonedDateTime: ZonedDateTime): ZonedDateTi
 }
 
 export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedFieldOptions): ZonedDateTimeSlots {
+  options = prepareOptions(options)
+
   if (isObjectlike(arg)) {
     const slots = getSlots(arg)
     if (slots && slots.branding === ZonedDateTimeBranding) {
@@ -398,6 +403,6 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
     }
     return { ...refineZonedDateTimeBag(arg as any, options), branding: ZonedDateTimeBranding }
   }
-  refineZonedFieldOptions(options) // parse unused options
+
   return { ...parseZonedDateTime(ensureString(arg), options), branding: ZonedDateTimeBranding }
 }
