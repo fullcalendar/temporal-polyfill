@@ -355,12 +355,6 @@ function formatNumberUnscientific(n: number, force?: any): string {
     return '' // TODO: rename this whole func
   }
 
-  // HACK for displaying huge numbers as a BigInt would
-  if (n > 1e15) {
-    const [a, b] = divModTrunc(Math.trunc(n), 1e15)
-    return a + padNumber(15, b)
-  }
-
   // avoid outputting scientific notation
   // https://stackoverflow.com/a/50978675/96342
   return n.toLocaleString('fullwide', { useGrouping: false })
