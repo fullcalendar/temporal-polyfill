@@ -237,19 +237,13 @@ built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/calendar-dateadd-called
 
 # Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
 built-ins/Temporal/PlainDateTime/prototype/since/balance-infinite-nanoseconds-duration.js
-built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
-built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
 built-ins/Temporal/PlainDateTime/prototype/until/balance-infinite-nanoseconds-duration.js
-built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
-built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
 
 # why does Duration 'day' operations need to consult calendar?
-built-ins/Temporal/Duration/prototype/add/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
-built-ins/Temporal/Duration/prototype/subtract/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
 
 ####################################################################################################
@@ -260,12 +254,8 @@ built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singu
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
-built-ins/Temporal/Instant/prototype/toString/order-of-operations.js
 # (also, `overflow options should be parsed WITHIN CalendarOpsAdapter, not before`...)
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
-
-# fewer getOffsetNanosecondsFor calls
-built-ins/Temporal/Instant/prototype/toString/timezone.js
 
 # relative Duration fewer dateAdd calls
 built-ins/Temporal/Duration/compare/order-of-operations.js
@@ -282,7 +272,6 @@ built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/getISOFields/order-of-operations.js
 
 # when diffing, we do not walk days one-by-one
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely-1.js
@@ -302,8 +291,6 @@ built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitel
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 
 # our diffing algorithm calls dateAdd/dateUntil fewer times
-built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-null-prototype-options.js
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-null-prototype-options.js
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
@@ -403,7 +390,6 @@ built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/custom.js
 
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
-built-ins/Temporal/PlainDate/prototype/add/balance-smaller-units.js
 built-ins/Temporal/PlainDate/prototype/add/custom.js
 built-ins/Temporal/PlainDate/prototype/day/custom.js
 built-ins/Temporal/PlainDate/prototype/dayOfWeek/custom.js
