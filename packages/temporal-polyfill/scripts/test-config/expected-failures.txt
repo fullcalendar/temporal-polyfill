@@ -1,5 +1,24 @@
 
 ####################################################################################################
+# Options parsing
+####################################################################################################
+
+# when parsing zdt string, if string fails, should not parse disambig/offset/overflow
+built-ins/Temporal/ZonedDateTime/from/observable-get-overflow-argument-string-invalid.js
+
+# accessing options multiple times. this is why CopyDataProperties exists
+# ALSO, diff options should be snapshotted probably
+built-ins/Temporal/PlainDateTime/from/order-of-operations.js
+built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
+
+####################################################################################################
 # UnbalanceDateDurationRelative
 ####################################################################################################
 
@@ -36,68 +55,15 @@ built-ins/Temporal/PlainYearMonth/prototype/since/roundingincrement-non-integer.
 built-ins/Temporal/PlainYearMonth/prototype/until/roundingincrement-non-integer.js
 built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
 
-####################################################################################################
-# unsure of what to do
-####################################################################################################
-
-# rounding, calling dateUntil/dateAdd in different order (and maybe fewer times)
-built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/total/order-of-operations.js
-built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-
-# Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
-# advance d1 all the way to d2. ignore this contrived case
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-mathematical-values-2.js
-# similar...
-built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
-# expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
-built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
-built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
-built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
-
-# Duration adding w/ negative values internally coalesces date+time differently than i'd expect,
-# calling dateAdd w/ a negative value
-built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
-
 # Problems with zdt-based Duration rounding relying too much on nanoseconds comparisons
 # (converting epoch->fields waaay too many times while doing diffing/clamping)
 built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
-# I disagree w/ irregular lengh-of-day tests for ZonedDateTime, especially the third `test`
-built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+####################################################################################################
+# ZDT diffing
+####################################################################################################
 
-# we don't support hours-in-day greater than 10000000xxx
-# (would require us to use DayTimeNano for simple operations)
-built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
-
-# TODO: order of adding large/small units is probably wrong in move versus diff
-#
-# I disagree with this diffing algo. seems buggy
-#   new Temporal.PlainDate(1972, 2, 1).until(new Temporal.PlainDate(1972, 2, 1).add(new Temporal.Duration(3, 11, 0, 29)), { largestUnit: 'years' })
-#   => P3Y11M29D
-#   new Temporal.Duration(3, 11, 0, 29).round({
-#     largestUnit: "years",
-#     relativeTo: new Temporal.PlainDate(1972, 2, 1),
-#   })
-#   => P4Y
-#
-built-ins/Temporal/Duration/prototype/round/february-leap-year.js
-#
-# same:
-# Temporal.ZonedDateTime.from("2019-11-01T00:00[America/Vancouver]").until(
-#   Temporal.ZonedDateTime.from("2019-11-01T00:00[America/Vancouver]").add(
-#     new Temporal.Duration(1, 0, 0, 0, 24)
-#   ), { largestUnit: 'year' })
-# => P1YT24H
-#
-intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
-
-# ..similar.. but calling getOffsetNanosecondsFor/getPossibleInstantsFor differently
+# zdt-based diffing should call getOffsetNanosecondsFor/getPossibleInstantsFor differently
 built-ins/Temporal/Duration/prototype/add/relativeto-propertybag-ambiguous-wall-clock-time.js
 built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-ambiguous-wall-clock-time.js
 built-ins/Temporal/Duration/prototype/subtract/relativeto-propertybag-ambiguous-wall-clock-time.js
@@ -121,15 +87,62 @@ built-ins/Temporal/ZonedDateTime/prototype/since/argument-propertybag-ambiguous-
 built-ins/Temporal/ZonedDateTime/prototype/startOfDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-ambiguous-wall-clock-time.js
 
+####################################################################################################
+# Misc CALENDAR non-compliance
+####################################################################################################
+
+# rounding, calling dateUntil/dateAdd in different order (and maybe fewer times)
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+
+# Duration adding w/ negative values internally coalesces date+time differently than i'd expect,
+# calling dateAdd w/ a negative value
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
+
+####################################################################################################
+# Misc TIMEZONE non-compliance
+####################################################################################################
+
 # too many `getPossibleInstantsFor` calls
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
 
-# extra getOffsetNanosecondsFor call
+# too many `getOffsetNanosecondsFor` call
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/order-of-operations.js
+
+####################################################################################################
+# Handling crazy results from CALENDAR
+####################################################################################################
+
+# Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
+# advance d1 all the way to d2. ignore this contrived case
+built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-mathematical-values-2.js
+# similar...
+built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
+# expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
+built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
+built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
+built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
+
+####################################################################################################
+# Handling crazy results from TIMEZONE
+####################################################################################################
+
+# I disagree w/ irregular length-of-day tests for ZonedDateTime, especially the third `test`
+built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
+built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+
+# we don't support hours-in-day greater than 10000000xxx
+# (would require us to use DayTimeNano for simple operations)
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
 # expecting to sanitycheck timezones that report 0-day-length
 built-ins/Temporal/Duration/prototype/round/zero-day-length.js
@@ -137,21 +150,6 @@ built-ins/Temporal/Duration/prototype/total/zero-day-length.js
 
 # ..further sanitychecking Timezone..
 built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-
-# accessing options multiple times. this is why CopyDataProperties exists
-# ALSO, diff options should be snapshotted probably
-built-ins/Temporal/PlainDateTime/from/order-of-operations.js
-built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
-built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
-built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
-
-# when parsing zdt string, if string fails, should not parse disambig/offset/overflow
-built-ins/Temporal/ZonedDateTime/from/observable-get-overflow-argument-string-invalid.js
 
 ####################################################################################################
 # avoid wastefulness (break spec or become conformant?)
@@ -345,6 +343,42 @@ built-ins/Temporal/Duration/prototype/toLocaleString/prop-desc.js
 
 # don't prohibit newer utilities
 built-ins/Temporal/Duration/call-builtin.js
+
+####################################################################################################
+# Known bug in spec that's getting fixed (https://github.com/tc39/proposal-temporal/issues/2563)
+####################################################################################################
+
+#
+# const dur = new Temporal.Duration(3, 11, 0, 29)
+# const pd1 = new Temporal.PlainDate(1972, 2, 1)
+# const pd2 = pd1.add(dur)
+#
+# console.log(
+#   'ACTUAL: ' +
+#   dur.round({ largestUnit: 'years', relativeTo: pd1 }).toString() // "P4Y"
+# )
+# console.log(
+#   'EXPECTED: ' +
+#   pd1.until(pd2, { largestUnit: 'years' }).toString() // "P3Y11M29D"
+# )
+#
+built-ins/Temporal/Duration/prototype/round/february-leap-year.js
+
+#
+# const dur = new Temporal.Duration(1, 0, 0, 0, 24)
+# const zdt1 = Temporal.ZonedDateTime.from("2019-11-01T00:00[America/Vancouver]")
+# const zdt2 = zdt1.add(dur)
+#
+# console.log(
+#   'ACTUAL: ' +
+#   dur.round({ largestUnit: 'years', relativeTo: zdt1 }).toString() // "P1Y1D"
+# )
+# console.log(
+#   'EXPECTED: ' +
+#   zdt1.until(zdt2, { largestUnit: 'years' }).toString() // "P1YT24H"
+# )
+#
+intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 
 ####################################################################################################
 # Don't care
