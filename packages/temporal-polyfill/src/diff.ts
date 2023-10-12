@@ -20,7 +20,7 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { DiffOptions, LargestUnitOptions, RoundingMode, refineDiffOptions } from './options'
+import { DiffOptions, LargestUnitOptions, RoundingMode, prepareOptions, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { TimeZoneSlot, getCommonTimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
@@ -139,14 +139,17 @@ export function diffZonedDateTimes(
   options: DiffOptions | undefined,
   invert?: boolean
 ): DurationInternals {
+  const calendar = getCommonCalendarSlot(internals.calendar, otherInternals.calendar)
+  const optionsCopy = prepareOptions(options)
+
   let durationInternals = updateDurationFieldsSign(
     diffZonedEpochNano(
-      getCommonCalendarSlot(internals.calendar, otherInternals.calendar),
-      getCommonTimeZoneSlot(internals.timeZone, otherInternals.timeZone),
+      calendar,
+      () => getCommonTimeZoneSlot(internals.timeZone, otherInternals.timeZone),
       internals.epochNanoseconds,
       otherInternals.epochNanoseconds,
-      ...refineDiffOptions(invert, options, Unit.Hour),
-      options,
+      ...refineDiffOptions(invert, optionsCopy, Unit.Hour),
+      optionsCopy,
     ),
   )
 
@@ -344,7 +347,7 @@ export function diffTimes(
 
 export function diffZonedEpochNano(
   calendarSlot: CalendarSlot,
-  timeZone: TimeZoneSlot,
+  getTimeZone: () => TimeZoneSlot,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -364,6 +367,8 @@ export function diffZonedEpochNano(
       roundingMode,
     )
   }
+
+  const timeZone = getTimeZone() // must be exactly here, before short-circuit
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {

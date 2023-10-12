@@ -586,7 +586,7 @@ export function createMarkerSystem(
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       moveZonedEpochNano.bind(undefined, calendar, timeZone) as MoveMarker<DayTimeNano>,
-      diffZonedEpochNano.bind(undefined, calendar, timeZone) as DiffMarkers<DayTimeNano>,
+      diffZonedEpochNano.bind(undefined, calendar, () => timeZone) as DiffMarkers<DayTimeNano>,
     ]
   } else {
     return [
