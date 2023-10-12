@@ -6,6 +6,7 @@
 # BUG with Duration rounding
 # We're not handling 'week' rounding well. should use `UnbalanceDateDurationRelative` algo
 built-ins/Temporal/Duration/prototype/round/calendar-possibly-required.js
+staging/Temporal/Duration/old/round.js
 
 # Duration::total should leverage UnbalanceDateDurationRelative
 built-ins/Temporal/Duration/prototype/total/dateuntil-field.js
@@ -38,9 +39,6 @@ built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
 ####################################################################################################
 # we know what to do
 ####################################################################################################
-
-# options-parsing bug where 'auto' considered not defined at all :(
-staging/Temporal/Duration/old/round.js
 
 # constructor arguments should be parsed in order (issue for referenceIsoYear/referenceIsoDay)
 built-ins/Temporal/PlainYearMonth/calendar-invalid.js

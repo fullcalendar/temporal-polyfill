@@ -79,10 +79,10 @@ export function refineDiffOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  let largestUnit: any = refineLargestUnit(options, maxUnit, minUnit, -1 as any)
+  let [largestUnit] = refineLargestUnit(options, maxUnit, minUnit, -1 as any) as [any, boolean]
   let roundingInc = parseRoundingIncInteger(options)
   let roundingMode = refineRoundingMode(options, defaultRoundingMode)
-  let smallestUnit = refineSmallestUnit(options, maxUnit, minUnit, minUnit)
+  let [smallestUnit] = refineSmallestUnit(options, maxUnit, minUnit, minUnit)
 
   if (largestUnit === -1) {
     largestUnit = Math.max(defaultLargestUnit, smallestUnit)
@@ -103,7 +103,7 @@ export function refineCalendarDiffOptions(
   options: LargestUnitOptions | undefined, // TODO: definitely make large-unit type via generics
 ): Unit { // TODO: only year/month/week/day???
   options = normalizeOptions(options)
-  return refineLargestUnit(options, Unit.Year, Unit.Day, Unit.Day)
+  return refineLargestUnit(options, Unit.Year, Unit.Day, Unit.Day)[0]
 }
 
 export type RoundTuple = [
@@ -132,7 +132,7 @@ export function refineRoundOptions(
   // alphabetical
   let roundingInc = parseRoundingIncInteger(options)
   const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
-  const smallestUnit = refineSmallestUnit(options, maxUnit) as DayTimeUnit
+  const [smallestUnit] = refineSmallestUnit(options, maxUnit) as [DayTimeUnit, boolean]
 
   roundingInc = refineRoundingInc(roundingInc, smallestUnit, undefined, solarMode)
 
@@ -157,13 +157,14 @@ export function refineDurationRoundOptions(
   options = normalizeUnitNameOptions(options, smallestUnitStr)
 
   // alphabeitcal
-  let largestUnit: any = refineLargestUnit(options, undefined, undefined, -1 as any)
+  let [largestUnit, largestUnitDefined] = refineLargestUnit(options, undefined, undefined, -1 as any) as [any, boolean]
   const relativeToInternals = refineRelativeTo(options)
   let roundingInc = parseRoundingIncInteger(options)
   const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
-  let smallestUnit: any = refineSmallestUnit(options, undefined, undefined, -1 as any)
+  let [smallestUnit, smallestUnitDefined] =
+    refineSmallestUnit(options, undefined, undefined, -1 as any) as [any, boolean]
 
-  if (smallestUnit === -1 && largestUnit === -1) {
+  if (!largestUnitDefined && !smallestUnitDefined) {
     throw new RangeError('Must have either smallestUnit or largestUnit')
   }
   if (smallestUnit === -1) {
@@ -193,7 +194,7 @@ export function refineTotalOptions(
 
   // alphabetical
   const relativeToInternals = refineRelativeTo(options)
-  const totalUnit = refineTotalUnit(options) // required
+  const [totalUnit] = refineTotalUnit(options) // required
 
   return [
     totalUnit, // required
@@ -293,7 +294,7 @@ function refineTimeDisplayTuple(
   // alphabetical
   const subsecDigits = refineSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
   const roundingMode = refineRoundingMode(options, RoundingMode.Trunc)
-  const smallestUnit = refineSmallestUnit(options, maxSmallestUnit, Unit.Nanosecond, -1 as number)
+  const [smallestUnit] = refineSmallestUnit(options, maxSmallestUnit, Unit.Nanosecond, -1 as number)
 
   if ((smallestUnit as number) !== -1) {
     return [
@@ -333,20 +334,20 @@ interface TotalUnitOptions {
 const refineSmallestUnit = refineUnitOption.bind<
   undefined, [BoundArg], // bound
   [SmallestUnitOptions, Unit?, Unit?, Unit?], // unbound
-  Unit // return
+  [Unit, boolean] // return
 >(undefined, smallestUnitStr)
 
 const refineLargestUnit = refineUnitOption.bind<
   undefined, [BoundArg], // bound
   [LargestUnitOptions, Unit?, Unit?, Unit?], // unbound
-  Unit
+  [Unit, boolean]
 >(undefined, largestUnitStr)
 
 // TODO: get totalUnitStr closer to this! etc
 const refineTotalUnit = refineUnitOption.bind<
   undefined, [BoundArg], // bound
   [TotalUnitOptions, Unit?, Unit?, Unit?], // unbound
-  Unit
+  [Unit, boolean]
 >(undefined, totalUnitStr)
 
 // Overflow
@@ -699,7 +700,7 @@ function refineUnitOption<O>(
   maxUnit: Unit = Unit.Year,
   minUnit: Unit = Unit.Nanosecond,
   defaultUnit?: Unit,
-): Unit {
+): [Unit, boolean] {
   // TODO: more DRY
   if (!isObjectlike(options)) {
     throw TypeError('Options must be object')
@@ -711,7 +712,7 @@ function refineUnitOption<O>(
     if (defaultUnit === undefined) {
       throw new RangeError('Must specify' + optionName) // best error?
     }
-    return defaultUnit
+    return [defaultUnit, false] // defined=false
   }
 
   unitName = toString(unitName)
@@ -721,7 +722,7 @@ function refineUnitOption<O>(
     if (defaultUnit === undefined) {
       throw new RangeError('Must specify' + optionName) // best error?
     }
-    return defaultUnit
+    return [defaultUnit, true] // defined=true
   }
 
   const unit = unitNameMap[unitName as UnitName] ??
@@ -734,7 +735,7 @@ function refineUnitOption<O>(
     throw new RangeError('Out of bounds' + optionName)
   }
 
-  return unit
+  return [unit, true] // defined=true
 }
 
 function refineChoiceOption<O>(
