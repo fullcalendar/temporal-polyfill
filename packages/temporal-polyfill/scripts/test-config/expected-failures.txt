@@ -27,10 +27,8 @@ built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
 built-ins/Temporal/Duration/prototype/round/calendar-possibly-required.js
 staging/Temporal/Duration/old/round.js
 
-# Duration::total should leverage UnbalanceDateDurationRelative
-built-ins/Temporal/Duration/prototype/total/dateuntil-field.js
-
 # More problems because of not using Duration UnbalanceDateDurationRelative
+# not handling 'week'
 built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
 built-ins/Temporal/Duration/prototype/round/roundingmode-expand.js
 built-ins/Temporal/Duration/prototype/round/roundingmode-floor.js
@@ -104,10 +102,10 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # Misc TIMEZONE non-compliance
 ####################################################################################################
 
-# too many `getPossibleInstantsFor` calls
+# we do too many `getPossibleInstantsFor` calls
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
 
-# too many `getOffsetNanosecondsFor` call
+# we do too many `getOffsetNanosecondsFor` call
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/order-of-operations.js
@@ -128,6 +126,9 @@ built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign
 built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
 built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
 built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
+
+# internal mock of 12-months is incompatible w/ how we expect that calendar to handle 2-years
+built-ins/Temporal/Duration/prototype/total/dateuntil-field.js
 
 ####################################################################################################
 # Handling crazy results from TIMEZONE
@@ -345,7 +346,7 @@ built-ins/Temporal/Duration/prototype/toLocaleString/prop-desc.js
 built-ins/Temporal/Duration/call-builtin.js
 
 ####################################################################################################
-# Known bug in spec that's getting fixed (https://github.com/tc39/proposal-temporal/issues/2563)
+# Known bug in spec that's MAYBE getting fixed (https://github.com/tc39/proposal-temporal/issues/2715)
 ####################################################################################################
 
 #
@@ -363,6 +364,10 @@ built-ins/Temporal/Duration/call-builtin.js
 # )
 #
 built-ins/Temporal/Duration/prototype/round/february-leap-year.js
+
+####################################################################################################
+# Known bug in spec that's getting fixed (https://github.com/tc39/proposal-temporal/issues/2563)
+####################################################################################################
 
 #
 # const dur = new Temporal.Duration(1, 0, 0, 0, 24)
