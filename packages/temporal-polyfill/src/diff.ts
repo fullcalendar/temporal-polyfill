@@ -10,7 +10,7 @@ import {
   negateDurationInternals,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields } from './isoFields'
+import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
@@ -218,18 +218,21 @@ export function diffDateTimes(
   const timeSign = Math.sign(timeNano)
 
   // simulate startDate plus time fields (because that happens before adding date)
-  let midIsoFields = startIsoFields
+  let midIsoFields: IsoDateFields = startIsoFields
 
   // move start-fields forward so time-diff-sign matches date-diff-sign
   if (timeSign === -sign) {
-    midIsoFields = {
-      ...moveByIsoDays(startIsoFields, sign),
-      ...pluckIsoTimeFields(startIsoFields),
-    }
+    midIsoFields = moveByIsoDays(startIsoFields, sign)
     timeNano += nanoInUtcDay * sign
   }
 
-  const dateDiff = calendarDateUntilEasy(calendarSlot, midIsoFields, endIsoFields, largestUnit, origOptions)
+  const dateDiff = calendarDateUntilEasy(
+    calendarSlot,
+    { ...midIsoFields, ...isoTimeFieldDefaults }, // hack
+    { ...endIsoFields, ...isoTimeFieldDefaults }, // hack
+    largestUnit,
+    origOptions,
+  )
   const timeDiff = nanoToDurationTimeFields(timeNano)
 
   return roundRelativeDuration(

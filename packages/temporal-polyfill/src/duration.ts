@@ -8,6 +8,7 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
+  durationFieldDefaults,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
@@ -103,7 +104,7 @@ export class Duration {
   }
 
   round(options: DurationRoundOptions): Duration {
-    const slots = getDurationSlots(this)
+    let slots = getDurationSlots(this)
     const durationLargestUnit = getLargestDurationUnit(slots)
     const [
       largestUnit,
@@ -146,18 +147,30 @@ export class Duration {
 
     const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
 
+    let transplantedWeeks = 0
+    if (
+      slots.weeks &&
+      largestUnit >= Unit.Week &&
+      smallestUnit <= Unit.Week
+    ) {
+      transplantedWeeks = slots.weeks
+      slots = { ...slots, weeks: 0 }
+    }
+
+    const roundedDurationFields = roundRelativeDuration(
+      ...spanDuration(slots, undefined, largestUnit, ...markerSystem),
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
+    )
+
+    roundedDurationFields.weeks += transplantedWeeks // HACK (mutating)
+
     return createDuration({
       branding: DurationBranding,
-      ...updateDurationFieldsSign(
-        roundRelativeDuration(
-          ...spanDuration(slots, undefined, largestUnit, ...markerSystem),
-          largestUnit,
-          smallestUnit,
-          roundingInc,
-          roundingMode,
-          ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
-        ),
-      ),
+      ...updateDurationFieldsSign(roundedDurationFields),
     })
   }
 
@@ -342,9 +355,12 @@ function addToDuration(
   })
 }
 
+// Utils
+// -------------------------------------------------------------------------------------------------
+
 function spanDuration<M>(
   durationFields0: DurationFields,
-  durationFields1: DurationFields | undefined,
+  durationFields1: DurationFields | undefined, // HACKy
   largestUnit: Unit, // TODO: more descrimination?
   // marker system...
   marker: M,
@@ -361,12 +377,15 @@ function spanDuration<M>(
     endMarker = moveMarker(endMarker, durationFields1)
   }
 
-  const balancedDuration = updateDurationFieldsSign( // yuck
-    diffMarkers(marker, endMarker, largestUnit)
-  )
-  return [balancedDuration, markerToEpochNano(endMarker)]
+  let balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+
+  return [
+    updateDurationFieldsSign(balancedDuration), // yuck
+    markerToEpochNano(endMarker),
+  ]
 }
 
+// TODO: DRY
 function getLargestDurationUnit(fields: DurationFields): Unit {
   let unit: Unit = Unit.Year
 

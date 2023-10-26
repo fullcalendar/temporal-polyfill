@@ -22,39 +22,24 @@ built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
 # UnbalanceDateDurationRelative
 ####################################################################################################
 
-# BUG with Duration rounding
-# We're not handling 'week' rounding well. should use `UnbalanceDateDurationRelative` algo
-built-ins/Temporal/Duration/prototype/round/calendar-possibly-required.js
-staging/Temporal/Duration/old/round.js
-
-# More problems because of not using Duration UnbalanceDateDurationRelative
-# not handling 'week'
-built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-expand.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-floor.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfCeil.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfEven.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfExpand.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfFloor.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfTrunc.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-trunc.js
-
 # Duration BAD!!! Can't do rel-rounding with big Durations because outside of range
 # should do UnbalanceDateDurationRelative instead :(
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-months.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-weeks.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
 
-# PlainYearMonth can't handle super big roundingIncrement
+# can't handle super big roundingIncrement
 # TODO: move to UnbalanceDateDurationRelative
 built-ins/Temporal/PlainYearMonth/prototype/since/roundingincrement-non-integer.js
 built-ins/Temporal/PlainYearMonth/prototype/until/roundingincrement-non-integer.js
 built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
+built-ins/Temporal/ZonedDateTime/prototype/since/roundingincrement-non-integer.js
+built-ins/Temporal/ZonedDateTime/prototype/until/roundingincrement-non-integer.js
 
 # Problems with zdt-based Duration rounding relying too much on nanoseconds comparisons
 # (converting epoch->fields waaay too many times while doing diffing/clamping)
+# NEVERMIND: it's fine. 5 calls to getPossibleInstantsFor, what one would expect for accuracy
 built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
 ####################################################################################################
@@ -123,7 +108,6 @@ built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
 # expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
-built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
 built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
 built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
 

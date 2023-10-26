@@ -1,4 +1,4 @@
-import { DayTimeNano, addDayTimeNanoAndNumber, createDayTimeNano, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, diffDayTimeNanos, signDayTimeNano } from './dayTimeNano'
+import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, diffDayTimeNanos, signDayTimeNano } from './dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from './diff'
 import {
   DurationFields,
@@ -433,7 +433,10 @@ function nudgeDurationDayTime(
   const nanoDiff = diffDayTimeNanos(dayTimeNano, roundedDayTimeNano)
   const expanded = signDayTimeNano(nanoDiff) === sign
 
-  const roundedDayTimeFields = nanoToDurationDayTimeFields(roundedDayTimeNano)
+  const roundedDayTimeFields = nanoToDurationDayTimeFields(
+    roundedDayTimeNano,
+    Math.min(Unit.Day, getLargestDurationUnit(durationFields)) as DayTimeUnit, // HACK
+  )
   const nudgedDurationFields = {
     ...durationFields,
     ...roundedDayTimeFields,
@@ -441,9 +444,22 @@ function nudgeDurationDayTime(
 
   return [
     nudgedDurationFields,
-    diffDayTimeNanos(nanoDiff, endEpochNano), // endEpochNano - nanoDiff
+    addDayTimeNanos(endEpochNano, nanoDiff),
     expanded,
   ]
+}
+
+// TODO: DRY
+function getLargestDurationUnit(fields: DurationFields): Unit {
+  let unit: Unit = Unit.Year
+
+  for (; unit > Unit.Nanosecond; unit--) {
+    if (fields[durationFieldNamesAsc[unit]]) {
+      break
+    }
+  }
+
+  return unit
 }
 
 /*
@@ -620,10 +636,14 @@ function bubbleRelativeDuration<M>(
 
   for (
     let currentUnit: Unit = smallestUnit + 1;
-    currentUnit < largestUnit;
+    currentUnit <= largestUnit;
     currentUnit++
   ) {
-    if (currentUnit === Unit.Week) { // correct?
+    // if balancing day->month->year, skip weeks
+    if (
+      currentUnit === Unit.Week &&
+      largestUnit !== Unit.Week
+    ) {
       continue
     }
 

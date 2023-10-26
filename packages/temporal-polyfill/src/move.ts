@@ -76,7 +76,7 @@ export function moveZonedEpochNano(
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): DayTimeNano {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour) // better name: timed nano
 
   if (!durationHasDateParts(durationFields)) {
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
