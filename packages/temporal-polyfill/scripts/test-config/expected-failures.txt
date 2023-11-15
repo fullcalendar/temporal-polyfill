@@ -19,6 +19,28 @@ built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
 
 ####################################################################################################
+# Misc access wrong-order
+####################################################################################################
+
+built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
+built-ins/Temporal/Calendar/prototype/dateUntil/order-of-operations.js
+built-ins/Temporal/PlainDate/from/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainMonthDay/from/order-of-operations.js
+built-ins/Temporal/PlainMonthDay/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/from/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/with/order-of-operations.js
+built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
+
+####################################################################################################
 # Misc CALENDAR non-compliance
 ####################################################################################################
 

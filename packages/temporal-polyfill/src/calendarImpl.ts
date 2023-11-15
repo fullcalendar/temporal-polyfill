@@ -165,7 +165,10 @@ export class CalendarImpl {
       }
     } else {
       // derive monthCodeNumber/isLeapMonth from year/month, then discard year
-      year = this.refineYear(fields as EraYearOrYear)
+      year = (fields.year === undefined && this.id === isoCalendarId)
+        ? isoEpochFirstLeapYear
+        : this.refineYear(fields as EraYearOrYear)
+
       month = this.refineMonth(fields, year, overflow)
       day = this.refineDay(fields as DayFields, month, year, overflow)
 
