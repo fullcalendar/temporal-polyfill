@@ -1,5 +1,6 @@
 import { CalendarImpl } from './calendarImpl'
 import { CalendarSlot, calendarDateAdd, calendarDateUntil, calendarFieldFuncs, getCommonCalendarSlot } from './calendarSlot'
+import { ensureObjectlike } from './cast'
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -70,7 +71,13 @@ export function diffPlainDates(
       getCommonCalendarSlot(internals0.calendar, internals1.calendar),
       internals0,
       internals1,
-      ...refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day),
+      ...refineDiffOptions(
+        invert,
+        options === undefined ? options : { ...ensureObjectlike(options) }, // YUCK
+        Unit.Day,
+        Unit.Year,
+        Unit.Day,
+      ),
     )
   )
 

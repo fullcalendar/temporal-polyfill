@@ -50,14 +50,9 @@ built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-ambiguous-
 # Misc CALENDAR non-compliance
 ####################################################################################################
 
-# rounding, calling dateUntil/dateAdd in different order (and maybe fewer times)
+# RoundDuration expects: get dateAdd, get dateUntil, call dateUntil, call dateAdd (weird!)
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
-built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-
-# Duration adding w/ negative values internally coalesces date+time differently than i'd expect,
-# calling dateAdd w/ a negative value
-built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 
 ####################################################################################################
 # Misc TIMEZONE non-compliance
@@ -222,6 +217,9 @@ built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
+# fewer calls to dateUntil
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+
 # we parse overflow options fewer times!
 # // toString property is read once by Calendar.dateFromFields() in the builtin
 # // calendars, to get the option value for the date part, and then once again
@@ -361,6 +359,28 @@ built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iter
 # )
 #
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
+
+####################################################################################################
+# Known bug in spec (not yet report, could already be fixed)
+####################################################################################################
+
+#
+# // Duration::add with relativeTo:PlainDate, when duration0+duration1 overflows day,
+# // does not balance-up to higher units
+#
+# relativeTo = new Temporal.PlainDate(2023, 1, 1)
+# duration0 = Temporal.Duration.from({ hours: 6 })
+# duration1 = Temporal.Duration.from({ months: 2, days: 30, hours: 20 })
+# durationResult = duration0.add(duration1, { relativeTo })
+# // { months: 2, days: 31, hours: 2 } -- UNDESIRED!!!
+#
+# pdt0 = new Temporal.PlainDateTime(2023, 1, 1)
+# pdt1 = pdt0.add({ hours: 6 })
+# pdt2 = pdt1.add({ months: 2, days: 30, hours: 20 })
+# durationResult = pdt0.until(pdt2, { largestUnit: 'months' })
+# // { months: 3, hours: 2 } -- DESIRED
+#
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 
 ####################################################################################################
 # Don't care
