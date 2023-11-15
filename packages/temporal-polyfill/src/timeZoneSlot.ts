@@ -13,6 +13,7 @@ import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
 import { queryTimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
 import { createLazyGenerator, isObjectlike } from './utils'
+import { isoCalendarId } from './calendarConfig'
 
 export type TimeZoneSlot = TimeZoneProtocol | string
 
@@ -60,7 +61,7 @@ export function timeZoneGetOffsetNanosecondsFor(
 
 export function timeZoneGetPossibleInstantsFor(
   timeZoneSlot: TimeZoneSlot,
-  isoDateTimeSlots: IsoDateTimeSlots,
+  isoDateTimeSlots: IsoDateTimeSlots, // DOESN'T NEED calendar -- TODO: change type?
 ): DayTimeNano[] {
   if (typeof timeZoneSlot === 'string') {
     return queryTimeZoneImpl(timeZoneSlot).getPossibleInstantsFor(isoDateTimeSlots)
@@ -69,6 +70,7 @@ export function timeZoneGetPossibleInstantsFor(
     createPlainDateTime({
       ...isoDateTimeSlots,
       branding: PlainDateTimeBranding,
+      calendar: isoCalendarId, // ALWAYS
     })
   )].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds

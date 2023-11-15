@@ -94,7 +94,7 @@ export function moveZonedEpochNano(
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
       ...pluckIsoTimeFields(isoDateTimeFields), // time parts
-      calendar,
+      calendar, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(
       getSingleInstantFor(timeZone, movedIsoDateTimeFields),
