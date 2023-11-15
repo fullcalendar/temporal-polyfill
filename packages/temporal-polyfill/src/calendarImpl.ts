@@ -289,7 +289,7 @@ export class CalendarImpl {
 
     if (allowEras && (era !== undefined || eraYear !== undefined)) {
       if (era === undefined || eraYear === undefined) {
-        throw new RangeError('Must define both era and eraYear')
+        throw new TypeError('Must define both era and eraYear')
       }
 
       const yearByEra = refineEraYear(this, era, eraYear)
