@@ -63,10 +63,8 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # Misc TIMEZONE non-compliance
 ####################################################################################################
 
-# we do too many `getPossibleInstantsFor` calls
+# not caching reference to `getOffsetNanosecondsFor` when doing `computeGapNear`
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
-
-# we do too many `getOffsetNanosecondsFor` call
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/order-of-operations.js

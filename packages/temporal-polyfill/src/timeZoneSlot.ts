@@ -154,14 +154,16 @@ export function getMatchingInstantFor(
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
   epochFuzzy = false,
 ): DayTimeNano {
-  const possibleEpochNanos = timeZoneGetPossibleInstantsFor(timeZoneSlot, isoDateTimeSlots)
-
-  if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
+  if (offsetNano !== undefined && offsetDisambig === OffsetDisambig.Use) {
     // we ALWAYS use Z as a zero offset
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
       return isoToEpochNanoWithOffset(isoDateTimeSlots, offsetNano)
     }
+  }
 
+  const possibleEpochNanos = timeZoneGetPossibleInstantsFor(timeZoneSlot, isoDateTimeSlots)
+
+  if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
     const matchingEpochNano = findMatchingEpochNano(
       possibleEpochNanos,
       isoDateTimeSlots,
