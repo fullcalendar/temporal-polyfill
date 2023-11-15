@@ -70,7 +70,6 @@ export function timeZoneGetPossibleInstantsFor(
     createPlainDateTime({
       ...isoDateTimeSlots,
       branding: PlainDateTimeBranding,
-      calendar: isoCalendarId, // ALWAYS
     })
   )].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds
