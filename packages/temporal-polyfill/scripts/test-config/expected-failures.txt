@@ -41,11 +41,6 @@ built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
 
-# problem with our implementation of AddDurationToOrSubtractDurationFromPlainYearMonth
-# (called movePlainYearMonth) -- issue with rejecting on underflow
-built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/end-of-month-out-of-range.js
-
 ####################################################################################################
 # Misc CALENDAR non-compliance
 ####################################################################################################
@@ -130,23 +125,14 @@ built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefi
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
 
 ####################################################################################################
-# avoid wastefulness (break spec or become conformant?)
+# PlainYearMonth operations break spec because we don't convert to raw fields and then back
+# to PlainYearMonth. We leverage Calendar::daysInMonth and Calendar::day instead
 ####################################################################################################
 
-# PlainYearMonth, ignore wasteful date<->yearmonth internal conversions for `add`
-# (uses dateAdd/fields/dateFromFields instead of just daysInMonth)
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-datefromfields-called.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-yearmonthfromfields-called-with-null-prototype-options.js
-built-ins/Temporal/PlainYearMonth/prototype/add/custom-daysInMonth-irrelevant.js
-built-ins/Temporal/PlainYearMonth/prototype/add/order-of-operations.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-datefromfields-called.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-yearmonthfromfields-called-with-null-prototype-options.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/custom-daysInMonth-irrelevant.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/order-of-operations.js
+#
+# since/until
+#
 
-# PlainYearMonth, wasteful `since`
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fromfields-called-with-null-prototype-fields.js
@@ -155,6 +141,58 @@ built-ins/Temporal/PlainYearMonth/prototype/until/calendar-datefromfields-called
 built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fields-iterable.js
 built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fromfields-called-with-null-prototype-fields.js
 built-ins/Temporal/PlainYearMonth/prototype/until/order-of-operations.js
+
+#
+# add/subtract
+#
+
+# overall order
+built-ins/Temporal/PlainYearMonth/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/order-of-operations.js
+
+# we're calling daysInMonth. it's okay
+built-ins/Temporal/PlainYearMonth/prototype/add/custom-daysInMonth-irrelevant.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/custom-daysInMonth-irrelevant.js
+
+# calling CalendarProtocol::dateFromFields/yearMonthFromFields
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+
+# date-range errors
+built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/end-of-month-out-of-range.js
+
+# calling CalendarProtocol::fields
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fields-iterable.js
+
+# calling CalendarProtocol::fields with bad field names
+built-ins/Temporal/PlainYearMonth/prototype/add/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/proto-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/proto-in-calendar-fields.js
+
+# calling CalendarProtocol::dateAdd/yearMonthFromFields
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
+
+# calling CalendarProtocol::dateAdd fewer times
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
+
+# accessing options
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 ####################################################################################################
 # Over-reliance on Calendar (ours is better)
@@ -257,14 +295,6 @@ built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-w
 # fewer calls to getOffsetNanosecondsFor
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
-
-# our PlainYearMonth::add/subtract calls Calendar::dateAdd fewer times!
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-dateadd.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
 
 # we display super large duration units as Number would, not BigInt
 built-ins/Temporal/Duration/prototype/toString/precision-exact-mathematical-values.js

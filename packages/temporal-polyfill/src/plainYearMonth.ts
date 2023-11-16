@@ -194,19 +194,12 @@ function movePlainYearMonth(
       : 1,
   )
 
-  const optionsCopy = { ...options } // safeguard against dateAdd mutation
+  const movedIsoDateFields = calendarDateAdd(calendar, isoDateFields, durationInternals, options)
 
-  // TODO: this is very wasteful. think about breaking spec and just using `movePlainYearMonthToDay`
   return createPlainYearMonth({
+    ...movePlainYearMonthToDay({ ...movedIsoDateFields, calendar }),
+    calendar,
     branding: PlainYearMonthBranding,
-    ...convertToPlainYearMonth(
-      createPlainDate({
-        ...calendarDateAdd(calendar, isoDateFields, durationInternals, options),
-        calendar,
-        branding: PlainDateBranding,
-      }),
-      optionsCopy,
-    )
   })
 }
 
