@@ -1,4 +1,4 @@
-import { CalendarArg } from './calendar'
+import { CalendarArg } from '../public/calendar'
 import { BoundArg, isClamped, mapPropsWithRefiners, pluckProps } from './utils'
 import {
   IsoDateFields,

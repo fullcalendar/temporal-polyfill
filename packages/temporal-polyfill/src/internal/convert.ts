@@ -46,14 +46,14 @@ import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // public
-import type { TimeZoneArg } from './timeZone'
-import { getZonedDateTimeSlots, type ZonedDateTime, type ZonedDateTimeBag, type ZonedDateTimeMod } from './zonedDateTime'
-import { getPlainDateSlots, type PlainDate, type PlainDateBag, type PlainDateMod } from './plainDate'
-import { getPlainDateTimeSlots, type PlainDateTime, type PlainDateTimeBag, type PlainDateTimeMod } from './plainDateTime'
-import type { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
-import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from './plainYearMonth'
-import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from './plainMonthDay'
-import type { DurationBag, DurationMod } from './duration'
+import type { TimeZoneArg } from '../public/timeZone'
+import { getZonedDateTimeSlots, type ZonedDateTime, type ZonedDateTimeBag, type ZonedDateTimeMod } from '../public/zonedDateTime'
+import { getPlainDateSlots, type PlainDate, type PlainDateBag, type PlainDateMod } from '../public/plainDate'
+import { getPlainDateTimeSlots, type PlainDateTime, type PlainDateTimeBag, type PlainDateTimeMod } from '../public/plainDateTime'
+import type { PlainTime, PlainTimeBag, PlainTimeMod } from '../public/plainTime'
+import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from '../public/plainYearMonth'
+import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from '../public/plainMonthDay'
+import type { DurationBag, DurationMod } from '../public/duration'
 import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, getMatchingInstantFor, getSingleInstantFor, refineTimeZoneSlot } from './timeZoneSlot'
 

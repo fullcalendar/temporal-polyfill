@@ -38,7 +38,7 @@ import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 
 // public
-import { createPlainDate } from './plainDate'
+import { createPlainDate } from '../public/plainDate'
 import { IsoDateSlots, IsoDateTimeSlots, PlainDateBranding, ZonedEpochSlots } from './slots'
 import { calendarFieldFuncs } from './calendarSlot'
 import { refinePlainMonthDayBag } from './convert'

@@ -1,6 +1,6 @@
-import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoTimeFields, isoTimeFieldDefaults } from '../internal/isoFields'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
-import { hasAllPropsByName } from './utils'
+import { hasAllPropsByName } from '../internal/utils'
 
 export function createProtocolChecker(
   propNames: string[]

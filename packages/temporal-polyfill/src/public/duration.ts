@@ -1,4 +1,4 @@
-import { mergeDurationBag, refineDurationBag } from './convert'
+import { mergeDurationBag, refineDurationBag } from '../internal/convert'
 import {
   absDurationInternals,
   addDayTimeDurationFields,
@@ -8,9 +8,9 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
-} from './durationFields'
-import { formatDurationInternals } from './isoFormat'
-import { parseDuration } from './isoParse'
+} from '../internal/durationFields'
+import { formatDurationInternals } from '../internal/isoFormat'
+import { parseDuration } from '../internal/isoParse'
 import {
   DurationRoundOptions,
   RelativeToOptions,
@@ -21,7 +21,7 @@ import {
   refineRelativeToOptions,
   refineTimeDisplayOptions,
   refineTotalOptions,
-} from './options'
+} from '../internal/options'
 import {
   MarkerSystem,
   SimpleMarkerSystem,
@@ -30,14 +30,14 @@ import {
   roundRelativeDuration,
   totalDayTimeDuration,
   totalRelativeDuration,
-} from './round'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
-import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from './units'
-import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from './round'
-import { DayTimeNano, compareDayTimeNanos } from './dayTimeNano'
-import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+} from '../internal/round'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
+import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
+import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from '../internal/round'
+import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
+import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { durationGettersMethods, neverValueOf } from './publicMixins'
-import { ensureString } from './cast'
+import { ensureString } from '../internal/cast'
 
 export type DurationBag = Partial<DurationFields>
 export type DurationMod = Partial<DurationFields>

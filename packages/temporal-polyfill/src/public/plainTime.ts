@@ -1,19 +1,19 @@
-import { TimeBag } from './calendarFields'
+import { TimeBag } from '../internal/calendarFields'
 import {
   createZonedDateTimeConverter,
   mergePlainTimeBag,
   refinePlainTimeBag,
   rejectInvalidBag,
-} from './convert'
-import { diffPlainTimes } from './diff'
+} from '../internal/convert'
+import { diffPlainTimes } from '../internal/diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { DurationInternals, negateDurationInternals } from './durationFields'
-import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from './isoFields'
-import { formatPlainTimeIso } from './isoFormat'
-import { createToLocaleStringMethods } from './intlFormat'
-import { checkIsoDateTimeInBounds, compareIsoTimeFields } from './isoMath'
-import { parsePlainTime } from './isoParse'
-import { moveTime } from './move'
+import { DurationInternals, negateDurationInternals } from '../internal/durationFields'
+import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from '../internal/isoFields'
+import { formatPlainTimeIso } from '../internal/isoFormat'
+import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/isoMath'
+import { parsePlainTime } from '../internal/isoParse'
+import { moveTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
@@ -21,18 +21,18 @@ import {
   TimeDisplayOptions,
   prepareOptions,
   refineOverflowOptions,
-} from './options'
+} from '../internal/options'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
-import { roundPlainTime } from './round'
-import { UnitName } from './units'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
+import { roundPlainTime } from '../internal/round'
+import { UnitName } from '../internal/units'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { TimeZoneArg } from './timeZone'
-import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
-import { ensureString } from './cast'
-import { zonedInternalsToIso } from './timeZoneSlot'
+import { ensureString } from '../internal/cast'
+import { zonedInternalsToIso } from '../internal/timeZoneSlot'
 
 export type PlainTimeBag = TimeBag
 export type PlainTimeMod = TimeBag

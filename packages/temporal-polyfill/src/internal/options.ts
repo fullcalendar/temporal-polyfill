@@ -17,9 +17,9 @@ import {
 } from './utils'
 
 // public
-import type { TimeZoneArg } from './timeZone'
-import type { PlainDate } from './plainDate'
-import type { ZonedDateTime, ZonedDateTimeBag } from './zonedDateTime'
+import type { TimeZoneArg } from '../public/timeZone'
+import type { PlainDate } from '../public/plainDate'
+import type { ZonedDateTime, ZonedDateTimeBag } from '../public/zonedDateTime'
 import { IsoDateSlots, PlainDateSlots, PlainTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // Compound Options

@@ -16,13 +16,13 @@ import {
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
 
 // public
-import type { ZonedDateTime } from './zonedDateTime'
-import type { PlainDate } from './plainDate'
-import type { PlainTime } from './plainTime'
-import type { PlainDateTime } from './plainDateTime'
-import type { PlainMonthDay } from './plainMonthDay'
-import type { PlainYearMonth } from './plainYearMonth'
-import type { Instant } from './instant'
+import type { ZonedDateTime } from '../public/zonedDateTime'
+import type { PlainDate } from '../public/plainDate'
+import type { PlainTime } from '../public/plainTime'
+import type { PlainDateTime } from '../public/plainDateTime'
+import type { PlainMonthDay } from '../public/plainMonthDay'
+import type { PlainYearMonth } from '../public/plainYearMonth'
+import type { Instant } from '../public/instant'
 import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
 import { getSingleInstantFor, getTimeZoneSlotId } from './timeZoneSlot'
 

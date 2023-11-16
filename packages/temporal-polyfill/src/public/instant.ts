@@ -1,30 +1,30 @@
-import { isoCalendarId } from './calendarConfig'
-import { diffInstants } from './diff'
+import { isoCalendarId } from '../internal/calendarConfig'
+import { diffInstants } from '../internal/diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { negateDurationInternals } from './durationFields'
-import { formatInstantIso } from './isoFormat'
-import { createToLocaleStringMethods } from './intlFormat'
-import { checkEpochNanoInBounds } from './isoMath'
-import { parseInstant } from './isoParse'
-import { moveEpochNano } from './move'
+import { negateDurationInternals } from '../internal/durationFields'
+import { formatInstantIso } from '../internal/isoFormat'
+import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { checkEpochNanoInBounds } from '../internal/isoMath'
+import { parseInstant } from '../internal/isoParse'
+import { moveEpochNano } from '../internal/move'
 import {
   DiffOptions,
   InstantDisplayOptions,
   RoundingOptions,
   prepareOptions,
-} from './options'
-import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from './cast'
-import { roundInstant } from './round'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from './utils'
+} from '../internal/options'
+import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from '../internal/cast'
+import { roundInstant } from '../internal/round'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from './units'
+import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
-import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from './dayTimeNano'
-import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
+import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { createEpochGetterMethods, neverValueOf } from './publicMixins'
-import { refineCalendarSlot } from './calendarSlot'
-import { refineTimeZoneSlot } from './timeZoneSlot'
+import { refineCalendarSlot } from '../internal/calendarSlot'
+import { refineTimeZoneSlot } from '../internal/timeZoneSlot'
 
 export type InstantArg = Instant | string
 

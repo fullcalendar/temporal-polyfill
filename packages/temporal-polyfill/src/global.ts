@@ -1,5 +1,5 @@
 import { DateTimeFormat, Temporal, toTemporalInstant } from './impl'
-import { defineProps } from './utils'
+import { defineProps } from './internal/utils'
 
 defineProps(globalThis, { Temporal })
 defineProps(Intl, { DateTimeFormat })
