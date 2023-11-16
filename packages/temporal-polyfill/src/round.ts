@@ -210,15 +210,17 @@ export function roundDayTimeDuration(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  largestRewriteUnit?: DayTimeUnit,
 ): DurationFields {
-  return balanceDayTimeDuration(
-    durationFields,
-    largestUnit,
-    computeNanoInc(smallestUnit, roundingInc),
-    roundingMode,
-    largestRewriteUnit,
-  )
+  return {
+    ...durationFieldDefaults,
+    ...balanceDayTimeDuration(
+      durationFields,
+      largestUnit,
+      computeNanoInc(smallestUnit, roundingInc),
+      roundingMode,
+      Unit.Day,
+    ),
+  }
 }
 
 export function balanceDayTimeDuration(
@@ -226,17 +228,13 @@ export function balanceDayTimeDuration(
   largestUnit: DayTimeUnit,
   nanoInc: number, // REQUIRED: not larger than a day
   roundingMode: RoundingMode,
-  largestRewriteUnit: DayTimeUnit = largestUnit,
-): DurationFields {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestRewriteUnit)
+  largestReadUnit: DayTimeUnit = largestUnit,
+): Partial<DurationFields> {
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestReadUnit)
   const roundedLargeNano = roundDayTimeNanoByInc(dayTimeNano, nanoInc, roundingMode)
-  const dayTimeFields = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit) // Partial
+  const partialDuration = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
 
-  return {
-    ...durationFields,
-    ...mapPropNamesToConstant(durationFieldNamesAsc.slice(0, largestRewriteUnit + 1), 0),
-    ...dayTimeFields,
-  }
+  return partialDuration
 }
 
 export function roundRelativeDuration<M>(

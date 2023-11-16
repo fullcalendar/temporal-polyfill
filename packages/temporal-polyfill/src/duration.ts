@@ -8,7 +8,6 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
-  durationFieldDefaults,
 } from './durationFields'
 import { formatDurationInternals } from './isoFormat'
 import { parseDuration } from './isoParse'
@@ -131,11 +130,10 @@ export class Duration {
         ...updateDurationFieldsSign(
           roundDayTimeDuration(
             slots,
-            largestUnit as DayTimeUnit,
+            largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
             smallestUnit as DayTimeUnit,
             roundingInc,
             roundingMode,
-            Unit.Day,
           ),
         )
       })
@@ -403,14 +401,15 @@ function durationToString(slots: DurationInternals, options?: TimeDisplayOptions
 
   // for performance AND for not losing precision when no rounding
   if (nanoInc > 1) {
-    slots = updateDurationFieldsSign(
-      balanceDayTimeDuration(
+    slots = updateDurationFieldsSign({
+      ...slots,
+      ...balanceDayTimeDuration(
         slots,
-        Math.min(getLargestDurationUnit(slots), Unit.Second),
+        Math.min(getLargestDurationUnit(slots), Unit.Day),
         nanoInc,
         roundingMode,
-      )
-    )
+      ),
+    })
   }
 
   return formatDurationInternals(
