@@ -12,7 +12,6 @@ import {
 } from './units'
 import {
   NumSign,
-  mapPropNames,
   mapPropNamesToConstant,
   mapPropNamesToIndex,
   mapProps,

@@ -27,7 +27,7 @@ import {
   givenFieldsToDayTimeNano,
   UnitName,
 } from './units'
-import { divModFloor, divTrunc, identityFunc, mapPropNamesToConstant } from './utils'
+import { divModFloor, divTrunc, identityFunc } from './utils'
 
 export function roundPlainDateTime(
   internals: IsoDateTimeSlots,

@@ -17,7 +17,7 @@ import {
   nanoInSec,
   Unit,
 } from './units'
-import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
+import { divModFloor, padNumber, padNumber2 } from './utils'
 
 // High-level
 // -------------------------------------------------------------------------------------------------

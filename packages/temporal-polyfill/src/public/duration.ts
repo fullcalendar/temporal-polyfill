@@ -36,8 +36,10 @@ import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../intern
 import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from '../internal/round'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { ensureString } from '../internal/cast'
+
+// public
+import { durationGettersMethods, neverValueOf } from './publicMixins'
 
 export type DurationBag = Partial<DurationFields>
 export type DurationMod = Partial<DurationFields>

@@ -14,6 +14,8 @@ import {
   pluckProps,
 } from './utils'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
+import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
+import { getSingleInstantFor, getTimeZoneSlotId } from './timeZoneSlot'
 
 // public
 import type { ZonedDateTime } from '../public/zonedDateTime'
@@ -23,8 +25,6 @@ import type { PlainDateTime } from '../public/plainDateTime'
 import type { PlainMonthDay } from '../public/plainMonthDay'
 import type { PlainYearMonth } from '../public/plainYearMonth'
 import type { Instant } from '../public/instant'
-import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
-import { getSingleInstantFor, getTimeZoneSlotId } from './timeZoneSlot'
 
 export type LocalesArg = string | string[]
 

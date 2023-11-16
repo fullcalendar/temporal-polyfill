@@ -1,4 +1,3 @@
-import { CalendarArg } from '../public/calendar'
 import { BoundArg, isClamped, mapPropsWithRefiners, pluckProps } from './utils'
 import {
   IsoDateFields,
@@ -12,6 +11,9 @@ import { Overflow } from './options'
 import { IsoDateSlots, IsoDateTimeSlots } from './slots'
 import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { toInteger } from './cast'
+
+// public
+import { CalendarArg } from '../public/calendar'
 
 // Refiners
 // -------------------------------------------------------------------------------------------------

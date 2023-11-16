@@ -1,3 +1,6 @@
+import { defineProps, defineStringTag } from '../internal/utils'
+
+// public
 import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
@@ -8,7 +11,6 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { defineProps, defineStringTag } from '../internal/utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export const Temporal = defineProps({}, {

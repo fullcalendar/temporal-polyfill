@@ -15,12 +15,12 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
+import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // public
 import type { TimeZoneArg } from '../public/timeZone'
 import type { PlainDate } from '../public/plainDate'
 import type { ZonedDateTime, ZonedDateTimeBag } from '../public/zonedDateTime'
-import { IsoDateSlots, PlainDateSlots, PlainTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------

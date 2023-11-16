@@ -53,7 +53,6 @@ import { Unit, milliInDay } from './units'
 import { Callable, clampEntity, compareNumbers, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { DurationInternals } from './durationFields'
 import { ensureString } from './cast'
-import { IsoDateSlots } from './slots'
 
 // Base Calendar Implementation
 // -------------------------------------------------------------------------------------------------

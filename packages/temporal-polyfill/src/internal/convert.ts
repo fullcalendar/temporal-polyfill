@@ -6,7 +6,6 @@ import {
   TimeFields,
   YearFields,
   dateFieldNames,
-  dateTimeFieldNames,
   dateTimeFieldRefiners,
   eraYearFieldRefiners,
   monthDayBasicNames,
@@ -44,6 +43,8 @@ import {
 import { Callable, pluckProps } from './utils'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
+import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot } from './calendarSlot'
+import { TimeZoneSlot, getMatchingInstantFor, getSingleInstantFor, refineTimeZoneSlot } from './timeZoneSlot'
 
 // public
 import type { TimeZoneArg } from '../public/timeZone'
@@ -54,8 +55,6 @@ import type { PlainTime, PlainTimeBag, PlainTimeMod } from '../public/plainTime'
 import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from '../public/plainYearMonth'
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from '../public/plainMonthDay'
 import type { DurationBag, DurationMod } from '../public/duration'
-import { CalendarSlot, calendarDateFromFields, calendarFields, calendarMergeFields, calendarMonthDayFromFields, calendarYearMonthFromFields, refineCalendarSlot } from './calendarSlot'
-import { TimeZoneSlot, getMatchingInstantFor, getSingleInstantFor, refineTimeZoneSlot } from './timeZoneSlot'
 
 // High-level to* methods
 // -------------------------------------------------------------------------------------------------
