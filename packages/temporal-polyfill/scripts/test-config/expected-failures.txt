@@ -3,9 +3,6 @@
 # Options parsing
 ####################################################################################################
 
-# when parsing zdt string, if string fails, should not parse disambig/offset/overflow
-built-ins/Temporal/ZonedDateTime/from/observable-get-overflow-argument-string-invalid.js
-
 # accessing options multiple times. this is why CopyDataProperties exists
 # ALSO, diff options should be snapshotted probably
 built-ins/Temporal/PlainDateTime/from/order-of-operations.js

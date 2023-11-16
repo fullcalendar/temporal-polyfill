@@ -114,6 +114,7 @@ export function validateOffsetNano(offsetNano: number): number {
     throw new RangeError('must be integer number')
   }
 
+  // TODO: DRY with string parsing?
   if (Math.abs(offsetNano) >= nanoInUtcDay) {
     throw new RangeError('out of range')
   }

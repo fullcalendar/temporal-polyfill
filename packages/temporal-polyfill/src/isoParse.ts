@@ -80,7 +80,10 @@ export function parseZonedOrPlainDateTime(s: string): IsoDateSlots | ZonedEpochS
     throw new RangeError()
   }
   if (organized.timeZone) {
-    return postProcessZonedDateTime(organized as ZonedDateTimeOrganized)
+    return postProcessZonedDateTime(
+      organized as ZonedDateTimeOrganized,
+      organized.offset ? parseOffsetNano(organized.offset) : undefined, // HACK
+    )
   }
   if (organized.hasZ) {
     throw new RangeError('Only Z cannot be parsed for this') // PlainDate doesn't accept it
@@ -94,13 +97,23 @@ NOTE: one of the only string-parsing methods that accepts options
 */
 export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): ZonedEpochSlots {
   const organized = parseMaybeGenericDateTime(s)
-  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
   if (!organized || !organized.timeZone) {
     throw new RangeError()
   }
 
-  return postProcessZonedDateTime(organized as ZonedDateTimeOrganized, offsetDisambig, epochDisambig)
+  // HACK to validate offset before parsing options
+  const { offset } = organized
+  const offsetNano = offset ? parseOffsetNano(offset) : undefined
+
+  const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
+
+  return postProcessZonedDateTime(
+    organized as ZonedDateTimeOrganized,
+    offsetNano, // HACK
+    offsetDisambig,
+    epochDisambig,
+  )
 }
 
 export function parsePlainDateTime(s: string): IsoDateTimeSlots {
@@ -296,6 +309,7 @@ export function parseTimeZoneId(s: string): string {
 
 function postProcessZonedDateTime(
   organized: ZonedDateTimeOrganized,
+  offsetNano: number | undefined, // HACK
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedEpochSlots {
@@ -305,7 +319,7 @@ function postProcessZonedDateTime(
   const epochNanoseconds = getMatchingInstantFor(
     organized.timeZone,
     constrainIsoDateTimeInternals(organized),
-    organized.offset ? parseOffsetNano(organized.offset) : undefined,
+    offsetNano,
     organized.hasZ,
     offsetDisambig,
     epochDisambig,
@@ -533,6 +547,7 @@ function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number 
     parseSubsecNano(parts[5] || '')
   )
 
+  // TODO: DRY with timeZoneSlot util?
   if (offsetNanoPos >= nanoInUtcDay) {
     throw new RangeError('Offset too large')
   }
