@@ -253,7 +253,7 @@ export function getSingleInstantFor(
 
   possibleEpochNanos = timeZoneGetPossibleInstantsFor(timeZoneSlot, {
     ...epochNanoToIso(zonedEpochNano, shiftNano), // abuse of offsetNano!
-    calendar: isoDateTimeSlots.calendar,
+    calendar: isoCalendarId,
   })
 
   return possibleEpochNanos[

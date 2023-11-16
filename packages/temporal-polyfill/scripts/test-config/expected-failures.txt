@@ -41,25 +41,6 @@ built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
 
-# getPossibleInstantsFor expects iso8601 calendar
-built-ins/Temporal/Duration/compare/relativeto-propertybag-getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/Duration/prototype/add/relativeto-propertybag-getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/Duration/prototype/subtract/relativeto-propertybag-getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/PlainDate/prototype/toZonedDateTime/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/PlainTime/prototype/toZonedDateTime/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/TimeZone/prototype/getInstantFor/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/startOfDay/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/getpossibleinstantsfor-called-with-iso8601-calendar.js
-#
-# however, this one wants original calendar:
-# built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
-
 # problem with our implementation of AddDurationToOrSubtractDurationFromPlainYearMonth
 # (called movePlainYearMonth) -- issue with rejecting on underflow
 built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
@@ -269,8 +250,9 @@ built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 # // internally to get the option value for the time part.
 built-ins/Temporal/ZonedDateTime/from/overflow-wrong-type.js
 
-# fewer calls to getPossibleInstantsFor while rounding ZonedDateTime to hour/min/sec..
+# fewer calls to getPossibleInstantsFor while rounding ZonedDateTime
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
+built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
 
 # fewer calls to getOffsetNanosecondsFor
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
