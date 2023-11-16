@@ -43,10 +43,6 @@ export function compareDayTimeNanos(a: DayTimeNano, b: DayTimeNano): NumSign {
   return compareNumbers(a[0], b[0]) || compareNumbers(a[1], b[1])
 }
 
-export function signDayTimeNano(num: DayTimeNano): NumSign {
-  return (Math.sign(num[0]) || Math.sign(num[1])) as NumSign
-}
-
 // Conversion
 // -------------------------------------------------------------------------------------------------
 

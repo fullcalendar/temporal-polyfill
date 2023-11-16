@@ -1,4 +1,4 @@
-import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, diffDayTimeNanos, signDayTimeNano } from './dayTimeNano'
+import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from './diff'
 import {
   DurationFields,
@@ -274,7 +274,7 @@ export function roundRelativeDuration<M>(
         : nudgeDurationDayTime // doesn't worry about DST
   ) as typeof nudgeRelativeDuration // accepts all units
 
-  let [roundedDurationFields, roundedEpochNano, grew] = nudgeFunc(
+  let [roundedDurationFields, roundedEpochNano, grewBigUnit] = nudgeFunc(
     durationInternals,
     endEpochNano,
     smallestUnit,
@@ -287,12 +287,12 @@ export function roundRelativeDuration<M>(
   )
 
   // grew a day/week/month/year?
-  if (grew) {
+  if (grewBigUnit) {
     roundedDurationFields = bubbleRelativeDuration(
       updateDurationFieldsSign(roundedDurationFields),
       roundedEpochNano,
       largestUnit,
-      smallestUnit,
+      Math.max(Unit.Day, smallestUnit),
       // marker system...
       marker,
       markerToEpochNano,
@@ -417,19 +417,19 @@ and return the (day) delta. Also return the (potentially) unbalanced new duratio
 function nudgeDurationDayTime(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for adding result to
-  smallestUnit: DayTimeUnit,
+  smallestUnit: DayTimeUnit, // always <=Day
   roundingInc: number,
   roundingMode: RoundingMode,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: DayTimeNano,
-  expanded: boolean,
+  expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const { sign } = durationFields
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
   const roundedDayTimeNano = roundDayTimeNano(dayTimeNano, smallestUnit, roundingInc, roundingMode)
   const nanoDiff = diffDayTimeNanos(dayTimeNano, roundedDayTimeNano)
-  const expanded = signDayTimeNano(nanoDiff) === sign
+  const expandedBigUnit = Math.sign(roundedDayTimeNano[0] - dayTimeNano[0]) === sign
 
   const roundedDayTimeFields = nanoToDurationDayTimeFields(
     roundedDayTimeNano,
@@ -443,7 +443,7 @@ function nudgeDurationDayTime(
   return [
     nudgedDurationFields,
     addDayTimeNanos(endEpochNano, nanoDiff),
-    expanded,
+    expandedBigUnit,
   ]
 }
 
@@ -467,7 +467,7 @@ Time ONLY. Days must use full-on marker moving
 function nudgeRelativeDurationTime<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for conformance
-  smallestUnit: TimeUnit,
+  smallestUnit: TimeUnit, // always <Day
   roundingInc: number,
   roundingMode: RoundingMode,
   // marker system...
@@ -477,7 +477,7 @@ function nudgeRelativeDurationTime<M>(
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: DayTimeNano,
-  expanded: boolean,
+  expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const { sign } = durationFields
   let [dayDelta, timeNano] = givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
@@ -521,7 +521,7 @@ function nudgeRelativeDurationTime<M>(
 function nudgeRelativeDuration<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
-  smallestUnit: Unit,
+  smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingMode,
   // marker system...
@@ -531,7 +531,7 @@ function nudgeRelativeDuration<M>(
 ): [
   durationFields: DurationFields,
   movedEpochNano: DayTimeNano,
-  expanded: boolean,
+  expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const { sign } = durationFields
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
@@ -563,7 +563,7 @@ function nudgeRelativeDuration<M>(
   return [
     baseDurationFields,
     expanded ? epochNano1 : epochNano0,
-    expanded,
+    expanded, // guaranteed to be a big unit because of big smallestUnit
   ]
 }
 
@@ -624,7 +624,7 @@ function bubbleRelativeDuration<M>(
   durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
-  smallestUnit: Unit,
+  smallestUnit: Unit, // guaranteed Day/Week/Month/Year
   // marker system...
   marker: M,
   markerToEpochNano: MarkerToEpochNano<M>,

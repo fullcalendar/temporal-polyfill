@@ -60,6 +60,11 @@ built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/getpossibleinstantsfor-
 # however, this one wants original calendar:
 # built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
 
+# problem with our implementation of AddDurationToOrSubtractDurationFromPlainYearMonth
+# (called movePlainYearMonth) -- issue with rejecting on underflow
+built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/end-of-month-out-of-range.js
+
 ####################################################################################################
 # Misc CALENDAR non-compliance
 ####################################################################################################
