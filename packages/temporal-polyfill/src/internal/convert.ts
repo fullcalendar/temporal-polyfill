@@ -56,6 +56,15 @@ import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, ty
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from '../public/plainMonthDay'
 import type { DurationBag, DurationMod } from '../public/duration'
 
+/*
+Initial subject should be converted to { calendar, timeZone, day, month, monthCode, year, era, eraYear }
+BEFORE being sent here
+`mod` should be just fields
+
+QUESTION: have different utils for complex object versus string?
+(ex: CalendarSlot vs string, TimeZoneSlot vs string)
+*/
+
 // High-level to* methods
 // -------------------------------------------------------------------------------------------------
 

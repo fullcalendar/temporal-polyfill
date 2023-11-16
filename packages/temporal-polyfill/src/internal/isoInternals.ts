@@ -84,6 +84,7 @@ export const generatePublicIsoDateTimeFields = generatePublicIsoFields.bind<
 
 // Advanced Refining
 // -------------------------------------------------------------------------------------------------
+// can be moved to 'PUBLIC'
 
 export function refineIsoDateTimeInternals(
   rawIsoDateTimeInternals: IsoDateTimeFields & { calendar: CalendarArg },

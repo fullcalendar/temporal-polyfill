@@ -18,9 +18,9 @@ import {
 import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 
 // public
-import type { TimeZoneArg } from '../public/timeZone'
-import type { PlainDate } from '../public/plainDate'
-import type { ZonedDateTime, ZonedDateTimeBag } from '../public/zonedDateTime'
+import type { TimeZoneArg } from '../public/timeZone' // for Instant display options
+import type { PlainDate } from '../public/plainDate' // for relativeTo ... just for slot
+import type { ZonedDateTime, ZonedDateTimeBag } from '../public/zonedDateTime' // for relativeTo ... for slots AND refining (aka 'convert')
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------

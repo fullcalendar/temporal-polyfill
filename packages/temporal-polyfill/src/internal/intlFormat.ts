@@ -29,6 +29,8 @@ import type { Instant } from '../public/instant'
 export type LocalesArg = string | string[]
 
 type OrigFormattable = number | Date
+
+// NOT really used. We immediately get slots
 type TemporalFormattable =
   | Instant
   | PlainDate

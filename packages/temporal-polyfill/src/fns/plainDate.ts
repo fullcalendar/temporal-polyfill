@@ -13,6 +13,12 @@ YES:
     )
     // NOTE: PlainDateTimeFns.fromString throws away timezone/offset info,
     // so it's not usable
+
+WE'RE NOT ALLOWING CalendarProtocol or TimeZoneProtocol because they accept
+Temporal objects, creating them will break tree-shaking
+
+ALSO, we don't like complex Calendar or TimeZone objects because they have a lot of functionality
+all bundled together, making it impossible to tree shake
 */
 
 /*

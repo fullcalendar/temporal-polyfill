@@ -19,6 +19,14 @@ import {
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
 
+/*
+This files relies on TimeZoneSlot/refineTimeZoneSlot
+Caller will need to pre-convert to a `timeZoneGetOffsetNanosecondsFor`-like function
+and other tricks for formatting TimeZone and Calendar as string
+(see formatZonedDateTimeIso)
+DO LAST!!!
+*/
+
 // High-level
 // -------------------------------------------------------------------------------------------------
 
