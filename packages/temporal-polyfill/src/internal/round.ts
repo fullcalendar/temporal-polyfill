@@ -19,7 +19,7 @@ import { EpochDisambig, OffsetDisambig, RoundingMode, RoundingOptions, refineRou
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
-import { computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneSlot'
+import { computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneMath'
 import {
   nanoInMinute,
   nanoInUtcDay,

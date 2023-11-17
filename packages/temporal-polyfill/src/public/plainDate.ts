@@ -22,7 +22,7 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, plu
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { ensureString } from '../internal/cast'
 import { refineCalendarSlot } from '../internal/calendarSlot'
-import { zonedInternalsToIso } from '../internal/timeZoneSlot'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { moveDateEasy } from '../internal/move'
 import { calendarProtocolDateAdd, createCalendarSlotRecord } from './calendarRecordComplex'
 import { calendarImplDateAdd } from '../internal/calendarRecordSimple'

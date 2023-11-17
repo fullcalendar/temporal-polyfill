@@ -47,7 +47,8 @@ import { bigIntToDayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNan
 import { ensureString, toBigInt } from '../internal/cast'
 import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { getPreferredCalendarSlot, refineCalendarSlot } from '../internal/calendarSlot'
-import { TimeZoneSlot, computeNanosecondsInDay, getMatchingInstantFor, getTimeZoneSlotId, refineTimeZoneSlot, zonedInternalsToIso } from '../internal/timeZoneSlot'
+import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot } from '../internal/timeZoneSlot'
+import { computeNanosecondsInDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneMath'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
 
 // public

@@ -26,7 +26,8 @@ import {
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
 import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
-import { getMatchingInstantFor, utcTimeZoneId } from './timeZoneSlot'
+import { utcTimeZoneId } from './timeZoneSlot'
+import { getMatchingInstantFor } from './timeZoneMath'
 import {
   TimeUnit,
   Unit,

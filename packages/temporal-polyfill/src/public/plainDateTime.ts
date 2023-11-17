@@ -18,7 +18,8 @@ import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, 
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { getPreferredCalendarSlot, refineCalendarSlot } from '../internal/calendarSlot'
-import { refineTimeZoneSlot, zonedInternalsToIso } from '../internal/timeZoneSlot'
+import { refineTimeZoneSlot } from '../internal/timeZoneSlot'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 
 // public
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'

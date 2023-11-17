@@ -27,7 +27,8 @@ import { DiffOptions, LargestUnitOptions, RoundingMode, prepareOptions, refineDi
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot, getCommonTimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
+import { TimeZoneSlot, getCommonTimeZoneSlot } from './timeZoneSlot'
+import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import {
   DayTimeUnit,
   TimeUnit,

@@ -28,7 +28,8 @@ import {
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
 import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
+import { TimeZoneSlot } from './timeZoneSlot'
+import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
 

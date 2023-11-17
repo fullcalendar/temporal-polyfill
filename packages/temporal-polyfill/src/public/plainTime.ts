@@ -25,7 +25,7 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { DurationBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { ensureString } from '../internal/cast'
-import { zonedInternalsToIso } from '../internal/timeZoneSlot'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 
 // public
 import { PlainDateArg, toPlainDateSlots } from './plainDate'

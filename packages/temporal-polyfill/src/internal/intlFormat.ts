@@ -15,7 +15,8 @@ import {
 } from './utils'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
 import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
-import { getSingleInstantFor, getTimeZoneSlotId } from './timeZoneSlot'
+import { getTimeZoneSlotId } from './timeZoneSlot'
+import { getSingleInstantFor } from './timeZoneMath'
 import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 
 // public

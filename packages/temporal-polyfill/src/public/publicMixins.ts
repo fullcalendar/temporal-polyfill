@@ -8,7 +8,7 @@ import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDate
 import { getCalendarSlotId } from '../internal/calendarSlot'
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { pluckIsoDateInternals } from '../internal/isoInternals'
-import { zonedInternalsToIso } from '../internal/timeZoneSlot'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 
 // public
 import { createPlainDate } from './plainDate'

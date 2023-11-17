@@ -1,8 +1,9 @@
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { InstantBranding, IsoDateTimeSlots, PlainDateTimeBranding } from '../internal/slots'
 import { TimeZoneImpl } from '../internal/timeZoneImpl'
+import { validateOffsetNano } from '../internal/timeZoneMath'
 import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../internal/timeZoneRecordSimple'
-import { TimeZoneSlot, validateOffsetNano } from '../internal/timeZoneSlot'
+import { TimeZoneSlot } from '../internal/timeZoneSlot'
 
 // public
 import { Instant, createInstant, getInstantSlots } from './instant'
