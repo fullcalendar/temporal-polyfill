@@ -1,7 +1,7 @@
 import { CalendarImpl } from './calendarImpl'
 import { calendarImplDateAdd, calendarImplDateUntil, calendarImplDay } from './calendarRecordSimple'
 import { CalendarDateAddFunc, CalendarDateUntilFunc } from './calendarRecordTypes'
-import { CalendarSlot, getCommonCalendarSlot } from './calendarSlot'
+import { CalendarSlot, getCommonCalendarSlot } from './calendarSlotUtils'
 import { ensureObjectlike } from './cast'
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
@@ -27,7 +27,7 @@ import { DiffOptions, LargestUnitOptions, RoundingMode, prepareOptions, refineDi
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot, getCommonTimeZoneSlot } from './timeZoneSlot'
+import { TimeZoneSlot, getCommonTimeZoneSlot } from './timeZoneSlotUtils'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import {
   DayTimeUnit,

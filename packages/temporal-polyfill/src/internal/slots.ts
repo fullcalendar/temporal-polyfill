@@ -1,8 +1,8 @@
-import { CalendarSlot } from './calendarSlot'
+import { CalendarSlot } from './calendarSlotUtils'
 import { DayTimeNano } from './dayTimeNano'
 import { DurationInternals } from './durationFields'
 import { IsoDateFields, IsoTimeFields } from './isoFields'
-import { TimeZoneSlot } from './timeZoneSlot'
+import { TimeZoneSlot } from './timeZoneSlotUtils'
 
 export interface BrandingSlots {
   branding: string

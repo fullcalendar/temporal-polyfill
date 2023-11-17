@@ -3,7 +3,7 @@ import { InstantBranding, IsoDateTimeSlots, PlainDateTimeBranding } from '../int
 import { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { validateOffsetNano } from '../internal/timeZoneMath'
 import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../internal/timeZoneRecordSimple'
-import { TimeZoneSlot } from '../internal/timeZoneSlot'
+import { TimeZoneSlot } from '../internal/timeZoneSlotUtils'
 
 // public
 import { Instant, createInstant, getInstantSlots } from './instant'

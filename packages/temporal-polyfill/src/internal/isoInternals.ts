@@ -9,7 +9,7 @@ import {
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
 import { IsoDateSlots, IsoDateTimeSlots } from './slots'
-import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { CalendarSlot, refineCalendarSlot } from './calendarSlotUtils'
 import { toInteger } from './cast'
 
 // public

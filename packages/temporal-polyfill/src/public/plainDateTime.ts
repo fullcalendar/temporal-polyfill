@@ -17,8 +17,8 @@ import { roundPlainDateTime } from '../internal/round'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { getPreferredCalendarSlot, refineCalendarSlot } from '../internal/calendarSlot'
-import { refineTimeZoneSlot } from '../internal/timeZoneSlot'
+import { getPreferredCalendarSlot, refineCalendarSlot } from '../internal/calendarSlotUtils'
+import { refineTimeZoneSlot } from '../internal/timeZoneSlotUtils'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 
 // public

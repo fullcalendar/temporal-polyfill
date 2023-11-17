@@ -6,8 +6,8 @@ import { createPropDescriptors, createTemporalNameDescriptors } from '../interna
 import { epochMilliToNano } from '../internal/isoMath'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { InstantBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, ZonedEpochSlots } from '../internal/slots'
-import { refineCalendarSlot } from '../internal/calendarSlot'
-import { refineTimeZoneSlot } from '../internal/timeZoneSlot'
+import { refineCalendarSlot } from '../internal/calendarSlotUtils'
+import { refineTimeZoneSlot } from '../internal/timeZoneSlotUtils'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 
 // public

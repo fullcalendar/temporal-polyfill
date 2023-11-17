@@ -1,5 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
-import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
+import { CalendarSlot, getCalendarSlotId } from './calendarSlotUtils'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
@@ -8,7 +8,7 @@ import { CalendarDisplay, DateTimeDisplayOptions, InstantDisplayOptions, OffsetD
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { timeZoneImplGetOffsetNanosecondsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot, utcTimeZoneId } from './timeZoneSlot'
+import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot, utcTimeZoneId } from './timeZoneSlotUtils'
 import {
   givenFieldsToDayTimeNano,
   nanoInHour,

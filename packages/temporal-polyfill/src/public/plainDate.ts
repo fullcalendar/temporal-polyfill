@@ -21,7 +21,7 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, r
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { ensureString } from '../internal/cast'
-import { refineCalendarSlot } from '../internal/calendarSlot'
+import { refineCalendarSlot } from '../internal/calendarSlotUtils'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { moveDateEasy } from '../internal/move'
 import { calendarProtocolDateAdd, createCalendarSlotRecord } from './calendarRecordComplex'

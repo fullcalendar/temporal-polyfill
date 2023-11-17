@@ -1,7 +1,7 @@
 import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
 import { calendarImplDateAdd } from './calendarRecordSimple'
 import { CalendarDateAddFunc } from './calendarRecordTypes'
-import { CalendarSlot } from './calendarSlot'
+import { CalendarSlot } from './calendarSlotUtils'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -28,7 +28,7 @@ import {
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
 import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot } from './timeZoneSlot'
+import { TimeZoneSlot } from './timeZoneSlotUtils'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'

@@ -14,8 +14,8 @@ import {
   pluckProps,
 } from './utils'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
-import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
-import { getTimeZoneSlotId } from './timeZoneSlot'
+import { CalendarSlot, getCalendarSlotId } from './calendarSlotUtils'
+import { getTimeZoneSlotId } from './timeZoneSlotUtils'
 import { getSingleInstantFor } from './timeZoneMath'
 import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 

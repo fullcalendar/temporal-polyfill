@@ -9,7 +9,7 @@ import { createLazyGenerator } from './utils'
 import { isoCalendarId } from './calendarConfig'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 import { timeZoneImplGetOffsetNanosecondsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot } from './timeZoneSlot'
+import { TimeZoneSlot } from './timeZoneSlotUtils'
 
 // public
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor } from '../public/timeZoneRecordComplex'

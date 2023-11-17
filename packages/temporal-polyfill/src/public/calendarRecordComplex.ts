@@ -1,7 +1,7 @@
 import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { CalendarImpl } from '../internal/calendarImpl'
 import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../internal/calendarRecordSimple'
-import { CalendarSlot } from '../internal/calendarSlot'
+import { CalendarSlot } from '../internal/calendarSlotUtils'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationInternals } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'

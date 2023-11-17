@@ -18,8 +18,8 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } fr
 import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { refineCalendarSlot } from '../internal/calendarSlot'
-import { refineTimeZoneSlot } from '../internal/timeZoneSlot'
+import { refineCalendarSlot } from '../internal/calendarSlotUtils'
+import { refineTimeZoneSlot } from '../internal/timeZoneSlotUtils'
 
 // public
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
