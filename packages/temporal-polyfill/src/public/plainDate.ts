@@ -24,6 +24,8 @@ import { ensureString } from '../internal/cast'
 import { refineCalendarSlot } from '../internal/calendarSlot'
 import { zonedInternalsToIso } from '../internal/timeZoneSlot'
 import { moveDateEasy } from '../internal/move'
+import { calendarProtocolDateAdd, createCalendarSlotRecord } from './calendarRecordComplex'
+import { calendarImplDateAdd } from '../internal/calendarRecordSimple'
 
 // public
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -81,9 +83,15 @@ export class PlainDate {
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
     const slots = getPlainDateSlots(this)
+    const calendarRecord = createCalendarSlotRecord(slots.calendar, {
+      dateAdd: calendarImplDateAdd,
+    }, {
+      dateAdd: calendarProtocolDateAdd,
+    })
+
     return createPlainDate({
       ...moveDateEasy(
-        slots.calendar,
+        calendarRecord,
         slots,
         toDurationSlots(durationArg),
         options,
@@ -95,9 +103,15 @@ export class PlainDate {
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
     const slots = getPlainDateSlots(this)
+    const calendarRecord = createCalendarSlotRecord(slots.calendar, {
+      dateAdd: calendarImplDateAdd,
+    }, {
+      dateAdd: calendarProtocolDateAdd,
+    })
+
     return createPlainDate({
       ...moveDateEasy(
-        slots.calendar,
+        calendarRecord,
         slots,
         negateDurationInternals(toDurationSlots(durationArg)),
         options,

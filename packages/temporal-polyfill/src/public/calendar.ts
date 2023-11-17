@@ -4,11 +4,12 @@ import { IsoDateFields } from '../internal/isoFields'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from '../internal/utils'
 import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { calendarDateAdd, calendarFields, calendarMergeFields, refineCalendarSlot, refineCalendarSlotString } from '../internal/calendarSlot'
+import { refineCalendarSlot, refineCalendarSlotString } from '../internal/calendarSlot'
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/convert'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
+import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
 
 // public
 import type { PlainDateTime } from './plainDateTime'
@@ -71,9 +72,12 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainDate {
     const { id } = getCalendarSlots(this)
+    const { dateAdd } = createCalendarImplRecord(id, {
+      dateAdd: calendarImplDateAdd,
+    })
+
     return createPlainDate({
-      ...calendarDateAdd(
-        id,
+      ...dateAdd(
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
         options,
@@ -89,10 +93,14 @@ export class Calendar implements CalendarProtocol {
     options?: LargestUnitOptions,
   ): Duration {
     const { id } = getCalendarSlots(this)
+    const calendarRecord = createCalendarImplRecord(id, {
+      dateUntil: calendarImplDateUntil,
+    })
+
     return createDuration({
       branding: DurationBranding,
       ...calendarDateUntilEasy(
-        id,
+        calendarRecord,
         toPlainDateSlots(plainDateArg0),
         toPlainDateSlots(plainDateArg1),
         refineCalendarDiffOptions(options),
@@ -136,6 +144,7 @@ export class Calendar implements CalendarProtocol {
 
   fields(fieldNames: Iterable<string>): Iterable<string> {
     const { id } = getCalendarSlots(this)
+    const calendarRecord = createCalendarImplRecord(id, { fields: calendarImplFields })
 
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
@@ -154,7 +163,7 @@ export class Calendar implements CalendarProtocol {
       fieldNamesArray.push(fieldName)
     }
 
-    return calendarFields(id, fieldNamesArray)
+    return calendarRecord.fields(fieldNamesArray)
   }
 
   mergeFields(
@@ -162,8 +171,9 @@ export class Calendar implements CalendarProtocol {
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
     const { id } = getCalendarSlots(this)
-    return calendarMergeFields(
-      id,
+    const { mergeFields } = createCalendarImplRecord(id, { mergeFields: calendarImplMergeFields })
+
+    return mergeFields(
       excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),
       excludeUndefinedProps(ensureNotNullOrUndefined(fields1)),
     )
@@ -220,6 +230,7 @@ const dateArgWhitelist: Record<string, string> = {
 
 defineStringTag(Calendar.prototype, CalendarBranding)
 
+// all these returns simple values (number/boolean)
 defineProps(
   Calendar.prototype,
   mapPropNames((propName: keyof DateGetterFields) => {
@@ -233,7 +244,6 @@ defineProps(
         ? slots as unknown as IsoDateFields
         : toPlainDateSlots(dateArg as PlainDateArg)
 
-      // TODO: DRY with calendarFieldFuncs
       return queryCalendarImpl(id)[propName](isoFields)
     }
   }, dateGetterNames) as DateGetterFieldMethods,

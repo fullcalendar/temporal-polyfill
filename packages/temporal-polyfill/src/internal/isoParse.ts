@@ -37,12 +37,13 @@ import {
 import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 import { IsoDateSlots, IsoDateTimeSlots, PlainDateBranding, ZonedEpochSlots } from './slots'
-import { calendarFieldFuncs } from './calendarSlot'
 import { refinePlainMonthDayBag } from './convert'
 
 // public
 // YUCK: figure out way to remove
 import { createPlainDate } from '../public/plainDate'
+import { calendarProtocolDay, createCalendarSlotRecord } from '../public/calendarRecordComplex'
+import { calendarImplDay } from './calendarRecordSimple'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -171,9 +172,15 @@ function resetToMonthStart(isoInternals: IsoDateSlots): IsoDateSlots {
 
 // TODO: DRY
 function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
+  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
+    day: calendarImplDay,
+  }, {
+    day: calendarProtocolDay,
+  })
+
   return moveByIsoDays(
     internals,
-    day - calendarFieldFuncs.day(internals.calendar, internals), // NOTE: non-compliant algorithm
+    day - calendarRecord.day(internals),
   )
 }
 

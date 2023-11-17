@@ -1,5 +1,8 @@
+import { calendarProtocolDateAdd, createCalendarSlotRecord } from '../public/calendarRecordComplex'
 import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
-import { CalendarSlot, calendarDateAdd } from './calendarSlot'
+import { calendarImplDateAdd } from './calendarRecordSimple'
+import { CalendarDateAddFunc } from './calendarRecordTypes'
+import { CalendarSlot } from './calendarSlot'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -37,10 +40,16 @@ export function movePlainDateTime(
   durationInternals: DurationInternals,
   options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): IsoDateTimeSlots {
+  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
+    dateAdd: calendarImplDateAdd,
+  }, {
+    dateAdd: calendarProtocolDateAdd,
+  })
+
   return {
     calendar: internals.calendar, // TODO: make this nicer
     ...moveDateTime(
-      internals.calendar,
+      calendarRecord,
       internals,
       durationInternals,
       options,
@@ -81,9 +90,15 @@ export function moveZonedEpochNano(
   if (!durationHasDateParts(durationFields)) {
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
   } else {
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      dateAdd: calendarImplDateAdd,
+    }, {
+      dateAdd: calendarProtocolDateAdd,
+    })
+
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
     const movedIsoDateFields = moveDateEasy(
-      calendar,
+      calendarRecord,
       isoDateTimeFields,
       {
         ...durationFields, // date parts
@@ -118,7 +133,7 @@ export function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFi
 // -------------------------------------------------------------------------------------------------
 
 export function moveDateTime(
-  calendar: CalendarSlot,
+  calendarRecord: { dateAdd: CalendarDateAddFunc },
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
@@ -127,7 +142,7 @@ export function moveDateTime(
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
   const movedIsoDateFields = moveDateEasy(
-    calendar,
+    calendarRecord,
     isoDateTimeFields, // only date parts will be used
     {
       ...durationFields, // date parts
@@ -144,14 +159,13 @@ export function moveDateTime(
 }
 
 export function moveDateEasy(
-  calendar: CalendarSlot,
+  calendarRecord: { dateAdd: CalendarDateAddFunc },
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return calendarDateAdd(
-      calendar,
+    return calendarRecord.dateAdd(
       isoDateFields,
       updateDurationFieldsSign(durationFields),
       options

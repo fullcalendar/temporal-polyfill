@@ -20,7 +20,8 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, r
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { ensureString } from '../internal/cast'
-import { calendarDateAdd, calendarDaysInMonth, calendarFieldFuncs } from '../internal/calendarSlot'
+import { calendarImplDateAdd, calendarImplDay, calendarImplDaysInMonth } from '../internal/calendarRecordSimple'
+import { calendarProtocolDateAdd, calendarProtocolDay, calendarProtocolDaysInMonth, createCalendarSlotRecord } from './calendarRecordComplex'
 
 // public
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
@@ -188,14 +189,22 @@ function movePlainYearMonth(
   options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): PlainYearMonth {
   const { calendar } = internals
+  const calendarRecord = createCalendarSlotRecord(calendar, {
+    dateAdd: calendarImplDateAdd,
+    daysInMonth: calendarImplDaysInMonth,
+  }, {
+    dateAdd: calendarProtocolDateAdd,
+    daysInMonth: calendarProtocolDaysInMonth,
+  })
+
   const isoDateFields = movePlainYearMonthToDay(
     internals,
     durationInternals.sign < 0
-      ? calendarDaysInMonth(calendar, internals)
+      ? calendarRecord.daysInMonth(internals)
       : 1,
   )
 
-  const movedIsoDateFields = calendarDateAdd(calendar, isoDateFields, durationInternals, options)
+  const movedIsoDateFields = calendarRecord.dateAdd(isoDateFields, durationInternals, options)
 
   return createPlainYearMonth({
     ...movePlainYearMonthToDay({ ...movedIsoDateFields, calendar }),
@@ -204,13 +213,16 @@ function movePlainYearMonth(
   })
 }
 
-/*
-TODO: move to move.ts
-TODO: DRY
-*/
+// TODO: DRY
 function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
+  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
+    day: calendarImplDay,
+  }, {
+    day: calendarProtocolDay,
+  })
+
   return moveByIsoDays(
     internals,
-    day - calendarFieldFuncs.day(internals.calendar, internals),
+    day - calendarRecord.day(internals),
   )
 }

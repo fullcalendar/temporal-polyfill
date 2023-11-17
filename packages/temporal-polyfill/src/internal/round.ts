@@ -1,3 +1,5 @@
+import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from '../public/calendarRecordComplex'
+import { calendarImplDateAdd, calendarImplDateUntil } from './calendarRecordSimple'
 import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from './diff'
 import {
@@ -603,15 +605,23 @@ export function createMarkerSystem(
       diffZonedEpochNano.bind(undefined, calendar, () => timeZone) as DiffMarkers<DayTimeNano>,
     ]
   } else {
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      dateAdd: calendarImplDateAdd,
+      dateUntil: calendarImplDateUntil,
+    }, {
+      dateAdd: calendarProtocolDateAdd,
+      dateUntil: calendarProtocolDateUntil,
+    })
+
     return [
       { ...markerInternals, ...isoTimeFieldDefaults } as IsoDateTimeFields,
       isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
       // TODO: better way to .bind to Calendar
       (m: IsoDateTimeFields, d: DurationFields) => {
-        return moveDateTime(calendar, m, d)
+        return moveDateTime(calendarRecord, m, d)
       },
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return updateDurationFieldsSign(diffDateTimes(calendar, m0, m1, largeUnit))
+        return updateDurationFieldsSign(diffDateTimes(calendarRecord, m0, m1, largeUnit))
       },
     ]
   }
