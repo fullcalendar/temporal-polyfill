@@ -38,12 +38,12 @@ import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 import { IsoDateSlots, IsoDateTimeSlots, PlainDateBranding, ZonedEpochSlots } from './slots'
 import { refinePlainMonthDayBag } from './convert'
+import { calendarImplDay } from './calendarRecordSimple'
 
 // public
 // YUCK: figure out way to remove
 import { createPlainDate } from '../public/plainDate'
 import { calendarProtocolDay, createCalendarSlotRecord } from '../public/calendarRecordComplex'
-import { calendarImplDay } from './calendarRecordSimple'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -325,7 +325,7 @@ function postProcessZonedDateTime(
   const timeZoneImpl = queryTimeZoneImpl(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
-    organized.timeZone,
+    timeZoneImpl, // CRAZY this works!
     constrainIsoDateTimeInternals(organized),
     offsetNano,
     organized.hasZ,

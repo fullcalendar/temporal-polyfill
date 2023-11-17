@@ -15,6 +15,7 @@ import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
+import { createTimeZoneProtocolRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------
@@ -92,10 +93,17 @@ export class TimeZone { // implements TimeZoneProtocol
     options?: EpochDisambigOptions
   ): Instant {
     getTimeZoneSlots(this) // validate `this`
+
+    // weird
+    const calendarRecord = createTimeZoneProtocolRecord(this, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
+
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: getSingleInstantFor(
-        this,
+        calendarRecord,
         toPlainDateTimeSlots(plainDateTimeArg),
         refineEpochDisambigOptions(options),
       )

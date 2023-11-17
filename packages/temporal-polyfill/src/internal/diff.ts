@@ -1,4 +1,3 @@
-import { calendarProtocolDateAdd, calendarProtocolDateUntil, calendarProtocolDay, createCalendarSlotRecord } from '../public/calendarRecordComplex'
 import { CalendarImpl } from './calendarImpl'
 import { calendarImplDateAdd, calendarImplDateUntil, calendarImplDay } from './calendarRecordSimple'
 import { CalendarDateAddFunc, CalendarDateUntilFunc } from './calendarRecordTypes'
@@ -27,6 +26,7 @@ import { moveDateTime, moveZonedEpochNano } from './move'
 import { DiffOptions, LargestUnitOptions, RoundingMode, prepareOptions, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 import { TimeZoneSlot, getCommonTimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
 import {
   DayTimeUnit,
@@ -36,6 +36,10 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc } from './utils'
+
+// public
+import { calendarProtocolDateAdd, calendarProtocolDateUntil, calendarProtocolDay, createCalendarSlotRecord } from '../public/calendarRecordComplex'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
@@ -408,7 +412,21 @@ export function diffZonedEpochNano(
     )
   }
 
+  const calendarRecord = createCalendarSlotRecord(calendarSlot, {
+    dateUntil: calendarImplDateUntil,
+  }, {
+    dateUntil: calendarProtocolDateUntil,
+  })
+
   const timeZone = getTimeZone() // must be exactly here, before short-circuit
+
+  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {
@@ -418,7 +436,7 @@ export function diffZonedEpochNano(
   const startIsoFields = zonedEpochNanoToIso(timeZone, startEpochNano)
   const startIsoTimeFields = pluckIsoTimeFields(startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZone, endEpochNano)
-  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZone) // necessary to bind?
+  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneRecord) // necessary to bind?
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields, calendar: calendarSlot }
   let midEpochNano = isoToZonedEpochNano(midIsoFields)
   let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
@@ -434,12 +452,6 @@ export function diffZonedEpochNano(
     midEpochNano = isoToZonedEpochNano(midIsoFields)
     midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
   }
-
-  const calendarRecord = createCalendarSlotRecord(calendarSlot, {
-    dateUntil: calendarImplDateUntil,
-  }, {
-    dateUntil: calendarProtocolDateUntil,
-  })
 
   const dateDiff = calendarDateUntilEasy(calendarRecord, startIsoFields, midIsoFields, largestUnit, origOptions)
   const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too

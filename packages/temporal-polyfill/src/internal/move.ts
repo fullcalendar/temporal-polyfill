@@ -1,4 +1,3 @@
-import { calendarProtocolDateAdd, createCalendarSlotRecord } from '../public/calendarRecordComplex'
 import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
 import { calendarImplDateAdd } from './calendarRecordSimple'
 import { CalendarDateAddFunc } from './calendarRecordTypes'
@@ -28,9 +27,14 @@ import {
 } from './isoMath'
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
 import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 import { TimeZoneSlot, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneSlot'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
+
+// public
+import { calendarProtocolDateAdd, createCalendarSlotRecord } from '../public/calendarRecordComplex'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -95,6 +99,13 @@ export function moveZonedEpochNano(
     }, {
       dateAdd: calendarProtocolDateAdd,
     })
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
 
     const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
     const movedIsoDateFields = moveDateEasy(
@@ -112,7 +123,7 @@ export function moveZonedEpochNano(
       calendar, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(
-      getSingleInstantFor(timeZone, movedIsoDateTimeFields),
+      getSingleInstantFor(timeZoneRecord, movedIsoDateTimeFields),
       dayTimeNano
     )
   }

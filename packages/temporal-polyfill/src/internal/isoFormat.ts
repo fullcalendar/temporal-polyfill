@@ -7,7 +7,8 @@ import { epochNanoToIso } from './isoMath'
 import { CalendarDisplay, DateTimeDisplayOptions, InstantDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot, timeZoneGetOffsetNanosecondsFor, utcTimeZoneId } from './timeZoneSlot'
+import { timeZoneImplGetOffsetNanosecondsFor } from './timeZoneRecordSimple'
+import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot, utcTimeZoneId } from './timeZoneSlot'
 import {
   givenFieldsToDayTimeNano,
   nanoInHour,
@@ -19,13 +20,8 @@ import {
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
 
-/*
-This files relies on TimeZoneSlot/refineTimeZoneSlot
-Caller will need to pre-convert to a `timeZoneGetOffsetNanosecondsFor`-like function
-and other tricks for formatting TimeZone and Calendar as string
-(see formatZonedDateTimeIso)
-DO LAST!!!
-*/
+// public
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor } from '../public/timeZoneRecordComplex'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -60,6 +56,12 @@ export function formatZonedDateTimeIso(
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   let { epochNanoseconds: epochNano, timeZone, calendar } = internals
+  const { getOffsetNanosecondsFor } = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+  })
+
   const [
     calendarDisplay,
     timeZoneDisplay,
@@ -70,7 +72,7 @@ export function formatZonedDateTimeIso(
   ] = refineZonedDateTimeDisplayOptions(options)
 
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const offsetNano = timeZoneGetOffsetNanosecondsFor(timeZone, epochNano)
+  const offsetNano = getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
@@ -89,7 +91,13 @@ export function formatInstantIso(
     roundingMode,
     subsecDigits,
   ] = refineInstantDisplayOptions(options)
+
   const timeZone = timeZoneArg !== undefined ? refineTimeZoneSlot(timeZoneArg) : utcTimeZoneId
+  const { getOffsetNanosecondsFor } = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+  })
 
   epochNano = roundDayTimeNanoByInc(
     epochNano,
@@ -98,7 +106,7 @@ export function formatInstantIso(
     true, // useDayOrigin
   )
 
-  let offsetNano = timeZoneGetOffsetNanosecondsFor(timeZone, epochNano)
+  let offsetNano = getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +

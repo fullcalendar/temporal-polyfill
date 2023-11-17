@@ -8,6 +8,7 @@ import { Unit } from './units'
 
 // CalendarImpl Record Creation
 // -------------------------------------------------------------------------------------------------
+// TODO: more DRY
 
 export type CalendarImplFunc = (calendarImpl: CalendarImpl, ...args: any[]) => any
 

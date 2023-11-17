@@ -18,6 +18,7 @@ import { getPlainYearMonthSlots } from './plainYearMonth'
 
 // CONDITIONAL Record Creation
 // -------------------------------------------------------------------------------------------------
+// TODO: more DRY
 
 export type CalendarProtocolFuncViaImpl<ImplFunc> =
   ImplFunc extends (calendarImpl: CalendarImpl, ...args: infer Args) => infer Ret
@@ -43,6 +44,7 @@ export function createCalendarSlotRecord<
 
 // CalendarProtocol Record Creation
 // -------------------------------------------------------------------------------------------------
+// TODO: more DRY
 
 type CalendarProtocolFunc = (calendarProtocol: CalendarProtocol, ...args: any[]) => any
 

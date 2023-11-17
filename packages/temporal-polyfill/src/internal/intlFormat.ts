@@ -16,6 +16,7 @@ import {
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
 import { CalendarSlot, getCalendarSlotId } from './calendarSlot'
 import { getSingleInstantFor, getTimeZoneSlotId } from './timeZoneSlot'
+import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 
 // public
 import type { ZonedDateTime } from '../public/zonedDateTime'
@@ -360,8 +361,13 @@ function timeFieldsToEpochNano(
   internals: IsoTimeFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
+  const timeZoneRecord = createTimeZoneImplRecord(resolvedOptions.timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  })
+
   return getSingleInstantFor(
-    resolvedOptions.timeZone,
+    timeZoneRecord,
     {
       calendar: isoCalendarId,
       isoYear: isoEpochOriginYear,
@@ -376,8 +382,13 @@ function dateInternalsToEpochNano(
   internals: IsoDateTimeSlots | IsoDateSlots,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
+  const timeZoneRecord = createTimeZoneImplRecord(resolvedOptions.timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  })
+
   return getSingleInstantFor(
-    resolvedOptions.timeZone,
+    timeZoneRecord,
     {
       ...isoTimeFieldDefaults,
       isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day

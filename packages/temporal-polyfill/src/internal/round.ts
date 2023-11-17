@@ -1,4 +1,3 @@
-import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from '../public/calendarRecordComplex'
 import { calendarImplDateAdd, calendarImplDateUntil } from './calendarRecordSimple'
 import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from './diff'
@@ -18,7 +17,9 @@ import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIs
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { EpochDisambig, OffsetDisambig, RoundingMode, RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { TimeZoneSlot, computeNanosecondsInDay, getMatchingInstantFor, timeZoneGetOffsetNanosecondsFor } from './timeZoneSlot'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
+import { computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneSlot'
 import {
   nanoInMinute,
   nanoInUtcDay,
@@ -30,6 +31,10 @@ import {
   UnitName,
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
+
+// public
+import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from '../public/calendarRecordComplex'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
 
 export function roundPlainDateTime(
   internals: IsoDateTimeSlots,
@@ -51,9 +56,17 @@ export function roundZonedDateTime(
   options: RoundingOptions | UnitName,
 ): ZonedEpochSlots {
   let { epochNanoseconds, timeZone, calendar } = internals
+  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
+
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
-  const offsetNano = timeZoneGetOffsetNanosecondsFor(timeZone, epochNanoseconds)
+  const offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNanoseconds)
   let isoDateTimeFields = {
     ...epochNanoToIso(epochNanoseconds, offsetNano),
     calendar,
@@ -66,12 +79,12 @@ export function roundZonedDateTime(
       smallestUnit as DayTimeUnit,
       roundingInc,
       roundingMode,
-      timeZone,
+      timeZoneRecord,
     )
   }
 
   epochNanoseconds = getMatchingInstantFor(
-    timeZone,
+    timeZoneRecord,
     { ...isoDateTimeFields, calendar },
     offsetNano,
     false, // z
@@ -131,7 +144,10 @@ export function roundDateTime(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  timeZoneSlot?: TimeZoneSlot | undefined,
+  timeZoneSlot?: undefined | {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
 ): IsoDateTimeFields {
   if (smallestUnit === Unit.Day) {
     return roundDateTimeToDay(isoFields, timeZoneSlot, roundingMode)
@@ -160,11 +176,14 @@ export function roundTime(
 // TODO: break into two separate functions?
 function roundDateTimeToDay(
   isoFields: IsoDateTimeSlots,
-  timeZoneSlot: TimeZoneSlot | undefined,
+  timeZoneRecord: undefined | {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
-  if (timeZoneSlot) {
-    const nanoInDay = computeNanosecondsInDay(timeZoneSlot, isoFields)
+  if (timeZoneRecord) {
+    const nanoInDay = computeNanosecondsInDay(timeZoneRecord, isoFields)
     const roundedTimeNano = roundByInc(isoTimeFieldsToNano(isoFields), nanoInDay, roundingMode)
     const dayDelta = roundedTimeNano ? 1 : 0
 

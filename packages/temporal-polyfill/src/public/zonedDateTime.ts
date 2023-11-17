@@ -48,6 +48,7 @@ import { ensureString, toBigInt } from '../internal/cast'
 import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { getPreferredCalendarSlot, refineCalendarSlot } from '../internal/calendarSlot'
 import { TimeZoneSlot, computeNanosecondsInDay, getMatchingInstantFor, getTimeZoneSlotId, refineTimeZoneSlot, zonedInternalsToIso } from '../internal/timeZoneSlot'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
 
 // public
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
@@ -61,6 +62,7 @@ import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg, TimeZoneProtocol, createTimeZone } from './timeZone'
 import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
 
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
@@ -94,14 +96,23 @@ export class ZonedDateTime {
   withPlainTime( plainTimeArg?: PlainTimeArg): ZonedDateTime {
     const isoTimeFields = optionalToPlainTimeFields(plainTimeArg) // must be parsed first
     const slots = getZonedDateTimeSlots(this)
+
     const { calendar, timeZone } = slots
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
+
     const isoFields = {
       ...zonedInternalsToIso(slots),
       ...isoTimeFields,
     }
 
     const epochNano = getMatchingInstantFor(
-      timeZone,
+      timeZoneRecord,
       isoFields,
       isoFields.offsetNanoseconds,
       false, // hasZ
@@ -121,7 +132,16 @@ export class ZonedDateTime {
   // TODO: more DRY with withPlainTime and zonedDateTimeWithBag?
   withPlainDate(plainDateArg: PlainDateArg): ZonedDateTime {
     const slots = getZonedDateTimeSlots(this)
+
     const { timeZone } = slots
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
+
     const plainDateSlots = toPlainDateSlots(plainDateArg)
     const isoFields = {
       ...zonedInternalsToIso(slots),
@@ -130,7 +150,7 @@ export class ZonedDateTime {
     const calendar = getPreferredCalendarSlot(slots.calendar, plainDateSlots.calendar)
 
     const epochNano = getMatchingInstantFor(
-      timeZone,
+      timeZoneRecord,
       isoFields,
       isoFields.offsetNanoseconds,
       false, // hasZ
@@ -209,7 +229,15 @@ export class ZonedDateTime {
 
   startOfDay(): ZonedDateTime {
     const slots = getZonedDateTimeSlots(this)
+
     let { epochNanoseconds, timeZone, calendar } = slots
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
 
     const isoFields = {
       ...zonedInternalsToIso(slots),
@@ -217,7 +245,7 @@ export class ZonedDateTime {
     }
 
     epochNanoseconds = getMatchingInstantFor(
-      timeZone,
+      timeZoneRecord,
       isoFields,
       undefined, // offsetNanoseconds
       false, // z
@@ -336,8 +364,17 @@ export class ZonedDateTime {
 
   get hoursInDay(): number {
     const slots = getZonedDateTimeSlots(this)
+
+    const timeZoneRecord = createTimeZoneSlotRecord(slots.timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
+
     return computeNanosecondsInDay(
-      slots.timeZone,
+      timeZoneRecord,
       zonedInternalsToIso(slots),
     ) / nanoInHour
   }

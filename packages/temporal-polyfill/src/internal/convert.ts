@@ -45,6 +45,9 @@ import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear
 import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
 import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, getMatchingInstantFor, getSingleInstantFor, refineTimeZoneSlot } from './timeZoneSlot'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
+import { calendarImplDateFromFields, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from './calendarRecordSimple'
+import { CalendarFieldsFunc, CalendarMergeFieldsFunc } from './calendarRecordTypes'
 
 // public
 import type { TimeZoneArg } from '../public/timeZone'
@@ -55,9 +58,9 @@ import type { PlainTime, PlainTimeBag, PlainTimeMod } from '../public/plainTime'
 import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from '../public/plainYearMonth'
 import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from '../public/plainMonthDay'
 import type { DurationBag, DurationMod } from '../public/duration'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
 import { calendarProtocolDateFromFields, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from '../public/calendarRecordComplex'
-import { calendarImplDateFromFields, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from './calendarRecordSimple'
-import { CalendarFieldsFunc, CalendarMergeFieldsFunc } from './calendarRecordTypes'
+
 
 /*
 Initial subject should be converted to { calendar, timeZone, day, month, monthCode, year, era, eraYear }
@@ -77,9 +80,17 @@ export function convertPlainDateTimeToZoned(
   options?: EpochDisambigOptions,
 ): ZonedEpochSlots {
   const { calendar } = internals
+  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
+
   const epochDisambig = refineEpochDisambigOptions(options)
   const epochNanoseconds = checkEpochNanoInBounds(
-    getSingleInstantFor(timeZone, internals, epochDisambig),
+    getSingleInstantFor(timeZoneRecord, internals, epochDisambig),
   )
 
   return {
@@ -125,10 +136,18 @@ export function refineMaybeZonedDateTimeBag(
   if (fields.timeZone !== undefined) {
     const isoDateFields = calendarRecord.dateFromFields(fields as any)
     const isoTimeFields = refineTimeBag(fields)
+
     const timeZone = refineTimeZoneSlot(fields.timeZone) // must happen after datetime fields
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
 
     const epochNanoseconds = getMatchingInstantFor(
-      timeZone,
+      timeZoneRecord,
       { ...isoDateFields, ...isoTimeFields },
       fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
       false, // z?
@@ -178,6 +197,13 @@ export function refineZonedDateTimeBag(
   // guaranteed via refineCalendarFields
   // must happen before Calendar::dateFromFields and parsing `options`
   const timeZone = refineTimeZoneSlot(fields.timeZone!)
+  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
@@ -185,7 +211,7 @@ export function refineZonedDateTimeBag(
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
-    timeZone,
+    timeZoneRecord,
     { ...isoDateFields, ...isoTimeFields },
     fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
     false, // z?
@@ -216,6 +242,13 @@ export function mergeZonedDateTimeBag(
     fields: calendarProtocolFields,
     mergeFields: calendarProtocolMergeFields,
   })
+  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
 
   const fields = mergeCalendarFields(
     calendarRecord,
@@ -232,7 +265,7 @@ export function mergeZonedDateTimeBag(
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
-    timeZone,
+    timeZoneRecord,
     { ...isoDateFields, ...isoTimeFields },
     parseOffsetNano(fields.offset!), // guaranteed via mergeCalendarFields
     false, // z?
@@ -261,11 +294,19 @@ export function createZonedDateTimeConverter<
 ) {
   return (internals, options) => {
     const timeZone = refineTimeZoneSlot((options as { timeZone: TimeZoneArg }).timeZone)
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
+
     const extraInternals = getMoreInternals(normalizeOptions(options as NarrowOptions))
 
     const finalInternals = { ...internals, ...extraInternals } as IsoDateTimeSlots
     const { calendar } = finalInternals
-    const epochNanoseconds = getSingleInstantFor(timeZone, finalInternals)
+    const epochNanoseconds = getSingleInstantFor(timeZoneRecord, finalInternals)
 
     return {
       calendar,
