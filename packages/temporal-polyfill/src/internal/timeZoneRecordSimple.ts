@@ -1,5 +1,5 @@
 import { DayTimeNano } from './dayTimeNano'
-import { IsoDateTimeSlots } from './slots'
+import { IsoDateTimeFields } from './isoFields'
 import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 
 // TimeZoneImpl Record Creation
@@ -43,7 +43,7 @@ export function timeZoneImplGetOffsetNanosecondsFor(
 
 export function timeZoneImplGetPossibleInstantsFor(
   timeZoneImpl: TimeZoneImpl,
-  isoDateTimeSlots: IsoDateTimeSlots, // needs calendar i think
+  isoFields: IsoDateTimeFields,
 ): DayTimeNano[] {
-  return timeZoneImpl.getPossibleInstantsFor(isoDateTimeSlots)
+  return timeZoneImpl.getPossibleInstantsFor(isoFields)
 }

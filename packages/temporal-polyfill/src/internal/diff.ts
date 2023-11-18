@@ -1,8 +1,5 @@
 import { CalendarImpl } from './calendarImpl'
-import { calendarImplDateAdd, calendarImplDateUntil, calendarImplDay } from './calendarRecordSimple'
 import { CalendarDateAddFunc, CalendarDateUntilFunc } from './calendarRecordTypes'
-import { CalendarSlot, getCommonCalendarSlot } from './calendarSlotUtils'
-import { ensureObjectlike } from './cast'
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -23,11 +20,8 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { DiffOptions, LargestUnitOptions, RoundingMode, prepareOptions, refineDiffOptions } from './options'
+import { DiffOptions, LargestUnitOptions, RoundingMode, refineDiffOptions } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
-import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot, getCommonTimeZoneSlot } from './timeZoneSlotUtils'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import {
   DayTimeUnit,
@@ -37,110 +31,10 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc } from './utils'
-
-// public
-import { calendarProtocolDateAdd, calendarProtocolDateUntil, calendarProtocolDay, createCalendarSlotRecord } from '../public/calendarRecordComplex'
-import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
-
-export function diffPlainDateTimes(
-  internals0: IsoDateTimeSlots,
-  internals1: IsoDateTimeSlots,
-  options: DiffOptions | undefined,
-  invert?: boolean
-): DurationInternals {
-  const calendarSlot = getCommonCalendarSlot(internals0.calendar, internals1.calendar)
-  const calendarRecord = createCalendarSlotRecord(calendarSlot, {
-    dateAdd: calendarImplDateAdd,
-    dateUntil: calendarImplDateUntil,
-  }, {
-    dateAdd: calendarProtocolDateAdd,
-    dateUntil: calendarProtocolDateUntil,
-  })
-
-  let durationInternals = updateDurationFieldsSign(
-    diffDateTimes(
-      calendarRecord,
-      internals0,
-      internals1,
-      ...refineDiffOptions(invert, options, Unit.Day),
-      options,
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return durationInternals
-}
-
-export function diffPlainDates(
-  internals0: IsoDateSlots,
-  internals1: IsoDateSlots,
-  options: DiffOptions | undefined,
-  invert?: boolean,
-): DurationInternals {
-  let durationInternals = updateDurationFieldsSign(
-    diffDates(
-      getCommonCalendarSlot(internals0.calendar, internals1.calendar),
-      internals0,
-      internals1,
-      ...refineDiffOptions(
-        invert,
-        options === undefined ? options : { ...ensureObjectlike(options) }, // YUCK
-        Unit.Day,
-        Unit.Year,
-        Unit.Day,
-      ),
-    )
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return durationInternals
-}
-
-export function diffPlainYearMonths(
-  internals0: IsoDateSlots,
-  internals1: IsoDateSlots,
-  options: DiffOptions | undefined,
-  invert?: boolean,
-): DurationInternals {
-  let durationInternals = updateDurationFieldsSign(
-    diffDates(
-      getCommonCalendarSlot(internals0.calendar, internals1.calendar),
-      movePlainYearMonthToDay(internals0),
-      movePlainYearMonthToDay(internals1),
-      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
-      options,
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return durationInternals
-}
-
-// TODO: DRY
-function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
-  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
-    day: calendarImplDay,
-  }, {
-    day: calendarProtocolDay,
-  })
-
-  return moveByIsoDays(
-    internals,
-    day - calendarRecord.day(internals),
-  )
-}
 
 export function diffPlainTimes(
   internals0: IsoTimeFields,
@@ -153,33 +47,6 @@ export function diffPlainTimes(
       internals0,
       internals1,
       ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return durationInternals
-}
-
-export function diffZonedDateTimes(
-  internals: ZonedEpochSlots,
-  otherInternals: ZonedEpochSlots,
-  options: DiffOptions | undefined,
-  invert?: boolean
-): DurationInternals {
-  const calendar = getCommonCalendarSlot(internals.calendar, otherInternals.calendar)
-  const optionsCopy = prepareOptions(options)
-
-  let durationInternals = updateDurationFieldsSign(
-    diffZonedEpochNano(
-      calendar,
-      () => getCommonTimeZoneSlot(internals.timeZone, otherInternals.timeZone),
-      internals.epochNanoseconds,
-      otherInternals.epochNanoseconds,
-      ...refineDiffOptions(invert, optionsCopy, Unit.Hour),
-      optionsCopy,
     ),
   )
 
@@ -279,7 +146,7 @@ export function diffDateTimes(
 }
 
 export function diffDates(
-  calendarSlot: CalendarSlot,
+  calendarRecord: { dateAdd: CalendarDateAddFunc, dateUntil: CalendarDateUntilFunc },
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
   largestUnit: Unit, // TODO: large field
@@ -288,12 +155,6 @@ export function diffDates(
   roundingMode: RoundingMode,
   origOptions?: LargestUnitOptions,
 ): DurationFields {
-  const calendarRecord = createCalendarSlotRecord(calendarSlot, {
-    dateUntil: calendarImplDateUntil,
-  }, {
-    dateUntil: calendarProtocolDateUntil,
-  })
-
   const dateDiff = calendarDateUntilEasy(calendarRecord, startIsoFields, endIsoFields, largestUnit, origOptions)
 
   // fast path, no rounding
@@ -301,12 +162,6 @@ export function diffDates(
   if (smallestUnit === Unit.Day && roundingInc === 1) {
     return dateDiff
   }
-
-  const { dateAdd } = createCalendarSlotRecord(calendarSlot, {
-    dateAdd: calendarImplDateAdd,
-  }, {
-    dateAdd: calendarProtocolDateAdd,
-  })
 
   return roundRelativeDuration(
     dateDiff,
@@ -317,7 +172,7 @@ export function diffDates(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateFields) => DayTimeNano, // markerToEpochNano
-    (m: IsoDateFields, d: DurationFields) => dateAdd(m, updateDurationFieldsSign(d)),
+    (m: IsoDateFields, d: DurationFields) => calendarRecord.dateAdd(m, updateDurationFieldsSign(d)),
   )
 }
 
@@ -391,8 +246,11 @@ export function diffTimes(
 // -------------------------------------------------------------------------------------------------
 
 export function diffZonedEpochNano(
-  calendarSlot: CalendarSlot,
-  getTimeZone: () => TimeZoneSlot,
+  calendarRecord: { dateAdd: CalendarDateAddFunc, dateUntil: CalendarDateUntilFunc },
+  getTimeZoneRecord: () => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -413,32 +271,18 @@ export function diffZonedEpochNano(
     )
   }
 
-  const calendarRecord = createCalendarSlotRecord(calendarSlot, {
-    dateUntil: calendarImplDateUntil,
-  }, {
-    dateUntil: calendarProtocolDateUntil,
-  })
-
-  const timeZone = getTimeZone() // must be exactly here, before short-circuit
-
-  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  }, {
-    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
-  })
+  const timeZoneRecord = getTimeZoneRecord()
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {
     return durationFieldDefaults
   }
 
-  const startIsoFields = zonedEpochNanoToIso(timeZone, startEpochNano)
+  const startIsoFields = zonedEpochNanoToIso(timeZoneRecord, startEpochNano)
   const startIsoTimeFields = pluckIsoTimeFields(startIsoFields)
-  const endIsoFields = zonedEpochNanoToIso(timeZone, endEpochNano)
+  const endIsoFields = zonedEpochNanoToIso(timeZoneRecord, endEpochNano)
   const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneRecord) // necessary to bind?
-  let midIsoFields = { ...endIsoFields, ...startIsoTimeFields, calendar: calendarSlot }
+  let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
   let midEpochNano = isoToZonedEpochNano(midIsoFields)
   let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
 
@@ -448,7 +292,6 @@ export function diffZonedEpochNano(
     midIsoFields = {
       ...moveByIsoDays(midIsoFields, -sign),
       ...startIsoTimeFields,
-      calendar: calendarSlot,
     }
     midEpochNano = isoToZonedEpochNano(midIsoFields)
     midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
@@ -468,7 +311,7 @@ export function diffZonedEpochNano(
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
-    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarSlot, timeZone, m, d),
+    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarRecord, timeZoneRecord, m, d),
   )
 }
 

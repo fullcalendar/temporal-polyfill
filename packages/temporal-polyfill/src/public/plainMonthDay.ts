@@ -1,25 +1,24 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetterNames } from '../internal/calendarFields'
-import {
-  convertPlainMonthDayToDate,
-  mergePlainMonthDayBag,
-  refinePlainMonthDayBag,
-  rejectInvalidBag,
-} from '../internal/convert'
-import { IsoDatePublic, refineIsoMonthDayInternals } from '../internal/isoInternals'
 import { formatIsoMonthDayFields, formatPossibleDate } from '../internal/isoFormat'
 import { createToLocaleStringMethods } from '../internal/intlFormat'
-import { isoEpochFirstLeapYear } from '../internal/isoMath'
-import { isPlainMonthDaysEqual } from '../internal/equality'
+import { compareIsoDateFields, isoEpochFirstLeapYear } from '../internal/isoMath'
 import { parsePlainMonthDay } from '../internal/isoParse'
 import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
-import { PlainDate, createPlainDate } from './plainDate'
-import { CalendarBranding, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { ensureString } from '../internal/cast'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
 
 // public
+import { CalendarBranding, IsoDateSlots, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoMonthDaySlots, IsoDatePublic } from './slots'
+import {
+  convertPlainMonthDayToDate,
+  mergePlainMonthDayBag,
+  refinePlainMonthDayBag,
+  rejectInvalidBag,
+} from './convert'
+import { PlainDate, createPlainDate } from './plainDate'
+import { getCalendarSlotId, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 
@@ -36,7 +35,7 @@ export class PlainMonthDay {
   ) {
     setSlots(this, {
       branding: PlainMonthDayBranding,
-      ...refineIsoMonthDayInternals({
+      ...refineIsoMonthDaySlots({
         isoYear: referenceIsoYear,
         isoMonth,
         isoDay,
@@ -58,11 +57,24 @@ export class PlainMonthDay {
   }
 
   toString(options?: DateTimeDisplayOptions): string {
-    return formatPossibleDate(formatIsoMonthDayFields, getPlainMonthDaySlots(this), options)
+    const slots = getPlainMonthDaySlots(this)
+
+    return formatPossibleDate(
+      getCalendarSlotId(slots.calendar),
+      formatIsoMonthDayFields,
+      slots,
+      options,
+    )
   }
 
   toJSON(): string {
-    return formatPossibleDate(formatIsoMonthDayFields, getPlainMonthDaySlots(this))
+    const slots = getPlainMonthDaySlots(this)
+
+    return formatPossibleDate(
+      getCalendarSlotId(slots.calendar),
+      formatIsoMonthDayFields,
+      slots,
+    )
   }
 
   toPlainDate(bag: YearFields): PlainDate {
@@ -135,4 +147,12 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
   const res = { ...parsePlainMonthDay(ensureString(arg)), branding: PlainMonthDayBranding }
   refineOverflowOptions(options) // parse unused options
   return res
+}
+
+export function isPlainMonthDaysEqual(
+  a: IsoDateSlots,
+  b: IsoDateSlots,
+): boolean {
+  return !compareIsoDateFields(a, b) &&
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }

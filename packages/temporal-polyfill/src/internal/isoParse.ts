@@ -8,13 +8,15 @@ import {
   negateDurationFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './isoFields'
 import {
-  constrainIsoDateInternals,
-  constrainIsoDateTimeInternals,
+  IsoDateFields,
+  IsoDateTimeFields,
+  IsoTimeFields,
+  constrainIsoTimeFields,
+  constrainIsoDateLike,
+  constrainIsoDateTimeLike,
   isIsoDateFieldsValid,
-  pluckIsoDateInternals,
-} from './isoInternals'
+} from './isoFields'
 import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
@@ -26,7 +28,6 @@ import {
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
 import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
-import { utcTimeZoneId } from './timeZoneSlotUtils'
 import { getMatchingInstantFor } from './timeZoneMath'
 import {
   TimeUnit,
@@ -37,14 +38,9 @@ import {
 } from './units'
 import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
-import { IsoDateSlots, IsoDateTimeSlots, PlainDateBranding, ZonedEpochSlots } from './slots'
-import { refinePlainMonthDayBag } from './convert'
-import { calendarImplDay } from './calendarRecordSimple'
-
-// public
-// YUCK: figure out way to remove
-import { createPlainDate } from '../public/plainDate'
-import { calendarProtocolDay, createCalendarSlotRecord } from '../public/calendarRecordComplex'
+import { CalendarDayFunc } from './calendarRecordTypes'
+import { calendarImplDay, createCalendarImplRecord } from './calendarRecordSimple'
+import { utcTimeZoneId } from './timeZoneConfig'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -71,12 +67,12 @@ export function parseInstant(s: string): DayTimeNano {
   }
 
   return isoToEpochNanoWithOffset(
-    constrainIsoDateTimeInternals(organized),
+    constrainIsoDateTimeLike(organized),
     offsetNano,
   )
 }
 
-export function parseZonedOrPlainDateTime(s: string): IsoDateSlots | ZonedEpochSlots {
+export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calendar: string }) | { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
   const organized = parseMaybeGenericDateTime(s)
 
   if (!organized) {
@@ -98,7 +94,7 @@ export function parseZonedOrPlainDateTime(s: string): IsoDateSlots | ZonedEpochS
 /*
 NOTE: one of the only string-parsing methods that accepts options
 */
-export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): ZonedEpochSlots {
+export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
   const organized = parseMaybeGenericDateTime(s)
 
   if (!organized || !organized.timeZone) {
@@ -119,7 +115,7 @@ export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): Zone
   )
 }
 
-export function parsePlainDateTime(s: string): IsoDateTimeSlots {
+export function parsePlainDateTime(s: string): IsoDateTimeFields & { calendar: string } {
   const organized = parseMaybeGenericDateTime(s)
 
   if (!organized || organized.hasZ) {
@@ -129,21 +125,20 @@ export function parsePlainDateTime(s: string): IsoDateTimeSlots {
   return postProcessDateTime(organized)
 }
 
-export function parsePlainDate(s: string): IsoDateSlots {
+export function parsePlainDate(s: string): IsoDateFields & { calendar: string } {
   const organized = parseMaybeGenericDateTime(s)
 
   if (!organized || organized.hasZ) {
     throw new RangeError()
   }
 
-  return pluckIsoDateInternals(
-    organized.hasTime
-      ? postProcessDateTime(organized)
-      : postProcessDate(organized)
-  )
+  // TODO: use pluckIsoDateInternals
+  return organized.hasTime
+    ? postProcessDateTime(organized)
+    : postProcessDate(organized)
 }
 
-export function parsePlainYearMonth(s: string): IsoDateSlots {
+export function parsePlainYearMonth(s: string): IsoDateFields & { calendar: string } {
   let organized = parseMaybeYearMonth(s)
 
   if (organized) {
@@ -154,38 +149,40 @@ export function parsePlainYearMonth(s: string): IsoDateSlots {
     return postProcessYearMonthOnly(organized)
   }
 
-  return resetToMonthStart(parsePlainDate(s))
-}
+  const isoFields = parsePlainDate(s)
+  const calendarRecord = createCalendarImplRecord(isoFields.calendar, {
+    day: calendarImplDay,
+  })
 
-function postProcessYearMonthOnly(organized: DateOrganized): IsoDateSlots {
-  return checkIsoYearMonthInBounds(constrainIsoDateInternals(organized))
-}
-
-function resetToMonthStart(isoInternals: IsoDateSlots): IsoDateSlots {
-  const { calendar } = isoInternals
-  const isoFields = movePlainYearMonthToDay(isoInternals)
+  const movedIsoFields = movePlainYearMonthToDay(
+    calendarRecord,
+    parsePlainDate(s),
+  )
 
   return {
-    ...isoFields,
-    calendar,
+    ...isoFields, // has calendar
+    ...movedIsoFields,
   }
 }
 
+function postProcessYearMonthOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
+  return checkIsoYearMonthInBounds(constrainIsoDateLike(organized))
+}
+
 // TODO: DRY
-function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
-  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
-    day: calendarImplDay,
-  }, {
-    day: calendarProtocolDay,
-  })
+function movePlainYearMonthToDay(
+  calendarRecord: { day: CalendarDayFunc },
+  isoFields: IsoDateFields,
+  day = 1,
+): IsoDateFields {
 
   return moveByIsoDays(
-    internals,
-    day - calendarRecord.day(internals),
+    isoFields,
+    day - calendarRecord.day(isoFields),
   )
 }
 
-export function parsePlainMonthDay(s: string): IsoDateSlots {
+export function parsePlainMonthDay(s: string): IsoDateFields & { calendar: string } {
   const organized = parseMaybeMonthDay(s)
 
   if (organized) {
@@ -199,29 +196,27 @@ export function parsePlainMonthDay(s: string): IsoDateSlots {
   return findBestYear(parsePlainDate(s))
 }
 
-function postProcessMonthDayOnly(organized: DateOrganized): IsoDateSlots {
-  const isoFields = constrainIsoDateInternals(organized)
-  const calendar = queryCalendarImpl(organized.calendar)
-  const plainDate = createPlainDate({ // YUCK
-    ...isoFields,
-    calendar: organized.calendar,
-    branding: PlainDateBranding,
-  })
+function postProcessMonthDayOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
+  const isoFields = constrainIsoDateLike(organized)
+  const calendarImpl = queryCalendarImpl(organized.calendar)
+  const [year, month, day] = calendarImpl.queryYearMonthDay(isoFields)
+
   return {
-    ...calendar.monthDayFromFields(plainDate),
+    ...calendarImpl.monthDayFromFields({ year, month, day }),
     calendar: organized.calendar,
   }
 }
 
-function findBestYear(isoInternals: IsoDateSlots): IsoDateSlots {
-  const { calendar } = isoInternals
-  const plainDate = createPlainDate({ // YUCK
-    ...isoInternals,
-    branding: PlainDateBranding,
-  })
+function findBestYear(
+  isoFields: IsoDateFields & { calendar: string },
+): IsoDateFields & { calendar: string } {
+  const calendarImpl = queryCalendarImpl(isoFields.calendar)
+  const [year, month, day] = calendarImpl.queryYearMonthDay(isoFields)
+
+  // okay?????? was using refinePlainMonthDayBag before
   return {
-    ...refinePlainMonthDayBag(plainDate),
-    calendar,
+    ...calendarImpl.monthDayFromFields({ year, month, day }),
+    calendar: isoFields.calendar,
   }
 }
 
@@ -321,13 +316,13 @@ function postProcessZonedDateTime(
   offsetNano: number | undefined, // HACK
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
-): ZonedEpochSlots {
+): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
   const calendarImpl = queryCalendarImpl(organized.calendar)
   const timeZoneImpl = queryTimeZoneImpl(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl, // CRAZY this works!
-    constrainIsoDateTimeInternals(organized),
+    constrainIsoDateTimeLike(organized),
     offsetNano,
     organized.hasZ,
     offsetDisambig,
@@ -343,12 +338,12 @@ function postProcessZonedDateTime(
   }
 }
 
-function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeSlots {
-  return normalizeCalendarStr(checkIsoDateTimeInBounds(constrainIsoDateTimeInternals(organized)))
+function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeFields & { calendar: string } {
+  return normalizeCalendarStr(checkIsoDateTimeInBounds(constrainIsoDateTimeLike(organized)))
 }
 
-function postProcessDate(organized: DateOrganized): IsoDateSlots {
-  return normalizeCalendarStr(checkIsoDateInBounds(constrainIsoDateInternals(organized)))
+function postProcessDate(organized: DateOrganized): IsoDateFields & { calendar: string } {
+  return normalizeCalendarStr(checkIsoDateInBounds(constrainIsoDateLike(organized)))
 }
 
 function normalizeCalendarStr<T extends { calendar: string }>(organized: T): T {

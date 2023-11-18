@@ -8,25 +8,31 @@ import { parseInstant } from '../internal/isoParse'
 import { moveEpochNano } from '../internal/move'
 import {
   DiffOptions,
-  InstantDisplayOptions,
   RoundingOptions,
+  TimeDisplayOptions,
+  TimeDisplayTuple,
+  normalizeOptions,
   prepareOptions,
+  refineTimeDisplayTuple,
 } from '../internal/options'
 import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from '../internal/cast'
 import { roundInstant } from '../internal/round'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
-import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { refineCalendarSlot } from '../internal/calendarSlotUtils'
-import { refineTimeZoneSlot } from '../internal/timeZoneSlotUtils'
+import { utcTimeZoneId } from '../internal/timeZoneConfig'
+import { timeZoneImplGetOffsetNanosecondsFor } from '../internal/timeZoneRecordSimple'
 
 // public
+import { DurationBranding, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { refineCalendarSlot } from './calendarSlot'
+import { refineTimeZoneSlot } from './timeZoneSlot'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createEpochGetterMethods, neverValueOf } from './publicMixins'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor } from './timeZoneRecordComplex'
 
 export type InstantArg = Instant | string
 
@@ -96,11 +102,55 @@ export class Instant {
   }
 
   toString(options?: InstantDisplayOptions): string {
-    return formatInstantIso(getInstantSlots(this).epochNanoseconds, options)
+    const slots = getInstantSlots(this)
+    const [
+      timeZoneArg,
+      nanoInc,
+      roundingMode,
+      subsecDigits,
+    ] = refineInstantDisplayOptions(options)
+
+    const providedTimeZone = timeZoneArg !== undefined
+    const timeZoneRecord = createTimeZoneSlotRecord(
+      providedTimeZone ? refineTimeZoneSlot(timeZoneArg) : utcTimeZoneId,
+      { getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor },
+      { getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor },
+    )
+
+    return formatInstantIso(
+      providedTimeZone,
+      timeZoneRecord,
+      slots.epochNanoseconds,
+      nanoInc,
+      roundingMode,
+      subsecDigits,
+    )
   }
 
   toJSON(): string {
-    return formatInstantIso(getInstantSlots(this).epochNanoseconds)
+    const slots = getInstantSlots(this)
+    const [
+      timeZoneArg,
+      nanoInc,
+      roundingMode,
+      subsecDigits,
+    ] = refineInstantDisplayOptions(undefined) // CRAZY
+
+    const providedTimeZone = timeZoneArg !== undefined
+    const timeZoneRecord = createTimeZoneSlotRecord(
+      providedTimeZone ? refineTimeZoneSlot(timeZoneArg) : utcTimeZoneId,
+      { getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor },
+      { getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor },
+    )
+
+    return formatInstantIso(
+      providedTimeZone,
+      timeZoneRecord,
+      slots.epochNanoseconds,
+      nanoInc,
+      roundingMode,
+      subsecDigits,
+    )
   }
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
@@ -203,6 +253,30 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
     branding: InstantBranding,
     epochNanoseconds: parseInstant(ensureStringViaPrimitive(arg as any)),
   }
+}
+
+export type InstantDisplayOptions =
+  { timeZone: TimeZoneArg } &
+  TimeDisplayOptions
+
+export type InstantDisplayTuple = [
+  TimeZoneArg,
+  ...TimeDisplayTuple,
+]
+
+export function refineInstantDisplayOptions(
+  options: InstantDisplayOptions | undefined,
+): InstantDisplayTuple {
+  options = normalizeOptions(options)
+
+  // alphabetical
+  const timeDisplayTuple = refineTimeDisplayTuple(options)
+  const timeZone: TimeZoneArg = options.timeZone
+
+  return [
+    timeZone, // TODO: possibly not needed after moving away from Record
+    ...timeDisplayTuple,
+  ]
 }
 
 // Legacy Date

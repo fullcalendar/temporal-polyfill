@@ -1,7 +1,5 @@
 import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
-import { calendarImplDateAdd } from './calendarRecordSimple'
 import { CalendarDateAddFunc } from './calendarRecordTypes'
-import { CalendarSlot } from './calendarSlotUtils'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -11,7 +9,6 @@ import {
   durationTimeFieldsToLargeNanoStrict,
   updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
-  DurationInternals,
 } from './durationFields'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
 import {
@@ -26,66 +23,21 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
-import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot } from './timeZoneSlotUtils'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc } from './utils'
-
-// public
-import { calendarProtocolDateAdd, createCalendarSlotRecord } from '../public/calendarRecordComplex'
-import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
-
-// High-level
-// -------------------------------------------------------------------------------------------------
-
-export function movePlainDateTime(
-  internals: IsoDateTimeSlots,
-  durationInternals: DurationInternals,
-  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
-): IsoDateTimeSlots {
-  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
-    dateAdd: calendarImplDateAdd,
-  }, {
-    dateAdd: calendarProtocolDateAdd,
-  })
-
-  return {
-    calendar: internals.calendar, // TODO: make this nicer
-    ...moveDateTime(
-      calendarRecord,
-      internals,
-      durationInternals,
-      options,
-    ),
-  }
-}
-
-export function moveZonedDateTime(
-  internals: ZonedEpochSlots,
-  durationFields: DurationFields,
-  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
-): ZonedEpochSlots {
-  const epochNano = moveZonedEpochNano(
-    internals.calendar,
-    internals.timeZone,
-    internals.epochNanoseconds,
-    durationFields,
-    options,
-  )
-  return {
-    ...internals,
-    epochNanoseconds: epochNano,
-  }
-}
+import { isoCalendarId } from './calendarConfig'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
-  calendar: CalendarSlot,
-  timeZone: TimeZoneSlot,
+  calendarRecord: { dateAdd: CalendarDateAddFunc },
+  timeZoneRecord: {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   epochNano: DayTimeNano,
   durationFields: DurationFields,
   options?: OverflowOptions,
@@ -95,20 +47,7 @@ export function moveZonedEpochNano(
   if (!durationHasDateParts(durationFields)) {
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
   } else {
-    const calendarRecord = createCalendarSlotRecord(calendar, {
-      dateAdd: calendarImplDateAdd,
-    }, {
-      dateAdd: calendarProtocolDateAdd,
-    })
-    const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
-      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-    }, {
-      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
-    })
-
-    const isoDateTimeFields = zonedEpochNanoToIso(timeZone, epochNano)
+    const isoDateTimeFields = zonedEpochNanoToIso(timeZoneRecord, epochNano)
     const movedIsoDateFields = moveDateEasy(
       calendarRecord,
       isoDateTimeFields,
@@ -121,7 +60,7 @@ export function moveZonedEpochNano(
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
       ...pluckIsoTimeFields(isoDateTimeFields), // time parts
-      calendar, // NOT USED but whatever
+      calendar: isoCalendarId, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(
       getSingleInstantFor(timeZoneRecord, movedIsoDateTimeFields),
@@ -203,7 +142,7 @@ export function moveDateEasy(
 Called by CalendarImpl, that's why it accepts refined overflow
 */
 export function moveDate(
-  calendar: CalendarImpl,
+  calendarImpl: CalendarImpl,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   overflow?: Overflow,
@@ -215,22 +154,22 @@ export function moveDate(
   days += givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
 
   if (years || months) {
-    let [year, month, day] = calendar.queryYearMonthDay(isoDateFields)
+    let [year, month, day] = calendarImpl.queryYearMonthDay(isoDateFields)
 
     if (years) {
-      const [monthCodeNumber, isLeapMonth] = calendar.queryMonthCode(year, month)
+      const [monthCodeNumber, isLeapMonth] = calendarImpl.queryMonthCode(year, month)
       year += years
-      month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, calendar.queryLeapMonth(year))
-      month = clampEntity('month', month, 1, calendar.computeMonthsInYear(year), overflow)
+      month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, calendarImpl.queryLeapMonth(year))
+      month = clampEntity('month', month, 1, calendarImpl.computeMonthsInYear(year), overflow)
     }
 
     if (months) {
-      ([year, month] = calendar.addMonths(year, month, months))
+      ([year, month] = calendarImpl.addMonths(year, month, months))
     }
 
-    day = clampEntity('day', day, 1, calendar.queryDaysInMonth(year, month), overflow)
+    day = clampEntity('day', day, 1, calendarImpl.queryDaysInMonth(year, month), overflow)
 
-    epochMilli = calendar.queryDateStart(year, month, day)
+    epochMilli = calendarImpl.queryDateStart(year, month, day)
   } else if (weeks || days) {
     epochMilli = isoToEpochMilli(isoDateFields)
   } else {

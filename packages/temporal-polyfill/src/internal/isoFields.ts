@@ -1,6 +1,7 @@
 import { toInteger } from './cast'
+import { computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
-import { BoundArg, clampProp, mapPropNamesToConstant, mapPropsWithRefiners, pluckProps, pluckPropsTuple } from './utils'
+import { BoundArg, clampProp, isClamped, mapPropNamesToConstant, mapPropsWithRefiners, pluckProps, pluckPropsTuple } from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -113,4 +114,26 @@ export function constrainIsoTimeFields(isoTimeFields: IsoTimeFields, overflow: O
     isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflow),
     isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflow),
   }
+}
+
+export function constrainIsoDateTimeLike<P extends IsoDateTimeFields>(isoDateTimeFields: P): P {
+  return {
+    ...constrainIsoDateLike(isoDateTimeFields),
+    ...constrainIsoTimeFields(isoDateTimeFields, Overflow.Reject),
+  }
+}
+
+export function constrainIsoDateLike<P extends IsoDateFields>(isoInternals: P): P {
+  if (!isIsoDateFieldsValid(isoInternals)) {
+    // TODO: more DRY error
+    throw new RangeError('Invalid iso date')
+  }
+  return isoInternals
+}
+
+export function isIsoDateFieldsValid(isoFields: IsoDateFields): boolean {
+  const { isoYear, isoMonth, isoDay } = isoFields
+
+  return isClamped(isoMonth, 1, computeIsoMonthsInYear(isoYear)) &&
+    isClamped(isoDay, 1, computeIsoDaysInMonth(isoYear, isoMonth))
 }

@@ -1,20 +1,23 @@
-import { ensureString } from './cast'
-import { parseMaybeOffsetNano, parseTimeZoneId } from './isoParse'
-import { getSlots } from './slots'
-import { isObjectlike } from './utils'
+import { ensureString } from '../internal/cast'
+import { parseMaybeOffsetNano, parseTimeZoneId } from '../internal/isoParse'
+import { isObjectlike } from '../internal/utils'
 
 // public
-import { createProtocolChecker } from '../public/publicUtils'
-import { TimeZoneArg, TimeZoneProtocol } from '../public/timeZone'
+import { getSlots } from './slots'
+import { createProtocolChecker } from './publicUtils'
+import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
 
 export type TimeZoneSlot = TimeZoneProtocol | string
-
-export const utcTimeZoneId = 'UTC'
 
 const checkTimeZoneProtocol = createProtocolChecker([
   'getPossibleInstantsFor',
   'getOffsetNanosecondsFor',
 ])
+
+// used by intlFormat!!!
+export function getTimeZoneSlotId(slot: TimeZoneSlot): string {
+  return typeof slot === 'string' ? slot : ensureString(slot.id)
+}
 
 export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
   if (isObjectlike(arg)) {
@@ -32,13 +35,6 @@ export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
 
 export function refineTimeZoneSlotString(arg: string): string {
   return parseTimeZoneId(ensureString(arg))
-}
-
-export function getCommonTimeZoneSlot(a: TimeZoneSlot, b: TimeZoneSlot): TimeZoneSlot {
-  if (!isTimeZoneSlotsEqual(a, b, true)) { // loose=true
-    throw new RangeError(`TimeZones not equal`)
-  }
-  return a
 }
 
 export function isTimeZoneSlotsEqual(a: TimeZoneSlot, b: TimeZoneSlot, loose?: boolean): boolean {
@@ -61,8 +57,4 @@ function getTimeZoneSlotRaw(slot: TimeZoneSlot, loose?: boolean): string | numbe
   }
 
   return id
-}
-
-export function getTimeZoneSlotId(slot: TimeZoneSlot): string {
-  return typeof slot === 'string' ? slot : ensureString(slot.id)
 }

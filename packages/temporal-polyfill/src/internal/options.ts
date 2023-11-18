@@ -1,8 +1,5 @@
-import { refineMaybeZonedDateTimeBag } from './convert'
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { pluckIsoDateInternals } from './isoInternals'
-import { parseZonedOrPlainDateTime } from './isoParse'
-import { toString, ensureObjectlike, toInteger, ensureString } from './cast'
+import { toString, ensureObjectlike, toInteger } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import {
   BoundArg,
@@ -15,12 +12,6 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
-import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
-
-// public
-import type { TimeZoneArg } from '../public/timeZone' // for Instant display options
-import type { PlainDate } from '../public/plainDate' // for relativeTo ... just for slot
-import type { ZonedDateTime, ZonedDateTimeBag } from '../public/zonedDateTime' // for relativeTo ... for slots AND refining (aka 'convert')
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -143,7 +134,7 @@ export type DurationRoundOptions = DiffOptions & RelativeToOptions
 
 export type DurationRoundTuple = [
   ...DiffTuple,
-  RelativeToInternals?,
+  any?, // TODO: relativeTo
 ]
 
 /*
@@ -152,13 +143,14 @@ This function is YUCK
 */
 export function refineDurationRoundOptions(
   options: DurationRoundOptions,
-  defaultLargestUnit: Unit
+  defaultLargestUnit: Unit,
+  refineRelativeTo: (relativeTo: any) => any,
 ): DurationRoundTuple {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
 
   // alphabeitcal
   let [largestUnit, largestUnitDefined] = refineLargestUnit(options, undefined, undefined, -1 as any) as [any, boolean]
-  const relativeToInternals = refineRelativeTo(options)
+  const relativeToInternals = refineRelativeTo(options.relativeTo)
   let roundingInc = parseRoundingIncInteger(options)
   const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
   let [smallestUnit, smallestUnitDefined] =
@@ -182,18 +174,20 @@ export function refineDurationRoundOptions(
   return [largestUnit, smallestUnit, roundingInc, roundingMode, relativeToInternals]
 }
 
+export type RelativeToOptions = { relativeTo: any } // TODO: better
 export type TotalUnitOptionsWithRel = TotalUnitOptions & RelativeToOptions
 
 export function refineTotalOptions(
-  options: TotalUnitOptionsWithRel | UnitName
+  options: TotalUnitOptionsWithRel | UnitName,
+  refineRelativeTo: (relativeTo: any) => any,
 ): [
   Unit,
-  RelativeToInternals | undefined,
+  any, // TODO: relativeTo
 ] {
   options = normalizeUnitNameOptions(options, totalUnitStr)
 
   // alphabetical
-  const relativeToInternals = refineRelativeTo(options)
+  const relativeToInternals = refineRelativeTo(options.relativeTo)
   const [totalUnit] = refineTotalUnit(options) // required
 
   return [
@@ -202,30 +196,11 @@ export function refineTotalOptions(
   ]
 }
 
-export function refineRelativeToOptions(options: RelativeToOptions | undefined): RelativeToInternals | undefined {
-  return refineRelativeTo(normalizeOptions(options))
-}
-
-export type InstantDisplayOptions =
-  { timeZone: TimeZoneArg } &
-  TimeDisplayOptions
-
-export type InstantDisplayTuple = [
-  TimeZoneArg,
-  ...TimeDisplayTuple,
-]
-
-export function refineInstantDisplayOptions(options: InstantDisplayOptions | undefined): InstantDisplayTuple {
-  options = normalizeOptions(options)
-
-  // alphabetical
-  const timeDisplayTuple = refineTimeDisplayTuple(options)
-  const timeZone: TimeZoneArg = options.timeZone
-
-  return [
-    timeZone, // TODO: possibly not needed after moving away from Record
-    ...timeDisplayTuple,
-  ]
+export function refineRelativeToOptions(
+  options: RelativeToOptions | undefined,
+  refineRelativeTo: (relativeTo: any) => any,
+): any | undefined { // TODO: relativeTo
+  return refineRelativeTo(normalizeOptions(options).relativeTo)
 }
 
 export type ZonedDateTimeDisplayOptions =
@@ -286,7 +261,8 @@ export function refineTimeDisplayOptions(
   return refineTimeDisplayTuple(normalizeOptions(options), maxSmallestUnit)
 }
 
-function refineTimeDisplayTuple(
+// public-only
+export function refineTimeDisplayTuple(
   options: TimeDisplayOptions,
   maxSmallestUnit: TimeUnit = Unit.Minute
 ): TimeDisplayTuple {
@@ -652,40 +628,6 @@ function refineSubsecDigits(options: SubsecDigitsOptions): SubsecDigits | undefi
   }
 
   return subsecDigits
-}
-
-// Relative-To
-// -------------------------------------------------------------------------------------------------
-
-export interface RelativeToOptions {
-  relativeTo?: ZonedDateTime | PlainDate | string // TODO: include 'bag' in here
-}
-
-// TODO: use in definition of `createMarkerSystem` ?
-type RelativeToInternals = ZonedEpochSlots | IsoDateSlots
-
-function refineRelativeTo(options: RelativeToOptions): RelativeToInternals | undefined {
-  const { relativeTo } = options
-
-  if (relativeTo !== undefined) {
-    if (isObjectlike(relativeTo)) {
-      const slots = getSlots(relativeTo)
-      const { branding } = slots || {}
-
-      if (
-        branding === 'ZonedDateTime' ||
-        branding === 'PlainDate'
-      ) {
-        return slots as (ZonedDateTimeSlots | PlainDateSlots)
-      } else if (branding === 'PlainDateTime') {
-        return pluckIsoDateInternals(slots as any)
-      }
-
-      return refineMaybeZonedDateTimeBag(relativeTo as unknown as ZonedDateTimeBag)
-    }
-
-    return parseZonedOrPlainDateTime(ensureString(relativeTo))
-  }
 }
 
 // Utils

@@ -4,13 +4,12 @@ import { DurationInternals, durationInternalNames } from '../internal/durationFi
 import { IsoTimeFields, isoTimeFieldNames } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
 import { mapPropNames } from '../internal/utils'
-import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, DurationBranding, DurationSlots, PlainDateBranding } from '../internal/slots'
-import { getCalendarSlotId } from '../internal/calendarSlotUtils'
 import { queryCalendarImpl } from '../internal/calendarImpl'
-import { pluckIsoDateInternals } from '../internal/isoInternals'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
 
 // public
+import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, DurationBranding, DurationSlots, PlainDateBranding, pluckIsoDateInternals } from './slots'
+import { getCalendarSlotId } from './calendarSlot'
+import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { createPlainDate } from './plainDate'
 import { CalendarProtocol } from './calendar'
 

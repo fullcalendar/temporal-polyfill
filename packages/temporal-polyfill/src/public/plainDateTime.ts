@@ -1,27 +1,26 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, TimeBag, dateGetterNames } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
-import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag, rejectInvalidBag } from '../internal/convert'
-import { diffPlainDateTimes } from '../internal/diff'
-import { negateDurationInternals } from '../internal/durationFields'
-import { isPlainDateTimesEqual } from '../internal/equality'
+import { diffDateTimes } from '../internal/diff'
+import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { createToLocaleStringMethods } from '../internal/intlFormat'
 import { IsoDateTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
-import { IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals, refineIsoDateTimeInternals } from '../internal/isoInternals'
 import { compareIsoDateTimeFields } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
-import { movePlainDateTime } from '../internal/move'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
-import { roundPlainDateTime } from '../internal/round'
-import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { UnitName } from '../internal/units'
+import { moveDateTime } from '../internal/move'
+import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingMode, RoundingOptions, prepareOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions } from '../internal/options'
+import { roundDateTime } from '../internal/round'
+import { DayTimeUnit, Unit, UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { getPreferredCalendarSlot, refineCalendarSlot } from '../internal/calendarSlotUtils'
-import { refineTimeZoneSlot } from '../internal/timeZoneSlotUtils'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { calendarImplDateAdd, calendarImplDateUntil } from '../internal/calendarRecordSimple'
 
 // public
+import { CalendarBranding, DurationBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateTimeSlots, IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
+import { getCalendarSlotId, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
+import { refineTimeZoneSlot } from './timeZoneSlot'
+import { zonedInternalsToIso } from './zonedInternalsToIso'
+import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag, rejectInvalidBag } from './convert'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { PlainDate, PlainDateArg, PlainDateBag, createPlainDate, toPlainDateSlots } from './plainDate'
@@ -32,6 +31,7 @@ import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
+import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from './calendarRecordComplex'
 
 export type PlainDateTimeBag = DateBag & TimeBag & { calendar?: CalendarArg }
 export type PlainDateTimeMod = DateBag & TimeBag
@@ -52,7 +52,7 @@ export class PlainDateTime {
   ) {
     setSlots(this, {
       branding: PlainDateTimeBranding,
-      ...refineIsoDateTimeInternals({
+      ...refineIsoDateTimeSlots({
         isoYear,
         isoMonth,
         isoDay,
@@ -102,25 +102,47 @@ export class PlainDateTime {
     })
   }
 
+  // TODO: more DRY
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+    const slots = getPlainDateTimeSlots(this)
+    const calendarRecord = createCalendarSlotRecord(slots.calendar, {
+      dateAdd: calendarImplDateAdd,
+    }, {
+      dateAdd: calendarProtocolDateAdd,
+    })
+
+    const movedIsoFields = moveDateTime(
+      calendarRecord,
+      slots,
+      toDurationSlots(durationArg),
+      options,
+    )
+
     return createPlainDateTime({
-      ...movePlainDateTime(
-        getPlainDateTimeSlots(this),
-        toDurationSlots(durationArg),
-        options,
-      ),
-      branding: PlainDateTimeBranding,
+      ...slots,
+      ...movedIsoFields,
     })
   }
 
+  // TODO: more DRY
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+    const slots = getPlainDateTimeSlots(this)
+    const calendarRecord = createCalendarSlotRecord(slots.calendar, {
+      dateAdd: calendarImplDateAdd,
+    }, {
+      dateAdd: calendarProtocolDateAdd,
+    })
+
+    const movedIsoFields = moveDateTime(
+      calendarRecord,
+      slots,
+      negateDurationInternals(toDurationSlots(durationArg)),
+      options,
+    )
+
     return createPlainDateTime({
-      ...movePlainDateTime(
-        getPlainDateTimeSlots(this),
-        negateDurationInternals(toDurationSlots(durationArg)),
-        options,
-      ),
-      branding: PlainDateTimeBranding,
+      ...slots,
+      ...movedIsoFields,
     })
   }
 
@@ -150,11 +172,13 @@ export class PlainDateTime {
   }
 
   toString(options?: DateTimeDisplayOptions): string {
-    return formatPlainDateTimeIso(getPlainDateTimeSlots(this), options)
+    const slots = getPlainDateTimeSlots(this)
+    return formatPlainDateTimeIso(getCalendarSlotId(slots.calendar), slots, options)
   }
 
   toJSON(): string {
-    return formatPlainDateTimeIso(getPlainDateTimeSlots(this))
+    const slots = getPlainDateTimeSlots(this)
+    return formatPlainDateTimeIso(getCalendarSlotId(slots.calendar), slots)
   }
 
   toZonedDateTime(
@@ -276,4 +300,59 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
   const res = { ...parsePlainDateTime(ensureString(arg)), branding: PlainDateTimeBranding } // will validate arg
   refineOverflowOptions(options) // parse unused options
   return res
+}
+
+export function diffPlainDateTimes(
+  internals0: IsoDateTimeSlots,
+  internals1: IsoDateTimeSlots,
+  options: DiffOptions | undefined,
+  invert?: boolean
+): DurationInternals {
+  const calendarSlot = getCommonCalendarSlot(internals0.calendar, internals1.calendar)
+  const calendarRecord = createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+  }, {
+    dateAdd: calendarProtocolDateAdd,
+    dateUntil: calendarProtocolDateUntil,
+  })
+
+  let durationInternals = updateDurationFieldsSign(
+    diffDateTimes(
+      calendarRecord,
+      internals0,
+      internals1,
+      ...refineDiffOptions(invert, options, Unit.Day),
+      options,
+    ),
+  )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+export function roundPlainDateTime(
+  internals: IsoDateTimeSlots,
+  options: RoundingOptions | UnitName,
+): IsoDateTimeSlots {
+  const isoDateTimeFields = roundDateTime(
+    internals,
+    ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
+  )
+
+  return {
+    ...isoDateTimeFields,
+    calendar: internals.calendar,
+  }
+}
+
+export function isPlainDateTimesEqual(
+  a: IsoDateTimeSlots,
+  b: IsoDateTimeSlots
+): boolean {
+  return !compareIsoDateTimeFields(a, b) &&
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }

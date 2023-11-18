@@ -1,14 +1,10 @@
 import { isoCalendarId } from './calendarConfig'
-import { CalendarSlot, getCalendarSlotId } from './calendarSlotUtils'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationInternals, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { epochNanoToIso } from './isoMath'
-import { CalendarDisplay, DateTimeDisplayOptions, InstantDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
+import { CalendarDisplay, DateTimeDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, RoundingMode, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
-import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { timeZoneImplGetOffsetNanosecondsFor } from './timeZoneRecordSimple'
-import { TimeZoneSlot, getTimeZoneSlotId, refineTimeZoneSlot, utcTimeZoneId } from './timeZoneSlotUtils'
 import {
   givenFieldsToDayTimeNano,
   nanoInHour,
@@ -19,15 +15,14 @@ import {
   Unit,
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
-
-// public
-import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor } from '../public/timeZoneRecordComplex'
+import { TimeZoneGetOffsetNanosecondsForFunc } from './timeZoneRecordTypes'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
 export function formatPlainDateTimeIso(
-  internals: IsoDateTimeSlots,
+  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  isoFields: IsoDateTimeFields,
   options?: DateTimeDisplayOptions,
 ): string {
   const [
@@ -37,31 +32,31 @@ export function formatPlainDateTimeIso(
     subsecDigits,
   ] = refineDateTimeDisplayOptions(options)
 
-  const roundedIsoFields = roundDateTimeToNano(internals, nanoInc, roundingMode)
+  const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
 
   return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
-    formatCalendar(internals.calendar, calendarDisplay)
+    formatCalendar(calendarId, calendarDisplay)
 }
 
 export function formatPlainDateIso(
-  internals: IsoDateSlots,
+  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  isoFields: IsoDateFields,
   options?: DateTimeDisplayOptions
 ): string {
-  return formatIsoDateFields(internals) +
-    formatCalendar(internals.calendar, refineDateDisplayOptions(options))
+  return formatIsoDateFields(isoFields) +
+    formatCalendar(calendarId, refineDateDisplayOptions(options))
 }
 
+/*
+TODO: rename to formatZonedEpochNano
+*/
 export function formatZonedDateTimeIso(
-  internals: ZonedEpochSlots,
+  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  timeZoneId: string, // TODO: serialized too soon!!!... getTimeZoneSlotId(timeZone)
+  timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
+  epochNano: DayTimeNano,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
-  let { epochNanoseconds: epochNano, timeZone, calendar } = internals
-  const { getOffsetNanosecondsFor } = createTimeZoneSlotRecord(timeZone, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-  }, {
-    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-  })
-
   const [
     calendarDisplay,
     timeZoneDisplay,
@@ -72,33 +67,23 @@ export function formatZonedDateTimeIso(
   ] = refineZonedDateTimeDisplayOptions(options)
 
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const offsetNano = getOffsetNanosecondsFor(epochNano)
+  const offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
     formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
-    formatTimeZone(timeZone, timeZoneDisplay) +
-    formatCalendar(calendar, calendarDisplay)
+    formatTimeZone(timeZoneId, timeZoneDisplay) +
+    formatCalendar(calendarId, calendarDisplay)
 }
 
 export function formatInstantIso(
+  providedTimeZone: boolean,
+  timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
   epochNano: DayTimeNano,
-  options?: InstantDisplayOptions,
+  nanoInc: number,
+  roundingMode: RoundingMode,
+  subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  const [
-    timeZoneArg,
-    nanoInc,
-    roundingMode,
-    subsecDigits,
-  ] = refineInstantDisplayOptions(options)
-
-  const timeZone = timeZoneArg !== undefined ? refineTimeZoneSlot(timeZoneArg) : utcTimeZoneId
-  const { getOffsetNanosecondsFor } = createTimeZoneSlotRecord(timeZone, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-  }, {
-    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-  })
-
   epochNano = roundDayTimeNanoByInc(
     epochNano,
     nanoInc,
@@ -106,11 +91,11 @@ export function formatInstantIso(
     true, // useDayOrigin
   )
 
-  let offsetNano = getOffsetNanosecondsFor(epochNano)
+  let offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
-    (timeZoneArg
+    (providedTimeZone
       ? formatOffsetNano(roundToMinute(offsetNano))
       : 'Z'
     )
@@ -130,29 +115,30 @@ export function formatPlainTimeIso(fields: IsoTimeFields, options?: TimeDisplayO
 
 /*
 High-level. Refined options.
+For PlainYearMonth and PlainMonthDay
 TODO: possible to simplify this function
 */
 export function formatPossibleDate(
-  formatSimple: (internals: IsoDateSlots) => string,
-  internals: IsoDateSlots,
+  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  formatSimple: (isoFields: IsoDateFields) => string,
+  isoFields: IsoDateFields,
   options?: DateTimeDisplayOptions,
 ) {
   const calendarDisplay = refineDateDisplayOptions(options)
-  const calendarId = getCalendarSlotId(internals.calendar)
   const showCalendar =
     calendarDisplay > CalendarDisplay.Never || // critical or always
     (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
 
   if (calendarDisplay === CalendarDisplay.Never) {
     if (calendarId === isoCalendarId) {
-      return formatSimple(internals)
+      return formatSimple(isoFields)
     } else {
-      return formatIsoDateFields(internals)
+      return formatIsoDateFields(isoFields)
     }
   } else if (showCalendar) {
-    return formatIsoDateFields(internals) + formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
+    return formatIsoDateFields(isoFields) + formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
   } else {
-    return formatSimple(internals)
+    return formatSimple(isoFields)
   }
 }
 
@@ -288,26 +274,24 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
 // complex objs
 //
 
-export function formatTimeZone(
-  timeZoneSlot: TimeZoneSlot,
+function formatTimeZone(
+  timeZoneId: string,
   timeZoneDisplay: TimeZoneDisplay,
 ): string {
   if (timeZoneDisplay !== TimeZoneDisplay.Never) {
     return '[' +
       (timeZoneDisplay === TimeZoneDisplay.Critical ? '!' : '') +
-      getTimeZoneSlotId(timeZoneSlot) +
+      timeZoneId +
       ']'
   }
   return ''
 }
 
 export function formatCalendar(
-  calendar: CalendarSlot,
+  calendarId: string,
   calendarDisplay: CalendarDisplay,
 ): string {
   if (calendarDisplay !== CalendarDisplay.Never) {
-    const calendarId = getCalendarSlotId(calendar)
-
     if (
       calendarDisplay > CalendarDisplay.Never || // critical or always
       (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)

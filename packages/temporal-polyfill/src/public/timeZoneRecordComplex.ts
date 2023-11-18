@@ -1,11 +1,13 @@
+import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { InstantBranding, IsoDateTimeSlots, PlainDateTimeBranding } from '../internal/slots'
+import { IsoDateTimeFields } from '../internal/isoFields'
 import { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { validateOffsetNano } from '../internal/timeZoneMath'
 import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../internal/timeZoneRecordSimple'
-import { TimeZoneSlot } from '../internal/timeZoneSlotUtils'
 
 // public
+import { InstantBranding, PlainDateTimeBranding } from './slots'
+import { TimeZoneSlot } from './timeZoneSlot'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZone'
@@ -79,12 +81,13 @@ export function timeZoneProtocolGetOffsetNanosecondsFor(
 
 export function timeZoneProtocolGetPossibleInstantsFor(
   timeZoneProtocol: TimeZoneProtocol,
-  isoDateTimeSlots: IsoDateTimeSlots, // needs calendar i think
+  isoFields: IsoDateTimeFields,
 ): DayTimeNano[] {
   return [...timeZoneProtocol.getPossibleInstantsFor(
     createPlainDateTime({
-      ...isoDateTimeSlots,
+      ...isoFields,
       branding: PlainDateTimeBranding,
+      calendar: isoCalendarId, // BAD, will need original slot
     })
   )].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds

@@ -1,15 +1,15 @@
 import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { CalendarImpl } from '../internal/calendarImpl'
 import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../internal/calendarRecordSimple'
-import { CalendarSlot } from '../internal/calendarSlotUtils'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationInternals } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { LargestUnitOptions, OverflowOptions } from '../internal/options'
-import { DurationBranding, IsoDateSlots, PlainDateBranding } from '../internal/slots'
 import { Unit, unitNamesAsc } from '../internal/units'
 
 // public
+import { CalendarSlot } from './calendarSlot'
+import { DurationBranding, IsoDateSlots, PlainDateBranding } from './slots'
 import { CalendarProtocol } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'

@@ -1,10 +1,10 @@
 import { DayTimeNano } from './dayTimeNano'
-import { IsoDateTimeSlots } from './slots'
+import { IsoDateTimeFields } from './isoFields'
 
 export type TimeZoneGetOffsetNanosecondsForFunc = (
   epochNano: DayTimeNano,
 ) => number
 
 export type TimeZoneGetPossibleInstantsForFunc = (
-  isoDateTimeSlots: IsoDateTimeSlots, // needs calendar i think
+  isoFields: IsoDateTimeFields,
 ) => DayTimeNano[]

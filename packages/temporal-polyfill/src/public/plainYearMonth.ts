@@ -1,29 +1,30 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, yearMonthGetterNames } from '../internal/calendarFields'
+import { diffDates } from '../internal/diff'
+import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
+import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
+import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/isoFormat'
+import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { compareIsoDateFields, moveByIsoDays } from '../internal/isoMath'
+import { parsePlainYearMonth } from '../internal/isoParse'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDiffOptions, refineOverflowOptions } from '../internal/options'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
+import { ensureString } from '../internal/cast'
+import { calendarImplDateAdd, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth } from '../internal/calendarRecordSimple'
+import { Unit } from '../internal/units'
+import { CalendarDayFunc } from '../internal/calendarRecordTypes'
+
+// public
 import {
   convertPlainYearMonthToDate,
   mergePlainYearMonthBag,
   refinePlainYearMonthBag,
   rejectInvalidBag,
-} from '../internal/convert'
-import {  diffPlainYearMonths } from '../internal/diff'
-import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { DurationInternals, negateDurationInternals } from '../internal/durationFields'
-import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
-import { IsoDatePublic, refineIsoYearMonthInternals } from '../internal/isoInternals'
-import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/isoFormat'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
-import { compareIsoDateFields, moveByIsoDays } from '../internal/isoMath'
-import { isPlainYearMonthsEqual } from '../internal/equality'
-import { parsePlainYearMonth } from '../internal/isoParse'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { ensureString } from '../internal/cast'
-import { calendarImplDateAdd, calendarImplDay, calendarImplDaysInMonth } from '../internal/calendarRecordSimple'
-import { calendarProtocolDateAdd, calendarProtocolDay, calendarProtocolDaysInMonth, createCalendarSlotRecord } from './calendarRecordComplex'
-
-// public
+} from './convert'
+import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots, IsoDatePublic } from './slots'
+import { calendarProtocolDateAdd, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, createCalendarSlotRecord } from './calendarRecordComplex'
+import { getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
@@ -41,7 +42,7 @@ export class PlainYearMonth {
   ) {
     setSlots(this, {
       branding: PlainYearMonthBranding,
-      ...refineIsoYearMonthInternals({
+      ...refineIsoYearMonthSlots({
         isoYear,
         isoMonth,
         isoDay: referenceIsoDay,
@@ -93,11 +94,24 @@ export class PlainYearMonth {
   }
 
   toString(options?: DateTimeDisplayOptions) {
-    return formatPossibleDate(formatIsoYearMonthFields, getPlainYearMonthSlots(this), options)
+    const slots = getPlainYearMonthSlots(this)
+
+    return formatPossibleDate(
+      getCalendarSlotId(slots.calendar),
+      formatIsoYearMonthFields,
+      slots,
+      options,
+    )
   }
 
   toJSON() { // not DRY
-    return formatPossibleDate(formatIsoYearMonthFields, getPlainYearMonthSlots(this))
+    const slots = getPlainYearMonthSlots(this)
+
+    return formatPossibleDate(
+      getCalendarSlotId(slots.calendar),
+      formatIsoYearMonthFields,
+      slots,
+    )
   }
 
   toPlainDate(bag: { day: number }): PlainDate {
@@ -192,12 +206,15 @@ function movePlainYearMonth(
   const calendarRecord = createCalendarSlotRecord(calendar, {
     dateAdd: calendarImplDateAdd,
     daysInMonth: calendarImplDaysInMonth,
+    day: calendarImplDay,
   }, {
     dateAdd: calendarProtocolDateAdd,
     daysInMonth: calendarProtocolDaysInMonth,
+    day: calendarProtocolDay,
   })
 
   const isoDateFields = movePlainYearMonthToDay(
+    calendarRecord,
     internals,
     durationInternals.sign < 0
       ? calendarRecord.daysInMonth(internals)
@@ -207,22 +224,63 @@ function movePlainYearMonth(
   const movedIsoDateFields = calendarRecord.dateAdd(isoDateFields, durationInternals, options)
 
   return createPlainYearMonth({
-    ...movePlainYearMonthToDay({ ...movedIsoDateFields, calendar }),
+    ...movePlainYearMonthToDay(calendarRecord, movedIsoDateFields),
     calendar,
     branding: PlainYearMonthBranding,
   })
 }
 
-// TODO: DRY
-function movePlainYearMonthToDay(internals: IsoDateSlots, day = 1): IsoDateFields {
-  const calendarRecord = createCalendarSlotRecord(internals.calendar, {
+function diffPlainYearMonths(
+  internals0: IsoDateSlots,
+  internals1: IsoDateSlots,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationInternals {
+  const calendar = getCommonCalendarSlot(internals0.calendar, internals1.calendar)
+  const calendarRecord = createCalendarSlotRecord(calendar, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
     day: calendarImplDay,
   }, {
+    dateAdd: calendarProtocolDateAdd,
+    dateUntil: calendarProtocolDateUntil,
     day: calendarProtocolDay,
   })
 
-  return moveByIsoDays(
-    internals,
-    day - calendarRecord.day(internals),
+  let durationInternals = updateDurationFieldsSign(
+    diffDates(
+      calendarRecord,
+      movePlainYearMonthToDay(calendarRecord, internals0),
+      movePlainYearMonthToDay(calendarRecord, internals1),
+      ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
+      options,
+    ),
   )
+
+  if (invert) {
+    durationInternals = negateDurationInternals(durationInternals)
+  }
+
+  return durationInternals
+}
+
+// TODO: DRY
+function movePlainYearMonthToDay(
+  calendarRecord: { day: CalendarDayFunc },
+  isoFields: IsoDateFields,
+  day = 1,
+): IsoDateFields {
+
+  return moveByIsoDays(
+    isoFields,
+    day - calendarRecord.day(isoFields),
+  )
+}
+
+export function isPlainYearMonthsEqual(
+  a: IsoDateSlots,
+  b: IsoDateSlots
+): boolean {
+  return !compareIsoDateFields(a, b) &&
+    isCalendarSlotsEqual(a.calendar, b.calendar)
 }

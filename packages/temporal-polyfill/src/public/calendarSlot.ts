@@ -1,17 +1,24 @@
-import { isoCalendarId } from './calendarConfig'
-import { calendarProtocolMethodNames } from './calendarFields'
-import { ensureString } from './cast'
-import { parseCalendarId } from './isoParse'
-import { getSlots } from './slots'
-import { isObjectlike } from './utils'
+import { isoCalendarId } from '../internal/calendarConfig'
+import { calendarProtocolMethodNames } from '../internal/calendarFields'
+import { ensureString } from '../internal/cast'
+import { parseCalendarId } from '../internal/isoParse'
+import { isObjectlike } from '../internal/utils'
 
 // public
-import { CalendarArg, CalendarProtocol } from '../public/calendar'
-import { createProtocolChecker } from '../public/publicUtils'
+import { getSlots } from './slots'
+import { CalendarArg, CalendarProtocol } from './calendar'
+import { createProtocolChecker } from './publicUtils'
 
 export type CalendarSlot = CalendarProtocol | string
 
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethodNames)
+
+// used by intlFormat!!!
+export function getCalendarSlotId(calendarSlot: CalendarSlot): string {
+  return typeof calendarSlot === 'string'
+    ? calendarSlot
+    : ensureString(calendarSlot.id)
+}
 
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectlike(calendarArg)) {
@@ -59,10 +66,4 @@ export function getPreferredCalendarSlot(a: CalendarSlot, b: CalendarSlot): Cale
   }
 
   throw new RangeError('Incompatible calendars')
-}
-
-export function getCalendarSlotId(calendarSlot: CalendarSlot): string {
-  return typeof calendarSlot === 'string'
-    ? calendarSlot
-    : ensureString(calendarSlot.id)
 }

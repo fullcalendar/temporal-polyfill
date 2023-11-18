@@ -1,6 +1,4 @@
-import { calendarImplDateAdd, calendarImplDateUntil } from './calendarRecordSimple'
 import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
-import { diffDateTimes, diffZonedEpochNano } from './diff'
 import {
   DurationFields,
   DurationInternals,
@@ -13,13 +11,10 @@ import {
   nanoToDurationTimeFields,
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
-import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, isoToEpochNano, nanoToIsoTimeAndDay, moveByIsoDays, epochNanoToIso } from './isoMath'
-import { moveDateTime, moveZonedEpochNano } from './move'
-import { EpochDisambig, OffsetDisambig, RoundingMode, RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
-import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots } from './slots'
-import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
+import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
+import { RoundingMode, RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
-import { computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneMath'
+import { computeNanosecondsInDay } from './timeZoneMath'
 import {
   nanoInMinute,
   nanoInUtcDay,
@@ -31,74 +26,7 @@ import {
   UnitName,
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
-
-// public
-import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from '../public/calendarRecordComplex'
-import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
-
-export function roundPlainDateTime(
-  internals: IsoDateTimeSlots,
-  options: RoundingOptions | UnitName,
-): IsoDateTimeSlots {
-  const isoDateTimeFields = roundDateTime(
-    internals,
-    ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
-  )
-
-  return {
-    ...isoDateTimeFields,
-    calendar: internals.calendar,
-  }
-}
-
-export function roundZonedDateTime(
-  internals: ZonedEpochSlots,
-  options: RoundingOptions | UnitName,
-): ZonedEpochSlots {
-  let { epochNanoseconds, timeZone, calendar } = internals
-  const timeZoneRecord = createTimeZoneSlotRecord(timeZone, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  }, {
-    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
-  })
-
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
-
-  const offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNanoseconds)
-  let isoDateTimeFields = {
-    ...epochNanoToIso(epochNanoseconds, offsetNano),
-    calendar,
-  }
-
-  isoDateTimeFields = {
-    calendar,
-    ...roundDateTime(
-      isoDateTimeFields,
-      smallestUnit as DayTimeUnit,
-      roundingInc,
-      roundingMode,
-      timeZoneRecord,
-    )
-  }
-
-  epochNanoseconds = getMatchingInstantFor(
-    timeZoneRecord,
-    { ...isoDateTimeFields, calendar },
-    offsetNano,
-    false, // z
-    OffsetDisambig.Prefer, // keep old offsetNano if possible
-    EpochDisambig.Compat,
-    true, // fuzzy
-  )
-
-  return {
-    epochNanoseconds,
-    timeZone,
-    calendar,
-  }
-}
+import { MarkerToEpochNano, MoveMarker } from './markerSystemTypes'
 
 export function roundInstant(
   epochNano: DayTimeNano,
@@ -140,17 +68,17 @@ export function roundToMinute(offsetNano: number): number {
 // -------------------------------------------------------------------------------------------------
 
 export function roundDateTime(
-  isoFields: IsoDateTimeSlots,
+  isoFields: IsoDateTimeFields,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  timeZoneSlot?: undefined | {
+  timeZoneRecord?: undefined | {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
 ): IsoDateTimeFields {
   if (smallestUnit === Unit.Day) {
-    return roundDateTimeToDay(isoFields, timeZoneSlot, roundingMode)
+    return roundDateTimeToDay(isoFields, timeZoneRecord, roundingMode)
   }
 
   return roundDateTimeToNano(
@@ -175,7 +103,7 @@ export function roundTime(
 
 // TODO: break into two separate functions?
 function roundDateTimeToDay(
-  isoFields: IsoDateTimeSlots,
+  isoFields: IsoDateTimeFields,
   timeZoneRecord: undefined | {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -586,64 +514,6 @@ function nudgeRelativeDuration<M>(
     expanded ? epochNano1 : epochNano0,
     expanded, // guaranteed to be a big unit because of big smallestUnit
   ]
-}
-
-// Marker System
-// -------------------------------------------------------------------------------------------------
-// TODO: best place for this?
-
-export type MarkerToEpochNano<M> = (marker: M) => DayTimeNano
-export type MoveMarker<M> = (marker: M, durationFields: DurationFields) => M
-export type DiffMarkers<M> = (marker0: M, marker1: M, largeUnit: Unit) => DurationInternals
-export type MarkerSystem<M> = [
-  M,
-  MarkerToEpochNano<M>,
-  MoveMarker<M>,
-  DiffMarkers<M>,
-]
-export type SimpleMarkerSystem<M> = [
-  M,
-  MarkerToEpochNano<M>,
-  MoveMarker<M>,
-]
-
-/*
-Okay that callers frequently cast to `unknown`?
-FYI: input can be a PlainDate's internals (IsoDateSlots), but marker has time
-*/
-export function createMarkerSystem(
-  markerInternals: ZonedEpochSlots | IsoDateSlots
-): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
-  const { calendar, timeZone, epochNanoseconds } = markerInternals as ZonedEpochSlots
-
-  if (epochNanoseconds) {
-    return [
-      epochNanoseconds,
-      identityFunc as MarkerToEpochNano<DayTimeNano>,
-      moveZonedEpochNano.bind(undefined, calendar, timeZone) as MoveMarker<DayTimeNano>,
-      diffZonedEpochNano.bind(undefined, calendar, () => timeZone) as DiffMarkers<DayTimeNano>,
-    ]
-  } else {
-    const calendarRecord = createCalendarSlotRecord(calendar, {
-      dateAdd: calendarImplDateAdd,
-      dateUntil: calendarImplDateUntil,
-    }, {
-      dateAdd: calendarProtocolDateAdd,
-      dateUntil: calendarProtocolDateUntil,
-    })
-
-    return [
-      { ...markerInternals, ...isoTimeFieldDefaults } as IsoDateTimeFields,
-      isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
-      // TODO: better way to .bind to Calendar
-      (m: IsoDateTimeFields, d: DurationFields) => {
-        return moveDateTime(calendarRecord, m, d)
-      },
-      (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return updateDurationFieldsSign(diffDateTimes(calendarRecord, m0, m1, largeUnit))
-      },
-    ]
-  }
 }
 
 // Utils

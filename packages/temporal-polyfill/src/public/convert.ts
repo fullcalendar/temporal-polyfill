@@ -1,4 +1,4 @@
-import { isoCalendarId } from './calendarConfig'
+import { isoCalendarId } from '../internal/calendarConfig'
 import {
   DateTimeBag,
   DayFields,
@@ -14,16 +14,16 @@ import {
   timeFieldsToIso,
   yearMonthBasicNames,
   yearMonthFieldNames,
-} from './calendarFields'
+} from '../internal/calendarFields'
 import {
   DurationInternals,
   durationFieldDefaults,
   durationFieldNames,
   durationFieldRefiners,
   updateDurationFieldsSign,
-} from './durationFields'
-import { IsoTimeFields, constrainIsoTimeFields } from './isoFields'
-import { parseOffsetNano } from './isoParse'
+} from '../internal/durationFields'
+import { IsoTimeFields, constrainIsoTimeFields } from '../internal/isoFields'
+import { parseOffsetNano } from '../internal/isoParse'
 import {
   EpochDisambig,
   EpochDisambigOptions,
@@ -35,33 +35,32 @@ import {
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
-} from './options'
+} from '../internal/options'
 import {
   ensureObjectlike,
   ensureStringViaPrimitive,
-} from './cast'
-import { Callable, pluckProps } from './utils'
-import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
-import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
-import { CalendarSlot, refineCalendarSlot } from './calendarSlotUtils'
-import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlotUtils'
-import { getMatchingInstantFor, getSingleInstantFor } from './timeZoneMath'
-import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
-import { calendarImplDateFromFields, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from './calendarRecordSimple'
-import { CalendarFieldsFunc, CalendarMergeFieldsFunc } from './calendarRecordTypes'
+} from '../internal/cast'
+import { Callable, pluckProps } from '../internal/utils'
+import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from '../internal/isoMath'
+import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZoneMath'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
+import { calendarImplDateFromFields, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from '../internal/calendarRecordSimple'
+import { CalendarFieldsFunc, CalendarMergeFieldsFunc } from '../internal/calendarRecordTypes'
 
 // public
-import type { TimeZoneArg } from '../public/timeZone'
-import { getZonedDateTimeSlots, type ZonedDateTime, type ZonedDateTimeBag, type ZonedDateTimeMod } from '../public/zonedDateTime'
-import { getPlainDateSlots, type PlainDate, type PlainDateBag, type PlainDateMod } from '../public/plainDate'
-import { getPlainDateTimeSlots, type PlainDateTime, type PlainDateTimeBag, type PlainDateTimeMod } from '../public/plainDateTime'
-import type { PlainTime, PlainTimeBag, PlainTimeMod } from '../public/plainTime'
-import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from '../public/plainYearMonth'
-import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from '../public/plainMonthDay'
-import type { DurationBag, DurationMod } from '../public/duration'
-import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from '../public/timeZoneRecordComplex'
-import { calendarProtocolDateFromFields, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from '../public/calendarRecordComplex'
-
+import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots } from './slots'
+import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
+import type { TimeZoneArg } from './timeZone'
+import { getZonedDateTimeSlots, type ZonedDateTime, type ZonedDateTimeBag, type ZonedDateTimeMod } from './zonedDateTime'
+import { getPlainDateSlots, type PlainDate, type PlainDateBag, type PlainDateMod } from './plainDate'
+import { getPlainDateTimeSlots, type PlainDateTime, type PlainDateTimeBag, type PlainDateTimeMod } from './plainDateTime'
+import type { PlainTime, PlainTimeBag, PlainTimeMod } from './plainTime'
+import { getPlainYearMonthSlots, type PlainYearMonth, type PlainYearMonthBag, type PlainYearMonthMod } from './plainYearMonth'
+import { getPlainMonthDaySlots, type PlainMonthDay, type PlainMonthDayBag, type PlainMonthDayMod } from './plainMonthDay'
+import type { DurationBag, DurationMod } from './duration'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
+import { calendarProtocolDateFromFields, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
 
 /*
 Initial subject should be converted to { calendar, timeZone, day, month, monthCode, year, era, eraYear }
@@ -411,7 +410,10 @@ export function refinePlainDateBag(
     requireFields,
   )
 
-  return calendarRecord.dateFromFields(fields as any, options)
+  return {
+    ...calendarRecord.dateFromFields(fields as any, options),
+    calendar,
+  }
 }
 
 export function mergePlainDateBag(
@@ -437,7 +439,10 @@ export function mergePlainDateBag(
     dateFieldNames,
   )
 
-  return calendarRecord.dateFromFields(fields as any, options)
+  return {
+    ...calendarRecord.dateFromFields(fields as any, options),
+    calendar,
+  }
 }
 
 function convertToIso(
@@ -497,7 +502,10 @@ export function refinePlainYearMonthBag(
     requireFields,
   )
 
-  return calendarRecord.yearMonthFromFields(fields, options)
+  return {
+    ...calendarRecord.yearMonthFromFields(fields, options),
+    calendar,
+  }
 }
 
 export function mergePlainYearMonthBag(
@@ -523,7 +531,10 @@ export function mergePlainYearMonthBag(
     yearMonthFieldNames,
   )
 
-  return calendarRecord.yearMonthFromFields(fields, options)
+  return {
+    ...calendarRecord.yearMonthFromFields(fields, options),
+    calendar,
+  }
 }
 
 /*
@@ -556,7 +567,10 @@ export function convertToPlainYearMonth(
     [],
   )
 
-  return calendarRecord.yearMonthFromFields(fields, options)
+  return {
+    ...calendarRecord.yearMonthFromFields(fields, options),
+    calendar,
+  }
 }
 
 // PlainMonthDay
@@ -601,7 +615,10 @@ export function refinePlainMonthDayBag(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return calendarRecord.monthDayFromFields(fields, options)
+  return {
+    ...calendarRecord.monthDayFromFields(fields, options),
+    calendar: calendar!,
+  }
 }
 
 export function mergePlainMonthDayBag(
@@ -627,7 +644,10 @@ export function mergePlainMonthDayBag(
     dateFieldNames,
   )
 
-  return calendarRecord.monthDayFromFields(fields, options)
+  return {
+    ...calendarRecord.monthDayFromFields(fields, options),
+    calendar,
+  }
 }
 
 export function convertToPlainMonthDay(
@@ -649,7 +669,10 @@ export function convertToPlainMonthDay(
     [], // requiredFields
   )
 
-  return calendarRecord.monthDayFromFields(fields)
+  return {
+    ...calendarRecord.monthDayFromFields(fields),
+    calendar,
+  }
 }
 
 /*
@@ -722,7 +745,7 @@ export function mergeDurationBag(
 // Calendar-field processing
 // -------------------------------------------------------------------------------------------------
 
-export function refineCalendarFields(
+function refineCalendarFields(
   calendarRecord: { fields: CalendarFieldsFunc },
   bag: Record<string, unknown>,
   validFieldNames: string[],
@@ -760,7 +783,7 @@ function mergeCalendarFields(
 /*
 defaults to ISO
 */
-export function getBagCalendarSlot(bag: any): CalendarSlot {
+function getBagCalendarSlot(bag: any): CalendarSlot {
   return extractBagCalendarSlot(bag) || isoCalendarId
 }
 

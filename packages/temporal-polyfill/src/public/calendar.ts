@@ -3,15 +3,15 @@ import { ensureString } from '../internal/cast'
 import { IsoDateFields } from '../internal/isoFields'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from '../internal/utils'
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
-import { refineCalendarSlot, refineCalendarSlotString } from '../internal/calendarSlotUtils'
 import { queryCalendarImpl } from '../internal/calendarImpl'
-import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/convert'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
 import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
 
 // public
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from './convert'
+import { refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
@@ -63,7 +63,7 @@ export class Calendar implements CalendarProtocol {
     setSlots(this, {
       branding: CalendarBranding,
       id: refineCalendarSlotString(id),
-    } as CalendarSlots)
+    } as CalendarClassSlots)
   }
 
   dateAdd(
@@ -252,14 +252,14 @@ defineProps(
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export type CalendarSlots = BrandingSlots & { id: string }
+export type CalendarClassSlots = BrandingSlots & { id: string }
 
-export function createCalendar(slots: CalendarSlots): Calendar {
+export function createCalendar(slots: CalendarClassSlots): Calendar {
   return createViaSlots(Calendar, slots)
 }
 
-export function getCalendarSlots(calendar: Calendar): CalendarSlots {
-  return getSpecificSlots(CalendarBranding, calendar) as CalendarSlots
+export function getCalendarSlots(calendar: Calendar): CalendarClassSlots {
+  return getSpecificSlots(CalendarBranding, calendar) as CalendarClassSlots
 }
 
 // HACK

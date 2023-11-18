@@ -1,6 +1,8 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
 import {
+  IsoDateFields,
+  IsoDateTimeFields,
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
@@ -13,9 +15,6 @@ import {
   hasAnyPropsByName,
   pluckProps,
 } from './utils'
-import { IsoDateSlots, IsoDateTimeSlots, ZonedEpochSlots, getSlots, getSpecificSlots } from './slots'
-import { CalendarSlot, getCalendarSlotId } from './calendarSlotUtils'
-import { getTimeZoneSlotId } from './timeZoneSlotUtils'
 import { getSingleInstantFor } from './timeZoneMath'
 import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 
@@ -27,6 +26,10 @@ import type { PlainDateTime } from '../public/plainDateTime'
 import type { PlainMonthDay } from '../public/plainMonthDay'
 import type { PlainYearMonth } from '../public/plainYearMonth'
 import type { Instant } from '../public/instant'
+import { getSlots, getSpecificSlots } from '../public/slots'
+import { CalendarSlot, getCalendarSlotId } from '../public/calendarSlot'
+import { getTimeZoneSlotId } from '../public/timeZoneSlot'
+// TODO: redesign how this all works!!!!!!!!!!!!!!!!!!!!!!!!
 
 export type LocalesArg = string | string[]
 
@@ -293,7 +296,7 @@ const optionsTransformers: Record<string, OptionsTransformer> = {
   PlainTime: createTransformer(timeValidNames, timeFallbacks, timeExclusions),
   Instant: createTransformer(dateTimeValidNames, dateTimeFallbacks, []),
 
-  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: ZonedEpochSlots) {
+  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: any) { // WAS ZonedEpochSlots ---------- adjust!!!
     if (!subjectInternals) {
       throw new TypeError('DateTimeFormat does not accept ZonedDateTime')
     }
@@ -352,8 +355,8 @@ type EpochNanoConverter = (
 ) => DayTimeNano
 
 const epochNanoConverters: Record<string, EpochNanoConverter> = {
-  Instant: (internals: ZonedEpochSlots) => internals.epochNanoseconds,
-  ZonedDateTime: (internals: ZonedEpochSlots) => internals.epochNanoseconds,
+  Instant: (internals: { epochNanoseconds: DayTimeNano }) => internals.epochNanoseconds,
+  ZonedDateTime: (internals: { epochNanoseconds: DayTimeNano }) => internals.epochNanoseconds,
   PlainTime: timeFieldsToEpochNano,
   // otherwise, use dateInternalsToEpochNano
 }
@@ -367,20 +370,16 @@ function timeFieldsToEpochNano(
     getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
   })
 
-  return getSingleInstantFor(
-    timeZoneRecord,
-    {
-      calendar: isoCalendarId,
-      isoYear: isoEpochOriginYear,
-      isoMonth: 1,
-      isoDay: 1,
-      ...internals,
-    },
-  )
+  return getSingleInstantFor(timeZoneRecord, {
+    isoYear: isoEpochOriginYear,
+    isoMonth: 1,
+    isoDay: 1,
+    ...internals,
+  })
 }
 
 function dateInternalsToEpochNano(
-  internals: IsoDateTimeSlots | IsoDateSlots,
+  internals: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
   const timeZoneRecord = createTimeZoneImplRecord(resolvedOptions.timeZone, {

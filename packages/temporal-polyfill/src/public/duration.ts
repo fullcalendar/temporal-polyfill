@@ -1,4 +1,3 @@
-import { mergeDurationBag, refineDurationBag } from '../internal/convert'
 import {
   absDurationInternals,
   addDayTimeDurationFields,
@@ -23,23 +22,28 @@ import {
   refineTotalOptions,
 } from '../internal/options'
 import {
-  MarkerSystem,
-  SimpleMarkerSystem,
   balanceDayTimeDuration,
   roundDayTimeDuration,
   roundRelativeDuration,
   totalDayTimeDuration,
   totalRelativeDuration,
 } from '../internal/round'
+import {
+  MarkerSystem,
+  SimpleMarkerSystem
+} from '../internal/markerSystemTypes'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
-import { MarkerToEpochNano, MoveMarker, DiffMarkers, createMarkerSystem } from '../internal/round'
+import { MarkerToEpochNano, MoveMarker, DiffMarkers } from '../internal/markerSystemTypes'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
-import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from '../internal/slots'
 import { ensureString } from '../internal/cast'
 
 // public
+import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { mergeDurationBag, refineDurationBag } from './convert'
+import { createMarkerSystem } from './markerSystemImpl'
 import { durationGettersMethods, neverValueOf } from './publicMixins'
+import { refinePublicRelativeTo } from './publicOptions'
 
 export type DurationBag = Partial<DurationFields>
 export type DurationMod = Partial<DurationFields>
@@ -113,7 +117,7 @@ export class Duration {
       roundingInc,
       roundingMode,
       markerInternals,
-    ] = refineDurationRoundOptions(options, durationLargestUnit)
+    ] = refineDurationRoundOptions(options, durationLargestUnit, refinePublicRelativeTo)
 
     const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
@@ -177,7 +181,7 @@ export class Duration {
   total(options: TotalUnitOptionsWithRel | UnitName): number {
     const slots = getDurationSlots(this)
     const durationLargestUnit = getLargestDurationUnit(slots)
-    const [totalUnit, markerInternals] = refineTotalOptions(options)
+    const [totalUnit, markerInternals] = refineTotalOptions(options, refinePublicRelativeTo)
     const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
 
     if (
@@ -226,7 +230,7 @@ export class Duration {
   ): NumSign {
     const durationFields0 = toDurationSlots(durationArg0)
     const durationFields1 = toDurationSlots(durationArg1)
-    const markerInternals = refineRelativeToOptions(options)
+    const markerInternals = refineRelativeToOptions(options, refinePublicRelativeTo)
     const largestUnit = Math.max(
       getLargestDurationUnit(durationFields0),
       getLargestDurationUnit(durationFields1),
@@ -314,7 +318,7 @@ function addToDuration(
   options: RelativeToOptions | undefined,
 ): Duration {
   let otherFields = toDurationSlots(otherArg) as DurationInternals
-  const markerInternals = refineRelativeToOptions(options) // optional
+  const markerInternals = refineRelativeToOptions(options, refinePublicRelativeTo) // optional
   const largestUnit = Math.max(
     getLargestDurationUnit(internals),
     getLargestDurationUnit(otherFields),

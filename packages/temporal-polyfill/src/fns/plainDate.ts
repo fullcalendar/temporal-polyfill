@@ -21,6 +21,11 @@ ALSO, we don't like complex Calendar or TimeZone objects because they have a lot
 all bundled together, making it impossible to tree shake
 */
 
+import { calendarImplDateAdd, createCalendarImplRecord } from "../internal/calendarRecordSimple"
+import { moveDateEasy } from "../internal/move"
+import { OverflowOptions } from "../internal/options"
+import { DurationSlots } from "../public/slots"
+
 /*
 NOTE: the inputted `slots.calendar` must always be a string! (NOT a CalendarProtocol)
 */
@@ -45,7 +50,24 @@ export function withFields(slots: any, newFields: any, options: any) {
 export function withCalendar(slots: any, calendarArg: any) {
 }
 
-export function add(slots: any, durationSlots: any, options: any) {
+export function add(
+  slots: any, // PlainDateSlots, but with STRING calendar ONLY
+  durationSlots: DurationSlots,
+  options?: OverflowOptions,
+) {
+  const calendarRecord = createCalendarImplRecord(slots.calendar, {
+    dateAdd: calendarImplDateAdd
+  })
+
+  return {
+    ...slots,
+    ...moveDateEasy(
+      calendarRecord,
+      slots,
+      durationSlots,
+      options,
+    ),
+  }
 }
 
 export function subtract(slots: any, durationSlots: any, options: any) {
