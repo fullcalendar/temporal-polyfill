@@ -1,6 +1,6 @@
 import { dateGetterRefiners, timeFieldNames } from '../internal/calendarFields'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
-import { DurationInternals, durationInternalNames } from '../internal/durationFields'
+import { DurationFieldsWithSign, durationInternalNames } from '../internal/durationFields'
 import { IsoTimeFields, isoTimeFieldNames } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
 import { mapPropNames } from '../internal/utils'
@@ -116,7 +116,7 @@ export function createEpochGetterMethods(branding: string) {
 /*
 Includes sign()
 */
-export const durationGettersMethods = mapPropNames((propName: keyof DurationInternals) => {
+export const durationGettersMethods = mapPropNames((propName: keyof DurationFieldsWithSign) => {
   return function (this: any) {
     const slots = getSpecificSlots(DurationBranding, this) as DurationSlots
     return slots[propName]

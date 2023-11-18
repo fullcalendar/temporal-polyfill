@@ -3,7 +3,7 @@ import { CalendarDateAddFunc, CalendarDateUntilFunc } from './calendarRecordType
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
-  DurationInternals,
+  DurationFieldsWithSign,
   durationFieldDefaults,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
@@ -42,7 +42,7 @@ export function diffPlainTimes(
   internals1: IsoTimeFields,
   options: DiffOptions | undefined,
   invert?: boolean
-): DurationInternals {
+): DurationFieldsWithSign {
   let durationInternals = updateDurationFieldsSign(
     diffTimes(
       internals0,
@@ -63,7 +63,7 @@ export function diffInstants(
   epochNano1: DayTimeNano,
   options?: DiffOptions,
   invert?: boolean
-): DurationInternals {
+): DurationFieldsWithSign {
   let durationInternals = updateDurationFieldsSign(
     diffEpochNano(
       epochNano0,
@@ -195,7 +195,7 @@ export function diffDatesExact(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
   largestUnit: Unit,
-): DurationInternals {
+): DurationFieldsWithSign {
   if (largestUnit <= Unit.Week) {
     let weeks = 0
     let days = diffDays(startIsoFields, endIsoFields)
@@ -357,7 +357,7 @@ export function calendarDateUntilEasy(
   isoDateFields1: IsoDateFields,
   largestUnit: Unit, // largeUnit
   origOptions?: LargestUnitOptions,
-): DurationInternals {
+): DurationFieldsWithSign {
   if (largestUnit === Unit.Day) {
     return updateDurationFieldsSign({
       ...durationFieldDefaults,

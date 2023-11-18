@@ -10,7 +10,7 @@ import { ensureString } from '../internal/cast'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
 
 // public
-import { CalendarBranding, IsoDateSlots, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoMonthDaySlots, IsoDatePublic } from './slots'
+import { CalendarBranding, IsoDateSlots, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoMonthDaySlots } from './slots'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
@@ -90,7 +90,7 @@ export class PlainMonthDay {
   }
 
   // not DRY
-  getISOFields(): IsoDatePublic {
+  getISOFields(): IsoDateSlots {
     const slots = getPlainMonthDaySlots(this)
     return { // !!!
       calendar: slots.calendar,

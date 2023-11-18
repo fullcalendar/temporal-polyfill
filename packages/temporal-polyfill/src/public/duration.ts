@@ -3,7 +3,7 @@ import {
   addDayTimeDurationFields,
   negateDurationInternals,
   refineDurationFields,
-  DurationInternals,
+  DurationFieldsWithSign,
   DurationFields,
   durationFieldNamesAsc,
   updateDurationFieldsSign,
@@ -313,11 +313,11 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
 
 function addToDuration(
   direction: -1 | 1,
-  internals: DurationInternals,
+  internals: DurationFieldsWithSign,
   otherArg: DurationArg,
   options: RelativeToOptions | undefined,
 ): Duration {
-  let otherFields = toDurationSlots(otherArg) as DurationInternals
+  let otherFields = toDurationSlots(otherArg) as DurationFieldsWithSign
   const markerInternals = refineRelativeToOptions(options, refinePublicRelativeTo) // optional
   const largestUnit = Math.max(
     getLargestDurationUnit(internals),
@@ -372,7 +372,7 @@ function spanDuration<M>(
   moveMarker: MoveMarker<M>,
   diffMarkers: DiffMarkers<M>,
 ): [
-  DurationInternals,
+  DurationFieldsWithSign,
   DayTimeNano,
 ] {
   let endMarker = moveMarker(marker, durationFields0)
@@ -402,7 +402,7 @@ function getLargestDurationUnit(fields: DurationFields): Unit {
   return unit
 }
 
-function durationToString(slots: DurationInternals, options?: TimeDisplayOptions): string {
+function durationToString(slots: DurationFieldsWithSign, options?: TimeDisplayOptions): string {
   const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
 
   // for performance AND for not losing precision when no rounding

@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, yearMonthGetterNames } from '../internal/calendarFields'
 import { diffDates } from '../internal/diff'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/isoFormat'
 import { LocalesArg, formatYearMonthLocaleString } from '../internal/intlFormat'
@@ -22,7 +22,7 @@ import {
   refinePlainYearMonthBag,
   rejectInvalidBag,
 } from './convert'
-import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots, IsoDatePublic } from './slots'
+import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots } from './slots'
 import { calendarProtocolDateAdd, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, createCalendarSlotRecord } from './calendarRecordComplex'
 import { getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
@@ -128,7 +128,7 @@ export class PlainYearMonth {
   }
 
   // not DRY
-  getISOFields(): IsoDatePublic {
+  getISOFields(): IsoDateSlots {
     const slots = getPlainYearMonthSlots(this)
     return { // !!!
       calendar: slots.calendar,
@@ -203,7 +203,7 @@ TODO: move to move.ts
 */
 function movePlainYearMonth(
   internals: IsoDateSlots,
-  durationInternals: DurationInternals,
+  durationInternals: DurationFieldsWithSign,
   options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
 ): PlainYearMonth {
   const { calendar } = internals
@@ -239,7 +239,7 @@ function diffPlainYearMonths(
   internals1: IsoDateSlots,
   options: DiffOptions | undefined,
   invert?: boolean,
-): DurationInternals {
+): DurationFieldsWithSign {
   const calendar = getCommonCalendarSlot(internals0.calendar, internals1.calendar)
   const calendarRecord = createCalendarSlotRecord(calendar, {
     dateAdd: calendarImplDateAdd,

@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { dateGetterNames } from '../internal/calendarFields'
-import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { LocalesArg, formatZonedLocaleString } from '../internal/intlFormat'
 import {
   isoTimeFieldDefaults,
@@ -46,7 +46,7 @@ import {
   refineZonedDateTimeBag,
   rejectInvalidBag,
 } from './convert'
-import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
+import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, IsoDateTimeSlots } from './slots'
 import { getCalendarSlotId, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, getTimeZoneSlotId, isTimeZoneSlotsEqual, refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
@@ -67,9 +67,6 @@ import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotR
 export type ZonedDateTimeBag = PlainDateTimeBag & { timeZone: TimeZoneArg, offset?: string }
 export type ZonedDateTimeMod = PlainDateTimeMod
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
-
-// TODO: make DRY with TimeZoneArg (it's a subset)
-export type ZonedPublic = IsoDateTimePublic & { timeZone: TimeZoneSlot, offset: string }
 
 export class ZonedDateTime {
   constructor(
@@ -389,7 +386,7 @@ export class ZonedDateTime {
     })
   }
 
-  getISOFields(): ZonedPublic {
+  getISOFields(): IsoDateTimeSlots & { timeZone: TimeZoneSlot, offset: string } {
     const slots = getZonedDateTimeSlots(this)
     return {
       ...pluckIsoDateTimeInternals(zonedInternalsToIso(slots)),
@@ -507,7 +504,7 @@ export function diffZonedDateTimes(
   otherInternals: ZonedEpochSlots,
   options: DiffOptions | undefined,
   invert?: boolean
-): DurationInternals {
+): DurationFieldsWithSign {
   const calendar = getCommonCalendarSlot(internals.calendar, otherInternals.calendar)
 
   const calendarRecord = createCalendarSlotRecord(calendar, {

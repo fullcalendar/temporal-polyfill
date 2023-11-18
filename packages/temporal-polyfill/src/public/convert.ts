@@ -16,7 +16,7 @@ import {
   yearMonthFieldNames,
 } from '../internal/calendarFields'
 import {
-  DurationInternals,
+  DurationFieldsWithSign,
   durationFieldDefaults,
   durationFieldNames,
   durationFieldRefiners,
@@ -724,7 +724,7 @@ function refineTimeBag(fields: TimeBag, overflow?: Overflow): IsoTimeFields {
 // Duration
 // -------------------------------------------------------------------------------------------------
 
-export function refineDurationBag(bag: DurationBag): DurationInternals {
+export function refineDurationBag(bag: DurationBag): DurationFieldsWithSign {
   // refine in 'partial' mode
   const durationFields = refineFields(bag, durationFieldNames) as DurationBag
 
@@ -735,9 +735,9 @@ export function refineDurationBag(bag: DurationBag): DurationInternals {
 }
 
 export function mergeDurationBag(
-  durationInternals: DurationInternals,
+  durationInternals: DurationFieldsWithSign,
   bag: DurationMod
-): DurationInternals {
+): DurationFieldsWithSign {
   const partialDurationFields = refineFields(bag, durationFieldNames)
   return updateDurationFieldsSign({ ...durationInternals, ...partialDurationFields })
 }

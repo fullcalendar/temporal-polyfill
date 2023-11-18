@@ -3,7 +3,7 @@ import { isoCalendarId } from './calendarConfig'
 import { queryCalendarImpl } from './calendarImpl'
 import {
   DurationFields,
-  DurationInternals,
+  DurationFieldsWithSign,
   durationFieldNamesAsc,
   negateDurationFields,
   updateDurationFieldsSign,
@@ -252,7 +252,7 @@ export function parsePlainTime(s: string): IsoTimeFields {
   return constrainIsoTimeFields(organized, Overflow.Reject)
 }
 
-export function parseDuration(s: string): DurationInternals {
+export function parseDuration(s: string): DurationFieldsWithSign {
   const parsed = parseMaybeDurationInternals(s)
 
   if (!parsed) {
@@ -446,7 +446,7 @@ function parseMaybeTime(s: string): IsoTimeFields | undefined {
     : undefined
 }
 
-function parseMaybeDurationInternals(s: string): DurationInternals | undefined {
+function parseMaybeDurationInternals(s: string): DurationFieldsWithSign | undefined {
   const parts = durationRegExp.exec(s)
   return parts ? organizeDurationParts(parts) : undefined
 }
@@ -559,7 +559,7 @@ function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number 
   return parseSign(parts[1]) * offsetNanoPos
 }
 
-function organizeDurationParts(parts: string[]): DurationInternals {
+function organizeDurationParts(parts: string[]): DurationFieldsWithSign {
   let hasAny = false
   let hasAnyFrac = false
   let leftoverNano = 0

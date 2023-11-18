@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, TimeBag, dateGetterNames } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { diffDateTimes } from '../internal/diff'
-import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { LocalesArg, formatDateTimeLocaleString } from '../internal/intlFormat'
 import { IsoDateTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
@@ -16,7 +16,7 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, plu
 import { calendarImplDateAdd, calendarImplDateUntil } from '../internal/calendarRecordSimple'
 
 // public
-import { CalendarBranding, DurationBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateTimeSlots, IsoDateTimePublic, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
+import { CalendarBranding, DurationBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateTimeSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
 import { getCalendarSlotId, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
@@ -230,7 +230,7 @@ export class PlainDateTime {
     })
   }
 
-  getISOFields(): IsoDateTimePublic {
+  getISOFields(): IsoDateTimeSlots {
     const slots = getPlainDateTimeSlots(this)
     return { // !!!
       calendar: slots.calendar,
@@ -311,7 +311,7 @@ export function diffPlainDateTimes(
   internals1: IsoDateTimeSlots,
   options: DiffOptions | undefined,
   invert?: boolean
-): DurationInternals {
+): DurationFieldsWithSign {
   const calendarSlot = getCommonCalendarSlot(internals0.calendar, internals1.calendar)
   const calendarRecord = createCalendarSlotRecord(calendarSlot, {
     dateAdd: calendarImplDateAdd,

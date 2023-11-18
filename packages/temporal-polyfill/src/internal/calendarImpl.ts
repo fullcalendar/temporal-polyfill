@@ -51,7 +51,7 @@ import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
 import { Overflow } from './options'
 import { Unit, milliInDay } from './units'
 import { Callable, clampEntity, compareNumbers, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
-import { DurationInternals } from './durationFields'
+import { DurationFieldsWithSign } from './durationFields'
 import { ensureString } from './cast'
 
 // Base Calendar Implementation
@@ -265,7 +265,7 @@ export class CalendarImpl {
 
   dateAdd(
     isoDateFields: IsoDateFields,
-    durationFields: DurationInternals,
+    durationFields: DurationFieldsWithSign,
     overflow?: Overflow,
   ): IsoDateFields {
     return moveDate(this, isoDateFields, durationFields, overflow)
@@ -275,7 +275,7 @@ export class CalendarImpl {
     startIsoDateFields: IsoDateFields,
     endIsoDateFields: IsoDateFields,
     largestUnit: Unit, // TODO: only year/month/week/day?
-  ): DurationInternals {
+  ): DurationFieldsWithSign {
     return diffDatesExact(this, startIsoDateFields, endIsoDateFields, largestUnit)
   }
 

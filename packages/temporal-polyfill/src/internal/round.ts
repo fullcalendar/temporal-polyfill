@@ -1,7 +1,7 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
-  DurationInternals,
+  DurationFieldsWithSign,
   durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
@@ -328,7 +328,7 @@ export function totalDayTimeNano(
 }
 
 export function totalRelativeDuration<M>(
-  durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   totalUnit: Unit,
   // marker system...
@@ -364,7 +364,7 @@ and return the (day) delta. Also return the (potentially) unbalanced new duratio
 */
 
 function nudgeDurationDayTime(
-  durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for adding result to
   smallestUnit: DayTimeUnit, // always <=Day
   roundingInc: number,
@@ -414,7 +414,7 @@ Handles crazy DST edge case
 Time ONLY. Days must use full-on marker moving
 */
 function nudgeRelativeDurationTime<M>(
-  durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for conformance
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number,
@@ -468,7 +468,7 @@ function nudgeRelativeDurationTime<M>(
 }
 
 function nudgeRelativeDuration<M>(
-  durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   smallestUnit: Unit, // always >Day
   roundingInc: number,
@@ -520,7 +520,7 @@ function nudgeRelativeDuration<M>(
 // -------------------------------------------------------------------------------------------------
 
 function bubbleRelativeDuration<M>(
-  durationFields: DurationInternals, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year

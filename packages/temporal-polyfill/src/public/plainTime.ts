@@ -1,6 +1,6 @@
 import { TimeBag } from '../internal/calendarFields'
 import { diffPlainTimes } from '../internal/diff'
-import { DurationInternals, negateDurationInternals } from '../internal/durationFields'
+import { DurationFieldsWithSign, negateDurationInternals } from '../internal/durationFields'
 import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { LocalesArg, formatTimeLocaleString } from '../internal/intlFormat'
@@ -196,7 +196,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
   return { ...parsePlainTime(ensureString(arg)), branding: PlainTimeBranding }
 }
 
-function movePlainTime(internals: IsoTimeFields, durationInternals: DurationInternals): PlainTime {
+function movePlainTime(internals: IsoTimeFields, durationInternals: DurationFieldsWithSign): PlainTime {
   return createPlainTime({
     ...moveTime(internals, durationInternals)[0],
     branding: PlainTimeBranding,

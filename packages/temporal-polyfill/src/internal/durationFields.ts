@@ -35,7 +35,7 @@ interface DurationTimeFields {
 
 export type DurationFields = DurationDateFields & DurationTimeFields
 
-export interface DurationInternals extends DurationFields {
+export interface DurationFieldsWithSign extends DurationFields {
   sign: NumSign
 }
 
@@ -58,7 +58,7 @@ const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day) as
 
 // unordered
 export const durationInternalNames = [...durationFieldNames, 'sign'] as
-  (keyof DurationInternals)[]
+  (keyof DurationFieldsWithSign)[]
 
 // Defaults
 // -------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNames, 
 
 export function refineDurationFields(
   rawFields: DurationFields,
-): DurationInternals {
+): DurationFieldsWithSign {
   return updateDurationFieldsSign(
     mapProps(toIntegerStrict, rawFields),
   )
@@ -134,9 +134,9 @@ export function nanoToDurationTimeFields(
 Mutates `fields`
 TODO: crazy-overused
 */
-export function updateDurationFieldsSign(fields: DurationFields): DurationInternals {
-  (fields as DurationInternals).sign = computeDurationFieldsSign(fields)
-  return (fields as DurationInternals)
+export function updateDurationFieldsSign(fields: DurationFields): DurationFieldsWithSign {
+  (fields as DurationFieldsWithSign).sign = computeDurationFieldsSign(fields)
+  return (fields as DurationFieldsWithSign)
 }
 
 export function addDayTimeDurationFields(
@@ -159,10 +159,10 @@ export function addDayTimeDurationFields(
   }
 }
 
-export function negateDurationInternals(internals: DurationInternals): DurationInternals {
+export function negateDurationInternals(internals: DurationFieldsWithSign): DurationFieldsWithSign {
   const res = negateDurationFields(internals)
-  ;(res as DurationInternals).sign = (-internals.sign || 0) as NumSign
-  return (res as DurationInternals)
+  ;(res as DurationFieldsWithSign).sign = (-internals.sign || 0) as NumSign
+  return (res as DurationFieldsWithSign)
 }
 
 export function negateDurationFields(fields: DurationFields): DurationFields {
@@ -175,7 +175,7 @@ export function negateDurationFields(fields: DurationFields): DurationFields {
   return res
 }
 
-export function absDurationInternals(internals: DurationInternals): DurationInternals {
+export function absDurationInternals(internals: DurationFieldsWithSign): DurationFieldsWithSign {
   if (internals.sign === -1) {
     return negateDurationInternals(internals)
   }

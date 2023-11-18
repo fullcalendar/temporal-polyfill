@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateFields, dateGetterNames } from '../internal/calendarFields'
 import { diffDates } from '../internal/diff'
-import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { LocalesArg, formatDateLocaleString } from '../internal/intlFormat'
@@ -23,7 +23,7 @@ import {
   refinePlainDateBag,
   rejectInvalidBag,
 } from './convert'
-import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateSlots, IsoDatePublic, pluckIsoDateInternals } from './slots'
+import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateSlots, pluckIsoDateInternals } from './slots'
 import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from './calendarRecordComplex'
 import { getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
@@ -195,7 +195,7 @@ export class PlainDate {
   }
 
   // not DRY
-  getISOFields(): IsoDatePublic {
+  getISOFields(): IsoDateSlots {
     const slots = getPlainDateSlots(this)
     return { // !!!
       calendar: slots.calendar,
@@ -281,7 +281,7 @@ export function diffPlainDates(
   internals1: IsoDateSlots,
   options: DiffOptions | undefined,
   invert?: boolean,
-): DurationInternals {
+): DurationFieldsWithSign {
   const calendar = getCommonCalendarSlot(internals0.calendar, internals1.calendar)
   const calendarRecord = createCalendarSlotRecord(calendar, {
     dateAdd: calendarImplDateAdd,

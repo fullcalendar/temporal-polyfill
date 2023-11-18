@@ -1,6 +1,6 @@
 import { toInteger } from '../internal/cast'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { DurationInternals } from '../internal/durationFields'
+import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoDateLike, constrainIsoDateTimeLike, isoDateFieldRefiners, isoTimeFieldRefiners } from '../internal/isoFields'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from '../internal/isoMath'
 import { BoundArg, mapPropsWithRefiners, pluckProps } from '../internal/utils'
@@ -40,7 +40,7 @@ export type PlainDateTimeSlots = { branding: typeof PlainDateTimeBranding } & Is
 export type PlainTimeSlots = { branding: typeof PlainTimeBranding } & IsoTimeFields
 export type ZonedDateTimeSlots = { branding: typeof ZonedDateTimeBranding } & ZonedEpochSlots
 export type InstantSlots = { branding: typeof InstantBranding } & EpochSlots
-export type DurationSlots = { branding: typeof DurationBranding } & DurationInternals // !!!
+export type DurationSlots = { branding: typeof DurationBranding } & DurationFieldsWithSign
 
 // Branding
 // -------------------------------------------------------------------------------------------------
@@ -144,20 +144,14 @@ export function refineIsoMonthDaySlots(
   )
 }
 
-// Public (getISOFields)
-// -------------------------------------------------------------------------------------------------
-
-export type IsoDatePublic = IsoDateFields & { calendar: CalendarSlot }
-export type IsoDateTimePublic = IsoDateTimeFields & { calendar: CalendarSlot }
-
 // Plucking
 // -------------------------------------------------------------------------------------------------
 
-export const isoDateInternalNames = Object.keys(isoDateInternalRefiners) as
-  (keyof (IsoDateFields & { calendar: any }))[]
+const isoDateInternalNames = Object.keys(isoDateInternalRefiners) as
+  (keyof IsoDateSlots)[]
 
-export const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort() as
-  (keyof (IsoDateTimeFields & { calendar: any }))[]
+const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort() as
+  (keyof IsoDateTimeSlots)[]
 
 export const pluckIsoDateInternals = pluckProps.bind<
   undefined, [BoundArg],
