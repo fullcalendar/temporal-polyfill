@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { diffInstants } from '../internal/diff'
 import { negateDurationInternals } from '../internal/durationFields'
 import { formatInstantIso } from '../internal/isoFormat'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { LocalesArg, formatInstantLocaleString } from '../internal/intlFormat'
 import { checkEpochNanoInBounds } from '../internal/isoMath'
 import { parseInstant } from '../internal/isoParse'
 import { moveEpochNano } from '../internal/move'
@@ -16,7 +16,7 @@ import {
   refineTimeDisplayTuple,
 } from '../internal/options'
 import { toBigInt, ensureObjectlike, ensureStringViaPrimitive } from '../internal/cast'
-import { roundInstant } from '../internal/round'
+import { roundEpochNano } from '../internal/round'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
@@ -90,7 +90,7 @@ export class Instant {
   round(options: RoundingOptions | UnitName): Instant {
     return createInstant({
       branding: InstantBranding,
-      epochNanoseconds: roundInstant(getInstantSlots(this).epochNanoseconds, options),
+      epochNanoseconds: roundEpochNano(getInstantSlots(this).epochNanoseconds, options),
     })
   }
 
@@ -151,6 +151,11 @@ export class Instant {
       roundingMode,
       subsecDigits,
     )
+  }
+
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+    const slots = getInstantSlots(this)
+    return formatInstantLocaleString(slots, locales, options)
   }
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
@@ -217,7 +222,6 @@ export class Instant {
 defineStringTag(Instant.prototype, InstantBranding)
 
 defineProps(Instant.prototype, {
-  ...createToLocaleStringMethods(InstantBranding),
   valueOf: neverValueOf,
 })
 

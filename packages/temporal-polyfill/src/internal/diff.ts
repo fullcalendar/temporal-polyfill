@@ -35,6 +35,7 @@ import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
+// the main value-add is doing negating and options-processing
 
 export function diffPlainTimes(
   internals0: IsoTimeFields,

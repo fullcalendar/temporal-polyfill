@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetterNames } from '../internal/calendarFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from '../internal/isoFormat'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { LocalesArg, formatMonthDayLocaleString } from '../internal/intlFormat'
 import { compareIsoDateFields, isoEpochFirstLeapYear } from '../internal/isoMath'
 import { parsePlainMonthDay } from '../internal/isoParse'
 import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
@@ -77,6 +77,11 @@ export class PlainMonthDay {
     )
   }
 
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+    const slots = getPlainMonthDaySlots(this)
+    return formatMonthDayLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+  }
+
   toPlainDate(bag: YearFields): PlainDate {
     return createPlainDate({
       ...convertPlainMonthDayToDate(this, bag),
@@ -109,7 +114,6 @@ export class PlainMonthDay {
 defineStringTag(PlainMonthDay.prototype, PlainMonthDayBranding)
 
 defineProps(PlainMonthDay.prototype, {
-  ...createToLocaleStringMethods(PlainMonthDayBranding),
   valueOf: neverValueOf,
 })
 

@@ -4,7 +4,7 @@ import { diffDates } from '../internal/diff'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
 import { formatPlainDateIso } from '../internal/isoFormat'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { LocalesArg, formatDateLocaleString } from '../internal/intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDiffOptions, refineOverflowOptions } from '../internal/options'
@@ -148,6 +148,11 @@ export class PlainDate {
     return formatPlainDateIso(getCalendarSlotId(slots.calendar), slots)
   }
 
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+    const slots = getPlainDateSlots(this)
+    return formatDateLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+  }
+
   toZonedDateTime(
     options: TimeZoneArg | { timeZone: TimeZoneArg, plainTime?: PlainTimeArg },
   ): ZonedDateTime {
@@ -223,7 +228,6 @@ export interface PlainDate extends DateFields {}
 defineStringTag(PlainDate.prototype, PlainDateBranding)
 
 defineProps(PlainDate.prototype, {
-  ...createToLocaleStringMethods(PlainDateBranding),
   valueOf: neverValueOf,
 })
 

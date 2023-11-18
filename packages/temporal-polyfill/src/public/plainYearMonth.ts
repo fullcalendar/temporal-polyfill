@@ -5,7 +5,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/isoFormat'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { LocalesArg, formatYearMonthLocaleString } from '../internal/intlFormat'
 import { compareIsoDateFields, moveByIsoDays } from '../internal/isoMath'
 import { parsePlainYearMonth } from '../internal/isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDiffOptions, refineOverflowOptions } from '../internal/options'
@@ -114,6 +114,11 @@ export class PlainYearMonth {
     )
   }
 
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+    const slots = getPlainYearMonthSlots(this)
+    return formatYearMonthLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+  }
+
   toPlainDate(bag: { day: number }): PlainDate {
     getPlainYearMonthSlots(this) // validate `this`
     return createPlainDate({
@@ -154,7 +159,6 @@ export class PlainYearMonth {
 defineStringTag(PlainYearMonth.prototype, PlainYearMonthBranding)
 
 defineProps(PlainYearMonth.prototype, {
-  ...createToLocaleStringMethods(PlainYearMonthBranding),
   valueOf: neverValueOf,
 })
 

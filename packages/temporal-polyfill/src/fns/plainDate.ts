@@ -88,6 +88,16 @@ export function equals(slots0: any, slots1: any) {
 export function toString(slots: any, options: any) {
 }
 
+export function toLocaleString(slots: any, locales: any, options: any): string {
+  return ''
+}
+
+export function toRangeLocaleString(slots0: any, slots1: any, locales: any, options: any): string { // best name?
+  return ''
+}
+
+// TODO: accept a proprietary Format object? probably yes, for maximum performance
+
 export function toZonedDateTime(slots: any, options: any) {
 }
 

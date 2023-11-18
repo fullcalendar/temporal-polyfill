@@ -3,7 +3,7 @@ import { diffPlainTimes } from '../internal/diff'
 import { DurationInternals, negateDurationInternals } from '../internal/durationFields'
 import { IsoTimeFields, pluckIsoTimeFields, refineIsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { LocalesArg, formatTimeLocaleString } from '../internal/intlFormat'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/isoMath'
 import { parsePlainTime } from '../internal/isoParse'
 import { moveTime } from '../internal/move'
@@ -114,6 +114,11 @@ export class PlainTime {
     return formatPlainTimeIso(getPlainTimeSlots(this))
   }
 
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+    const slots = getPlainTimeSlots(this)
+    return formatTimeLocaleString(slots, locales, options)
+  }
+
   toZonedDateTime(options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
     return createZonedDateTime({
       branding: ZonedDateTimeBranding,
@@ -150,7 +155,6 @@ export class PlainTime {
 defineStringTag(PlainTime.prototype, PlainTimeBranding)
 
 defineProps(PlainTime.prototype, {
-  ...createToLocaleStringMethods(PlainTimeBranding),
   valueOf: neverValueOf,
 })
 

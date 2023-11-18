@@ -28,7 +28,7 @@ import {
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { MarkerToEpochNano, MoveMarker } from './markerSystemTypes'
 
-export function roundInstant(
+export function roundEpochNano(
   epochNano: DayTimeNano,
   options: RoundingOptions | UnitName,
 ): DayTimeNano {

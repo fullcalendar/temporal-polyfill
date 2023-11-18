@@ -3,7 +3,7 @@ import { DateBag, TimeBag, dateGetterNames } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { diffDateTimes } from '../internal/diff'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
-import { createToLocaleStringMethods } from '../internal/intlFormat'
+import { LocalesArg, formatDateTimeLocaleString } from '../internal/intlFormat'
 import { IsoDateTimeFields, isoDateTimeFieldNames, isoTimeFieldDefaults, pluckIsoTimeFields } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { compareIsoDateTimeFields } from '../internal/isoMath'
@@ -181,6 +181,11 @@ export class PlainDateTime {
     return formatPlainDateTimeIso(getCalendarSlotId(slots.calendar), slots)
   }
 
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
+    const slots = getPlainDateTimeSlots(this)
+    return formatDateTimeLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+  }
+
   toZonedDateTime(
     timeZoneArg: TimeZoneArg,
     options?: EpochDisambigOptions,
@@ -255,7 +260,6 @@ export class PlainDateTime {
 defineStringTag(PlainDateTime.prototype, PlainDateTimeBranding)
 
 defineProps(PlainDateTime.prototype, {
-  ...createToLocaleStringMethods(PlainDateTimeBranding),
   valueOf: neverValueOf,
 })
 

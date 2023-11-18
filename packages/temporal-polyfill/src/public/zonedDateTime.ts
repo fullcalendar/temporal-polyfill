@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { dateGetterNames } from '../internal/calendarFields'
 import { DurationInternals, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
-import { LocalesArg, slotsToLocaleString } from '../internal/intlFormat'
+import { LocalesArg, formatZonedLocaleString } from '../internal/intlFormat'
 import {
   isoTimeFieldDefaults,
   pluckIsoTimeFields,
@@ -342,16 +342,7 @@ export class ZonedDateTime {
 
   toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
     const slots = getZonedDateTimeSlots(this)
-
-    // Copy options so accessing doesn't cause side-effects
-    // TODO: stop this from happening twice, in slotsToLocaleString too
-    options = { ...options }
-
-    if ('timeZone' in options) {
-      throw new TypeError('Cannot specify TimeZone')
-    }
-
-    return slotsToLocaleString(slots, locales, options)
+    return formatZonedLocaleString(getCalendarSlotId(slots.calendar), getTimeZoneSlotId(slots.timeZone), slots, locales, options)
   }
 
   toInstant(): Instant {

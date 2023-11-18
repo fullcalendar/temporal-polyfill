@@ -8,220 +8,19 @@ import {
 } from './isoFields'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import {
-  Classlike,
-  createLazyGenerator,
-  defineProps,
   excludePropsByName,
   hasAnyPropsByName,
-  pluckProps,
 } from './utils'
 import { getSingleInstantFor } from './timeZoneMath'
 import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 
-// public
-import type { ZonedDateTime } from '../public/zonedDateTime'
-import type { PlainDate } from '../public/plainDate'
-import type { PlainTime } from '../public/plainTime'
-import type { PlainDateTime } from '../public/plainDateTime'
-import type { PlainMonthDay } from '../public/plainMonthDay'
-import type { PlainYearMonth } from '../public/plainYearMonth'
-import type { Instant } from '../public/instant'
-import { getSlots, getSpecificSlots } from '../public/slots'
-import { CalendarSlot, getCalendarSlotId } from '../public/calendarSlot'
-import { getTimeZoneSlotId } from '../public/timeZoneSlot'
-// TODO: redesign how this all works!!!!!!!!!!!!!!!!!!!!!!!!
-
 export type LocalesArg = string | string[]
-
-type OrigFormattable = number | Date
-
-// NOT really used. We immediately get slots
-type TemporalFormattable =
-  | Instant
-  | PlainDate
-  | PlainDateTime
-  | ZonedDateTime
-  | PlainYearMonth
-  | PlainMonthDay
-  | PlainTime
-
-export type Formattable = TemporalFormattable | OrigFormattable
-
-// toLocaleString
-// -------------------------------------------------------------------------------------------------
-
-export function createToLocaleStringMethods(branding: string) {
-  return {
-    toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-      return slotsToLocaleString(getSpecificSlots(branding, this), locales, options)
-    }
-  }
-}
-
-export function slotsToLocaleString(slots: any, locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-  const { branding } = slots
-
-  // Copy options so accessing doesn't cause side-effects
-  options = { ...options }
-
-  options = optionsTransformers[branding](options, slots)
-  const subformat = new OrigDateTimeFormat(locales, options)
-  const epochMilli = toEpochMilli(branding, slots, subformat.resolvedOptions())
-
-  return subformat.format(epochMilli)
-}
-
-// Temporal-aware Intl.DateTimeFormat
-// -------------------------------------------------------------------------------------------------
-
-type DateTimeFormatInternals = [
-  SubformatFactory,
-  Intl.ResolvedDateTimeFormatOptions,
-]
-
-type SubformatFactory = (temporalName: string) => Intl.DateTimeFormat | undefined
-
-const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
-
 export const OrigDateTimeFormat = Intl.DateTimeFormat
-
-export class DateTimeFormat extends OrigDateTimeFormat {
-  constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-    super(locales, options)
-
-    // Copy options so accessing doesn't cause side-effects
-    // Must store recursively flattened options because given `options` could mutate in future
-    // Algorithm: whitelist against resolved options
-    const resolvedOptions = this.resolvedOptions()
-    const { locale } = resolvedOptions
-    options = pluckProps(
-      Object.keys(options) as OptionNames,
-      resolvedOptions as Intl.DateTimeFormatOptions
-    )
-
-    const subformatFactory = createLazyGenerator((temporalName: string) => {
-      if (optionsTransformers[temporalName]) {
-        return new OrigDateTimeFormat(locale, optionsTransformers[temporalName](options))
-      }
-    })
-
-    formatInternalsMap.set(this, [
-      subformatFactory,
-      resolvedOptions,
-    ])
-  }
-
-  format(arg?: Formattable): string {
-    const [formattable, format] = resolveSingleFormattable(this, arg)
-
-    return format
-      ? format.format(formattable)
-      : super.format(formattable)
-      // can't use the origMethd.call trick because .format() is always bound
-      // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
-  }
-
-  formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
-    const [formattable, format] = resolveSingleFormattable(this, arg)
-
-    return format
-      ? format.formatToParts(formattable)
-      : super.formatToParts(formattable)
-  }
-}
-
-export interface DateTimeFormat {
-  formatRange(arg0: Formattable, arg1: Formattable): string
-  formatRangeToParts(arg0: Formattable, arg1: Formattable): Intl.DateTimeFormatPart[]
-}
-
-['formatRange', 'formatRangeToParts'].forEach((methodName) => {
-  const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
-
-  if (origMethod) {
-    defineProps(DateTimeFormat.prototype, {
-      [methodName]: function(
-        this: Intl.DateTimeFormat,
-        arg0: Formattable,
-        arg1: Formattable,
-      ) {
-        const [formattable0, formattable1, format] = resolveRangeFormattables(this, arg0, arg1)
-        return origMethod.call(format, formattable0, formattable1)
-      }
-    })
-  }
-})
-
-// Intl.DateTimeFormat Arg-normalization Utils
-// -------------------------------------------------------------------------------------------------
-
-function resolveSingleFormattable(
-  format: DateTimeFormat,
-  arg: Formattable | undefined,
-): [
-  OrigFormattable | undefined,
-  Intl.DateTimeFormat | undefined // undefined if should use orig method
-] {
-  if (arg !== undefined) {
-    return resolveFormattable(arg, ...formatInternalsMap.get(format)!)
-  }
-
-  // arg was not specified (current datetime)
-  return [arg] as unknown as
-    [OrigFormattable | undefined, undefined]
-}
-
-function resolveRangeFormattables(
-  format: DateTimeFormat | Intl.DateTimeFormat, // reused
-  arg0: Formattable,
-  arg1: Formattable,
-): [
-  OrigFormattable,
-  OrigFormattable,
-  Intl.DateTimeFormat, // always defined
-] {
-  const formatInternals = formatInternalsMap.get(format)!
-  const [formattable0, format0] = resolveFormattable(arg0, ...formatInternals)
-  const [formattable1, format1] = resolveFormattable(arg1, ...formatInternals)
-
-  if (format0 || format1) {
-    // the returned DateTimeFormats are idempotent per Temporal type,
-    // so testing inequality is a way to test mismatching Temporal types.
-    if (format0 !== format1) {
-      throw new TypeError('Accepts two Temporal values of same type')
-    }
-    format = format0! // guaranteed to be truthy and equal
-  }
-
-  return [formattable0, formattable1, format]
-}
-
-function resolveFormattable(
-  arg: Formattable,
-  subformatFactory: SubformatFactory,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): [
-  OrigFormattable,
-  Intl.DateTimeFormat | undefined // undefined if should use orig method
-] {
-  const slots = getSlots(arg)
-  const { branding } = slots || {}
-  const format = branding && subformatFactory(branding)
-
-  if (format) {
-    const epochMilli = toEpochMilli(branding, slots!, resolvedOptions)
-    return [epochMilli, format]
-  }
-
-  // arg is an OrigFormattable
-  return [arg] as unknown as
-    [OrigFormattable, undefined]
-}
 
 // Option Transformers
 // -------------------------------------------------------------------------------------------------
 
-type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
+export type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
 
 const numericStr = 'numeric'
 const timeZoneNameStrs: OptionNames = ['timeZoneName']
@@ -278,34 +77,34 @@ const monthDayExclusions: OptionNames = [
   ...timeValidNames,
 ]
 
-// Options Transformer Config
-// --------------------------
+// Transformer Funcs
+// -----------------
 
 type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
-  subjectInternals?: any, // `this` object during toLocaleString
+  timeZoneId?: string | undefined,
 ) => Intl.DateTimeFormatOptions
 
-const zonedOptionsTransformer = createTransformer(zonedValidNames, zonedFallbacks, [])
+const transformMonthDayOptions = createTransformer(monthDayValidNames, monthDayFallbacks, monthDayExclusions)
+const transformYearMonthOptions = createTransformer(yearMonthValidNames, yearMonthFallbacks, yearMonthExclusions)
+const transformDateOptions = createTransformer(dateValidNames, dateFallbacks, dateExclusions)
+const transformDateTimeOptions = createTransformer(dateTimeValidNames, dateTimeFallbacks, timeZoneNameStrs)
+const transformTimeOptions = createTransformer(timeValidNames, timeFallbacks, timeExclusions)
+const transformEpochOptions = createTransformer(dateTimeValidNames, dateTimeFallbacks, [])
+const _transformZonedEpochOptions = createTransformer(zonedValidNames, zonedFallbacks, [])
 
-const optionsTransformers: Record<string, OptionsTransformer> = {
-  PlainMonthDay: createTransformer(monthDayValidNames, monthDayFallbacks, monthDayExclusions),
-  PlainYearMonth: createTransformer(yearMonthValidNames, yearMonthFallbacks, yearMonthExclusions),
-  PlainDate: createTransformer(dateValidNames, dateFallbacks, dateExclusions),
-  PlainDateTime: createTransformer(dateTimeValidNames, dateTimeFallbacks, timeZoneNameStrs),
-  PlainTime: createTransformer(timeValidNames, timeFallbacks, timeExclusions),
-  Instant: createTransformer(dateTimeValidNames, dateTimeFallbacks, []),
-
-  ZonedDateTime(options: Intl.DateTimeFormatOptions, subjectInternals?: any) { // WAS ZonedEpochSlots ---------- adjust!!!
-    if (!subjectInternals) {
-      throw new TypeError('DateTimeFormat does not accept ZonedDateTime')
-    }
-    if (options.timeZone !== undefined) {
-      throw new RangeError('Cannot specify timeZone') // for ZonedDateTime::toLocaleString
-    }
-    options.timeZone = getTimeZoneSlotId(subjectInternals.timeZone)
-    return zonedOptionsTransformer(options)
+function transformZonedEpochOptions(
+  options: Intl.DateTimeFormatOptions,
+  timeZoneId?: string, // TODO: serialized too soon!!!... getTimeZoneSlotId(calendar)
+) {
+  if (!timeZoneId) {
+    throw new TypeError('DateTimeFormat does not accept ZonedDateTime')
   }
+  if (options.timeZone !== undefined) {
+    throw new RangeError('Cannot specify timeZone') // for ZonedDateTime::toLocaleString
+  }
+  options.timeZone = timeZoneId
+  return _transformZonedEpochOptions(options)
 }
 
 function createTransformer(
@@ -326,39 +125,31 @@ function createTransformer(
   }
 }
 
-// Epoch Conversions
+// Converting Fields to Epoch Milliseconds
 // -------------------------------------------------------------------------------------------------
 
-type MaybeWithCalendar = { calendar?: CalendarSlot }
-
-function toEpochMilli(
-  temporalName: string,
-  internals: unknown | MaybeWithCalendar,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-) {
-  if ((internals as MaybeWithCalendar).calendar) {
-    checkCalendarsCompatible(
-      temporalName,
-      getCalendarSlotId((internals as MaybeWithCalendar).calendar!),
-      resolvedOptions.calendar,
-    )
-  }
-
-  const internalsToEpochNano = epochNanoConverters[temporalName] || dateInternalsToEpochNano
-  const epochNano = internalsToEpochNano(internals, resolvedOptions)
-  return epochNanoToMilli(epochNano)
-}
-
 type EpochNanoConverter = (
-  internals: any,
+  fields: any,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ) => DayTimeNano
 
-const epochNanoConverters: Record<string, EpochNanoConverter> = {
-  Instant: (internals: { epochNanoseconds: DayTimeNano }) => internals.epochNanoseconds,
-  ZonedDateTime: (internals: { epochNanoseconds: DayTimeNano }) => internals.epochNanoseconds,
-  PlainTime: timeFieldsToEpochNano,
-  // otherwise, use dateInternalsToEpochNano
+export function toEpochMilli(
+  calendarId: string | undefined, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  fields: any,
+  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
+  fieldsToEpochNano: EpochNanoConverter = dateFieldsToEpochNano,
+  strictCalendarCheck?: boolean,
+) {
+  if (calendarId) {
+    checkCalendarsCompatible(
+      calendarId,
+      resolvedOptions.calendar,
+      strictCalendarCheck,
+    )
+  }
+
+  const epochNano = fieldsToEpochNano(fields, resolvedOptions)
+  return epochNanoToMilli(epochNano)
 }
 
 function timeFieldsToEpochNano(
@@ -378,8 +169,8 @@ function timeFieldsToEpochNano(
   })
 }
 
-function dateInternalsToEpochNano(
-  internals: IsoDateTimeFields | IsoDateFields,
+function dateFieldsToEpochNano(
+  isoFields: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
   const timeZoneRecord = createTimeZoneImplRecord(resolvedOptions.timeZone, {
@@ -387,31 +178,152 @@ function dateInternalsToEpochNano(
     getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
   })
 
-  return getSingleInstantFor(
-    timeZoneRecord,
-    {
-      ...isoTimeFieldDefaults,
-      isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day
-      ...internals,
-    },
+  return getSingleInstantFor(timeZoneRecord, {
+    ...isoTimeFieldDefaults,
+    isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day
+    ...isoFields,
+  })
+}
+
+function extractEpochNano(slots: { epochNanoseconds: DayTimeNano }): DayTimeNano {
+  return slots.epochNanoseconds
+}
+
+// Lookups for Intl.DateTimeFormat (move elsewhere?)
+// -------------------------------------------------------------------------------------------------
+
+export const optionsTransformers: Record<string, OptionsTransformer> = {
+  PlainMonthDay: transformMonthDayOptions,
+  PlainYearMonth: transformYearMonthOptions,
+  PlainDate: transformDateOptions,
+  PlainDateTime: transformDateTimeOptions,
+  PlainTime: transformTimeOptions,
+  Instant: transformEpochOptions,
+  ZonedDateTime: transformZonedEpochOptions,
+}
+
+export const epochNanoConverters: Record<string, EpochNanoConverter> = {
+  Instant: extractEpochNano,
+  ZonedDateTime: extractEpochNano,
+  PlainTime: timeFieldsToEpochNano,
+  // otherwise, dateFieldsToEpochNano
+}
+
+export const strictCalendarChecks: Record<string, boolean> = {
+  PlainYearMonth: true,
+  PlainMonthDay: true,
+  // otherwise, false
+}
+
+// toLocaleString
+// -------------------------------------------------------------------------------------------------
+
+export function formatMonthDayLocaleString(
+  calendarId: string,
+  fields: IsoDateFields,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return formatLocaleString(transformMonthDayOptions, calendarId, undefined, fields, locales, options, undefined, true)
+}
+
+export function formatYearMonthLocaleString(
+  calendarId: string,
+  fields: IsoDateFields,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return formatLocaleString(transformYearMonthOptions, calendarId, undefined, fields, locales, options, undefined, true)
+}
+
+export function formatDateLocaleString(
+  calendarId: string,
+  fields: IsoDateFields,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return formatLocaleString(transformDateOptions, calendarId, undefined, fields, locales, options)
+}
+
+export function formatDateTimeLocaleString(
+  calendarId: string,
+  fields: IsoDateTimeFields,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return formatLocaleString(transformDateTimeOptions, calendarId, undefined, fields, locales, options)
+}
+
+export function formatTimeLocaleString(
+  fields: IsoTimeFields,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return formatLocaleString(transformTimeOptions, undefined, undefined, fields, locales, options, timeFieldsToEpochNano)
+}
+
+export function formatInstantLocaleString(
+  fields: { epochNanoseconds: DayTimeNano },
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return formatLocaleString(transformEpochOptions, undefined, undefined, fields, locales, options, extractEpochNano)
+}
+
+export function formatZonedLocaleString(
+  timeZoneId: string,
+  calendarId: string,
+  fields: { epochNanoseconds: DayTimeNano },
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  // Copy options so accessing doesn't cause side-effects
+  // TODO: stop this from happening twice, in slotsToLocaleString too
+  options = { ...options }
+
+  // TODO: probably not necessary. already checked in optionsTransformers
+  if ('timeZone' in options) {
+    throw new TypeError('Cannot specify TimeZone')
+  }
+
+  return formatLocaleString(transformZonedEpochOptions, calendarId, timeZoneId, fields, locales, options, extractEpochNano)
+}
+
+export function formatLocaleString(
+  transformOptions: OptionsTransformer,
+  calendarId: string | undefined, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  timeZoneId: string | undefined, // TODO: serialized too soon!!!... getTimeZoneSlotId(calendar)
+  fields: any,
+  locales?: LocalesArg,
+  options: Intl.DateTimeFormatOptions = {},
+  fieldsToEpochNano?: EpochNanoConverter,
+  strictCalendarCheck?: boolean,
+): string {
+  options = { ...options } // copy options so accessing doesn't cause side-effects
+  options = transformOptions(options, timeZoneId)
+
+  const subformat = new OrigDateTimeFormat(locales, options)
+  const epochMilli = toEpochMilli(
+    calendarId,
+    fields,
+    subformat.resolvedOptions(),
+    fieldsToEpochNano,
+    strictCalendarCheck,
   )
+
+  return subformat.format(epochMilli)
 }
 
 // Calendar Check
 // -------------------------------------------------------------------------------------------------
 
-const strictCalendarCheck: Record<string, boolean> = {
-  PlainYearMonth: true,
-  PlainMonthDay: true,
-}
-
 function checkCalendarsCompatible(
-  temporalName: string,
   internalCalendarId: string,
   resolveCalendarId: string,
+  strictCalendarCheck: boolean | undefined,
 ): void {
   if (
-    (strictCalendarCheck[temporalName] || internalCalendarId !== isoCalendarId) &&
+    (strictCalendarCheck || internalCalendarId !== isoCalendarId) &&
     (internalCalendarId !== resolveCalendarId)
   ) {
     throw new RangeError('Mismatching calendars')
