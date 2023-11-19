@@ -5,9 +5,10 @@ import { calendarImplDateFromFields, calendarImplFields } from '../internal/cale
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
+import { refineMaybeZonedDateTimeBag } from '../internal/convert'
+import { ZonedDateTimeBag } from '../internal/genericBag'
 
 // public
-import { refineMaybeZonedDateTimeBag } from './convert'
 import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots, pluckIsoDateInternals } from './slots'
 import type { PlainDate } from './plainDate'
 import type { ZonedDateTime } from './zonedDateTime'
@@ -16,7 +17,6 @@ import { getBagCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { TimeZoneArg } from './timeZone'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
-import { ZonedDateTimeBag } from './genericBag'
 import { CalendarArg } from './calendar'
 
 export function refinePublicRelativeTo(relativeTo: ZonedDateTime | PlainDate | string): ZonedEpochSlots | IsoDateSlots | undefined {

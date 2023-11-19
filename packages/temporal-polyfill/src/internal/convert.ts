@@ -16,16 +16,16 @@ import {
   timeFieldsToIso,
   yearMonthBasicNames,
   yearMonthFieldNames,
-} from '../internal/calendarFields'
+} from './calendarFields'
 import {
   DurationFieldsWithSign,
   durationFieldDefaults,
   durationFieldNames,
   durationFieldRefiners,
   updateDurationFieldsSign,
-} from '../internal/durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/isoFields'
-import { parseOffsetNano } from '../internal/isoParse'
+} from './durationFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './isoFields'
+import { parseOffsetNano } from './isoParse'
 import {
   EpochDisambig,
   EpochDisambigOptions,
@@ -36,19 +36,17 @@ import {
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
-} from '../internal/options'
+} from './options'
 import {
   ensureObjectlike,
   ensureStringViaPrimitive,
-} from '../internal/cast'
-import { Callable, pluckProps } from '../internal/utils'
-import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from '../internal/isoMath'
-import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZoneMath'
-import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecordTypes'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
-import { DayTimeNano } from '../internal/dayTimeNano'
-
-// public?
+} from './cast'
+import { Callable, pluckProps } from './utils'
+import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
+import { getMatchingInstantFor, getSingleInstantFor } from './timeZoneMath'
+import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from './calendarRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
+import { DayTimeNano } from './dayTimeNano'
 import { PlainDateTimeBag, ZonedDateTimeBag } from './genericBag'
 
 export function convertPlainDateTimeToZoned(

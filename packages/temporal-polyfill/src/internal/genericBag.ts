@@ -1,4 +1,4 @@
-import { DateBag, MonthDayBag, TimeBag, YearMonthBag } from '../internal/calendarFields'
+import { DateBag, MonthDayBag, TimeBag, YearMonthBag } from './calendarFields'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
 export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }

@@ -19,12 +19,11 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { ensureString } from '../internal/cast'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
+import { mergePlainTimeBag, refinePlainTimeBag } from '../internal/convert'
+import { getSingleInstantFor } from '../internal/timeZoneMath'
+import { PlainTimeBag } from '../internal/genericBag'
 
 // public
-import {
-  mergePlainTimeBag,
-  refinePlainTimeBag,
-} from './convert'
 import { DurationBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
@@ -35,8 +34,6 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
-import { getSingleInstantFor } from '../internal/timeZoneMath'
-import { PlainTimeBag } from './genericBag'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 

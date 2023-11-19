@@ -38,10 +38,10 @@ import { MarkerToEpochNano, MoveMarker, DiffMarkers } from '../internal/markerSy
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { ensureString } from '../internal/cast'
 import { DurationBag } from '../internal/calendarFields'
+import { mergeDurationBag, refineDurationBag } from '../internal/convert'
 
 // public
 import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
-import { mergeDurationBag, refineDurationBag } from './convert'
 import { createMarkerSystem } from './markerSystemImpl'
 import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { refinePublicRelativeTo } from './publicOptions'

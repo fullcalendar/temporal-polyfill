@@ -7,10 +7,10 @@ import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
 import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
+import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/convert'
 
 // public
 import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
-import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from './convert'
 import { refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'

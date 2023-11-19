@@ -1,8 +1,4 @@
-import {
-  Classlike,
-  createLazyGenerator,
-  defineProps, pluckProps
-} from '../internal/utils'
+import { Classlike, createLazyGenerator, defineProps, pluckProps } from '../internal/utils'
 import { OrigDateTimeFormat, LocalesArg, OptionNames, toEpochMilli, optionsTransformers } from '../internal/intlFormat'
 
 // public
