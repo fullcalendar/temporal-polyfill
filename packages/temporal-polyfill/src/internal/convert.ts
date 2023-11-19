@@ -47,7 +47,7 @@ import { getMatchingInstantFor, getSingleInstantFor } from './timeZoneMath'
 import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from './calendarRecordTypes'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 import { DayTimeNano } from './dayTimeNano'
-import { PlainDateTimeBag, ZonedDateTimeBag } from './genericBag'
+import { ZonedDateTimeBag } from './genericBag'
 
 export function convertPlainDateTimeToZoned(
   timeZoneRecord: {
@@ -207,7 +207,7 @@ export function refinePlainDateTimeBag(
     dateFromFields: CalendarDateFromFieldsFunc,
     fields: CalendarFieldsFunc,
   },
-  bag: PlainDateTimeBag<unknown>,
+  bag: DateTimeBag,
   options: OverflowOptions | undefined,
 ): IsoDateTimeFields {
   const fields = refineCalendarFields(
