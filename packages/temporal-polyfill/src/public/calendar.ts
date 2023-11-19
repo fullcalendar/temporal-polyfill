@@ -6,7 +6,7 @@ import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } fro
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
-import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
+import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
 
 // public
 import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -114,8 +114,14 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainDate {
     const { id } = getCalendarSlots(this)
+    const calendarRecord = createCalendarImplRecord(id, {
+      dateFromFields: calendarImplDateFromFields,
+      fields: calendarImplFields,
+    })
+
     return createPlainDate({
-      ...refinePlainDateBag(fields, options, id, getRequiredDateFields(id)),
+      ...refinePlainDateBag(calendarRecord, fields, options, getRequiredDateFields(id)),
+      calendar: id,
       branding: PlainDateBranding,
     })
   }
@@ -125,8 +131,14 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainYearMonth {
     const { id } = getCalendarSlots(this)
+    const calendarRecord = createCalendarImplRecord(id, {
+      yearMonthFromFields: calendarImplYearMonthFromFields,
+      fields: calendarImplFields,
+    })
+
     return createPlainYearMonth({
-      ...refinePlainYearMonthBag(fields, options, id, getRequiredYearMonthFields(id)),
+      ...refinePlainYearMonthBag(calendarRecord, fields, options, getRequiredYearMonthFields(id)),
+      calendar: id,
       branding: PlainYearMonthBranding,
     })
   }
@@ -136,8 +148,14 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainMonthDay {
     const { id } = getCalendarSlots(this)
+    const calendarRecord = createCalendarImplRecord(id, {
+      monthDayFromFields: calendarImplMonthDayFromFields,
+      fields: calendarImplFields,
+    })
+
     return createPlainMonthDay({
-      ...refinePlainMonthDayBag(fields, options, id, getRequiredMonthDayFields(id)),
+      ...refinePlainMonthDayBag(calendarRecord, false, fields, options, getRequiredMonthDayFields(id)),
+      calendar: id,
       branding: PlainMonthDayBranding,
     })
   }

@@ -67,3 +67,27 @@ export function getPreferredCalendarSlot(a: CalendarSlot, b: CalendarSlot): Cale
 
   throw new RangeError('Incompatible calendars')
 }
+
+// bag
+// ---
+
+/*
+defaults to ISO
+*/
+export function getBagCalendarSlot(bag: any): CalendarSlot {
+  return extractBagCalendarSlot(bag) || isoCalendarId
+}
+
+export function extractBagCalendarSlot(bag: any): CalendarSlot | undefined {
+  const slots = getSlots(bag)
+  const { calendar } = (slots || {}) as { calendar?: CalendarSlot }
+
+  if (calendar) {
+    return calendar
+  }
+
+  const bagCalendar = bag.calendar
+  if (bagCalendar !== undefined) {
+    return refineCalendarSlot(bagCalendar)
+  }
+}

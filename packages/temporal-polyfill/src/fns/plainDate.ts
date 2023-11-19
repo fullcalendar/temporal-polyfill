@@ -21,14 +21,21 @@ ALSO, we don't like complex Calendar or TimeZone objects because they have a lot
 all bundled together, making it impossible to tree shake
 */
 
-import { calendarImplDateAdd, createCalendarImplRecord } from "../internal/calendarRecordSimple"
-import { moveDateEasy } from "../internal/move"
-import { OverflowOptions } from "../internal/options"
-import { DurationSlots } from "../public/slots"
+import { calendarImplDateAdd, createCalendarImplRecord } from '../internal/calendarRecordSimple'
+import { moveDateEasy } from '../internal/move'
+import { OverflowOptions } from '../internal/options'
+import { DurationSlots } from '../public/slots'
 
 /*
 NOTE: the inputted `slots.calendar` must always be a string! (NOT a CalendarProtocol)
 */
+
+export function create(isoYear: number, isoMonth: number, isoDay: number, calendar: string) {
+}
+
+export function from(thing: any, options: any) {
+  // realistically, public APIs will accept a bunch of things?
+}
 
 export function fromString(s: string, options: any) {
 }
@@ -88,10 +95,12 @@ export function equals(slots0: any, slots1: any) {
 export function toString(slots: any, options: any) {
 }
 
+// TODO: format(formatObj, slots)
 export function toLocaleString(slots: any, locales: any, options: any): string {
   return ''
 }
 
+// TODO: formatRange(formatObj, slots0, slots1)
 export function toRangeLocaleString(slots0: any, slots1: any, locales: any, options: any): string { // best name?
   return ''
 }

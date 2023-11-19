@@ -1,6 +1,7 @@
 import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
 import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
 import { BoundArg, mapPropNamesToConstant, remapProps } from './utils'
+import { DurationFields } from './durationFields'
 
 // Year/Month/Day (no era/eraYear)
 // -------------------------------------------------------------------------------------------------
@@ -41,6 +42,7 @@ export type MonthDayFieldsIntl = YearFieldsIntl & MonthDayFields
 export type YearMonthBag = Partial<YearMonthFieldsIntl>
 export type DateBag = Partial<DateFieldsIntl>
 export type MonthDayBag = Partial<MonthDayFieldsIntl>
+export type DurationBag = Partial<DurationFields>
 
 // Strict Bag (with complex expressions)
 // -------------------------------------------------------------------------------------------------

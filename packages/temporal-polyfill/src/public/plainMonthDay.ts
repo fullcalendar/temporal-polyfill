@@ -8,23 +8,23 @@ import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflow
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { ensureString } from '../internal/cast'
 import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
+import { calendarImplDateFromFields, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields } from '../internal/calendarRecordSimple'
 
 // public
-import { CalendarBranding, IsoDateSlots, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoMonthDaySlots } from './slots'
+import { CalendarBranding, IsoDateSlots, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoMonthDaySlots, rejectInvalidBag } from './slots'
 import {
   convertPlainMonthDayToDate,
   mergePlainMonthDayBag,
   refinePlainMonthDayBag,
-  rejectInvalidBag,
 } from './convert'
 import { PlainDate, createPlainDate } from './plainDate'
-import { getCalendarSlotId, isCalendarSlotsEqual } from './calendarSlot'
+import { extractBagCalendarSlot, getCalendarSlotId, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
+import { calendarProtocolDateFromFields, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
+import { PlainMonthDayBag } from './genericBag'
 
-export type PlainMonthDayBag = MonthDayBag & { calendar?: CalendarArg }
-export type PlainMonthDayMod = MonthDayBag
-export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag | string
+export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
 export class PlainMonthDay {
   constructor(
@@ -44,11 +44,22 @@ export class PlainMonthDay {
     })
   }
 
-  with(mod: PlainMonthDayMod, options?: OverflowOptions): PlainMonthDay {
-    getPlainMonthDaySlots(this) // validate `this`
+  with(mod: MonthDayBag, options?: OverflowOptions): PlainMonthDay {
+    const { calendar } = getPlainMonthDaySlots(this)
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      monthDayFromFields: calendarImplMonthDayFromFields,
+      fields: calendarImplFields,
+      mergeFields: calendarImplMergeFields,
+    }, {
+      monthDayFromFields: calendarProtocolMonthDayFromFields,
+      fields: calendarProtocolFields,
+      mergeFields: calendarProtocolMergeFields,
+    })
+
     return createPlainMonthDay({
+      ...mergePlainMonthDayBag(calendarRecord, this, rejectInvalidBag(mod), prepareOptions(options)),
+      calendar,
       branding: PlainMonthDayBranding,
-      ...mergePlainMonthDayBag(this, rejectInvalidBag(mod), prepareOptions(options))
     })
   }
 
@@ -83,8 +94,20 @@ export class PlainMonthDay {
   }
 
   toPlainDate(bag: YearFields): PlainDate {
+    const { calendar } = getPlainMonthDaySlots(this)
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      dateFromFields: calendarImplDateFromFields,
+      fields: calendarImplFields,
+      mergeFields: calendarImplMergeFields,
+    }, {
+      dateFromFields: calendarProtocolDateFromFields,
+      fields: calendarProtocolFields,
+      mergeFields: calendarProtocolMergeFields,
+    })
+
     return createPlainDate({
-      ...convertPlainMonthDayToDate(this, bag),
+      ...convertPlainMonthDayToDate(calendarRecord, this, bag),
+      calendar,
       branding: PlainDateBranding,
     })
   }
@@ -145,7 +168,23 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
       refineOverflowOptions(options) // parse unused options
       return slots as PlainMonthDaySlots
     }
-    return { ...refinePlainMonthDayBag(arg as PlainMonthDayBag, options), branding: PlainMonthDayBranding }
+
+    const calendarMaybe = extractBagCalendarSlot(arg) // TODO: double-access of slots(.calendar)
+    const calendar = calendarMaybe || isoCalendarId
+
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      monthDayFromFields: calendarImplMonthDayFromFields,
+      fields: calendarImplFields,
+    }, {
+      monthDayFromFields: calendarProtocolMonthDayFromFields,
+      fields: calendarProtocolFields,
+    })
+
+    return {
+      ...refinePlainMonthDayBag(calendarRecord, !calendarMaybe, arg as MonthDayBag, options),
+      calendar,
+      branding: PlainMonthDayBranding,
+    }
   }
 
   const res = { ...parsePlainMonthDay(ensureString(arg)), branding: PlainMonthDayBranding }

@@ -18,15 +18,14 @@ import { roundPlainTime } from '../internal/round'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { ensureString } from '../internal/cast'
+import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
 
 // public
 import {
-  createZonedDateTimeConverter,
   mergePlainTimeBag,
   refinePlainTimeBag,
-  rejectInvalidBag,
 } from './convert'
-import { DurationBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { DurationBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -34,14 +33,12 @@ import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
+import { refineTimeZoneSlot } from './timeZoneSlot'
+import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
+import { getSingleInstantFor } from '../internal/timeZoneMath'
+import { PlainTimeBag } from './genericBag'
 
-export type PlainTimeBag = TimeBag
-export type PlainTimeMod = TimeBag
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
-
-const zonedDateTimeConverter = createZonedDateTimeConverter((options: { plainDate: PlainDateArg }) => {
-  return toPlainDateSlots(options.plainDate)
-})
 
 export class PlainTime {
   constructor(
@@ -65,7 +62,7 @@ export class PlainTime {
     })
   }
 
-  with(mod: PlainTimeMod, options?: OverflowOptions): PlainTime {
+  with(mod: TimeBag, options?: OverflowOptions): PlainTime {
     getPlainTimeSlots(this) // validate `this`
     return createPlainTime({
       ...mergePlainTimeBag(this, rejectInvalidBag(mod), options), // it's crazy we don't do prepareOptions
@@ -120,9 +117,23 @@ export class PlainTime {
   }
 
   toZonedDateTime(options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
+    const slots = getPlainTimeSlots(this)
+    const plainDateSlots = toPlainDateSlots(options.plainDate)
+    const timeZoneSlot = refineTimeZoneSlot(options.timeZone)
+
+    const timeZoneRecord = createTimeZoneSlotRecord(timeZoneSlot, {
+      getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+    }, {
+      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+    })
+
     return createZonedDateTime({
+      epochNanoseconds: getSingleInstantFor(timeZoneRecord, { ...plainDateSlots, ...slots }),
+      calendar: plainDateSlots.calendar,
+      timeZone: timeZoneSlot,
       branding: ZonedDateTimeBranding,
-      ...zonedDateTimeConverter(getPlainTimeSlots(this), options)
     })
   }
 

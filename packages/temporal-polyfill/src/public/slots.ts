@@ -164,3 +164,19 @@ export const pluckIsoDateTimeInternals = pluckProps.bind<
   [IsoDateTimeSlots],
   IsoDateTimeSlots // return
 >(undefined, isoDateTimeInternalNames)
+
+// Reject
+// -------------------------------------------------------------------------------------------------
+
+export function rejectInvalidBag<B>(bag: B): B {
+  if (getSlots(bag)) {
+    throw new TypeError('Cant pass a Temporal object')
+  }
+  if ((bag as any).calendar !== undefined) {
+    throw new TypeError('Ah')
+  }
+  if ((bag as any).timeZone !== undefined) {
+    throw new TypeError('Ah')
+  }
+  return bag
+}

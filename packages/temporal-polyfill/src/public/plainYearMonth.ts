@@ -11,7 +11,7 @@ import { parsePlainYearMonth } from '../internal/isoParse'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDiffOptions, refineOverflowOptions } from '../internal/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { ensureString } from '../internal/cast'
-import { calendarImplDateAdd, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth } from '../internal/calendarRecordSimple'
+import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth, calendarImplFields, calendarImplMergeFields, calendarImplYearMonthFromFields } from '../internal/calendarRecordSimple'
 import { Unit } from '../internal/units'
 import { CalendarDayFunc } from '../internal/calendarRecordTypes'
 
@@ -20,18 +20,16 @@ import {
   convertPlainYearMonthToDate,
   mergePlainYearMonthBag,
   refinePlainYearMonthBag,
-  rejectInvalidBag,
 } from './convert'
-import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots } from './slots'
-import { calendarProtocolDateAdd, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, createCalendarSlotRecord } from './calendarRecordComplex'
-import { getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
+import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots, rejectInvalidBag } from './slots'
+import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
+import { getBagCalendarSlot, getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
+import { PlainYearMonthBag } from './genericBag'
 
-export type PlainYearMonthBag = YearMonthBag & { calendar?: CalendarArg }
-export type PlainYearMonthMod = YearMonthBag
-export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
+export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
 export class PlainYearMonth {
   constructor(
@@ -51,11 +49,22 @@ export class PlainYearMonth {
     })
   }
 
-  with(mod: PlainYearMonthMod, options?: OverflowOptions): PlainYearMonth {
-    getPlainYearMonthSlots(this) // validate `this`
+  with(mod: YearMonthBag, options?: OverflowOptions): PlainYearMonth {
+    const { calendar } = getPlainYearMonthSlots(this)
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      yearMonthFromFields: calendarImplYearMonthFromFields,
+      fields: calendarImplFields,
+      mergeFields: calendarImplMergeFields,
+    }, {
+      yearMonthFromFields: calendarProtocolYearMonthFromFields,
+      fields: calendarProtocolFields,
+      mergeFields: calendarProtocolMergeFields,
+    })
+
     return createPlainYearMonth({
+      ...mergePlainYearMonthBag(calendarRecord, this, rejectInvalidBag(mod), prepareOptions(options)),
+      calendar,
       branding: PlainYearMonthBranding,
-      ...mergePlainYearMonthBag(this, rejectInvalidBag(mod), prepareOptions(options))
     })
   }
 
@@ -120,9 +129,20 @@ export class PlainYearMonth {
   }
 
   toPlainDate(bag: { day: number }): PlainDate {
-    getPlainYearMonthSlots(this) // validate `this`
+    const { calendar } = getPlainYearMonthSlots(this)
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      dateFromFields: calendarImplDateFromFields,
+      fields: calendarImplFields,
+      mergeFields: calendarImplMergeFields,
+    }, {
+      dateFromFields: calendarProtocolDateFromFields,
+      fields: calendarProtocolFields,
+      mergeFields: calendarProtocolMergeFields,
+    })
+
     return createPlainDate({
-      ...convertPlainYearMonthToDate(this, bag),
+      ...convertPlainYearMonthToDate(calendarRecord, this, bag),
+      calendar,
       branding: PlainDateBranding,
     })
   }
@@ -187,8 +207,19 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
       refineOverflowOptions(options) // parse unused options
       return slots as PlainYearMonthSlots
     }
+
+    const calendar = getBagCalendarSlot(arg) // TODO: double-access of slots(.calendar)
+    const calendarRecord = createCalendarSlotRecord(calendar, {
+      yearMonthFromFields: calendarImplYearMonthFromFields,
+      fields: calendarImplFields,
+    }, {
+      yearMonthFromFields: calendarProtocolYearMonthFromFields,
+      fields: calendarProtocolFields,
+    })
+
     return {
-      ...refinePlainYearMonthBag(arg as PlainYearMonthBag, options),
+      ...refinePlainYearMonthBag(calendarRecord, arg as YearMonthBag, options),
+      calendar,
       branding: PlainYearMonthBranding,
     }
   }

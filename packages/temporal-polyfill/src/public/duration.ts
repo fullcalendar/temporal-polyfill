@@ -37,6 +37,7 @@ import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../intern
 import { MarkerToEpochNano, MoveMarker, DiffMarkers } from '../internal/markerSystemTypes'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { ensureString } from '../internal/cast'
+import { DurationBag } from '../internal/calendarFields'
 
 // public
 import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
@@ -45,8 +46,6 @@ import { createMarkerSystem } from './markerSystemImpl'
 import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { refinePublicRelativeTo } from './publicOptions'
 
-export type DurationBag = Partial<DurationFields>
-export type DurationMod = Partial<DurationFields>
 export type DurationArg = Duration | DurationBag | string
 
 export class Duration {
@@ -79,7 +78,7 @@ export class Duration {
     })
   }
 
-  with(mod: DurationMod): Duration {
+  with(mod: DurationBag): Duration {
     return createDuration({
       branding: DurationBranding,
       ...mergeDurationBag(getDurationSlots(this), mod)
