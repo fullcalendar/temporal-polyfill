@@ -17,12 +17,16 @@ export function createTimeZoneImplRecord<
   TimeZoneImplFuncs extends Record<string, TimeZoneImplFunc>
 >(
   timeZoneId: string,
-  funcs: TimeZoneImplFuncs,
+  funcs: TimeZoneImplFuncs = {} as any,
 ): {
   [K in keyof TimeZoneImplFuncs]: TimeZoneImplMethod<TimeZoneImplFuncs[K]>
+} & {
+  id: string
 } {
   const timeZoneImpl = queryTimeZoneImpl(timeZoneId)
-  const timeZoneRecord: any = {}
+  const timeZoneRecord: any = {
+    id: timeZoneImpl.id, // normalized (needed?)
+  }
 
   for (const methodName in funcs) {
     timeZoneRecord[methodName] = funcs[methodName].bind(timeZoneImpl)

@@ -13,7 +13,6 @@ export type CalendarSlot = CalendarProtocol | string
 
 const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethodNames)
 
-// used by intlFormat!!!
 export function getCalendarSlotId(calendarSlot: CalendarSlot): string {
   return typeof calendarSlot === 'string'
     ? calendarSlot

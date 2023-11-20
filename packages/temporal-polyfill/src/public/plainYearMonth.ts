@@ -20,7 +20,7 @@ import { PlainYearMonthBag } from '../internal/genericBag'
 // public
 import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots, rejectInvalidBag } from './slots'
 import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
-import { getBagCalendarSlot, getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
+import { getBagCalendarSlot, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
@@ -102,7 +102,7 @@ export class PlainYearMonth {
     const slots = getPlainYearMonthSlots(this)
 
     return formatPossibleDate(
-      getCalendarSlotId(slots.calendar),
+      createCalendarSlotRecord(slots.calendar),
       formatIsoYearMonthFields,
       slots,
       options,
@@ -113,7 +113,7 @@ export class PlainYearMonth {
     const slots = getPlainYearMonthSlots(this)
 
     return formatPossibleDate(
-      getCalendarSlotId(slots.calendar),
+      createCalendarSlotRecord(slots.calendar),
       formatIsoYearMonthFields,
       slots,
     )
@@ -121,7 +121,7 @@ export class PlainYearMonth {
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const slots = getPlainYearMonthSlots(this)
-    return formatYearMonthLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+    return formatYearMonthLocaleString(createCalendarSlotRecord(slots.calendar), slots, locales, options)
   }
 
   toPlainDate(bag: { day: number }): PlainDate {

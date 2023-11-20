@@ -11,6 +11,7 @@ import { TimeZoneSlot } from './timeZoneSlot'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZone'
+import { ensureString } from '../internal/cast'
 
 // CONDITIONAL Record Creation
 // -------------------------------------------------------------------------------------------------
@@ -25,12 +26,14 @@ export function createTimeZoneSlotRecord<
   TimeZoneImplFuncs extends Record<string, TimeZoneImplFunc>
 >(
   timeZoneSlot: TimeZoneSlot,
-  implFuncs: TimeZoneImplFuncs,
+  implFuncs: TimeZoneImplFuncs = {} as any,
   protocolFuncs: {
     [K in keyof TimeZoneImplFuncs]: TimeZoneProtocolFuncViaImpl<TimeZoneImplFuncs[K]>
-  },
+  } = {} as any,
 ): {
   [K in keyof TimeZoneImplFuncs]: TimeZoneImplMethod<TimeZoneImplFuncs[K]>
+} & {
+  id: string
 } {
   if (typeof timeZoneSlot === 'string') {
     return createTimeZoneImplRecord(timeZoneSlot, implFuncs)
@@ -52,8 +55,14 @@ export type TimeZoneProtocolMethod<Func> =
 export function createTimeZoneProtocolRecord<Funcs extends { [funcName: string]: TimeZoneProtocolFunc }>(
   timeZoneProtocol: TimeZoneProtocol,
   funcs: Funcs,
-): { [FuncName in keyof Funcs]: TimeZoneProtocolMethod<Funcs[FuncName]> } {
-  const timeZoneRecord: any = {}
+): {
+  [FuncName in keyof Funcs]: TimeZoneProtocolMethod<Funcs[FuncName]>
+} & {
+  id: string
+} {
+  const timeZoneRecord: any = {
+    get id() { return ensureString(timeZoneProtocol.id) }
+  }
 
   for (const methodName in funcs) {
     timeZoneRecord[methodName] = funcs[methodName].bind(timeZoneProtocol)

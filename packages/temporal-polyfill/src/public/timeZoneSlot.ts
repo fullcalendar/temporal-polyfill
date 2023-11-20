@@ -14,7 +14,6 @@ const checkTimeZoneProtocol = createProtocolChecker([
   'getOffsetNanosecondsFor',
 ])
 
-// used by intlFormat!!!
 export function getTimeZoneSlotId(slot: TimeZoneSlot): string {
   return typeof slot === 'string' ? slot : ensureString(slot.id)
 }

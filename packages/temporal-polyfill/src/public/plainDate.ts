@@ -21,7 +21,7 @@ import { PlainDateBag } from '../internal/genericBag'
 // public
 import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateSlots, pluckIsoDateInternals, rejectInvalidBag } from './slots'
 import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
-import { getBagCalendarSlot, getCalendarSlotId, getCommonCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
+import { getBagCalendarSlot, getCommonCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
@@ -143,17 +143,17 @@ export class PlainDate {
 
   toString(options?: DateTimeDisplayOptions): string {
     const slots = getPlainDateSlots(this)
-    return formatPlainDateIso(getCalendarSlotId(slots.calendar), slots, options)
+    return formatPlainDateIso(createCalendarSlotRecord(slots.calendar), slots, options)
   }
 
   toJSON(): string {
     const slots = getPlainDateSlots(this)
-    return formatPlainDateIso(getCalendarSlotId(slots.calendar), slots)
+    return formatPlainDateIso(createCalendarSlotRecord(slots.calendar), slots)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const slots = getPlainDateSlots(this)
-    return formatDateLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+    return formatDateLocaleString(createCalendarSlotRecord(slots.calendar), slots, locales, options)
   }
 
   toZonedDateTime(

@@ -15,7 +15,7 @@ import { PlainMonthDayBag } from '../internal/genericBag'
 // public
 import { CalendarBranding, IsoDateSlots, PlainDateBranding, PlainMonthDayBranding, PlainMonthDaySlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoMonthDaySlots, rejectInvalidBag } from './slots'
 import { PlainDate, createPlainDate } from './plainDate'
-import { extractBagCalendarSlot, getCalendarSlotId, isCalendarSlotsEqual } from './calendarSlot'
+import { extractBagCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
 import { calendarProtocolDateFromFields, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
@@ -67,7 +67,7 @@ export class PlainMonthDay {
     const slots = getPlainMonthDaySlots(this)
 
     return formatPossibleDate(
-      getCalendarSlotId(slots.calendar),
+      createCalendarSlotRecord(slots.calendar),
       formatIsoMonthDayFields,
       slots,
       options,
@@ -78,7 +78,7 @@ export class PlainMonthDay {
     const slots = getPlainMonthDaySlots(this)
 
     return formatPossibleDate(
-      getCalendarSlotId(slots.calendar),
+      createCalendarSlotRecord(slots.calendar),
       formatIsoMonthDayFields,
       slots,
     )
@@ -86,7 +86,7 @@ export class PlainMonthDay {
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const slots = getPlainMonthDaySlots(this)
-    return formatMonthDayLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+    return formatMonthDayLocaleString(createCalendarSlotRecord(slots.calendar), slots, locales, options)
   }
 
   toPlainDate(bag: YearFields): PlainDate {

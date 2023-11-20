@@ -21,7 +21,7 @@ import { TimeZoneGetOffsetNanosecondsForFunc } from './timeZoneRecordTypes'
 // -------------------------------------------------------------------------------------------------
 
 export function formatPlainDateTimeIso(
-  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  calendarRecord: { id: string },
   isoFields: IsoDateTimeFields,
   options?: DateTimeDisplayOptions,
 ): string {
@@ -35,25 +35,24 @@ export function formatPlainDateTimeIso(
   const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
 
   return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
-    formatCalendar(calendarId, calendarDisplay)
+    formatCalendar(calendarRecord, calendarDisplay)
 }
 
 export function formatPlainDateIso(
-  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  calendarRecord: { id: string },
   isoFields: IsoDateFields,
   options?: DateTimeDisplayOptions
 ): string {
   return formatIsoDateFields(isoFields) +
-    formatCalendar(calendarId, refineDateDisplayOptions(options))
+    formatCalendar(calendarRecord, refineDateDisplayOptions(options))
 }
 
 /*
 TODO: rename to formatZonedEpochNano
 */
 export function formatZonedDateTimeIso(
-  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
-  timeZoneId: string, // TODO: serialized too soon!!!... getTimeZoneSlotId(timeZone)
-  timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
+  calendarRecord: { id: string },
+  timeZoneRecord: { id: string, getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
   epochNano: DayTimeNano,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
@@ -72,8 +71,8 @@ export function formatZonedDateTimeIso(
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
     formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
-    formatTimeZone(timeZoneId, timeZoneDisplay) +
-    formatCalendar(calendarId, calendarDisplay)
+    formatTimeZone(timeZoneRecord, timeZoneDisplay) +
+    formatCalendar(calendarRecord, calendarDisplay)
 }
 
 export function formatInstantIso(
@@ -119,12 +118,13 @@ For PlainYearMonth and PlainMonthDay
 TODO: possible to simplify this function
 */
 export function formatPossibleDate(
-  calendarId: string, // TODO: serialized too soon!!!... getCalendarSlotId(calendar)
+  calendarRecord: { id: string },
   formatSimple: (isoFields: IsoDateFields) => string,
   isoFields: IsoDateFields,
   options?: DateTimeDisplayOptions,
 ) {
   const calendarDisplay = refineDateDisplayOptions(options)
+  const calendarId = calendarRecord.id
   const showCalendar =
     calendarDisplay > CalendarDisplay.Never || // critical or always
     (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
@@ -275,23 +275,25 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
 //
 
 function formatTimeZone(
-  timeZoneId: string,
+  timeZoneRecord: { id: string },
   timeZoneDisplay: TimeZoneDisplay,
 ): string {
   if (timeZoneDisplay !== TimeZoneDisplay.Never) {
     return '[' +
       (timeZoneDisplay === TimeZoneDisplay.Critical ? '!' : '') +
-      timeZoneId +
+      timeZoneRecord.id +
       ']'
   }
   return ''
 }
 
 export function formatCalendar(
-  calendarId: string,
+  calendarRecord: { id: string },
   calendarDisplay: CalendarDisplay,
 ): string {
   if (calendarDisplay !== CalendarDisplay.Never) {
+    const calendarId = calendarRecord.id
+
     if (
       calendarDisplay > CalendarDisplay.Never || // critical or always
       (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)

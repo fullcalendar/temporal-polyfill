@@ -10,7 +10,10 @@ import type { PlainMonthDay } from './plainMonthDay'
 import type { PlainYearMonth } from './plainYearMonth'
 import type { Instant } from './instant'
 import { BrandingSlots, getSlots } from './slots'
-import { TimeZoneSlot, getTimeZoneSlotId } from './timeZoneSlot'
+import { TimeZoneSlot } from './timeZoneSlot'
+import { createTimeZoneSlotRecord } from './timeZoneRecordComplex'
+import { CalendarSlot } from './calendarSlot'
+import { createCalendarSlotRecord } from './calendarRecordComplex'
 
 type OrigFormattable = number | Date
 type TemporalFormattable = Instant |
@@ -30,7 +33,7 @@ type DateTimeFormatInternals = [
 
 type SubformatFactory = (
   branding: string,
-  timeZoneId?: string, // TODO: serialized too soon!!!... getTimeZoneSlotId(calendar)
+  timeZoneRecord?: { id: string },
 ) => Intl.DateTimeFormat | undefined
 
 const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
@@ -51,10 +54,10 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
     const subformatFactory = createLazyGenerator((
       branding: string,
-      timeZoneId?: string, // TODO: serialized too soon!!!... getTimeZoneSlotId(calendar)
+      timeZoneRecord?: { id: string },
     ) => {
       if (optionsTransformers[branding]) {
-        const transformedOptions = optionsTransformers[branding](options, timeZoneId)
+        const transformedOptions = optionsTransformers[branding](options, timeZoneRecord)
         return new OrigDateTimeFormat(locale, transformedOptions)
       }
     })
@@ -158,11 +161,14 @@ function resolveFormattable(
     Intl.DateTimeFormat | undefined // undefined if should use orig method
   ] {
   const slots = getSlots(arg)
-  const { branding, timeZone } = (slots || {}) as Partial<BrandingSlots & { timeZone: TimeZoneSlot }>
-  const format = branding && subformatFactory(branding, timeZone ? getTimeZoneSlotId(timeZone) : undefined)
+  const { branding, calendar, timeZone } = (slots || {}) as Partial<BrandingSlots & { calendar: CalendarSlot, timeZone: TimeZoneSlot }>
 
+  const calendarRecord = (calendar && createCalendarSlotRecord(calendar)) as ({ id: string } | undefined)
+  const timeZoneRecord = (timeZone && createTimeZoneSlotRecord(timeZone)) as ({ id: string } | undefined)
+
+  const format = branding && subformatFactory(branding, timeZoneRecord)
   if (format) {
-    const epochMilli = toEpochMilli(branding, slots!, resolvedOptions)
+    const epochMilli = toEpochMilli(calendarRecord, slots!, resolvedOptions)
     return [epochMilli, format]
   }
 

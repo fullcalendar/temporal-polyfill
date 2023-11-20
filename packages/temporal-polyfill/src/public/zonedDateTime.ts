@@ -42,7 +42,7 @@ import { ZonedDateTimeBag } from '../internal/genericBag'
 
 // public
 import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, IsoDateTimeSlots, rejectInvalidBag } from './slots'
-import { getBagCalendarSlot, getCalendarSlotId, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
+import { getBagCalendarSlot, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, getTimeZoneSlotId, isTimeZoneSlotsEqual, refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
@@ -324,8 +324,7 @@ export class ZonedDateTime {
     const slots = getZonedDateTimeSlots(this)
 
     return formatZonedDateTimeIso(
-      getCalendarSlotId(slots.calendar),
-      getTimeZoneSlotId(slots.timeZone),
+      createCalendarSlotRecord(slots.calendar),
       createTimeZoneSlotRecord(slots.timeZone, {
         getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
       }, {
@@ -340,8 +339,7 @@ export class ZonedDateTime {
     const slots = getZonedDateTimeSlots(this)
 
     return formatZonedDateTimeIso(
-      getCalendarSlotId(slots.calendar),
-      getTimeZoneSlotId(slots.timeZone),
+      createCalendarSlotRecord(slots.calendar),
       createTimeZoneSlotRecord(slots.timeZone, {
         getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
       }, {
@@ -353,7 +351,13 @@ export class ZonedDateTime {
 
   toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
     const slots = getZonedDateTimeSlots(this)
-    return formatZonedLocaleString(getCalendarSlotId(slots.calendar), getTimeZoneSlotId(slots.timeZone), slots, locales, options)
+    return formatZonedLocaleString(
+      createTimeZoneSlotRecord(slots.timeZone),
+      createCalendarSlotRecord(slots.calendar),
+      slots,
+      locales,
+      options,
+    )
   }
 
   toInstant(): Instant {

@@ -20,7 +20,7 @@ import { PlainDateBag, PlainDateTimeBag } from '../internal/genericBag'
 
 // public
 import { CalendarBranding, DurationBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateTimeSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, rejectInvalidBag } from './slots'
-import { getBagCalendarSlot, getCalendarSlotId, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
+import { getBagCalendarSlot, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
@@ -185,17 +185,17 @@ export class PlainDateTime {
 
   toString(options?: DateTimeDisplayOptions): string {
     const slots = getPlainDateTimeSlots(this)
-    return formatPlainDateTimeIso(getCalendarSlotId(slots.calendar), slots, options)
+    return formatPlainDateTimeIso(createCalendarSlotRecord(slots.calendar), slots, options)
   }
 
   toJSON(): string {
     const slots = getPlainDateTimeSlots(this)
-    return formatPlainDateTimeIso(getCalendarSlotId(slots.calendar), slots)
+    return formatPlainDateTimeIso(createCalendarSlotRecord(slots.calendar), slots)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const slots = getPlainDateTimeSlots(this)
-    return formatDateTimeLocaleString(getCalendarSlotId(slots.calendar), slots, locales, options)
+    return formatDateTimeLocaleString(createCalendarSlotRecord(slots.calendar), slots, locales, options)
   }
 
   toZonedDateTime(

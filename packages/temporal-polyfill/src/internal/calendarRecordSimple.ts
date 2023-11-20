@@ -20,15 +20,19 @@ export function createCalendarImplRecord<
   CalendarImplFuncs extends Record<string, CalendarImplFunc>
 >(
   calendarId: string,
-  funcs: CalendarImplFuncs,
+  funcs: CalendarImplFuncs = {} as any,
 ): {
   [K in keyof CalendarImplFuncs]: CalendarImplMethod<CalendarImplFuncs[K]>
+} & {
+  id: string
 } {
   const calendarImpl = queryCalendarImpl(calendarId)
-  const calendarRecord: any = {}
+  const calendarRecord: any = {
+    id: calendarImpl.id, // normalized (needed?)
+  }
 
   for (const methodName in funcs) {
-    calendarRecord[methodName] = funcs[methodName].bind(calendarImpl)
+    calendarRecord[methodName] = funcs[methodName].bind(undefined, calendarImpl)
   }
 
   return calendarRecord

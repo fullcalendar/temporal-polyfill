@@ -1,7 +1,7 @@
 import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { CalendarImpl } from '../internal/calendarImpl'
 import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../internal/calendarRecordSimple'
-import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
+import { ensureObjectlike, ensurePositiveInteger, ensureString } from '../internal/cast'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { LargestUnitOptions, OverflowOptions } from '../internal/options'
@@ -29,12 +29,14 @@ export function createCalendarSlotRecord<
   CalendarImplFuncs extends Record<string, CalendarImplFunc>
 >(
   calendarSlot: CalendarSlot,
-  implFuncs: CalendarImplFuncs,
+  implFuncs: CalendarImplFuncs = {} as any,
   protocolFuncs: {
     [K in keyof CalendarImplFuncs]: CalendarProtocolFuncViaImpl<CalendarImplFuncs[K]>
-  },
+  } = {} as any,
 ): {
   [K in keyof CalendarImplFuncs]: CalendarImplMethod<CalendarImplFuncs[K]>
+} & {
+  id: string
 } {
   if (typeof calendarSlot === 'string') {
     return createCalendarImplRecord(calendarSlot, implFuncs)
@@ -56,11 +58,17 @@ type CalendarProtocolMethod<Func> =
 function createCalendarProtocolRecord<Funcs extends { [funcName: string]: CalendarProtocolFunc }>(
   calendarProtocol: CalendarProtocol,
   funcs: Funcs,
-): { [FuncName in keyof Funcs]: CalendarProtocolMethod<Funcs[FuncName]> } {
-  const calendarRecord: any = {}
+): {
+  [FuncName in keyof Funcs]: CalendarProtocolMethod<Funcs[FuncName]>
+} & {
+  id: string
+} {
+  const calendarRecord: any = {
+    get id() { return ensureString(calendarProtocol.id) }
+  }
 
   for (const methodName in funcs) {
-    calendarRecord[methodName] = funcs[methodName].bind(calendarProtocol)
+    calendarRecord[methodName] = funcs[methodName].bind(undefined, calendarProtocol)
   }
 
   return calendarRecord
