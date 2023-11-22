@@ -41,9 +41,10 @@ import { convertToPlainMonthDay, convertToPlainYearMonth, mergeZonedDateTimeBag,
 import { ZonedDateTimeBag } from '../internal/genericBag'
 
 // public
-import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, IsoDateTimeSlots, rejectInvalidBag } from './slots'
-import { getBagCalendarSlot, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
-import { TimeZoneSlot, getTimeZoneSlotId, isTimeZoneSlotsEqual, refineTimeZoneSlot } from './timeZoneSlot'
+import { ZonedDateTimeSlots, ZonedEpochSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, IsoDateTimeSlots, rejectInvalidBag } from './slots'
+import { CalendarBranding, DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { getBagCalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
@@ -58,6 +59,7 @@ import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCal
 import { optionalToPlainTimeFields } from './publicUtils'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
 import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
+import { getCommonCalendarSlot, getId, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/idLike'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 
@@ -324,7 +326,8 @@ export class ZonedDateTime {
     const slots = getZonedDateTimeSlots(this)
 
     return formatZonedDateTimeIso(
-      createCalendarSlotRecord(slots.calendar),
+      slots.calendar,
+      slots.timeZone,
       createTimeZoneSlotRecord(slots.timeZone, {
         getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
       }, {
@@ -339,7 +342,8 @@ export class ZonedDateTime {
     const slots = getZonedDateTimeSlots(this)
 
     return formatZonedDateTimeIso(
-      createCalendarSlotRecord(slots.calendar),
+      slots.calendar,
+      slots.timeZone,
       createTimeZoneSlotRecord(slots.timeZone, {
         getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
       }, {
@@ -352,8 +356,8 @@ export class ZonedDateTime {
   toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
     const slots = getZonedDateTimeSlots(this)
     return formatZonedLocaleString(
-      createTimeZoneSlotRecord(slots.timeZone),
-      createCalendarSlotRecord(slots.calendar),
+      slots.timeZone,
+      slots.calendar,
       slots,
       locales,
       options,
@@ -481,7 +485,7 @@ export class ZonedDateTime {
   }
 
   get timeZoneId(): string {
-    return getTimeZoneSlotId(getZonedDateTimeSlots(this).timeZone)
+    return getId(getZonedDateTimeSlots(this).timeZone)
   }
 
   static from(arg: any, options?: ZonedFieldOptions) {
@@ -540,7 +544,7 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
     })
 
     let timeZone: TimeZoneSlot
-    function getTimeZoneRecord(timeZoneArg: TimeZoneArg) {
+    function refineTimeZoneArg(timeZoneArg: TimeZoneArg) {
       timeZone = refineTimeZoneSlot(timeZoneArg)
       return createTimeZoneSlotRecord(timeZone, {
         getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
@@ -552,7 +556,7 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
     }
 
     return {
-      epochNanoseconds: refineZonedDateTimeBag(calendarRecord, getTimeZoneRecord, arg as any, options),
+      epochNanoseconds: refineZonedDateTimeBag(calendarRecord, refineTimeZoneArg, arg as any, options),
       calendar,
       timeZone: timeZone!,
       branding: ZonedDateTimeBranding,
@@ -663,5 +667,5 @@ export function isZonedDateTimesEqual(
 ): boolean {
   return !compareDayTimeNanos(a.epochNanoseconds, b.epochNanoseconds) &&
     isTimeZoneSlotsEqual(a.timeZone, b.timeZone) &&
-    isCalendarSlotsEqual(a.calendar, b.calendar)
+    isIdLikeEqual(a.calendar, b.calendar)
 }

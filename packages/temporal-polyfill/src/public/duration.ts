@@ -41,10 +41,12 @@ import { DurationBag } from '../internal/calendarFields'
 import { mergeDurationBag, refineDurationBag } from '../internal/convert'
 
 // public
-import { DurationBranding, DurationSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { DurationBranding } from '../genericApi/branding'
 import { createMarkerSystem } from './markerSystemImpl'
 import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { refinePublicRelativeTo } from './publicOptions'
+import { DurationSlots } from '../genericApi/genericTypes'
 
 export type DurationArg = Duration | DurationBag | string
 

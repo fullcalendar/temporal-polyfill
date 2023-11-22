@@ -1,120 +1,205 @@
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../internal/options'
+import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
+import { queryCalendarImpl } from '../internal/calendarImpl'
+import { NumSign } from '../internal/utils'
+import { getCalendarIdFromBag, refineCalendarSlotString } from '../internal/calendarSlotString'
+import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import * as PlainDateFuncs from '../genericApi/plainDate'
+import { DateTimeFormatSlots } from './dateTimeFormat'
 
-/*
-Will fullcalendar's application of this cause space-savings?
-YES:
-- no YearMonth/MonthDay logic
-- optional Zoned logic...
-  NO: still need to convert inputted LegacyDate/string to PlainDateTime, and need zone
-  WILL NEED:
-    const pdt = ZonedDateTimeFns.toPlainDateTime(
-      ZonedDateTimeFns.fromString(
-        str + (strHasTimeZone(str) ? '' : `[${defaultTimeZone}]`)
-      )
-    )
-    // NOTE: PlainDateTimeFns.fromString throws away timezone/offset info,
-    // so it's not usable
+// TODO: do Readonly<> everywhere?
 
-WE'RE NOT ALLOWING CalendarProtocol or TimeZoneProtocol because they accept
-Temporal objects, creating them will break tree-shaking
-
-ALSO, we don't like complex Calendar or TimeZone objects because they have a lot of functionality
-all bundled together, making it impossible to tree shake
-*/
-
-import { calendarImplDateAdd, createCalendarImplRecord } from '../internal/calendarRecordSimple'
-import { moveDateEasy } from '../internal/move'
-import { OverflowOptions } from '../internal/options'
-import { DurationSlots } from '../public/slots'
-
-/*
-NOTE: the inputted `slots.calendar` must always be a string! (NOT a CalendarProtocol)
-*/
-
-export function create(isoYear: number, isoMonth: number, isoDay: number, calendar: string) {
+export function create(
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+  calendar?: string,
+): PlainDateSlots<string> {
+  return PlainDateFuncs.create(refineCalendarSlotString, isoYear, isoMonth, isoDay, calendar)
 }
 
-export function from(thing: any, options: any) {
-  // realistically, public APIs will accept a bunch of things?
+export function fromString(s: string): PlainDateSlots<string> {
+  return PlainDateFuncs.fromString(s) // NOTE: just forwards
 }
 
-export function fromString(s: string, options: any) {
+export function fromFields(
+  fields: DateBag & { calendar?: string },
+  options: OverflowOptions,
+): PlainDateSlots<string> {
+  return PlainDateFuncs.fromFields(
+    createDateNewCalendarRecordIMPL,
+    getCalendarIdFromBag(fields),
+    fields,
+    options,
+  )
 }
 
-export function fromFields(fields: any, options: any) {
-}
-
-//// slots already have this. only useful for ZonedDateTime
-// export function getISOFields(slots: any) {
-// }
-
-// era/eraYear/year/month/monthCode/day (not calendar)
-export function getFields(slots: any) {
-}
-
-export function withFields(slots: any, newFields: any, options: any) {
-}
-
-export function withCalendar(slots: any, calendarArg: any) {
-}
-
-export function add(
-  slots: any, // PlainDateSlots, but with STRING calendar ONLY
-  durationSlots: DurationSlots,
-  options?: OverflowOptions,
-) {
-  const calendarRecord = createCalendarImplRecord(slots.calendar, {
-    dateAdd: calendarImplDateAdd
-  })
+export function getFields(slots: PlainDateSlots<string>): DateFields & Partial<EraYearFields> {
+  const calendarImpl = queryCalendarImpl(slots.calendar)
+  const [year, month, day] = calendarImpl.queryYearMonthDay(slots)
 
   return {
-    ...slots,
-    ...moveDateEasy(
-      calendarRecord,
-      slots,
-      durationSlots,
-      options,
-    ),
+    era: calendarImpl.era(slots), // inefficient: requeries y/m/d
+    eraYear: calendarImpl.eraYear(slots), // inefficient: requeries y/m/d
+    year,
+    month,
+    monthCode: calendarImpl.monthCode(slots), // inefficient: requeries y/m/d
+    day,
   }
 }
 
-export function subtract(slots: any, durationSlots: any, options: any) {
+export function withFields(
+  slots: PlainDateSlots<string>,
+  newFields: DateBag,
+  options: OverflowOptions,
+): PlainDateSlots<string> {
+  return PlainDateFuncs.withFields(
+    getDateModCalendarRecordIMPL,
+    slots,
+    getFields(slots), // TODO: just use y/m/d?
+    newFields,
+    options,
+  )
 }
 
-export function until(slots0: any, slots1: any, options: any) {
+export function withCalendar(
+  slots: PlainDateSlots<string>,
+  calendarId: string,
+): PlainDateSlots<string> {
+  return {
+    ...slots,
+    calendar: refineCalendarSlotString(calendarId)
+  }
 }
 
-export function since(slots0: any, slots1: any, options: any) {
+export function add(
+  slots: PlainDateSlots<string>,
+  durationSlots: DurationSlots,
+  options?: OverflowOptions,
+): PlainDateSlots<string> {
+  return PlainDateFuncs.add(
+    getMoveCalendarRecordIMPL,
+    slots,
+    durationSlots,
+    options,
+  )
 }
 
-export function compare(slots0: any, slots1: any) {
+export function subtract(
+  slots: PlainDateSlots<string>,
+  durationSlots: DurationSlots,
+  options?: OverflowOptions,
+): PlainDateSlots<string> {
+  return PlainDateFuncs.subtract(
+    getMoveCalendarRecordIMPL,
+    slots,
+    durationSlots,
+    options,
+  )
 }
 
-export function equals(slots0: any, slots1: any) {
+export function until(
+  slots0: PlainDateSlots<string>,
+  slots1: PlainDateSlots<string>,
+  options?: DiffOptions,
+): DurationSlots {
+  return PlainDateFuncs.until(
+    getDiffCalendarRecordIMPL,
+    slots0,
+    slots1,
+    options,
+  )
 }
 
-export function toString(slots: any, options: any) {
+export function since(
+  slots0: PlainDateSlots<string>,
+  slots1: PlainDateSlots<string>,
+  options?: DiffOptions,
+): DurationSlots {
+  return PlainDateFuncs.since(
+    getDiffCalendarRecordIMPL,
+    slots0,
+    slots1,
+    options,
+  )
 }
 
-// TODO: format(formatObj, slots)
-export function toLocaleString(slots: any, locales: any, options: any): string {
-  return ''
+export function compare(slots0: PlainDateSlots<string>, slots1: PlainDateSlots<string>): NumSign {
+  return PlainDateFuncs.compare(slots0, slots1) // NOTE: just forwards
 }
 
-// TODO: formatRange(formatObj, slots0, slots1)
-export function toRangeLocaleString(slots0: any, slots1: any, locales: any, options: any): string { // best name?
-  return ''
+export function equals(slots0: PlainDateSlots<string>, slots1: PlainDateSlots<string>): boolean {
+  return PlainDateFuncs.equals(slots0, slots1) // NOTE: just forwards
 }
 
-// TODO: accept a proprietary Format object? probably yes, for maximum performance
-
-export function toZonedDateTime(slots: any, options: any) {
+export function toString(slots: PlainDateSlots<string>, options?: DateTimeDisplayOptions): string {
+  return PlainDateFuncs.toString(slots, options) // NOTE: just forwards
 }
 
-export function toPlainDateTime(slots: any) {
+export function toZonedDateTime(
+  slots: PlainDateSlots<string>,
+  options: string | { timeZone: string, plainTime?: PlainTimeSlots },
+): ZonedDateTimeSlots<string, string> {
+  let timeZoneArg: string
+  let plainTimeArg: PlainTimeSlots | undefined
+
+  if (typeof options === 'string') {
+    timeZoneArg = options
+  } else {
+    timeZoneArg = options.timeZone
+    plainTimeArg = options.plainTime
+  }
+
+  return PlainDateFuncs.toZonedDateTime(
+    createTypicalTimeZoneRecordIMPL,
+    slots,
+    refineTimeZoneSlotString(timeZoneArg),
+    plainTimeArg,
+  )
 }
 
-export function toPlainYearMonth(slots: any) {
+export function toPlainDateTime(
+  slots: PlainDateSlots<string>,
+  plainTime?: PlainTimeSlots,
+): PlainDateTimeSlots<string> {
+  return PlainDateFuncs.toPlainDateTime(slots, plainTime) // NOTE: just forwards
 }
 
-export function toPlainMonthDay(slots: any) {
+export function toPlainYearMonth(slots: PlainDateSlots<string>): PlainYearMonthSlots<string> {
+  const calenadarImpl = queryCalendarImpl(slots.calendar)
+  const [year, month, day] = calenadarImpl.queryYearMonthDay(slots)
+
+  return PlainDateFuncs.toPlainYearMonth(
+    createYearMonthNewCalendarRecordIMPL,
+    slots,
+    { year, month, day },
+  )
+}
+
+export function toPlainMonthDay(slots: PlainDateSlots<string>): PlainMonthDaySlots<string> {
+  const calenadarImpl = queryCalendarImpl(slots.calendar)
+  const [year, month, day] = calenadarImpl.queryYearMonthDay(slots)
+
+  return PlainDateFuncs.toPlainMonthDay(
+    createMonthDayNewCalendarRecordIMPL,
+    slots,
+    { year, month, day },
+  )
+}
+
+// DateTimeFormat
+// --------------
+
+export function format(format: DateTimeFormatSlots, slots: PlainDateSlots<string>): string {
+  return '' // TODO
+}
+
+export function formatRange(
+  format: DateTimeFormatSlots,
+  slots0: PlainDateSlots<string>,
+  slots1: PlainDateSlots<string>
+): string {
+  return '' // TODO
 }

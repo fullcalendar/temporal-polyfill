@@ -23,14 +23,11 @@ export function createCalendarImplRecord<
   funcs: CalendarImplFuncs = {} as any,
 ): {
   [K in keyof CalendarImplFuncs]: CalendarImplMethod<CalendarImplFuncs[K]>
-} & {
-  id: string
 } {
   const calendarImpl = queryCalendarImpl(calendarId)
-  const calendarRecord: any = {
-    id: calendarImpl.id, // normalized (needed?)
-  }
+  const calendarRecord: any = {}
 
+  // TODO: get rid of this
   for (const methodName in funcs) {
     calendarRecord[methodName] = funcs[methodName].bind(undefined, calendarImpl)
   }

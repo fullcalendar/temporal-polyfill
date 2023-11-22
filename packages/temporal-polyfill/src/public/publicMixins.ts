@@ -5,20 +5,23 @@ import { IsoTimeFields, isoTimeFieldNames } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
 import { mapPropNames } from '../internal/utils'
 import { queryCalendarImpl } from '../internal/calendarImpl'
+import { getId } from '../internal/idLike'
 
 // public
-import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, DurationBranding, DurationSlots, PlainDateBranding, pluckIsoDateInternals } from './slots'
-import { getCalendarSlotId } from './calendarSlot'
+import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, pluckIsoDateInternals } from './slots'
+import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { createPlainDate } from './plainDate'
 import { CalendarProtocol } from './calendar'
+import { DurationSlots } from '../genericApi/genericTypes'
 
 // TODO: better types
+// TODO: move this out!!!
 export function createCalendarIdGetterMethods(branding: string): { calendarId(): string } {
   return {
     calendarId() {
       const slots = getSpecificSlots(branding, this) as (BrandingSlots & CalendarSlots)
-      return getCalendarSlotId(slots.calendar)
+      return getId(slots.calendar)
     }
   }
 }

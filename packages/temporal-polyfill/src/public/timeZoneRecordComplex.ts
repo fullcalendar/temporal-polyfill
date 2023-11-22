@@ -6,7 +6,7 @@ import { validateOffsetNano } from '../internal/timeZoneMath'
 import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../internal/timeZoneRecordSimple'
 
 // public
-import { InstantBranding, PlainDateTimeBranding } from './slots'
+import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 import { TimeZoneSlot } from './timeZoneSlot'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'

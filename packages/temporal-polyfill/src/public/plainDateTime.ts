@@ -19,8 +19,9 @@ import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYear
 import { PlainDateBag, PlainDateTimeBag } from '../internal/genericBag'
 
 // public
-import { CalendarBranding, DurationBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateTimeSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, rejectInvalidBag } from './slots'
-import { getBagCalendarSlot, getCommonCalendarSlot, getPreferredCalendarSlot, isCalendarSlotsEqual, refineCalendarSlot } from './calendarSlot'
+import { IsoDateTimeSlots, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoDateTimeSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, rejectInvalidBag } from './slots'
+import { CalendarBranding, DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { getBagCalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
@@ -35,6 +36,7 @@ import { createCalendarGetterMethods, createCalendarIdGetterMethods, createTimeG
 import { optionalToPlainTimeFields } from './publicUtils'
 import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
+import { getCommonCalendarSlot, getPreferredCalendarSlot, isIdLikeEqual } from '../internal/idLike'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
@@ -185,17 +187,17 @@ export class PlainDateTime {
 
   toString(options?: DateTimeDisplayOptions): string {
     const slots = getPlainDateTimeSlots(this)
-    return formatPlainDateTimeIso(createCalendarSlotRecord(slots.calendar), slots, options)
+    return formatPlainDateTimeIso(slots.calendar, slots, options)
   }
 
   toJSON(): string {
     const slots = getPlainDateTimeSlots(this)
-    return formatPlainDateTimeIso(createCalendarSlotRecord(slots.calendar), slots)
+    return formatPlainDateTimeIso(slots.calendar, slots)
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const slots = getPlainDateTimeSlots(this)
-    return formatDateTimeLocaleString(createCalendarSlotRecord(slots.calendar), slots, locales, options)
+    return formatDateTimeLocaleString(slots.calendar, slots, locales, options)
   }
 
   toZonedDateTime(
@@ -411,5 +413,5 @@ export function isPlainDateTimesEqual(
   b: IsoDateTimeSlots
 ): boolean {
   return !compareIsoDateTimeFields(a, b) &&
-    isCalendarSlotsEqual(a.calendar, b.calendar)
+    isIdLikeEqual(a.calendar, b.calendar)
 }

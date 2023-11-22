@@ -24,7 +24,8 @@ import { getSingleInstantFor } from '../internal/timeZoneMath'
 import { PlainTimeBag } from '../internal/genericBag'
 
 // public
-import { DurationBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'

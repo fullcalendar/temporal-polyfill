@@ -9,7 +9,8 @@ import { Unit, unitNamesAsc } from '../internal/units'
 
 // public
 import { CalendarSlot } from './calendarSlot'
-import { DurationBranding, IsoDateSlots, PlainDateBranding } from './slots'
+import { IsoDateSlots } from './slots'
+import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { CalendarProtocol } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
@@ -35,8 +36,6 @@ export function createCalendarSlotRecord<
   } = {} as any,
 ): {
   [K in keyof CalendarImplFuncs]: CalendarImplMethod<CalendarImplFuncs[K]>
-} & {
-  id: string
 } {
   if (typeof calendarSlot === 'string') {
     return createCalendarImplRecord(calendarSlot, implFuncs)
@@ -60,12 +59,8 @@ function createCalendarProtocolRecord<Funcs extends { [funcName: string]: Calend
   funcs: Funcs,
 ): {
   [FuncName in keyof Funcs]: CalendarProtocolMethod<Funcs[FuncName]>
-} & {
-  id: string
 } {
-  const calendarRecord: any = {
-    get id() { return ensureString(calendarProtocol.id) }
-  }
+  const calendarRecord: any = {}
 
   for (const methodName in funcs) {
     calendarRecord[methodName] = funcs[methodName].bind(undefined, calendarProtocol)

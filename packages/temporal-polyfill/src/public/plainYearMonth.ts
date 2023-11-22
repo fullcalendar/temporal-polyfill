@@ -18,12 +18,14 @@ import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMon
 import { PlainYearMonthBag } from '../internal/genericBag'
 
 // public
-import { CalendarBranding, DurationBranding, IsoDateSlots, PlainDateBranding, PlainYearMonthBranding, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots, rejectInvalidBag } from './slots'
+import { IsoDateSlots, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, refineIsoYearMonthSlots, rejectInvalidBag } from './slots'
+import { CalendarBranding, DurationBranding, PlainDateBranding, PlainYearMonthBranding } from '../genericApi/branding'
 import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
-import { getBagCalendarSlot, getCommonCalendarSlot, isCalendarSlotsEqual } from './calendarSlot'
+import { getBagCalendarSlot } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
+import { getCommonCalendarSlot, isIdLikeEqual } from '../internal/idLike'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
@@ -102,7 +104,7 @@ export class PlainYearMonth {
     const slots = getPlainYearMonthSlots(this)
 
     return formatPossibleDate(
-      createCalendarSlotRecord(slots.calendar),
+      slots.calendar,
       formatIsoYearMonthFields,
       slots,
       options,
@@ -113,7 +115,7 @@ export class PlainYearMonth {
     const slots = getPlainYearMonthSlots(this)
 
     return formatPossibleDate(
-      createCalendarSlotRecord(slots.calendar),
+      slots.calendar,
       formatIsoYearMonthFields,
       slots,
     )
@@ -121,7 +123,7 @@ export class PlainYearMonth {
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
     const slots = getPlainYearMonthSlots(this)
-    return formatYearMonthLocaleString(createCalendarSlotRecord(slots.calendar), slots, locales, options)
+    return formatYearMonthLocaleString(slots.calendar, slots, locales, options)
   }
 
   toPlainDate(bag: { day: number }): PlainDate {
@@ -313,5 +315,5 @@ export function isPlainYearMonthsEqual(
   b: IsoDateSlots
 ): boolean {
   return !compareIsoDateFields(a, b) &&
-    isCalendarSlotsEqual(a.calendar, b.calendar)
+    isIdLikeEqual(a.calendar, b.calendar)
 }

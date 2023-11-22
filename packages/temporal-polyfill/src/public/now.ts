@@ -6,7 +6,8 @@ import { epochMilliToNano } from '../internal/isoMath'
 import { DayTimeNano } from '../internal/dayTimeNano'
 
 // public
-import { InstantBranding, IsoDateTimeSlots, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, ZonedEpochSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
+import { IsoDateTimeSlots, ZonedEpochSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
+import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'

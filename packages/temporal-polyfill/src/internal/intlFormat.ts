@@ -13,6 +13,7 @@ import {
 } from './utils'
 import { getSingleInstantFor } from './timeZoneMath'
 import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
+import { IdLike, getId } from './idLike'
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat
@@ -82,7 +83,7 @@ const monthDayExclusions: OptionNames = [
 
 type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
-  timeZoneRecord?: { id: string },
+  timeZoneIdLike?: IdLike,
 ) => Intl.DateTimeFormatOptions
 
 const transformMonthDayOptions = createTransformer(monthDayValidNames, monthDayFallbacks, monthDayExclusions)
@@ -95,15 +96,15 @@ const _transformZonedEpochOptions = createTransformer(zonedValidNames, zonedFall
 
 function transformZonedEpochOptions(
   options: Intl.DateTimeFormatOptions,
-  timeZoneRecord?: { id: string },
+  timeZoneIdLike?: IdLike,
 ) {
-  if (!timeZoneRecord) {
+  if (!timeZoneIdLike) {
     throw new TypeError('DateTimeFormat does not accept ZonedDateTime')
   }
   if (options.timeZone !== undefined) {
     throw new RangeError('Cannot specify timeZone') // for ZonedDateTime::toLocaleString
   }
-  options.timeZone = timeZoneRecord.id
+  options.timeZone = getId(timeZoneIdLike)
   return _transformZonedEpochOptions(options)
 }
 
@@ -134,15 +135,15 @@ type EpochNanoConverter = (
 ) => DayTimeNano
 
 export function toEpochMilli(
-  calendarRecord: { id: string } | undefined,
+  calendarIdLike: IdLike | undefined,
   fields: any,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
   fieldsToEpochNano: EpochNanoConverter = dateFieldsToEpochNano,
   strictCalendarCheck?: boolean,
 ) {
-  if (calendarRecord) {
+  if (calendarIdLike) {
     checkCalendarsCompatible(
-      calendarRecord.id,
+      getId(calendarIdLike),
       resolvedOptions.calendar,
       strictCalendarCheck,
     )
@@ -219,39 +220,39 @@ export const strictCalendarChecks: Record<string, boolean> = {
 // -------------------------------------------------------------------------------------------------
 
 export function formatMonthDayLocaleString(
-  calendarRecord: { id: string },
+  calendarIdLike: IdLike,
   fields: IsoDateFields,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformMonthDayOptions, calendarRecord, undefined, fields, locales, options, undefined, true)
+  return formatLocaleString(transformMonthDayOptions, calendarIdLike, undefined, fields, locales, options, undefined, true)
 }
 
 export function formatYearMonthLocaleString(
-  calendarRecord: { id: string },
+  calendarIdLike: IdLike,
   fields: IsoDateFields,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformYearMonthOptions, calendarRecord, undefined, fields, locales, options, undefined, true)
+  return formatLocaleString(transformYearMonthOptions, calendarIdLike, undefined, fields, locales, options, undefined, true)
 }
 
 export function formatDateLocaleString(
-  calendarRecord: { id: string },
+  calendarIdLike: IdLike,
   fields: IsoDateFields,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformDateOptions, calendarRecord, undefined, fields, locales, options)
+  return formatLocaleString(transformDateOptions, calendarIdLike, undefined, fields, locales, options)
 }
 
 export function formatDateTimeLocaleString(
-  calendarRecord: { id: string },
+  calendarIdLike: IdLike,
   fields: IsoDateTimeFields,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformDateTimeOptions, calendarRecord, undefined, fields, locales, options)
+  return formatLocaleString(transformDateTimeOptions, calendarIdLike, undefined, fields, locales, options)
 }
 
 export function formatTimeLocaleString(
@@ -271,8 +272,8 @@ export function formatInstantLocaleString(
 }
 
 export function formatZonedLocaleString(
-  timeZoneRecord: { id: string },
-  calendarRecord: { id: string },
+  timeZoneRecord: IdLike,
+  calendarIdLike: IdLike,
   fields: { epochNanoseconds: DayTimeNano },
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
@@ -286,13 +287,13 @@ export function formatZonedLocaleString(
     throw new TypeError('Cannot specify TimeZone')
   }
 
-  return formatLocaleString(transformZonedEpochOptions, calendarRecord, timeZoneRecord, fields, locales, options, extractEpochNano)
+  return formatLocaleString(transformZonedEpochOptions, calendarIdLike, timeZoneRecord, fields, locales, options, extractEpochNano)
 }
 
 export function formatLocaleString(
   transformOptions: OptionsTransformer,
-  calendarRecord: { id: string } | undefined,
-  timeZoneRecord: { id: string } | undefined,
+  calendarIdLike: IdLike | undefined,
+  timeZoneIdLike: IdLike | undefined,
   fields: any,
   locales?: LocalesArg,
   options: Intl.DateTimeFormatOptions = {},
@@ -300,11 +301,11 @@ export function formatLocaleString(
   strictCalendarCheck?: boolean,
 ): string {
   options = { ...options } // copy options so accessing doesn't cause side-effects
-  options = transformOptions(options, timeZoneRecord)
+  options = transformOptions(options, timeZoneIdLike)
 
   const subformat = new OrigDateTimeFormat(locales, options)
   const epochMilli = toEpochMilli(
-    calendarRecord,
+    calendarIdLike,
     fields,
     subformat.resolvedOptions(),
     fieldsToEpochNano,

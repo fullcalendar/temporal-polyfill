@@ -10,8 +10,10 @@ import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil,
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/convert'
 
 // public
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
-import { refineCalendarSlot, refineCalendarSlotString } from './calendarSlot'
+import { BrandingSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
+import { refineCalendarSlot } from './calendarSlot'
+import { refineCalendarSlotString } from '../internal/calendarSlotString'
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'

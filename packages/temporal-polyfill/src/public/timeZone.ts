@@ -10,13 +10,16 @@ import { epochNanoToIso } from '../internal/isoMath'
 
 // public
 import { refineCalendarSlot } from './calendarSlot'
-import { isTimeZoneSlotsEqual, refineTimeZoneSlot, refineTimeZoneSlotString } from './timeZoneSlot'
-import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createViaSlots, getSpecificSlots, setSlots } from './slots'
+import { refineTimeZoneSlot } from './timeZoneSlot'
+import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
+import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slots'
+import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
 import { createTimeZoneProtocolRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
+import { isTimeZoneSlotsEqual } from '../internal/idLike'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------

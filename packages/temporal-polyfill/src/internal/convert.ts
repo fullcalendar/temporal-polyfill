@@ -121,7 +121,7 @@ export function refineZonedDateTimeBag<T>(
     dateFromFields: CalendarDateFromFieldsFunc,
     fields: CalendarFieldsFunc,
   },
-  getTimeZoneRecord: (timeZoneArg: T) => {
+  refineTimeZoneArg: (timeZoneArg: T) => { // does refining AND record-creation. WEIRD
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
@@ -138,7 +138,7 @@ export function refineZonedDateTimeBag<T>(
   ) as ZonedDateTimeBag<unknown, T>
 
   // must happen before Calendar::dateFromFields and parsing `options`
-  const timeZoneRecord = getTimeZoneRecord(
+  const timeZoneRecord = refineTimeZoneArg(
     fields.timeZone! // guaranteed via refineCalendarFields
   )
 
