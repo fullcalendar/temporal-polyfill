@@ -1,5 +1,5 @@
 import { toInteger } from './cast'
-import { checkIsoDateInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
+import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
 import { BoundArg, clampProp, isClamped, mapPropNamesToConstant, mapPropsWithRefiners, pluckProps, pluckPropsTuple } from './utils'
 
@@ -147,6 +147,26 @@ export function refineIsoDateArgs(isoYear: number, isoMonth: number, isoDay: num
       isoYear: toInteger(isoYear),
       isoMonth: toInteger(isoMonth),
       isoDay: toInteger(isoDay),
+    })
+  )
+}
+
+export function refineIsoDateTimeArgs(
+  isoYear: number, isoMonth: number, isoDay: number,
+  isoHour: number, isoMinute: number, isoSecond: number,
+  isoMillisecond: number, isoMicrosecond: number, isoNanosecond: number,
+): IsoDateTimeFields {
+  return checkIsoDateTimeInBounds(
+    constrainIsoDateTimeLike({
+      isoYear: toInteger(isoYear),
+      isoMonth: toInteger(isoMonth),
+      isoDay: toInteger(isoDay),
+      isoHour: toInteger(isoHour),
+      isoMinute: toInteger(isoMinute),
+      isoSecond: toInteger(isoSecond),
+      isoMillisecond: toInteger(isoMillisecond),
+      isoMicrosecond: toInteger(isoMicrosecond),
+      isoNanosecond: toInteger(isoNanosecond),
     })
   )
 }

@@ -16,9 +16,11 @@ import { getSingleInstantFor } from '../internal/timeZoneMath'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'
-import { rejectInvalidBag } from '../public/slots'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
-import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots } from './genericTypes'
+import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots } from './genericTypes'
+
+// public
+import { rejectInvalidBag } from '../public/slots'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -80,6 +82,7 @@ export function withFields<C>(
   }
 }
 
+// TODO: reusable function across types
 export function withCalendar<C>(
   plainDateSlots: PlainDateSlots<C>,
   calendarSlot: C,
@@ -92,7 +95,7 @@ export function add<C>(
     dateAdd: CalendarDateAddFunc,
   },
   plainDateSlots: PlainDateSlots<C>,
-  durationSlots: any,
+  durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
   return {
@@ -111,7 +114,7 @@ export function subtract<C>(
     dateAdd: CalendarDateAddFunc,
   },
   plainDateSlots: PlainDateSlots<C>,
-  durationSlots: any,
+  durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
   return add(getCalendarRecord, plainDateSlots, negateDurationInternals(durationSlots), options)
@@ -126,7 +129,7 @@ export function until<C extends IdLike>(
   plainDateSlots1: PlainDateSlots<C>,
   options?: DiffOptions,
   invertRoundingMode?: boolean,
-): DurationFieldsWithSign & { branding: typeof DurationBranding } {
+): DurationSlots {
   return {
     ...updateDurationFieldsSign(
       diffDates(
@@ -156,7 +159,7 @@ export function since<C extends IdLike>(
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
   options?: DiffOptions,
-): DurationFieldsWithSign & { branding: typeof DurationBranding } {
+): DurationSlots {
   return {
     branding: DurationBranding,
     ...negateDurationInternals(

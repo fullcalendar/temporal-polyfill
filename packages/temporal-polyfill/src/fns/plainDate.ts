@@ -26,7 +26,7 @@ export function fromString(s: string): PlainDateSlots<string> {
 
 export function fromFields(
   fields: DateBag & { calendar?: string },
-  options: OverflowOptions,
+  options?: OverflowOptions,
 ): PlainDateSlots<string> {
   return PlainDateFuncs.fromFields(
     createDateNewCalendarRecordIMPL,
@@ -53,7 +53,7 @@ export function getFields(slots: PlainDateSlots<string>): DateFields & Partial<E
 export function withFields(
   slots: PlainDateSlots<string>,
   newFields: DateBag,
-  options: OverflowOptions,
+  options?: OverflowOptions,
 ): PlainDateSlots<string> {
   return PlainDateFuncs.withFields(
     getDateModCalendarRecordIMPL,
@@ -64,6 +64,7 @@ export function withFields(
   )
 }
 
+// TODO: more DRY
 export function withCalendar(
   slots: PlainDateSlots<string>,
   calendarId: string,
@@ -169,7 +170,7 @@ export function toPlainDateTime(
 
 export function toPlainYearMonth(slots: PlainDateSlots<string>): PlainYearMonthSlots<string> {
   const calenadarImpl = queryCalendarImpl(slots.calendar)
-  const [year, month, day] = calenadarImpl.queryYearMonthDay(slots)
+  const [year, month, day] = calenadarImpl.queryYearMonthDay(slots) // TODO: DRY
 
   return PlainDateFuncs.toPlainYearMonth(
     createYearMonthNewCalendarRecordIMPL,
@@ -180,7 +181,7 @@ export function toPlainYearMonth(slots: PlainDateSlots<string>): PlainYearMonthS
 
 export function toPlainMonthDay(slots: PlainDateSlots<string>): PlainMonthDaySlots<string> {
   const calenadarImpl = queryCalendarImpl(slots.calendar)
-  const [year, month, day] = calenadarImpl.queryYearMonthDay(slots)
+  const [year, month, day] = calenadarImpl.queryYearMonthDay(slots) // TODO: DRY
 
   return PlainDateFuncs.toPlainMonthDay(
     createMonthDayNewCalendarRecordIMPL,
