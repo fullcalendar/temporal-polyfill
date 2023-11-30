@@ -8,8 +8,8 @@ import { diffZonedEpochNano } from '../internal/diff'
 import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { ZonedDateTimeBag } from '../internal/genericBag'
 import { IdLike, getCommonCalendarSlot, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/idLike'
-import { isoTimeFieldDefaults, pluckIsoTimeFields } from '../internal/isoFields'
-import { formatZonedDateTimeIso } from '../internal/isoFormat'
+import { IsoDateTimeFields, isoTimeFieldDefaults, pluckIsoTimeFields } from '../internal/isoFields'
+import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { moveZonedEpochNano } from '../internal/move'
@@ -79,6 +79,22 @@ export function fromFields<C, TA, T>(
   }
 }
 
+export function getISOFields<C, T>(
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+): IsoDateTimeFields & { calendar: C, timeZone: T, offset: string } {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any) // TODO!!!
+  return {
+    ...pluckIsoDateTimeInternals(isoFields),
+    // alphabetical
+    calendar: zonedDateTimeSlots.calendar,
+    offset: formatOffsetNano(
+      // TODO: more DRY
+      isoFields.offsetNanoseconds,
+    ),
+    timeZone: zonedDateTimeSlots.timeZone,
+  }
+}
+
 export function withFields<C, T>(
   getCalendarRecord: (calendarSlot: C) => {
     dateFromFields: CalendarDateFromFieldsFunc,
@@ -90,7 +106,7 @@ export function withFields<C, T>(
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  initialFields: DateTimeFields & Partial<EraYearFields>,
+  initialFields: DateTimeFields & Partial<EraYearFields>, // TODO: allow offset
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<C, T> {

@@ -172,7 +172,7 @@ export function mergeZonedDateTimeBag(
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
   zonedDateTime: any,
-  mod: DateTimeBag,
+  mod: DateTimeBag, // TODO: allow offset. correct base type tho?
   options: ZonedFieldOptions | undefined,
 ): DayTimeNano {
   const fields = mergeCalendarFields(

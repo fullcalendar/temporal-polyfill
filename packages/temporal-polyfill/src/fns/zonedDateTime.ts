@@ -9,6 +9,12 @@ import { NumSign } from '../internal/utils'
 import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createSimpleTimeZoneRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
+import { formatOffsetNano } from '../internal/isoFormat'
+import { queryCalendarImpl } from '../internal/calendarImpl'
+import { IsoDateTimeFields } from '../internal/isoFields'
+
+// public
+import { zonedInternalsToIso } from '../public/zonedInternalsToIso'
 
 export function create(
   epochNano: bigint,
@@ -42,11 +48,43 @@ export function fromFields(
   )
 }
 
-// TODO: getFields !!!
+export function getISOFields(
+  zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
+): IsoDateTimeFields & { calendar: string, timeZone: string, offset: string } {
+  return ZonedDateTimeFuncs.getISOFields(zonedDateTimeSlots) // just forwards
+}
+
+export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { offset: string }
+
+export function getFields(
+  zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
+): ZonedDateTimeFields {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots) // TODO!!!
+  const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
+
+  const calendarImpl = queryCalendarImpl(zonedDateTimeSlots.calendar)
+  const [year, month, day] = calendarImpl.queryYearMonthDay(isoFields)
+
+  return {
+    era: calendarImpl.era(isoFields), // inefficient: requeries y/m/d
+    eraYear: calendarImpl.eraYear(isoFields), // inefficient: requeries y/m/d
+    year,
+    month,
+    monthCode: calendarImpl.monthCode(isoFields), // inefficient: requeries y/m/d
+    day,
+    // TODO: util for time...
+    hour: isoFields.isoHour,
+    minute: isoFields.isoMinute,
+    second: isoFields.isoSecond,
+    millisecond: isoFields.isoMillisecond,
+    microsecond: isoFields.isoMicrosecond,
+    nanosecond: isoFields.isoNanosecond,
+    offset: offsetString,
+  }
+}
 
 export function withFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-  initialFields: DateTimeFields & Partial<EraYearFields>,
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<string, string> {
@@ -54,7 +92,7 @@ export function withFields(
     getDateModCalendarRecordIMPL,
     createTypicalTimeZoneRecordIMPL,
     zonedDateTimeSlots,
-    initialFields,
+    getFields(zonedDateTimeSlots),
     modFields,
     options,
   )

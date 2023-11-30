@@ -14,12 +14,13 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { ZonedDateTimeBag } from '../internal/genericBag'
 import { getId } from '../internal/idLike'
+import { IsoDateTimeFields } from '../internal/isoFields'
 import { CalendarBranding, TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateTimeInternals, IsoDateTimeSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
@@ -252,19 +253,10 @@ export class ZonedDateTime {
     )
   }
 
-  // not DRY
-  getISOFields(): IsoDateTimeSlots & { timeZone: TimeZoneSlot, offset: string } {
-    const slots = getZonedDateTimeSlots(this)
-    return {
-      ...pluckIsoDateTimeInternals(zonedInternalsToIso(slots)),
-      // alphabetical
-      calendar: slots.calendar,
-      offset: formatOffsetNano(
-        // TODO: more DRY
-        zonedInternalsToIso(slots).offsetNanoseconds,
-      ),
-      timeZone: slots.timeZone,
-    }
+  getISOFields(): IsoDateTimeFields & { calendar: CalendarSlot, timeZone: TimeZoneSlot, offset: string } {
+    return ZonedDateTimeFuncs.getISOFields(
+      getZonedDateTimeSlots(this)
+    )
   }
 
   // not DRY
