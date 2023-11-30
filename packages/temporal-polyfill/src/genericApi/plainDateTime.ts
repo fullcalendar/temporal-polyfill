@@ -49,13 +49,13 @@ export function fromString(s: string): PlainDateTimeSlots<string> {
   }
 }
 
-export function fromFields<CA, C>(
+export function fromFields<C>(
   getCalendarRecord: (calendarSlot: C) => {
     dateFromFields: CalendarDateFromFieldsFunc,
     fields: CalendarFieldsFunc,
   },
   calendarSlot: C,
-  fields: DateBag & { calendar?: CA },
+  fields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<C> {
   const calendarRecord = getCalendarRecord(calendarSlot)
@@ -190,13 +190,10 @@ export function since<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
   options?: DiffOptions,
-): DurationSlots {
-  return {
-    branding: DurationBranding,
-    ...negateDurationInternals(
-      until(getCalendarRecord, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
-    )
-  }
+): DurationFieldsWithSign {
+  return negateDurationInternals(
+    until(getCalendarRecord, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
+  )
 }
 
 export function round<C>(

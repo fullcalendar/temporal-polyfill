@@ -47,6 +47,14 @@ export function createTypicalTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
   })
 }
 
+export function createSimpleTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
+  return createTimeZoneSlotRecord(timeZoneSlot, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+  })
+}
+
 export function createYearMonthNewCalendarRecord(calendarSlot: CalendarSlot) {
   return createCalendarSlotRecord(calendarSlot, {
     yearMonthFromFields: calendarImplYearMonthFromFields,

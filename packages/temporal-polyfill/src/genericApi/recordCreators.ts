@@ -29,6 +29,12 @@ export function createTypicalTimeZoneRecordIMPL(timeZoneSlot: string) {
   })
 }
 
+export function createSimpleTimeZoneRecordIMPL(timeZoneSlot: string) {
+  return createTimeZoneImplRecord(timeZoneSlot, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+  })
+}
+
 export function createYearMonthNewCalendarRecordIMPL(calendarId: string) {
   return createCalendarImplRecord(calendarId, {
     yearMonthFromFields: calendarImplYearMonthFromFields,

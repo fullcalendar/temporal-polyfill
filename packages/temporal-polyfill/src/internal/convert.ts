@@ -116,18 +116,21 @@ export function refineMaybeZonedDateTimeBag<T>(
 // ZonedDateTime
 // -------------------------------------------------------------------------------------------------
 
-export function refineZonedDateTimeBag<T>(
-  calendarRecord: {
+export function refineZonedDateTimeBag<C, TA, T>(
+  getCalendarRecord: (calendarSlot: C) => {
     dateFromFields: CalendarDateFromFieldsFunc,
     fields: CalendarFieldsFunc,
   },
-  refineTimeZoneArg: (timeZoneArg: T) => { // does refining AND record-creation. WEIRD
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
-  bag: ZonedDateTimeBag<unknown, T>,
+  calendarSlot: C,
+  bag: ZonedDateTimeBag<unknown, TA>,
   options: ZonedFieldOptions | undefined,
-): DayTimeNano {
+): [DayTimeNano, T] {
+  const calendarRecord = getCalendarRecord(calendarSlot)
   const fields = refineCalendarFields(
     calendarRecord,
     bag,
@@ -135,12 +138,11 @@ export function refineZonedDateTimeBag<T>(
     ['timeZone'], // requireFields
     // forcedValidFieldNames (TODO: more compressed)
     ['hour', 'microsecond', 'millisecond', 'minute', 'nanosecond', 'offset', 'second', 'timeZone'],
-  ) as ZonedDateTimeBag<unknown, T>
+  ) as ZonedDateTimeBag<unknown, TA>
 
   // must happen before Calendar::dateFromFields and parsing `options`
-  const timeZoneRecord = refineTimeZoneArg(
-    fields.timeZone! // guaranteed via refineCalendarFields
-  )
+  const timeZoneSlot = refineTimeZoneArg(fields.timeZone!) // guaranteed via refineCalendarFields
+  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
   const isoDateFields = calendarRecord.dateFromFields(fields as any, options)
@@ -156,7 +158,7 @@ export function refineZonedDateTimeBag<T>(
     false, // fuzzy
   )
 
-  return epochNanoseconds
+  return [epochNanoseconds, timeZoneSlot]
 }
 
 export function mergeZonedDateTimeBag(

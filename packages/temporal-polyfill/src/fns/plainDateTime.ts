@@ -12,8 +12,6 @@ import { DateTimeFormatSlots } from './dateTimeFormat'
 
 // TODO: do Readonly<> everywhere?
 
-// TODO: try Github copilot!!!
-
 export function create(
   isoYear: number,
   isoMonth: number,
@@ -140,7 +138,8 @@ export function since(
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateTimeFuncs.since(getDiffCalendarRecordIMPL, plainDateTimeSlots0, plainDateTimeSlots1, options)
+  return PlainDateTimeFuncs.since(getDiffCalendarRecordIMPL, plainDateTimeSlots0, plainDateTimeSlots1, options) as
+    unknown as DurationSlots // !!!
 }
 
 export function round(

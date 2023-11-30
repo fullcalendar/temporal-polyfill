@@ -246,12 +246,17 @@ export function diffTimes(
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
-export function diffZonedEpochNano(
-  calendarRecord: { dateAdd: CalendarDateAddFunc, dateUntil: CalendarDateUntilFunc },
-  getTimeZoneRecord: () => {
+export function diffZonedEpochNano<C, T>(
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
+  calendarSlot: C,
+  timeZoneSlot: T,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -272,7 +277,8 @@ export function diffZonedEpochNano(
     )
   }
 
-  const timeZoneRecord = getTimeZoneRecord()
+  const calendarRecord = getCalendarRecord(calendarSlot)
+  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {

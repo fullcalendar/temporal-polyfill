@@ -33,7 +33,9 @@ import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc
 // -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
-  calendarRecord: { dateAdd: CalendarDateAddFunc },
+  calendarRecord: {
+    dateAdd: CalendarDateAddFunc
+  },
   timeZoneRecord: {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,

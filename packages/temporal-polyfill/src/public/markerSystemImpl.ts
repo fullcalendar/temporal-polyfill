@@ -17,6 +17,7 @@ import { MarkerSystem, MarkerToEpochNano, MoveMarker, DiffMarkers } from '../int
 import { IsoDateSlots, ZonedEpochSlots } from './slots'
 import { calendarProtocolDateAdd, calendarProtocolDateUntil, createCalendarSlotRecord } from './calendarRecordComplex'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
+import { createTypicalTimeZoneRecord, getDiffCalendarRecord } from './recordCreators'
 
 /*
 Okay that callers frequently cast to `unknown`?
@@ -51,7 +52,12 @@ export function createMarkerSystem(
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       moveZonedEpochNano.bind(undefined, calendarRecord, getTimeZoneRecord()) as MoveMarker<DayTimeNano>,
-      diffZonedEpochNano.bind(undefined, calendarRecord, getTimeZoneRecord) as DiffMarkers<DayTimeNano>,
+      diffZonedEpochNano.bind(undefined,
+        getDiffCalendarRecord as any, // !!! 'unknown' problems
+        createTypicalTimeZoneRecord as any, // !!! 'unknown' problems
+        calendar,
+        timeZone,
+      ) as DiffMarkers<DayTimeNano>,
     ]
   } else {
     return [
