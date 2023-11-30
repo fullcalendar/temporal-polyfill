@@ -1,6 +1,6 @@
-import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from '../internal/calendarRecordSimple'
+import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from '../internal/calendarRecordSimple'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
-import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
+import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
 import { CalendarSlot } from './calendarSlot'
 import { TimeZoneSlot } from './timeZoneSlot'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
@@ -62,6 +62,42 @@ export function createYearMonthNewCalendarRecord(calendarSlot: CalendarSlot) {
   }, {
     yearMonthFromFields: calendarProtocolYearMonthFromFields,
     fields: calendarProtocolFields,
+  })
+}
+
+export function createYearMonthModCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    yearMonthFromFields: calendarImplYearMonthFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  }, {
+    yearMonthFromFields: calendarProtocolYearMonthFromFields,
+    fields: calendarProtocolFields,
+    mergeFields: calendarProtocolMergeFields,
+  })
+}
+
+export function createYearMonthMoveCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarImplDateAdd,
+    daysInMonth: calendarImplDaysInMonth,
+    day: calendarImplDay,
+  }, {
+    dateAdd: calendarProtocolDateAdd,
+    daysInMonth: calendarProtocolDaysInMonth,
+    day: calendarProtocolDay,
+  })
+}
+
+export function createYearMonthDiffCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+    day: calendarImplDay,
+  }, {
+    dateAdd: calendarProtocolDateAdd,
+    dateUntil: calendarProtocolDateUntil,
+    day: calendarProtocolDay,
   })
 }
 

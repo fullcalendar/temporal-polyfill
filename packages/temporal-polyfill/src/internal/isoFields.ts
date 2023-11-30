@@ -123,6 +123,7 @@ export function constrainIsoDateTimeLike<P extends IsoDateTimeFields>(isoDateTim
   }
 }
 
+// TODO: remove `extends`
 export function constrainIsoDateLike<P extends IsoDateFields>(isoInternals: P): P {
   if (!isIsoDateFieldsValid(isoInternals)) {
     // TODO: more DRY error

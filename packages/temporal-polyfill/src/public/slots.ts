@@ -1,6 +1,5 @@
 import { toInteger } from '../internal/cast'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoDateLike, constrainIsoDateTimeLike, isoDateFieldRefiners, isoTimeFieldRefiners } from '../internal/isoFields'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from '../internal/isoMath'
 import { BoundArg, mapPropsWithRefiners, pluckProps } from '../internal/utils'

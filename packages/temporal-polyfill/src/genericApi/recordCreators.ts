@@ -1,4 +1,4 @@
-import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
+import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
 import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
 
 export function getDateModCalendarRecordIMPL(calendarId: string) {
@@ -39,6 +39,30 @@ export function createYearMonthNewCalendarRecordIMPL(calendarId: string) {
   return createCalendarImplRecord(calendarId, {
     yearMonthFromFields: calendarImplYearMonthFromFields,
     fields: calendarImplFields,
+  })
+}
+
+export function createYearMonthModCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    yearMonthFromFields: calendarImplYearMonthFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+export function createYearMonthMoveCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateAdd: calendarImplDateAdd,
+    daysInMonth: calendarImplDaysInMonth,
+    day: calendarImplDay,
+  })
+}
+
+export function createYearMonthDiffCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+    day: calendarImplDay,
   })
 }
 
