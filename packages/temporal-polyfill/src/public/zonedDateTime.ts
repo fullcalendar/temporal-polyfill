@@ -20,7 +20,7 @@ import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
@@ -64,8 +64,8 @@ export class ZonedDateTime {
         createTypicalTimeZoneRecord,
         getZonedDateTimeSlots(this),
         this as any, // TODO: needs getters
-        mod,
-        options,
+        rejectInvalidBag(mod),
+        prepareOptions(options),
       ),
     )
   }

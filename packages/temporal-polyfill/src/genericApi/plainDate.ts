@@ -19,9 +19,6 @@ import { NumSign } from '../internal/utils'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots } from './genericTypes'
 
-// public
-import { rejectInvalidBag } from '../public/slots'
-
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
   isoYear: number,
@@ -76,7 +73,7 @@ export function withFields<C>(
   const calendarRecord = getCalendarRecord(calendarSlot)
 
   return {
-    ...mergePlainDateBag(calendarRecord, initialFields, rejectInvalidBag(modFields), options),
+    ...mergePlainDateBag(calendarRecord, initialFields, modFields, options),
     calendar: calendarSlot,
     branding: PlainDateBranding,
   }

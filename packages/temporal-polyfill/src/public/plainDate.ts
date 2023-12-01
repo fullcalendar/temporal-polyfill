@@ -22,7 +22,7 @@ import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, pluckIsoDateInternals, setSlots } from './slots'
+import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, pluckIsoDateInternals, rejectInvalidBag, setSlots } from './slots'
 import { getDateModCalendarRecord, getMoveCalendarRecord, getDiffCalendarRecord, createTypicalTimeZoneRecord, createYearMonthNewCalendarRecord, createMonthDayNewCalendarRecord, createDateNewCalendarRecord } from './recordCreators'
 
 export type PlainDateArg = PlainDate | PlainDateBag<CalendarArg> | string
@@ -47,7 +47,7 @@ export class PlainDate {
         getDateModCalendarRecord,
         getPlainDateSlots(this),
         this,
-        mod,
+        rejectInvalidBag(mod),
         prepareOptions(options),
       )
     )

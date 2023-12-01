@@ -8,7 +8,7 @@ import { PlainDateBag, PlainDateTimeBag } from '../internal/genericBag'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, IsoDateTimeSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals, IsoDateTimeSlots, rejectInvalidBag } from './slots'
 import { CalendarBranding, PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -59,8 +59,8 @@ export class PlainDateTime {
         getDateModCalendarRecord,
         getPlainDateTimeSlots(this),
         this as any, // TODO: needs getters
-        mod,
-        options,
+        rejectInvalidBag(mod),
+        prepareOptions(options),
       )
     )
   }

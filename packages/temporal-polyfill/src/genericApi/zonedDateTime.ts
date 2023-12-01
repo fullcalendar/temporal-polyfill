@@ -13,7 +13,7 @@ import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { moveZonedEpochNano } from '../internal/move'
-import { DiffOptions, EpochDisambig, OffsetDisambig, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, prepareOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
+import { DiffOptions, EpochDisambig, OffsetDisambig, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
 import { roundDateTime } from '../internal/round'
 import { computeNanosecondsInDay, getMatchingInstantFor } from '../internal/timeZoneMath'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
@@ -23,7 +23,7 @@ import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDa
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './genericTypes'
 
 // public
-import { pluckIsoDateInternals, pluckIsoDateTimeInternals, rejectInvalidBag } from '../public/slots'
+import { pluckIsoDateInternals, pluckIsoDateTimeInternals } from '../public/slots'
 import { zonedInternalsToIso } from '../public/zonedInternalsToIso'
 
 export function create<CA, C, TA, T>(
@@ -119,8 +119,8 @@ export function withFields<C, T>(
       getCalendarRecord(calendar),
       getTimeZoneRecord(timeZone),
       initialFields,
-      rejectInvalidBag(modFields),
-      prepareOptions(options),
+      modFields,
+      options,
     ),
     branding: ZonedDateTimeBranding,
   }

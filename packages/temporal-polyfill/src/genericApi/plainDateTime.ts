@@ -11,7 +11,7 @@ import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { compareIsoDateTimeFields } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
 import { moveDateTime } from '../internal/move'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingMode, RoundingOptions, prepareOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
+import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingMode, RoundingOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
 import { roundDateTime } from '../internal/round'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeUnit, Unit, UnitName } from '../internal/units'
@@ -20,7 +20,7 @@ import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthD
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './genericTypes'
 
 // public
-import { pluckIsoDateInternals, rejectInvalidBag } from '../public/slots'
+import { pluckIsoDateInternals } from '../public/slots'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -85,8 +85,8 @@ export function withFields<C>(
     ...mergePlainDateTimeBag(
       calendarRecord,
       initialFields,
-      rejectInvalidBag(modFields),
-      prepareOptions(options),
+      modFields,
+      options,
     ),
     calendar: calendarSlot,
     branding: PlainDateTimeBranding,

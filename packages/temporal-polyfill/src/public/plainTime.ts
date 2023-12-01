@@ -48,7 +48,8 @@ export class PlainTime {
   with(mod: TimeBag, options?: OverflowOptions): PlainTime {
     getPlainTimeSlots(this) // validate this
     return createPlainTime(
-      PlainTimeFuncs.withFields(this as any, rejectInvalidBag(mod), options) // !!!
+      // it's crazy we don't do prepareOptions
+      PlainTimeFuncs.withFields(this as any, rejectInvalidBag(mod), options) // any!!!
     )
   }
 

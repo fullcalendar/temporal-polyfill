@@ -69,7 +69,7 @@ export function withFields(
   options?: OverflowOptions,
 ): PlainTimeSlots {
   return {
-    ...mergePlainTimeBag(initialFields, mod, options), // it's crazy we don't do prepareOptions
+    ...mergePlainTimeBag(initialFields, mod, options),
     branding: PlainTimeBranding,
   }
 }
