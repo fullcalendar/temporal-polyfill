@@ -6,6 +6,7 @@ import { DateTimeDisplayOptions, OverflowOptions } from '../internal/options'
 import { PlainDateSlots, PlainMonthDaySlots } from '../genericApi/genericTypes'
 import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
+import { DateTimeFormatSlots } from './dateTimeFormat'
 
 export function create(
   isoMonth: number,
@@ -97,4 +98,19 @@ export function toPlainDate(
     getFields(plainMonthDaySlots),
     bag,
   )
+}
+
+// DateTimeFormat
+// --------------
+
+export function format(format: DateTimeFormatSlots, slots: PlainMonthDaySlots<string>): string {
+  return '' // TODO
+}
+
+export function formatRange(
+  format: DateTimeFormatSlots,
+  slots0: PlainMonthDaySlots<string>,
+  slots1: PlainMonthDaySlots<string>
+): string {
+  return '' // TODO
 }

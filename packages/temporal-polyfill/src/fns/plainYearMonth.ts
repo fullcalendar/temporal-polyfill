@@ -6,6 +6,7 @@ import { NumSign } from '../internal/utils'
 import { createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, createYearMonthDiffCalendarRecordIMPL, createYearMonthModCalendarRecordIMPL, createYearMonthMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from '../genericApi/genericTypes'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
+import { DateTimeFormatSlots } from './dateTimeFormat'
 
 export function create(
   isoYear: number,
@@ -150,4 +151,19 @@ export function toPlainDate<C>(
     plainYearMonthFields,
     bag,
   )
+}
+
+// DateTimeFormat
+// --------------
+
+export function format(format: DateTimeFormatSlots, slots: PlainYearMonthSlots<string>): string {
+  return '' // TODO
+}
+
+export function formatRange(
+  format: DateTimeFormatSlots,
+  slots0: PlainYearMonthSlots<string>,
+  slots1: PlainYearMonthSlots<string>
+): string {
+  return '' // TODO
 }

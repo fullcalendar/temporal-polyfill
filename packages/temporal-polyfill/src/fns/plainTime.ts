@@ -3,6 +3,7 @@ import { OverflowOptions } from '../internal/options'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/genericTypes'
 import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
+import { DateTimeFormatSlots } from './dateTimeFormat'
 
 export const create = PlainTimeFuncs.create
 
@@ -67,4 +68,19 @@ export function toPlainDateTime(
   plainDateSlots: PlainDateSlots<string>,
 ): PlainDateTimeSlots<string> {
   return PlainTimeFuncs.toPlainDateTime(plainTimeSlots, plainDateSlots) // just pass through
+}
+
+// DateTimeFormat
+// --------------
+
+export function format(format: DateTimeFormatSlots, slots: PlainTimeSlots): string {
+  return '' // TODO
+}
+
+export function formatRange(
+  format: DateTimeFormatSlots,
+  slots0: PlainTimeSlots,
+  slots1: PlainTimeSlots
+): string {
+  return '' // TODO
 }
