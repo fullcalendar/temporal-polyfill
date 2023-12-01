@@ -10,7 +10,7 @@ import {
   updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
 } from './durationFields'
-import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, pluckIsoTimeFields } from './isoFields'
+import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './isoFields'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
@@ -25,7 +25,7 @@ import {
 import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
-import { clampEntity, divTrunc, modTrunc } from './utils'
+import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 import { isoCalendarId } from './calendarConfig'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 
@@ -61,7 +61,7 @@ export function moveZonedEpochNano(
     )
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
-      ...pluckIsoTimeFields(isoDateTimeFields), // time parts
+      ...pluckProps(isoTimeFieldNamesDesc, isoDateTimeFields), // time parts
       calendar: isoCalendarId, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(

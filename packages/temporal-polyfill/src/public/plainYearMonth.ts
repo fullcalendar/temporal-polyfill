@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, yearMonthGetterNames } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
+import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
 import { LocalesArg, formatYearMonthLocaleString } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
@@ -127,9 +127,9 @@ export class PlainYearMonth {
   // not DRY
   getISOFields(): IsoDateSlots {
     const slots = getPlainYearMonthSlots(this)
-    return { // must be alphabetical
+    return { // alphabetical
       calendar: slots.calendar,
-      ...pluckProps<IsoDateFields>(isoDateFieldNames, slots),
+      ...pluckProps<IsoDateFields>(isoDateFieldNamesAlpha, slots),
     }
   }
 

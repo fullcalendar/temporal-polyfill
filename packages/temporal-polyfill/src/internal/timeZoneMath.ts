@@ -6,6 +6,27 @@ import { roundToMinute } from './round'
 import { nanoInUtcDay } from './units'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 import { ensureNumber } from './cast'
+import { createLazyGenerator } from './utils'
+
+export const zonedInternalsToIso = createLazyGenerator(_zonedInternalsToIso)
+
+/*
+TODO: ensure returning in desc order, so we don't need to pluck
+BUT WAIT: returns offsetNanoseconds, which might be undesirable. Use returned tuple?
+*/
+function _zonedInternalsToIso(
+  internals: { epochNanoseconds: DayTimeNano }, // goes first because key
+  timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
+): IsoDateTimeFields & { offsetNanoseconds: number } {
+  const { epochNanoseconds } = internals
+  const offsetNanoseconds = timeZoneRecord.getOffsetNanosecondsFor(epochNanoseconds)
+  const isoDateTimeFields = epochNanoToIso(epochNanoseconds, offsetNanoseconds)
+
+  return {
+    ...isoDateTimeFields,
+    offsetNanoseconds,
+  }
+}
 
 export function computeNanosecondsInDay(
   timeZoneRecord: {

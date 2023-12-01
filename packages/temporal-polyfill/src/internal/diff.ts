@@ -10,7 +10,7 @@ import {
   negateDurationInternals,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoTimeFields, pluckIsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './isoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
@@ -30,7 +30,7 @@ import {
   milliInDay,
   nanoInUtcDay,
 } from './units'
-import { NumSign, divModTrunc, identityFunc } from './utils'
+import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 
 // High-Level
@@ -286,7 +286,7 @@ export function diffZonedEpochNano<C, T>(
   }
 
   const startIsoFields = zonedEpochNanoToIso(timeZoneRecord, startEpochNano)
-  const startIsoTimeFields = pluckIsoTimeFields(startIsoFields)
+  const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZoneRecord, endEpochNano)
   const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneRecord) // necessary to bind?
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }

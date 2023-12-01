@@ -3,7 +3,7 @@ import { MonthDayBag, YearFields, monthDayGetterNames } from '../internal/calend
 import { LocalesArg, formatMonthDayLocaleString } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { IsoDateFields, isoDateFieldNames } from '../internal/isoFields'
+import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
 import { PlainMonthDayBag } from '../internal/genericBag'
 import { CalendarBranding, PlainMonthDayBranding } from '../genericApi/branding'
 import { PlainMonthDaySlots } from '../genericApi/genericTypes'
@@ -78,7 +78,7 @@ export class PlainMonthDay {
     const slots = getPlainMonthDaySlots(this)
     return { // alphabetical
       calendar: slots.calendar,
-      ...pluckProps<IsoDateFields>(isoDateFieldNames, slots),
+      ...pluckProps<IsoDateFields>(isoDateFieldNamesAlpha, slots),
     }
   }
 

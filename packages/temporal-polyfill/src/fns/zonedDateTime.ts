@@ -11,10 +11,8 @@ import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, c
 import { formatOffsetNano } from '../internal/isoFormat'
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { IsoDateTimeFields } from '../internal/isoFields'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
-
-// public
-import { zonedInternalsToIso } from '../public/zonedInternalsToIso'
 
 export function create(
   epochNano: bigint,
@@ -51,7 +49,7 @@ export function fromFields(
 export function getISOFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): IsoDateTimeFields & { calendar: string, timeZone: string, offset: string } {
-  return ZonedDateTimeFuncs.getISOFields(zonedDateTimeSlots) // just forwards
+  return ZonedDateTimeFuncs.getISOFields(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots)
 }
 
 export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { offset: string }
@@ -59,7 +57,7 @@ export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { of
 export function getFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): ZonedDateTimeFields {
-  const isoFields = zonedInternalsToIso(zonedDateTimeSlots) // TODO!!!
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, createSimpleTimeZoneRecordIMPL(zonedDateTimeSlots.timeZone))
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   const calendarImpl = queryCalendarImpl(zonedDateTimeSlots.calendar)
@@ -254,19 +252,19 @@ export function toJSON(
 export function toPlainDate(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): PlainDateSlots<string> {
-  return ZonedDateTimeFuncs.toPlainDate(zonedDateTimeSlots0) // just forwards
+  return ZonedDateTimeFuncs.toPlainDate(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots0)
 }
 
 export function toPlainTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): PlainTimeSlots {
-  return ZonedDateTimeFuncs.toPlainTime(zonedDateTimeSlots0) // just forwards
+  return ZonedDateTimeFuncs.toPlainTime(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots0)
 }
 
 export function toPlainDateTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): PlainDateTimeSlots<string> {
-  return ZonedDateTimeFuncs.toPlainDateTime(zonedDateTimeSlots0) // just forwards
+  return ZonedDateTimeFuncs.toPlainDateTime(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots0)
 }
 
 export function toPlainYearMonth(

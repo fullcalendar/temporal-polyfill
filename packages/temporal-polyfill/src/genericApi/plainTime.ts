@@ -4,7 +4,7 @@ import { mergePlainTimeBag, refinePlainTimeBag } from '../internal/convert'
 import { diffPlainTimes } from '../internal/diff'
 import { negateDurationInternals } from '../internal/durationFields'
 import { PlainTimeBag } from '../internal/genericBag'
-import { IsoTimeFields, constrainIsoTimeFields, pluckIsoTimeFields } from '../internal/isoFields'
+import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/isoMath'
 import { parsePlainTime } from '../internal/isoParse'
@@ -14,7 +14,7 @@ import { roundPlainTime } from '../internal/round'
 import { getSingleInstantFor } from '../internal/timeZoneMath'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { UnitName } from '../internal/units'
-import { NumSign } from '../internal/utils'
+import { NumSign, pluckProps } from '../internal/utils'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from './genericTypes'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from './branding'
 
@@ -60,7 +60,7 @@ export function fromString(s: string): PlainTimeSlots {
 }
 
 export function getISOFields(slots: PlainTimeSlots): IsoTimeFields {
-  return pluckIsoTimeFields(slots) // just forwards
+  return pluckProps(isoTimeFieldNamesAlpha, slots)
 }
 
 export function withFields(

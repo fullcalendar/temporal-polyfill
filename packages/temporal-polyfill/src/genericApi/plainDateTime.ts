@@ -6,7 +6,7 @@ import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYear
 import { diffDateTimes } from '../internal/diff'
 import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IdLike, getCommonCalendarSlot, getPreferredCalendarSlot, isIdLikeEqual } from '../internal/idLike'
-import { IsoDateTimeFields, pluckIsoTimeFields, refineIsoDateTimeArgs } from '../internal/isoFields'
+import { IsoDateTimeFields, isoDateFieldNamesDesc, isoTimeFieldNamesDesc, refineIsoDateTimeArgs } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { compareIsoDateTimeFields } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
@@ -15,12 +15,9 @@ import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOpti
 import { roundDateTime } from '../internal/round'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeUnit, Unit, UnitName } from '../internal/units'
-import { NumSign } from '../internal/utils'
+import { NumSign, pluckProps } from '../internal/utils'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './genericTypes'
-
-// public
-import { pluckIsoDateInternals } from '../public/slots'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -263,7 +260,7 @@ export function toPlainDate<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
 ): PlainDateSlots<C> {
   return {
-    ...pluckIsoDateInternals(plainDateTimeSlots as any) as any, // TODO!!!
+    ...pluckProps(isoDateFieldNamesDesc, plainDateTimeSlots),
     branding: PlainDateBranding,
   }
 }
@@ -306,7 +303,7 @@ export function toPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
 ): PlainTimeSlots {
   return {
-    ...pluckIsoTimeFields(plainDateTimeSlots),
+    ...pluckProps(isoTimeFieldNamesDesc, plainDateTimeSlots),
     branding: PlainTimeBranding,
   }
 }

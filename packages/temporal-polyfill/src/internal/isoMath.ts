@@ -4,9 +4,7 @@ import {
   IsoDateTimeFields,
   IsoDateFields,
   IsoTimeFields,
-  IsoTuple,
   isoTimeFieldNamesAsc,
-  pluckIsoTuple,
   isoTimeFieldDefaults,
 } from './isoFields'
 import {
@@ -259,7 +257,15 @@ If out-of-bounds, returns undefined
 export function isoToEpochMilli(
   isoDateTimeFields: IsoDateTimeFields | IsoDateFields,
 ): number | undefined {
-  return isoArgsToEpochMilli(...pluckIsoTuple(isoDateTimeFields))
+  return isoArgsToEpochMilli(
+    isoDateTimeFields.isoYear,
+    isoDateTimeFields.isoMonth,
+    isoDateTimeFields.isoDay,
+    (isoDateTimeFields as IsoDateTimeFields).isoHour,
+    (isoDateTimeFields as IsoDateTimeFields).isoMinute,
+    (isoDateTimeFields as IsoDateTimeFields).isoSecond,
+    (isoDateTimeFields as IsoDateTimeFields).isoMillisecond,
+  )
 }
 
 /*
@@ -299,6 +305,16 @@ export function isoToEpochNanoWithOffset(isoFields: IsoDateTimeFields, offsetNan
 }
 
 // ISO Arguments -> Epoch
+
+export type IsoTuple = [
+  isoYear: number,
+  isoMonth?: number,
+  isoDay?: number,
+  isoHour?: number,
+  isoMinute?: number,
+  isoSecond?: number,
+  isoMilli?: number,
+]
 
 /*
 Assumes in-bounds

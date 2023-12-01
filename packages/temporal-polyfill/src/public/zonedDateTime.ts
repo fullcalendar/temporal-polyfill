@@ -15,6 +15,7 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } fr
 import { ZonedDateTimeBag } from '../internal/genericBag'
 import { getId } from '../internal/idLike'
 import { IsoDateTimeFields } from '../internal/isoFields'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { CalendarBranding, TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
@@ -23,7 +24,6 @@ import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { Instant, createInstant } from './instant'
@@ -217,19 +217,19 @@ export class ZonedDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate(
-      ZonedDateTimeFuncs.toPlainDate(getZonedDateTimeSlots(this))
+      ZonedDateTimeFuncs.toPlainDate(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
     )
   }
 
   toPlainTime(): PlainTime {
     return createPlainTime(
-      ZonedDateTimeFuncs.toPlainTime(getZonedDateTimeSlots(this))
+      ZonedDateTimeFuncs.toPlainTime(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
     )
   }
 
   toPlainDateTime(): PlainDateTime {
     return createPlainDateTime(
-      ZonedDateTimeFuncs.toPlainDateTime(getZonedDateTimeSlots(this))
+      ZonedDateTimeFuncs.toPlainDateTime(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
     )
   }
 
@@ -254,9 +254,7 @@ export class ZonedDateTime {
   }
 
   getISOFields(): IsoDateTimeFields & { calendar: CalendarSlot, timeZone: TimeZoneSlot, offset: string } {
-    return ZonedDateTimeFuncs.getISOFields(
-      getZonedDateTimeSlots(this)
-    )
+    return ZonedDateTimeFuncs.getISOFields(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
   }
 
   // not DRY
@@ -284,13 +282,19 @@ export class ZonedDateTime {
 
   // TODO: more DRY
   get offsetNanoseconds(): number {
-    return zonedInternalsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds
+    const slots = getZonedDateTimeSlots(this)
+    const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
+
+    return zonedInternalsToIso(slots, timeZoneRecord).offsetNanoseconds
   }
 
   // TODO: more DRY
   get offset(): string {
+    const slots = getZonedDateTimeSlots(this)
+    const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
+
     return formatOffsetNano(
-      zonedInternalsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds,
+      zonedInternalsToIso(slots, timeZoneRecord).offsetNanoseconds,
     )
   }
 

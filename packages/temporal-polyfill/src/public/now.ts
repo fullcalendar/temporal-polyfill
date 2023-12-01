@@ -1,16 +1,15 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { OrigDateTimeFormat } from '../internal/intlFormat'
-import { pluckIsoTimeFields } from '../internal/isoFields'
-import { createPropDescriptors, createTemporalNameDescriptors } from '../internal/utils'
+import { createPropDescriptors, createTemporalNameDescriptors, pluckProps } from '../internal/utils'
 import { epochMilliToNano } from '../internal/isoMath'
 import { DayTimeNano } from '../internal/dayTimeNano'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 
 // public
-import { IsoDateTimeSlots, ZonedEpochSlots, pluckIsoDateInternals, pluckIsoDateTimeInternals } from './slots'
-import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
-import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { CalendarArg } from './calendar'
 import { Instant, createInstant } from './instant'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -18,6 +17,8 @@ import { PlainTime, createPlainTime } from './plainTime'
 import { TimeZoneArg } from './timeZone'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
+import { createSimpleTimeZoneRecord } from './recordCreators'
+import { isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/isoFields'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -65,14 +66,14 @@ function getCurrentPlainDate(
   timeZoneArg: TimeZoneArg,
 ): PlainDate {
   return createPlainDate({
-    ...pluckIsoDateInternals(getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg)),
+    ...pluckProps(isoDateFieldNamesDesc, getCurrentPlainDateTimeSlots(calendarArg, timeZoneArg)),
     branding: PlainDateBranding,
   })
 }
 
 function getCurrentPlainTime(timeZoneArg: TimeZoneArg): PlainTime {
   return createPlainTime({
-    ...pluckIsoTimeFields(getCurrentPlainDateTimeSlots(isoCalendarId, timeZoneArg)),
+    ...pluckProps(isoTimeFieldNamesDesc, getCurrentPlainDateTimeSlots(isoCalendarId, timeZoneArg)),
     branding: PlainTimeBranding,
   })
 }
@@ -88,9 +89,16 @@ function getCurrentPlainDateTimeSlots(
   calendarArg: CalendarArg,
   timeZoneArg: TimeZoneArg,
 ): IsoDateTimeSlots {
-  return pluckIsoDateTimeInternals(
-    zonedInternalsToIso(getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)),
-  )
+  const zonedSlots = getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)
+  const timeZoneRecord = createSimpleTimeZoneRecord(zonedSlots.timeZone)
+
+  return {
+    ...pluckProps(
+      isoDateTimeFieldNamesDesc,
+      zonedInternalsToIso(zonedSlots, timeZoneRecord),
+    ),
+    calendar: zonedSlots.calendar,
+  }
 }
 
 function getCurrentZonedDateTimeSlots(

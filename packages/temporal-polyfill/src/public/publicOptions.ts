@@ -1,18 +1,18 @@
 import { parseZonedOrPlainDateTime } from '../internal/isoParse'
 import { ensureString } from '../internal/cast'
-import { isObjectlike } from '../internal/utils'
+import { isObjectlike, pluckProps } from '../internal/utils'
 import { calendarImplDateFromFields, calendarImplFields } from '../internal/calendarRecordSimple'
 import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../internal/timeZoneRecordSimple'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { IsoDateTimeFields } from '../internal/isoFields'
+import { IsoDateTimeFields, isoDateFieldNamesDesc } from '../internal/isoFields'
 import { refineMaybeZonedDateTimeBag } from '../internal/convert'
 import { ZonedDateTimeBag } from '../internal/genericBag'
 import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 
 // public
-import { IsoDateSlots, ZonedEpochSlots, getSlots, pluckIsoDateInternals } from './slots'
-import type { PlainDate } from './plainDate'
-import type { ZonedDateTime } from './zonedDateTime'
+import { IsoDateSlots, ZonedEpochSlots, getSlots } from './slots'
+import { PlainDate } from './plainDate'
+import { ZonedDateTime } from './zonedDateTime'
 import { calendarProtocolDateFromFields, calendarProtocolFields, createCalendarSlotRecord } from './calendarRecordComplex'
 import { CalendarSlot, getBagCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -30,7 +30,10 @@ export function refinePublicRelativeTo(relativeTo: ZonedDateTime | PlainDate | s
         branding === 'PlainDate') {
         return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
       } else if (branding === 'PlainDateTime') {
-        return pluckIsoDateInternals(slots as any)
+        return {
+          ...pluckProps(isoDateFieldNamesDesc, slots as any),
+          calendar: (slots as any).calendar, // !!!
+        }
       }
 
       const calendar = getBagCalendarSlot(relativeTo) // TODO: double-access of slots(.calendar)

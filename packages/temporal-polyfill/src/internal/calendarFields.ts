@@ -1,4 +1,4 @@
-import { IsoTimeFields, isoTimeFieldNames } from './isoFields'
+import { IsoTimeFields, isoTimeFieldNamesAlpha } from './isoFields'
 import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
 import { BoundArg, mapPropNamesToConstant, remapProps } from './utils'
 import { DurationFields } from './durationFields'
@@ -268,7 +268,7 @@ export const timeFieldsToIso = remapProps.bind<
   undefined, [BoundArg, BoundArg], // bound
   [TimeFields], // unbound
   IsoTimeFields // return
->(undefined, timeFieldNames, isoTimeFieldNames)
+>(undefined, timeFieldNames, isoTimeFieldNamesAlpha)
 
 // Defaults
 // -------------------------------------------------------------------------------------------------

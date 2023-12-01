@@ -8,23 +8,19 @@ import { diffZonedEpochNano } from '../internal/diff'
 import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { ZonedDateTimeBag } from '../internal/genericBag'
 import { IdLike, getCommonCalendarSlot, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/idLike'
-import { IsoDateTimeFields, isoTimeFieldDefaults, pluckIsoTimeFields } from '../internal/isoFields'
+import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from '../internal/isoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { moveZonedEpochNano } from '../internal/move'
 import { DiffOptions, EpochDisambig, OffsetDisambig, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
 import { roundDateTime } from '../internal/round'
-import { computeNanosecondsInDay, getMatchingInstantFor } from '../internal/timeZoneMath'
+import { computeNanosecondsInDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneMath'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeUnit, Unit, UnitName, nanoInHour } from '../internal/units'
-import { NumSign } from '../internal/utils'
+import { NumSign, pluckProps } from '../internal/utils'
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './genericTypes'
-
-// public
-import { pluckIsoDateInternals, pluckIsoDateTimeInternals } from '../public/slots'
-import { zonedInternalsToIso } from '../public/zonedInternalsToIso'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -80,17 +76,17 @@ export function fromFields<C, TA, T>(
 }
 
 export function getISOFields<C, T>(
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+  },
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
 ): IsoDateTimeFields & { calendar: C, timeZone: T, offset: string } {
-  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any) // TODO!!!
-  return {
-    ...pluckIsoDateTimeInternals(isoFields),
-    // alphabetical
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any, getTimeZoneRecord(zonedDateTimeSlots.timeZone))
+
+  return { // alphabetical
     calendar: zonedDateTimeSlots.calendar,
-    offset: formatOffsetNano(
-      // TODO: more DRY
-      isoFields.offsetNanoseconds,
-    ),
+    ...pluckProps(isoDateTimeFieldNamesAlpha, isoFields),
+    offset: formatOffsetNano(isoFields.offsetNanoseconds), // TODO: more DRY
     timeZone: zonedDateTimeSlots.timeZone,
   }
 }
@@ -138,7 +134,7 @@ export function withPlainTime<C, T>(
   const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
 
   const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any), // TODO!!!
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
     ...plainTimeSlots,
   }
 
@@ -172,7 +168,7 @@ export function withPlainDate<C extends IdLike, T>(
   const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
 
   const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any), // TODO!!!
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
     ...plainDateSlots,
   }
   const calendar = getPreferredCalendarSlot(zonedDateTimeSlots.calendar, plainDateSlots.calendar)
@@ -357,7 +353,7 @@ export function startOfDay<C, T>(
   const timeZoneRecord = getTimeZoneRecord(timeZone)
 
   const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any), // TODO!!!!!!!!!
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
     ...isoTimeFieldDefaults,
   }
 
@@ -390,7 +386,7 @@ export function hoursInDay<C, T>(
 
   return computeNanosecondsInDay(
     timeZoneRecord,
-    zonedInternalsToIso(zonedDateTimeSlots as any), // TODO!!!
+    zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
   ) / nanoInHour
 }
 
@@ -447,31 +443,49 @@ export function toInstant(
   }
 }
 
-export function toPlainDate<C>(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
+export function toPlainDate<C, T>(
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+  },
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateSlots<C> {
   return {
-    ...pluckIsoDateInternals(zonedInternalsToIso(zonedDateTimeSlots0 as any)), // TODO!!!
-    calendar: zonedDateTimeSlots0.calendar, // TODO!!!
+    ...pluckProps(
+      isoDateFieldNamesDesc,
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneRecord(zonedDateTimeSlots0.timeZone)),
+    ),
+    calendar: zonedDateTimeSlots0.calendar,
     branding: PlainDateBranding,
   }
 }
 
-export function toPlainTime<C>(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
+export function toPlainTime<C, T>(
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+  },
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainTimeSlots {
   return {
-    ...pluckIsoTimeFields(zonedInternalsToIso(zonedDateTimeSlots0 as any)), // TODO!!!
+    ...pluckProps(
+      isoTimeFieldNamesDesc,
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneRecord(zonedDateTimeSlots0.timeZone)),
+    ),
     branding: PlainTimeBranding,
   }
 }
 
-export function toPlainDateTime<C>(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
+export function toPlainDateTime<C, T>(
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+  },
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateTimeSlots<C> {
   return {
-    ...pluckIsoDateTimeInternals(zonedInternalsToIso(zonedDateTimeSlots0 as any)), // TODO!!!
-    calendar: zonedDateTimeSlots0.calendar, // TODO!!!
+    ...pluckProps(
+      isoDateTimeFieldNamesDesc,
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneRecord(zonedDateTimeSlots0.timeZone)),
+    ),
+    calendar: zonedDateTimeSlots0.calendar,
     branding: PlainDateTimeBranding,
   }
 }

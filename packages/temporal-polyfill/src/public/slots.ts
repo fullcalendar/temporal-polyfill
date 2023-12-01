@@ -1,12 +1,8 @@
-import { toInteger } from '../internal/cast'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoDateLike, constrainIsoDateTimeLike, isoDateFieldRefiners, isoTimeFieldRefiners } from '../internal/isoFields'
-import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from '../internal/isoMath'
-import { BoundArg, mapPropsWithRefiners, pluckProps } from '../internal/utils'
+import { IsoDateFields, IsoTimeFields } from '../internal/isoFields'
 
 // public
-import { CalendarArg } from './calendar'
-import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { CalendarSlot } from './calendarSlot'
 import { TimeZoneSlot } from './timeZoneSlot'
 
 // Types
@@ -24,6 +20,7 @@ export interface EpochSlots {
   epochNanoseconds: DayTimeNano
 }
 
+// TODO: kill
 export interface ZonedEpochSlots extends EpochSlots {
   timeZone: TimeZoneSlot
   calendar: CalendarSlot
@@ -53,92 +50,6 @@ export function getSpecificSlots(branding: string, obj: any): BrandingSlots {
   }
   return slots
 }
-
-// Refining
-// -------------------------------------------------------------------------------------------------
-
-// Ordered alphabetically
-export const isoDateInternalRefiners = {
-  calendar: refineCalendarSlot,
-  ...isoDateFieldRefiners,
-}
-
-// Unordered
-export const isoDateTimeInternalRefiners = {
-  ...isoDateInternalRefiners,
-  ...isoTimeFieldRefiners,
-}
-
-export function refineIsoDateTimeSlots(
-  rawIsoDateTimeInternals: IsoDateTimeFields & { calendar: CalendarArg }
-): IsoDateTimeSlots {
-  return checkIsoDateTimeInBounds(
-    constrainIsoDateTimeLike(
-      mapPropsWithRefiners(rawIsoDateTimeInternals, isoDateTimeInternalRefiners)
-    )
-  )
-}
-
-export function refineIsoDateSlots(
-  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg }
-): IsoDateSlots {
-  return checkIsoDateInBounds(
-    constrainIsoDateLike(
-      mapPropsWithRefiners(rawIsoDateInternals, isoDateInternalRefiners)
-    )
-  )
-}
-
-export function refineIsoYearMonthSlots(
-  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg }
-): IsoDateSlots {
-  return checkIsoYearMonthInBounds(
-    constrainIsoDateLike({
-      // do in order of PlainYearMonth constructor... WEIRD
-      // ALSO: was having weird issue with ordering of prop access with mapPropsWithRefiners
-      isoYear: toInteger(rawIsoDateInternals.isoYear),
-      isoMonth: toInteger(rawIsoDateInternals.isoMonth),
-      calendar: refineCalendarSlot(rawIsoDateInternals.calendar),
-      isoDay: toInteger(rawIsoDateInternals.isoDay),
-    })
-  )
-}
-
-export function refineIsoMonthDaySlots(
-  rawIsoDateInternals: IsoDateFields & { calendar: CalendarArg }
-): IsoDateSlots {
-  return checkIsoDateInBounds(
-    constrainIsoDateLike({
-      // do in order of PlainMonthDay constructor... WEIRD
-      // ALSO: was having weird issue with ordering of prop access with mapPropsWithRefiners
-      isoMonth: toInteger(rawIsoDateInternals.isoMonth),
-      isoDay: toInteger(rawIsoDateInternals.isoDay),
-      calendar: refineCalendarSlot(rawIsoDateInternals.calendar),
-      isoYear: toInteger(rawIsoDateInternals.isoYear),
-    })
-  )
-}
-
-// Plucking
-// -------------------------------------------------------------------------------------------------
-
-const isoDateInternalNames = Object.keys(isoDateInternalRefiners) as
-  (keyof IsoDateSlots)[]
-
-const isoDateTimeInternalNames = Object.keys(isoDateTimeInternalRefiners).sort() as
-  (keyof IsoDateTimeSlots)[]
-
-export const pluckIsoDateInternals = pluckProps.bind<
-  undefined, [BoundArg],
-  [IsoDateSlots],
-  IsoDateSlots // return
->(undefined, isoDateInternalNames) // bound
-
-export const pluckIsoDateTimeInternals = pluckProps.bind<
-  undefined, [BoundArg],
-  [IsoDateTimeSlots],
-  IsoDateTimeSlots // return
->(undefined, isoDateTimeInternalNames)
 
 // Reject
 // -------------------------------------------------------------------------------------------------

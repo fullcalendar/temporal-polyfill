@@ -1,7 +1,7 @@
 import { toInteger } from './cast'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
 import { Overflow } from './options'
-import { BoundArg, clampProp, isClamped, mapPropNamesToConstant, mapPropsWithRefiners, pluckProps, pluckPropsTuple } from './utils'
+import { clampProp, isClamped, mapPropNamesToConstant, mapPropsWithRefiners, pluckProps, pluckPropsTuple } from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -20,88 +20,45 @@ export interface IsoTimeFields {
 
 export type IsoDateTimeFields = IsoDateFields & IsoTimeFields
 
-// Refiners
-// -------------------------------------------------------------------------------------------------
-
-// Ordered by ascending size
-// ALSO happends to be alphabetical order
-export const isoDateFieldRefiners = {
-  isoDay: toInteger,
-  isoMonth: toInteger,
-  isoYear: toInteger,
-}
-
-// Ordered by ascending size
-export const isoTimeFieldRefiners = {
-  isoNanosecond: toInteger,
-  isoMicrosecond: toInteger,
-  isoMillisecond: toInteger,
-  isoSecond: toInteger,
-  isoMinute: toInteger,
-  isoHour: toInteger,
-}
-
-export const isoDateTimeFieldRefiners = {
-  ...isoDateFieldRefiners,
-  ...isoTimeFieldRefiners,
-}
-
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-export const isoDateFieldNames = Object.keys(isoDateFieldRefiners) as
-  (keyof IsoDateFields)[]
+// descending by unit
+export const isoDateFieldNamesDesc: (keyof IsoDateFields)[] = [
+  'isoYear',
+  'isoMonth',
+  'isoDay',
+]
+export const isoTimeFieldNamesDesc: (keyof IsoTimeFields)[] = [
+  'isoHour',
+  'isoMinute',
+  'isoSecond',
+  'isoMillisecond',
+  'isoMicrosecond',
+  'isoNanosecond',
+]
+export const isoDateTimeFieldNamesDesc: (keyof IsoDateTimeFields)[] = [
+  ...isoDateFieldNamesDesc,
+  ...isoTimeFieldNamesDesc,
+]
 
-export const isoTimeFieldNamesAsc = Object.keys(isoTimeFieldRefiners) as
-  (keyof IsoTimeFields)[]
+// ascending by unit
+export const isoDateFieldNamesAsc = isoDateFieldNamesDesc.slice().reverse()
+export const isoTimeFieldNamesAsc = isoTimeFieldNamesDesc.slice().reverse()
+export const isoDateTimeFieldNamesAsc = isoDateTimeFieldNamesDesc.slice().reverse()
 
-export const isoDateTimeFieldNames = Object.keys(isoDateTimeFieldRefiners).sort() as
-  (keyof IsoDateTimeFields)[]
-
-export const isoTimeFieldNames = isoTimeFieldNamesAsc.slice().sort()
-export const isoDateTimeFieldNamesAsc = [...isoTimeFieldNamesAsc, ...isoDateFieldNames]
+// alphabetical
+export const isoDateFieldNamesAlpha = isoDateFieldNamesDesc.slice().sort()
+export const isoTimeFieldNamesAlpha = isoTimeFieldNamesDesc.slice().sort()
+export const isoDateTimeFieldNamesAlpha = isoDateTimeFieldNamesDesc.slice().sort()
 
 // Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const isoTimeFieldDefaults = mapPropNamesToConstant(isoTimeFieldNames, 0)
-
-// Conversion
-// -------------------------------------------------------------------------------------------------
-
-export const pluckIsoTimeFields = pluckProps.bind<
-  undefined, [BoundArg], // bound
-  [IsoTimeFields], // unbound
-  IsoTimeFields // return
->(undefined, isoTimeFieldNames)
-
-export type IsoTuple = [
-  isoYear: number,
-  isoMonth?: number,
-  isoDay?: number,
-  isoHour?: number,
-  isoMinute?: number,
-  isoSecond?: number,
-  isoMilli?: number,
-]
-
-export const pluckIsoTuple = pluckPropsTuple.bind<
-  undefined, [BoundArg], // bound
-  [Partial<IsoDateTimeFields> & { isoYear: number }], // unbound
-  IsoTuple // return
->(undefined, isoDateTimeFieldNamesAsc.slice().reverse())
+export const isoTimeFieldDefaults = mapPropNamesToConstant(isoTimeFieldNamesAlpha, 0)
 
 // Advanced
 // -------------------------------------------------------------------------------------------------
-
-export function refineIsoTimeFields(
-  rawIsoTimeInternals: IsoTimeFields,
-): IsoTimeFields {
-  return constrainIsoTimeFields(
-    mapPropsWithRefiners(rawIsoTimeInternals, isoTimeFieldRefiners),
-    Overflow.Reject,
-  )
-}
 
 export function constrainIsoTimeFields(isoTimeFields: IsoTimeFields, overflow: Overflow | undefined): IsoTimeFields {
   // TODO: clever way to compress this, using functional programming

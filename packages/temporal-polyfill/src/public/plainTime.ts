@@ -1,5 +1,5 @@
 import { TimeBag } from '../internal/calendarFields'
-import { IsoTimeFields, pluckIsoTimeFields } from '../internal/isoFields'
+import { IsoTimeFields, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/isoFields'
 import { LocalesArg, formatTimeLocaleString } from '../internal/intlFormat'
 import {
   DiffOptions,
@@ -9,15 +9,15 @@ import {
   refineOverflowOptions,
 } from '../internal/options'
 import { UnitName } from '../internal/units'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainTimeBag } from '../internal/genericBag'
+import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 
 // public
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
-import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
@@ -25,7 +25,7 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { createTypicalTimeZoneRecord } from './recordCreators'
+import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './recordCreators'
 import { CalendarSlot } from './calendarSlot'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
@@ -161,16 +161,30 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
   if (isObjectlike(arg)) {
     const slots = (getSlots(arg) || {}) as { branding?: string }
 
-    switch(slots.branding) {
+    switch (slots.branding) {
       case PlainTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return slots as PlainTimeSlots
+
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return { ...pluckIsoTimeFields(slots as PlainDateTimeSlots<CalendarSlot>), branding: PlainTimeBranding }
+        return {
+          ...pluckProps(isoTimeFieldNamesDesc, slots as PlainDateTimeSlots<CalendarSlot>),
+          branding: PlainTimeBranding,
+        }
+
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return { ...pluckIsoTimeFields(zonedInternalsToIso(slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>)), branding: PlainTimeBranding }
+        return {
+          ...pluckProps(
+            isoTimeFieldNamesDesc,
+            zonedInternalsToIso(
+              slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+              createSimpleTimeZoneRecord((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone)
+            ),
+          ),
+          branding: PlainTimeBranding,
+        }
     }
 
     return PlainTimeFuncs.fromFields(arg as PlainTimeBag, options)
