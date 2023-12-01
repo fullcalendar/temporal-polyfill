@@ -105,7 +105,7 @@ export class CalendarImpl {
     return checkIsoYearMonthInBounds(this.queryIsoFields(year, month, 1))
   }
 
-  monthDayFromFields(fields: MonthDayBag, overflow?: Overflow): IsoDateFields {
+  monthDayFromFields(fields: DateBag, overflow?: Overflow): IsoDateFields {
     let { month, monthCode } = fields as Partial<MonthFields>
     let year
     let isLeapMonth

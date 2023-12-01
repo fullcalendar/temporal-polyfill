@@ -6,7 +6,7 @@ import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMon
 import { diffDates } from '../internal/diff'
 import { negateDurationFields, updateDurationFieldsSign } from '../internal/durationFields'
 import { IdLike, getCommonCalendarSlot, isIdLikeEqual } from '../internal/idLike'
-import { IsoDateFields } from '../internal/isoFields'
+import { IsoDateFields, constrainIsoDateLike } from '../internal/isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/isoFormat'
 import { checkIsoYearMonthInBounds, compareIsoDateFields, moveByIsoDays } from '../internal/isoMath'
 import { parsePlainYearMonth } from '../internal/isoParse'
@@ -26,14 +26,16 @@ export function create<CA, C>(
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
   const calendarSlot = refineCalendarArg(calendar)
-  const referenceIsoDayInt = toInteger(referenceIsoDay)
+  const isoDayInt = toInteger(referenceIsoDay)
 
   return {
-    ...checkIsoYearMonthInBounds({
-      isoYear: isoYearInt,
-      isoMonth: isoMonthInt,
-      isoDay: referenceIsoDayInt
-    }),
+    ...checkIsoYearMonthInBounds(
+      constrainIsoDateLike({
+        isoYear: isoYearInt,
+        isoMonth: isoMonthInt,
+        isoDay: isoDayInt
+      })
+    ),
     calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
@@ -194,6 +196,9 @@ export function toString(
   )
 }
 
+/*
+TODO: remove this and have callers omit options param from toString?
+*/
 export function toJSON(
   plainYearMonthSlots: PlainYearMonthSlots<IdLike>,
 ): string {

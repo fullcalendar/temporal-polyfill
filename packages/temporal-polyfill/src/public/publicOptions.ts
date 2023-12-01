@@ -7,13 +7,14 @@ import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { refineMaybeZonedDateTimeBag } from '../internal/convert'
 import { ZonedDateTimeBag } from '../internal/genericBag'
+import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 
 // public
-import { IsoDateSlots, PlainDateSlots, ZonedDateTimeSlots, ZonedEpochSlots, getSlots, pluckIsoDateInternals } from './slots'
+import { IsoDateSlots, ZonedEpochSlots, getSlots, pluckIsoDateInternals } from './slots'
 import type { PlainDate } from './plainDate'
 import type { ZonedDateTime } from './zonedDateTime'
 import { calendarProtocolDateFromFields, calendarProtocolFields, createCalendarSlotRecord } from './calendarRecordComplex'
-import { getBagCalendarSlot } from './calendarSlot'
+import { CalendarSlot, getBagCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { TimeZoneArg } from './timeZone'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
@@ -27,7 +28,7 @@ export function refinePublicRelativeTo(relativeTo: ZonedDateTime | PlainDate | s
 
       if (branding === 'ZonedDateTime' ||
         branding === 'PlainDate') {
-        return slots as (ZonedDateTimeSlots | PlainDateSlots)
+        return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
       } else if (branding === 'PlainDateTime') {
         return pluckIsoDateInternals(slots as any)
       }

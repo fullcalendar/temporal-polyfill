@@ -8,9 +8,10 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, plu
 import { PlainYearMonthBag } from '../internal/genericBag'
 import { CalendarBranding, PlainYearMonthBranding } from '../genericApi/branding'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
+import { PlainYearMonthSlots } from '../genericApi/genericTypes'
 
 // public
-import { IsoDateSlots, PlainYearMonthSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slots'
+import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -166,12 +167,12 @@ defineGetters(PlainYearMonth.prototype, {
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export function createPlainYearMonth(slots: PlainYearMonthSlots): PlainYearMonth {
+export function createPlainYearMonth(slots: PlainYearMonthSlots<CalendarSlot>): PlainYearMonth {
   return createViaSlots(PlainYearMonth, slots)
 }
 
-export function getPlainYearMonthSlots(plainYearMonth: PlainYearMonth): PlainYearMonthSlots {
-  return getSpecificSlots(PlainYearMonthBranding, plainYearMonth) as PlainYearMonthSlots
+export function getPlainYearMonthSlots(plainYearMonth: PlainYearMonth): PlainYearMonthSlots<CalendarSlot> {
+  return getSpecificSlots(PlainYearMonthBranding, plainYearMonth) as PlainYearMonthSlots<CalendarSlot>
 }
 
 export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: OverflowOptions) {
@@ -182,7 +183,7 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
 
     if (slots.branding === PlainYearMonthBranding) {
       refineOverflowOptions(options) // parse unused options
-      return slots as PlainYearMonthSlots
+      return slots as PlainYearMonthSlots<CalendarSlot>
     }
 
     return PlainYearMonthFuncs.fromFields(

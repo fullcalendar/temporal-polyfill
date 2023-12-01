@@ -7,6 +7,19 @@ import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, time
 
 // TODO: put types in here too
 
+// date
+// ----
+
+export function createDateNewCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateFromFields: calendarImplDateFromFields,
+    fields: calendarImplFields,
+  }, {
+    dateFromFields: calendarProtocolDateFromFields,
+    fields: calendarProtocolFields,
+  })
+}
+
 export function getDateModCalendarRecord(calendarSlot: CalendarSlot) {
   return createCalendarSlotRecord(calendarSlot, {
     dateFromFields: calendarImplDateFromFields,
@@ -37,23 +50,8 @@ export function getDiffCalendarRecord(calendarSlot: CalendarSlot) {
   })
 }
 
-export function createTypicalTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
-  return createTimeZoneSlotRecord(timeZoneSlot, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  }, {
-    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
-  })
-}
-
-export function createSimpleTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
-  return createTimeZoneSlotRecord(timeZoneSlot, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-  }, {
-    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-  })
-}
+// year month
+// ----------
 
 export function createYearMonthNewCalendarRecord(calendarSlot: CalendarSlot) {
   return createCalendarSlotRecord(calendarSlot, {
@@ -101,6 +99,9 @@ export function createYearMonthDiffCalendarRecord(calendarSlot: CalendarSlot) {
   })
 }
 
+// month day
+// ---------
+
 export function createMonthDayNewCalendarRecord(calendarSlot: CalendarSlot) {
   return createCalendarSlotRecord(calendarSlot, {
     monthDayFromFields: calendarImplMonthDayFromFields,
@@ -111,12 +112,35 @@ export function createMonthDayNewCalendarRecord(calendarSlot: CalendarSlot) {
   })
 }
 
-export function createDateNewCalendarRecord(calendarSlot: CalendarSlot) {
+export function createMonthDayModCalendarRecord(calendarSlot: CalendarSlot) {
   return createCalendarSlotRecord(calendarSlot, {
-    dateFromFields: calendarImplDateFromFields,
+    monthDayFromFields: calendarImplMonthDayFromFields,
     fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
   }, {
-    dateFromFields: calendarProtocolDateFromFields,
+    monthDayFromFields: calendarProtocolMonthDayFromFields,
     fields: calendarProtocolFields,
+    mergeFields: calendarProtocolMergeFields,
+  })
+}
+
+// time zone
+// ---------
+
+export function createTypicalTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
+  return createTimeZoneSlotRecord(timeZoneSlot, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
+}
+
+export function createSimpleTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
+  return createTimeZoneSlotRecord(timeZoneSlot, {
+    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
+  }, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
   })
 }

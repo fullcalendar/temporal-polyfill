@@ -8,6 +8,7 @@ export function refineCalendarSlotString(calendarArg: string): string {
 
 // bag
 // ---
+// TODO: consolidate with getCalendarSlotFromBag/extractCalendarSlotFromBag
 
 export function getCalendarIdFromBag(bag: { calendar?: string }): string {
   return extractCalendarIdFromBag(bag) || isoCalendarId

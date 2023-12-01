@@ -12,10 +12,11 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { PlainTimeBag } from '../internal/genericBag'
 import { PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 
 // public
-import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -23,8 +24,9 @@ import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
-import { refineTimeZoneSlot } from './timeZoneSlot'
+import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { createTypicalTimeZoneRecord } from './recordCreators'
+import { CalendarSlot } from './calendarSlot'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 
@@ -164,10 +166,10 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
         return slots as PlainTimeSlots
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return { ...pluckIsoTimeFields(slots as PlainDateTimeSlots), branding: PlainTimeBranding }
+        return { ...pluckIsoTimeFields(slots as PlainDateTimeSlots<CalendarSlot>), branding: PlainTimeBranding }
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return { ...pluckIsoTimeFields(zonedInternalsToIso(slots as ZonedDateTimeSlots)), branding: PlainTimeBranding }
+        return { ...pluckIsoTimeFields(zonedInternalsToIso(slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>)), branding: PlainTimeBranding }
     }
 
     return PlainTimeFuncs.fromFields(arg as PlainTimeBag, options)

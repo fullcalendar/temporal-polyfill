@@ -34,7 +34,7 @@ export function fromFields(
 
 export function getFields(slots: PlainYearMonthSlots<string>): YearMonthFields & Partial<EraYearFields> {
   const calendarImpl = queryCalendarImpl(slots.calendar)
-  const [year, month, day] = calendarImpl.queryYearMonthDay(slots)
+  const [year, month] = calendarImpl.queryYearMonthDay(slots)
 
   return {
     era: calendarImpl.era(slots), // inefficient: requeries y/m/d

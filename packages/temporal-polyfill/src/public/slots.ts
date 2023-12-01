@@ -3,7 +3,6 @@ import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoDateLike, constrainIsoDateTimeLike, isoDateFieldRefiners, isoTimeFieldRefiners } from '../internal/isoFields'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from '../internal/isoMath'
 import { BoundArg, mapPropsWithRefiners, pluckProps } from '../internal/utils'
-import { PlainYearMonthBranding, PlainMonthDayBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, InstantBranding, DurationBranding } from '../genericApi/branding'
 
 // public
 import { CalendarArg } from './calendar'
@@ -25,22 +24,12 @@ export interface EpochSlots {
   epochNanoseconds: DayTimeNano
 }
 
-// hard to get rid of!!!
 export interface ZonedEpochSlots extends EpochSlots {
   timeZone: TimeZoneSlot
   calendar: CalendarSlot
 }
 export type IsoDateSlots = IsoDateFields & CalendarSlots
 export type IsoDateTimeSlots = IsoDateSlots & IsoTimeFields
-
-// TODO: kill these
-export type PlainYearMonthSlots = { branding: typeof PlainYearMonthBranding } & IsoDateSlots
-export type PlainMonthDaySlots = { branding: typeof PlainMonthDayBranding } & IsoDateSlots
-export type PlainDateSlots = { branding: typeof PlainDateBranding } & IsoDateSlots
-export type PlainDateTimeSlots = { branding: typeof PlainDateTimeBranding } & IsoDateTimeSlots
-export type PlainTimeSlots = { branding: typeof PlainTimeBranding } & IsoTimeFields
-export type ZonedDateTimeSlots = { branding: typeof ZonedDateTimeBranding } & ZonedEpochSlots
-export type InstantSlots = { branding: typeof InstantBranding } & EpochSlots
 
 // Lookup
 // -------------------------------------------------------------------------------------------------

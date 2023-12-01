@@ -6,14 +6,16 @@ import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/
 import { mapPropNames } from '../internal/utils'
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getId } from '../internal/idLike'
+import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
+import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 
 // public
-import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, ZonedDateTimeSlots, EpochSlots, pluckIsoDateInternals } from './slots'
-import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
+import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, EpochSlots, pluckIsoDateInternals } from './slots'
 import { zonedInternalsToIso } from './zonedInternalsToIso'
 import { createPlainDate } from './plainDate'
 import { CalendarProtocol } from './calendar'
-import { DurationSlots } from '../genericApi/genericTypes'
+import { TimeZoneSlot } from './timeZoneSlot'
+import { CalendarSlot } from './calendarSlot'
 
 // TODO: better types
 // TODO: move this out!!!
@@ -57,7 +59,7 @@ export function createZonedCalendarGetterMethods(
 ) {
   return mapPropNames((name, i) => {
     return function (this: any) {
-      const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots
+      const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
       const { calendar } = slots
       const isoFields = zonedInternalsToIso(slots)
 
@@ -89,7 +91,7 @@ export function createTimeGetterMethods(branding: string) {
 export function createZonedTimeGetterMethods(branding: string) {
   return mapPropNames((name, i) => {
     return function (this: any) {
-      const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots
+      const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
       return zonedInternalsToIso(slots)[isoTimeFieldNames[i]]
     }
   }, timeFieldNames)

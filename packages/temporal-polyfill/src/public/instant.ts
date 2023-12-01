@@ -22,12 +22,13 @@ import { UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { utcTimeZoneId } from '../internal/timeZoneConfig'
 import { timeZoneImplGetOffsetNanosecondsFor } from '../internal/timeZoneRecordSimple'
+import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 
 // public
-import { InstantSlots, ZonedDateTimeSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from '../genericApi/branding'
-import { refineCalendarSlot } from './calendarSlot'
-import { refineTimeZoneSlot } from './timeZoneSlot'
+import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
+import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
@@ -250,7 +251,7 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
         case InstantBranding:
           return slots as InstantSlots
         case ZonedDateTimeBranding:
-          return { epochNanoseconds: (slots as ZonedDateTimeSlots).epochNanoseconds, branding: InstantBranding }
+          return { epochNanoseconds: (slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).epochNanoseconds, branding: InstantBranding }
       }
     }
   }

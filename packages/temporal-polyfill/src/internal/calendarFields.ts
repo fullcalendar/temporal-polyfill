@@ -34,7 +34,7 @@ export interface EraYearFields {
 export type YearFieldsIntl = EraYearFields & YearFields
 export type YearMonthFieldsIntl = EraYearFields & YearMonthFields
 export type DateFieldsIntl = EraYearFields & DateFields
-export type MonthDayFieldsIntl = YearFieldsIntl & MonthDayFields
+export type MonthDayFieldsIntl = MonthDayFields // this is stupid
 
 // Simple Bag (all props optional)
 // -------------------------------------------------------------------------------------------------
