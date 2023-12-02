@@ -5,17 +5,13 @@ import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { DurationFields, DurationFieldsWithSign, absDurationInternals, addDayTimeDurationFields, durationFieldNamesAsc, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { formatDurationInternals } from '../internal/isoFormat'
 import { parseDuration } from '../internal/isoParse'
-import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MoveMarker, SimpleMarkerSystem } from '../internal/markerSystemTypes'
-import { DurationRoundOptions, RelativeToOptions, SubsecDigits, TimeDisplayOptions, TotalUnitOptionsWithRel, refineDurationRoundOptions, refineRelativeToOptions, refineTimeDisplayOptions, refineTotalOptions } from '../internal/options'
+import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarketSlots, MoveMarker, SimpleMarkerSystem } from '../internal/markerSystemTypes'
+import { DurationRoundOptions, RelativeToOptions, SubsecDigits, TimeDisplayOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTimeDisplayOptions, refineTotalOptions } from '../internal/options'
 import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { DurationBranding } from './branding'
 import { DurationSlots } from './genericTypes'
-
-// public
-import { createMarkerSystem } from '../public/markerSystemImpl'
-import { refinePublicRelativeTo } from '../public/publicOptions'
 
 export function create(
   years: number = 0,
@@ -70,13 +66,16 @@ export function withFields(
   }
 }
 
-export function add(
+export function add<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
   slots: DurationSlots,
   otherSlots: DurationSlots,
-  options?: RelativeToOptions,
+  options?: RelativeToOptions<RA>,
   direction: -1 | 1 = 1,
 ): DurationSlots {
-  const markerInternals = refineRelativeToOptions(options, refinePublicRelativeTo) // optional
+  const normalOptions = normalizeOptions(options)
+  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
   const largestUnit = Math.max(
     getLargestDurationUnit(slots),
     getLargestDurationUnit(otherSlots),
@@ -86,7 +85,7 @@ export function add(
     largestUnit < Unit.Day || (
       largestUnit === Unit.Day &&
       // has uniform days?
-      !(markerInternals && (markerInternals as any).epochNanoseconds)
+      !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
     return {
@@ -97,7 +96,7 @@ export function add(
     }
   }
 
-  if (!markerInternals) {
+  if (!markerSlots) {
     throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
   }
 
@@ -105,7 +104,7 @@ export function add(
     otherSlots = negateDurationInternals(otherSlots) as any // !!!
   }
 
-  const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+  const markerSystem = createMarkerSystem(markerSlots)
   return {
     branding: DurationBranding,
     ...spanDuration(
@@ -117,12 +116,14 @@ export function add(
   }
 }
 
-export function subtract(
+export function subtract<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
   slots: DurationSlots,
   otherSlots: DurationSlots,
-  options?: RelativeToOptions,
+  options?: RelativeToOptions<RA>,
 ): DurationSlots {
-  return add(slots, otherSlots, options, -1)
+  return add(refineRelativeTo, createMarkerSystem, slots, otherSlots, options, -1)
 }
 
 export function negated(slots: DurationSlots): DurationSlots {
@@ -139,15 +140,20 @@ export function abs(slots: DurationSlots): DurationSlots {
   }
 }
 
-export function round(slots: DurationSlots, options: DurationRoundOptions): DurationSlots {
+export function round<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
+  slots: DurationSlots,
+  options: DurationRoundOptions<RA>,
+): DurationSlots {
   const durationLargestUnit = getLargestDurationUnit(slots)
   const [
     largestUnit,
     smallestUnit,
     roundingInc,
     roundingMode,
-    markerInternals,
-  ] = refineDurationRoundOptions(options, durationLargestUnit, refinePublicRelativeTo)
+    markerSlots,
+  ] = refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
 
   const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
@@ -157,7 +163,7 @@ export function round(slots: DurationSlots, options: DurationRoundOptions): Dura
     maxLargestUnit < Unit.Day || (
       maxLargestUnit === Unit.Day &&
       // has uniform days?
-      !(markerInternals && (markerInternals as any).epochNanoseconds)
+      !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
     // TODO: check internals doesn't have large fields
@@ -175,11 +181,11 @@ export function round(slots: DurationSlots, options: DurationRoundOptions): Dura
     }
   }
 
-  if (!markerInternals) {
+  if (!markerSlots) {
     throw new RangeError('need relativeTo')
   }
 
-  const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+  const markerSystem = createMarkerSystem(markerSlots)
 
   let transplantedWeeks = 0
   if (
@@ -208,26 +214,31 @@ export function round(slots: DurationSlots, options: DurationRoundOptions): Dura
   }
 }
 
-export function total(slots: DurationSlots, options: TotalUnitOptionsWithRel | UnitName): number {
+export function total<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
+  slots: DurationSlots,
+  options: TotalUnitOptionsWithRel<RA> | UnitName,
+): number {
   const durationLargestUnit = getLargestDurationUnit(slots)
-  const [totalUnit, markerInternals] = refineTotalOptions(options, refinePublicRelativeTo)
+  const [totalUnit, markerSlots] = refineTotalOptions(options, refineRelativeTo)
   const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
 
   if (
     maxLargestUnit < Unit.Day || (
       maxLargestUnit === Unit.Day &&
       // has uniform days?
-      !(markerInternals && (markerInternals as any).epochNanoseconds)
+      !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
 
-  if (!markerInternals) {
+  if (!markerSlots) {
     throw new RangeError('need relativeTo')
   }
 
-  const markerSystem = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+  const markerSystem = createMarkerSystem(markerSlots)
 
   return totalRelativeDuration(
     ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
@@ -266,12 +277,15 @@ export function blank(slots: DurationSlots): boolean {
   return !slots.sign
 }
 
-export function compare(
+export function compare<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
-  options?: RelativeToOptions,
+  options?: RelativeToOptions<RA>,
 ): NumSign {
-  const markerInternals = refineRelativeToOptions(options, refinePublicRelativeTo)
+  const normalOptions = normalizeOptions(options)
+  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
   const largestUnit = Math.max(
     getLargestDurationUnit(durationSlots0),
     getLargestDurationUnit(durationSlots1),
@@ -297,7 +311,7 @@ export function compare(
     largestUnit < Unit.Day || (
       largestUnit === Unit.Day &&
       // has uniform days?
-      !(markerInternals && (markerInternals as any).epochNanoseconds)
+      !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
     return compareDayTimeNanos(
@@ -306,11 +320,11 @@ export function compare(
     )
   }
 
-  if (!markerInternals) {
+  if (!markerSlots) {
     throw new RangeError('need relativeTo')
   }
 
-  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerInternals) as MarkerSystem<unknown>
+  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerSlots)
 
   return compareDayTimeNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),

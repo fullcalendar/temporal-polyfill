@@ -69,17 +69,21 @@ export function convertPlainDateTimeToZoned(
 /*
 TODO: make more DRY with other methods
 */
-export function refineMaybeZonedDateTimeBag<T>(
+export function refineMaybeZonedDateTimeBag<TA, T>(
   calendarRecord: {
     dateFromFields: CalendarDateFromFieldsFunc,
     fields: CalendarFieldsFunc,
   },
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneRecord: (timeZoneArg: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
-  bag: ZonedDateTimeBag<unknown, T>,
-): DayTimeNano | IsoDateTimeFields {
+  bag: ZonedDateTimeBag<unknown, TA>,
+): {
+  epochNanoseconds: DayTimeNano,
+  timeZone: T,
+} | IsoDateTimeFields {
   const fields = refineCalendarFields(
     calendarRecord,
     bag,
@@ -87,16 +91,17 @@ export function refineMaybeZonedDateTimeBag<T>(
     [], // requireFields
     // forcedValidFieldNames (TODO: more compressed)
     ['hour', 'microsecond', 'millisecond', 'minute', 'nanosecond', 'offset', 'second', 'timeZone'],
-  ) as ZonedDateTimeBag<unknown, T>
+  ) as ZonedDateTimeBag<unknown, TA>
 
   if (fields.timeZone !== undefined) {
     const isoDateFields = calendarRecord.dateFromFields(fields as any)
     const isoTimeFields = refineTimeBag(fields)
 
     // must happen after datetime fields
-    const timeZoneRecord = getTimeZoneRecord(fields.timeZone)
+    const timeZoneSlot = refineTimeZoneArg(fields.timeZone)
+    const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
 
-    return getMatchingInstantFor(
+    const epochNanoseconds = getMatchingInstantFor(
       timeZoneRecord,
       { ...isoDateFields, ...isoTimeFields },
       fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
@@ -105,6 +110,8 @@ export function refineMaybeZonedDateTimeBag<T>(
       EpochDisambig.Compat, // TODO: is default already?
       false, // fuzzy
     )
+
+    return { epochNanoseconds, timeZone: timeZoneSlot }
   } else {
     const isoDateInternals = calendarRecord.dateFromFields(fields as any)
     const isoTimeFields = refineTimeBag(fields)
@@ -116,8 +123,8 @@ export function refineMaybeZonedDateTimeBag<T>(
 // ZonedDateTime
 // -------------------------------------------------------------------------------------------------
 
-export function refineZonedDateTimeBag<C, TA, T>(
-  getCalendarRecord: (calendarSlot: C) => {
+export function refineZonedDateTimeBag<TA, T>(
+  calendarRecord: {
     dateFromFields: CalendarDateFromFieldsFunc,
     fields: CalendarFieldsFunc,
   },
@@ -126,11 +133,12 @@ export function refineZonedDateTimeBag<C, TA, T>(
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
-  calendarSlot: C,
   bag: ZonedDateTimeBag<unknown, TA>,
   options: ZonedFieldOptions | undefined,
-): [DayTimeNano, T] {
-  const calendarRecord = getCalendarRecord(calendarSlot)
+): {
+  epochNanoseconds: DayTimeNano,
+  timeZone: T,
+} {
   const fields = refineCalendarFields(
     calendarRecord,
     bag,
@@ -158,7 +166,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
     false, // fuzzy
   )
 
-  return [epochNanoseconds, timeZoneSlot]
+  return { epochNanoseconds, timeZone: timeZoneSlot }
 }
 
 export function mergeZonedDateTimeBag(

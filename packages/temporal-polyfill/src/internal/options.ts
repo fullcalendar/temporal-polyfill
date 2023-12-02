@@ -130,22 +130,19 @@ export function refineRoundOptions(
   return [smallestUnit, roundingInc, roundingMode]
 }
 
-export type DurationRoundOptions = DiffOptions & RelativeToOptions
+export type DurationRoundOptions<RA> = DiffOptions & RelativeToOptions<RA>
 
-export type DurationRoundTuple = [
-  ...DiffTuple,
-  any?, // TODO: relativeTo
-]
+export type DurationRoundTuple<R> = [...DiffTuple, R]
 
 /*
 TODO: much more DRY with refineDiffOptions
 This function is YUCK
 */
-export function refineDurationRoundOptions(
-  options: DurationRoundOptions,
+export function refineDurationRoundOptions<RA, R>(
+  options: DurationRoundOptions<RA>,
   defaultLargestUnit: Unit,
-  refineRelativeTo: (relativeTo: any) => any,
-): DurationRoundTuple {
+  refineRelativeTo: (relativeTo: RA) => R,
+): DurationRoundTuple<R> {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
 
   // alphabeitcal
@@ -174,15 +171,15 @@ export function refineDurationRoundOptions(
   return [largestUnit, smallestUnit, roundingInc, roundingMode, relativeToInternals]
 }
 
-export type RelativeToOptions = { relativeTo: any } // TODO: better
-export type TotalUnitOptionsWithRel = TotalUnitOptions & RelativeToOptions
+export type RelativeToOptions<RA> = { relativeTo: RA }
+export type TotalUnitOptionsWithRel<RA> = TotalUnitOptions & RelativeToOptions<RA>
 
-export function refineTotalOptions(
-  options: TotalUnitOptionsWithRel | UnitName,
-  refineRelativeTo: (relativeTo: any) => any,
+export function refineTotalOptions<RA, R>(
+  options: TotalUnitOptionsWithRel<RA> | UnitName,
+  refineRelativeTo: (relativeTo: RA) => R,
 ): [
   Unit,
-  any, // TODO: relativeTo
+  R,
 ] {
   options = normalizeUnitNameOptions(options, totalUnitStr)
 
@@ -194,13 +191,6 @@ export function refineTotalOptions(
     totalUnit, // required
     relativeToInternals,
   ]
-}
-
-export function refineRelativeToOptions(
-  options: RelativeToOptions | undefined,
-  refineRelativeTo: (relativeTo: any) => any,
-): any | undefined { // TODO: relativeTo
-  return refineRelativeTo(normalizeOptions(options).relativeTo)
 }
 
 export type ZonedDateTimeDisplayOptions =

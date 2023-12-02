@@ -14,6 +14,10 @@ import { DurationSlots } from '../genericApi/genericTypes'
 // public
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
 import { durationGettersMethods, neverValueOf } from './publicMixins'
+import { PlainDateArg } from './plainDate'
+import { ZonedDateTimeArg } from './zonedDateTime'
+import { refinePublicRelativeTo } from './publicOptions'
+import { createPublicMarkerSystem } from './markerSystemImpl'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -48,20 +52,28 @@ export class Duration {
     return createDuration(DurationFuncs.withFields(getDurationSlots(this), mod))
   }
 
-  add(otherArg: DurationArg, options?: RelativeToOptions) {
-    return createDuration(DurationFuncs.add(
-      getDurationSlots(this),
-      toDurationSlots(otherArg),
-      options,
-    ))
+  add(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
+    return createDuration(
+      DurationFuncs.add(
+        refinePublicRelativeTo,
+        createPublicMarkerSystem,
+        getDurationSlots(this),
+        toDurationSlots(otherArg),
+        options,
+      )
+    )
   }
 
-  subtract(otherArg: DurationArg, options?: RelativeToOptions) {
-    return createDuration(DurationFuncs.subtract(
-      getDurationSlots(this),
-      toDurationSlots(otherArg),
-      options,
-    ))
+  subtract(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
+    return createDuration(
+      DurationFuncs.subtract(
+        refinePublicRelativeTo,
+        createPublicMarkerSystem,
+        getDurationSlots(this),
+        toDurationSlots(otherArg),
+        options,
+      )
+    )
   }
 
   negated(): Duration {
@@ -72,12 +84,24 @@ export class Duration {
     return createDuration(DurationFuncs.abs(getDurationSlots(this)))
   }
 
-  round(options: DurationRoundOptions): Duration {
-    return createDuration(DurationFuncs.round(getDurationSlots(this), options))
+  round(options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>): Duration {
+    return createDuration(
+      DurationFuncs.round(
+        refinePublicRelativeTo,
+        createPublicMarkerSystem,
+        getDurationSlots(this),
+        options,
+      )
+    )
   }
 
-  total(options: TotalUnitOptionsWithRel | UnitName): number {
-    return DurationFuncs.total(getDurationSlots(this), options)
+  total(options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
+    return DurationFuncs.total(
+      refinePublicRelativeTo,
+      createPublicMarkerSystem,
+      getDurationSlots(this),
+      options,
+    )
   }
 
   toString(options?: TimeDisplayOptions): string {
@@ -101,9 +125,11 @@ export class Duration {
   static compare(
     durationArg0: DurationArg,
     durationArg1: DurationArg,
-    options?: RelativeToOptions,
+    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
   ): NumSign {
     return DurationFuncs.compare(
+      refinePublicRelativeTo,
+      createPublicMarkerSystem,
       toDurationSlots(durationArg0),
       toDurationSlots(durationArg1),
       options,

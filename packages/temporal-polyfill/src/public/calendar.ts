@@ -6,7 +6,7 @@ import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } fro
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
-import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
+import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/convert'
 
 // public
@@ -20,6 +20,7 @@ import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './pl
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/recordCreators'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------
@@ -74,12 +75,12 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainDate {
     const { id } = getCalendarSlots(this)
-    const { dateAdd } = createCalendarImplRecord(id, {
-      dateAdd: calendarImplDateAdd,
+    const calendarRecord = createCalendarImplRecord(id, {
+      dateAdd: calendarImplDateAdd, // weird, but will soon be valuable for fns tree-shaking (or just call directly)
     })
 
     return createPlainDate({
-      ...dateAdd(
+      ...calendarRecord.dateAdd(
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
         options,
@@ -116,10 +117,7 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainDate {
     const { id } = getCalendarSlots(this)
-    const calendarRecord = createCalendarImplRecord(id, {
-      dateFromFields: calendarImplDateFromFields,
-      fields: calendarImplFields,
-    })
+    const calendarRecord = createDateNewCalendarRecordIMPL(id)
 
     return createPlainDate({
       ...refinePlainDateBag(calendarRecord, fields, options, getRequiredDateFields(id)),
@@ -133,10 +131,7 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainYearMonth {
     const { id } = getCalendarSlots(this)
-    const calendarRecord = createCalendarImplRecord(id, {
-      yearMonthFromFields: calendarImplYearMonthFromFields,
-      fields: calendarImplFields,
-    })
+    const calendarRecord = createYearMonthNewCalendarRecordIMPL(id)
 
     return createPlainYearMonth({
       ...refinePlainYearMonthBag(calendarRecord, fields, options, getRequiredYearMonthFields(id)),
@@ -150,10 +145,7 @@ export class Calendar implements CalendarProtocol {
     options?: OverflowOptions,
   ): PlainMonthDay {
     const { id } = getCalendarSlots(this)
-    const calendarRecord = createCalendarImplRecord(id, {
-      monthDayFromFields: calendarImplMonthDayFromFields,
-      fields: calendarImplFields,
-    })
+    const calendarRecord = createMonthDayNewCalendarRecordIMPL(id)
 
     return createPlainMonthDay({
       ...refinePlainMonthDayBag(calendarRecord, false, fields, options, getRequiredMonthDayFields(id)),
@@ -164,7 +156,9 @@ export class Calendar implements CalendarProtocol {
 
   fields(fieldNames: Iterable<string>): Iterable<string> {
     const { id } = getCalendarSlots(this)
-    const calendarRecord = createCalendarImplRecord(id, { fields: calendarImplFields })
+    const calendarRecord = createCalendarImplRecord(id, {
+      fields: calendarImplFields // weird, but will soon be valuable for fns tree-shaking (or just call directly)
+    })
 
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
@@ -191,7 +185,9 @@ export class Calendar implements CalendarProtocol {
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
     const { id } = getCalendarSlots(this)
-    const { mergeFields } = createCalendarImplRecord(id, { mergeFields: calendarImplMergeFields })
+    const { mergeFields } = createCalendarImplRecord(id, {
+      mergeFields: calendarImplMergeFields // weird, but will soon be valuable for fns tree-shaking (or just call directly)
+    })
 
     return mergeFields(
       excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),

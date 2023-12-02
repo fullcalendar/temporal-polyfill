@@ -18,8 +18,8 @@ import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
-import { createTimeZoneProtocolRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
 import { isTimeZoneSlotsEqual } from '../internal/idLike'
+import { createTypicalTimeZoneRecord } from './recordCreators'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ export class TimeZone { // implements TimeZoneProtocol
     setSlots(this, {
       branding: TimeZoneBranding,
       id: refineTimeZoneSlotString(timeZoneId),
-    } as TimeZoneSlots)
+    } as TimeZoneClassSlots)
   }
 
   getPossibleInstantsFor(plainDateTimeArg: PlainDateTimeArg): Instant[]  {
@@ -84,7 +84,9 @@ export class TimeZone { // implements TimeZoneProtocol
     calendarArg: CalendarArg = isoCalendarId
   ): PlainDateTime {
     getTimeZoneSlots(this) // validate `this`
+
     const epochNano = toInstantSlots(instantArg).epochNanoseconds
+
     return createPlainDateTime({
       calendar: refineCalendarSlot(calendarArg),
       ...zonedEpochNanoToIsoWithTZObj(this, epochNano),
@@ -98,16 +100,10 @@ export class TimeZone { // implements TimeZoneProtocol
   ): Instant {
     getTimeZoneSlots(this) // validate `this`
 
-    // weird
-    const calendarRecord = createTimeZoneProtocolRecord(this, {
-      getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
-      getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
-    })
-
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: getSingleInstantFor(
-        calendarRecord,
+        createTypicalTimeZoneRecord(this), // use protocol so other methods accessed
         toPlainDateTimeSlots(plainDateTimeArg),
         refineEpochDisambigOptions(options),
       )
@@ -159,14 +155,14 @@ defineStringTag(TimeZone.prototype, TimeZoneBranding)
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export type TimeZoneSlots = BrandingSlots & { id: string }
+export type TimeZoneClassSlots = BrandingSlots & { id: string }
 
-export function createTimeZone(slots: TimeZoneSlots): TimeZone {
+export function createTimeZone(slots: TimeZoneClassSlots): TimeZone {
   return createViaSlots(TimeZone, slots)
 }
 
-export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneSlots {
-  return getSpecificSlots(TimeZoneBranding, timeZone) as TimeZoneSlots
+export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneClassSlots {
+  return getSpecificSlots(TimeZoneBranding, timeZone) as TimeZoneClassSlots
 }
 
 function getImplTransition(direction: -1 | 1, impl: TimeZoneImpl, instantArg: InstantArg): Instant | null {

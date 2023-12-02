@@ -246,17 +246,15 @@ export function diffTimes(
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
-export function diffZonedEpochNano<C, T>(
-  getCalendarRecord: (calendarSlot: C) => {
+export function diffZonedEpochNano(
+  calendarRecord: {
     dateAdd: CalendarDateAddFunc,
     dateUntil: CalendarDateUntilFunc
   },
-  getTimeZoneRecord: (timeZoneSlot: T) => {
+  timeZoneRecord: {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
   },
-  calendarSlot: C,
-  timeZoneSlot: T,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -264,25 +262,21 @@ export function diffZonedEpochNano<C, T>(
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
   origOptions?: LargestUnitOptions,
-): DurationFields {
+): DurationFieldsWithSign {
   if (largestUnit < Unit.Day) {
     // doesn't need timeZone
-    return diffEpochNano(
+    return updateDurationFieldsSign(diffEpochNano(
       startEpochNano,
       endEpochNano,
       largestUnit as TimeUnit,
       smallestUnit as TimeUnit,
       roundingInc,
       roundingMode,
-    )
+    ))
   }
-
-  const calendarRecord = getCalendarRecord(calendarSlot)
-  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
-
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {
-    return durationFieldDefaults
+    return updateDurationFieldsSign(durationFieldDefaults)
   }
 
   const startIsoFields = zonedEpochNanoToIso(timeZoneRecord, startEpochNano)
@@ -308,7 +302,7 @@ export function diffZonedEpochNano<C, T>(
   const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
 
-  return roundRelativeDuration(
+  return updateDurationFieldsSign(roundRelativeDuration(
     { ...dateDiff, ...timeDiff },
     endEpochNano,
     largestUnit,
@@ -319,7 +313,7 @@ export function diffZonedEpochNano<C, T>(
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
     (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarRecord, timeZoneRecord, m, d),
-  )
+  ))
 }
 
 export function diffEpochNano(

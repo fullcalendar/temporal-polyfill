@@ -58,19 +58,15 @@ export function fromFields<C, TA, T>(
   fields: ZonedDateTimeBag<unknown, TA>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<C, T> {
-  const [epochNanoseconds, timeZoneSlot] = refineZonedDateTimeBag(
-    getCalendarRecord,
-    refineTimeZoneArg,
-    getTimeZoneRecord,
-    calendarSlot,
-    fields,
-    options,
-  )
-
   return {
     calendar: calendarSlot,
-    timeZone: timeZoneSlot,
-    epochNanoseconds,
+    ...refineZonedDateTimeBag(
+      getCalendarRecord(calendarSlot),
+      refineTimeZoneArg,
+      getTimeZoneRecord,
+      fields,
+      options,
+    ),
     branding: ZonedDateTimeBranding,
   }
 }
@@ -266,10 +262,8 @@ export function until<C extends IdLike, T>(
 
   return updateDurationFieldsSign(
     diffZonedEpochNano(
-      getCalendarRecord,
-      getTimeZoneRecord,
-      calendarSlot,
-      timeZoneSlot,
+      getCalendarRecord(calendarSlot),
+      getTimeZoneRecord(timeZoneSlot),
       zonedDateTimeSlots0.epochNanoseconds,
       zonedDateTimeSlots1.epochNanoseconds,
       ...refineDiffOptions(invertRoundingMode, options, Unit.Hour),
