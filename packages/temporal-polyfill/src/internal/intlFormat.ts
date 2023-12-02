@@ -91,8 +91,8 @@ const transformYearMonthOptions = createTransformer(yearMonthValidNames, yearMon
 const transformDateOptions = createTransformer(dateValidNames, dateFallbacks, dateExclusions)
 const transformDateTimeOptions = createTransformer(dateTimeValidNames, dateTimeFallbacks, timeZoneNameStrs)
 const transformTimeOptions = createTransformer(timeValidNames, timeFallbacks, timeExclusions)
-const transformEpochOptions = createTransformer(dateTimeValidNames, dateTimeFallbacks, [])
-const _transformZonedEpochOptions = createTransformer(zonedValidNames, zonedFallbacks, [])
+const transformEpochOptions = createTransformer(dateTimeValidNames, dateTimeFallbacks)
+const _transformZonedEpochOptions = createTransformer(zonedValidNames, zonedFallbacks)
 
 function transformZonedEpochOptions(
   options: Intl.DateTimeFormatOptions,
@@ -111,7 +111,7 @@ function transformZonedEpochOptions(
 function createTransformer(
   validNames: OptionNames,
   fallbacks: Intl.DateTimeFormatOptions,
-  excludedNames: OptionNames,
+  excludedNames: OptionNames = [],
 ): OptionsTransformer {
   const excludedNameSet = new Set(excludedNames)
 

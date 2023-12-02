@@ -1,5 +1,5 @@
 import { Classlike, createLazyGenerator, defineProps, pluckProps } from '../internal/utils'
-import { OrigDateTimeFormat, LocalesArg, OptionNames, toEpochMilli, optionsTransformers } from '../internal/intlFormat'
+import { OrigDateTimeFormat, LocalesArg, OptionNames, toEpochMilli, optionsTransformers, epochNanoConverters, strictCalendarChecks } from '../internal/intlFormat'
 
 // public
 import { ZonedDateTime } from './zonedDateTime'
@@ -34,6 +34,9 @@ type SubformatFactory = (
 ) => Intl.DateTimeFormat | undefined
 
 const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
+
+// Intl.DateTimeFormat
+// -------------------------------------------------------------------------------------------------
 
 export class DateTimeFormat extends OrigDateTimeFormat {
   constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
@@ -110,14 +113,15 @@ export interface DateTimeFormat {
 // -------------------------------------------------------------------------------------------------
 
 function resolveSingleFormattable(
-  format: DateTimeFormat,
+  format: Intl.DateTimeFormat,
   arg: Formattable | undefined
 ): [
-    OrigFormattable | undefined,
-    Intl.DateTimeFormat | undefined // undefined if should use orig method
-  ] {
+  OrigFormattable | undefined,
+  Intl.DateTimeFormat | undefined // undefined if should use orig method
+] {
   if (arg !== undefined) {
-    return resolveFormattable(arg, ...formatInternalsMap.get(format)!)
+    const formatInternals = formatInternalsMap.get(format)!
+    return resolveFormattable(arg, ...formatInternals)
   }
 
   // arg was not specified (current datetime)
@@ -125,14 +129,14 @@ function resolveSingleFormattable(
 }
 
 function resolveRangeFormattables(
-  format: DateTimeFormat | Intl.DateTimeFormat,
+  format: Intl.DateTimeFormat,
   arg0: Formattable,
   arg1: Formattable
 ): [
-    OrigFormattable,
-    OrigFormattable,
-    Intl.DateTimeFormat
-  ] {
+  OrigFormattable,
+  OrigFormattable,
+  Intl.DateTimeFormat
+] {
   const formatInternals = formatInternalsMap.get(format)!
   const [formattable0, format0] = resolveFormattable(arg0, ...formatInternals)
   const [formattable1, format1] = resolveFormattable(arg1, ...formatInternals)
@@ -154,15 +158,23 @@ function resolveFormattable(
   subformatFactory: SubformatFactory,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions
 ): [
-    OrigFormattable,
-    Intl.DateTimeFormat | undefined // undefined if should use orig method
-  ] {
+  OrigFormattable,
+  Intl.DateTimeFormat | undefined // undefined if should use orig method
+] {
   const slots = getSlots(arg)
-  const { branding, calendar, timeZone } = (slots || {}) as Partial<BrandingSlots & { calendar: IdLike, timeZone: IdLike }>
+  const { branding, calendar, timeZone } = (slots || {}) as
+    Partial<BrandingSlots & { calendar: IdLike, timeZone: IdLike }>
 
   const format = branding && subformatFactory(branding, timeZone)
   if (format) {
-    const epochMilli = toEpochMilli(calendar, slots!, resolvedOptions)
+    const epochMilli = toEpochMilli(
+      calendar,
+      slots!,
+      resolvedOptions,
+      epochNanoConverters[branding],
+      strictCalendarChecks[branding],
+    )
+
     return [epochMilli, format]
   }
 
