@@ -17,7 +17,7 @@ import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
 import { refinePublicRelativeTo } from './publicOptions'
-import { createPublicMarkerSystem } from './markerSystemImpl'
+import { createTypicalTimeZoneRecord, getDiffCalendarRecord } from './recordCreators'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -56,7 +56,8 @@ export class Duration {
     return createDuration(
       DurationFuncs.add(
         refinePublicRelativeTo,
-        createPublicMarkerSystem,
+        getDiffCalendarRecord,
+        createTypicalTimeZoneRecord,
         getDurationSlots(this),
         toDurationSlots(otherArg),
         options,
@@ -68,7 +69,8 @@ export class Duration {
     return createDuration(
       DurationFuncs.subtract(
         refinePublicRelativeTo,
-        createPublicMarkerSystem,
+        getDiffCalendarRecord,
+        createTypicalTimeZoneRecord,
         getDurationSlots(this),
         toDurationSlots(otherArg),
         options,
@@ -88,7 +90,8 @@ export class Duration {
     return createDuration(
       DurationFuncs.round(
         refinePublicRelativeTo,
-        createPublicMarkerSystem,
+        getDiffCalendarRecord,
+        createTypicalTimeZoneRecord,
         getDurationSlots(this),
         options,
       )
@@ -98,7 +101,8 @@ export class Duration {
   total(options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
     return DurationFuncs.total(
       refinePublicRelativeTo,
-      createPublicMarkerSystem,
+      getDiffCalendarRecord,
+      createTypicalTimeZoneRecord,
       getDurationSlots(this),
       options,
     )
@@ -129,7 +133,8 @@ export class Duration {
   ): NumSign {
     return DurationFuncs.compare(
       refinePublicRelativeTo,
-      createPublicMarkerSystem,
+      getDiffCalendarRecord,
+      createTypicalTimeZoneRecord,
       toDurationSlots(durationArg0),
       toDurationSlots(durationArg1),
       options,

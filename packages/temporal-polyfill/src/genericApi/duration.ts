@@ -1,15 +1,21 @@
 import { DurationBag } from '../internal/calendarFields'
+import { CalendarDateAddFunc, CalendarDateUntilFunc } from '../internal/calendarRecordTypes'
 import { ensureString, toIntegerStrict } from '../internal/cast'
 import { mergeDurationBag, refineDurationBag } from '../internal/convert'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
+import { diffDateTimes, diffZonedEpochNano } from '../internal/diff'
 import { DurationFields, DurationFieldsWithSign, absDurationInternals, addDayTimeDurationFields, durationFieldNamesAsc, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { IsoDateTimeFields, isoTimeFieldDefaults } from '../internal/isoFields'
 import { formatDurationInternals } from '../internal/isoFormat'
+import { isoToEpochNano } from '../internal/isoMath'
 import { parseDuration } from '../internal/isoParse'
 import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarketSlots, MoveMarker, SimpleMarkerSystem } from '../internal/markerSystemTypes'
+import { moveDateTime, moveZonedEpochNano } from '../internal/move'
 import { DurationRoundOptions, RelativeToOptions, SubsecDigits, TimeDisplayOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTimeDisplayOptions, refineTotalOptions } from '../internal/options'
 import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
-import { NumSign } from '../internal/utils'
+import { NumSign, identityFunc } from '../internal/utils'
 import { DurationBranding } from './branding'
 import { DurationSlots } from './genericTypes'
 
@@ -68,7 +74,14 @@ export function withFields(
 
 export function add<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
-  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc,
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -104,7 +117,9 @@ export function add<RA, C, T>(
     otherSlots = negateDurationInternals(otherSlots) as any // !!!
   }
 
-  const markerSystem = createMarkerSystem(markerSlots)
+  const markerSystem = createMarkerSystem(getCalendarRecord, getTimeZoneRecord, markerSlots) as
+    MarkerSystem<any>
+
   return {
     branding: DurationBranding,
     ...spanDuration(
@@ -118,12 +133,19 @@ export function add<RA, C, T>(
 
 export function subtract<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
-  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc,
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
 ): DurationSlots {
-  return add(refineRelativeTo, createMarkerSystem, slots, otherSlots, options, -1)
+  return add(refineRelativeTo, getCalendarRecord, getTimeZoneRecord, slots, otherSlots, options, -1)
 }
 
 export function negated(slots: DurationSlots): DurationSlots {
@@ -142,7 +164,14 @@ export function abs(slots: DurationSlots): DurationSlots {
 
 export function round<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
-  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc,
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   slots: DurationSlots,
   options: DurationRoundOptions<RA>,
 ): DurationSlots {
@@ -185,7 +214,8 @@ export function round<RA, C, T>(
     throw new RangeError('need relativeTo')
   }
 
-  const markerSystem = createMarkerSystem(markerSlots)
+  const markerSystem = createMarkerSystem(getCalendarRecord, getTimeZoneRecord, markerSlots) as
+    MarkerSystem<any>
 
   let transplantedWeeks = 0
   if (
@@ -216,7 +246,14 @@ export function round<RA, C, T>(
 
 export function total<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
-  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>, // not always called
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc,
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   slots: DurationSlots,
   options: TotalUnitOptionsWithRel<RA> | UnitName,
 ): number {
@@ -238,7 +275,8 @@ export function total<RA, C, T>(
     throw new RangeError('need relativeTo')
   }
 
-  const markerSystem = createMarkerSystem(markerSlots)
+  const markerSystem = createMarkerSystem(getCalendarRecord, getTimeZoneRecord, markerSlots) as
+    MarkerSystem<any>
 
   return totalRelativeDuration(
     ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
@@ -279,7 +317,14 @@ export function blank(slots: DurationSlots): boolean {
 
 export function compare<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
-  createMarkerSystem: (markerSlots: MarketSlots<C, T>) => MarkerSystem<any>,
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc,
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -324,7 +369,8 @@ export function compare<RA, C, T>(
     throw new RangeError('need relativeTo')
   }
 
-  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(markerSlots)
+  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(getCalendarRecord, getTimeZoneRecord, markerSlots) as
+    MarkerSystem<any>
 
   return compareDayTimeNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),
@@ -334,6 +380,44 @@ export function compare<RA, C, T>(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
+
+function createMarkerSystem<C, T>(
+  getCalendarRecord: (calendarSlot: C) => {
+    dateAdd: CalendarDateAddFunc,
+    dateUntil: CalendarDateUntilFunc,
+  },
+  getTimeZoneRecord: (timeZoneSlot: T) => {
+    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
+    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
+  },
+  markerSlots: MarketSlots<C, T>,
+): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
+  const { calendar, timeZone, epochNanoseconds } = markerSlots as
+    { calendar: C, timeZone?: T, epochNanoseconds?: DayTimeNano }
+
+  const calendarRecord = getCalendarRecord(calendar)
+
+  if (epochNanoseconds) {
+    const timeZoneRecord = getTimeZoneRecord(timeZone!)
+
+    return [
+      epochNanoseconds,
+      identityFunc as MarkerToEpochNano<DayTimeNano>,
+      moveZonedEpochNano.bind(undefined, calendarRecord, timeZoneRecord),
+      diffZonedEpochNano.bind(undefined, calendarRecord, timeZoneRecord),
+    ]
+  } else {
+    return [
+      { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
+      isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
+      moveDateTime.bind(undefined, calendarRecord),
+      // TODO: use .bind after updateDurationFieldsSign removed
+      (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
+        return updateDurationFieldsSign(diffDateTimes(calendarRecord, m0, m1, largeUnit))
+      },
+    ]
+  }
+}
 
 function spanDuration<M>(
   durationFields0: DurationFields,
