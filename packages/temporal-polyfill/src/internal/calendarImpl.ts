@@ -12,11 +12,11 @@ import {
   EraYearOrYear,
   MonthFields,
   YearFieldsIntl,
-  intlYearFieldNames,
-  eraYearFieldNames,
-  monthDayFieldNames,
-  monthFieldNames,
-  yearStatNames,
+  intlYearFieldNamesAlpha,
+  eraYearFieldNamesAlpha,
+  monthDayFieldNamesAlpha,
+  monthFieldNamesAlpha,
+  yearStatNamesAlpha,
   DayFields,
   DateBag,
   YearMonthBag,
@@ -198,7 +198,7 @@ export class CalendarImpl {
 
   fields(fieldNames: string[]): string[] {
     if (getAllowErasInFields(this) && fieldNames.includes('year')) {
-      return [...fieldNames, ...eraYearFieldNames]
+      return [...fieldNames, ...eraYearFieldNamesAlpha]
     }
 
     return fieldNames
@@ -210,18 +210,18 @@ export class CalendarImpl {
   ): Record<string, unknown> {
     const merged = Object.assign(Object.create(null), baseFields)
 
-    spliceFields(merged, additionalFields, monthFieldNames)
+    spliceFields(merged, additionalFields, monthFieldNamesAlpha)
 
     if (getAllowErasInFields(this)) {
-      spliceFields(merged, additionalFields, intlYearFieldNames)
+      spliceFields(merged, additionalFields, intlYearFieldNamesAlpha)
     }
 
     if (getErasBeginMidYear(this)) {
       spliceFields(
         merged,
         additionalFields,
-        monthDayFieldNames, // any found?
-        eraYearFieldNames, // then, delete these
+        monthDayFieldNamesAlpha, // any found?
+        eraYearFieldNamesAlpha, // then, delete these
       )
     }
 
@@ -410,7 +410,7 @@ const yearMethods = {} as YearMethods
 (
   Object.keys(yearComputeMethods) as (keyof YearComputeMethods)[]
 ).forEach((computeMethodName, i) => {
-  yearMethods[yearStatNames[i]] = function(
+  yearMethods[yearStatNamesAlpha[i]] = function(
     this: CalendarImpl,
     isoDateFields: IsoDateFields,
   ) {
@@ -767,7 +767,7 @@ era/eraYear/year/day
 Fields that are easily-extractable from IntlFields (non-month fields)
 */
 (
-  [...intlYearFieldNames, 'day'] as EasyIntlMethodName[]
+  [...intlYearFieldNamesAlpha, 'day'] as EasyIntlMethodName[]
 ).forEach((dateFieldName) => {
   IntlCalendarImpl.prototype[dateFieldName] = function(
     this: IntlCalendarImpl,

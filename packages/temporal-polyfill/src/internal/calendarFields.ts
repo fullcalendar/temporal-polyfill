@@ -168,42 +168,42 @@ export const dateStatRefiners = {
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-export const eraYearFieldNames = Object.keys(eraYearFieldRefiners) as
+export const eraYearFieldNamesAlpha = Object.keys(eraYearFieldRefiners) as
   (keyof EraYearFields)[]
 
 // eraYearAndYearFieldNames
-export const intlYearFieldNames = [...eraYearFieldNames, 'year'] as
+export const intlYearFieldNamesAlpha = [...eraYearFieldNamesAlpha, 'year'] as
   (keyof YearFieldsIntl)[]
 
-export const dateFieldNames = Object.keys(dateFieldRefiners) as
+export const dateFieldNamesAlpha = Object.keys(dateFieldRefiners) as
   (keyof DateFields)[]
 
 // month/monthCode/year
-export const yearMonthFieldNames = Object.keys(yearMonthFieldRefiners) as
+export const yearMonthFieldNamesAlpha = Object.keys(yearMonthFieldRefiners) as
   (keyof YearMonthFields)[]
 
 // day/month/monthCode
-export const monthDayFieldNames = dateFieldNames.slice(0, 3) as
+export const monthDayFieldNamesAlpha = dateFieldNamesAlpha.slice(0, 3) as
   (keyof MonthDayFields)[]
 
 // month/monthCode
-export const monthFieldNames = monthDayFieldNames.slice(1) as
+export const monthFieldNamesAlpha = monthDayFieldNamesAlpha.slice(1) as
   (keyof MonthFields)[]
 
-export const dateTimeFieldNames = Object.keys(dateTimeFieldRefiners).sort() as
+export const dateTimeFieldNamesAlpha = Object.keys(dateTimeFieldRefiners).sort() as
   (keyof DateTimeFields)[]
 
-export const timeFieldNames = Object.keys(timeFieldRefiners) as
+export const timeFieldNamesAlpha = Object.keys(timeFieldRefiners) as
   (keyof TimeFields)[]
 
 // monthCode/year
-export const yearMonthBasicNames = yearMonthFieldNames.slice(1) as
+export const yearMonthBasicNamesAlpha = yearMonthFieldNamesAlpha.slice(1) as
   (keyof YearMonthBasics)[]
 
-export const monthDayBasicNames = ['day', 'monthCode'] as
+export const monthDayBasicNamesAlpha = ['day', 'monthCode'] as
   (keyof MonthDayBasics)[]
 
-export const yearStatNames = Object.keys(yearStatRefiners) as
+export const yearStatNamesAlpha = Object.keys(yearStatRefiners) as
   (keyof YearStats)[]
 
 // unordered
@@ -253,13 +253,13 @@ export const calendarProtocolMethodNames: string[] = [
 
 // unordered
 export const yearMonthGetterNames = [
-  ...eraYearFieldNames,
-  ...yearMonthFieldNames,
+  ...eraYearFieldNamesAlpha,
+  ...yearMonthFieldNamesAlpha,
   ...yearMonthStatNames,
 ]
 
 // unordered
-export const monthDayGetterNames = monthDayBasicNames
+export const monthDayGetterNames = monthDayBasicNamesAlpha
 
 // Conversion
 // -------------------------------------------------------------------------------------------------
@@ -268,9 +268,9 @@ export const timeFieldsToIso = remapProps.bind<
   undefined, [BoundArg, BoundArg], // bound
   [TimeFields], // unbound
   IsoTimeFields // return
->(undefined, timeFieldNames, isoTimeFieldNamesAlpha)
+>(undefined, timeFieldNamesAlpha, isoTimeFieldNamesAlpha)
 
 // Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNames, 0)
+export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNamesAlpha, 0)

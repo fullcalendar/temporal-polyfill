@@ -1,4 +1,4 @@
-import { dateGetterRefiners, timeFieldNames } from '../internal/calendarFields'
+import { dateGetterRefiners, timeFieldNamesAlpha } from '../internal/calendarFields'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFieldsWithSign, durationInternalNames } from '../internal/durationFields'
 import { IsoDateFields, IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
@@ -56,7 +56,7 @@ export function createTimeGetterMethods(
       const isoFields = slotsToIsoFields(slots)
       return isoFields[isoTimeFieldNamesAlpha[i]]
     }
-  }, timeFieldNames)
+  }, timeFieldNamesAlpha)
 }
 
 /*
