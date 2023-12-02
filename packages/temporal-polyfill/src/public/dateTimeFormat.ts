@@ -2,18 +2,15 @@ import { Classlike, createLazyGenerator, defineProps, pluckProps } from '../inte
 import { OrigDateTimeFormat, LocalesArg, OptionNames, toEpochMilli, optionsTransformers } from '../internal/intlFormat'
 
 // public
-import type { ZonedDateTime } from './zonedDateTime'
-import type { PlainDate } from './plainDate'
-import type { PlainTime } from './plainTime'
-import type { PlainDateTime } from './plainDateTime'
-import type { PlainMonthDay } from './plainMonthDay'
-import type { PlainYearMonth } from './plainYearMonth'
-import type { Instant } from './instant'
+import { ZonedDateTime } from './zonedDateTime'
+import { PlainDate } from './plainDate'
+import { PlainTime } from './plainTime'
+import { PlainDateTime } from './plainDateTime'
+import { PlainMonthDay } from './plainMonthDay'
+import { PlainYearMonth } from './plainYearMonth'
+import { Instant } from './instant'
 import { BrandingSlots, getSlots } from './slots'
-import { TimeZoneSlot } from './timeZoneSlot'
-import { createTimeZoneSlotRecord } from './timeZoneRecordComplex'
-import { CalendarSlot } from './calendarSlot'
-import { createCalendarSlotRecord } from './calendarRecordComplex'
+import { IdLike } from '../internal/idLike'
 
 type OrigFormattable = number | Date
 type TemporalFormattable = Instant |
@@ -33,7 +30,7 @@ type DateTimeFormatInternals = [
 
 type SubformatFactory = (
   branding: string,
-  timeZoneRecord?: { id: string },
+  timeZoneIdLike?: IdLike,
 ) => Intl.DateTimeFormat | undefined
 
 const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
@@ -54,10 +51,10 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
     const subformatFactory = createLazyGenerator((
       branding: string,
-      timeZoneRecord?: { id: string },
+      timeZoneIdLike?: IdLike,
     ) => {
       if (optionsTransformers[branding]) {
-        const transformedOptions = optionsTransformers[branding](options, timeZoneRecord)
+        const transformedOptions = optionsTransformers[branding](options, timeZoneIdLike)
         return new OrigDateTimeFormat(locale, transformedOptions)
       }
     })
@@ -161,14 +158,11 @@ function resolveFormattable(
     Intl.DateTimeFormat | undefined // undefined if should use orig method
   ] {
   const slots = getSlots(arg)
-  const { branding, calendar, timeZone } = (slots || {}) as Partial<BrandingSlots & { calendar: CalendarSlot, timeZone: TimeZoneSlot }>
+  const { branding, calendar, timeZone } = (slots || {}) as Partial<BrandingSlots & { calendar: IdLike, timeZone: IdLike }>
 
-  const calendarRecord = (calendar && createCalendarSlotRecord(calendar)) as ({ id: string } | undefined)
-  const timeZoneRecord = (timeZone && createTimeZoneSlotRecord(timeZone)) as ({ id: string } | undefined)
-
-  const format = branding && subformatFactory(branding, timeZoneRecord)
+  const format = branding && subformatFactory(branding, timeZone)
   if (format) {
-    const epochMilli = toEpochMilli(calendarRecord, slots!, resolvedOptions)
+    const epochMilli = toEpochMilli(calendar, slots!, resolvedOptions)
     return [epochMilli, format]
   }
 

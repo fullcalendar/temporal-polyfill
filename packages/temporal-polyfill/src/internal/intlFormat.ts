@@ -12,8 +12,8 @@ import {
   hasAnyPropsByName,
 } from './utils'
 import { getSingleInstantFor } from './timeZoneMath'
-import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 import { IdLike, getId } from './idLike'
+import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators' // weird
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat
@@ -157,10 +157,7 @@ function timeFieldsToEpochNano(
   internals: IsoTimeFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
-  const timeZoneRecord = createTimeZoneImplRecord(resolvedOptions.timeZone, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  })
+  const timeZoneRecord = createTypicalTimeZoneRecordIMPL(resolvedOptions.timeZone)
 
   return getSingleInstantFor(timeZoneRecord, {
     isoYear: isoEpochOriginYear,
@@ -174,10 +171,7 @@ function dateFieldsToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
-  const timeZoneRecord = createTimeZoneImplRecord(resolvedOptions.timeZone, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  })
+  const timeZoneRecord = createTypicalTimeZoneRecordIMPL(resolvedOptions.timeZone)
 
   return getSingleInstantFor(timeZoneRecord, {
     ...isoTimeFieldDefaults,
@@ -272,7 +266,7 @@ export function formatInstantLocaleString(
 }
 
 export function formatZonedLocaleString(
-  timeZoneRecord: IdLike,
+  timeZoneIdLike: IdLike,
   calendarIdLike: IdLike,
   fields: { epochNanoseconds: DayTimeNano },
   locales?: LocalesArg,
@@ -287,7 +281,7 @@ export function formatZonedLocaleString(
     throw new TypeError('Cannot specify TimeZone')
   }
 
-  return formatLocaleString(transformZonedEpochOptions, calendarIdLike, timeZoneRecord, fields, locales, options, extractEpochNano)
+  return formatLocaleString(transformZonedEpochOptions, calendarIdLike, timeZoneIdLike, fields, locales, options, extractEpochNano)
 }
 
 export function formatLocaleString(
