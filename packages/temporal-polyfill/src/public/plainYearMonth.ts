@@ -6,6 +6,7 @@ import { LocalesArg, formatYearMonthLocaleString } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainYearMonthBag } from '../internal/genericBag'
+import { getId } from '../internal/idLike'
 import { CalendarBranding, PlainYearMonthBranding } from '../genericApi/branding'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import { PlainYearMonthSlots } from '../genericApi/genericTypes'
@@ -15,7 +16,7 @@ import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, rej
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
-import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
+import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
 import { createYearMonthDiffCalendarRecord, createYearMonthModCalendarRecord, createYearMonthMoveCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord } from './recordCreators'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
@@ -141,6 +142,11 @@ export class PlainYearMonth {
       : calendar
   }
 
+  // not DRY
+  get calendarId(): string {
+    return getId(getPlainYearMonthSlots(this).calendar)
+  }
+
   static from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {
     return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
   }
@@ -160,7 +166,6 @@ defineProps(PlainYearMonth.prototype, {
 })
 
 defineGetters(PlainYearMonth.prototype, {
-  ...createCalendarIdGetterMethods(PlainYearMonthBranding),
   ...createCalendarGetterMethods(PlainYearMonthBranding, yearMonthGetterNames),
 })
 

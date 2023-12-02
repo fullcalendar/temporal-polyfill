@@ -259,7 +259,7 @@ export const yearMonthGetterNames = [
 ]
 
 // unordered
-export const monthDayGetterNames = monthDayFieldNames
+export const monthDayGetterNames = monthDayBasicNames
 
 // Conversion
 // -------------------------------------------------------------------------------------------------

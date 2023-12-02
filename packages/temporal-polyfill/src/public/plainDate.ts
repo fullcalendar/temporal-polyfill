@@ -5,6 +5,7 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, r
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainDateBag } from '../internal/genericBag'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { getId } from '../internal/idLike'
 import { CalendarBranding, PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainDateFuncs from '../genericApi/plainDate'
@@ -16,7 +17,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
-import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
+import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -191,6 +192,11 @@ export class PlainDate {
       : calendar
   }
 
+  // not DRY
+  get calendarId(): string {
+    return getId(getPlainDateSlots(this).calendar)
+  }
+
   static from(arg: any, options?: OverflowOptions): PlainDate {
     return createPlainDate(toPlainDateSlots(arg, options))
   }
@@ -212,7 +218,6 @@ defineProps(PlainDate.prototype, {
 })
 
 defineGetters(PlainDate.prototype, {
-  ...createCalendarIdGetterMethods(PlainDateBranding),
   ...createCalendarGetterMethods(PlainDateBranding, dateGetterNames),
 })
 

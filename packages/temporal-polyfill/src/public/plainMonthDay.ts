@@ -5,6 +5,7 @@ import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflow
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
 import { PlainMonthDayBag } from '../internal/genericBag'
+import { getId } from '../internal/idLike'
 import { CalendarBranding, PlainMonthDayBranding } from '../genericApi/branding'
 import { PlainMonthDaySlots } from '../genericApi/genericTypes'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
@@ -14,7 +15,7 @@ import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalid
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
-import { createCalendarGetterMethods, createCalendarIdGetterMethods, neverValueOf } from './publicMixins'
+import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
 import { createMonthDayModCalendarRecord, createMonthDayNewCalendarRecord, getDateModCalendarRecord } from './recordCreators'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
@@ -90,6 +91,11 @@ export class PlainMonthDay {
       : calendar
   }
 
+  // not DRY
+  get calendarId(): string {
+    return getId(getPlainMonthDaySlots(this).calendar)
+  }
+
   static from(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDay {
     return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
   }
@@ -101,12 +107,8 @@ defineProps(PlainMonthDay.prototype, {
   valueOf: neverValueOf,
 })
 
-const cdm = createCalendarGetterMethods(PlainMonthDayBranding, monthDayGetterNames)
-delete (cdm as any).month // hack
-
 defineGetters(PlainMonthDay.prototype, {
-  ...createCalendarIdGetterMethods(PlainMonthDayBranding),
-  ...cdm,
+  ...createCalendarGetterMethods(PlainMonthDayBranding, monthDayGetterNames),
 })
 
 // Utils

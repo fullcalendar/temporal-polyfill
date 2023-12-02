@@ -6,6 +6,7 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainDateBag, PlainDateTimeBag } from '../internal/genericBag'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { getId } from '../internal/idLike'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
@@ -22,7 +23,7 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createCalendarGetterMethods, createCalendarIdGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
+import { createCalendarGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
 import { createDateNewCalendarRecord, createMonthDayNewCalendarRecord, createSimpleTimeZoneRecord, createTypicalTimeZoneRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord, getDiffCalendarRecord, getMoveCalendarRecord } from './recordCreators'
 
@@ -226,6 +227,11 @@ export class PlainDateTime {
       : calendar
   }
 
+  // not DRY
+  get calendarId(): string {
+    return getId(getPlainDateTimeSlots(this).calendar)
+  }
+
   static from(arg: PlainDateTimeArg, options: OverflowOptions): PlainDateTime {
     return createPlainDateTime(toPlainDateTimeSlots(arg, options))
   }
@@ -245,7 +251,6 @@ defineProps(PlainDateTime.prototype, {
 })
 
 defineGetters(PlainDateTime.prototype, {
-  ...createCalendarIdGetterMethods(PlainDateTimeBranding),
   ...createCalendarGetterMethods(PlainDateTimeBranding, dateGetterNames),
   ...createTimeGetterMethods(PlainDateTimeBranding),
 })

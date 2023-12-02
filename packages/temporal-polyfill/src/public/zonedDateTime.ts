@@ -33,7 +33,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg, TimeZoneProtocol, createTimeZone } from './timeZone'
-import { createCalendarIdGetterMethods, createEpochGetterMethods, createZonedCalendarGetterMethods, createZonedTimeGetterMethods, neverValueOf } from './publicMixins'
+import { createCalendarGetterMethods, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
 import { createDateNewCalendarRecord, createMonthDayNewCalendarRecord, createSimpleTimeZoneRecord, createTypicalTimeZoneRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord, getDiffCalendarRecord, getMoveCalendarRecord } from './recordCreators'
 
@@ -273,6 +273,11 @@ export class ZonedDateTime {
       : timeZone
   }
 
+  // not DRY
+  get calendarId(): string {
+    return getId(getZonedDateTimeSlots(this).calendar)
+  }
+
   get hoursInDay(): number {
     return ZonedDateTimeFuncs.hoursInDay(
       createTypicalTimeZoneRecord,
@@ -283,19 +288,14 @@ export class ZonedDateTime {
   // TODO: more DRY
   get offsetNanoseconds(): number {
     const slots = getZonedDateTimeSlots(this)
-    const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
-
-    return zonedInternalsToIso(slots, timeZoneRecord).offsetNanoseconds
+    return slotsToIsoFields(slots).offsetNanoseconds
   }
 
   // TODO: more DRY
   get offset(): string {
     const slots = getZonedDateTimeSlots(this)
-    const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
-
-    return formatOffsetNano(
-      zonedInternalsToIso(slots, timeZoneRecord).offsetNanoseconds,
-    )
+    const offsetNano = slotsToIsoFields(slots).offsetNanoseconds
+    return formatOffsetNano(offsetNano)
   }
 
   get timeZoneId(): string {
@@ -321,11 +321,17 @@ defineProps(ZonedDateTime.prototype, {
 })
 
 defineGetters(ZonedDateTime.prototype, {
-  ...createCalendarIdGetterMethods(ZonedDateTimeBranding),
-  ...createZonedCalendarGetterMethods(ZonedDateTimeBranding, dateGetterNames),
-  ...createZonedTimeGetterMethods(ZonedDateTimeBranding),
+  ...createCalendarGetterMethods(ZonedDateTimeBranding, dateGetterNames, slotsToIsoFields),
+  ...createTimeGetterMethods(ZonedDateTimeBranding, slotsToIsoFields),
   ...createEpochGetterMethods(ZonedDateTimeBranding),
 })
+
+function slotsToIsoFields(
+  slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
+): IsoDateTimeFields & { offsetNanoseconds: number } {
+  const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
+  return zonedInternalsToIso(slots, timeZoneRecord)
+}
 
 // Utils
 // -------------------------------------------------------------------------------------------------

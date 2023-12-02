@@ -1,107 +1,67 @@
 import { dateGetterRefiners, timeFieldNames } from '../internal/calendarFields'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFieldsWithSign, durationInternalNames } from '../internal/durationFields'
-import { IsoTimeFields, isoDateFieldNamesDesc, isoTimeFieldNamesAlpha } from '../internal/isoFields'
+import { IsoDateFields, IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
-import { mapPropNames, pluckProps } from '../internal/utils'
+import { identityFunc, mapPropNames } from '../internal/utils'
 import { queryCalendarImpl } from '../internal/calendarImpl'
-import { getId } from '../internal/idLike'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
-import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { DurationSlots } from '../genericApi/genericTypes'
 
 // public
-import { getSpecificSlots, BrandingSlots, CalendarSlots, IsoDateSlots, EpochSlots } from './slots'
+import { getSpecificSlots, BrandingSlots, IsoDateSlots, EpochSlots } from './slots'
 import { createPlainDate } from './plainDate'
 import { CalendarProtocol } from './calendar'
-import { TimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot } from './calendarSlot'
-import { createSimpleTimeZoneRecord } from './recordCreators'
-
-// TODO: better types
-// TODO: move this out!!!
-export function createCalendarIdGetterMethods(branding: string): { calendarId(): string } {
-  return {
-    calendarId() {
-      const slots = getSpecificSlots(branding, this) as (BrandingSlots & CalendarSlots)
-      return getId(slots.calendar)
-    }
-  }
-}
 
 export function createCalendarGetterMethods(
   branding: string,
-  names: string[]
+  names: string[],
+  slotsToIsoFields: ((slots: any) => IsoDateFields) = identityFunc,
 ) {
-  return mapPropNames((name, i) => {
+  return mapPropNames((name) => {
     return function (this: any) {
       const slots = getSpecificSlots(branding, this) as (BrandingSlots & IsoDateSlots)
-      const { calendar } = slots
-
-      // TODO: make DRY
-      return typeof calendar === 'string'
-        ? (queryCalendarImpl(calendar) as any)[name](slots)
-        : (dateGetterRefiners as any)[name](
-            (calendar[name as keyof CalendarProtocol] as any)(
-              createPlainDate({
-                ...slots,
-                branding: PlainDateBranding,
-              })
-            )
-          )
+      const isoFields = slotsToIsoFields(slots)
+      return queryCalendarVal(name as string, slots.calendar, isoFields)
     }
   }, names)
 }
 
-// YUCK
-export function createZonedCalendarGetterMethods(
-  branding: string,
-  names: string[]
+function queryCalendarVal(
+  methodName: string,
+  calendarSlot: CalendarSlot,
+  isoFields: IsoDateFields,
 ) {
-  return mapPropNames((name, i) => {
-    return function (this: any) {
-      const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
-      const { calendar, timeZone } = slots
-      const timeZoneRecord = createSimpleTimeZoneRecord(timeZone)
-      const isoFields = zonedInternalsToIso(slots, timeZoneRecord)
-
-      // TODO: make DRY
-      return typeof calendar === 'string'
-        ? (queryCalendarImpl(calendar) as any)[name](isoFields)
-        : (dateGetterRefiners as any)[name](
-            (calendar[name as keyof CalendarProtocol] as any)(
-              createPlainDate({
-                ...pluckProps(isoDateFieldNamesDesc, isoFields),
-                calendar,
-                branding: PlainDateBranding,
-              })
-            )
-          )
-    }
-  }, names)
+  return typeof calendarSlot === 'string'
+    ? (queryCalendarImpl(calendarSlot) as any)[methodName](isoFields)
+    : (dateGetterRefiners as any)[methodName](
+        (calendarSlot[methodName as keyof CalendarProtocol] as any)(
+          createPlainDate({
+            ...isoFields,
+            calendar: calendarSlot,
+            branding: PlainDateBranding,
+          })
+        )
+      )
 }
 
-export function createTimeGetterMethods(branding: string) {
+export function createTimeGetterMethods(
+  branding: string,
+  slotsToIsoFields: ((slots: any) => IsoTimeFields) = identityFunc,
+) {
   return mapPropNames((name, i) => {
     return function (this: any) {
       const slots = getSpecificSlots(branding, this) as (BrandingSlots & IsoTimeFields)
-      return slots[isoTimeFieldNamesAlpha[i]]
+      const isoFields = slotsToIsoFields(slots)
+      return isoFields[isoTimeFieldNamesAlpha[i]]
     }
   }, timeFieldNames)
 }
 
-// YUCK
-export function createZonedTimeGetterMethods(branding: string) {
-  return mapPropNames((name, i) => {
-    return function (this: any) {
-      const slots = getSpecificSlots(branding, this) as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
-      const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
-
-      return zonedInternalsToIso(slots, timeZoneRecord)[isoTimeFieldNamesAlpha[i]]
-    }
-  }, timeFieldNames)
-}
-
+/*
+TODO: define using map
+*/
 export function createEpochGetterMethods(branding: string) {
   return {
     epochSeconds() {
