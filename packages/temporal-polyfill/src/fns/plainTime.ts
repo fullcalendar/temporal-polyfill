@@ -1,9 +1,9 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { OverflowOptions } from '../internal/options'
+import { LocalesArg, prepPlainTimeFormat } from '../internal/intlFormat'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/genericTypes'
 import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
-import { DateTimeFormatSlots } from './dateTimeFormat'
 
 export const create = PlainTimeFuncs.create
 
@@ -70,17 +70,40 @@ export function toPlainDateTime(
   return PlainTimeFuncs.toPlainDateTime(plainTimeSlots, plainDateSlots) // just pass through
 }
 
-// DateTimeFormat
-// --------------
-
-export function format(format: DateTimeFormatSlots, slots: PlainTimeSlots): string {
-  return '' // TODO
+export function toLocaleString(
+  slots: PlainTimeSlots,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
+  return format.format(epochMilli)
 }
 
-export function formatRange(
-  format: DateTimeFormatSlots,
+export function toLocaleStringParts(
+  slots: PlainTimeSlots,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
+  return format.formatToParts(epochMilli)
+}
+
+export function rangeToLocaleString(
   slots0: PlainTimeSlots,
-  slots1: PlainTimeSlots
+  slots1: PlainTimeSlots,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
 ): string {
-  return '' // TODO
+  const [format, epochMilli0, epochMilli1] = prepPlainTimeFormat(locales, options, slots0, slots1)
+  return (format as any).formatRange(epochMilli0, epochMilli1!)
+}
+
+export function rangeToLocaleStringParts(
+  slots0: PlainTimeSlots,
+  slots1: PlainTimeSlots,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+  ): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepPlainTimeFormat(locales, options, slots0, slots1)
+  return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

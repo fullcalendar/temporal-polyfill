@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { diffInstants } from '../internal/diff'
 import { negateDurationInternals } from '../internal/durationFields'
 import { formatInstantIso } from '../internal/isoFormat'
-import { LocalesArg, formatInstantLocaleString } from '../internal/intlFormat'
+import { LocalesArg, prepInstantFormat } from '../internal/intlFormat'
 import { checkEpochNanoInBounds } from '../internal/isoMath'
 import { parseInstant } from '../internal/isoParse'
 import { moveEpochNano } from '../internal/move'
@@ -155,8 +155,9 @@ export class Instant {
     )
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    return formatInstantLocaleString(getInstantSlots(this), locales, options)
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const [format, epochMilli] =  prepInstantFormat(locales, options, getInstantSlots(this))
+    return format.format(epochMilli)
   }
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {

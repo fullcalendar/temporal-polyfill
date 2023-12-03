@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetterNames } from '../internal/calendarFields'
-import { LocalesArg, formatMonthDayLocaleString } from '../internal/intlFormat'
+import { LocalesArg, prepPlainMonthDayFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
@@ -57,8 +57,9 @@ export class PlainMonthDay {
     return PlainMonthDayFuncs.toJSON(getPlainMonthDaySlots(this))
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    return formatMonthDayLocaleString(getPlainMonthDaySlots(this), locales, options)
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const [format, epochMilli] = prepPlainMonthDayFormat(locales, options, getPlainMonthDaySlots(this))
+    return format.format(epochMilli)
   }
 
   toPlainDate(bag: YearFields): PlainDate {

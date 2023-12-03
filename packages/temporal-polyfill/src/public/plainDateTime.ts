@@ -1,5 +1,5 @@
 import { DateTimeBag, dateGetterNames } from '../internal/calendarFields'
-import { LocalesArg, formatDateTimeLocaleString } from '../internal/intlFormat'
+import { LocalesArg, prepPlainDateTimeFormat } from '../internal/intlFormat'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults } from '../internal/isoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { UnitName } from '../internal/units'
@@ -159,7 +159,8 @@ export class PlainDateTime {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    return formatDateTimeLocaleString(getPlainDateTimeSlots(this), locales, options)
+    const [format, epochMilli] = prepPlainDateTimeFormat(locales, options, getPlainDateTimeSlots(this))
+    return format.format(epochMilli)
   }
 
   toZonedDateTime(

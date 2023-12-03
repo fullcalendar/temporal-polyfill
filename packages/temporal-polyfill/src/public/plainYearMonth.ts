@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, yearMonthGetterNames } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
-import { LocalesArg, formatYearMonthLocaleString } from '../internal/intlFormat'
+import { LocalesArg, prepPlainYearMonthFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainYearMonthBag } from '../internal/genericBag'
@@ -108,8 +108,9 @@ export class PlainYearMonth {
     return PlainYearMonthFuncs.toJSON(getPlainYearMonthSlots(this))
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    return formatYearMonthLocaleString(getPlainYearMonthSlots(this), locales, options)
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const [format, epochMilli] = prepPlainYearMonthFormat(locales, options, getPlainYearMonthSlots(this))
+    return format.format(epochMilli)
   }
 
   toPlainDate(bag: { day: number }): PlainDate {

@@ -1,6 +1,5 @@
-import { Classlike, createLazyGenerator, defineProps, pluckProps } from '../internal/utils'
-import { OrigDateTimeFormat, LocalesArg, OptionNames, toEpochMilli, optionsTransformers, epochNanoConverters, strictCalendarChecks } from '../internal/intlFormat'
-import { ZonedDateTimeBranding } from '../genericApi/branding'
+import { Classlike, defineProps, pluckProps } from '../internal/utils'
+import { OrigDateTimeFormat, LocalesArg, OptionNames, createBoundFormatPrepFunc, BoundFormatPrepFunc } from '../internal/intlFormat'
 
 // public
 import { ZonedDateTime } from './zonedDateTime'
@@ -10,7 +9,7 @@ import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Instant } from './instant'
-import { BrandingSlots, getSlots } from './slots'
+import { getSlots } from './slots'
 
 type OrigFormattable = number | Date
 type TemporalFormattable = Instant |
@@ -23,14 +22,7 @@ type TemporalFormattable = Instant |
 
 export type Formattable = TemporalFormattable | OrigFormattable
 
-type DateTimeFormatInternals = [
-  SubformatCreator,
-  Intl.ResolvedDateTimeFormatOptions
-]
-
-type SubformatCreator = (branding: string) => Intl.DateTimeFormat | undefined
-
-const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
+const prepSubformatMap = new WeakMap<DateTimeFormat, BoundFormatPrepFunc>()
 
 // Intl.DateTimeFormat
 // -------------------------------------------------------------------------------------------------
@@ -43,41 +35,32 @@ export class DateTimeFormat extends OrigDateTimeFormat {
     // Must store recursively flattened options because given `options` could mutate in future
     // Algorithm: whitelist against resolved options
     const resolvedOptions = this.resolvedOptions()
-    const { locale } = resolvedOptions
-    options = pluckProps(
+    const origOptions = pluckProps(
       Object.keys(options) as OptionNames,
       resolvedOptions as Intl.DateTimeFormatOptions
     )
 
-    const createSubformat = createLazyGenerator((branding: string) => {
-      if (optionsTransformers[branding]) {
-        const transformedOptions = optionsTransformers[branding](options)
-        return new OrigDateTimeFormat(locale, transformedOptions)
-      }
-    })
-
-    formatInternalsMap.set(this, [
-      createSubformat,
-      resolvedOptions,
-    ])
+    prepSubformatMap.set(this, createBoundFormatPrepFunc(origOptions, resolvedOptions))
   }
 
   format(arg?: Formattable): string {
-    const [formattable, format] = resolveSingleFormattable(this, arg)
+    const prepSubformat = prepSubformatMap.get(this)!
+    const [format, epochMilli] = prepSubformat(getSlots(arg))
 
-    return format
-      ? format.format(formattable)
-      : super.format(formattable)
-    // can't use the origMethd.call trick because .format() is always bound
+    // can't use the origMethod.call() trick because .format() is always bound
     // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
+    return format
+      ? format.format(epochMilli)
+      : super.format(arg as OrigFormattable)
   }
 
   formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
-    const [formattable, format] = resolveSingleFormattable(this, arg)
+    const prepSubformat = prepSubformatMap.get(this)!
+    const [format, epochMilli] = prepSubformat(getSlots(arg))
 
     return format
-      ? format.formatToParts(formattable)
-      : super.formatToParts(formattable)
+      ? format.formatToParts(epochMilli)
+      : super.formatToParts(arg as OrigFormattable)
   }
 }
 
@@ -86,90 +69,19 @@ export interface DateTimeFormat {
   formatRangeToParts(arg0: Formattable, arg1: Formattable): Intl.DateTimeFormatPart[]
 }
 
-['formatRange', 'formatRangeToParts'].forEach((methodName) => {
+;['formatRange', 'formatRangeToParts'].forEach((methodName) => {
   const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
 
   if (origMethod) {
     defineProps(DateTimeFormat.prototype, {
-      [methodName]: function (
-        this: Intl.DateTimeFormat,
-        arg0: Formattable,
-        arg1: Formattable
-      ) {
-        const [formattable0, formattable1, format] = resolveRangeFormattables(this, arg0, arg1)
-        return origMethod.call(format, formattable0, formattable1)
+      [methodName]: function (this: DateTimeFormat, arg0: Formattable, arg1: Formattable) {
+        const prepSubformat = prepSubformatMap.get(this)!
+        const [format, epochMilli0, epochMilli1] = prepSubformat(getSlots(arg0), getSlots(arg1))
+
+        return format
+          ? origMethod.call(format, epochMilli0, epochMilli1)
+          : origMethod.call(this, arg0, arg1)
       }
     })
   }
 })
-
-// Arg-normalization Utils
-// -------------------------------------------------------------------------------------------------
-
-function resolveSingleFormattable(
-  format: Intl.DateTimeFormat,
-  arg: Formattable | undefined
-): [
-  OrigFormattable | undefined,
-  Intl.DateTimeFormat | undefined // undefined if should use orig method
-] {
-  if (arg !== undefined) {
-    const formatInternals = formatInternalsMap.get(format)!
-    return resolveFormattable(arg, ...formatInternals)
-  }
-
-  // arg was not specified (current datetime)
-  return [arg] as unknown as [OrigFormattable | undefined, undefined]
-}
-
-function resolveRangeFormattables(
-  format: Intl.DateTimeFormat,
-  arg0: Formattable,
-  arg1: Formattable
-): [
-  OrigFormattable,
-  OrigFormattable,
-  Intl.DateTimeFormat
-] {
-  const formatInternals = formatInternalsMap.get(format)!
-  const [formattable0, format0] = resolveFormattable(arg0, ...formatInternals)
-  const [formattable1, format1] = resolveFormattable(arg1, ...formatInternals)
-
-  if (format0 || format1) {
-    // the returned DateTimeFormats are idempotent per Temporal type,
-    // so testing inequality is a way to test mismatching Temporal types.
-    if (format0 !== format1) {
-      throw new TypeError('Accepts two Temporal values of same type')
-    }
-    format = format0! // guaranteed to be truthy and equal
-  }
-
-  return [formattable0, formattable1, format]
-}
-
-function resolveFormattable(
-  arg: Formattable,
-  createSubformat: SubformatCreator,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions
-): [
-  OrigFormattable,
-  Intl.DateTimeFormat | undefined // undefined if should use orig method
-] {
-  const slots = getSlots(arg)
-  const { branding } = (slots || {}) as Partial<BrandingSlots>
-  const format = branding && createSubformat(branding)
-
-  if (format) {
-    const epochMilli = toEpochMilli(
-      slots!,
-      resolvedOptions,
-      epochNanoConverters[branding],
-      strictCalendarChecks[branding],
-    )
-
-    return [epochMilli, format]
-  }
-
-  // arg is an OrigFormattable
-  return [arg] as unknown as [OrigFormattable, undefined]
-}

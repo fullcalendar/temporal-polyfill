@@ -1,6 +1,6 @@
 import { DateBag, DateFields, dateGetterNames } from '../internal/calendarFields'
 import { IsoDateFields, isoDateFieldNamesAlpha, isoDateFieldNamesDesc } from '../internal/isoFields'
-import { LocalesArg, formatDateLocaleString } from '../internal/intlFormat'
+import { LocalesArg, prepPlainDateFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainDateBag } from '../internal/genericBag'
@@ -118,7 +118,8 @@ export class PlainDate {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    return formatDateLocaleString(getPlainDateSlots(this), locales, options)
+    const [format, epochMilli] = prepPlainDateFormat(locales, options, getPlainDateSlots(this))
+    return format.format(epochMilli)
   }
 
   toZonedDateTime(

@@ -1,6 +1,6 @@
 import { TimeBag } from '../internal/calendarFields'
-import { IsoTimeFields, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/isoFields'
-import { LocalesArg, formatTimeLocaleString } from '../internal/intlFormat'
+import { IsoTimeFields, isoTimeFieldNamesDesc } from '../internal/isoFields'
+import { LocalesArg, prepPlainTimeFormat } from '../internal/intlFormat'
 import {
   DiffOptions,
   OverflowOptions,
@@ -95,8 +95,9 @@ export class PlainTime {
     return PlainTimeFuncs.toJSON(getPlainTimeSlots(this))
   }
 
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    return formatTimeLocaleString(getPlainTimeSlots(this), locales, options)
+  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+    const [format, epochMilli] = prepPlainTimeFormat(locales, options, getPlainTimeSlots(this))
+    return format.format(epochMilli)
   }
 
   // TODO: ensure options isn't undefined before accessing

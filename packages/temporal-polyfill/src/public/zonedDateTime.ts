@@ -1,5 +1,5 @@
 import { DateTimeBag, dateGetterNames } from '../internal/calendarFields'
-import { LocalesArg, formatZonedLocaleString } from '../internal/intlFormat'
+import { LocalesArg, prepZonedDateTimeFormat } from '../internal/intlFormat'
 import { formatOffsetNano } from '../internal/isoFormat'
 import {
   DiffOptions,
@@ -197,8 +197,9 @@ export class ZonedDateTime {
     )
   }
 
-  toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-    return formatZonedLocaleString(getZonedDateTimeSlots(this), locales, options)
+  toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}): string {
+    const [format, epochMilli] = prepZonedDateTimeFormat(locales, options, getZonedDateTimeSlots(this))
+    return format.format(epochMilli)
   }
 
   toInstant(): Instant {

@@ -1,5 +1,3 @@
-import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../internal/calendarSlotString'
@@ -7,8 +5,10 @@ import { DurationFieldsWithSign } from '../internal/durationFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions } from '../internal/options'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
+import { LocalesArg, prepPlainDateTimeFormat } from '../internal/intlFormat'
+import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
-import { DateTimeFormatSlots } from './dateTimeFormat'
 
 // TODO: do Readonly<> everywhere?
 
@@ -216,17 +216,40 @@ export function toPlainTime(
   return PlainDateTimeFuncs.toPlainTime(plainDateTimeSlots) // just forward
 }
 
-// DateTimeFormat
-// --------------
-
-export function format(format: DateTimeFormatSlots, slots: PlainDateTimeSlots<string>): string {
-  return '' // TODO
+export function toLocaleString(
+  slots: PlainDateTimeSlots<string>,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepPlainDateTimeFormat(locales, options, slots)
+  return format.format(epochMilli)
 }
 
-export function formatRange(
-  format: DateTimeFormatSlots,
+export function toLocaleStringParts(
+  slots: PlainDateTimeSlots<string>,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli] = prepPlainDateTimeFormat(locales, options, slots)
+  return format.formatToParts(epochMilli)
+}
+
+export function rangeToLocaleString(
   slots0: PlainDateTimeSlots<string>,
-  slots1: PlainDateTimeSlots<string>
+  slots1: PlainDateTimeSlots<string>,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
 ): string {
-  return '' // TODO
+  const [format, epochMilli0, epochMilli1] = prepPlainDateTimeFormat(locales, options, slots0, slots1)
+  return (format as any).formatRange(epochMilli0, epochMilli1!)
+}
+
+export function rangeToLocaleStringParts(
+  slots0: PlainDateTimeSlots<string>,
+  slots1: PlainDateTimeSlots<string>,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+  ): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepPlainDateTimeFormat(locales, options, slots0, slots1)
+  return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
