@@ -108,10 +108,8 @@ export class PlainYearMonth {
     return PlainYearMonthFuncs.toJSON(getPlainYearMonthSlots(this))
   }
 
-  // TODO: rethink this
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    const slots = getPlainYearMonthSlots(this)
-    return formatYearMonthLocaleString(slots.calendar, slots, locales, options)
+    return formatYearMonthLocaleString(getPlainYearMonthSlots(this), locales, options)
   }
 
   toPlainDate(bag: { day: number }): PlainDate {

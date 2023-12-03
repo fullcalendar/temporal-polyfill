@@ -197,16 +197,8 @@ export class ZonedDateTime {
     )
   }
 
-  // TODO: rethink this!!!
   toLocaleString(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-    const slots = getZonedDateTimeSlots(this)
-    return formatZonedLocaleString(
-      slots.timeZone,
-      slots.calendar,
-      slots,
-      locales,
-      options,
-    )
+    return formatZonedLocaleString(getZonedDateTimeSlots(this), locales, options)
   }
 
   toInstant(): Instant {

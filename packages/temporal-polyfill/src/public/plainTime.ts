@@ -95,10 +95,8 @@ export class PlainTime {
     return PlainTimeFuncs.toJSON(getPlainTimeSlots(this))
   }
 
-  // TODO: figure this out
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    const slots = getPlainTimeSlots(this)
-    return formatTimeLocaleString(slots, locales, options)
+    return formatTimeLocaleString(getPlainTimeSlots(this), locales, options)
   }
 
   // TODO: ensure options isn't undefined before accessing

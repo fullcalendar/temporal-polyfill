@@ -156,8 +156,7 @@ export class Instant {
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    const slots = getInstantSlots(this)
-    return formatInstantLocaleString(slots, locales, options)
+    return formatInstantLocaleString(getInstantSlots(this), locales, options)
   }
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {

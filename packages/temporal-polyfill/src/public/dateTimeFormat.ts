@@ -1,5 +1,6 @@
 import { Classlike, createLazyGenerator, defineProps, pluckProps } from '../internal/utils'
 import { OrigDateTimeFormat, LocalesArg, OptionNames, toEpochMilli, optionsTransformers, epochNanoConverters, strictCalendarChecks } from '../internal/intlFormat'
+import { ZonedDateTimeBranding } from '../genericApi/branding'
 
 // public
 import { ZonedDateTime } from './zonedDateTime'
@@ -10,7 +11,6 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Instant } from './instant'
 import { BrandingSlots, getSlots } from './slots'
-import { IdLike } from '../internal/idLike'
 
 type OrigFormattable = number | Date
 type TemporalFormattable = Instant |
@@ -28,10 +28,7 @@ type DateTimeFormatInternals = [
   Intl.ResolvedDateTimeFormatOptions
 ]
 
-type SubformatFactory = (
-  branding: string,
-  timeZoneIdLike?: IdLike,
-) => Intl.DateTimeFormat | undefined
+type SubformatFactory = (branding: string) => Intl.DateTimeFormat | undefined
 
 const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
 
@@ -52,12 +49,9 @@ export class DateTimeFormat extends OrigDateTimeFormat {
       resolvedOptions as Intl.DateTimeFormatOptions
     )
 
-    const subformatFactory = createLazyGenerator((
-      branding: string,
-      timeZoneIdLike?: IdLike,
-    ) => {
+    const subformatFactory = createLazyGenerator((branding: string) => {
       if (optionsTransformers[branding]) {
-        const transformedOptions = optionsTransformers[branding](options, timeZoneIdLike)
+        const transformedOptions = optionsTransformers[branding](options)
         return new OrigDateTimeFormat(locale, transformedOptions)
       }
     })
@@ -162,13 +156,15 @@ function resolveFormattable(
   Intl.DateTimeFormat | undefined // undefined if should use orig method
 ] {
   const slots = getSlots(arg)
-  const { branding, calendar, timeZone } = (slots || {}) as
-    Partial<BrandingSlots & { calendar: IdLike, timeZone: IdLike }>
+  const { branding } = (slots || {}) as Partial<BrandingSlots>
 
-  const format = branding && subformatFactory(branding, timeZone)
+  if (branding === ZonedDateTimeBranding) {
+    throw new TypeError('ZonedDateTime is not supported')
+  }
+
+  const format = branding && subformatFactory(branding)
   if (format) {
     const epochMilli = toEpochMilli(
-      calendar,
       slots!,
       resolvedOptions,
       epochNanoConverters[branding],

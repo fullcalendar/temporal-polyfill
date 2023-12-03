@@ -158,10 +158,8 @@ export class PlainDateTime {
     return PlainDateTimeFuncs.toJSON(getPlainDateTimeSlots(this))
   }
 
-  // TODO: rethink this!!!
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
-    const slots = getPlainDateTimeSlots(this)
-    return formatDateTimeLocaleString(slots.calendar, slots, locales, options)
+    return formatDateTimeLocaleString(getPlainDateTimeSlots(this), locales, options)
   }
 
   toZonedDateTime(
