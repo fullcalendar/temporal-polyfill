@@ -182,7 +182,9 @@ export const optionsTransformers: Record<string, OptionsTransformer> = {
   PlainDateTime: transformDateTimeOptions,
   PlainTime: transformTimeOptions,
   Instant: transformEpochOptions,
-  ZonedDateTime: transformZonedEpochOptions,
+  ZonedDateTime() {
+    throw new TypeError('ZonedDateTime is not supported') // for Intl.DateTimeFormat
+  },
 }
 
 export const epochNanoConverters: Record<string, EpochNanoConverter<any>> = {

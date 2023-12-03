@@ -24,11 +24,11 @@ type TemporalFormattable = Instant |
 export type Formattable = TemporalFormattable | OrigFormattable
 
 type DateTimeFormatInternals = [
-  SubformatFactory,
+  SubformatCreator,
   Intl.ResolvedDateTimeFormatOptions
 ]
 
-type SubformatFactory = (branding: string) => Intl.DateTimeFormat | undefined
+type SubformatCreator = (branding: string) => Intl.DateTimeFormat | undefined
 
 const formatInternalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
 
@@ -49,7 +49,7 @@ export class DateTimeFormat extends OrigDateTimeFormat {
       resolvedOptions as Intl.DateTimeFormatOptions
     )
 
-    const subformatFactory = createLazyGenerator((branding: string) => {
+    const createSubformat = createLazyGenerator((branding: string) => {
       if (optionsTransformers[branding]) {
         const transformedOptions = optionsTransformers[branding](options)
         return new OrigDateTimeFormat(locale, transformedOptions)
@@ -57,7 +57,7 @@ export class DateTimeFormat extends OrigDateTimeFormat {
     })
 
     formatInternalsMap.set(this, [
-      subformatFactory,
+      createSubformat,
       resolvedOptions,
     ])
   }
@@ -149,7 +149,7 @@ function resolveRangeFormattables(
 
 function resolveFormattable(
   arg: Formattable,
-  subformatFactory: SubformatFactory,
+  createSubformat: SubformatCreator,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions
 ): [
   OrigFormattable,
@@ -157,12 +157,8 @@ function resolveFormattable(
 ] {
   const slots = getSlots(arg)
   const { branding } = (slots || {}) as Partial<BrandingSlots>
+  const format = branding && createSubformat(branding)
 
-  if (branding === ZonedDateTimeBranding) {
-    throw new TypeError('ZonedDateTime is not supported')
-  }
-
-  const format = branding && subformatFactory(branding)
   if (format) {
     const epochMilli = toEpochMilli(
       slots!,
