@@ -87,7 +87,7 @@ const monthDayExclusions: OptionNames = [
 // Transformer Funcs
 // -----------------
 
-type OptionsTransformer = (options: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions
+type OptionsTransformer = (options: Intl.DateTimeFormatOptions | undefined) => Intl.DateTimeFormatOptions
 
 const transformMonthDayOptions = createTransformer(monthDayValidNames, monthDayFallbacks, monthDayExclusions)
 const transformYearMonthOptions = createTransformer(yearMonthValidNames, yearMonthFallbacks, yearMonthExclusions)
@@ -104,8 +104,8 @@ function createTransformer(
 ): OptionsTransformer {
   const excludedNameSet = new Set(excludedNames)
 
-  return (options: Intl.DateTimeFormatOptions) => {
-    options = excludePropsByName(options, excludedNameSet)
+  return (options: Intl.DateTimeFormatOptions | undefined) => {
+    options = excludePropsByName(options || {}, excludedNameSet)
 
     if (!hasAnyPropsByName(options, validNames)) {
       Object.assign(options, fallbacks)
@@ -206,7 +206,7 @@ export function formatMonthDayLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformMonthDayOptions, slots, locales, options, undefined, true)
+  return formatLocaleString(slots, locales, transformMonthDayOptions(options), undefined, true)
 }
 
 export function formatYearMonthLocaleString(
@@ -214,7 +214,7 @@ export function formatYearMonthLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformYearMonthOptions, slots, locales, options, undefined, true)
+  return formatLocaleString(slots, locales, transformYearMonthOptions(options), undefined, true)
 }
 
 export function formatDateLocaleString(
@@ -222,7 +222,7 @@ export function formatDateLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformDateOptions, slots, locales, options)
+  return formatLocaleString(slots, locales, transformDateOptions(options))
 }
 
 export function formatDateTimeLocaleString(
@@ -230,7 +230,7 @@ export function formatDateTimeLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformDateTimeOptions, slots, locales, options)
+  return formatLocaleString(slots, locales, transformDateTimeOptions(options))
 }
 
 export function formatTimeLocaleString(
@@ -238,7 +238,7 @@ export function formatTimeLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformTimeOptions, slots, locales, options, timeFieldsToEpochNano)
+  return formatLocaleString(slots, locales, transformTimeOptions(options), timeFieldsToEpochNano)
 }
 
 export function formatInstantLocaleString(
@@ -246,7 +246,7 @@ export function formatInstantLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return formatLocaleString(transformEpochOptions, slots, locales, options, extractEpochNano)
+  return formatLocaleString(slots, locales, transformEpochOptions(options), extractEpochNano)
 }
 
 export function formatZonedLocaleString(
@@ -254,31 +254,24 @@ export function formatZonedLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  function transformOptions(options: Intl.DateTimeFormatOptions) {
-    if ('timeZone' in options) {
-      throw new TypeError('Cannot specify TimeZone')
-    }
+  options = transformZonedEpochOptions(options)
 
-    options = transformZonedEpochOptions(options)
-    options.timeZone = getId(slots.timeZone)
-
-    return options
+  if ('timeZone' in options) {
+    throw new TypeError('Cannot specify TimeZone')
   }
 
-  return formatLocaleString(transformOptions, slots, locales, options, extractEpochNano)
+  options.timeZone = getId(slots.timeZone)
+
+  return formatLocaleString(slots, locales, options, extractEpochNano)
 }
 
 function formatLocaleString<S extends { calendar?: IdLike }>(
-  transformOptions: OptionsTransformer,
   slots: S,
-  locales?: LocalesArg,
-  options: Intl.DateTimeFormatOptions = {},
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions,
   slotsToEpochNano?: EpochNanoConverter<S>,
   strictCalendarCheck?: boolean,
 ): string {
-  options = { ...options } // copy options so accessing doesn't cause side-effects
-  options = transformOptions(options)
-
   const subformat = new OrigDateTimeFormat(locales, options)
   const epochMilli = toEpochMilli(
     slots,
