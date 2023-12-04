@@ -3,7 +3,7 @@ import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFie
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { extractCalendarIdFromBag, refineCalendarSlotString } from '../internal/calendarSlotString'
 import { DateTimeDisplayOptions, OverflowOptions } from '../internal/options'
-import { LocalesArg, prepPlainMonthDayFormat } from '../internal/intlFormat'
+import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/intlFormat'
 import { PlainDateSlots, PlainMonthDaySlots } from '../genericApi/genericTypes'
 import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
@@ -105,7 +105,7 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepPlainMonthDayFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainMonthDayFormat(locales, options, slots)
   return format.format(epochMilli)
 }
 
@@ -114,7 +114,7 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepPlainMonthDayFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainMonthDayFormat(locales, options, slots)
   return format.formatToParts(epochMilli)
 }
 
@@ -124,7 +124,7 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepPlainMonthDayFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainMonthDayFormat(locales, options, slots0, slots1)
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -134,6 +134,6 @@ export function rangeToLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
   ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepPlainMonthDayFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainMonthDayFormat(locales, options, slots0, slots1)
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

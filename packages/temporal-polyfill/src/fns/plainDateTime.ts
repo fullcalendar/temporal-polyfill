@@ -5,7 +5,7 @@ import { DurationFieldsWithSign } from '../internal/durationFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions } from '../internal/options'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
-import { LocalesArg, prepPlainDateTimeFormat } from '../internal/intlFormat'
+import { LocalesArg, prepCachedPlainDateTimeFormat } from '../internal/intlFormat'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
@@ -221,7 +221,7 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepPlainDateTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainDateTimeFormat(locales, options, slots)
   return format.format(epochMilli)
 }
 
@@ -230,7 +230,7 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepPlainDateTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainDateTimeFormat(locales, options, slots)
   return format.formatToParts(epochMilli)
 }
 
@@ -240,7 +240,7 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepPlainDateTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateTimeFormat(locales, options, slots0, slots1)
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -250,6 +250,6 @@ export function rangeToLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
   ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepPlainDateTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateTimeFormat(locales, options, slots0, slots1)
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

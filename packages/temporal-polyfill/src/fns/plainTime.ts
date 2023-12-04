@@ -1,6 +1,6 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { OverflowOptions } from '../internal/options'
-import { LocalesArg, prepPlainTimeFormat } from '../internal/intlFormat'
+import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/intlFormat'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/genericTypes'
 import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
@@ -75,7 +75,7 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainTimeFormat(locales, options, slots)
   return format.format(epochMilli)
 }
 
@@ -84,7 +84,7 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainTimeFormat(locales, options, slots)
   return format.formatToParts(epochMilli)
 }
 
@@ -94,7 +94,7 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepPlainTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(locales, options, slots0, slots1)
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -104,6 +104,6 @@ export function rangeToLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
   ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepPlainTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(locales, options, slots0, slots1)
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
