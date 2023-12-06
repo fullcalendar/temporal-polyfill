@@ -4,7 +4,7 @@ import { DurationFieldsWithSign, durationInternalNames } from '../internal/durat
 import { IsoDateFields, IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
 import { identityFunc, mapPropNames } from '../internal/utils'
-import { queryCalendarImpl } from '../internal/calendarImpl'
+import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { DurationSlots } from '../genericApi/genericTypes'
 

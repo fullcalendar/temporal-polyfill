@@ -1,4 +1,5 @@
-import { TimeZoneImpl, queryTimeZoneImpl } from '../internal/timeZoneImpl'
+import { TimeZoneImpl } from '../internal/timeZoneImpl'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { formatOffsetNano } from '../internal/isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from '../genericApi/options'
 import { isoCalendarId } from '../internal/calendarConfig'

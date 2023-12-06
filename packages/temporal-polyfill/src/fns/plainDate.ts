@@ -1,5 +1,5 @@
 import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImpl'
+import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateFormat } from '../internal/intlFormat'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'

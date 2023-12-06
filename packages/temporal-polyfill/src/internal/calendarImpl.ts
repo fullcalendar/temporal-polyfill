@@ -3,7 +3,6 @@ import {
   eraRemaps,
   getAllowErasInFields,
   getErasBeginMidYear,
-  gregoryCalendarId,
   isoCalendarId,
   japaneseCalendarId,
   leapYearMetas,
@@ -51,7 +50,6 @@ import { Overflow } from './optionEnums'
 import { Unit, milliInDay } from './units'
 import { Callable, clampEntity, compareNumbers, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { DurationFieldsWithSign } from './durationFields'
-import { ensureString } from './cast'
 
 // Base Calendar Implementation
 // -------------------------------------------------------------------------------------------------
@@ -541,7 +539,7 @@ function refineMonthCode(
 // Gregory Calendar
 // -------------------------------------------------------------------------------------------------
 
-class GregoryCalendarImpl extends CalendarImpl {
+export class GregoryCalendarImpl extends CalendarImpl {
   era(isoDateFields: IsoDateFields): string | undefined {
     return computeGregoryEra(isoDateFields.isoYear)
   }
@@ -562,7 +560,7 @@ function computeGregoryEraYear(isoYear: number): number {
 // Japanese Calendar
 // -------------------------------------------------------------------------------------------------
 
-class JapaneseCalendarImpl extends GregoryCalendarImpl {
+export class JapaneseCalendarImpl extends GregoryCalendarImpl {
   isoDateFieldsToIntl = createJapaneseFieldCache()
 
   era(isoDateFields: IsoDateFields): string | undefined {
@@ -577,7 +575,7 @@ class JapaneseCalendarImpl extends GregoryCalendarImpl {
 // Intl Calendar
 // -------------------------------------------------------------------------------------------------
 
-class IntlCalendarImpl extends CalendarImpl {
+export class IntlCalendarImpl extends CalendarImpl {
   isoDateFieldsToIntl: (isoDateFields: IsoDateFields) => IntlFields
   queryYear: YearQueryFunc
 
@@ -775,41 +773,6 @@ Fields that are easily-extractable from IntlFields (non-month fields)
     return this.isoDateFieldsToIntl(isoDateFields)[dateFieldName as EasyIntlMethodName]
   } as Callable
 })
-
-// CalendarImpl Querying
-// -------------------------------------------------------------------------------------------------
-
-const calendarImplClasses: {
-  [calendarId: string]: { new(calendarId: string): CalendarImpl }
-} = {
-  [isoCalendarId]: CalendarImpl,
-  [gregoryCalendarId]: GregoryCalendarImpl,
-  [japaneseCalendarId]: JapaneseCalendarImpl,
-}
-
-const queryCacheableCalendarImpl = createLazyGenerator((calendarId, CalendarImplClass) => {
-  return new CalendarImplClass(calendarId)
-})
-
-export function queryCalendarImpl(calendarId: string): CalendarImpl {
-  // TODO: fix double-call of ensureString
-  calendarId = ensureString(calendarId).toLowerCase()
-
-  // explicitly deprecated calendars
-  // TODO: use faster map?
-  if (calendarId === 'islamicc') {
-    calendarId = 'islamic-civil'
-  }
-
-  const calendarIdBase = getCalendarIdBase(calendarId)
-  const CalendarImplClass = calendarImplClasses[calendarIdBase]
-
-  if (CalendarImplClass) {
-    calendarId = calendarIdBase
-  }
-
-  return queryCacheableCalendarImpl(calendarId, CalendarImplClass || IntlCalendarImpl)
-}
 
 // IntlFields Querying
 // -------------------------------------------------------------------------------------------------
@@ -1032,7 +995,7 @@ function isCalendarIdsRelated(calendarId0: string, calendarId1: string): boolean
   return getCalendarIdBase(calendarId0) === getCalendarIdBase(calendarId1)
 }
 
-function getCalendarIdBase(calendarId: string): string {
+export function getCalendarIdBase(calendarId: string): string {
   return calendarId.split('-')[0]
 }
 

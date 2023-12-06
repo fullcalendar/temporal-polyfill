@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImpl'
+import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, OverflowOptions } from '../genericApi/options'
 import { extractCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'

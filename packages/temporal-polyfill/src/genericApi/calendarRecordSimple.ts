@@ -1,5 +1,6 @@
 import { DateBagStrict, MonthDayBag, YearMonthBag } from '../internal/calendarFields'
-import { CalendarImpl, queryCalendarImpl } from '../internal/calendarImpl'
+import { CalendarImpl } from '../internal/calendarImpl'
+import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { Overflow } from '../internal/optionEnums'

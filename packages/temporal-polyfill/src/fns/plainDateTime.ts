@@ -1,5 +1,5 @@
 import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImpl'
+import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'

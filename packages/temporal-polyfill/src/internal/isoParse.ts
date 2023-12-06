@@ -1,6 +1,6 @@
 import { unitNanoMap, nanoInSec, nanoInUtcDay } from './units'
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarImpl } from './calendarImpl'
+import { queryCalendarImpl } from './calendarImplQuery'
 import {
   DurationFields,
   DurationFieldsWithSign,
@@ -27,7 +27,8 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionEnums'
-import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
+import { FixedTimeZoneImpl } from './timeZoneImpl'
+import { queryTimeZoneImpl } from './timeZoneImplQuery'
 import { getMatchingInstantFor } from './timeZoneMath'
 import {
   TimeUnit,
@@ -155,7 +156,7 @@ export function parsePlainYearMonth(s: string): IsoDateFields & { calendar: stri
   }
 
   const isoFields = parsePlainDate(s)
-  const calendarRecord = createCalendarImplRecord(isoFields.calendar, {
+  const calendarRecord = createCalendarImplRecord(isoFields.calendar, { // BAD
     day: calendarImplDay,
   })
 

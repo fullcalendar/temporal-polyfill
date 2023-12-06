@@ -1,6 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
 import { parseIntlYear } from './calendarImpl'
-import { ensureString } from './cast'
 import { DayTimeNano, addDayTimeNanoAndNumber, numberToDayTimeNano } from './dayTimeNano'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
@@ -13,34 +12,12 @@ import {
   isoToEpochNanoWithOffset,
   isoToEpochSec,
 } from './isoMath'
-import { parseMaybeOffsetNano } from './isoParse'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
 const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
-
-const queryCacheableTimeZoneImpl = createLazyGenerator((timeZoneId: string): TimeZoneImpl => {
-  return timeZoneId === 'UTC'
-    ? new FixedTimeZoneImpl(0, timeZoneId) // override ID
-    : new IntlTimeZoneImpl(timeZoneId)
-})
-
-export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
-  // TODO: fix double-call of ensureString
-  timeZoneId = ensureString(timeZoneId)
-    .toLowerCase() // whaaa... lower-then-upper?
-
-  const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
-  if (offsetNano !== undefined) {
-    return new FixedTimeZoneImpl(offsetNano)
-  }
-
-  return queryCacheableTimeZoneImpl(
-    timeZoneId.toUpperCase() // normalize IANA string using uppercase so 'UTC'
-  )
-}
 
 export interface TimeZoneImpl {
   id: string

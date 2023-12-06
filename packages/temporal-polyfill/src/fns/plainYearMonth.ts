@@ -1,5 +1,5 @@
 import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImpl'
+import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
