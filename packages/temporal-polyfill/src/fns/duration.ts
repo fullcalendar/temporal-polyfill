@@ -1,7 +1,8 @@
 import { NumSign, identityFunc } from '../internal/utils'
 import { UnitName } from '../internal/units'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../genericApi/options'
-import { createTypicalTimeZoneRecordIMPL, getDiffCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { getDiffCalendarRecordIMPL } from '../genericApi/recordCreators'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as DurationFuncs from '../genericApi/duration'
 
@@ -23,7 +24,7 @@ export function add(
   return DurationFuncs.add(
     identityFunc,
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     slots,
     otherSlots,
     options,
@@ -38,7 +39,7 @@ export function subtract(
   return DurationFuncs.subtract(
     identityFunc,
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     slots,
     otherSlots,
     options,
@@ -56,7 +57,7 @@ export function round(
   return DurationFuncs.round(
     identityFunc,
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     slots,
     options,
   )
@@ -69,7 +70,7 @@ export function total(
   return DurationFuncs.total(
     identityFunc,
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     slots,
     options,
   )
@@ -89,7 +90,7 @@ export function compare(
   return DurationFuncs.compare(
     identityFunc,
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     durationSlots0,
     durationSlots1,
     options,

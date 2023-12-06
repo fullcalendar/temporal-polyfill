@@ -1,9 +1,9 @@
 import { LocalesArg, prepCachedInstantFormat } from '../internal/intlFormat'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { InstantDisplayOptions } from '../genericApi/options'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
-import { createSimpleTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 import * as InstantFuncs from '../genericApi/instant'
 
 export const create = InstantFuncs.create
@@ -30,7 +30,7 @@ export function toString(
 ): string {
   return InstantFuncs.toString(
     refineTimeZoneSlotString,
-    createSimpleTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     instantSlots,
     options,
   )
@@ -41,7 +41,7 @@ export function toJSON(
 ): string {
   return InstantFuncs.toString(
     refineTimeZoneSlotString,
-    createSimpleTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     instantSlots,
   )
 }

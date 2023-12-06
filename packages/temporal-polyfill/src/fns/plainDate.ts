@@ -2,10 +2,11 @@ import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
 import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateFormat } from '../internal/intlFormat'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainDateFuncs from '../genericApi/plainDate'
 
@@ -154,7 +155,7 @@ export function toZonedDateTime(
   }
 
   return PlainDateFuncs.toZonedDateTime(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     slots,
     refineTimeZoneSlotString(timeZoneArg),
     plainTimeArg,

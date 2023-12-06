@@ -4,10 +4,11 @@ import { DurationFieldsWithSign } from '../internal/durationFields'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateTimeFormat } from '../internal/intlFormat'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions } from '../genericApi/options'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
 // TODO: do Readonly<> everywhere?
@@ -175,7 +176,7 @@ export function toZonedDateTime(
   timeZoneId: string,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots<string, string> {
-  return PlainDateTimeFuncs.toZonedDateTime(createTypicalTimeZoneRecordIMPL, plainDateTimeSlots, timeZoneId, options)
+  return PlainDateTimeFuncs.toZonedDateTime(queryTimeZoneImpl, plainDateTimeSlots, timeZoneId, options)
 }
 
 export function toPlainDate(

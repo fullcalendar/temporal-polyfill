@@ -1,11 +1,8 @@
 import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields } from '../genericApi/calendarRecordSimple'
-import { timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from '../genericApi/timeZoneRecordSimple'
 import { calendarProtocolDateAdd, calendarProtocolDateFromFields, calendarProtocolDateUntil, calendarProtocolDay, calendarProtocolDaysInMonth, calendarProtocolFields, calendarProtocolMergeFields, calendarProtocolMonthDayFromFields, calendarProtocolYearMonthFromFields, createCalendarSlotRecord } from './calendarRecordComplex'
 import { CalendarSlot } from './calendarSlot'
 import { TimeZoneSlot } from './timeZoneSlot'
 import { createTimeZoneSlotRecord, timeZoneProtocolGetOffsetNanosecondsFor, timeZoneProtocolGetPossibleInstantsFor } from './timeZoneRecordComplex'
-
-// TODO: put types in here too
 
 // date
 // ----
@@ -129,9 +126,6 @@ export function createMonthDayModCalendarRecord(calendarSlot: CalendarSlot) {
 
 export function createTypicalTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
   return createTimeZoneSlotRecord(timeZoneSlot, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  }, {
     getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
     getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
   })
@@ -139,8 +133,6 @@ export function createTypicalTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
 
 export function createSimpleTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
   return createTimeZoneSlotRecord(timeZoneSlot, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-  }, {
     getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
   })
 }

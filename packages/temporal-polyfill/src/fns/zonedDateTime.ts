@@ -11,9 +11,10 @@ import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOpti
 import { ZonedDateTimeBag } from '../genericApi/genericBag'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createSimpleTimeZoneRecordIMPL, createTypicalTimeZoneRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
 import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 
 export function create(
   epochNano: bigint,
@@ -40,7 +41,7 @@ export function fromFields(
   return ZonedDateTimeFuncs.fromFields(
     createDateNewCalendarRecordIMPL,
     refineTimeZoneSlotString,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     getCalendarIdFromBag(fields),
     fields,
     options,
@@ -50,7 +51,7 @@ export function fromFields(
 export function getISOFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): IsoDateTimeFields & { calendar: string, timeZone: string, offset: string } {
-  return ZonedDateTimeFuncs.getISOFields(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots)
+  return ZonedDateTimeFuncs.getISOFields(queryTimeZoneImpl, zonedDateTimeSlots)
 }
 
 export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { offset: string }
@@ -58,7 +59,7 @@ export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { of
 export function getFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): ZonedDateTimeFields {
-  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, createSimpleTimeZoneRecordIMPL(zonedDateTimeSlots.timeZone))
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   const calendarImpl = queryCalendarImpl(zonedDateTimeSlots.calendar)
@@ -89,7 +90,7 @@ export function withFields(
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.withFields(
     getDateModCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
     getFields(zonedDateTimeSlots),
     modFields,
@@ -102,7 +103,7 @@ export function withPlainTime(
   plainTimeSlots: PlainTimeSlots,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.withPlainTime(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
     plainTimeSlots,
   )
@@ -113,7 +114,7 @@ export function withPlainDate(
   plainDateSlots: PlainDateSlots<string>,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.withPlainDate(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
     plainDateSlots,
   )
@@ -140,7 +141,7 @@ export function add(
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.add(
     getMoveCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
     durationSlots,
     options,
@@ -154,7 +155,7 @@ export function subtract(
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.subtract(
     getMoveCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
     durationSlots,
     options,
@@ -168,7 +169,7 @@ export function until(
 ): DurationFieldsWithSign {
   return ZonedDateTimeFuncs.until(
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots0,
     zonedDateTimeSlots1,
     options,
@@ -182,7 +183,7 @@ export function since(
 ): DurationFieldsWithSign {
   return ZonedDateTimeFuncs.since(
     getDiffCalendarRecordIMPL,
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots0,
     zonedDateTimeSlots1,
     options,
@@ -194,7 +195,7 @@ export function round(
   options: RoundingOptions | UnitName,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.round(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
     options,
   )
@@ -204,14 +205,14 @@ export function startOfDay(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.startOfDay(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
   )
 }
 
 export function hoursInDay(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
   return ZonedDateTimeFuncs.hoursInDay(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots,
   )
 }
@@ -235,7 +236,7 @@ export function toString(
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   return ZonedDateTimeFuncs.toString(
-    createSimpleTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots0,
     options
   )
@@ -245,7 +246,7 @@ export function toJSON(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): string {
   return ZonedDateTimeFuncs.toString(
-    createSimpleTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     zonedDateTimeSlots0,
   )
 }
@@ -253,19 +254,19 @@ export function toJSON(
 export function toPlainDate(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): PlainDateSlots<string> {
-  return ZonedDateTimeFuncs.toPlainDate(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots0)
+  return ZonedDateTimeFuncs.toPlainDate(queryTimeZoneImpl, zonedDateTimeSlots0)
 }
 
 export function toPlainTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): PlainTimeSlots {
-  return ZonedDateTimeFuncs.toPlainTime(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots0)
+  return ZonedDateTimeFuncs.toPlainTime(queryTimeZoneImpl, zonedDateTimeSlots0)
 }
 
 export function toPlainDateTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
 ): PlainDateTimeSlots<string> {
-  return ZonedDateTimeFuncs.toPlainDateTime(createSimpleTimeZoneRecordIMPL, zonedDateTimeSlots0)
+  return ZonedDateTimeFuncs.toPlainDateTime(queryTimeZoneImpl, zonedDateTimeSlots0)
 }
 
 export function toPlainYearMonth(

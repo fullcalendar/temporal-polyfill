@@ -1,5 +1,4 @@
 import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from './calendarRecordSimple'
-import { createTimeZoneImplRecord, timeZoneImplGetOffsetNanosecondsFor, timeZoneImplGetPossibleInstantsFor } from './timeZoneRecordSimple'
 
 // date
 // ----
@@ -81,21 +80,5 @@ export function createMonthDayModCalendarRecordIMPL(calendarId: string) {
     monthDayFromFields: calendarImplMonthDayFromFields,
     fields: calendarImplFields,
     mergeFields: calendarImplMergeFields,
-  })
-}
-
-// time zone
-// ---------
-
-export function createTypicalTimeZoneRecordIMPL(timeZoneSlot: string) {
-  return createTimeZoneImplRecord(timeZoneSlot, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
-    getPossibleInstantsFor: timeZoneImplGetPossibleInstantsFor,
-  })
-}
-
-export function createSimpleTimeZoneRecordIMPL(timeZoneSlot: string) {
-  return createTimeZoneImplRecord(timeZoneSlot, {
-    getOffsetNanosecondsFor: timeZoneImplGetOffsetNanosecondsFor,
   })
 }

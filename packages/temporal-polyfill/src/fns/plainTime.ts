@@ -1,8 +1,8 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/intlFormat'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { OverflowOptions } from '../genericApi/options'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/genericTypes'
-import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 
 export const create = PlainTimeFuncs.create
@@ -56,7 +56,7 @@ export function toZonedDateTime(
   options: { timeZone: string, plainDate: PlainDateSlots<string> },
 ) {
   return PlainTimeFuncs.toZonedDateTime(
-    createTypicalTimeZoneRecordIMPL,
+    queryTimeZoneImpl,
     slots,
     options.timeZone,
     options.plainDate,

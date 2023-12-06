@@ -3,7 +3,7 @@ import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { validateOffsetNano } from '../internal/timeZoneMath'
-import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../genericApi/timeZoneRecordSimple'
+import { TimeZoneImplFunc, TimeZoneImplMethod } from '../genericApi/timeZoneRecordSimple'
 import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 
 // public
@@ -12,6 +12,7 @@ import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZone'
 import { ensureString } from '../internal/cast'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 
 // CONDITIONAL Record Creation
 // -------------------------------------------------------------------------------------------------
@@ -26,7 +27,6 @@ export function createTimeZoneSlotRecord<
   TimeZoneImplFuncs extends Record<string, TimeZoneImplFunc>
 >(
   timeZoneSlot: TimeZoneSlot,
-  implFuncs: TimeZoneImplFuncs = {} as any,
   protocolFuncs: {
     [K in keyof TimeZoneImplFuncs]: TimeZoneProtocolFuncViaImpl<TimeZoneImplFuncs[K]>
   } = {} as any,
@@ -36,7 +36,7 @@ export function createTimeZoneSlotRecord<
   id: string
 } {
   if (typeof timeZoneSlot === 'string') {
-    return createTimeZoneImplRecord(timeZoneSlot, implFuncs)
+    return queryTimeZoneImpl(timeZoneSlot) as any // !!!
   }
   return createTimeZoneProtocolRecord(timeZoneSlot, protocolFuncs) as any
 }
