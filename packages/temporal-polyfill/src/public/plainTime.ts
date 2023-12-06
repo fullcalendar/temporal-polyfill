@@ -12,7 +12,7 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainTimeBag } from '../internal/genericBag'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
-import { PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 
@@ -72,9 +72,10 @@ export class PlainTime {
   }
 
   since(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-    return createDuration(
-      PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
-    )
+    return createDuration({
+      branding: DurationBranding, // weird
+      ...PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
+    })
   }
 
   round(options: RoundingOptions | UnitName): PlainTime {

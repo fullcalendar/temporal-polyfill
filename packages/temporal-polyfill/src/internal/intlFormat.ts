@@ -113,7 +113,7 @@ const transformYearMonthOptions = createOptionsTransformer(yearMonthValidNames, 
 const transformDateOptions = createOptionsTransformer(dateValidNames, dateFallbacks, dateExclusions)
 const transformDateTimeOptions = createOptionsTransformer(dateTimeValidNames, dateTimeFallbacks, timeZoneNameStrs)
 const transformTimeOptions = createOptionsTransformer(timeValidNames, timeFallbacks, timeExclusions)
-const transformEpochOptions = createOptionsTransformer(dateTimeValidNames, dateTimeFallbacks)
+const transformEpochOptions = createOptionsTransformer(dateTimeValidNames, dateTimeFallbacks) // TOOD: rename to 'instant'?
 const transformZonedEpochOptionsBasic = createOptionsTransformer(zonedValidNames, zonedFallbacks)
 
 // HACK: only ever called with toLocaleString/etc, so can assume slots0

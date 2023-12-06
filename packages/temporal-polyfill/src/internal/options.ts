@@ -317,6 +317,28 @@ const refineTotalUnit = refineUnitOption.bind<
   [Unit, boolean]
 >(undefined, totalUnitStr)
 
+// Instant
+// -------------------------------------------------------------------------------------------------
+
+export type InstantDisplayOptions<TA> = { timeZone: TA } & TimeDisplayOptions
+
+export type InstantDisplayTuple<TA> = [TA, ...TimeDisplayTuple]
+
+export function refineInstantDisplayOptions<TA>(
+  options: InstantDisplayOptions<TA> | undefined,
+): InstantDisplayTuple<TA> {
+  options = normalizeOptions(options)
+
+  // alphabetical
+  const timeDisplayTuple = refineTimeDisplayTuple(options)
+  const timeZoneArg: TA = options.timeZone
+
+  return [
+    timeZoneArg, // TODO: possibly not needed after moving away from Record
+    ...timeDisplayTuple,
+  ]
+}
+
 // Overflow
 // -------------------------------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@ import {
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
-import { RoundingOptions, refineRoundOptions, roundingModeFuncs } from './options'
+import { roundingModeFuncs } from './options'
 import { RoundingMode } from './optionEnums'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 import { computeNanosecondsInDay } from './timeZoneMath'
@@ -24,46 +24,9 @@ import {
   DayTimeUnit,
   TimeUnit,
   givenFieldsToDayTimeNano,
-  UnitName,
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { MarkerToEpochNano, MoveMarker } from './markerSystemTypes'
-
-export function roundEpochNano(
-  epochNano: DayTimeNano,
-  options: RoundingOptions | UnitName,
-): DayTimeNano {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
-    options,
-    Unit.Hour,
-    true, // solarMode
-  )
-
-  return roundDayTimeNano(
-    epochNano,
-    smallestUnit as TimeUnit,
-    roundingInc,
-    roundingMode,
-    true, // useDayOrigin
-  )
-}
-
-export function roundPlainTime(
-  fields: IsoTimeFields,
-  options: RoundingOptions | UnitName
-): IsoTimeFields {
-  return roundTime(
-    fields,
-    ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
-  )
-}
-
-// Misc
-// -------------------------------------------------------------------------------------------------
-
-export function roundToMinute(offsetNano: number): number {
-  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
-}
 
 // Rounding Dates
 // -------------------------------------------------------------------------------------------------
@@ -519,6 +482,10 @@ function nudgeRelativeDuration<M>(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
+
+export function roundToMinute(offsetNano: number): number {
+  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
+}
 
 function bubbleRelativeDuration<M>(
   durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)

@@ -187,7 +187,7 @@ export function since<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
   options?: DiffOptions,
-): DurationFieldsWithSign {
+): DurationFieldsWithSign { // lots of confusion!!! should be DurationSlots!!!!!!!!!!!!!!!!!!!!!!!!!
   return negateDurationInternals(
     until(getCalendarRecord, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
   )

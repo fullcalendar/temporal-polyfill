@@ -20,7 +20,6 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { DiffOptions, LargestUnitOptions, refineDiffOptions } from './options'
 import { Overflow, RoundingMode } from './optionEnums'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
@@ -33,55 +32,6 @@ import {
 } from './units'
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
-
-// High-Level
-// -------------------------------------------------------------------------------------------------
-// the main value-add is doing negating and options-processing
-
-export function diffPlainTimes(
-  internals0: IsoTimeFields,
-  internals1: IsoTimeFields,
-  options: DiffOptions | undefined,
-  invert?: boolean
-): DurationFieldsWithSign {
-  let durationInternals = updateDurationFieldsSign(
-    diffTimes(
-      internals0,
-      internals1,
-      ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return durationInternals
-}
-
-export function diffInstants(
-  epochNano0: DayTimeNano,
-  epochNano1: DayTimeNano,
-  options?: DiffOptions,
-  invert?: boolean
-): DurationFieldsWithSign {
-  let durationInternals = updateDurationFieldsSign(
-    diffEpochNano(
-      epochNano0,
-      epochNano1,
-      ...(
-        refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as
-          [TimeUnit, TimeUnit, number, RoundingMode]
-      ),
-    ),
-  )
-
-  if (invert) {
-    durationInternals = negateDurationInternals(durationInternals)
-  }
-
-  return durationInternals
-}
 
 // Dates & Times
 // -------------------------------------------------------------------------------------------------

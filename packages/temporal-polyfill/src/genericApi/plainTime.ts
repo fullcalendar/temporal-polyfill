@@ -1,20 +1,20 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
 import { mergePlainTimeBag, refinePlainTimeBag } from '../internal/convert'
-import { diffPlainTimes } from '../internal/diff'
-import { negateDurationInternals } from '../internal/durationFields'
+import { diffTimes } from '../internal/diff'
+import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { PlainTimeBag } from '../internal/genericBag'
 import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/isoMath'
 import { parsePlainTime } from '../internal/isoParse'
 import { moveTime } from '../internal/move'
-import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineTimeDisplayOptions } from '../internal/options'
-import { Overflow } from '../internal/optionEnums'
-import { roundPlainTime } from '../internal/round'
+import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineDiffOptions, refineRoundOptions, refineTimeDisplayOptions } from '../internal/options'
+import { Overflow, RoundingMode } from '../internal/optionEnums'
+import { roundTime } from '../internal/round'
 import { getSingleInstantFor } from '../internal/timeZoneMath'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
-import { UnitName } from '../internal/units'
+import { TimeUnit, Unit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from './genericTypes'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from './branding'
@@ -96,11 +96,17 @@ export function until(
   plainTimeSlots0: PlainTimeSlots,
   plainTimeSlots1: PlainTimeSlots,
   options?: DiffOptions,
-  invert?: boolean, // TODO: start using invertRoundingMode
+  invertRoundingMode?: boolean,
 ): DurationSlots {
   return {
-    ...diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options, invert),
-    branding: DurationBranding,
+    ...updateDurationFieldsSign(
+      diffTimes(
+        plainTimeSlots0,
+        plainTimeSlots1,
+        ...(refineDiffOptions(invertRoundingMode, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
+      ),
+    ),
+    branding: DurationBranding
   }
 }
 
@@ -108,8 +114,8 @@ export function since(
   plainTimeSlots0: PlainTimeSlots,
   plainTimeSlots1: PlainTimeSlots,
   options?: DiffOptions,
-): DurationSlots {
-  return until(plainTimeSlots1, plainTimeSlots0, options, true)
+): DurationFieldsWithSign { // !!!
+  return negateDurationInternals(until(plainTimeSlots1, plainTimeSlots0, options, true))
 }
 
 export function round(
@@ -117,7 +123,10 @@ export function round(
   options: RoundingOptions | UnitName,
 ): PlainTimeSlots {
   return {
-    ...roundPlainTime(slots, options),
+    ...roundTime(
+      slots,
+      ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
+    ),
     branding: PlainTimeBranding,
   }
 }
