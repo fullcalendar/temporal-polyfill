@@ -482,18 +482,6 @@ const refineRoundingMode = refineChoiceOption.bind<
   RoundingMode // return
 >(undefined, 'roundingMode', roundingModeMap)
 
-export const roundingModeFuncs = [
-  Math.floor,
-  roundHalfFloor,
-  Math.ceil,
-  roundHalfCeil,
-  Math.trunc,
-  roundHalfTrunc,
-  roundExpand,
-  roundHalfExpand,
-  roundHalfEven,
-]
-
 function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
   if (roundingMode < 4) {
     return (roundingMode + 2) % 4

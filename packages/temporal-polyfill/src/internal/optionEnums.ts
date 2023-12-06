@@ -1,3 +1,4 @@
+import { roundExpand, roundHalfCeil, roundHalfEven, roundHalfExpand, roundHalfFloor, roundHalfTrunc } from './utils'
 
 export const enum Overflow {
   Constrain,
@@ -49,6 +50,19 @@ export const enum RoundingMode {
   HalfExpand,
   HalfEven
 }
+
+// not an enum :(
+export const roundingModeFuncs = [
+  Math.floor,
+  roundHalfFloor,
+  Math.ceil,
+  roundHalfCeil,
+  Math.trunc,
+  roundHalfTrunc,
+  roundExpand,
+  roundHalfExpand,
+  roundHalfEven,
+]
 
 // not an enum :(
 export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
