@@ -7,7 +7,7 @@ import { defineStringTag } from '../internal/utils'
 import { getSingleInstantFor, validateOffsetNano } from '../internal/timeZoneMath'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { epochNanoToIso } from '../internal/isoMath'
-import { isTimeZoneSlotsEqual } from '../internal/idLike'
+import { isTimeZoneSlotsEqual } from '../genericApi/timeZoneSlot'
 import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 

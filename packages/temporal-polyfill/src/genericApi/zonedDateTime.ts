@@ -5,7 +5,7 @@ import { ensureString, toBigInt } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffZonedEpochNano } from '../internal/diff'
 import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
-import { IdLike, getCommonCalendarSlot, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/idLike'
+import { IdLike, isIdLikeEqual } from '../internal/idLike'
 import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from '../internal/isoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/isoMath'
@@ -22,6 +22,8 @@ import { ZonedDateTimeBag } from './genericBag'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergeZonedDateTimeBag, refineZonedDateTimeBag } from './convert'
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './genericTypes'
+import { isTimeZoneSlotsEqual } from './timeZoneSlot'
+import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlot'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
