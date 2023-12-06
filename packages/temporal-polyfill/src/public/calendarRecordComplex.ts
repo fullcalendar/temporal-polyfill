@@ -6,17 +6,17 @@ import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { overflowMapNames } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
+import { Overflow } from '../internal/optionEnums'
+import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 
 // public
 import { CalendarSlot } from './calendarSlot'
 import { IsoDateSlots } from './slots'
-import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { CalendarProtocol } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { Overflow } from '../internal/optionEnums'
 
 // CONDITIONAL Record Creation
 // -------------------------------------------------------------------------------------------------

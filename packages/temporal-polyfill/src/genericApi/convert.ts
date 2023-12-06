@@ -16,16 +16,16 @@ import {
   timeFieldsToIso,
   yearMonthBasicNamesAlpha,
   yearMonthFieldNamesAlpha,
-} from './calendarFields'
+} from '../internal/calendarFields'
 import {
   DurationFieldsWithSign,
   durationFieldDefaults,
   durationFieldNames,
   durationFieldRefiners,
   updateDurationFieldsSign,
-} from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './isoFields'
-import { parseOffsetNano } from './isoParse'
+} from '../internal/durationFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/isoFields'
+import { parseOffsetNano } from '../internal/isoParse'
 import {
   EpochDisambigOptions,
   OverflowOptions,
@@ -33,16 +33,16 @@ import {
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
-} from './options'
-import { EpochDisambig, OffsetDisambig, Overflow } from './optionEnums'
-import { ensureObjectlike, ensureStringViaPrimitive } from './cast'
-import { Callable, pluckProps } from './utils'
-import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from './isoMath'
-import { getMatchingInstantFor, getSingleInstantFor } from './timeZoneMath'
-import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from './calendarRecordTypes'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
-import { DayTimeNano } from './dayTimeNano'
-import { ZonedDateTimeBag } from './genericBag'
+} from '../internal/options'
+import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/optionEnums'
+import { ensureObjectlike, ensureStringViaPrimitive } from '../internal/cast'
+import { Callable, pluckProps } from '../internal/utils'
+import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from '../internal/isoMath'
+import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZoneMath'
+import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
+import { DayTimeNano } from '../internal/dayTimeNano'
+import { ZonedDateTimeBag } from '../internal/genericBag'
 
 export function convertPlainDateTimeToZoned(
   timeZoneRecord: {

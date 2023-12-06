@@ -1,10 +1,10 @@
 import { isObjectlike } from '../internal/utils'
+import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
 
 // public
 import { getSlots } from './slots'
 import { createProtocolChecker } from './publicUtils'
 import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
-import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
 
 export type TimeZoneSlot = TimeZoneProtocol | string
 

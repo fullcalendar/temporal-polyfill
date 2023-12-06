@@ -7,18 +7,18 @@ import { defineStringTag } from '../internal/utils'
 import { getSingleInstantFor, validateOffsetNano } from '../internal/timeZoneMath'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { epochNanoToIso } from '../internal/isoMath'
+import { isTimeZoneSlotsEqual } from '../internal/idLike'
+import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
 
 // public
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
 import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slots'
-import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
-import { isTimeZoneSlotsEqual } from '../internal/idLike'
 import { createTypicalTimeZoneRecord } from './recordCreators'
 
 // TimeZone Protocol

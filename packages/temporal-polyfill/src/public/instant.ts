@@ -5,11 +5,11 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } fr
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import * as InstantFuncs from '../genericApi/instant'
 
 // public
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
-import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'

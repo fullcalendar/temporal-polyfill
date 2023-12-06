@@ -4,6 +4,7 @@ import { createPropDescriptors, createTemporalNameDescriptors, pluckProps } from
 import { epochMilliToNano } from '../internal/isoMath'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/isoFields'
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 
 // public
@@ -18,7 +19,6 @@ import { TimeZoneArg } from './timeZone'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createSimpleTimeZoneRecord } from './recordCreators'
-import { isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/isoFields'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),

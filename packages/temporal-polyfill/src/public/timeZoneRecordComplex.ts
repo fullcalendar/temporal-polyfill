@@ -4,9 +4,9 @@ import { IsoDateTimeFields } from '../internal/isoFields'
 import { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { validateOffsetNano } from '../internal/timeZoneMath'
 import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../internal/timeZoneRecordSimple'
+import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 
 // public
-import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 import { TimeZoneSlot } from './timeZoneSlot'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'

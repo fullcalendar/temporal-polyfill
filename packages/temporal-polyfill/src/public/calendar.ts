@@ -7,20 +7,20 @@ import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
 import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../internal/calendarRecordSimple'
-import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/convert'
+import { refineCalendarSlotString } from '../internal/calendarSlotString'
+import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/convert'
+import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/recordCreators'
 
 // public
 import { BrandingSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
-import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
 import { refineCalendarSlot } from './calendarSlot'
-import { refineCalendarSlotString } from '../internal/calendarSlotString'
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/recordCreators'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------

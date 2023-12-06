@@ -1,7 +1,6 @@
 import { DurationBag } from '../internal/calendarFields'
 import { CalendarDateAddFunc, CalendarDateUntilFunc } from '../internal/calendarRecordTypes'
 import { ensureString, toIntegerStrict } from '../internal/cast'
-import { mergeDurationBag, refineDurationBag } from '../internal/convert'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from '../internal/diff'
 import { DurationFields, DurationFieldsWithSign, absDurationInternals, addDayTimeDurationFields, durationFieldNamesAsc, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
@@ -17,6 +16,7 @@ import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, to
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
 import { NumSign, identityFunc } from '../internal/utils'
+import { mergeDurationBag, refineDurationBag } from './convert'
 import { DurationBranding } from './branding'
 import { DurationSlots } from './genericTypes'
 
