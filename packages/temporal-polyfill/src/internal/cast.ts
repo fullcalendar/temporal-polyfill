@@ -2,12 +2,6 @@ import { isObjectlike } from './utils'
 
 // TODO: rename 'ensure' to 'require' ?
 
-export function ensureInstanceOf<T>(Class: { new(): T; }, obj: T): T {
-  if (!(obj instanceof Class)) {
-    throw new TypeError('Must be certain type'); // TODO: show Class's symbol?
-  }
-  return obj;
-}
 function ensureType<A>(typeName: string, arg: A): A {
   if (typeof arg !== typeName) {
     throw new TypeError(`Must be certain type ${typeName}`);

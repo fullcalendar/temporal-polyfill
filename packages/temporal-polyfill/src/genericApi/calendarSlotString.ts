@@ -1,6 +1,8 @@
-import { isoCalendarId } from './calendarConfig'
-import { ensureString } from './cast'
-import { parseCalendarId } from './isoParse'
+import { isoCalendarId } from '../internal/calendarConfig'
+import { ensureString } from '../internal/cast'
+import { parseCalendarId } from '../internal/isoParse'
+
+// TODO: move to genericApi
 
 export function refineCalendarSlotString(calendarArg: string): string {
   return parseCalendarId(ensureString(calendarArg)) // ensures its real calendar via queryCalendarImpl

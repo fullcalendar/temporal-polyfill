@@ -1,12 +1,12 @@
 import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { CalendarImpl } from '../internal/calendarImpl'
-import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../internal/calendarRecordSimple'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { overflowMapNames } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Overflow } from '../internal/optionEnums'
+import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 
 // public

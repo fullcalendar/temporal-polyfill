@@ -1,9 +1,11 @@
-import { DateBagStrict, MonthDayBag, YearMonthBag } from './calendarFields'
-import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
-import { DurationFieldsWithSign } from './durationFields'
-import { IsoDateFields } from './isoFields'
-import { Overflow } from './optionEnums'
-import { Unit } from './units'
+import { DateBagStrict, MonthDayBag, YearMonthBag } from '../internal/calendarFields'
+import { CalendarImpl, queryCalendarImpl } from '../internal/calendarImpl'
+import { DurationFieldsWithSign } from '../internal/durationFields'
+import { IsoDateFields } from '../internal/isoFields'
+import { Overflow } from '../internal/optionEnums'
+import { Unit } from '../internal/units'
+
+// TODO: move to 'internal'
 
 // CalendarImpl Record Creation
 // -------------------------------------------------------------------------------------------------

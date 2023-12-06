@@ -1,5 +1,5 @@
 import { isObjectlike } from '../internal/utils'
-import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 
 // public
 import { getSlots } from './slots'

@@ -9,11 +9,11 @@ import { IsoDateTimeFields } from '../internal/isoFields'
 import { epochNanoToIso } from '../internal/isoMath'
 import { isTimeZoneSlotsEqual } from '../internal/idLike'
 import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 
 // public
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
-import { refineTimeZoneSlotString } from '../internal/timeZoneSlotString'
 import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slots'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'

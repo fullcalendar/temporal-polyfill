@@ -39,8 +39,10 @@ import {
 import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 import { CalendarDayFunc } from './calendarRecordTypes'
-import { calendarImplDay, createCalendarImplRecord } from './calendarRecordSimple'
 import { utcTimeZoneId } from './timeZoneConfig'
+
+// generic API - BAD
+import { calendarImplDay, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -178,7 +180,6 @@ function movePlainYearMonthToDay(
   isoFields: IsoDateFields,
   day = 1,
 ): IsoDateFields {
-
   return moveByIsoDays(
     isoFields,
     day - calendarRecord.day(isoFields),

@@ -3,7 +3,7 @@ import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { validateOffsetNano } from '../internal/timeZoneMath'
-import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../internal/timeZoneRecordSimple'
+import { TimeZoneImplFunc, TimeZoneImplMethod, createTimeZoneImplRecord } from '../genericApi/timeZoneRecordSimple'
 import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 
 // public

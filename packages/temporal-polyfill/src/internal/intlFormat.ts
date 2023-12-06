@@ -5,7 +5,9 @@ import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { createLazyGenerator, excludePropsByName, hasAnyPropsByName } from './utils'
 import { getSingleInstantFor } from './timeZoneMath'
 import { IdLike, getId } from './idLike'
-import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators' // weird
+
+// generic API - BAD
+import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat
@@ -137,7 +139,7 @@ function isoDateFieldsToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
-  const timeZoneRecord = createTypicalTimeZoneRecordIMPL(resolvedOptions.timeZone)
+  const timeZoneRecord = createTypicalTimeZoneRecordIMPL(resolvedOptions.timeZone) // BAD
 
   return getSingleInstantFor(timeZoneRecord, {
     ...isoTimeFieldDefaults,

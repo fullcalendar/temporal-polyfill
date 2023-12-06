@@ -7,7 +7,6 @@ import {
   durationFieldDefaults,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
-  negateDurationInternals,
   updateDurationFieldsSign,
 } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './isoFields'

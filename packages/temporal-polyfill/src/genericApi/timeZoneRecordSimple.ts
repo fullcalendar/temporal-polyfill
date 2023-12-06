@@ -1,6 +1,6 @@
-import { DayTimeNano } from './dayTimeNano'
-import { IsoDateTimeFields } from './isoFields'
-import { TimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
+import { DayTimeNano } from '../internal/dayTimeNano'
+import { IsoDateTimeFields } from '../internal/isoFields'
+import { TimeZoneImpl, queryTimeZoneImpl } from '../internal/timeZoneImpl'
 
 // TimeZoneImpl Record Creation
 // -------------------------------------------------------------------------------------------------
