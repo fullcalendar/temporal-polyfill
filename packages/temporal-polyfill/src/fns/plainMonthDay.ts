@@ -5,7 +5,7 @@ import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/intlForma
 import { DateTimeDisplayOptions, OverflowOptions } from '../genericApi/options'
 import { extractCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { PlainDateSlots, PlainMonthDaySlots } from '../genericApi/genericTypes'
-import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
 
 export function create(

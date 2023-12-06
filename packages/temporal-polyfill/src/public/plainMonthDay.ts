@@ -11,12 +11,12 @@ import { PlainMonthDaySlots } from '../genericApi/genericTypes'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
 
 // public
-import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
-import { createMonthDayModCalendarRecord, createMonthDayNewCalendarRecord, getDateModCalendarRecord } from './recordCreators'
+import { createMonthDayModCalendarRecord, createMonthDayNewCalendarRecord, getDateModCalendarRecord } from './calendarRecordComplex'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
@@ -74,7 +74,7 @@ export class PlainMonthDay {
   }
 
   // not DRY
-  getISOFields(): IsoDateSlots {
+  getISOFields(): PublicDateSlots {
     const slots = getPlainMonthDaySlots(this)
     return { // alphabetical
       calendar: slots.calendar,

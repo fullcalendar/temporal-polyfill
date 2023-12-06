@@ -25,8 +25,8 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './recordCreators'
 import { CalendarSlot } from './calendarSlot'
+import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 

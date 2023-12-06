@@ -6,7 +6,7 @@ import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainDateFuncs from '../genericApi/plainDate'
 

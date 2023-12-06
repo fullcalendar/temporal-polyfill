@@ -6,48 +6,119 @@ import { IsoDateFields } from '../internal/isoFields'
 import { Overflow } from '../internal/options'
 import { Unit } from '../internal/units'
 
-// TODO: move to 'internal'
-
-// CalendarImpl Record Creation
-// -------------------------------------------------------------------------------------------------
-// TODO: more DRY
-
-export type CalendarImplFunc = (calendarImpl: CalendarImpl, ...args: any[]) => any
-
-export type CalendarImplMethod<Func> =
-  Func extends (calendarImpl: CalendarImpl, ...args: infer Args) => infer Ret
-    ? (...args: Args) => Ret
-    : never
-
 export function createCalendarImplRecord<
-  CalendarImplFuncs extends Record<string, CalendarImplFunc>
+  ImplMethods extends Record<string, (this: CalendarImpl, ...any: any[]) => any>
 >(
   calendarId: string,
-  funcs: CalendarImplFuncs = {} as any,
+  implMethods: ImplMethods,
 ): {
-  [K in keyof CalendarImplFuncs]: CalendarImplMethod<CalendarImplFuncs[K]>
+  [K in keyof ImplMethods]: ImplMethods[K] extends (this: CalendarImpl, ...args: infer Args) => infer Ret
+    ? (...args: Args) => Ret
+    : never
 } {
   const calendarImpl = queryCalendarImpl(calendarId)
   const calendarRecord: any = {}
 
-  // TODO: get rid of this
-  for (const methodName in funcs) {
-    calendarRecord[methodName] = funcs[methodName].bind(undefined, calendarImpl)
+  for (const methodName in implMethods) {
+    calendarRecord[methodName] = implMethods[methodName].bind(calendarImpl)
   }
 
   return calendarRecord
 }
 
-// CalendarImpl Functions
+// Preconfigured Creators
+// -------------------------------------------------------------------------------------------------
+
+// date
+
+export function createDateNewCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateFromFields: calendarImplDateFromFields,
+    fields: calendarImplFields,
+  })
+}
+
+export function getDateModCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateFromFields: calendarImplDateFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+export function getMoveCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateAdd: calendarImplDateAdd,
+  })
+}
+
+export function getDiffCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+  })
+}
+
+// year month
+
+export function createYearMonthNewCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    yearMonthFromFields: calendarImplYearMonthFromFields,
+    fields: calendarImplFields,
+  })
+}
+
+export function createYearMonthModCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    yearMonthFromFields: calendarImplYearMonthFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+export function createYearMonthMoveCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateAdd: calendarImplDateAdd,
+    daysInMonth: calendarImplDaysInMonth,
+    day: calendarImplDay,
+  })
+}
+
+export function createYearMonthDiffCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+    day: calendarImplDay,
+  })
+}
+
+// month day
+
+export function createMonthDayNewCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    monthDayFromFields: calendarImplMonthDayFromFields,
+    fields: calendarImplFields,
+  })
+}
+
+export function createMonthDayModCalendarRecordIMPL(calendarId: string) {
+  return createCalendarImplRecord(calendarId, {
+    monthDayFromFields: calendarImplMonthDayFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+// Individual CalendarImpl Methods
 // -------------------------------------------------------------------------------------------------
 
 export function calendarImplDateAdd(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   isoDateFields: IsoDateFields,
   durationInternals: DurationFieldsWithSign,
   overflow: Overflow,
 ): IsoDateFields {
-  return calendarImpl.dateAdd(
+  return this.dateAdd(
     isoDateFields,
     durationInternals,
     overflow,
@@ -55,12 +126,12 @@ export function calendarImplDateAdd(
 }
 
 export function calendarImplDateUntil(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit,
 ): DurationFieldsWithSign {
-  return calendarImpl.dateUntil(
+  return this.dateUntil(
     isoDateFields0,
     isoDateFields1,
     largestUnit,
@@ -68,64 +139,63 @@ export function calendarImplDateUntil(
 }
 
 export function calendarImplDateFromFields(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   fields: DateBagStrict,
   overflow: Overflow,
 ): IsoDateFields {
-  return calendarImpl.dateFromFields(
+  return this.dateFromFields(
     fields,
     overflow,
   )
 }
 
 export function calendarImplYearMonthFromFields(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   fields: YearMonthBag,
   overflow: Overflow,
 ): IsoDateFields {
-  return calendarImpl.yearMonthFromFields(
+  return this.yearMonthFromFields(
     fields,
     overflow,
   )
 }
 
 export function calendarImplMonthDayFromFields(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   fields: MonthDayBag,
   overflow: Overflow,
 ): IsoDateFields {
-  return calendarImpl.monthDayFromFields(
+  return this.monthDayFromFields(
     fields,
     overflow,
   )
 }
 
 export function calendarImplFields(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   fieldNames: string[],
 ): string[] {
-  return calendarImpl.fields(fieldNames)
+  return this.fields(fieldNames)
 }
 
 export function calendarImplMergeFields(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   fields0: Record<string, unknown>,
   fields1: Record<string, unknown>,
 ): Record<string, unknown> {
-  return calendarImpl.mergeFields(fields0, fields1)
+  return this.mergeFields(fields0, fields1)
 }
 
 export function calendarImplDay(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   isoDateFields: IsoDateFields,
 ): number {
-  return calendarImpl.day(isoDateFields)
+  return this.day(isoDateFields)
 }
 
-
 export function calendarImplDaysInMonth(
-  calendarImpl: CalendarImpl,
+  this: CalendarImpl,
   isoDateFields: IsoDateFields,
 ): number {
-  return calendarImpl.daysInMonth(isoDateFields)
+  return this.daysInMonth(isoDateFields)
 }

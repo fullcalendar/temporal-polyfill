@@ -4,7 +4,7 @@ import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
-import { createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, createYearMonthDiffCalendarRecordIMPL, createYearMonthModCalendarRecordIMPL, createYearMonthMoveCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, createYearMonthDiffCalendarRecordIMPL, createYearMonthModCalendarRecordIMPL, createYearMonthMoveCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from '../genericApi/genericTypes'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 

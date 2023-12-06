@@ -12,21 +12,20 @@ export interface BrandingSlots {
   branding: string
 }
 
-export interface CalendarSlots {
-  calendar: CalendarSlot
-}
-
 export interface EpochSlots {
   epochNanoseconds: DayTimeNano
 }
 
-// TODO: kill
 export interface ZonedEpochSlots extends EpochSlots {
   timeZone: TimeZoneSlot
   calendar: CalendarSlot
 }
-export type IsoDateSlots = IsoDateFields & CalendarSlots
-export type IsoDateTimeSlots = IsoDateSlots & IsoTimeFields
+
+// Types for getISOFields()
+// -------------------------------------------------------------------------------------------------
+
+export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
+export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
 
 // Lookup
 // -------------------------------------------------------------------------------------------------

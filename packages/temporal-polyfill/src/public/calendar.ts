@@ -10,7 +10,7 @@ import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calenda
 import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/convert'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/recordCreators'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
 
 // public
 import { BrandingSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'

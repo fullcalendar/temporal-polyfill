@@ -1,9 +1,8 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
-import { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { validateOffsetNano } from '../internal/timeZoneMath'
-import { TimeZoneImplFunc, TimeZoneImplMethod } from '../genericApi/timeZoneRecordSimple'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 
 // public
@@ -11,75 +10,66 @@ import { TimeZoneSlot } from './timeZoneSlot'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZone'
-import { ensureString } from '../internal/cast'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 
-// CONDITIONAL Record Creation
-// -------------------------------------------------------------------------------------------------
-// TODO: more DRY
-
-export type TimeZoneProtocolFuncViaImpl<ImplFunc> =
-  ImplFunc extends (timeZoneImpl: TimeZoneImpl, ...args: infer Args) => infer Ret
-    ? (timeZoneProtocol: TimeZoneProtocol, ...args: Args) => Ret
-    : never
-
-export function createTimeZoneSlotRecord<
-  TimeZoneImplFuncs extends Record<string, TimeZoneImplFunc>
->(
-  timeZoneSlot: TimeZoneSlot,
-  protocolFuncs: {
-    [K in keyof TimeZoneImplFuncs]: TimeZoneProtocolFuncViaImpl<TimeZoneImplFuncs[K]>
-  } = {} as any,
+export function createTimeZoneSlotRecord<ProtocolMethods extends Record<string, (this: TimeZoneProtocol, ...args: any[]) => any>>(
+  slot: TimeZoneSlot,
+  protocolMethods: ProtocolMethods,
 ): {
-  [K in keyof TimeZoneImplFuncs]: TimeZoneImplMethod<TimeZoneImplFuncs[K]>
-} & {
-  id: string
+  [K in keyof ProtocolMethods]:
+    ProtocolMethods[K] extends (this: TimeZoneProtocol, ...args: infer Args) => infer Ret
+      ? (this: {}, ...args: Args) => Ret
+      : never
 } {
-  if (typeof timeZoneSlot === 'string') {
-    return queryTimeZoneImpl(timeZoneSlot) as any // !!!
+  if (typeof slot === 'string') {
+    return queryTimeZoneImpl(slot) as any // !!!
   }
-  return createTimeZoneProtocolRecord(timeZoneSlot, protocolFuncs) as any
+
+  return createTimeZoneProtocolRecord(slot, protocolMethods) as any
 }
 
-// TimeZoneProtocol Record Creation
-// -------------------------------------------------------------------------------------------------
-// TODO: more DRY
-
-export type TimeZoneProtocolFunc = (timeZoneProtocol: TimeZoneProtocol, ...args: any[]) => any
-
-export type TimeZoneProtocolMethod<Func> =
-  Func extends (timeZoneProtocol: TimeZoneProtocol, ...args: infer Args) => infer Ret
-    ? (...args: Args) => Ret
-    : never
-
-export function createTimeZoneProtocolRecord<Funcs extends { [funcName: string]: TimeZoneProtocolFunc }>(
-  timeZoneProtocol: TimeZoneProtocol,
-  funcs: Funcs,
+export function createTimeZoneProtocolRecord<ProtocolMethods extends Record<string, (this: TimeZoneProtocol, ...args: any[]) => any>>(
+  protocol: TimeZoneProtocol,
+  protocolMethods: ProtocolMethods,
 ): {
-  [FuncName in keyof Funcs]: TimeZoneProtocolMethod<Funcs[FuncName]>
-} & {
-  id: string
+  [K in keyof ProtocolMethods]:
+    ProtocolMethods[K] extends (this: TimeZoneProtocol, ...args: infer Args) => infer Ret
+      ? (...args: Args) => Ret
+      : never
 } {
-  const timeZoneRecord: any = {
-    get id() { return ensureString(timeZoneProtocol.id) }
+  const recordMethods: any = {}
+
+  for (const methodName in protocolMethods) {
+    recordMethods[methodName] = protocolMethods[methodName].bind(protocol)
   }
 
-  for (const methodName in funcs) {
-    timeZoneRecord[methodName] = funcs[methodName].bind(timeZoneProtocol)
-  }
-
-  return timeZoneRecord
+  return recordMethods
 }
 
-// TimeZoneProtocol Functions
+// Preconfigured Creators
+// -------------------------------------------------------------------------------------------------
+
+export function createTypicalTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
+  return createTimeZoneSlotRecord(timeZoneSlot, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+    getPossibleInstantsFor: timeZoneProtocolGetPossibleInstantsFor,
+  })
+}
+
+export function createSimpleTimeZoneRecord(timeZoneSlot: TimeZoneSlot) {
+  return createTimeZoneSlotRecord(timeZoneSlot, {
+    getOffsetNanosecondsFor: timeZoneProtocolGetOffsetNanosecondsFor,
+  })
+}
+
+// Individual Methods
 // -------------------------------------------------------------------------------------------------
 
 export function timeZoneProtocolGetOffsetNanosecondsFor(
-  timeZoneProtocol: TimeZoneProtocol,
+  this: TimeZoneProtocol,
   epochNano: DayTimeNano,
 ): number {
   return validateOffsetNano(
-    timeZoneProtocol.getOffsetNanosecondsFor(
+    this.getOffsetNanosecondsFor(
       createInstant({
         branding: InstantBranding,
         epochNanoseconds: epochNano
@@ -89,10 +79,10 @@ export function timeZoneProtocolGetOffsetNanosecondsFor(
 }
 
 export function timeZoneProtocolGetPossibleInstantsFor(
-  timeZoneProtocol: TimeZoneProtocol,
+  this: TimeZoneProtocol,
   isoFields: IsoDateTimeFields,
 ): DayTimeNano[] {
-  return [...timeZoneProtocol.getPossibleInstantsFor(
+  return [...this.getPossibleInstantsFor(
     createPlainDateTime({
       ...isoFields,
       branding: PlainDateTimeBranding,

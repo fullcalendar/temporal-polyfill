@@ -11,7 +11,7 @@ import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots }
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, setSlots, IsoDateTimeSlots, rejectInvalidBag } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots, PublicDateTimeSlots, rejectInvalidBag } from './slots'
 import { CalendarBranding, PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -25,7 +25,8 @@ import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createCalendarGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
-import { createDateNewCalendarRecord, createMonthDayNewCalendarRecord, createSimpleTimeZoneRecord, createTypicalTimeZoneRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord, getDiffCalendarRecord, getMoveCalendarRecord } from './recordCreators'
+import { createDateNewCalendarRecord, createMonthDayNewCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord, getDiffCalendarRecord, getMoveCalendarRecord } from './calendarRecordComplex'
+import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
@@ -210,7 +211,7 @@ export class PlainDateTime {
   }
 
   // not DRY
-  getISOFields(): IsoDateTimeSlots {
+  getISOFields(): PublicDateTimeSlots {
     const slots = getPlainDateTimeSlots(this)
     return { // alphabetical
       calendar: slots.calendar,

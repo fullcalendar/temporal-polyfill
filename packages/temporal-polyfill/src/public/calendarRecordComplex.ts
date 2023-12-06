@@ -1,89 +1,193 @@
 import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
-import { CalendarImpl } from '../internal/calendarImpl'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { overflowMapNames } from '../genericApi/options'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Overflow } from '../internal/options'
-import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
+import { CalendarImpl } from '../internal/calendarImpl'
+import { calendarImplDateAdd, calendarImplDateFromFields, calendarImplDateUntil, calendarImplDay, calendarImplDaysInMonth, calendarImplFields, calendarImplMergeFields, calendarImplMonthDayFromFields, calendarImplYearMonthFromFields, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 
 // public
 import { CalendarSlot } from './calendarSlot'
-import { IsoDateSlots } from './slots'
 import { CalendarProtocol } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 
-// CONDITIONAL Record Creation
-// -------------------------------------------------------------------------------------------------
-// TODO: more DRY
-
-export type CalendarProtocolFuncViaImpl<ImplFunc> =
-  ImplFunc extends (calendarImpl: CalendarImpl, ...args: infer Args) => infer Ret
-    ? (calendarProtocol: CalendarProtocol, ...args: Args) => Ret
-    : never
-
-export function createCalendarSlotRecord<
-  CalendarImplFuncs extends Record<string, CalendarImplFunc>
->(
+export function createCalendarSlotRecord<ProtocolMethods extends Record<string, (this: CalendarProtocol, ...args: any[]) => any>>(
   calendarSlot: CalendarSlot,
-  implFuncs: CalendarImplFuncs = {} as any,
-  protocolFuncs: {
-    [K in keyof CalendarImplFuncs]: CalendarProtocolFuncViaImpl<CalendarImplFuncs[K]>
-  } = {} as any,
+  protocolMethods: ProtocolMethods,
+  implMethods: {
+    [K in keyof ProtocolMethods]:
+      ProtocolMethods[K] extends (this: CalendarProtocol, ...args: infer Args) => infer Ret
+        ? (this: CalendarImpl, ...args: Args) => Ret
+        : never
+  },
 ): {
-  [K in keyof CalendarImplFuncs]: CalendarImplMethod<CalendarImplFuncs[K]>
+  [K in keyof ProtocolMethods]:
+    ProtocolMethods[K] extends (this: CalendarProtocol, ...args: infer Args) => infer Ret
+      ? (this: {}, ...args: Args) => Ret
+      : never
 } {
   if (typeof calendarSlot === 'string') {
-    return createCalendarImplRecord(calendarSlot, implFuncs)
+    return createCalendarImplRecord(calendarSlot, implMethods) as any // !!!
   }
-  return createCalendarProtocolRecord(calendarSlot, protocolFuncs) as any
+
+  return createCalendarProtocolRecord(calendarSlot, protocolMethods)
 }
 
-// CalendarProtocol Record Creation
-// -------------------------------------------------------------------------------------------------
-// TODO: more DRY
-
-type CalendarProtocolFunc = (calendarProtocol: CalendarProtocol, ...args: any[]) => any
-
-type CalendarProtocolMethod<Func> =
-  Func extends (calendarProtocol: CalendarProtocol, ...args: infer Args) => infer Ret
-    ? (...args: Args) => Ret
-    : never
-
-function createCalendarProtocolRecord<Funcs extends { [funcName: string]: CalendarProtocolFunc }>(
+function createCalendarProtocolRecord<ProtocolMethods extends Record<string, (this: CalendarProtocol, ...args: any[]) => any>>(
   calendarProtocol: CalendarProtocol,
-  funcs: Funcs,
+  protocolMethods: ProtocolMethods,
 ): {
-  [FuncName in keyof Funcs]: CalendarProtocolMethod<Funcs[FuncName]>
+  [K in keyof ProtocolMethods]:
+    ProtocolMethods[K] extends (this: CalendarProtocol, ...args: infer Args) => infer Ret
+      ? (...args: Args) => Ret
+      : never
 } {
   const calendarRecord: any = {}
 
-  for (const methodName in funcs) {
-    calendarRecord[methodName] = funcs[methodName].bind(undefined, calendarProtocol)
+  for (const methodName in protocolMethods) {
+    calendarRecord[methodName] = protocolMethods[methodName].bind(calendarProtocol)
   }
 
   return calendarRecord
 }
 
-// CalendarProtocol Functions
+// Preconfigured Creators
+// -------------------------------------------------------------------------------------------------
+
+// date
+
+export function createDateNewCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateFromFields: calendarProtocolDateFromFields,
+    fields: calendarProtocolFields,
+  }, {
+    dateFromFields: calendarImplDateFromFields,
+    fields: calendarImplFields,
+  })
+}
+
+export function getDateModCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateFromFields: calendarProtocolDateFromFields,
+    fields: calendarProtocolFields,
+    mergeFields: calendarProtocolMergeFields,
+  }, {
+    dateFromFields: calendarImplDateFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+export function getMoveCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarProtocolDateAdd,
+  }, {
+    dateAdd: calendarImplDateAdd,
+  })
+}
+
+export function getDiffCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarProtocolDateAdd,
+    dateUntil: calendarProtocolDateUntil,
+  }, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+  })
+}
+
+// year month
+
+export function createYearMonthNewCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    yearMonthFromFields: calendarProtocolYearMonthFromFields,
+    fields: calendarProtocolFields,
+  }, {
+    yearMonthFromFields: calendarImplYearMonthFromFields,
+    fields: calendarImplFields,
+  })
+}
+
+export function createYearMonthModCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    yearMonthFromFields: calendarProtocolYearMonthFromFields,
+    fields: calendarProtocolFields,
+    mergeFields: calendarProtocolMergeFields,
+  }, {
+    yearMonthFromFields: calendarImplYearMonthFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+export function createYearMonthMoveCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarProtocolDateAdd,
+    daysInMonth: calendarProtocolDaysInMonth,
+    day: calendarProtocolDay,
+  }, {
+    dateAdd: calendarImplDateAdd,
+    daysInMonth: calendarImplDaysInMonth,
+    day: calendarImplDay,
+  })
+}
+
+export function createYearMonthDiffCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    dateAdd: calendarProtocolDateAdd,
+    dateUntil: calendarProtocolDateUntil,
+    day: calendarProtocolDay,
+  }, {
+    dateAdd: calendarImplDateAdd,
+    dateUntil: calendarImplDateUntil,
+    day: calendarImplDay,
+  })
+}
+
+// month day
+
+export function createMonthDayNewCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    monthDayFromFields: calendarProtocolMonthDayFromFields,
+    fields: calendarProtocolFields,
+  }, {
+    monthDayFromFields: calendarImplMonthDayFromFields,
+    fields: calendarImplFields,
+  })
+}
+
+export function createMonthDayModCalendarRecord(calendarSlot: CalendarSlot) {
+  return createCalendarSlotRecord(calendarSlot, {
+    monthDayFromFields: calendarProtocolMonthDayFromFields,
+    fields: calendarProtocolFields,
+    mergeFields: calendarProtocolMergeFields,
+  }, {
+    monthDayFromFields: calendarImplMonthDayFromFields,
+    fields: calendarImplFields,
+    mergeFields: calendarImplMergeFields,
+  })
+}
+
+// Individual CalendarProtocol Methods
 // -------------------------------------------------------------------------------------------------
 
 export function calendarProtocolDateAdd(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   isoDateFields: IsoDateFields,
   durationInternals: DurationFieldsWithSign,
   overflow: Overflow,
 ): IsoDateFields {
   return getPlainDateSlots(
-    calendarProtocol.dateAdd(
+    this.dateAdd(
       createPlainDate({
         ...isoDateFields,
-        calendar: calendarProtocol,
+        calendar: this,
         branding: PlainDateBranding, // go at to override what isoDateFields might provide!
       }),
       createDuration({
@@ -99,21 +203,21 @@ export function calendarProtocolDateAdd(
 }
 
 export function calendarProtocolDateUntil(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit,
 ): DurationFieldsWithSign {
   return getDurationSlots(
-    calendarProtocol.dateUntil(
+    this.dateUntil(
       createPlainDate({
         ...isoDateFields0,
-        calendar: calendarProtocol,
+        calendar: this,
         branding: PlainDateBranding,
       }),
       createPlainDate({
         ...isoDateFields1,
-        calendar: calendarProtocol,
+        calendar: this,
         branding: PlainDateBranding,
       }),
       Object.assign(
@@ -125,12 +229,12 @@ export function calendarProtocolDateUntil(
 }
 
 export function calendarProtocolDateFromFields(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   fields: DateBagStrict,
   overflow: Overflow,
-): IsoDateSlots { // YUCK
+): IsoDateFields {
   return getPlainDateSlots(
-    calendarProtocol.dateFromFields(
+    this.dateFromFields(
       // TODO: make util
       // only necessary if fabricating internally
       Object.assign(Object.create(null), fields) as DateBagStrict,
@@ -143,12 +247,12 @@ export function calendarProtocolDateFromFields(
 }
 
 export function calendarProtocolYearMonthFromFields(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   fields: YearMonthBag,
   overflow: Overflow,
-): IsoDateSlots {
+): IsoDateFields {
   return getPlainYearMonthSlots(
-    calendarProtocol.yearMonthFromFields(
+    this.yearMonthFromFields(
       // TODO: make util
       // only necessary if fabricating internally
       Object.assign(Object.create(null), fields) as YearMonthBagStrict,
@@ -161,12 +265,12 @@ export function calendarProtocolYearMonthFromFields(
 }
 
 export function calendarProtocolMonthDayFromFields(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   fields: MonthDayBag,
   overflow: Overflow,
-): IsoDateSlots {
+): IsoDateFields {
   return getPlainMonthDaySlots(
-    calendarProtocol.monthDayFromFields(
+    this.monthDayFromFields(
       // TODO: make util
       // only necessary if fabricating internally
       Object.assign(Object.create(null), fields) as MonthDayBagStrict,
@@ -179,19 +283,19 @@ export function calendarProtocolMonthDayFromFields(
 }
 
 export function calendarProtocolFields(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   fieldNames: string[],
 ): string[] {
-  return [...calendarProtocol.fields(fieldNames)]
+  return [...this.fields(fieldNames)]
 }
 
 export function calendarProtocolMergeFields(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   fields0: Record<string, unknown>,
   fields1: Record<string, unknown>,
 ): Record<string, unknown> {
   return ensureObjectlike(
-    calendarProtocol.mergeFields(
+    this.mergeFields(
       Object.assign(Object.create(null), fields0),
       Object.assign(Object.create(null), fields1),
     ),
@@ -199,14 +303,14 @@ export function calendarProtocolMergeFields(
 }
 
 export function calendarProtocolDay(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   isoDateFields: IsoDateFields,
 ): number {
   return ensurePositiveInteger(
-    calendarProtocol.day(
+    this.day(
       createPlainDate({
         ...isoDateFields,
-        calendar: calendarProtocol,
+        calendar: this,
         branding: PlainDateBranding,
       })
     )
@@ -214,14 +318,14 @@ export function calendarProtocolDay(
 }
 
 export function calendarProtocolDaysInMonth(
-  calendarProtocol: CalendarProtocol,
+  this: CalendarProtocol,
   isoDateFields: IsoDateFields,
 ): number {
   return ensurePositiveInteger(
-    calendarProtocol.daysInMonth(
+    this.daysInMonth(
       createPlainDate({
         ...isoDateFields,
-        calendar: calendarProtocol,
+        calendar: this,
         branding: PlainDateBranding,
       })
     )

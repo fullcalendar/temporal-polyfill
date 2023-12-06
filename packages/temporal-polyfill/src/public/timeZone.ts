@@ -20,7 +20,7 @@ import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
-import { createTypicalTimeZoneRecord } from './recordCreators'
+import { createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------

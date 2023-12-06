@@ -23,8 +23,9 @@ import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { IsoDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
-import { getDateModCalendarRecord, getMoveCalendarRecord, getDiffCalendarRecord, createTypicalTimeZoneRecord, createYearMonthNewCalendarRecord, createMonthDayNewCalendarRecord, createDateNewCalendarRecord, createSimpleTimeZoneRecord } from './recordCreators'
+import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { getDateModCalendarRecord, getMoveCalendarRecord, getDiffCalendarRecord, createYearMonthNewCalendarRecord, createMonthDayNewCalendarRecord, createDateNewCalendarRecord } from './calendarRecordComplex'
+import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
 
 export type PlainDateArg = PlainDate | PlainDateBag<CalendarArg> | string
 
@@ -175,7 +176,7 @@ export class PlainDate {
   }
 
   // not DRY
-  getISOFields(): IsoDateSlots {
+  getISOFields(): PublicDateSlots {
     const slots = getPlainDateSlots(this)
     return { // alphabetical
       calendar: slots.calendar,

@@ -9,7 +9,7 @@ import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { DurationSlots } from '../genericApi/genericTypes'
 
 // public
-import { getSpecificSlots, BrandingSlots, IsoDateSlots, EpochSlots } from './slots'
+import { getSpecificSlots, BrandingSlots, PublicDateSlots, EpochSlots } from './slots'
 import { createPlainDate } from './plainDate'
 import { CalendarProtocol } from './calendar'
 import { CalendarSlot } from './calendarSlot'
@@ -21,7 +21,7 @@ export function createCalendarGetterMethods(
 ) {
   return mapPropNames((name) => {
     return function (this: any) {
-      const slots = getSpecificSlots(branding, this) as (BrandingSlots & IsoDateSlots)
+      const slots = getSpecificSlots(branding, this) as (BrandingSlots & PublicDateSlots)
       const isoFields = slotsToIsoFields(slots)
       return queryCalendarVal(name as string, slots.calendar, isoFields)
     }

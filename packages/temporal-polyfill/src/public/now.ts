@@ -8,7 +8,7 @@ import { isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 
 // public
-import { IsoDateTimeSlots, ZonedEpochSlots } from './slots'
+import { PublicDateTimeSlots, ZonedEpochSlots } from './slots'
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarArg } from './calendar'
@@ -18,7 +18,7 @@ import { PlainTime, createPlainTime } from './plainTime'
 import { TimeZoneArg } from './timeZone'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createSimpleTimeZoneRecord } from './recordCreators'
+import { createSimpleTimeZoneRecord } from './timeZoneRecordComplex'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -88,7 +88,7 @@ function getCurrentInstant(): Instant {
 function getCurrentPlainDateTimeSlots(
   calendarArg: CalendarArg,
   timeZoneArg: TimeZoneArg,
-): IsoDateTimeSlots {
+): PublicDateTimeSlots {
   const zonedSlots = getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)
   const timeZoneRecord = createSimpleTimeZoneRecord(zonedSlots.timeZone)
 
