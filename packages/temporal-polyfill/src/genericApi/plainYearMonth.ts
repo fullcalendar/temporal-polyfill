@@ -10,7 +10,7 @@ import { IsoDateFields, constrainIsoDateLike } from '../internal/isoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/isoFormat'
 import { checkIsoYearMonthInBounds, compareIsoDateFields, moveByIsoDays } from '../internal/isoMath'
 import { parsePlainYearMonth } from '../internal/isoParse'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDiffOptions } from '../internal/options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from '../internal/options'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { DurationBranding, PlainDateBranding, PlainYearMonthBranding } from './branding'
@@ -106,7 +106,11 @@ export function add<C>(
       : 1,
   )
 
-  const movedIsoDateFields = calendarRecord.dateAdd(isoDateFields, durationSlots, options)
+  const movedIsoDateFields = calendarRecord.dateAdd(
+    isoDateFields,
+    durationSlots,
+    refineOverflowOptions(options),
+  )
 
   return {
     ...movePlainYearMonthToDay(calendarRecord, movedIsoDateFields),
@@ -191,7 +195,7 @@ export function toString(
     plainYearMonthSlots.calendar,
     formatIsoYearMonthFields,
     plainYearMonthSlots,
-    options,
+    refineDateDisplayOptions(options),
   )
 }
 

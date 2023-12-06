@@ -11,7 +11,7 @@ import { formatPlainDateIso } from '../internal/isoFormat'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
 import { moveDateEasy } from '../internal/move'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDiffOptions } from '../internal/options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from '../internal/options'
 import { getSingleInstantFor } from '../internal/timeZoneMath'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { Unit } from '../internal/units'
@@ -101,7 +101,7 @@ export function add<C>(
       getCalendarRecord(plainDateSlots.calendar),
       plainDateSlots,
       durationSlots,
-      options,
+      refineOverflowOptions(options),
     )
   }
 }
@@ -184,7 +184,7 @@ export function toString<C extends IdLike>(
   plainDateSlots: PlainDateSlots<C>,
   options?: DateTimeDisplayOptions,
 ): string {
-  return formatPlainDateIso(plainDateSlots.calendar, plainDateSlots, options)
+  return formatPlainDateIso(plainDateSlots.calendar, plainDateSlots, refineDateDisplayOptions(options))
 }
 
 export function toJSON<C extends IdLike>(

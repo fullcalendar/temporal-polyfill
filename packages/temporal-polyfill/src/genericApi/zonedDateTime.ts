@@ -13,7 +13,7 @@ import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { moveZonedEpochNano } from '../internal/move'
-import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
+import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions, refineZonedDateTimeDisplayOptions, refineZonedFieldOptions } from '../internal/options'
 import { EpochDisambig, OffsetDisambig } from '../internal/optionEnums'
 import { roundDateTime } from '../internal/round'
 import { computeNanosecondsInDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneMath'
@@ -40,7 +40,7 @@ export function create<CA, C, TA, T>(
 
 export function fromString(s: string, options?: ZonedFieldOptions): ZonedDateTimeSlots<string, string> {
   return {
-    ...parseZonedDateTime(ensureString(s), options),
+    ...parseZonedDateTime(ensureString(s), ...refineZonedFieldOptions(options)),
     branding: ZonedDateTimeBranding,
   }
 }
@@ -220,7 +220,7 @@ export function add<C, T>(
     getTimeZoneRecord(zonedDateTimeSlots.timeZone),
     zonedDateTimeSlots.epochNanoseconds,
     durationSlots,
-    options,
+    refineOverflowOptions(options),
   )
 
   return {
@@ -415,7 +415,7 @@ export function toString<C extends IdLike, T extends IdLike>(
     zonedDateTimeSlots0.timeZone,
     getTimeZoneRecord(zonedDateTimeSlots0.timeZone),
     zonedDateTimeSlots0.epochNanoseconds,
-    options,
+    ...refineZonedDateTimeDisplayOptions(options),
   )
 }
 

@@ -43,7 +43,7 @@ export function moveZonedEpochNano(
   },
   epochNano: DayTimeNano,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): DayTimeNano {
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour) // better name: timed nano
 
@@ -58,7 +58,7 @@ export function moveZonedEpochNano(
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
       },
-      options,
+      overflow,
     )
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
@@ -90,7 +90,7 @@ export function moveDateTime(
   calendarRecord: { dateAdd: CalendarDateAddFunc },
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateTimeFields {
   // could have over 24 hours!!!
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
@@ -103,7 +103,7 @@ export function moveDateTime(
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
     },
-    options,
+    overflow,
   )
 
   return checkIsoDateTimeInBounds({
@@ -116,19 +116,17 @@ export function moveDateEasy(
   calendarRecord: { dateAdd: CalendarDateAddFunc },
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
     return calendarRecord.dateAdd(
       isoDateFields,
       updateDurationFieldsSign(durationFields),
-      options
+      overflow
     )
   }
 
   // don't need calendar going forward...
-
-  refineOverflowOptions(options)
 
   // TODO: DRY
   const days = durationFields.days + givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]

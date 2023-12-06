@@ -8,7 +8,7 @@ import { constrainIsoDateLike } from '../internal/isoFields'
 import { formatIsoMonthDayFields, formatPossibleDate } from '../internal/isoFormat'
 import { checkIsoDateInBounds, compareIsoDateFields, isoEpochFirstLeapYear } from '../internal/isoMath'
 import { parsePlainMonthDay } from '../internal/isoParse'
-import { DateTimeDisplayOptions, OverflowOptions } from '../internal/options'
+import { DateTimeDisplayOptions, OverflowOptions, refineDateDisplayOptions } from '../internal/options'
 import { PlainDateBranding, PlainMonthDayBranding } from './branding'
 import { PlainDateSlots, PlainMonthDaySlots } from './genericTypes'
 
@@ -100,7 +100,7 @@ export function toString(
     plainMonthDaySlots.calendar,
     formatIsoMonthDayFields,
     plainMonthDaySlots,
-    options,
+    refineDateDisplayOptions(options),
   )
 }
 

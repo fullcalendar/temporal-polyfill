@@ -12,7 +12,7 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
-import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay } from './optionEnums'
+import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './optionEnums'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -20,8 +20,8 @@ import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay,
 
 export function refineOverflowOptions(
   options: OverflowOptions | undefined,
-): Overflow | undefined {
-  return options === undefined ? undefined : refineOverflow(options)
+): Overflow {
+  return options === undefined ? Overflow.Constrain : refineOverflow(options)
 }
 
 export type ZonedFieldOptions = OverflowOptions & EpochDisambigOptions & OffsetDisambigOptions
@@ -538,13 +538,6 @@ function refineRoundingInc(
 
 // Subsec Digits
 // -------------------------------------------------------------------------------------------------
-
-/*
-addons:
-  -1 means hide seconds
-  undefined means 'auto' (display all digits but no trailing zeros)
-*/
-export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 export interface SubsecDigitsOptions {
   fractionalSecondDigits?: SubsecDigits

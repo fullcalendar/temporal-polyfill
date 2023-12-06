@@ -2,7 +2,7 @@ import { DateBagStrict, MonthDayBag, YearMonthBag } from './calendarFields'
 import { CalendarImpl, queryCalendarImpl } from './calendarImpl'
 import { DurationFieldsWithSign } from './durationFields'
 import { IsoDateFields } from './isoFields'
-import { LargestUnitOptions, OverflowOptions, refineOverflowOptions } from './options'
+import { Overflow } from './optionEnums'
 import { Unit } from './units'
 
 // CalendarImpl Record Creation
@@ -42,12 +42,12 @@ export function calendarImplDateAdd(
   calendarImpl: CalendarImpl,
   isoDateFields: IsoDateFields,
   durationInternals: DurationFieldsWithSign,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateFields {
   return calendarImpl.dateAdd(
     isoDateFields,
     durationInternals,
-    refineOverflowOptions(options),
+    overflow,
   )
 }
 
@@ -67,33 +67,33 @@ export function calendarImplDateUntil(
 export function calendarImplDateFromFields(
   calendarImpl: CalendarImpl,
   fields: DateBagStrict,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateFields {
   return calendarImpl.dateFromFields(
     fields,
-    refineOverflowOptions(options),
+    overflow,
   )
 }
 
 export function calendarImplYearMonthFromFields(
   calendarImpl: CalendarImpl,
   fields: YearMonthBag,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateFields {
   return calendarImpl.yearMonthFromFields(
     fields,
-    refineOverflowOptions(options),
+    overflow,
   )
 }
 
 export function calendarImplMonthDayFromFields(
   calendarImpl: CalendarImpl,
   fields: MonthDayBag,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateFields {
   return calendarImpl.monthDayFromFields(
     fields,
-    refineOverflowOptions(options),
+    overflow,
   )
 }
 

@@ -1,7 +1,7 @@
 import { DateBagStrict, DateGetterFields, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha, dateGetterNames } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { IsoDateFields } from '../internal/isoFields'
-import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/options'
+import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from '../internal/options'
 import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } from '../internal/utils'
 import { queryCalendarImpl } from '../internal/calendarImpl'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
@@ -83,7 +83,7 @@ export class Calendar implements CalendarProtocol {
       ...calendarRecord.dateAdd(
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
-        options,
+        refineOverflowOptions(options),
       ),
       calendar: id,
       branding: PlainDateBranding,

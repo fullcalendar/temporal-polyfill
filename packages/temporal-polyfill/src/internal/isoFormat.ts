@@ -3,8 +3,7 @@ import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationFieldsWithSign, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { epochNanoToIso } from './isoMath'
-import { DateTimeDisplayOptions, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, ZonedDateTimeDisplayOptions } from './options'
-import { CalendarDisplay, OffsetDisplay, RoundingMode, TimeZoneDisplay } from './optionEnums'
+import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './optionEnums'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import {
   givenFieldsToDayTimeNano,
@@ -25,15 +24,11 @@ import { IdLike, getId } from './idLike'
 export function formatPlainDateTimeIso(
   calendarIdLike: IdLike,
   isoFields: IsoDateTimeFields,
-  options?: DateTimeDisplayOptions,
+  calendarDisplay: CalendarDisplay,
+  nanoInc: number,
+  roundingMode: RoundingMode,
+  subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  const [
-    calendarDisplay,
-    nanoInc,
-    roundingMode,
-    subsecDigits,
-  ] = refineDateTimeDisplayOptions(options)
-
   const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
 
   return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
@@ -43,10 +38,9 @@ export function formatPlainDateTimeIso(
 export function formatPlainDateIso(
   calendarIdLike: IdLike,
   isoFields: IsoDateFields,
-  options?: DateTimeDisplayOptions
+  calendarDisplay: CalendarDisplay,
 ): string {
-  return formatIsoDateFields(isoFields) +
-    formatCalendar(calendarIdLike, refineDateDisplayOptions(options))
+  return formatIsoDateFields(isoFields) + formatCalendar(calendarIdLike, calendarDisplay)
 }
 
 /*
@@ -57,17 +51,13 @@ export function formatZonedDateTimeIso(
   tiemZoneIdLike: IdLike,
   timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
   epochNano: DayTimeNano,
-  options?: ZonedDateTimeDisplayOptions,
+  calendarDisplay: CalendarDisplay,
+  timeZoneDisplay: TimeZoneDisplay,
+  offsetDisplay: OffsetDisplay,
+  nanoInc: number,
+  roundingMode: RoundingMode,
+  subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  const [
-    calendarDisplay,
-    timeZoneDisplay,
-    offsetDisplay,
-    nanoInc,
-    roundingMode,
-    subsecDigits,
-  ] = refineZonedDateTimeDisplayOptions(options)
-
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
   const offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
@@ -103,9 +93,12 @@ export function formatInstantIso(
     )
 }
 
-export function formatPlainTimeIso(fields: IsoTimeFields, options?: TimeDisplayOptions): string {
-  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options)
-
+export function formatPlainTimeIso(
+  fields: IsoTimeFields,
+  nanoInc: number,
+  roundingMode: RoundingMode,
+  subsecDigits: SubsecDigits | -1 | undefined,
+): string {
   return formatIsoTimeFields(
     roundTimeToNano(fields, nanoInc, roundingMode)[0],
     subsecDigits,
@@ -124,9 +117,8 @@ export function formatPossibleDate(
   calendarIdLike: IdLike,
   formatSimple: (isoFields: IsoDateFields) => string,
   isoFields: IsoDateFields,
-  options?: DateTimeDisplayOptions,
+  calendarDisplay: CalendarDisplay,
 ) {
-  const calendarDisplay = refineDateDisplayOptions(options)
   const calendarId = getId(calendarIdLike)
   const showCalendar =
     calendarDisplay > CalendarDisplay.Never || // critical or always

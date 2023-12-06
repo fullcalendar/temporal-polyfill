@@ -11,7 +11,8 @@ import { isoToEpochNano } from '../internal/isoMath'
 import { parseDuration } from '../internal/isoParse'
 import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarketSlots, MoveMarker, SimpleMarkerSystem } from '../internal/markerSystemTypes'
 import { moveDateTime, moveZonedEpochNano } from '../internal/move'
-import { DurationRoundOptions, RelativeToOptions, SubsecDigits, TimeDisplayOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTimeDisplayOptions, refineTotalOptions } from '../internal/options'
+import { Overflow, SubsecDigits } from '../internal/optionEnums'
+import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTimeDisplayOptions, refineTotalOptions } from '../internal/options'
 import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
@@ -403,14 +404,18 @@ function createMarkerSystem<C, T>(
     return [
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
-      moveZonedEpochNano.bind(undefined, calendarRecord, timeZoneRecord),
+      (epochNano: DayTimeNano, durationFields: DurationFields) => {
+        return moveZonedEpochNano(calendarRecord, timeZoneRecord, epochNano, durationFields, Overflow.Constrain)
+      },
       diffZonedEpochNano.bind(undefined, calendarRecord, timeZoneRecord),
     ]
   } else {
     return [
       { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
       isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
-      moveDateTime.bind(undefined, calendarRecord),
+      (isoField: IsoDateTimeFields, durationFields: DurationFields) => {
+        return moveDateTime(calendarRecord, isoField, durationFields, Overflow.Constrain)
+      },
       // TODO: use .bind after updateDurationFieldsSign removed
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
         return updateDurationFieldsSign(diffDateTimes(calendarRecord, m0, m1, largeUnit))

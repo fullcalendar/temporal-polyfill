@@ -49,3 +49,12 @@ export const enum RoundingMode {
   HalfExpand,
   HalfEven
 }
+
+// not an enum :(
+export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+/*
+common SubsecDigits addons:
+  -1 means hide seconds
+  undefined means 'auto' (display all digits but no trailing zeros)
+*/

@@ -21,7 +21,7 @@ import {
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { DiffOptions, LargestUnitOptions, refineDiffOptions } from './options'
-import { RoundingMode } from './optionEnums'
+import { Overflow, RoundingMode } from './optionEnums'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import {
@@ -141,7 +141,7 @@ export function diffDateTimes(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateTimeFields) => DayTimeNano, // markerToEpochNano -- TODO: better after removing `!`
-    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarRecord, m, d),
+    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarRecord, m, d, Overflow.Constrain),
   )
 }
 
@@ -171,7 +171,7 @@ export function diffDates(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateFields) => DayTimeNano, // markerToEpochNano
-    (m: IsoDateFields, d: DurationFields) => calendarRecord.dateAdd(m, updateDurationFieldsSign(d)),
+    (m: IsoDateFields, d: DurationFields) => calendarRecord.dateAdd(m, updateDurationFieldsSign(d), Overflow.Constrain),
   )
 }
 
@@ -309,7 +309,7 @@ export function diffZonedEpochNano(
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
-    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarRecord, timeZoneRecord, m, d),
+    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarRecord, timeZoneRecord, m, d, Overflow.Constrain),
   ))
 }
 

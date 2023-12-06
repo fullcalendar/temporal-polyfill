@@ -4,7 +4,7 @@ import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
-import { LargestUnitOptions, OverflowOptions } from '../internal/options'
+import { overflowMapNames } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
 
 // public
@@ -16,6 +16,7 @@ import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
+import { Overflow } from '../internal/optionEnums'
 
 // CONDITIONAL Record Creation
 // -------------------------------------------------------------------------------------------------
@@ -76,7 +77,7 @@ export function calendarProtocolDateAdd(
   calendarProtocol: CalendarProtocol,
   isoDateFields: IsoDateFields,
   durationInternals: DurationFieldsWithSign,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateFields {
   return getPlainDateSlots(
     calendarProtocol.dateAdd(
@@ -89,7 +90,10 @@ export function calendarProtocolDateAdd(
         ...durationInternals,
         branding: DurationBranding,
       }),
-      options,
+      Object.assign(
+        Object.create(null),
+        { overflow: overflowMapNames[overflow] },
+      )
     )
   )
 }
@@ -123,14 +127,17 @@ export function calendarProtocolDateUntil(
 export function calendarProtocolDateFromFields(
   calendarProtocol: CalendarProtocol,
   fields: DateBagStrict,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateSlots { // YUCK
   return getPlainDateSlots(
     calendarProtocol.dateFromFields(
       // TODO: make util
       // only necessary if fabricating internally
       Object.assign(Object.create(null), fields) as DateBagStrict,
-      options,
+      Object.assign(
+        Object.create(null),
+        { overflow: overflowMapNames[overflow] },
+      )
     )
   )
 }
@@ -138,14 +145,17 @@ export function calendarProtocolDateFromFields(
 export function calendarProtocolYearMonthFromFields(
   calendarProtocol: CalendarProtocol,
   fields: YearMonthBag,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateSlots {
   return getPlainYearMonthSlots(
     calendarProtocol.yearMonthFromFields(
       // TODO: make util
       // only necessary if fabricating internally
       Object.assign(Object.create(null), fields) as YearMonthBagStrict,
-      options,
+      Object.assign(
+        Object.create(null),
+        { overflow: overflowMapNames[overflow] },
+      )
     )
   )
 }
@@ -153,14 +163,17 @@ export function calendarProtocolYearMonthFromFields(
 export function calendarProtocolMonthDayFromFields(
   calendarProtocol: CalendarProtocol,
   fields: MonthDayBag,
-  options?: OverflowOptions,
+  overflow: Overflow,
 ): IsoDateSlots {
   return getPlainMonthDaySlots(
     calendarProtocol.monthDayFromFields(
       // TODO: make util
       // only necessary if fabricating internally
       Object.assign(Object.create(null), fields) as MonthDayBagStrict,
-      options,
+      Object.assign(
+        Object.create(null),
+        { overflow: overflowMapNames[overflow] },
+      )
     )
   )
 }

@@ -11,7 +11,7 @@ import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { compareIsoDateTimeFields } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
 import { moveDateTime } from '../internal/move'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineDiffOptions, refineRoundOptions } from '../internal/options'
+import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineDateTimeDisplayOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions } from '../internal/options'
 import { RoundingMode } from '../internal/optionEnums'
 import { roundDateTime } from '../internal/round'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
@@ -137,7 +137,7 @@ export function add<C>(
       getCalendarRecord(plainDateTimeSlots.calendar),
       plainDateTimeSlots,
       durationSlots,
-      options,
+      refineOverflowOptions(options),
     )
   }
 }
@@ -228,13 +228,13 @@ export function toString<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   options?: DateTimeDisplayOptions,
 ): string {
-  return formatPlainDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, options)
+  return formatPlainDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, ...refineDateTimeDisplayOptions(options))
 }
 
 export function toJSON<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
 ): string {
-  return formatPlainDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0)
+  return formatPlainDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, ...refineDateTimeDisplayOptions(undefined))
 }
 
 export function toZonedDateTime<C, TZ>(

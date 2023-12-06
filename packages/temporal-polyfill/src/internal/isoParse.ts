@@ -26,7 +26,6 @@ import {
   nanoToIsoTimeAndDay,
   moveByIsoDays,
 } from './isoMath'
-import { ZonedFieldOptions, refineZonedFieldOptions } from './options'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionEnums'
 import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor } from './timeZoneMath'
@@ -95,7 +94,12 @@ export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calenda
 /*
 NOTE: one of the only string-parsing methods that accepts options
 */
-export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
+export function parseZonedDateTime(
+  s: string,
+  overflow: Overflow, // unused!
+  offsetDisambig: OffsetDisambig,
+  epochDisambig: EpochDisambig,
+): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
   const organized = parseMaybeGenericDateTime(s)
 
   if (!organized || !organized.timeZone) {
@@ -105,8 +109,6 @@ export function parseZonedDateTime(s: string, options?: ZonedFieldOptions): { ep
   // HACK to validate offset before parsing options
   const { offset } = organized
   const offsetNano = offset ? parseOffsetNano(offset) : undefined
-
-  const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
   return postProcessZonedDateTime(
     organized as ZonedDateTimeOrganized,

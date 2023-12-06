@@ -9,7 +9,7 @@ import { formatPlainTimeIso } from '../internal/isoFormat'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/isoMath'
 import { parsePlainTime } from '../internal/isoParse'
 import { moveTime } from '../internal/move'
-import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions } from '../internal/options'
+import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineTimeDisplayOptions } from '../internal/options'
 import { Overflow } from '../internal/optionEnums'
 import { roundPlainTime } from '../internal/round'
 import { getSingleInstantFor } from '../internal/timeZoneMath'
@@ -140,7 +140,7 @@ export function toString(
   slots: PlainTimeSlots,
   options?: TimeDisplayOptions
 ): string {
-  return formatPlainTimeIso(slots, options) // just forwards
+  return formatPlainTimeIso(slots, ...refineTimeDisplayOptions(options))
 }
 
 export function toJSON(slots: PlainTimeSlots): string {
