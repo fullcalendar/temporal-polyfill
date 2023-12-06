@@ -20,7 +20,8 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { DiffOptions, LargestUnitOptions, RoundingMode, refineDiffOptions } from './options'
+import { DiffOptions, LargestUnitOptions, refineDiffOptions } from './options'
+import { RoundingMode } from './optionEnums'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import {

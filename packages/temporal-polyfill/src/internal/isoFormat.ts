@@ -3,7 +3,8 @@ import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationFieldsWithSign, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { epochNanoToIso } from './isoMath'
-import { CalendarDisplay, DateTimeDisplayOptions, OffsetDisplay, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, RoundingMode, SubsecDigits, TimeDisplayOptions, TimeZoneDisplay, ZonedDateTimeDisplayOptions } from './options'
+import { DateTimeDisplayOptions, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions, SubsecDigits, TimeDisplayOptions, ZonedDateTimeDisplayOptions } from './options'
+import { CalendarDisplay, OffsetDisplay, RoundingMode, TimeZoneDisplay } from './optionEnums'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import {
   givenFieldsToDayTimeNano,

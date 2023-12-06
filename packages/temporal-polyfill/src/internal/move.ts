@@ -22,7 +22,8 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { Overflow, OverflowOptions, refineOverflowOptions } from './options'
+import { OverflowOptions, refineOverflowOptions } from './options'
+import { Overflow } from './optionEnums'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'

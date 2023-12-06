@@ -26,7 +26,8 @@ import {
   nanoToIsoTimeAndDay,
   moveByIsoDays,
 } from './isoMath'
-import { EpochDisambig, OffsetDisambig, Overflow, ZonedFieldOptions, refineZonedFieldOptions } from './options'
+import { ZonedFieldOptions, refineZonedFieldOptions } from './options'
+import { EpochDisambig, OffsetDisambig, Overflow } from './optionEnums'
 import { FixedTimeZoneImpl, queryTimeZoneImpl } from './timeZoneImpl'
 import { getMatchingInstantFor } from './timeZoneMath'
 import {

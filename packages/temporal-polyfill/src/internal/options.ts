@@ -12,6 +12,7 @@ import {
   roundHalfFloor,
   roundHalfTrunc,
 } from './utils'
+import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay } from './optionEnums'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------
@@ -319,11 +320,6 @@ const refineTotalUnit = refineUnitOption.bind<
 // Overflow
 // -------------------------------------------------------------------------------------------------
 
-export const enum Overflow {
-  Constrain,
-  Reject,
-}
-
 export interface OverflowOptions {
   overflow?: keyof typeof overflowMap
 }
@@ -343,13 +339,6 @@ const refineOverflow = refineChoiceOption.bind<
 
 // Epoch Disambig
 // -------------------------------------------------------------------------------------------------
-
-export const enum EpochDisambig {
-  Compat,
-  Reject,
-  Earlier,
-  Later,
-}
 
 export interface EpochDisambigOptions {
   disambiguation?: keyof typeof epochDisambigMap
@@ -371,13 +360,6 @@ const refineEpochDisambig = refineChoiceOption.bind<
 // Offset Disambig
 // -------------------------------------------------------------------------------------------------
 
-export const enum OffsetDisambig {
-  Reject,
-  Use,
-  Prefer,
-  Ignore,
-}
-
 export interface OffsetDisambigOptions {
   offset?: keyof typeof offsetDisambigMap
 }
@@ -397,13 +379,6 @@ const refineOffsetDisambig = refineChoiceOption.bind<
 
 // Calendar Display
 // -------------------------------------------------------------------------------------------------
-
-export const enum CalendarDisplay {
-  Auto,
-  Never,
-  Critical,
-  Always,
-}
 
 export interface CalendarDisplayOptions {
   calendarName?: keyof typeof calendarDisplayMap
@@ -425,12 +400,6 @@ const refineCalendarDisplay = refineChoiceOption.bind<
 // TimeZone Display
 // -------------------------------------------------------------------------------------------------
 
-export const enum TimeZoneDisplay {
-  Auto,
-  Never,
-  Critical,
-}
-
 export interface TimeZoneDisplayOptions {
   timeZoneName?: keyof typeof timeZoneDisplayMap
 }
@@ -450,11 +419,6 @@ const refineTimeZoneDisplay = refineChoiceOption.bind<
 // Offset Display
 // -------------------------------------------------------------------------------------------------
 
-export const enum OffsetDisplay {
-  Auto,
-  Never,
-}
-
 export interface OffsetDisplayOptions {
   offset?: keyof typeof offsetDisplayMap
 }
@@ -472,20 +436,6 @@ const refineOffsetDisplay = refineChoiceOption.bind<
 
 // Rounding Mode
 // -------------------------------------------------------------------------------------------------
-
-export const enum RoundingMode {
-  // modes that get inverted (see invertRoundingMode)
-  Floor,
-  HalfFloor,
-  Ceil,
-  HalfCeil,
-  // other modes
-  Trunc, // default for most things (still true??)
-  HalfTrunc,
-  Expand,
-  HalfExpand, // default for date/time/duration::round() (lots of things!)
-  HalfEven,
-}
 
 export interface RoundingModeOptions {
   roundingMode?: keyof typeof roundingModeMap

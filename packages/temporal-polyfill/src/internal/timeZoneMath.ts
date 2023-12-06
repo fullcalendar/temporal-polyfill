@@ -1,7 +1,7 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset, moveByIsoDays } from './isoMath'
-import { EpochDisambig, OffsetDisambig } from './options'
+import { EpochDisambig, OffsetDisambig } from './optionEnums'
 import { roundToMinute } from './round'
 import { nanoInUtcDay } from './units'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'

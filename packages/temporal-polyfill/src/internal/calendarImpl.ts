@@ -48,7 +48,7 @@ import {
   isoToEpochMilli,
 } from './isoMath'
 import { moveByIntlMonths, moveByIsoMonths, moveDate } from './move'
-import { Overflow } from './options'
+import { Overflow } from './optionEnums'
 import { Unit, milliInDay } from './units'
 import { Callable, clampEntity, compareNumbers, createLazyGenerator, mapPropNamesToIndex, padNumber2 } from './utils'
 import { DurationFieldsWithSign } from './durationFields'

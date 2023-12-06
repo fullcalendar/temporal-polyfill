@@ -1,4 +1,4 @@
-import { Overflow } from './options'
+import { Overflow } from './optionEnums'
 
 /*
 Is this making this more complex at cost of no lower min size?
