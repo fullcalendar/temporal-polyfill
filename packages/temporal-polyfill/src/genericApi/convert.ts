@@ -42,7 +42,7 @@ import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZone
 import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecordTypes'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { ZonedDateTimeBag } from '../internal/genericBag'
+import { ZonedDateTimeBag } from './genericBag'
 
 export function convertPlainDateTimeToZoned(
   timeZoneRecord: {

@@ -4,9 +4,9 @@ import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDes
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { PlainDateBag, PlainDateTimeBag } from '../internal/genericBag'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { getId } from '../internal/idLike'
+import { PlainDateBag, PlainDateTimeBag } from '../genericApi/genericBag'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
