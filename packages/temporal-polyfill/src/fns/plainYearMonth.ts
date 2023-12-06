@@ -3,10 +3,10 @@ import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
-import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
-import { createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, createYearMonthDiffCalendarRecordIMPL, createYearMonthModCalendarRecordIMPL, createYearMonthMoveCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
+import { createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, createYearMonthDiffCalendarRecordIMPL, createYearMonthModCalendarRecordIMPL, createYearMonthMoveCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from '../genericApi/genericTypes'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
+import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
 
 export function create(
   isoYear: number,

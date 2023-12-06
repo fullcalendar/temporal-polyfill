@@ -1,5 +1,6 @@
-import { parseMaybeOffsetNano } from '../internal/isoParse'
+import { parseMaybeOffsetNano, parseTimeZoneId } from '../internal/isoParse'
 import { IdLike, getId } from '../internal/idLike'
+import { ensureString } from '../internal/cast'
 
 export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike, loose?: boolean): boolean {
   return a === b || getTimeZoneSlotRaw(a, loose) === getTimeZoneSlotRaw(b, loose)
@@ -21,4 +22,8 @@ function getTimeZoneSlotRaw(slot: IdLike, loose?: boolean): string | number {
   }
 
   return id
+}
+
+export function refineTimeZoneSlotString(arg: string): string {
+  return parseTimeZoneId(ensureString(arg))
 }

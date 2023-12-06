@@ -2,7 +2,7 @@ import { NumSign, identityFunc } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../genericApi/options'
-import { getDiffCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
+import { getDiffCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as DurationFuncs from '../genericApi/duration'
 

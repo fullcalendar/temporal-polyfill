@@ -26,7 +26,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot } from './calendarSlot'
-import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
+import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecord'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 

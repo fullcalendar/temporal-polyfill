@@ -3,9 +3,9 @@ import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFie
 import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, OverflowOptions } from '../genericApi/options'
-import { extractCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { PlainDateSlots, PlainMonthDaySlots } from '../genericApi/genericTypes'
-import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
+import { extractCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
+import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
 
 export function create(

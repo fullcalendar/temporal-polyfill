@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { calendarProtocolMethodNames } from '../internal/calendarFields'
 import { isObjectlike } from '../internal/utils'
-import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
+import { refineCalendarSlotString } from '../genericApi/calendarSlot'
 
 // public
 import { getSlots } from './slots'
@@ -38,27 +38,5 @@ export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }): Cal
   const { calendar } = bag
   if (calendar !== undefined) {
     return refineCalendarSlot(calendar)
-  }
-}
-
-
-// bag ... OLD!!!
-// --------------
-
-export function getBagCalendarSlot(bag: any): CalendarSlot { // defaults to ISO
-  return extractBagCalendarSlot(bag) || isoCalendarId
-}
-
-export function extractBagCalendarSlot(bag: any): CalendarSlot | undefined {
-  const slots = getSlots(bag)
-  const { calendar } = (slots || {}) as { calendar?: CalendarSlot }
-
-  if (calendar) {
-    return calendar
-  }
-
-  const bagCalendar = bag.calendar
-  if (bagCalendar !== undefined) {
-    return refineCalendarSlot(bagCalendar)
   }
 }

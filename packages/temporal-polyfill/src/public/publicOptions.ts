@@ -12,12 +12,12 @@ import { PlainDateBranding, ZonedDateTimeBranding } from '../genericApi/branding
 import { BrandingSlots, getSlots } from './slots'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
-import { CalendarSlot, getBagCalendarSlot } from './calendarSlot'
+import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
-import { createDateNewCalendarRecord } from './calendarRecordComplex'
-import { createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
+import { createDateNewCalendarRecord } from './calendarRecord'
+import { createTypicalTimeZoneRecord } from './timeZoneRecord'
 
 export function refinePublicRelativeTo(
   relativeTo: ZonedDateTimeArg | PlainDateArg | undefined,
@@ -38,7 +38,7 @@ export function refinePublicRelativeTo(
           }
       }
 
-      const calendar = getBagCalendarSlot(relativeTo)
+      const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!
       const res = refineMaybeZonedDateTimeBag(
         createDateNewCalendarRecord(calendar),
         refineTimeZoneSlot,

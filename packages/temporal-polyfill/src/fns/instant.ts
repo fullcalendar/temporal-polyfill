@@ -1,8 +1,8 @@
 import { LocalesArg, prepCachedInstantFormat } from '../internal/intlFormat'
 import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { InstantDisplayOptions } from '../genericApi/options'
-import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
-import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
+import { refineCalendarSlotString } from '../genericApi/calendarSlot'
 import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as InstantFuncs from '../genericApi/instant'
 

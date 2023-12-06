@@ -5,10 +5,10 @@ import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateTimeFormat } from '../internal/intlFormat'
 import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
-import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions } from '../genericApi/options'
+import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
 // TODO: do Readonly<> everywhere?

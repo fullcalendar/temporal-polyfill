@@ -16,7 +16,7 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
-import { createMonthDayModCalendarRecord, createMonthDayNewCalendarRecord, getDateModCalendarRecord } from './calendarRecordComplex'
+import { createMonthDayModCalendarRecord, createMonthDayNewCalendarRecord, getDateModCalendarRecord } from './calendarRecord'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 

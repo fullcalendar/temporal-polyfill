@@ -10,7 +10,7 @@ import { IsoDateTimeFields } from '../internal/isoFields'
 import { epochNanoToIso } from '../internal/isoMath'
 import { isTimeZoneSlotsEqual } from '../genericApi/timeZoneSlot'
 import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
-import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
 
 // public
 import { refineCalendarSlot } from './calendarSlot'
@@ -20,7 +20,7 @@ import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
-import { createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
+import { createTypicalTimeZoneRecord } from './timeZoneRecord'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------

@@ -17,8 +17,8 @@ import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
 import { refinePublicRelativeTo } from './publicOptions'
-import { getDiffCalendarRecord } from './calendarRecordComplex'
-import { createTypicalTimeZoneRecord } from './timeZoneRecordComplex'
+import { getDiffCalendarRecord } from './calendarRecord'
+import { createTypicalTimeZoneRecord } from './timeZoneRecord'
 
 export type DurationArg = Duration | DurationBag | string
 

@@ -18,7 +18,7 @@ import { PlainTime, createPlainTime } from './plainTime'
 import { TimeZoneArg } from './timeZone'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createSimpleTimeZoneRecord } from './timeZoneRecordComplex'
+import { createSimpleTimeZoneRecord } from './timeZoneRecord'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),

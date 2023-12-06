@@ -6,11 +6,11 @@ import { defineProps, defineStringTag, excludeUndefinedProps, mapPropNames } fro
 import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { calendarDateUntilEasy } from '../internal/diff'
-import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
-import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
+import { calendarImplDateAdd, calendarImplDateUntil, calendarImplFields, calendarImplMergeFields, createCalendarImplRecord } from '../genericApi/calendarRecord'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/convert'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/calendarRecordSimple'
+import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL } from '../genericApi/calendarRecord'
+import { refineCalendarSlotString } from '../genericApi/calendarSlot'
 
 // public
 import { BrandingSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'

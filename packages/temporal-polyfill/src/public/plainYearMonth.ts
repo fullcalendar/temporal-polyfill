@@ -17,7 +17,7 @@ import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './cale
 import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
-import { createYearMonthDiffCalendarRecord, createYearMonthModCalendarRecord, createYearMonthMoveCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord } from './calendarRecordComplex'
+import { createYearMonthDiffCalendarRecord, createYearMonthModCalendarRecord, createYearMonthMoveCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord } from './calendarRecord'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 

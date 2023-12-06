@@ -17,7 +17,7 @@ import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createEpochGetterMethods, neverValueOf } from './publicMixins'
-import { createSimpleTimeZoneRecord } from './timeZoneRecordComplex'
+import { createSimpleTimeZoneRecord } from './timeZoneRecord'
 
 export type InstantArg = Instant | string
 

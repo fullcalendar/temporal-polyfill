@@ -1,5 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
+import { ensureString } from '../internal/cast'
 import { IdLike, isIdLikeEqual, getId } from '../internal/idLike'
+import { parseCalendarId } from '../internal/isoParse'
 
 export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   if (!isIdLikeEqual(a, b)) {
@@ -26,4 +28,22 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
   }
 
   throw new RangeError('Incompatible calendars')
+}
+
+export function refineCalendarSlotString(calendarArg: string): string {
+  return parseCalendarId(ensureString(calendarArg)) // ensures its real calendar via queryCalendarImpl
+}
+
+// bag
+// ---
+
+export function getCalendarIdFromBag(bag: { calendar?: string }): string {
+  return extractCalendarIdFromBag(bag) || isoCalendarId
+}
+
+export function extractCalendarIdFromBag(bag: { calendar?: string }): string | undefined {
+  const { calendar } = bag
+  if (calendar !== undefined) {
+    return refineCalendarSlotString(calendar)
+  }
 }

@@ -4,6 +4,8 @@ import { IsoDateFields } from './isoFields'
 import { Overflow } from './options'
 import { Unit } from './units'
 
+// TODO: do high-order types
+
 export type CalendarDateAddFunc = (
   isoDateFields: IsoDateFields,
   durationInternals: DurationFieldsWithSign,

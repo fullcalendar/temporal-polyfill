@@ -43,7 +43,7 @@ import { CalendarDayFunc } from './calendarRecord'
 import { utcTimeZoneId } from './timeZoneConfig'
 
 // generic API - BAD
-import { calendarImplDay, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
+import { calendarImplDay, createCalendarImplRecord } from '../genericApi/calendarRecord'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
