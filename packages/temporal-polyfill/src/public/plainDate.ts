@@ -1,7 +1,7 @@
 import { DateBag, DateFields, dateGetterNames } from '../internal/calendarFields'
 import { IsoDateFields, isoDateFieldNamesAlpha, isoDateFieldNamesDesc } from '../internal/isoFields'
 import { LocalesArg, prepPlainDateFormat } from '../internal/intlFormat'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../genericApi/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { getId } from '../internal/idLike'

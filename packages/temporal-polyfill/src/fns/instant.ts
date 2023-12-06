@@ -1,5 +1,5 @@
 import { LocalesArg, prepCachedInstantFormat } from '../internal/intlFormat'
-import { InstantDisplayOptions } from '../internal/options'
+import { InstantDisplayOptions } from '../genericApi/options'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'

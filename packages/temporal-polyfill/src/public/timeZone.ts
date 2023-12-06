@@ -1,6 +1,6 @@
 import { TimeZoneImpl, queryTimeZoneImpl } from '../internal/timeZoneImpl'
 import { formatOffsetNano } from '../internal/isoFormat'
-import { EpochDisambigOptions, refineEpochDisambigOptions } from '../internal/options'
+import { EpochDisambigOptions, refineEpochDisambigOptions } from '../genericApi/options'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { defineStringTag } from '../internal/utils'

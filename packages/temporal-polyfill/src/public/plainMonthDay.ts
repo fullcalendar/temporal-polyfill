@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, YearFields, monthDayGetterNames } from '../internal/calendarFields'
 import { LocalesArg, prepPlainMonthDayFormat } from '../internal/intlFormat'
-import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/options'
+import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../genericApi/options'
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
 import { getId } from '../internal/idLike'

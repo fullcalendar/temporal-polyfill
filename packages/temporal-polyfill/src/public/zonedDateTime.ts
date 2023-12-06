@@ -9,7 +9,7 @@ import {
   ZonedFieldOptions,
   prepareOptions,
   refineZonedFieldOptions,
-} from '../internal/options'
+} from '../genericApi/options'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { getId } from '../internal/idLike'

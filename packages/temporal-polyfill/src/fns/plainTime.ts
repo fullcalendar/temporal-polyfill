@@ -1,6 +1,6 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
-import { OverflowOptions } from '../internal/options'
 import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/intlFormat'
+import { OverflowOptions } from '../genericApi/options'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/genericTypes'
 import { createTypicalTimeZoneRecordIMPL } from '../genericApi/recordCreators'
 import * as PlainTimeFuncs from '../genericApi/plainTime'

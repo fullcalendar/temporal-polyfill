@@ -12,7 +12,6 @@ import {
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
-import { roundingModeFuncs } from './options'
 import { RoundingMode } from './optionEnums'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
 import { computeNanosecondsInDay } from './timeZoneMath'
@@ -27,6 +26,9 @@ import {
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { MarkerToEpochNano, MoveMarker } from './markerSystemTypes'
+
+// generic API - BAD
+import { roundingModeFuncs } from '../genericApi/options'
 
 // Rounding Dates
 // -------------------------------------------------------------------------------------------------

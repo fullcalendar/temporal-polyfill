@@ -1,6 +1,6 @@
-import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../internal/options'
 import { NumSign, identityFunc } from '../internal/utils'
 import { UnitName } from '../internal/units'
+import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../genericApi/options'
 import { createTypicalTimeZoneRecordIMPL, getDiffCalendarRecordIMPL } from '../genericApi/recordCreators'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as DurationFuncs from '../genericApi/duration'

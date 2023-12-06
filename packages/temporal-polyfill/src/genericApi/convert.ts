@@ -26,14 +26,6 @@ import {
 } from '../internal/durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/isoFields'
 import { parseOffsetNano } from '../internal/isoParse'
-import {
-  EpochDisambigOptions,
-  OverflowOptions,
-  ZonedFieldOptions,
-  refineEpochDisambigOptions,
-  refineOverflowOptions,
-  refineZonedFieldOptions,
-} from '../internal/options'
 import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/optionEnums'
 import { ensureObjectlike, ensureStringViaPrimitive } from '../internal/cast'
 import { Callable, pluckProps } from '../internal/utils'
@@ -42,6 +34,14 @@ import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZone
 import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecordTypes'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
 import { DayTimeNano } from '../internal/dayTimeNano'
+import {
+  EpochDisambigOptions,
+  OverflowOptions,
+  ZonedFieldOptions,
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+  refineZonedFieldOptions,
+} from './options'
 import { ZonedDateTimeBag } from './genericBag'
 
 export function convertPlainDateTimeToZoned(

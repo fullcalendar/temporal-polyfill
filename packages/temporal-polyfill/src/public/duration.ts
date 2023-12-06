@@ -3,7 +3,7 @@ import {
   RelativeToOptions,
   TimeDisplayOptions,
   TotalUnitOptionsWithRel,
-} from '../internal/options'
+} from '../genericApi/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
