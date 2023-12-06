@@ -268,7 +268,6 @@ export function until<C extends IdLike, T>(
       zonedDateTimeSlots0.epochNanoseconds,
       zonedDateTimeSlots1.epochNanoseconds,
       ...refineDiffOptions(invertRoundingMode, options, Unit.Hour),
-      options,
     ),
   )
 }

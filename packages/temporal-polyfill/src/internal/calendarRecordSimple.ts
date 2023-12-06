@@ -56,7 +56,6 @@ export function calendarImplDateUntil(
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit,
-  origOptions?: LargestUnitOptions,
 ): DurationFieldsWithSign {
   return calendarImpl.dateUntil(
     isoDateFields0,

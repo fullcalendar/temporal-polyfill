@@ -173,7 +173,6 @@ export function until<C extends IdLike>(
         plainDateTimeSlots0,
         plainDateTimeSlots1,
         ...refineDiffOptions(invertRoundingMode, options, Unit.Day),
-        options,
       ),
     ),
     branding: DurationBranding,

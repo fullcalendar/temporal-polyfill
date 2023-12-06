@@ -1,7 +1,7 @@
 import { DateBagStrict, MonthDayBag, YearMonthBag } from './calendarFields'
 import { DurationFieldsWithSign } from './durationFields'
 import { IsoDateFields } from './isoFields'
-import { LargestUnitOptions, OverflowOptions } from './options'
+import { OverflowOptions } from './options'
 import { Unit } from './units'
 
 export type CalendarDateAddFunc = (
@@ -14,7 +14,6 @@ export type CalendarDateUntilFunc = (
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit,
-  origOptions?: LargestUnitOptions,
 ) => DurationFieldsWithSign
 
 export type CalendarDateFromFieldsFunc = (

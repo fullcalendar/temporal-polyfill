@@ -107,7 +107,6 @@ export class Calendar implements CalendarProtocol {
         toPlainDateSlots(plainDateArg0),
         toPlainDateSlots(plainDateArg1),
         refineCalendarDiffOptions(options),
-        options,
       )
     })
   }

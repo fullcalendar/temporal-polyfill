@@ -94,7 +94,6 @@ export function diffDateTimes(
   smallestUnit: Unit = Unit.Nanosecond,
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
-  origOptions?: LargestUnitOptions,
 ): DurationFields {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
@@ -130,7 +129,6 @@ export function diffDateTimes(
     { ...midIsoFields, ...isoTimeFieldDefaults }, // hack
     { ...endIsoFields, ...isoTimeFieldDefaults }, // hack
     largestUnit,
-    origOptions,
   )
   const timeDiff = nanoToDurationTimeFields(timeNano)
 
@@ -155,9 +153,8 @@ export function diffDates(
   smallestUnit: Unit, // TODO: large field
   roundingInc: number,
   roundingMode: RoundingMode,
-  origOptions?: LargestUnitOptions,
 ): DurationFields {
-  const dateDiff = calendarDateUntilEasy(calendarRecord, startIsoFields, endIsoFields, largestUnit, origOptions)
+  const dateDiff = calendarDateUntilEasy(calendarRecord, startIsoFields, endIsoFields, largestUnit)
 
   // fast path, no rounding
   // important for tests and custom calendars
@@ -262,7 +259,6 @@ export function diffZonedEpochNano(
   smallestUnit: Unit = Unit.Nanosecond,
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
-  origOptions?: LargestUnitOptions,
 ): DurationFieldsWithSign {
   if (largestUnit < Unit.Day) {
     // doesn't need timeZone
@@ -299,7 +295,7 @@ export function diffZonedEpochNano(
     midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
   }
 
-  const dateDiff = calendarDateUntilEasy(calendarRecord, startIsoFields, midIsoFields, largestUnit, origOptions)
+  const dateDiff = calendarDateUntilEasy(calendarRecord, startIsoFields, midIsoFields, largestUnit)
   const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
 
@@ -357,7 +353,6 @@ export function calendarDateUntilEasy(
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit, // largeUnit
-  origOptions?: LargestUnitOptions,
 ): DurationFieldsWithSign {
   if (largestUnit === Unit.Day) {
     return updateDurationFieldsSign({
@@ -365,7 +360,7 @@ export function calendarDateUntilEasy(
       days: diffDays(isoDateFields0, isoDateFields1)
     })
   }
-  return calendarRecord.dateUntil(isoDateFields0, isoDateFields1, largestUnit, origOptions)
+  return calendarRecord.dateUntil(isoDateFields0, isoDateFields1, largestUnit)
 }
 
 function diffYearMonthDay(

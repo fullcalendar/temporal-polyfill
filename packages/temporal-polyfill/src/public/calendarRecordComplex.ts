@@ -1,7 +1,7 @@
 import { DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { CalendarImpl } from '../internal/calendarImpl'
 import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../internal/calendarRecordSimple'
-import { ensureObjectlike, ensurePositiveInteger, ensureString } from '../internal/cast'
+import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { LargestUnitOptions, OverflowOptions } from '../internal/options'
@@ -99,7 +99,6 @@ export function calendarProtocolDateUntil(
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit,
-  origOptions?: LargestUnitOptions,
 ): DurationFieldsWithSign {
   return getDurationSlots(
     calendarProtocol.dateUntil(
@@ -115,7 +114,7 @@ export function calendarProtocolDateUntil(
       }),
       Object.assign(
         Object.create(null),
-        { ...origOptions, largestUnit: unitNamesAsc[largestUnit] },
+        { largestUnit: unitNamesAsc[largestUnit] },
       )
     ),
   )

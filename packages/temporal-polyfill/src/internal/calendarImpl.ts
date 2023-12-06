@@ -20,7 +20,6 @@ import {
   DayFields,
   DateBag,
   YearMonthBag,
-  MonthDayBag,
 } from './calendarFields'
 import {
   computeIntlMonthsInYearSpan,

@@ -126,6 +126,8 @@ export function moveDateEasy(
     )
   }
 
+  // don't need calendar going forward...
+
   refineOverflowOptions(options)
 
   // TODO: DRY

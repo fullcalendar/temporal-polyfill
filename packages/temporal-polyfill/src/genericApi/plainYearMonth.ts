@@ -149,7 +149,6 @@ export function until<C extends IdLike>(
         movePlainYearMonthToDay(calendarRecord, plainYearMonthSlots0),
         movePlainYearMonthToDay(calendarRecord, plainYearMonthSlots1),
         ...refineDiffOptions(invertRoundingMode, options, Unit.Year, Unit.Year, Unit.Month),
-        options,
       ),
     ),
     branding: DurationBranding,
