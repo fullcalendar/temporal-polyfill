@@ -1,7 +1,7 @@
 import { DateBagStrict, MonthDayBag, YearMonthBag } from './calendarFields'
 import { DurationFieldsWithSign } from './durationFields'
 import { IsoDateFields } from './isoFields'
-import { Overflow } from './optionEnums'
+import { Overflow } from './options'
 import { Unit } from './units'
 
 export type CalendarDateAddFunc = (

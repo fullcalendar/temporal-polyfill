@@ -3,7 +3,7 @@ import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationFieldsWithSign, absDurationInternals, durationFieldNamesAsc } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
 import { epochNanoToIso } from './isoMath'
-import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './optionEnums'
+import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './options'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import {
   givenFieldsToDayTimeNano,
@@ -15,7 +15,7 @@ import {
   Unit,
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
-import { TimeZoneGetOffsetNanosecondsForFunc } from './timeZoneRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc } from './timeZoneRecord'
 import { IdLike, getId } from './idLike'
 
 // High-level

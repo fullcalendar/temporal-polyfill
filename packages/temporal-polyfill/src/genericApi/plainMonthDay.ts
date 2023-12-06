@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
-import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc } from '../internal/calendarRecordTypes'
+import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc } from '../internal/calendarRecord'
 import { ensureString, toInteger } from '../internal/cast'
 import { IdLike, isIdLikeEqual } from '../internal/idLike'
 import { constrainIsoDateLike } from '../internal/isoFields'

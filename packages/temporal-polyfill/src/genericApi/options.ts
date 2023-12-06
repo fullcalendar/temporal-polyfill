@@ -1,18 +1,8 @@
 import { DurationFields, durationFieldIndexes } from '../internal/durationFields'
 import { toString, ensureObjectlike, toInteger } from '../internal/cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from '../internal/units'
-import {
-  BoundArg,
-  clampEntity,
-  isObjectlike,
-  roundExpand,
-  roundHalfCeil,
-  roundHalfEven,
-  roundHalfExpand,
-  roundHalfFloor,
-  roundHalfTrunc,
-} from '../internal/utils'
-import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from '../internal/optionEnums'
+import { BoundArg, clampEntity, isObjectlike } from '../internal/utils'
+import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from '../internal/options'
 
 // Compound Options
 // -------------------------------------------------------------------------------------------------

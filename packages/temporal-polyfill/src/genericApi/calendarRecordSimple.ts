@@ -3,7 +3,7 @@ import { CalendarImpl } from '../internal/calendarImpl'
 import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
-import { Overflow } from '../internal/optionEnums'
+import { Overflow } from '../internal/options'
 import { Unit } from '../internal/units'
 
 // TODO: move to 'internal'

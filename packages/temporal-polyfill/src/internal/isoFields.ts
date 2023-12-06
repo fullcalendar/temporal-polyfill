@@ -1,6 +1,6 @@
 import { toInteger } from './cast'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
-import { Overflow } from './optionEnums'
+import { Overflow } from './options'
 import { clampProp, isClamped, mapPropNamesToConstant } from './utils'
 
 export interface IsoDateFields {

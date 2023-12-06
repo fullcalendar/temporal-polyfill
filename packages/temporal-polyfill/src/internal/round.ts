@@ -12,8 +12,8 @@ import {
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
-import { RoundingMode, roundingModeFuncs } from './optionEnums'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
+import { RoundingMode, roundingModeFuncs } from './options'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
 import { computeNanosecondsInDay } from './timeZoneMath'
 import {
   nanoInMinute,

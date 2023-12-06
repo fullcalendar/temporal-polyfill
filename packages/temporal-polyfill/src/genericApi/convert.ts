@@ -26,13 +26,13 @@ import {
 } from '../internal/durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/isoFields'
 import { parseOffsetNano } from '../internal/isoParse'
-import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/optionEnums'
+import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/options'
 import { ensureObjectlike, ensureStringViaPrimitive } from '../internal/cast'
 import { Callable, pluckProps } from '../internal/utils'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from '../internal/isoMath'
 import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZoneMath'
-import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecordTypes'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecordTypes'
+import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecord'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import {
   EpochDisambigOptions,

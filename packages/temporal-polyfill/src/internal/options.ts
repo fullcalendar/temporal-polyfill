@@ -51,7 +51,6 @@ export const enum RoundingMode {
   HalfEven
 }
 
-// not an enum :(
 export const roundingModeFuncs = [
   Math.floor,
   roundHalfFloor,
@@ -64,7 +63,6 @@ export const roundingModeFuncs = [
   roundHalfEven,
 ]
 
-// not an enum :(
 export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 /*

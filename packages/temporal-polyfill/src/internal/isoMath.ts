@@ -1,4 +1,4 @@
-import { Overflow } from './optionEnums'
+import { Overflow } from './options'
 import { diffEpochMilliByDay } from './diff'
 import {
   IsoDateTimeFields,

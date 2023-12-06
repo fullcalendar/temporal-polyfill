@@ -1,5 +1,5 @@
 import { CalendarImpl } from './calendarImpl'
-import { CalendarDateAddFunc, CalendarDateUntilFunc } from './calendarRecordTypes'
+import { CalendarDateAddFunc, CalendarDateUntilFunc } from './calendarRecord'
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -19,7 +19,7 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { moveDateTime, moveZonedEpochNano } from './move'
-import { Overflow, RoundingMode } from './optionEnums'
+import { Overflow, RoundingMode } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import {
@@ -30,7 +30,7 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
 
 // Dates & Times
 // -------------------------------------------------------------------------------------------------

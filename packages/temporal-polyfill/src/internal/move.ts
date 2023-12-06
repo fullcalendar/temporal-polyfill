@@ -1,5 +1,5 @@
 import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
-import { CalendarDateAddFunc } from './calendarRecordTypes'
+import { CalendarDateAddFunc } from './calendarRecord'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -22,12 +22,12 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './isoMath'
-import { Overflow } from './optionEnums'
+import { Overflow } from './options'
 import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 import { isoCalendarId } from './calendarConfig'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------

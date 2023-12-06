@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
-import { CalendarDateAddFunc, CalendarDateFromFieldsFunc, CalendarDateUntilFunc, CalendarDayFunc, CalendarDaysInMonthFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecordTypes'
+import { CalendarDateAddFunc, CalendarDateFromFieldsFunc, CalendarDateUntilFunc, CalendarDayFunc, CalendarDaysInMonthFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecord'
 import { ensureString, toInteger } from '../internal/cast'
 import { diffDates } from '../internal/diff'
 import { negateDurationFields, updateDurationFieldsSign } from '../internal/durationFields'

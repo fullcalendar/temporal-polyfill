@@ -5,7 +5,7 @@ import { DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { overflowMapNames } from '../genericApi/options'
 import { Unit, unitNamesAsc } from '../internal/units'
-import { Overflow } from '../internal/optionEnums'
+import { Overflow } from '../internal/options'
 import { CalendarImplFunc, CalendarImplMethod, createCalendarImplRecord } from '../genericApi/calendarRecordSimple'
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 

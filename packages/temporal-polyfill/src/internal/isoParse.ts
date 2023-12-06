@@ -26,7 +26,7 @@ import {
   nanoToIsoTimeAndDay,
   moveByIsoDays,
 } from './isoMath'
-import { EpochDisambig, OffsetDisambig, Overflow } from './optionEnums'
+import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { FixedTimeZoneImpl } from './timeZoneImpl'
 import { queryTimeZoneImpl } from './timeZoneImplQuery'
 import { getMatchingInstantFor } from './timeZoneMath'
@@ -39,7 +39,7 @@ import {
 } from './units'
 import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
-import { CalendarDayFunc } from './calendarRecordTypes'
+import { CalendarDayFunc } from './calendarRecord'
 import { utcTimeZoneId } from './timeZoneConfig'
 
 // generic API - BAD

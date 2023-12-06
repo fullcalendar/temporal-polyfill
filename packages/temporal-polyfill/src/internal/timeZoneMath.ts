@@ -1,10 +1,10 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset, moveByIsoDays } from './isoMath'
-import { EpochDisambig, OffsetDisambig } from './optionEnums'
+import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
 import { nanoInUtcDay } from './units'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
 import { ensureNumber } from './cast'
 import { createLazyGenerator } from './utils'
 

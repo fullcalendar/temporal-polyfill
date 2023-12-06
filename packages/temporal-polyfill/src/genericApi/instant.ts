@@ -6,7 +6,7 @@ import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSi
 import { formatInstantIso } from '../internal/isoFormat'
 import { checkEpochNanoInBounds } from '../internal/isoMath'
 import { moveEpochNano } from '../internal/move'
-import { RoundingMode } from '../internal/optionEnums'
+import { RoundingMode } from '../internal/options'
 import { roundDayTimeNano } from '../internal/round'
 import { utcTimeZoneId } from '../internal/timeZoneConfig'
 import { TimeUnit, Unit, UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
@@ -15,7 +15,7 @@ import { DiffOptions, InstantDisplayOptions, RoundingOptions, refineDiffOptions,
 import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, InstantSlots, ZonedDateTimeSlots } from './genericTypes'
 import { parseInstant } from '../internal/isoParse'
-import { TimeZoneGetOffsetNanosecondsForFunc } from '../internal/timeZoneRecordTypes'
+import { TimeZoneGetOffsetNanosecondsForFunc } from '../internal/timeZoneRecord'
 
 export function create(epochNano: bigint): InstantSlots {
   return {
