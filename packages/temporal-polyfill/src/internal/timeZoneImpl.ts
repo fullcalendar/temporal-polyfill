@@ -1,5 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
-import { parseIntlYear } from './calendarImpl'
+import { parseIntlYear } from './calendarIntl'
 import { DayTimeNano, addDayTimeNanoAndNumber, numberToDayTimeNano } from './dayTimeNano'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'

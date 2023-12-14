@@ -12,10 +12,10 @@ import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 
 // public
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, PublicDateTimeSlots, rejectInvalidBag } from './slots'
-import { CalendarBranding, PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
+import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
@@ -23,10 +23,11 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createCalendarGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
+import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
-import { createDateNewCalendarRecord, createMonthDayNewCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord, getDiffCalendarRecord, getMoveCalendarRecord } from './calendarRecord'
 import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecord'
+import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
+import { dateTimeCalendarGetters } from './publicMixins'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
@@ -58,7 +59,7 @@ export class PlainDateTime {
   with(mod: DateTimeBag, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime(
       PlainDateTimeFuncs.withFields(
-        getDateModCalendarRecord,
+        createDateModOps,
         getPlainDateTimeSlots(this),
         this as any, // TODO: needs getters
         rejectInvalidBag(mod),
@@ -97,7 +98,7 @@ export class PlainDateTime {
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime(
       PlainDateTimeFuncs.add(
-        getMoveCalendarRecord,
+        createMoveOps,
         getPlainDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -108,7 +109,7 @@ export class PlainDateTime {
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime(
       PlainDateTimeFuncs.subtract(
-        getMoveCalendarRecord,
+        createMoveOps,
         getPlainDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -119,7 +120,7 @@ export class PlainDateTime {
   until(otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
       PlainDateTimeFuncs.until(
-        getDiffCalendarRecord,
+        createDiffOps,
         getPlainDateTimeSlots(this),
         toPlainDateTimeSlots(otherArg),
         options,
@@ -130,7 +131,7 @@ export class PlainDateTime {
   since(otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
       PlainDateTimeFuncs.since(
-        getDiffCalendarRecord,
+        createDiffOps,
         getPlainDateTimeSlots(this),
         toPlainDateTimeSlots(otherArg),
         options,
@@ -187,7 +188,7 @@ export class PlainDateTime {
   toPlainYearMonth(): PlainYearMonth {
     return createPlainYearMonth(
       PlainDateTimeFuncs.toPlainYearMonth(
-        createYearMonthNewCalendarRecord,
+        createYearMonthRefineOps,
         getPlainDateTimeSlots(this),
         this as any, // TODO!!!
       )
@@ -197,7 +198,7 @@ export class PlainDateTime {
   toPlainMonthDay(): PlainMonthDay {
     return createPlainMonthDay(
       PlainDateTimeFuncs.toPlainMonthDay(
-        createMonthDayNewCalendarRecord,
+        createMonthDayRefineOps,
         getPlainDateTimeSlots(this),
         this as any, // TODO!!!
       )
@@ -223,7 +224,7 @@ export class PlainDateTime {
   getCalendar(): CalendarProtocol {
     const { calendar } = getPlainDateTimeSlots(this)
     return typeof calendar === 'string'
-      ? createCalendar({ branding: CalendarBranding, id: calendar })
+      ? new Calendar(calendar)
       : calendar
   }
 
@@ -251,7 +252,7 @@ defineProps(PlainDateTime.prototype, {
 })
 
 defineGetters(PlainDateTime.prototype, {
-  ...createCalendarGetterMethods(PlainDateTimeBranding, dateGetterNames),
+  ...dateTimeCalendarGetters,
   ...createTimeGetterMethods(PlainDateTimeBranding),
 })
 
@@ -297,7 +298,7 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
     }
 
     return PlainDateTimeFuncs.fromFields(
-      createDateNewCalendarRecord,
+      createDateRefineOps,
       slots.calendar || getCalendarSlotFromBag(arg as PlainDateBag<CalendarArg>),
       arg as PlainDateBag<CalendarArg>,
       options,

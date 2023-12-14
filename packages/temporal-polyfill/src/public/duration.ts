@@ -17,8 +17,8 @@ import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
 import { refinePublicRelativeTo } from './publicOptions'
-import { getDiffCalendarRecord } from './calendarRecord'
 import { createTypicalTimeZoneRecord } from './timeZoneRecord'
+import { createDiffOps } from './calendarOpsQuery'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -57,7 +57,7 @@ export class Duration {
     return createDuration(
       DurationFuncs.add(
         refinePublicRelativeTo,
-        getDiffCalendarRecord,
+        createDiffOps,
         createTypicalTimeZoneRecord,
         getDurationSlots(this),
         toDurationSlots(otherArg),
@@ -70,7 +70,7 @@ export class Duration {
     return createDuration(
       DurationFuncs.subtract(
         refinePublicRelativeTo,
-        getDiffCalendarRecord,
+        createDiffOps,
         createTypicalTimeZoneRecord,
         getDurationSlots(this),
         toDurationSlots(otherArg),
@@ -91,7 +91,7 @@ export class Duration {
     return createDuration(
       DurationFuncs.round(
         refinePublicRelativeTo,
-        getDiffCalendarRecord,
+        createDiffOps,
         createTypicalTimeZoneRecord,
         getDurationSlots(this),
         options,
@@ -102,7 +102,7 @@ export class Duration {
   total(options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
     return DurationFuncs.total(
       refinePublicRelativeTo,
-      getDiffCalendarRecord,
+      createDiffOps,
       createTypicalTimeZoneRecord,
       getDurationSlots(this),
       options,
@@ -134,7 +134,7 @@ export class Duration {
   ): NumSign {
     return DurationFuncs.compare(
       refinePublicRelativeTo,
-      getDiffCalendarRecord,
+      createDiffOps,
       createTypicalTimeZoneRecord,
       toDurationSlots(durationArg0),
       toDurationSlots(durationArg1),

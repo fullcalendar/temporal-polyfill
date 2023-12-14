@@ -1,5 +1,4 @@
 import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { DurationFieldsWithSign } from '../internal/durationFields'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
@@ -8,8 +7,9 @@ import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions } from '../genericApi/options'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
+import * as Utils from './utils'
+import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 
 // TODO: do Readonly<> everywhere?
 
@@ -43,7 +43,7 @@ export function fromFields(
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
   return PlainDateTimeFuncs.fromFields(
-    createDateNewCalendarRecordIMPL,
+    createNativeDateRefineOps,
     getCalendarIdFromBag(fields),
     fields,
     options,
@@ -51,16 +51,8 @@ export function fromFields(
 }
 
 export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields & Partial<EraYearFields> {
-  const calendarImpl = queryCalendarImpl(slots.calendar)
-  const [year, month, day] = calendarImpl.queryYearMonthDay(slots)
-
   return {
-    era: calendarImpl.era(slots), // inefficient: requeries y/m/d
-    eraYear: calendarImpl.eraYear(slots), // inefficient: requeries y/m/d
-    year,
-    month,
-    monthCode: calendarImpl.monthCode(slots), // inefficient: requeries y/m/d
-    day,
+    ...Utils.getDateFields(slots),
     // TODO: util for time...
     hour: slots.isoHour,
     minute: slots.isoMinute,
@@ -71,13 +63,24 @@ export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields & P
   }
 }
 
+// TODO: add specific types
+export const dayOfWeek = Utils.dayOfWeek
+export const daysInWeek = Utils.daysInWeek
+export const weekOfYear = Utils.weekOfYear
+export const yearOfWeek = Utils.yearOfWeek
+export const dayOfYear = Utils.dayOfYear
+export const daysInMonth = Utils.daysInMonth
+export const daysInYear = Utils.daysInYear
+export const monthsInYear = Utils.monthsInYear
+export const inLeapYear = Utils.inLeapYear
+
 export function withFields(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
   newFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
   return PlainDateTimeFuncs.withFields(
-    getDateModCalendarRecordIMPL,
+    createNativeDateModOps,
     plainDateTimeSlots,
     getFields(plainDateTimeSlots), // TODO: just use y/m/d?
     newFields,
@@ -115,7 +118,7 @@ export function add(
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.add(getMoveCalendarRecordIMPL, plainDateTimeSlots, durationSlots, options)
+  return PlainDateTimeFuncs.add(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
 }
 
 export function subtract(
@@ -123,7 +126,7 @@ export function subtract(
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.subtract(getMoveCalendarRecordIMPL, plainDateTimeSlots, durationSlots, options)
+  return PlainDateTimeFuncs.subtract(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
 }
 
 export function until(
@@ -131,7 +134,7 @@ export function until(
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateTimeFuncs.until(getDiffCalendarRecordIMPL, plainDateTimeSlots0, plainDateTimeSlots1, options)
+  return PlainDateTimeFuncs.until(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options)
 }
 
 export function since(
@@ -139,7 +142,7 @@ export function since(
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateTimeFuncs.since(getDiffCalendarRecordIMPL, plainDateTimeSlots0, plainDateTimeSlots1, options) as
+  return PlainDateTimeFuncs.since(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options) as
     unknown as DurationSlots // !!!
 }
 
@@ -188,11 +191,11 @@ export function toPlainDate(
 export function toPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
 ): PlainYearMonthSlots<string> {
-  const calenadarImpl = queryCalendarImpl(plainDateTimeSlots.calendar)
-  const [year, month, day] = calenadarImpl.queryYearMonthDay(plainDateTimeSlots) // TODO: DRY
+  const calendarOps = createNativePartOps(plainDateTimeSlots.calendar)
+  const [year, month, day] = calendarOps.dateParts(plainDateTimeSlots) // TODO: DRY
 
   return PlainDateTimeFuncs.toPlainYearMonth(
-    createYearMonthNewCalendarRecordIMPL,
+    createNativeYearMonthRefineOps,
     plainDateTimeSlots,
     { year, month, day },
   )
@@ -201,11 +204,11 @@ export function toPlainYearMonth(
 export function toPlainMonthDay(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
 ): PlainMonthDaySlots<string> {
-  const calenadarImpl = queryCalendarImpl(plainDateTimeSlots.calendar)
-  const [year, month, day] = calenadarImpl.queryYearMonthDay(plainDateTimeSlots) // TODO: DRY
+  const calendarOps = createNativePartOps(plainDateTimeSlots.calendar)
+  const [year, month, day] = calendarOps.dateParts(plainDateTimeSlots) // TODO: DRY
 
   return PlainDateTimeFuncs.toPlainMonthDay(
-    createMonthDayNewCalendarRecordIMPL,
+    createNativeMonthDayRefineOps,
     plainDateTimeSlots,
     { year, month, day },
   )

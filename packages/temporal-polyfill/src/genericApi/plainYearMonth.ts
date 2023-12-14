@@ -1,6 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
-import { CalendarDateAddFunc, CalendarDateFromFieldsFunc, CalendarDateUntilFunc, CalendarDayFunc, CalendarDaysInMonthFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecord'
 import { ensureString, toInteger } from '../internal/cast'
 import { diffDates } from '../internal/diff'
 import { negateDurationFields, updateDurationFieldsSign } from '../internal/durationFields'
@@ -16,6 +15,7 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplay
 import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMonthBag } from './convert'
 import { DurationBranding, PlainDateBranding, PlainYearMonthBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from './genericTypes'
+import { DateModOps, DiffOps, MoveOps, YearMonthModOps, YearMonthRefineOps } from '../internal/calendarOps'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -50,109 +50,90 @@ export function fromString(s: string): PlainYearMonthSlots<string> {
 }
 
 export function fromFields<C>(
-  getCalendarRecord: (calendar: C) => {
-    yearMonthFromFields: CalendarYearMonthFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendar: C) => YearMonthRefineOps,
   calendarSlot: C,
   bag: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   return {
-    ...refinePlainYearMonthBag(getCalendarRecord(calendarSlot), bag, options),
+    ...refinePlainYearMonthBag(getCalendarOps(calendarSlot), bag, options),
     calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function withFields<C>(
-  getCalendarRecord: (calendar: C) => {
-    yearMonthFromFields: CalendarYearMonthFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-    mergeFields: CalendarMergeFieldsFunc,
-  },
+  getCalendarOps: (calendar: C) => YearMonthModOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   initialFields: YearMonthFieldsIntl,
   mod: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...mergePlainYearMonthBag(calendarRecord, initialFields, mod, options),
+    ...mergePlainYearMonthBag(calendarOps, initialFields, mod, options),
     calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function add<C>(
-  getCalendarRecord: (calendar: C) => {
-    dateAdd: CalendarDateAddFunc,
-    daysInMonth: CalendarDaysInMonthFunc,
-    day: CalendarDayFunc,
-  },
+  getCalendarOps: (calendar: C) => MoveOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   const isoDateFields = movePlainYearMonthToDay(
-    calendarRecord,
+    calendarOps,
     plainYearMonthSlots,
     durationSlots.sign < 0
-      ? calendarRecord.daysInMonth(plainYearMonthSlots)
+      ? calendarOps.daysInMonth(plainYearMonthSlots)
       : 1,
   )
 
-  const movedIsoDateFields = calendarRecord.dateAdd(
+  const movedIsoDateFields = calendarOps.dateAdd(
     isoDateFields,
     durationSlots,
     refineOverflowOptions(options),
   )
 
   return {
-    ...movePlainYearMonthToDay(calendarRecord, movedIsoDateFields),
+    ...movePlainYearMonthToDay(calendarOps, movedIsoDateFields),
     calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function subtract<C>(
-  getCalendarRecord: (calendar: C) => {
-    dateAdd: CalendarDateAddFunc,
-    daysInMonth: CalendarDaysInMonthFunc,
-    day: CalendarDayFunc,
-  },
+  getCalendarOps: (calendar: C) => MoveOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
-  return add(getCalendarRecord, plainYearMonthSlots, negateDurationFields(durationSlots) as any, options) // !!!
+  return add(getCalendarOps, plainYearMonthSlots, negateDurationFields(durationSlots) as any, options) // !!!
 }
 
 export function until<C extends IdLike>(
-  getCalendarRecord: (calendar: C) => {
-    dateAdd: CalendarDateAddFunc,
-    dateUntil: CalendarDateUntilFunc,
-    day: CalendarDayFunc,
-  },
+  getCalendarOps: (calendar: C) => DiffOps,
   plainYearMonthSlots0: PlainYearMonthSlots<C>,
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
   options?: DiffOptions,
   invertRoundingMode?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
     ...updateDurationFieldsSign(
       diffDates(
-        calendarRecord,
-        movePlainYearMonthToDay(calendarRecord, plainYearMonthSlots0),
-        movePlainYearMonthToDay(calendarRecord, plainYearMonthSlots1),
+        calendarOps,
+        movePlainYearMonthToDay(calendarOps, plainYearMonthSlots0),
+        movePlainYearMonthToDay(calendarOps, plainYearMonthSlots1),
         ...refineDiffOptions(invertRoundingMode, options, Unit.Year, Unit.Year, Unit.Month),
       ),
     ),
@@ -161,16 +142,12 @@ export function until<C extends IdLike>(
 }
 
 export function since<C extends IdLike>(
-  getCalendarRecord: (calendar: C) => {
-    dateAdd: CalendarDateAddFunc,
-    dateUntil: CalendarDateUntilFunc,
-    day: CalendarDayFunc,
-  },
+  getCalendarOps: (calendar: C) => DiffOps,
   plainYearMonthSlots0: PlainYearMonthSlots<C>,
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
   options?: DiffOptions,
 ): DurationSlots {
-  return negateDurationFields(until(getCalendarRecord, plainYearMonthSlots1, plainYearMonthSlots0, options, true)) as any // !!!
+  return negateDurationFields(until(getCalendarOps, plainYearMonthSlots1, plainYearMonthSlots0, options, true)) as any // !!!
 }
 
 export function compare(
@@ -210,20 +187,16 @@ export function toJSON(
 }
 
 export function toPlainDate<C>(
-  getCalendarRecord: (calendar: C) => {
-    dateFromFields: CalendarDateFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-    mergeFields: CalendarMergeFieldsFunc,
-  },
+  getCalendarOps: (calendar: C) => DateModOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   plainYearMonthFields: YearMonthFieldsIntl,
   bag: { day: number },
 ): PlainDateSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...convertPlainYearMonthToDate(calendarRecord, plainYearMonthFields, bag),
+    ...convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag),
     calendar: calendarSlot,
     branding: PlainDateBranding,
   }
@@ -233,12 +206,12 @@ export function toPlainDate<C>(
 // -----
 
 function movePlainYearMonthToDay(
-  calendarRecord: { day: CalendarDayFunc },
+  calendarOps: MoveOps,
   isoFields: IsoDateFields,
   day = 1,
 ): IsoDateFields {
   return moveByIsoDays(
     isoFields,
-    day - calendarRecord.day(isoFields),
+    day - calendarOps.day(isoFields),
   )
 }

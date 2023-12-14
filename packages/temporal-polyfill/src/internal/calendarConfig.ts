@@ -1,5 +1,3 @@
-import { CalendarImpl } from './calendarImpl'
-
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
 export const japaneseCalendarId = 'japanese'
@@ -12,13 +10,13 @@ if origin is <0, consider the era to be 'reverse' direction
   year = -origin - eraYear
   year = -(origin + eraYear)
 */
-export const eraOriginsByCalendarId: {
+export const gregoryCalendarOrigins: Record<string, number> = {
+  bce: -1,
+  ce: 0,
+}
+export const eraOriginsByCalendarId: { // for calendarIntl only
   [calendarId: string]: Record<string, number>
 } = {
-  [gregoryCalendarId]: {
-    bce: -1,
-    ce: 0,
-  },
   [japaneseCalendarId]: {
     bce: -1,
     ce: 0,
@@ -62,17 +60,7 @@ export const eraRemaps: Record<string, string> = {
   ad: 'ce',
 }
 
-export function getAllowErasInFields(calendarImpl: CalendarImpl): boolean {
-  return calendarImpl.id !== isoCalendarId
-}
-
-export function getErasBeginMidYear(calendarImpl: CalendarImpl): boolean {
-  return calendarImpl.id === japaneseCalendarId
-}
-
-export const leapYearMetas: {
-  [calendarId: string]: number
-} = {
+export const leapMonthMetas: Record<string, number> = {
   chinese: 13, // (positive) max possible leap month
   dangi: 13, // "
   hebrew: -6, // (negative) constant leap month

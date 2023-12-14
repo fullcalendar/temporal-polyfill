@@ -7,17 +7,18 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, r
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { getId } from '../internal/idLike'
 import { PlainYearMonthBag } from '../genericApi/genericBag'
-import { CalendarBranding, PlainYearMonthBranding } from '../genericApi/branding'
+import { PlainYearMonthBranding } from '../genericApi/branding'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import { PlainYearMonthSlots } from '../genericApi/genericTypes'
 
 // public
 import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
-import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
+import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
-import { createCalendarGetterMethods, neverValueOf } from './publicMixins'
-import { createYearMonthDiffCalendarRecord, createYearMonthModCalendarRecord, createYearMonthMoveCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord } from './calendarRecord'
+import { neverValueOf } from './publicMixins'
+import { createDateModOps, createDiffOps, createMoveOps, createYearMonthModOps, createYearMonthRefineOps } from './calendarOpsQuery'
+import { yearMonthGetters } from './publicMixins'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
@@ -37,7 +38,7 @@ export class PlainYearMonth {
   with(mod: YearMonthBag, options?: OverflowOptions): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.withFields(
-        createYearMonthModCalendarRecord,
+        createYearMonthModOps,
         getPlainYearMonthSlots(this),
         this as any, // !!!
         rejectInvalidBag(mod),
@@ -52,7 +53,7 @@ export class PlainYearMonth {
   ): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.add(
-        createYearMonthMoveCalendarRecord,
+        createMoveOps,
         getPlainYearMonthSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -66,7 +67,7 @@ export class PlainYearMonth {
   ): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.subtract(
-        createYearMonthMoveCalendarRecord,
+        createMoveOps,
         getPlainYearMonthSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -77,7 +78,7 @@ export class PlainYearMonth {
   until(otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
     return createDuration(
       PlainYearMonthFuncs.until(
-        createYearMonthDiffCalendarRecord,
+        createDiffOps,
         getPlainYearMonthSlots(this),
         toPlainYearMonthSlots(otherArg),
         options
@@ -88,7 +89,7 @@ export class PlainYearMonth {
   since(otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
     return createDuration(
       PlainYearMonthFuncs.since(
-        createYearMonthDiffCalendarRecord,
+        createDiffOps,
         getPlainYearMonthSlots(this),
         toPlainYearMonthSlots(otherArg),
         options
@@ -116,7 +117,7 @@ export class PlainYearMonth {
   toPlainDate(bag: { day: number }): PlainDate {
     return createPlainDate(
       PlainYearMonthFuncs.toPlainDate(
-        getDateModCalendarRecord,
+        createDateModOps,
         getPlainYearMonthSlots(this),
         this as any, // !!!
         bag,
@@ -137,7 +138,7 @@ export class PlainYearMonth {
   getCalendar(): CalendarProtocol {
     const { calendar } = getPlainYearMonthSlots(this)
     return typeof calendar === 'string'
-      ? createCalendar({ branding: CalendarBranding, id: calendar })
+      ? new Calendar(calendar)
       : calendar
   }
 
@@ -165,7 +166,7 @@ defineProps(PlainYearMonth.prototype, {
 })
 
 defineGetters(PlainYearMonth.prototype, {
-  ...createCalendarGetterMethods(PlainYearMonthBranding, yearMonthGetterNames),
+  ...yearMonthGetters,
 })
 
 // Utils
@@ -191,7 +192,7 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
     }
 
     return PlainYearMonthFuncs.fromFields(
-      createYearMonthNewCalendarRecord,
+      createYearMonthRefineOps,
       slots.calendar || getCalendarSlotFromBag(arg as any), // !!!
       arg as any, // !!!
       options,

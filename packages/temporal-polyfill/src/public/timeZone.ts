@@ -24,6 +24,7 @@ import { createTypicalTimeZoneRecord } from './timeZoneRecord'
 
 // TimeZone Protocol
 // -------------------------------------------------------------------------------------------------
+// TODO: move into separate file (along with checkTimeZoneProtocol)
 
 interface TimeZoneProtocolMethods {
   getOffsetNanosecondsFor(instant: InstantArg): number
@@ -47,7 +48,7 @@ export interface TimeZoneProtocol extends TimeZoneProtocolMethods {
 
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
 
-export class TimeZone { // implements TimeZoneProtocol
+export class TimeZone implements TimeZoneProtocol {
   constructor(timeZoneId: string) {
     setSlots(this, {
       branding: TimeZoneBranding,

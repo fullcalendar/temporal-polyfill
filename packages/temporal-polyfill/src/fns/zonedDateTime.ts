@@ -3,18 +3,19 @@ import { DurationFieldsWithSign } from '../internal/durationFields'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { formatOffsetNano } from '../internal/isoFormat'
-import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { LocalesArg, prepCachedZonedDateTimeFormat } from '../internal/intlFormat'
+import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions } from '../genericApi/options'
 import { ZonedDateTimeBag } from '../genericApi/genericBag'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
-import { createDateNewCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, getDiffCalendarRecordIMPL, getMoveCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
+import * as Utils from './utils'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/isoMath'
+import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 
 export function create(
   epochNano: bigint,
@@ -39,7 +40,7 @@ export function fromFields(
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.fromFields(
-    createDateNewCalendarRecordIMPL,
+    createNativeDateRefineOps,
     refineTimeZoneSlotString,
     queryTimeZoneImpl,
     getCalendarIdFromBag(fields),
@@ -62,16 +63,8 @@ export function getFields(
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
-  const calendarImpl = queryCalendarImpl(zonedDateTimeSlots.calendar)
-  const [year, month, day] = calendarImpl.queryYearMonthDay(isoFields)
-
   return {
-    era: calendarImpl.era(isoFields), // inefficient: requeries y/m/d
-    eraYear: calendarImpl.eraYear(isoFields), // inefficient: requeries y/m/d
-    year,
-    month,
-    monthCode: calendarImpl.monthCode(isoFields), // inefficient: requeries y/m/d
-    day,
+    ...Utils.getDateFields({ ...isoFields, calendar: zonedDateTimeSlots.calendar }),
     // TODO: util for time...
     hour: isoFields.isoHour,
     minute: isoFields.isoMinute,
@@ -83,13 +76,58 @@ export function getFields(
   }
 }
 
+export function dayOfWeek(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return computeIsoDayOfWeek(isoFields)
+}
+
+export function daysInWeek(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return computeIsoDaysInWeek(isoFields)
+}
+
+export function weekOfYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return computeIsoWeekOfYear(isoFields)
+}
+
+export function yearOfWeek(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return computeIsoYearOfWeek(isoFields)
+}
+
+export function dayOfYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return Utils.dayOfYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+}
+
+export function daysInMonth(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return Utils.daysInMonth({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+}
+
+export function daysInYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return Utils.daysInYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+}
+
+export function monthsInYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return Utils.monthsInYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+}
+
+export function inLeapYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): boolean {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryTimeZoneImpl(zonedDateTimeSlots.timeZone))
+  return Utils.inLeapYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+}
+
 export function withFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.withFields(
-    getDateModCalendarRecordIMPL,
+    createNativeDateModOps,
     queryTimeZoneImpl,
     zonedDateTimeSlots,
     getFields(zonedDateTimeSlots),
@@ -140,7 +178,7 @@ export function add(
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.add(
-    getMoveCalendarRecordIMPL,
+    createNativeMoveOps,
     queryTimeZoneImpl,
     zonedDateTimeSlots,
     durationSlots,
@@ -154,7 +192,7 @@ export function subtract(
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.subtract(
-    getMoveCalendarRecordIMPL,
+    createNativeMoveOps,
     queryTimeZoneImpl,
     zonedDateTimeSlots,
     durationSlots,
@@ -168,7 +206,7 @@ export function until(
   options?: DiffOptions,
 ): DurationFieldsWithSign {
   return ZonedDateTimeFuncs.until(
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     zonedDateTimeSlots0,
     zonedDateTimeSlots1,
@@ -182,7 +220,7 @@ export function since(
   options?: DiffOptions,
 ): DurationFieldsWithSign {
   return ZonedDateTimeFuncs.since(
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     zonedDateTimeSlots0,
     zonedDateTimeSlots1,
@@ -274,7 +312,7 @@ export function toPlainYearMonth(
   zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
 ): PlainYearMonthSlots<string> {
   return ZonedDateTimeFuncs.toPlainYearMonth(
-    createYearMonthNewCalendarRecordIMPL,
+    createNativeYearMonthRefineOps,
     zonedDateTimeSlots0,
     zonedDateTimeFields,
   )
@@ -285,7 +323,7 @@ export function toPlainMonthDay(
   zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
 ): PlainMonthDaySlots<string> {
   return ZonedDateTimeFuncs.toPlainMonthDay(
-    createMonthDayNewCalendarRecordIMPL,
+    createNativeMonthDayRefineOps,
     zonedDateTimeSlots0,
     zonedDateTimeFields,
   )

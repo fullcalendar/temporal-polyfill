@@ -1,50 +1,105 @@
-import { dateGetterRefiners, timeFieldNamesAlpha } from '../internal/calendarFields'
+import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
+import { DurationSlots } from '../genericApi/genericTypes'
+import { timeFieldNamesAlpha } from '../internal/calendarFields'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFieldsWithSign, durationInternalNames } from '../internal/durationFields'
-import { IsoDateFields, IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
+import { IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
 import { identityFunc, mapPropNames } from '../internal/utils'
-import { queryCalendarImpl } from '../internal/calendarImplQuery'
-import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
-import { DurationSlots } from '../genericApi/genericTypes'
+import { getCalendarSlots } from './calendar'
+import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from './calendarAdapter'
+import { createSimpleOps } from './calendarOpsQuery'
+import { toPlainDateSlots } from './plainDate'
+import { BrandingSlots, EpochSlots, getSlots, getSpecificSlots } from './slots'
 
-// public
-import { getSpecificSlots, BrandingSlots, PublicDateSlots, EpochSlots } from './slots'
-import { createPlainDate } from './plainDate'
-import { CalendarProtocol } from './calendar'
-import { CalendarSlot } from './calendarSlot'
+// For Calendar
+// -------------------------------------------------------------------------------------------------
+// Always assumes underlying Native calendar `ops`
 
-export function createCalendarGetterMethods(
-  branding: string,
-  names: string[],
-  slotsToIsoFields: ((slots: any) => IsoDateFields) = identityFunc,
-) {
-  return mapPropNames((name) => {
-    return function (this: any) {
-      const slots = getSpecificSlots(branding, this) as (BrandingSlots & PublicDateSlots)
-      const isoFields = slotsToIsoFields(slots)
-      return queryCalendarVal(name as string, slots.calendar, isoFields)
+function createCalendarMethods<M>(methodNameMap: M, alsoAccept: string[]): {
+  [K in keyof M]: (dateArg: any) => any
+} {
+  const methods = {} as any
+
+  for (const methodName in methodNameMap) {
+    methods[methodName] = function(this: any, dateArg: any) {
+      const { ops } = getCalendarSlots(this)
+      const argSlots = (getSlots(dateArg) || {}) as any
+      const { branding } = argSlots
+      const refinedSlots = branding === PlainDateBranding || alsoAccept.includes(branding)
+        ? argSlots
+        : toPlainDateSlots(dateArg)
+
+      return (ops as any)[methodName](refinedSlots)
     }
-  }, names)
+  }
+
+  return methods
 }
 
-function queryCalendarVal(
-  methodName: string,
-  calendarSlot: CalendarSlot,
-  isoFields: IsoDateFields,
-) {
-  return typeof calendarSlot === 'string'
-    ? (queryCalendarImpl(calendarSlot) as any)[methodName](isoFields)
-    : (dateGetterRefiners as any)[methodName](
-        (calendarSlot[methodName as keyof CalendarProtocol] as any)(
-          createPlainDate({
-            ...isoFields,
-            calendar: calendarSlot,
-            branding: PlainDateBranding,
-          })
-        )
-      )
+export const calendarMethods = {
+  ...createCalendarMethods(yearMonthOnlyRefiners, [PlainYearMonthBranding]),
+  ...createCalendarMethods(dateOnlyRefiners, []),
+  ...createCalendarMethods(monthOnlyRefiners, [PlainYearMonthBranding, PlainMonthDayBranding]),
+  ...createCalendarMethods(dayOnlyRefiners, [PlainMonthDayBranding]),
 }
+
+// For PlainDate/etc
+// -------------------------------------------------------------------------------------------------
+// Assumes general calendar (native/adapter)
+
+/*
+Made external for ZonedDateTime
+*/
+export function createCalendarGetters<M>(
+  branding: string,
+  methodNameMap: M,
+  slotsToIsoFields: ((slots: any) => IsoTimeFields) = identityFunc as any,
+): {
+  [K in keyof M]: () => any
+} {
+  const methods = {} as any
+
+  for (const methodName in methodNameMap) {
+    methods[methodName] = function(this: any) {
+      const slots = getSpecificSlots(this, branding) as any
+      const { calendar } = slots
+      const simpleOps = createSimpleOps(calendar)
+      const isoFields = slotsToIsoFields(slots)
+
+      return simpleOps[methodName](isoFields)
+    }
+  }
+
+  return methods
+}
+
+export const dateTimeCalendarGetters = createCalendarGetters(PlainDateTimeBranding, dateRefiners) // hack
+export const dateCalendarGetters = createCalendarGetters(PlainDateBranding, dateRefiners)
+export const yearMonthGetters = createCalendarGetters(PlainYearMonthBranding, {
+  ...yearMonthOnlyRefiners,
+  ...monthOnlyRefiners,
+})
+export const monthDayGetters = createCalendarGetters(PlainMonthDayBranding, {
+  ...monthOnlyRefiners,
+  ...dayOnlyRefiners,
+})
+
+// Duration
+// -------------------------------------------------------------------------------------------------
+
+/*
+Includes sign()
+*/
+export const durationGettersMethods = mapPropNames((propName: keyof DurationFieldsWithSign) => {
+  return function (this: any) {
+    const slots = getSpecificSlots(DurationBranding, this) as DurationSlots
+    return slots[propName]
+  }
+}, durationInternalNames)
+
+// Time
+// -------------------------------------------------------------------------------------------------
 
 export function createTimeGetterMethods(
   branding: string,
@@ -59,9 +114,9 @@ export function createTimeGetterMethods(
   }, timeFieldNamesAlpha)
 }
 
-/*
-TODO: define using map
-*/
+// Epoch
+// -------------------------------------------------------------------------------------------------
+
 export function createEpochGetterMethods(branding: string) {
   return {
     epochSeconds() {
@@ -83,15 +138,8 @@ export function createEpochGetterMethods(branding: string) {
   }
 }
 
-/*
-Includes sign()
-*/
-export const durationGettersMethods = mapPropNames((propName: keyof DurationFieldsWithSign) => {
-  return function (this: any) {
-    const slots = getSpecificSlots(DurationBranding, this) as DurationSlots
-    return slots[propName]
-  }
-}, durationInternalNames)
+// Misc
+// -------------------------------------------------------------------------------------------------
 
 export function neverValueOf() {
   throw new TypeError('Cannot convert object using valueOf')

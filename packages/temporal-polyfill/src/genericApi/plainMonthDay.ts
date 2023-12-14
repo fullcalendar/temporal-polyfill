@@ -1,6 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
-import { CalendarDateFromFieldsFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc } from '../internal/calendarRecord'
 import { ensureString, toInteger } from '../internal/cast'
 import { IdLike, isIdLikeEqual } from '../internal/idLike'
 import { constrainIsoDateLike } from '../internal/isoFields'
@@ -11,6 +10,7 @@ import { DateTimeDisplayOptions, OverflowOptions, refineDateDisplayOptions } fro
 import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from './convert'
 import { PlainDateBranding, PlainMonthDayBranding } from './branding'
 import { PlainDateSlots, PlainMonthDaySlots } from './genericTypes'
+import { DateModOps, MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -45,40 +45,33 @@ export function fromString(s: string): PlainMonthDaySlots<string> {
 }
 
 export function fromFields<C>(
-  getCalendarRecord: (calendar: C) => {
-    monthDayFromFields: CalendarMonthDayFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendar: C) => MonthDayRefineOps,
   calendarSlot: C,
   calendarAbsent: boolean,
   fields: MonthDayBag,
   options?: OverflowOptions
 ): PlainMonthDaySlots<C> {
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...refinePlainMonthDayBag(calendarRecord, calendarAbsent, fields, options),
+    ...refinePlainMonthDayBag(calendarOps, calendarAbsent, fields, options),
     calendar: calendarSlot,
     branding: PlainMonthDayBranding,
   }
 }
 
 export function withFields<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    monthDayFromFields: CalendarMonthDayFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-    mergeFields: CalendarMergeFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MonthDayModOps,
   plainMonthDaySlots: PlainMonthDaySlots<C>,
   initialFields: MonthDayFields,
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots<C> {
   const calendarSlot = plainMonthDaySlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...mergePlainMonthDayBag(calendarRecord, initialFields, modFields, options),
+    ...mergePlainMonthDayBag(calendarOps, initialFields, modFields, options),
     calendar: calendarSlot,
     branding: PlainMonthDayBranding,
   }
@@ -111,20 +104,16 @@ export function toJSON(
 }
 
 export function toPlainDate<C>(
-  getCalendarRecord: (calendar: C) => {
-    dateFromFields: CalendarDateFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-    mergeFields: CalendarMergeFieldsFunc,
-  },
+  getCalendarOps: (calendar: C) => DateModOps,
   plainMonthDaySlots: PlainMonthDaySlots<C>,
   plainMonthDayFields: MonthDayFields,
   bag: YearFields,
 ): PlainDateSlots<C> {
   const calendarSlot = plainMonthDaySlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...convertPlainMonthDayToDate(calendarRecord, plainMonthDayFields, bag),
+    ...convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag),
     calendar: calendarSlot,
     branding: PlainDateBranding,
   }

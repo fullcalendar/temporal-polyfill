@@ -2,9 +2,9 @@ import { NumSign, identityFunc } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
 import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../genericApi/options'
-import { getDiffCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as DurationFuncs from '../genericApi/duration'
+import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 
 type RelativeToArg = ZonedDateTimeSlots<string, string> | PlainDateSlots<string>
 
@@ -23,7 +23,7 @@ export function add(
 ): DurationSlots {
   return DurationFuncs.add(
     identityFunc,
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     slots,
     otherSlots,
@@ -38,7 +38,7 @@ export function subtract(
 ): DurationSlots {
   return DurationFuncs.subtract(
     identityFunc,
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     slots,
     otherSlots,
@@ -56,7 +56,7 @@ export function round(
 ): DurationSlots {
   return DurationFuncs.round(
     identityFunc,
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     slots,
     options,
@@ -69,7 +69,7 @@ export function total(
 ): number {
   return DurationFuncs.total(
     identityFunc,
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     slots,
     options,
@@ -89,7 +89,7 @@ export function compare(
 ): NumSign {
   return DurationFuncs.compare(
     identityFunc,
-    getDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     queryTimeZoneImpl,
     durationSlots0,
     durationSlots1,

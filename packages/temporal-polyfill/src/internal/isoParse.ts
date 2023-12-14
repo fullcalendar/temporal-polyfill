@@ -1,6 +1,5 @@
 import { unitNanoMap, nanoInSec, nanoInUtcDay } from './units'
 import { isoCalendarId } from './calendarConfig'
-import { queryCalendarImpl } from './calendarImplQuery'
 import {
   DurationFields,
   DurationFieldsWithSign,
@@ -39,11 +38,9 @@ import {
 } from './units'
 import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
-import { CalendarDayFunc } from './calendarRecord'
 import { utcTimeZoneId } from './timeZoneConfig'
-
-// generic API - BAD
-import { calendarImplDay, createCalendarImplRecord } from '../genericApi/calendarRecord'
+import { MoveOps } from './calendarOps'
+import { createNativeMoveOps, createNativePartOps } from './calendarNativeQuery'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -156,12 +153,9 @@ export function parsePlainYearMonth(s: string): IsoDateFields & { calendar: stri
   }
 
   const isoFields = parsePlainDate(s)
-  const calendarRecord = createCalendarImplRecord(isoFields.calendar, { // BAD
-    day: calendarImplDay,
-  })
-
+  const calendarOps = createNativeMoveOps(isoFields.calendar)
   const movedIsoFields = movePlainYearMonthToDay(
-    calendarRecord,
+    calendarOps,
     parsePlainDate(s),
   )
 
@@ -177,7 +171,7 @@ function postProcessYearMonthOnly(organized: DateOrganized): IsoDateFields & { c
 
 // TODO: DRY
 function movePlainYearMonthToDay(
-  calendarRecord: { day: CalendarDayFunc },
+  calendarRecord: MoveOps,
   isoFields: IsoDateFields,
   day = 1,
 ): IsoDateFields {
@@ -203,11 +197,11 @@ export function parsePlainMonthDay(s: string): IsoDateFields & { calendar: strin
 
 function postProcessMonthDayOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
   const isoFields = constrainIsoDateLike(organized)
-  const calendarImpl = queryCalendarImpl(organized.calendar)
-  const [year, month, day] = calendarImpl.queryYearMonthDay(isoFields)
+  const calendarOps = createNativePartOps(organized.calendar)
+  const [year, month, day] = calendarOps.dateParts(isoFields)
 
   return {
-    ...calendarImpl.monthDayFromFields({ year, month, day }),
+    ...calendarOps.monthDayFromFields({ year, month, day }),
     calendar: organized.calendar,
   }
 }
@@ -215,12 +209,12 @@ function postProcessMonthDayOnly(organized: DateOrganized): IsoDateFields & { ca
 function findBestYear(
   isoFields: IsoDateFields & { calendar: string },
 ): IsoDateFields & { calendar: string } {
-  const calendarImpl = queryCalendarImpl(isoFields.calendar)
-  const [year, month, day] = calendarImpl.queryYearMonthDay(isoFields)
+  const calendarOps = createNativePartOps(isoFields.calendar)
+  const [year, month, day] = calendarOps.dateParts(isoFields)
 
   // okay?????? was using refinePlainMonthDayBag before
   return {
-    ...calendarImpl.monthDayFromFields({ year, month, day }),
+    ...calendarOps.monthDayFromFields({ year, month, day }),
     calendar: isoFields.calendar,
   }
 }
@@ -282,6 +276,8 @@ Validates whether it's a supported id
 */
 export function parseCalendarId(s: string): string {
   const res = parseMaybeGenericDateTime(s) || parseMaybeYearMonth(s) || parseMaybeMonthDay(s)
+
+  // NOTE: only islamicc is normalized. all other calendarIds that produce valid DateTimeFormats are kept as-is
 
   if (res) {
     return queryCalendarImpl(res.calendar).id // normalize (not DRY)

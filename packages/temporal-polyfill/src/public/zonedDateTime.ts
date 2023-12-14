@@ -1,4 +1,4 @@
-import { DateTimeBag, dateGetterNames } from '../internal/calendarFields'
+import { DateTimeBag } from '../internal/calendarFields'
 import { LocalesArg, prepZonedDateTimeFormat } from '../internal/intlFormat'
 import { formatOffsetNano } from '../internal/isoFormat'
 import {
@@ -16,7 +16,7 @@ import { getId } from '../internal/idLike'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { zonedInternalsToIso } from '../internal/timeZoneMath'
 import { ZonedDateTimeBag } from '../genericApi/genericBag'
-import { CalendarBranding, TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 
@@ -24,7 +24,7 @@ import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { CalendarArg, CalendarProtocol, createCalendar } from './calendar'
+import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { Instant, createInstant } from './instant'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
@@ -33,10 +33,10 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg, TimeZoneProtocol, createTimeZone } from './timeZone'
-import { createCalendarGetterMethods, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
+import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
-import { createDateNewCalendarRecord, createMonthDayNewCalendarRecord, createYearMonthNewCalendarRecord, getDateModCalendarRecord, getDiffCalendarRecord, getMoveCalendarRecord } from './calendarRecord'
 import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecord'
+import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 
@@ -61,7 +61,7 @@ export class ZonedDateTime {
   with(mod: DateTimeBag, options?: ZonedFieldOptions): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.withFields(
-        getDateModCalendarRecord,
+        createDateModOps,
         createTypicalTimeZoneRecord,
         getZonedDateTimeSlots(this),
         this as any, // TODO: needs getters
@@ -112,7 +112,7 @@ export class ZonedDateTime {
   add(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.add(
-        getMoveCalendarRecord,
+        createMoveOps,
         createTypicalTimeZoneRecord,
         getZonedDateTimeSlots(this),
         toDurationSlots(durationArg),
@@ -124,7 +124,7 @@ export class ZonedDateTime {
   subtract(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.subtract(
-        getMoveCalendarRecord,
+        createMoveOps,
         createTypicalTimeZoneRecord,
         getZonedDateTimeSlots(this),
         toDurationSlots(durationArg),
@@ -136,7 +136,7 @@ export class ZonedDateTime {
   until(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
       ZonedDateTimeFuncs.until(
-        getDiffCalendarRecord,
+        createDiffOps,
         createTypicalTimeZoneRecord,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
@@ -148,7 +148,7 @@ export class ZonedDateTime {
   since(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
       ZonedDateTimeFuncs.since(
-        getDiffCalendarRecord,
+        createDiffOps,
         createTypicalTimeZoneRecord,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
@@ -230,7 +230,7 @@ export class ZonedDateTime {
   toPlainYearMonth(): PlainYearMonth {
     return createPlainYearMonth(
       ZonedDateTimeFuncs.toPlainYearMonth(
-        createYearMonthNewCalendarRecord,
+        createYearMonthRefineOps,
         getZonedDateTimeSlots(this),
         this as any, // !!!
       )
@@ -240,7 +240,7 @@ export class ZonedDateTime {
   toPlainMonthDay(): PlainMonthDay {
     return createPlainMonthDay(
       ZonedDateTimeFuncs.toPlainMonthDay(
-        createMonthDayNewCalendarRecord,
+        createMonthDayRefineOps,
         getZonedDateTimeSlots(this),
         this as any, // !!!
       )
@@ -255,7 +255,7 @@ export class ZonedDateTime {
   getCalendar(): CalendarProtocol {
     const { calendar } = getZonedDateTimeSlots(this)
     return typeof calendar === 'string'
-      ? createCalendar({ branding: CalendarBranding, id: calendar })
+      ? new Calendar(calendar)
       : calendar
   }
 
@@ -315,7 +315,7 @@ defineProps(ZonedDateTime.prototype, {
 })
 
 defineGetters(ZonedDateTime.prototype, {
-  ...createCalendarGetterMethods(ZonedDateTimeBranding, dateGetterNames, slotsToIsoFields),
+  ...createCalendarGetters(ZonedDateTimeBranding, slotsToIsoFields),
   ...createTimeGetterMethods(ZonedDateTimeBranding, slotsToIsoFields),
   ...createEpochGetterMethods(ZonedDateTimeBranding),
 })
@@ -350,7 +350,7 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
     }
 
     return ZonedDateTimeFuncs.fromFields(
-      createDateNewCalendarRecord,
+      createDateRefineOps,
       refineTimeZoneSlot,
       createTypicalTimeZoneRecord,
       slots.calendar || getCalendarSlotFromBag(arg as any), // !!!

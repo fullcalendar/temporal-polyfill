@@ -1,12 +1,12 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, OverflowOptions } from '../genericApi/options'
 import { PlainDateSlots, PlainMonthDaySlots } from '../genericApi/genericTypes'
 import { extractCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
-import { createMonthDayModCalendarRecordIMPL, createMonthDayNewCalendarRecordIMPL, getDateModCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
+import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
+import { computeMonthDayFields } from '../internal/calendarNative'
 
 export function create(
   isoMonth: number,
@@ -35,7 +35,7 @@ export function fromFields(
   const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
 
   return PlainMonthDayFuncs.fromFields(
-    createMonthDayNewCalendarRecordIMPL,
+    createNativeMonthDayRefineOps,
     calendar,
     !calendarMaybe,
     fields,
@@ -43,15 +43,10 @@ export function fromFields(
   )
 }
 
+// TODO: put this in utils
 export function getFields(slots: PlainMonthDaySlots<string>): MonthDayFields {
-  const calendarImpl = queryCalendarImpl(slots.calendar)
-  const [, month, day] = calendarImpl.queryYearMonthDay(slots)
-
-  return {
-    month,
-    monthCode: calendarImpl.monthCode(slots),
-    day,
-  }
+  const calendarOps = createNativePartOps(slots.calendar)
+  return computeMonthDayFields(calendarOps, slots)
 }
 
 export function withFields(
@@ -60,7 +55,7 @@ export function withFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots<string> {
   return PlainMonthDayFuncs.withFields(
-    createMonthDayModCalendarRecordIMPL,
+    createNativeMonthDayModOps,
     plainMonthDaySlots,
     getFields(plainMonthDaySlots),
     modFields,
@@ -93,7 +88,7 @@ export function toPlainDate(
   bag: YearFields,
 ): PlainDateSlots<string> {
   return PlainMonthDayFuncs.toPlainDate(
-    getDateModCalendarRecordIMPL,
+    createNativeDateModOps,
     plainMonthDaySlots,
     getFields(plainMonthDaySlots),
     bag,

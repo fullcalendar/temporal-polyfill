@@ -16,8 +16,8 @@ import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
-import { createDateNewCalendarRecord } from './calendarRecord'
 import { createTypicalTimeZoneRecord } from './timeZoneRecord'
+import { createDateRefineOps } from './calendarOpsQuery'
 
 export function refinePublicRelativeTo(
   relativeTo: ZonedDateTimeArg | PlainDateArg | undefined,
@@ -40,7 +40,7 @@ export function refinePublicRelativeTo(
 
       const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!
       const res = refineMaybeZonedDateTimeBag(
-        createDateNewCalendarRecord(calendar),
+        createDateRefineOps(calendar),
         refineTimeZoneSlot,
         createTypicalTimeZoneRecord,
         relativeTo as unknown as ZonedDateTimeBag<CalendarArg, TimeZoneArg>, // !!!

@@ -1,5 +1,3 @@
-import { CalendarImpl, refineMonthCodeNumber } from './calendarImpl'
-import { CalendarDateAddFunc } from './calendarRecord'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
@@ -28,14 +26,15 @@ import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 import { isoCalendarId } from './calendarConfig'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
+import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
+import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
+import { MoveOps } from './calendarOps'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
-  calendarRecord: {
-    dateAdd: CalendarDateAddFunc
-  },
+  calendarOps: MoveOps,
   timeZoneRecord: {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -51,7 +50,7 @@ export function moveZonedEpochNano(
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZoneRecord, epochNano)
     const movedIsoDateFields = moveDateEasy(
-      calendarRecord,
+      calendarOps,
       isoDateTimeFields,
       {
         ...durationFields, // date parts
@@ -86,7 +85,7 @@ export function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFi
 // -------------------------------------------------------------------------------------------------
 
 export function moveDateTime(
-  calendarRecord: { dateAdd: CalendarDateAddFunc },
+  calendarOps: MoveOps,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
   overflow: Overflow,
@@ -95,7 +94,7 @@ export function moveDateTime(
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
   const movedIsoDateFields = moveDateEasy(
-    calendarRecord,
+    calendarOps,
     isoDateTimeFields, // only date parts will be used
     {
       ...durationFields, // date parts
@@ -112,13 +111,13 @@ export function moveDateTime(
 }
 
 export function moveDateEasy(
-  calendarRecord: { dateAdd: CalendarDateAddFunc },
+  calendarOps: MoveOps,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   overflow: Overflow,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return calendarRecord.dateAdd(
+    return calendarOps.dateAdd(
       isoDateFields,
       updateDurationFieldsSign(durationFields),
       overflow
@@ -140,11 +139,8 @@ export function moveDateEasy(
   return isoDateFields
 }
 
-/*
-Called by CalendarImpl, that's why it accepts refined overflow
-*/
-export function moveDate(
-  calendarImpl: CalendarImpl,
+export function nativeDateAdd(
+  this: NativeMoveOps,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   overflow?: Overflow,
@@ -156,22 +152,22 @@ export function moveDate(
   days += givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
 
   if (years || months) {
-    let [year, month, day] = calendarImpl.queryYearMonthDay(isoDateFields)
+    let [year, month, day] = this.dateParts(isoDateFields)
 
     if (years) {
-      const [monthCodeNumber, isLeapMonth] = calendarImpl.queryMonthCode(year, month)
+      const [monthCodeNumber, isLeapMonth] = this.monthCodeParts(year, month)
       year += years
-      month = refineMonthCodeNumber(monthCodeNumber, isLeapMonth, calendarImpl.queryLeapMonth(year))
-      month = clampEntity('month', month, 1, calendarImpl.computeMonthsInYear(year), overflow)
+      month = monthCodeNumberToMonth(monthCodeNumber, isLeapMonth, this.leapMonth(year))
+      month = clampEntity('month', month, 1, this.monthsInYearPart(year), overflow)
     }
 
     if (months) {
-      ([year, month] = calendarImpl.addMonths(year, month, months))
+      ([year, month] = this.monthAdd(year, month, months))
     }
 
-    day = clampEntity('day', day, 1, calendarImpl.queryDaysInMonth(year, month), overflow)
+    day = clampEntity('day', day, 1, this.daysInMonthParts(year, month), overflow)
 
-    epochMilli = calendarImpl.queryDateStart(year, month, day)
+    epochMilli = this.epochMilli(year, month, day)
   } else if (weeks || days) {
     epochMilli = isoToEpochMilli(isoDateFields)
   } else {
@@ -201,10 +197,7 @@ export function moveTime(
 // Calendar-related Utils
 // -------------------------------------------------------------------------------------------------
 
-export function moveByIsoMonths(year: number, month: number, monthDelta: number): [
-  year: number,
-  month: number,
-] {
+export function isoMonthAdd(year: number, month: number, monthDelta: number): YearMonthParts {
   year += divTrunc(monthDelta, isoMonthsInYear)
   month += modTrunc(monthDelta, isoMonthsInYear)
 
@@ -219,15 +212,12 @@ export function moveByIsoMonths(year: number, month: number, monthDelta: number)
   return [year, month]
 }
 
-export function moveByIntlMonths(
+export function intlMonthAdd(
+  this: IntlCalendar,
   year: number,
   month: number,
   monthDelta: number,
-  calendarImpl: CalendarImpl
-): [
-  year: number,
-  month: number,
-] {
+): YearMonthParts {
   if (monthDelta) {
     month += monthDelta
 
@@ -236,14 +226,14 @@ export function moveByIntlMonths(
         throw new RangeError('Months out of range')
       }
       while (month < 1) {
-        month += calendarImpl.computeMonthsInYear(--year)
+        month += computeIntlMonthsInYear.call(this, --year)
       }
     } else {
       if (month > Number.MAX_SAFE_INTEGER) {
         throw new RangeError('Months out of range')
       }
       let monthsInYear
-      while (month > (monthsInYear = calendarImpl.computeMonthsInYear(year))) {
+      while (month > (monthsInYear = computeIntlMonthsInYear.call(this, year))) {
         month -= monthsInYear
         year++
       }

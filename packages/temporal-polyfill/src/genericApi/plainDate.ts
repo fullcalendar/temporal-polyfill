@@ -1,6 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
-import { CalendarDateAddFunc, CalendarDateFromFieldsFunc, CalendarDateUntilFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecord'
 import { ensureObjectlike, ensureString } from '../internal/cast'
 import { diffDates } from '../internal/diff'
 import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
@@ -19,6 +18,7 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplay
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateBag, refinePlainDateBag } from './convert'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots } from './genericTypes'
+import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -42,39 +42,32 @@ export function fromString(s: string): PlainDateSlots<string> {
 }
 
 export function fromFields<CA, C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateFromFields: CalendarDateFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DateRefineOps,
   calendarSlot: C,
   fields: DateBag & { calendar?: CA },
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...refinePlainDateBag(calendarRecord, fields, options),
+    ...refinePlainDateBag(calendarOps, fields, options),
     calendar: calendarSlot,
     branding: PlainDateBranding,
   }
 }
 
 export function withFields<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateFromFields: CalendarDateFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-    mergeFields: CalendarMergeFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DateModOps,
   plainDateSlots: PlainDateSlots<C>,
   initialFields: DateFields & Partial<EraYearFields>,
   modFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
   const calendarSlot = plainDateSlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...mergePlainDateBag(calendarRecord, initialFields, modFields, options),
+    ...mergePlainDateBag(calendarOps, initialFields, modFields, options),
     calendar: calendarSlot,
     branding: PlainDateBranding,
   }
@@ -89,9 +82,7 @@ export function withCalendar<C>(
 }
 
 export function add<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MoveOps,
   plainDateSlots: PlainDateSlots<C>,
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
@@ -99,7 +90,7 @@ export function add<C>(
   return {
     ...plainDateSlots,
     ...moveDateEasy(
-      getCalendarRecord(plainDateSlots.calendar),
+      getCalendarOps(plainDateSlots.calendar),
       plainDateSlots,
       durationSlots,
       refineOverflowOptions(options),
@@ -108,21 +99,16 @@ export function add<C>(
 }
 
 export function subtract<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MoveOps,
   plainDateSlots: PlainDateSlots<C>,
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
-  return add(getCalendarRecord, plainDateSlots, negateDurationInternals(durationSlots), options)
+  return add(getCalendarOps, plainDateSlots, negateDurationInternals(durationSlots), options)
 }
 
 export function until<C extends IdLike>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-    dateUntil: CalendarDateUntilFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DiffOps,
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
   options?: DiffOptions,
@@ -131,7 +117,7 @@ export function until<C extends IdLike>(
   return {
     ...updateDurationFieldsSign(
       diffDates(
-        getCalendarRecord(
+        getCalendarOps(
           getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
         ),
         plainDateSlots0,
@@ -150,10 +136,7 @@ export function until<C extends IdLike>(
 }
 
 export function since<C extends IdLike>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-    dateUntil: CalendarDateUntilFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DiffOps,
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
   options?: DiffOptions,
@@ -161,7 +144,7 @@ export function since<C extends IdLike>(
   return {
     branding: DurationBranding,
     ...negateDurationInternals(
-      until(getCalendarRecord, plainDateSlots0, plainDateSlots1, options, true)
+      until(getCalendarOps, plainDateSlots0, plainDateSlots1, options, true)
     )
   }
 }
@@ -227,36 +210,30 @@ export function toPlainDateTime<C>(
 }
 
 export function toPlainYearMonth<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    yearMonthFromFields: CalendarYearMonthFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps,
   plainDateSlots: { calendar: C },
   plainDateFields: DateBag, // TODO: DateBag correct type?
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainDateSlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...convertToPlainYearMonth(calendarRecord, plainDateFields),
+    ...convertToPlainYearMonth(calendarOps, plainDateFields),
     calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function toPlainMonthDay<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    monthDayFromFields: CalendarMonthDayFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps,
   plainDateSlots: { calendar: C },
   plainDateFields: DateBag, // TODO: DateBag correct type?
 ): PlainMonthDaySlots<C> {
   const calendarSlot = plainDateSlots.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...convertToPlainMonthDay(calendarRecord, plainDateFields),
+    ...convertToPlainMonthDay(calendarOps, plainDateFields),
     calendar: calendarSlot,
     branding: PlainMonthDayBranding,
   }

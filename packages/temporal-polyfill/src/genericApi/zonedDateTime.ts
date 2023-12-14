@@ -1,6 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
-import { CalendarDateAddFunc, CalendarDateFromFieldsFunc, CalendarDateUntilFunc, CalendarFieldsFunc, CalendarMergeFieldsFunc, CalendarMonthDayFromFieldsFunc, CalendarYearMonthFromFieldsFunc } from '../internal/calendarRecord'
 import { ensureString, toBigInt } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffZonedEpochNano } from '../internal/diff'
@@ -24,6 +23,7 @@ import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDa
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './genericTypes'
 import { isTimeZoneSlotsEqual } from './timeZoneSlot'
 import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlot'
+import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -48,10 +48,7 @@ export function fromString(s: string, options?: ZonedFieldOptions): ZonedDateTim
 }
 
 export function fromFields<C, TA, T>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateFromFields: CalendarDateFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DateRefineOps,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
@@ -64,7 +61,7 @@ export function fromFields<C, TA, T>(
   return {
     calendar: calendarSlot,
     ...refineZonedDateTimeBag(
-      getCalendarRecord(calendarSlot),
+      getCalendarOps(calendarSlot),
       refineTimeZoneArg,
       getTimeZoneRecord,
       fields,
@@ -91,11 +88,7 @@ export function getISOFields<C, T>(
 }
 
 export function withFields<C, T>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateFromFields: CalendarDateFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-    mergeFields: CalendarMergeFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DateModOps,
   getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -111,7 +104,7 @@ export function withFields<C, T>(
     calendar,
     timeZone,
     epochNanoseconds: mergeZonedDateTimeBag(
-      getCalendarRecord(calendar),
+      getCalendarOps(calendar),
       getTimeZoneRecord(timeZone),
       initialFields,
       modFields,
@@ -206,9 +199,7 @@ export function withCalendar<C, T>(
 }
 
 export function add<C, T>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -218,7 +209,7 @@ export function add<C, T>(
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<C, T> {
   const movedEpochNanoseconds = moveZonedEpochNano(
-    getCalendarRecord(zonedDateTimeSlots.calendar),
+    getCalendarOps(zonedDateTimeSlots.calendar),
     getTimeZoneRecord(zonedDateTimeSlots.timeZone),
     zonedDateTimeSlots.epochNanoseconds,
     durationSlots,
@@ -232,9 +223,7 @@ export function add<C, T>(
 }
 
 export function subtract<C, T>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -243,14 +232,11 @@ export function subtract<C, T>(
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<C, T> {
-  return add(getCalendarRecord, getTimeZoneRecord, zonedDateTimeSlots, negateDurationInternals(durationSlots), options)
+  return add(getCalendarOps, getTimeZoneRecord, zonedDateTimeSlots, negateDurationInternals(durationSlots), options)
 }
 
 export function until<C extends IdLike, T>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-    dateUntil: CalendarDateUntilFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -265,7 +251,7 @@ export function until<C extends IdLike, T>(
 
   return updateDurationFieldsSign(
     diffZonedEpochNano(
-      getCalendarRecord(calendarSlot),
+      getCalendarOps(calendarSlot),
       getTimeZoneRecord(timeZoneSlot),
       zonedDateTimeSlots0.epochNanoseconds,
       zonedDateTimeSlots1.epochNanoseconds,
@@ -275,10 +261,7 @@ export function until<C extends IdLike, T>(
 }
 
 export function since<C extends IdLike, T>(
-  getCalendarRecord: (calendarSlot: C) => {
-    dateAdd: CalendarDateAddFunc,
-    dateUntil: CalendarDateUntilFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneRecord: (timeZoneSlot: T) => {
     getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
     getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
@@ -288,7 +271,7 @@ export function since<C extends IdLike, T>(
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
 ): DurationFieldsWithSign {
   return negateDurationInternals(
-    until(getCalendarRecord, getTimeZoneRecord, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
+    until(getCalendarOps, getTimeZoneRecord, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
   )
 }
 
@@ -487,36 +470,30 @@ export function toPlainDateTime<C, T>(
 }
 
 export function toPlainYearMonth<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    yearMonthFromFields: CalendarYearMonthFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
   zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
 ): PlainYearMonthSlots<C> {
   const calendarSlot = zonedDateTimeSlots0.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...convertToPlainYearMonth(calendarRecord, zonedDateTimeFields),
+    ...convertToPlainYearMonth(calendarOps, zonedDateTimeFields),
     calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function toPlainMonthDay<C>(
-  getCalendarRecord: (calendarSlot: C) => {
-    monthDayFromFields: CalendarMonthDayFromFieldsFunc,
-    fields: CalendarFieldsFunc,
-  },
+  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
   zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
 ): PlainMonthDaySlots<C> {
   const calendarSlot = zonedDateTimeSlots0.calendar
-  const calendarRecord = getCalendarRecord(calendarSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...convertToPlainMonthDay(calendarRecord, zonedDateTimeFields),
+    ...convertToPlainMonthDay(calendarOps, zonedDateTimeFields),
     calendar: calendarSlot,
     branding: PlainMonthDayBranding,
   }

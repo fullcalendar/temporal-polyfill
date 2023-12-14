@@ -1,12 +1,13 @@
 import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } from '../internal/calendarFields'
-import { queryCalendarImpl } from '../internal/calendarImplQuery'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
-import { createYearMonthNewCalendarRecordIMPL, getDateModCalendarRecordIMPL, createYearMonthDiffCalendarRecordIMPL, createYearMonthModCalendarRecordIMPL, createYearMonthMoveCalendarRecordIMPL } from '../genericApi/calendarRecord'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from '../genericApi/genericTypes'
-import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
+import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
+import * as Utils from './utils'
+import { createNativeDateModOps, createNativeDiffOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthModOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
+import { computeYearMonthFields } from '../internal/calendarNative'
 
 export function create(
   isoYear: number,
@@ -26,25 +27,24 @@ export function fromFields(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.fromFields(
-    createYearMonthNewCalendarRecordIMPL,
+    createNativeYearMonthRefineOps,
     getCalendarIdFromBag(bag),
     bag,
     options,
   )
 }
 
+// TODO: put this in utils
 export function getFields(slots: PlainYearMonthSlots<string>): YearMonthFields & Partial<EraYearFields> {
-  const calendarImpl = queryCalendarImpl(slots.calendar)
-  const [year, month] = calendarImpl.queryYearMonthDay(slots)
-
-  return {
-    era: calendarImpl.era(slots), // inefficient: requeries y/m/d
-    eraYear: calendarImpl.eraYear(slots), // inefficient: requeries y/m/d
-    year,
-    month,
-    monthCode: calendarImpl.monthCode(slots), // inefficient: requeries y/m/d
-  }
+  const calendarOps = createNativePartOps(slots.calendar)
+  return computeYearMonthFields(calendarOps, slots)
 }
+
+// TODO: add specific types
+export const daysInMonth = Utils.daysInMonth
+export const daysInYear = Utils.daysInYear
+export const monthsInYear = Utils.monthsInYear
+export const inLeapYear = Utils.inLeapYear
 
 export function withFields(
   plainYearMonthSlots: PlainYearMonthSlots<string>,
@@ -53,7 +53,7 @@ export function withFields(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.withFields(
-    createYearMonthModCalendarRecordIMPL,
+    createNativeYearMonthModOps,
     plainYearMonthSlots,
     initialFields,
     mod,
@@ -67,7 +67,7 @@ export function add(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.add(
-    createYearMonthMoveCalendarRecordIMPL,
+    createNativeMoveOps,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -80,7 +80,7 @@ export function subtract(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.subtract(
-    createYearMonthMoveCalendarRecordIMPL,
+    createNativeMoveOps,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -93,7 +93,7 @@ export function until(
   options?: DiffOptions,
 ): DurationSlots {
   return PlainYearMonthFuncs.until(
-    createYearMonthDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
     options,
@@ -106,7 +106,7 @@ export function since(
   options?: DiffOptions,
 ): DurationSlots {
   return PlainYearMonthFuncs.since(
-    createYearMonthDiffCalendarRecordIMPL,
+    createNativeDiffOps,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
     options,
@@ -146,7 +146,7 @@ export function toPlainDate(
   bag: { day: number },
 ): PlainDateSlots<string> {
   return PlainYearMonthFuncs.toPlainDate(
-    getDateModCalendarRecordIMPL,
+    createNativeDateModOps,
     plainYearMonthSlots,
     plainYearMonthFields,
     bag,
