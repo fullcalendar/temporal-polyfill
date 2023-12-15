@@ -1,7 +1,7 @@
-import { IsoTimeFields, isoTimeFieldNamesAlpha } from './isoFields'
-import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toInteger, toIntegerOrUndefined, toString, toStringOrUndefined } from './cast'
+import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesAsc } from './isoFields'
 import { BoundArg, mapPropNamesToConstant, remapProps } from './utils'
 import { DurationFields } from './durationFields'
+import { Unit, unitNamesAsc } from './units'
 
 // Year/Month/Day (no era/eraYear)
 // -------------------------------------------------------------------------------------------------
@@ -98,168 +98,33 @@ export interface DateStats extends YearMonthStats {
   daysInWeek: number
 }
 
-// Refiners
+// Field Names
 // -------------------------------------------------------------------------------------------------
 
-const dayFieldRefiners = { day: toInteger }
-const monthCodeFieldRefiners = { monthCode: toString }
+export const timeFieldNamesAsc = unitNamesAsc.slice(0, Unit.Day)
+export const dateFieldNamesAsc = unitNamesAsc.slice(Unit.Day)
 
-// Ordered alphabetically
-export const eraYearFieldRefiners = {
-  era: toStringOrUndefined,
-  eraYear: toIntegerOrUndefined,
-}
+export const offsetFieldNames = ['offset']
+export const timeZoneFieldNames = ['timeZone']
 
-// Ordered alphabetically
-// Does not include era/eraYear
-const yearMonthFieldRefiners = {
-  month: toInteger,
-  ...monthCodeFieldRefiners,
-  year: toInteger,
-}
+export const timeAndOffsetFieldNames = [...timeFieldNamesAsc, ...offsetFieldNames]
+export const timeAndZoneFieldNames = [...timeAndOffsetFieldNames, ...timeZoneFieldNames]
 
-// Ordered alphabetically
-// Does not include era/eraYear
-export const dateFieldRefiners = {
-  ...dayFieldRefiners,
-  ...yearMonthFieldRefiners,
-}
+// pre-sorted!!!...
 
-// Ordered alphabetically
-const timeFieldRefiners = {
-  hour: toInteger,
-  microsecond: toInteger,
-  millisecond: toInteger,
-  minute: toInteger,
-  nanosecond: toInteger,
-  second: toInteger,
-}
+export const eraYearFieldNames = ['era', 'eraYear']
+export const allYearFieldNames = [...eraYearFieldNames, 'year']
 
-// Unordered
-// Does not include era/eraYear
-export const dateTimeFieldRefiners = {
-  ...dateFieldRefiners,
-  ...timeFieldRefiners,
-}
+export const yearFieldNames = ['year']
+export const monthCodeFieldNames = ['monthCode']
+export const dayFieldNames = ['day']
 
-// Ordered alphabetically, for predictable macros
-const yearStatRefiners = {
-  daysInYear: ensurePositiveInteger,
-  inLeapYear: ensureBoolean,
-  monthsInYear: ensurePositiveInteger,
-}
+export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
+export const monthDayFieldNames = [...dayFieldNames, ...monthFieldNames] // day/month/monthCode
+export const monthCodeDayFieldNames = [...dayFieldNames, ...monthCodeFieldNames] // day/monthCode
 
-// Unordered
-export const yearMonthStatRefiners = {
-  ...yearStatRefiners,
-  daysInMonth: ensurePositiveInteger,
-}
-
-// Unordered
-export const dateStatRefiners = {
-  ...yearMonthStatRefiners,
-  dayOfWeek: ensurePositiveInteger,
-  dayOfYear: ensurePositiveInteger,
-  weekOfYear: ensurePositiveInteger,
-  yearOfWeek: ensureInteger, // allows negative
-  daysInWeek: ensurePositiveInteger,
-}
-
-// Property Names
-// -------------------------------------------------------------------------------------------------
-
-export const eraYearFieldNamesAlpha = Object.keys(eraYearFieldRefiners) as
-  (keyof EraYearFields)[]
-
-// eraYearAndYearFieldNames
-export const intlYearFieldNamesAlpha = [...eraYearFieldNamesAlpha, 'year'] as
-  (keyof YearFieldsIntl)[]
-
-export const dateFieldNamesAlpha = Object.keys(dateFieldRefiners) as
-  (keyof DateFields)[]
-
-// month/monthCode/year
-export const yearMonthFieldNamesAlpha = Object.keys(yearMonthFieldRefiners) as
-  (keyof YearMonthFields)[]
-
-// day/month/monthCode
-export const monthDayFieldNamesAlpha = dateFieldNamesAlpha.slice(0, 3) as
-  (keyof MonthDayFields)[]
-
-// month/monthCode
-export const monthFieldNamesAlpha = monthDayFieldNamesAlpha.slice(1) as
-  (keyof MonthFields)[]
-
-export const dateTimeFieldNamesAlpha = Object.keys(dateTimeFieldRefiners).sort() as
-  (keyof DateTimeFields)[]
-
-export const timeFieldNamesAlpha = Object.keys(timeFieldRefiners) as
-  (keyof TimeFields)[]
-
-// monthCode/year
-export const yearMonthBasicNamesAlpha = yearMonthFieldNamesAlpha.slice(1) as
-  (keyof YearMonthBasics)[]
-
-export const monthDayBasicNamesAlpha = ['day', 'monthCode'] as
-  (keyof MonthDayBasics)[]
-
-export const yearStatNamesAlpha = Object.keys(yearStatRefiners) as
-  (keyof YearStats)[]
-
-// unordered
-export const yearMonthStatNames = Object.keys(yearMonthStatRefiners) as
-  (keyof YearMonthStats)[]
-
-// unordered
-export const dateStatNames = Object.keys(dateStatRefiners) as
-  (keyof DateStats)[]
-
-export type DateGetterFields = DateFieldsIntl & DateStats
-
-export const dateFieldOnlyRefiners = {
-  // ...eraYearFieldRefiners,
-  // HACK: use strict instead...
-  era: ensureStringOrUndefined,
-  eraYear: ensureIntegerOrUndefined,
-
-  // ...dateFieldRefiners,
-  // HACK: use strict instead...
-  year: ensureInteger,
-  monthCode: ensureString,
-  month: ensurePositiveInteger,
-  day: ensurePositiveInteger,
-}
-
-export const dateGetterRefiners = {
-  ...dateFieldOnlyRefiners,
-  ...dateStatRefiners, // already strict
-}
-
-// unordered
-// HACK: IMPORTANT that first two props are era/eraYear for slicing in calendarProtocolMethodNames...
-export const dateGetterNames = Object.keys(dateGetterRefiners) as
-  (keyof DateGetterFields)[]
-
-export const calendarProtocolMethodNames: string[] = [
-  ...dateGetterNames.slice(2), // remove era/eraYear. HACKY
-  'dateAdd',
-  'dateUntil',
-  'dateFromFields',
-  'yearMonthFromFields',
-  'monthDayFromFields',
-  'fields',
-  'mergeFields'
-]
-
-// unordered
-export const yearMonthGetterNames = [
-  ...eraYearFieldNamesAlpha,
-  ...yearMonthFieldNamesAlpha,
-  ...yearMonthStatNames,
-]
-
-// unordered
-export const monthDayGetterNames = monthDayBasicNamesAlpha
+export const yearMonthFieldNames = [...monthFieldNames, ...yearFieldNames] // month/monthCode/year
+export const yearMonthCodeFieldNames = [...monthCodeFieldNames, ...yearFieldNames] // monthCode/year
 
 // Conversion
 // -------------------------------------------------------------------------------------------------
@@ -268,9 +133,9 @@ export const timeFieldsToIso = remapProps.bind<
   undefined, [BoundArg, BoundArg], // bound
   [TimeFields], // unbound
   IsoTimeFields // return
->(undefined, timeFieldNamesAlpha, isoTimeFieldNamesAlpha)
+>(undefined, timeFieldNamesAsc, isoTimeFieldNamesAsc)
 
 // Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNamesAlpha, 0)
+export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNamesAsc, 0)

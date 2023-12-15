@@ -1,3 +1,5 @@
+import { dayFieldNames, yearFieldNames } from "./calendarFields"
+
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
 export const japaneseCalendarId = 'japanese'
@@ -70,11 +72,11 @@ export const leapMonthMetas: Record<string, number> = {
 // ---------------------
 
 export function getRequiredYearMonthFields(calendarId: string): string[] {
-  return calendarId === isoCalendarId ? ['year'] : []
+  return calendarId === isoCalendarId ? yearFieldNames : []
 }
 
 export function getRequiredMonthDayFields(calendarId: string): string[] {
-  return calendarId === isoCalendarId ? ['day'] : []
+  return calendarId === isoCalendarId ? dayFieldNames : []
 }
 
 export function getRequiredDateFields(calendarId: string): string[] {

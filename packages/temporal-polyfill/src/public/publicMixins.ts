@@ -1,16 +1,16 @@
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
 import { DurationSlots } from '../genericApi/genericTypes'
-import { timeFieldNamesAlpha } from '../internal/calendarFields'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFieldsWithSign, durationInternalNames } from '../internal/durationFields'
 import { IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/isoMath'
 import { identityFunc, mapPropNames } from '../internal/utils'
 import { getCalendarSlots } from './calendar'
-import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from './calendarAdapter'
+import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from '../genericApi/refineConfig'
 import { createSimpleOps } from './calendarOpsQuery'
 import { toPlainDateSlots } from './plainDate'
 import { BrandingSlots, EpochSlots, getSlots, getSpecificSlots } from './slots'
+import { timeFieldNamesAsc } from '../internal/calendarFields'
 
 // For Calendar
 // -------------------------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ export function createTimeGetterMethods(
       const isoFields = slotsToIsoFields(slots)
       return isoFields[isoTimeFieldNamesAlpha[i]]
     }
-  }, timeFieldNamesAlpha)
+  }, timeFieldNamesAsc)
 }
 
 // Epoch

@@ -1,4 +1,4 @@
-import { DateTimeBag, dateGetterNames } from '../internal/calendarFields'
+import { DateTimeBag } from '../internal/calendarFields'
 import { LocalesArg, prepPlainDateTimeFormat } from '../internal/intlFormat'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults } from '../internal/isoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../genericApi/options'

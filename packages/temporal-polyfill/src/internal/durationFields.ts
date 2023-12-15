@@ -17,14 +17,14 @@ import {
   mapProps,
 } from './utils'
 
-interface DurationDateFields {
+export interface DurationDateFields {
   days: number
   weeks: number
   months: number
   years: number
 }
 
-interface DurationTimeFields {
+export interface DurationTimeFields {
   nanoseconds: number
   microseconds: number
   milliseconds: number
@@ -39,42 +39,27 @@ export interface DurationFieldsWithSign extends DurationFields {
   sign: NumSign
 }
 
-// Property Names
+// Field Names
 // -------------------------------------------------------------------------------------------------
 
-// pluralized
-export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + 's') as
-  (keyof DurationFields)[]
+export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + 's') as (keyof DurationFields)[]
+export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(0, Unit.Day)
+export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
+
+export const durationInternalNames = [...durationFieldNamesAsc, 'sign'] as (keyof DurationFieldsWithSign)[]
 
 export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 
-export const durationFieldNames = durationFieldNamesAsc.slice().sort()
-
-const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(0, Unit.Day) as
-  (keyof DurationTimeFields)[]
-
-const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day) as
-  (keyof DurationDateFields)[]
-
-// unordered
-export const durationInternalNames = [...durationFieldNames, 'sign'] as
-  (keyof DurationFieldsWithSign)[]
-
-// Defaults
+// Field Defaults
 // -------------------------------------------------------------------------------------------------
 
-export const durationFieldDefaults = mapPropNamesToConstant(durationFieldNames, 0)
-
+export const durationFieldDefaults = mapPropNamesToConstant(durationFieldNamesAsc, 0)
 export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFieldNamesAsc, 0)
-
-// Refiners
-// -------------------------------------------------------------------------------------------------
-
-export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNames, toIntegerStrict)
 
 // Field <-> Field Conversion
 // -------------------------------------------------------------------------------------------------
 
+// wtf? use durationFieldRefiners
 export function refineDurationFields(
   rawFields: DurationFields,
 ): DurationFieldsWithSign {
@@ -168,7 +153,7 @@ export function negateDurationInternals(internals: DurationFieldsWithSign): Dura
 export function negateDurationFields(fields: DurationFields): DurationFields {
   const res = {} as DurationFields
 
-  for (const fieldName of durationFieldNames) {
+  for (const fieldName of durationFieldNamesAsc) {
     res[fieldName] = fields[fieldName] * -1 || 0
   }
 
@@ -188,7 +173,7 @@ export function durationHasDateParts(fields: DurationFields): boolean {
 
 function computeDurationFieldsSign(
   fields: DurationFields,
-  fieldNames = durationFieldNames,
+  fieldNames = durationFieldNamesAsc,
 ): NumSign {
   let sign: NumSign = 0
 

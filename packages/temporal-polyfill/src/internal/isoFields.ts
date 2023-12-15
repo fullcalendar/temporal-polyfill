@@ -23,7 +23,7 @@ export type IsoDateTimeFields = IsoDateFields & IsoTimeFields
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-// descending by unit
+// descending by unit (for internal plucking to slots)
 export const isoDateFieldNamesDesc: (keyof IsoDateFields)[] = [
   'isoYear',
   'isoMonth',
@@ -42,12 +42,10 @@ export const isoDateTimeFieldNamesDesc: (keyof IsoDateTimeFields)[] = [
   ...isoTimeFieldNamesDesc,
 ]
 
-// ascending by unit
-export const isoDateFieldNamesAsc = isoDateFieldNamesDesc.slice().reverse()
+// ascending by unit (for converting to/from non-iso)
 export const isoTimeFieldNamesAsc = isoTimeFieldNamesDesc.slice().reverse()
-export const isoDateTimeFieldNamesAsc = isoDateTimeFieldNamesDesc.slice().reverse()
 
-// alphabetical
+// alphabetical (for getISOFields)
 export const isoDateFieldNamesAlpha = isoDateFieldNamesDesc.slice().sort()
 export const isoTimeFieldNamesAlpha = isoTimeFieldNamesDesc.slice().sort()
 export const isoDateTimeFieldNamesAlpha = isoDateTimeFieldNamesDesc.slice().sort()

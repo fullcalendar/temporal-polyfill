@@ -1,7 +1,7 @@
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { overflowMapNames } from '../genericApi/options'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
-import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensureObjectlike, ensurePositiveInteger, ensureString, ensureStringOrUndefined } from '../internal/cast'
+import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFields, DurationFieldsWithSign } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
 import { Overflow } from '../internal/options'
@@ -12,43 +12,7 @@ import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-
-// Refiner Config
-// -------------------------------------------------------------------------------------------------
-
-export const dateOnlyRefiners = {
-  dayOfWeek: ensurePositiveInteger,
-  dayOfYear: ensurePositiveInteger,
-  weekOfYear: ensurePositiveInteger,
-  yearOfWeek: ensureInteger, // can be negative
-  daysInWeek: ensurePositiveInteger,
-}
-
-export const yearMonthOnlyRefiners = {
-  era: ensureStringOrUndefined,
-  eraYear: ensureIntegerOrUndefined,
-  year: ensureInteger,
-  month: ensurePositiveInteger,
-  daysInMonth: ensurePositiveInteger,
-  daysInYear: ensurePositiveInteger,
-  inLeapYear: ensureBoolean,
-  monthsInYear: ensurePositiveInteger,
-}
-
-export const monthOnlyRefiners = {
-  monthCode: ensureString,
-}
-
-export const dayOnlyRefiners = {
-  day: ensurePositiveInteger,
-}
-
-export const dateRefiners = {
-  ...dateOnlyRefiners,
-  ...yearMonthOnlyRefiners,
-  ...monthOnlyRefiners,
-  ...dayOnlyRefiners,
-}
+import { dateRefiners } from '../genericApi/refineConfig'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------

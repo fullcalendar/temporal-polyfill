@@ -17,19 +17,6 @@ export const enum Unit {
   Year, // 9
 }
 
-export const unitNameMap = {
-  nanosecond: Unit.Nanosecond,
-  microsecond: Unit.Microsecond,
-  millisecond: Unit.Millisecond,
-  second: Unit.Second,
-  minute: Unit.Minute,
-  hour: Unit.Hour,
-  day: Unit.Day,
-  week: Unit.Week,
-  month: Unit.Month,
-  year: Unit.Year,
-}
-
 export type UnitName = keyof typeof unitNameMap
 // TODO: more convenient type for OR-ing with DurationFields (for plural?)
 
@@ -42,6 +29,21 @@ export type TimeUnit =
   Unit.Hour
 
 export type DayTimeUnit = Unit.Day | TimeUnit
+
+// -------------------------------------------------------------------------------------------------
+
+export const unitNameMap = {
+  nanosecond: Unit.Nanosecond,
+  microsecond: Unit.Microsecond,
+  millisecond: Unit.Millisecond,
+  second: Unit.Second,
+  minute: Unit.Minute,
+  hour: Unit.Hour,
+  day: Unit.Day,
+  week: Unit.Week,
+  month: Unit.Month,
+  year: Unit.Year,
+}
 
 export const unitNamesAsc = Object.keys(unitNameMap) as (keyof typeof unitNameMap)[]
 

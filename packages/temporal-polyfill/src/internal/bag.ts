@@ -1,5 +1,5 @@
 import { japaneseCalendarId } from './calendarConfig'
-import { DateBag, DayFields, EraYearOrYear, MonthFields, YearMonthBag, eraYearFieldNamesAlpha, intlYearFieldNamesAlpha, monthDayFieldNamesAlpha, monthFieldNamesAlpha } from './calendarFields'
+import { DateBag, DayFields, EraYearOrYear, MonthFields, YearMonthBag, allYearFieldNames, eraYearFieldNames, monthDayFieldNames, monthFieldNames } from './calendarFields'
 import { computeIsoYearMonthForMonthDay } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
 import { IsoDateFields } from './isoFields'
@@ -283,8 +283,8 @@ export function nativeFieldsMethod(
   this: NativeYearMonthRefineDeps,
   fieldNames: string[],
 ): string[] {
-  if (this.getEraOrigins() && fieldNames.includes('era')) {
-    return [...fieldNames, ...eraYearFieldNamesAlpha]
+  if (this.getEraOrigins() && fieldNames.includes('year')) {
+    return [...fieldNames, ...eraYearFieldNames]
   }
   return fieldNames
 }
@@ -296,18 +296,18 @@ export function nativeMergeFields(
 ): Record<string, unknown> {
   const merged = Object.assign(Object.create(null), baseFields)
 
-  spliceFields(merged, additionalFields, monthFieldNamesAlpha)
+  spliceFields(merged, additionalFields, monthFieldNames)
 
   if (this.getEraOrigins()) {
-    spliceFields(merged, additionalFields, intlYearFieldNamesAlpha)
+    spliceFields(merged, additionalFields, allYearFieldNames)
 
     // eras begin mid-year?
     if ((this as any).idBase === japaneseCalendarId) {
       spliceFields(
         merged,
         additionalFields,
-        monthDayFieldNamesAlpha, // any found?
-        eraYearFieldNamesAlpha, // then, delete these
+        monthDayFieldNames, // any found?
+        eraYearFieldNames, // then, delete these
       )
     }
   }
