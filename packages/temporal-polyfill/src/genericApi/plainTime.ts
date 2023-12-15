@@ -10,7 +10,7 @@ import { moveTime } from '../internal/move'
 import { Overflow, RoundingMode } from '../internal/options'
 import { roundTime } from '../internal/round'
 import { getSingleInstantFor } from '../internal/timeZoneMath'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
+import { TimeZoneOps } from '../internal/timeZoneOps'
 import { TimeUnit, Unit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
 import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineDiffOptions, refineRoundOptions, refineTimeDisplayOptions } from './options'
@@ -157,17 +157,14 @@ export function toJSON(slots: PlainTimeSlots): string {
 }
 
 export function toZonedDateTime<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: PlainTimeSlots,
   timeZoneSlot: T,
   plainDateSlots: PlainDateSlots<C>,
 ): ZonedDateTimeSlots<C, T> {
   return {
     epochNanoseconds: getSingleInstantFor(
-      getTimeZoneRecord(timeZoneSlot),
+      getTimeZoneOps(timeZoneSlot),
       { ...plainDateSlots, ...slots },
     ),
     calendar: plainDateSlots.calendar,

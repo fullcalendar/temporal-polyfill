@@ -15,7 +15,7 @@ import { DiffOptions, InstantDisplayOptions, RoundingOptions, refineDiffOptions,
 import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, InstantSlots, ZonedDateTimeSlots } from './genericTypes'
 import { parseInstant } from '../internal/isoParse'
-import { TimeZoneGetOffsetNanosecondsForFunc } from '../internal/timeZoneRecord'
+import { SimpleTimeZoneOps } from '../internal/timeZoneOps'
 
 export function create(epochNano: bigint): InstantSlots {
   return {
@@ -142,10 +142,8 @@ export function equals(
 }
 
 export function toString<TA, T>(
-  refineTimeZoneArg: (timeZoneArg: TA) => T, // refineTimeZoneSlot
-  getTimeZoneRecord: (timeSlotSlot: T) => { // createTimeZoneSlotRecord
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,
   instantSlots: InstantSlots,
   options?: InstantDisplayOptions<TA>,
 ): string {
@@ -157,7 +155,7 @@ export function toString<TA, T>(
   ] = refineInstantDisplayOptions(options)
 
   const providedTimeZone = timeZoneArg !== undefined
-  const timeZoneRecord = getTimeZoneRecord(
+  const timeZoneOps = getTimeZoneOps(
     providedTimeZone
       ? refineTimeZoneArg(timeZoneArg)
       : utcTimeZoneId as any,
@@ -165,7 +163,7 @@ export function toString<TA, T>(
 
   return formatInstantIso(
     providedTimeZone,
-    timeZoneRecord,
+    timeZoneOps,
     instantSlots.epochNanoseconds,
     nanoInc,
     roundingMode,
@@ -177,13 +175,11 @@ export function toString<TA, T>(
 TODO: smarter way without needing params
 */
 export function toJSON<TA, T>(
-  refineTimeZoneArg: (timeZoneArg: TA) => T, // refineTimeZoneSlot
-  getTimeZoneRecord: (timeSlotSlot: T) => { // createTimeZoneSlotRecord
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,
   instantSlots: InstantSlots,
 ): string {
-  return toString(refineTimeZoneArg, getTimeZoneRecord, instantSlots)
+  return toString(refineTimeZoneArg, getTimeZoneOps, instantSlots)
 }
 
 export function toZonedDateTimeISO<T>(

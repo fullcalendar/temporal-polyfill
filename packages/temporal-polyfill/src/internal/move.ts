@@ -26,20 +26,17 @@ import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 import { isoCalendarId } from './calendarConfig'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
+import { TimeZoneOps } from './timeZoneOps'
 import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
-import { DateAddOp, DayOp, MoveOps } from './calendarOps'
+import { DayOp, MoveOps } from './calendarOps'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
 export function moveZonedEpochNano(
   calendarOps: MoveOps,
-  timeZoneRecord: {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  timeZoneOps: TimeZoneOps,
   epochNano: DayTimeNano,
   durationFields: DurationFields,
   overflow: Overflow,
@@ -49,7 +46,7 @@ export function moveZonedEpochNano(
   if (!durationHasDateParts(durationFields)) {
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
   } else {
-    const isoDateTimeFields = zonedEpochNanoToIso(timeZoneRecord, epochNano)
+    const isoDateTimeFields = zonedEpochNanoToIso(timeZoneOps, epochNano)
     const movedIsoDateFields = moveDateEasy(
       calendarOps,
       isoDateTimeFields,
@@ -65,7 +62,7 @@ export function moveZonedEpochNano(
       calendar: isoCalendarId, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(
-      getSingleInstantFor(timeZoneRecord, movedIsoDateTimeFields),
+      getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
       dayTimeNano
     )
   }

@@ -34,7 +34,7 @@ import { ensureObjectlike } from '../internal/cast'
 import { Callable, pluckProps } from '../internal/utils'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from '../internal/isoMath'
 import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZoneMath'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
+import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import {
   EpochDisambigOptions,
@@ -54,16 +54,13 @@ const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
 // -------------------------------------------------------------------------------------------------
 
 export function convertPlainDateTimeToZoned(
-  timeZoneRecord: {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  timeZoneOps: TimeZoneOps,
   isoFields: IsoDateTimeFields,
   options?: EpochDisambigOptions,
 ): DayTimeNano {
   const epochDisambig = refineEpochDisambigOptions(options)
   return checkEpochNanoInBounds(
-    getSingleInstantFor(timeZoneRecord, isoFields, epochDisambig),
+    getSingleInstantFor(timeZoneOps, isoFields, epochDisambig),
   )
 }
 
@@ -76,10 +73,7 @@ TODO: make more DRY with other methods
 export function refineMaybeZonedDateTimeBag<TA, T>(
   calendarOps: DateRefineOps,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneRecord: (timeZoneArg: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneArg: T) => TimeZoneOps,
   bag: ZonedDateTimeBag<unknown, TA>,
 ): {
   epochNanoseconds: DayTimeNano,
@@ -99,10 +93,10 @@ export function refineMaybeZonedDateTimeBag<TA, T>(
 
     // must happen after datetime fields
     const timeZoneSlot = refineTimeZoneArg(fields.timeZone)
-    const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
+    const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
     const epochNanoseconds = getMatchingInstantFor(
-      timeZoneRecord,
+      timeZoneOps,
       { ...isoDateFields, ...isoTimeFields },
       fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
       false, // z?
@@ -126,10 +120,7 @@ export function refineMaybeZonedDateTimeBag<TA, T>(
 export function refineZonedDateTimeBag<TA, T>(
   calendarOps: DateRefineOps,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   bag: ZonedDateTimeBag<unknown, TA>,
   options: ZonedFieldOptions | undefined,
 ): {
@@ -146,14 +137,14 @@ export function refineZonedDateTimeBag<TA, T>(
 
   // must happen before Calendar::dateFromFields and parsing `options`
   const timeZoneSlot = refineTimeZoneArg(fields.timeZone!) // guaranteed via refineCalendarFields
-  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
   const isoDateFields = calendarOps.dateFromFields(fields as any, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
-    timeZoneRecord,
+    timeZoneOps,
     { ...isoDateFields, ...isoTimeFields },
     fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
     false, // z?
@@ -167,10 +158,7 @@ export function refineZonedDateTimeBag<TA, T>(
 
 export function mergeZonedDateTimeBag(
   calendarOps: DateModOps,
-  timeZoneRecord: {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  timeZoneOps: TimeZoneOps,
   zonedDateTime: any,
   mod: DateTimeBag, // TODO: allow offset. correct base type tho?
   options: ZonedFieldOptions | undefined,
@@ -189,7 +177,7 @@ export function mergeZonedDateTimeBag(
   const isoTimeFields = refineTimeBag(fields, overflow)
 
   const epochNanoseconds = getMatchingInstantFor(
-    timeZoneRecord,
+    timeZoneOps,
     { ...isoDateFields, ...isoTimeFields },
     parseOffsetNano(fields.offset!), // guaranteed via mergeCalendarFields
     false, // z?

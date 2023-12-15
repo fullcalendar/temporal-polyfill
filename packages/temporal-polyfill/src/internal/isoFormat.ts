@@ -15,7 +15,7 @@ import {
   Unit,
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
-import { TimeZoneGetOffsetNanosecondsForFunc } from './timeZoneRecord'
+import { SimpleTimeZoneOps } from './timeZoneOps'
 import { IdLike, getId } from './idLike'
 
 // High-level
@@ -49,7 +49,7 @@ TODO: rename to formatZonedEpochNano
 export function formatZonedDateTimeIso(
   calendarIdLike: IdLike,
   tiemZoneIdLike: IdLike,
-  timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
+  timeZoneOps: SimpleTimeZoneOps,
   epochNano: DayTimeNano,
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
@@ -59,7 +59,7 @@ export function formatZonedDateTimeIso(
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNano)
+  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
@@ -70,7 +70,7 @@ export function formatZonedDateTimeIso(
 
 export function formatInstantIso(
   providedTimeZone: boolean,
-  timeZoneRecord: { getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc },
+  timeZoneOps: SimpleTimeZoneOps,
   epochNano: DayTimeNano,
   nanoInc: number,
   roundingMode: RoundingMode,
@@ -83,7 +83,7 @@ export function formatInstantIso(
     true, // useDayOrigin
   )
 
-  let offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNano)
+  let offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +

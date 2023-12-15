@@ -13,7 +13,7 @@ import {
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
 import { RoundingMode, roundingModeFuncs } from './options'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
+import { TimeZoneOps } from './timeZoneOps'
 import { computeNanosecondsInDay } from './timeZoneMath'
 import {
   nanoInMinute,
@@ -35,13 +35,10 @@ export function roundDateTime(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  timeZoneRecord?: undefined | {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  timeZoneOps?: TimeZoneOps | undefined,
 ): IsoDateTimeFields {
   if (smallestUnit === Unit.Day) {
-    return roundDateTimeToDay(isoFields, timeZoneRecord, roundingMode)
+    return roundDateTimeToDay(isoFields, timeZoneOps, roundingMode)
   }
 
   return roundDateTimeToNano(
@@ -67,14 +64,11 @@ export function roundTime(
 // TODO: break into two separate functions?
 function roundDateTimeToDay(
   isoFields: IsoDateTimeFields,
-  timeZoneRecord: undefined | {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  timeZoneOps: TimeZoneOps | undefined,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
-  if (timeZoneRecord) {
-    const nanoInDay = computeNanosecondsInDay(timeZoneRecord, isoFields)
+  if (timeZoneOps) {
+    const nanoInDay = computeNanosecondsInDay(timeZoneOps, isoFields)
     const roundedTimeNano = roundByInc(isoTimeFieldsToNano(isoFields), nanoInDay, roundingMode)
     const dayDelta = roundedTimeNano ? 1 : 0
 

@@ -11,7 +11,7 @@ import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/isoM
 import { parsePlainDate } from '../internal/isoParse'
 import { moveDateEasy } from '../internal/move'
 import { getSingleInstantFor } from '../internal/timeZoneMath'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
+import { TimeZoneOps } from '../internal/timeZoneOps'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './options'
@@ -178,20 +178,17 @@ export function toJSON<C extends IdLike>(
 }
 
 export function toZonedDateTime<C, TZ>(
-  getTimeZoneRecord: (timeZoneSlot: TZ) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
   plainDateSlots: PlainDateSlots<C>,
   timeZoneSlot: TZ,
   plainTimeFields: IsoTimeFields = isoTimeFieldDefaults,
 ): ZonedDateTimeSlots<C, TZ> {
-  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   return {
     calendar: plainDateSlots.calendar,
     timeZone: timeZoneSlot,
-    epochNanoseconds: getSingleInstantFor(timeZoneRecord, { ...plainDateSlots, ...plainTimeFields }),
+    epochNanoseconds: getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...plainTimeFields }),
     branding: ZonedDateTimeBranding,
   }
 }

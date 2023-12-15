@@ -65,7 +65,7 @@ export class IntlTimeZoneImpl implements TimeZoneImpl {
 
   constructor(id: string) {
     const format = buildIntlFormat(id)
-    this.id = format.resolvedOptions().timeZone // TODO: less calling of .resolvedOptions()
+    this.id = format.resolvedOptions().timeZone
     this.store = createIntlTimeZoneStore(createComputeOffsetSec(format))
   }
 

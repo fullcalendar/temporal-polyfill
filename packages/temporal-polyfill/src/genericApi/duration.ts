@@ -11,7 +11,7 @@ import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarketSlots, MoveMarker, 
 import { moveDateTime, moveZonedEpochNano } from '../internal/move'
 import { Overflow, SubsecDigits } from '../internal/options'
 import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
+import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
 import { NumSign, identityFunc } from '../internal/utils'
 import { DiffOps } from '../internal/calendarOps'
@@ -76,10 +76,7 @@ export function withFields(
 export function add<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -115,7 +112,7 @@ export function add<RA, C, T>(
     otherSlots = negateDurationInternals(otherSlots) as any // !!!
   }
 
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneRecord, markerSlots) as
+  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
   return {
@@ -132,15 +129,12 @@ export function add<RA, C, T>(
 export function subtract<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
 ): DurationSlots {
-  return add(refineRelativeTo, getCalendarOps, getTimeZoneRecord, slots, otherSlots, options, -1)
+  return add(refineRelativeTo, getCalendarOps, getTimeZoneOps, slots, otherSlots, options, -1)
 }
 
 export function negated(slots: DurationSlots): DurationSlots {
@@ -160,10 +154,7 @@ export function abs(slots: DurationSlots): DurationSlots {
 export function round<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   options: DurationRoundOptions<RA>,
 ): DurationSlots {
@@ -206,7 +197,7 @@ export function round<RA, C, T>(
     throw new RangeError('need relativeTo')
   }
 
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneRecord, markerSlots) as
+  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
   let transplantedWeeks = 0
@@ -239,10 +230,7 @@ export function round<RA, C, T>(
 export function total<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   options: TotalUnitOptionsWithRel<RA> | UnitName,
 ): number {
@@ -264,7 +252,7 @@ export function total<RA, C, T>(
     throw new RangeError('need relativeTo')
   }
 
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneRecord, markerSlots) as
+  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
   return totalRelativeDuration(
@@ -307,10 +295,7 @@ export function blank(slots: DurationSlots): boolean {
 export function compare<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -355,7 +340,7 @@ export function compare<RA, C, T>(
     throw new RangeError('need relativeTo')
   }
 
-  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(getCalendarOps, getTimeZoneRecord, markerSlots) as
+  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
   return compareDayTimeNanos(
@@ -369,10 +354,7 @@ export function compare<RA, C, T>(
 
 function createMarkerSystem<C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   markerSlots: MarketSlots<C, T>,
 ): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
   const { calendar, timeZone, epochNanoseconds } = markerSlots as
@@ -381,15 +363,15 @@ function createMarkerSystem<C, T>(
   const calendarOps = getCalendarOps(calendar)
 
   if (epochNanoseconds) {
-    const timeZoneRecord = getTimeZoneRecord(timeZone!)
+    const timeZoneOps = getTimeZoneOps(timeZone!)
 
     return [
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       (epochNano: DayTimeNano, durationFields: DurationFields) => {
-        return moveZonedEpochNano(calendarOps, timeZoneRecord, epochNano, durationFields, Overflow.Constrain)
+        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields, Overflow.Constrain)
       },
-      diffZonedEpochNano.bind(undefined, calendarOps, timeZoneRecord),
+      diffZonedEpochNano.bind(undefined, calendarOps, timeZoneOps),
     ]
   } else {
     return [

@@ -12,7 +12,7 @@ import { parsePlainDateTime } from '../internal/isoParse'
 import { moveDateTime } from '../internal/move'
 import { RoundingMode } from '../internal/options'
 import { roundDateTime } from '../internal/round'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
+import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, Unit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineDateTimeDisplayOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions } from './options'
@@ -222,20 +222,17 @@ export function toJSON<C extends IdLike>(
 }
 
 export function toZonedDateTime<C, TZ>(
-  getTimeZoneRecord: (timeZoneSlot: TZ) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   timeZoneSlot: TZ,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots<C, TZ> {
-  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   return {
     calendar: plainDateTimeSlots.calendar,
     timeZone: timeZoneSlot,
-    epochNanoseconds: convertPlainDateTimeToZoned(timeZoneRecord, plainDateTimeSlots, options),
+    epochNanoseconds: convertPlainDateTimeToZoned(timeZoneOps, plainDateTimeSlots, options),
     branding: ZonedDateTimeBranding,
   }
 }

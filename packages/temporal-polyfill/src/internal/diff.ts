@@ -28,7 +28,7 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
+import { TimeZoneOps } from './timeZoneOps'
 import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps } from './calendarOps'
@@ -193,10 +193,7 @@ export function diffTimes(
 
 export function diffZonedEpochNano(
   calendarOps: DiffOps,
-  timeZoneRecord: {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  timeZoneOps: TimeZoneOps,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -220,10 +217,10 @@ export function diffZonedEpochNano(
     return updateDurationFieldsSign(durationFieldDefaults)
   }
 
-  const startIsoFields = zonedEpochNanoToIso(timeZoneRecord, startEpochNano)
+  const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
-  const endIsoFields = zonedEpochNanoToIso(timeZoneRecord, endEpochNano)
-  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneRecord) // necessary to bind?
+  const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
+  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneOps) // necessary to bind?
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
   let midEpochNano = isoToZonedEpochNano(midIsoFields)
   let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
@@ -253,7 +250,7 @@ export function diffZonedEpochNano(
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
-    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneRecord, m, d, Overflow.Constrain),
+    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d, Overflow.Constrain),
   ))
 }
 

@@ -13,7 +13,7 @@ import { moveZonedEpochNano } from '../internal/move'
 import { EpochDisambig, OffsetDisambig } from '../internal/options'
 import { roundDateTime } from '../internal/round'
 import { computeNanosecondsInDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneMath'
-import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from '../internal/timeZoneRecord'
+import { SimpleTimeZoneOps, TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, nanoInHour } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions, refineZonedDateTimeDisplayOptions, refineZonedFieldOptions } from './options'
@@ -50,10 +50,7 @@ export function fromString(s: string, options?: ZonedFieldOptions): ZonedDateTim
 export function fromFields<C, TA, T>(
   getCalendarOps: (calendarSlot: C) => DateRefineOps,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   calendarSlot: C,
   fields: ZonedDateTimeBag<unknown, TA>,
   options?: ZonedFieldOptions,
@@ -63,7 +60,7 @@ export function fromFields<C, TA, T>(
     ...refineZonedDateTimeBag(
       getCalendarOps(calendarSlot),
       refineTimeZoneArg,
-      getTimeZoneRecord,
+      getTimeZoneOps,
       fields,
       options,
     ),
@@ -72,12 +69,10 @@ export function fromFields<C, TA, T>(
 }
 
 export function getISOFields<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
 ): IsoDateTimeFields & { calendar: C, timeZone: T, offset: string } {
-  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any, getTimeZoneRecord(zonedDateTimeSlots.timeZone))
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any, getTimeZoneOps(zonedDateTimeSlots.timeZone))
 
   return { // alphabetical
     calendar: zonedDateTimeSlots.calendar,
@@ -89,10 +84,7 @@ export function getISOFields<C, T>(
 
 export function withFields<C, T>(
   getCalendarOps: (calendarSlot: C) => DateModOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   initialFields: DateTimeFields & Partial<EraYearFields>, // TODO: allow offset
   modFields: DateTimeBag,
@@ -105,7 +97,7 @@ export function withFields<C, T>(
     timeZone,
     epochNanoseconds: mergeZonedDateTimeBag(
       getCalendarOps(calendar),
-      getTimeZoneRecord(timeZone),
+      getTimeZoneOps(timeZone),
       initialFields,
       modFields,
       options,
@@ -115,23 +107,20 @@ export function withFields<C, T>(
 }
 
 export function withPlainTime<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   plainTimeSlots: PlainTimeSlots,
 ): ZonedDateTimeSlots<C, T> {
   const timeZoneSlot = zonedDateTimeSlots.timeZone
-  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
     ...plainTimeSlots,
   }
 
   const epochNano = getMatchingInstantFor(
-    timeZoneRecord,
+    timeZoneOps,
     isoFields,
     isoFields.offsetNanoseconds,
     false, // hasZ
@@ -149,24 +138,21 @@ export function withPlainTime<C, T>(
 }
 
 export function withPlainDate<C extends IdLike, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   plainDateSlots: PlainDateSlots<C>,
 ): ZonedDateTimeSlots<C, T> {
   const timeZoneSlot = zonedDateTimeSlots.timeZone
-  const timeZoneRecord = getTimeZoneRecord(timeZoneSlot)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
     ...plainDateSlots,
   }
   const calendar = getPreferredCalendarSlot(zonedDateTimeSlots.calendar, plainDateSlots.calendar)
 
   const epochNano = getMatchingInstantFor(
-    timeZoneRecord,
+    timeZoneOps,
     isoFields,
     isoFields.offsetNanoseconds,
     false, // hasZ
@@ -200,17 +186,14 @@ export function withCalendar<C, T>(
 
 export function add<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<C, T> {
   const movedEpochNanoseconds = moveZonedEpochNano(
     getCalendarOps(zonedDateTimeSlots.calendar),
-    getTimeZoneRecord(zonedDateTimeSlots.timeZone),
+    getTimeZoneOps(zonedDateTimeSlots.timeZone),
     zonedDateTimeSlots.epochNanoseconds,
     durationSlots,
     refineOverflowOptions(options),
@@ -224,23 +207,17 @@ export function add<C, T>(
 
 export function subtract<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   durationSlots: DurationFieldsWithSign,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<C, T> {
-  return add(getCalendarOps, getTimeZoneRecord, zonedDateTimeSlots, negateDurationInternals(durationSlots), options)
+  return add(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots, negateDurationInternals(durationSlots), options)
 }
 
 export function until<C extends IdLike, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
@@ -252,7 +229,7 @@ export function until<C extends IdLike, T>(
   return updateDurationFieldsSign(
     diffZonedEpochNano(
       getCalendarOps(calendarSlot),
-      getTimeZoneRecord(timeZoneSlot),
+      getTimeZoneOps(timeZoneSlot),
       zonedDateTimeSlots0.epochNanoseconds,
       zonedDateTimeSlots1.epochNanoseconds,
       ...refineDiffOptions(invertRoundingMode, options, Unit.Hour),
@@ -262,31 +239,25 @@ export function until<C extends IdLike, T>(
 
 export function since<C extends IdLike, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
 ): DurationFieldsWithSign {
   return negateDurationInternals(
-    until(getCalendarOps, getTimeZoneRecord, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
+    until(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
   )
 }
 
 export function round<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   options: RoundingOptions | UnitName,
 ): ZonedDateTimeSlots<C, T> {
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const timeZoneRecord = getTimeZoneRecord(timeZone)
+  const timeZoneOps = getTimeZoneOps(timeZone)
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
-  const offsetNano = timeZoneRecord.getOffsetNanosecondsFor(epochNanoseconds)
+  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
   let isoDateTimeFields = {
     ...epochNanoToIso(epochNanoseconds, offsetNano),
     calendar,
@@ -299,12 +270,12 @@ export function round<C, T>(
       smallestUnit as DayTimeUnit,
       roundingInc,
       roundingMode,
-      timeZoneRecord,
+      timeZoneOps,
     )
   }
 
   epochNanoseconds = getMatchingInstantFor(
-    timeZoneRecord,
+    timeZoneOps,
     isoDateTimeFields,
     offsetNano,
     false, // z
@@ -322,22 +293,19 @@ export function round<C, T>(
 }
 
 export function startOfDay<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
 ): ZonedDateTimeSlots<C, T> {
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const timeZoneRecord = getTimeZoneRecord(timeZone)
+  const timeZoneOps = getTimeZoneOps(timeZone)
 
   const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
     ...isoTimeFieldDefaults,
   }
 
   epochNanoseconds = getMatchingInstantFor(
-    timeZoneRecord,
+    timeZoneOps,
     isoFields,
     undefined, // offsetNanoseconds
     false, // z
@@ -355,17 +323,14 @@ export function startOfDay<C, T>(
 }
 
 export function hoursInDay<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-    getPossibleInstantsFor: TimeZoneGetPossibleInstantsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
 ): number {
-  const timeZoneRecord = getTimeZoneRecord(zonedDateTimeSlots.timeZone)
+  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
 
   return computeNanosecondsInDay(
-    timeZoneRecord,
-    zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneRecord),
+    timeZoneOps,
+    zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
   ) / nanoInHour
 }
 
@@ -389,28 +354,24 @@ export function equals<C extends IdLike, T extends IdLike>(
 }
 
 export function toString<C extends IdLike, T extends IdLike>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   return formatZonedDateTimeIso(
     zonedDateTimeSlots0.calendar,
     zonedDateTimeSlots0.timeZone,
-    getTimeZoneRecord(zonedDateTimeSlots0.timeZone),
+    getTimeZoneOps(zonedDateTimeSlots0.timeZone),
     zonedDateTimeSlots0.epochNanoseconds,
     ...refineZonedDateTimeDisplayOptions(options),
   )
 }
 
 export function toJSON<C extends IdLike, T extends IdLike>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): string {
-  return toString(getTimeZoneRecord, zonedDateTimeSlots0)
+  return toString(getTimeZoneOps, zonedDateTimeSlots0)
 }
 
 export function toInstant(
@@ -423,15 +384,13 @@ export function toInstant(
 }
 
 export function toPlainDate<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateSlots<C> {
   return {
     ...pluckProps(
       isoDateFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneRecord(zonedDateTimeSlots0.timeZone)),
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
     calendar: zonedDateTimeSlots0.calendar,
     branding: PlainDateBranding,
@@ -439,30 +398,26 @@ export function toPlainDate<C, T>(
 }
 
 export function toPlainTime<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainTimeSlots {
   return {
     ...pluckProps(
       isoTimeFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneRecord(zonedDateTimeSlots0.timeZone)),
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
     branding: PlainTimeBranding,
   }
 }
 
 export function toPlainDateTime<C, T>(
-  getTimeZoneRecord: (timeZoneSlot: T) => {
-    getOffsetNanosecondsFor: TimeZoneGetOffsetNanosecondsForFunc,
-  },
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateTimeSlots<C> {
   return {
     ...pluckProps(
       isoDateTimeFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneRecord(zonedDateTimeSlots0.timeZone)),
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
     calendar: zonedDateTimeSlots0.calendar,
     branding: PlainDateTimeBranding,
