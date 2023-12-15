@@ -9,10 +9,10 @@ const queryCacheableTimeZoneImpl = createLazyGenerator((timeZoneId: string): Tim
     : new IntlTimeZoneImpl(timeZoneId)
 })
 
-/*
-timeZoneId must be normalized
-*/
 export function queryTimeZoneImpl(timeZoneId: string): TimeZoneImpl {
+  // normalize for cache-key. choose uppercase for 'UTC'
+  timeZoneId = timeZoneId.toLocaleUpperCase()
+
   const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
     return new FixedTimeZoneImpl(offsetNano)

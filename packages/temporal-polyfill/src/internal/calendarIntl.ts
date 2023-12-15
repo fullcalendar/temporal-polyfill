@@ -222,6 +222,9 @@ export interface IntlCalendar {
 
 // -------------------------------------------------------------------------------------------------
 
+/*
+Expects an already-normalized calendarId
+*/
 export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {

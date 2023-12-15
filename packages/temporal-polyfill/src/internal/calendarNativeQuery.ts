@@ -3,6 +3,10 @@ import { gregoryDateModOps, gregoryDateRefineOps, gregoryMonthDayModOps, gregory
 import { createCalendarIntlOps, intlDateModOps, intlDateRefineOps, intlDayOfYearOps, intlDaysInMonthOps, intlDaysInYearOps, intlDiffOps, intlInLeapYearOps, intlMonthDayModOps, intlMonthDayParseOps, intlMonthDayRefineOps, intlMonthsInYearOps, intlMoveOps, intlPartOps, intlStandardOps, intlYearMonthDiffOps, intlYearMonthModOps, intlYearMonthMoveOps, intlYearMonthParseOps, intlYearMonthRefineOps } from './calendarIntl'
 import { isoDateModOps, isoDateRefineOps, isoDayOfYearOps, isoDaysInMonthOps, isoDaysInYearOps, isoDiffOps, isoInLeapYearOps, isoMonthDayModOps, isoMonthDayParseOps, isoMonthDayRefineOps, isoMonthsInYearOps, isoMoveOps, isoPartOps, isoStandardOps, isoYearMonthDiffOps, isoYearMonthModOps, isoYearMonthMoveOps, isoYearMonthParseOps, isoYearMonthRefineOps } from './calendarIso'
 
+/*
+All functions expect realized/normalized calendarId
+*/
+
 // Refine
 export const createNativeYearMonthRefineOps = createNativeOpsCreator(isoYearMonthRefineOps, intlYearMonthRefineOps, gregoryYearMonthRefineOps)
 export const createNativeDateRefineOps = createNativeOpsCreator(isoDateRefineOps, intlDateRefineOps, gregoryDateRefineOps)

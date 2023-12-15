@@ -257,17 +257,13 @@ export function parseCalendarId(s: string): string {
   return res ? res.calendar : s
 }
 
-export function normalizeCalendarId(calendarId: string): string {
+export function realizeCalendarId(calendarId: string): string {
   calendarId = calendarId.toLocaleLowerCase()
 
   if (calendarId === 'islamicc') {
     calendarId = 'islamic-civil'
   }
 
-  return calendarId
-}
-
-export function realizeCalendarId(calendarId: string): string {
   // check that it's valid. DRY enough with createNativeOpsCreator?
   if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
     queryIntlCalendar(calendarId)
@@ -294,12 +290,8 @@ export function parseTimeZoneId(s: string): string {
   return s
 }
 
-export function normalizeTimeZoneId(calendarId: string): string {
-  return calendarId.toUpperCase() // so 'UTC'
-}
-
 export function realizeTimeZoneId(calendarId: string): string {
-  return queryTimeZoneImpl(normalizeTimeZoneId(calendarId)).id
+  return queryTimeZoneImpl(calendarId).id // queryTimeZoneImpl will normalize the id
 }
 
 // Post-processing organized result
@@ -311,7 +303,7 @@ function postProcessZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
-  const timeZoneImpl = queryTimeZoneImpl(normalizeTimeZoneId(organized.timeZone))
+  const timeZoneImpl = queryTimeZoneImpl(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
