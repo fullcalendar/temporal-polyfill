@@ -19,7 +19,7 @@ import {
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { Overflow, RoundingMode } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
-import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
+import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -28,7 +28,6 @@ import {
   nanoInUtcDay,
 } from './units'
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
-import { TimeZoneOps } from './timeZoneOps'
 import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps } from './calendarOps'

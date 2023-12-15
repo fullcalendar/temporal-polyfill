@@ -4,7 +4,7 @@ import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDes
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../genericApi/options'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { getId } from '../internal/idLike'
 import { PlainDateBag, PlainDateTimeBag } from '../genericApi/genericBag'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'

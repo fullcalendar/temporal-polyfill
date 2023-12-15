@@ -1,11 +1,11 @@
-import { TimeZoneImpl } from '../internal/timeZoneImpl'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
+import { NativeTimeZone } from '../internal/timeZoneNative'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { formatOffsetNano } from '../internal/isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from '../genericApi/options'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { defineStringTag } from '../internal/utils'
-import { getSingleInstantFor, validateOffsetNano } from '../internal/timeZoneMath'
+import { getSingleInstantFor, validateOffsetNano } from '../internal/timeZoneOps'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { epochNanoToIso } from '../internal/isoMath'
 import { isTimeZoneSlotsEqual } from '../genericApi/timeZoneSlot'
@@ -58,7 +58,7 @@ export class TimeZone implements TimeZoneProtocol {
 
   getPossibleInstantsFor(plainDateTimeArg: PlainDateTimeArg): Instant[]  {
     const { id } = getTimeZoneSlots(this)
-    return queryTimeZoneImpl(id).getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
+    return queryNativeTimeZone(id).getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
       .map((epochNano: DayTimeNano) => {
         return createInstant({
           branding: InstantBranding,
@@ -69,7 +69,7 @@ export class TimeZone implements TimeZoneProtocol {
 
   getOffsetNanosecondsFor(instantArg: InstantArg): number {
     const { id } = getTimeZoneSlots(this)
-    return queryTimeZoneImpl(id).getOffsetNanosecondsFor(toInstantSlots(instantArg).epochNanoseconds)
+    return queryNativeTimeZone(id).getOffsetNanosecondsFor(toInstantSlots(instantArg).epochNanoseconds)
   }
 
   getOffsetStringFor(instantArg: InstantArg): string {
@@ -114,12 +114,12 @@ export class TimeZone implements TimeZoneProtocol {
 
   getNextTransition(instantArg: InstantArg): Instant | null {
     const { id } = getTimeZoneSlots(this)
-    return getImplTransition(1, queryTimeZoneImpl(id), instantArg)
+    return getImplTransition(1, queryNativeTimeZone(id), instantArg)
   }
 
   getPreviousTransition(instantArg: InstantArg): Instant | null {
     const { id } = getTimeZoneSlots(this)
-    return getImplTransition(-1, queryTimeZoneImpl(id), instantArg)
+    return getImplTransition(-1, queryNativeTimeZone(id), instantArg)
   }
 
   equals(otherArg: TimeZoneArg): boolean {
@@ -167,7 +167,7 @@ export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneClassSlots {
   return getSpecificSlots(TimeZoneBranding, timeZone) as TimeZoneClassSlots
 }
 
-function getImplTransition(direction: -1 | 1, impl: TimeZoneImpl, instantArg: InstantArg): Instant | null {
+function getImplTransition(direction: -1 | 1, impl: NativeTimeZone, instantArg: InstantArg): Instant | null {
   const epochNano = impl.getTransition(toInstantSlots(instantArg).epochNanoseconds, direction)
   return epochNano ?
     createInstant({

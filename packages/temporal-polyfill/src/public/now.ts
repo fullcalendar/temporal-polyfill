@@ -3,7 +3,7 @@ import { OrigDateTimeFormat } from '../internal/intlFormat'
 import { createPropDescriptors, createTemporalNameDescriptors, pluckProps } from '../internal/utils'
 import { epochMilliToNano } from '../internal/isoMath'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/isoFields'
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 

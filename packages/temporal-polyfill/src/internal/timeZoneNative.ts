@@ -12,24 +12,48 @@ import {
   isoToEpochNanoWithOffset,
   isoToEpochSec,
 } from './isoMath'
+import { parseMaybeOffsetNano } from './isoParse'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
+
+export const utcTimeZoneId = 'UTC'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
 const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
 
-export interface TimeZoneImpl {
+export interface NativeTimeZone {
   id: string
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number
   getPossibleInstantsFor(isoFields: IsoDateTimeFields): DayTimeNano[]
   getTransition(epochNano: DayTimeNano, direction: -1 | 1): DayTimeNano | undefined
 }
 
+// Query
+// -------------------------------------------------------------------------------------------------
+
+const queryNonFixedTimeZone = createLazyGenerator((timeZoneId: string): NativeTimeZone => {
+  return timeZoneId === utcTimeZoneId
+    ? new FixedTimeZone(0, timeZoneId) // override ID
+    : new IntlTimeZone(timeZoneId)
+})
+
+export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
+  // normalize for cache-key. choose uppercase for 'UTC'
+  timeZoneId = timeZoneId.toLocaleUpperCase()
+
+  const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
+  if (offsetNano !== undefined) {
+    return new FixedTimeZone(offsetNano)
+  }
+
+  return queryNonFixedTimeZone(timeZoneId)
+}
+
 // Fixed
 // -------------------------------------------------------------------------------------------------
 
-export class FixedTimeZoneImpl implements TimeZoneImpl {
+export class FixedTimeZone implements NativeTimeZone {
   constructor(
     public offsetNano: number,
     public id: string = formatOffsetNano(offsetNano)
@@ -59,7 +83,7 @@ interface IntlTimeZoneStore {
   getTransition: (epochSec: number, direction: -1 | 1) => number | undefined
 }
 
-export class IntlTimeZoneImpl implements TimeZoneImpl {
+export class IntlTimeZone implements NativeTimeZone {
   id: string
   store: IntlTimeZoneStore
 

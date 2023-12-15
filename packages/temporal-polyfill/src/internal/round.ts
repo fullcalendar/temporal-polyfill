@@ -13,8 +13,7 @@ import {
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay, moveByIsoDays } from './isoMath'
 import { RoundingMode, roundingModeFuncs } from './options'
-import { TimeZoneOps } from './timeZoneOps'
-import { computeNanosecondsInDay } from './timeZoneMath'
+import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
 import {
   nanoInMinute,
   nanoInUtcDay,

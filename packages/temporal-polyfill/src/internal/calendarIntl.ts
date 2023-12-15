@@ -7,7 +7,7 @@ import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './int
 import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
 import { checkIsoDateInBounds, epochMilliToIso, isoArgsToEpochMilli, isoEpochFirstLeapYear, isoEpochOriginYear, isoToEpochMilli } from './isoMath'
 import { intlMonthAdd } from './move'
-import { utcTimeZoneId } from './timeZoneConfig'
+import { utcTimeZoneId } from './timeZoneNative'
 import { milliInDay } from './units'
 import { compareNumbers, createLazyGenerator, mapPropNamesToIndex } from './utils'
 

@@ -1,8 +1,8 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
-import { validateOffsetNano } from '../internal/timeZoneMath'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
+import { validateOffsetNano } from '../internal/timeZoneOps'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 
 // public
@@ -21,7 +21,7 @@ export function createTimeZoneSlotRecord<ProtocolMethods extends Record<string, 
       : never
 } {
   if (typeof slot === 'string') {
-    return queryTimeZoneImpl(slot) as any // !!!
+    return queryNativeTimeZone(slot) as any // !!!
   }
 
   return createTimeZoneProtocolRecord(slot, protocolMethods) as any

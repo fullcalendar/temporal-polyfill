@@ -3,7 +3,7 @@ import { IsoDateFields, isoDateFieldNamesAlpha, isoDateFieldNamesDesc } from '..
 import { LocalesArg, prepPlainDateFormat } from '../internal/intlFormat'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../genericApi/options'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { getId } from '../internal/idLike'
 import { PlainDateBag } from '../genericApi/genericBag'
 import { PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'

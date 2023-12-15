@@ -1,5 +1,5 @@
 import { LocalesArg, prepCachedInstantFormat } from '../internal/intlFormat'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { InstantDisplayOptions } from '../genericApi/options'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
 import { refineCalendarSlotString } from '../genericApi/calendarSlot'
@@ -30,7 +30,7 @@ export function toString(
 ): string {
   return InstantFuncs.toString(
     refineTimeZoneSlotString,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     instantSlots,
     options,
   )
@@ -41,7 +41,7 @@ export function toJSON(
 ): string {
   return InstantFuncs.toString(
     refineTimeZoneSlotString,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     instantSlots,
   )
 }

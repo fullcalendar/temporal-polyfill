@@ -1,7 +1,7 @@
 import { parseMaybeOffsetNano, parseTimeZoneId, realizeTimeZoneId } from '../internal/isoParse'
 import { IdLike, getId } from '../internal/idLike'
 import { ensureString } from '../internal/cast'
-import { utcTimeZoneId } from '../internal/timeZoneConfig'
+import { utcTimeZoneId } from '../internal/timeZoneNative'
 
 export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike, loose?: boolean): boolean {
   return a === b || getTimeZoneSlotRaw(a, loose) === getTimeZoneSlotRaw(b, loose)

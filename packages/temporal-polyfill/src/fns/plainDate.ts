@@ -1,7 +1,7 @@
 import { DateBag } from '../internal/calendarFields'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateFormat } from '../internal/intlFormat'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/options'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
@@ -155,7 +155,7 @@ export function toZonedDateTime(
   }
 
   return PlainDateFuncs.toZonedDateTime(
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     slots,
     refineTimeZoneSlotString(timeZoneArg),
     plainTimeArg,

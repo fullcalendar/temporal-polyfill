@@ -1,6 +1,6 @@
 import { NumSign, identityFunc } from '../internal/utils'
 import { UnitName } from '../internal/units'
-import { queryTimeZoneImpl } from '../internal/timeZoneImplQuery'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../genericApi/options'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
 import * as DurationFuncs from '../genericApi/duration'
@@ -24,7 +24,7 @@ export function add(
   return DurationFuncs.add(
     identityFunc,
     createNativeDiffOps,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     slots,
     otherSlots,
     options,
@@ -39,7 +39,7 @@ export function subtract(
   return DurationFuncs.subtract(
     identityFunc,
     createNativeDiffOps,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     slots,
     otherSlots,
     options,
@@ -57,7 +57,7 @@ export function round(
   return DurationFuncs.round(
     identityFunc,
     createNativeDiffOps,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     slots,
     options,
   )
@@ -70,7 +70,7 @@ export function total(
   return DurationFuncs.total(
     identityFunc,
     createNativeDiffOps,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     slots,
     options,
   )
@@ -90,7 +90,7 @@ export function compare(
   return DurationFuncs.compare(
     identityFunc,
     createNativeDiffOps,
-    queryTimeZoneImpl,
+    queryNativeTimeZone,
     durationSlots0,
     durationSlots1,
     options,

@@ -33,8 +33,7 @@ import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/options'
 import { ensureObjectlike } from '../internal/cast'
 import { Callable, pluckProps } from '../internal/utils'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds, isoEpochFirstLeapYear } from '../internal/isoMath'
-import { getMatchingInstantFor, getSingleInstantFor } from '../internal/timeZoneMath'
-import { TimeZoneOps } from '../internal/timeZoneOps'
+import { getMatchingInstantFor, getSingleInstantFor, TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import {
   EpochDisambigOptions,

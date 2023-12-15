@@ -10,7 +10,7 @@ import {
 } from '../genericApi/options'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { zonedInternalsToIso } from '../internal/timeZoneMath'
+import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { PlainTimeBag } from '../genericApi/genericBag'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'

@@ -22,11 +22,10 @@ import {
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { Overflow } from './options'
-import { getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneMath'
+import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 import { isoCalendarId } from './calendarConfig'
-import { TimeZoneOps } from './timeZoneOps'
 import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps } from './calendarOps'

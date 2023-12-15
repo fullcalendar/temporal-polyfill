@@ -26,9 +26,9 @@ import {
   moveByIsoDays,
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { FixedTimeZoneImpl } from './timeZoneImpl'
-import { queryTimeZoneImpl } from './timeZoneImplQuery'
-import { getMatchingInstantFor } from './timeZoneMath'
+import { FixedTimeZone } from './timeZoneNative'
+import { queryNativeTimeZone } from './timeZoneNative'
+import { getMatchingInstantFor } from './timeZoneOps'
 import {
   TimeUnit,
   Unit,
@@ -38,11 +38,9 @@ import {
 } from './units'
 import { divModFloor } from './utils'
 import { DayTimeNano } from './dayTimeNano'
-import { utcTimeZoneId } from './timeZoneConfig'
-import { MoveOps } from './calendarOps'
+import { utcTimeZoneId } from './timeZoneNative'
 import { queryIntlCalendar } from './calendarIntl'
-import { NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeYearMonthParseOps, NativeYearMonthRefineOps } from './calendarNative'
-import { refineCalendarSlotString } from '../genericApi/calendarSlot'
+import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
 
 // High-level
@@ -291,7 +289,7 @@ export function parseTimeZoneId(s: string): string {
 }
 
 export function realizeTimeZoneId(calendarId: string): string {
-  return queryTimeZoneImpl(calendarId).id // queryTimeZoneImpl will normalize the id
+  return queryNativeTimeZone(calendarId).id // queryTimeZoneImpl will normalize the id
 }
 
 // Post-processing organized result
@@ -303,7 +301,7 @@ function postProcessZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
-  const timeZoneImpl = queryTimeZoneImpl(organized.timeZone)
+  const timeZoneImpl = queryNativeTimeZone(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
@@ -312,7 +310,7 @@ function postProcessZonedDateTime(
     organized.hasZ,
     offsetDisambig,
     epochDisambig,
-    !(timeZoneImpl instanceof FixedTimeZoneImpl), // only allow fuzzy minute-rounding matching if named-timezone
+    !(timeZoneImpl instanceof FixedTimeZone), // only allow fuzzy minute-rounding matching if named-timezone
       // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
   )
 
