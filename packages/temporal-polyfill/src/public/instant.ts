@@ -17,7 +17,7 @@ import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createEpochGetterMethods, neverValueOf } from './publicMixins'
-import { createSimpleTimeZoneRecord } from './timeZoneRecord'
+import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
 
 export type InstantArg = Instant | string
 
@@ -84,7 +84,7 @@ export class Instant {
   toString(options?: InstantDisplayOptions<TimeZoneSlot>): string {
     return InstantFuncs.toString(
       refineTimeZoneSlot,
-      createSimpleTimeZoneRecord,
+      createSimpleTimeZoneOps,
       getInstantSlots(this),
       options,
     )
@@ -93,7 +93,7 @@ export class Instant {
   toJSON(): string {
     return InstantFuncs.toString(
       refineTimeZoneSlot,
-      createSimpleTimeZoneRecord,
+      createSimpleTimeZoneOps,
       getInstantSlots(this),
     )
   }

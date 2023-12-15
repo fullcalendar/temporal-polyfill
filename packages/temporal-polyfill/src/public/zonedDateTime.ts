@@ -24,7 +24,8 @@ import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
+import { Calendar, CalendarArg } from './calendar'
+import { CalendarProtocol } from './calendarProtocol'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { Instant, createInstant } from './instant'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
@@ -32,11 +33,12 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { TimeZoneArg, TimeZoneProtocol, createTimeZone } from './timeZone'
+import { TimeZoneArg, createTimeZone } from './timeZone'
+import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
-import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecord'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
+import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 
@@ -62,7 +64,7 @@ export class ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.withFields(
         createDateModOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         this as any, // TODO: needs getters
         rejectInvalidBag(mod),
@@ -74,7 +76,7 @@ export class ZonedDateTime {
   withPlainTime(plainTimeArg?: PlainTimeArg): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.withPlainTime(
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         optionalToPlainTimeFields(plainTimeArg) as any, // TODO!!!
       )
@@ -84,7 +86,7 @@ export class ZonedDateTime {
   withPlainDate(plainDateArg: PlainDateArg): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.withPlainDate(
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toPlainDateSlots(plainDateArg),
       )
@@ -113,7 +115,7 @@ export class ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.add(
         createMoveOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -125,7 +127,7 @@ export class ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.subtract(
         createMoveOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -137,7 +139,7 @@ export class ZonedDateTime {
     return createDuration(
       ZonedDateTimeFuncs.until(
         createDiffOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
         prepareOptions(options),
@@ -149,7 +151,7 @@ export class ZonedDateTime {
     return createDuration(
       ZonedDateTimeFuncs.since(
         createDiffOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
         prepareOptions(options),
@@ -160,7 +162,7 @@ export class ZonedDateTime {
   round(options: RoundingOptions | UnitName): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.round(
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
         options,
       )
@@ -170,7 +172,7 @@ export class ZonedDateTime {
   startOfDay(): ZonedDateTime {
     return createZonedDateTime(
       ZonedDateTimeFuncs.startOfDay(
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getZonedDateTimeSlots(this),
       )
     )
@@ -185,7 +187,7 @@ export class ZonedDateTime {
 
   toString(options?: ZonedDateTimeDisplayOptions): string {
     return ZonedDateTimeFuncs.toString(
-      createSimpleTimeZoneRecord,
+      createSimpleTimeZoneOps,
       getZonedDateTimeSlots(this),
       options,
     )
@@ -193,7 +195,7 @@ export class ZonedDateTime {
 
   toJSON(): string {
     return ZonedDateTimeFuncs.toJSON(
-      createSimpleTimeZoneRecord,
+      createSimpleTimeZoneOps,
       getZonedDateTimeSlots(this),
     )
   }
@@ -211,19 +213,19 @@ export class ZonedDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate(
-      ZonedDateTimeFuncs.toPlainDate(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
+      ZonedDateTimeFuncs.toPlainDate(createSimpleTimeZoneOps, getZonedDateTimeSlots(this))
     )
   }
 
   toPlainTime(): PlainTime {
     return createPlainTime(
-      ZonedDateTimeFuncs.toPlainTime(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
+      ZonedDateTimeFuncs.toPlainTime(createSimpleTimeZoneOps, getZonedDateTimeSlots(this))
     )
   }
 
   toPlainDateTime(): PlainDateTime {
     return createPlainDateTime(
-      ZonedDateTimeFuncs.toPlainDateTime(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
+      ZonedDateTimeFuncs.toPlainDateTime(createSimpleTimeZoneOps, getZonedDateTimeSlots(this))
     )
   }
 
@@ -248,7 +250,7 @@ export class ZonedDateTime {
   }
 
   getISOFields(): IsoDateTimeFields & { calendar: CalendarSlot, timeZone: TimeZoneSlot, offset: string } {
-    return ZonedDateTimeFuncs.getISOFields(createSimpleTimeZoneRecord, getZonedDateTimeSlots(this))
+    return ZonedDateTimeFuncs.getISOFields(createSimpleTimeZoneOps, getZonedDateTimeSlots(this))
   }
 
   // not DRY
@@ -274,7 +276,7 @@ export class ZonedDateTime {
 
   get hoursInDay(): number {
     return ZonedDateTimeFuncs.hoursInDay(
-      createTypicalTimeZoneRecord,
+      createTimeZoneOps,
       getZonedDateTimeSlots(this),
     )
   }
@@ -323,8 +325,8 @@ defineGetters(ZonedDateTime.prototype, {
 function slotsToIsoFields(
   slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
 ): IsoDateTimeFields & { offsetNanoseconds: number } {
-  const timeZoneRecord = createSimpleTimeZoneRecord(slots.timeZone)
-  return zonedInternalsToIso(slots, timeZoneRecord)
+  const timeZoneNative = createSimpleTimeZoneOps(slots.timeZone)
+  return zonedInternalsToIso(slots, timeZoneNative)
 }
 
 // Utils
@@ -352,7 +354,7 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
     return ZonedDateTimeFuncs.fromFields(
       createDateRefineOps,
       refineTimeZoneSlot,
-      createTypicalTimeZoneRecord,
+      createTimeZoneOps,
       slots.calendar || getCalendarSlotFromBag(arg as any), // !!!
       arg as any, // !!!
       options,

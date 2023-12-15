@@ -26,7 +26,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot } from './calendarSlot'
-import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecord'
+import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 
@@ -105,7 +105,7 @@ export class PlainTime {
   toZonedDateTime(options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
     return createZonedDateTime(
       PlainTimeFuncs.toZonedDateTime(
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getPlainTimeSlots(this),
         refineTimeZoneSlot(options.timeZone),
         toPlainDateSlots(options.plainDate),
@@ -180,7 +180,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
             isoTimeFieldNamesDesc,
             zonedInternalsToIso(
               slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-              createSimpleTimeZoneRecord((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone)
+              createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone)
             ),
           ),
           branding: PlainTimeBranding,

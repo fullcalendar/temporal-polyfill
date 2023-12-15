@@ -1,16 +1,11 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { isObjectlike } from '../internal/utils'
 import { refineCalendarSlotString } from '../genericApi/calendarSlot'
-import { calendarProtocolMethodNames } from '../genericApi/refineConfig'
-
-// public
 import { getSlots } from './slots'
-import { CalendarArg, CalendarProtocol } from './calendar'
-import { createProtocolChecker } from './publicUtils'
+import { CalendarArg } from './calendar'
+import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
 
 export type CalendarSlot = CalendarProtocol | string
-
-const checkCalendarProtocol = createProtocolChecker(calendarProtocolMethodNames)
 
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectlike(calendarArg)) {

@@ -18,7 +18,7 @@ import { PlainTime, createPlainTime } from './plainTime'
 import { TimeZoneArg } from './timeZone'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createSimpleTimeZoneRecord } from './timeZoneRecord'
+import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -90,12 +90,12 @@ function getCurrentPlainDateTimeSlots(
   timeZoneArg: TimeZoneArg,
 ): PublicDateTimeSlots {
   const zonedSlots = getCurrentZonedDateTimeSlots(calendarArg, timeZoneArg)
-  const timeZoneRecord = createSimpleTimeZoneRecord(zonedSlots.timeZone)
+  const timeZoneOps = createSimpleTimeZoneOps(zonedSlots.timeZone)
 
   return {
     ...pluckProps(
       isoDateTimeFieldNamesDesc,
-      zonedInternalsToIso(zonedSlots, timeZoneRecord),
+      zonedInternalsToIso(zonedSlots, timeZoneOps),
     ),
     calendar: zonedSlots.calendar,
   }

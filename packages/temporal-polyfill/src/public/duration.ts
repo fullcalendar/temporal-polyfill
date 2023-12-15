@@ -17,8 +17,8 @@ import { durationGettersMethods, neverValueOf } from './publicMixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
 import { refinePublicRelativeTo } from './publicOptions'
-import { createTypicalTimeZoneRecord } from './timeZoneRecord'
 import { createDiffOps } from './calendarOpsQuery'
+import { createTimeZoneOps } from './timeZoneOpsQuery'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -58,7 +58,7 @@ export class Duration {
       DurationFuncs.add(
         refinePublicRelativeTo,
         createDiffOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getDurationSlots(this),
         toDurationSlots(otherArg),
         options,
@@ -71,7 +71,7 @@ export class Duration {
       DurationFuncs.subtract(
         refinePublicRelativeTo,
         createDiffOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getDurationSlots(this),
         toDurationSlots(otherArg),
         options,
@@ -92,7 +92,7 @@ export class Duration {
       DurationFuncs.round(
         refinePublicRelativeTo,
         createDiffOps,
-        createTypicalTimeZoneRecord,
+        createTimeZoneOps,
         getDurationSlots(this),
         options,
       )
@@ -103,7 +103,7 @@ export class Duration {
     return DurationFuncs.total(
       refinePublicRelativeTo,
       createDiffOps,
-      createTypicalTimeZoneRecord,
+      createTimeZoneOps,
       getDurationSlots(this),
       options,
     )
@@ -135,7 +135,7 @@ export class Duration {
     return DurationFuncs.compare(
       refinePublicRelativeTo,
       createDiffOps,
-      createTypicalTimeZoneRecord,
+      createTimeZoneOps,
       toDurationSlots(durationArg0),
       toDurationSlots(durationArg1),
       options,

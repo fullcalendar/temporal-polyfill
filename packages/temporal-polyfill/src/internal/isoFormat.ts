@@ -270,13 +270,13 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
 //
 
 function formatTimeZone(
-  timeZoneRecord: IdLike,
+  timeZoneNative: IdLike,
   timeZoneDisplay: TimeZoneDisplay,
 ): string {
   if (timeZoneDisplay !== TimeZoneDisplay.Never) {
     return '[' +
       (timeZoneDisplay === TimeZoneDisplay.Critical ? '!' : '') +
-      getId(timeZoneRecord) +
+      getId(timeZoneNative) +
       ']'
   }
   return ''

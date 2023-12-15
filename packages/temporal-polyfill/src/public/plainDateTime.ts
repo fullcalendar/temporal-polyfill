@@ -15,7 +15,8 @@ import { createViaSlots, getSlots, getSpecificSlots, setSlots, PublicDateTimeSlo
 import { PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
+import { Calendar, CalendarArg } from './calendar'
+import { CalendarProtocol } from './calendarProtocol'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
@@ -25,9 +26,9 @@ import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createTimeGetterMethods, neverValueOf } from './publicMixins'
 import { optionalToPlainTimeFields } from './publicUtils'
-import { createSimpleTimeZoneRecord, createTypicalTimeZoneRecord } from './timeZoneRecord'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { dateTimeCalendarGetters } from './publicMixins'
+import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
@@ -171,7 +172,7 @@ export class PlainDateTime {
   ): ZonedDateTime {
     return createZonedDateTime(
       PlainDateTimeFuncs.toZonedDateTime(
-       createTypicalTimeZoneRecord,
+       createTimeZoneOps,
        getPlainDateTimeSlots(this),
        refineTimeZoneSlot(timeZoneArg),
        options,
@@ -289,7 +290,7 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
             isoDateTimeFieldNamesDesc,
             zonedInternalsToIso(
               slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-              createSimpleTimeZoneRecord((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone),
+              createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone),
             ),
           ),
           calendar: (slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).calendar,

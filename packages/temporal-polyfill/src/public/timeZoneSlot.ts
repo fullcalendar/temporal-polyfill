@@ -1,17 +1,10 @@
 import { isObjectlike } from '../internal/utils'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
-
-// public
 import { getSlots } from './slots'
-import { createProtocolChecker } from './publicUtils'
-import { TimeZoneArg, TimeZoneProtocol } from './timeZone'
+import { TimeZoneArg } from './timeZone'
+import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
 
 export type TimeZoneSlot = TimeZoneProtocol | string
-
-const checkTimeZoneProtocol = createProtocolChecker([
-  'getPossibleInstantsFor',
-  'getOffsetNanosecondsFor',
-])
 
 export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
   if (isObjectlike(arg)) {

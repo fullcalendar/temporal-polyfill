@@ -20,28 +20,8 @@ import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
-import { createTypicalTimeZoneRecord } from './timeZoneRecord'
-
-// TimeZone Protocol
-// -------------------------------------------------------------------------------------------------
-// TODO: move into separate file (along with checkTimeZoneProtocol)
-
-interface TimeZoneProtocolMethods {
-  getOffsetNanosecondsFor(instant: InstantArg): number
-  getOffsetStringFor?(instant: InstantArg): string
-  getPlainDateTimeFor?(instant: InstantArg, calendarArg?: CalendarArg): PlainDateTime
-  getInstantFor?(dateTime: PlainDateTimeArg, options?: EpochDisambigOptions): Instant
-  getNextTransition?(startingPoint: InstantArg): Instant | null
-  getPreviousTransition?(startingPoint: InstantArg): Instant | null
-  getPossibleInstantsFor(dateTime: PlainDateTimeArg): Instant[]
-  toString?(): string
-  toJSON?(): string
-  equals?(otherArg: TimeZoneArg): boolean
-}
-
-export interface TimeZoneProtocol extends TimeZoneProtocolMethods {
-  id: string
-}
+import { createTimeZoneOps } from './timeZoneOpsQuery'
+import { TimeZoneProtocol } from './timeZoneProtocol'
 
 // TimeZone Class
 // -------------------------------------------------------------------------------------------------
@@ -105,7 +85,7 @@ export class TimeZone implements TimeZoneProtocol {
     return createInstant({
       branding: InstantBranding,
       epochNanoseconds: getSingleInstantFor(
-        createTypicalTimeZoneRecord(this), // use protocol so other methods accessed
+        createTimeZoneOps(this), // use protocol so other methods accessed
         toPlainDateTimeSlots(plainDateTimeArg),
         refineEpochDisambigOptions(options),
       )

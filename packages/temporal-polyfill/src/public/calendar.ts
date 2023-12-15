@@ -19,41 +19,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { NativeStandardOps } from '../internal/calendarNative'
 import { calendarMethods } from './publicMixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
-
-// Calendar Protocol
-// -------------------------------------------------------------------------------------------------
-// TODO: move into separate file (along with checkCalendarProtocol)
-
-interface CalendarProtocolMethods {
-  year(dateArg: PlainYearMonth | PlainDateArg): number
-  month(dateArg: PlainYearMonth | PlainDateArg): number
-  monthCode(dateArg: PlainYearMonth | PlainMonthDay | PlainDateArg): string
-  day(dateArg: PlainMonthDay | PlainDateArg): number
-  era(dateArg: PlainYearMonth | PlainDateArg): string | undefined
-  eraYear(dateArg: PlainYearMonth | PlainDateArg): number | undefined
-  dayOfWeek(dateArg: PlainDateArg): number
-  dayOfYear(dateArg: PlainDateArg): number
-  weekOfYear(dateArg: PlainDateArg): number
-  yearOfWeek(dateArg: PlainDateArg): number
-  daysInWeek(dateArg: PlainDateArg): number
-  daysInMonth(dateArg: PlainYearMonth | PlainDateArg): number
-  daysInYear(dateArg: PlainYearMonth | PlainDateArg): number
-  monthsInYear(dateArg: PlainYearMonth | PlainDateArg): number
-  inLeapYear(dateArg: PlainYearMonth | PlainDateArg): boolean
-  dateFromFields(fields: DateBagStrict, options?: OverflowOptions): PlainDate
-  yearMonthFromFields(fields: YearMonthBagStrict, options?: OverflowOptions): PlainYearMonth
-  monthDayFromFields(fields: MonthDayBagStrict, options?: OverflowOptions): PlainMonthDay
-  dateAdd(dateArg: PlainDateArg, duration: DurationArg, options?: OverflowOptions): PlainDate
-  dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options?: LargestUnitOptions): Duration
-  fields(fieldNames: Iterable<string>): Iterable<string>
-  mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
-  toString?(): string;
-  toJSON?(): string;
-}
-
-export interface CalendarProtocol extends CalendarProtocolMethods {
-  id: string
-}
+import { CalendarProtocol } from './calendarProtocol'
 
 // Calendar Class
 // -------------------------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import { IsoDateFields } from '../internal/isoFields'
 import { Overflow } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Callable, mapProps } from '../internal/utils'
-import { CalendarProtocol } from './calendar'
+import { CalendarProtocol } from './calendarProtocol'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
@@ -172,17 +172,17 @@ export const yearMonthDiffAdapters = { ...diffAdapters, day: dayAdapter }
 // Compound Adapter Instantiation
 // -------------------------------------------------------------------------------------------------
 
-export type CompoundAdapterMethods<KV> = {
+export type AdapterCompoundOps<KV> = {
   [K in keyof KV]:
     KV[K] extends (c: CalendarProtocol, m: Callable, ...args: infer Args) => infer Return
       ? (...args: Args) => Return
       : never
 }
 
-export function createCompoundAdapterOps<KV extends {}>(
+export function createAdapterCompoundOps<KV extends {}>(
   calendarProtocol: CalendarProtocol,
   adapterFuncs: KV,
-): CompoundAdapterMethods<KV> {
+): AdapterCompoundOps<KV> {
   const keys = Object.keys(adapterFuncs).sort()
   const boundFuncs = {} as any
 

@@ -137,9 +137,9 @@ function isoDateFieldsToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
-  const timeZoneRecord = queryNativeTimeZone(resolvedOptions.timeZone)
+  const timeZoneNative = queryNativeTimeZone(resolvedOptions.timeZone)
 
-  return getSingleInstantFor(timeZoneRecord, {
+  return getSingleInstantFor(timeZoneNative, {
     ...isoTimeFieldDefaults,
     isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day
     ...isoFields,
@@ -150,9 +150,9 @@ function isoTimeFieldsToEpochNano(
   internals: IsoTimeFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): DayTimeNano {
-  const timeZoneRecord = queryNativeTimeZone(resolvedOptions.timeZone)
+  const timeZoneNative = queryNativeTimeZone(resolvedOptions.timeZone)
 
-  return getSingleInstantFor(timeZoneRecord, {
+  return getSingleInstantFor(timeZoneNative, {
     isoYear: isoEpochOriginYear,
     isoMonth: 1,
     isoDay: 1,

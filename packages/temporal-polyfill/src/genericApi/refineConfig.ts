@@ -56,19 +56,6 @@ export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNamesAs
 
 // -------------------------------------------------------------------------------------------------
 
-export const calendarProtocolMethodNames: string[] = [
-  ...Object.keys(dateRefiners).slice(0, 2), // remove era/eraYear
-  'dateAdd',
-  'dateUntil',
-  'dateFromFields',
-  'yearMonthFromFields',
-  'monthDayFromFields',
-  'fields',
-  'mergeFields',
-]
-
-// -------------------------------------------------------------------------------------------------
-
 export const builtinRefiners = {
   ...dateFieldRefiners,
   ...timeFieldRefiners,
