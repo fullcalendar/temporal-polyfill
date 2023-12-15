@@ -11,6 +11,7 @@ import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayB
 import { PlainDateBranding, PlainMonthDayBranding } from './branding'
 import { PlainDateSlots, PlainMonthDaySlots } from './genericTypes'
 import { DateModOps, MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
+import { NativeMonthDayParseOps } from '../internal/calendarNative'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -37,9 +38,12 @@ export function create<CA, C>(
   }
 }
 
-export function fromString(s: string): PlainMonthDaySlots<string> {
+export function fromString(
+  getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
+  s: string,
+): PlainMonthDaySlots<string> {
   return {
-    ...parsePlainMonthDay(ensureString(s)),
+    ...parsePlainMonthDay(getCalendarOps, ensureString(s)),
     branding: PlainMonthDayBranding,
   }
 }

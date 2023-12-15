@@ -18,6 +18,7 @@ import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
 import { neverValueOf } from './publicMixins'
 import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from './calendarOpsQuery'
 import { monthDayGetters } from './publicMixins'
+import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
@@ -143,7 +144,7 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
     )
   }
 
-  const res = PlainMonthDayFuncs.fromString(arg)
+  const res = PlainMonthDayFuncs.fromString(createNativeStandardOps, arg)
   refineOverflowOptions(options) // parse unused options
   return res
 }

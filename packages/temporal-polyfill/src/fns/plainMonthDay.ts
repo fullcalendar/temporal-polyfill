@@ -5,7 +5,7 @@ import { DateTimeDisplayOptions, OverflowOptions } from '../genericApi/options'
 import { PlainDateSlots, PlainMonthDaySlots } from '../genericApi/genericTypes'
 import { extractCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
-import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
+import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { computeMonthDayFields } from '../internal/calendarNative'
 
 export function create(
@@ -24,7 +24,7 @@ export function create(
 }
 
 export function fromString(s: string): PlainMonthDaySlots<string> {
-  return PlainMonthDayFuncs.fromString(s) // just a passthrough
+  return PlainMonthDayFuncs.fromString(createNativeMonthDayParseOps, s)
 }
 
 export function fromFields(

@@ -309,7 +309,7 @@ export function refinePlainYearMonthBag(
   calendarOps: YearMonthRefineOps,
   bag: YearMonthBag,
   options: OverflowOptions | undefined,
-  requireFields: string[] = [], // when called from Calendar
+  requireFields?: string[],
 ): IsoDateFields {
   const fields = refineCalendarFields(
     calendarOps,

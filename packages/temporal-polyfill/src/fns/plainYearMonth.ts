@@ -6,7 +6,7 @@ import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from '../genericAp
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlot'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import * as Utils from './utils'
-import { createNativeDateModOps, createNativeDiffOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthModOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
+import { createNativeDateModOps, createNativePartOps, createNativeYearMonthDiffOps, createNativeYearMonthModOps, createNativeYearMonthMoveOps, createNativeYearMonthParseOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { computeYearMonthFields } from '../internal/calendarNative'
 
 export function create(
@@ -19,7 +19,7 @@ export function create(
 }
 
 export function fromString(s: string): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.fromString(s) // NOTE: just forwards
+  return PlainYearMonthFuncs.fromString(createNativeYearMonthParseOps, s)
 }
 
 export function fromFields(
@@ -67,7 +67,7 @@ export function add(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.add(
-    createNativeMoveOps,
+    createNativeYearMonthMoveOps,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -80,7 +80,7 @@ export function subtract(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.subtract(
-    createNativeMoveOps,
+    createNativeYearMonthMoveOps,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -93,7 +93,7 @@ export function until(
   options?: DiffOptions,
 ): DurationSlots {
   return PlainYearMonthFuncs.until(
-    createNativeDiffOps,
+    createNativeYearMonthDiffOps,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
     options,
@@ -106,7 +106,7 @@ export function since(
   options?: DiffOptions,
 ): DurationSlots {
   return PlainYearMonthFuncs.since(
-    createNativeDiffOps,
+    createNativeYearMonthDiffOps,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
     options,

@@ -1,5 +1,5 @@
 import { nativeDateFromFields, nativeMonthDayFromFields, nativeYearMonthFromFields, nativeFieldsMethod, nativeMergeFields } from './bag'
-import { DateRefineOps, DiffOps, MergeFieldsOp, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from './calendarOps'
+import { DateRefineOps, DayOp, DiffOps, MergeFieldsOp, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from './calendarOps'
 import { nativeDateUntil } from './diff'
 import { IsoDateFields } from './isoFields'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from './isoMath'
@@ -37,37 +37,6 @@ export type IsoFieldsOp = (year: number, month: number, day: number) => IsoDateF
 export type MonthAddOp = (year: number, month: number, monthDelta: number) => YearMonthParts
 export type GetEraOrigins = () => Record<string, number> | undefined
 export type GetLeapMonthMeta = () => number | undefined
-
-// Math
-// -------------------------------------------------------------------------------------------------
-
-interface NativeMathOps {
-  dateParts: DatePartsOp
-  monthCodeParts: MonthCodePartsOp
-  monthsInYearPart: MonthsInYearPartOp
-  daysInMonthParts: DaysInMonthPartsOp
-  monthAdd: MonthAddOp
-}
-
-export type NativeMoveOps = MoveOps & NativeMathOps & {
-  leapMonth: LeapMonthOp
-  epochMilli: EpochMilliOp
-}
-
-export type NativeDiffOps = DiffOps & NativeMathOps & {
-  monthsInYearSpan: MonthsInYearSpanOp
-}
-
-// Base
-
-export const nativeMoveBase: MoveOps = {
-  dateAdd: nativeDateAdd,
-}
-
-export const nativeDiffBase: DiffOps = {
-  dateAdd: nativeDateAdd,
-  dateUntil: nativeDateUntil,
-}
 
 // Refine
 // -------------------------------------------------------------------------------------------------
@@ -115,6 +84,40 @@ export const nativeMonthDayRefineBase: MonthDayRefineOps = {
 export type NativeYearMonthModOps = NativeYearMonthRefineOps & { mergeFields: MergeFieldsOp }
 export type NativeDateModOps = NativeDateRefineOps & { mergeFields: MergeFieldsOp }
 export type NativeMonthDayModOps = NativeMonthDayRefineOps & { mergeFields: MergeFieldsOp }
+
+// Math
+// -------------------------------------------------------------------------------------------------
+
+interface NativeMathOps {
+  dateParts: DatePartsOp
+  monthCodeParts: MonthCodePartsOp
+  monthsInYearPart: MonthsInYearPartOp
+  daysInMonthParts: DaysInMonthPartsOp
+  monthAdd: MonthAddOp
+}
+
+export type NativeMoveOps = MoveOps & NativeMathOps & {
+  leapMonth: LeapMonthOp
+  epochMilli: EpochMilliOp
+}
+
+export type NativeDiffOps = DiffOps & NativeMathOps & {
+  monthsInYearSpan: MonthsInYearSpanOp
+}
+
+export type NativeYearMonthMoveOps = NativeMoveOps & { day: DayOp }
+export type NativeYearMonthDiffOps = NativeDiffOps & { day: DayOp }
+
+// Base
+
+export const nativeMoveBase: MoveOps = {
+  dateAdd: nativeDateAdd,
+}
+
+export const nativeDiffBase: DiffOps = {
+  dateAdd: nativeDateAdd,
+  dateUntil: nativeDateUntil,
+}
 
 // Parts & Stats
 // -------------------------------------------------------------------------------------------------
@@ -169,15 +172,31 @@ export interface NativePartOps {
   monthCodeParts: MonthCodePartsOp
 }
 
+// String Parsing
+// -------------------------------------------------------------------------------------------------
+
+export interface NativeYearMonthParseOps {
+  day: DayOp
+}
+
+export interface NativeMonthDayParseOps {
+  dateParts: DatePartsOp
+  monthCodeParts: MonthCodePartsOp
+  yearMonthForMonthDay: YearMonthForMonthDayOp
+  isoFields: IsoFieldsOp
+}
+
 // Standard
 // -------------------------------------------------------------------------------------------------
 
 export type NativeStandardOps =
-  NativeMoveOps &
-  NativeDiffOps &
   NativeYearMonthRefineOps &
   NativeDateRefineOps &
   NativeMonthDayRefineOps &
+  NativeMoveOps &
+  NativeDiffOps &
+  NativeYearMonthModOps &
+  NativeYearMonthDiffOps &
   NativeInLeapYearOps &
   NativeMonthsInYearOps &
   NativeDaysInMonthOps &
@@ -187,6 +206,8 @@ export type NativeStandardOps =
   NativeEraYearOps &
   NativeMonthCodeOps &
   NativePartOps &
+  NativeYearMonthParseOps &
+  NativeMonthDayParseOps &
   {
     mergeFields: MergeFieldsOp // for 'mod' ops
 

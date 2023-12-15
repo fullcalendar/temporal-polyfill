@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { ensureString } from '../internal/cast'
 import { IdLike, isIdLikeEqual, getId } from '../internal/idLike'
-import { parseCalendarId } from '../internal/isoParse'
+import { parseCalendarId, realizeCalendarId } from '../internal/isoParse'
 
 export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   if (!isIdLikeEqual(a, b)) {
@@ -31,7 +31,7 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
 }
 
 export function refineCalendarSlotString(calendarArg: string): string {
-  return parseCalendarId(ensureString(calendarArg)) // ensures its real calendar via queryCalendarImpl
+  return realizeCalendarId(parseCalendarId(ensureString(calendarArg)))
 }
 
 // bag

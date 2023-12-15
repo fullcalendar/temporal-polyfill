@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { YearMonthBag, yearMonthGetterNames } from '../internal/calendarFields'
+import { YearMonthBag } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
 import { LocalesArg, prepPlainYearMonthFormat } from '../internal/intlFormat'
@@ -17,8 +17,9 @@ import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './cale
 import { Calendar, CalendarArg, CalendarProtocol } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { neverValueOf } from './publicMixins'
-import { createDateModOps, createDiffOps, createMoveOps, createYearMonthModOps, createYearMonthRefineOps } from './calendarOpsQuery'
+import { createDateModOps, createYearMonthDiffOps, createYearMonthModOps, createYearMonthMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { yearMonthGetters } from './publicMixins'
+import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
@@ -53,7 +54,7 @@ export class PlainYearMonth {
   ): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.add(
-        createMoveOps,
+        createYearMonthMoveOps,
         getPlainYearMonthSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -67,7 +68,7 @@ export class PlainYearMonth {
   ): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.subtract(
-        createMoveOps,
+        createYearMonthMoveOps,
         getPlainYearMonthSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -78,7 +79,7 @@ export class PlainYearMonth {
   until(otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
     return createDuration(
       PlainYearMonthFuncs.until(
-        createDiffOps,
+        createYearMonthDiffOps,
         getPlainYearMonthSlots(this),
         toPlainYearMonthSlots(otherArg),
         options
@@ -89,7 +90,7 @@ export class PlainYearMonth {
   since(otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
     return createDuration(
       PlainYearMonthFuncs.since(
-        createDiffOps,
+        createYearMonthDiffOps,
         getPlainYearMonthSlots(this),
         toPlainYearMonthSlots(otherArg),
         options
@@ -199,7 +200,7 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
     )
   }
 
-  const res = PlainYearMonthFuncs.fromString(arg)
+  const res = PlainYearMonthFuncs.fromString(createNativeStandardOps, arg)
   refineOverflowOptions(options) // parse unused options
   return res
 }

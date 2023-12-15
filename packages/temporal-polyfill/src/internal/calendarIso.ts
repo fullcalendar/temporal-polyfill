@@ -1,4 +1,4 @@
-import { NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDiffOps, NativeMonthDayModOps, NativeMonthDayRefineOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthModOps, NativeYearMonthRefineOps, LeapMonthOp, DateParts, GetEraOrigins, GetLeapMonthMeta, MonthCodeParts, YearMonthParts, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeYearMonthRefineBase, EraParts, nativeStandardBase, NativeDaysInMonthOps, NativeInLeapYearOps, NativeDaysInYearOps, NativeMonthsInYearOps, computeInLeapYear, computeMonthsInYear, computeDaysInMonth, computeDaysInYear } from './calendarNative'
+import { NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDiffOps, NativeMonthDayModOps, NativeMonthDayRefineOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthModOps, NativeYearMonthRefineOps, LeapMonthOp, DateParts, GetEraOrigins, GetLeapMonthMeta, MonthCodeParts, YearMonthParts, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeYearMonthRefineBase, EraParts, nativeStandardBase, NativeDaysInMonthOps, NativeInLeapYearOps, NativeDaysInYearOps, NativeMonthsInYearOps, computeInLeapYear, computeMonthsInYear, computeDaysInMonth, computeDaysInYear, NativeYearMonthMoveOps, NativeYearMonthDiffOps, NativeYearMonthParseOps, NativeMonthDayParseOps } from './calendarNative'
 import { computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoInLeapYear, computeIsoMonthsInYear, isoArgsToEpochMilli, isoEpochFirstLeapYear } from './isoMath'
 import { IsoDateFields } from './isoFields'
 import { computeIsoMonthsInYearSpan } from './diff'
@@ -6,37 +6,13 @@ import { isoMonthAdd } from './move'
 import { noop } from './utils'
 import { nativeMergeFields } from './bag'
 
-// Math
-// -------------------------------------------------------------------------------------------------
-
-const isoMathOps = {
-  dateParts: computeIsoDateParts,
-  monthCodeParts: computeIsoMonthCodeParts,
-  monthsInYearPart: computeIsoMonthsInYear,
-  daysInMonthParts: computeIsoDaysInMonth,
-  monthAdd: isoMonthAdd,
-}
-
-export const isoMoveOps: NativeMoveOps = {
-  ...nativeMoveBase,
-  ...isoMathOps,
-  leapMonth: noop as LeapMonthOp,
-  epochMilli: computeIsoEpochMilli,
-}
-
-export const isoDiffOps: NativeDiffOps = {
-  ...nativeDiffBase,
-  ...isoMathOps,
-  monthsInYearSpan: computeIsoMonthsInYearSpan,
-}
-
 // Refine
 // -------------------------------------------------------------------------------------------------
 
 const isoYearMonthRefineDeps = {
   leapMonth: noop as LeapMonthOp,
   monthsInYearPart: computeIsoMonthsInYear,
-  isoFields: isoFields,
+  isoFields: computeIsoFieldsFromParts,
   getEraOrigins: noop as GetEraOrigins,
   getLeapMonthMeta: noop as GetLeapMonthMeta,
 }
@@ -84,33 +60,41 @@ export const isoMonthDayModOps: NativeMonthDayModOps = {
   mergeFields: nativeMergeFields,
 }
 
-// Standard (Native-only)
+// Math
 // -------------------------------------------------------------------------------------------------
 
-export const isoStandardOps: NativeStandardOps = {
-  ...nativeStandardBase,
+const isoMathOps = {
   dateParts: computeIsoDateParts,
-  eraParts: computeIsoEraParts,
   monthCodeParts: computeIsoMonthCodeParts,
-  yearMonthForMonthDay: computeIsoYearMonthForMonthDay,
-  inLeapYearPart: computeIsoInLeapYear,
-  leapMonth: noop as LeapMonthOp,
   monthsInYearPart: computeIsoMonthsInYear,
-  monthsInYearSpan: computeIsoMonthsInYearSpan,
   daysInMonthParts: computeIsoDaysInMonth,
-  daysInYearPart: computeIsoDaysInYear,
-  dayOfYear: computeIsoDayOfYear,
-  isoFields: isoFields,
-  epochMilli: computeIsoEpochMilli,
   monthAdd: isoMonthAdd,
-  getEraOrigins: noop as GetEraOrigins,
-  getLeapMonthMeta: noop as GetLeapMonthMeta,
-  year: computeIsoYear,
-  month: computeIsoMonth,
+}
+
+export const isoMoveOps: NativeMoveOps = {
+  ...nativeMoveBase,
+  ...isoMathOps,
+  leapMonth: noop as LeapMonthOp,
+  epochMilli: computeIsoEpochMilli,
+}
+
+export const isoDiffOps: NativeDiffOps = {
+  ...nativeDiffBase,
+  ...isoMathOps,
+  monthsInYearSpan: computeIsoMonthsInYearSpan,
+}
+
+export const isoYearMonthMoveOps: NativeYearMonthMoveOps = {
+  ...isoMoveOps,
   day: computeIsoDay,
 }
 
-// Parts & Stats (Native-only)
+export const isoYearMonthDiffOps: NativeYearMonthDiffOps = {
+  ...isoDiffOps,
+  day: computeIsoDay,
+}
+
+// Parts & Stats
 // -------------------------------------------------------------------------------------------------
 
 export const isoPartOps: NativePartOps = {
@@ -147,6 +131,46 @@ export const isoDayOfYearOps: NativeDayOfYearOps = {
   dayOfYear: computeIsoDayOfYear,
 }
 
+// String Parsing
+// -------------------------------------------------------------------------------------------------
+
+export const isoYearMonthParseOps: NativeYearMonthParseOps = {
+  day: computeIsoDay,
+}
+
+export const isoMonthDayParseOps: NativeMonthDayParseOps = {
+  dateParts: computeIsoDateParts,
+  monthCodeParts: computeIsoMonthCodeParts,
+  yearMonthForMonthDay: computeIsoYearMonthForMonthDay,
+  isoFields: computeIsoFieldsFromParts,
+}
+
+// Standard
+// -------------------------------------------------------------------------------------------------
+
+export const isoStandardOps: NativeStandardOps = {
+  ...nativeStandardBase,
+  dateParts: computeIsoDateParts,
+  eraParts: computeIsoEraParts,
+  monthCodeParts: computeIsoMonthCodeParts,
+  yearMonthForMonthDay: computeIsoYearMonthForMonthDay,
+  inLeapYearPart: computeIsoInLeapYear,
+  leapMonth: noop as LeapMonthOp,
+  monthsInYearPart: computeIsoMonthsInYear,
+  monthsInYearSpan: computeIsoMonthsInYearSpan,
+  daysInMonthParts: computeIsoDaysInMonth,
+  daysInYearPart: computeIsoDaysInYear,
+  dayOfYear: computeIsoDayOfYear,
+  isoFields: computeIsoFieldsFromParts,
+  epochMilli: computeIsoEpochMilli,
+  monthAdd: isoMonthAdd,
+  getEraOrigins: noop as GetEraOrigins,
+  getLeapMonthMeta: noop as GetLeapMonthMeta,
+  year: computeIsoYear,
+  month: computeIsoMonth,
+  day: computeIsoDay,
+}
+
 // -------------------------------------------------------------------------------------------------
 
 function computeIsoYear(isoFields: IsoDateFields): number {
@@ -177,7 +201,7 @@ export function computeIsoYearMonthForMonthDay(monthCodeNumber: number): YearMon
   return [isoEpochFirstLeapYear, monthCodeNumber]
 }
 
-function isoFields(year: number, month: number, day: number): IsoDateFields {
+function computeIsoFieldsFromParts(year: number, month: number, day: number): IsoDateFields {
   return { isoYear: year, isoMonth: month, isoDay: day }
 }
 

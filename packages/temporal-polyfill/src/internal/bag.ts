@@ -7,7 +7,9 @@ import { checkIsoDateInBounds, checkIsoYearMonthInBounds, isoEpochFirstLeapYear 
 import { Overflow } from './options'
 import { clampEntity } from './utils'
 
-// TODO: merge this file with convert.ts
+// Would like to merge this file with convert.ts
+// but convert.ts deals with option parsing. It needs to because it must ensure the bags
+// are parsed BEFORE the options are parsed
 
 export function nativeDateFromFields(
   this: NativeDateRefineDeps,

@@ -53,51 +53,25 @@ export const dateRefiners = {
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
 
-function dateAddAdapter(
+function fieldsAdapter(
   calendarProtocol: CalendarProtocol,
-  dateAdd: CalendarProtocol['dateAdd'],
-  isoFields: IsoDateFields,
-  durationFields: DurationFields,
-  overflow: Overflow,
-) {
-  return getPlainDateSlots(
-    dateAdd.call(
-      calendarProtocol,
-      createPlainDate({
-        ...isoFields,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding, // go at to override what isoDateFields might provide!
-      }),
-      createDuration({
-        ...(durationFields as DurationFieldsWithSign), // !!!
-        branding: DurationBranding,
-      }),
-      Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
-    )
-  )
+  fieldsMethod: CalendarProtocol['fields'],
+  fieldNames: Iterable<string>,
+): string[] {
+  return [...fieldsMethod.call(calendarProtocol, fieldNames)]
 }
 
-function dateUntilAdapter(
+function mergeFieldsAdapter(
   calendarProtocol: CalendarProtocol,
-  dateUntil: CalendarProtocol['dateUntil'],
-  isoFields0: IsoDateFields,
-  isoFields1: IsoDateFields,
-  largestUnit: Unit,
+  mergeFields: CalendarProtocol['mergeFields'],
+  fields: any,
+  additionalFields: any,
 ) {
-  return getDurationSlots(
-    dateUntil.call(
+  return ensureObjectlike(
+    mergeFields.call(
       calendarProtocol,
-      createPlainDate({
-        ...isoFields0,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding,
-      }),
-      createPlainDate({
-        ...isoFields1,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding,
-      }),
-      Object.assign(Object.create(null), { largestUnit: unitNamesAsc[largestUnit] })
+      Object.assign(Object.create(null), fields),
+      Object.assign(Object.create(null), additionalFields),
     ),
   )
 }
@@ -147,34 +121,74 @@ function monthDayFromFieldsAdapter(
   )
 }
 
-function fieldsAdapter(
+function dateAddAdapter(
   calendarProtocol: CalendarProtocol,
-  fieldsMethod: CalendarProtocol['fields'],
-  fieldNames: Iterable<string>,
-): string[] {
-  return [...fieldsMethod.call(calendarProtocol, fieldNames)]
+  dateAdd: CalendarProtocol['dateAdd'],
+  isoFields: IsoDateFields,
+  durationFields: DurationFields,
+  overflow: Overflow,
+) {
+  return getPlainDateSlots(
+    dateAdd.call(
+      calendarProtocol,
+      createPlainDate({
+        ...isoFields,
+        calendar: calendarProtocol,
+        branding: PlainDateBranding, // go at to override what isoDateFields might provide!
+      }),
+      createDuration({
+        ...(durationFields as DurationFieldsWithSign), // !!!
+        branding: DurationBranding,
+      }),
+      Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
+    )
+  )
 }
 
-function mergeFieldsAdapter(
+function dateUntilAdapter(
   calendarProtocol: CalendarProtocol,
-  mergeFields: CalendarProtocol['mergeFields'],
-  fields: any,
-  additionalFields: any,
+  dateUntil: CalendarProtocol['dateUntil'],
+  isoFields0: IsoDateFields,
+  isoFields1: IsoDateFields,
+  largestUnit: Unit,
 ) {
-  return ensureObjectlike(
-    mergeFields.call(
+  return getDurationSlots(
+    dateUntil.call(
       calendarProtocol,
-      Object.assign(Object.create(null), fields),
-      Object.assign(Object.create(null), additionalFields),
+      createPlainDate({
+        ...isoFields0,
+        calendar: calendarProtocol,
+        branding: PlainDateBranding,
+      }),
+      createPlainDate({
+        ...isoFields1,
+        calendar: calendarProtocol,
+        branding: PlainDateBranding,
+      }),
+      Object.assign(Object.create(null), { largestUnit: unitNamesAsc[largestUnit] })
     ),
+  )
+}
+
+function dayAdapter(
+  calendarProtocol: CalendarProtocol,
+  dayMethod: CalendarProtocol['day'],
+  isoFields: IsoDateFields,
+): number {
+  return ensurePositiveInteger(
+    dayMethod.call(
+      calendarProtocol,
+      createPlainDate({
+        ...isoFields,
+        calendar: calendarProtocol,
+        branding: PlainDateBranding,
+      })
+    )
   )
 }
 
 // Compound Adapter Sets
 // -------------------------------------------------------------------------------------------------
-
-export const moveAdapters = { dateAdd: dateAddAdapter }
-export const diffAdapters = { ...moveAdapters, dateUntil: dateUntilAdapter }
 
 const refineAdapters = { fields: fieldsAdapter }
 export const dateRefineAdapters = { dateFromFields: dateFromFieldsAdapter, ...refineAdapters }
@@ -186,10 +200,15 @@ export const dateModAdapters = { ...dateRefineAdapters, ...modAdapters }
 export const yearMonthModAdapters = { ...yearMonthRefineAdapters, ...modAdapters }
 export const monthDayModAdapters = { ...monthDayRefineAdapters, ...modAdapters }
 
+export const moveAdapters = { dateAdd: dateAddAdapter }
+export const diffAdapters = { ...moveAdapters, dateUntil: dateUntilAdapter }
+export const yearMonthMoveAdapters = { ...moveAdapters, day: dayAdapter }
+export const yearMonthDiffAdapters = { ...diffAdapters, day: dayAdapter }
+
 // Compound Adapter Instantiation
 // -------------------------------------------------------------------------------------------------
 
-type ComplexAdapterMethods<KV> = {
+export type CompoundAdapterMethods<KV> = {
   [K in keyof KV]:
     KV[K] extends (c: CalendarProtocol, m: Callable, ...args: infer Args) => infer Return
       ? (...args: Args) => Return
@@ -199,7 +218,7 @@ type ComplexAdapterMethods<KV> = {
 export function createCompoundAdapterOps<KV extends {}>(
   calendarProtocol: CalendarProtocol,
   adapterFuncs: KV,
-): ComplexAdapterMethods<KV> {
+): CompoundAdapterMethods<KV> {
   const keys = Object.keys(adapterFuncs).sort()
   const boundFuncs = {} as any
 
@@ -222,6 +241,10 @@ interface AdapterSimpleState {
   calendarProtocol: CalendarProtocol
 }
 
+export type AdapterSimpleOps = {
+  [K in keyof typeof dateRefiners]: (isoFields: IsoDateFields) => any
+}
+
 const adapterSimpleOps = mapProps(
   (refiner, methodName) => {
     return function(this: AdapterSimpleState, isoFields: IsoDateFields) {
@@ -238,9 +261,11 @@ const adapterSimpleOps = mapProps(
     }
   },
   dateRefiners as Record<string, Callable>,
-)
+) as AdapterSimpleOps
 
-export function createAdapterSimpleOps(calendarProtocol: CalendarProtocol) {
+export function createAdapterSimpleOps(
+  calendarProtocol: CalendarProtocol
+): AdapterSimpleOps {
   return Object.assign(
     Object.create(adapterSimpleOps),
     { calendarProtocol } as AdapterSimpleState,

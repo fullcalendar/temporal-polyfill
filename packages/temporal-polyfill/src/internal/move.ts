@@ -18,6 +18,7 @@ import {
   isoMonthsInYear,
   isoTimeFieldsToNano,
   isoToEpochMilli,
+  moveByIsoDays,
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { Overflow } from './options'
@@ -28,7 +29,7 @@ import { isoCalendarId } from './calendarConfig'
 import { TimeZoneGetOffsetNanosecondsForFunc, TimeZoneGetPossibleInstantsForFunc } from './timeZoneRecord'
 import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
-import { MoveOps } from './calendarOps'
+import { DateAddOp, DayOp, MoveOps } from './calendarOps'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
@@ -137,6 +138,13 @@ export function moveDateEasy(
   }
 
   return isoDateFields
+}
+
+export function moveToMonthStart(
+  calendarOps: { day: DayOp },
+  isoFields: IsoDateFields,
+): IsoDateFields {
+  return moveByIsoDays(isoFields, 1 - calendarOps.day(isoFields))
 }
 
 export function nativeDateAdd(

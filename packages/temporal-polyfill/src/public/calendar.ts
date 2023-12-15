@@ -17,8 +17,8 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { NativeStandardOps } from '../internal/calendarNative'
-import { createSimpleOps } from './calendarOpsQuery'
 import { calendarMethods } from './publicMixins'
+import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 
 // Calendar Protocol
 // -------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ export class Calendar implements CalendarProtocol {
     setSlots(this, {
       branding: CalendarBranding,
       id: refineCalendarSlotString(id), // TODO: wasteful if we query the impl anyway
-      ops: createSimpleOps(id),
+      ops: createNativeStandardOps(id),
     } as CalendarClassSlots)
   }
 

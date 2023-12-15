@@ -1,12 +1,13 @@
 import { nativeMergeFields } from './bag'
 import { eraOriginsByCalendarId, eraRemaps, japaneseCalendarId, leapMonthMetas } from './calendarConfig'
 import { computeGregoryEraParts } from './calendarGregory'
-import { NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDiffOps, NativeMonthDayRefineOps, NativeMonthDayModOps, NativeMoveOps, NativePartOps, NativeYearMonthModOps, NativeYearMonthRefineOps, nativeDiffBase, nativeMoveBase, NativeStandardOps, DateParts, MonthCodeParts, EraParts, YearMonthParts, nativeYearMonthRefineBase, nativeDateRefineBase, nativeMonthDayRefineBase, eraYearToYear, monthCodeNumberToMonth, monthToMonthCodeNumber, nativeStandardBase, NativeDaysInMonthOps, NativeInLeapYearOps, NativeMonthsInYearOps, NativeDaysInYearOps, NativeEraOps, NativeEraYearOps, NativeMonthCodeOps, computeInLeapYear, computeMonthsInYear, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeMonthCode } from './calendarNative'
+import { NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDiffOps, NativeMonthDayRefineOps, NativeMonthDayModOps, NativeMoveOps, NativePartOps, NativeYearMonthModOps, NativeYearMonthRefineOps, nativeDiffBase, nativeMoveBase, NativeStandardOps, DateParts, MonthCodeParts, EraParts, YearMonthParts, nativeYearMonthRefineBase, nativeDateRefineBase, nativeMonthDayRefineBase, eraYearToYear, monthCodeNumberToMonth, monthToMonthCodeNumber, nativeStandardBase, NativeDaysInMonthOps, NativeInLeapYearOps, NativeMonthsInYearOps, NativeDaysInYearOps, NativeEraOps, NativeEraYearOps, NativeMonthCodeOps, computeInLeapYear, computeMonthsInYear, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeMonthCode, NativeYearMonthMoveOps, NativeYearMonthDiffOps, NativeYearMonthParseOps, NativeMonthDayParseOps } from './calendarNative'
 import { computeIntlMonthsInYearSpan, diffEpochMilliByDay } from './diff'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
 import { checkIsoDateInBounds, epochMilliToIso, isoArgsToEpochMilli, isoEpochFirstLeapYear, isoEpochOriginYear, isoToEpochMilli } from './isoMath'
 import { intlMonthAdd } from './move'
+import { utcTimeZoneId } from './timeZoneConfig'
 import { milliInDay } from './units'
 import { compareNumbers, createLazyGenerator, mapPropNamesToIndex } from './utils'
 
@@ -15,30 +16,6 @@ export function createCalendarIntlOps<M extends {}>(
   methods: M
 ): M & IntlCalendar {
   return Object.assign(Object.create(methods), queryIntlCalendar(calendarId))
-}
-
-// Math
-// -------------------------------------------------------------------------------------------------
-
-const intlMathOps = {
-  dateParts: computeIntlDateParts,
-  monthCodeParts: computeIntlMonthCodeParts,
-  monthsInYearPart: computeIntlMonthsInYear,
-  daysInMonthParts: computeIntlDaysInMonth,
-  monthAdd: intlMonthAdd,
-}
-
-export const intlMoveOps: NativeMoveOps = {
-  ...nativeMoveBase,
-  ...intlMathOps,
-  leapMonth: computeIntlLeapMonth,
-  epochMilli: computeIntlEpochMilli,
-}
-
-export const intlDiffOps: NativeDiffOps = {
-  ...nativeDiffBase,
-  ...intlMathOps,
-  monthsInYearSpan: computeIntlMonthsInYearSpan,
 }
 
 // Refine
@@ -95,6 +72,40 @@ export const intlMonthDayModOps: NativeMonthDayModOps = {
   mergeFields: nativeMergeFields,
 }
 
+// Math
+// -------------------------------------------------------------------------------------------------
+
+const intlMathOps = {
+  dateParts: computeIntlDateParts,
+  monthCodeParts: computeIntlMonthCodeParts,
+  monthsInYearPart: computeIntlMonthsInYear,
+  daysInMonthParts: computeIntlDaysInMonth,
+  monthAdd: intlMonthAdd,
+}
+
+export const intlMoveOps: NativeMoveOps = {
+  ...nativeMoveBase,
+  ...intlMathOps,
+  leapMonth: computeIntlLeapMonth,
+  epochMilli: computeIntlEpochMilli,
+}
+
+export const intlDiffOps: NativeDiffOps = {
+  ...nativeDiffBase,
+  ...intlMathOps,
+  monthsInYearSpan: computeIntlMonthsInYearSpan,
+}
+
+export const intlYearMonthMoveOps: NativeYearMonthMoveOps = {
+  ...intlMoveOps,
+  day: computeIntlDay,
+}
+
+export const intlYearMonthDiffOps: NativeYearMonthDiffOps = {
+  ...intlDiffOps,
+  day: computeIntlDay,
+}
+
 // Parts & Stats
 // -------------------------------------------------------------------------------------------------
 
@@ -148,6 +159,20 @@ export const intlPartOps: NativePartOps = {
   monthCodeParts: computeIntlMonthCodeParts,
 }
 
+// String Parsing
+// -------------------------------------------------------------------------------------------------
+
+export const intlYearMonthParseOps: NativeYearMonthParseOps = {
+  day: computeIntlDay,
+}
+
+export const intlMonthDayParseOps: NativeMonthDayParseOps = {
+  dateParts: computeIntlDateParts,
+  monthCodeParts: computeIntlMonthCodeParts,
+  yearMonthForMonthDay: computeIntlYearMonthForMonthDay,
+  isoFields: computeIsoFieldsFromIntlParts,
+}
+
 // Standard
 // -------------------------------------------------------------------------------------------------
 
@@ -197,7 +222,7 @@ export interface IntlCalendar {
 
 // -------------------------------------------------------------------------------------------------
 
-const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
+export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
   const intlFormat = buildIntlFormat(calendarId)
@@ -314,7 +339,7 @@ export function parseIntlYear(
 function buildIntlFormat(calendarId: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {
     calendar: calendarId,
-    timeZone: 'UTC',
+    timeZone: utcTimeZoneId,
     era: 'short', // 'narrow' is too terse for japanese months
     year: 'numeric',
     month: 'short', // easier to identify monthCodes
