@@ -19,7 +19,7 @@ import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { createAdapterOps } from './timeZoneAdapter'
+import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { ensureString } from '../internal/cast'
 
 // TimeZone Class
@@ -58,7 +58,7 @@ export class TimeZone implements TimeZoneProtocol {
     getTimeZoneSlots(this) // validate `this`
 
     const epochNano = toInstantSlots(instantArg).epochNanoseconds
-    const calendarOps = createAdapterOps(this) // for accessing own methods
+    const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
     const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
 
     return formatOffsetNano(offsetNano)
@@ -71,7 +71,7 @@ export class TimeZone implements TimeZoneProtocol {
     getTimeZoneSlots(this) // validate `this`
 
     const epochNano = toInstantSlots(instantArg).epochNanoseconds
-    const calendarOps = createAdapterOps(this) // for accessing own methods
+    const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
     const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
 
     return createPlainDateTime({
