@@ -256,11 +256,7 @@ export function parseCalendarId(s: string): string {
 }
 
 export function realizeCalendarId(calendarId: string): string {
-  calendarId = calendarId.toLocaleLowerCase()
-
-  if (calendarId === 'islamicc') {
-    calendarId = 'islamic-civil'
-  }
+  calendarId = normalizeCalendarId(calendarId)
 
   // check that it's valid. DRY enough with createNativeOpsCreator?
   if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
@@ -268,6 +264,16 @@ export function realizeCalendarId(calendarId: string): string {
   }
 
   return calendarId // return original instead of using queried-result. keeps id extensions
+}
+
+export function normalizeCalendarId(calendarId: string): string {
+  calendarId = calendarId.toLocaleLowerCase()
+
+  if (calendarId === 'islamicc') {
+    calendarId = 'islamic-civil'
+  }
+
+  return calendarId
 }
 
 export function parseTimeZoneId(s: string): string {

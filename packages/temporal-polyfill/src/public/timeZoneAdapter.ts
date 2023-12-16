@@ -68,6 +68,7 @@ export const timeZoneAdapters = {
   getPossibleInstantsFor: adapterGetPossibleInstantsFor,
 }
 
+// TODO: rename to be about 'offset'
 export const simpleTimeZoneAdapters = {
   getOffsetNanosecondsFor: adapterGetOffsetNanosecondsFor,
 }
@@ -82,9 +83,9 @@ export type AdapterOps<KV> = {
       : never
 }
 
-export function createAdapterOps<KV extends {}>(
+export function createAdapterOps<KV extends {} = typeof timeZoneAdapters>(
   timeZoneProtocol: TimeZoneProtocol,
-  adapterFuncs: KV,
+  adapterFuncs: KV = timeZoneAdapters as any,
 ): AdapterOps<KV> {
   const keys = Object.keys(adapterFuncs).sort()
   const boundFuncs = {} as any

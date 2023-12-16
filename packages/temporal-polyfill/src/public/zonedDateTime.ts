@@ -33,7 +33,7 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { TimeZoneArg, createTimeZone } from './timeZone'
+import { TimeZone, TimeZoneArg, createTimeZone } from './timeZone'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
@@ -265,7 +265,7 @@ export class ZonedDateTime {
   getTimeZone(): TimeZoneProtocol {
     const { timeZone } = getZonedDateTimeSlots(this)
     return typeof timeZone === 'string'
-      ? createTimeZone({ branding: TimeZoneBranding, id: timeZone })
+      ? new TimeZone(timeZone)
       : timeZone
   }
 

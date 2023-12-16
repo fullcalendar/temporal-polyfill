@@ -5,7 +5,6 @@ import { defineProps, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/bagGeneric'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
-import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
 
 // public
 import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
@@ -20,6 +19,7 @@ import { NativeStandardOps } from '../internal/calendarNative'
 import { calendarMethods } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
+import { normalizeCalendarId } from '../internal/parseIso'
 
 // Calendar Class
 // -------------------------------------------------------------------------------------------------
@@ -28,10 +28,13 @@ export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime 
 
 export class Calendar implements CalendarProtocol {
   constructor(id: string) {
+    id = normalizeCalendarId(ensureString(id))
+    const calendarNative = createNativeStandardOps(id)
+
     setSlots(this, {
       branding: CalendarBranding,
-      id: refineCalendarSlotString(id), // TODO: wasteful if we query the impl anyway!!!
-      ops: createNativeStandardOps(id),
+      id,
+      native: calendarNative,
     } as CalendarClassSlots)
   }
 
@@ -42,10 +45,10 @@ export class Calendar implements CalendarProtocol {
     durationArg: DurationArg,
     options?: OverflowOptions,
   ): PlainDate {
-    const { id, ops } = getCalendarSlots(this)
+    const { id, native } = getCalendarSlots(this)
 
     return createPlainDate({
-      ...ops.dateAdd(
+      ...native.dateAdd(
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
         refineOverflowOptions(options),
@@ -60,11 +63,11 @@ export class Calendar implements CalendarProtocol {
     plainDateArg1: PlainDateArg,
     options?: LargestUnitOptions,
   ): Duration {
-    const { ops } = getCalendarSlots(this)
+    const { native } = getCalendarSlots(this)
 
     return createDuration({
       branding: DurationBranding,
-      ...ops.dateUntil(
+      ...native.dateUntil(
         toPlainDateSlots(plainDateArg0),
         toPlainDateSlots(plainDateArg1),
         refineCalendarDiffOptions(options),
@@ -76,10 +79,10 @@ export class Calendar implements CalendarProtocol {
     fields: DateBagStrict,
     options?: OverflowOptions,
   ): PlainDate {
-    const { id, ops } = getCalendarSlots(this)
+    const { id, native } = getCalendarSlots(this)
 
     return createPlainDate({
-      ...refinePlainDateBag(ops, fields, options, getRequiredDateFields(id)),
+      ...refinePlainDateBag(native, fields, options, getRequiredDateFields(id)),
       calendar: id,
       branding: PlainDateBranding,
     })
@@ -89,10 +92,10 @@ export class Calendar implements CalendarProtocol {
     fields: YearMonthBagStrict,
     options?: OverflowOptions,
   ): PlainYearMonth {
-    const { id, ops } = getCalendarSlots(this)
+    const { id, native } = getCalendarSlots(this)
 
     return createPlainYearMonth({
-      ...refinePlainYearMonthBag(ops, fields, options, getRequiredYearMonthFields(id)),
+      ...refinePlainYearMonthBag(native, fields, options, getRequiredYearMonthFields(id)),
       calendar: id,
       branding: PlainYearMonthBranding,
     })
@@ -102,17 +105,17 @@ export class Calendar implements CalendarProtocol {
     fields: MonthDayBagStrict,
     options?: OverflowOptions,
   ): PlainMonthDay {
-    const { id, ops } = getCalendarSlots(this)
+    const { id, native } = getCalendarSlots(this)
 
     return createPlainMonthDay({
-      ...refinePlainMonthDayBag(ops, false, fields, options, getRequiredMonthDayFields(id)),
+      ...refinePlainMonthDayBag(native, false, fields, options, getRequiredMonthDayFields(id)),
       calendar: id,
       branding: PlainMonthDayBranding,
     })
   }
 
   fields(fieldNames: Iterable<string>): Iterable<string> {
-    const { ops } = getCalendarSlots(this)
+    const { native } = getCalendarSlots(this)
 
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
@@ -131,16 +134,16 @@ export class Calendar implements CalendarProtocol {
       fieldNamesArray.push(fieldName)
     }
 
-    return ops.fields(fieldNamesArray)
+    return native.fields(fieldNamesArray)
   }
 
   mergeFields(
     fields0: Record<string, unknown>,
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
-    const { ops } = getCalendarSlots(this)
+    const { native } = getCalendarSlots(this)
 
-    return ops.mergeFields(
+    return native.mergeFields(
       excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),
       excludeUndefinedProps(ensureNotNullOrUndefined(fields1)),
     )
@@ -183,7 +186,7 @@ defineProps(Calendar.prototype, calendarMethods)
 
 export type CalendarClassSlots = BrandingSlots & { // TODO: move to top
   id: string,
-  ops: NativeStandardOps
+  native: NativeStandardOps
 }
 
 export function createCalendar(slots: CalendarClassSlots): Calendar {

@@ -1,16 +1,16 @@
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { SimpleTimeZoneOps, TimeZoneOps } from '../internal/timeZoneOps'
-import { createAdapterOps, simpleTimeZoneAdapters, timeZoneAdapters } from './timeZoneAdapter'
+import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { TimeZoneSlot } from './timeZoneSlot'
 
 export function createTimeZoneOps(
   timeZoneSlot: TimeZoneSlot,
-  adapterFuncs = timeZoneAdapters
+  adapterFuncs?: any
 ): TimeZoneOps {
   if (typeof timeZoneSlot === 'string') {
     return queryNativeTimeZone(timeZoneSlot)
   }
-  return createAdapterOps(timeZoneSlot, adapterFuncs)
+  return createAdapterOps(timeZoneSlot, adapterFuncs) as any
 }
 
 export function createSimpleTimeZoneOps(timeZoneSlot: TimeZoneSlot): SimpleTimeZoneOps {

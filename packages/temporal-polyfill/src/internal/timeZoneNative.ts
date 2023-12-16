@@ -22,7 +22,7 @@ const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
 const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
 
-export interface NativeTimeZone {
+export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
   id: string
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number
   getPossibleInstantsFor(isoFields: IsoDateTimeFields): DayTimeNano[]
