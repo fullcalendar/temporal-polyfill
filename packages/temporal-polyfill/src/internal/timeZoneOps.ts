@@ -4,7 +4,6 @@ import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset } from './epoc
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
 import { nanoInUtcDay } from './units'
-import { ensureNumber } from './cast'
 import { createLazyGenerator } from './utils'
 import { moveByIsoDays } from './move'
 
@@ -27,7 +26,7 @@ export const zonedInternalsToIso = createLazyGenerator(_zonedInternalsToIso, Wea
 
 /*
 TODO: ensure returning in desc order, so we don't need to pluck
-BUT WAIT: returns offsetNanoseconds, which might be undesirable. Use returned tuple?
+IMPORTANT: given timeZoneOps must be associated with the `internal` timeZone (even tho not present)
 */
 function _zonedInternalsToIso(
   internals: { epochNanoseconds: DayTimeNano }, // goes first because key
