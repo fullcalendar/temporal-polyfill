@@ -2,7 +2,7 @@ import { nativeDateFromFields, nativeMonthDayFromFields, nativeYearMonthFromFiel
 import { DateRefineOps, DayOp, DiffOps, MergeFieldsOp, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from './calendarOps'
 import { nativeDateUntil } from './diff'
 import { IsoDateFields } from './calendarIsoFields'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from './isoMath'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from './calendarIso'
 import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
 

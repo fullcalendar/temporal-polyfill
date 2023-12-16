@@ -17,13 +17,14 @@ import {
   isIsoDateFieldsValid,
 } from './calendarIsoFields'
 import {
+  isoEpochFirstLeapYear,
+} from './calendarIso'
+import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
-  checkIsoYearMonthInBounds,
-  isoEpochFirstLeapYear,
-  isoToEpochNanoWithOffset,
-  nanoToIsoTimeAndDay,
-} from './isoMath'
+  checkIsoYearMonthInBounds, isoToEpochNanoWithOffset,
+  nanoToIsoTimeAndDay
+} from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { FixedTimeZone } from './timeZoneNative'
 import { queryNativeTimeZone } from './timeZoneNative'

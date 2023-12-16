@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { OrigDateTimeFormat } from '../internal/formatIntl'
 import { createPropDescriptors, createTemporalNameDescriptors, pluckProps } from '../internal/utils'
-import { epochMilliToNano } from '../internal/isoMath'
+import { epochMilliToNano } from '../internal/epochAndTime'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'

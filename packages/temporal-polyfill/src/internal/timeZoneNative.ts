@@ -10,8 +10,8 @@ import {
   epochNanoToSecRemainder,
   isoArgsToEpochSec,
   isoToEpochNanoWithOffset,
-  isoToEpochSec,
-} from './isoMath'
+  isoToEpochSec
+} from './epochAndTime'
 import { parseMaybeOffsetNano } from './parseIso'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'

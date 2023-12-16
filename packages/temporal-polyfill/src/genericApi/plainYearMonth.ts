@@ -6,7 +6,7 @@ import { durationFieldDefaults, negateDurationFields, updateDurationFieldsSign }
 import { getCommonCalendarSlot } from './calendarSlotString'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/formatIso'
-import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/isoMath'
+import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'

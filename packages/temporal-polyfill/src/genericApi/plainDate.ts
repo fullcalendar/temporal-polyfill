@@ -6,7 +6,7 @@ import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSi
 import { getCommonCalendarSlot } from './calendarSlotString'
 import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, refineIsoDateArgs } from '../internal/calendarIsoFields'
 import { formatPlainDateIso } from '../internal/formatIso'
-import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/isoMath'
+import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainDate } from '../internal/parseIso'
 import { moveDateEasy } from '../internal/move'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'

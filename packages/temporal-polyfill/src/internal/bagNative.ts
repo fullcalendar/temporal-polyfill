@@ -3,7 +3,8 @@ import { DateBag, DayFields, EraYearOrYear, MonthFields, YearMonthBag, allYearFi
 import { computeIsoYearMonthForMonthDay } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
 import { IsoDateFields } from './calendarIsoFields'
-import { checkIsoDateInBounds, checkIsoYearMonthInBounds, isoEpochFirstLeapYear } from './isoMath'
+import { isoEpochFirstLeapYear } from './calendarIso'
+import { checkIsoDateInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { Overflow } from './options'
 import { clampEntity } from './utils'
 

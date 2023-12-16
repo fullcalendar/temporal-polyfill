@@ -1,6 +1,6 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
-import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset } from './isoMath'
+import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
 import { nanoInUtcDay } from './units'

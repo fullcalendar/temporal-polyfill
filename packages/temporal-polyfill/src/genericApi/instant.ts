@@ -4,7 +4,7 @@ import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '.
 import { diffEpochNano } from '../internal/diff'
 import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { formatInstantIso } from '../internal/formatIso'
-import { checkEpochNanoInBounds } from '../internal/isoMath'
+import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { moveEpochNano } from '../internal/move'
 import { RoundingMode } from '../internal/options'
 import { roundDayTimeNano } from '../internal/round'

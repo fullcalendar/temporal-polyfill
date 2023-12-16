@@ -14,7 +14,7 @@ import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots,
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 import * as Utils from './utils'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/isoMath'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 
 export function create(

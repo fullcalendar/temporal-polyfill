@@ -11,10 +11,12 @@ import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, 
 import {
   isoDaysInWeek,
   isoMonthsInYear,
+} from './calendarIso'
+import {
   isoTimeFieldsToNano,
   isoToEpochMilli,
-  isoToEpochNano,
-} from './isoMath'
+  isoToEpochNano
+} from './epochAndTime'
 import { moveByIsoDays, moveDateTime, moveZonedEpochNano } from './move'
 import { Overflow, RoundingMode } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'

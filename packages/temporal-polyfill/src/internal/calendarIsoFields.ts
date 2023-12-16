@@ -1,5 +1,6 @@
 import { toInteger } from './cast'
-import { checkIsoDateInBounds, checkIsoDateTimeInBounds, computeIsoDaysInMonth, computeIsoMonthsInYear } from './isoMath'
+import { computeIsoDaysInMonth, computeIsoMonthsInYear } from './calendarIso'
+import { checkIsoDateInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
 import { Overflow } from './options'
 import { clampProp, isClamped, mapPropNamesToConstant } from './utils'
 

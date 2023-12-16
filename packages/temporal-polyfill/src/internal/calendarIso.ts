@@ -1,9 +1,9 @@
 import { NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDiffOps, NativeMonthDayModOps, NativeMonthDayRefineOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthModOps, NativeYearMonthRefineOps, LeapMonthOp, DateParts, GetEraOrigins, GetLeapMonthMeta, MonthCodeParts, YearMonthParts, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeYearMonthRefineBase, EraParts, nativeStandardBase, NativeDaysInMonthOps, NativeInLeapYearOps, NativeDaysInYearOps, NativeMonthsInYearOps, computeInLeapYear, computeMonthsInYear, computeDaysInMonth, computeDaysInYear, NativeYearMonthMoveOps, NativeYearMonthDiffOps, NativeYearMonthParseOps, NativeMonthDayParseOps } from './calendarNative'
-import { computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoInLeapYear, computeIsoMonthsInYear, isoArgsToEpochMilli, isoEpochFirstLeapYear } from './isoMath'
-import { IsoDateFields } from './calendarIsoFields'
-import { computeIsoMonthsInYearSpan } from './diff'
+import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './epochAndTime'
+import { IsoDateFields, isoTimeFieldDefaults } from './calendarIsoFields'
+import { computeIsoMonthsInYearSpan, diffEpochMilliByDay } from './diff'
 import { isoMonthAdd } from './move'
-import { noop } from './utils'
+import { modFloor, noop } from './utils'
 import { nativeMergeFields } from './bagNative'
 
 // Refine
@@ -173,6 +173,11 @@ export const isoStandardOps: NativeStandardOps = {
 
 // -------------------------------------------------------------------------------------------------
 
+export const isoEpochOriginYear = 1970
+export const isoEpochFirstLeapYear = 1972
+export const isoMonthsInYear = 12
+export const isoDaysInWeek = 7
+
 function computeIsoYear(isoFields: IsoDateFields): number {
   return isoFields.isoYear
 }
@@ -211,4 +216,98 @@ function computeIsoEpochMilli(year: number, month?: number, day?: number): numbe
     throw new RangeError('Out of range')
   }
   return epochMilli
+}
+
+export function computeIsoDaysInWeek(isoDateFields: IsoDateFields) {
+  return isoDaysInWeek
+}
+
+export function computeIsoMonthsInYear(isoYear: number): number { // for methods
+  return isoMonthsInYear
+}
+
+export function computeIsoDaysInMonth(isoYear: number, isoMonth: number): number {
+  switch (isoMonth) {
+    case 2:
+      return computeIsoInLeapYear(isoYear) ? 29 : 28
+    case 4:
+    case 6:
+    case 9:
+    case 11:
+      return 30
+  }
+  return 31
+}
+
+function computeIsoDaysInYear(isoYear: number): number {
+  return computeIsoInLeapYear(isoYear) ? 366 : 365
+}
+
+function computeIsoInLeapYear(isoYear: number): boolean {
+  // % is dangerous, but comparing 0 with -0 is fine
+  return isoYear % 4 === 0 && (isoYear % 100 !== 0 || isoYear % 400 === 0)
+}
+
+function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
+  return diffEpochMilliByDay(
+    isoToEpochMilli(isoDateYearStart(isoDateFields))!,
+    isoToEpochMilli(isoDateFields)!,
+  ) + 1
+}
+
+export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
+  const [legacyDate, nudge] = isoToLegacyDate(
+    isoDateFields.isoYear,
+    isoDateFields.isoMonth,
+    isoDateFields.isoDay,
+  )
+
+  return modFloor(legacyDate.getDay() + 1 - nudge, 7) || 7
+}
+
+export function computeIsoYearOfWeek(isoDateFields: IsoDateFields): number {
+  return computeIsoWeekParts(isoDateFields)[0]
+}
+
+export function computeIsoWeekOfYear(isoDateFields: IsoDateFields): number {
+  return computeIsoWeekParts(isoDateFields)[1]
+}
+
+type WeekParts = [
+  isoYear: number,
+  isoWeek: number,
+]
+
+function computeIsoWeekParts(isoDateFields: IsoDateFields): WeekParts {
+  const doy = computeIsoDayOfYear(isoDateFields)
+  const dow = computeIsoDayOfWeek(isoDateFields)
+  const doj = computeIsoDayOfWeek(isoDateYearStart(isoDateFields))
+  const isoWeek = Math.floor((doy - dow + 10) / isoDaysInWeek)
+  const { isoYear } = isoDateFields
+
+  if (isoWeek < 1) {
+    return [
+      isoYear - 1,
+      (doj === 5 || (doj === 6 && computeIsoInLeapYear(isoYear - 1))) ? 53 : 52,
+    ]
+  }
+  if (isoWeek === 53) {
+    if (computeIsoDaysInYear(isoYear) - doy < 4 - dow) {
+      return [
+        isoYear + 1,
+        1,
+      ]
+    }
+  }
+
+  return [isoYear, isoWeek]
+}
+
+function isoDateYearStart(isoDateFields: IsoDateFields): IsoDateFields {
+  return {
+    ...isoDateFields,
+    isoMonth: 1,
+    isoDay: 1,
+    ...isoTimeFieldDefaults, // needed?
+  }
 }

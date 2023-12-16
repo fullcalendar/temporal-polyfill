@@ -1,11 +1,10 @@
 import { Overflow } from './options'
-import { diffEpochMilliByDay } from './diff'
 import {
   IsoDateTimeFields,
   IsoDateFields,
   IsoTimeFields,
   isoTimeFieldNamesAsc,
-  isoTimeFieldDefaults,
+  isoTimeFieldDefaults
 } from './calendarIsoFields'
 import {
   Unit,
@@ -16,114 +15,12 @@ import {
   nanoInMilli,
   nanoInSec,
   nanoInUtcDay,
-  nanoToGivenFields,
+  nanoToGivenFields
 } from './units'
-import { NumSign, divModFloor, clampProp, compareNumbers, divModTrunc, modFloor } from './utils'
+import { NumSign, divModFloor, clampProp, compareNumbers, divModTrunc } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, compareDayTimeNanos, dayTimeNanoToBigInt, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, numberToDayTimeNano } from './dayTimeNano'
 
-// ISO Calendar
-// -------------------------------------------------------------------------------------------------
-
-export const isoEpochOriginYear = 1970
-export const isoEpochFirstLeapYear = 1972
-export const isoMonthsInYear = 12
-export const isoDaysInWeek = 7
-
-export function computeIsoDaysInWeek(isoDateFields: IsoDateFields) {
-  return isoDaysInWeek
-}
-
-export function computeIsoMonthsInYear(isoYear: number): number { // for methods
-  return isoMonthsInYear
-}
-
-export function computeIsoDaysInMonth(isoYear: number, isoMonth: number): number {
-  switch (isoMonth) {
-    case 2:
-      return computeIsoInLeapYear(isoYear) ? 29 : 28
-    case 4:
-    case 6:
-    case 9:
-    case 11:
-      return 30
-  }
-  return 31
-}
-
-export function computeIsoDaysInYear(isoYear: number): number {
-  return computeIsoInLeapYear(isoYear) ? 366 : 365
-}
-
-export function computeIsoInLeapYear(isoYear: number): boolean {
-  // % is dangerous, but comparing 0 with -0 is fine
-  return isoYear % 4 === 0 && (isoYear % 100 !== 0 || isoYear % 400 === 0)
-}
-
-export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
-  return diffEpochMilliByDay(
-    isoToEpochMilli(isoDateYearStart(isoDateFields))!,
-    isoToEpochMilli(isoDateFields)!,
-  ) + 1
-}
-
-export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
-  const [legacyDate, nudge] = isoToLegacyDate(
-    isoDateFields.isoYear,
-    isoDateFields.isoMonth,
-    isoDateFields.isoDay,
-  )
-
-  return modFloor(legacyDate.getDay() + 1 - nudge, 7) || 7
-}
-
-export function computeIsoYearOfWeek(isoDateFields: IsoDateFields): number {
-  return computeIsoWeekParts(isoDateFields)[0]
-}
-
-export function computeIsoWeekOfYear(isoDateFields: IsoDateFields): number {
-  return computeIsoWeekParts(isoDateFields)[1]
-}
-
-type WeekParts = [
-  isoYear: number,
-  isoWeek: number,
-]
-
-function computeIsoWeekParts(isoDateFields: IsoDateFields): WeekParts {
-  const doy = computeIsoDayOfYear(isoDateFields)
-  const dow = computeIsoDayOfWeek(isoDateFields)
-  const doj = computeIsoDayOfWeek(isoDateYearStart(isoDateFields))
-  const isoWeek = Math.floor((doy - dow + 10) / isoDaysInWeek)
-  const { isoYear } = isoDateFields
-
-  if (isoWeek < 1) {
-    return [
-      isoYear - 1,
-      (doj === 5 || (doj === 6 && computeIsoInLeapYear(isoYear - 1))) ? 53 : 52,
-    ]
-  }
-  if (isoWeek === 53) {
-    if (computeIsoDaysInYear(isoYear) - doy < 4 - dow) {
-      return [
-        isoYear + 1,
-        1,
-      ]
-    }
-  }
-
-  return [isoYear, isoWeek]
-}
-
-function isoDateYearStart(isoDateFields: IsoDateFields): IsoDateFields {
-  return {
-    ...isoDateFields,
-    isoMonth: 1,
-    isoDay: 1,
-    ...isoTimeFieldDefaults, // needed?
-  }
-}
-
-const maxDays = 1e8
+const maxDays = 100000000
 const epochNanoMax: DayTimeNano = [maxDays, 0]
 const epochNanoMin: DayTimeNano = [-maxDays, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
@@ -131,7 +28,7 @@ const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
 export function checkIsoYearMonthInBounds<T extends IsoDateFields>(isoFields: T): T {
   // TODO: just authenticate based on hardcoded min/max isoYear/Month/Day. for other types too
-  clampProp(isoFields, 'isoYear' as any,  -271821, 275760, Overflow.Reject)
+  clampProp(isoFields, 'isoYear' as any, -271821, 275760, Overflow.Reject)
 
   if (isoFields.isoYear === isoYearMin) {
     clampProp(isoFields, 'isoMonth' as any, 4, 12, Overflow.Reject)
@@ -172,8 +69,7 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(isoFields:
 }
 
 export function checkEpochNanoInBounds(epochNano: DayTimeNano | undefined): DayTimeNano {
-  if (
-    epochNano === undefined ||
+  if (epochNano === undefined ||
     compareDayTimeNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
     compareDayTimeNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {
@@ -198,7 +94,6 @@ export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
 
 // Epoch Unit Conversion
 // -------------------------------------------------------------------------------------------------
-
 // nano -> [micro/milli/sec]
 
 export function epochNanoToSec(epochNano: DayTimeNano): number {
@@ -235,7 +130,6 @@ export const epochGetters = {
 
 // ISO <-> Epoch Conversion
 // -------------------------------------------------------------------------------------------------
-
 // ISO Fields -> Epoch
 
 export function isoToEpochSec(isoDateTimeFields: IsoDateTimeFields): [number, number] {
@@ -247,11 +141,10 @@ export function isoToEpochSec(isoDateTimeFields: IsoDateTimeFields): [number, nu
     isoDateTimeFields.isoDay,
     isoDateTimeFields.isoHour,
     isoDateTimeFields.isoMinute,
-    isoDateTimeFields.isoSecond,
+    isoDateTimeFields.isoSecond
   )
 
-  const subsecNano =
-    isoDateTimeFields.isoMillisecond * nanoInMilli +
+  const subsecNano = isoDateTimeFields.isoMillisecond * nanoInMilli +
     isoDateTimeFields.isoMicrosecond * nanoInMicro +
     isoDateTimeFields.isoNanosecond
 
@@ -262,7 +155,7 @@ export function isoToEpochSec(isoDateTimeFields: IsoDateTimeFields): [number, nu
 If out-of-bounds, returns undefined
 */
 export function isoToEpochMilli(
-  isoDateTimeFields: IsoDateTimeFields | IsoDateFields,
+  isoDateTimeFields: IsoDateTimeFields | IsoDateFields
 ): number | undefined {
   return isoArgsToEpochMilli(
     isoDateTimeFields.isoYear,
@@ -271,7 +164,7 @@ export function isoToEpochMilli(
     (isoDateTimeFields as IsoDateTimeFields).isoHour,
     (isoDateTimeFields as IsoDateTimeFields).isoMinute,
     (isoDateTimeFields as IsoDateTimeFields).isoSecond,
-    (isoDateTimeFields as IsoDateTimeFields).isoMillisecond,
+    (isoDateTimeFields as IsoDateTimeFields).isoMillisecond
   )
 }
 
@@ -280,15 +173,14 @@ For converting to fake epochNano values for math
 If out-of-bounds, returns undefined
 */
 export function isoToEpochNano(
-  isoFields: IsoDateTimeFields | IsoDateFields,
+  isoFields: IsoDateTimeFields | IsoDateFields
 ): DayTimeNano | undefined {
   const epochMilli = isoToEpochMilli(isoFields)
 
   if (epochMilli !== undefined) {
     const [days, milliRemainder] = divModTrunc(epochMilli, milliInDay)
 
-    const timeNano =
-      milliRemainder * nanoInMilli +
+    const timeNano = milliRemainder * nanoInMilli +
       ((isoFields as IsoDateTimeFields).isoMicrosecond || 0) * nanoInMicro +
       ((isoFields as IsoDateTimeFields).isoNanosecond || 0)
 
@@ -320,7 +212,7 @@ export type IsoTuple = [
   isoHour?: number,
   isoMinute?: number,
   isoSecond?: number,
-  isoMilli?: number,
+  isoMilli?: number
 ]
 
 /*
@@ -341,15 +233,14 @@ export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
     return epochMilli - nudge * milliInDay
   }
 }
-
-function isoToLegacyDate(
+export function isoToLegacyDate(
   isoYear: number,
   isoMonth: number = 1,
   isoDay: number = 1,
   isoHour: number = 0,
   isoMinute: number = 0,
   isoSec: number = 0,
-  isoMilli: number = 0,
+  isoMilli: number = 0
 ): [Date, number] {
   // allows this function to accept values beyond valid Instants
   // (PlainDateTime allows values within 24hrs)
@@ -364,7 +255,6 @@ function isoToLegacyDate(
 
   return [legacyDate, nudge]
 }
-
 // Epoch -> ISO Fields
 
 export function epochNanoToIso(epochNano: DayTimeNano, offsetNano: number): IsoDateTimeFields {
@@ -392,13 +282,13 @@ Given epochMilli assumed to be within PlainDateTime's range
 */
 export function epochMilliToIso(epochMilli: number): {
   // return value
-  isoYear: number,
-  isoMonth: number,
-  isoDay: number,
-  isoHour: number,
-  isoMinute: number,
-  isoSecond: number,
-  isoMillisecond: number,
+  isoYear: number
+  isoMonth: number
+  isoDay: number
+  isoHour: number
+  isoMinute: number
+  isoSecond: number
+  isoMillisecond: number
 } {
   // TODO: use cmp?
   const nudge = epochMilli < -milliInDay * maxDays ? 1 : epochMilli > milliInDay * maxDays ? -1 : 0
@@ -407,7 +297,7 @@ export function epochMilliToIso(epochMilli: number): {
   return {
     isoYear: legacyDate.getUTCFullYear(),
     isoMonth: legacyDate.getUTCMonth() + 1,
-    isoDay: legacyDate.getUTCDate() - nudge, // luckily the days for min/max are in middle of month
+    isoDay: legacyDate.getUTCDate() - nudge,
     isoHour: legacyDate.getUTCHours(),
     isoMinute: legacyDate.getUTCMinutes(),
     isoSecond: legacyDate.getUTCSeconds(),
@@ -420,7 +310,7 @@ export function epochMilliToIso(epochMilli: number): {
 
 export function compareIsoDateTimeFields(
   isoFields0: IsoDateTimeFields,
-  isoFields1: IsoDateTimeFields,
+  isoFields1: IsoDateTimeFields
 ): NumSign {
   return compareIsoDateFields(isoFields0, isoFields1) ||
     compareIsoTimeFields(isoFields0, isoFields1)
@@ -428,20 +318,20 @@ export function compareIsoDateTimeFields(
 
 export function compareIsoDateFields(
   isoFields0: IsoDateFields,
-  isoFields1: IsoDateFields,
+  isoFields1: IsoDateFields
 ): NumSign {
   return compareNumbers(
     isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields1)!,
+    isoToEpochMilli(isoFields1)!
   )
 }
 
 export function compareIsoTimeFields(
   isoFields0: IsoTimeFields,
-  isoFields1: IsoTimeFields,
+  isoFields1: IsoTimeFields
 ): NumSign {
   return compareNumbers(
     isoTimeFieldsToNano(isoFields0),
-    isoTimeFieldsToNano(isoFields1),
+    isoTimeFieldsToNano(isoFields1)
   )
 }
