@@ -6,13 +6,12 @@ import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/calendarIsoFields'
 import { Overflow } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
-import { Callable, mapProps } from '../internal/utils'
+import { Callable } from '../internal/utils'
 import { CalendarProtocol } from './calendarProtocol'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { dateRefiners } from '../genericApi/refiners'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
@@ -196,42 +195,4 @@ export function createAdapterCompoundOps<KV extends {}>(
   }
 
   return boundFuncs
-}
-
-// Simple Adapter-Instantiation (always accepts PlainDate, simply refines result)
-// -------------------------------------------------------------------------------------------------
-
-interface AdapterSimpleState {
-  calendarProtocol: CalendarProtocol
-}
-
-export type AdapterSimpleOps = {
-  [K in keyof typeof dateRefiners]: (isoFields: IsoDateFields) => any
-}
-
-const adapterSimpleOps = mapProps(
-  (refiner, methodName) => {
-    return function(this: AdapterSimpleState, isoFields: IsoDateFields) {
-      const { calendarProtocol } = this
-      return refiner(
-        (calendarProtocol as any)[methodName](
-          createPlainDate({
-            ...isoFields,
-            calendar: calendarProtocol,
-            branding: PlainDateBranding,
-          })
-        )
-      )
-    }
-  },
-  dateRefiners as Record<string, Callable>,
-) as AdapterSimpleOps
-
-export function createAdapterSimpleOps(
-  calendarProtocol: CalendarProtocol
-): AdapterSimpleOps {
-  return Object.assign(
-    Object.create(adapterSimpleOps),
-    { calendarProtocol } as AdapterSimpleState,
-  )
 }

@@ -7,7 +7,7 @@ import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/
 import { identityFunc, mapPropNames } from '../internal/utils'
 import { getCalendarSlots } from './calendar'
 import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from '../genericApi/refiners'
-import { createSimpleOps } from './calendarOpsQuery'
+import { createSimpleOps } from './calendarSimpleOps'
 import { toPlainDateSlots } from './plainDate'
 import { BrandingSlots, EpochSlots, getSlots, getSpecificSlots } from './slotsForClasses'
 import { timeFieldNamesAsc } from '../internal/calendarFields'

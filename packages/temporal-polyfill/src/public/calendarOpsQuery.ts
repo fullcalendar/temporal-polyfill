@@ -1,5 +1,5 @@
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
-import { AdapterSimpleOps, AdapterCompoundOps, createAdapterSimpleOps, createAdapterCompoundOps, dateModAdapters, dateRefineAdapters, diffAdapters, monthDayModAdapters, monthDayRefineAdapters, moveAdapters, yearMonthDiffAdapters, yearMonthModAdapters, yearMonthMoveAdapters, yearMonthRefineAdapters } from './calendarAdapter'
+import { AdapterCompoundOps, createAdapterCompoundOps, dateModAdapters, dateRefineAdapters, diffAdapters, monthDayModAdapters, monthDayRefineAdapters, moveAdapters, yearMonthDiffAdapters, yearMonthModAdapters, yearMonthMoveAdapters, yearMonthRefineAdapters } from './calendarAdapter'
 import { CalendarSlot } from './calendarSlot'
 
 // Refine
@@ -31,11 +31,4 @@ function createCompoundOpsCreator<KV extends {}>(
     }
     return createAdapterCompoundOps(calendarSlot, adapterFuncs)
   }
-}
-
-export function createSimpleOps(calendarSlot: CalendarSlot): AdapterSimpleOps {
-  if (typeof calendarSlot === 'string') {
-    return createNativeStandardOps(calendarSlot) // has everything
-  }
-  return createAdapterSimpleOps(calendarSlot)
 }
