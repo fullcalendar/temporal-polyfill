@@ -1,14 +1,14 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAsc } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
-import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from '../genericApi/options'
+import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
 import { defineProps, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
-import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/convert'
+import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/bagGeneric'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
-import { refineCalendarSlotString } from '../genericApi/calendarSlot'
+import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
 
 // public
-import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slots'
+import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { refineCalendarSlot } from './calendarSlot'
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'
@@ -17,7 +17,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { NativeStandardOps } from '../internal/calendarNative'
-import { calendarMethods } from './publicMixins'
+import { calendarMethods } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 
@@ -30,7 +30,7 @@ export class Calendar implements CalendarProtocol {
   constructor(id: string) {
     setSlots(this, {
       branding: CalendarBranding,
-      id: refineCalendarSlotString(id), // TODO: wasteful if we query the impl anyway
+      id: refineCalendarSlotString(id), // TODO: wasteful if we query the impl anyway!!!
       ops: createNativeStandardOps(id),
     } as CalendarClassSlots)
   }

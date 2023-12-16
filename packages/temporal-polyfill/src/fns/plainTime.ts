@@ -1,8 +1,8 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
-import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/intlFormat'
+import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { OverflowOptions } from '../genericApi/options'
-import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/genericTypes'
+import { OverflowOptions } from '../genericApi/optionsRefine'
+import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/slotsGeneric'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 
 export const create = PlainTimeFuncs.create

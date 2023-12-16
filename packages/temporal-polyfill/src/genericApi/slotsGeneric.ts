@@ -1,6 +1,6 @@
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { DurationFieldsWithSign } from '../internal/durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from '../internal/isoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { DurationBranding, InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 
 export type PlainDateSlots<C> = IsoDateFields & { calendar: C, branding: typeof PlainDateBranding }

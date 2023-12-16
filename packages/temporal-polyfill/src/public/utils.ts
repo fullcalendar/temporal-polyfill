@@ -1,4 +1,4 @@
-import { IsoTimeFields, isoTimeFieldDefaults } from '../internal/isoFields'
+import { IsoTimeFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { hasAllPropsByName } from '../internal/utils'
 
 // public

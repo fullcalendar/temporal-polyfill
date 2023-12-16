@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationFieldsWithSign, absDurationInternals, durationFieldNamesAsc } from './durationFields'
-import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './isoFields'
+import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './calendarIsoFields'
 import { epochNanoToIso } from './isoMath'
 import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './options'
 import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
@@ -16,7 +16,7 @@ import {
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
 import { SimpleTimeZoneOps } from './timeZoneOps'
-import { IdLike, getId } from './idLike'
+import { IdLike, getId } from './cast'
 
 // High-level
 // -------------------------------------------------------------------------------------------------

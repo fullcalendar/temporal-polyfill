@@ -1,10 +1,10 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { epochNanoToMilli, isoEpochOriginYear } from './isoMath'
 import { createLazyGenerator, excludePropsByName, hasAnyPropsByName } from './utils'
 import { getSingleInstantFor } from './timeZoneOps'
-import { IdLike, getId } from './idLike'
+import { IdLike, getId } from './cast'
 import { queryNativeTimeZone } from './timeZoneNative'
 
 export type LocalesArg = string | string[]
@@ -301,8 +301,8 @@ export const prepCachedZonedDateTimeFormat = createFormatPrepper(zonedDateTimeCo
 // TODO: move to public dir?
 
 export type BoundFormatPrepFunc = ( // already bound to locale/options
-  slots0: { branding: string} | undefined, // TODO: how to make BrandingSlots available?
-  slots1?: { branding: string} | undefined, //
+  slots0: { branding: string } | undefined,
+  slots1?: { branding: string } | undefined, // TODO: use BrandingSlots after moving to public
 ) => BoundFormatPrepFuncRes
 
 export type BoundFormatPrepFuncRes = [

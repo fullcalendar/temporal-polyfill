@@ -3,11 +3,11 @@ import { ensureString, toIntegerStrict } from '../internal/cast'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from '../internal/diff'
 import { DurationFields, DurationFieldsWithSign, absDurationInternals, addDayTimeDurationFields, durationFieldNamesAsc, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
-import { IsoDateTimeFields, isoTimeFieldDefaults } from '../internal/isoFields'
-import { formatDurationInternals } from '../internal/isoFormat'
+import { IsoDateTimeFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
+import { formatDurationInternals } from '../internal/formatIso'
 import { isoToEpochNano } from '../internal/isoMath'
-import { parseDuration } from '../internal/isoParse'
-import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarketSlots, MoveMarker, SimpleMarkerSystem } from '../internal/markerSystemTypes'
+import { parseDuration } from '../internal/parseIso'
+import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarkerSlots, MoveMarker, SimpleMarkerSystem } from '../internal/marker'
 import { moveDateTime, moveZonedEpochNano } from '../internal/move'
 import { Overflow, SubsecDigits } from '../internal/options'
 import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
@@ -15,10 +15,10 @@ import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
 import { NumSign, identityFunc } from '../internal/utils'
 import { DiffOps } from '../internal/calendarOps'
-import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTimeDisplayOptions, refineTotalOptions } from './options'
-import { mergeDurationBag, refineDurationBag } from './convert'
+import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTimeDisplayOptions, refineTotalOptions } from './optionsRefine'
+import { mergeDurationBag, refineDurationBag } from './bagGeneric'
 import { DurationBranding } from './branding'
-import { DurationSlots } from './genericTypes'
+import { DurationSlots } from './slotsGeneric'
 
 export function create(
   years: number = 0,
@@ -74,7 +74,7 @@ export function withFields(
 }
 
 export function add<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
@@ -127,7 +127,7 @@ export function add<RA, C, T>(
 }
 
 export function subtract<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
@@ -152,7 +152,7 @@ export function abs(slots: DurationSlots): DurationSlots {
 }
 
 export function round<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
@@ -228,7 +228,7 @@ export function round<RA, C, T>(
 }
 
 export function total<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
@@ -293,7 +293,7 @@ export function blank(slots: DurationSlots): boolean {
 }
 
 export function compare<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarketSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,
@@ -355,7 +355,7 @@ export function compare<RA, C, T>(
 function createMarkerSystem<C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  markerSlots: MarketSlots<C, T>,
+  markerSlots: MarkerSlots<C, T>,
 ): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
   const { calendar, timeZone, epochNanoseconds } = markerSlots as
     { calendar: C, timeZone?: T, epochNanoseconds?: DayTimeNano }

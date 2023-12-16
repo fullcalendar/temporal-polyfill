@@ -1,5 +1,5 @@
 import { Classlike, defineProps, pluckProps } from '../internal/utils'
-import { OrigDateTimeFormat, LocalesArg, OptionNames, createBoundFormatPrepFunc, BoundFormatPrepFunc } from '../internal/intlFormat'
+import { OrigDateTimeFormat, LocalesArg, OptionNames, createBoundFormatPrepFunc, BoundFormatPrepFunc } from '../internal/formatIntl'
 
 // public
 import { ZonedDateTime } from './zonedDateTime'
@@ -9,7 +9,7 @@ import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Instant } from './instant'
-import { getSlots } from './slots'
+import { getSlots } from './slotsForClasses'
 
 type OrigFormattable = number | Date
 type TemporalFormattable = Instant |

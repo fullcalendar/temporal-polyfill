@@ -1,6 +1,6 @@
 import { DateTimeBag } from '../internal/calendarFields'
-import { LocalesArg, prepZonedDateTimeFormat } from '../internal/intlFormat'
-import { formatOffsetNano } from '../internal/isoFormat'
+import { LocalesArg, prepZonedDateTimeFormat } from '../internal/formatIntl'
+import { formatOffsetNano } from '../internal/formatIso'
 import {
   DiffOptions,
   OverflowOptions,
@@ -9,19 +9,19 @@ import {
   ZonedFieldOptions,
   prepareOptions,
   refineZonedFieldOptions,
-} from '../genericApi/options'
+} from '../genericApi/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
-import { getId } from '../internal/idLike'
-import { IsoDateTimeFields } from '../internal/isoFields'
+import { getId } from '../internal/cast'
+import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { ZonedDateTimeBag } from '../genericApi/genericBag'
+import { ZonedDateTimeBag } from '../genericApi/bagGeneric'
 import { TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
-import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { Calendar, CalendarArg } from './calendar'
@@ -35,8 +35,8 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg, createTimeZone } from './timeZone'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './publicMixins'
-import { optionalToPlainTimeFields } from './publicUtils'
+import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './mixins'
+import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 

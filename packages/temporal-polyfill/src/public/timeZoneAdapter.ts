@@ -1,12 +1,13 @@
 import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { IsoDateTimeFields } from '../internal/isoFields'
-import { validateOffsetNano } from '../internal/timeZoneOps'
+import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { Callable } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
+import { ensureNumber } from '../internal/cast'
+import { nanoInUtcDay } from '../internal/units'
 
 // Individual Adapters
 // -------------------------------------------------------------------------------------------------
@@ -44,6 +45,19 @@ function adapterGetPossibleInstantsFor(
   ].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds
   })
+}
+
+export function validateOffsetNano(offsetNano: number): number {
+  if (!Number.isInteger(ensureNumber(offsetNano))) {
+    throw new RangeError('must be integer number')
+  }
+
+  // TODO: DRY with string parsing?
+  if (Math.abs(offsetNano) >= nanoInUtcDay) {
+    throw new RangeError('out of range')
+  }
+
+  return offsetNano
 }
 
 // Adapter Sets

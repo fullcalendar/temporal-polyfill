@@ -1,7 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { ensureString } from '../internal/cast'
-import { IdLike, isIdLikeEqual, getId } from '../internal/idLike'
-import { parseCalendarId, realizeCalendarId } from '../internal/isoParse'
+import { IdLike, isIdLikeEqual, getId, ensureString } from '../internal/cast'
+import { parseCalendarId, realizeCalendarId } from '../internal/parseIso'
 
 export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   if (!isIdLikeEqual(a, b)) {

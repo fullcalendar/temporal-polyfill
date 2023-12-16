@@ -1,9 +1,9 @@
 import { DayTimeNano } from './dayTimeNano'
 import { DurationFields, DurationFieldsWithSign } from './durationFields'
-import { IsoDateFields } from './isoFields'
+import { IsoDateFields } from './calendarIsoFields'
 import { Unit } from './units'
 
-export type MarketSlots<C, T> =
+export type MarkerSlots<C, T> =
   { epochNanoseconds: DayTimeNano, timeZone: T, calendar: C } |
   (IsoDateFields & { calendar: C })
 

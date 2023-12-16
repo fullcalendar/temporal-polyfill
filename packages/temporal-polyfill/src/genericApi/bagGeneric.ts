@@ -27,8 +27,8 @@ import {
   durationFieldNamesAsc,
   updateDurationFieldsSign,
 } from '../internal/durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/isoFields'
-import { parseOffsetNano } from '../internal/isoParse'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/calendarIsoFields'
+import { parseOffsetNano } from '../internal/parseIso'
 import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/options'
 import { ensureObjectlike } from '../internal/cast'
 import { Callable, pluckProps } from '../internal/utils'
@@ -42,10 +42,16 @@ import {
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
-} from './options'
-import { ZonedDateTimeBag } from './genericBag'
+} from './optionsRefine'
 import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, MonthDayRefineOps, YearMonthModOps, YearMonthRefineOps } from '../internal/calendarOps'
-import { builtinRefiners } from './refineConfig'
+import { builtinRefiners } from './refiners'
+
+export type PlainDateBag<C> = DateBag & { calendar?: C }
+export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }
+export type ZonedDateTimeBag<C, T> = PlainDateTimeBag<C> & { timeZone: T, offset?: string }
+export type PlainTimeBag = TimeBag
+export type PlainYearMonthBag<C> = YearMonthBag & { calendar?: C }
+export type PlainMonthDayBag<C> = MonthDayBag & { calendar?: C }
 
 const timeFieldNamesAlpha = timeFieldNamesAsc.slice().sort()
 const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
@@ -253,8 +259,8 @@ export function refinePlainDateBag(
     dateFieldNamesAsc,
     requireFields,
   )
-  const overflow = refineOverflowOptions(options)
 
+  const overflow = refineOverflowOptions(options)
   return calendarOps.dateFromFields(fields as any, overflow)
 }
 
@@ -311,8 +317,8 @@ export function refinePlainYearMonthBag(
     yearMonthFieldNames,
     requireFields,
   )
-  const overflow = refineOverflowOptions(options)
 
+  const overflow = refineOverflowOptions(options)
   return calendarOps.yearMonthFromFields(fields, overflow)
 }
 
@@ -328,8 +334,8 @@ export function mergePlainYearMonthBag(
     bag,
     yearMonthFieldNames,
   )
-  const overflow = refineOverflowOptions(options)
 
+  const overflow = refineOverflowOptions(options)
   return calendarOps.yearMonthFromFields(fields, overflow)
 }
 
@@ -360,8 +366,8 @@ export function convertToPlainYearMonth(
     input as any,
     yearMonthCodeFieldNames,
   )
-  const overflow = refineOverflowOptions(options)
 
+  const overflow = refineOverflowOptions(options)
   return calendarOps.yearMonthFromFields(fields, overflow)
 }
 
@@ -405,8 +411,8 @@ export function mergePlainMonthDayBag(
     bag,
     dateFieldNamesAsc,
   )
-  const overflow = refineOverflowOptions(options)
 
+  const overflow = refineOverflowOptions(options)
   return calendarOps.monthDayFromFields(fields, overflow)
 }
 

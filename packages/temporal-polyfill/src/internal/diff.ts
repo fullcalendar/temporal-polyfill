@@ -7,7 +7,7 @@ import {
   nanoToDurationTimeFields,
   updateDurationFieldsSign,
 } from './durationFields'
-import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './isoFields'
+import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,

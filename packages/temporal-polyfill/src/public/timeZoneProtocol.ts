@@ -1,8 +1,8 @@
-import { EpochDisambigOptions } from '../genericApi/options'
+import { EpochDisambigOptions } from '../genericApi/optionsRefine'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg } from './instant'
 import { PlainDateTime, PlainDateTimeArg } from './plainDateTime'
-import { createProtocolChecker } from './publicUtils'
+import { createProtocolChecker } from './utils'
 import { TimeZoneArg } from './timeZone'
 import { timeZoneAdapters } from './timeZoneAdapter'
 

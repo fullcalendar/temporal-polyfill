@@ -1,6 +1,6 @@
 import { DateBag, YearMonthBag } from './calendarFields'
 import { DurationFields, DurationFieldsWithSign } from './durationFields'
-import { IsoDateFields } from './isoFields'
+import { IsoDateFields } from './calendarIsoFields'
 import { Overflow } from './options'
 import { Unit } from './units'
 

@@ -15,7 +15,7 @@ import {
   constrainIsoDateLike,
   constrainIsoDateTimeLike,
   isIsoDateFieldsValid,
-} from './isoFields'
+} from './calendarIsoFields'
 import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,

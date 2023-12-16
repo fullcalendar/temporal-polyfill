@@ -1,9 +1,9 @@
-import { LocalesArg, prepCachedInstantFormat } from '../internal/intlFormat'
+import { LocalesArg, prepCachedInstantFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { InstantDisplayOptions } from '../genericApi/options'
-import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
-import { refineCalendarSlotString } from '../genericApi/calendarSlot'
-import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { InstantDisplayOptions } from '../genericApi/optionsRefine'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
+import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
+import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as InstantFuncs from '../genericApi/instant'
 
 export const create = InstantFuncs.create

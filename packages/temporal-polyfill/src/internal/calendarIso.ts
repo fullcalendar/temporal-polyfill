@@ -1,10 +1,10 @@
 import { NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDiffOps, NativeMonthDayModOps, NativeMonthDayRefineOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthModOps, NativeYearMonthRefineOps, LeapMonthOp, DateParts, GetEraOrigins, GetLeapMonthMeta, MonthCodeParts, YearMonthParts, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeYearMonthRefineBase, EraParts, nativeStandardBase, NativeDaysInMonthOps, NativeInLeapYearOps, NativeDaysInYearOps, NativeMonthsInYearOps, computeInLeapYear, computeMonthsInYear, computeDaysInMonth, computeDaysInYear, NativeYearMonthMoveOps, NativeYearMonthDiffOps, NativeYearMonthParseOps, NativeMonthDayParseOps } from './calendarNative'
 import { computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoInLeapYear, computeIsoMonthsInYear, isoArgsToEpochMilli, isoEpochFirstLeapYear } from './isoMath'
-import { IsoDateFields } from './isoFields'
+import { IsoDateFields } from './calendarIsoFields'
 import { computeIsoMonthsInYearSpan } from './diff'
 import { isoMonthAdd } from './move'
 import { noop } from './utils'
-import { nativeMergeFields } from './bag'
+import { nativeMergeFields } from './bagNative'
 
 // Refine
 // -------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
-import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset, moveByIsoDays } from './isoMath'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
@@ -196,17 +196,4 @@ export function zonedEpochNanoToIso(
 ): IsoDateTimeFields {
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   return epochNanoToIso(epochNano, offsetNano)
-}
-
-export function validateOffsetNano(offsetNano: number): number {
-  if (!Number.isInteger(ensureNumber(offsetNano))) {
-    throw new RangeError('must be integer number')
-  }
-
-  // TODO: DRY with string parsing?
-  if (Math.abs(offsetNano) >= nanoInUtcDay) {
-    throw new RangeError('out of range')
-  }
-
-  return offsetNano
 }

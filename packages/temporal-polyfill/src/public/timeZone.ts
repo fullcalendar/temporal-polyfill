@@ -1,27 +1,28 @@
 import { NativeTimeZone } from '../internal/timeZoneNative'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { formatOffsetNano } from '../internal/isoFormat'
-import { EpochDisambigOptions, refineEpochDisambigOptions } from '../genericApi/options'
+import { formatOffsetNano } from '../internal/formatIso'
+import { EpochDisambigOptions, refineEpochDisambigOptions } from '../genericApi/optionsRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { defineStringTag } from '../internal/utils'
-import { getSingleInstantFor, validateOffsetNano } from '../internal/timeZoneOps'
-import { IsoDateTimeFields } from '../internal/isoFields'
+import { getSingleInstantFor } from '../internal/timeZoneOps'
+import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { epochNanoToIso } from '../internal/isoMath'
-import { isTimeZoneSlotsEqual } from '../genericApi/timeZoneSlot'
+import { isTimeZoneSlotsEqual } from '../genericApi/timeZoneSlotString'
 import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
-import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlot'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 
 // public
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
-import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slots'
+import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
 import { createTimeZoneOps } from './timeZoneOpsQuery'
 import { TimeZoneProtocol } from './timeZoneProtocol'
+import { validateOffsetNano } from './timeZoneAdapter'
 
 // TimeZone Class
 // -------------------------------------------------------------------------------------------------
@@ -33,6 +34,7 @@ export class TimeZone implements TimeZoneProtocol {
     setSlots(this, {
       branding: TimeZoneBranding,
       id: refineTimeZoneSlotString(timeZoneId),
+      // TODO: query ops here!!!!
     } as TimeZoneClassSlots)
   }
 
@@ -56,7 +58,7 @@ export class TimeZone implements TimeZoneProtocol {
     getTimeZoneSlots(this) // validate `this`
     return formatOffsetNano(
       // strange we leverage the TimeZone here, but necessary for TimeZone subclasses
-      // COPIED from timeZoneOpsAdapterMethods::getOffsetNanosecondsFor
+      // COPIED from timeZoneOpsAdapterMethods::getOffsetNanosecondsFor!!!!!!!!!!!!!!!!!!
       validateOffsetNano(this.getOffsetNanosecondsFor(createInstant(toInstantSlots(instantArg))))
     )
   }
@@ -163,7 +165,7 @@ function zonedEpochNanoToIsoWithTZObj(
   epochNano: DayTimeNano,
 ): IsoDateTimeFields {
   // emulate what TimeZone::getOffsetNanosecondsFor does
-  const offsetNano = validateOffsetNano(
+  const offsetNano = validateOffsetNano( // !!!!!!!!!!!!
     timeZone.getOffsetNanosecondsFor(
       createInstant({
         branding: InstantBranding,

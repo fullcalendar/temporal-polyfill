@@ -1,15 +1,15 @@
-import { parseZonedOrPlainDateTime } from '../internal/isoParse'
+import { parseZonedOrPlainDateTime } from '../internal/parseIso'
 import { ensureString } from '../internal/cast'
 import { isObjectlike, pluckProps } from '../internal/utils'
-import { isoDateFieldNamesDesc } from '../internal/isoFields'
-import { refineMaybeZonedDateTimeBag } from '../genericApi/convert'
-import { MarketSlots } from '../internal/markerSystemTypes'
-import { ZonedDateTimeBag } from '../genericApi/genericBag'
-import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
+import { refineMaybeZonedDateTimeBag } from '../genericApi/bagGeneric'
+import { MarkerSlots } from '../internal/marker'
+import { ZonedDateTimeBag } from '../genericApi/bagGeneric'
+import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import { PlainDateBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 
 // public
-import { BrandingSlots, getSlots } from './slots'
+import { BrandingSlots, getSlots } from './slotsForClasses'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
 import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
@@ -21,7 +21,7 @@ import { createTimeZoneOps } from './timeZoneOpsQuery'
 
 export function refinePublicRelativeTo(
   relativeTo: ZonedDateTimeArg | PlainDateArg | undefined,
-): MarketSlots<CalendarSlot, TimeZoneSlot> | undefined {
+): MarkerSlots<CalendarSlot, TimeZoneSlot> | undefined {
   if (relativeTo !== undefined) {
     if (isObjectlike(relativeTo)) {
       const slots = (getSlots(relativeTo) || {}) as Partial<BrandingSlots>

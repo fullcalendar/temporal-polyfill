@@ -8,7 +8,7 @@ import {
   updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
 } from './durationFields'
-import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './isoFields'
+import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,

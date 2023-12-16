@@ -1,5 +1,5 @@
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/isoMath'
-import { IsoDateFields } from '../internal/isoFields'
+import { IsoDateFields } from '../internal/calendarIsoFields'
 import { DateFields, EraYearFields } from '../internal/calendarFields'
 import { createNativeDayOfYearOps, createNativeDaysInMonthOps, createNativeDaysInYearOps, createNativeInLeapYearOps, createNativeMonthsInYearOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { computeDateFields } from '../internal/calendarNative'

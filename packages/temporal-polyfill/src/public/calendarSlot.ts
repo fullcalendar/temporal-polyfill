@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { isObjectlike } from '../internal/utils'
-import { refineCalendarSlotString } from '../genericApi/calendarSlot'
-import { getSlots } from './slots'
+import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
+import { getSlots } from './slotsForClasses'
 import { CalendarArg } from './calendar'
 import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
 

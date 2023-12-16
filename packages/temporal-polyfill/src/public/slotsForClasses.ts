@@ -1,31 +1,11 @@
-import { DayTimeNano } from '../internal/dayTimeNano'
-import { IsoDateFields, IsoTimeFields } from '../internal/isoFields'
-
-// public
+import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { CalendarSlot } from './calendarSlot'
+import { DayTimeNano } from '../internal/dayTimeNano'
 import { TimeZoneSlot } from './timeZoneSlot'
-
-// Types
-// -------------------------------------------------------------------------------------------------
 
 export interface BrandingSlots {
   branding: string
 }
-
-export interface EpochSlots {
-  epochNanoseconds: DayTimeNano
-}
-
-export interface ZonedEpochSlots extends EpochSlots {
-  timeZone: TimeZoneSlot
-  calendar: CalendarSlot
-}
-
-// Types for getISOFields()
-// -------------------------------------------------------------------------------------------------
-
-export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
-export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
 
 // Lookup
 // -------------------------------------------------------------------------------------------------
@@ -64,4 +44,22 @@ export function rejectInvalidBag<B>(bag: B): B {
     throw new TypeError('Ah')
   }
   return bag
+}
+
+// Types for getISOFields()
+// -------------------------------------------------------------------------------------------------
+
+export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
+export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
+
+// For internal use within public API
+// -------------------------------------------------------------------------------------------------
+
+export interface EpochSlots {
+  epochNanoseconds: DayTimeNano
+}
+
+export interface ZonedEpochSlots extends EpochSlots {
+  timeZone: TimeZoneSlot
+  calendar: CalendarSlot
 }

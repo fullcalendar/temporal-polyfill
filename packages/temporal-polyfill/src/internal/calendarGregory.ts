@@ -1,7 +1,7 @@
 import { gregoryCalendarOrigins } from './calendarConfig'
 import { isoDateModOps, isoDateRefineOps, isoMonthDayModOps, isoMonthDayRefineOps, isoPartOps, isoStandardOps, isoYearMonthModOps, isoYearMonthRefineOps } from './calendarIso'
 import { EraParts, NativeDateModOps, NativeDateRefineOps, NativeMonthDayModOps, NativeMonthDayRefineOps, NativePartOps, NativeStandardOps, NativeYearMonthModOps, NativeYearMonthRefineOps } from './calendarNative'
-import { IsoDateFields } from './isoFields'
+import { IsoDateFields } from './calendarIsoFields'
 
 export const gregoryPartOps: NativePartOps = {
   ...isoPartOps,

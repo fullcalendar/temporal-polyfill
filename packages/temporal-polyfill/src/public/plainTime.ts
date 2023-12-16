@@ -1,29 +1,29 @@
 import { TimeBag } from '../internal/calendarFields'
-import { IsoTimeFields, isoTimeFieldNamesDesc } from '../internal/isoFields'
-import { LocalesArg, prepPlainTimeFormat } from '../internal/intlFormat'
+import { IsoTimeFields, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
+import { LocalesArg, prepPlainTimeFormat } from '../internal/formatIntl'
 import {
   DiffOptions,
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
   refineOverflowOptions,
-} from '../genericApi/options'
+} from '../genericApi/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainTimeBag } from '../genericApi/genericBag'
+import { PlainTimeBag } from '../genericApi/bagGeneric'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
-import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/genericTypes'
+import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slots'
+import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { createTimeGetterMethods, neverValueOf } from './publicMixins'
+import { createTimeGetterMethods, neverValueOf } from './mixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot } from './calendarSlot'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'

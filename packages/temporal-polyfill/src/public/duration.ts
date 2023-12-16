@@ -3,20 +3,20 @@ import {
   RelativeToOptions,
   TimeDisplayOptions,
   TotalUnitOptionsWithRel,
-} from '../genericApi/options'
+} from '../genericApi/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
 import * as DurationFuncs from '../genericApi/duration'
 import { DurationBranding } from '../genericApi/branding'
-import { DurationSlots } from '../genericApi/genericTypes'
+import { DurationSlots } from '../genericApi/slotsGeneric'
 
 // public
-import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slots'
-import { durationGettersMethods, neverValueOf } from './publicMixins'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
+import { durationGettersMethods, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
-import { refinePublicRelativeTo } from './publicOptions'
+import { refinePublicRelativeTo } from './markerRefine'
 import { createDiffOps } from './calendarOpsQuery'
 import { createTimeZoneOps } from './timeZoneOpsQuery'
 
