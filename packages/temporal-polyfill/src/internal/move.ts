@@ -18,7 +18,6 @@ import {
   isoMonthsInYear,
   isoTimeFieldsToNano,
   isoToEpochMilli,
-  moveByIsoDays,
   nanoToIsoTimeAndDay,
 } from './isoMath'
 import { Overflow } from './options'
@@ -245,4 +244,14 @@ export function intlMonthAdd(
   }
 
   return [year, month]
+}
+
+export function moveByIsoDays(
+  isoDateFields: IsoDateFields,
+  days: number,
+): IsoDateFields {
+  if (days) {
+    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields)! + days * milliInDay)
+  }
+  return isoDateFields
 }

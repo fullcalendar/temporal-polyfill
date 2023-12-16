@@ -23,7 +23,6 @@ import {
   isoEpochFirstLeapYear,
   isoToEpochNanoWithOffset,
   nanoToIsoTimeAndDay,
-  moveByIsoDays,
 } from './isoMath'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { FixedTimeZone } from './timeZoneNative'

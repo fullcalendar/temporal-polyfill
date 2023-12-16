@@ -6,7 +6,7 @@ import { durationFieldDefaults, negateDurationFields, updateDurationFieldsSign }
 import { getCommonCalendarSlot } from './calendarSlotString'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/formatIso'
-import { checkIsoYearMonthInBounds, compareIsoDateFields, moveByIsoDays } from '../internal/isoMath'
+import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/isoMath'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'
@@ -16,7 +16,7 @@ import { DurationBranding, PlainDateBranding, PlainYearMonthBranding } from './b
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from './slotsGeneric'
 import { DateModOps, YearMonthDiffOps, YearMonthModOps, YearMonthMoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { NativeYearMonthParseOps } from '../internal/calendarNative'
-import { moveToMonthStart } from '../internal/move'
+import { moveByIsoDays, moveToMonthStart } from '../internal/move'
 import { Overflow } from '../internal/options'
 
 export function create<CA, C>(

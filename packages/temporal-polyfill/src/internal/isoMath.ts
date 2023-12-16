@@ -445,16 +445,3 @@ export function compareIsoTimeFields(
     isoTimeFieldsToNano(isoFields1),
   )
 }
-
-// Moving (would put in move.ts, but circular dep problems -- still??)
-// -------------------------------------------------------------------------------------------------
-
-export function moveByIsoDays(
-  isoDateFields: IsoDateFields,
-  days: number,
-): IsoDateFields {
-  if (days) {
-    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields)! + days * milliInDay)
-  }
-  return isoDateFields
-}

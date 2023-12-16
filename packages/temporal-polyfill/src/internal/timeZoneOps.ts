@@ -1,11 +1,12 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
-import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset, moveByIsoDays } from './isoMath'
+import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset } from './isoMath'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
 import { nanoInUtcDay } from './units'
 import { ensureNumber } from './cast'
 import { createLazyGenerator } from './utils'
+import { moveByIsoDays } from './move'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
 export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
