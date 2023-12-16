@@ -2,7 +2,6 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { ensureStringViaPrimitive, toBigInt } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffEpochNano } from '../internal/diff'
-import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { formatInstantIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { moveEpochNano } from '../internal/move'
@@ -16,6 +15,7 @@ import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from './bran
 import { DurationSlots, InstantSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { parseInstant } from '../internal/parseIso'
 import { SimpleTimeZoneOps } from '../internal/timeZoneOps'
+import { DurationFields, negateDuration } from '../internal/durationFields'
 
 export function create(epochNano: bigint): InstantSlots {
   return {
@@ -61,7 +61,7 @@ export function fromEpochNanoseconds(epochNano: bigint): InstantSlots {
 
 export function add(
   instantSlots: InstantSlots,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
 ): InstantSlots {
   return {
     branding: InstantBranding,
@@ -71,9 +71,9 @@ export function add(
 
 export function subtract(
   instantSlots: InstantSlots,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
 ): InstantSlots {
-  return add(instantSlots, negateDurationInternals(durationSlots) as any)
+  return add(instantSlots, negateDuration(durationSlots))
 }
 
 export function until(
@@ -84,16 +84,14 @@ export function until(
 ): DurationSlots {
   return {
     branding: DurationBranding,
-    ...updateDurationFieldsSign(
-      diffEpochNano(
-        instantSlots0.epochNanoseconds,
-        instantSlots1.epochNanoseconds,
-        ...(
-          refineDiffOptions(invertRoundingMode, options, Unit.Second, Unit.Hour) as
-            [TimeUnit, TimeUnit, number, RoundingMode]
-        ),
+    ...diffEpochNano(
+      instantSlots0.epochNanoseconds,
+      instantSlots1.epochNanoseconds,
+      ...(
+        refineDiffOptions(invertRoundingMode, options, Unit.Second, Unit.Hour) as
+          [TimeUnit, TimeUnit, number, RoundingMode]
       ),
-    )
+    ),
   }
 }
 
@@ -101,8 +99,8 @@ export function since(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
   options?: DiffOptions,
-): DurationFieldsWithSign { // !!!
-  return negateDurationInternals(until(instantSlots1, instantSlots0, options, true))
+): DurationFields {
+  return negateDuration(until(instantSlots1, instantSlots0, options, true))
 }
 
 export function round(

@@ -1,7 +1,6 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
 import { diffTimes } from '../internal/diff'
-import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { formatPlainTimeIso } from '../internal/formatIso'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/epochAndTime'
@@ -17,6 +16,7 @@ import { PlainTimeBag } from './bagGeneric'
 import { mergePlainTimeBag, refinePlainTimeBag } from './bagGeneric'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from './branding'
+import { DurationFields, negateDuration } from '../internal/durationFields'
 
 export function create(
   isoHour: number = 0,
@@ -88,7 +88,7 @@ export function subtract(
   slots: PlainTimeSlots,
   durationSlots: DurationSlots,
 ): PlainTimeSlots {
-  return add(slots, negateDurationInternals(durationSlots) as unknown as DurationSlots) // !!!
+  return add(slots, negateDuration(durationSlots) as unknown as DurationSlots)
 }
 
 export function until(
@@ -98,12 +98,10 @@ export function until(
   invertRoundingMode?: boolean,
 ): DurationSlots {
   return {
-    ...updateDurationFieldsSign(
-      diffTimes(
-        plainTimeSlots0,
-        plainTimeSlots1,
-        ...(refineDiffOptions(invertRoundingMode, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
-      ),
+    ...diffTimes(
+      plainTimeSlots0,
+      plainTimeSlots1,
+      ...(refineDiffOptions(invertRoundingMode, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
     ),
     branding: DurationBranding
   }
@@ -113,8 +111,8 @@ export function since(
   plainTimeSlots0: PlainTimeSlots,
   plainTimeSlots1: PlainTimeSlots,
   options?: DiffOptions,
-): DurationFieldsWithSign { // !!!
-  return negateDurationInternals(until(plainTimeSlots1, plainTimeSlots0, options, true))
+): DurationFields {
+  return negateDuration(until(plainTimeSlots1, plainTimeSlots0, options, true))
 }
 
 export function round(

@@ -1,14 +1,13 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, addDayTimeNanos, createDayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
-  DurationFieldsWithSign,
   durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
-  updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
+  queryDurationSign,
 } from './durationFields'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './calendarIsoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
@@ -156,11 +155,11 @@ export function roundRelativeDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
 ): DurationFields {
-  const durationInternals = updateDurationFieldsSign(durationFields)
+  const sign = queryDurationSign(durationFields)
 
   // fast path, no rounding
   if (
-    !durationInternals.sign || (
+    !sign || (
       smallestUnit === Unit.Nanosecond &&
       roundingInc === 1
     )
@@ -181,7 +180,7 @@ export function roundRelativeDuration<M>(
   ) as typeof nudgeRelativeDuration // accepts all units
 
   let [roundedDurationFields, roundedEpochNano, grewBigUnit] = nudgeFunc(
-    durationInternals,
+    durationFields,
     endEpochNano,
     smallestUnit,
     roundingInc,
@@ -195,7 +194,7 @@ export function roundRelativeDuration<M>(
   // grew a day/week/month/year?
   if (grewBigUnit) {
     roundedDurationFields = bubbleRelativeDuration(
-      updateDurationFieldsSign(roundedDurationFields),
+      roundedDurationFields,
       roundedEpochNano,
       largestUnit,
       Math.max(Unit.Day, smallestUnit),
@@ -285,7 +284,7 @@ export function totalDayTimeNano(
 }
 
 export function totalRelativeDuration<M>(
-  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   totalUnit: Unit,
   // marker system...
@@ -293,7 +292,7 @@ export function totalRelativeDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
 ): number {
-  const { sign } = durationFields
+  const sign = queryDurationSign(durationFields)
 
   const [epochNano0, epochNano1] = clampRelativeDuration(
     clearDurationFields(durationFields, totalUnit - 1),
@@ -321,7 +320,7 @@ and return the (day) delta. Also return the (potentially) unbalanced new duratio
 */
 
 function nudgeDurationDayTime(
-  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for adding result to
   smallestUnit: DayTimeUnit, // always <=Day
   roundingInc: number,
@@ -331,7 +330,7 @@ function nudgeDurationDayTime(
   nudgedEpochNano: DayTimeNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const { sign } = durationFields
+  const sign = queryDurationSign(durationFields)
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
   const roundedDayTimeNano = roundDayTimeNano(dayTimeNano, smallestUnit, roundingInc, roundingMode)
   const nanoDiff = diffDayTimeNanos(dayTimeNano, roundedDayTimeNano)
@@ -371,7 +370,7 @@ Handles crazy DST edge case
 Time ONLY. Days must use full-on marker moving
 */
 function nudgeRelativeDurationTime<M>(
-  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for conformance
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number,
@@ -385,7 +384,7 @@ function nudgeRelativeDurationTime<M>(
   nudgedEpochNano: DayTimeNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const { sign } = durationFields
+  const sign = queryDurationSign(durationFields)
   let [dayDelta, timeNano] = givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
@@ -425,7 +424,7 @@ function nudgeRelativeDurationTime<M>(
 }
 
 function nudgeRelativeDuration<M>(
-  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   smallestUnit: Unit, // always >Day
   roundingInc: number,
@@ -439,7 +438,7 @@ function nudgeRelativeDuration<M>(
   movedEpochNano: DayTimeNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const { sign } = durationFields
+  const sign = queryDurationSign(durationFields)
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
 
   const baseDurationFields = clearDurationFields(durationFields, smallestUnit - 1)
@@ -481,7 +480,7 @@ export function roundToMinute(offsetNano: number): number {
 }
 
 function bubbleRelativeDuration<M>(
-  durationFields: DurationFieldsWithSign, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year
@@ -490,7 +489,7 @@ function bubbleRelativeDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
 ): DurationFields {
-  const { sign } = durationFields
+  const sign = queryDurationSign(durationFields)
 
   for (
     let currentUnit: Unit = smallestUnit + 1;
@@ -516,7 +515,7 @@ function bubbleRelativeDuration<M>(
     )
 
     if (!beyondThreshold || Math.sign(beyondThreshold) === sign) {
-      durationFields = updateDurationFieldsSign(baseDurationFields)
+      durationFields = baseDurationFields
     } else {
       break
     }

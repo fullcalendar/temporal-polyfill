@@ -1,5 +1,4 @@
 import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
-import { DurationFieldsWithSign } from '../internal/durationFields'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { formatOffsetNano } from '../internal/formatIso'
@@ -16,6 +15,7 @@ import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 import * as Utils from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
+import { DurationFields } from '../internal/durationFields'
 
 export function create(
   epochNano: bigint,
@@ -174,7 +174,7 @@ export function withCalendar(
 
 export function add(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.add(
@@ -188,7 +188,7 @@ export function add(
 
 export function subtract(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<string, string> {
   return ZonedDateTimeFuncs.subtract(
@@ -204,7 +204,7 @@ export function until(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<string, string>,
   options?: DiffOptions,
-): DurationFieldsWithSign {
+): DurationFields {
   return ZonedDateTimeFuncs.until(
     createNativeDiffOps,
     queryNativeTimeZone,
@@ -218,7 +218,7 @@ export function since(
   zonedDateTimeSlots0: ZonedDateTimeSlots<string, string>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<string, string>,
   options?: DiffOptions,
-): DurationFieldsWithSign {
+): DurationFields {
   return ZonedDateTimeFuncs.since(
     createNativeDiffOps,
     queryNativeTimeZone,

@@ -12,9 +12,9 @@ import {
 } from './units'
 import {
   NumSign,
+  createLazyGenerator,
   mapPropNamesToConstant,
   mapPropNamesToIndex,
-  mapProps,
 } from './utils'
 
 export interface DurationDateFields {
@@ -35,18 +35,12 @@ export interface DurationTimeFields {
 
 export type DurationFields = DurationDateFields & DurationTimeFields
 
-export interface DurationFieldsWithSign extends DurationFields {
-  sign: NumSign
-}
-
 // Field Names
 // -------------------------------------------------------------------------------------------------
 
 export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + 's') as (keyof DurationFields)[]
 export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(0, Unit.Day)
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
-
-export const durationInternalNames = [...durationFieldNamesAsc, 'sign'] as (keyof DurationFieldsWithSign)[]
 
 export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 
@@ -55,18 +49,6 @@ export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 
 export const durationFieldDefaults = mapPropNamesToConstant(durationFieldNamesAsc, 0)
 export const durationTimeFieldDefaults = mapPropNamesToConstant(durationTimeFieldNamesAsc, 0)
-
-// Field <-> Field Conversion
-// -------------------------------------------------------------------------------------------------
-
-// wtf? use durationFieldRefiners
-export function refineDurationFields(
-  rawFields: DurationFields,
-): DurationFieldsWithSign {
-  return updateDurationFieldsSign(
-    mapProps(toIntegerStrict, rawFields),
-  )
-}
 
 // Field <-> Nanosecond Conversion
 // -------------------------------------------------------------------------------------------------
@@ -115,16 +97,7 @@ export function nanoToDurationTimeFields(
 // Field Math
 // -------------------------------------------------------------------------------------------------
 
-/*
-Mutates `fields`
-TODO: crazy-overused
-*/
-export function updateDurationFieldsSign(fields: DurationFields): DurationFieldsWithSign {
-  (fields as DurationFieldsWithSign).sign = computeDurationFieldsSign(fields)
-  return (fields as DurationFieldsWithSign)
-}
-
-export function addDayTimeDurationFields(
+export function addDayTimeDuration(
   a: DurationFields,
   b: DurationFields,
   sign: NumSign,
@@ -144,13 +117,7 @@ export function addDayTimeDurationFields(
   }
 }
 
-export function negateDurationInternals(internals: DurationFieldsWithSign): DurationFieldsWithSign {
-  const res = negateDurationFields(internals)
-  ;(res as DurationFieldsWithSign).sign = (-internals.sign || 0) as NumSign
-  return (res as DurationFieldsWithSign)
-}
-
-export function negateDurationFields(fields: DurationFields): DurationFields {
+export function negateDuration(fields: DurationFields): DurationFields {
   const res = {} as DurationFields
 
   for (const fieldName of durationFieldNamesAsc) {
@@ -160,18 +127,18 @@ export function negateDurationFields(fields: DurationFields): DurationFields {
   return res
 }
 
-export function absDurationInternals(internals: DurationFieldsWithSign): DurationFieldsWithSign {
-  if (internals.sign === -1) {
-    return negateDurationInternals(internals)
+export function absDuration(fields: DurationFields): DurationFields {
+  if (queryDurationSign(fields) === -1) {
+    return negateDuration(fields)
   }
-  return internals
+  return fields
 }
 
 export function durationHasDateParts(fields: DurationFields): boolean {
-  return Boolean(computeDurationFieldsSign(fields, durationDateFieldNamesAsc))
+  return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))
 }
 
-function computeDurationFieldsSign(
+function computeDurationSign(
   fields: DurationFields,
   fieldNames = durationFieldNamesAsc,
 ): NumSign {
@@ -189,4 +156,11 @@ function computeDurationFieldsSign(
   }
 
   return sign
+}
+
+export const queryDurationSign = createLazyGenerator(computeDurationSign, WeakMap)
+
+export function checkDurationFields(fields: DurationFields): DurationFields {
+  queryDurationSign(fields) // check and prime cache
+  return fields
 }

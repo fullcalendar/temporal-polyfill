@@ -1,7 +1,7 @@
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
 import { DurationSlots } from '../genericApi/slotsGeneric'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
-import { DurationFieldsWithSign, durationInternalNames } from '../internal/durationFields'
+import { DurationFields, durationFieldNamesAsc } from '../internal/durationFields'
 import { IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/epochAndTime'
 import { identityFunc, mapPropNames } from '../internal/utils'
@@ -23,14 +23,14 @@ function createCalendarMethods<M>(methodNameMap: M, alsoAccept: string[]): {
 
   for (const methodName in methodNameMap) {
     methods[methodName] = function(this: any, dateArg: any) {
-      const { ops } = getCalendarSlots(this)
+      const { native } = getCalendarSlots(this)
       const argSlots = (getSlots(dateArg) || {}) as any
       const { branding } = argSlots
       const refinedSlots = branding === PlainDateBranding || alsoAccept.includes(branding)
         ? argSlots
         : toPlainDateSlots(dateArg)
 
-      return (ops as any)[methodName](refinedSlots)
+      return (native as any)[methodName](refinedSlots)
     }
   }
 
@@ -88,15 +88,12 @@ export const monthDayGetters = createCalendarGetters(PlainMonthDayBranding, {
 // Duration
 // -------------------------------------------------------------------------------------------------
 
-/*
-Includes sign()
-*/
-export const durationGettersMethods = mapPropNames((propName: keyof DurationFieldsWithSign) => {
+export const durationGettersMethods = mapPropNames((propName: keyof DurationFields) => {
   return function (this: any) {
     const slots = getSpecificSlots(DurationBranding, this) as DurationSlots
     return slots[propName]
   }
-}, durationInternalNames)
+}, durationFieldNamesAsc)
 
 // Time
 // -------------------------------------------------------------------------------------------------

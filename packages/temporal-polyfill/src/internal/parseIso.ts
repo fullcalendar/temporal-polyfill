@@ -2,10 +2,8 @@ import { unitNanoMap, nanoInSec, nanoInUtcDay } from './units'
 import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
 import {
   DurationFields,
-  DurationFieldsWithSign,
   durationFieldNamesAsc,
-  negateDurationFields,
-  updateDurationFieldsSign,
+  negateDuration,
 } from './durationFields'
 import {
   IsoDateFields,
@@ -230,7 +228,7 @@ export function parsePlainTime(s: string): IsoTimeFields {
   return constrainIsoTimeFields(organized, Overflow.Reject)
 }
 
-export function parseDuration(s: string): DurationFieldsWithSign {
+export function parseDuration(s: string): DurationFields {
   const parsed = parseMaybeDurationInternals(s)
 
   if (!parsed) {
@@ -435,7 +433,7 @@ function parseMaybeTime(s: string): IsoTimeFields | undefined {
     : undefined
 }
 
-function parseMaybeDurationInternals(s: string): DurationFieldsWithSign | undefined {
+function parseMaybeDurationInternals(s: string): DurationFields | undefined {
   const parts = durationRegExp.exec(s)
   return parts ? organizeDurationParts(parts) : undefined
 }
@@ -548,7 +546,7 @@ function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number 
   return parseSign(parts[1]) * offsetNanoPos
 }
 
-function organizeDurationParts(parts: string[]): DurationFieldsWithSign {
+function organizeDurationParts(parts: string[]): DurationFields {
   let hasAny = false
   let hasAnyFrac = false
   let leftoverNano = 0
@@ -568,10 +566,10 @@ function organizeDurationParts(parts: string[]): DurationFieldsWithSign {
   }
 
   if (parseSign(parts[1]) < 0) {
-    durationFields = negateDurationFields(durationFields)
+    durationFields = negateDuration(durationFields)
   }
 
-  return updateDurationFieldsSign(durationFields)
+  return durationFields
 
   function parseUnit(wholeStr: string): number
   function parseUnit(wholeStr: string, fracStr: string, timeUnit: TimeUnit): number

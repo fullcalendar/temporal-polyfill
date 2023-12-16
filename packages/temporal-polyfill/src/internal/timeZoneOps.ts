@@ -23,7 +23,7 @@ export type SimpleTimeZoneOps = {
 // Operations on passed-in instances
 // -------------------------------------------------------------------------------------------------
 
-export const zonedInternalsToIso = createLazyGenerator(_zonedInternalsToIso)
+export const zonedInternalsToIso = createLazyGenerator(_zonedInternalsToIso, WeakMap)
 
 /*
 TODO: ensure returning in desc order, so we don't need to pluck

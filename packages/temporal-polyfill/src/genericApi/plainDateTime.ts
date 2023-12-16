@@ -2,7 +2,6 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
 import { IdLike, isIdLikeEqual, ensureString } from '../internal/cast'
 import { diffDateTimes } from '../internal/diff'
-import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlotString'
 import { IsoDateTimeFields, isoDateFieldNamesDesc, isoTimeFieldNamesDesc, refineIsoDateTimeArgs } from '../internal/calendarIsoFields'
 import { formatPlainDateTimeIso } from '../internal/formatIso'
@@ -19,6 +18,7 @@ import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYear
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
+import { DurationFields, negateDuration } from '../internal/durationFields'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -119,7 +119,7 @@ export function withCalendar<C>(
 export function add<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<C> {
   return {
@@ -136,10 +136,10 @@ export function add<C>(
 export function subtract<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<C> {
-  return add(getCalendarOps, plainDateTimeSlots, negateDurationInternals(durationSlots), options)
+  return add(getCalendarOps, plainDateTimeSlots, negateDuration(durationSlots), options)
 }
 
 export function until<C extends IdLike>(
@@ -153,13 +153,11 @@ export function until<C extends IdLike>(
   const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...updateDurationFieldsSign(
-      diffDateTimes(
-        calendarOps,
-        plainDateTimeSlots0,
-        plainDateTimeSlots1,
-        ...refineDiffOptions(invertRoundingMode, options, Unit.Day),
-      ),
+    ...diffDateTimes(
+      calendarOps,
+      plainDateTimeSlots0,
+      plainDateTimeSlots1,
+      ...refineDiffOptions(invertRoundingMode, options, Unit.Day),
     ),
     branding: DurationBranding,
   }
@@ -170,8 +168,8 @@ export function since<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
   options?: DiffOptions,
-): DurationFieldsWithSign { // lots of confusion!!! should be DurationSlots!!!!!!!!!!!!!!!!!!!!!!!!!
-  return negateDurationInternals(
+): DurationFields {
+  return negateDuration(
     until(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
   )
 }

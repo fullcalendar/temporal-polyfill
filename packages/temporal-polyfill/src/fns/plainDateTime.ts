@@ -1,5 +1,4 @@
 import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
-import { DurationFieldsWithSign } from '../internal/durationFields'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateTimeFormat } from '../internal/formatIntl'
@@ -10,6 +9,7 @@ import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, 
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 import * as Utils from './utils'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
+import { DurationFields } from '../internal/durationFields'
 
 // TODO: do Readonly<> everywhere?
 
@@ -115,7 +115,7 @@ export function withCalendar(
 
 export function add(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
   return PlainDateTimeFuncs.add(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
@@ -123,7 +123,7 @@ export function add(
 
 export function subtract(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
   return PlainDateTimeFuncs.subtract(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)

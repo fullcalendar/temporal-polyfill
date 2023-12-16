@@ -1,5 +1,5 @@
 import { DateBag, YearMonthBag } from './calendarFields'
-import { DurationFields, DurationFieldsWithSign } from './durationFields'
+import { DurationFields } from './durationFields'
 import { IsoDateFields } from './calendarIsoFields'
 import { Overflow } from './options'
 import { Unit } from './units'
@@ -12,7 +12,7 @@ export type MonthDayFromFieldsOp = (fields: DateBag, overflow: Overflow) => IsoD
 export type FieldsOp = (fieldNames: string[]) => string[]
 export type MergeFieldsOp = (fields: DateBag, additionalFields: DateBag) => DateBag
 export type DateAddOp = (isoFields: IsoDateFields, durationFields: DurationFields, overflow: Overflow) => IsoDateFields
-export type DateUntilOp = (isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit) => DurationFieldsWithSign
+export type DateUntilOp = (isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit) => DurationFields
 export type DayOp = (isoFields: IsoDateFields) => number
 
 // Refine

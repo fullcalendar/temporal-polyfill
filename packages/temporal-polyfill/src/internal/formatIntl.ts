@@ -282,7 +282,7 @@ export function createFormatCache<S>(
 
       return format
     }
-  })
+  }, WeakMap)
 
   return (locales, options, transformOptions, slots0, slots1) => {
     return queryFormatFactory(options)(locales, transformOptions, slots0, slots1)

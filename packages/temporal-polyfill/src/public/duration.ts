@@ -123,6 +123,10 @@ export class Duration {
     return DurationFuncs.blank(getDurationSlots(this))
   }
 
+  get sign(): NumSign {
+    return DurationFuncs.sign(getDurationSlots(this))
+  }
+
   static from(arg: DurationArg): Duration {
     return createDuration(toDurationSlots(arg))
   }

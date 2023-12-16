@@ -5,7 +5,6 @@ import {
   durationHasDateParts,
   durationTimeFieldDefaults,
   durationTimeFieldsToLargeNanoStrict,
-  updateDurationFieldsSign,
   durationFieldsToDayTimeNano,
 } from './durationFields'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './calendarIsoFields'
@@ -116,7 +115,7 @@ export function moveDateEasy(
   if (durationFields.years || durationFields.months || durationFields.weeks) {
     return calendarOps.dateAdd(
       isoDateFields,
-      updateDurationFieldsSign(durationFields),
+      durationFields,
       overflow
     )
   }

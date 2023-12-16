@@ -22,10 +22,10 @@ import {
   yearMonthFieldNames,
 } from '../internal/calendarFields'
 import {
-  DurationFieldsWithSign,
+  DurationFields,
+  checkDurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
-  updateDurationFieldsSign,
 } from '../internal/durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/calendarIsoFields'
 import { parseOffsetNano } from '../internal/parseIso'
@@ -481,22 +481,26 @@ function refineTimeBag(fields: TimeBag, overflow?: Overflow): IsoTimeFields {
 // Duration
 // -------------------------------------------------------------------------------------------------
 
-export function refineDurationBag(bag: DurationBag): DurationFieldsWithSign {
+export function refineDurationBag(bag: DurationBag): DurationFields {
   // refine in 'partial' mode
   const durationFields = refineFields(bag, durationFieldNamesAlpha) as DurationBag
 
-  return updateDurationFieldsSign({
+  return checkDurationFields({
     ...durationFieldDefaults,
     ...durationFields
   })
 }
 
 export function mergeDurationBag(
-  durationInternals: DurationFieldsWithSign,
+  durationFields: DurationFields,
   bag: DurationBag
-): DurationFieldsWithSign {
+): DurationFields {
   const partialDurationFields = refineFields(bag, durationFieldNamesAlpha)
-  return updateDurationFieldsSign({ ...durationInternals, ...partialDurationFields })
+
+  return checkDurationFields({
+    ...durationFields,
+    ...partialDurationFields,
+  })
 }
 
 // Calendar-field processing

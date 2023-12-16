@@ -2,7 +2,7 @@ import { DurationBag } from '../internal/calendarFields'
 import { ensureString, toIntegerStrict } from '../internal/cast'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from '../internal/diff'
-import { DurationFields, DurationFieldsWithSign, absDurationInternals, addDayTimeDurationFields, durationFieldNamesAsc, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
+import { DurationFields, absDuration, addDayTimeDuration, checkDurationFields, durationFieldNamesAsc, negateDuration, queryDurationSign } from '../internal/durationFields'
 import { IsoDateTimeFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { formatDurationInternals } from '../internal/formatIso'
 import { isoToEpochNano } from '../internal/epochAndTime'
@@ -33,7 +33,7 @@ export function create(
   nanoseconds: number = 0,
 ): DurationSlots {
   return {
-    ...updateDurationFieldsSign({
+    ...checkDurationFields({
       years: toIntegerStrict(years),
       months: toIntegerStrict(months),
       weeks: toIntegerStrict(weeks),
@@ -98,9 +98,7 @@ export function add<RA, C, T>(
   ) {
     return {
       branding: DurationBranding,
-      ...updateDurationFieldsSign(
-        addDayTimeDurationFields(slots, otherSlots, direction, largestUnit as DayTimeUnit)
-      )
+      ...addDayTimeDuration(slots, otherSlots, direction, largestUnit as DayTimeUnit),
     }
   }
 
@@ -109,7 +107,7 @@ export function add<RA, C, T>(
   }
 
   if (direction === -1) {
-    otherSlots = negateDurationInternals(otherSlots) as any // !!!
+    otherSlots = negateDuration(otherSlots) as any // !!!
   }
 
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
@@ -139,14 +137,14 @@ export function subtract<RA, C, T>(
 
 export function negated(slots: DurationSlots): DurationSlots {
   return {
-    ...negateDurationInternals(slots),
+    ...negateDuration(slots),
     branding: DurationBranding,
   }
 }
 
 export function abs(slots: DurationSlots): DurationSlots {
   return {
-    ...absDurationInternals(slots),
+    ...absDuration(slots),
     branding: DurationBranding,
   }
 }
@@ -181,15 +179,13 @@ export function round<RA, C, T>(
     // TODO: check internals doesn't have large fields
     return {
       branding: DurationBranding,
-      ...updateDurationFieldsSign(
-        roundDayTimeDuration(
-          slots,
-          largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
-          smallestUnit as DayTimeUnit,
-          roundingInc,
-          roundingMode,
-        ),
-      )
+      ...roundDayTimeDuration(
+        slots,
+        largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
+        smallestUnit as DayTimeUnit,
+        roundingInc,
+        roundingMode,
+      ),
     }
   }
 
@@ -223,7 +219,7 @@ export function round<RA, C, T>(
 
   return {
     branding: DurationBranding,
-    ...updateDurationFieldsSign(roundedDurationFields),
+    ...roundedDurationFields,
   }
 }
 
@@ -267,7 +263,7 @@ export function toString(slots: DurationSlots, options?: TimeDisplayOptions): st
 
   // for performance AND for not losing precision when no rounding
   if (nanoInc > 1) {
-    slots = updateDurationFieldsSign({
+    slots = {
       ...slots,
       ...balanceDayTimeDuration(
         slots,
@@ -275,7 +271,7 @@ export function toString(slots: DurationSlots, options?: TimeDisplayOptions): st
         nanoInc,
         roundingMode,
       ),
-    }) as any // !!!!!! - but different than others
+    }
   }
 
   return formatDurationInternals(
@@ -288,8 +284,12 @@ export function toJSON(slots: DurationSlots): string {
   return toString(slots)
 }
 
+export function sign(slots: DurationSlots): NumSign {
+  return queryDurationSign(slots) // TODO: just forward
+}
+
 export function blank(slots: DurationSlots): boolean {
-  return !slots.sign
+  return !queryDurationSign(slots)
 }
 
 export function compare<RA, C, T>(
@@ -382,7 +382,7 @@ function createMarkerSystem<C, T>(
       },
       // TODO: use .bind after updateDurationFieldsSign removed
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return updateDurationFieldsSign(diffDateTimes(calendarOps, m0, m1, largeUnit))
+        return diffDateTimes(calendarOps, m0, m1, largeUnit)
       },
     ]
   }
@@ -398,7 +398,7 @@ function spanDuration<M>(
   moveMarker: MoveMarker<M>,
   diffMarkers: DiffMarkers<M>,
 ): [
-  DurationFieldsWithSign,
+  DurationFields,
   DayTimeNano,
 ] {
   let endMarker = moveMarker(marker, durationFields0)
@@ -410,7 +410,7 @@ function spanDuration<M>(
   let balancedDuration = diffMarkers(marker, endMarker, largestUnit)
 
   return [
-    updateDurationFieldsSign(balancedDuration), // yuck
+    balancedDuration,
     markerToEpochNano(endMarker),
   ]
 }

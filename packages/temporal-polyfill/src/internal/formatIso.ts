@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
-import { DurationFieldsWithSign, absDurationInternals, durationFieldNamesAsc } from './durationFields'
+import { DurationFields, absDuration, durationFieldNamesAsc, negateDuration, queryDurationSign } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './calendarIsoFields'
 import { epochNanoToIso } from './epochAndTime'
 import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './options'
@@ -211,11 +211,11 @@ export function formatOffsetNano(
 }
 
 export function formatDurationInternals(
-  durationInternals: DurationFieldsWithSign, // already balanced
+  durationFields: DurationFields, // already balanced
   subsecDigits: SubsecDigits | undefined,
 ): string {
-  const { sign } = durationInternals
-  const abs = absDurationInternals(durationInternals)
+  const sign = queryDurationSign(durationFields)
+  const abs = sign === -1 ? negateDuration(durationFields): durationFields
   const { hours, minutes } = abs
 
   const [wholeSeconds, subsecNano] = dayTimeNanoToNumberRemainder(

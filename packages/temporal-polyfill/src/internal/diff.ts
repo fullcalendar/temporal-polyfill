@@ -1,11 +1,9 @@
 import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
-  DurationFieldsWithSign,
   durationFieldDefaults,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
-  updateDurationFieldsSign,
 } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
@@ -121,7 +119,7 @@ export function diffDates(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateFields) => DayTimeNano, // markerToEpochNano
-    (m: IsoDateFields, d: DurationFields) => calendarOps.dateAdd(m, updateDurationFieldsSign(d), Overflow.Constrain),
+    (m: IsoDateFields, d: DurationFields) => calendarOps.dateAdd(m, d, Overflow.Constrain),
   )
 }
 
@@ -140,22 +138,21 @@ export function nativeDateUntil(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
   largestUnit: Unit,
-): DurationFieldsWithSign {
+): DurationFields {
   if (largestUnit <= Unit.Week) {
     let weeks = 0
     let days = diffDays(startIsoFields, endIsoFields)
-    const sign = Math.sign(days) as NumSign
 
     if (largestUnit === Unit.Week) {
       [weeks, days] = divModTrunc(days, isoDaysInWeek)
     }
 
-    return { ...durationFieldDefaults, weeks, days, sign }
+    return { ...durationFieldDefaults, weeks, days }
   }
 
   const yearMonthDayStart = this.dateParts(startIsoFields)
   const yearMonthDayEnd = this.dateParts(endIsoFields)
-  let [years, months, days, sign] = diffYearMonthDay(
+  let [years, months, days] = diffYearMonthDay(
     this,
     ...yearMonthDayStart,
     ...yearMonthDayEnd,
@@ -166,7 +163,7 @@ export function nativeDateUntil(
     years = 0
   }
 
-  return { ...durationFieldDefaults, years, months, days, sign }
+  return { ...durationFieldDefaults, years, months, days }
 }
 
 export function diffTimes(
@@ -200,21 +197,21 @@ export function diffZonedEpochNano(
   smallestUnit: Unit = Unit.Nanosecond,
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
-): DurationFieldsWithSign {
+): DurationFields {
   if (largestUnit < Unit.Day) {
     // doesn't need timeZone
-    return updateDurationFieldsSign(diffEpochNano(
+    return diffEpochNano(
       startEpochNano,
       endEpochNano,
       largestUnit as TimeUnit,
       smallestUnit as TimeUnit,
       roundingInc,
       roundingMode,
-    ))
+    )
   }
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {
-    return updateDurationFieldsSign(durationFieldDefaults)
+    return durationFieldDefaults
   }
 
   const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
@@ -240,7 +237,7 @@ export function diffZonedEpochNano(
   const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
 
-  return updateDurationFieldsSign(roundRelativeDuration(
+  return roundRelativeDuration(
     { ...dateDiff, ...timeDiff },
     endEpochNano,
     largestUnit,
@@ -251,7 +248,7 @@ export function diffZonedEpochNano(
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
     (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d, Overflow.Constrain),
-  ))
+  )
 }
 
 export function diffEpochNano(
@@ -294,12 +291,12 @@ export function calendarDateUntilEasy(
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit, // largeUnit
-): DurationFieldsWithSign {
+): DurationFields {
   if (largestUnit === Unit.Day) {
-    return updateDurationFieldsSign({
+    return {
       ...durationFieldDefaults,
       days: diffDays(isoDateFields0, isoDateFields1)
-    })
+    }
   }
   return calendarOps.dateUntil(isoDateFields0, isoDateFields1, largestUnit)
 }
@@ -316,7 +313,6 @@ function diffYearMonthDay(
   yearDiff: number,
   monthDiff: number,
   dayDiff: number,
-  sign: NumSign,
 ] {
   let yearDiff!: number
   let monthsInYear1!: number
@@ -370,7 +366,7 @@ function diffYearMonthDay(
     }
   }
 
-  return [yearDiff, monthDiff, dayDiff, sign]
+  return [yearDiff, monthDiff, dayDiff]
 }
 
 export function computeIsoMonthsInYearSpan(yearDelta: number): number {

@@ -3,7 +3,6 @@ import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal
 import { ensureString, toBigInt, IdLike, isIdLikeEqual } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffZonedEpochNano } from '../internal/diff'
-import { DurationFieldsWithSign, negateDurationInternals, updateDurationFieldsSign } from '../internal/durationFields'
 import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/epochAndTime'
@@ -22,6 +21,7 @@ import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, P
 import { isTimeZoneSlotsEqual } from './timeZoneSlotString'
 import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlotString'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
+import { DurationFields, negateDuration } from '../internal/durationFields'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -186,7 +186,7 @@ export function add<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<C, T> {
   const movedEpochNanoseconds = moveZonedEpochNano(
@@ -207,10 +207,10 @@ export function subtract<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  durationSlots: DurationFieldsWithSign,
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): ZonedDateTimeSlots<C, T> {
-  return add(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots, negateDurationInternals(durationSlots), options)
+  return add(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots, negateDuration(durationSlots), options)
 }
 
 export function until<C extends IdLike, T>(
@@ -220,18 +220,16 @@ export function until<C extends IdLike, T>(
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
   invertRoundingMode?: boolean,
-): DurationFieldsWithSign {
+): DurationFields {
   const calendarSlot = getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
   const timeZoneSlot = zonedDateTimeSlots0.timeZone // TODO: ensure same timeZone with zonedDateTimeSlots1???
 
-  return updateDurationFieldsSign(
-    diffZonedEpochNano(
-      getCalendarOps(calendarSlot),
-      getTimeZoneOps(timeZoneSlot),
-      zonedDateTimeSlots0.epochNanoseconds,
-      zonedDateTimeSlots1.epochNanoseconds,
-      ...refineDiffOptions(invertRoundingMode, options, Unit.Hour),
-    ),
+  return diffZonedEpochNano(
+    getCalendarOps(calendarSlot),
+    getTimeZoneOps(timeZoneSlot),
+    zonedDateTimeSlots0.epochNanoseconds,
+    zonedDateTimeSlots1.epochNanoseconds,
+    ...refineDiffOptions(invertRoundingMode, options, Unit.Hour),
   )
 }
 
@@ -241,10 +239,8 @@ export function since<C extends IdLike, T>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
-): DurationFieldsWithSign {
-  return negateDurationInternals(
-    until(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
-  )
+): DurationFields {
+  return until(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
 }
 
 export function round<C, T>(

@@ -2,7 +2,7 @@ import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { overflowMapNames } from '../genericApi/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
-import { DurationFields, DurationFieldsWithSign } from '../internal/durationFields'
+import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/calendarIsoFields'
 import { Overflow } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
@@ -101,7 +101,7 @@ function dateAddAdapter(
         branding: PlainDateBranding, // go at to override what isoDateFields might provide!
       }),
       createDuration({
-        ...(durationFields as DurationFieldsWithSign), // !!!
+        ...durationFields,
         branding: DurationBranding,
       }),
       Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
