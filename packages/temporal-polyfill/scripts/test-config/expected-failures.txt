@@ -6,6 +6,9 @@
 # internal CalendarProtocol receiving options. undefined or not?
 built-ins/Temporal/PlainDate/compare/calendar-datefromfields-called-with-options-undefined.js
 
+# optional params and func/class.length
+built-ins/Temporal/PlainDate/length.js
+
 ####################################################################################################
 # Options parsing
 ####################################################################################################

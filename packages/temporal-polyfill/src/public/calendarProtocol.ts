@@ -39,7 +39,7 @@ export interface CalendarProtocol extends CalendarProtocolMethods {
 }
 
 const requiredMethodNames: string[] = [
-  ...Object.keys(dateRefiners).slice(0, 2), // remove era/eraYear
+  ...Object.keys(dateRefiners).slice(2), // remove era/eraYear
   // TODO: use adapter keys? (might result in more complexity and larger size)
   'dateAdd',
   'dateUntil',
