@@ -55,20 +55,19 @@ export function fromString(
 }
 
 export function fromFields<C>(
-  getCalendarOps: (calendar: C) => YearMonthRefineOps,
+  getCalendarOps: (calendar: C) => YearMonthRefineOps<C>,
   calendarSlot: C,
   bag: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   return {
     ...refinePlainYearMonthBag(getCalendarOps(calendarSlot), bag, options),
-    calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function withFields<C>(
-  getCalendarOps: (calendar: C) => YearMonthModOps,
+  getCalendarOps: (calendar: C) => YearMonthModOps<C>,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   initialFields: YearMonthFieldsIntl,
   mod: YearMonthBag,
@@ -79,7 +78,6 @@ export function withFields<C>(
 
   return {
     ...mergePlainYearMonthBag(calendarOps, initialFields, mod, options),
-    calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
@@ -189,7 +187,7 @@ export function toJSON(
 }
 
 export function toPlainDate<C>(
-  getCalendarOps: (calendar: C) => DateModOps,
+  getCalendarOps: (calendar: C) => DateModOps<C>,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   plainYearMonthFields: YearMonthFieldsIntl,
   bag: { day: number },
@@ -199,7 +197,6 @@ export function toPlainDate<C>(
 
   return {
     ...convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag),
-    calendar: calendarSlot,
     branding: PlainDateBranding,
   }
 }

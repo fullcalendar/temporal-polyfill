@@ -83,7 +83,6 @@ export class Calendar implements CalendarProtocol {
 
     return createPlainDate({
       ...refinePlainDateBag(native, fields, options, getRequiredDateFields(id)),
-      calendar: id,
       branding: PlainDateBranding,
     })
   }
@@ -96,7 +95,6 @@ export class Calendar implements CalendarProtocol {
 
     return createPlainYearMonth({
       ...refinePlainYearMonthBag(native, fields, options, getRequiredYearMonthFields(id)),
-      calendar: id,
       branding: PlainYearMonthBranding,
     })
   }
@@ -109,7 +107,6 @@ export class Calendar implements CalendarProtocol {
 
     return createPlainMonthDay({
       ...refinePlainMonthDayBag(native, false, fields, options, getRequiredMonthDayFields(id)),
-      calendar: id,
       branding: PlainMonthDayBranding,
     })
   }

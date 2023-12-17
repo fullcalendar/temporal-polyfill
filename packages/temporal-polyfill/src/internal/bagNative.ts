@@ -16,32 +16,38 @@ export function nativeDateFromFields(
   this: NativeDateRefineDeps,
   fields: DateBag,
   overflow: Overflow
-): IsoDateFields {
+): IsoDateFields & { calendar: string } {
   const year = refineYear(this, fields)
   const month = refineMonth(this, fields, year, overflow)
   const day = refineDay(this, fields as DayFields, month, year, overflow)
   const isoFields = this.isoFields(year, month, day)
 
-  return checkIsoDateInBounds(isoFields)
+  return {
+    ...checkIsoDateInBounds(isoFields),
+    calendar: this.id,
+  }
 }
 
 export function nativeYearMonthFromFields(
   this: NativeYearMonthRefineDeps,
   fields: YearMonthBag,
   overflow: Overflow
-): IsoDateFields {
+): IsoDateFields & { calendar: string } {
   const year = refineYear(this, fields)
   const month = refineMonth(this, fields, year, overflow)
   const isoFields = this.isoFields(year, month, 1)
 
-  return checkIsoYearMonthInBounds(isoFields)
+  return {
+    ...checkIsoYearMonthInBounds(isoFields),
+    calendar: this.id,
+  }
 }
 
 export function nativeMonthDayFromFields(
   this: NativeMonthDayRefineOps,
   fields: DateBag,
   overflow?: Overflow
-): IsoDateFields {
+): IsoDateFields & { calendar: string } {
   const easyMonthRefining = this.yearMonthForMonthDay === computeIsoYearMonthForMonthDay // HACK
   let { month, monthCode } = fields as Partial<MonthFields>
   let year
@@ -128,7 +134,10 @@ export function nativeMonthDayFromFields(
     )
   }
 
-  return this.isoFields(year, month, day)
+  return {
+    ...this.isoFields(year, month, day),
+    calendar: this.id,
+  }
 }
 
 function refineYear(

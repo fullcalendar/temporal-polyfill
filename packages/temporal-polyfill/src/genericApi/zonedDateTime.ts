@@ -46,7 +46,7 @@ export function fromString(s: string, options?: ZonedFieldOptions): ZonedDateTim
 }
 
 export function fromFields<C, TA, T>(
-  getCalendarOps: (calendarSlot: C) => DateRefineOps,
+  getCalendarOps: (calendarSlot: C) => DateRefineOps<C>,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   calendarSlot: C,
@@ -54,7 +54,6 @@ export function fromFields<C, TA, T>(
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<C, T> {
   return {
-    calendar: calendarSlot,
     ...refineZonedDateTimeBag(
       getCalendarOps(calendarSlot),
       refineTimeZoneArg,
@@ -81,7 +80,7 @@ export function getISOFields<C, T>(
 }
 
 export function withFields<C, T>(
-  getCalendarOps: (calendarSlot: C) => DateModOps,
+  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   initialFields: DateTimeFields & Partial<EraYearFields>, // TODO: allow offset
@@ -419,7 +418,7 @@ export function toPlainDateTime<C, T>(
 }
 
 export function toPlainYearMonth<C>(
-  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps,
+  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
   zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
 ): PlainYearMonthSlots<C> {
@@ -428,13 +427,12 @@ export function toPlainYearMonth<C>(
 
   return {
     ...convertToPlainYearMonth(calendarOps, zonedDateTimeFields),
-    calendar: calendarSlot,
     branding: PlainYearMonthBranding,
   }
 }
 
 export function toPlainMonthDay<C>(
-  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps,
+  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps<C>,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
   zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
 ): PlainMonthDaySlots<C> {
@@ -443,7 +441,6 @@ export function toPlainMonthDay<C>(
 
   return {
     ...convertToPlainMonthDay(calendarOps, zonedDateTimeFields),
-    calendar: calendarSlot,
     branding: PlainMonthDayBranding,
   }
 }

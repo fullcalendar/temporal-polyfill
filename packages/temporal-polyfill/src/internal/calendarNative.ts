@@ -42,6 +42,7 @@ export type GetLeapMonthMeta = () => number | undefined
 // -------------------------------------------------------------------------------------------------
 
 export type NativeYearMonthRefineDeps = {
+  id: string
   leapMonth: LeapMonthOp
   monthsInYearPart: MonthsInYearPartOp
   isoFields: IsoFieldsOp
@@ -57,23 +58,23 @@ export type NativeMonthDayRefineDeps = NativeDateRefineDeps & {
   yearMonthForMonthDay: YearMonthForMonthDayOp
 }
 
-export type NativeYearMonthRefineOps = YearMonthRefineOps & NativeYearMonthRefineDeps
-export type NativeDateRefineOps = DateRefineOps & NativeDateRefineDeps
-export type NativeMonthDayRefineOps = MonthDayRefineOps & NativeMonthDayRefineDeps
+export type NativeYearMonthRefineOps = YearMonthRefineOps<string> & NativeYearMonthRefineDeps
+export type NativeDateRefineOps = DateRefineOps<string> & NativeDateRefineDeps
+export type NativeMonthDayRefineOps = MonthDayRefineOps<string> & NativeMonthDayRefineDeps
 
 // Base
 
-export const nativeYearMonthRefineBase: YearMonthRefineOps = {
+export const nativeYearMonthRefineBase: YearMonthRefineOps<string> = {
   yearMonthFromFields: nativeYearMonthFromFields,
   fields: nativeFieldsMethod,
 }
 
-export const nativeDateRefineBase: DateRefineOps = {
+export const nativeDateRefineBase: DateRefineOps<string> = {
   dateFromFields: nativeDateFromFields,
   fields: nativeFieldsMethod,
 }
 
-export const nativeMonthDayRefineBase: MonthDayRefineOps = {
+export const nativeMonthDayRefineBase: MonthDayRefineOps<string> = {
   monthDayFromFields: nativeMonthDayFromFields,
   fields: nativeFieldsMethod,
 }
@@ -224,8 +225,8 @@ export type NativeStandardOps =
 export const nativeStandardBase = {
   dateAdd: nativeDateAdd,
   dateUntil: nativeDateUntil,
-  yearMonthFromFields: nativeYearMonthFromFields,
   dateFromFields: nativeDateFromFields,
+  yearMonthFromFields: nativeYearMonthFromFields,
   monthDayFromFields: nativeMonthDayFromFields,
   fields: nativeFieldsMethod,
   mergeFields: nativeMergeFields,

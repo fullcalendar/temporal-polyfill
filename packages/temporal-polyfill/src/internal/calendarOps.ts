@@ -4,11 +4,13 @@ import { IsoDateFields } from './calendarIsoFields'
 import { Overflow } from './options'
 import { Unit } from './units'
 
+// Operations for internal use!
+
 // Function Types
 // (Must always be called from a CalendarOps object)
-export type DateFromFieldsOp = (fields: DateBag, overflow: Overflow) => IsoDateFields
-export type YearMonthFromFieldsOp = (fields: YearMonthBag, overflow: Overflow) => IsoDateFields
-export type MonthDayFromFieldsOp = (fields: DateBag, overflow: Overflow) => IsoDateFields
+export type DateFromFieldsOp<C> = (fields: DateBag, overflow: Overflow) => IsoDateFields & { calendar: C }
+export type YearMonthFromFieldsOp<C> = (fields: YearMonthBag, overflow: Overflow) => IsoDateFields & { calendar: C }
+export type MonthDayFromFieldsOp<C> = (fields: DateBag, overflow: Overflow) => IsoDateFields & { calendar: C }
 export type FieldsOp = (fieldNames: string[]) => string[]
 export type MergeFieldsOp = (fields: DateBag, additionalFields: DateBag) => DateBag
 export type DateAddOp = (isoFields: IsoDateFields, durationFields: DurationFields, overflow: Overflow) => IsoDateFields
@@ -16,14 +18,16 @@ export type DateUntilOp = (isoFields0: IsoDateFields, isoFields1: IsoDateFields,
 export type DayOp = (isoFields: IsoDateFields) => number
 
 // Refine
-export type DateRefineOps = { dateFromFields: DateFromFieldsOp, fields: FieldsOp }
-export type YearMonthRefineOps = { yearMonthFromFields: YearMonthFromFieldsOp, fields: FieldsOp }
-export type MonthDayRefineOps = { monthDayFromFields: MonthDayFromFieldsOp, fields: FieldsOp }
+// (assumes received fields are ALREADY refined)
+export type DateRefineOps<C> = { dateFromFields: DateFromFieldsOp<C>, fields: FieldsOp }
+export type YearMonthRefineOps<C> = { yearMonthFromFields: YearMonthFromFieldsOp<C>, fields: FieldsOp }
+export type MonthDayRefineOps<C> = { monthDayFromFields: MonthDayFromFieldsOp<C>, fields: FieldsOp }
 
 // Mod
-export type YearMonthModOps = YearMonthRefineOps & { mergeFields: MergeFieldsOp }
-export type DateModOps = DateRefineOps & { mergeFields: MergeFieldsOp }
-export type MonthDayModOps = MonthDayRefineOps & { mergeFields: MergeFieldsOp }
+// (assumes received fields are ALREADY refined)
+export type YearMonthModOps<C> = YearMonthRefineOps<C> & { mergeFields: MergeFieldsOp }
+export type DateModOps<C> = DateRefineOps<C> & { mergeFields: MergeFieldsOp }
+export type MonthDayModOps<C> = MonthDayRefineOps<C> & { mergeFields: MergeFieldsOp }
 
 // Math
 export type MoveOps = { dateAdd: DateAddOp }

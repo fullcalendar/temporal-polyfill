@@ -15,6 +15,7 @@ import { noop } from './utils'
 // ------
 
 const isoYearMonthRefineDeps = {
+  id: isoCalendarId,
   leapMonth: noop as LeapMonthOp,
   monthsInYearPart: computeIsoMonthsInYear,
   isoFields: computeIsoFieldsFromParts,
@@ -155,6 +156,7 @@ export const isoMonthDayParseOps: NativeMonthDayParseOps = {
 
 export const isoStandardOps: NativeStandardOps = {
   ...nativeStandardBase,
+  id: isoCalendarId,
   dateParts: computeIsoDateParts,
   eraParts: computeIsoEraParts,
   monthCodeParts: computeIsoMonthCodeParts,
@@ -186,36 +188,43 @@ export const gregoryPartOps: NativePartOps = {
 
 export const gregoryYearMonthRefineOps: NativeYearMonthRefineOps = {
   ...isoYearMonthRefineOps,
+  id: gregoryCalendarId,
   getEraOrigins: getGregoryEraOrigins,
 }
 
 export const gregoryDateRefineOps: NativeDateRefineOps = {
   ...isoDateRefineOps,
+  id: gregoryCalendarId,
   getEraOrigins: getGregoryEraOrigins,
 }
 
 export const gregoryMonthDayRefineOps: NativeMonthDayRefineOps = {
   ...isoMonthDayRefineOps,
+  id: gregoryCalendarId,
   getEraOrigins: getGregoryEraOrigins,
 }
 
 export const gregoryYearMonthModOps: NativeYearMonthModOps = {
   ...isoYearMonthModOps,
+  id: gregoryCalendarId,
   getEraOrigins: getGregoryEraOrigins,
 }
 
 export const gregoryDateModOps: NativeDateModOps = {
   ...isoDateModOps,
+  id: gregoryCalendarId,
   getEraOrigins: getGregoryEraOrigins,
 }
 
 export const gregoryMonthDayModOps: NativeMonthDayModOps = {
   ...isoMonthDayModOps,
+  id: gregoryCalendarId,
   getEraOrigins: getGregoryEraOrigins,
 }
 
 export const gregoryStandardOps: NativeStandardOps = {
   ...isoStandardOps,
+  id: gregoryCalendarId,
   eraParts: computeGregoryEraParts,
   getEraOrigins: getGregoryEraOrigins,
 }
@@ -244,17 +253,17 @@ const intlMonthDayRefineDeps = {
   yearMonthForMonthDay: computeIntlYearMonthForMonthDay,
 }
 
-export const intlYearMonthRefineOps: NativeYearMonthRefineOps = {
+export const intlYearMonthRefineOps: Omit<NativeYearMonthRefineOps, 'id'> = {
   ...nativeYearMonthRefineBase,
   ...intlYearMonthRefineDeps,
 }
 
-export const intlDateRefineOps: NativeDateRefineOps = {
+export const intlDateRefineOps: Omit<NativeDateRefineOps, 'id'> = {
   ...nativeDateRefineBase,
   ...intlDateRefineDeps,
 }
 
-export const intlMonthDayRefineOps: NativeMonthDayRefineOps = {
+export const intlMonthDayRefineOps: Omit<NativeMonthDayRefineOps, 'id'> = {
   ...nativeMonthDayRefineBase,
   ...intlMonthDayRefineDeps,
 }
@@ -262,17 +271,17 @@ export const intlMonthDayRefineOps: NativeMonthDayRefineOps = {
 // Mod
 // ---
 
-export const intlYearMonthModOps: NativeYearMonthModOps = {
+export const intlYearMonthModOps: Omit<NativeYearMonthModOps, 'id'> = {
   ...intlYearMonthRefineOps,
   mergeFields: nativeMergeFields,
 }
 
-export const intlDateModOps: NativeDateModOps = {
+export const intlDateModOps: Omit<NativeDateModOps, 'id'> = {
   ...intlDateRefineOps,
   mergeFields: nativeMergeFields,
 }
 
-export const intlMonthDayModOps: NativeMonthDayModOps = {
+export const intlMonthDayModOps: Omit<NativeMonthDayModOps, 'id'> = {
   ...intlMonthDayRefineOps,
   mergeFields: nativeMergeFields,
 }
@@ -381,7 +390,7 @@ export const intlMonthDayParseOps: NativeMonthDayParseOps = {
 // Standard
 // --------
 
-export const intlStandardOps: NativeStandardOps = {
+export const intlStandardOps: Omit<NativeStandardOps, 'id'> = {
   ...nativeStandardBase,
   dateParts: computeIntlDateParts,
   eraParts: computeIntlEraParts,

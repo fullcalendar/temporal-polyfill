@@ -24,6 +24,7 @@ interface IntlYearMonths {
 }
 
 export interface IntlCalendar {
+  id: string,
   idBase: string,
   queryFields: (isoFields: IsoDateFields) => IntlDateFields
   queryYearMonths: (year: number) => IntlYearMonths
@@ -57,6 +58,7 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   }
 
   return {
+    id: calendarId,
     idBase: calendarIdBase,
     queryFields: createIntlFieldCache(epochMilliToIntlFields),
     queryYearMonths: createIntlYearMonthCache(epochMilliToIntlFields),

@@ -48,7 +48,7 @@ export function fromString(s: string): PlainDateTimeSlots<string> {
 }
 
 export function fromFields<C>(
-  getCalendarOps: (calendarSlot: C) => DateRefineOps,
+  getCalendarOps: (calendarSlot: C) => DateRefineOps<C>,
   calendarSlot: C,
   fields: DateTimeBag,
   options?: OverflowOptions,
@@ -57,13 +57,12 @@ export function fromFields<C>(
 
   return {
     ...refinePlainDateTimeBag(calendarOps, fields, options),
-    calendar: calendarSlot,
     branding: PlainDateTimeBranding,
   }
 }
 
 export function withFields<C>(
-  getCalendarOps: (calendarSlot: C) => DateModOps,
+  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   initialFields: DateTimeFields & Partial<EraYearFields>,
   modFields: DateTimeBag,
@@ -79,7 +78,6 @@ export function withFields<C>(
       modFields,
       options,
     ),
-    calendar: calendarSlot,
     branding: PlainDateTimeBranding,
   }
 }
@@ -244,7 +242,7 @@ export function toPlainDate<C>(
 }
 
 export function toPlainYearMonth<C>(
-  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps,
+  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainDateFields: DateBag, // TODO: DateBag correct type?
 ): PlainYearMonthSlots<C> {
@@ -258,7 +256,7 @@ export function toPlainYearMonth<C>(
 }
 
 export function toPlainMonthDay<C>(
-  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps,
+  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps<C>,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainDateFields: DateBag, // TODO: DateBag correct type?
 ): PlainMonthDaySlots<C> {
