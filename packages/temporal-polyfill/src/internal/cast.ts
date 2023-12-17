@@ -67,6 +67,13 @@ function ensureNumberIsPositive(num: number): number {
 // -------------------------------------------------------------------------------------------------
 
 export function toString(arg: string): string {
+  if (typeof arg === 'symbol') {
+    throw new TypeError('Symbol now allowed')
+  }
+  return String(arg)
+}
+
+export function toStringViaPrimitive(arg: string): string { // see ToPrimitiveAndRequireString
   if (isObjectlike(arg)) {
     return String(arg)
   }

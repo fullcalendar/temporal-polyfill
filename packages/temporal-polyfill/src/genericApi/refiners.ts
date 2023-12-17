@@ -1,5 +1,5 @@
 import { timeFieldNamesAsc } from '../internal/calendarFields'
-import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toString, toInteger, toStrictInteger, toPositiveInteger } from '../internal/cast'
+import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toStringViaPrimitive, toInteger, toStrictInteger, toPositiveInteger } from '../internal/cast'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import { mapPropNamesToConstant } from '../internal/utils'
 
@@ -46,11 +46,11 @@ export const dateRefiners = {
 // These should refine things on INPUT of user-entered fields and should allow {valueOf()}
 
 const dateFieldRefiners = {
-  era: toString,
+  era: toStringViaPrimitive,
   eraYear: toInteger,
   year: toInteger,
   month: toPositiveInteger,
-  monthCode: toString,
+  monthCode: toStringViaPrimitive,
   day: toPositiveInteger,
 }
 
@@ -62,5 +62,5 @@ export const builtinRefiners = {
   ...dateFieldRefiners,
   ...timeFieldRefiners,
   ...durationFieldRefiners,
-  offset: toString,
+  offset: toStringViaPrimitive,
 }
