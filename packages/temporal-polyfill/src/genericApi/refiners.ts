@@ -1,20 +1,18 @@
 import { timeFieldNamesAsc } from '../internal/calendarFields'
-import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, ensureStringViaPrimitive, toInteger, toIntegerStrict } from '../internal/cast'
+import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined, toString, toInteger, toStrictInteger, toPositiveInteger } from '../internal/cast'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import { mapPropNamesToConstant } from '../internal/utils'
 
 // Refiner Config
 // -------------------------------------------------------------------------------------------------
+// These refine things on OUTPUT of CalendarProtocol queries
 
-export const yearMonthFieldOnlyRefiners = {
+export const yearMonthOnlyRefiners = {
   era: ensureStringOrUndefined,
   eraYear: ensureIntegerOrUndefined,
   year: ensureInteger,
   month: ensurePositiveInteger,
-}
 
-export const yearMonthOnlyRefiners = {
-  ...yearMonthFieldOnlyRefiners,
   daysInMonth: ensurePositiveInteger,
   daysInYear: ensurePositiveInteger,
   inLeapYear: ensureBoolean,
@@ -44,21 +42,25 @@ export const dateRefiners = {
   ...dateOnlyRefiners,
 }
 
-export const dateFieldRefiners = {
-  ...yearMonthFieldOnlyRefiners,
-  ...monthOnlyRefiners,
-  ...dayOnlyRefiners,
+// -------------------------------------------------------------------------------------------------
+// These should refine things on INPUT of user-entered fields and should allow {valueOf()}
+
+const dateFieldRefiners = {
+  era: toString,
+  eraYear: toInteger,
+  year: toInteger,
+  month: toPositiveInteger,
+  monthCode: toString,
+  day: toPositiveInteger,
 }
 
-export const timeFieldRefiners = mapPropNamesToConstant(timeFieldNamesAsc, toInteger)
+const timeFieldRefiners = mapPropNamesToConstant(timeFieldNamesAsc, toInteger)
 
-export const durationFieldRefiners = mapPropNamesToConstant(durationFieldNamesAsc, toIntegerStrict)
-
-// -------------------------------------------------------------------------------------------------
+const durationFieldRefiners = mapPropNamesToConstant(durationFieldNamesAsc, toStrictInteger)
 
 export const builtinRefiners = {
   ...dateFieldRefiners,
   ...timeFieldRefiners,
   ...durationFieldRefiners,
-  offset: ensureStringViaPrimitive,
+  offset: toString,
 }

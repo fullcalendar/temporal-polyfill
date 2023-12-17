@@ -7,7 +7,7 @@ import {
   TimeBag,
   YearFields,
   YearMonthBag,
-  dateFieldNamesAsc,
+  dateFieldNamesAlpha,
   dayFieldNames,
   monthCodeDayFieldNames,
   offsetFieldNames,
@@ -88,7 +88,7 @@ export function refineMaybeZonedDateTimeBag<TA, T>(
   const fields = refineCalendarFields(
     calendarOps,
     bag,
-    dateFieldNamesAsc, // validFieldNames
+    dateFieldNamesAlpha, // validFieldNames
     [], // requireFields
     timeAndZoneFieldNames, // forcedValidFieldNames
   ) as ZonedDateTimeBag<unknown, TA>
@@ -136,7 +136,7 @@ export function refineZonedDateTimeBag<TA, T>(
   const fields = refineCalendarFields(
     calendarOps,
     bag,
-    dateFieldNamesAsc, // validFieldNames
+    dateFieldNamesAlpha, // validFieldNames
     timeZoneFieldNames, // requireFields
     timeAndZoneFieldNames, // forcedValidFieldNames
   ) as ZonedDateTimeBag<unknown, TA>
@@ -173,7 +173,7 @@ export function mergeZonedDateTimeBag(
     calendarOps,
     zonedDateTime as any,
     mod,
-    dateFieldNamesAsc, // validFieldNames
+    dateFieldNamesAlpha, // validFieldNames
     timeAndOffsetFieldNames, // forcedValidFieldNames
     offsetFieldNames, // requiredObjFieldNames
   ) as ZonedDateTimeBag<unknown, unknown>
@@ -206,7 +206,7 @@ export function refinePlainDateTimeBag(
   const fields = refineCalendarFields(
     calendarOps,
     bag,
-    dateFieldNamesAsc,
+    dateFieldNamesAlpha,
     [], // requiredFields
     timeFieldNamesAsc, // forcedValidFieldNames
   ) as DateTimeBag
@@ -231,7 +231,7 @@ export function mergePlainDateTimeBag(
     calendarOps,
     plainDateTime,
     mod,
-    dateFieldNamesAsc, // validFieldNames
+    dateFieldNamesAlpha, // validFieldNames
     timeFieldNamesAsc, // forcedValidFieldNames
   ) as DateTimeBag
 
@@ -257,7 +257,7 @@ export function refinePlainDateBag(
   const fields = refineCalendarFields(
     calendarOps,
     bag,
-    dateFieldNamesAsc,
+    dateFieldNamesAlpha,
     requireFields,
   )
 
@@ -275,7 +275,7 @@ export function mergePlainDateBag(
     calendarOps,
     plainDate,
     mod,
-    dateFieldNamesAsc,
+    dateFieldNamesAlpha,
   )
   const overflow = refineOverflowOptions(options)
 
@@ -385,7 +385,7 @@ export function refinePlainMonthDayBag(
   const fields = refineCalendarFields(
     calendarOps,
     bag,
-    dateFieldNamesAsc,
+    dateFieldNamesAlpha,
     requireFields,
   )
 
@@ -410,7 +410,7 @@ export function mergePlainMonthDayBag(
     calendarOps,
     plainMonthDay,
     bag,
-    dateFieldNamesAsc,
+    dateFieldNamesAlpha,
   )
 
   const overflow = refineOverflowOptions(options)

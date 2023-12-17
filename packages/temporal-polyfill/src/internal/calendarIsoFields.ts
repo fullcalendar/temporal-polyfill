@@ -91,7 +91,7 @@ export function constrainIsoDateLike<P extends IsoDateFields>(isoInternals: P): 
 export function isIsoDateFieldsValid(isoFields: IsoDateFields): boolean {
   const { isoYear, isoMonth, isoDay } = isoFields
 
-  return isClamped(isoMonth, 1, computeIsoMonthsInYear(isoYear)) &&
+  return isClamped(isoMonth, 1, computeIsoMonthsInYear(isoYear)) && // TODO: use just 12
     isClamped(isoDay, 1, computeIsoDaysInMonth(isoYear, isoMonth))
 }
 

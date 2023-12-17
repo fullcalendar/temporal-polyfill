@@ -48,6 +48,7 @@ function adapterGetPossibleInstantsFor(
 }
 
 export function validateOffsetNano(offsetNano: number): number {
+  // TODO: use util for this?
   if (!Number.isInteger(ensureNumber(offsetNano))) {
     throw new RangeError('must be integer number')
   }

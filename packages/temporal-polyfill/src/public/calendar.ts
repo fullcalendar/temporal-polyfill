@@ -1,4 +1,4 @@
-import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAsc } from '../internal/calendarFields'
+import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
 import { defineProps, excludeUndefinedProps } from '../internal/utils'
@@ -120,7 +120,7 @@ export class Calendar implements CalendarProtocol {
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
     */
-    const allowed = new Set<string>(dateFieldNamesAsc)
+    const allowed = new Set<string>(dateFieldNamesAlpha)
     const fieldNamesArray: string[] = []
 
     for (const fieldName of fieldNames) {

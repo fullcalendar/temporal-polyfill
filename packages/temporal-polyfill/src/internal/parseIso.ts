@@ -13,6 +13,8 @@ import {
   constrainIsoDateLike,
   constrainIsoDateTimeLike,
   isIsoDateFieldsValid,
+  isoDateFieldNamesDesc,
+  isoDateTimeFieldNamesDesc,
 } from './calendarIsoFields'
 import {
   isoEpochFirstLeapYear,
@@ -34,7 +36,7 @@ import {
   nanoInMinute,
   nanoToGivenFields,
 } from './units'
-import { divModFloor } from './utils'
+import { divModFloor, pluckProps } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 import { utcTimeZoneId } from './timeZoneNative'
 import { queryIntlCalendar } from './calendarIntl'
@@ -124,7 +126,10 @@ export function parsePlainDateTime(s: string): IsoDateTimeFields & { calendar: s
     throw new RangeError()
   }
 
-  return postProcessDateTime(organized)
+  return pluckProps(
+    [...isoDateTimeFieldNamesDesc, 'calendar'],
+    postProcessDateTime(organized),
+  )
 }
 
 export function parsePlainDate(s: string): IsoDateFields & { calendar: string } {
@@ -134,10 +139,12 @@ export function parsePlainDate(s: string): IsoDateFields & { calendar: string } 
     throw new RangeError()
   }
 
-  // TODO: use pluckIsoDateInternals
-  return organized.hasTime
-    ? postProcessDateTime(organized)
-    : postProcessDate(organized)
+  return pluckProps(
+    [...isoDateFieldNamesDesc, 'calendar'],
+    organized.hasTime
+      ? postProcessDateTime(organized)
+      : postProcessDate(organized)
+  )
 }
 
 export function parsePlainYearMonth(

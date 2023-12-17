@@ -102,7 +102,6 @@ export interface DateStats extends YearMonthStats {
 // -------------------------------------------------------------------------------------------------
 
 export const timeFieldNamesAsc = unitNamesAsc.slice(0, Unit.Day)
-export const dateFieldNamesAsc = unitNamesAsc.slice(Unit.Day)
 
 export const offsetFieldNames = ['offset']
 export const timeZoneFieldNames = ['timeZone']
@@ -117,14 +116,16 @@ export const allYearFieldNames = [...eraYearFieldNames, 'year']
 
 export const yearFieldNames = ['year']
 export const monthCodeFieldNames = ['monthCode']
-export const dayFieldNames = ['day']
-
 export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
-export const monthDayFieldNames = [...dayFieldNames, ...monthFieldNames] // day/month/monthCode
-export const monthCodeDayFieldNames = [...dayFieldNames, ...monthCodeFieldNames] // day/monthCode
+export const dayFieldNames = ['day']
 
 export const yearMonthFieldNames = [...monthFieldNames, ...yearFieldNames] // month/monthCode/year
 export const yearMonthCodeFieldNames = [...monthCodeFieldNames, ...yearFieldNames] // monthCode/year
+
+export const dateFieldNamesAlpha = [...dayFieldNames, ...yearMonthFieldNames]
+
+export const monthDayFieldNames = [...dayFieldNames, ...monthFieldNames] // day/month/monthCode
+export const monthCodeDayFieldNames = [...dayFieldNames, ...monthCodeFieldNames] // day/monthCode
 
 // Conversion
 // -------------------------------------------------------------------------------------------------

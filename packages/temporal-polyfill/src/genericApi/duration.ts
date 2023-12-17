@@ -1,5 +1,5 @@
 import { DurationBag } from '../internal/calendarFields'
-import { ensureString, toIntegerStrict } from '../internal/cast'
+import { ensureString, toStrictInteger } from '../internal/cast'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
 import { diffDateTimes, diffZonedEpochNano } from '../internal/diff'
 import { DurationFields, absDuration, addDayTimeDuration, checkDurationFields, durationFieldNamesAsc, negateDuration, queryDurationSign } from '../internal/durationFields'
@@ -34,16 +34,16 @@ export function create(
 ): DurationSlots {
   return {
     ...checkDurationFields({
-      years: toIntegerStrict(years),
-      months: toIntegerStrict(months),
-      weeks: toIntegerStrict(weeks),
-      days: toIntegerStrict(days),
-      hours: toIntegerStrict(hours),
-      minutes: toIntegerStrict(minutes),
-      seconds: toIntegerStrict(seconds),
-      milliseconds: toIntegerStrict(milliseconds),
-      microseconds: toIntegerStrict(microseconds),
-      nanoseconds: toIntegerStrict(nanoseconds),
+      years: toStrictInteger(years),
+      months: toStrictInteger(months),
+      weeks: toStrictInteger(weeks),
+      days: toStrictInteger(days),
+      hours: toStrictInteger(hours),
+      minutes: toStrictInteger(minutes),
+      seconds: toStrictInteger(seconds),
+      milliseconds: toStrictInteger(milliseconds),
+      microseconds: toStrictInteger(microseconds),
+      nanoseconds: toStrictInteger(nanoseconds),
     }),
     branding: DurationBranding,
   }

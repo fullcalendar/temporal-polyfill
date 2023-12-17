@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { ensureStringViaPrimitive, toBigInt } from '../internal/cast'
+import { toString as argToString, toBigInt } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffEpochNano } from '../internal/diff'
 import { formatInstantIso } from '../internal/formatIso'
@@ -27,7 +27,7 @@ export function create(epochNano: bigint): InstantSlots {
 export function fromString(s: string): InstantSlots {
   return {
     branding: InstantBranding,
-    epochNanoseconds: parseInstant(ensureStringViaPrimitive(s)),
+    epochNanoseconds: parseInstant(argToString(s)),
   }
 }
 
@@ -139,6 +139,7 @@ export function equals(
   return !compare(instantSlots0, instantSlots1)
 }
 
+// instant-to-string
 export function toString<TA, T>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,

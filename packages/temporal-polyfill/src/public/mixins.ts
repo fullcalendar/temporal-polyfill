@@ -62,7 +62,7 @@ export function createCalendarGetters<M>(
 
   for (const methodName in methodNameMap) {
     methods[methodName] = function(this: any) {
-      const slots = getSpecificSlots(this, branding) as any
+      const slots = getSpecificSlots(branding, this) as any
       const { calendar } = slots
       const simpleOps = createSimpleOps(calendar) as any
       const isoFields = slotsToIsoFields(slots)

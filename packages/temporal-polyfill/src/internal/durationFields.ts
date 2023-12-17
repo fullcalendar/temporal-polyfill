@@ -1,4 +1,4 @@
-import { toIntegerStrict } from './cast'
+import { toStrictInteger } from './cast'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DayTimeUnit,
