@@ -32,10 +32,7 @@ export function refinePublicRelativeTo(
           return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
 
         case PlainDateBranding:
-          return {
-            ...pluckProps(isoDateFieldNamesDesc, slots as any),
-            calendar: (slots as any).calendar, // !!!
-          }
+          return pluckProps([...isoDateFieldNamesDesc, 'calendar'], slots as any)
       }
 
       const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!

@@ -246,7 +246,7 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return {
-          ...pluckProps(isoDateFieldNamesDesc, slots as PlainDateSlots<CalendarSlot>),
+          ...pluckProps([...isoDateFieldNamesDesc, 'calendar'], slots as PlainDateSlots<CalendarSlot>),
           branding: PlainDateBranding
         }
 

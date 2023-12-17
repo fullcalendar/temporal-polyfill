@@ -238,7 +238,7 @@ export function toPlainDate<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
 ): PlainDateSlots<C> {
   return {
-    ...pluckProps(isoDateFieldNamesDesc, plainDateTimeSlots),
+    ...pluckProps([...isoDateFieldNamesDesc, 'calendar'], plainDateTimeSlots),
     branding: PlainDateBranding,
   }
 }
