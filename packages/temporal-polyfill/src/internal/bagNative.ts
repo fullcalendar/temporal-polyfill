@@ -1,4 +1,4 @@
-import { japaneseCalendarId } from './calendarConfig'
+import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { DateBag, DayFields, EraYearOrYear, MonthFields, YearMonthBag, allYearFieldNames, eraYearFieldNames, monthDayFieldNames, monthFieldNames } from './calendarFields'
 import { computeIsoYearMonthForMonthDay } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
@@ -48,7 +48,7 @@ export function nativeMonthDayFromFields(
   fields: DateBag,
   overflow?: Overflow
 ): IsoDateFields & { calendar: string } {
-  const easyMonthRefining = this.yearMonthForMonthDay === computeIsoYearMonthForMonthDay // HACK
+  const easyMonthRefining = this.id === isoCalendarId // HACK
   let { month, monthCode } = fields as Partial<MonthFields>
   let year
   let isLeapMonth

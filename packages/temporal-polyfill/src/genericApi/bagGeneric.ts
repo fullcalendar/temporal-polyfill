@@ -446,7 +446,7 @@ export function convertPlainMonthDayToDate<C>(
     monthCodeDayFieldNames, // inputFieldNames
     ensureObjectlike(bag), // extra
     yearFieldNames, // extraFieldNames
-    { overflow: 'reject' }, // unlike others. correct. unforunately needs to parse
+    { overflow: 'constrain' }, // unlike others. correct. unforunately needs to parse
   )
 }
 

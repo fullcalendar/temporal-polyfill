@@ -30,6 +30,8 @@ built-ins/Temporal/PlainYearMonth/prototype/equals/calendar-yearmonthfromfields-
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-yearmonthfromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/until/calendar-yearmonthfromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/with/calendar-arguments.js
+built-ins/Temporal/PlainMonthDay/prototype/equals/calendar-monthdayfromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainMonthDay/prototype/with/calendar-arguments.js
 
 # FIX: dateUntil options should pass-through rando options
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
@@ -46,6 +48,7 @@ built-ins/Temporal/PlainDate/length.js
 built-ins/Temporal/PlainDateTime/length.js
 built-ins/Temporal/ZonedDateTime/length.js
 built-ins/Temporal/PlainTime/length.js
+built-ins/Temporal/PlainMonthDay/length.js
 
 # sanitychecking calendar/timezone results
 built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-length.js
