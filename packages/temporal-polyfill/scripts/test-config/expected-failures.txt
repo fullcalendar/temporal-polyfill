@@ -1,4 +1,6 @@
 
+# TODO: expected-failures-es5.txt still runs. merge it into this files
+
 ####################################################################################################
 # AFTER REFACTOR
 ####################################################################################################
@@ -603,17 +605,7 @@ built-ins/Temporal/PlainDate/prototype/since/length.js
 built-ins/Temporal/PlainDate/prototype/until/length.js
 built-ins/Temporal/PlainDate/prototype/valueOf/name.js
 built-ins/Temporal/PlainDate/prototype/add/length.js
-built-ins/Temporal/Now/plainDateTime/length.js
-built-ins/Temporal/Now/plainDateTime/name.js
-built-ins/Temporal/Now/zonedDateTime/length.js
-built-ins/Temporal/Now/zonedDateTime/name.js
-built-ins/Temporal/Now/instant/name.js
-built-ins/Temporal/Now/plainDateISO/length.js
-built-ins/Temporal/Now/plainDateTimeISO/length.js
-built-ins/Temporal/Now/plainDate/length.js
-built-ins/Temporal/Now/plainTimeISO/length.js
 built-ins/Temporal/Now/timeZoneId/name.js
-built-ins/Temporal/Now/zonedDateTimeISO/length.js
 built-ins/Temporal/Duration/prototype/subtract/length.js
 built-ins/Temporal/Duration/prototype/valueOf/name.js
 built-ins/Temporal/Duration/prototype/add/length.js
