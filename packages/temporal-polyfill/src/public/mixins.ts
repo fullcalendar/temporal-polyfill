@@ -2,7 +2,7 @@ import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthD
 import { DurationSlots } from '../genericApi/slotsGeneric'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from '../internal/durationFields'
-import { IsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
+import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/epochAndTime'
 import { identityFunc, mapPropNames } from '../internal/utils'
 import { getCalendarSlots } from './calendar'
@@ -106,7 +106,7 @@ export function createTimeGetterMethods(
     return function (this: any) {
       const slots = getSpecificSlots(branding, this) as (BrandingSlots & IsoTimeFields)
       const isoFields = slotsToIsoFields(slots)
-      return isoFields[isoTimeFieldNamesAlpha[i]]
+      return isoFields[isoTimeFieldNamesAsc[i]]
     }
   }, timeFieldNamesAsc)
 }

@@ -5,6 +5,12 @@
 
 # internal CalendarProtocol receiving options. undefined or not?
 built-ins/Temporal/PlainDate/compare/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainDate/prototype/equals/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainDate/prototype/since/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-arguments.js
+built-ins/Temporal/PlainDate/prototype/toPlainMonthDay/calendar-monthdayfromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-arguments.js
+built-ins/Temporal/PlainDate/prototype/toPlainYearMonth/calendar-yearmonthfromfields-called-with-options-undefined.js
 
 # optional params and func/class.length
 built-ins/Temporal/PlainDate/length.js
