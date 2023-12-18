@@ -1,6 +1,6 @@
 import { PlainDateBranding } from '../genericApi/branding'
 import { dateRefiners } from '../genericApi/refiners'
-import { IsoDateFields } from '../internal/calendarIsoFields'
+import { IsoDateFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { Callable, mapProps } from '../internal/utils'
 import { CalendarProtocol } from './calendarProtocol'
@@ -23,6 +23,7 @@ const adapterSimpleOps = mapProps(
         (calendarProtocol as any)[methodName](
           createPlainDate({
             ...isoFields,
+            ...isoTimeFieldDefaults, // yuck
             calendar: calendarProtocol,
             branding: PlainDateBranding,
           })
