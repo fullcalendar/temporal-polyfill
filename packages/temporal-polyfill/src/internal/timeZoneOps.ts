@@ -8,11 +8,11 @@ import { createLazyGenerator } from './utils'
 import { moveByIsoDays } from './move'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
-export type PossibleInstantsOp<C> = (isoFields: IsoDateTimeFields & { calendar: C }) => DayTimeNano[]
+export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
 
-export type TimeZoneOps<C> = {
+export type TimeZoneOps = {
   getOffsetNanosecondsFor: OffsetNanosecondsOp,
-  getPossibleInstantsFor: PossibleInstantsOp<C>,
+  getPossibleInstantsFor: PossibleInstantsOp,
 }
 
 export type SimpleTimeZoneOps = {
@@ -42,20 +42,15 @@ function _zonedInternalsToIso(
   }
 }
 
-export function computeNanosecondsInDay<C>(
-  timeZoneOps: TimeZoneOps<C>,
-  isoFields: IsoDateFields & { calendar: C },
+export function computeNanosecondsInDay(
+  timeZoneOps: TimeZoneOps,
+  isoFields: IsoDateFields
 ): number {
   isoFields = { ...isoFields, ...isoTimeFieldDefaults }
 
   // TODO: have getSingleInstantFor accept IsoDateFields?
   const epochNano0 = getSingleInstantFor(timeZoneOps, { ...isoFields, ...isoTimeFieldDefaults, })
-
-  const epochNano1 = getSingleInstantFor(timeZoneOps, {
-    ...moveByIsoDays(isoFields, 1),
-    ...isoTimeFieldDefaults,
-    calendar: isoFields.calendar,
-  })
+  const epochNano1 = getSingleInstantFor(timeZoneOps, { ...moveByIsoDays(isoFields, 1), ...isoTimeFieldDefaults })
 
   const nanoInDay = dayTimeNanoToNumber(
     diffDayTimeNanos(epochNano0, epochNano1)
@@ -68,9 +63,9 @@ export function computeNanosecondsInDay<C>(
   return nanoInDay
 }
 
-export function getMatchingInstantFor<C>(
-  timeZoneOps: TimeZoneOps<C>,
-  isoFields: IsoDateTimeFields & { calendar: C },
+export function getMatchingInstantFor(
+  timeZoneOps: TimeZoneOps,
+  isoFields: IsoDateTimeFields,
   offsetNano: number | undefined,
   hasZ: boolean,
   // need these defaults?
@@ -139,9 +134,9 @@ function findMatchingEpochNano(
   }
 }
 
-export function getSingleInstantFor<C>(
-  timeZoneOps: TimeZoneOps<C>,
-  isoFields: IsoDateTimeFields & { calendar: C },
+export function getSingleInstantFor(
+  timeZoneOps: TimeZoneOps,
+  isoFields: IsoDateTimeFields,
   disambig: EpochDisambig = EpochDisambig.Compat,
   possibleEpochNanos: DayTimeNano[] = timeZoneOps.getPossibleInstantsFor(isoFields)
 ): DayTimeNano {
@@ -172,10 +167,9 @@ export function getSingleInstantFor<C>(
       ? -1
       : 1) // 'later' or 'compatible'
 
-  possibleEpochNanos = timeZoneOps.getPossibleInstantsFor({
-    ...epochNanoToIso(zonedEpochNano, shiftNano),
-    calendar: isoFields.calendar,
-  })
+  possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(
+    epochNanoToIso(zonedEpochNano, shiftNano),
+  )
 
   return possibleEpochNanos[disambig === EpochDisambig.Earlier
     ? 0
@@ -196,8 +190,8 @@ function computeGapNear(
   return endOffsetNano - startOffsetNano
 }
 
-export function zonedEpochNanoToIso<C>(
-  timeZoneOps: TimeZoneOps<C>,
+export function zonedEpochNanoToIso(
+  timeZoneOps: TimeZoneOps,
   epochNano: DayTimeNano
 ): IsoDateTimeFields {
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)

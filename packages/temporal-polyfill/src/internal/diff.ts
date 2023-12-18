@@ -188,10 +188,9 @@ export function diffTimes(
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
-export function diffZonedEpochNano<C>(
+export function diffZonedEpochNano(
   calendarOps: DiffOps,
-  timeZoneOps: TimeZoneOps<C>,
-  calendarSlot: C, // weird order
+  timeZoneOps: TimeZoneOps,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -218,8 +217,8 @@ export function diffZonedEpochNano<C>(
   const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
-  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneOps as any)
-  let midIsoFields = { ...endIsoFields, ...startIsoTimeFields, calendar: calendarSlot }
+  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneOps) // necessary to bind?
+  let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
   let midEpochNano = isoToZonedEpochNano(midIsoFields)
   let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
 
@@ -229,7 +228,6 @@ export function diffZonedEpochNano<C>(
     midIsoFields = {
       ...moveByIsoDays(midIsoFields, -sign),
       ...startIsoTimeFields,
-      calendar: calendarSlot,
     }
     midEpochNano = isoToZonedEpochNano(midIsoFields)
     midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
@@ -249,7 +247,7 @@ export function diffZonedEpochNano<C>(
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
-    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, calendarSlot, m, d, Overflow.Constrain),
+    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d, Overflow.Constrain),
   )
 }
 

@@ -172,7 +172,7 @@ export function toJSON<C extends IdLike>(
 }
 
 export function toZonedDateTime<C, TZ>(
-  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
   plainDateSlots: PlainDateSlots<C>,
   timeZoneSlot: TZ,
   plainTimeFields: IsoTimeFields = isoTimeFieldDefaults,

@@ -76,7 +76,7 @@ export function withFields(
 export function add<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -127,7 +127,7 @@ export function add<RA, C, T>(
 export function subtract<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -152,7 +152,7 @@ export function abs(slots: DurationSlots): DurationSlots {
 export function round<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   options: DurationRoundOptions<RA>,
 ): DurationSlots {
@@ -226,7 +226,7 @@ export function round<RA, C, T>(
 export function total<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   options: TotalUnitOptionsWithRel<RA> | UnitName,
 ): number {
@@ -295,7 +295,7 @@ export function blank(slots: DurationSlots): boolean {
 export function compare<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -354,7 +354,7 @@ export function compare<RA, C, T>(
 
 function createMarkerSystem<C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   markerSlots: MarkerSlots<C, T>,
 ): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
   const { calendar, timeZone, epochNanoseconds } = markerSlots as
@@ -369,9 +369,9 @@ function createMarkerSystem<C, T>(
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       (epochNano: DayTimeNano, durationFields: DurationFields) => {
-        return moveZonedEpochNano(calendarOps, timeZoneOps, calendar, epochNano, durationFields, Overflow.Constrain)
+        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields, Overflow.Constrain)
       },
-      diffZonedEpochNano.bind(undefined, calendarOps, timeZoneOps as any, calendar),
+      diffZonedEpochNano.bind(undefined, calendarOps, timeZoneOps),
     ]
   } else {
     return [

@@ -24,6 +24,7 @@ import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
+import { isoCalendarId } from './calendarConfig'
 import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps } from './calendarOps'
@@ -31,10 +32,9 @@ import { DayOp, MoveOps } from './calendarOps'
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
-export function moveZonedEpochNano<C>(
+export function moveZonedEpochNano(
   calendarOps: MoveOps,
-  timeZoneOps: TimeZoneOps<C>,
-  calendarSlot: C, // weird position
+  timeZoneOps: TimeZoneOps,
   epochNano: DayTimeNano,
   durationFields: DurationFields,
   overflow: Overflow,
@@ -57,7 +57,7 @@ export function moveZonedEpochNano<C>(
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
       ...pluckProps(isoTimeFieldNamesDesc, isoDateTimeFields), // time parts
-      calendar: calendarSlot,
+      calendar: isoCalendarId, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(
       getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
