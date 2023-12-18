@@ -76,7 +76,7 @@ export function withFields(
 
 export function add(
   slots: PlainTimeSlots,
-  durationSlots: DurationSlots,
+  durationSlots: DurationFields,
 ): PlainTimeSlots {
   return {
     ...moveTime(slots, durationSlots)[0],
@@ -86,9 +86,9 @@ export function add(
 
 export function subtract(
   slots: PlainTimeSlots,
-  durationSlots: DurationSlots,
+  durationSlots: DurationFields,
 ): PlainTimeSlots {
-  return add(slots, negateDuration(durationSlots) as unknown as DurationSlots)
+  return add(slots, negateDuration(durationSlots))
 }
 
 export function until(

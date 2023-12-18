@@ -166,10 +166,11 @@ export function since<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
   options?: DiffOptions,
-): DurationFields {
-  return negateDuration(
-    until(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
-  )
+): DurationSlots {
+  return {
+    ...negateDuration(until(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)),
+    branding: DurationBranding,
+  }
 }
 
 export function round<C>(

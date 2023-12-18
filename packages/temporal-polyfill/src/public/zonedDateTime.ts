@@ -16,7 +16,7 @@ import { getId } from '../internal/cast'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { ZonedDateTimeBag } from '../genericApi/bagGeneric'
-import { TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { DurationBranding, TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
 
@@ -136,27 +136,29 @@ export class ZonedDateTime {
   }
 
   until(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return createDuration(
-      ZonedDateTimeFuncs.until(
+    return createDuration({
+      ...ZonedDateTimeFuncs.until(
         createDiffOps,
         createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
         prepareOptions(options),
-      ) as unknown as DurationSlots // !!!
-    )
+      ),
+      branding: DurationBranding,
+    })
   }
 
   since(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return createDuration(
-      ZonedDateTimeFuncs.since(
+    return createDuration({
+      ...ZonedDateTimeFuncs.since(
         createDiffOps,
         createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
         prepareOptions(options),
-      ) as unknown as DurationSlots // !!!
-    )
+      ),
+      branding: DurationBranding,
+    })
   }
 
   round(options: RoundingOptions | UnitName): ZonedDateTime {

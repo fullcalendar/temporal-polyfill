@@ -136,7 +136,7 @@ export class PlainDateTime {
         getPlainDateTimeSlots(this),
         toPlainDateTimeSlots(otherArg),
         options,
-      ) as unknown as DurationSlots // !!!
+      )
     )
   }
 
