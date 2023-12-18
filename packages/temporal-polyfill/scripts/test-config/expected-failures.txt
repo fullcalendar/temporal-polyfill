@@ -18,6 +18,7 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 
 # optional params and func/class.length
 built-ins/Temporal/PlainDate/length.js
+built-ins/Temporal/PlainDateTime/length.js
 
 ####################################################################################################
 # Options parsing
@@ -26,9 +27,7 @@ built-ins/Temporal/PlainDate/length.js
 # accessing options multiple times. this is why CopyDataProperties exists
 # ALSO, diff options should be snapshotted probably
 built-ins/Temporal/PlainDateTime/from/order-of-operations.js
-built-ins/Temporal/PlainDateTime/from/overflow-wrong-type.js
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/with/overflow-wrong-type.js
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js

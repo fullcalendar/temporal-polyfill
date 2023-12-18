@@ -127,7 +127,8 @@ export function add<C>(
       plainDateTimeSlots,
       durationSlots,
       refineOverflowOptions(options),
-    )
+    ),
+    branding: PlainDateTimeBranding, // YUCK. all because checkIsoDateTimeInBounds too liberal
   }
 }
 
