@@ -113,7 +113,6 @@ built-ins/Temporal/PlainMonthDay/from/order-of-operations.js
 built-ins/Temporal/PlainMonthDay/prototype/with/order-of-operations.js
 built-ins/Temporal/PlainYearMonth/from/order-of-operations.js
 built-ins/Temporal/PlainYearMonth/prototype/with/order-of-operations.js
-built-ins/Temporal/TimeZone/prototype/getInstantFor/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
