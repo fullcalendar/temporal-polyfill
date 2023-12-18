@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
 import { ensureString, toInteger, IdLike, isIdLikeEqual } from '../internal/cast'
 import { diffDates } from '../internal/diff'
-import { durationFieldDefaults, negateDuration, queryDurationSign } from '../internal/durationFields'
+import { DurationFields, durationFieldDefaults, negateDuration, queryDurationSign } from '../internal/durationFields'
 import { getCommonCalendarSlot } from './calendarSlotString'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
 import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/formatIso'
@@ -85,7 +85,7 @@ export function withFields<C>(
 export function add<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  durationSlots: DurationSlots,
+  durationFields: DurationFields,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
@@ -93,14 +93,14 @@ export function add<C>(
   let isoDateFields = moveToMonthStart(calendarOps, plainYearMonthSlots)
 
   // if moving backwards in time, set to last day of month
-  if (queryDurationSign(durationSlots) < 0) {
+  if (queryDurationSign(durationFields) < 0) {
     isoDateFields = calendarOps.dateAdd(isoDateFields, { ...durationFieldDefaults, months: 1 }, Overflow.Constrain)
     isoDateFields = moveByIsoDays(isoDateFields, -1)
   }
 
   const movedIsoDateFields = calendarOps.dateAdd(
     isoDateFields,
-    durationSlots,
+    durationFields,
     refineOverflowOptions(options),
   )
 
@@ -114,10 +114,10 @@ export function add<C>(
 export function subtract<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  durationSlots: DurationSlots,
+  durationFields: DurationFields,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
-  return add(getCalendarOps, plainYearMonthSlots, negateDuration(durationSlots) as any, options) // !!!
+  return add(getCalendarOps, plainYearMonthSlots, negateDuration(durationFields), options)
 }
 
 export function until<C extends IdLike>(
@@ -147,7 +147,10 @@ export function since<C extends IdLike>(
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
   options?: DiffOptions,
 ): DurationSlots {
-  return negateDuration(until(getCalendarOps, plainYearMonthSlots1, plainYearMonthSlots0, options, true)) as any // !!!
+  return {
+    ...negateDuration(until(getCalendarOps, plainYearMonthSlots0, plainYearMonthSlots1, options, true)),
+    branding: DurationBranding,
+  }
 }
 
 export function compare(
