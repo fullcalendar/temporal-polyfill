@@ -39,6 +39,7 @@ import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethod
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { dateRefiners } from '../genericApi/refiners'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 
@@ -319,7 +320,7 @@ defineProps(ZonedDateTime.prototype, {
 })
 
 defineGetters(ZonedDateTime.prototype, {
-  ...createCalendarGetters(ZonedDateTimeBranding, slotsToIsoFields),
+  ...createCalendarGetters(ZonedDateTimeBranding, dateRefiners, slotsToIsoFields),
   ...createTimeGetterMethods(ZonedDateTimeBranding, slotsToIsoFields),
   ...createEpochGetterMethods(ZonedDateTimeBranding),
 })

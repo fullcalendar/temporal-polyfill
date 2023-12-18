@@ -29,6 +29,13 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 # optional params and func/class.length
 built-ins/Temporal/PlainDate/length.js
 built-ins/Temporal/PlainDateTime/length.js
+built-ins/Temporal/ZonedDateTime/length.js
+
+# sanitychecking calendar/timezone results
+built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainDate/prototype/until/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainDateTime/prototype/since/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainDateTime/prototype/until/rounding-zero-year-month-week-length.js
 
 ####################################################################################################
 # Options parsing

@@ -18,7 +18,7 @@ import { ZonedDateTimeBag } from './bagGeneric'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergeZonedDateTimeBag, refineZonedDateTimeBag } from './bagGeneric'
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './slotsGeneric'
-import { isTimeZoneSlotsEqual } from './timeZoneSlotString'
+import { getCommonTimeZoneSlot, isTimeZoneSlotsEqual } from './timeZoneSlotString'
 import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlotString'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields, negateDuration } from '../internal/durationFields'
@@ -40,7 +40,7 @@ export function create<CA, C, TA, T>(
 
 export function fromString(s: string, options?: ZonedFieldOptions): ZonedDateTimeSlots<string, string> {
   return {
-    ...parseZonedDateTime(ensureString(s), ...refineZonedFieldOptions(options)),
+    ...parseZonedDateTime(ensureString(s), options),
     branding: ZonedDateTimeBranding,
   }
 }
@@ -212,7 +212,7 @@ export function subtract<C, T>(
   return add(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots, negateDuration(durationSlots), options)
 }
 
-export function until<C extends IdLike, T>(
+export function until<C extends IdLike, T extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
@@ -221,7 +221,7 @@ export function until<C extends IdLike, T>(
   invertRoundingMode?: boolean,
 ): DurationFields {
   const calendarSlot = getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
-  const timeZoneSlot = zonedDateTimeSlots0.timeZone // TODO: ensure same timeZone with zonedDateTimeSlots1???
+  const timeZoneSlot = getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)
 
   return diffZonedEpochNano(
     getCalendarOps(calendarSlot),
@@ -232,7 +232,7 @@ export function until<C extends IdLike, T>(
   )
 }
 
-export function since<C extends IdLike, T>(
+export function since<C extends IdLike, T extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,

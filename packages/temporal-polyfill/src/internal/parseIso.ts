@@ -42,6 +42,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { queryIntlCalendar } from './calendarIntl'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
+import { ZonedFieldOptions, refineZonedFieldOptions } from '../genericApi/optionsRefine'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -97,9 +98,7 @@ NOTE: one of the only string-parsing methods that accepts options
 */
 export function parseZonedDateTime(
   s: string,
-  overflow: Overflow, // unused!
-  offsetDisambig: OffsetDisambig,
-  epochDisambig: EpochDisambig,
+  options?: ZonedFieldOptions,
 ): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
   const organized = parseMaybeGenericDateTime(s)
 
@@ -107,9 +106,9 @@ export function parseZonedDateTime(
     throw new RangeError()
   }
 
-  // HACK to validate offset before parsing options
   const { offset } = organized
   const offsetNano = offset ? parseOffsetNano(offset) : undefined
+  const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
   return postProcessZonedDateTime(
     organized as ZonedDateTimeOrganized,

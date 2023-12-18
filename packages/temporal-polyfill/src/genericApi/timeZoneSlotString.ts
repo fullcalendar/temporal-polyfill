@@ -2,6 +2,14 @@ import { parseMaybeOffsetNano, parseTimeZoneId, realizeTimeZoneId } from '../int
 import { ensureString, IdLike, getId } from '../internal/cast'
 import { utcTimeZoneId } from '../internal/timeZoneNative'
 
+export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
+  if (!isTimeZoneSlotsEqual(a, b)) {
+    throw new RangeError('Calendars must be the same')
+  }
+
+  return a
+}
+
 export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike, loose?: boolean): boolean {
   return a === b || getTimeZoneSlotRaw(a, loose) === getTimeZoneSlotRaw(b, loose)
 }
