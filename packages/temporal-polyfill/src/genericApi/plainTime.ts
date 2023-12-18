@@ -112,7 +112,7 @@ export function since(
   plainTimeSlots1: PlainTimeSlots,
   options?: DiffOptions,
 ): DurationFields {
-  return negateDuration(until(plainTimeSlots1, plainTimeSlots0, options, true))
+  return negateDuration(until(plainTimeSlots0, plainTimeSlots1, options, true))
 }
 
 export function round(

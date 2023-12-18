@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { toBigInt, ensureString } from '../internal/cast'
+import { toBigInt, toStringViaPrimitive } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffEpochNano } from '../internal/diff'
 import { formatInstantIso } from '../internal/formatIso'
@@ -27,7 +27,8 @@ export function create(epochNano: bigint): InstantSlots {
 export function fromString(s: string): InstantSlots {
   return {
     branding: InstantBranding,
-    epochNanoseconds: parseInstant(ensureString(s)),
+    epochNanoseconds: parseInstant(toStringViaPrimitive(s)), // instead of 'requiring' like other types,
+      // coerce, because there's no fromFields, so no need to differentiate param type
   }
 }
 
@@ -100,7 +101,7 @@ export function since(
   instantSlots1: InstantSlots,
   options?: DiffOptions,
 ): DurationFields {
-  return negateDuration(until(instantSlots1, instantSlots0, options, true))
+  return negateDuration(until(instantSlots0, instantSlots1, options, true))
 }
 
 export function round(
