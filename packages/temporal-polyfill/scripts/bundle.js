@@ -64,13 +64,13 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
-          chunkFileNames: 'chunk-[hash]' + extensions.cjs,
+          chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.cjs,
         },
         {
           format: 'es',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
-          chunkFileNames: 'chunk-[hash]' + extensions.esm,
+          chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.esm,
         }
       ]
     },
