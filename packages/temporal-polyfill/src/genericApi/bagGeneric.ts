@@ -59,9 +59,9 @@ const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
 
 // -------------------------------------------------------------------------------------------------
 
-export function convertPlainDateTimeToZoned(
-  timeZoneOps: TimeZoneOps,
-  isoFields: IsoDateTimeFields,
+export function convertPlainDateTimeToZoned<C>(
+  timeZoneOps: TimeZoneOps<C>,
+  isoFields: IsoDateTimeFields & { calendar: C },
   options?: EpochDisambigOptions,
 ): DayTimeNano {
   const epochDisambig = refineEpochDisambigOptions(options)
@@ -79,7 +79,7 @@ TODO: make more DRY with other methods
 export function refineMaybeZonedDateTimeBag<C, TA, T>(
   calendarOps: DateRefineOps<C>,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneOps: (timeZoneArg: T) => TimeZoneOps,
+  getTimeZoneOps: (timeZoneArg: T) => TimeZoneOps<C>,
   bag: ZonedDateTimeBag<unknown, TA>,
 ): {
   epochNanoseconds: DayTimeNano,
@@ -126,7 +126,7 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
 export function refineZonedDateTimeBag<C, TA, T>(
   calendarOps: DateRefineOps<C>,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
   bag: ZonedDateTimeBag<unknown, TA>,
   options: ZonedFieldOptions | undefined,
 ): {
@@ -165,7 +165,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
 
 export function mergeZonedDateTimeBag<C>(
   calendarOps: DateModOps<C>,
-  timeZoneOps: TimeZoneOps,
+  timeZoneOps: TimeZoneOps<C>,
   zonedDateTime: any,
   mod: DateTimeBag, // TODO: allow offset. correct base type tho?
   options: ZonedFieldOptions | undefined,

@@ -144,6 +144,7 @@ function isoDateFieldsToEpochNano(
     ...isoTimeFieldDefaults,
     isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day
     ...isoFields,
+    calendar: isoCalendarId,
   })
 }
 
@@ -158,6 +159,7 @@ function isoTimeFieldsToEpochNano(
     isoMonth: 1,
     isoDay: 1,
     ...internals,
+    calendar: isoCalendarId,
   })
 }
 

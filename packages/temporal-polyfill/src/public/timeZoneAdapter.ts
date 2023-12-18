@@ -8,6 +8,7 @@ import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { ensureNumber } from '../internal/cast'
 import { nanoInUtcDay } from '../internal/units'
+import { CalendarSlot } from './calendarSlot'
 
 // Individual Adapters
 // -------------------------------------------------------------------------------------------------
@@ -31,7 +32,7 @@ function adapterGetOffsetNanosecondsFor(
 function adapterGetPossibleInstantsFor(
   timeZoneProtocol: TimeZoneProtocol,
   getPossibleInstantsFor: TimeZoneProtocol['getPossibleInstantsFor'],
-  isoFields: IsoDateTimeFields,
+  isoFields: IsoDateTimeFields & { calendar: CalendarSlot },
 ): DayTimeNano[] {
   return [
     ...getPossibleInstantsFor.call(
@@ -39,7 +40,6 @@ function adapterGetPossibleInstantsFor(
       createPlainDateTime({
         ...isoFields,
         branding: PlainDateTimeBranding,
-        calendar: isoCalendarId, // BAD, will need original slot
       })
     )
   ].map((instant: Instant) => {

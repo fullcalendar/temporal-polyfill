@@ -154,7 +154,7 @@ export function toJSON(slots: PlainTimeSlots): string {
 }
 
 export function toZonedDateTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps<C>,
   slots: PlainTimeSlots,
   timeZoneSlot: T,
   plainDateSlots: PlainDateSlots<C>,

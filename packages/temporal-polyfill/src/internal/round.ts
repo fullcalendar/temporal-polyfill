@@ -29,12 +29,12 @@ import { moveByIsoDays } from './move'
 // Rounding Dates
 // -------------------------------------------------------------------------------------------------
 
-export function roundDateTime(
-  isoFields: IsoDateTimeFields,
+export function roundDateTime<C>(
+  isoFields: IsoDateTimeFields & { calendar: C },
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  timeZoneOps?: TimeZoneOps | undefined,
+  timeZoneOps?: TimeZoneOps<C> | undefined,
 ): IsoDateTimeFields {
   if (smallestUnit === Unit.Day) {
     return roundDateTimeToDay(isoFields, timeZoneOps, roundingMode)
@@ -61,9 +61,9 @@ export function roundTime(
 }
 
 // TODO: break into two separate functions?
-function roundDateTimeToDay(
-  isoFields: IsoDateTimeFields,
-  timeZoneOps: TimeZoneOps | undefined,
+function roundDateTimeToDay<C>(
+  isoFields: IsoDateTimeFields & { calendar: C },
+  timeZoneOps: TimeZoneOps<C> | undefined,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
   if (timeZoneOps) {
