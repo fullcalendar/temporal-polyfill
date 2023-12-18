@@ -20,7 +20,7 @@ export type EraYearOp = (isoFields: IsoDateFields) => number | undefined
 export type EraPartsOp = (isoFields: IsoDateFields) => EraParts
 export type MonthCodeOp = (isoFields: IsoDateFields) => string
 export type MonthCodePartsOp = (year: number, month: number) => MonthCodeParts
-export type YearMonthForMonthDayOp = (monthCodeNumber: number, isLeapMonth: boolean, day: number) => YearMonthParts
+export type YearMonthForMonthDayOp = (monthCodeNumber: number, isLeapMonth: boolean, day: number) => YearMonthParts | undefined // receives positive monthCode integer
 export type InLeapYearOp = (isoFields: IsoDateFields) => boolean
 export type InLeapYearPartOp = (year: number) => boolean
 export type LeapMonthOp = (year: number) => number | undefined

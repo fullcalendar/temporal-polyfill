@@ -181,7 +181,7 @@ function normalizeShortEra(formattedEra: string): string {
 // -------------------------------------------------------------------------------------------------
 
 export function computeIntlYear(this: IntlCalendar, isoFields: IsoDateFields): number {
-  return this.queryFields(isoFields).day
+  return this.queryFields(isoFields).year
 }
 
 export function computeIntlMonth(this: IntlCalendar, isoFields: IsoDateFields): number {
@@ -230,7 +230,7 @@ export function computeIntlMonthCodeParts(
 ): MonthCodeParts {
   const leapMonth = computeIntlLeapMonth.call(this, year)
   const monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
-  const isLeapMonth = leapMonth === monthCodeNumber
+  const isLeapMonth = leapMonth === month
   return [monthCodeNumber, isLeapMonth]
 }
 
@@ -328,7 +328,7 @@ export function computeIntlYearMonthForMonthDay(
   monthCodeNumber: number,
   isLeapMonth: boolean,
   day: number,
-): YearMonthParts {
+): YearMonthParts | undefined {
   let [startYear, startMonth, startDay] = computeIntlDateParts.call(this, {
     isoYear: isoEpochFirstLeapYear,
     isoMonth: 12,
@@ -340,6 +340,7 @@ export function computeIntlYearMonthForMonthDay(
 
   // ensure monthCodeNumber/isLeapMonth/day is within `isoEpochFirstLeapYear`
   // TODO: use general-purpose array-comparison util later
+  // TODO: look at official IntlCalendarImpl::monthDayFromFields()
   if (
     (
       compareNumbers(monthCodeNumber, startMonthCodeNumber) ||
@@ -362,8 +363,6 @@ export function computeIntlYearMonthForMonthDay(
       return [yearTry, monthTry]
     }
   }
-
-  throw new RangeError('Could not guess year')
 }
 
 // -------------------------------------------------------------------------------------------------

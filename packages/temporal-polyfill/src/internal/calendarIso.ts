@@ -33,8 +33,14 @@ export function computeIsoMonthCodeParts(isoYear: number, isoMonth: number): Mon
   return [isoMonth, false]
 }
 
-export function computeIsoYearMonthForMonthDay(monthCodeNumber: number): YearMonthParts {
-  return [isoEpochFirstLeapYear, monthCodeNumber]
+export function computeIsoYearMonthForMonthDay(
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  day: number,
+): YearMonthParts | undefined {
+  if (!isLeapMonth) {
+    return [isoEpochFirstLeapYear, monthCodeNumber]
+  }
 }
 
 export function computeIsoFieldsFromParts(year: number, month: number, day: number): IsoDateFields {

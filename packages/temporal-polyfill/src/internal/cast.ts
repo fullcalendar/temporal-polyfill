@@ -116,7 +116,7 @@ export function toStrictInteger(arg: number): number {
 }
 
 export function toPositiveInteger(arg: number): number {
-  return ensureNumberIsPositive(toNumber(arg))
+  return ensureNumberIsPositive(toInteger(arg))
 }
 
 // ID-like

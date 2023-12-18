@@ -1,7 +1,7 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
-import { defineProps, excludeUndefinedProps } from '../internal/utils'
+import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/bagGeneric'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
@@ -177,6 +177,8 @@ type DateGetterFields = {
 export interface Calendar extends DateGetterFields {}
 
 defineProps(Calendar.prototype, calendarMethods)
+
+defineStringTag(Calendar.prototype, CalendarBranding)
 
 // Utils
 // -------------------------------------------------------------------------------------------------

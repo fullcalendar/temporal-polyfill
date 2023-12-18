@@ -1,6 +1,6 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { DateBag, DayFields, EraYearOrYear, MonthFields, YearMonthBag, allYearFieldNames, eraYearFieldNames, monthDayFieldNames, monthFieldNames } from './calendarFields'
-import { computeIsoYearMonthForMonthDay } from './calendarIso'
+import { computeIsoDaysInMonth, computeIsoYearMonthForMonthDay, isoMonthsInYear } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
 import { IsoDateFields } from './calendarIsoFields'
 import { isoEpochFirstLeapYear } from './calendarIso'
@@ -48,70 +48,58 @@ export function nativeMonthDayFromFields(
   fields: DateBag,
   overflow?: Overflow
 ): IsoDateFields & { calendar: string } {
-  const easyMonthRefining = this.id === isoCalendarId // HACK
-  let { month, monthCode } = fields as Partial<MonthFields>
-  let year
-  let isLeapMonth
-  let monthCodeNumber
-  let day
-  let calledRefineDay = false
+  let { monthCode } = fields as Partial<MonthFields>
+  let monthCodeNumber: number
+  let isLeapMonth: boolean
+  let year: number | undefined
+  let month: number | undefined
+  let day: number
 
   if (monthCode !== undefined) {
     [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-    year = fields.year
 
-    if (year !== undefined || easyMonthRefining) {
-      // just for validation
-      // year can be undefined
-      month = refineMonth(this, fields, year!, overflow)
-    } else {
-      month = fields.month
-
-      // without year, half-ass our validation...
-      // TODO: improve
-      if (monthCodeNumber <= 0) {
-        throw new RangeError('Below zero')
-      }
-
-      // TODO: should be smarter for Intl calendars with leap-months? (use year if available?)
-      if (month !== undefined && month !== monthCodeNumber) {
-        throw new RangeError('Inconsistent month/monthCode')
-      }
+    // simulate refineDay :(
+    if (monthCodeNumber <= 0) {
+      throw new RangeError('Below zero')
     }
-
-    const maybeDay = fields.day
-    if (maybeDay === undefined) {
+    if (fields.day === undefined) {
       throw new TypeError('Must specify day')
     }
+    day = fields.day
 
-    day = maybeDay
+    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+    if (!res) {
+      throw new RangeError('Could not guess year')
+    }
+    [year, month] = res
 
-    // half-ass validation
-    if (overflow !== undefined &&
-      year !== undefined &&
-      month !== undefined) {
-      // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
-      if (day <= 0) {
-        throw new RangeError('Below zero')
-      }
-
+    if (fields.month !== undefined && fields.month !== month) {
+      throw new RangeError('Inconsistent month/monthCode')
+    }
+    if (this.id === isoCalendarId) {
+      month = clampEntity(
+        'month',
+        month,
+        1,
+        isoMonthsInYear,
+        Overflow.Reject, // always reject bad iso months
+      )
       day = clampEntity(
         'day',
         day,
         1,
-        this.daysInMonthParts(year, month),
-        overflow
+        computeIsoDaysInMonth(fields.year ?? year, month),
+        overflow,
       )
     }
+
   } else {
-    // derive monthCodeNumber/isLeapMonth from year/month, then discard year
-    year = (fields.year === undefined && easyMonthRefining)
+    year = (fields.year === undefined && this.id === isoCalendarId) // HACK
       ? isoEpochFirstLeapYear
       : refineYear(this, fields as EraYearOrYear)
 
     month = refineMonth(this, fields, year, overflow)
     day = refineDay(this, fields as DayFields, month, year, overflow)
-    calledRefineDay = true
 
     const leapMonth = this.leapMonth(year)
     isLeapMonth = month === leapMonth
@@ -119,19 +107,12 @@ export function nativeMonthDayFromFields(
       (leapMonth && month >= leapMonth)
         ? 1
         : 0)
-  }
 
-  [year, month] = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
-
-  // HACK. TODO: more DRY with refineDay
-  if (!calledRefineDay) {
-    day = clampEntity(
-      'day',
-      day,
-      1,
-      this.daysInMonthParts(year, month),
-      overflow
-    )
+    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+    if (!res) {
+      throw new RangeError('Could not guess year')
+    }
+    [year, month] = res
   }
 
   return {

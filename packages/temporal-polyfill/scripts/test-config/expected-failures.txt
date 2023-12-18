@@ -36,6 +36,23 @@ built-ins/Temporal/PlainMonthDay/prototype/equals/calendar-monthdayfromfields-ca
 built-ins/Temporal/PlainMonthDay/prototype/with/calendar-arguments.js
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
+built-ins/Temporal/Calendar/prototype/dateAdd/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/dateUntil/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/day/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/dayOfWeek/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/dayOfYear/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/daysInMonth/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/daysInWeek/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/daysInYear/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/inLeapYear/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/month/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/monthCode/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/monthsInYear/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/weekOfYear/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/year/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/Calendar/prototype/yearOfWeek/calendar-datefromfields-called-with-options-undefined.js
+intl402/Temporal/Calendar/prototype/era/calendar-datefromfields-called-with-options-undefined.js
+intl402/Temporal/Calendar/prototype/eraYear/calendar-datefromfields-called-with-options-undefined.js
 
 # FIX: dateUntil options should pass-through rando options
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
@@ -86,8 +103,6 @@ built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 ####################################################################################################
 
 # Misc access wrong-order
-built-ins/Temporal/Calendar/prototype/dateAdd/order-of-operations.js
-built-ins/Temporal/Calendar/prototype/dateUntil/order-of-operations.js
 built-ins/Temporal/PlainDate/from/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js
