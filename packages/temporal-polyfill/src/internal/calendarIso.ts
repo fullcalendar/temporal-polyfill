@@ -82,7 +82,7 @@ export function computeIsoInLeapYear(isoYear: number): boolean {
 export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
   return diffEpochMilliByDay(
     isoToEpochMilli(isoDateYearStart(isoDateFields))!,
-    isoToEpochMilli(isoDateFields)!,
+    isoToEpochMilli({ ...isoDateFields, ...isoTimeFieldDefaults })!, // YUCK
   ) + 1
 }
 

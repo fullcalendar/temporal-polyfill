@@ -55,6 +55,7 @@ export function fromFields<C, TA, T>(
 ): ZonedDateTimeSlots<C, T> {
   return {
     ...refineZonedDateTimeBag(
+      calendarSlot,
       getCalendarOps(calendarSlot),
       refineTimeZoneArg,
       getTimeZoneOps,
@@ -220,12 +221,9 @@ export function until<C extends IdLike, T extends IdLike>(
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
   invertRoundingMode?: boolean,
 ): DurationFields {
-  const calendarSlot = getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
-  const timeZoneSlot = getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)
-
   return diffZonedEpochNano(
-    getCalendarOps(calendarSlot),
-    getTimeZoneOps(timeZoneSlot),
+    () => getCalendarOps(getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)),
+    () => getTimeZoneOps(getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)),
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
     ...refineDiffOptions(invertRoundingMode, options, Unit.Hour),
@@ -239,7 +237,7 @@ export function since<C extends IdLike, T extends IdLike>(
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
   options?: DiffOptions, // TODO: force caller to always provide, even if undefined?
 ): DurationFields {
-  return until(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
+  return negateDuration(until(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true))
 }
 
 export function round<C, T>(

@@ -124,8 +124,8 @@ function transformZonedEpochOptions(
   slots1?: { timeZone: IdLike },
 ): Intl.DateTimeFormatOptions {
   options = transformZonedEpochOptionsBasic(options)
-  if (options.timeZone) {
-    throw new RangeError('Cannot specify timeZone in Intl.DateTimeFormat options')
+  if (options.timeZone !== undefined) {
+    throw new TypeError('Cannot specify timeZone in Intl.DateTimeFormat options')
   }
   options.timeZone = getCommonTimeZoneId(slots0!, slots1)
   return options

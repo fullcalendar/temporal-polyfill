@@ -124,6 +124,7 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
 // -------------------------------------------------------------------------------------------------
 
 export function refineZonedDateTimeBag<C, TA, T>(
+  calendarSlot: C,
   calendarOps: DateRefineOps<C>,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
@@ -160,7 +161,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
     false, // fuzzy
   )
 
-  return { epochNanoseconds, timeZone: timeZoneSlot, calendar: isoDateFields.calendar }
+  return { epochNanoseconds, timeZone: timeZoneSlot, calendar: calendarSlot }
 }
 
 export function mergeZonedDateTimeBag<C>(

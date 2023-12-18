@@ -17,11 +17,19 @@ built-ins/Temporal/PlainDateTime/prototype/toPlainYearMonth/calendar-yearmonthfr
 built-ins/Temporal/PlainDateTime/prototype/withPlainDate/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainDateTime/prototype/toPlainMonthDay/calendar-arguments.js
 built-ins/Temporal/PlainDateTime/prototype/toPlainYearMonth/calendar-arguments.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/calendar-arguments.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/calendar-monthdayfromfields-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/calendar-arguments.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/calendar-yearmonthfromfields-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
+built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/calendar-datefromfields-called-with-options-undefined.js
 
 # FIX: dateUntil options should pass-through rando options
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
+built-ins/Temporal/ZonedDateTime/prototype/with/calendar-options.js
 
 # getPossibleInstantsFor wants plainDateTimes that sometimes have calendar. instead, always give iso
 built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
@@ -36,6 +44,8 @@ built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-lengt
 built-ins/Temporal/PlainDate/prototype/until/rounding-zero-year-month-week-length.js
 built-ins/Temporal/PlainDateTime/prototype/since/rounding-zero-year-month-week-length.js
 built-ins/Temporal/PlainDateTime/prototype/until/rounding-zero-year-month-week-length.js
+built-ins/Temporal/ZonedDateTime/prototype/since/rounding-zero-year-month-week-length.js
+built-ins/Temporal/ZonedDateTime/prototype/until/rounding-zero-year-month-week-length.js
 
 ####################################################################################################
 # Options parsing
@@ -49,7 +59,6 @@ built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
 
 ####################################################################################################
 # Temporary
@@ -92,7 +101,6 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/order-of-operations.js
 
 # not caching reference to `TimeZoneProtocol::getOffsetNanosecondsFor` for Duration operations
 built-ins/Temporal/Duration/prototype/add/relativeto-propertybag-ambiguous-wall-clock-time.js
@@ -104,10 +112,8 @@ built-ins/Temporal/Duration/compare/relativeto-propertybag-ambiguous-wall-clock-
 # not caching reference to `TimeZoneProtocol::getOffsetNanosecondsFor` for ZonedDateTime operations
 built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-ambiguous-wall-clock-time.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-ambiguous-wall-clock-time.js
-built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/round/rounding-is-noop.js
 built-ins/Temporal/ZonedDateTime/prototype/since/argument-propertybag-ambiguous-wall-clock-time.js
-built-ins/Temporal/ZonedDateTime/prototype/startOfDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-ambiguous-wall-clock-time.js
 
 ####################################################################################################
@@ -314,12 +320,6 @@ built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
 # fewer calls to dateUntil
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-
-# we parse overflow options fewer times!
-# // toString property is read once by Calendar.dateFromFields() in the builtin
-# // calendars, to get the option value for the date part, and then once again
-# // internally to get the option value for the time part.
-built-ins/Temporal/ZonedDateTime/from/overflow-wrong-type.js
 
 # fewer calls to getPossibleInstantsFor while rounding ZonedDateTime
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js

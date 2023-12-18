@@ -189,8 +189,8 @@ export function diffTimes(
 // -------------------------------------------------------------------------------------------------
 
 export function diffZonedEpochNano(
-  calendarOps: DiffOps,
-  timeZoneOps: TimeZoneOps,
+  getCalendarOps: () => DiffOps,
+  getTimeZoneOps: () => TimeZoneOps,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -198,6 +198,8 @@ export function diffZonedEpochNano(
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
 ): DurationFields {
+  const calendarOps = getCalendarOps()
+
   if (largestUnit < Unit.Day) {
     // doesn't need timeZone
     return diffEpochNano(
@@ -209,10 +211,13 @@ export function diffZonedEpochNano(
       roundingMode,
     )
   }
+
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {
     return durationFieldDefaults
   }
+
+  const timeZoneOps = getTimeZoneOps()
 
   const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
