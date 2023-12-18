@@ -6,7 +6,7 @@ import { refineMaybeZonedDateTimeBag } from '../genericApi/bagGeneric'
 import { MarkerSlots } from '../internal/marker'
 import { ZonedDateTimeBag } from '../genericApi/bagGeneric'
 import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
-import { PlainDateBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 
 // public
 import { BrandingSlots, getSlots } from './slotsForClasses'
@@ -31,7 +31,7 @@ export function refinePublicRelativeTo(
         case PlainDateBranding:
           return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
 
-        case PlainDateBranding:
+        case PlainDateTimeBranding:
           return pluckProps([...isoDateFieldNamesDesc, 'calendar'], slots as any)
       }
 

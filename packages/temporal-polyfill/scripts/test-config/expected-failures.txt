@@ -32,6 +32,8 @@ built-ins/Temporal/PlainYearMonth/prototype/until/calendar-yearmonthfromfields-c
 built-ins/Temporal/PlainYearMonth/prototype/with/calendar-arguments.js
 built-ins/Temporal/PlainMonthDay/prototype/equals/calendar-monthdayfromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainMonthDay/prototype/with/calendar-arguments.js
+built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
 
 # FIX: dateUntil options should pass-through rando options
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
@@ -49,6 +51,7 @@ built-ins/Temporal/PlainDateTime/length.js
 built-ins/Temporal/ZonedDateTime/length.js
 built-ins/Temporal/PlainTime/length.js
 built-ins/Temporal/PlainMonthDay/length.js
+built-ins/Temporal/Duration/length.js
 
 # sanitychecking calendar/timezone results
 built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-length.js
@@ -59,6 +62,9 @@ built-ins/Temporal/ZonedDateTime/prototype/since/rounding-zero-year-month-week-l
 built-ins/Temporal/ZonedDateTime/prototype/until/rounding-zero-year-month-week-length.js
 built-ins/Temporal/PlainYearMonth/prototype/since/rounding-zero-year-month-length.js
 built-ins/Temporal/PlainYearMonth/prototype/until/rounding-zero-year-month-length.js
+built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
+built-ins/Temporal/Duration/prototype/round/zero-year-month-week-length.js
+built-ins/Temporal/Duration/prototype/total/zero-year-month-week-length.js
 
 ####################################################################################################
 # Options parsing
@@ -115,13 +121,6 @@ built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/order-of-operations.j
 built-ins/Temporal/PlainTime/prototype/toZonedDateTime/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 
-# not caching reference to `TimeZoneProtocol::getOffsetNanosecondsFor` for Duration operations
-built-ins/Temporal/Duration/prototype/add/relativeto-propertybag-ambiguous-wall-clock-time.js
-built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-ambiguous-wall-clock-time.js
-built-ins/Temporal/Duration/prototype/subtract/relativeto-propertybag-ambiguous-wall-clock-time.js
-built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-ambiguous-wall-clock-time.js
-built-ins/Temporal/Duration/compare/relativeto-propertybag-ambiguous-wall-clock-time.js
-
 # not caching reference to `TimeZoneProtocol::getOffsetNanosecondsFor` for ZonedDateTime operations
 built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-ambiguous-wall-clock-time.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-ambiguous-wall-clock-time.js
@@ -142,9 +141,6 @@ built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign
 # expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
 built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
 built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
-
-# internal mock of 12-months is incompatible w/ how we expect that calendar to handle 2-years
-built-ins/Temporal/Duration/prototype/total/dateuntil-field.js
 
 ####################################################################################################
 # Handling crazy results from TIMEZONE
@@ -265,7 +261,6 @@ built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-
 
 # why does Duration 'day' operations need to consult calendar?
 built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
-built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
 
 ####################################################################################################
 # Ours is better
@@ -396,22 +391,6 @@ built-ins/Temporal/Duration/call-builtin.js
 # Known bug in spec that's MAYBE getting fixed (https://github.com/tc39/proposal-temporal/issues/2715)
 # SOLUTION: do rounding by actually adding then diffing
 ####################################################################################################
-
-#
-# const dur = new Temporal.Duration(3, 11, 0, 29)
-# const pd1 = new Temporal.PlainDate(1972, 2, 1)
-# const pd2 = pd1.add(dur)
-#
-# console.log(
-#   'ACTUAL: ' +
-#   dur.round({ largestUnit: 'years', relativeTo: pd1 }).toString() // "P4Y"
-# )
-# console.log(
-#   'EXPECTED: ' +
-#   pd1.until(pd2, { largestUnit: 'years' }).toString() // "P3Y11M29D"
-# )
-#
-built-ins/Temporal/Duration/prototype/round/february-leap-year.js
 
 # Can't do rel-rounding with big Durations because outside of range
 built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-months.js

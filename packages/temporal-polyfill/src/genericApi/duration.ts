@@ -197,11 +197,7 @@ export function round<RA, C, T>(
     MarkerSystem<any>
 
   let transplantedWeeks = 0
-  if (
-    slots.weeks &&
-    largestUnit >= Unit.Week &&
-    smallestUnit <= Unit.Week
-  ) {
+  if (slots.weeks && smallestUnit === Unit.Week) {
     transplantedWeeks = slots.weeks
     slots = { ...slots, weeks: 0 }
   }
