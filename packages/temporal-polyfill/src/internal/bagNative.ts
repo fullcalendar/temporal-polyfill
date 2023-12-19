@@ -1,7 +1,7 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { DateBag, DayFields, EraYearOrYear, MonthFields, YearMonthBag, allYearFieldNames, eraYearFieldNames, monthDayFieldNames, monthFieldNames } from './calendarFields'
-import { computeIsoDaysInMonth, computeIsoYearMonthForMonthDay, isoMonthsInYear } from './calendarIso'
-import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
+import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
+import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarId, getCalendarLeapMonthMeta, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
 import { IsoDateFields } from './calendarIsoFields'
 import { isoEpochFirstLeapYear } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
@@ -24,7 +24,7 @@ export function nativeDateFromFields(
 
   return {
     ...checkIsoDateInBounds(isoFields),
-    calendar: this.id,
+    calendar: getCalendarId(this),
   }
 }
 
@@ -39,7 +39,7 @@ export function nativeYearMonthFromFields(
 
   return {
     ...checkIsoYearMonthInBounds(isoFields),
-    calendar: this.id,
+    calendar: getCalendarId(this),
   }
 }
 
@@ -48,6 +48,7 @@ export function nativeMonthDayFromFields(
   fields: DateBag,
   overflow?: Overflow
 ): IsoDateFields & { calendar: string } {
+  let isIso = getCalendarId(this) === isoCalendarId // HACK
   let { monthCode } = fields as Partial<MonthFields>
   let monthCodeNumber: number
   let isLeapMonth: boolean
@@ -76,7 +77,7 @@ export function nativeMonthDayFromFields(
     if (fields.month !== undefined && fields.month !== month) {
       throw new RangeError('Inconsistent month/monthCode')
     }
-    if (this.id === isoCalendarId) {
+    if (isIso) {
       month = clampEntity(
         'month',
         month,
@@ -94,7 +95,7 @@ export function nativeMonthDayFromFields(
     }
 
   } else {
-    year = (fields.year === undefined && this.id === isoCalendarId) // HACK
+    year = (fields.year === undefined && isIso)
       ? isoEpochFirstLeapYear
       : refineYear(this, fields as EraYearOrYear)
 
@@ -117,7 +118,7 @@ export function nativeMonthDayFromFields(
 
   return {
     ...this.isoFields(year, month, day),
-    calendar: this.id,
+    calendar: getCalendarId(this),
   }
 }
 
@@ -126,7 +127,7 @@ function refineYear(
   fields: DateBag
 ): number {
   let { era, eraYear, year } = fields
-  const eraOrigins = calendarNative.getEraOrigins()
+  const eraOrigins = getCalendarEraOrigins(calendarNative)
 
   if (era !== undefined || eraYear !== undefined) {
     if (era === undefined || eraYear === undefined) {
@@ -202,7 +203,7 @@ function refineMonthCode(
   let month = monthCodeNumberToMonth(monthCodeNumber, wantsLeapMonth, leapMonth)
 
   if (wantsLeapMonth) {
-    const leapMonthMeta = calendarNative.getLeapMonthMeta()
+    const leapMonthMeta = getCalendarLeapMonthMeta(calendarNative)
 
     // calendar does not support leap years
     if (leapMonthMeta === undefined) {
@@ -274,7 +275,7 @@ export function nativeFieldsMethod(
   this: NativeYearMonthRefineDeps,
   fieldNames: string[],
 ): string[] {
-  if (this.getEraOrigins() && fieldNames.includes('year')) {
+  if (getCalendarEraOrigins(this) && fieldNames.includes('year')) {
     return [...fieldNames, ...eraYearFieldNames]
   }
   return fieldNames
@@ -289,11 +290,11 @@ export function nativeMergeFields(
 
   spliceFields(merged, additionalFields, monthFieldNames)
 
-  if (this.getEraOrigins()) {
+  if (getCalendarEraOrigins(this)) {
     spliceFields(merged, additionalFields, allYearFieldNames)
 
     // eras begin mid-year?
-    if ((this as any).idBase === japaneseCalendarId) {
+    if (getCalendarId(this) === japaneseCalendarId) {
       spliceFields(
         merged,
         additionalFields,

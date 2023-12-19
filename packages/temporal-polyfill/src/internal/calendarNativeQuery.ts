@@ -1,9 +1,8 @@
 import { nativeMergeFields } from './bagNative'
-import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
-import { computeGregoryEraParts, getGregoryEraOrigins } from './calendarGregory'
-import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, createCalendarIntlOps, getIntlEraOrigins, getIntlLeapMonthMeta } from './calendarIntl'
+import { gregoryCalendarId, isoCalendarId, japaneseCalendarId } from './calendarConfig'
+import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, queryIntlCalendar } from './calendarIntl'
 import { computeIsoDateParts, computeIsoDay, computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoEpochMilli, computeIsoEraParts, computeIsoFieldsFromParts, computeIsoInLeapYear, computeIsoMonth, computeIsoMonthCodeParts, computeIsoMonthsInYear, computeIsoYear, computeIsoYearMonthForMonthDay } from './calendarIso'
-import { GetEraOrigins, GetLeapMonthMeta, LeapMonthOp, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeInLeapYear, computeMonthCode, computeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
+import { LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeInLeapYear, computeMonthCode, computeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
 import { intlMonthAdd, isoMonthAdd } from './move'
 import { noop } from './utils'
@@ -19,8 +18,6 @@ const isoYearMonthRefineDeps = {
   leapMonth: noop as LeapMonthOp,
   monthsInYearPart: computeIsoMonthsInYear,
   isoFields: computeIsoFieldsFromParts,
-  getEraOrigins: noop as GetEraOrigins,
-  getLeapMonthMeta: noop as GetLeapMonthMeta,
 }
 
 const isoDateRefineDeps = {
@@ -171,62 +168,9 @@ export const isoStandardOps: NativeStandardOps = {
   isoFields: computeIsoFieldsFromParts,
   epochMilli: computeIsoEpochMilli,
   monthAdd: isoMonthAdd,
-  getEraOrigins: noop as GetEraOrigins,
-  getLeapMonthMeta: noop as GetLeapMonthMeta,
   year: computeIsoYear,
   month: computeIsoMonth,
   day: computeIsoDay,
-}
-
-// Gregory
-// -------------------------------------------------------------------------------------------------
-
-export const gregoryPartOps: NativePartOps = {
-  ...isoPartOps,
-  eraParts: computeGregoryEraParts,
-}
-
-export const gregoryYearMonthRefineOps: NativeYearMonthRefineOps = {
-  ...isoYearMonthRefineOps,
-  id: gregoryCalendarId,
-  getEraOrigins: getGregoryEraOrigins,
-}
-
-export const gregoryDateRefineOps: NativeDateRefineOps = {
-  ...isoDateRefineOps,
-  id: gregoryCalendarId,
-  getEraOrigins: getGregoryEraOrigins,
-}
-
-export const gregoryMonthDayRefineOps: NativeMonthDayRefineOps = {
-  ...isoMonthDayRefineOps,
-  id: gregoryCalendarId,
-  getEraOrigins: getGregoryEraOrigins,
-}
-
-export const gregoryYearMonthModOps: NativeYearMonthModOps = {
-  ...isoYearMonthModOps,
-  id: gregoryCalendarId,
-  getEraOrigins: getGregoryEraOrigins,
-}
-
-export const gregoryDateModOps: NativeDateModOps = {
-  ...isoDateModOps,
-  id: gregoryCalendarId,
-  getEraOrigins: getGregoryEraOrigins,
-}
-
-export const gregoryMonthDayModOps: NativeMonthDayModOps = {
-  ...isoMonthDayModOps,
-  id: gregoryCalendarId,
-  getEraOrigins: getGregoryEraOrigins,
-}
-
-export const gregoryStandardOps: NativeStandardOps = {
-  ...isoStandardOps,
-  id: gregoryCalendarId,
-  eraParts: computeGregoryEraParts,
-  getEraOrigins: getGregoryEraOrigins,
 }
 
 // Intl
@@ -239,8 +183,6 @@ const intlYearMonthRefineDeps = {
   leapMonth: computeIntlLeapMonth,
   monthsInYearPart: computeIntlMonthsInYear,
   isoFields: computeIsoFieldsFromIntlParts,
-  getEraOrigins: getIntlEraOrigins,
-  getLeapMonthMeta: getIntlLeapMonthMeta,
 }
 
 const intlDateRefineDeps = {
@@ -406,8 +348,6 @@ export const intlStandardOps: Omit<NativeStandardOps, 'id'> = {
   isoFields: computeIsoFieldsFromIntlParts,
   epochMilli: computeIntlEpochMilli,
   monthAdd: intlMonthAdd,
-  getEraOrigins: getIntlEraOrigins,
-  getLeapMonthMeta: getIntlLeapMonthMeta,
   year: computeIntlYear,
   month: computeIntlMonth,
   day: computeIntlDay,
@@ -420,14 +360,14 @@ All functions expect realized/normalized calendarId
 */
 
 // Refine
-export const createNativeYearMonthRefineOps = createNativeOpsCreator(isoYearMonthRefineOps, intlYearMonthRefineOps, gregoryYearMonthRefineOps)
-export const createNativeDateRefineOps = createNativeOpsCreator(isoDateRefineOps, intlDateRefineOps, gregoryDateRefineOps)
-export const createNativeMonthDayRefineOps = createNativeOpsCreator(isoMonthDayRefineOps, intlMonthDayRefineOps, gregoryMonthDayRefineOps)
+export const createNativeYearMonthRefineOps = createNativeOpsCreator(isoYearMonthRefineOps, intlYearMonthRefineOps)
+export const createNativeDateRefineOps = createNativeOpsCreator(isoDateRefineOps, intlDateRefineOps)
+export const createNativeMonthDayRefineOps = createNativeOpsCreator(isoMonthDayRefineOps, intlMonthDayRefineOps)
 
 // Mod
-export const createNativeYearMonthModOps = createNativeOpsCreator(isoYearMonthModOps, intlYearMonthModOps, gregoryYearMonthModOps)
-export const createNativeDateModOps = createNativeOpsCreator(isoDateModOps, intlDateModOps, gregoryDateModOps)
-export const createNativeMonthDayModOps = createNativeOpsCreator(isoMonthDayModOps, intlMonthDayModOps, gregoryMonthDayModOps)
+export const createNativeYearMonthModOps = createNativeOpsCreator(isoYearMonthModOps, intlYearMonthModOps)
+export const createNativeDateModOps = createNativeOpsCreator(isoDateModOps, intlDateModOps)
+export const createNativeMonthDayModOps = createNativeOpsCreator(isoMonthDayModOps, intlMonthDayModOps)
 
 // Math
 export const createNativeMoveOps = createNativeOpsCreator(isoMoveOps, intlMoveOps)
@@ -441,28 +381,24 @@ export const createNativeMonthsInYearOps = createNativeOpsCreator(isoMonthsInYea
 export const createNativeDaysInMonthOps = createNativeOpsCreator(isoDaysInMonthOps, intlDaysInMonthOps)
 export const createNativeDaysInYearOps = createNativeOpsCreator(isoDaysInYearOps, intlDaysInYearOps)
 export const createNativeDayOfYearOps = createNativeOpsCreator(isoDayOfYearOps, intlDayOfYearOps)
-export const createNativePartOps = createNativeOpsCreator(isoPartOps, intlPartOps, gregoryPartOps)
+export const createNativePartOps = createNativeOpsCreator(isoPartOps, intlPartOps)
 
 // String Parsing
 export const createNativeYearMonthParseOps = createNativeOpsCreator(isoYearMonthParseOps, intlYearMonthParseOps)
 export const createNativeMonthDayParseOps = createNativeOpsCreator(isoMonthDayParseOps, intlMonthDayParseOps)
 
 // Standard
-export const createNativeStandardOps = createNativeOpsCreator(isoStandardOps, intlStandardOps, gregoryStandardOps)
+export const createNativeStandardOps = createNativeOpsCreator(isoStandardOps, intlStandardOps)
 
-function createNativeOpsCreator<O extends {}>(
-  isoOps: O,
-  intlOps: O,
-  gregoryOps?: O,
-): (
-  (calendarId: string) => O
+function createNativeOpsCreator<O extends {}>(isoOps: O, intlOps: O): (
+  (calendarId: string) => O & NativeCalendar
 ) {
   return (calendarId) => {
     if (calendarId === isoCalendarId) {
       return isoOps
-    } else if (calendarId === gregoryCalendarId) {
-      return gregoryOps || isoOps
+    } else if (calendarId === gregoryCalendarId || calendarId === japaneseCalendarId) {
+      return Object.assign(Object.create(isoOps), { id: calendarId })
     }
-    return createCalendarIntlOps(calendarId, intlOps)
+    return Object.assign(Object.create(intlOps), queryIntlCalendar(calendarId))
   }
 }

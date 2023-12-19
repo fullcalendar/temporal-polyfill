@@ -1,8 +1,11 @@
 import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './epochAndTime'
 import { IsoDateFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { diffEpochMilliByDay } from './diff'
-import { modFloor } from './utils'
-import { DateParts, EraParts, MonthCodeParts, YearMonthParts } from './calendarNative'
+import { createLazyGenerator, modFloor } from './utils'
+import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
+import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
+import { buildIntlFormat, parseIntlYear } from './calendarIntl'
+import { hashIntlFormatParts } from './formatIntl'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
@@ -19,10 +22,6 @@ export function computeIsoMonth(isoFields: IsoDateFields): number {
 
 export function computeIsoDay(isoFields: IsoDateFields): number {
   return isoFields.isoDay
-}
-
-export function computeIsoEraParts(): EraParts {
-  return [undefined, undefined]
 }
 
 export function computeIsoDateParts(isoFields: IsoDateFields): DateParts {
@@ -147,4 +146,43 @@ function isoDateYearStart(isoDateFields: IsoDateFields): IsoDateFields {
     isoDay: 1,
     ...isoTimeFieldDefaults, // needed?
   }
+}
+
+// Era (complicated stuff)
+// -------------------------------------------------------------------------------------------------
+
+export function computeIsoEraParts(this: NativeCalendar, isoFields: IsoDateFields): EraParts {
+  if (this.id === gregoryCalendarId) {
+    return computeGregoryEraParts(isoFields)
+  }
+
+  if (this.id === japaneseCalendarId) {
+    return queryJapaneseEraParts(isoFields)
+  }
+
+  return [undefined, undefined] // iso
+}
+
+function computeGregoryEraParts({ isoYear }: IsoDateFields): EraParts {
+  if (isoYear < 1) {
+    return ['bce', -isoYear + 1]
+  }
+  return ['ce', isoYear]
+}
+
+const queryJapaneseEraParts = createLazyGenerator(computeJapaneseEraParts, WeakMap)
+const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
+let japeneseEraFormat: Intl.DateTimeFormat
+
+function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
+  const epochMilli = isoToEpochMilli(isoFields)!
+
+  if (epochMilli < primaryJapaneseEraMilli) {
+    return computeGregoryEraParts(isoFields)
+  }
+
+  japeneseEraFormat ||= buildIntlFormat(japaneseCalendarId)
+  const intlPartsHash = hashIntlFormatParts(japeneseEraFormat, epochMilli)
+  const { era, eraYear } = parseIntlYear(intlPartsHash, japaneseCalendarId)
+  return [era, eraYear]
 }

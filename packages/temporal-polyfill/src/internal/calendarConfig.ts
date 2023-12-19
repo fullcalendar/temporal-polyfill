@@ -12,13 +12,13 @@ if origin is <0, consider the era to be 'reverse' direction
   year = -origin - eraYear, same as...
   year = -(origin + eraYear)
 */
-export const gregoryCalendarOrigins: Record<string, number> = {
-  bce: -1,
-  ce: 0,
-}
-export const eraOriginsByCalendarId: { // for calendarIntl only
+export const eraOriginsByCalendarId: {
   [calendarId: string]: Record<string, number>
 } = {
+  [gregoryCalendarId]: {
+    bce: -1,
+    ce: 0,
+  },
   [japaneseCalendarId]: {
     bce: -1,
     ce: 0,
@@ -70,6 +70,7 @@ export const leapMonthMetas: Record<string, number> = {
 
 // only used by calendar
 // ---------------------
+// TODO: move to calendarNative?, like getCalendarEraOrigins/getCalendarLeapMonthMeta
 
 export function getRequiredYearMonthFields(calendarId: string): string[] {
   return calendarId === isoCalendarId ? yearFieldNames : []

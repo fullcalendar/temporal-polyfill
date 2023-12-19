@@ -195,7 +195,7 @@ export function parsePlainMonthDay(
   // normalize year&month to be as close as possible to epoch
   const [origYear, origMonth, day] = calendarOps.dateParts(dateSlots)
   const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(origYear, origMonth)
-  const [year, month] = calendarOps.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+  const [year, month] = calendarOps.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)! // !HACK
   const isoFields = calendarOps.isoFields(year, month, day)
 
   return { ...isoFields, calendar }

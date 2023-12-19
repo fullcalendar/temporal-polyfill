@@ -5,6 +5,7 @@ import { IsoDateFields } from './calendarIsoFields'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from './calendarIso'
 import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
+import { eraOriginsByCalendarId, isoCalendarId, leapMonthMetas } from './calendarConfig'
 
 // Struct Types
 export type DateParts = [year: number, month: number, day: number]
@@ -38,16 +39,18 @@ export type MonthAddOp = (year: number, month: number, monthDelta: number) => Ye
 export type GetEraOrigins = () => Record<string, number> | undefined
 export type GetLeapMonthMeta = () => number | undefined
 
+// Internal State
+export interface NativeCalendar {
+  id?: string
+}
+
 // Refine
 // -------------------------------------------------------------------------------------------------
 
-export type NativeYearMonthRefineDeps = {
-  id: string
+export type NativeYearMonthRefineDeps = NativeCalendar & {
   leapMonth: LeapMonthOp
   monthsInYearPart: MonthsInYearPartOp
   isoFields: IsoFieldsOp
-  getEraOrigins: GetEraOrigins
-  getLeapMonthMeta: GetLeapMonthMeta
 }
 
 export type NativeDateRefineDeps = NativeYearMonthRefineDeps & {
@@ -89,7 +92,7 @@ export type NativeMonthDayModOps = NativeMonthDayRefineOps & { mergeFields: Merg
 // Math
 // -------------------------------------------------------------------------------------------------
 
-interface NativeMathOps {
+export interface NativeMathOps {
   dateParts: DatePartsOp
   monthCodeParts: MonthCodePartsOp
   monthsInYearPart: MonthsInYearPartOp
@@ -388,5 +391,27 @@ export function monthToMonthCodeNumber(month: number, leapMonth?: number): numbe
 
 export function eraYearToYear(eraYear: number, eraOrigin: number): number {
   // see the origin format in calendarConfig
-  return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1)
+  return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1) || 0 // protect against -0
+}
+
+// -------------------------------------------------------------------------------------------------
+
+export function getCalendarId(native: NativeCalendar): string {
+  return native.id || isoCalendarId
+}
+
+export function getCalendarIdBase(native: NativeCalendar): string {
+  return computeCalendarIdBase(getCalendarId(native))
+}
+
+export function computeCalendarIdBase(calendarId: string): string {
+  return calendarId.split('-')[0]
+}
+
+export function getCalendarEraOrigins(native: NativeCalendar): Record<string, number> | undefined {
+  return eraOriginsByCalendarId[getCalendarIdBase(native)]
+}
+
+export function getCalendarLeapMonthMeta(native: NativeCalendar): number | undefined {
+  return leapMonthMetas[getCalendarIdBase(native)]
 }

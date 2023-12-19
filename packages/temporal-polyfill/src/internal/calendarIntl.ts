@@ -1,5 +1,4 @@
-import { eraOriginsByCalendarId, eraRemaps, japaneseCalendarId, leapMonthMetas } from './calendarConfig'
-import { computeGregoryEraParts } from './calendarGregory'
+import { eraOriginsByCalendarId, eraRemaps, japaneseCalendarId } from './calendarConfig'
 import { diffEpochMilliByDay } from './diff'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './formatIntl'
 import { IsoDateFields, isoTimeFieldDefaults } from './calendarIsoFields'
@@ -8,7 +7,7 @@ import { checkIsoDateInBounds, epochMilliToIso, isoArgsToEpochMilli, isoToEpochM
 import { utcTimeZoneId } from './timeZoneNative'
 import { milliInDay } from './units'
 import { compareNumbers, createLazyGenerator, mapPropNamesToIndex } from './utils'
-import { DateParts, EraParts, MonthCodeParts, YearMonthParts, eraYearToYear, monthCodeNumberToMonth, monthToMonthCodeNumber } from './calendarNative'
+import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts, computeCalendarIdBase, eraYearToYear, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber } from './calendarNative'
 
 interface IntlDateFields {
   era: string | undefined
@@ -23,18 +22,9 @@ interface IntlYearMonths {
   monthStrToIndex: Record<string, number>
 }
 
-export interface IntlCalendar {
-  id: string,
-  idBase: string,
+export interface IntlCalendar extends NativeCalendar {
   queryFields: (isoFields: IsoDateFields) => IntlDateFields
   queryYearMonths: (year: number) => IntlYearMonths
-}
-
-export function createCalendarIntlOps<M extends {}>(
-  calendarId: string,
-  methods: M
-): M & IntlCalendar {
-  return Object.assign(Object.create(methods), queryIntlCalendar(calendarId))
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -46,9 +36,9 @@ export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
   const intlFormat = buildIntlFormat(calendarId)
-  const calendarIdBase = getCalendarIdBase(calendarId)
+  const calendarIdBase = computeCalendarIdBase(calendarId)
 
-  if (calendarIdBase !== getCalendarIdBase(intlFormat.resolvedOptions().calendar)) {
+  if (calendarIdBase !== computeCalendarIdBase(intlFormat.resolvedOptions().calendar)) {
     throw new RangeError('Invalid calendar: ' + calendarId)
   }
 
@@ -59,7 +49,6 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
 
   return {
     id: calendarId,
-    idBase: calendarIdBase,
     queryFields: createIntlFieldCache(epochMilliToIntlFields),
     queryYearMonths: createIntlYearMonthCache(epochMilliToIntlFields),
   }
@@ -157,7 +146,8 @@ export function parseIntlYear(
   return { era, eraYear, year }
 }
 
-function buildIntlFormat(calendarId: string): Intl.DateTimeFormat {
+// TODO: rename to be about calendar
+export function buildIntlFormat(calendarId: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {
     calendar: calendarId,
     timeZone: utcTimeZoneId,
@@ -244,7 +234,7 @@ export function computeIntlLeapMonth(
 
   if (currentLength > prevMonthStrs.length) {
     // hardcoded leap month. usually means complex month-code schemes
-    const leapMonthMeta = leapMonthMetas[this.idBase]
+    const leapMonthMeta = getCalendarLeapMonthMeta(this) as number // hack for <0
     if (leapMonthMeta < 0) {
       return -leapMonthMeta
     }
@@ -255,14 +245,6 @@ export function computeIntlLeapMonth(
       }
     }
   }
-}
-
-export function getIntlEraOrigins(this: IntlCalendar): Record<string, number> | undefined {
-  return eraOriginsByCalendarId[this.idBase]
-}
-
-export function getIntlLeapMonthMeta(this: IntlCalendar): number | undefined {
-  return leapMonthMetas[this.idBase]
 }
 
 export function computeIntlInLeapYear(this: IntlCalendar, year: number): boolean {
@@ -310,15 +292,7 @@ export function computeIntlMonthsInYear(this: IntlCalendar, year: number): numbe
   return this.queryYearMonths(year).monthEpochMilli.length
 }
 
-const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
-
 export function computeIntlEraParts(this: IntlCalendar, isoFields: IsoDateFields): EraParts {
-  if (
-    this.idBase === japaneseCalendarId &&
-    isoToEpochMilli(isoFields)! < primaryJapaneseEraMilli
-  ) {
-    return computeGregoryEraParts(isoFields)
-  }
   const intlFields = this.queryFields(isoFields)
   return [intlFields.era, intlFields.eraYear]
 }
@@ -369,8 +343,4 @@ export function computeIntlYearMonthForMonthDay(
 
 function queryMonthStrs(intlCalendar: IntlCalendar, year: number): string[] {
   return Object.keys(intlCalendar.queryYearMonths(year).monthStrToIndex)
-}
-
-function getCalendarIdBase(calendarId: string): string {
-  return calendarId.split('-')[0]
 }
