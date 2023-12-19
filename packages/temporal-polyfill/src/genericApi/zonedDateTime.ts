@@ -248,6 +248,12 @@ export function round<C, T>(
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
   const timeZoneOps = getTimeZoneOps(timeZone)
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
+
+  // short circuit (elsewhere? consolidate somehow?)
+  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
+    return zonedDateTimeSlots
+  }
+
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
   let isoDateTimeFields = {
     ...epochNanoToIso(epochNanoseconds, offsetNano),

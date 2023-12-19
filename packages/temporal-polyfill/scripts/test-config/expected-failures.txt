@@ -99,13 +99,6 @@ built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
 ####################################################################################################
-# Misc TIMEZONE non-compliance
-####################################################################################################
-
-# not caching reference to `TimeZoneProtocol::getOffsetNanosecondsFor` for ZonedDateTime operations
-built-ins/Temporal/ZonedDateTime/prototype/round/rounding-is-noop.js
-
-####################################################################################################
 # Handling crazy results from CALENDAR
 ####################################################################################################
 
