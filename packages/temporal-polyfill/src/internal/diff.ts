@@ -89,7 +89,7 @@ export function diffDateTimes(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateTimeFields) => DayTimeNano, // markerToEpochNano -- TODO: better after removing `!`
-    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarOps, m, d, Overflow.Constrain),
+    (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarOps, m, d),
   )
 }
 
@@ -119,7 +119,7 @@ export function diffDates(
     roundingMode,
     startIsoFields, // marker
     isoToEpochNano as (isoFields: IsoDateFields) => DayTimeNano, // markerToEpochNano
-    (m: IsoDateFields, d: DurationFields) => calendarOps.dateAdd(m, d, Overflow.Constrain),
+    (m: IsoDateFields, d: DurationFields) => calendarOps.dateAdd(m, d),
   )
 }
 
@@ -252,7 +252,7 @@ export function diffZonedEpochNano(
     startEpochNano, // marker
     identityFunc, // markerToEpochNano
     // TODO: better way to bind
-    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d, Overflow.Constrain),
+    (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d),
   )
 }
 

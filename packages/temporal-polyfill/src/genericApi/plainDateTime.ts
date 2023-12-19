@@ -126,7 +126,7 @@ export function add<C>(
       getCalendarOps(plainDateTimeSlots.calendar),
       plainDateTimeSlots,
       durationSlots,
-      refineOverflowOptions(options),
+      options,
     ),
     branding: PlainDateTimeBranding, // YUCK. all because checkIsoDateTimeInBounds too liberal
   }

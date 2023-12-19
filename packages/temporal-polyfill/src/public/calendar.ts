@@ -51,7 +51,7 @@ export class Calendar implements CalendarProtocol {
       ...native.dateAdd(
         toPlainDateSlots(plainDateArg),
         toDurationSlots(durationArg),
-        refineOverflowOptions(options),
+        options,
       ),
       calendar: id,
       branding: PlainDateBranding,

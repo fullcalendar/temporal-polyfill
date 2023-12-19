@@ -194,7 +194,7 @@ export function add<C, T>(
     getTimeZoneOps(zonedDateTimeSlots.timeZone),
     zonedDateTimeSlots.epochNanoseconds,
     durationSlots,
-    refineOverflowOptions(options),
+    options,
   )
 
   return {

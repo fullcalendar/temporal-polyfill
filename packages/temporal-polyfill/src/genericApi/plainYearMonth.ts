@@ -94,14 +94,14 @@ export function add<C>(
 
   // if moving backwards in time, set to last day of month
   if (queryDurationSign(durationFields) < 0) {
-    isoDateFields = calendarOps.dateAdd(isoDateFields, { ...durationFieldDefaults, months: 1 }, Overflow.Constrain)
+    isoDateFields = calendarOps.dateAdd(isoDateFields, { ...durationFieldDefaults, months: 1 })
     isoDateFields = moveByIsoDays(isoDateFields, -1)
   }
 
   const movedIsoDateFields = calendarOps.dateAdd(
     isoDateFields,
     durationFields,
-    refineOverflowOptions(options),
+    options,
   )
 
   return {

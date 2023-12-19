@@ -1,5 +1,5 @@
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
-import { overflowMapNames } from '../genericApi/optionsRefine'
+import { OverflowOptions, overflowMapNames } from '../genericApi/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'
@@ -44,13 +44,13 @@ function dateFromFieldsAdapter(
   calendarProtocol: CalendarProtocol,
   dateFromFields: CalendarProtocol['dateFromFields'],
   fields: DateBag,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ): IsoDateFields & { calendar: CalendarSlot } {
   return getPlainDateSlots(
     dateFromFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as DateBagStrict,
-      Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
+      options && Object.assign(Object.create(null), options)
     )
   )
 }
@@ -59,13 +59,13 @@ function yearMonthFromFieldsAdapter(
   calendarProtocol: CalendarProtocol,
   yearMonthFromFields: CalendarProtocol['yearMonthFromFields'],
   fields: YearMonthBag,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ): IsoDateFields & { calendar: CalendarSlot } {
   return getPlainYearMonthSlots(
     yearMonthFromFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as YearMonthBagStrict,
-      Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
+      options && Object.assign(Object.create(null), options)
     )
   )
 }
@@ -74,13 +74,13 @@ function monthDayFromFieldsAdapter(
   calendarProtocol: CalendarProtocol,
   monthDayFromFields: CalendarProtocol['monthDayFromFields'],
   fields: MonthDayBag,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ): IsoDateFields & { calendar: CalendarSlot } {
   return getPlainMonthDaySlots(
     monthDayFromFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as MonthDayBagStrict,
-      Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
+      options && Object.assign(Object.create(null), options)
     )
   )
 }
@@ -90,7 +90,7 @@ function dateAddAdapter(
   dateAdd: CalendarProtocol['dateAdd'],
   isoFields: IsoDateFields,
   durationFields: DurationFields,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ) {
   return getPlainDateSlots(
     dateAdd.call(
@@ -104,7 +104,7 @@ function dateAddAdapter(
         ...durationFields,
         branding: DurationBranding,
       }),
-      Object.assign(Object.create(null), { overflow: overflowMapNames[overflow] })
+      Object.assign(Object.create(null), options), // needs object
     )
   )
 }

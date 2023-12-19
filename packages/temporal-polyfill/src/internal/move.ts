@@ -28,6 +28,7 @@ import { isoCalendarId } from './calendarConfig'
 import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps } from './calendarOps'
+import { OverflowOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
@@ -37,12 +38,13 @@ export function moveZonedEpochNano(
   timeZoneOps: TimeZoneOps,
   epochNano: DayTimeNano,
   durationFields: DurationFields,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ): DayTimeNano {
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour) // better name: timed nano
 
   if (!durationHasDateParts(durationFields)) {
     epochNano = addDayTimeNanos(epochNano, dayTimeNano)
+    refineOverflowOptions(options) // for validation only
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZoneOps, epochNano)
     const movedIsoDateFields = moveDateEasy(
@@ -52,7 +54,7 @@ export function moveZonedEpochNano(
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // time parts
       },
-      overflow,
+      options,
     )
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
@@ -84,7 +86,7 @@ export function moveDateTime(
   calendarOps: MoveOps,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ): IsoDateTimeFields {
   // could have over 24 hours!!!
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
@@ -97,7 +99,7 @@ export function moveDateTime(
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
       days: durationFields.days + dayDelta,
     },
-    overflow,
+    options,
   )
 
   return checkIsoDateTimeInBounds({
@@ -110,15 +112,17 @@ export function moveDateEasy(
   calendarOps: MoveOps,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
-  overflow: Overflow,
+  options?: OverflowOptions,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
     return calendarOps.dateAdd(
       isoDateFields,
       durationFields,
-      overflow
+      options
     )
   }
+
+  refineOverflowOptions(options) // for validation only
 
   // don't need calendar going forward...
 
@@ -146,8 +150,9 @@ export function nativeDateAdd(
   this: NativeMoveOps,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
-  overflow?: Overflow,
+  options?: OverflowOptions,
 ): IsoDateFields {
+  const overflow = refineOverflowOptions(options)
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 

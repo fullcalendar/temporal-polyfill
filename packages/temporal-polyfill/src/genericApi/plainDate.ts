@@ -89,7 +89,7 @@ export function add<C>(
       getCalendarOps(plainDateSlots.calendar),
       plainDateSlots,
       durationSlots,
-      refineOverflowOptions(options),
+      options,
     )
   }
 }

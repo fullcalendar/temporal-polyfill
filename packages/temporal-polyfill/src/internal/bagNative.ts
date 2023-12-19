@@ -7,6 +7,7 @@ import { isoEpochFirstLeapYear } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { Overflow } from './options'
 import { clampEntity } from './utils'
+import { OverflowOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
 
 // Would like to merge this file with convert.ts
 // but convert.ts deals with option parsing. It needs to because it must ensure the bags
@@ -15,8 +16,9 @@ import { clampEntity } from './utils'
 export function nativeDateFromFields(
   this: NativeDateRefineDeps,
   fields: DateBag,
-  overflow: Overflow
+  options?: OverflowOptions,
 ): IsoDateFields & { calendar: string } {
+  const overflow = refineOverflowOptions(options)
   const year = refineYear(this, fields)
   const month = refineMonth(this, fields, year, overflow)
   const day = refineDay(this, fields as DayFields, month, year, overflow)
@@ -31,8 +33,9 @@ export function nativeDateFromFields(
 export function nativeYearMonthFromFields(
   this: NativeYearMonthRefineDeps,
   fields: YearMonthBag,
-  overflow: Overflow
+  options?: OverflowOptions,
 ): IsoDateFields & { calendar: string } {
+  const overflow = refineOverflowOptions(options)
   const year = refineYear(this, fields)
   const month = refineMonth(this, fields, year, overflow)
   const isoFields = this.isoFields(year, month, 1)
@@ -46,8 +49,9 @@ export function nativeYearMonthFromFields(
 export function nativeMonthDayFromFields(
   this: NativeMonthDayRefineOps,
   fields: DateBag,
-  overflow?: Overflow
+  options?: OverflowOptions
 ): IsoDateFields & { calendar: string } {
+  const overflow = refineOverflowOptions(options)
   let isIso = getCalendarId(this) === isoCalendarId // HACK
   let { monthCode } = fields as Partial<MonthFields>
   let monthCodeNumber: number
@@ -161,7 +165,7 @@ function refineMonth(
   calendarNative: NativeYearMonthRefineDeps,
   fields: Partial<MonthFields>,
   year: number,
-  overflow?: Overflow
+  overflow: Overflow
 ): number {
   let { month, monthCode } = fields
 
@@ -196,7 +200,7 @@ function refineMonthCode(
   calendarNative: NativeYearMonthRefineDeps,
   monthCode: string,
   year: number,
-  overflow: Overflow | undefined
+  overflow: Overflow,
 ) {
   const leapMonth = calendarNative.leapMonth(year)
   const [monthCodeNumber, wantsLeapMonth] = parseMonthCode(monthCode)

@@ -176,7 +176,6 @@ export function round<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
-    // TODO: check internals doesn't have large fields
     return {
       branding: DurationBranding,
       ...roundDayTimeDuration(
@@ -365,7 +364,7 @@ function createMarkerSystem<C, T>(
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       (epochNano: DayTimeNano, durationFields: DurationFields) => {
-        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields, Overflow.Constrain)
+        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields)
       },
       diffZonedEpochNano.bind(undefined, () => calendarOps, () => timeZoneOps),
     ]
@@ -374,7 +373,7 @@ function createMarkerSystem<C, T>(
       { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
       isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
       (isoField: IsoDateTimeFields, durationFields: DurationFields) => {
-        return moveDateTime(calendarOps, isoField, durationFields, Overflow.Constrain)
+        return moveDateTime(calendarOps, isoField, durationFields)
       },
       // TODO: use .bind after updateDurationFieldsSign removed
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
