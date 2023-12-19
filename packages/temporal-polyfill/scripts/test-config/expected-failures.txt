@@ -150,13 +150,10 @@ built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-ambiguous-
 
 # Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
 # advance d1 all the way to d2. ignore this contrived case
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-mathematical-values-2.js
 # similar...
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
 # expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
-built-ins/Temporal/Duration/prototype/round/zero-day-length-1.js
-built-ins/Temporal/Duration/prototype/total/zero-day-length-1.js
 
 ####################################################################################################
 # Handling crazy results from TIMEZONE
@@ -284,10 +281,6 @@ built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 # relative Duration fewer dateAdd calls
 built-ins/Temporal/Duration/compare/order-of-operations.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
-# SIMILARLY, dateAdd called with different arguments
-built-ins/Temporal/Duration/compare/precision-exact-mathematical-values-1.js
-# fewer dateUntil calls here too...
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-precision-exact-mathematical-values-1.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 
 # our bag->ZonedDateTime doesn't need to call TimeZone::getOffsetNanosecondsFor
@@ -296,20 +289,6 @@ built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-timezone-getoffsetnanosecondsfor-not-callable.js
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
-
-# when diffing, we do not walk days one-by-one
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely-1.js
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely-2.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely-1.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely-2.js
-built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-1.js
-built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely-2.js
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-1.js
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely-2.js
-built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely-1.js
-built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely-2.js
-built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely-1.js
-built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely-2.js
 
 # when diffing, we do not walk year/months one-by-one
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
@@ -393,12 +372,6 @@ built-ins/Temporal/Duration/call-builtin.js
 # Known bug in spec that's MAYBE getting fixed (https://github.com/tc39/proposal-temporal/issues/2715)
 # SOLUTION: do rounding by actually adding then diffing
 ####################################################################################################
-
-# Can't do rel-rounding with big Durations because outside of range
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-months.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-days.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-months.js
-built-ins/Temporal/Duration/prototype/round/precision-exact-in-balance-duration-relative-years-with-calendar.js
 
 # Can't handle super big roundingIncrement
 built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js

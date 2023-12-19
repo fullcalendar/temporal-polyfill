@@ -1,7 +1,6 @@
 # Failures in this file only apply to the optimized and transpiled polyfill
 # sources.
 
-built-ins/Temporal/Now/timeZone/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/day/builtin.js
 built-ins/Temporal/Calendar/prototype/day/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/dayOfWeek/builtin.js
@@ -14,7 +13,6 @@ built-ins/Temporal/Calendar/prototype/daysInWeek/builtin.js
 built-ins/Temporal/Calendar/prototype/daysInWeek/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/daysInYear/builtin.js
 built-ins/Temporal/Calendar/prototype/daysInYear/not-a-constructor.js
-EXPECTED built-ins/Temporal/Calendar/prototype/fields/long-input.js
 built-ins/Temporal/Calendar/prototype/inLeapYear/builtin.js
 built-ins/Temporal/Calendar/prototype/inLeapYear/not-a-constructor.js
 built-ins/Temporal/Calendar/prototype/month/builtin.js
