@@ -329,7 +329,7 @@ export function createBoundFormatPrepFunc(
 
     if (branding) {
       if (slots1 && slots1.branding && slots1.branding !== branding) {
-        throw new RangeError('Mismatching branding')
+        throw new TypeError('Mismatching branding')
       }
 
       const config = classFormatConfigs[branding]

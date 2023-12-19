@@ -9,7 +9,7 @@ for converting from [era,eraYear] -> year
 if origin is >=0,
   year = origin + eraYear
 if origin is <0, consider the era to be 'reverse' direction
-  year = -origin - eraYear
+  year = -origin - eraYear, same as...
   year = -(origin + eraYear)
 */
 export const gregoryCalendarOrigins: Record<string, number> = {
