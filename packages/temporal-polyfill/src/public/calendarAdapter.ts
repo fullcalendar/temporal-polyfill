@@ -104,7 +104,7 @@ function dateAddAdapter(
         ...durationFields,
         branding: DurationBranding,
       }),
-      Object.assign(Object.create(null), options), // needs object
+      options && Object.assign(Object.create(null), options),
     )
   )
 }

@@ -118,7 +118,7 @@ export function add<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   durationSlots: DurationFields,
-  options?: OverflowOptions,
+  options: OverflowOptions = {}, // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots<C> {
   return {
     ...plainDateTimeSlots,

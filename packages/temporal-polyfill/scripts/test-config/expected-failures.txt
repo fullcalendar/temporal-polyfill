@@ -14,11 +14,6 @@ built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 
-# internal CalendarProtocol receiving options. undefined or not?
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-options-undefined.js
-built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
-
 ####################################################################################################
 # Temporary
 ####################################################################################################
@@ -27,6 +22,7 @@ built-ins/Temporal/Duration/prototype/add/calendar-dateadd.js
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 
 # Misc access wrong-order (mostly because of how overflow should be parsed IN calendar operations?)
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
@@ -175,7 +171,6 @@ built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singu
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
-built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-options-undefined.js
 
 # fewer calls to dateAdd/dateUntil
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js

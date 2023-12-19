@@ -187,7 +187,7 @@ export function add<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   durationSlots: DurationFields,
-  options?: OverflowOptions,
+  options: OverflowOptions = {}, // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots<C, T> {
   const movedEpochNanoseconds = moveZonedEpochNano(
     getCalendarOps(zonedDateTimeSlots.calendar),
