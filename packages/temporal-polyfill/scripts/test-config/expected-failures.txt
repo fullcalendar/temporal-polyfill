@@ -3,8 +3,16 @@
 # TODO: util for globs that don't match any tests!!!
 
 ####################################################################################################
-# AFTER REFACTOR
+# Options parsing
 ####################################################################################################
+
+# accessing options multiple times. this is why CopyDataProperties exists
+# ALSO, diff options should be snapshotted probably
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 
 # internal CalendarProtocol receiving options. undefined or not?
 built-ins/Temporal/PlainDate/compare/calendar-datefromfields-called-with-options-undefined.js
@@ -55,52 +63,16 @@ built-ins/Temporal/Calendar/prototype/yearOfWeek/calendar-datefromfields-called-
 intl402/Temporal/Calendar/prototype/era/calendar-datefromfields-called-with-options-undefined.js
 intl402/Temporal/Calendar/prototype/eraYear/calendar-datefromfields-called-with-options-undefined.js
 
+####################################################################################################
+# Temporary
+####################################################################################################
+
 # FIX: dateUntil options should pass-through rando options
 built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/PlainDateTime/prototype/with/calendar-options.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
 built-ins/Temporal/ZonedDateTime/prototype/with/calendar-options.js
-
-# getPossibleInstantsFor wants plainDateTimes that sometimes have calendar. instead, always give iso
-built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
-
-# optional params and func/class.length
-built-ins/Temporal/PlainDate/length.js
-built-ins/Temporal/PlainDateTime/length.js
-built-ins/Temporal/ZonedDateTime/length.js
-built-ins/Temporal/PlainTime/length.js
-built-ins/Temporal/PlainMonthDay/length.js
-built-ins/Temporal/Duration/length.js
-
-# sanitychecking calendar/timezone results
-built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainDate/prototype/until/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainDateTime/prototype/since/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainDateTime/prototype/until/rounding-zero-year-month-week-length.js
-built-ins/Temporal/ZonedDateTime/prototype/since/rounding-zero-year-month-week-length.js
-built-ins/Temporal/ZonedDateTime/prototype/until/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainYearMonth/prototype/since/rounding-zero-year-month-length.js
-built-ins/Temporal/PlainYearMonth/prototype/until/rounding-zero-year-month-length.js
-built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
-built-ins/Temporal/Duration/prototype/round/zero-year-month-week-length.js
-built-ins/Temporal/Duration/prototype/total/zero-year-month-week-length.js
-
-####################################################################################################
-# Options parsing
-####################################################################################################
-
-# accessing options multiple times. this is why CopyDataProperties exists
-# ALSO, diff options should be snapshotted probably
-built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
-
-####################################################################################################
-# Temporary
-####################################################################################################
 
 # Misc access wrong-order (mostly because of how overflow should be parsed IN calendar operations?)
 built-ins/Temporal/PlainDate/from/order-of-operations.js
@@ -155,6 +127,18 @@ built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds
 built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
 # expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
 
+built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainDate/prototype/until/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainDateTime/prototype/since/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainDateTime/prototype/until/rounding-zero-year-month-week-length.js
+built-ins/Temporal/ZonedDateTime/prototype/since/rounding-zero-year-month-week-length.js
+built-ins/Temporal/ZonedDateTime/prototype/until/rounding-zero-year-month-week-length.js
+built-ins/Temporal/PlainYearMonth/prototype/since/rounding-zero-year-month-length.js
+built-ins/Temporal/PlainYearMonth/prototype/until/rounding-zero-year-month-length.js
+built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
+built-ins/Temporal/Duration/prototype/round/zero-year-month-week-length.js
+built-ins/Temporal/Duration/prototype/total/zero-year-month-week-length.js
+
 ####################################################################################################
 # Handling crazy results from TIMEZONE
 ####################################################################################################
@@ -187,7 +171,7 @@ built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefi
 
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
-# to PlainYearMonth. We leverage Calendar::daysInMonth and Calendar::day instead
+# to PlainYearMonth. We leverage Calendar::day instead
 ####################################################################################################
 
 #
@@ -443,6 +427,9 @@ built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/year/custom.js
 built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/custom.js
 
+# getPossibleInstantsFor wants plainDateTimes that sometimes have calendar. instead, always give iso
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
+
 # problem with our adapter needing specific instance of Temporal object
 built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainDate/prototype/add/custom.js
@@ -585,6 +572,12 @@ built-ins/Temporal/Duration/prototype/add/length.js
 built-ins/Temporal/Duration/compare/length.js
 intl402/Temporal/Calendar/prototype/era/name.js
 intl402/Temporal/Calendar/prototype/eraYear/name.js
+built-ins/Temporal/PlainDate/length.js
+built-ins/Temporal/PlainDateTime/length.js
+built-ins/Temporal/ZonedDateTime/length.js
+built-ins/Temporal/PlainTime/length.js
+built-ins/Temporal/PlainMonthDay/length.js
+built-ins/Temporal/Duration/length.js
 
 # we use array spreading internally
 built-ins/Temporal/PlainMonthDay/from/argument-builtin-calendar-no-array-iteration.js
