@@ -101,14 +101,14 @@ export class PlainTime {
     return format.format(epochMilli)
   }
 
-  // TODO: ensure options isn't undefined before accessing
   toZonedDateTime(options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
     return createZonedDateTime(
       PlainTimeFuncs.toZonedDateTime(
+        refineTimeZoneSlot,
+        toPlainDateSlots,
         createTimeZoneOps,
         getPlainTimeSlots(this),
-        refineTimeZoneSlot(options.timeZone),
-        toPlainDateSlots(options.plainDate),
+        options,
       )
     )
   }

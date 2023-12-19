@@ -4,6 +4,8 @@ import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { OverflowOptions } from '../genericApi/optionsRefine'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots } from '../genericApi/slotsGeneric'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
+import { identityFunc } from '../internal/utils'
+import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 
 export const create = PlainTimeFuncs.create
 
@@ -56,10 +58,11 @@ export function toZonedDateTime(
   options: { timeZone: string, plainDate: PlainDateSlots<string> },
 ) {
   return PlainTimeFuncs.toZonedDateTime(
+    refineTimeZoneSlotString,
+    identityFunc,
     queryNativeTimeZone,
     slots,
-    options.timeZone,
-    options.plainDate,
+    options,
   )
 }
 

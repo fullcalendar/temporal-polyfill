@@ -224,12 +224,10 @@ export function toZonedDateTime<C, TZ>(
   timeZoneSlot: TZ,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots<C, TZ> {
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-
   return {
     calendar: plainDateTimeSlots.calendar,
     timeZone: timeZoneSlot,
-    epochNanoseconds: convertPlainDateTimeToZoned(timeZoneOps, plainDateTimeSlots, options),
+    epochNanoseconds: convertPlainDateTimeToZoned(getTimeZoneOps, timeZoneSlot, plainDateTimeSlots, options),
     branding: ZonedDateTimeBranding,
   }
 }

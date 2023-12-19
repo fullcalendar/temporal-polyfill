@@ -153,15 +153,20 @@ export function toJSON(slots: PlainTimeSlots): string {
   return toString(slots)
 }
 
-export function toZonedDateTime<C, T>(
+export function toZonedDateTime<C, TA, T, PA>(
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots<C>,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: PlainTimeSlots,
-  timeZoneSlot: T,
-  plainDateSlots: PlainDateSlots<C>,
+  options: { timeZone: TA, plainDate: PA },
 ): ZonedDateTimeSlots<C, T> {
+  const plainDateSlots = refinePlainDateArg(options.plainDate)
+  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+
   return {
     epochNanoseconds: getSingleInstantFor(
-      getTimeZoneOps(timeZoneSlot),
+      timeZoneOps,
       { ...plainDateSlots, ...slots },
     ),
     calendar: plainDateSlots.calendar,

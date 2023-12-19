@@ -59,12 +59,15 @@ const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
 
 // -------------------------------------------------------------------------------------------------
 
-export function convertPlainDateTimeToZoned(
-  timeZoneOps: TimeZoneOps,
+export function convertPlainDateTimeToZoned<TZ>(
+  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
+  timeZoneSlot: TZ,
   isoFields: IsoDateTimeFields,
   options?: EpochDisambigOptions,
 ): DayTimeNano {
   const epochDisambig = refineEpochDisambigOptions(options)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+
   return checkEpochNanoInBounds(
     getSingleInstantFor(timeZoneOps, isoFields, epochDisambig),
   )
@@ -143,13 +146,12 @@ export function refineZonedDateTimeBag<C, TA, T>(
     timeAndZoneFieldNames, // forcedValidFieldNames
   ) as ZonedDateTimeBag<unknown, TA>
 
-  // must happen before Calendar::dateFromFields and parsing `options`
-  const timeZoneSlot = refineTimeZoneArg(fields.timeZone!) // guaranteed via refineCalendarFields
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
+  const timeZoneSlot = refineTimeZoneArg(fields.timeZone!) // guaranteed via refineCalendarFields
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
   const isoDateFields = calendarOps.dateFromFields(fields as any, overflow)
   const isoTimeFields = refineTimeBag(fields, overflow)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneOps,

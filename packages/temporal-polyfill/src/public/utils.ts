@@ -17,6 +17,7 @@ export function createProtocolChecker(
   }
 }
 
+// kill?
 export function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
 }

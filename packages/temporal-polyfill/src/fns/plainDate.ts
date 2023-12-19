@@ -1,5 +1,5 @@
 import { DateBag } from '../internal/calendarFields'
-import { NumSign } from '../internal/utils'
+import { NumSign, identityFunc } from '../internal/utils'
 import { LocalesArg, prepCachedPlainDateFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
@@ -144,21 +144,16 @@ export function toZonedDateTime(
   slots: PlainDateSlots<string>,
   options: string | { timeZone: string, plainTime?: PlainTimeSlots },
 ): ZonedDateTimeSlots<string, string> {
-  let timeZoneArg: string
-  let plainTimeArg: PlainTimeSlots | undefined
-
-  if (typeof options === 'string') {
-    timeZoneArg = options
-  } else {
-    timeZoneArg = options.timeZone
-    plainTimeArg = options.plainTime
-  }
+  const optionsObj = typeof options === 'string'
+    ? { timeZone: options }
+    : options
 
   return PlainDateFuncs.toZonedDateTime(
+    refineTimeZoneSlotString,
+    identityFunc,
     queryNativeTimeZone,
     slots,
-    refineTimeZoneSlotString(timeZoneArg),
-    plainTimeArg,
+    optionsObj,
   )
 }
 

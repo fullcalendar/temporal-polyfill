@@ -171,18 +171,25 @@ export function toJSON<C extends IdLike>(
   return toString(plainDateSlots)
 }
 
-export function toZonedDateTime<C, TZ>(
-  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
+export function toZonedDateTime<C, TA, T, PA>(
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  refinePlainTimeArg: (plainTimeArg: PA) => IsoTimeFields,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   plainDateSlots: PlainDateSlots<C>,
-  timeZoneSlot: TZ,
-  plainTimeFields: IsoTimeFields = isoTimeFieldDefaults,
-): ZonedDateTimeSlots<C, TZ> {
+  options: { timeZone: TA, plainTime?: PA },
+): ZonedDateTimeSlots<C, T> {
+  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
+  const plainTimeArg = options.plainTime
+  const isoTimeFields = plainTimeArg !== undefined
+    ? refinePlainTimeArg(plainTimeArg)
+    : isoTimeFieldDefaults
+
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   return {
     calendar: plainDateSlots.calendar,
     timeZone: timeZoneSlot,
-    epochNanoseconds: getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...plainTimeFields }),
+    epochNanoseconds: getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...isoTimeFields }),
     branding: ZonedDateTimeBranding,
   }
 }

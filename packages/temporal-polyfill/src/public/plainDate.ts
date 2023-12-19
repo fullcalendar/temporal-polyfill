@@ -14,7 +14,7 @@ import * as PlainDateFuncs from '../genericApi/plainDate'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
-import { PlainTimeArg } from './plainTime'
+import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Calendar, CalendarArg } from './calendar'
 import { CalendarProtocol } from './calendarProtocol'
@@ -128,22 +128,18 @@ export class PlainDate {
   toZonedDateTime(
     options: TimeZoneArg | { timeZone: TimeZoneArg, plainTime?: PlainTimeArg },
   ): ZonedDateTime {
-    let timeZoneArg: TimeZoneArg
-    let plainTimeArg: PlainTimeArg | undefined
-
-    if (isObjectlike(options) && !(options instanceof TimeZone)) {
-      timeZoneArg = (options as { timeZone: TimeZoneArg }).timeZone
-      plainTimeArg = (options as { plainTime?: PlainTimeArg }).plainTime
-    } else {
-      timeZoneArg = options
-    }
+    const optionsObj =
+      (!isObjectlike(options) || options instanceof TimeZone)
+        ? { timeZone: options }
+        : options as { timeZone: TimeZoneArg, plainTime?: PlainTimeArg }
 
     return createZonedDateTime(
       PlainDateFuncs.toZonedDateTime(
+        refineTimeZoneSlot,
+        toPlainTimeSlots,
         createTimeZoneOps,
         getPlainDateSlots(this),
-        refineTimeZoneSlot(timeZoneArg),
-        optionalToPlainTimeFields(plainTimeArg),
+        optionsObj,
       )
     )
   }
