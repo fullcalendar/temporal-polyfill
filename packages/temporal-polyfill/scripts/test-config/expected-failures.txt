@@ -15,20 +15,6 @@ built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 
 ####################################################################################################
-# Temporary
-####################################################################################################
-
-# Misc access wrong-order (mostly because of how overflow should be parsed IN calendar operations?)
-built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
-built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/add/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/subtract/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
-
-####################################################################################################
 # Handling crazy results from CALENDAR
 ####################################################################################################
 
@@ -140,6 +126,14 @@ built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options
 built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
+
+####################################################################################################
+# ::toPlainMonthDay/toPlainYearMonth
+####################################################################################################
+
+# we access ZonedDateTimes/PlainDate/etc's monthCode/day and year/monthCode fields directly
+built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
 
 ####################################################################################################
 # Over-reliance on Calendar (ours is better)

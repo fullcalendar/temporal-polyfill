@@ -1,10 +1,9 @@
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
-import { DiffOptions, OverflowOptions, overflowMapNames } from '../genericApi/optionsRefine'
+import { DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/calendarIsoFields'
-import { Overflow } from '../internal/options'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Callable } from '../internal/utils'
 import { CalendarProtocol } from './calendarProtocol'
@@ -50,7 +49,7 @@ function dateFromFieldsAdapter(
     dateFromFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as DateBagStrict,
-      options && Object.assign(Object.create(null), options)
+      options,
     )
   )
 }
@@ -65,7 +64,7 @@ function yearMonthFromFieldsAdapter(
     yearMonthFromFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as YearMonthBagStrict,
-      options && Object.assign(Object.create(null), options)
+      options,
     )
   )
 }
@@ -80,7 +79,7 @@ function monthDayFromFieldsAdapter(
     monthDayFromFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as MonthDayBagStrict,
-      options && Object.assign(Object.create(null), options)
+      options,
     )
   )
 }
@@ -104,7 +103,7 @@ function dateAddAdapter(
         ...durationFields,
         branding: DurationBranding,
       }),
-      options && Object.assign(Object.create(null), options),
+      options,
     )
   )
 }

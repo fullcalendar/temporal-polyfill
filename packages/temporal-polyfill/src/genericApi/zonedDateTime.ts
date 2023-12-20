@@ -187,11 +187,15 @@ export function add<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   durationSlots: DurationFields,
-  options: OverflowOptions = {}, // so internal Calendar knows options *could* have been passed in
+  options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots<C, T> {
+  // correct calling order. switch moveZonedEpochNano arg order?
+  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
+  const calendarOps = getCalendarOps(zonedDateTimeSlots.calendar)
+
   const movedEpochNanoseconds = moveZonedEpochNano(
-    getCalendarOps(zonedDateTimeSlots.calendar),
-    getTimeZoneOps(zonedDateTimeSlots.timeZone),
+    calendarOps,
+    timeZoneOps,
     zonedDateTimeSlots.epochNanoseconds,
     durationSlots,
     options,

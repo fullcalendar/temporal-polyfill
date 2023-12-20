@@ -152,7 +152,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
-    options && { ...options, overflow: overflowMapNames[overflow] },
+    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
@@ -189,7 +189,7 @@ export function mergeZonedDateTimeBag<C>(
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options, true)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
-    options && { ...options, overflow: overflowMapNames[overflow] },
+    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -225,7 +225,7 @@ export function refinePlainDateTimeBag<C>(
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
-    options && { ...options, overflow: overflowMapNames[overflow] },
+    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -252,7 +252,7 @@ export function mergePlainDateTimeBag<C>(
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
-    options && { ...options, overflow: overflowMapNames[overflow] },
+    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
