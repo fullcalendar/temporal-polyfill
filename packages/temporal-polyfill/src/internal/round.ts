@@ -305,11 +305,14 @@ export function totalRelativeDuration<M>(
   )
 
   // TODO: more DRY
-  const portion =
+  const frac =
     dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) /
     dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
+  if (!Number.isFinite(frac)) {
+    throw new RangeError('Faulty Calendar rounding')
+  }
 
-  return durationFields[durationFieldNamesAsc[totalUnit]] + portion * sign
+  return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
 }
 
 // Nudge
@@ -455,9 +458,14 @@ function nudgeRelativeDuration<M>(
     moveMarker,
   )
 
-  const frac = // always between 0 and 1 (positive)
+  // TODO: more DRY
+  // usually between 0-1, however can be higher when weeks aren't bounded by months
+  const frac =
     dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) / // distance travelled
     dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1)) // entire possible distance
+  if (!Number.isFinite(frac)) {
+    throw new RangeError('Faulty Calendar rounding')
+  }
 
   const exactVal = truncedVal + (frac * sign * roundingInc)
   const roundedVal = roundByInc(exactVal, roundingInc, roundingMode)

@@ -7,22 +7,8 @@
 
 # Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
 # advance d1 all the way to d2. ignore this contrived case
-# similar...
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
-# expecting us to sanitycheck weird results from dateUntil for Duation::round. stupid
-
-built-ins/Temporal/PlainDate/prototype/since/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainDate/prototype/until/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainDateTime/prototype/since/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainDateTime/prototype/until/rounding-zero-year-month-week-length.js
-built-ins/Temporal/ZonedDateTime/prototype/since/rounding-zero-year-month-week-length.js
-built-ins/Temporal/ZonedDateTime/prototype/until/rounding-zero-year-month-week-length.js
-built-ins/Temporal/PlainYearMonth/prototype/since/rounding-zero-year-month-length.js
-built-ins/Temporal/PlainYearMonth/prototype/until/rounding-zero-year-month-length.js
-built-ins/Temporal/Duration/prototype/round/throws-in-unbalance-duration-relative-when-sign-mismatched.js
-built-ins/Temporal/Duration/prototype/round/zero-year-month-week-length.js
-built-ins/Temporal/Duration/prototype/total/zero-year-month-week-length.js
 
 ####################################################################################################
 # Handling crazy results from TIMEZONE

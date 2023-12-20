@@ -25,6 +25,7 @@ export type IsoDateTimeFields = IsoDateFields & IsoTimeFields
 // -------------------------------------------------------------------------------------------------
 
 // descending by unit (for internal plucking to slots)
+// ACTUALLY no point. Debuggers show alhpabetized props anyway
 export const isoDateFieldNamesDesc: (keyof IsoDateFields)[] = [
   'isoYear',
   'isoMonth',

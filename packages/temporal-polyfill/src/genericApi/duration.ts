@@ -201,8 +201,17 @@ export function round<RA, C, T>(
     slots = { ...slots, weeks: 0 }
   }
 
+  const [balancedDuration, endEpochNano] = spanDuration(slots, undefined, largestUnit, ...markerSystem)
+
+  const sign0 = queryDurationSign(slots)
+  const sign1 = queryDurationSign(balancedDuration)
+  if (sign0 && sign1 && sign0 !== sign1) {
+    throw new RangeError('Faulty Calendar rounding')
+  }
+
   const roundedDurationFields = roundRelativeDuration(
-    ...spanDuration(slots, undefined, largestUnit, ...markerSystem),
+    balancedDuration,
+    endEpochNano,
     largestUnit,
     smallestUnit,
     roundingInc,
