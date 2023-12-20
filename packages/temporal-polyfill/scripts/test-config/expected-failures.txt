@@ -2,15 +2,6 @@
 # TODO: expected-failures-es5.txt still runs. merge it into this files
 
 ####################################################################################################
-# Handling crazy results from CALENDAR
-####################################################################################################
-
-# Duration::round has an exhaustive algorithm for if dateUntil gives (artificial) results that don't...
-# advance d1 all the way to d2. ignore this contrived case
-built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
-
-####################################################################################################
 # Handling crazy results from TIMEZONE
 ####################################################################################################
 
@@ -99,6 +90,20 @@ built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options
 built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
+
+####################################################################################################
+# Calendar intentional spec breaking (diffing/etc)
+####################################################################################################
+
+# spec's NanosecondsToDays has more complicated back-off strategy that's supposed to throw errors
+# when receiving whacky results from getPossibleInstantsFor. Because we reuse our diffing algorithm
+# instead of NanosecondsToDays, and our diffing algorithm has its own back-off strategy for ZDT diffing,
+# no error is thrown.
+built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
+
+# we have fewer calls to getOffsetNanosecondsFor, and test is brittle
+# if you remove TemporalHelpers.SUBSTITUTE_SKIP in the mocks, test will pass
+built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 
 ####################################################################################################
 # ::toPlainMonthDay/toPlainYearMonth intentional spec break
