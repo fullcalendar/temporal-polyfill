@@ -49,10 +49,7 @@ export class PlainYearMonth {
     )
   }
 
-  add(
-    durationArg: DurationArg,
-    options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
-  ): PlainYearMonth {
+  add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.add(
         createYearMonthMoveOps,
@@ -65,7 +62,7 @@ export class PlainYearMonth {
 
   subtract(
     durationArg: DurationArg,
-    options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object
+    options?: OverflowOptions
   ): PlainYearMonth {
     return createPlainYearMonth(
       PlainYearMonthFuncs.subtract(

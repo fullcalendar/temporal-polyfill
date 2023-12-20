@@ -489,6 +489,8 @@ built-ins/Temporal/ZonedDateTime/length.js
 built-ins/Temporal/PlainTime/length.js
 built-ins/Temporal/PlainMonthDay/length.js
 built-ins/Temporal/Duration/length.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/length.js
+built-ins/Temporal/PlainYearMonth/prototype/add/length.js
 
 # we use array spreading internally
 built-ins/Temporal/PlainMonthDay/from/argument-builtin-calendar-no-array-iteration.js

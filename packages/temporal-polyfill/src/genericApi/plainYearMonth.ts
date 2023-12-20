@@ -86,7 +86,7 @@ export function add<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
