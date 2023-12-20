@@ -16,21 +16,6 @@ built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseco
 # (would require us to use DayTimeNano for simple operations)
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
-# expecting to sanitycheck timezones that report 0-day-length
-built-ins/Temporal/Duration/prototype/round/zero-day-length.js
-built-ins/Temporal/Duration/prototype/total/zero-day-length.js
-
-# ..further sanitychecking Timezone..
-built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-
-# zdt-based diffing should call getPossibleInstantsFor cyclically if TimeZone gives weird results
-built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
-
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
@@ -92,18 +77,31 @@ built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-op
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 ####################################################################################################
-# Calendar intentional spec breaking (diffing/etc)
+# TimeZone intentional spec breaking (diffing/etc)
 ####################################################################################################
 
 # spec's NanosecondsToDays has more complicated back-off strategy that's supposed to throw errors
 # when receiving whacky results from getPossibleInstantsFor. Because we reuse our diffing algorithm
 # instead of NanosecondsToDays, and our diffing algorithm has its own back-off strategy for ZDT diffing,
-# no error is thrown.
+# no error is thrown, which deviates from the spec.
 built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
+built-ins/Temporal/Duration/prototype/round/zero-day-length.js
+built-ins/Temporal/Duration/prototype/total/zero-day-length.js
 
 # we have fewer calls to getOffsetNanosecondsFor, and test is brittle
 # if you remove TemporalHelpers.SUBSTITUTE_SKIP in the mocks, test will pass
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+
+# For balancing, we internally use diffing instead of NanosecondsToDays.
+# The spec requires NanosecondsToDays, which has checks the multiple subsequent calls to
+# getPossibleInstantsFor with progressing ISO-fields has similarly progressing Instants.
+built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely.js
+built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
 
 ####################################################################################################
 # ::toPlainMonthDay/toPlainYearMonth intentional spec break
