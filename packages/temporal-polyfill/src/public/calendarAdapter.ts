@@ -1,5 +1,5 @@
 import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
-import { OverflowOptions, overflowMapNames } from '../genericApi/optionsRefine'
+import { DiffOptions, OverflowOptions, overflowMapNames } from '../genericApi/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'
@@ -115,6 +115,7 @@ function dateUntilAdapter(
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
   largestUnit: Unit,
+  origOptions?: DiffOptions
 ) {
   return getDurationSlots(
     dateUntil.call(
@@ -129,7 +130,11 @@ function dateUntilAdapter(
         calendar: calendarProtocol,
         branding: PlainDateBranding,
       }),
-      Object.assign(Object.create(null), { largestUnit: unitNamesAsc[largestUnit] })
+      Object.assign(
+        Object.create(null),
+        origOptions,
+        { largestUnit: unitNamesAsc[largestUnit] },
+      )
     ),
   )
 }

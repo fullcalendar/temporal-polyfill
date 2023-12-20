@@ -26,6 +26,8 @@ import {
   Unit,
   milliInDay,
   nanoInUtcDay,
+  unitNameMap,
+  unitNamesAsc,
 } from './units'
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
 import { NativeDiffOps } from './calendarNative'
@@ -47,11 +49,12 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   let durationFields = diffZonedEpochNano(
-    () => getCalendarOps(getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)),
+    getCalendarOps(getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)),
     () => getTimeZoneOps(getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)),
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
     ...refineDiffOptions(invert, options, Unit.Hour),
+    options,
   )
 
   if (invert) {
@@ -103,6 +106,7 @@ export function diffPlainDateTimes<C extends IdLike>(
     plainDateTimeSlots0,
     plainDateTimeSlots1,
     ...refineDiffOptions(invert, options, Unit.Day),
+    options,
   )
 
   if (invert) {
@@ -124,11 +128,12 @@ export function diffPlainYearMonth<C extends IdLike>(
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
   const calendarOps = getCalendarOps(calendarSlot)
-  let durationFields =diffDates(
+  let durationFields = diffDates(
     calendarOps,
     moveToMonthStart(calendarOps, plainYearMonthSlots0),
     moveToMonthStart(calendarOps, plainYearMonthSlots1),
     ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
+    options,
   )
 
   if (invert) {
@@ -161,6 +166,7 @@ export function diffPlainDates<C extends IdLike>(
       Unit.Year,
       Unit.Day,
     ),
+    options,
   )
 
   if (invert) {
@@ -207,6 +213,7 @@ export function diffDateTimes(
   smallestUnit: Unit = Unit.Nanosecond,
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
+  origOptions?: DiffOptions,
 ): DurationFields {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
@@ -242,6 +249,7 @@ export function diffDateTimes(
     { ...midIsoFields, ...isoTimeFieldDefaults }, // hack
     { ...endIsoFields, ...isoTimeFieldDefaults }, // hack
     largestUnit,
+    origOptions,
   )
   const timeDiff = nanoToDurationTimeFields(timeNano)
 
@@ -266,8 +274,9 @@ export function diffDates(
   smallestUnit: Unit, // TODO: large field
   roundingInc: number,
   roundingMode: RoundingMode,
+  origOptions: DiffOptions | undefined,
 ): DurationFields {
-  const dateDiff = calendarDateUntilEasy(calendarOps, startIsoFields, endIsoFields, largestUnit)
+  const dateDiff = calendarDateUntilEasy(calendarOps, startIsoFields, endIsoFields, largestUnit, origOptions)
 
   // fast path, no rounding
   // important for tests and custom calendars
@@ -354,7 +363,7 @@ export function diffTimes(
 // -------------------------------------------------------------------------------------------------
 
 export function diffZonedEpochNano(
-  getCalendarOps: () => DiffOps,
+  calendarOps: DiffOps,
   getTimeZoneOps: () => TimeZoneOps,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
@@ -362,9 +371,8 @@ export function diffZonedEpochNano(
   smallestUnit: Unit = Unit.Nanosecond,
   roundingInc: number = 1,
   roundingMode: RoundingMode = RoundingMode.HalfExpand,
+  origOptions?: DiffOptions,
 ): DurationFields {
-  const calendarOps = getCalendarOps()
-
   if (largestUnit < Unit.Day) {
     // doesn't need timeZone
     return diffEpochNano(
@@ -403,7 +411,7 @@ export function diffZonedEpochNano(
     midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
   }
 
-  const dateDiff = calendarDateUntilEasy(calendarOps, startIsoFields, midIsoFields, largestUnit)
+  const dateDiff = calendarDateUntilEasy(calendarOps, startIsoFields, midIsoFields, largestUnit, origOptions)
   const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
 
@@ -461,6 +469,7 @@ export function calendarDateUntilEasy(
   isoDateFields0: IsoDateFields,
   isoDateFields1: IsoDateFields,
   largestUnit: Unit, // largeUnit
+  origOptions: DiffOptions | undefined, // what largestUnit derived from
 ): DurationFields {
   if (largestUnit === Unit.Day) {
     return {
@@ -468,7 +477,13 @@ export function calendarDateUntilEasy(
       days: diffDays(isoDateFields0, isoDateFields1)
     }
   }
-  return calendarOps.dateUntil(isoDateFields0, isoDateFields1, largestUnit)
+
+  return calendarOps.dateUntil(
+    isoDateFields0,
+    isoDateFields1,
+    largestUnit,
+    origOptions,
+  )
 }
 
 function diffYearMonthDay(

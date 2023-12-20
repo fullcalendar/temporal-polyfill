@@ -18,12 +18,6 @@ built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 # Temporary
 ####################################################################################################
 
-# FIX: dateUntil options should pass-through rando options
-built-ins/Temporal/PlainDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/PlainDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-copy-of-options.js
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-copy-of-options.js
-
 # Misc access wrong-order (mostly because of how overflow should be parsed IN calendar operations?)
 built-ins/Temporal/PlainDate/prototype/add/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/subtract/order-of-operations.js

@@ -366,7 +366,7 @@ function createMarkerSystem<C, T>(
       (epochNano: DayTimeNano, durationFields: DurationFields) => {
         return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields)
       },
-      diffZonedEpochNano.bind(undefined, () => calendarOps, () => timeZoneOps),
+      diffZonedEpochNano.bind(undefined, calendarOps, () => timeZoneOps),
     ]
   } else {
     return [

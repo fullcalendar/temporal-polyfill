@@ -2,7 +2,7 @@ import { DateBag, YearMonthBag } from './calendarFields'
 import { DurationFields } from './durationFields'
 import { IsoDateFields } from './calendarIsoFields'
 import { Unit } from './units'
-import { OverflowOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
 
 // Operations for internal use!
 
@@ -14,7 +14,7 @@ export type MonthDayFromFieldsOp<C> = (fields: DateBag, options?: OverflowOption
 export type FieldsOp = (fieldNames: string[]) => string[]
 export type MergeFieldsOp = (fields: DateBag, additionalFields: DateBag) => DateBag
 export type DateAddOp = (isoFields: IsoDateFields, durationFields: DurationFields, options?: OverflowOptions) => IsoDateFields
-export type DateUntilOp = (isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit) => DurationFields
+export type DateUntilOp = (isoFields0: IsoDateFields, isoFields1: IsoDateFields, largestUnit: Unit, origOptions?: DiffOptions) => DurationFields
 export type DayOp = (isoFields: IsoDateFields) => number
 
 // Refine
