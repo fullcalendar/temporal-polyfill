@@ -12,7 +12,7 @@ import { roundDateTime } from '../internal/round'
 import { SimpleTimeZoneOps, TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, nanoInHour } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
-import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions, refineZonedDateTimeDisplayOptions, refineZonedFieldOptions } from './optionsRefine'
+import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, prepareOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions, refineZonedDateTimeDisplayOptions, refineZonedFieldOptions } from './optionsRefine'
 import { ZonedDateTimeBag } from './bagGeneric'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergeZonedDateTimeBag, refineZonedDateTimeBag } from './bagGeneric'
 import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
@@ -88,6 +88,7 @@ export function withFields<C, T>(
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<C, T> {
+  const optionsCopy = prepareOptions(options)
   const { calendar, timeZone } = zonedDateTimeSlots
 
   return {
@@ -98,7 +99,7 @@ export function withFields<C, T>(
       getTimeZoneOps(timeZone),
       initialFields,
       modFields,
-      options,
+      optionsCopy,
     ),
     branding: ZonedDateTimeBranding,
   }

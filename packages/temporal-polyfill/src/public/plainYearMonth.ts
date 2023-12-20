@@ -44,7 +44,7 @@ export class PlainYearMonth {
         getPlainYearMonthSlots(this),
         this as any, // !!!
         rejectInvalidBag(mod),
-        prepareOptions(options),
+        options,
       )
     )
   }

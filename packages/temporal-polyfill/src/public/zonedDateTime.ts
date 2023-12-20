@@ -69,7 +69,7 @@ export class ZonedDateTime {
         getZonedDateTimeSlots(this),
         this as any, // TODO: needs getters
         rejectInvalidBag(mod),
-        prepareOptions(options),
+        options,
       ),
     )
   }

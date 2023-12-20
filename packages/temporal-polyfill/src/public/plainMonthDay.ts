@@ -43,7 +43,7 @@ export class PlainMonthDay {
         getPlainMonthDaySlots(this),
         this as any, // !!!
         rejectInvalidBag(mod),
-        prepareOptions(options),
+        options,
       )
     )
   }

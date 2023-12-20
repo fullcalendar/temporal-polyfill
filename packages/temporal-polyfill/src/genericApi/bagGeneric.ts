@@ -41,6 +41,7 @@ import {
   OverflowOptions,
   ZonedFieldOptions,
   overflowMapNames,
+  prepareOptions,
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,

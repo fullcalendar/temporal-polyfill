@@ -64,7 +64,7 @@ export class PlainDateTime {
         getPlainDateTimeSlots(this),
         this as any, // TODO: needs getters
         rejectInvalidBag(mod),
-        prepareOptions(options),
+        options,
       )
     )
   }

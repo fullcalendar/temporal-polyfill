@@ -13,7 +13,7 @@ import { roundDateTime } from '../internal/round'
 import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
+import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
 import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from './bagGeneric'
 import { PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './slotsGeneric'
@@ -68,6 +68,7 @@ export function withFields<C>(
   modFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<C> {
+  const optionsCopy = prepareOptions(options)
   const calendarSlot = plainDateTimeSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
@@ -76,7 +77,7 @@ export function withFields<C>(
       calendarOps,
       initialFields,
       modFields,
-      options,
+      optionsCopy,
     ),
     branding: PlainDateTimeBranding,
   }

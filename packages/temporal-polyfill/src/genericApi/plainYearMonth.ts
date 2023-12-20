@@ -10,7 +10,7 @@ import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/epo
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './optionsRefine'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './optionsRefine'
 import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMonthBag } from './bagGeneric'
 import { DurationBranding, PlainDateBranding, PlainYearMonthBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots } from './slotsGeneric'
@@ -73,11 +73,12 @@ export function withFields<C>(
   mod: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
+  const optionsCopy = prepareOptions(options)
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...mergePlainYearMonthBag(calendarOps, initialFields, mod, options),
+    ...mergePlainYearMonthBag(calendarOps, initialFields, mod, optionsCopy),
     branding: PlainYearMonthBranding,
   }
 }

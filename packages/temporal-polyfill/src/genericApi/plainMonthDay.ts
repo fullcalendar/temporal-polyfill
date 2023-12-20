@@ -6,7 +6,7 @@ import { formatIsoMonthDayFields, formatPossibleDate } from '../internal/formatI
 import { isoEpochFirstLeapYear } from '../internal/calendarIso'
 import { checkIsoDateInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainMonthDay } from '../internal/parseIso'
-import { DateTimeDisplayOptions, OverflowOptions, refineDateDisplayOptions } from './optionsRefine'
+import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions } from './optionsRefine'
 import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from './bagGeneric'
 import { PlainDateBranding, PlainMonthDayBranding } from './branding'
 import { PlainDateSlots, PlainMonthDaySlots } from './slotsGeneric'
@@ -70,11 +70,12 @@ export function withFields<C>(
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots<C> {
+  const optionsCopy = prepareOptions(options)
   const calendarSlot = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...mergePlainMonthDayBag(calendarOps, initialFields, modFields, options),
+    ...mergePlainMonthDayBag(calendarOps, initialFields, modFields, optionsCopy),
     branding: PlainMonthDayBranding,
   }
 }

@@ -52,7 +52,7 @@ export class PlainDate {
         getPlainDateSlots(this),
         this,
         rejectInvalidBag(mod),
-        prepareOptions(options),
+        options,
       )
     )
   }

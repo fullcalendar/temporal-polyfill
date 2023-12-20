@@ -11,7 +11,7 @@ import { moveDateEasy } from '../internal/move'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
 import { Unit } from '../internal/units'
 import { NumSign } from '../internal/utils'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './optionsRefine'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions, refineDiffOptions, refineOverflowOptions } from './optionsRefine'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateBag, refinePlainDateBag } from './bagGeneric'
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots } from './slotsGeneric'
@@ -60,11 +60,12 @@ export function withFields<C>(
   modFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
+  const optionsCopy = prepareOptions(options)
   const calendarSlot = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
   return {
-    ...mergePlainDateBag(calendarOps, initialFields, modFields, options),
+    ...mergePlainDateBag(calendarOps, initialFields, modFields, optionsCopy),
     branding: PlainDateBranding,
   }
 }
