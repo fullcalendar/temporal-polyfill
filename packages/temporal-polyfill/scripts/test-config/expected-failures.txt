@@ -1,15 +1,5 @@
 
 # TODO: expected-failures-es5.txt still runs. merge it into this files
-# TODO: util for globs that don't match any tests!!!
-# audit prepareOptions???
-
-####################################################################################################
-# Options parsing
-####################################################################################################
-
-# don't access own time parts via fields/refineFields
-# weird because we DO want to do this on the add-on fields
-built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 ####################################################################################################
 # Handling crazy results from CALENDAR
@@ -125,12 +115,20 @@ built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-op
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 ####################################################################################################
-# ::toPlainMonthDay/toPlainYearMonth
+# ::toPlainMonthDay/toPlainYearMonth intentional spec break
 ####################################################################################################
 
 # we access ZonedDateTimes/PlainDate/etc's monthCode/day and year/monthCode fields directly
 built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
+
+####################################################################################################
+# PlainDateTime::with intentional spec break
+####################################################################################################
+
+# don't access own time parts via fields/refineFields
+# weird because we DO want to do this on the add-on fields
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 ####################################################################################################
 # Over-reliance on Calendar (ours is better)
