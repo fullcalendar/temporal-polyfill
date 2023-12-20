@@ -1,6 +1,6 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
-import { diffTimes } from '../internal/diff'
+import { diffPlainTimes, diffTimes } from '../internal/diff'
 import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { formatPlainTimeIso } from '../internal/formatIso'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/epochAndTime'
@@ -95,16 +95,8 @@ export function until(
   plainTimeSlots0: PlainTimeSlots,
   plainTimeSlots1: PlainTimeSlots,
   options?: DiffOptions,
-  invertRoundingMode?: boolean,
 ): DurationSlots {
-  return {
-    ...diffTimes(
-      plainTimeSlots0,
-      plainTimeSlots1,
-      ...(refineDiffOptions(invertRoundingMode, options, Unit.Hour, Unit.Hour) as [TimeUnit, TimeUnit, number, RoundingMode]),
-    ),
-    branding: DurationBranding
-  }
+  return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options)
 }
 
 export function since(
@@ -112,7 +104,7 @@ export function since(
   plainTimeSlots1: PlainTimeSlots,
   options?: DiffOptions,
 ): DurationFields {
-  return negateDuration(until(plainTimeSlots0, plainTimeSlots1, options, true))
+  return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options, true)
 }
 
 export function round(

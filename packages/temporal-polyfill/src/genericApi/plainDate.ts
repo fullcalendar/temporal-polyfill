@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
 import { IdLike, isIdLikeEqual, ensureObjectlike, ensureString } from '../internal/cast'
-import { diffDates } from '../internal/diff'
+import { diffDates, diffPlainDates } from '../internal/diff'
 import { getCommonCalendarSlot } from './calendarSlotString'
 import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, refineIsoDateArgs } from '../internal/calendarIsoFields'
 import { formatPlainDateIso } from '../internal/formatIso'
@@ -108,25 +108,8 @@ export function until<C extends IdLike>(
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
   options?: DiffOptions,
-  invertRoundingMode?: boolean,
 ): DurationSlots {
-  return {
-    ...diffDates(
-      getCalendarOps(
-        getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
-      ),
-      plainDateSlots0,
-      plainDateSlots1,
-      ...refineDiffOptions(
-        invertRoundingMode,
-        options === undefined ? options : { ...ensureObjectlike(options) }, // YUCK
-        Unit.Day,
-        Unit.Year,
-        Unit.Day,
-      ),
-    ),
-    branding: DurationBranding,
-  }
+  return diffPlainDates(getCalendarOps, plainDateSlots0, plainDateSlots1, options)
 }
 
 export function since<C extends IdLike>(
@@ -135,12 +118,7 @@ export function since<C extends IdLike>(
   plainDateSlots1: PlainDateSlots<C>,
   options?: DiffOptions,
 ): DurationSlots {
-  return {
-    branding: DurationBranding,
-    ...negateDuration(
-      until(getCalendarOps, plainDateSlots0, plainDateSlots1, options, true)
-    )
-  }
+  return diffPlainDates(getCalendarOps, plainDateSlots0, plainDateSlots1, options, true)
 }
 
 export function compare(

@@ -4,6 +4,7 @@ import {
   durationFieldDefaults,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
+  negateDuration,
 } from './durationFields'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
@@ -15,8 +16,8 @@ import {
   isoToEpochMilli,
   isoToEpochNano
 } from './epochAndTime'
-import { moveByIsoDays, moveDateTime, moveZonedEpochNano } from './move'
-import { Overflow, RoundingMode } from './options'
+import { moveByIsoDays, moveDateTime, moveToMonthStart, moveZonedEpochNano } from './move'
+import { RoundingMode } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import {
@@ -29,7 +30,171 @@ import {
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
 import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
-import { DiffOps } from './calendarOps'
+import { DiffOps, YearMonthDiffOps } from './calendarOps'
+import { DurationSlots, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
+import { DiffOptions, refineDiffOptions } from '../genericApi/optionsRefine'
+import { DurationBranding } from '../genericApi/branding'
+import { IdLike, ensureObjectlike } from './cast'
+import { getCommonCalendarSlot } from '../genericApi/calendarSlotString'
+import { getCommonTimeZoneSlot } from '../genericApi/timeZoneSlotString'
+
+export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
+  zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationSlots {
+  let durationFields = diffZonedEpochNano(
+    () => getCalendarOps(getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)),
+    () => getTimeZoneOps(getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)),
+    zonedDateTimeSlots0.epochNanoseconds,
+    zonedDateTimeSlots1.epochNanoseconds,
+    ...refineDiffOptions(invert, options, Unit.Hour),
+  )
+
+  if (invert) {
+    durationFields = negateDuration(durationFields)
+  }
+
+  return {
+    ...durationFields,
+    branding: DurationBranding,
+  }
+}
+
+export function diffInstants(
+  instantSlots0: InstantSlots,
+  instantSlots1: InstantSlots,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationSlots {
+  let durationFields = diffEpochNano(
+    instantSlots0.epochNanoseconds,
+    instantSlots1.epochNanoseconds,
+    ...(
+      refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as
+        [TimeUnit, TimeUnit, number, RoundingMode]
+    ),
+  )
+
+  if (invert) {
+    durationFields = negateDuration(durationFields)
+  }
+
+  return {
+    ...durationFields,
+    branding: DurationBranding,
+  }
+}
+
+export function diffPlainDateTimes<C extends IdLike>(
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  plainDateTimeSlots0: PlainDateTimeSlots<C>,
+  plainDateTimeSlots1: PlainDateTimeSlots<C>,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationSlots {
+  const calendarSlot = getCommonCalendarSlot(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
+  const calendarOps = getCalendarOps(calendarSlot)
+  let durationFields = diffDateTimes(
+    calendarOps,
+    plainDateTimeSlots0,
+    plainDateTimeSlots1,
+    ...refineDiffOptions(invert, options, Unit.Day),
+  )
+
+  if (invert) {
+    durationFields = negateDuration(durationFields)
+  }
+
+  return {
+    ...durationFields,
+    branding: DurationBranding,
+  }
+}
+
+export function diffPlainYearMonth<C extends IdLike>(
+  getCalendarOps: (calendar: C) => YearMonthDiffOps,
+  plainYearMonthSlots0: PlainYearMonthSlots<C>,
+  plainYearMonthSlots1: PlainYearMonthSlots<C>,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationSlots {
+  const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
+  const calendarOps = getCalendarOps(calendarSlot)
+  let durationFields =diffDates(
+    calendarOps,
+    moveToMonthStart(calendarOps, plainYearMonthSlots0),
+    moveToMonthStart(calendarOps, plainYearMonthSlots1),
+    ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
+  )
+
+  if (invert) {
+    durationFields = negateDuration(durationFields)
+  }
+
+  return {
+    ...durationFields,
+    branding: DurationBranding,
+  }
+}
+
+export function diffPlainDates<C extends IdLike>(
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  plainDateSlots0: PlainDateSlots<C>,
+  plainDateSlots1: PlainDateSlots<C>,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationSlots {
+  let durationFields = diffDates(
+    getCalendarOps(
+      getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
+    ),
+    plainDateSlots0,
+    plainDateSlots1,
+    ...refineDiffOptions(
+      invert,
+      options === undefined ? options : { ...ensureObjectlike(options) }, // YUCK
+      Unit.Day,
+      Unit.Year,
+      Unit.Day,
+    ),
+  )
+
+  if (invert) {
+    durationFields = negateDuration(durationFields)
+  }
+
+  return {
+    ...durationFields,
+    branding: DurationBranding,
+  }
+}
+
+export function diffPlainTimes(
+  plainTimeSlots0: IsoTimeFields,
+  plainTimeSlots1: IsoTimeFields,
+  options: DiffOptions | undefined,
+  invert?: boolean,
+): DurationSlots {
+  let durationFields = diffTimes(
+    plainTimeSlots0,
+    plainTimeSlots1,
+    ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as
+      [TimeUnit, TimeUnit, number, RoundingMode]),
+  )
+
+  if (invert) {
+    durationFields = negateDuration(durationFields)
+  }
+
+  return {
+    ...durationFields,
+    branding: DurationBranding
+  }
+}
 
 // Dates & Times
 // -------------------------------------------------------------------------------------------------

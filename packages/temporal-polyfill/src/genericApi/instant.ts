@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { toBigInt, toStringViaPrimitive } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
-import { diffEpochNano } from '../internal/diff'
+import { diffEpochNano, diffInstants } from '../internal/diff'
 import { formatInstantIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { moveEpochNano } from '../internal/move'
@@ -81,19 +81,8 @@ export function until(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
   options?: DiffOptions,
-  invertRoundingMode?: boolean,
 ): DurationSlots {
-  return {
-    branding: DurationBranding,
-    ...diffEpochNano(
-      instantSlots0.epochNanoseconds,
-      instantSlots1.epochNanoseconds,
-      ...(
-        refineDiffOptions(invertRoundingMode, options, Unit.Second, Unit.Hour) as
-          [TimeUnit, TimeUnit, number, RoundingMode]
-      ),
-    ),
-  }
+  return diffInstants(instantSlots0, instantSlots1, options)
 }
 
 export function since(
@@ -101,7 +90,7 @@ export function since(
   instantSlots1: InstantSlots,
   options?: DiffOptions,
 ): DurationFields {
-  return negateDuration(until(instantSlots0, instantSlots1, options, true))
+  return diffInstants(instantSlots0, instantSlots1, options, true)
 }
 
 export function round(

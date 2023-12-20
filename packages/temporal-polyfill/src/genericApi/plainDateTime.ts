@@ -1,8 +1,8 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
 import { IdLike, isIdLikeEqual, ensureString } from '../internal/cast'
-import { diffDateTimes } from '../internal/diff'
-import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlotString'
+import { diffPlainDateTimes } from '../internal/diff'
+import { getPreferredCalendarSlot } from './calendarSlotString'
 import { IsoDateTimeFields, isoDateFieldNamesDesc, isoTimeFieldNamesDesc, refineIsoDateTimeArgs } from '../internal/calendarIsoFields'
 import { formatPlainDateTimeIso } from '../internal/formatIso'
 import { compareIsoDateTimeFields } from '../internal/epochAndTime'
@@ -11,11 +11,11 @@ import { moveDateTime } from '../internal/move'
 import { RoundingMode } from '../internal/options'
 import { roundDateTime } from '../internal/round'
 import { TimeZoneOps } from '../internal/timeZoneOps'
-import { DayTimeUnit, Unit, UnitName } from '../internal/units'
+import { DayTimeUnit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineDateTimeDisplayOptions, refineDiffOptions, refineOverflowOptions, refineRoundOptions } from './optionsRefine'
+import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
 import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from './bagGeneric'
-import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
+import { PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields, negateDuration } from '../internal/durationFields'
@@ -146,20 +146,8 @@ export function until<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
   options?: DiffOptions,
-  invertRoundingMode?: boolean,
 ): DurationSlots {
-  const calendarSlot = getCommonCalendarSlot(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...diffDateTimes(
-      calendarOps,
-      plainDateTimeSlots0,
-      plainDateTimeSlots1,
-      ...refineDiffOptions(invertRoundingMode, options, Unit.Day),
-    ),
-    branding: DurationBranding,
-  }
+  return diffPlainDateTimes(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options)
 }
 
 export function since<C extends IdLike>(
@@ -168,10 +156,7 @@ export function since<C extends IdLike>(
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
   options?: DiffOptions,
 ): DurationSlots {
-  return {
-    ...negateDuration(until(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)),
-    branding: DurationBranding,
-  }
+  return diffPlainDateTimes(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
 }
 
 export function round<C>(

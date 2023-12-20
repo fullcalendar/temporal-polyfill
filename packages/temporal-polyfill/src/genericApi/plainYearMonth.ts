@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
 import { ensureString, toInteger, IdLike, isIdLikeEqual } from '../internal/cast'
-import { diffDates } from '../internal/diff'
+import { diffDates, diffPlainYearMonth } from '../internal/diff'
 import { DurationFields, durationFieldDefaults, negateDuration, queryDurationSign } from '../internal/durationFields'
 import { getCommonCalendarSlot } from './calendarSlotString'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
@@ -125,20 +125,8 @@ export function until<C extends IdLike>(
   plainYearMonthSlots0: PlainYearMonthSlots<C>,
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
   options?: DiffOptions,
-  invertRoundingMode?: boolean,
 ): DurationSlots {
-  const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...diffDates(
-      calendarOps,
-      moveToMonthStart(calendarOps, plainYearMonthSlots0),
-      moveToMonthStart(calendarOps, plainYearMonthSlots1),
-      ...refineDiffOptions(invertRoundingMode, options, Unit.Year, Unit.Year, Unit.Month),
-    ),
-    branding: DurationBranding,
-  }
+  return diffPlainYearMonth(getCalendarOps, plainYearMonthSlots0, plainYearMonthSlots1, options)
 }
 
 export function since<C extends IdLike>(
@@ -147,10 +135,7 @@ export function since<C extends IdLike>(
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
   options?: DiffOptions,
 ): DurationSlots {
-  return {
-    ...negateDuration(until(getCalendarOps, plainYearMonthSlots0, plainYearMonthSlots1, options, true)),
-    branding: DurationBranding,
-  }
+  return diffPlainYearMonth(getCalendarOps, plainYearMonthSlots0, plainYearMonthSlots1, options, true)
 }
 
 export function compare(
