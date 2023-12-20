@@ -68,14 +68,14 @@ export class PlainTime {
 
   until(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      PlainTimeFuncs.until(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), prepareOptions(options))
+      PlainTimeFuncs.until(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
     )
   }
 
   since(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
     return createDuration({
       branding: DurationBranding, // weird
-      ...PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), prepareOptions(options))
+      ...PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
     })
   }
 

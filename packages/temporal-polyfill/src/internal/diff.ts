@@ -48,13 +48,14 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
+  const optionsCopy = prepareOptions(options)
   let durationFields = diffZonedEpochNano(
     getCalendarOps(getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)),
     () => getTimeZoneOps(getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)),
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
-    ...refineDiffOptions(invert, options, Unit.Hour),
-    options,
+    ...refineDiffOptions(invert, optionsCopy, Unit.Hour),
+    optionsCopy,
   )
 
   if (invert) {
@@ -189,10 +190,11 @@ export function diffPlainTimes(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
+  const optionsCopy = prepareOptions(options)
   let durationFields = diffTimes(
     plainTimeSlots0,
     plainTimeSlots1,
-    ...(refineDiffOptions(invert, options, Unit.Hour, Unit.Hour) as
+    ...(refineDiffOptions(invert, optionsCopy, Unit.Hour, Unit.Hour) as
       [TimeUnit, TimeUnit, number, RoundingMode]),
   )
 

@@ -143,7 +143,7 @@ export class ZonedDateTime {
         createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
-        prepareOptions(options),
+        options,
       ),
       branding: DurationBranding,
     })
@@ -156,7 +156,7 @@ export class ZonedDateTime {
         createTimeZoneOps,
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
-        prepareOptions(options),
+        options,
       ),
       branding: DurationBranding,
     })
