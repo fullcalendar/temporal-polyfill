@@ -656,7 +656,7 @@ function normalizeUnitNameOptions<O extends {}>(
 }
 
 /*
-Used for to* and diff* functions
+Used for to* and diff* and `with` functions
 */
 export function prepareOptions<O>(options: O): O {
   if (options === undefined) {

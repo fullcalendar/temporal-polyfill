@@ -52,20 +52,19 @@ export class Instant {
       InstantFuncs.until(
         getInstantSlots(this),
         toInstantSlots(otherArg),
-        prepareOptions(options),
+        options,
       ),
     )
   }
 
   since(otherArg: InstantArg, options?: DiffOptions): Duration {
-    return createDuration({
-      branding: DurationBranding, // !!!
-      ...InstantFuncs.since(
+    return createDuration(
+      InstantFuncs.since(
         getInstantSlots(this),
         toInstantSlots(otherArg),
-        prepareOptions(options),
+        options,
       ),
-    })
+    )
   }
 
   round(options: RoundingOptions | UnitName): Instant {

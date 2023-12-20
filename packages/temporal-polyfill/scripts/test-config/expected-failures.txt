@@ -1,18 +1,15 @@
 
 # TODO: expected-failures-es5.txt still runs. merge it into this files
 # TODO: util for globs that don't match any tests!!!
+# audit prepareOptions???
 
 ####################################################################################################
 # Options parsing
 ####################################################################################################
 
-# accessing options multiple times. this is why CopyDataProperties exists
-# ALSO, diff options should be snapshotted probably
+# don't access own time parts via fields/refineFields
+# weird because we DO want to do this on the add-on fields
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainTime/prototype/until/order-of-operations.js
 
 ####################################################################################################
 # Handling crazy results from CALENDAR
@@ -163,6 +160,8 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-opti
 # fewer calls to dateAdd/dateUntil
 built-ins/Temporal/Duration/prototype/round/order-of-operations.js
 built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 
 # internal TimeZone::getOffsetNanosecondsFor called fewer times
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js

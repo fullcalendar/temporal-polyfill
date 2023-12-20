@@ -89,7 +89,7 @@ export function since(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
   options?: DiffOptions,
-): DurationFields {
+): DurationSlots {
   return diffInstants(instantSlots0, instantSlots1, options, true)
 }
 

@@ -377,7 +377,7 @@ function createMarkerSystem<C, T>(
       },
       // TODO: use .bind after updateDurationFieldsSign removed
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return diffDateTimes(calendarOps, m0, m1, largeUnit)
+        return diffDateTimes(getCalendarOps, calendar, m0, m1, largeUnit)
       },
     ]
   }

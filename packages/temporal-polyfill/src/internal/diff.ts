@@ -34,7 +34,7 @@ import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { DurationSlots, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
-import { DiffOptions, refineDiffOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, prepareOptions, refineDiffOptions } from '../genericApi/optionsRefine'
 import { DurationBranding } from '../genericApi/branding'
 import { IdLike, ensureObjectlike } from './cast'
 import { getCommonCalendarSlot } from '../genericApi/calendarSlotString'
@@ -73,11 +73,12 @@ export function diffInstants(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
+  const optionsCopy = prepareOptions(options)
   let durationFields = diffEpochNano(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
     ...(
-      refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as
+      refineDiffOptions(invert, optionsCopy, Unit.Second, Unit.Hour) as
         [TimeUnit, TimeUnit, number, RoundingMode]
     ),
   )
@@ -100,13 +101,16 @@ export function diffPlainDateTimes<C extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
-  const calendarOps = getCalendarOps(calendarSlot)
+  const optionsCopy = prepareOptions(options)
+  const diffOptionsTuple = refineDiffOptions(invert, optionsCopy, Unit.Day)
+
   let durationFields = diffDateTimes(
-    calendarOps,
+    getCalendarOps,
+    calendarSlot,
     plainDateTimeSlots0,
     plainDateTimeSlots1,
-    ...refineDiffOptions(invert, options, Unit.Day),
-    options,
+    ...diffOptionsTuple,
+    optionsCopy,
   )
 
   if (invert) {
@@ -205,8 +209,9 @@ export function diffPlainTimes(
 // Dates & Times
 // -------------------------------------------------------------------------------------------------
 
-export function diffDateTimes(
-  calendarOps: DiffOps,
+export function diffDateTimes<C>(
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  calendarSlot: C,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
   largestUnit: Unit,
@@ -230,6 +235,10 @@ export function diffDateTimes(
   }
 
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  if (!sign) {
+    return durationFieldDefaults
+  }
+
   const startTimeNano = isoTimeFieldsToNano(startIsoFields)
   const endTimeNano = isoTimeFieldsToNano(endIsoFields)
   let timeNano = endTimeNano - startTimeNano
@@ -244,6 +253,7 @@ export function diffDateTimes(
     timeNano += nanoInUtcDay * sign
   }
 
+  const calendarOps = getCalendarOps(calendarSlot)
   const dateDiff = calendarDateUntilEasy(
     calendarOps,
     { ...midIsoFields, ...isoTimeFieldDefaults }, // hack

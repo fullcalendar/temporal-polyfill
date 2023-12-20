@@ -6,6 +6,7 @@ import {
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
+  prepareOptions,
   refineOverflowOptions,
 } from '../genericApi/optionsRefine'
 import { UnitName } from '../internal/units'
@@ -67,14 +68,14 @@ export class PlainTime {
 
   until(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      PlainTimeFuncs.until(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
+      PlainTimeFuncs.until(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), prepareOptions(options))
     )
   }
 
   since(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
     return createDuration({
       branding: DurationBranding, // weird
-      ...PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
+      ...PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), prepareOptions(options))
     })
   }
 
