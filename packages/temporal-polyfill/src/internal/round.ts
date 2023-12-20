@@ -69,7 +69,7 @@ function roundDateTimeToDay(
   if (timeZoneOps) {
     const nanoInDay = computeNanosecondsInDay(timeZoneOps, isoFields)
     const roundedTimeNano = roundByInc(isoTimeFieldsToNano(isoFields), nanoInDay, roundingMode)
-    const dayDelta = roundedTimeNano ? 1 : 0
+    const dayDelta = roundedTimeNano / nanoInDay
 
     return checkIsoDateTimeInBounds({
       ...moveByIsoDays(isoFields, dayDelta),

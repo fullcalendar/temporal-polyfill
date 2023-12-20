@@ -5,16 +5,10 @@
 # Handling crazy results from TIMEZONE
 ####################################################################################################
 
-# I disagree w/ irregular length-of-day tests for ZonedDateTime, especially the third `test`
-built-ins/Temporal/ZonedDateTime/prototype/round/smallest-unit-day-rounding-modes.js
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-
-# we don't support hours-in-day greater than 10000000xxx
-# (would require us to use DayTimeNano for simple operations)
-built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
@@ -102,6 +96,12 @@ built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefini
 built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely.js
 built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely.js
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
+
+# we don't support hours-in-day greater than 10000000xxx (line 119 in the test),
+# which can happen if 1-day-apart TimeZone::getPossibleInstantsFor calls give results wildly apart.
+# results in slightly-less-precise-than-desirable (already ridiculous) .hoursInDay values
+# this happens because we don't leverage bigint for such normally-simple operations
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
 
 ####################################################################################################
 # ::toPlainMonthDay/toPlainYearMonth intentional spec break
