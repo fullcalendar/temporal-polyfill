@@ -251,23 +251,9 @@ intl402/Temporal/TimeZone/prototype/equals/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
 
 ####################################################################################################
-# Known bug in spec that's getting fixed (https://github.com/tc39/proposal-temporal/issues/2563)
+# Reported bug: https://github.com/tc39/proposal-temporal/issues/2742
 ####################################################################################################
 
-#
-# const dur = new Temporal.Duration(1, 0, 0, 0, 24)
-# const zdt1 = Temporal.ZonedDateTime.from("2019-11-01T00:00[America/Vancouver]")
-# const zdt2 = zdt1.add(dur)
-#
-# console.log(
-#   'ACTUAL: ' +
-#   dur.round({ largestUnit: 'years', relativeTo: zdt1 }).toString() // "P1Y1D"
-# )
-# console.log(
-#   'EXPECTED: ' +
-#   zdt1.until(zdt2, { largestUnit: 'years' }).toString() // "P1YT24H"
-# )
-#
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 
 ####################################################################################################

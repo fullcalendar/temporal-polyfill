@@ -327,7 +327,7 @@ function postProcessZonedDateTime(
   return {
     epochNanoseconds,
     timeZone: timeZoneImpl.id,
-    calendar: realizeCalendarId(organized.calendar),
+    calendar: realizeCalendarId(organized.calendar), // TODO: use timeZoneImpl.id somehow???
   }
 }
 
