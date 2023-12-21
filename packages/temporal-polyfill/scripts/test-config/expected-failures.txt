@@ -194,7 +194,7 @@ built-ins/Temporal/Duration/prototype/toString/precision-exact-mathematical-valu
 built-ins/Temporal/Duration/prototype/toString/precision-formatted-as-decimal-number.js
 
 ####################################################################################################
-# Weird stuff
+# Intl stuff
 ####################################################################################################
 
 # Node16-specific bugs with timezone normalization
@@ -243,7 +243,6 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 ####################################################################################################
 
 # Can't handle super big roundingIncrement
-built-ins/Temporal/Duration/prototype/round/roundingincrement-non-integer.js
 built-ins/Temporal/ZonedDateTime/prototype/since/roundingincrement-non-integer.js
 built-ins/Temporal/ZonedDateTime/prototype/until/roundingincrement-non-integer.js
 

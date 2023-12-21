@@ -121,14 +121,32 @@ export function roundDayTimeDuration(
     ...balanceDayTimeDuration(
       durationFields,
       largestUnit,
-      computeNanoInc(smallestUnit, roundingInc),
+      smallestUnit,
+      roundingInc,
       roundingMode,
       Unit.Day,
     ),
   }
 }
 
+// TODO: more DRY
 export function balanceDayTimeDuration(
+  durationFields: DurationFields,
+  largestUnit: DayTimeUnit,
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingMode,
+  largestReadUnit: DayTimeUnit = largestUnit,
+): Partial<DurationFields> {
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestReadUnit)
+  const roundedLargeNano = roundDayTimeNano(dayTimeNano, smallestUnit, roundingInc, roundingMode)
+  const partialDuration = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
+
+  return partialDuration
+}
+
+// TODO: more DRY
+export function balanceDayTimeDurationByInc(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit,
   nanoInc: number, // REQUIRED: not larger than a day

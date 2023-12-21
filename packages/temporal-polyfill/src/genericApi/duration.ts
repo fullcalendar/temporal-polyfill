@@ -10,7 +10,7 @@ import { parseDuration } from '../internal/parseIso'
 import { DiffMarkers, MarkerSystem, MarkerToEpochNano, MarkerSlots, MoveMarker, SimpleMarkerSystem } from '../internal/marker'
 import { moveDateTime, moveZonedEpochNano } from '../internal/move'
 import { SubsecDigits } from '../internal/options'
-import { balanceDayTimeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
+import { balanceDayTimeDurationByInc, roundDayTimeDuration, roundRelativeDuration, totalDayTimeDuration, totalRelativeDuration } from '../internal/round'
 import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano } from '../internal/units'
 import { NumSign, identityFunc } from '../internal/utils'
@@ -269,7 +269,7 @@ export function toString(slots: DurationSlots, options?: TimeDisplayOptions): st
   if (nanoInc > 1) {
     slots = {
       ...slots,
-      ...balanceDayTimeDuration(
+      ...balanceDayTimeDurationByInc(
         slots,
         Math.min(getLargestDurationUnit(slots), Unit.Day),
         nanoInc,
