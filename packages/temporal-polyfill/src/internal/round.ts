@@ -200,6 +200,7 @@ export function roundRelativeDuration<M>(
   let [roundedDurationFields, roundedEpochNano, grewBigUnit] = nudgeFunc(
     durationFields,
     endEpochNano,
+    largestUnit,
     smallestUnit,
     roundingInc,
     roundingMode,
@@ -343,6 +344,7 @@ and return the (day) delta. Also return the (potentially) unbalanced new duratio
 function nudgeDurationDayTime(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for adding result to
+  largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit, // always <=Day
   roundingInc: number,
   roundingMode: RoundingMode,
@@ -359,7 +361,7 @@ function nudgeDurationDayTime(
 
   const roundedDayTimeFields = nanoToDurationDayTimeFields(
     roundedDayTimeNano,
-    Math.min(Unit.Day, getLargestDurationUnit(durationFields)) as DayTimeUnit, // HACK
+    Math.min(largestUnit, Unit.Day),
   )
   const nudgedDurationFields = {
     ...durationFields,
@@ -393,6 +395,7 @@ Time ONLY. Days must use full-on marker moving
 function nudgeRelativeDurationTime<M>(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano, // NOT NEEDED, just for conformance
+  largestUnit: Unit,
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number,
   roundingMode: RoundingMode,
@@ -448,6 +451,7 @@ function nudgeRelativeDurationTime<M>(
 function nudgeRelativeDuration<M>(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: DayTimeNano,
+  largestUnit: Unit,
   smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingMode,

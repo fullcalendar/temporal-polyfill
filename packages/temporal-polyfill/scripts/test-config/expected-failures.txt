@@ -242,10 +242,6 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 # SOLUTION: do rounding by actually adding then diffing
 ####################################################################################################
 
-# Can't handle super big roundingIncrement
-built-ins/Temporal/ZonedDateTime/prototype/since/roundingincrement-non-integer.js
-built-ins/Temporal/ZonedDateTime/prototype/until/roundingincrement-non-integer.js
-
 # Problems with zdt-based Duration rounding relying too much on nanoseconds comparisons
 # (converting epoch->fields waaay too many times while doing diffing/clamping)
 # NEVERMIND: it's fine. 5 calls to getPossibleInstantsFor, what one would expect for accuracy
