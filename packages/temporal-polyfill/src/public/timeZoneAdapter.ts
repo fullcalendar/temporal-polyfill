@@ -6,7 +6,7 @@ import { Callable } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { ensureNumber } from '../internal/cast'
+import { ensureFunction, ensureNumber } from '../internal/cast'
 import { nanoInUtcDay } from '../internal/units'
 
 // Individual Adapters
@@ -96,7 +96,7 @@ export function createAdapterOps<KV extends {} = typeof timeZoneAdapters>(
     boundFuncs[key] = (adapterFuncs as any)[key].bind(
       undefined,
       timeZoneProtocol,
-      (timeZoneProtocol as any)[key],
+      ensureFunction((timeZoneProtocol as any)[key]),
     )
   }
 

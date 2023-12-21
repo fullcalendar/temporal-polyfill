@@ -1,4 +1,4 @@
-import { isObjectlike } from './utils'
+import { Callable, isObjectlike } from './utils'
 
 // TODO: rename 'ensure' to 'require' ?
 // -------------------------------------------------------------------------------------------------
@@ -20,6 +20,7 @@ function ensureType<A>(typeName: string, arg: A): A {
 export const ensureString = ensureType.bind(undefined, 'string') as (arg: string) => string
 export const ensureBoolean = ensureType.bind(undefined, 'boolean') as (arg: boolean) => boolean
 export const ensureNumber = ensureType.bind(undefined, 'number') as (arg: number) => number
+export const ensureFunction = ensureType.bind(undefined, 'function') as (arg: Callable) => Callable
 
 export function ensureStringOrUndefined(input: string | undefined): string | undefined {
   if (input !== undefined && typeof input !== 'string') {
