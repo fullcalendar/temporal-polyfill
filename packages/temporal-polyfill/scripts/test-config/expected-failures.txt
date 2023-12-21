@@ -2,15 +2,6 @@
 # TODO: expected-failures-es5.txt still runs. merge it into this files
 
 ####################################################################################################
-# Handling crazy results from TIMEZONE
-####################################################################################################
-
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-
-####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
 ####################################################################################################
@@ -82,8 +73,24 @@ built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign
 built-ins/Temporal/Duration/prototype/round/zero-day-length.js
 built-ins/Temporal/Duration/prototype/total/zero-day-length.js
 
-# we have fewer calls to getOffsetNanosecondsFor, and test is brittle
-# if you remove TemporalHelpers.SUBSTITUTE_SKIP in the mocks, test will pass
+# DifferenceZonedDateTime sanity-checks its `timeRemainderNs` against NanosecondsToDays to account
+# for any day-overflow that erratic TimeZone protocols might be responsible for. We don't bother to
+# check this.
+#
+# SIDENOTE: this is probably why our zdt-diffing implementation calls getOffsetNanosecondsFor
+# fewer times
+#
+# Many things call NanosecondsToDays under the hood:
+# - AddDuration > DifferenceZonedDateTime > NanosecondsToDays
+#
+built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
+built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
+#
+# Coincidentally, if you comment-out the TemporalHelpers.SUBSTITUTE_SKIP lines in the mocks,
+# things correctly throw RangeErrors, but this is incidental and unrelated (mismatching Duration signs)
+#
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
 
@@ -150,11 +157,10 @@ built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 
-# internal TimeZone::getOffsetNanosecondsFor called fewer times
+# There's one fewer TimeZone::getOffsetNanosecondsFor call for `InterpretISODateTimeOffset`
+# because internally, intermediate PlainDateTime is supposed to be created
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/toString/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
-# (also, `overflow options should be parsed WITHIN CalendarOpsAdapter, not before`...)
 built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 
 # relative Duration fewer dateAdd calls

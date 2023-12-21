@@ -354,9 +354,9 @@ export function toString<C extends IdLike, T extends IdLike>(
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   return formatZonedDateTimeIso(
+    getTimeZoneOps,
     zonedDateTimeSlots0.calendar,
     zonedDateTimeSlots0.timeZone,
-    getTimeZoneOps(zonedDateTimeSlots0.timeZone),
     zonedDateTimeSlots0.epochNanoseconds,
     ...refineZonedDateTimeDisplayOptions(options),
   )

@@ -46,10 +46,10 @@ export function formatPlainDateIso(
 /*
 TODO: rename to formatZonedEpochNano
 */
-export function formatZonedDateTimeIso(
-  calendarIdLike: IdLike,
-  tiemZoneIdLike: IdLike,
-  timeZoneOps: SimpleTimeZoneOps,
+export function formatZonedDateTimeIso<T extends IdLike>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  calendarSlot: IdLike,
+  timeZoneSlot: T,
   epochNano: DayTimeNano,
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
@@ -59,13 +59,14 @@ export function formatZonedDateTimeIso(
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return formatIsoDateTimeFields(isoFields, subsecDigits) +
     formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
-    formatTimeZone(tiemZoneIdLike, timeZoneDisplay) +
-    formatCalendar(calendarIdLike, calendarDisplay)
+    formatTimeZone(timeZoneSlot, timeZoneDisplay) +
+    formatCalendar(calendarSlot, calendarDisplay)
 }
 
 export function formatInstantIso(

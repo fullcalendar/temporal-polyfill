@@ -199,11 +199,39 @@ export type ZonedDateTimeDisplayTuple = [
 
 export function refineZonedDateTimeDisplayOptions(options: ZonedDateTimeDisplayOptions | undefined): ZonedDateTimeDisplayTuple {
   options = normalizeOptions(options)
+
+  // TODO: fix this... terribly un-DRY with refineTimeDisplayTuple
+
+  // alphabetical
+  const calendarDisplay = refineCalendarDisplay(options)
+  const subsecDigits = refineSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const offsetDisplay = refineOffsetDisplay(options)
+  const roundingMode = refineRoundingMode(options, RoundingMode.Trunc)
+  const [smallestUnit] = refineSmallestUnit(options, Unit.Minute, Unit.Nanosecond, -1 as number)
+  const timeZoneDisplay = refineTimeZoneDisplay(options)
+
+  if ((smallestUnit as number) !== -1) {
+    return [
+      calendarDisplay,
+      timeZoneDisplay,
+      offsetDisplay,
+
+      unitNanoMap[smallestUnit],
+      roundingMode,
+      (smallestUnit < Unit.Minute)
+        ? (9 - (smallestUnit * 3)) as SubsecDigits
+        : -1, // hide seconds --- NOTE: not relevant when maxSmallestUnit is <minute !!!
+    ]
+  }
+
   return [
-    refineCalendarDisplay(options),
-    refineTimeZoneDisplay(options),
-    refineOffsetDisplay(options),
-    ...refineTimeDisplayTuple(options),
+    calendarDisplay,
+    timeZoneDisplay,
+    offsetDisplay,
+
+    subsecDigits === undefined ? 1 : 10 ** (9 - subsecDigits),
+    roundingMode,
+    subsecDigits,
   ]
 }
 
