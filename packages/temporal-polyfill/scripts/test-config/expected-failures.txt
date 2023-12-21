@@ -92,6 +92,16 @@ built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-op
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 ####################################################################################################
+# Calendar intentional spec breaking
+####################################################################################################
+
+# In the spec, `AddDuration` adds dur0 y/m/w/d, then dur1 y/m/w/d, then combines and adds time parts.
+# Our version uses two `moveDateTime` calls for better code reuse, which results in:
+#   +dur0.timeparts +dur0.ymwd +dur1.timeparts +dur1.ymwd
+# Same ultimate results but different calls to Calendar::dateAdd w/ different intermediate durations.
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
+
+####################################################################################################
 # TimeZone intentional spec breaking (diffing/etc)
 ####################################################################################################
 
@@ -255,28 +265,6 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 ####################################################################################################
 
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
-
-####################################################################################################
-# Known bug in spec (not yet report, could already be fixed)
-####################################################################################################
-
-#
-# // Duration::add with relativeTo:PlainDate, when duration0+duration1 overflows day,
-# // does not balance-up to higher units
-#
-# relativeTo = new Temporal.PlainDate(2023, 1, 1)
-# duration0 = Temporal.Duration.from({ hours: 6 })
-# duration1 = Temporal.Duration.from({ months: 2, days: 30, hours: 20 })
-# durationResult = duration0.add(duration1, { relativeTo })
-# // { months: 2, days: 31, hours: 2 } -- UNDESIRED!!!
-#
-# pdt0 = new Temporal.PlainDateTime(2023, 1, 1)
-# pdt1 = pdt0.add({ hours: 6 })
-# pdt2 = pdt1.add({ months: 2, days: 30, hours: 20 })
-# durationResult = pdt0.until(pdt2, { largestUnit: 'months' })
-# // { months: 3, hours: 2 } -- DESIRED
-#
-built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 
 ####################################################################################################
 # Don't care
