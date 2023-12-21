@@ -3,12 +3,14 @@
 
 # OUR SHORTCOMING:
 # our zdt-rounding doesn't consider the zdt's dayLengthNs (which is expensive to compute)
-# when doing rounding
+# when doing rounding. relevant when smallestUnit:'day'.
+# (all this in spite of none of the below files test smallestUnit:'day')
 #
 # SOLUTION: integrate the logic in round.ts::nudgeRelativeDurationTime into genericApi/zonedDateTime.ts::round
 #
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
+built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
 # wrong record-extraction ordering (difficult)
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
@@ -142,36 +144,22 @@ built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 ####################################################################################################
-# Over-reliance on Calendar (ours is better)
-####################################################################################################
-
-# vvv -- for nanoseconds-in-day (afterwards.. check dividing by zero throws error)
-built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
-built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-options-undefined.js
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-options-undefined.js
-
-# Why does day/nanosecond diffing (which does not need a calendar) call Calendar::dateUntil?
-built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
-
-# why does Duration 'day' operations need to consult calendar?
-built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
-
-####################################################################################################
 # Ours is better
 ####################################################################################################
 
-# fewer calls to dateAdd/dateUntil
-# for real. our onion-shell algorithm is better
+# fewer calls to dateAdd/dateUntil. for real. our onion-shell algorithm is better
+# we use diffing to balance.
+# we do not do UnbalanceDateDurationRelative+BalanceDateDurationRelative
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
-
-# our Duration rounding uses diffing to balance
-# it does not do UnbalanceDateDurationRelative+BalanceDateDurationRelative which would result
-# in two dateUntil calls
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-options-undefined.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 
 # NEW ASSESSMENT:
