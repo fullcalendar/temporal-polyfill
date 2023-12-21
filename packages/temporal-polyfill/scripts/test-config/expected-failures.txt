@@ -13,6 +13,8 @@ built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-w
 # wrong record-extraction ordering (difficult)
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
@@ -159,29 +161,25 @@ built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singu
 # Ours is better
 ####################################################################################################
 
-# dateAdd called fewer times
+# fewer calls to dateAdd/dateUntil
+# for real. our onion-shell algorithm is better
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
-
-# fewer calls to dateAdd/dateUntil
-built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/total/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
-
-# relative Duration fewer dateAdd calls
-built-ins/Temporal/Duration/compare/order-of-operations.js
-built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
-
-# our diffing algorithm calls dateAdd/dateUntil fewer times
-built-ins/Temporal/Duration/prototype/add/order-of-operations.js
-built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
 # our Duration rounding uses diffing to balance
 # it does not do UnbalanceDateDurationRelative+BalanceDateDurationRelative which would result
 # in two dateUntil calls
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
+
+# NEW ASSESSMENT:
+# if no calendar units, no need to consult relativeTo's calendar or pluck dateAdd/dateUntil
+# TODO: change our ways? if caller provides relativeTo, simply respect calendar?
+built-ins/Temporal/Duration/compare/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
 # There's one fewer TimeZone::getOffsetNanosecondsFor call for `InterpretISODateTimeOffset`
 # (which converts converts isoFields+offset to epochNano)
@@ -194,14 +192,14 @@ built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
 
-# our zonedInternalsToIso cache (which converts zdt to iso-fields) avoids a second call to getOffsetNanosecondsFor
-built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
-
 # fewer calls to getOffsetNanosecondsFor
 # because of NanosecondsToDays and InterpretISODateTimeOffset
 # and many other fewer (and sometimes different) calls :(
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
+
+# our zonedInternalsToIso cache (which converts zdt to iso-fields) avoids a second call to getOffsetNanosecondsFor
+built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 
 # we display super large duration units as Number would, not BigInt
 built-ins/Temporal/Duration/prototype/toString/precision-exact-mathematical-values.js
@@ -391,6 +389,7 @@ built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/custom-timezone.js
 built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
 
 # why, with optional method argument, should length be 0?
 built-ins/Temporal/Duration/prototype/toString/length.js
