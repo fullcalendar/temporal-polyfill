@@ -7,6 +7,8 @@ import { createLazyGenerator, excludePropsByName, hasAnyPropsByName } from './ut
 import { getSingleInstantFor } from './timeZoneOps'
 import { IdLike, getId } from './cast'
 import { queryNativeTimeZone } from './timeZoneNative'
+import { Formattable } from '../public/dateTimeFormat'
+import { BrandingSlots, getSlots } from '../public/slotsForClasses'
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat
@@ -302,8 +304,8 @@ export const prepCachedZonedDateTimeFormat = createFormatPrepper(zonedDateTimeCo
 // TODO: move to public dir?
 
 export type BoundFormatPrepFunc = ( // already bound to locale/options
-  slots0: { branding: string } | undefined,
-  slots1?: { branding: string } | undefined, // TODO: use BrandingSlots after moving to public
+  arg0?: Formattable,
+  arg1?: Formattable
 ) => BoundFormatPrepFuncRes
 
 export type BoundFormatPrepFuncRes = [
@@ -324,14 +326,20 @@ export function createBoundFormatPrepFunc(
     return new OrigDateTimeFormat(resolvedLocale, transformedOptions)
   })
 
-  return (slots0, slots1) => {
+  return (arg0, arg1) => {
+    const slots0 = getSlots(arg0)
     const { branding } = slots0 || {}
+    let slots1: BrandingSlots | undefined
+
+    if (arg1 !== undefined) {
+      slots1 = getSlots(arg1)
+
+      if (branding !== (slots1 || {}).branding) {
+        throw new TypeError('Mismatched types')
+      }
+    }
 
     if (branding) {
-      if (slots1 && slots1.branding && slots1.branding !== branding) {
-        throw new TypeError('Mismatching branding')
-      }
-
       const config = classFormatConfigs[branding]
       if (!config) {
         throw new TypeError('Cannot format ' + branding)

@@ -45,7 +45,7 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
   format(arg?: Formattable): string {
     const prepSubformat = prepSubformatMap.get(this)!
-    const [format, epochMilli] = prepSubformat(getSlots(arg))
+    const [format, epochMilli] = prepSubformat(arg)
 
     // can't use the origMethod.call() trick because .format() is always bound
     // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
@@ -56,7 +56,7 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
   formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
     const prepSubformat = prepSubformatMap.get(this)!
-    const [format, epochMilli] = prepSubformat(getSlots(arg))
+    const [format, epochMilli] = prepSubformat(arg)
 
     return format
       ? format.formatToParts(epochMilli)
@@ -76,7 +76,7 @@ export interface DateTimeFormat {
     defineProps(DateTimeFormat.prototype, {
       [methodName]: function (this: DateTimeFormat, arg0: Formattable, arg1: Formattable) {
         const prepSubformat = prepSubformatMap.get(this)!
-        const [format, epochMilli0, epochMilli1] = prepSubformat(getSlots(arg0), getSlots(arg1))
+        const [format, epochMilli0, epochMilli1] = prepSubformat(arg0, arg1)
 
         return format
           ? origMethod.call(format, epochMilli0, epochMilli1)

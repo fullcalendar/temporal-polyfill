@@ -197,11 +197,6 @@ built-ins/Temporal/Duration/prototype/toString/precision-formatted-as-decimal-nu
 # Weird stuff
 ####################################################################################################
 
-# for Intl.DateTimeFormat::formatRange,
-# should throw TypeError on Temporal-obj mismatch before RangeError about invalid gregory/iso calendars
-intl402/Intl/DateTimeFormat/prototype/formatRange/fails-on-distinct-temporal-types.js
-intl402/Intl/DateTimeFormat/prototype/formatRangeToParts/fails-on-distinct-temporal-types.js
-
 # Node16-specific bugs with timezone normalization
 # Asia/Kolkata should not get normalized to Asia/Calcutta
 intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
