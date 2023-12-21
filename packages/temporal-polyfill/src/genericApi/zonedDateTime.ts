@@ -255,7 +255,7 @@ export function round<C, T>(
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
   let isoDateTimeFields = {
     ...epochNanoToIso(epochNanoseconds, offsetNano),
-    calendar,
+    calendar, // repeat below?
   }
 
   isoDateTimeFields = {

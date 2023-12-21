@@ -1,6 +1,15 @@
 
 # TODO: expected-failures-es5.txt still runs. merge it into this files
 
+# OUR SHORTCOMING:
+# our zdt-rounding doesn't consider the zdt's dayLengthNs (which is expensive to compute)
+# when doing rounding
+#
+# SOLUTION: integrate the logic in round.ts::nudgeRelativeDurationTime into genericApi/zonedDateTime.ts::round
+#
+built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
+built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
+
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
@@ -157,7 +166,23 @@ built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 
+# relative Duration fewer dateAdd calls
+built-ins/Temporal/Duration/compare/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
+
+# our diffing algorithm calls dateAdd/dateUntil fewer times
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
+
+# fewer calls to dateUntil
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+
+# when diffing, we do not walk year/months one-by-one
+built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
+
 # There's one fewer TimeZone::getOffsetNanosecondsFor call for `InterpretISODateTimeOffset`
+# (which converts converts isoFields+offset to epochNano)
 # because internally, intermediate PlainDateTime is supposed to be created
 built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
@@ -167,29 +192,12 @@ built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
 
-# relative Duration fewer dateAdd calls
-built-ins/Temporal/Duration/compare/order-of-operations.js
-built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
-built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
-
-# our zonedInternalsToIso cache (which converts zdt to iso-fields) saves a call to getOffsetNanosecondsFor
+# our zonedInternalsToIso cache (which converts zdt to iso-fields) avoids a second call to getOffsetNanosecondsFor
 built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 
-# when diffing, we do not walk year/months one-by-one
-built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
-
-# our diffing algorithm calls dateAdd/dateUntil fewer times
-built-ins/Temporal/Duration/prototype/add/order-of-operations.js
-built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
-
-# fewer calls to dateUntil
-built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-
-# fewer calls to getPossibleInstantsFor while rounding ZonedDateTime
-built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
-built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
-
 # fewer calls to getOffsetNanosecondsFor
+# because of NanosecondsToDays and InterpretISODateTimeOffset
+# and many other fewer (and sometimes different) calls :(
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
 

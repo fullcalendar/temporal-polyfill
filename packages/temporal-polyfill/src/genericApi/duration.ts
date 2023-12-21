@@ -364,25 +364,27 @@ function createMarkerSystem<C, T>(
   const { calendar, timeZone, epochNanoseconds } = markerSlots as
     { calendar: C, timeZone?: T, epochNanoseconds?: DayTimeNano }
 
-  const calendarOps = getCalendarOps(calendar)
-
   if (epochNanoseconds) {
-    const timeZoneOps = getTimeZoneOps(timeZone!)
-
     return [
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       (epochNano: DayTimeNano, durationFields: DurationFields) => {
-        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields)
+        return moveZonedEpochNano(getCalendarOps(calendar), getTimeZoneOps(timeZone!), epochNano, durationFields)
       },
-      diffZonedEpochNano.bind(undefined, calendarOps, () => timeZoneOps),
+      diffZonedEpochNano.bind(
+        undefined,
+        getCalendarOps as any,
+        getTimeZoneOps as any,
+        calendar,
+        () => timeZone!,
+      ),
     ]
   } else {
     return [
       { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
       isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
       (isoField: IsoDateTimeFields, durationFields: DurationFields) => {
-        return moveDateTime(calendarOps, isoField, durationFields)
+        return moveDateTime(getCalendarOps(calendar), isoField, durationFields)
       },
       // TODO: use .bind after updateDurationFieldsSign removed
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {

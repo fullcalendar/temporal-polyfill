@@ -48,10 +48,14 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
+  const calendarSlot = getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
   const optionsCopy = prepareOptions(options)
+
   let durationFields = diffZonedEpochNano(
-    getCalendarOps(getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)),
-    () => getTimeZoneOps(getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone)),
+    getCalendarOps,
+    getTimeZoneOps,
+    calendarSlot,
+    () => getCommonTimeZoneSlot(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone),
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
     ...refineDiffOptions(invert, optionsCopy, Unit.Hour),
@@ -374,9 +378,11 @@ export function diffTimes(
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
-export function diffZonedEpochNano(
-  calendarOps: DiffOps,
-  getTimeZoneOps: () => TimeZoneOps,
+export function diffZonedEpochNano<C, T>(
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  calendarSlot: C,
+  getTimeZoneSlot: () => T,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -397,12 +403,15 @@ export function diffZonedEpochNano(
     )
   }
 
+  const timeZoneSlot = getTimeZoneSlot()
+
   const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
   if (!sign) {
     return durationFieldDefaults
   }
 
-  const timeZoneOps = getTimeZoneOps()
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+  const calendarOps = getCalendarOps(calendarSlot)
 
   const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
