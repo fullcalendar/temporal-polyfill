@@ -10,6 +10,10 @@
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
 
+# wrong record-extraction ordering (difficult)
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
+
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
@@ -169,16 +173,14 @@ built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 # relative Duration fewer dateAdd calls
 built-ins/Temporal/Duration/compare/order-of-operations.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
-built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 
 # our diffing algorithm calls dateAdd/dateUntil fewer times
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
-# fewer calls to dateUntil
-built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-
-# when diffing, we do not walk year/months one-by-one
+# our Duration rounding uses diffing to balance
+# it does not do UnbalanceDateDurationRelative+BalanceDateDurationRelative which would result
+# in two dateUntil calls
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 
 # There's one fewer TimeZone::getOffsetNanosecondsFor call for `InterpretISODateTimeOffset`

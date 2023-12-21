@@ -136,13 +136,15 @@ export function diffPlainYearMonth<C extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
+  const optionsCopy = prepareOptions(options)
+
   const calendarOps = getCalendarOps(calendarSlot)
   let durationFields = diffDates(
-    calendarOps,
+    getCalendarOps(calendarSlot),
     moveToMonthStart(calendarOps, plainYearMonthSlots0),
     moveToMonthStart(calendarOps, plainYearMonthSlots1),
-    ...refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month),
-    options,
+    ...refineDiffOptions(invert, optionsCopy, Unit.Year, Unit.Year, Unit.Month),
+    optionsCopy,
   )
 
   if (invert) {
@@ -162,20 +164,22 @@ export function diffPlainDates<C extends IdLike>(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
+  const calendarSlot = getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
+  const optionsCopy = prepareOptions(options)
+  const optionsTuple = refineDiffOptions(
+    invert,
+    optionsCopy,
+    Unit.Day,
+    Unit.Year,
+    Unit.Day,
+  )
+
   let durationFields = diffDates(
-    getCalendarOps(
-      getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
-    ),
+    getCalendarOps(calendarSlot),
     plainDateSlots0,
     plainDateSlots1,
-    ...refineDiffOptions(
-      invert,
-      options === undefined ? options : { ...ensureObjectlike(options) }, // YUCK
-      Unit.Day,
-      Unit.Year,
-      Unit.Day,
-    ),
-    options,
+    ...optionsTuple,
+    optionsCopy,
   )
 
   if (invert) {
@@ -195,6 +199,7 @@ export function diffPlainTimes(
   invert?: boolean,
 ): DurationSlots {
   const optionsCopy = prepareOptions(options)
+
   let durationFields = diffTimes(
     plainTimeSlots0,
     plainTimeSlots1,
