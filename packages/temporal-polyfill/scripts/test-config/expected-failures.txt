@@ -18,6 +18,19 @@ built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
+# TODO: fewer calls to getPossibleInstantsFor for Duration rounding
+# IMPROVE our marker system somehow
+#
+# our algorithm:
+#   p0 = parse(relativeTo) --- getPossibleInstantsFor
+#   p1 = p0 + duration --- getPossibleInstantsFor
+#   diff0 = diff(p0 -> p1) --- getPossibleInstantsFor
+#   p3 = p0 + diff0.roundedSmallestUnitAndLarger  --- getPossibleInstantsFor
+#   p4 = p3 + nextIncrementOfSmallestUnit --- getPossibleInstantsFor
+#   value = roundFunc(p1 between p3<->p4)
+#
+built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
+
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
@@ -236,16 +249,6 @@ intl402/Temporal/TimeZone/from/timezone-case-insensitive.js
 intl402/Temporal/TimeZone/prototype/equals/canonical-not-equal.js
 intl402/Temporal/TimeZone/prototype/equals/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
-
-####################################################################################################
-# Known bug in spec that's MAYBE getting fixed (https://github.com/tc39/proposal-temporal/issues/2715)
-# SOLUTION: do rounding by actually adding then diffing
-####################################################################################################
-
-# Problems with zdt-based Duration rounding relying too much on nanoseconds comparisons
-# (converting epoch->fields waaay too many times while doing diffing/clamping)
-# NEVERMIND: it's fine. 5 calls to getPossibleInstantsFor, what one would expect for accuracy
-built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
 ####################################################################################################
 # Known bug in spec that's getting fixed (https://github.com/tc39/proposal-temporal/issues/2563)
