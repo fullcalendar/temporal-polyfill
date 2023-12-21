@@ -19,6 +19,7 @@ import { ZonedDateTimeArg } from './zonedDateTime'
 import { refinePublicRelativeTo } from './markerRefine'
 import { createDiffOps } from './calendarOpsQuery'
 import { createTimeZoneOps } from './timeZoneOpsQuery'
+import { LocalesArg } from '../internal/formatIntl'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -111,6 +112,11 @@ export class Duration {
 
   toString(options?: TimeDisplayOptions): string {
     return DurationFuncs.toString(getDurationSlots(this), options)
+  }
+
+  toLocaleString(locales?: LocalesArg, options?: any): string {
+    getDurationSlots(this) // check type
+    return new (Intl as any).DurationFormat(locales, options).format(this)
   }
 
   // TODO: toLocaleString

@@ -223,7 +223,7 @@ intl402/Temporal/TimeZone/links-backward.js
 intl402/Temporal/TimeZone/links-asia.js
 intl402/Temporal/TimeZone/links-africa.js
 
-# Intl.DateTimeFormat should more liberally accept timeZones?
+# Intl.DateTimeFormat does not accept numeric-offset `timeZones`s and we are okay with that
 intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
 intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
 intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
@@ -236,13 +236,6 @@ intl402/Temporal/TimeZone/from/timezone-case-insensitive.js
 intl402/Temporal/TimeZone/prototype/equals/canonical-not-equal.js
 intl402/Temporal/TimeZone/prototype/equals/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
-
-# no Duration::toLocaleString yet
-built-ins/Temporal/Duration/prototype/toLocaleString/branding.js
-built-ins/Temporal/Duration/prototype/toLocaleString/prop-desc.js
-
-# don't prohibit newer utilities
-built-ins/Temporal/Duration/call-builtin.js
 
 ####################################################################################################
 # Known bug in spec that's MAYBE getting fixed (https://github.com/tc39/proposal-temporal/issues/2715)
@@ -395,6 +388,7 @@ built-ins/Temporal/PlainYearMonth/prototype/toString/length.js
 built-ins/Temporal/ZonedDateTime/prototype/toLocaleString/length.js
 built-ins/Temporal/ZonedDateTime/prototype/toString/length.js
 built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/length.js
+built-ins/Temporal/Duration/prototype/toLocaleString/length.js
 
 # b/c of fullcalendar/temporal weird class-construction
 #
@@ -473,6 +467,9 @@ built-ins/Temporal/PlainMonthDay/length.js
 built-ins/Temporal/Duration/length.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/length.js
 built-ins/Temporal/PlainYearMonth/prototype/add/length.js
+
+# not allowed to call built-in utilities like Number.isFinite or Math.sign
+built-ins/Temporal/Duration/call-builtin.js
 
 # we use array spreading internally
 built-ins/Temporal/PlainMonthDay/from/argument-builtin-calendar-no-array-iteration.js
