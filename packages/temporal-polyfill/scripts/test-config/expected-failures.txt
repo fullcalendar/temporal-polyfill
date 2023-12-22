@@ -13,8 +13,6 @@ built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-w
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
 # wrong record-extraction ordering (difficult)
-built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
@@ -184,6 +182,8 @@ built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singu
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
 
 # NEW ASSESSMENT:
 # if no calendar units, no need to consult relativeTo's calendar or pluck dateAdd/dateUntil

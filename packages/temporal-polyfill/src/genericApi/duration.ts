@@ -195,6 +195,7 @@ export function round<RA, C, T>(
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
+  // TODO: do this in roundRelativeDuration?
   let transplantedWeeks = 0
   if (slots.weeks && smallestUnit === Unit.Week) {
     transplantedWeeks = slots.weeks
