@@ -12,10 +12,6 @@ built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor
 built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
-# wrong record-extraction ordering (difficult)
-built-ins/Temporal/Duration/prototype/add/order-of-operations.js
-built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
-
 # TODO: fewer calls to getPossibleInstantsFor for Duration rounding
 # IMPROVE our marker system somehow
 #
@@ -165,8 +161,15 @@ built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 ####################################################################################################
-# Ours is better
+# Ours is better (mainly calendar)
 ####################################################################################################
+
+# because of diff/balancing problems, different onion-related calls
+# also, same problem as below. Fix?:
+#   if no calendar units, no need to consult relativeTo's calendar or pluck dateAdd/dateUntil
+#   TODO: change our ways? if caller provides relativeTo, simply respect calendar?
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
 # fewer calls to dateAdd/dateUntil. for real. our onion-shell algorithm is better
 # we use diffing to balance.

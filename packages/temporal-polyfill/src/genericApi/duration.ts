@@ -1,7 +1,7 @@
 import { DurationBag } from '../internal/calendarFields'
 import { ensureString, toStrictInteger } from '../internal/cast'
 import { DayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
-import { diffDateTimes, diffZonedEpochNano } from '../internal/diff'
+import { diffDateTimes, diffDateTimes2, diffZonedEpochNano, diffZonedEpochNano2 } from '../internal/diff'
 import { DurationFields, absDuration, addDayTimeDuration, checkDurationFields, durationFieldNamesAsc, negateDuration, queryDurationSign } from '../internal/durationFields'
 import { IsoDateTimeFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { formatDurationInternals } from '../internal/formatIso'
@@ -365,31 +365,30 @@ function createMarkerSystem<C, T>(
   const { calendar, timeZone, epochNanoseconds } = markerSlots as
     { calendar: C, timeZone?: T, epochNanoseconds?: DayTimeNano }
 
+  const calendarOps = getCalendarOps(calendar)
+
   if (epochNanoseconds) {
+    const timeZoneOps = getTimeZoneOps(timeZone!)
+
     return [
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
       (epochNano: DayTimeNano, durationFields: DurationFields) => {
-        return moveZonedEpochNano(getCalendarOps(calendar), getTimeZoneOps(timeZone!), epochNano, durationFields)
+        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields)
       },
-      diffZonedEpochNano.bind(
-        undefined,
-        getCalendarOps as any,
-        getTimeZoneOps as any,
-        calendar,
-        () => timeZone!,
-      ),
+      (epochNano0: DayTimeNano, epochNano1: DayTimeNano, largestUnit: Unit) => {
+        return diffZonedEpochNano2(calendarOps, timeZoneOps, epochNano0, epochNano1, largestUnit)
+      },
     ]
   } else {
     return [
       { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
       isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
       (isoField: IsoDateTimeFields, durationFields: DurationFields) => {
-        return moveDateTime(getCalendarOps(calendar), isoField, durationFields)
+        return moveDateTime(calendarOps, isoField, durationFields)
       },
-      // TODO: use .bind after updateDurationFieldsSign removed
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return diffDateTimes(getCalendarOps, calendar, m0, m1, largeUnit)
+        return diffDateTimes2(calendarOps, m0, m1, largeUnit)
       },
     ]
   }

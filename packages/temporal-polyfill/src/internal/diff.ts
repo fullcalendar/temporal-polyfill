@@ -289,6 +289,61 @@ export function diffDateTimes<C>(
   )
 }
 
+/*
+No rounding!
+TODO: make DRY
+*/
+export function diffDateTimes2<C>(
+  calendarOps: DiffOps,
+  startIsoFields: IsoDateTimeFields,
+  endIsoFields: IsoDateTimeFields,
+  largestUnit: Unit,
+  origOptions?: DiffOptions,
+): DurationFields {
+  const startEpochNano = isoToEpochNano(startIsoFields)!
+  const endEpochNano = isoToEpochNano(endIsoFields)!
+
+  if (largestUnit < Unit.Day) {
+    return {
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(
+        diffDayTimeNanos(startEpochNano, endEpochNano),
+        largestUnit as DayTimeUnit,
+      )
+    }
+  }
+
+  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  if (!sign) {
+    return durationFieldDefaults
+  }
+
+  const startTimeNano = isoTimeFieldsToNano(startIsoFields)
+  const endTimeNano = isoTimeFieldsToNano(endIsoFields)
+  let timeNano = endTimeNano - startTimeNano
+  const timeSign = Math.sign(timeNano)
+
+  // simulate startDate plus time fields (because that happens before adding date)
+  let midIsoFields: IsoDateFields = startIsoFields
+
+  // move start-fields forward so time-diff-sign matches date-diff-sign
+  if (timeSign === -sign) {
+    midIsoFields = moveByIsoDays(startIsoFields, sign)
+    timeNano += nanoInUtcDay * sign
+  }
+
+  const dateDiff = calendarOps.dateUntil(
+    { ...midIsoFields, ...isoTimeFieldDefaults }, // hack
+    { ...endIsoFields, ...isoTimeFieldDefaults }, // hack
+    largestUnit,
+    origOptions,
+  )
+  const timeDiff = nanoToDurationTimeFields(timeNano)
+  const dateTimeDiff = { ...dateDiff, ...timeDiff }
+
+  return dateTimeDiff
+}
+
 export function diffDates<C>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   calendarSlot: C,
@@ -480,6 +535,63 @@ export function diffZonedEpochNano<C, T>(
     identityFunc, // markerToEpochNano
     (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d), // moveMarker
   )
+}
+
+/*
+No rounding!
+TODO: make DRY
+*/
+export function diffZonedEpochNano2(
+  calendarOps: DiffOps,
+  timeZoneOps: TimeZoneOps,
+  startEpochNano: DayTimeNano,
+  endEpochNano: DayTimeNano,
+  largestUnit: Unit,
+  origOptions?: DiffOptions,
+): DurationFields {
+  if (largestUnit < Unit.Day) {
+    return {
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(
+        diffDayTimeNanos(startEpochNano, endEpochNano),
+        largestUnit as DayTimeUnit,
+      )
+    }
+  }
+
+  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  if (!sign) {
+    return durationFieldDefaults
+  }
+
+  const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
+  const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
+  const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
+  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneOps) // necessary to bind?
+  let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
+  let midEpochNano = isoToZonedEpochNano(midIsoFields)
+  let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
+
+  // Might need multiple backoffs: one for simple time overage, other for end being in DST gap
+  // TODO: use a do-while loop?
+  while (midSign === -sign) {
+    midIsoFields = {
+      ...moveByIsoDays(midIsoFields, -sign),
+      ...startIsoTimeFields,
+    }
+    midEpochNano = isoToZonedEpochNano(midIsoFields)
+    midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
+  }
+
+  const dateDiff = largestUnit === Unit.Day
+    ? { ...durationFieldDefaults, days: diffDays(startIsoFields, midIsoFields), }
+    : calendarOps.dateUntil(startIsoFields, midIsoFields, largestUnit, origOptions)
+
+  const timeDiffNano = dayTimeNanoToNumber(diffDayTimeNanos(midEpochNano, endEpochNano)) // could be over 24 hour, so we need to consider day too
+  const timeDiff = nanoToDurationTimeFields(timeDiffNano)
+  const dateTimeDiff = { ...dateDiff, ...timeDiff }
+
+  return dateTimeDiff
 }
 
 export function diffEpochNano(
