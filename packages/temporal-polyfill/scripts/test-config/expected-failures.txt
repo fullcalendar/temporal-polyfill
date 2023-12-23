@@ -1,10 +1,6 @@
 
 # TODO: expected-failures-es5.txt still runs. merge it into this files
 
-#
-# ALSO: if relativeTo given, always consule calendar (test below)
-#
-
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
@@ -152,10 +148,16 @@ built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 # because of diff/balancing problems, different onion-related calls
 # also, same problem as below. Fix?:
-#   if no calendar units, no need to consult relativeTo's calendar or pluck dateAdd/dateUntil
-#   TODO: change our ways? if caller provides relativeTo, simply respect calendar?
+#   a CalendarRecord's dateAdd method is plucked but never used because all units are <=day
+#   just don't pluck it. file bug?
 built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
+
+# a CalendarRecord's dateAdd method is plucked but never used because all units are <=day
+# just don't pluck it. file bug?
+built-ins/Temporal/Duration/compare/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
 # fewer calls to dateAdd/dateUntil. for real. our onion-shell algorithm is better
 # we use diffing to balance.
@@ -173,13 +175,6 @@ built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-op
 built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
 built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
-
-# NEW ASSESSMENT:
-# if no calendar units, no need to consult relativeTo's calendar or pluck dateAdd/dateUntil
-# TODO: change our ways? if caller provides relativeTo, simply respect calendar?
-built-ins/Temporal/Duration/compare/order-of-operations.js
-built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 
 # There's one fewer TimeZone::getOffsetNanosecondsFor call for `InterpretISODateTimeOffset`
 # (which converts converts isoFields+offset to epochNano)
