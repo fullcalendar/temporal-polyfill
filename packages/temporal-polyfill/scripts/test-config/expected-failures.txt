@@ -7,23 +7,15 @@
 # (all this in spite of none of the below files test smallestUnit:'day')
 #
 # SOLUTION: integrate the logic in round.ts::nudgeRelativeDurationTime into genericApi/zonedDateTime.ts::round
+# MAYBE. or just do dayDelta (RoundISODateTime)
 #
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
-# TODO: fewer calls to getPossibleInstantsFor for Duration rounding
-# IMPROVE our marker system somehow
 #
-# our algorithm:
-#   p0 = parse(relativeTo) --- getPossibleInstantsFor
-#   p1 = p0 + duration --- getPossibleInstantsFor
-#   diff0 = diff(p0 -> p1) --- getPossibleInstantsFor
-#   p3 = p0 + diff0.roundedSmallestUnitAndLarger  --- getPossibleInstantsFor
-#   p4 = p3 + nextIncrementOfSmallestUnit --- getPossibleInstantsFor
-#   value = roundFunc(p1 between p3<->p4)
+# ALSO: if relativeTo given, always consule calendar (test below)
 #
-built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
@@ -268,6 +260,10 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 ####################################################################################################
 
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
+
+# To fix bug, the window-of-time that's being rounded within should have its start/ends
+# passed through getPossibleInstantsFor, increasing the call count
+built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
 ####################################################################################################
 # Don't care
