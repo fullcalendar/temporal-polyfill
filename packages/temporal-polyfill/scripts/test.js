@@ -39,6 +39,7 @@ yargs(hideBin(process.argv))
     (parsedArgv) => {
       const expectedFailureFiles = [
         'expected-failures.txt',
+        'expected-failures-surface.txt',
       ];
 
       const nodeVersion = parseInt(process.versions.node.split('.')[0]);
