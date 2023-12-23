@@ -506,8 +506,13 @@ export function diffZonedEpochNano<C, T>(
   let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
 
   // Might need multiple backoffs: one for simple time overage, other for end being in DST gap
+  // (so 2 backoffs max)
   // TODO: use a do-while loop?
+  let cnt = 0
   while (midSign === -sign) {
+    if (cnt++ > 1) {
+      throw new RangeError('Invalid TimeZoneProtocol results')
+    }
     midIsoFields = {
       ...moveByIsoDays(midIsoFields, -sign),
       ...startIsoTimeFields,
