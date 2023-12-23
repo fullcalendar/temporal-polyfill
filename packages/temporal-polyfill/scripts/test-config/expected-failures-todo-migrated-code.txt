@@ -1,2 +1,0 @@
-# Failures in this file will be fixed after migrating the latest polyfill changes
-# from proposal-temporal.

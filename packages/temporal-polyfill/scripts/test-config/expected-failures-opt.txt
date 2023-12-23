@@ -1,2 +1,0 @@
-# Failures in this file only apply to the optimized, but not transpiled,
-# polyfill sources.
