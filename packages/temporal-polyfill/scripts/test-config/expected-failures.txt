@@ -1,18 +1,6 @@
 
 # TODO: expected-failures-es5.txt still runs. merge it into this files
 
-# OUR SHORTCOMING:
-# our zdt-rounding doesn't consider the zdt's dayLengthNs (which is expensive to compute)
-# when doing rounding. relevant when smallestUnit:'day'.
-# (all this in spite of none of the below files test smallestUnit:'day')
-#
-# SOLUTION: integrate the logic in round.ts::nudgeRelativeDurationTime into genericApi/zonedDateTime.ts::round
-# MAYBE. or just do dayDelta (RoundISODateTime)
-#
-built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
-built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
-
 #
 # ALSO: if relativeTo given, always consule calendar (test below)
 #
@@ -90,6 +78,12 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 ####################################################################################################
 # TimeZone intentional spec breaking (diffing/etc)
 ####################################################################################################
+
+# It's not necessary to compute hours-in-day when rounding time parts
+# (hours-in-day needs 2 extra getPossibleInstantsFor calls)
+built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
+built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
+built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
 # spec's NanosecondsToDays has more complicated back-off strategy that's supposed to throw errors
 # when receiving whacky results from getPossibleInstantsFor. Because we reuse our diffing algorithm
