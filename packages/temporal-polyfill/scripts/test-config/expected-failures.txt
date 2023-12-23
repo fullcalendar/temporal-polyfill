@@ -1,6 +1,4 @@
 
-# TODO: expected-failures-es5.txt still runs. merge it into this files
-
 ####################################################################################################
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
@@ -427,6 +425,55 @@ built-ins/Temporal/PlainMonthDay/length.js
 built-ins/Temporal/Duration/length.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/length.js
 built-ins/Temporal/PlainYearMonth/prototype/add/length.js
+
+# more class construction stuff
+built-ins/Temporal/Calendar/prototype/day/builtin.js
+built-ins/Temporal/Calendar/prototype/day/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/dayOfWeek/builtin.js
+built-ins/Temporal/Calendar/prototype/dayOfWeek/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/dayOfYear/builtin.js
+built-ins/Temporal/Calendar/prototype/dayOfYear/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/daysInMonth/builtin.js
+built-ins/Temporal/Calendar/prototype/daysInMonth/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/daysInWeek/builtin.js
+built-ins/Temporal/Calendar/prototype/daysInWeek/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/daysInYear/builtin.js
+built-ins/Temporal/Calendar/prototype/daysInYear/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/inLeapYear/builtin.js
+built-ins/Temporal/Calendar/prototype/inLeapYear/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/month/builtin.js
+built-ins/Temporal/Calendar/prototype/month/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/monthCode/builtin.js
+built-ins/Temporal/Calendar/prototype/monthCode/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/monthsInYear/builtin.js
+built-ins/Temporal/Calendar/prototype/monthsInYear/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/weekOfYear/builtin.js
+built-ins/Temporal/Calendar/prototype/weekOfYear/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/yearOfWeek/builtin.js
+built-ins/Temporal/Calendar/prototype/yearOfWeek/not-a-constructor.js
+built-ins/Temporal/Calendar/prototype/year/builtin.js
+built-ins/Temporal/Calendar/prototype/year/not-a-constructor.js
+built-ins/Temporal/Duration/prototype/valueOf/builtin.js
+built-ins/Temporal/Duration/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/Instant/prototype/valueOf/builtin.js
+built-ins/Temporal/Instant/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/PlainDate/prototype/valueOf/builtin.js
+built-ins/Temporal/PlainDate/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/PlainDateTime/prototype/valueOf/builtin.js
+built-ins/Temporal/PlainDateTime/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/PlainMonthDay/prototype/valueOf/builtin.js
+built-ins/Temporal/PlainMonthDay/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/PlainTime/prototype/valueOf/builtin.js
+built-ins/Temporal/PlainTime/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/PlainYearMonth/prototype/valueOf/builtin.js
+built-ins/Temporal/PlainYearMonth/prototype/valueOf/not-a-constructor.js
+built-ins/Temporal/ZonedDateTime/prototype/valueOf/builtin.js
+built-ins/Temporal/ZonedDateTime/prototype/valueOf/not-a-constructor.js
+intl402/Temporal/Calendar/prototype/era/builtin.js
+intl402/Temporal/Calendar/prototype/era/not-a-constructor.js
+intl402/Temporal/Calendar/prototype/eraYear/builtin.js
+intl402/Temporal/Calendar/prototype/eraYear/not-a-constructor.js
+built-ins/Temporal/Now/timeZoneId/not-a-constructor.js
 
 # not allowed to call built-in utilities like Number.isFinite or Math.sign
 built-ins/Temporal/Duration/call-builtin.js
