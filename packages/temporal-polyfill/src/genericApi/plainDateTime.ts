@@ -17,26 +17,9 @@ import { mergePlainDateTimeBag, plainDateTimeWithFields, refinePlainDateTimeBag 
 import { plainDateTimesEqual } from '../internal/compare'
 import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
+import { createPlainDateTimeSlots } from '../internal/slotsCreate'
 
-export function create<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
-  isoYear: number,
-  isoMonth: number,
-  isoDay: number,
-  isoHour: number = 0, isoMinute: number = 0, isoSecond: number = 0,
-  isoMillisecond: number = 0, isoMicrosecond: number = 0, isoNanosecond: number = 0,
-  calendarArg: CA = isoCalendarId as any,
-): IsoDateTimeFields & { calendar: C, branding: typeof PlainDateTimeBranding } {
-  return {
-    ...refineIsoDateTimeArgs(
-      isoYear, isoMonth, isoDay,
-      isoHour, isoMinute, isoSecond,
-      isoMillisecond, isoMicrosecond, isoNanosecond,
-    ),
-    calendar: refineCalendarArg(calendarArg),
-    branding: PlainDateTimeBranding,
-  }
-}
+export const create = createPlainDateTimeSlots
 
 export const fromString = parsePlainDateTime
 

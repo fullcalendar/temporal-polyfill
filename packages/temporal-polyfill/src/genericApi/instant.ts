@@ -13,13 +13,9 @@ import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime, instantToZonedDateTimeISO } from '../internal/convert'
+import { createInstantSlots } from '../internal/slotsCreate'
 
-export function create(epochNano: bigint): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
-  }
-}
+export const create = createInstantSlots
 
 export const fromString = parseInstant
 

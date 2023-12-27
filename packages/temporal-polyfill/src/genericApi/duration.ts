@@ -12,35 +12,9 @@ import { DiffOps } from '../internal/calendarOps'
 import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel } from '../internal/optionsRefine'
 import { DurationBranding, DurationSlots } from '../internal/slots'
 import { mergeDurationBag, refineDurationBag } from '../internal/bag'
+import { createDurationSlots } from '../internal/slotsCreate'
 
-export function create(
-  years: number = 0,
-  months: number = 0,
-  weeks: number = 0,
-  days: number = 0,
-  hours: number = 0,
-  minutes: number = 0,
-  seconds: number = 0,
-  milliseconds: number = 0,
-  microseconds: number = 0,
-  nanoseconds: number = 0,
-): DurationSlots {
-  return {
-    ...checkDurationFields({
-      years: toStrictInteger(years),
-      months: toStrictInteger(months),
-      weeks: toStrictInteger(weeks),
-      days: toStrictInteger(days),
-      hours: toStrictInteger(hours),
-      minutes: toStrictInteger(minutes),
-      seconds: toStrictInteger(seconds),
-      milliseconds: toStrictInteger(milliseconds),
-      microseconds: toStrictInteger(microseconds),
-      nanoseconds: toStrictInteger(nanoseconds),
-    }),
-    branding: DurationBranding,
-  }
-}
+export const create = createDurationSlots
 
 export const fromString = parseDuration
 

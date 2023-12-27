@@ -16,30 +16,9 @@ import { negateDuration } from '../internal/durationMath'
 import { PlainTimeBag, mergePlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
 import { plainTimesEqual } from '../internal/compare'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
+import { createPlainTimeSlots } from '../internal/slotsCreate'
 
-export function create(
-  isoHour: number = 0,
-  isoMinute: number = 0,
-  isoSecond: number = 0,
-  isoMillisecond: number = 0,
-  isoMicrosecond: number = 0,
-  isoNanosecond: number = 0,
-): PlainTimeSlots {
-  return {
-    ...constrainIsoTimeFields(
-      {
-        isoHour: toInteger(isoHour),
-        isoMinute: toInteger(isoMinute),
-        isoSecond: toInteger(isoSecond),
-        isoMillisecond: toInteger(isoMillisecond),
-        isoMicrosecond: toInteger(isoMicrosecond),
-        isoNanosecond: toInteger(isoNanosecond),
-      },
-      Overflow.Reject,
-    ),
-    branding: PlainTimeBranding,
-  }
-}
+export const create = createPlainTimeSlots
 
 export const fromFields = refinePlainTimeBag
 

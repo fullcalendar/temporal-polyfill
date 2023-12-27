@@ -16,31 +16,9 @@ import { movePlainYearMonth } from '../internal/move'
 import { mergePlainYearMonthBag, plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bag'
 import { plainYearMonthsEqual } from '../internal/compare'
 import { plainYearMonthToPlainDate } from '../internal/convert'
+import { createPlainYearMonthSlots } from '../internal/slotsCreate'
 
-export function create<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
-  isoYear: number,
-  isoMonth: number,
-  calendar: CA = isoCalendarId as any,
-  referenceIsoDay: number = 1,
-): PlainYearMonthSlots<C> {
-  const isoYearInt = toInteger(isoYear)
-  const isoMonthInt = toInteger(isoMonth)
-  const calendarSlot = refineCalendarArg(calendar)
-  const isoDayInt = toInteger(referenceIsoDay)
-
-  return {
-    ...checkIsoYearMonthInBounds(
-      constrainIsoDateLike({
-        isoYear: isoYearInt,
-        isoMonth: isoMonthInt,
-        isoDay: isoDayInt
-      })
-    ),
-    calendar: calendarSlot,
-    branding: PlainYearMonthBranding,
-  }
-}
+export const create = createPlainYearMonthSlots
 
 export const fromString = parsePlainYearMonth
 

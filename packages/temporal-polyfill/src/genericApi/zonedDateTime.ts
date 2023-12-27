@@ -21,21 +21,9 @@ import { ZonedDateTimeBag, mergeZonedDateTimeBag, refineZonedDateTimeBag, zonedD
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
+import { createZonedDateTimeSlots } from '../internal/slotsCreate'
 
-export function create<CA, C, TA, T>(
-  refineCalendarArg: (calendarArg: CA) => C,
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
-  epochNano: bigint,
-  timeZoneArg: TA,
-  calendarArg: CA = isoCalendarId as any,
-): ZonedDateTimeSlots<C, T> {
-  return {
-    epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
-    timeZone: refineTimeZoneArg(timeZoneArg),
-    calendar: refineCalendarArg(calendarArg),
-    branding: ZonedDateTimeBranding,
-  }
-}
+export const create = createZonedDateTimeSlots
 
 export const fromString = parseZonedDateTime
 

@@ -13,31 +13,9 @@ import { NativeMonthDayParseOps } from '../internal/calendarNative'
 import { mergePlainMonthDayBag, plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { plainMonthDayToPlainDate } from '../internal/convert'
+import { createPlainMonthDaySlots } from '../internal/slotsCreate'
 
-export function create<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
-  isoMonth: number,
-  isoDay: number,
-  calendar: CA = isoCalendarId as any,
-  referenceIsoYear: number = isoEpochFirstLeapYear
-): PlainMonthDaySlots<C> {
-  const isoMonthInt = toInteger(isoMonth)
-  const isoDayInt = toInteger(isoDay)
-  const calendarSlot = refineCalendarArg(calendar)
-  const isoYearInt = toInteger(referenceIsoYear)
-
-  return {
-    ...checkIsoDateInBounds(
-      constrainIsoDateLike({
-        isoYear: isoYearInt,
-        isoMonth: isoMonthInt,
-        isoDay: isoDayInt
-      })
-    ),
-    calendar: calendarSlot,
-    branding: PlainMonthDayBranding,
-  }
-}
+export const create = createPlainMonthDaySlots
 
 export const fromString = parsePlainMonthDay
 
