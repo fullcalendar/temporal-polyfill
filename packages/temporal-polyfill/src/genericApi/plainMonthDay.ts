@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
+import { MonthDayBag, MonthDayFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
 import { formatPlainMonthDayIso } from '../internal/formatIso'
@@ -7,11 +7,12 @@ import { isoEpochFirstLeapYear } from '../internal/calendarIso'
 import { checkIsoDateInBounds } from '../internal/epochAndTime'
 import { parsePlainMonthDay } from '../internal/parseIso'
 import { OverflowOptions, prepareOptions } from '../internal/optionsRefine'
-import { IdLike, PlainDateBranding, PlainDateSlots, PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
-import { DateModOps, MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
+import { IdLike, PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
+import { MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
 import { NativeMonthDayParseOps } from '../internal/calendarNative'
-import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from '../internal/bag'
+import { mergePlainMonthDayBag, refinePlainMonthDayBag } from '../internal/bag'
 import { plainMonthDaysEqual } from '../internal/compare'
+import { plainMonthDayToPlainDate } from '../internal/convert'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -90,17 +91,4 @@ export function toJSON(
   return toString(plainMonthDaySlots)
 }
 
-export function toPlainDate<C>(
-  getCalendarOps: (calendar: C) => DateModOps<C>,
-  plainMonthDaySlots: PlainMonthDaySlots<C>,
-  plainMonthDayFields: MonthDayFields,
-  bag: YearFields,
-): PlainDateSlots<C> {
-  const calendarSlot = plainMonthDaySlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag),
-    branding: PlainDateBranding,
-  }
-}
+export const toPlainDate = plainMonthDayToPlainDate

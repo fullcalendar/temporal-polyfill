@@ -3,19 +3,19 @@ import { ensureString, toInteger } from '../internal/cast'
 import { diffPlainTimes } from '../internal/diff'
 import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { formatPlainTimeIso } from '../internal/formatIso'
-import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/epochAndTime'
+import { compareIsoTimeFields } from '../internal/epochAndTime'
 import { parsePlainTime } from '../internal/parseIso'
-import { movePlainTime, moveTime } from '../internal/move'
+import { movePlainTime } from '../internal/move'
 import { Overflow } from '../internal/options'
 import { roundPlainTime } from '../internal/round'
-import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
 import { pluckProps } from '../internal/utils'
 import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
+import { DurationSlots, PlainTimeBranding, PlainTimeSlots } from '../internal/slots'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { PlainTimeBag, mergePlainTimeBag, refinePlainTimeBag } from '../internal/bag'
 import { plainTimesEqual } from '../internal/compare'
+import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
 
 export function create(
   isoHour: number = 0,
@@ -110,37 +110,6 @@ export function toJSON(slots: PlainTimeSlots): string {
   return toString(slots)
 }
 
-export function toZonedDateTime<C, TA, T, PA>(
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
-  refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots<C>,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: PlainTimeSlots,
-  options: { timeZone: TA, plainDate: PA },
-): ZonedDateTimeSlots<C, T> {
-  const plainDateSlots = refinePlainDateArg(options.plainDate)
-  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+export const toZonedDateTime = plainTimeToZonedDateTime
 
-  return {
-    epochNanoseconds: getSingleInstantFor(
-      timeZoneOps,
-      { ...plainDateSlots, ...slots },
-    ),
-    calendar: plainDateSlots.calendar,
-    timeZone: timeZoneSlot,
-    branding: ZonedDateTimeBranding,
-  }
-}
-
-export function toPlainDateTime<C>(
-  plainTimeSlots0: PlainTimeSlots,
-  plainDateSlots1: PlainDateSlots<C>,
-): PlainDateTimeSlots<C> {
-  return {
-    ...checkIsoDateTimeInBounds({
-      ...plainTimeSlots0,
-      ...plainDateSlots1,
-    }),
-    branding: PlainDateTimeBranding,
-  }
-}
+export const toPlainDateTime = plainTimeToPlainDateTime

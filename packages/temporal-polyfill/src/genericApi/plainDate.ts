@@ -15,6 +15,7 @@ import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateBag, refinePlainDateBag } from '../internal/bag'
 import { plainDatesEqual } from '../internal/compare'
+import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -117,66 +118,7 @@ export function toJSON<C extends IdLike>(
   return toString(plainDateSlots)
 }
 
-export function toZonedDateTime<C, TA, T, PA>(
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
-  refinePlainTimeArg: (plainTimeArg: PA) => IsoTimeFields,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  plainDateSlots: PlainDateSlots<C>,
-  options: { timeZone: TA, plainTime?: PA },
-): ZonedDateTimeSlots<C, T> {
-  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
-  const plainTimeArg = options.plainTime
-  const isoTimeFields = plainTimeArg !== undefined
-    ? refinePlainTimeArg(plainTimeArg)
-    : isoTimeFieldDefaults
-
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-
-  return {
-    calendar: plainDateSlots.calendar,
-    timeZone: timeZoneSlot,
-    epochNanoseconds: getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...isoTimeFields }),
-    branding: ZonedDateTimeBranding,
-  }
-}
-
-export function toPlainDateTime<C>(
-  plainDateSlots: PlainDateSlots<C>,
-  plainTimeFields: IsoTimeFields = isoTimeFieldDefaults,
-): PlainDateTimeSlots<C> {
-  return {
-    ...checkIsoDateTimeInBounds({
-      ...plainDateSlots,
-      ...plainTimeFields,
-    }),
-    branding: PlainDateTimeBranding,
-  }
-}
-
-export function toPlainYearMonth<C>(
-  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
-  plainDateSlots: { calendar: C },
-  plainDateFields: DateBag, // TODO: DateBag correct type?
-): PlainYearMonthSlots<C> {
-  const calendarSlot = plainDateSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertToPlainYearMonth(calendarOps, plainDateFields),
-    branding: PlainYearMonthBranding,
-  }
-}
-
-export function toPlainMonthDay<C>(
-  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps<C>,
-  plainDateSlots: { calendar: C },
-  plainDateFields: DateBag, // TODO: DateBag correct type?
-): PlainMonthDaySlots<C> {
-  const calendarSlot = plainDateSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertToPlainMonthDay(calendarOps, plainDateFields),
-    branding: PlainMonthDayBranding,
-  }
-}
+export const toZonedDateTime = plainDateToZonedDateTime
+export const toPlainDateTime = plainDateToPlainDateTime
+export const toPlainYearMonth = plainDateToPlainYearMonth
+export const toPlainMonthDay = plainDateToPlainMonthDay

@@ -1,8 +1,8 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
+import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
 import { ensureString, toBigInt } from '../internal/cast'
 import { bigIntToDayTimeNano } from '../internal/dayTimeNano'
-import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
+import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { parseZonedDateTime } from '../internal/parseIso'
@@ -12,13 +12,14 @@ import { roundZonedDateTime } from '../internal/round'
 import { SimpleTimeZoneOps, TimeZoneOps, computeHoursInDay, computeStartOfDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneOps'
 import { pluckProps } from '../internal/utils'
 import { DiffOptions, OverflowOptions, ZonedFieldOptions, prepareOptions } from '../internal/optionsRefine'
-import { IdLike, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/slots'
-import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
+import { IdLike, PlainDateSlots, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot } from '../internal/slots'
+import { DateModOps, DateRefineOps, DiffOps, MoveOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { diffZonedDateTimes } from '../internal/diff'
-import { ZonedDateTimeBag, convertToPlainMonthDay, convertToPlainYearMonth, mergeZonedDateTimeBag, refineZonedDateTimeBag } from '../internal/bag'
+import { ZonedDateTimeBag, mergeZonedDateTimeBag, refineZonedDateTimeBag } from '../internal/bag'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
+import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -231,80 +232,9 @@ export function toJSON<C extends IdLike, T extends IdLike>(
   return toString(getTimeZoneOps, zonedDateTimeSlots0)
 }
 
-export function toInstant(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>
-): InstantSlots {
-  return {
-    epochNanoseconds: zonedDateTimeSlots0.epochNanoseconds,
-    branding: InstantBranding,
-  }
-}
-
-export function toPlainDate<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-): PlainDateSlots<C> {
-  return {
-    ...pluckProps(
-      isoDateFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    ),
-    calendar: zonedDateTimeSlots0.calendar,
-    branding: PlainDateBranding,
-  }
-}
-
-export function toPlainTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-): PlainTimeSlots {
-  return {
-    ...pluckProps(
-      isoTimeFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    ),
-    branding: PlainTimeBranding,
-  }
-}
-
-export function toPlainDateTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-): PlainDateTimeSlots<C> {
-  return {
-    ...pluckProps(
-      isoDateTimeFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    ),
-    calendar: zonedDateTimeSlots0.calendar,
-    branding: PlainDateTimeBranding,
-  }
-}
-
-export function toPlainYearMonth<C>(
-  getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
-  zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
-): PlainYearMonthSlots<C> {
-  const calendarSlot = zonedDateTimeSlots0.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertToPlainYearMonth(calendarOps, zonedDateTimeFields),
-    branding: PlainYearMonthBranding,
-  }
-}
-
-export function toPlainMonthDay<C>(
-  getCalendarOps: (calendarSlot: C) => MonthDayRefineOps<C>,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
-  zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
-): PlainMonthDaySlots<C> {
-  const calendarSlot = zonedDateTimeSlots0.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertToPlainMonthDay(calendarOps, zonedDateTimeFields),
-    branding: PlainMonthDayBranding,
-  }
-}
+export const toInstant = zonedDateTimeToInstant
+export const toPlainDate = zonedDateTimeToPlainDate
+export const toPlainTime = zonedDateTimeToPlainTime
+export const toPlainDateTime = zonedDateTimeToPlainDateTime
+export const toPlainYearMonth = zonedDateTimeToPlainYearMonth
+export const toPlainMonthDay = zonedDateTimeToPlainMonthDay

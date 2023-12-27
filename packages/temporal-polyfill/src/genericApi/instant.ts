@@ -14,6 +14,7 @@ import { SimpleTimeZoneOps } from '../internal/timeZoneOps'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { compareInstants, instantsEqual } from '../internal/compare'
+import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime, instantToZonedDateTimeISO } from '../internal/convert'
 
 export function create(epochNano: bigint): InstantSlots {
   return {
@@ -30,33 +31,13 @@ export function fromString(s: string): InstantSlots {
   }
 }
 
-export function fromEpochSeconds(epochSec: number): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec))
-  }
-}
+export const fromEpochSeconds = epochSecToInstant
 
-export function fromEpochMilliseconds(epochMilli: number): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: checkEpochNanoInBounds(numberToDayTimeNano(epochMilli, nanoInMilli)),
-  }
-}
+export const fromEpochMilliseconds = epochMilliToInstant
 
-export function fromEpochMicroseconds(epochMicro: bigint): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro))
-  }
-}
+export const fromEpochMicroseconds = epochMicroToInstant
 
-export function fromEpochNanoseconds(epochNano: bigint): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
-  }
-}
+export const fromEpochNanoseconds = epochNanoToInstant
 
 export const add = moveInstant
 
@@ -99,22 +80,6 @@ export function toJSON<TA, T>(
   return toString(refineTimeZoneArg, getTimeZoneOps, instantSlots)
 }
 
-export function toZonedDateTimeISO<T>(
-  instantSlots: InstantSlots,
-  timeZoneSlot: T,
-): ZonedDateTimeSlots<string, T> {
-  return toZonedDateTime(instantSlots, timeZoneSlot, isoCalendarId)
-}
+export const toZonedDateTimeISO = instantToZonedDateTimeISO
 
-export function toZonedDateTime<C, T>(
-  instantSlots: InstantSlots,
-  timeZoneSlot: T,
-  calendarSlot: C,
-): ZonedDateTimeSlots<C, T> {
-  return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds: instantSlots.epochNanoseconds,
-    timeZone: timeZoneSlot,
-    calendar: calendarSlot,
-  }
-}
+export const toZonedDateTime = instantToZonedDateTime

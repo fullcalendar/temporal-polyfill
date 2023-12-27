@@ -9,12 +9,13 @@ import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { DiffOptions, OverflowOptions, prepareOptions } from '../internal/optionsRefine'
-import { DurationSlots, IdLike, PlainDateBranding, PlainDateSlots, PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
-import { DateModOps, YearMonthDiffOps, YearMonthModOps, YearMonthMoveOps, YearMonthRefineOps } from '../internal/calendarOps'
+import { DurationSlots, IdLike, PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
+import { YearMonthDiffOps, YearMonthModOps, YearMonthMoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { NativeYearMonthParseOps } from '../internal/calendarNative'
 import { movePlainYearMonth } from '../internal/move'
-import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMonthBag } from '../internal/bag'
+import { mergePlainYearMonthBag, refinePlainYearMonthBag } from '../internal/bag'
 import { plainYearMonthsEqual } from '../internal/compare'
+import { plainYearMonthToPlainDate } from '../internal/convert'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -124,17 +125,4 @@ export function toJSON(
   return toString(plainYearMonthSlots)
 }
 
-export function toPlainDate<C>(
-  getCalendarOps: (calendar: C) => DateModOps<C>,
-  plainYearMonthSlots: PlainYearMonthSlots<C>,
-  plainYearMonthFields: YearMonthFieldsIntl,
-  bag: { day: number },
-): PlainDateSlots<C> {
-  const calendarSlot = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag),
-    branding: PlainDateBranding,
-  }
-}
+export const toPlainDate = plainYearMonthToPlainDate
