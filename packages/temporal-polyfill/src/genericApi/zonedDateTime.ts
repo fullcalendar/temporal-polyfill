@@ -6,7 +6,7 @@ import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, i
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { parseZonedDateTime } from '../internal/parseIso'
-import { moveZonedEpochNano } from '../internal/move'
+import { moveZonedDateTime } from '../internal/move'
 import { OffsetDisambig } from '../internal/options'
 import { roundZonedDateTime } from '../internal/round'
 import { SimpleTimeZoneOps, TimeZoneOps, computeHoursInDay, computeStartOfDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneOps'
@@ -180,30 +180,7 @@ export function withCalendar<C, T>(
   return { ...zonedDateTimeSlots, calendar: calendarSlot }
 }
 
-export function add<C, T>(
-  getCalendarOps: (calendarSlot: C) => MoveOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  durationSlots: DurationFields,
-  options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): ZonedDateTimeSlots<C, T> {
-  // correct calling order. switch moveZonedEpochNano arg order?
-  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
-  const calendarOps = getCalendarOps(zonedDateTimeSlots.calendar)
-
-  const movedEpochNanoseconds = moveZonedEpochNano(
-    calendarOps,
-    timeZoneOps,
-    zonedDateTimeSlots.epochNanoseconds,
-    durationSlots,
-    options,
-  )
-
-  return {
-    ...zonedDateTimeSlots,
-    epochNanoseconds: movedEpochNanoseconds,
-  }
-}
+export const add = moveZonedDateTime
 
 export function subtract<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,

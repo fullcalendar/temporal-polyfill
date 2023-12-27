@@ -1,17 +1,16 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
-import { diffPlainTimes, diffTimes } from '../internal/diff'
+import { diffPlainTimes } from '../internal/diff'
 import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
-import { formatPlainTimeIso, formatTimeIso } from '../internal/formatIso'
+import { formatPlainTimeIso } from '../internal/formatIso'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/epochAndTime'
 import { parsePlainTime } from '../internal/parseIso'
-import { moveTime } from '../internal/move'
-import { Overflow, RoundingMode } from '../internal/options'
-import { roundTime } from '../internal/round'
+import { movePlainTime, moveTime } from '../internal/move'
+import { Overflow } from '../internal/options'
+import { roundPlainTime } from '../internal/round'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
-import { TimeUnit, Unit, UnitName } from '../internal/units'
-import { NumSign, pluckProps } from '../internal/utils'
-import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineRoundOptions, refineTimeDisplayOptions } from './optionsRefine'
+import { pluckProps } from '../internal/utils'
+import { DiffOptions, OverflowOptions } from './optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
@@ -74,15 +73,7 @@ export function withFields(
   }
 }
 
-export function add(
-  slots: PlainTimeSlots,
-  durationSlots: DurationFields,
-): PlainTimeSlots {
-  return {
-    ...moveTime(slots, durationSlots)[0],
-    branding: PlainTimeBranding,
-  }
-}
+export const add = movePlainTime
 
 export function subtract(
   slots: PlainTimeSlots,
@@ -107,18 +98,7 @@ export function since(
   return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options, true)
 }
 
-export function round(
-  slots: PlainTimeSlots,
-  options: RoundingOptions | UnitName,
-): PlainTimeSlots {
-  return {
-    ...roundTime(
-      slots,
-      ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
-    ),
-    branding: PlainTimeBranding,
-  }
-}
+export const round = roundPlainTime
 
 export const compare = compareIsoTimeFields
 

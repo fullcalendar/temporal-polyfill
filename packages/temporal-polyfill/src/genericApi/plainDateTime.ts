@@ -6,13 +6,11 @@ import { IsoDateTimeFields, isoDateFieldNamesDesc, isoTimeFieldNamesDesc, refine
 import { formatDateTimeIso, formatPlainDateTimeIso } from '../internal/formatIso'
 import { compareIsoDateTimeFields } from '../internal/epochAndTime'
 import { parsePlainDateTime } from '../internal/parseIso'
-import { moveDateTime } from '../internal/move'
-import { RoundingMode } from '../internal/options'
-import { roundDateTime } from '../internal/round'
+import { movePlainDateTime } from '../internal/move'
+import { roundPlainDateTime } from '../internal/round'
 import { TimeZoneOps } from '../internal/timeZoneOps'
-import { DayTimeUnit, UnitName } from '../internal/units'
 import { pluckProps } from '../internal/utils'
-import { DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
+import { DiffOptions, EpochDisambigOptions, OverflowOptions, prepareOptions, refineDateTimeDisplayOptions } from './optionsRefine'
 import { DurationSlots, IdLike, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot, isIdLikeEqual } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
@@ -115,23 +113,7 @@ export function withCalendar<C>(
   return { ...plainDateTimeSlots, calendar: calendarSlot }
 }
 
-export function add<C>(
-  getCalendarOps: (calendarSlot: C) => MoveOps,
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  durationSlots: DurationFields,
-  options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): PlainDateTimeSlots<C> {
-  return {
-    ...plainDateTimeSlots,
-    ...moveDateTime(
-      getCalendarOps(plainDateTimeSlots.calendar),
-      plainDateTimeSlots,
-      durationSlots,
-      options,
-    ),
-    branding: PlainDateTimeBranding, // YUCK. all because checkIsoDateTimeInBounds too liberal
-  }
-}
+export const add = movePlainDateTime
 
 export function subtract<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
@@ -160,21 +142,7 @@ export function since<C extends IdLike>(
   return diffPlainDateTimes(getCalendarOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
 }
 
-export function round<C>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  options: RoundingOptions | UnitName,
-): PlainDateTimeSlots<C> {
-  const roundedIsoFields = roundDateTime(
-    plainDateTimeSlots,
-    ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
-  )
-
-  return {
-    ...roundedIsoFields,
-    calendar: plainDateTimeSlots.calendar,
-    branding: PlainDateTimeBranding,
-  }
-}
+export const round = roundPlainDateTime
 
 export const compare = compareIsoDateTimeFields
 

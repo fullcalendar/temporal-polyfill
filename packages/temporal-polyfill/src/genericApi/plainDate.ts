@@ -3,12 +3,12 @@ import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { diffPlainDates } from '../internal/diff'
 import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, refineIsoDateArgs } from '../internal/calendarIsoFields'
-import { formatDateIso, formatPlainDateIso } from '../internal/formatIso'
+import { formatPlainDateIso } from '../internal/formatIso'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainDate } from '../internal/parseIso'
-import { moveDateEasy } from '../internal/move'
+import { movePlainDate } from '../internal/move'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions } from './optionsRefine'
+import { DiffOptions, OverflowOptions, prepareOptions } from './optionsRefine'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots, PlainDateBranding, IdLike, isIdLikeEqual, ZonedDateTimeBranding, PlainDateTimeBranding, PlainYearMonthBranding, PlainMonthDayBranding } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
@@ -76,22 +76,7 @@ export function withCalendar<C>(
   return { ...plainDateSlots, calendar: calendarSlot }
 }
 
-export function add<C>(
-  getCalendarOps: (calendarSlot: C) => MoveOps,
-  plainDateSlots: PlainDateSlots<C>,
-  durationSlots: DurationFields,
-  options?: OverflowOptions,
-): PlainDateSlots<C> {
-  return {
-    ...plainDateSlots,
-    ...moveDateEasy(
-      getCalendarOps(plainDateSlots.calendar),
-      plainDateSlots,
-      durationSlots,
-      options,
-    )
-  }
-}
+export const add = movePlainDate
 
 export function subtract<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,

@@ -38,6 +38,7 @@ export type MonthDayFieldsIntl = MonthDayFields // this is stupid
 
 // Simple Bag (all props optional)
 // -------------------------------------------------------------------------------------------------
+// TODO: move to bag.ts?
 
 export type YearMonthBag = Partial<YearMonthFieldsIntl>
 export type DateBag = Partial<DateFieldsIntl>

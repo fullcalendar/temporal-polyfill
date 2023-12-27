@@ -27,7 +27,7 @@ import {
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
 import { totalDayTimeNano } from './total'
-import { ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 import { RoundingOptions, refineRoundOptions } from '../genericApi/optionsRefine'
 
 export function roundZonedDateTime<C, T>(
@@ -76,6 +76,57 @@ export function roundZonedDateTime<C, T>(
     timeZone,
     calendar,
     branding: ZonedDateTimeBranding,
+  }
+}
+
+export function roundPlainDateTime<C>(
+  plainDateTimeSlots: PlainDateTimeSlots<C>,
+  options: RoundingOptions | UnitName,
+): PlainDateTimeSlots<C> {
+  const roundedIsoFields = roundDateTime(
+    plainDateTimeSlots,
+    ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
+  )
+
+  return {
+    ...roundedIsoFields,
+    calendar: plainDateTimeSlots.calendar,
+    branding: PlainDateTimeBranding,
+  }
+}
+
+export function roundPlainTime(
+  slots: PlainTimeSlots,
+  options: RoundingOptions | UnitName,
+): PlainTimeSlots {
+  return {
+    ...roundTime(
+      slots,
+      ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
+    ),
+    branding: PlainTimeBranding,
+  }
+}
+
+export function roundInstant(
+  instantSlots: InstantSlots,
+  options: RoundingOptions | UnitName
+): InstantSlots {
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions( // TODO: inline this
+    options,
+    Unit.Hour,
+    true, // solarMode
+  )
+
+  return {
+    branding: InstantBranding,
+    epochNanoseconds: roundDayTimeNano(
+      instantSlots.epochNanoseconds,
+      smallestUnit as TimeUnit,
+      roundingInc,
+      roundingMode,
+      true, // useDayOrigin
+    ),
   }
 }
 

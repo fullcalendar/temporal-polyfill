@@ -1,15 +1,13 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { toBigInt, toStringViaPrimitive } from '../internal/cast'
-import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
+import { bigIntToDayTimeNano, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffInstants } from '../internal/diff'
-import { formatEpochNanoIso, formatInstantIso } from '../internal/formatIso'
+import { formatInstantIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds } from '../internal/epochAndTime'
-import { moveEpochNano } from '../internal/move'
-import { roundDayTimeNano } from '../internal/round'
-import { utcTimeZoneId } from '../internal/timeZoneNative'
-import { TimeUnit, Unit, UnitName, nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
-import { NumSign } from '../internal/utils'
-import { DiffOptions, InstantDisplayOptions, RoundingOptions, refineInstantDisplayOptions, refineRoundOptions } from './optionsRefine'
+import { moveInstant } from '../internal/move'
+import { roundInstant } from '../internal/round'
+import { nanoInMicro, nanoInMilli, nanoInSec } from '../internal/units'
+import { DiffOptions } from './optionsRefine'
 import { DurationSlots, InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
 import { parseInstant } from '../internal/parseIso'
 import { SimpleTimeZoneOps } from '../internal/timeZoneOps'
@@ -60,15 +58,7 @@ export function fromEpochNanoseconds(epochNano: bigint): InstantSlots {
   }
 }
 
-export function add(
-  instantSlots: InstantSlots,
-  durationSlots: DurationFields,
-): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: moveEpochNano(instantSlots.epochNanoseconds, durationSlots),
-  }
-}
+export const add = moveInstant
 
 export function subtract(
   instantSlots: InstantSlots,
@@ -93,27 +83,7 @@ export function since(
   return diffInstants(instantSlots0, instantSlots1, options, true)
 }
 
-export function round(
-  instantSlots: InstantSlots,
-  options: RoundingOptions | UnitName
-): InstantSlots {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions( // TODO: inline this
-    options,
-    Unit.Hour,
-    true, // solarMode
-  )
-
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: roundDayTimeNano(
-      instantSlots.epochNanoseconds,
-      smallestUnit as TimeUnit,
-      roundingInc,
-      roundingMode,
-      true, // useDayOrigin
-    ),
-  }
-}
+export const round = roundInstant
 
 export const compare = compareInstants
 

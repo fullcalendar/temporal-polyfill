@@ -2,18 +2,17 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
 import { diffPlainYearMonth } from '../internal/diff'
-import { DurationFields, durationFieldDefaults } from '../internal/durationFields'
-import { negateDuration, queryDurationSign } from '../internal/durationMath'
+import { DurationFields } from '../internal/durationFields'
+import { negateDuration } from '../internal/durationMath'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
-import { formatIsoYearMonthFields, formatPlainYearMonthIso, formatPossibleDate } from '../internal/formatIso'
+import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainYearMonth } from '../internal/parseIso'
-import { NumSign } from '../internal/utils'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions } from './optionsRefine'
-import { DurationSlots, IdLike, PlainDateBranding, PlainDateSlots, PlainYearMonthBranding, PlainYearMonthSlots, isIdLikeEqual } from '../internal/slots'
+import { DiffOptions, OverflowOptions, prepareOptions } from './optionsRefine'
+import { DurationSlots, IdLike, PlainDateBranding, PlainDateSlots, PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { DateModOps, YearMonthDiffOps, YearMonthModOps, YearMonthMoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { NativeYearMonthParseOps } from '../internal/calendarNative'
-import { moveByIsoDays, moveToMonthStart } from '../internal/move'
+import { movePlainYearMonth } from '../internal/move'
 import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMonthBag } from '../internal/bag'
 import { plainYearMonthsEqual } from '../internal/compare'
 
@@ -81,34 +80,7 @@ export function withFields<C>(
   }
 }
 
-export function add<C>(
-  getCalendarOps: (calendar: C) => YearMonthMoveOps,
-  plainYearMonthSlots: PlainYearMonthSlots<C>,
-  durationFields: DurationFields,
-  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object,
-): PlainYearMonthSlots<C> {
-  const calendarSlot = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-  let isoDateFields = moveToMonthStart(calendarOps, plainYearMonthSlots)
-
-  // if moving backwards in time, set to last day of month
-  if (queryDurationSign(durationFields) < 0) {
-    isoDateFields = calendarOps.dateAdd(isoDateFields, { ...durationFieldDefaults, months: 1 })
-    isoDateFields = moveByIsoDays(isoDateFields, -1)
-  }
-
-  const movedIsoDateFields = calendarOps.dateAdd(
-    isoDateFields,
-    durationFields,
-    options,
-  )
-
-  return {
-    ...moveToMonthStart(calendarOps, movedIsoDateFields),
-    calendar: calendarSlot,
-    branding: PlainYearMonthBranding,
-  }
-}
+export const add = movePlainYearMonth
 
 export function subtract<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
