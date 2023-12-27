@@ -1,15 +1,14 @@
-import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
-import { DurationSlots } from '../genericApi/slotsGeneric'
+import { BrandingSlots, DurationBranding, DurationSlots, EpochSlots, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../internal/slots'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from '../internal/durationFields'
-import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
+import { IsoTimeFields, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/epochAndTime'
 import { identityFunc, mapPropNames } from '../internal/utils'
 import { getCalendarSlots } from './calendar'
 import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from '../genericApi/refiners'
 import { createSimpleOps } from './calendarSimpleOps'
 import { toPlainDateSlots } from './plainDate'
-import { BrandingSlots, EpochSlots, getSlots, getSpecificSlots } from './slotsForClasses'
+import { getSlots, getSpecificSlots } from './slotsForClasses'
 import { timeFieldNamesAsc } from '../internal/calendarFields'
 
 // For Calendar

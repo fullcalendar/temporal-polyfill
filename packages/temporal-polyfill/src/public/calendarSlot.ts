@@ -1,9 +1,9 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { isObjectlike } from '../internal/utils'
-import { refineCalendarSlotString } from '../genericApi/calendarSlotString'
 import { getSlots } from './slotsForClasses'
 import { CalendarArg } from './calendar'
 import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
+import { refineCalendarSlotString } from '../internal/slots'
 
 export type CalendarSlot = CalendarProtocol | string
 

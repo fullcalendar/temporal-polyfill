@@ -7,13 +7,11 @@ import { DayTimeNano } from '../internal/dayTimeNano'
 import { defineStringTag } from '../internal/utils'
 import { getSingleInstantFor } from '../internal/timeZoneOps'
 import { epochNanoToIso } from '../internal/epochAndTime'
-import { isTimeZoneSlotsEqual } from '../genericApi/timeZoneSlotString'
-import { InstantBranding, PlainDateTimeBranding, TimeZoneBranding } from '../genericApi/branding'
 
 // public
 import { refineCalendarSlot } from './calendarSlot'
 import { refineTimeZoneSlot } from './timeZoneSlot'
-import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
+import { createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
@@ -21,6 +19,7 @@ import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSl
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { ensureString } from '../internal/cast'
+import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, isTimeZoneSlotsEqual } from '../internal/slots'
 
 // TimeZone Class
 // -------------------------------------------------------------------------------------------------

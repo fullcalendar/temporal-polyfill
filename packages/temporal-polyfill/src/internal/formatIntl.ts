@@ -5,10 +5,10 @@ import { isoEpochOriginYear } from './calendarIso'
 import { epochNanoToMilli } from './epochAndTime'
 import { createLazyGenerator, excludePropsByName, hasAnyPropsByName } from './utils'
 import { getSingleInstantFor } from './timeZoneOps'
-import { IdLike, getId } from './cast'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { Formattable } from '../public/dateTimeFormat'
-import { BrandingSlots, getSlots } from '../public/slotsForClasses'
+import { getSlots } from '../public/slotsForClasses'
+import { BrandingSlots, IdLike, getId } from './slots'
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat

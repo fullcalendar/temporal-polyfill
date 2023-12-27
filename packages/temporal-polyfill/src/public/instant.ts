@@ -1,11 +1,10 @@
 import { LocalesArg, prepInstantFormat } from '../internal/formatIntl'
-import { DiffOptions, InstantDisplayOptions, RoundingOptions, prepareOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../genericApi/optionsRefine'
 import { ensureObjectlike } from '../internal/cast'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
-import { InstantSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
-import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
 import * as InstantFuncs from '../genericApi/instant'
 
 // public

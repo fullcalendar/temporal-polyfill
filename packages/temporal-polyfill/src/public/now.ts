@@ -1,8 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { createPropDescriptors, createTemporalNameDescriptors } from '../internal/utils'
-import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
-
-// public
 import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { Instant, createInstant } from './instant'
@@ -12,6 +9,7 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
 import { getCurrentEpochNanoseconds, getCurrentIsoDate, getCurrentIsoDateTime, getCurrentIsoTime, getCurrentTimeZoneId } from '../genericApi/now'
+import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../internal/slots'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),

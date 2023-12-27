@@ -1,4 +1,3 @@
-import { InstantBranding, PlainDateTimeBranding } from '../genericApi/branding'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
@@ -8,6 +7,7 @@ import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { ensureFunction, ensureNumber } from '../internal/cast'
 import { nanoInUtcDay } from '../internal/units'
+import { InstantBranding, PlainDateTimeBranding } from '../internal/slots'
 
 // Individual Adapters
 // -------------------------------------------------------------------------------------------------

@@ -26,19 +26,13 @@ import {
   Unit,
   milliInDay,
   nanoInUtcDay,
-  unitNameMap,
-  unitNamesAsc,
 } from './units'
 import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
 import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
-import { DurationSlots, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
+import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
 import { DiffOptions, prepareOptions, refineDiffOptions } from '../genericApi/optionsRefine'
-import { DurationBranding } from '../genericApi/branding'
-import { IdLike, ensureObjectlike } from './cast'
-import { getCommonCalendarSlot } from '../genericApi/calendarSlotString'
-import { getCommonTimeZoneSlot } from '../genericApi/timeZoneSlotString'
 
 export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,

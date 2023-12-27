@@ -1,5 +1,5 @@
+import { refineTimeZoneSlotString } from '../internal/slots'
 import { isObjectlike } from '../internal/utils'
-import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 import { getSlots } from './slotsForClasses'
 import { TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'

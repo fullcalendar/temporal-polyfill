@@ -1,5 +1,5 @@
-import { PlainDateBranding } from '../genericApi/branding'
 import { dateRefiners } from '../genericApi/refiners'
+import { PlainDateBranding } from '../internal/slots'
 import { IsoDateFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { Callable, mapProps } from '../internal/utils'

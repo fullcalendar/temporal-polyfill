@@ -3,10 +3,7 @@ import { ensureString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../genericApi/optionsRefine'
 import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
-import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
-
-// public
-import { BrandingSlots, createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
+import { createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { refineCalendarSlot } from './calendarSlot'
 import type { PlainDateTime } from './plainDateTime'
 import type { ZonedDateTime } from './zonedDateTime'
@@ -20,6 +17,7 @@ import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { normalizeCalendarId } from '../internal/parseIso'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../internal/slots'
 
 // Calendar Class
 // -------------------------------------------------------------------------------------------------

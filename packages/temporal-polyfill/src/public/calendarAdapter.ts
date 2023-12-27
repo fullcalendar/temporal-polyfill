@@ -1,4 +1,3 @@
-import { DurationBranding, PlainDateBranding } from '../genericApi/branding'
 import { DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
@@ -12,6 +11,7 @@ import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './calendarSlot'
+import { DurationBranding, PlainDateBranding } from '../internal/slots'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
