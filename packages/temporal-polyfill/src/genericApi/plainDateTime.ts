@@ -13,7 +13,7 @@ import { DurationSlots, IdLike, PlainDateSlots, PlainDateTimeBranding, PlainDate
 import { DateModOps, DateRefineOps, DiffOps, MoveOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
-import { mergePlainDateTimeBag, refinePlainDateTimeBag } from '../internal/bag'
+import { mergePlainDateTimeBag, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
 import { plainDateTimesEqual } from '../internal/compare'
 import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 
@@ -41,27 +41,7 @@ export const fromString = parsePlainDateTime
 
 export const fromFields = refinePlainDateTimeBag
 
-export function withFields<C>(
-  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  initialFields: DateTimeFields & Partial<EraYearFields>,
-  modFields: DateTimeBag,
-  options?: OverflowOptions,
-): PlainDateTimeSlots<C> {
-  const optionsCopy = prepareOptions(options)
-  const calendarSlot = plainDateTimeSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...mergePlainDateTimeBag(
-      calendarOps,
-      initialFields,
-      modFields,
-      optionsCopy,
-    ),
-    branding: PlainDateTimeBranding,
-  }
-}
+export const withFields = plainDateTimeWithFields
 
 export function withPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,

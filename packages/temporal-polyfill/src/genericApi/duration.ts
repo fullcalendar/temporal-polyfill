@@ -1,5 +1,5 @@
 import { DurationBag } from '../internal/calendarFields'
-import { ensureString, toStrictInteger } from '../internal/cast'
+import { toStrictInteger } from '../internal/cast'
 import { MarkerSlots, absDuration, addToDuration, checkDurationFields, negateDuration, queryDurationSign, roundDuration } from '../internal/durationMath'
 import { compareDurations } from '../internal/compare'
 import { totalDuration } from '../internal/total'

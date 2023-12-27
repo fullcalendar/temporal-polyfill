@@ -13,7 +13,7 @@ import { DurationSlots, IdLike, PlainYearMonthBranding, PlainYearMonthSlots } fr
 import { YearMonthDiffOps, YearMonthModOps, YearMonthMoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { NativeYearMonthParseOps } from '../internal/calendarNative'
 import { movePlainYearMonth } from '../internal/move'
-import { mergePlainYearMonthBag, refinePlainYearMonthBag } from '../internal/bag'
+import { mergePlainYearMonthBag, plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bag'
 import { plainYearMonthsEqual } from '../internal/compare'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 
@@ -46,22 +46,7 @@ export const fromString = parsePlainYearMonth
 
 export const fromFields = refinePlainYearMonthBag
 
-export function withFields<C>(
-  getCalendarOps: (calendar: C) => YearMonthModOps<C>,
-  plainYearMonthSlots: PlainYearMonthSlots<C>,
-  initialFields: YearMonthFieldsIntl,
-  mod: YearMonthBag,
-  options?: OverflowOptions,
-): PlainYearMonthSlots<C> {
-  const optionsCopy = prepareOptions(options)
-  const calendarSlot = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...mergePlainYearMonthBag(calendarOps, initialFields, mod, optionsCopy),
-    branding: PlainYearMonthBranding,
-  }
-}
+export const withFields = plainYearMonthWithFields
 
 export const add = movePlainYearMonth
 

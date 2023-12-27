@@ -10,7 +10,7 @@ import { OverflowOptions, prepareOptions } from '../internal/optionsRefine'
 import { IdLike, PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
 import { NativeMonthDayParseOps } from '../internal/calendarNative'
-import { mergePlainMonthDayBag, refinePlainMonthDayBag } from '../internal/bag'
+import { mergePlainMonthDayBag, plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { plainMonthDayToPlainDate } from '../internal/convert'
 
@@ -43,22 +43,7 @@ export const fromString = parsePlainMonthDay
 
 export const fromFields = refinePlainMonthDayBag
 
-export function withFields<C>(
-  getCalendarOps: (calendarSlot: C) => MonthDayModOps<C>,
-  plainMonthDaySlots: PlainMonthDaySlots<C>,
-  initialFields: MonthDayFields,
-  modFields: MonthDayBag,
-  options?: OverflowOptions,
-): PlainMonthDaySlots<C> {
-  const optionsCopy = prepareOptions(options)
-  const calendarSlot = plainMonthDaySlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...mergePlainMonthDayBag(calendarOps, initialFields, modFields, optionsCopy),
-    branding: PlainMonthDayBranding,
-  }
-}
+export const withFields = plainMonthDayWithFields
 
 export const equals = plainMonthDaysEqual
 

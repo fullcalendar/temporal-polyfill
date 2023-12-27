@@ -13,7 +13,7 @@ import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainTimeBranding, PlainTimeSlots } from '../internal/slots'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
-import { PlainTimeBag, mergePlainTimeBag, refinePlainTimeBag } from '../internal/bag'
+import { PlainTimeBag, mergePlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
 import { plainTimesEqual } from '../internal/compare'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
 
@@ -49,16 +49,7 @@ export function getISOFields(slots: PlainTimeSlots): IsoTimeFields {
   return pluckProps(isoTimeFieldNamesAlpha, slots)
 }
 
-export function withFields(
-  initialFields: TimeFields, // NOTE: does not accept PlainTimeFields!
-  mod: TimeBag,
-  options?: OverflowOptions,
-): PlainTimeSlots {
-  return {
-    ...mergePlainTimeBag(initialFields, mod, options),
-    branding: PlainTimeBranding,
-  }
-}
+export const withFields = plainTimeWithFields
 
 export const add = movePlainTime
 

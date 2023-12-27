@@ -17,7 +17,7 @@ import { DateModOps, DateRefineOps, DiffOps, MoveOps } from '../internal/calenda
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { diffZonedDateTimes } from '../internal/diff'
-import { ZonedDateTimeBag, mergeZonedDateTimeBag, refineZonedDateTimeBag } from '../internal/bag'
+import { ZonedDateTimeBag, mergeZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 
@@ -54,30 +54,7 @@ export function getISOFields<C, T>(
   }
 }
 
-export function withFields<C, T>(
-  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  initialFields: DateTimeFields & Partial<EraYearFields>, // TODO: allow offset
-  modFields: DateTimeBag,
-  options?: ZonedFieldOptions,
-): ZonedDateTimeSlots<C, T> {
-  const optionsCopy = prepareOptions(options)
-  const { calendar, timeZone } = zonedDateTimeSlots
-
-  return {
-    calendar,
-    timeZone,
-    epochNanoseconds: mergeZonedDateTimeBag(
-      getCalendarOps(calendar),
-      getTimeZoneOps(timeZone),
-      initialFields,
-      modFields,
-      optionsCopy,
-    ),
-    branding: ZonedDateTimeBranding,
-  }
-}
+export const withFields = zonedDateTimeWithFields
 
 export function withPlainTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,

@@ -1,5 +1,5 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { DateBag, DateTimeBag, DayFields, DurationBag, EraYearOrYear, MonthDayBag, MonthFields, TimeBag, YearFields, YearMonthBag, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAsc, timeFieldsToIso, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
+import { DateBag, DateFields, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAsc, timeFieldsToIso, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarId, getCalendarLeapMonthMeta, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './calendarIsoFields'
@@ -7,7 +7,7 @@ import { isoEpochFirstLeapYear } from './calendarIso'
 import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { Callable, clampEntity, pluckProps } from './utils'
-import { EpochDisambigOptions, OverflowOptions, ZonedFieldOptions, overflowMapNames, refineEpochDisambigOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
+import { EpochDisambigOptions, OverflowOptions, ZonedFieldOptions, overflowMapNames, prepareOptions, refineEpochDisambigOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
@@ -27,6 +27,117 @@ export type PlainMonthDayBag<C> = MonthDayBag & { calendar?: C }
 
 const timeFieldNamesAlpha = timeFieldNamesAsc.slice().sort()
 const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
+
+// -------------------------------------------------------------------------------------------------
+
+export function plainDateWithFields<C>(
+  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
+  plainDateSlots: PlainDateSlots<C>,
+  initialFields: DateFields & Partial<EraYearFields>,
+  modFields: DateBag,
+  options?: OverflowOptions,
+): PlainDateSlots<C> {
+  const optionsCopy = prepareOptions(options)
+  const calendarSlot = plainDateSlots.calendar
+  const calendarOps = getCalendarOps(calendarSlot)
+
+  return {
+    ...mergePlainDateBag(calendarOps, initialFields, modFields, optionsCopy),
+    branding: PlainDateBranding,
+  }
+}
+
+export function plainMonthDayWithFields<C>(
+  getCalendarOps: (calendarSlot: C) => MonthDayModOps<C>,
+  plainMonthDaySlots: PlainMonthDaySlots<C>,
+  initialFields: MonthDayFields,
+  modFields: MonthDayBag,
+  options?: OverflowOptions,
+): PlainMonthDaySlots<C> {
+  const optionsCopy = prepareOptions(options)
+  const calendarSlot = plainMonthDaySlots.calendar
+  const calendarOps = getCalendarOps(calendarSlot)
+
+  return {
+    ...mergePlainMonthDayBag(calendarOps, initialFields, modFields, optionsCopy),
+    branding: PlainMonthDayBranding,
+  }
+}
+
+export function plainYearMonthWithFields<C>(
+  getCalendarOps: (calendar: C) => YearMonthModOps<C>,
+  plainYearMonthSlots: PlainYearMonthSlots<C>,
+  initialFields: YearMonthFieldsIntl,
+  mod: YearMonthBag,
+  options?: OverflowOptions,
+): PlainYearMonthSlots<C> {
+  const optionsCopy = prepareOptions(options)
+  const calendarSlot = plainYearMonthSlots.calendar
+  const calendarOps = getCalendarOps(calendarSlot)
+
+  return {
+    ...mergePlainYearMonthBag(calendarOps, initialFields, mod, optionsCopy),
+    branding: PlainYearMonthBranding,
+  }
+}
+
+export function plainDateTimeWithFields<C>(
+  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
+  plainDateTimeSlots: PlainDateTimeSlots<C>,
+  initialFields: DateTimeFields & Partial<EraYearFields>,
+  modFields: DateTimeBag,
+  options?: OverflowOptions,
+): PlainDateTimeSlots<C> {
+  const optionsCopy = prepareOptions(options)
+  const calendarSlot = plainDateTimeSlots.calendar
+  const calendarOps = getCalendarOps(calendarSlot)
+
+  return {
+    ...mergePlainDateTimeBag(
+      calendarOps,
+      initialFields,
+      modFields,
+      optionsCopy,
+    ),
+    branding: PlainDateTimeBranding,
+  }
+}
+
+export function zonedDateTimeWithFields<C, T>(
+  getCalendarOps: (calendarSlot: C) => DateModOps<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+  initialFields: DateTimeFields & Partial<EraYearFields>, // TODO: allow offset
+  modFields: DateTimeBag,
+  options?: ZonedFieldOptions,
+): ZonedDateTimeSlots<C, T> {
+  const optionsCopy = prepareOptions(options)
+  const { calendar, timeZone } = zonedDateTimeSlots
+
+  return {
+    calendar,
+    timeZone,
+    epochNanoseconds: mergeZonedDateTimeBag(
+      getCalendarOps(calendar),
+      getTimeZoneOps(timeZone),
+      initialFields,
+      modFields,
+      optionsCopy,
+    ),
+    branding: ZonedDateTimeBranding,
+  }
+}
+
+export function plainTimeWithFields(
+  initialFields: TimeFields, // NOTE: does not accept PlainTimeFields!
+  mod: TimeBag,
+  options?: OverflowOptions,
+): PlainTimeSlots {
+  return {
+    ...mergePlainTimeBag(initialFields, mod, options),
+    branding: PlainTimeBranding,
+  }
+}
 
 // -------------------------------------------------------------------------------------------------
 
