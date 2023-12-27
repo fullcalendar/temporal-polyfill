@@ -3,9 +3,10 @@ import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calend
 import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
-import { nanoInUtcDay } from './units'
+import { nanoInHour, nanoInUtcDay } from './units'
 import { createLazyGenerator } from './utils'
 import { moveByIsoDays } from './move'
+import { ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
 export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
@@ -196,4 +197,46 @@ export function zonedEpochNanoToIso(
 ): IsoDateTimeFields {
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   return epochNanoToIso(epochNano, offsetNano)
+}
+
+export function computeStartOfDay<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+): ZonedDateTimeSlots<C, T> {
+  let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
+  const timeZoneOps = getTimeZoneOps(timeZone)
+
+  const isoFields = {
+    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
+    ...isoTimeFieldDefaults,
+  }
+
+  epochNanoseconds = getMatchingInstantFor(
+    timeZoneOps,
+    isoFields,
+    undefined, // offsetNanoseconds
+    false, // z
+    OffsetDisambig.Reject,
+    EpochDisambig.Compat,
+    true, // fuzzy
+  )
+
+  return {
+    branding: ZonedDateTimeBranding,
+    epochNanoseconds,
+    timeZone,
+    calendar,
+  }
+}
+
+export function computeHoursInDay<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+): number {
+  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
+
+  return computeNanosecondsInDay(
+    timeZoneOps,
+    zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
+  ) / nanoInHour
 }

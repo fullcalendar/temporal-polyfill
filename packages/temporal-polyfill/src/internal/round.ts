@@ -11,9 +11,9 @@ import {
 } from './durationFields'
 import { DiffMarkers, MarkerToEpochNano, MoveMarker, queryDurationSign } from './durationMath'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './calendarIsoFields'
-import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
-import { RoundingMode, roundingModeFuncs } from './options'
-import { TimeZoneOps, computeNanosecondsInDay } from './timeZoneOps'
+import { checkIsoDateTimeInBounds, epochNanoToIso, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
+import { EpochDisambig, OffsetDisambig, RoundingMode, roundingModeFuncs } from './options'
+import { TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneOps'
 import {
   nanoInMinute,
   nanoInUtcDay,
@@ -22,10 +22,62 @@ import {
   DayTimeUnit,
   TimeUnit,
   givenFieldsToDayTimeNano,
+  UnitName,
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
 import { totalDayTimeNano } from './total'
+import { ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { RoundingOptions, refineRoundOptions } from '../genericApi/optionsRefine'
+
+export function roundZonedDateTime<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+  options: RoundingOptions | UnitName,
+): ZonedDateTimeSlots<C, T> {
+  let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
+  const timeZoneOps = getTimeZoneOps(timeZone)
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
+
+  // short circuit (elsewhere? consolidate somehow?)
+  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
+    return zonedDateTimeSlots
+  }
+
+  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
+  let isoDateTimeFields = {
+    ...epochNanoToIso(epochNanoseconds, offsetNano),
+    calendar, // repeat below?
+  }
+
+  isoDateTimeFields = {
+    calendar,
+    ...roundDateTime(
+      isoDateTimeFields,
+      smallestUnit as DayTimeUnit,
+      roundingInc,
+      roundingMode,
+      timeZoneOps,
+    )
+  }
+
+  epochNanoseconds = getMatchingInstantFor(
+    timeZoneOps,
+    isoDateTimeFields,
+    offsetNano,
+    false, // z
+    OffsetDisambig.Prefer, // keep old offsetNano if possible
+    EpochDisambig.Compat,
+    true, // fuzzy
+  )
+
+  return {
+    epochNanoseconds,
+    timeZone,
+    calendar,
+    branding: ZonedDateTimeBranding,
+  }
+}
 
 // Rounding Dates
 // -------------------------------------------------------------------------------------------------

@@ -1,18 +1,17 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
 import { ensureString, toBigInt } from '../internal/cast'
-import { bigIntToDayTimeNano, compareDayTimeNanos } from '../internal/dayTimeNano'
-import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
+import { bigIntToDayTimeNano } from '../internal/dayTimeNano'
+import { IsoDateTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
-import { checkEpochNanoInBounds, epochNanoToIso } from '../internal/epochAndTime'
+import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { parseZonedDateTime } from '../internal/parseIso'
 import { moveZonedEpochNano } from '../internal/move'
-import { EpochDisambig, OffsetDisambig } from '../internal/options'
-import { roundDateTime } from '../internal/round'
-import { SimpleTimeZoneOps, TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneOps'
-import { DayTimeUnit, Unit, UnitName, nanoInHour } from '../internal/units'
-import { NumSign, pluckProps } from '../internal/utils'
-import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, prepareOptions, refineRoundOptions, refineZonedDateTimeDisplayOptions } from './optionsRefine'
+import { OffsetDisambig } from '../internal/options'
+import { roundZonedDateTime } from '../internal/round'
+import { SimpleTimeZoneOps, TimeZoneOps, computeHoursInDay, computeStartOfDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneOps'
+import { pluckProps } from '../internal/utils'
+import { DiffOptions, OverflowOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, prepareOptions, refineZonedDateTimeDisplayOptions } from './optionsRefine'
 import { IdLike, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
@@ -236,96 +235,11 @@ export function since<C extends IdLike, T extends IdLike>(
   return diffZonedDateTimes(getCalendarOps, getTimeZoneOps, zonedDateTimeSlots0, zonedDateTimeSlots1, options, true)
 }
 
-export function round<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  options: RoundingOptions | UnitName,
-): ZonedDateTimeSlots<C, T> {
-  let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const timeZoneOps = getTimeZoneOps(timeZone)
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
+export const round = roundZonedDateTime
 
-  // short circuit (elsewhere? consolidate somehow?)
-  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
-    return zonedDateTimeSlots
-  }
+export const startOfDay = computeStartOfDay
 
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
-  let isoDateTimeFields = {
-    ...epochNanoToIso(epochNanoseconds, offsetNano),
-    calendar, // repeat below?
-  }
-
-  isoDateTimeFields = {
-    calendar,
-    ...roundDateTime(
-      isoDateTimeFields,
-      smallestUnit as DayTimeUnit,
-      roundingInc,
-      roundingMode,
-      timeZoneOps,
-    )
-  }
-
-  epochNanoseconds = getMatchingInstantFor(
-    timeZoneOps,
-    isoDateTimeFields,
-    offsetNano,
-    false, // z
-    OffsetDisambig.Prefer, // keep old offsetNano if possible
-    EpochDisambig.Compat,
-    true, // fuzzy
-  )
-
-  return {
-    epochNanoseconds,
-    timeZone,
-    calendar,
-    branding: ZonedDateTimeBranding,
-  }
-}
-
-export function startOfDay<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-): ZonedDateTimeSlots<C, T> {
-  let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const timeZoneOps = getTimeZoneOps(timeZone)
-
-  const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
-    ...isoTimeFieldDefaults,
-  }
-
-  epochNanoseconds = getMatchingInstantFor(
-    timeZoneOps,
-    isoFields,
-    undefined, // offsetNanoseconds
-    false, // z
-    OffsetDisambig.Reject,
-    EpochDisambig.Compat,
-    true, // fuzzy
-  )
-
-  return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds,
-    timeZone,
-    calendar,
-  }
-}
-
-export function hoursInDay<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-): number {
-  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
-
-  return computeNanosecondsInDay(
-    timeZoneOps,
-    zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
-  ) / nanoInHour
-}
+export const hoursInDay = computeHoursInDay
 
 export const compare = compareZonedDateTimes
 
