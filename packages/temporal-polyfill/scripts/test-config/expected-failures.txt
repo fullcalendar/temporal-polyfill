@@ -192,7 +192,7 @@ built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor
 built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 
-# PRECISION
+# PRECISION (TimeZone subclass/protocol only)
 # we don't support hours-in-day greater than 10000000xxx (line 119 in the test),
 # which can happen if 1-day-apart TimeZone::getPossibleInstantsFor calls give results wildly apart.
 # results in slightly-less-precise-than-desirable (already ridiculous) .hoursInDay values

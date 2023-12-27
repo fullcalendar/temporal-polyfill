@@ -3,8 +3,8 @@ import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
 import {
   DurationFields,
   durationFieldNamesAsc,
-  negateDuration,
 } from './durationFields'
+import { negateDuration } from './durationMath'
 import {
   IsoDateFields,
   IsoDateTimeFields,

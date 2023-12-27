@@ -16,7 +16,8 @@ import { PlainTimeBag } from './bagGeneric'
 import { mergePlainTimeBag, refinePlainTimeBag } from './bagGeneric'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from './branding'
-import { DurationFields, negateDuration } from '../internal/durationFields'
+import { DurationFields } from '../internal/durationFields'
+import { negateDuration } from '../internal/durationMath'
 
 export function create(
   isoHour: number = 0,

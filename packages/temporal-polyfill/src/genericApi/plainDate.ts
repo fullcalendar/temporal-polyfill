@@ -16,7 +16,8 @@ import { convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateBag, ref
 import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots } from './slotsGeneric'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
-import { DurationFields, negateDuration } from '../internal/durationFields'
+import { DurationFields } from '../internal/durationFields'
+import { negateDuration } from '../internal/durationMath'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,

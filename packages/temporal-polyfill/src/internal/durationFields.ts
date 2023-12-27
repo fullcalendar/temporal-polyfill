@@ -1,5 +1,5 @@
-import { toStrictInteger } from './cast'
-import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
+import { DayTimeNano } from './dayTimeNano'
+import { durationHasDateParts } from './durationMath'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -11,8 +11,6 @@ import {
   unitNanoMap,
 } from './units'
 import {
-  NumSign,
-  createLazyGenerator,
   mapPropNamesToConstant,
   mapPropNamesToIndex,
 } from './utils'
@@ -94,73 +92,18 @@ export function nanoToDurationTimeFields(
   return nanoToGivenFields(nano, largestUnit, durationFieldNamesAsc as (keyof DurationTimeFields)[])
 }
 
-// Field Math
-// -------------------------------------------------------------------------------------------------
-
-export function addDayTimeDuration(
-  a: DurationFields,
-  b: DurationFields,
-  sign: NumSign,
-  largestUnit: DayTimeUnit
+/*
+Returns all units
+*/
+export function clearDurationFields(
+  durationFields: DurationFields,
+  largestUnitToClear: Unit,
 ): DurationFields {
-  const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
-  const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
-  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, sign)
+  const copy = { ...durationFields }
 
-  if (!Number.isFinite(combined[0])) {
-    throw new RangeError('Too much')
+  for (let unit: Unit = Unit.Nanosecond; unit <= largestUnitToClear; unit++) {
+    copy[durationFieldNamesAsc[unit]] = 0
   }
 
-  return {
-    ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(combined, largestUnit)
-  }
-}
-
-export function negateDuration(fields: DurationFields): DurationFields {
-  const res = {} as DurationFields
-
-  for (const fieldName of durationFieldNamesAsc) {
-    res[fieldName] = fields[fieldName] * -1 || 0
-  }
-
-  return res
-}
-
-export function absDuration(fields: DurationFields): DurationFields {
-  if (queryDurationSign(fields) === -1) {
-    return negateDuration(fields)
-  }
-  return fields
-}
-
-export function durationHasDateParts(fields: DurationFields): boolean {
-  return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))
-}
-
-function computeDurationSign(
-  fields: DurationFields,
-  fieldNames = durationFieldNamesAsc,
-): NumSign {
-  let sign: NumSign = 0
-
-  for (const fieldName of fieldNames) {
-    const fieldSign = Math.sign(fields[fieldName]) as NumSign
-
-    if (fieldSign) {
-      if (sign && sign !== fieldSign) {
-        throw new RangeError('Cant have mixed signs')
-      }
-      sign = fieldSign
-    }
-  }
-
-  return sign
-}
-
-export const queryDurationSign = createLazyGenerator(computeDurationSign, WeakMap)
-
-export function checkDurationFields(fields: DurationFields): DurationFields {
-  queryDurationSign(fields) // check and prime cache
-  return fields
+  return copy
 }

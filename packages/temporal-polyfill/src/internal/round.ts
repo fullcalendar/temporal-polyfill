@@ -7,8 +7,9 @@ import {
   durationFieldsToDayTimeNano,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
-  queryDurationSign,
+  clearDurationFields,
 } from './durationFields'
+import { MarkerToEpochNano, MoveMarker, queryDurationSign } from './durationMath'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './calendarIsoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
 import { RoundingMode, roundingModeFuncs } from './options'
@@ -23,7 +24,6 @@ import {
   givenFieldsToDayTimeNano,
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
-import { MarkerToEpochNano, MoveMarker } from './marker'
 import { moveByIsoDays } from './move'
 
 // Rounding Dates
@@ -257,6 +257,14 @@ export function roundDayTimeNano(
   )
 }
 
+// weird place?
+export function totalDayTimeNano(
+  dayTimeNano: DayTimeNano,
+  totalUnit: DayTimeUnit,
+): number {
+  return dayTimeNanoToNumber(dayTimeNano, unitNanoMap[totalUnit], true) // exact
+}
+
 export function roundDayTimeNanoByInc(
   dayTimeNano: DayTimeNano,
   nanoInc: number, // REQUIRED: not larger than a day
@@ -280,58 +288,6 @@ export function roundDayTimeNanoByInc(
 
 function roundWithMode(num: number, roundingMode: RoundingMode): number {
   return roundingModeFuncs[roundingMode](num)
-}
-
-// Total Duration
-// -------------------------------------------------------------------------------------------------
-
-export function totalDayTimeDuration(
-  durationFields: DurationFields,
-  totalUnit: DayTimeUnit,
-): number {
-  return totalDayTimeNano(
-    durationFieldsToDayTimeNano(durationFields, Unit.Day),
-    totalUnit,
-  )
-}
-
-export function totalDayTimeNano(
-  dayTimeNano: DayTimeNano,
-  totalUnit: DayTimeUnit,
-): number {
-  return dayTimeNanoToNumber(dayTimeNano, unitNanoMap[totalUnit], true) // exact
-}
-
-export function totalRelativeDuration<M>(
-  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
-  endEpochNano: DayTimeNano,
-  totalUnit: Unit,
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
-): number {
-  const sign = queryDurationSign(durationFields)
-
-  const [epochNano0, epochNano1] = clampRelativeDuration(
-    clearDurationFields(durationFields, totalUnit - 1),
-    totalUnit,
-    sign,
-    // marker system...
-    marker,
-    markerToEpochNano,
-    moveMarker,
-  )
-
-  // TODO: more DRY
-  const frac =
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) /
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
-  if (!Number.isFinite(frac)) {
-    throw new RangeError('Faulty Calendar rounding')
-  }
-
-  return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
 }
 
 // Nudge
@@ -373,19 +329,6 @@ function nudgeDurationDayTime(
     addDayTimeNanos(endEpochNano, nanoDiff),
     expandedBigUnit,
   ]
-}
-
-// TODO: DRY
-function getLargestDurationUnit(fields: DurationFields): Unit {
-  let unit: Unit = Unit.Year
-
-  for (; unit > Unit.Nanosecond; unit--) {
-    if (fields[durationFieldNamesAsc[unit]]) {
-      break
-    }
-  }
-
-  return unit
 }
 
 /*
@@ -555,7 +498,7 @@ function bubbleRelativeDuration<M>(
   return durationFields
 }
 
-function clampRelativeDuration<M>(
+export function clampRelativeDuration<M>(
   durationFields: DurationFields,
   clampUnit: Unit,
   clampDistance: number,
@@ -573,20 +516,4 @@ function clampRelativeDuration<M>(
   const epochNano0 = markerToEpochNano(marker0)
   const epochNano1 = markerToEpochNano(marker1)
   return [epochNano0, epochNano1]
-}
-
-/*
-Returns all units
-*/
-function clearDurationFields(
-  durationFields: DurationFields,
-  largestUnitToClear: Unit,
-): DurationFields {
-  const copy = { ...durationFields }
-
-  for (let unit: Unit = Unit.Nanosecond; unit <= largestUnitToClear; unit++) {
-    copy[durationFieldNamesAsc[unit]] = 0
-  }
-
-  return copy
 }

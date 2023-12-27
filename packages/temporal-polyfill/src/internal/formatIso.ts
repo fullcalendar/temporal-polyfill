@@ -1,6 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
-import { DurationFields, absDuration, durationFieldNamesAsc, negateDuration, queryDurationSign } from './durationFields'
+import { DurationFields, durationFieldNamesAsc } from './durationFields'
+import { absDuration, negateDuration, queryDurationSign } from './durationMath'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './calendarIsoFields'
 import { epochNanoToIso } from './epochAndTime'
 import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './options'

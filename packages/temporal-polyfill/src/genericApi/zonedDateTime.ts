@@ -20,7 +20,8 @@ import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, P
 import { getCommonTimeZoneSlot, isTimeZoneSlotsEqual } from './timeZoneSlotString'
 import { getCommonCalendarSlot, getPreferredCalendarSlot } from './calendarSlotString'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
-import { DurationFields, negateDuration } from '../internal/durationFields'
+import { DurationFields } from '../internal/durationFields'
+import { negateDuration } from '../internal/durationMath'
 import { diffZonedDateTimes } from '../internal/diff'
 
 export function create<CA, C, TA, T>(

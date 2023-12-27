@@ -4,22 +4,28 @@ import {
   TimeDisplayOptions,
   TotalUnitOptionsWithRel,
 } from '../genericApi/optionsRefine'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
+import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
 import * as DurationFuncs from '../genericApi/duration'
-import { DurationBranding } from '../genericApi/branding'
-import { DurationSlots } from '../genericApi/slotsGeneric'
-
-// public
-import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
+import { DurationBranding, PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
+import { BrandingSlots, createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { durationGettersMethods, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
-import { refinePublicRelativeTo } from './markerRefine'
-import { createDiffOps } from './calendarOpsQuery'
+import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
 import { createTimeZoneOps } from './timeZoneOpsQuery'
 import { LocalesArg } from '../internal/formatIntl'
+import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
+import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
+import { MarkerSlots } from '../internal/durationMath'
+import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
+import { ZonedDateTimeBag, refineMaybeZonedDateTimeBag } from '../genericApi/bagGeneric'
+import { CalendarArg } from './calendar'
+import { TimeZoneArg } from './timeZone'
+import { ensureString } from '../internal/cast'
+import { parseZonedOrPlainDateTime } from '../internal/parseIso'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -187,4 +193,35 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
   }
 
   return DurationFuncs.fromString(arg)
+}
+
+function refinePublicRelativeTo(
+  relativeTo: ZonedDateTimeArg | PlainDateArg | undefined,
+): MarkerSlots<CalendarSlot, TimeZoneSlot> | undefined {
+  if (relativeTo !== undefined) {
+    if (isObjectlike(relativeTo)) {
+      const slots = (getSlots(relativeTo) || {}) as Partial<BrandingSlots>
+
+      switch (slots.branding) {
+        case ZonedDateTimeBranding:
+        case PlainDateBranding:
+          return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
+
+        case PlainDateTimeBranding:
+          return pluckProps([...isoDateFieldNamesDesc, 'calendar'], slots as any)
+      }
+
+      const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!
+      const res = refineMaybeZonedDateTimeBag(
+        createDateRefineOps(calendar),
+        refineTimeZoneSlot,
+        createTimeZoneOps,
+        relativeTo as unknown as ZonedDateTimeBag<CalendarArg, TimeZoneArg>, // !!!
+      )
+
+      return { ...res, calendar }
+    }
+
+    return parseZonedOrPlainDateTime(ensureString(relativeTo))
+  }
 }

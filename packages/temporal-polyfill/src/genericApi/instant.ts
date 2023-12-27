@@ -15,7 +15,8 @@ import { DurationBranding, InstantBranding, ZonedDateTimeBranding } from './bran
 import { DurationSlots, InstantSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { parseInstant } from '../internal/parseIso'
 import { SimpleTimeZoneOps } from '../internal/timeZoneOps'
-import { DurationFields, negateDuration } from '../internal/durationFields'
+import { DurationFields } from '../internal/durationFields'
+import { negateDuration } from '../internal/durationMath'
 
 export function create(epochNano: bigint): InstantSlots {
   return {

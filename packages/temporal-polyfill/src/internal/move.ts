@@ -2,11 +2,11 @@ import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
   durationFieldNamesAsc,
-  durationHasDateParts,
   durationTimeFieldDefaults,
   durationTimeFieldsToLargeNanoStrict,
   durationFieldsToDayTimeNano,
 } from './durationFields'
+import { durationHasDateParts } from './durationMath'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
@@ -20,7 +20,6 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay
 } from './epochAndTime'
-import { Overflow } from './options'
 import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'

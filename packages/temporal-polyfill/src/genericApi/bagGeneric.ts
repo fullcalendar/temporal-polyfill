@@ -23,10 +23,10 @@ import {
 } from '../internal/calendarFields'
 import {
   DurationFields,
-  checkDurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
 } from '../internal/durationFields'
+import { checkDurationFields } from '../internal/durationMath'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from '../internal/calendarIsoFields'
 import { parseOffsetNano } from '../internal/parseIso'
 import { EpochDisambig, OffsetDisambig, Overflow } from '../internal/options'

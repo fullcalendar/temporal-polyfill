@@ -4,8 +4,8 @@ import {
   durationFieldDefaults,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
-  negateDuration,
 } from './durationFields'
+import { negateDuration } from './durationMath'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
