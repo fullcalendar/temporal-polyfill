@@ -212,9 +212,9 @@ function refinePublicRelativeTo(
 
       const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!
       const res = refineMaybeZonedDateTimeBag(
-        createDateRefineOps(calendar),
         refineTimeZoneSlot,
         createTimeZoneOps,
+        createDateRefineOps(calendar),
         relativeTo as unknown as ZonedDateTimeBag<CalendarArg, TimeZoneArg>, // !!!
       )
 

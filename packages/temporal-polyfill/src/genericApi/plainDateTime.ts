@@ -39,19 +39,7 @@ export function create<CA, C>(
 
 export const fromString = parsePlainDateTime
 
-export function fromFields<C>(
-  getCalendarOps: (calendarSlot: C) => DateRefineOps<C>,
-  calendarSlot: C,
-  fields: DateTimeBag,
-  options?: OverflowOptions,
-): PlainDateTimeSlots<C> {
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...refinePlainDateTimeBag(calendarOps, fields, options),
-    branding: PlainDateTimeBranding,
-  }
-}
+export const fromFields = refinePlainDateTimeBag
 
 export function withFields<C>(
   getCalendarOps: (calendarSlot: C) => DateModOps<C>,

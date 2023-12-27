@@ -41,15 +41,7 @@ export function create(
   }
 }
 
-export function fromFields(
-  fields: PlainTimeBag,
-  options?: OverflowOptions,
-) {
-  return {
-    ...refinePlainTimeBag(fields, options),
-    branding: PlainTimeBranding,
-  }
-}
+export const fromFields = refinePlainTimeBag
 
 export const fromString = parsePlainTime
 

@@ -28,8 +28,7 @@ export function fromFields(
   options?: OverflowOptions,
 ): PlainDateSlots<string> {
   return PlainDateFuncs.fromFields(
-    createNativeDateRefineOps,
-    getCalendarIdFromBag(fields),
+    createNativeDateRefineOps(getCalendarIdFromBag(fields)),
     fields,
     options,
   )

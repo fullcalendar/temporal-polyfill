@@ -37,11 +37,12 @@ export function fromFields(
   fields: ZonedDateTimeBag<string, string>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<string, string> {
+  const calendarId = getCalendarIdFromBag(fields)
   return ZonedDateTimeFuncs.fromFields(
-    createNativeDateRefineOps,
     refineTimeZoneSlotString,
     queryNativeTimeZone,
-    getCalendarIdFromBag(fields),
+    createNativeDateRefineOps(calendarId),
+    calendarId,
     fields,
     options,
   )

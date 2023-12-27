@@ -133,8 +133,7 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
     const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
 
     return PlainMonthDayFuncs.fromFields(
-      createMonthDayRefineOps,
-      calendar,
+      createMonthDayRefineOps(calendar),
       !calendarMaybe,
       arg as MonthDayBag,
       options,

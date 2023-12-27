@@ -41,20 +41,7 @@ export function create<CA, C>(
 
 export const fromString = parsePlainMonthDay
 
-export function fromFields<C>(
-  getCalendarOps: (calendar: C) => MonthDayRefineOps<C>,
-  calendarSlot: C,
-  calendarAbsent: boolean,
-  fields: MonthDayBag,
-  options?: OverflowOptions
-): PlainMonthDaySlots<C> {
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...refinePlainMonthDayBag(calendarOps, calendarAbsent, fields, options),
-    branding: PlainMonthDayBranding,
-  }
-}
+export const fromFields = refinePlainMonthDayBag
 
 export function withFields<C>(
   getCalendarOps: (calendarSlot: C) => MonthDayModOps<C>,

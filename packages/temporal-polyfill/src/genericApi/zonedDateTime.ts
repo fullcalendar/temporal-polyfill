@@ -38,26 +38,7 @@ export function create<CA, C, TA, T>(
 
 export const fromString = parseZonedDateTime
 
-export function fromFields<C, TA, T>(
-  getCalendarOps: (calendarSlot: C) => DateRefineOps<C>,
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  calendarSlot: C,
-  fields: ZonedDateTimeBag<unknown, TA>,
-  options?: ZonedFieldOptions,
-): ZonedDateTimeSlots<C, T> {
-  return {
-    ...refineZonedDateTimeBag(
-      calendarSlot,
-      getCalendarOps(calendarSlot),
-      refineTimeZoneArg,
-      getTimeZoneOps,
-      fields,
-      options,
-    ),
-    branding: ZonedDateTimeBranding,
-  }
-}
+export const fromFields = refineZonedDateTimeBag
 
 export function getISOFields<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
@@ -161,6 +142,7 @@ export function withPlainDate<C extends IdLike, T>(
   }
 }
 
+// TODO: reusable function across types
 export function withTimeZone<C, T>(
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   timeZoneSlot: T,

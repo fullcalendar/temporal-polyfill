@@ -187,8 +187,7 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
     }
 
     return PlainYearMonthFuncs.fromFields(
-      createYearMonthRefineOps,
-      slots.calendar || getCalendarSlotFromBag(arg as any), // !!!
+      createYearMonthRefineOps(slots.calendar || getCalendarSlotFromBag(arg as any)), // !!!
       arg as any, // !!!
       options,
     )

@@ -258,8 +258,7 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
     }
 
     return PlainDateFuncs.fromFields(
-      createDateRefineOps,
-      slots.calendar || getCalendarSlotFromBag(arg as PlainDateBag<CalendarArg>),
+      createDateRefineOps(slots.calendar || getCalendarSlotFromBag(arg as PlainDateBag<CalendarArg>)),
       arg as PlainDateBag<CalendarArg>,
       options,
     )

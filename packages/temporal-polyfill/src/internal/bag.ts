@@ -16,6 +16,7 @@ import { parseOffsetNano } from './parseIso'
 import { ensureObjectlike } from './cast'
 import { checkDurationFields } from './durationMath'
 import { builtinRefiners } from './refiners'
+import { DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
 export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }
@@ -50,9 +51,9 @@ export function convertPlainDateTimeToZoned<TZ>(
 TODO: make more DRY with other methods
 */
 export function refineMaybeZonedDateTimeBag<C, TA, T>(
-  calendarOps: DateRefineOps<C>,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeZoneArg: T) => TimeZoneOps,
+  calendarOps: DateRefineOps<C>,
   bag: ZonedDateTimeBag<unknown, TA>,
 ): {
   epochNanoseconds: DayTimeNano,
@@ -97,17 +98,13 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
 // -------------------------------------------------------------------------------------------------
 
 export function refineZonedDateTimeBag<C, TA, T>(
-  calendarSlot: C,
-  calendarOps: DateRefineOps<C>,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  calendarOps: DateRefineOps<C>,
+  calendarSlot: C,
   bag: ZonedDateTimeBag<unknown, TA>,
   options: ZonedFieldOptions | undefined,
-): {
-  epochNanoseconds: DayTimeNano,
-  timeZone: T,
-  calendar: C,
-} {
+): ZonedDateTimeSlots<C, T> {
   const fields = refineCalendarFields(
     calendarOps,
     bag,
@@ -115,7 +112,6 @@ export function refineZonedDateTimeBag<C, TA, T>(
     timeZoneFieldNames, // requireFields
     timeAndZoneFieldNames, // forcedValidFieldNames
   ) as ZonedDateTimeBag<unknown, TA>
-
 
   const timeZoneSlot = refineTimeZoneArg(fields.timeZone!) // guaranteed via refineCalendarFields
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
@@ -136,7 +132,12 @@ export function refineZonedDateTimeBag<C, TA, T>(
     false, // fuzzy
   )
 
-  return { epochNanoseconds, timeZone: timeZoneSlot, calendar: calendarSlot }
+  return {
+    epochNanoseconds,
+    timeZone: timeZoneSlot,
+    calendar: calendarSlot,
+    branding: ZonedDateTimeBranding,
+  }
 }
 
 export function mergeZonedDateTimeBag<C>(
@@ -182,7 +183,7 @@ export function refinePlainDateTimeBag<C>(
   calendarOps: DateRefineOps<C>,
   bag: DateTimeBag,
   options: OverflowOptions | undefined,
-): IsoDateTimeFields & { calendar: C } {
+): PlainDateTimeSlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
     bag,
@@ -198,10 +199,15 @@ export function refinePlainDateTimeBag<C>(
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
-  return checkIsoDateTimeInBounds({
+  const isoFields = checkIsoDateTimeInBounds({
     ...isoDateInternals,
     ...isoTimeFields,
   })
+
+  return {
+    ...isoFields,
+    branding: PlainDateTimeBranding,
+  }
 }
 
 export function mergePlainDateTimeBag<C>(
@@ -239,7 +245,7 @@ export function refinePlainDateBag<C>(
   bag: DateBag,
   options: OverflowOptions | undefined,
   requireFields: string[] = [],
-): IsoDateFields & { calendar: C } {
+): PlainDateSlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
     bag,
@@ -247,7 +253,10 @@ export function refinePlainDateBag<C>(
     requireFields,
   )
 
-  return calendarOps.dateFromFields(fields as any, options)
+  return {
+    ...calendarOps.dateFromFields(fields as any, options),
+    branding: PlainDateBranding,
+  }
 }
 
 export function mergePlainDateBag<C>(
@@ -294,7 +303,7 @@ export function refinePlainYearMonthBag<C>(
   bag: YearMonthBag,
   options: OverflowOptions | undefined,
   requireFields?: string[],
-): IsoDateFields & { calendar: C } {
+): PlainYearMonthSlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
     bag,
@@ -302,7 +311,10 @@ export function refinePlainYearMonthBag<C>(
     requireFields,
   )
 
-  return calendarOps.yearMonthFromFields(fields, options)
+  return {
+    ...calendarOps.yearMonthFromFields(fields, options),
+    branding: PlainYearMonthBranding,
+  }
 }
 
 export function mergePlainYearMonthBag<C>(
@@ -361,7 +373,7 @@ export function refinePlainMonthDayBag<C>(
   bag: MonthDayBag,
   options?: OverflowOptions,
   requireFields: string[] = [], // when called from Calendar
-): IsoDateFields & { calendar: C } {
+): PlainMonthDaySlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
     bag,
@@ -376,7 +388,10 @@ export function refinePlainMonthDayBag<C>(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return calendarOps.monthDayFromFields(fields, options)
+  return {
+    ...calendarOps.monthDayFromFields(fields, options),
+    branding: PlainMonthDayBranding,
+  }
 }
 
 export function mergePlainMonthDayBag<C>(
@@ -432,11 +447,14 @@ export function convertPlainMonthDayToDate<C>(
 export function refinePlainTimeBag(
   bag: TimeBag,
   options: OverflowOptions | undefined,
-): IsoTimeFields {
+): PlainTimeSlots {
   const overflow = refineOverflowOptions(options) // spec says overflow parsed first
   const fields = refineFields(bag, timeFieldNamesAlpha, [], true) as TimeBag // disallowEmpty
 
-  return refineTimeBag(fields, overflow)
+  return {
+    ...refineTimeBag(fields, overflow),
+    branding: PlainTimeBranding,
+  }
 }
 
 export function mergePlainTimeBag(
@@ -459,14 +477,17 @@ function refineTimeBag(fields: TimeBag, overflow?: Overflow): IsoTimeFields {
 // Duration
 // -------------------------------------------------------------------------------------------------
 
-export function refineDurationBag(bag: DurationBag): DurationFields {
+export function refineDurationBag(bag: DurationBag): DurationSlots {
   // refine in 'partial' mode
   const durationFields = refineFields(bag, durationFieldNamesAlpha) as DurationBag
 
-  return checkDurationFields({
-    ...durationFieldDefaults,
-    ...durationFields
-  })
+  return {
+    branding: DurationBranding,
+    ...checkDurationFields({
+      ...durationFieldDefaults,
+      ...durationFields
+    }),
+  }
 }
 
 export function mergeDurationBag(

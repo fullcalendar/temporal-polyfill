@@ -79,10 +79,9 @@ export class Calendar implements CalendarProtocol {
   ): PlainDate {
     const { id, native } = getCalendarSlots(this)
 
-    return createPlainDate({
-      ...refinePlainDateBag(native, fields, options, getRequiredDateFields(id)),
-      branding: PlainDateBranding,
-    })
+    return createPlainDate(
+      refinePlainDateBag(native, fields, options, getRequiredDateFields(id)),
+    )
   }
 
   yearMonthFromFields(
@@ -91,10 +90,9 @@ export class Calendar implements CalendarProtocol {
   ): PlainYearMonth {
     const { id, native } = getCalendarSlots(this)
 
-    return createPlainYearMonth({
-      ...refinePlainYearMonthBag(native, fields, options, getRequiredYearMonthFields(id)),
-      branding: PlainYearMonthBranding,
-    })
+    return createPlainYearMonth(
+      refinePlainYearMonthBag(native, fields, options, getRequiredYearMonthFields(id)),
+    )
   }
 
   monthDayFromFields(
@@ -103,10 +101,9 @@ export class Calendar implements CalendarProtocol {
   ): PlainMonthDay {
     const { id, native } = getCalendarSlots(this)
 
-    return createPlainMonthDay({
-      ...refinePlainMonthDayBag(native, false, fields, options, getRequiredMonthDayFields(id)),
-      branding: PlainMonthDayBranding,
-    })
+    return createPlainMonthDay(
+      refinePlainMonthDayBag(native, false, fields, options, getRequiredMonthDayFields(id)),
+    )
   }
 
   fields(fieldNames: Iterable<string>): Iterable<string> {

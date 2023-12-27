@@ -350,11 +350,13 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
       return slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
     }
 
+    const calendarSlot = slots.calendar || getCalendarSlotFromBag(arg as any)
+
     return ZonedDateTimeFuncs.fromFields(
-      createDateRefineOps,
       refineTimeZoneSlot,
       createTimeZoneOps,
-      slots.calendar || getCalendarSlotFromBag(arg as any), // !!!
+      createDateRefineOps(calendarSlot),
+      calendarSlot,
       arg as any, // !!!
       options,
     )

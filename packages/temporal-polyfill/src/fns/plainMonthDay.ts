@@ -34,8 +34,7 @@ export function fromFields(
   const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
 
   return PlainMonthDayFuncs.fromFields(
-    createNativeMonthDayRefineOps,
-    calendar,
+    createNativeMonthDayRefineOps(calendar),
     !calendarMaybe,
     fields,
     options,

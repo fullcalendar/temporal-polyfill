@@ -44,17 +44,7 @@ export function create<CA, C>(
 
 export const fromString = parsePlainYearMonth
 
-export function fromFields<C>(
-  getCalendarOps: (calendar: C) => YearMonthRefineOps<C>,
-  calendarSlot: C,
-  bag: YearMonthBag,
-  options?: OverflowOptions,
-): PlainYearMonthSlots<C> {
-  return {
-    ...refinePlainYearMonthBag(getCalendarOps(calendarSlot), bag, options),
-    branding: PlainYearMonthBranding,
-  }
-}
+export const fromFields = refinePlainYearMonthBag
 
 export function withFields<C>(
   getCalendarOps: (calendar: C) => YearMonthModOps<C>,

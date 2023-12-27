@@ -44,12 +44,7 @@ export function create(
 
 export const fromString = parseDuration
 
-export function fromFields(fields: DurationBag): DurationSlots {
-  return {
-    ...refineDurationBag(fields),
-    branding: DurationBranding,
-  }
-}
+export const fromFields = refineDurationBag
 
 export function withFields(
   slots: DurationSlots,

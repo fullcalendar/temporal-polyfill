@@ -26,8 +26,7 @@ export function fromFields(
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return PlainYearMonthFuncs.fromFields(
-    createNativeYearMonthRefineOps,
-    getCalendarIdFromBag(bag),
+    createNativeYearMonthRefineOps(getCalendarIdFromBag(bag)),
     bag,
     options,
   )
