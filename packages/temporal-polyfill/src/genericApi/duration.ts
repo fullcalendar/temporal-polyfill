@@ -1,15 +1,13 @@
 import { DurationBag } from '../internal/calendarFields'
 import { ensureString, toStrictInteger } from '../internal/cast'
-import { MarkerSlots, absDuration, addToDuration, checkDurationFields, compareDurations, getLargestDurationUnit, negateDuration, queryDurationSign, roundDuration, totalDuration } from '../internal/durationMath'
-import { formatDurationInternals } from '../internal/formatIso'
+import { MarkerSlots, absDuration, addToDuration, checkDurationFields, compareDurations, negateDuration, queryDurationSign, roundDuration, totalDuration } from '../internal/durationMath'
+import { formatDurationIso } from '../internal/formatIso'
 import { parseDuration } from '../internal/parseIso'
-import { SubsecDigits } from '../internal/options'
-import { balanceDayTimeDurationByInc } from '../internal/round'
 import { TimeZoneOps } from '../internal/timeZoneOps'
-import { Unit, UnitName } from '../internal/units'
+import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { DiffOps } from '../internal/calendarOps'
-import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel, refineTimeDisplayOptions } from './optionsRefine'
+import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel } from './optionsRefine'
 import { DurationBranding, DurationSlots } from '../internal/slots'
 import { mergeDurationBag, refineDurationBag } from '../internal/bag'
 
@@ -124,25 +122,7 @@ export function total<RA, C, T>(
 }
 
 export function toString(slots: DurationSlots, options?: TimeDisplayOptions): string {
-  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
-
-  // for performance AND for not losing precision when no rounding
-  if (nanoInc > 1) {
-    slots = {
-      ...slots,
-      ...balanceDayTimeDurationByInc(
-        slots,
-        Math.min(getLargestDurationUnit(slots), Unit.Day),
-        nanoInc,
-        roundingMode,
-      ),
-    }
-  }
-
-  return formatDurationInternals(
-    slots,
-    subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
-  )
+  return formatDurationIso(slots, options)
 }
 
 export function toJSON(slots: DurationSlots): string {

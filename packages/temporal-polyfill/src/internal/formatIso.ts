@@ -1,11 +1,11 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
-import { negateDuration, queryDurationSign } from './durationMath'
+import { getLargestDurationUnit, negateDuration, queryDurationSign } from './durationMath'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './calendarIsoFields'
 import { epochNanoToIso } from './epochAndTime'
 import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './options'
-import { roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
+import { balanceDayTimeDurationByInc, roundDateTimeToNano, roundDayTimeNanoByInc, roundTimeToNano, roundToMinute } from './round'
 import {
   givenFieldsToDayTimeNano,
   nanoInHour,
@@ -17,10 +17,33 @@ import {
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
 import { SimpleTimeZoneOps } from './timeZoneOps'
-import { IdLike, getId } from './slots'
+import { DurationSlots, IdLike, getId } from './slots'
+import { TimeDisplayOptions, refineTimeDisplayOptions } from '../genericApi/optionsRefine'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
+
+export function formatDurationIso(slots: DurationSlots, options?: TimeDisplayOptions): string {
+  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
+
+  // for performance AND for not losing precision when no rounding
+  if (nanoInc > 1) {
+    slots = {
+      ...slots,
+      ...balanceDayTimeDurationByInc(
+        slots,
+        Math.min(getLargestDurationUnit(slots), Unit.Day),
+        nanoInc,
+        roundingMode,
+      ),
+    }
+  }
+
+  return formatDurationInternals(
+    slots,
+    subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
+  )
+}
 
 export function formatPlainDateTimeIso(
   calendarIdLike: IdLike,
