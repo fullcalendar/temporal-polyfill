@@ -18,6 +18,7 @@ import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMon
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from '../internal/bag'
+import { plainDateTimesEqual } from '../internal/compare'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -175,20 +176,9 @@ export function round<C>(
   }
 }
 
-export function compare(
-  plainDateTimeSlots0: IsoDateTimeFields,
-  plainDateTimeSlots1: IsoDateTimeFields,
-): NumSign {
-  return compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) // just forwards
-}
+export const compare = compareIsoDateTimeFields
 
-export function equals<C extends IdLike>(
-  plainDateTimeSlots0: PlainDateTimeSlots<C>,
-  plainDateTimeSlots1: PlainDateTimeSlots<C>,
-): boolean {
-  return !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
-    isIdLikeEqual(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
-}
+export const equals = plainDateTimesEqual
 
 export function toString<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,

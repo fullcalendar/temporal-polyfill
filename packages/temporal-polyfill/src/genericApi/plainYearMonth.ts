@@ -15,6 +15,7 @@ import { DateModOps, YearMonthDiffOps, YearMonthModOps, YearMonthMoveOps, YearMo
 import { NativeYearMonthParseOps } from '../internal/calendarNative'
 import { moveByIsoDays, moveToMonthStart } from '../internal/move'
 import { convertPlainYearMonthToDate, mergePlainYearMonthBag, refinePlainYearMonthBag } from '../internal/bag'
+import { plainYearMonthsEqual } from '../internal/compare'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -136,20 +137,9 @@ export function since<C extends IdLike>(
   return diffPlainYearMonth(getCalendarOps, plainYearMonthSlots0, plainYearMonthSlots1, options, true)
 }
 
-export function compare(
-  plainYearMonthSlots0: PlainYearMonthSlots<unknown>,
-  plainYearMonthSlots1: PlainYearMonthSlots<unknown>,
-): NumSign {
-  return compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) // just forwards
-}
+export const compare = compareIsoDateFields
 
-export function equals(
-  plainYearMonthSlots0: PlainYearMonthSlots<IdLike>,
-  plainYearMonthSlots1: PlainYearMonthSlots<IdLike>,
-): boolean {
-  return !compare(plainYearMonthSlots0, plainYearMonthSlots1) &&
-    isIdLikeEqual(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
-}
+export const equals = plainYearMonthsEqual
 
 export function toString(
   plainYearMonthSlots: PlainYearMonthSlots<IdLike>,

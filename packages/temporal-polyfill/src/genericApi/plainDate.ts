@@ -8,13 +8,13 @@ import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/epoc
 import { parsePlainDate } from '../internal/parseIso'
 import { moveDateEasy } from '../internal/move'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
-import { NumSign } from '../internal/utils'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions } from './optionsRefine'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots, PlainDateBranding, IdLike, isIdLikeEqual, ZonedDateTimeBranding, PlainDateTimeBranding, PlainYearMonthBranding, PlainMonthDayBranding } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateBag, refinePlainDateBag } from '../internal/bag'
+import { plainDatesEqual } from '../internal/compare'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -120,20 +120,9 @@ export function since<C extends IdLike>(
   return diffPlainDates(getCalendarOps, plainDateSlots0, plainDateSlots1, options, true)
 }
 
-export function compare(
-  plainDateSlots0: IsoDateFields,
-  plainDateSlots1: IsoDateFields,
-): NumSign {
-  return compareIsoDateFields(plainDateSlots0, plainDateSlots1) // just forwards
-}
+export const compare = compareIsoDateFields
 
-export function equals<C extends IdLike>(
-  plainDateSlots0: PlainDateSlots<C>,
-  plainDateSlots1: PlainDateSlots<C>,
-): boolean {
-  return !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
-    isIdLikeEqual(plainDateSlots0.calendar, plainDateSlots1.calendar)
-}
+export const equals = plainDatesEqual
 
 export function toString<C extends IdLike>(
   plainDateSlots: PlainDateSlots<C>,

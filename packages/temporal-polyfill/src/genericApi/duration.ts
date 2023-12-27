@@ -1,6 +1,7 @@
 import { DurationBag } from '../internal/calendarFields'
 import { ensureString, toStrictInteger } from '../internal/cast'
-import { MarkerSlots, absDuration, addToDuration, checkDurationFields, compareDurations, negateDuration, queryDurationSign, roundDuration } from '../internal/durationMath'
+import { MarkerSlots, absDuration, addToDuration, checkDurationFields, negateDuration, queryDurationSign, roundDuration } from '../internal/durationMath'
+import { compareDurations } from '../internal/compare'
 import { totalDuration } from '../internal/total'
 import { formatDurationIso } from '../internal/formatIso'
 import { parseDuration } from '../internal/parseIso'

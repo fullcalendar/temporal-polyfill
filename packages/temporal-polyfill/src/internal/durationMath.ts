@@ -1,7 +1,7 @@
-import { DayTimeNano, addDayTimeNanos, compareDayTimeNanos } from './dayTimeNano'
-import { DayTimeUnit, Unit, givenFieldsToDayTimeNano, unitNanoMap } from './units'
+import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
+import { DayTimeUnit, Unit, unitNanoMap } from './units'
 import { NumSign, createLazyGenerator, identityFunc } from './utils'
-import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nanoToDurationDayTimeFields, durationFieldNamesAsc, durationDateFieldNamesAsc, isDurationsEqual } from './durationFields'
+import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nanoToDurationDayTimeFields, durationFieldNamesAsc, durationDateFieldNamesAsc } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationBranding, DurationSlots } from './slots'
@@ -25,54 +25,6 @@ export type MarkerSystem<M> = [
   MoveMarker<M>,
   DiffMarkers<M>
 ]
-
-// -------------------------------------------------------------------------------------------------
-
-export function compareDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  durationSlots0: DurationSlots,
-  durationSlots1: DurationSlots,
-  options?: RelativeToOptions<RA>,
-): NumSign {
-  const normalOptions = normalizeOptions(options)
-  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
-  const largestUnit = Math.max(
-    getLargestDurationUnit(durationSlots0),
-    getLargestDurationUnit(durationSlots1),
-  ) as Unit
-
-  // fast-path if fields identical
-  if (isDurationsEqual(durationSlots0, durationSlots1)) {
-    return 0
-  }
-
-  if (
-    largestUnit < Unit.Day || (
-      largestUnit === Unit.Day &&
-      // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds)
-    )
-  ) {
-    return compareDayTimeNanos(
-      givenFieldsToDayTimeNano(durationSlots0, Unit.Day, durationFieldNamesAsc),
-      givenFieldsToDayTimeNano(durationSlots1, Unit.Day, durationFieldNamesAsc)
-    )
-  }
-
-  if (!markerSlots) {
-    throw new RangeError('need relativeTo')
-  }
-
-  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
-    MarkerSystem<any>
-
-  return compareDayTimeNanos(
-    markerToEpochNano(moveMarker(marker, durationSlots0)),
-    markerToEpochNano(moveMarker(marker, durationSlots1)),
-  )
-}
 
 export function roundDuration<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,

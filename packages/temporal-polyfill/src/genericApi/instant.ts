@@ -15,6 +15,7 @@ import { parseInstant } from '../internal/parseIso'
 import { SimpleTimeZoneOps } from '../internal/timeZoneOps'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
+import { compareInstants, instantsEqual } from '../internal/compare'
 
 export function create(epochNano: bigint): InstantSlots {
   return {
@@ -114,19 +115,9 @@ export function round(
   }
 }
 
-export function compare(
-  instantSlots0: InstantSlots,
-  instantSlots1: InstantSlots,
-): NumSign {
-  return compareDayTimeNanos(instantSlots0.epochNanoseconds, instantSlots1.epochNanoseconds)
-}
+export const compare = compareInstants
 
-export function equals(
-  instantSlots0: InstantSlots,
-  instantSlots1: InstantSlots,
-): boolean {
-  return !compare(instantSlots0, instantSlots1)
-}
+export const equals = instantsEqual
 
 // instant-to-string
 export function toString<TA, T>(

@@ -11,6 +11,7 @@ import { IdLike, PlainDateBranding, PlainDateSlots, PlainMonthDayBranding, Plain
 import { DateModOps, MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
 import { NativeMonthDayParseOps } from '../internal/calendarNative'
 import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from '../internal/bag'
+import { plainMonthDaysEqual } from '../internal/compare'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -79,13 +80,7 @@ export function withFields<C>(
   }
 }
 
-export function equals<C extends IdLike>(
-  plainMonthDaySlots0: PlainMonthDaySlots<C>,
-  plainMonthDaySlots1: PlainMonthDaySlots<C>,
-): boolean {
-  return !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
-    isIdLikeEqual(plainMonthDaySlots0.calendar, plainMonthDaySlots1.calendar)
-}
+export const equals = plainMonthDaysEqual
 
 export function toString(
   plainMonthDaySlots: PlainMonthDaySlots<IdLike>,

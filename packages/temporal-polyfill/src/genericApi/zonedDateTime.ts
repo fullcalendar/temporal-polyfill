@@ -19,6 +19,7 @@ import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { diffZonedDateTimes } from '../internal/diff'
 import { ZonedDateTimeBag, convertToPlainMonthDay, convertToPlainYearMonth, mergeZonedDateTimeBag, refineZonedDateTimeBag } from '../internal/bag'
+import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -326,24 +327,9 @@ export function hoursInDay<C, T>(
   ) / nanoInHour
 }
 
-export function compare(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>,
-  zonedDateTimeSlots1: ZonedDateTimeSlots<unknown, unknown>,
-): NumSign {
-  return compareDayTimeNanos(
-    zonedDateTimeSlots0.epochNanoseconds,
-    zonedDateTimeSlots1.epochNanoseconds,
-  )
-}
+export const compare = compareZonedDateTimes
 
-export function equals<C extends IdLike, T extends IdLike>(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-  zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
-): boolean {
-  return !compare(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
-    isTimeZoneSlotsEqual(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone) &&
-    isIdLikeEqual(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
-}
+export const equals = zonedDateTimesEqual
 
 export function toString<C extends IdLike, T extends IdLike>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,

@@ -16,6 +16,7 @@ import { DurationSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlot
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
 import { PlainTimeBag, mergePlainTimeBag, refinePlainTimeBag } from '../internal/bag'
+import { plainTimesEqual } from '../internal/compare'
 
 export function create(
   isoHour: number = 0,
@@ -119,19 +120,9 @@ export function round(
   }
 }
 
-export function compare(
-  plainTimeSlots0: PlainTimeSlots,
-  plainTimeSlots1: PlainTimeSlots,
-): NumSign {
-  return compareIsoTimeFields(plainTimeSlots0, plainTimeSlots1) // just forwards
-}
+export const compare = compareIsoTimeFields
 
-export function equals(
-  plainTimeSlots0: PlainTimeSlots,
-  plainTimeSlots1: PlainTimeSlots,
-): boolean {
-  return !compare(plainTimeSlots0, plainTimeSlots1)
-}
+export const equals = plainTimesEqual
 
 export function toString(
   slots: PlainTimeSlots,
