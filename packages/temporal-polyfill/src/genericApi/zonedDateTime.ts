@@ -20,6 +20,7 @@ import { diffZonedDateTimes } from '../internal/diff'
 import { ZonedDateTimeBag, mergeZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
+import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
 
 export function create<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -30,7 +31,7 @@ export function create<CA, C, TA, T>(
 ): ZonedDateTimeSlots<C, T> {
   return {
     epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
-    timeZone: refineTimeZoneArg(timeZoneArg), // TODO: validate string/object somehow?
+    timeZone: refineTimeZoneArg(timeZoneArg),
     calendar: refineCalendarArg(calendarArg),
     branding: ZonedDateTimeBranding,
   }
@@ -56,84 +57,13 @@ export function getISOFields<C, T>(
 
 export const withFields = zonedDateTimeWithFields
 
-export function withPlainTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  plainTimeSlots: PlainTimeSlots,
-): ZonedDateTimeSlots<C, T> {
-  const timeZoneSlot = zonedDateTimeSlots.timeZone
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+export const withPlainTime = zonedDateTimeWithPlainTime
 
-  const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
-    ...plainTimeSlots,
-  }
+export const withPlainDate = zonedDateTimeWithPlainDate
 
-  const epochNano = getMatchingInstantFor(
-    timeZoneOps,
-    isoFields,
-    isoFields.offsetNanoseconds,
-    false, // hasZ
-    OffsetDisambig.Prefer, // OffsetDisambig
-    undefined, // EpochDisambig
-    false, // fuzzy
-  )
+export const withTimeZone = slotsWithTimeZone
 
-  return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds: epochNano,
-    timeZone: timeZoneSlot,
-    calendar: zonedDateTimeSlots.calendar,
-  }
-}
-
-export function withPlainDate<C extends IdLike, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  plainDateSlots: PlainDateSlots<C>,
-): ZonedDateTimeSlots<C, T> {
-  const timeZoneSlot = zonedDateTimeSlots.timeZone
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-
-  const isoFields = {
-    ...zonedInternalsToIso(zonedDateTimeSlots as any, timeZoneOps),
-    ...plainDateSlots,
-  }
-  const calendar = getPreferredCalendarSlot(zonedDateTimeSlots.calendar, plainDateSlots.calendar)
-
-  const epochNano = getMatchingInstantFor(
-    timeZoneOps,
-    isoFields,
-    isoFields.offsetNanoseconds,
-    false, // hasZ
-    OffsetDisambig.Prefer, // OffsetDisambig
-    undefined, // EpochDisambig
-    false, // fuzzy
-  )
-
-  return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds: epochNano,
-    timeZone: timeZoneSlot,
-    calendar,
-  }
-}
-
-// TODO: reusable function across types
-export function withTimeZone<C, T>(
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  timeZoneSlot: T,
-): ZonedDateTimeSlots<C, T> {
-  return { ...zonedDateTimeSlots, timeZone: timeZoneSlot }
-}
-
-// TODO: reusable function across types
-export function withCalendar<C, T>(
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  calendarSlot: C,
-): ZonedDateTimeSlots<C, T> {
-  return { ...zonedDateTimeSlots, calendar: calendarSlot }
-}
+export const withCalendar = slotsWithCalendar
 
 export const add = moveZonedDateTime
 

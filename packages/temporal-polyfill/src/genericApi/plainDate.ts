@@ -16,6 +16,7 @@ import { negateDuration } from '../internal/durationMath'
 import { convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateBag, plainDateWithFields, refinePlainDateBag } from '../internal/bag'
 import { plainDatesEqual } from '../internal/compare'
 import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
+import { slotsWithCalendar } from '../internal/slotsMod'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -37,13 +38,7 @@ export const fromFields = refinePlainDateBag
 
 export const withFields = plainDateWithFields
 
-// TODO: reusable function across types
-export function withCalendar<C>(
-  plainDateSlots: PlainDateSlots<C>,
-  calendarSlot: C,
-): PlainDateSlots<C> {
-  return { ...plainDateSlots, calendar: calendarSlot }
-}
+export const withCalendar = slotsWithCalendar
 
 export const add = movePlainDate
 

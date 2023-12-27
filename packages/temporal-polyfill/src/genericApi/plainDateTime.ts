@@ -16,6 +16,7 @@ import { negateDuration } from '../internal/durationMath'
 import { mergePlainDateTimeBag, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
 import { plainDateTimesEqual } from '../internal/compare'
 import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
+import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
@@ -43,37 +44,11 @@ export const fromFields = refinePlainDateTimeBag
 
 export const withFields = plainDateTimeWithFields
 
-export function withPlainTime<C>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainTimeSlots: PlainTimeSlots,
-): PlainDateTimeSlots<C> {
-  return {
-    ...plainDateTimeSlots,
-    ...plainTimeSlots,
-    branding: PlainDateTimeBranding,
-  }
-}
+export const withPlainTime = plainDateTimeWithPlainTime
 
-export function withPlainDate<C extends IdLike>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainDateSlots: PlainDateSlots<C>,
-) {
-  return {
-    ...plainDateTimeSlots,
-    ...plainDateSlots,
-    // TODO: more DRY with other datetime types
-    calendar: getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar),
-    branding: PlainDateTimeBranding,
-  }
-}
+export const withPlainDate = plainDateTimeWithPlainDate
 
-// TODO: reusable function across types
-export function withCalendar<C>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  calendarSlot: C,
-): PlainDateTimeSlots<C> {
-  return { ...plainDateTimeSlots, calendar: calendarSlot }
-}
+export const withCalendar = slotsWithCalendar
 
 export const add = movePlainDateTime
 
