@@ -1,4 +1,4 @@
-import { EpochDisambigOptions } from '../genericApi/optionsRefine'
+import { EpochDisambigOptions } from '../internal/optionsRefine'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg } from './instant'
 import { PlainDateTime, PlainDateTimeArg } from './plainDateTime'

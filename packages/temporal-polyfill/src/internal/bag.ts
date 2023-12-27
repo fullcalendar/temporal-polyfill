@@ -7,7 +7,7 @@ import { isoEpochFirstLeapYear } from './calendarIso'
 import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { Callable, clampEntity, pluckProps } from './utils'
-import { EpochDisambigOptions, OverflowOptions, ZonedFieldOptions, overflowMapNames, refineEpochDisambigOptions, refineOverflowOptions, refineZonedFieldOptions } from '../genericApi/optionsRefine'
+import { EpochDisambigOptions, OverflowOptions, ZonedFieldOptions, overflowMapNames, refineEpochDisambigOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
@@ -15,7 +15,7 @@ import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, Mon
 import { parseOffsetNano } from './parseIso'
 import { ensureObjectlike } from './cast'
 import { checkDurationFields } from './durationMath'
-import { builtinRefiners } from '../genericApi/refiners'
+import { builtinRefiners } from './refiners'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
 export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }

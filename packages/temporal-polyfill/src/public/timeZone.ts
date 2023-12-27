@@ -1,7 +1,7 @@
 import { NativeTimeZone } from '../internal/timeZoneNative'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { formatOffsetNano } from '../internal/formatIso'
-import { EpochDisambigOptions, refineEpochDisambigOptions } from '../genericApi/optionsRefine'
+import { EpochDisambigOptions, refineEpochDisambigOptions } from '../internal/optionsRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { defineStringTag } from '../internal/utils'

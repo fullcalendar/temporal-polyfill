@@ -1,6 +1,6 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
-import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../genericApi/optionsRefine'
+import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
 import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'

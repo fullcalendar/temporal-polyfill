@@ -9,7 +9,7 @@ import { TimeZoneOps } from '../internal/timeZoneOps'
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { DiffOps } from '../internal/calendarOps'
-import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel } from './optionsRefine'
+import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel } from '../internal/optionsRefine'
 import { DurationBranding, DurationSlots } from '../internal/slots'
 import { mergeDurationBag, refineDurationBag } from '../internal/bag'
 

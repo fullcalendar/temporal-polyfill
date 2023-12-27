@@ -1,10 +1,10 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict } from '../internal/calendarFields'
-import { LargestUnitOptions, OverflowOptions } from '../genericApi/optionsRefine'
+import { LargestUnitOptions, OverflowOptions } from '../internal/optionsRefine'
 import { PlainDate, PlainDateArg } from './plainDate'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg } from './duration'
-import { dateRefiners } from '../genericApi/refiners'
+import { dateRefiners } from '../internal/refiners'
 import { createProtocolChecker } from './utils'
 
 interface CalendarProtocolMethods {

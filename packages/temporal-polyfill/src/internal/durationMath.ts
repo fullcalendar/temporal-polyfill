@@ -5,7 +5,7 @@ import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nan
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationBranding, DurationSlots } from './slots'
-import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from '../genericApi/optionsRefine'
+import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from './optionsRefine'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { diffDateTimes2, diffZonedEpochNano2 } from './diff'

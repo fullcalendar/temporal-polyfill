@@ -4,7 +4,7 @@ import { DurationFields, durationFieldsToDayTimeNano, durationFieldNamesAsc, cle
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots } from './slots'
-import { TotalUnitOptionsWithRel, refineTotalOptions } from '../genericApi/optionsRefine'
+import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
 import { clampRelativeDuration } from './round'
 import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, spanDuration, MarkerToEpochNano, MoveMarker, DiffMarkers, queryDurationSign } from './durationMath'
 

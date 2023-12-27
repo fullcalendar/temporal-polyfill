@@ -1,4 +1,4 @@
-import { DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
 import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'

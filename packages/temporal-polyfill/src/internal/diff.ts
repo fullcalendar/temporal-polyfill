@@ -32,7 +32,7 @@ import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
-import { DiffOptions, prepareOptions, refineDiffOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, prepareOptions, refineDiffOptions } from './optionsRefine'
 
 export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,

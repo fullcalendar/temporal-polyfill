@@ -1,7 +1,7 @@
 import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } from '../internal/calendarFields'
 import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import * as Utils from './utils'

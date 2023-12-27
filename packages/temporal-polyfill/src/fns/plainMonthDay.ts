@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
 import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, OverflowOptions } from '../genericApi/optionsRefine'
+import { DateTimeDisplayOptions, OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
 import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'

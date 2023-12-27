@@ -28,7 +28,7 @@ import { isoCalendarId } from './calendarConfig'
 import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
-import { OverflowOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import { InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots } from './slots'
 
 export function moveInstant(

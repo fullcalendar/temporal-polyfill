@@ -7,7 +7,7 @@ import {
   RoundingOptions,
   TimeDisplayOptions,
   refineOverflowOptions,
-} from '../genericApi/optionsRefine'
+} from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'

@@ -42,7 +42,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { queryIntlCalendar } from './calendarIntl'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
-import { ZonedFieldOptions, refineZonedFieldOptions } from '../genericApi/optionsRefine'
+import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 
 // High-level
 // -------------------------------------------------------------------------------------------------

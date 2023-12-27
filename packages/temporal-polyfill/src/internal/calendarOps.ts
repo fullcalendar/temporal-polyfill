@@ -2,7 +2,7 @@ import { DateBag, YearMonthBag } from './calendarFields'
 import { DurationFields } from './durationFields'
 import { IsoDateFields } from './calendarIsoFields'
 import { Unit } from './units'
-import { DiffOptions, OverflowOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, OverflowOptions } from './optionsRefine'
 
 // Operations for internal use!
 

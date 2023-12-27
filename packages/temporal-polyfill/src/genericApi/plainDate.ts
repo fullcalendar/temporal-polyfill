@@ -8,7 +8,7 @@ import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/epoc
 import { parsePlainDate } from '../internal/parseIso'
 import { movePlainDate } from '../internal/move'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
-import { DiffOptions, OverflowOptions, prepareOptions } from './optionsRefine'
+import { DiffOptions, OverflowOptions, prepareOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, ZonedDateTimeSlots, PlainDateTimeSlots, PlainYearMonthSlots, PlainMonthDaySlots, DurationSlots, PlainDateBranding, IdLike, isIdLikeEqual, ZonedDateTimeBranding, PlainDateTimeBranding, PlainYearMonthBranding, PlainMonthDayBranding } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'

@@ -5,7 +5,7 @@ import { IsoTimeFields, isoTimeFieldNamesAsc } from '../internal/calendarIsoFiel
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from '../internal/epochAndTime'
 import { identityFunc, mapPropNames } from '../internal/utils'
 import { getCalendarSlots } from './calendar'
-import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from '../genericApi/refiners'
+import { dateOnlyRefiners, dateRefiners, dayOnlyRefiners, monthOnlyRefiners, yearMonthOnlyRefiners } from '../internal/refiners'
 import { createSimpleOps } from './calendarSimpleOps'
 import { toPlainDateSlots } from './plainDate'
 import { getSlots, getSpecificSlots } from './slotsForClasses'

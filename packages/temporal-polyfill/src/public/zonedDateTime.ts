@@ -9,7 +9,7 @@ import {
   ZonedFieldOptions,
   prepareOptions,
   refineZonedFieldOptions,
-} from '../genericApi/optionsRefine'
+} from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
@@ -34,7 +34,7 @@ import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethod
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { dateRefiners } from '../genericApi/refiners'
+import { dateRefiners } from '../internal/refiners'
 import { ZonedDateTimeBag } from '../internal/bag'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string

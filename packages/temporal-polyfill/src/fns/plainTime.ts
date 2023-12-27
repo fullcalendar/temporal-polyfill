@@ -1,7 +1,7 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { OverflowOptions } from '../genericApi/optionsRefine'
+import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
 import { identityFunc } from '../internal/utils'

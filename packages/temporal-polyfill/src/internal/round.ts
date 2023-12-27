@@ -28,7 +28,7 @@ import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
 import { totalDayTimeNano } from './total'
 import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
-import { RoundingOptions, refineRoundOptions } from '../genericApi/optionsRefine'
+import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 
 export function roundZonedDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,

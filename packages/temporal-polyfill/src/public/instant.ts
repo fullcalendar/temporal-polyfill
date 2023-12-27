@@ -1,5 +1,5 @@
 import { LocalesArg, prepInstantFormat } from '../internal/formatIntl'
-import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../genericApi/optionsRefine'
+import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../internal/optionsRefine'
 import { ensureObjectlike } from '../internal/cast'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'

@@ -18,7 +18,7 @@ import {
 import { divModFloor, padNumber, padNumber2 } from './utils'
 import { SimpleTimeZoneOps } from './timeZoneOps'
 import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getId } from './slots'
-import { DateTimeDisplayOptions, InstantDisplayOptions, TimeDisplayOptions, ZonedDateTimeDisplayOptions, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions } from '../genericApi/optionsRefine'
+import { DateTimeDisplayOptions, InstantDisplayOptions, TimeDisplayOptions, ZonedDateTimeDisplayOptions, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions } from './optionsRefine'
 import { utcTimeZoneId } from './timeZoneNative'
 
 // High-level

@@ -5,7 +5,7 @@ import { durationFieldNamesAsc, isDurationsEqual } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, isIdLikeEqual, isTimeZoneSlotsEqual } from './slots'
-import { RelativeToOptions, normalizeOptions } from '../genericApi/optionsRefine'
+import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem } from './durationMath'
 import { compareIsoDateFields, compareIsoDateTimeFields, compareIsoTimeFields } from './epochAndTime'
 
