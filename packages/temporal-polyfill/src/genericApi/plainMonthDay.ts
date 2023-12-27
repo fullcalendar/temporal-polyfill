@@ -2,12 +2,12 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
-import { formatIsoMonthDayFields, formatPossibleDate } from '../internal/formatIso'
+import { formatPlainMonthDayIso } from '../internal/formatIso'
 import { isoEpochFirstLeapYear } from '../internal/calendarIso'
-import { checkIsoDateInBounds, compareIsoDateFields } from '../internal/epochAndTime'
+import { checkIsoDateInBounds } from '../internal/epochAndTime'
 import { parsePlainMonthDay } from '../internal/parseIso'
-import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions } from './optionsRefine'
-import { IdLike, PlainDateBranding, PlainDateSlots, PlainMonthDayBranding, PlainMonthDaySlots, isIdLikeEqual } from '../internal/slots'
+import { OverflowOptions, prepareOptions } from './optionsRefine'
+import { IdLike, PlainDateBranding, PlainDateSlots, PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { DateModOps, MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
 import { NativeMonthDayParseOps } from '../internal/calendarNative'
 import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from '../internal/bag'
@@ -82,17 +82,7 @@ export function withFields<C>(
 
 export const equals = plainMonthDaysEqual
 
-export function toString(
-  plainMonthDaySlots: PlainMonthDaySlots<IdLike>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return formatPossibleDate(
-    plainMonthDaySlots.calendar,
-    formatIsoMonthDayFields,
-    plainMonthDaySlots,
-    refineDateDisplayOptions(options),
-  )
-}
+export const toString = formatPlainMonthDayIso
 
 export function toJSON(
   plainMonthDaySlots: PlainMonthDaySlots<IdLike>,

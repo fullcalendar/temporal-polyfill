@@ -17,8 +17,9 @@ import {
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
 import { SimpleTimeZoneOps } from './timeZoneOps'
-import { DurationSlots, IdLike, getId } from './slots'
-import { TimeDisplayOptions, refineTimeDisplayOptions } from '../genericApi/optionsRefine'
+import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getId } from './slots'
+import { DateTimeDisplayOptions, InstantDisplayOptions, TimeDisplayOptions, ZonedDateTimeDisplayOptions, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions } from '../genericApi/optionsRefine'
+import { utcTimeZoneId } from './timeZoneNative'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -45,7 +46,98 @@ export function formatDurationIso(slots: DurationSlots, options?: TimeDisplayOpt
   )
 }
 
-export function formatPlainDateTimeIso(
+export function formatZonedDateTimeIso<C extends IdLike, T extends IdLike>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
+  options?: ZonedDateTimeDisplayOptions,
+): string {
+  return formatZonedEpochNanoIso(
+    getTimeZoneOps,
+    zonedDateTimeSlots0.calendar,
+    zonedDateTimeSlots0.timeZone,
+    zonedDateTimeSlots0.epochNanoseconds,
+    ...refineZonedDateTimeDisplayOptions(options),
+  )
+}
+
+export function formatInstantIso<TA, T>(
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,
+  instantSlots: InstantSlots,
+  options?: InstantDisplayOptions<TA>,
+): string {
+  const [
+    timeZoneArg,
+    nanoInc,
+    roundingMode,
+    subsecDigits,
+  ] = refineInstantDisplayOptions(options)
+
+  const providedTimeZone = timeZoneArg !== undefined
+  const timeZoneOps = getTimeZoneOps(
+    providedTimeZone
+      ? refineTimeZoneArg(timeZoneArg)
+      : utcTimeZoneId as any,
+  )
+
+  return formatEpochNanoIso(
+    providedTimeZone,
+    timeZoneOps,
+    instantSlots.epochNanoseconds,
+    nanoInc,
+    roundingMode,
+    subsecDigits,
+  )
+}
+
+export function formatPlainYearMonthIso(
+  plainYearMonthSlots: PlainYearMonthSlots<IdLike>,
+  options?: DateTimeDisplayOptions,
+): string {
+  return formatPossibleDate(
+    plainYearMonthSlots.calendar,
+    formatIsoYearMonthFields,
+    plainYearMonthSlots,
+    refineDateDisplayOptions(options),
+  )
+}
+
+export function formatPlainDateTimeIso<C extends IdLike>(
+  plainDateTimeSlots0: PlainDateTimeSlots<C>,
+  options?: DateTimeDisplayOptions,
+): string {
+  return formatDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, ...refineDateTimeDisplayOptions(options))
+}
+
+export function formatPlainDateIso<C extends IdLike>(
+  plainDateSlots: PlainDateSlots<C>,
+  options?: DateTimeDisplayOptions,
+): string {
+  return formatDateIso(plainDateSlots.calendar, plainDateSlots, refineDateDisplayOptions(options))
+}
+
+export function formatPlainTimeIso(
+  slots: PlainTimeSlots,
+  options?: TimeDisplayOptions
+): string {
+  return formatTimeIso(slots, ...refineTimeDisplayOptions(options))
+}
+
+export function formatPlainMonthDayIso(
+  plainMonthDaySlots: PlainMonthDaySlots<IdLike>,
+  options?: DateTimeDisplayOptions,
+): string {
+  return formatPossibleDate(
+    plainMonthDaySlots.calendar,
+    formatIsoMonthDayFields,
+    plainMonthDaySlots,
+    refineDateDisplayOptions(options),
+  )
+}
+
+// -------------------------------------------------------------------------------------------------
+
+export function formatDateTimeIso(
   calendarIdLike: IdLike,
   isoFields: IsoDateTimeFields,
   calendarDisplay: CalendarDisplay,
@@ -59,7 +151,7 @@ export function formatPlainDateTimeIso(
     formatCalendar(calendarIdLike, calendarDisplay)
 }
 
-export function formatPlainDateIso(
+export function formatDateIso(
   calendarIdLike: IdLike,
   isoFields: IsoDateFields,
   calendarDisplay: CalendarDisplay,
@@ -67,10 +159,7 @@ export function formatPlainDateIso(
   return formatIsoDateFields(isoFields) + formatCalendar(calendarIdLike, calendarDisplay)
 }
 
-/*
-TODO: rename to formatZonedEpochNano
-*/
-export function formatZonedDateTimeIso<T extends IdLike>(
+export function formatZonedEpochNanoIso<T extends IdLike>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   calendarSlot: IdLike,
   timeZoneSlot: T,
@@ -93,7 +182,7 @@ export function formatZonedDateTimeIso<T extends IdLike>(
     formatCalendar(calendarSlot, calendarDisplay)
 }
 
-export function formatInstantIso(
+export function formatEpochNanoIso(
   providedTimeZone: boolean,
   timeZoneOps: SimpleTimeZoneOps,
   epochNano: DayTimeNano,
@@ -118,7 +207,7 @@ export function formatInstantIso(
     )
 }
 
-export function formatPlainTimeIso(
+export function formatTimeIso(
   fields: IsoTimeFields,
   nanoInc: number,
   roundingMode: RoundingMode,

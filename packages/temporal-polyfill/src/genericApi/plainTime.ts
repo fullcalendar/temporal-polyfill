@@ -2,7 +2,7 @@ import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { ensureString, toInteger } from '../internal/cast'
 import { diffPlainTimes, diffTimes } from '../internal/diff'
 import { IsoTimeFields, constrainIsoTimeFields, isoTimeFieldNamesAlpha } from '../internal/calendarIsoFields'
-import { formatPlainTimeIso } from '../internal/formatIso'
+import { formatPlainTimeIso, formatTimeIso } from '../internal/formatIso'
 import { checkIsoDateTimeInBounds, compareIsoTimeFields } from '../internal/epochAndTime'
 import { parsePlainTime } from '../internal/parseIso'
 import { moveTime } from '../internal/move'
@@ -124,12 +124,7 @@ export const compare = compareIsoTimeFields
 
 export const equals = plainTimesEqual
 
-export function toString(
-  slots: PlainTimeSlots,
-  options?: TimeDisplayOptions
-): string {
-  return formatPlainTimeIso(slots, ...refineTimeDisplayOptions(options))
-}
+export const toString = formatPlainTimeIso
 
 export function toJSON(slots: PlainTimeSlots): string {
   return toString(slots)

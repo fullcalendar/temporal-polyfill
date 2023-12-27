@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { toBigInt, toStringViaPrimitive } from '../internal/cast'
 import { bigIntToDayTimeNano, compareDayTimeNanos, numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffInstants } from '../internal/diff'
-import { formatInstantIso } from '../internal/formatIso'
+import { formatEpochNanoIso, formatInstantIso } from '../internal/formatIso'
 import { checkEpochNanoInBounds } from '../internal/epochAndTime'
 import { moveEpochNano } from '../internal/move'
 import { roundDayTimeNano } from '../internal/round'
@@ -119,40 +119,8 @@ export const compare = compareInstants
 
 export const equals = instantsEqual
 
-// instant-to-string
-export function toString<TA, T>(
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,
-  instantSlots: InstantSlots,
-  options?: InstantDisplayOptions<TA>,
-): string {
-  const [
-    timeZoneArg,
-    nanoInc,
-    roundingMode,
-    subsecDigits,
-  ] = refineInstantDisplayOptions(options)
+export const toString = formatInstantIso
 
-  const providedTimeZone = timeZoneArg !== undefined
-  const timeZoneOps = getTimeZoneOps(
-    providedTimeZone
-      ? refineTimeZoneArg(timeZoneArg)
-      : utcTimeZoneId as any,
-  )
-
-  return formatInstantIso(
-    providedTimeZone,
-    timeZoneOps,
-    instantSlots.epochNanoseconds,
-    nanoInc,
-    roundingMode,
-    subsecDigits,
-  )
-}
-
-/*
-TODO: smarter way without needing params
-*/
 export function toJSON<TA, T>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,

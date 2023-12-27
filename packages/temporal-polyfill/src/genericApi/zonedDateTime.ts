@@ -11,7 +11,7 @@ import { OffsetDisambig } from '../internal/options'
 import { roundZonedDateTime } from '../internal/round'
 import { SimpleTimeZoneOps, TimeZoneOps, computeHoursInDay, computeStartOfDay, getMatchingInstantFor, zonedInternalsToIso } from '../internal/timeZoneOps'
 import { pluckProps } from '../internal/utils'
-import { DiffOptions, OverflowOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions, prepareOptions, refineZonedDateTimeDisplayOptions } from './optionsRefine'
+import { DiffOptions, OverflowOptions, ZonedFieldOptions, prepareOptions } from './optionsRefine'
 import { IdLike, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot, isIdLikeEqual, isTimeZoneSlotsEqual } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
@@ -245,19 +245,7 @@ export const compare = compareZonedDateTimes
 
 export const equals = zonedDateTimesEqual
 
-export function toString<C extends IdLike, T extends IdLike>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-  options?: ZonedDateTimeDisplayOptions,
-): string {
-  return formatZonedDateTimeIso(
-    getTimeZoneOps,
-    zonedDateTimeSlots0.calendar,
-    zonedDateTimeSlots0.timeZone,
-    zonedDateTimeSlots0.epochNanoseconds,
-    ...refineZonedDateTimeDisplayOptions(options),
-  )
-}
+export const toString = formatZonedDateTimeIso
 
 export function toJSON<C extends IdLike, T extends IdLike>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,

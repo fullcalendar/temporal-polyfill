@@ -3,7 +3,7 @@ import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal
 import { ensureString } from '../internal/cast'
 import { diffPlainDateTimes } from '../internal/diff'
 import { IsoDateTimeFields, isoDateFieldNamesDesc, isoTimeFieldNamesDesc, refineIsoDateTimeArgs } from '../internal/calendarIsoFields'
-import { formatPlainDateTimeIso } from '../internal/formatIso'
+import { formatDateTimeIso, formatPlainDateTimeIso } from '../internal/formatIso'
 import { compareIsoDateTimeFields } from '../internal/epochAndTime'
 import { parsePlainDateTime } from '../internal/parseIso'
 import { moveDateTime } from '../internal/move'
@@ -11,8 +11,8 @@ import { RoundingMode } from '../internal/options'
 import { roundDateTime } from '../internal/round'
 import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, UnitName } from '../internal/units'
-import { NumSign, pluckProps } from '../internal/utils'
-import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
+import { pluckProps } from '../internal/utils'
+import { DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
 import { DurationSlots, IdLike, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot, isIdLikeEqual } from '../internal/slots'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
@@ -180,17 +180,12 @@ export const compare = compareIsoDateTimeFields
 
 export const equals = plainDateTimesEqual
 
-export function toString<C extends IdLike>(
-  plainDateTimeSlots0: PlainDateTimeSlots<C>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return formatPlainDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, ...refineDateTimeDisplayOptions(options))
-}
+export const toString = formatPlainDateTimeIso
 
 export function toJSON<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
 ): string {
-  return formatPlainDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, ...refineDateTimeDisplayOptions(undefined))
+  return formatDateTimeIso(plainDateTimeSlots0.calendar, plainDateTimeSlots0, ...refineDateTimeDisplayOptions(undefined))
 }
 
 export function toZonedDateTime<C, TZ>(

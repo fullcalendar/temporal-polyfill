@@ -3,7 +3,7 @@ import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
 import { diffPlainDates } from '../internal/diff'
 import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, refineIsoDateArgs } from '../internal/calendarIsoFields'
-import { formatPlainDateIso } from '../internal/formatIso'
+import { formatDateIso, formatPlainDateIso } from '../internal/formatIso'
 import { checkIsoDateTimeInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainDate } from '../internal/parseIso'
 import { moveDateEasy } from '../internal/move'
@@ -124,12 +124,7 @@ export const compare = compareIsoDateFields
 
 export const equals = plainDatesEqual
 
-export function toString<C extends IdLike>(
-  plainDateSlots: PlainDateSlots<C>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return formatPlainDateIso(plainDateSlots.calendar, plainDateSlots, refineDateDisplayOptions(options))
-}
+export const toString = formatPlainDateIso
 
 export function toJSON<C extends IdLike>(
   plainDateSlots: PlainDateSlots<C>,

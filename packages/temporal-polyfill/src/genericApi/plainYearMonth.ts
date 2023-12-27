@@ -5,7 +5,7 @@ import { diffPlainYearMonth } from '../internal/diff'
 import { DurationFields, durationFieldDefaults } from '../internal/durationFields'
 import { negateDuration, queryDurationSign } from '../internal/durationMath'
 import { constrainIsoDateLike } from '../internal/calendarIsoFields'
-import { formatIsoYearMonthFields, formatPossibleDate } from '../internal/formatIso'
+import { formatIsoYearMonthFields, formatPlainYearMonthIso, formatPossibleDate } from '../internal/formatIso'
 import { checkIsoYearMonthInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { NumSign } from '../internal/utils'
@@ -141,17 +141,7 @@ export const compare = compareIsoDateFields
 
 export const equals = plainYearMonthsEqual
 
-export function toString(
-  plainYearMonthSlots: PlainYearMonthSlots<IdLike>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return formatPossibleDate(
-    plainYearMonthSlots.calendar,
-    formatIsoYearMonthFields,
-    plainYearMonthSlots,
-    refineDateDisplayOptions(options),
-  )
-}
+export const toString = formatPlainYearMonthIso
 
 /*
 TODO: remove this and have callers omit options param from toString?
