@@ -1,16 +1,16 @@
-import { DayTimeNano, addDayTimeNanos, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
-import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano, unitNanoMap } from './units'
+import { DayTimeNano, addDayTimeNanos, compareDayTimeNanos } from './dayTimeNano'
+import { DayTimeUnit, Unit, givenFieldsToDayTimeNano, unitNanoMap } from './units'
 import { NumSign, createLazyGenerator, identityFunc } from './utils'
-import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nanoToDurationDayTimeFields, durationFieldNamesAsc, durationDateFieldNamesAsc, clearDurationFields, isDurationsEqual } from './durationFields'
+import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nanoToDurationDayTimeFields, durationFieldNamesAsc, durationDateFieldNamesAsc, isDurationsEqual } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationBranding, DurationSlots } from './slots'
-import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel, normalizeOptions, refineDurationRoundOptions, refineTotalOptions } from '../genericApi/optionsRefine'
+import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from '../genericApi/optionsRefine'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { diffDateTimes2, diffZonedEpochNano2 } from './diff'
 import { isoToEpochNano } from './epochAndTime'
-import { clampRelativeDuration, roundDayTimeDuration, roundRelativeDuration, totalDayTimeNano } from './round'
+import { roundDayTimeDuration, roundRelativeDuration } from './round'
 
 export type MarkerSlots<C, T> =
   { epochNanoseconds: DayTimeNano, timeZone: T, calendar: C } |
@@ -72,84 +72,6 @@ export function compareDurations<RA, C, T>(
     markerToEpochNano(moveMarker(marker, durationSlots0)),
     markerToEpochNano(moveMarker(marker, durationSlots1)),
   )
-}
-
-export function totalDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: DurationSlots,
-  options: TotalUnitOptionsWithRel<RA> | UnitName,
-): number {
-  const durationLargestUnit = getLargestDurationUnit(slots)
-  const [totalUnit, markerSlots] = refineTotalOptions(options, refineRelativeTo)
-  const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
-
-  if (
-    maxLargestUnit < Unit.Day || (
-      maxLargestUnit === Unit.Day &&
-      // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds)
-    )
-  ) {
-    return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
-  }
-
-  if (!markerSlots) {
-    throw new RangeError('need relativeTo')
-  }
-
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
-    MarkerSystem<any>
-
-  return totalRelativeDuration(
-    ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
-    totalUnit,
-    ...markerSystem,
-  )
-}
-
-function totalDayTimeDuration(
-  durationFields: DurationFields,
-  totalUnit: DayTimeUnit,
-): number {
-  return totalDayTimeNano(
-    durationFieldsToDayTimeNano(durationFields, Unit.Day),
-    totalUnit,
-  )
-}
-
-function totalRelativeDuration<M>(
-  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
-  endEpochNano: DayTimeNano,
-  totalUnit: Unit,
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
-  diffMarkers?: DiffMarkers<M>, // unused
-): number {
-  const sign = queryDurationSign(durationFields)
-
-  const [epochNano0, epochNano1] = clampRelativeDuration(
-    clearDurationFields(durationFields, totalUnit - 1),
-    totalUnit,
-    sign,
-    // marker system...
-    marker,
-    markerToEpochNano,
-    moveMarker,
-  )
-
-  // TODO: more DRY
-  const frac =
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) /
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
-  if (!Number.isFinite(frac)) {
-    throw new RangeError('Faulty Calendar rounding')
-  }
-
-  return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
 }
 
 export function roundDuration<RA, C, T>(
@@ -282,7 +204,7 @@ export function addToDuration<RA, C, T>(
   }
 }
 
-export function addDayTimeDuration(
+function addDayTimeDuration(
   a: DurationFields,
   b: DurationFields,
   sign: NumSign,
@@ -350,7 +272,7 @@ export function checkDurationFields(fields: DurationFields): DurationFields {
   return fields
 }
 
-function createMarkerSystem<C, T>(
+export function createMarkerSystem<C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   markerSlots: MarkerSlots<C, T>,
@@ -387,7 +309,10 @@ function createMarkerSystem<C, T>(
   }
 }
 
-function spanDuration<M>(
+/*
+Rebalances duration(s)
+*/
+export function spanDuration<M>(
   durationFields0: DurationFields,
   durationFields1: DurationFields | undefined, // HACKy
   largestUnit: Unit, // TODO: more descrimination?

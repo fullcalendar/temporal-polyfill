@@ -25,6 +25,7 @@ import {
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
+import { totalDayTimeNano } from './total'
 
 // Rounding Dates
 // -------------------------------------------------------------------------------------------------
@@ -256,14 +257,6 @@ export function roundDayTimeNano(
     roundingMode,
     useDayOrigin
   )
-}
-
-// weird place?
-export function totalDayTimeNano(
-  dayTimeNano: DayTimeNano,
-  totalUnit: DayTimeUnit,
-): number {
-  return dayTimeNanoToNumber(dayTimeNano, unitNanoMap[totalUnit], true) // exact
 }
 
 export function roundDayTimeNanoByInc(
