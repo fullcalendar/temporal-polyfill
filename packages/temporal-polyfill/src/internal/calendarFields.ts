@@ -1,4 +1,4 @@
-import { IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields' // TODO: move?
+import { IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { BoundArg, mapPropNamesToConstant, remapProps } from './utils'
 import { DurationFields } from './durationFields'
 import { Unit, unitNamesAsc } from './units'

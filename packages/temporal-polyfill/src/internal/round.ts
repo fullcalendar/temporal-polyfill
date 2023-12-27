@@ -9,7 +9,7 @@ import {
   nanoToDurationTimeFields,
   clearDurationFields,
 } from './durationFields'
-import { MarkerToEpochNano, MoveMarker, queryDurationSign } from './durationMath'
+import { DiffMarkers, MarkerToEpochNano, MoveMarker, queryDurationSign } from './durationMath'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './calendarIsoFields'
 import { checkIsoDateTimeInBounds, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
 import { RoundingMode, roundingModeFuncs } from './options'
@@ -172,6 +172,7 @@ export function roundRelativeDuration<M>(
   marker: M,
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
+  diffMarkers?: DiffMarkers<M>, // unused
 ): DurationFields {
   const sign = queryDurationSign(durationFields)
 

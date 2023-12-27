@@ -1,7 +1,7 @@
 import { DayTimeNano, addDayTimeNanos, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { DayTimeUnit, Unit, UnitName, givenFieldsToDayTimeNano, unitNanoMap } from './units'
 import { NumSign, createLazyGenerator, identityFunc } from './utils'
-import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nanoToDurationDayTimeFields, durationFieldNamesAsc, durationDateFieldNamesAsc, clearDurationFields } from './durationFields'
+import { DurationFields, durationFieldsToDayTimeNano, durationFieldDefaults, nanoToDurationDayTimeFields, durationFieldNamesAsc, durationDateFieldNamesAsc, clearDurationFields, isDurationsEqual } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationBranding, DurationSlots } from './slots'
@@ -25,11 +25,8 @@ export type MarkerSystem<M> = [
   MoveMarker<M>,
   DiffMarkers<M>
 ]
-export type SimpleMarkerSystem<M> = [
-  M,
-  MarkerToEpochNano<M>,
-  MoveMarker<M>
-]
+
+// -------------------------------------------------------------------------------------------------
 
 export function compareDurations<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
@@ -47,18 +44,7 @@ export function compareDurations<RA, C, T>(
   ) as Unit
 
   // fast-path if fields identical
-  if (
-    durationSlots0.years === durationSlots1.years &&
-    durationSlots0.months === durationSlots1.months &&
-    durationSlots0.weeks === durationSlots1.weeks &&
-    durationSlots0.days === durationSlots1.days &&
-    durationSlots0.hours === durationSlots1.hours &&
-    durationSlots0.minutes === durationSlots1.minutes &&
-    durationSlots0.seconds === durationSlots1.seconds &&
-    durationSlots0.milliseconds === durationSlots1.milliseconds &&
-    durationSlots0.microseconds === durationSlots1.microseconds &&
-    durationSlots0.nanoseconds === durationSlots1.nanoseconds
-  ) {
+  if (isDurationsEqual(durationSlots0, durationSlots1)) {
     return 0
   }
 
@@ -119,7 +105,7 @@ export function totalDuration<RA, C, T>(
   return totalRelativeDuration(
     ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
     totalUnit,
-    ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
+    ...markerSystem,
   )
 }
 
@@ -141,6 +127,7 @@ function totalRelativeDuration<M>(
   marker: M,
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
+  diffMarkers?: DiffMarkers<M>, // unused
 ): number {
   const sign = queryDurationSign(durationFields)
 
@@ -233,7 +220,7 @@ export function roundDuration<RA, C, T>(
     smallestUnit,
     roundingInc,
     roundingMode,
-    ...(markerSystem as unknown as SimpleMarkerSystem<unknown>),
+    ...markerSystem,
   )
 
   roundedDurationFields.weeks += transplantedWeeks // HACK (mutating)
