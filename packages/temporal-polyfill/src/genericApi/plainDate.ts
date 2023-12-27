@@ -31,12 +31,7 @@ export function create<CA, C>(
   }
 }
 
-export function fromString(s: string): PlainDateSlots<string> {
-  return {
-    ...parsePlainDate(ensureString(s)),
-    branding: PlainDateBranding,
-  }
-}
+export const fromString = parsePlainDate
 
 export function fromFields<CA, C>(
   getCalendarOps: (calendarSlot: C) => DateRefineOps<C>,

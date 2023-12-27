@@ -43,12 +43,17 @@ import { queryIntlCalendar } from './calendarIntl'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
+import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { ensureString, toStringViaPrimitive } from './cast'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
-export function parseInstant(s: string): DayTimeNano {
-  const organized = parseMaybeGenericDateTime(s)
+export function parseInstant(s: string): InstantSlots {
+  const organized = parseMaybeGenericDateTime(toStringViaPrimitive(s))
+  // instead of 'requiring' like other types,
+  // coerce, because there's no fromFields, so no need to differentiate param type
+
   if (!organized) {
     throw new RangeError()
   }
@@ -68,39 +73,22 @@ export function parseInstant(s: string): DayTimeNano {
     parseMaybeOffsetNano(organized.timeZone, true) // onlyHourMinute=true
   }
 
-  return isoToEpochNanoWithOffset(
+  const epochNanoseconds = isoToEpochNanoWithOffset(
     constrainIsoDateTimeLike(organized),
     offsetNano,
   )
+
+  return {
+    branding: InstantBranding,
+    epochNanoseconds,
+  }
 }
 
-export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calendar: string }) | { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
-  const organized = parseMaybeGenericDateTime(s)
-
-  if (!organized) {
-    throw new RangeError()
-  }
-  if (organized.timeZone) {
-    return postProcessZonedDateTime(
-      organized as ZonedDateTimeOrganized,
-      organized.offset ? parseOffsetNano(organized.offset) : undefined, // HACK
-    )
-  }
-  if (organized.hasZ) {
-    throw new RangeError('Only Z cannot be parsed for this') // PlainDate doesn't accept it
-  }
-
-  return postProcessDateTime(organized)
-}
-
-/*
-NOTE: one of the only string-parsing methods that accepts options
-*/
 export function parseZonedDateTime(
   s: string,
   options?: ZonedFieldOptions,
-): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
-  const organized = parseMaybeGenericDateTime(s)
+): ZonedDateTimeSlots<string, string> {
+  const organized = parseMaybeGenericDateTime(ensureString(s))
 
   if (!organized || !organized.timeZone) {
     throw new RangeError()
@@ -110,46 +98,62 @@ export function parseZonedDateTime(
   const offsetNano = offset ? parseOffsetNano(offset) : undefined
   const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
-  return postProcessZonedDateTime(
+  const isoFields = postProcessZonedDateTime(
     organized as ZonedDateTimeOrganized,
     offsetNano, // HACK
     offsetDisambig,
     epochDisambig,
   )
+
+  return {
+    ...isoFields,
+    branding: ZonedDateTimeBranding,
+  }
 }
 
-export function parsePlainDateTime(s: string): IsoDateTimeFields & { calendar: string } {
-  const organized = parseMaybeGenericDateTime(s)
+export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
+  const organized = parseMaybeGenericDateTime(ensureString(s))
 
   if (!organized || organized.hasZ) {
     throw new RangeError()
   }
 
-  return pluckProps(
+  const isoFields = pluckProps(
     [...isoDateTimeFieldNamesDesc, 'calendar'],
     postProcessDateTime(organized),
   )
+
+  return {
+    ...isoFields,
+    branding: PlainDateTimeBranding,
+  }
 }
 
-export function parsePlainDate(s: string): IsoDateFields & { calendar: string } {
-  const organized = parseMaybeGenericDateTime(s)
+export function parsePlainDate(s: string): PlainDateSlots<string> {
+  const organized = parseMaybeGenericDateTime(ensureString(s))
 
   if (!organized || organized.hasZ) {
     throw new RangeError()
   }
 
-  return pluckProps(
+  const isoFields = pluckProps(
     [...isoDateFieldNamesDesc, 'calendar'],
     organized.hasTime
       ? postProcessDateTime(organized)
       : postProcessDate(organized)
   )
+
+  return {
+    ...isoFields,
+    branding: PlainDateBranding,
+  }
 }
 
 export function parsePlainYearMonth(
   getCalendarOps: (calendarId: string) => NativeYearMonthParseOps,
   s: string,
-): IsoDateFields & { calendar: string } {
+): PlainYearMonthSlots<string> {
+  s = ensureString(s)
   let organized = parseMaybeYearMonth(s)
 
   if (organized) {
@@ -157,7 +161,10 @@ export function parsePlainYearMonth(
       throw new RangeError('Invalid calendar')
     }
 
-    return postProcessYearMonthOnly(organized)
+    return {
+      ...postProcessYearMonthOnly(organized),
+      branding: PlainYearMonthBranding,
+    }
   }
 
   const isoFields = parsePlainDate(s)
@@ -167,17 +174,15 @@ export function parsePlainYearMonth(
   return {
     ...isoFields, // has calendar
     ...movedIsoFields,
+    branding: PlainYearMonthBranding,
   }
-}
-
-function postProcessYearMonthOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
-  return checkIsoYearMonthInBounds(constrainIsoDateLike(organized))
 }
 
 export function parsePlainMonthDay(
   getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
   s: string,
-): IsoDateFields & { calendar: string } {
+): PlainMonthDaySlots<string> {
+  s = ensureString(s)
   const organized = parseMaybeMonthDay(s)
 
   if (organized) {
@@ -185,7 +190,10 @@ export function parsePlainMonthDay(
       throw new RangeError('Invalid calendar')
     }
 
-    return constrainIsoDateLike(organized) // `organized` has isoEpochFirstLeapYear
+    return {
+      ...constrainIsoDateLike(organized), // `organized` has isoEpochFirstLeapYear
+      branding: PlainMonthDayBranding,
+    }
   }
 
   const dateSlots = parsePlainDate(s)
@@ -198,11 +206,15 @@ export function parsePlainMonthDay(
   const [year, month] = calendarOps.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)! // !HACK
   const isoFields = calendarOps.isoFields(year, month, day)
 
-  return { ...isoFields, calendar }
+  return {
+    ...isoFields,
+    calendar,
+    branding: PlainMonthDayBranding,
+  }
 }
 
-
-export function parsePlainTime(s: string): IsoTimeFields {
+export function parsePlainTime(s: string): PlainTimeSlots {
+  s = ensureString(s)
   let organized: IsoTimeFields | GenericDateTimeOrganized | undefined = parseMaybeTime(s)
 
   if (!organized) {
@@ -231,17 +243,48 @@ export function parsePlainTime(s: string): IsoTimeFields {
     throw new RangeError()
   }
 
-  return constrainIsoTimeFields(organized, Overflow.Reject)
+  return {
+    ...constrainIsoTimeFields(organized, Overflow.Reject),
+    branding: PlainTimeBranding,
+  }
 }
 
-export function parseDuration(s: string): DurationFields {
-  const parsed = parseMaybeDurationInternals(s)
+export function parseDuration(s: string): DurationSlots {
+  const parsed = parseMaybeDurationInternals(ensureString(s))
 
   if (!parsed) {
     throw new RangeError()
   }
 
-  return parsed
+  return {
+    ...parsed,
+    branding: DurationBranding,
+  }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calendar: string }) | { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
+  const organized = parseMaybeGenericDateTime(s)
+
+  if (!organized) {
+    throw new RangeError()
+  }
+  if (organized.timeZone) {
+    return postProcessZonedDateTime(
+      organized as ZonedDateTimeOrganized,
+      organized.offset ? parseOffsetNano(organized.offset) : undefined, // HACK
+    )
+  }
+  if (organized.hasZ) {
+    throw new RangeError('Only Z cannot be parsed for this') // PlainDate doesn't accept it
+  }
+
+  return postProcessDateTime(organized)
+}
+
+function postProcessYearMonthOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
+  return checkIsoYearMonthInBounds(constrainIsoDateLike(organized))
 }
 
 export function parseOffsetNano(s: string): number {

@@ -42,15 +42,7 @@ export function create<CA, C>(
   }
 }
 
-export function fromString(
-  getCalendarOps: (calendarId: string) => NativeYearMonthParseOps,
-  s: string,
-): PlainYearMonthSlots<string> {
-  return {
-    ...parsePlainYearMonth(getCalendarOps, ensureString(s)),
-    branding: PlainYearMonthBranding,
-  }
-}
+export const fromString = parsePlainYearMonth
 
 export function fromFields<C>(
   getCalendarOps: (calendar: C) => YearMonthRefineOps<C>,

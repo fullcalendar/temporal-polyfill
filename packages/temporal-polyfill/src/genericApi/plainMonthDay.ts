@@ -39,15 +39,7 @@ export function create<CA, C>(
   }
 }
 
-export function fromString(
-  getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
-  s: string,
-): PlainMonthDaySlots<string> {
-  return {
-    ...parsePlainMonthDay(getCalendarOps, ensureString(s)),
-    branding: PlainMonthDayBranding,
-  }
-}
+export const fromString = parsePlainMonthDay
 
 export function fromFields<C>(
   getCalendarOps: (calendar: C) => MonthDayRefineOps<C>,

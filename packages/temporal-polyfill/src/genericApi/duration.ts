@@ -42,12 +42,7 @@ export function create(
   }
 }
 
-export function fromString(s: string): DurationSlots {
-  return {
-    ...parseDuration(ensureString(s)),
-    branding: DurationBranding,
-  }
-}
+export const fromString = parseDuration
 
 export function fromFields(fields: DurationBag): DurationSlots {
   return {

@@ -51,12 +51,7 @@ export function fromFields(
   }
 }
 
-export function fromString(s: string): PlainTimeSlots {
-  return {
-    ...parsePlainTime(ensureString(s)),
-    branding: PlainTimeBranding,
-  }
-}
+export const fromString = parsePlainTime
 
 export function getISOFields(slots: PlainTimeSlots): IsoTimeFields {
   return pluckProps(isoTimeFieldNamesAlpha, slots)

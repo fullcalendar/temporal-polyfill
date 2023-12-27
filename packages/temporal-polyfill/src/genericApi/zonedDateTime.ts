@@ -36,12 +36,7 @@ export function create<CA, C, TA, T>(
   }
 }
 
-export function fromString(s: string, options?: ZonedFieldOptions): ZonedDateTimeSlots<string, string> {
-  return {
-    ...parseZonedDateTime(ensureString(s), options),
-    branding: ZonedDateTimeBranding,
-  }
-}
+export const fromString = parseZonedDateTime
 
 export function fromFields<C, TA, T>(
   getCalendarOps: (calendarSlot: C) => DateRefineOps<C>,

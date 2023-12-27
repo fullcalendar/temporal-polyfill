@@ -23,13 +23,7 @@ export function create(epochNano: bigint): InstantSlots {
   }
 }
 
-export function fromString(s: string): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: parseInstant(toStringViaPrimitive(s)), // instead of 'requiring' like other types,
-      // coerce, because there's no fromFields, so no need to differentiate param type
-  }
-}
+export const fromString = parseInstant
 
 export const fromEpochSeconds = epochSecToInstant
 
