@@ -6,11 +6,8 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { getId } from '../internal/cast'
-import { PlainDateBag, PlainDateTimeBag } from '../genericApi/bagGeneric'
-import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
+import { PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
-
-// public
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, PublicDateTimeSlots, rejectInvalidBag } from './slotsForClasses'
 import { PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
@@ -29,6 +26,7 @@ import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { dateTimeCalendarGetters } from './mixins'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { PlainDateBag, PlainDateTimeBag } from '../internal/bag'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 

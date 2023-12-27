@@ -1,4 +1,4 @@
-import { nativeDateFromFields, nativeMonthDayFromFields, nativeYearMonthFromFields, nativeFieldsMethod, nativeMergeFields } from './bagNative'
+import { nativeDateFromFields, nativeMonthDayFromFields, nativeYearMonthFromFields, nativeFieldsMethod, nativeMergeFields } from './bag'
 import { DateRefineOps, DayOp, DiffOps, MergeFieldsOp, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from './calendarOps'
 import { nativeDateUntil } from './diff'
 import { IsoDateFields } from './calendarIsoFields'

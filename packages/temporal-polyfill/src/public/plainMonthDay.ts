@@ -5,12 +5,9 @@ import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflow
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { getId } from '../internal/cast'
-import { PlainMonthDayBag } from '../genericApi/bagGeneric'
 import { PlainMonthDayBranding } from '../genericApi/branding'
 import { PlainMonthDaySlots } from '../genericApi/slotsGeneric'
 import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
-
-// public
 import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
@@ -20,6 +17,7 @@ import { neverValueOf } from './mixins'
 import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from './calendarOpsQuery'
 import { monthDayGetters } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
+import { PlainMonthDayBag } from '../internal/bag'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 

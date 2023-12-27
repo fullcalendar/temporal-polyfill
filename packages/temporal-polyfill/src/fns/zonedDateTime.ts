@@ -7,7 +7,6 @@ import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { LocalesArg, prepCachedZonedDateTimeFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions } from '../genericApi/optionsRefine'
-import { ZonedDateTimeBag } from '../genericApi/bagGeneric'
 import { refineTimeZoneSlotString } from '../genericApi/timeZoneSlotString'
 import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import { getCalendarIdFromBag, refineCalendarSlotString } from '../genericApi/calendarSlotString'
@@ -16,6 +15,7 @@ import * as Utils from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { DurationFields } from '../internal/durationFields'
+import { ZonedDateTimeBag } from '../internal/bag'
 
 export function create(
   epochNano: bigint,

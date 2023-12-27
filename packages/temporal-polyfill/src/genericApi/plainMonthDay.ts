@@ -7,11 +7,11 @@ import { isoEpochFirstLeapYear } from '../internal/calendarIso'
 import { checkIsoDateInBounds, compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainMonthDay } from '../internal/parseIso'
 import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineDateDisplayOptions } from './optionsRefine'
-import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from './bagGeneric'
 import { PlainDateBranding, PlainMonthDayBranding } from './branding'
 import { PlainDateSlots, PlainMonthDaySlots } from './slotsGeneric'
 import { DateModOps, MonthDayModOps, MonthDayRefineOps } from '../internal/calendarOps'
 import { NativeMonthDayParseOps } from '../internal/calendarNative'
+import { convertPlainMonthDayToDate, mergePlainMonthDayBag, refinePlainMonthDayBag } from '../internal/bag'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,

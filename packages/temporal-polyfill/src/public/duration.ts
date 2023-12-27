@@ -21,11 +21,11 @@ import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
 import { MarkerSlots } from '../internal/durationMath'
 import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
-import { ZonedDateTimeBag, refineMaybeZonedDateTimeBag } from '../genericApi/bagGeneric'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { ensureString } from '../internal/cast'
 import { parseZonedOrPlainDateTime } from '../internal/parseIso'
+import { ZonedDateTimeBag, refineMaybeZonedDateTimeBag } from '../internal/bag'
 
 export type DurationArg = Duration | DurationBag | string
 

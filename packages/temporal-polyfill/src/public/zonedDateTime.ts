@@ -15,12 +15,9 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } fr
 import { getId } from '../internal/cast'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { ZonedDateTimeBag } from '../genericApi/bagGeneric'
-import { DurationBranding, TimeZoneBranding, ZonedDateTimeBranding } from '../genericApi/branding'
-import { DurationSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
+import { DurationBranding, ZonedDateTimeBranding } from '../genericApi/branding'
+import { ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as ZonedDateTimeFuncs from '../genericApi/zonedDateTime'
-
-// public
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -33,13 +30,14 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { TimeZone, TimeZoneArg, createTimeZone } from './timeZone'
+import { TimeZone, TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createCalendarGetters, createEpochGetterMethods, createTimeGetterMethods, neverValueOf } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { dateRefiners } from '../genericApi/refiners'
+import { ZonedDateTimeBag } from '../internal/bag'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 

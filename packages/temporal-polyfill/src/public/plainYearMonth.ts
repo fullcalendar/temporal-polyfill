@@ -6,12 +6,9 @@ import { LocalesArg, prepPlainYearMonthFormat } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { getId } from '../internal/cast'
-import { PlainYearMonthBag } from '../genericApi/bagGeneric'
 import { PlainYearMonthBranding } from '../genericApi/branding'
 import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import { PlainYearMonthSlots } from '../genericApi/slotsGeneric'
-
-// public
 import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { Calendar, CalendarArg } from './calendar'
@@ -21,6 +18,7 @@ import { neverValueOf } from './mixins'
 import { createDateModOps, createYearMonthDiffOps, createYearMonthModOps, createYearMonthMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { yearMonthGetters } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
+import { PlainYearMonthBag } from '../internal/bag'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 

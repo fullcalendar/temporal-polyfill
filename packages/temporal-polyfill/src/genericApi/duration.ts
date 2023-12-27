@@ -10,9 +10,9 @@ import { Unit, UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { DiffOps } from '../internal/calendarOps'
 import { DurationRoundOptions, RelativeToOptions, TimeDisplayOptions, TotalUnitOptionsWithRel, refineTimeDisplayOptions } from './optionsRefine'
-import { mergeDurationBag, refineDurationBag } from './bagGeneric'
 import { DurationBranding } from './branding'
 import { DurationSlots } from './slotsGeneric'
+import { mergeDurationBag, refineDurationBag } from '../internal/bag'
 
 export function create(
   years: number = 0,

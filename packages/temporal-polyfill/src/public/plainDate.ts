@@ -5,7 +5,6 @@ import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, r
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { getId } from '../internal/cast'
-import { PlainDateBag } from '../genericApi/bagGeneric'
 import { PlainDateBranding, PlainDateTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { PlainDateSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as PlainDateFuncs from '../genericApi/plainDate'
@@ -28,6 +27,7 @@ import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInva
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { dateCalendarGetters } from './mixins'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { PlainDateBag } from '../internal/bag'
 
 export type PlainDateArg = PlainDate | PlainDateBag<CalendarArg> | string
 

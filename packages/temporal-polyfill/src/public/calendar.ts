@@ -1,9 +1,8 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
 import { ensureString } from '../internal/cast'
-import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions, refineOverflowOptions } from '../genericApi/optionsRefine'
+import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../genericApi/optionsRefine'
 import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
-import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../genericApi/bagGeneric'
 import { CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../genericApi/branding'
 
 // public
@@ -20,6 +19,7 @@ import { calendarMethods } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { normalizeCalendarId } from '../internal/parseIso'
+import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
 
 // Calendar Class
 // -------------------------------------------------------------------------------------------------

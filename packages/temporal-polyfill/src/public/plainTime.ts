@@ -6,18 +6,14 @@ import {
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
-  prepareOptions,
   refineOverflowOptions,
 } from '../genericApi/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainTimeBag } from '../genericApi/bagGeneric'
 import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from '../genericApi/branding'
 import { PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from '../genericApi/slotsGeneric'
 import * as PlainTimeFuncs from '../genericApi/plainTime'
-
-// public
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -28,6 +24,7 @@ import { createTimeGetterMethods, neverValueOf } from './mixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot } from './calendarSlot'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { PlainTimeBag } from '../internal/bag'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 

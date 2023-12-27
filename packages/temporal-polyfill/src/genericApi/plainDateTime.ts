@@ -14,12 +14,12 @@ import { TimeZoneOps } from '../internal/timeZoneOps'
 import { DayTimeUnit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineDateTimeDisplayOptions, refineRoundOptions } from './optionsRefine'
-import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from './bagGeneric'
 import { PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainTimeBranding, PlainYearMonthBranding, ZonedDateTimeBranding } from './branding'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots } from './slotsGeneric'
 import { DateModOps, DateRefineOps, DiffOps, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from '../internal/calendarOps'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
+import { convertPlainDateTimeToZoned, convertToPlainMonthDay, convertToPlainYearMonth, mergePlainDateTimeBag, refinePlainDateTimeBag } from '../internal/bag'
 
 export function create<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,

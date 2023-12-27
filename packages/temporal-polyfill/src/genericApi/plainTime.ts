@@ -11,13 +11,12 @@ import { roundTime } from '../internal/round'
 import { TimeZoneOps, getSingleInstantFor } from '../internal/timeZoneOps'
 import { TimeUnit, Unit, UnitName } from '../internal/units'
 import { NumSign, pluckProps } from '../internal/utils'
-import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineDiffOptions, refineRoundOptions, refineTimeDisplayOptions } from './optionsRefine'
-import { PlainTimeBag } from './bagGeneric'
-import { mergePlainTimeBag, refinePlainTimeBag } from './bagGeneric'
+import { DiffOptions, OverflowOptions, RoundingOptions, TimeDisplayOptions, refineRoundOptions, refineTimeDisplayOptions } from './optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots } from './slotsGeneric'
-import { DurationBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from './branding'
+import { PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding } from './branding'
 import { DurationFields } from '../internal/durationFields'
 import { negateDuration } from '../internal/durationMath'
+import { PlainTimeBag, mergePlainTimeBag, refinePlainTimeBag } from '../internal/bag'
 
 export function create(
   isoHour: number = 0,
