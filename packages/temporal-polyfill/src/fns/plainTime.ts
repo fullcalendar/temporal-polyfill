@@ -1,17 +1,27 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
-import * as PlainTimeFuncs from '../genericApi/plainTime'
+import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
+import { DurationSlots, PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
 import { identityFunc } from '../internal/utils'
+import { createPlainTimeSlots } from '../internal/slotsCreate'
+import { plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
+import { parsePlainTime } from '../internal/parseIso'
+import { movePlainTime } from '../internal/move'
+import { diffPlainTimes } from '../internal/diff'
+import { roundPlainTime } from '../internal/round'
+import { compareIsoTimeFields } from '../internal/epochAndTime'
+import { plainTimesEqual } from '../internal/compare'
+import { formatPlainTimeIso } from '../internal/formatIso'
+import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
 
-export const create = PlainTimeFuncs.create
+export const create = createPlainTimeSlots
 
-export const fromFields = PlainTimeFuncs.fromFields
+export const fromFields = refinePlainTimeBag
 
-export const fromString = PlainTimeFuncs.fromString
+export const fromString = parsePlainTime
 
+// TODO: use util
 export function getFields(slots: PlainTimeSlots): TimeFields {
   return {
     hour: slots.isoHour,
@@ -23,40 +33,58 @@ export function getFields(slots: PlainTimeSlots): TimeFields {
   }
 }
 
-export const getISOFields = PlainTimeFuncs.getISOFields
-
 export function withFields(
   slots: PlainTimeSlots,
   mod: TimeBag,
   options?: OverflowOptions,
 ): PlainTimeSlots {
-  return PlainTimeFuncs.withFields(getFields(slots), mod, options)
+  return plainTimeWithFields(getFields(slots), mod, options)
 }
 
-export const add = PlainTimeFuncs.add
+export function add(
+  slots: PlainTimeSlots,
+  durationSlots: DurationSlots,
+): PlainTimeSlots {
+  return movePlainTime(false, slots, durationSlots)
+}
 
-export const subtract = PlainTimeFuncs.subtract
+export function subtract(
+  slots: PlainTimeSlots,
+  durationSlots: DurationSlots,
+): PlainTimeSlots {
+  return movePlainTime(true, slots, durationSlots)
+}
 
-export const until = PlainTimeFuncs.until
+export function until(
+  plainTimeSlots0: PlainTimeSlots,
+  plainTimeSlots1: PlainTimeSlots,
+  options?: DiffOptions,
+): DurationSlots {
+  return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options)
+}
 
-export const since = PlainTimeFuncs.since
+export function since(
+  plainTimeSlots0: PlainTimeSlots,
+  plainTimeSlots1: PlainTimeSlots,
+  options?: DiffOptions,
+): DurationSlots {
+  return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options, true)
+}
 
-export const round = PlainTimeFuncs.round
+export const round = roundPlainTime
 
-export const compare = PlainTimeFuncs.compare
+export const compare = compareIsoTimeFields
 
-export const equals = PlainTimeFuncs.equals
+export const equals = plainTimesEqual
 
-export const toString = PlainTimeFuncs.toString
-
-export const toJSON = PlainTimeFuncs.toJSON
+export const toString = formatPlainTimeIso
 
 // TODO: ensure options isn't undefined before accessing
 export function toZonedDateTime(
   slots: PlainTimeSlots,
   options: { timeZone: string, plainDate: PlainDateSlots<string> },
 ) {
-  return PlainTimeFuncs.toZonedDateTime(
+  return plainTimeToZonedDateTime(
     refineTimeZoneSlotString,
     identityFunc,
     queryNativeTimeZone,
@@ -65,12 +93,7 @@ export function toZonedDateTime(
   )
 }
 
-export function toPlainDateTime(
-  plainTimeSlots: PlainTimeSlots,
-  plainDateSlots: PlainDateSlots<string>,
-): PlainDateTimeSlots<string> {
-  return PlainTimeFuncs.toPlainDateTime(plainTimeSlots, plainDateSlots) // just pass through
-}
+export const toPlainDateTime = plainTimeToPlainDateTime
 
 export function toLocaleString(
   slots: PlainTimeSlots,

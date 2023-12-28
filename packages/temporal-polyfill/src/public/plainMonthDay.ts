@@ -5,7 +5,6 @@ import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflow
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { PlainMonthDayBranding, PlainMonthDaySlots, getId } from '../internal/slots'
-import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
 import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
@@ -15,7 +14,12 @@ import { neverValueOf } from './mixins'
 import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from './calendarOpsQuery'
 import { monthDayGetters } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
-import { PlainMonthDayBag } from '../internal/bag'
+import { PlainMonthDayBag, plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
+import { createPlainMonthDaySlots } from '../internal/slotsCreate'
+import { plainMonthDaysEqual } from '../internal/compare'
+import { formatPlainMonthDayIso } from '../internal/formatIso'
+import { plainMonthDayToPlainDate } from '../internal/convert'
+import { parsePlainMonthDay } from '../internal/parseIso'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
@@ -28,13 +32,13 @@ export class PlainMonthDay {
   ) {
     setSlots(
       this,
-      PlainMonthDayFuncs.create(refineCalendarSlot, isoMonth, isoDay, calendar, referenceIsoYear)
+      createPlainMonthDaySlots(refineCalendarSlot, isoMonth, isoDay, calendar, referenceIsoYear)
     )
   }
 
   with(mod: MonthDayBag, options?: OverflowOptions): PlainMonthDay {
     return createPlainMonthDay(
-      PlainMonthDayFuncs.withFields(
+      plainMonthDayWithFields(
         createMonthDayModOps,
         getPlainMonthDaySlots(this),
         this as any, // !!!
@@ -45,15 +49,15 @@ export class PlainMonthDay {
   }
 
   equals(otherArg: PlainMonthDayArg): boolean {
-    return PlainMonthDayFuncs.equals(getPlainMonthDaySlots(this), toPlainMonthDaySlots(otherArg))
+    return plainMonthDaysEqual(getPlainMonthDaySlots(this), toPlainMonthDaySlots(otherArg))
   }
 
   toString(options?: DateTimeDisplayOptions): string {
-    return PlainMonthDayFuncs.toString(getPlainMonthDaySlots(this), options)
+    return formatPlainMonthDayIso(getPlainMonthDaySlots(this), options)
   }
 
   toJSON(): string {
-    return PlainMonthDayFuncs.toJSON(getPlainMonthDaySlots(this))
+    return formatPlainMonthDayIso(getPlainMonthDaySlots(this))
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
@@ -63,7 +67,7 @@ export class PlainMonthDay {
 
   toPlainDate(bag: YearFields): PlainDate {
     return createPlainDate(
-      PlainMonthDayFuncs.toPlainDate(
+      plainMonthDayToPlainDate(
         createDateModOps,
         getPlainMonthDaySlots(this),
         this as any, // !!!
@@ -132,7 +136,7 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
     const calendarMaybe = slots.calendar || extractCalendarSlotFromBag(arg as PlainMonthDaySlots<CalendarSlot>)
     const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
 
-    return PlainMonthDayFuncs.fromFields(
+    return refinePlainMonthDayBag(
       createMonthDayRefineOps(calendar),
       !calendarMaybe,
       arg as MonthDayBag,
@@ -140,7 +144,7 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
     )
   }
 
-  const res = PlainMonthDayFuncs.fromString(createNativeStandardOps, arg)
+  const res = parsePlainMonthDay(createNativeStandardOps, arg)
   refineOverflowOptions(options) // parse unused options
   return res
 }

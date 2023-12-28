@@ -109,10 +109,10 @@ export function addToDuration<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  doSubtract: boolean,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
-  direction: -1 | 1 = 1,
 ): DurationSlots {
   const normalOptions = normalizeOptions(options)
   const markerSlots = refineRelativeTo(normalOptions.relativeTo)
@@ -130,7 +130,7 @@ export function addToDuration<RA, C, T>(
   ) {
     return {
       branding: DurationBranding,
-      ...addDayTimeDuration(slots, otherSlots, direction, largestUnit as DayTimeUnit),
+      ...addDayTimeDuration(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
     }
   }
 
@@ -138,8 +138,8 @@ export function addToDuration<RA, C, T>(
     throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
   }
 
-  if (direction === -1) {
-    otherSlots = negateDuration(otherSlots) as any // !!!
+  if (doSubtract) {
+    otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
@@ -157,14 +157,14 @@ export function addToDuration<RA, C, T>(
 }
 
 function addDayTimeDuration(
+  doSubtract: boolean,
   a: DurationFields,
   b: DurationFields,
-  sign: NumSign,
   largestUnit: DayTimeUnit
 ): DurationFields {
   const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
   const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
-  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, sign)
+  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, doSubtract ? -1 : 1)
 
   if (!Number.isFinite(combined[0])) {
     throw new RangeError('Too much')
@@ -176,7 +176,14 @@ function addDayTimeDuration(
   }
 }
 
-export function negateDuration(fields: DurationFields): DurationFields {
+export function negateDuration(slots: DurationSlots): DurationSlots {
+  return {
+    ...negateDurationFields(slots),
+    branding: DurationBranding,
+  }
+}
+
+export function negateDurationFields(fields: DurationFields): DurationFields {
   const res = {} as DurationFields
 
   for (const fieldName of durationFieldNamesAsc) {
@@ -186,9 +193,16 @@ export function negateDuration(fields: DurationFields): DurationFields {
   return res
 }
 
-export function absDuration(fields: DurationFields): DurationFields {
+export function absDuration(slots: DurationSlots): DurationSlots {
+  return {
+    ...absDurationFields(slots),
+    branding: DurationBranding,
+  }
+}
+
+export function absDurationFields(fields: DurationFields): DurationFields {
   if (queryDurationSign(fields) === -1) {
-    return negateDuration(fields)
+    return negateDurationFields(fields)
   }
   return fields
 }
@@ -215,6 +229,10 @@ function computeDurationSign(
   }
 
   return sign
+}
+
+export function queryDurationBlank(durationFields: DurationFields): boolean {
+  return !queryDurationSign(durationFields)
 }
 
 export const queryDurationSign = createLazyGenerator(computeDurationSign, WeakMap)

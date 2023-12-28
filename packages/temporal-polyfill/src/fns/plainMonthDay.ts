@@ -3,9 +3,14 @@ import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFie
 import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
-import * as PlainMonthDayFuncs from '../genericApi/plainMonthDay'
 import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { computeMonthDayFields } from '../internal/calendarNative'
+import { createPlainMonthDaySlots } from '../internal/slotsCreate'
+import { parsePlainMonthDay } from '../internal/parseIso'
+import { plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
+import { plainMonthDaysEqual } from '../internal/compare'
+import { formatPlainMonthDayIso } from '../internal/formatIso'
+import { plainMonthDayToPlainDate } from '../internal/convert'
 
 export function create(
   isoMonth: number,
@@ -13,7 +18,7 @@ export function create(
   calendar?: string,
   referenceIsoYear?: number,
 ): PlainMonthDaySlots<string> {
-  return PlainMonthDayFuncs.create(
+  return createPlainMonthDaySlots(
     refineCalendarSlotString,
     isoMonth,
     isoDay,
@@ -23,7 +28,7 @@ export function create(
 }
 
 export function fromString(s: string): PlainMonthDaySlots<string> {
-  return PlainMonthDayFuncs.fromString(createNativeMonthDayParseOps, s)
+  return parsePlainMonthDay(createNativeMonthDayParseOps, s)
 }
 
 export function fromFields(
@@ -33,7 +38,7 @@ export function fromFields(
   const calendarMaybe = extractCalendarIdFromBag(fields)
   const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
 
-  return PlainMonthDayFuncs.fromFields(
+  return refinePlainMonthDayBag(
     createNativeMonthDayRefineOps(calendar),
     !calendarMaybe,
     fields,
@@ -52,7 +57,7 @@ export function withFields(
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots<string> {
-  return PlainMonthDayFuncs.withFields(
+  return plainMonthDayWithFields(
     createNativeMonthDayModOps,
     plainMonthDaySlots,
     getFields(plainMonthDaySlots),
@@ -61,31 +66,15 @@ export function withFields(
   )
 }
 
-export function equals(
-  plainMonthDaySlots0: PlainMonthDaySlots<string>,
-  plainMonthDaySlots1: PlainMonthDaySlots<string>,
-): boolean {
-  return PlainMonthDayFuncs.equals(plainMonthDaySlots0, plainMonthDaySlots1)
-}
+export const equals = plainMonthDaysEqual
 
-export function toString(
-  plainMonthDaySlots: PlainMonthDaySlots<string>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return PlainMonthDayFuncs.toString(plainMonthDaySlots, options)
-}
-
-export function toJSON(
-  plainMonthDaySlots: PlainMonthDaySlots<string>,
-): string {
-  return PlainMonthDayFuncs.toJSON(plainMonthDaySlots)
-}
+export const toString = formatPlainMonthDayIso
 
 export function toPlainDate(
   plainMonthDaySlots: PlainMonthDaySlots<string>,
   bag: YearFields,
 ): PlainDateSlots<string> {
-  return PlainMonthDayFuncs.toPlainDate(
+  return plainMonthDayToPlainDate(
     createNativeDateModOps,
     plainMonthDaySlots,
     getFields(plainMonthDaySlots),

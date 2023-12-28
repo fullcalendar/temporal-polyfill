@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
-import { getLargestDurationUnit, negateDuration, queryDurationSign } from './durationMath'
+import { getLargestDurationUnit, negateDurationFields, queryDurationSign } from './durationMath'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields } from './calendarIsoFields'
 import { epochNanoToIso } from './epochAndTime'
 import { CalendarDisplay, OffsetDisplay, RoundingMode, SubsecDigits, TimeZoneDisplay } from './options'
@@ -329,7 +329,7 @@ export function formatDurationInternals(
   subsecDigits: SubsecDigits | undefined,
 ): string {
   const sign = queryDurationSign(durationFields)
-  const abs = sign === -1 ? negateDuration(durationFields): durationFields
+  const abs = sign === -1 ? negateDurationFields(durationFields): durationFields
   const { hours, minutes } = abs
 
   const [wholeSeconds, subsecNano] = dayTimeNanoToNumberRemainder(

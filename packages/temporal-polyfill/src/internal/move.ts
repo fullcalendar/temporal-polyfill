@@ -7,7 +7,7 @@ import {
   durationFieldsToDayTimeNano,
   durationFieldDefaults,
 } from './durationFields'
-import { durationHasDateParts, queryDurationSign } from './durationMath'
+import { durationHasDateParts, negateDuration, negateDurationFields, queryDurationSign } from './durationMath'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
@@ -29,23 +29,28 @@ import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calenda
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
-import { InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots } from './slots'
+import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots } from './slots'
 
 export function moveInstant(
+  doSubtract: boolean,
   instantSlots: InstantSlots,
-  durationSlots: DurationFields,
+  durationSlots: DurationSlots,
 ): InstantSlots {
   return {
     branding: InstantBranding,
-    epochNanoseconds: moveEpochNano(instantSlots.epochNanoseconds, durationSlots),
+    epochNanoseconds: moveEpochNano(
+      instantSlots.epochNanoseconds,
+      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+    ),
   }
 }
 
 export function moveZonedDateTime<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  doSubtract: boolean,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  durationSlots: DurationFields,
+  durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots<C, T> {
   // correct calling order. switch moveZonedEpochNano arg order?
@@ -56,7 +61,7 @@ export function moveZonedDateTime<C, T>(
     calendarOps,
     timeZoneOps,
     zonedDateTimeSlots.epochNanoseconds,
-    durationSlots,
+    doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     options,
   )
 
@@ -68,13 +73,18 @@ export function moveZonedDateTime<C, T>(
 
 export function movePlainYearMonth<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
+  doSubtract: boolean,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  durationFields: DurationFields,
+  durationFields: DurationSlots,
   options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
   let isoDateFields = moveToMonthStart(calendarOps, plainYearMonthSlots)
+
+  if (doSubtract) {
+    durationFields = negateDuration(durationFields)
+  }
 
   // if moving backwards in time, set to last day of month
   if (queryDurationSign(durationFields) < 0) {
@@ -97,8 +107,9 @@ export function movePlainYearMonth<C>(
 
 export function movePlainDateTime<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
+  doSubtract: boolean,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  durationSlots: DurationFields,
+  durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots<C> {
   return {
@@ -106,7 +117,7 @@ export function movePlainDateTime<C>(
     ...moveDateTime(
       getCalendarOps(plainDateTimeSlots.calendar),
       plainDateTimeSlots,
-      durationSlots,
+      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     ),
     branding: PlainDateTimeBranding, // YUCK. all because checkIsoDateTimeInBounds too liberal
@@ -115,8 +126,9 @@ export function movePlainDateTime<C>(
 
 export function movePlainDate<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
+  doSubtract: boolean,
   plainDateSlots: PlainDateSlots<C>,
-  durationSlots: DurationFields,
+  durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
   return {
@@ -124,18 +136,19 @@ export function movePlainDate<C>(
     ...moveDateEasy(
       getCalendarOps(plainDateSlots.calendar),
       plainDateSlots,
-      durationSlots,
+      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     )
   }
 }
 
 export function movePlainTime(
+  doSubtract: boolean,
   slots: PlainTimeSlots,
   durationSlots: DurationFields,
 ): PlainTimeSlots {
   return {
-    ...moveTime(slots, durationSlots)[0],
+    ...moveTime(slots, doSubtract ? negateDurationFields(durationSlots) : durationSlots)[0],
     branding: PlainTimeBranding,
   }
 }

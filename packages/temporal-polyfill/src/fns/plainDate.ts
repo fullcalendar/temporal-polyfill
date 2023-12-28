@@ -4,9 +4,18 @@ import { LocalesArg, prepCachedPlainDateFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import * as PlainDateFuncs from '../genericApi/plainDate'
 import * as Utils from './utils'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
+import { createPlainDateSlots } from '../internal/slotsCreate'
+import { parsePlainDate } from '../internal/parseIso'
+import { plainDateWithFields, refinePlainDateBag } from '../internal/bag'
+import { slotsWithCalendar } from '../internal/slotsMod'
+import { movePlainDate } from '../internal/move'
+import { diffPlainDates } from '../internal/diff'
+import { compareIsoDateFields } from '../internal/epochAndTime'
+import { plainDatesEqual } from '../internal/compare'
+import { formatPlainDateIso } from '../internal/formatIso'
+import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
 
 // TODO: do Readonly<> everywhere?
 
@@ -16,18 +25,16 @@ export function create(
   isoDay: number,
   calendar?: string,
 ): PlainDateSlots<string> {
-  return PlainDateFuncs.create(refineCalendarSlotString, isoYear, isoMonth, isoDay, calendar)
+  return createPlainDateSlots(refineCalendarSlotString, isoYear, isoMonth, isoDay, calendar)
 }
 
-export function fromString(s: string): PlainDateSlots<string> {
-  return PlainDateFuncs.fromString(s) // NOTE: just forwards
-}
+export const fromString = parsePlainDate
 
 export function fromFields(
   fields: DateBag & { calendar?: string },
   options?: OverflowOptions,
 ): PlainDateSlots<string> {
-  return PlainDateFuncs.fromFields(
+  return refinePlainDateBag(
     createNativeDateRefineOps(getCalendarIdFromBag(fields)),
     fields,
     options,
@@ -53,7 +60,7 @@ export function withFields(
   newFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots<string> {
-  return PlainDateFuncs.withFields(
+  return plainDateWithFields(
     createNativeDateModOps,
     slots,
     getFields(slots), // TODO: just use y/m/d?
@@ -62,15 +69,11 @@ export function withFields(
   )
 }
 
-// TODO: more DRY
 export function withCalendar(
   slots: PlainDateSlots<string>,
   calendarId: string,
 ): PlainDateSlots<string> {
-  return {
-    ...slots,
-    calendar: refineCalendarSlotString(calendarId)
-  }
+  return slotsWithCalendar(slots, refineCalendarSlotString(calendarId))
 }
 
 export function add(
@@ -78,8 +81,9 @@ export function add(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateSlots<string> {
-  return PlainDateFuncs.add(
+  return movePlainDate(
     createNativeMoveOps,
+    false,
     slots,
     durationSlots,
     options,
@@ -91,8 +95,9 @@ export function subtract(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateSlots<string> {
-  return PlainDateFuncs.subtract(
+  return movePlainDate(
     createNativeMoveOps,
+    true,
     slots,
     durationSlots,
     options,
@@ -104,7 +109,7 @@ export function until(
   slots1: PlainDateSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateFuncs.until(
+  return diffPlainDates(
     createNativeDiffOps,
     slots0,
     slots1,
@@ -117,25 +122,19 @@ export function since(
   slots1: PlainDateSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateFuncs.since(
+  return diffPlainDates(
     createNativeDiffOps,
     slots0,
     slots1,
     options,
+    true,
   )
 }
 
-export function compare(slots0: PlainDateSlots<string>, slots1: PlainDateSlots<string>): NumSign {
-  return PlainDateFuncs.compare(slots0, slots1) // NOTE: just forwards
-}
-
-export function equals(slots0: PlainDateSlots<string>, slots1: PlainDateSlots<string>): boolean {
-  return PlainDateFuncs.equals(slots0, slots1) // NOTE: just forwards
-}
-
-export function toString(slots: PlainDateSlots<string>, options?: DateTimeDisplayOptions): string {
-  return PlainDateFuncs.toString(slots, options) // NOTE: just forwards
-}
+// TODO: specific args
+export const equals = plainDatesEqual
+export const compare = compareIsoDateFields
+export const toString = formatPlainDateIso
 
 export function toZonedDateTime(
   slots: PlainDateSlots<string>,
@@ -145,7 +144,7 @@ export function toZonedDateTime(
     ? { timeZone: options }
     : options
 
-  return PlainDateFuncs.toZonedDateTime(
+  return plainDateToZonedDateTime(
     refineTimeZoneSlotString,
     identityFunc,
     queryNativeTimeZone,
@@ -154,18 +153,13 @@ export function toZonedDateTime(
   )
 }
 
-export function toPlainDateTime(
-  slots: PlainDateSlots<string>,
-  plainTime?: PlainTimeSlots,
-): PlainDateTimeSlots<string> {
-  return PlainDateFuncs.toPlainDateTime(slots, plainTime) // NOTE: just forwards
-}
+export const toPlainDateTime = plainDateToPlainDateTime
 
 export function toPlainYearMonth(slots: PlainDateSlots<string>): PlainYearMonthSlots<string> {
   const calenadarOps = createNativePartOps(slots.calendar)
   const [year, month, day] = calenadarOps.dateParts(slots) // TODO: DRY
 
-  return PlainDateFuncs.toPlainYearMonth(
+  return plainDateToPlainYearMonth(
     createNativeYearMonthRefineOps,
     slots,
     { year, month, day },
@@ -176,7 +170,7 @@ export function toPlainMonthDay(slots: PlainDateSlots<string>): PlainMonthDaySlo
   const calenadarOps = createNativePartOps(slots.calendar)
   const [year, month, day] = calenadarOps.dateParts(slots) // TODO: DRY
 
-  return PlainDateFuncs.toPlainMonthDay(
+  return plainDateToPlainMonthDay(
     createNativeMonthDayRefineOps,
     slots,
     { year, month, day },

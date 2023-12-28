@@ -30,6 +30,16 @@ const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
 
 // -------------------------------------------------------------------------------------------------
 
+export function durationWithFields(
+  slots: DurationSlots,
+  fields: DurationBag,
+): DurationSlots {
+  return {
+    ...mergeDurationBag(slots, fields),
+    branding: DurationBranding,
+  }
+}
+
 export function plainDateWithFields<C>(
   getCalendarOps: (calendarSlot: C) => DateModOps<C>,
   plainDateSlots: PlainDateSlots<C>,

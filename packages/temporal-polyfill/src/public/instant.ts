@@ -5,9 +5,6 @@ import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } fr
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
-import * as InstantFuncs from '../genericApi/instant'
-
-// public
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { CalendarSlot, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -17,6 +14,14 @@ import { CalendarArg } from './calendar'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createEpochGetterMethods, neverValueOf } from './mixins'
 import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
+import { createInstantSlots } from '../internal/slotsCreate'
+import { moveInstant } from '../internal/move'
+import { diffInstants } from '../internal/diff'
+import { roundInstant } from '../internal/round'
+import { compareInstants, instantsEqual } from '../internal/compare'
+import { formatInstantIso } from '../internal/formatIso'
+import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
+import { parseInstant } from '../internal/parseIso'
 
 export type InstantArg = Instant | string
 
@@ -24,13 +29,14 @@ export class Instant {
   constructor(epochNano: bigint) {
     setSlots(
       this,
-      InstantFuncs.create(epochNano),
+      createInstantSlots(epochNano),
     )
   }
 
   add(durationArg: DurationArg): Instant {
     return createInstant(
-      InstantFuncs.add(
+      moveInstant(
+        false,
         getInstantSlots(this),
         toDurationSlots(durationArg),
       ),
@@ -39,7 +45,8 @@ export class Instant {
 
   subtract(durationArg: DurationArg): Instant {
     return createInstant(
-      InstantFuncs.subtract(
+      moveInstant(
+        true,
         getInstantSlots(this),
         toDurationSlots(durationArg),
       ),
@@ -48,7 +55,7 @@ export class Instant {
 
   until(otherArg: InstantArg, options?: DiffOptions): Duration {
     return createDuration(
-      InstantFuncs.until(
+      diffInstants(
         getInstantSlots(this),
         toInstantSlots(otherArg),
         options,
@@ -58,7 +65,7 @@ export class Instant {
 
   since(otherArg: InstantArg, options?: DiffOptions): Duration {
     return createDuration(
-      InstantFuncs.since(
+      diffInstants(
         getInstantSlots(this),
         toInstantSlots(otherArg),
         options,
@@ -68,7 +75,7 @@ export class Instant {
 
   round(options: RoundingOptions | UnitName): Instant {
     return createInstant(
-      InstantFuncs.round(
+      roundInstant(
         getInstantSlots(this),
         options,
       ),
@@ -76,11 +83,11 @@ export class Instant {
   }
 
   equals(otherArg: InstantArg): boolean {
-    return InstantFuncs.equals(getInstantSlots(this), toInstantSlots(otherArg))
+    return instantsEqual(getInstantSlots(this), toInstantSlots(otherArg))
   }
 
   toString(options?: InstantDisplayOptions<TimeZoneSlot>): string {
-    return InstantFuncs.toString(
+    return formatInstantIso(
       refineTimeZoneSlot,
       createSimpleTimeZoneOps,
       getInstantSlots(this),
@@ -89,7 +96,7 @@ export class Instant {
   }
 
   toJSON(): string {
-    return InstantFuncs.toString(
+    return formatInstantIso(
       refineTimeZoneSlot,
       createSimpleTimeZoneOps,
       getInstantSlots(this),
@@ -103,7 +110,7 @@ export class Instant {
 
   toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
     return createZonedDateTime(
-      InstantFuncs.toZonedDateTimeISO(
+      instantToZonedDateTime(
         getInstantSlots(this),
         refineTimeZoneSlot(timeZoneArg),
       ),
@@ -115,7 +122,7 @@ export class Instant {
     const refinedObj = ensureObjectlike(options)
 
     return createZonedDateTime(
-      InstantFuncs.toZonedDateTime(
+      instantToZonedDateTime(
         slots,
         refineTimeZoneSlot(refinedObj.timeZone),
         refineCalendarSlot(refinedObj.calendar),
@@ -128,23 +135,23 @@ export class Instant {
   }
 
   static fromEpochSeconds(epochSec: number): Instant {
-    return createInstant(InstantFuncs.fromEpochSeconds(epochSec))
+    return createInstant(epochSecToInstant(epochSec))
   }
 
   static fromEpochMilliseconds(epochMilli: number): Instant {
-    return createInstant(InstantFuncs.fromEpochMilliseconds(epochMilli))
+    return createInstant(epochMilliToInstant(epochMilli))
   }
 
   static fromEpochMicroseconds(epochMicro: bigint): Instant {
-    return createInstant(InstantFuncs.fromEpochMicroseconds(epochMicro))
+    return createInstant(epochMicroToInstant(epochMicro))
   }
 
   static fromEpochNanoseconds(epochNano: bigint): Instant {
-    return createInstant(InstantFuncs.fromEpochNanoseconds(epochNano))
+    return createInstant(epochNanoToInstant(epochNano))
   }
 
   static compare(a: InstantArg, b: InstantArg): NumSign {
-    return InstantFuncs.compare(toInstantSlots(a), toInstantSlots(b))
+    return compareInstants(toInstantSlots(a), toInstantSlots(b))
   }
 }
 
@@ -182,7 +189,7 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
       }
     }
   }
-  return InstantFuncs.fromString(arg as any)
+  return parseInstant(arg as any)
 }
 
 // Legacy Date

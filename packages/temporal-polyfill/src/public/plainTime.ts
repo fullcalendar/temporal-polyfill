@@ -1,5 +1,5 @@
 import { TimeBag } from '../internal/calendarFields'
-import { IsoTimeFields, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
+import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
 import { LocalesArg, prepPlainTimeFormat } from '../internal/formatIntl'
 import {
   DiffOptions,
@@ -12,7 +12,6 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { DurationBranding, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
-import * as PlainTimeFuncs from '../genericApi/plainTime'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -23,7 +22,16 @@ import { createTimeGetterMethods, neverValueOf } from './mixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot } from './calendarSlot'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { PlainTimeBag } from '../internal/bag'
+import { PlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
+import { createPlainTimeSlots } from '../internal/slotsCreate'
+import { movePlainTime } from '../internal/move'
+import { diffPlainTimes } from '../internal/diff'
+import { roundPlainTime } from '../internal/round'
+import { plainTimesEqual } from '../internal/compare'
+import { formatPlainTimeIso } from '../internal/formatIso'
+import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
+import { compareIsoTimeFields } from '../internal/epochAndTime'
+import { parsePlainTime } from '../internal/parseIso'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 
@@ -38,59 +46,57 @@ export class PlainTime {
   ) {
     setSlots(
       this,
-      PlainTimeFuncs.create(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond),
+      createPlainTimeSlots(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond),
     )
   }
 
   with(mod: TimeBag, options?: OverflowOptions): PlainTime {
     getPlainTimeSlots(this) // validate this
     return createPlainTime(
-      // it's crazy we don't do prepareOptions
-      PlainTimeFuncs.withFields(this as any, rejectInvalidBag(mod), options) // any!!!
+      plainTimeWithFields(this as any, rejectInvalidBag(mod), options) // any!!!
     )
   }
 
   add(durationArg: DurationArg): PlainTime {
     return createPlainTime(
-      PlainTimeFuncs.add(getPlainTimeSlots(this), toDurationSlots(durationArg))
+      movePlainTime(false, getPlainTimeSlots(this), toDurationSlots(durationArg))
     )
   }
 
   subtract(durationArg: DurationArg): PlainTime {
     return createPlainTime(
-      PlainTimeFuncs.subtract(getPlainTimeSlots(this), toDurationSlots(durationArg))
+      movePlainTime(true, getPlainTimeSlots(this), toDurationSlots(durationArg))
     )
   }
 
   until(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      PlainTimeFuncs.until(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
+      diffPlainTimes(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
     )
   }
 
   since(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-    return createDuration({
-      branding: DurationBranding, // weird
-      ...PlainTimeFuncs.since(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
-    })
+    return createDuration(
+      diffPlainTimes(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options, true)
+    )
   }
 
   round(options: RoundingOptions | UnitName): PlainTime {
     return createPlainTime(
-      PlainTimeFuncs.round(getPlainTimeSlots(this), options)
+      roundPlainTime(getPlainTimeSlots(this), options)
     )
   }
 
   equals(other: PlainTimeArg): boolean {
-    return PlainTimeFuncs.equals(getPlainTimeSlots(this), toPlainTimeSlots(other))
+    return plainTimesEqual(getPlainTimeSlots(this), toPlainTimeSlots(other))
   }
 
   toString(options?: TimeDisplayOptions): string {
-    return PlainTimeFuncs.toString(getPlainTimeSlots(this), options)
+    return formatPlainTimeIso(getPlainTimeSlots(this), options)
   }
 
   toJSON(): string {
-    return PlainTimeFuncs.toJSON(getPlainTimeSlots(this))
+    return formatPlainTimeIso(getPlainTimeSlots(this))
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
@@ -100,7 +106,7 @@ export class PlainTime {
 
   toZonedDateTime(options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
     return createZonedDateTime(
-      PlainTimeFuncs.toZonedDateTime(
+      plainTimeToZonedDateTime(
         refineTimeZoneSlot,
         toPlainDateSlots,
         createTimeZoneOps,
@@ -112,12 +118,13 @@ export class PlainTime {
 
   toPlainDateTime(plainDateArg: PlainDateArg): PlainDateTime {
     return createPlainDateTime(
-      PlainTimeFuncs.toPlainDateTime(getPlainTimeSlots(this), toPlainDateSlots(plainDateArg))
+      plainTimeToPlainDateTime(getPlainTimeSlots(this), toPlainDateSlots(plainDateArg))
     )
   }
 
   getISOFields(): IsoTimeFields {
-    return PlainTimeFuncs.getISOFields(getPlainTimeSlots(this))
+    // TODO: make util
+    return pluckProps(isoTimeFieldNamesAlpha, getPlainTimeSlots(this))
   }
 
   static from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
@@ -125,7 +132,7 @@ export class PlainTime {
   }
 
   static compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumSign {
-    return PlainTimeFuncs.compare(
+    return compareIsoTimeFields(
       toPlainTimeSlots(arg0),
       toPlainTimeSlots(arg1),
     )
@@ -184,9 +191,9 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
         }
     }
 
-    return PlainTimeFuncs.fromFields(arg as PlainTimeBag, options)
+    return refinePlainTimeBag(arg as PlainTimeBag, options)
   }
 
   refineOverflowOptions(options) // parse unused options
-  return PlainTimeFuncs.fromString(arg)
+  return parsePlainTime(arg)
 }

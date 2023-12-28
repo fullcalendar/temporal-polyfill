@@ -3,10 +3,18 @@ import { NumSign } from '../internal/utils'
 import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
-import * as PlainYearMonthFuncs from '../genericApi/plainYearMonth'
 import * as Utils from './utils'
 import { createNativeDateModOps, createNativePartOps, createNativeYearMonthDiffOps, createNativeYearMonthModOps, createNativeYearMonthMoveOps, createNativeYearMonthParseOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { computeYearMonthFields } from '../internal/calendarNative'
+import { createPlainYearMonthSlots } from '../internal/slotsCreate'
+import { parsePlainYearMonth } from '../internal/parseIso'
+import { plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bag'
+import { movePlainYearMonth } from '../internal/move'
+import { diffPlainYearMonth } from '../internal/diff'
+import { compareIsoDateFields } from '../internal/epochAndTime'
+import { plainYearMonthsEqual } from '../internal/compare'
+import { formatPlainYearMonthIso } from '../internal/formatIso'
+import { plainYearMonthToPlainDate } from '../internal/convert'
 
 export function create(
   isoYear: number,
@@ -14,18 +22,18 @@ export function create(
   calendar?: string,
   referenceIsoDay?: number,
 ): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.create(refineCalendarSlotString, isoYear, isoMonth, calendar, referenceIsoDay)
+  return createPlainYearMonthSlots(refineCalendarSlotString, isoYear, isoMonth, calendar, referenceIsoDay)
 }
 
 export function fromString(s: string): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.fromString(createNativeYearMonthParseOps, s)
+  return parsePlainYearMonth(createNativeYearMonthParseOps, s)
 }
 
 export function fromFields(
   bag: YearMonthBag & { calendar?: string },
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.fromFields(
+  return refinePlainYearMonthBag(
     createNativeYearMonthRefineOps(getCalendarIdFromBag(bag)),
     bag,
     options,
@@ -50,7 +58,7 @@ export function withFields(
   mod: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.withFields(
+  return plainYearMonthWithFields(
     createNativeYearMonthModOps,
     plainYearMonthSlots,
     initialFields,
@@ -64,8 +72,9 @@ export function add(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.add(
+  return movePlainYearMonth(
     createNativeYearMonthMoveOps,
+    false,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -77,8 +86,9 @@ export function subtract(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
-  return PlainYearMonthFuncs.subtract(
+  return movePlainYearMonth(
     createNativeYearMonthMoveOps,
+    true,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -90,7 +100,7 @@ export function until(
   plainYearMonthSlots1: PlainYearMonthSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainYearMonthFuncs.until(
+  return diffPlainYearMonth(
     createNativeYearMonthDiffOps,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
@@ -103,47 +113,27 @@ export function since(
   plainYearMonthSlots1: PlainYearMonthSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainYearMonthFuncs.since(
+  return diffPlainYearMonth(
     createNativeYearMonthDiffOps,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
     options,
+    true,
   )
 }
 
-export function compare(
-  plainYearMonthSlots0: PlainYearMonthSlots<string>,
-  plainYearMonthSlots1: PlainYearMonthSlots<string>,
-): NumSign {
-  return PlainYearMonthFuncs.compare(plainYearMonthSlots0, plainYearMonthSlots1) // just forwards
-}
+export const compare = compareIsoDateFields
 
-export function equals(
-  plainYearMonthSlots0: PlainYearMonthSlots<string>,
-  plainYearMonthSlots1: PlainYearMonthSlots<string>,
-): boolean {
-  return PlainYearMonthFuncs.equals(plainYearMonthSlots0, plainYearMonthSlots1) // just forwards
-}
+export const equals = plainYearMonthsEqual
 
-export function toString(
-  plainYearMonthSlots: PlainYearMonthSlots<string>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return PlainYearMonthFuncs.toString(plainYearMonthSlots, options) // just forwards
-}
-
-export function toJSON(
-  plainYearMonthSlots: PlainYearMonthSlots<string>,
-): string {
-  return PlainYearMonthFuncs.toJSON(plainYearMonthSlots) // just forwards
-}
+export const toString = formatPlainYearMonthIso
 
 export function toPlainDate(
   plainYearMonthSlots: PlainYearMonthSlots<string>,
   plainYearMonthFields: YearMonthFieldsIntl,
   bag: { day: number },
 ): PlainDateSlots<string> {
-  return PlainYearMonthFuncs.toPlainDate(
+  return plainYearMonthToPlainDate(
     createNativeDateModOps,
     plainYearMonthSlots,
     plainYearMonthFields,

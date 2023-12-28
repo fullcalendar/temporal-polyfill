@@ -279,17 +279,10 @@ export function plainDateToPlainMonthDay<C>(
   }
 }
 
-export function instantToZonedDateTimeISO<T>(
-  instantSlots: InstantSlots,
-  timeZoneSlot: T,
-): ZonedDateTimeSlots<string, T> {
-  return instantToZonedDateTime(instantSlots, timeZoneSlot, isoCalendarId)
-}
-
 export function instantToZonedDateTime<C, T>(
   instantSlots: InstantSlots,
   timeZoneSlot: T,
-  calendarSlot: C,
+  calendarSlot: C = isoCalendarId as any,
 ): ZonedDateTimeSlots<C, T> {
   return {
     branding: ZonedDateTimeBranding,

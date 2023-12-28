@@ -1,32 +1,63 @@
 import { LocalesArg, prepCachedInstantFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { InstantDisplayOptions } from '../internal/optionsRefine'
-import { InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import * as InstantFuncs from '../genericApi/instant'
+import { DiffOptions, InstantDisplayOptions } from '../internal/optionsRefine'
+import { DurationSlots, InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { createInstantSlots } from '../internal/slotsCreate'
+import { parseInstant } from '../internal/parseIso'
+import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
+import { moveInstant } from '../internal/move'
+import { compareInstants, instantsEqual } from '../internal/compare'
+import { formatInstantIso } from '../internal/formatIso'
+import { diffInstants } from '../internal/diff'
+import { roundInstant } from '../internal/round'
 
-export const create = InstantFuncs.create
+export const create = createInstantSlots
 
-export const fromString = InstantFuncs.fromString
+export const fromString = parseInstant
 
-export const fromEpochSeconds = InstantFuncs.fromEpochSeconds
+export const fromEpochSeconds = epochSecToInstant
 
-export const fromEpochMilliseconds = InstantFuncs.fromEpochMilliseconds
+export const fromEpochMilliseconds = epochMilliToInstant
 
-export const fromEpochMicroseconds = InstantFuncs.fromEpochMicroseconds
+export const fromEpochMicroseconds = epochMicroToInstant
 
-export const fromEpochNanoseconds = InstantFuncs.fromEpochNanoseconds
+export const fromEpochNanoseconds = epochNanoToInstant
 
-export const add = InstantFuncs.add
+export function add(instantSlots: InstantSlots, durationSlots: DurationSlots): InstantSlots {
+  return moveInstant(false, instantSlots, durationSlots)
+}
 
-export const subtract = InstantFuncs.subtract
+export function subtract(instantSlots: InstantSlots, durationSlots: DurationSlots): InstantSlots {
+  return moveInstant(true, instantSlots, durationSlots)
+}
 
-export const compare = InstantFuncs.compare
+export function until(
+  instantSlots0: InstantSlots,
+  instantSlots1: InstantSlots,
+  options?: DiffOptions,
+): DurationSlots {
+  return diffInstants(instantSlots0, instantSlots1, options)
+}
+
+export function since(
+  instantSlots0: InstantSlots,
+  instantSlots1: InstantSlots,
+  options?: DiffOptions,
+): DurationSlots {
+  return diffInstants(instantSlots0, instantSlots1, options, true)
+}
+
+export const round = roundInstant
+
+export const equals = instantsEqual
+
+export const compare = compareInstants
 
 export function toString(
   instantSlots: InstantSlots,
   options?: InstantDisplayOptions<string>,
 ): string {
-  return InstantFuncs.toString(
+  return formatInstantIso(
     refineTimeZoneSlotString,
     queryNativeTimeZone,
     instantSlots,
@@ -37,7 +68,7 @@ export function toString(
 export function toJSON(
   instantSlots: InstantSlots,
 ): string {
-  return InstantFuncs.toString(
+  return formatInstantIso(
     refineTimeZoneSlotString,
     queryNativeTimeZone,
     instantSlots,
@@ -48,14 +79,17 @@ export function toZonedDateTimeISO(
   instantSlots: InstantSlots,
   timeZoneSlot: string,
 ): ZonedDateTimeSlots<string, string> {
-  return InstantFuncs.toZonedDateTimeISO(instantSlots, timeZoneSlot) // just forward
+  return instantToZonedDateTime(
+    instantSlots,
+    refineTimeZoneSlotString(timeZoneSlot),
+  )
 }
 
 export function toZonedDateTime(
   instantSlots: InstantSlots,
   options: { timeZone: string, calendar: string }
 ): ZonedDateTimeSlots<string, string> {
-  return InstantFuncs.toZonedDateTime(
+  return instantToZonedDateTime(
     instantSlots,
     refineTimeZoneSlotString(options.timeZone),
     refineCalendarSlotString(options.calendar),

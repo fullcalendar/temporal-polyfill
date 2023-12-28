@@ -1,9 +1,9 @@
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from "../internal/calendarIsoFields"
-import { DayTimeNano } from '../internal/dayTimeNano'
-import { epochMilliToNano } from '../internal/epochAndTime'
-import { OrigDateTimeFormat } from '../internal/formatIntl'
-import { SimpleTimeZoneOps, zonedInternalsToIso } from '../internal/timeZoneOps'
-import { pluckProps } from '../internal/utils'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldNamesDesc } from "./calendarIsoFields"
+import { DayTimeNano } from './dayTimeNano'
+import { epochMilliToNano } from './epochAndTime'
+import { OrigDateTimeFormat } from './formatIntl'
+import { SimpleTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
+import { pluckProps } from './utils'
 
 export function getCurrentIsoDateTime(timeZoneOps: SimpleTimeZoneOps): IsoDateTimeFields {
   const zonedSlots = { epochNanoseconds: getCurrentEpochNanoseconds() }

@@ -5,7 +5,7 @@ import {
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationFields'
-import { negateDuration } from './durationMath'
+import { negateDurationFields } from './durationMath'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
@@ -57,7 +57,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   )
 
   if (invert) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return {
@@ -83,7 +83,7 @@ export function diffInstants(
   )
 
   if (invert) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return {
@@ -113,7 +113,7 @@ export function diffPlainDateTimes<C extends IdLike>(
   )
 
   if (invert) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return {
@@ -143,7 +143,7 @@ export function diffPlainYearMonth<C extends IdLike>(
   )
 
   if (invert) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return {
@@ -179,7 +179,7 @@ export function diffPlainDates<C extends IdLike>(
   )
 
   if (invert) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return {
@@ -204,7 +204,7 @@ export function diffPlainTimes(
   )
 
   if (invert) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return {

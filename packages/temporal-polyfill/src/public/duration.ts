@@ -7,7 +7,6 @@ import {
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
-import * as DurationFuncs from '../genericApi/duration'
 import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { durationGettersMethods, neverValueOf } from './mixins'
@@ -18,13 +17,17 @@ import { createTimeZoneOps } from './timeZoneOpsQuery'
 import { LocalesArg } from '../internal/formatIntl'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
-import { MarkerSlots } from '../internal/durationMath'
+import { MarkerSlots, absDuration, addToDuration, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
 import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { ensureString } from '../internal/cast'
-import { parseZonedOrPlainDateTime } from '../internal/parseIso'
-import { ZonedDateTimeBag, refineMaybeZonedDateTimeBag } from '../internal/bag'
+import { parseDuration, parseZonedOrPlainDateTime } from '../internal/parseIso'
+import { ZonedDateTimeBag, durationWithFields, refineDurationBag, refineMaybeZonedDateTimeBag } from '../internal/bag'
+import { createDurationSlots } from '../internal/slotsCreate'
+import { totalDuration } from '../internal/total'
+import { formatDurationIso } from '../internal/formatIso'
+import { compareDurations } from '../internal/compare'
 
 export type DurationArg = Duration | DurationBag | string
 
@@ -41,7 +44,7 @@ export class Duration {
     microseconds?: number,
     nanoseconds?: number,
   ) {
-    setSlots(this, DurationFuncs.create(
+    setSlots(this, createDurationSlots(
       years,
       months,
       weeks,
@@ -56,15 +59,16 @@ export class Duration {
   }
 
   with(mod: DurationBag): Duration {
-    return createDuration(DurationFuncs.withFields(getDurationSlots(this), mod))
+    return createDuration(durationWithFields(getDurationSlots(this), mod))
   }
 
   add(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
     return createDuration(
-      DurationFuncs.add(
+      addToDuration(
         refinePublicRelativeTo,
         createDiffOps,
         createTimeZoneOps,
+        false,
         getDurationSlots(this),
         toDurationSlots(otherArg),
         options,
@@ -74,10 +78,11 @@ export class Duration {
 
   subtract(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
     return createDuration(
-      DurationFuncs.subtract(
+      addToDuration(
         refinePublicRelativeTo,
         createDiffOps,
         createTimeZoneOps,
+        true,
         getDurationSlots(this),
         toDurationSlots(otherArg),
         options,
@@ -86,16 +91,16 @@ export class Duration {
   }
 
   negated(): Duration {
-    return createDuration(DurationFuncs.negated(getDurationSlots(this)))
+    return createDuration(negateDuration(getDurationSlots(this)))
   }
 
   abs(): Duration {
-    return createDuration(DurationFuncs.abs(getDurationSlots(this)))
+    return createDuration(absDuration(getDurationSlots(this)))
   }
 
   round(options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>): Duration {
     return createDuration(
-      DurationFuncs.round(
+      roundDuration(
         refinePublicRelativeTo,
         createDiffOps,
         createTimeZoneOps,
@@ -106,7 +111,7 @@ export class Duration {
   }
 
   total(options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
-    return DurationFuncs.total(
+    return totalDuration(
       refinePublicRelativeTo,
       createDiffOps,
       createTimeZoneOps,
@@ -116,7 +121,7 @@ export class Duration {
   }
 
   toString(options?: TimeDisplayOptions): string {
-    return DurationFuncs.toString(getDurationSlots(this), options)
+    return formatDurationIso(getDurationSlots(this), options)
   }
 
   toLocaleString(locales?: LocalesArg, options?: any): string {
@@ -127,15 +132,15 @@ export class Duration {
   // TODO: toLocaleString
 
   toJSON(): string {
-    return DurationFuncs.toJSON(getDurationSlots(this))
+    return formatDurationIso(getDurationSlots(this))
   }
 
   get blank(): boolean {
-    return DurationFuncs.blank(getDurationSlots(this))
+    return queryDurationBlank(getDurationSlots(this))
   }
 
   get sign(): NumSign {
-    return DurationFuncs.sign(getDurationSlots(this))
+    return queryDurationSign(getDurationSlots(this))
   }
 
   static from(arg: DurationArg): Duration {
@@ -147,7 +152,7 @@ export class Duration {
     durationArg1: DurationArg,
     options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
   ): NumSign {
-    return DurationFuncs.compare(
+    return compareDurations(
       refinePublicRelativeTo,
       createDiffOps,
       createTimeZoneOps,
@@ -188,10 +193,10 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
       return slots as DurationSlots
     }
 
-    return DurationFuncs.fromFields(arg as DurationBag)
+    return refineDurationBag(arg as DurationBag)
   }
 
-  return DurationFuncs.fromString(arg)
+  return parseDuration(arg)
 }
 
 function refinePublicRelativeTo(

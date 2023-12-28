@@ -4,7 +4,7 @@ import {
   DurationFields,
   durationFieldNamesAsc,
 } from './durationFields'
-import { negateDuration } from './durationMath'
+import { negateDurationFields } from './durationMath'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -615,7 +615,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
   }
 
   if (parseSign(parts[1]) < 0) {
-    durationFields = negateDuration(durationFields)
+    durationFields = negateDurationFields(durationFields)
   }
 
   return durationFields

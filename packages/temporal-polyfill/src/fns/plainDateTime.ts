@@ -5,10 +5,20 @@ import { LocalesArg, prepCachedPlainDateTimeFormat } from '../internal/formatInt
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
-import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 import * as Utils from './utils'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { DurationFields } from '../internal/durationFields'
+import { createPlainDateTimeSlots } from '../internal/slotsCreate'
+import { parsePlainDateTime } from '../internal/parseIso'
+import { plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
+import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
+import { movePlainDateTime } from '../internal/move'
+import { diffPlainDateTimes } from '../internal/diff'
+import { roundPlainDateTime } from '../internal/round'
+import { compareIsoDateTimeFields } from '../internal/epochAndTime'
+import { plainDateTimesEqual } from '../internal/compare'
+import { formatPlainDateTimeIso } from '../internal/formatIso'
+import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 
 // TODO: do Readonly<> everywhere?
 
@@ -24,7 +34,7 @@ export function create(
   isoNanosecond?: number,
   calendar?: string,
 ): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.create(
+  return createPlainDateTimeSlots(
     refineCalendarSlotString,
     isoYear, isoMonth, isoDay,
     isoHour, isoMinute, isoSecond,
@@ -33,20 +43,9 @@ export function create(
   )
 }
 
-export function fromString(s: string): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.fromString(s) // NOTE: just forwards
-}
+export const fromString = parsePlainDateTime
 
-export function fromFields(
-  fields: DateTimeBag & { calendar?: string },
-  options?: OverflowOptions,
-): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.fromFields(
-    createNativeDateRefineOps(getCalendarIdFromBag(fields)),
-    fields,
-    options,
-  )
-}
+export const fromFields = refinePlainDateTimeBag
 
 export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields & Partial<EraYearFields> {
   return {
@@ -77,7 +76,7 @@ export function withFields(
   newFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.withFields(
+  return plainDateTimeWithFields(
     createNativeDateModOps,
     plainDateTimeSlots,
     getFields(plainDateTimeSlots), // TODO: just use y/m/d?
@@ -86,45 +85,34 @@ export function withFields(
   )
 }
 
-export function withPlainTime<C>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainTimeSlots: PlainTimeSlots,
-): PlainDateTimeSlots<C> {
-  return PlainDateTimeFuncs.withPlainTime(plainDateTimeSlots, plainTimeSlots) // just forward
-}
+export const withPlainTime = plainDateTimeWithPlainTime
 
-export function withPlainDate(
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-  plainDateSlots: PlainDateSlots<string>,
-) {
-  return PlainDateTimeFuncs.withPlainDate(plainDateTimeSlots, plainDateSlots) // just forward
-}
+export const withPlainDate = plainDateTimeWithPlainDate
 
-// TODO: more DRY
 export function withCalendar(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
   calendarId: string,
 ): PlainDateTimeSlots<string> {
-  return {
-    ...plainDateTimeSlots,
-    calendar: refineCalendarSlotString(calendarId)
-  }
+  return slotsWithCalendar(
+    plainDateTimeSlots,
+    refineCalendarSlotString(calendarId),
+  )
 }
 
 export function add(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
-  durationSlots: DurationFields,
+  durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.add(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
+  return movePlainDateTime(createNativeMoveOps, false, plainDateTimeSlots, durationSlots, options)
 }
 
 export function subtract(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
-  durationSlots: DurationFields,
+  durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.subtract(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
+  return movePlainDateTime(createNativeMoveOps, true, plainDateTimeSlots, durationSlots, options)
 }
 
 export function until(
@@ -132,7 +120,7 @@ export function until(
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateTimeFuncs.until(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options)
+  return diffPlainDateTimes(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options)
 }
 
 export function since(
@@ -140,51 +128,26 @@ export function since(
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
   options?: DiffOptions,
 ): DurationSlots {
-  return PlainDateTimeFuncs.since(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options) as
-    unknown as DurationSlots // !!!
+  return diffPlainDateTimes(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
 }
 
-export function round(
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-  options: RoundingOptions | UnitName,
-): PlainDateTimeSlots<string> {
-  return PlainDateTimeFuncs.round(plainDateTimeSlots, options) // just forward
-}
+export const round = roundPlainDateTime
 
-export function compare(
-  plainDateTimeSlots0: PlainDateTimeSlots<string>,
-  plainDateTimeSlots1: PlainDateTimeSlots<string>,
-): NumSign {
-  return PlainDateTimeFuncs.compare(plainDateTimeSlots0, plainDateTimeSlots1) // just forward
-}
+export const compare = compareIsoDateTimeFields
 
-export function equals(
-  plainDateTimeSlots0: PlainDateTimeSlots<string>,
-  plainDateTimeSlots1: PlainDateTimeSlots<string>,
-): boolean {
-  return PlainDateTimeFuncs.equals(plainDateTimeSlots0, plainDateTimeSlots1) // just forward
-}
+export const equals = plainDateTimesEqual
 
-export function toString(
-  plainDateTimeSlots0: PlainDateTimeSlots<string>,
-  options?: DateTimeDisplayOptions,
-): string {
-  return PlainDateTimeFuncs.toString(plainDateTimeSlots0, options) // just forwrad
-}
+export const toString = formatPlainDateTimeIso
 
 export function toZonedDateTime(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
   timeZoneId: string,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots<string, string> {
-  return PlainDateTimeFuncs.toZonedDateTime(queryNativeTimeZone, plainDateTimeSlots, timeZoneId, options)
+  return plainDateTimeToZonedDateTime(queryNativeTimeZone, plainDateTimeSlots, timeZoneId, options)
 }
 
-export function toPlainDate(
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-): PlainDateSlots<string> {
-  return PlainDateTimeFuncs.toPlainDate(plainDateTimeSlots) // just forward
-}
+export const toPlainDate = plainDateTimeToPlainDate
 
 export function toPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
@@ -192,7 +155,7 @@ export function toPlainYearMonth(
   const calendarOps = createNativePartOps(plainDateTimeSlots.calendar)
   const [year, month, day] = calendarOps.dateParts(plainDateTimeSlots) // TODO: DRY
 
-  return PlainDateTimeFuncs.toPlainYearMonth(
+  return plainDateTimeToPlainYearMonth(
     createNativeYearMonthRefineOps,
     plainDateTimeSlots,
     { year, month, day },
@@ -205,18 +168,14 @@ export function toPlainMonthDay(
   const calendarOps = createNativePartOps(plainDateTimeSlots.calendar)
   const [year, month, day] = calendarOps.dateParts(plainDateTimeSlots) // TODO: DRY
 
-  return PlainDateTimeFuncs.toPlainMonthDay(
+  return plainDateTimeToPlainMonthDay(
     createNativeMonthDayRefineOps,
     plainDateTimeSlots,
     { year, month, day },
   )
 }
 
-export function toPlainTime(
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-): PlainTimeSlots {
-  return PlainDateTimeFuncs.toPlainTime(plainDateTimeSlots) // just forward
-}
+export const toPlainTime = plainDateTimeToPlainTime
 
 export function toLocaleString(
   slots: PlainDateTimeSlots<string>,

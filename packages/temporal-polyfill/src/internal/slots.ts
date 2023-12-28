@@ -1,10 +1,13 @@
 import { DayTimeNano } from './dayTimeNano'
 import { DurationFields } from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateTimeFieldNamesAlpha } from './calendarIsoFields'
 import { ensureString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseMaybeOffsetNano, parseTimeZoneId, realizeCalendarId, realizeTimeZoneId } from './parseIso'
 import { utcTimeZoneId } from './timeZoneNative'
+import { SimpleTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
+import { pluckProps } from './utils'
+import { formatOffsetNano } from './formatIso'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
@@ -133,4 +136,21 @@ export function isIdLikeEqual(
   calendarSlot1: IdLike,
 ): boolean {
   return calendarSlot0 === calendarSlot1 || getId(calendarSlot0) === getId(calendarSlot1)
+}
+
+// getISOFields()
+// -------------------------------------------------------------------------------------------------
+
+export function getPublicZonedDateTimeFields<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+): IsoDateTimeFields & { calendar: C, timeZone: T, offset: string } {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any, getTimeZoneOps(zonedDateTimeSlots.timeZone))
+
+  return { // alphabetical
+    calendar: zonedDateTimeSlots.calendar,
+    ...pluckProps(isoDateTimeFieldNamesAlpha, isoFields),
+    offset: formatOffsetNano(isoFields.offsetNanoseconds), // TODO: more DRY
+    timeZone: zonedDateTimeSlots.timeZone,
+  }
 }

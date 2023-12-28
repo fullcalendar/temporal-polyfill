@@ -6,7 +6,6 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getId } from '../internal/slots'
-import * as PlainDateTimeFuncs from '../genericApi/plainDateTime'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, PublicDateTimeSlots, rejectInvalidBag } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -24,7 +23,17 @@ import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { dateTimeCalendarGetters } from './mixins'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { PlainDateBag, PlainDateTimeBag } from '../internal/bag'
+import { PlainDateBag, PlainDateTimeBag, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
+import { createPlainDateTimeSlots } from '../internal/slotsCreate'
+import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
+import { movePlainDateTime } from '../internal/move'
+import { diffPlainDateTimes } from '../internal/diff'
+import { roundPlainDateTime } from '../internal/round'
+import { plainDateTimesEqual } from '../internal/compare'
+import { formatPlainDateTimeIso } from '../internal/formatIso'
+import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
+import { compareIsoDateTimeFields } from '../internal/epochAndTime'
+import { parsePlainDateTime } from '../internal/parseIso'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
@@ -43,7 +52,7 @@ export class PlainDateTime {
   ) {
     setSlots(
       this,
-      PlainDateTimeFuncs.create(
+      createPlainDateTimeSlots(
         refineCalendarSlot,
         isoYear, isoMonth, isoDay,
         isoHour, isoMinute, isoSecond,
@@ -55,7 +64,7 @@ export class PlainDateTime {
 
   with(mod: DateTimeBag, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.withFields(
+      plainDateTimeWithFields(
         createDateModOps,
         getPlainDateTimeSlots(this),
         this as any, // TODO: needs getters
@@ -67,7 +76,7 @@ export class PlainDateTime {
 
   withPlainTime(plainTimeArg?: PlainTimeArg): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.withPlainTime(
+      plainDateTimeWithPlainTime(
         getPlainDateTimeSlots(this),
         optionalToPlainTimeFields(plainTimeArg) as any, // TODO!!!!
       )
@@ -76,7 +85,7 @@ export class PlainDateTime {
 
   withPlainDate(plainDateArg: PlainDateArg): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.withPlainDate(
+      plainDateTimeWithPlainDate(
         getPlainDateTimeSlots(this),
         toPlainDateSlots(plainDateArg),
       )
@@ -85,7 +94,7 @@ export class PlainDateTime {
 
   withCalendar(calendarArg: CalendarArg): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.withCalendar(
+      slotsWithCalendar(
         getPlainDateTimeSlots(this),
         refineCalendarSlot(calendarArg),
       )
@@ -94,8 +103,9 @@ export class PlainDateTime {
 
   add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.add(
+      movePlainDateTime(
         createMoveOps,
+        false,
         getPlainDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -105,8 +115,9 @@ export class PlainDateTime {
 
   subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.subtract(
+      movePlainDateTime(
         createMoveOps,
+        true,
         getPlainDateTimeSlots(this),
         toDurationSlots(durationArg),
         options,
@@ -116,7 +127,7 @@ export class PlainDateTime {
 
   until(otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      PlainDateTimeFuncs.until(
+      diffPlainDateTimes(
         createDiffOps,
         getPlainDateTimeSlots(this),
         toPlainDateTimeSlots(otherArg),
@@ -127,18 +138,19 @@ export class PlainDateTime {
 
   since(otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      PlainDateTimeFuncs.since(
+      diffPlainDateTimes(
         createDiffOps,
         getPlainDateTimeSlots(this),
         toPlainDateTimeSlots(otherArg),
         options,
+        true,
       )
     )
   }
 
   round(options: RoundingOptions | UnitName): PlainDateTime {
     return createPlainDateTime(
-      PlainDateTimeFuncs.round(
+      roundPlainDateTime(
         getPlainDateTimeSlots(this),
         options,
       )
@@ -146,15 +158,15 @@ export class PlainDateTime {
   }
 
   equals(otherArg: PlainDateTimeArg): boolean {
-    return PlainDateTimeFuncs.equals(getPlainDateTimeSlots(this), toPlainDateTimeSlots(otherArg))
+    return plainDateTimesEqual(getPlainDateTimeSlots(this), toPlainDateTimeSlots(otherArg))
   }
 
   toString(options?: DateTimeDisplayOptions): string {
-    return PlainDateTimeFuncs.toString(getPlainDateTimeSlots(this), options)
+    return formatPlainDateTimeIso(getPlainDateTimeSlots(this), options)
   }
 
   toJSON(): string {
-    return PlainDateTimeFuncs.toJSON(getPlainDateTimeSlots(this))
+    return formatPlainDateTimeIso(getPlainDateTimeSlots(this))
   }
 
   toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) {
@@ -167,7 +179,7 @@ export class PlainDateTime {
     options?: EpochDisambigOptions,
   ): ZonedDateTime {
     return createZonedDateTime(
-      PlainDateTimeFuncs.toZonedDateTime(
+      plainDateTimeToZonedDateTime(
        createTimeZoneOps,
        getPlainDateTimeSlots(this),
        refineTimeZoneSlot(timeZoneArg),
@@ -178,13 +190,13 @@ export class PlainDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate(
-      PlainDateTimeFuncs.toPlainDate(getPlainDateTimeSlots(this))
+      plainDateTimeToPlainDate(getPlainDateTimeSlots(this))
     )
   }
 
   toPlainYearMonth(): PlainYearMonth {
     return createPlainYearMonth(
-      PlainDateTimeFuncs.toPlainYearMonth(
+      plainDateTimeToPlainYearMonth(
         createYearMonthRefineOps,
         getPlainDateTimeSlots(this),
         this as any, // TODO!!!
@@ -194,7 +206,7 @@ export class PlainDateTime {
 
   toPlainMonthDay(): PlainMonthDay {
     return createPlainMonthDay(
-      PlainDateTimeFuncs.toPlainMonthDay(
+      plainDateTimeToPlainMonthDay(
         createMonthDayRefineOps,
         getPlainDateTimeSlots(this),
         this as any, // TODO!!!
@@ -204,7 +216,7 @@ export class PlainDateTime {
 
   toPlainTime(): PlainTime {
     return createPlainTime(
-      PlainDateTimeFuncs.toPlainTime(getPlainDateTimeSlots(this)),
+      plainDateTimeToPlainTime(getPlainDateTimeSlots(this)),
     )
   }
 
@@ -235,7 +247,7 @@ export class PlainDateTime {
   }
 
   static compare(arg0: PlainDateTimeArg, arg1: PlainDateTimeArg): NumSign {
-    return PlainDateTimeFuncs.compare(
+    return compareIsoDateTimeFields(
       toPlainDateTimeSlots(arg0),
       toPlainDateTimeSlots(arg1),
     )
@@ -294,14 +306,14 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
         }
     }
 
-    return PlainDateTimeFuncs.fromFields(
+    return refinePlainDateTimeBag(
       createDateRefineOps(slots.calendar || getCalendarSlotFromBag(arg as PlainDateBag<CalendarArg>)),
       arg as PlainDateBag<CalendarArg>,
       options,
     )
   }
 
-  const res = PlainDateTimeFuncs.fromString(arg)
+  const res = parsePlainDateTime(arg)
   refineOverflowOptions(options) // parse unused options
   return res
 }
