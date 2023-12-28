@@ -19,10 +19,9 @@ import { PlainYearMonthBag, plainYearMonthWithFields, refinePlainYearMonthBag } 
 import { createPlainYearMonthSlots } from '../internal/slotsCreate'
 import { movePlainYearMonth } from '../internal/move'
 import { diffPlainYearMonth } from '../internal/diff'
-import { plainYearMonthsEqual } from '../internal/compare'
+import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
-import { compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { PublicDateSlots } from '../internal/slotsPublic'
 

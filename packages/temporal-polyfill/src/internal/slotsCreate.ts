@@ -1,12 +1,13 @@
 import { isoCalendarId } from './calendarConfig'
 import { isoEpochFirstLeapYear } from './calendarIso'
-import { constrainIsoDateLike, constrainIsoTimeFields, refineIsoDateArgs, refineIsoDateTimeArgs } from './constrain'
+import { constrainIsoDateLike, constrainIsoDateTimeLike, constrainIsoTimeFields } from './constrain'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { bigIntToDayTimeNano } from './dayTimeNano'
 import { checkDurationFields } from './durationMath'
-import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
+import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { Overflow } from './options'
 import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { IsoDateFields, IsoDateTimeFields } from './calendarIsoFields'
 
 export function createDurationSlots(
   years: number = 0,
@@ -165,4 +166,37 @@ export function createZonedDateTimeSlots<CA, C, TA, T>(
     calendar: refineCalendarArg(calendarArg),
     branding: ZonedDateTimeBranding,
   }
+}
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+function refineIsoDateArgs(isoYear: number, isoMonth: number, isoDay: number): IsoDateFields {
+  return checkIsoDateInBounds(
+    constrainIsoDateLike({
+      isoYear: toInteger(isoYear),
+      isoMonth: toInteger(isoMonth),
+      isoDay: toInteger(isoDay),
+    })
+  )
+}
+
+function refineIsoDateTimeArgs(
+  isoYear: number, isoMonth: number, isoDay: number,
+  isoHour: number, isoMinute: number, isoSecond: number,
+  isoMillisecond: number, isoMicrosecond: number, isoNanosecond: number,
+): IsoDateTimeFields {
+  return checkIsoDateTimeInBounds(
+    constrainIsoDateTimeLike({
+      isoYear: toInteger(isoYear),
+      isoMonth: toInteger(isoMonth),
+      isoDay: toInteger(isoDay),
+      isoHour: toInteger(isoHour),
+      isoMinute: toInteger(isoMinute),
+      isoSecond: toInteger(isoSecond),
+      isoMillisecond: toInteger(isoMillisecond),
+      isoMicrosecond: toInteger(isoMicrosecond),
+      isoNanosecond: toInteger(isoNanosecond),
+    })
+  )
 }

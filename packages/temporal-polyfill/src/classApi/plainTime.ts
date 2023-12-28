@@ -27,10 +27,9 @@ import { createPlainTimeSlots } from '../internal/slotsCreate'
 import { movePlainTime } from '../internal/move'
 import { diffPlainTimes } from '../internal/diff'
 import { roundPlainTime } from '../internal/round'
-import { plainTimesEqual } from '../internal/compare'
+import { plainTimesEqual, compareIsoTimeFields } from '../internal/compare'
 import { formatPlainTimeIso } from '../internal/formatIso'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
-import { compareIsoTimeFields } from '../internal/epochAndTime'
 import { parsePlainTime } from '../internal/parseIso'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string

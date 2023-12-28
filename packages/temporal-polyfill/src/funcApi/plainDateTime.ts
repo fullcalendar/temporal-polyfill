@@ -15,8 +15,7 @@ import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalend
 import { movePlainDateTime } from '../internal/move'
 import { diffPlainDateTimes } from '../internal/diff'
 import { roundPlainDateTime } from '../internal/round'
-import { compareIsoDateTimeFields } from '../internal/epochAndTime'
-import { plainDateTimesEqual } from '../internal/compare'
+import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compare'
 import { formatPlainDateTimeIso } from '../internal/formatIso'
 import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 

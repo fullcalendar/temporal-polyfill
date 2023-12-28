@@ -304,34 +304,3 @@ export function epochMilliToIso(epochMilli: number): {
     isoMillisecond: legacyDate.getUTCMilliseconds(),
   }
 }
-
-// Comparison (low-level)
-// -------------------------------------------------------------------------------------------------
-
-export function compareIsoDateTimeFields(
-  isoFields0: IsoDateTimeFields,
-  isoFields1: IsoDateTimeFields
-): NumSign {
-  return compareIsoDateFields(isoFields0, isoFields1) ||
-    compareIsoTimeFields(isoFields0, isoFields1)
-}
-
-export function compareIsoDateFields(
-  isoFields0: IsoDateFields,
-  isoFields1: IsoDateFields
-): NumSign {
-  return compareNumbers(
-    isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields1)!
-  )
-}
-
-export function compareIsoTimeFields(
-  isoFields0: IsoTimeFields,
-  isoFields1: IsoTimeFields
-): NumSign {
-  return compareNumbers(
-    isoTimeFieldsToNano(isoFields0),
-    isoTimeFieldsToNano(isoFields1)
-  )
-}

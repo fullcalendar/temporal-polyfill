@@ -12,35 +12,24 @@ import { SimpleTimeZoneOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIs
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { pluckProps } from './utils'
 
-export function plainMonthDayToPlainDate<C>(
-  getCalendarOps: (calendar: C) => DateModOps<C>,
-  plainMonthDaySlots: PlainMonthDaySlots<C>,
-  plainMonthDayFields: MonthDayFields,
-  bag: YearFields,
-): PlainDateSlots<C> {
-  const calendarSlot = plainMonthDaySlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
+// Instant -> *
+// -------------------------------------------------------------------------------------------------
 
+export function instantToZonedDateTime<C, T>(
+  instantSlots: InstantSlots,
+  timeZoneSlot: T,
+  calendarSlot: C = isoCalendarId as any,
+): ZonedDateTimeSlots<C, T> {
   return {
-    ...convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag),
-    branding: PlainDateBranding,
+    branding: ZonedDateTimeBranding,
+    epochNanoseconds: instantSlots.epochNanoseconds,
+    timeZone: timeZoneSlot,
+    calendar: calendarSlot,
   }
 }
 
-export function plainYearMonthToPlainDate<C>(
-  getCalendarOps: (calendar: C) => DateModOps<C>,
-  plainYearMonthSlots: PlainYearMonthSlots<C>,
-  plainYearMonthFields: YearMonthFieldsIntl,
-  bag: { day: number },
-): PlainDateSlots<C> {
-  const calendarSlot = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
-
-  return {
-    ...convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag),
-    branding: PlainDateBranding,
-  }
-}
+// ZonedDateTime -> *
+// -------------------------------------------------------------------------------------------------
 
 export function zonedDateTimeToInstant(
   zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>
@@ -48,33 +37,6 @@ export function zonedDateTimeToInstant(
   return {
     epochNanoseconds: zonedDateTimeSlots0.epochNanoseconds,
     branding: InstantBranding,
-  }
-}
-
-export function zonedDateTimeToPlainDate<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-): PlainDateSlots<C> {
-  return {
-    ...pluckProps(
-      isoDateFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    ),
-    calendar: zonedDateTimeSlots0.calendar,
-    branding: PlainDateBranding,
-  }
-}
-
-export function zonedDateTimeToPlainTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-): PlainTimeSlots {
-  return {
-    ...pluckProps(
-      isoTimeFieldNamesDesc,
-      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    ),
-    branding: PlainTimeBranding,
   }
 }
 
@@ -89,6 +51,20 @@ export function zonedDateTimeToPlainDateTime<C, T>(
     ),
     calendar: zonedDateTimeSlots0.calendar,
     branding: PlainDateTimeBranding,
+  }
+}
+
+export function zonedDateTimeToPlainDate<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
+): PlainDateSlots<C> {
+  return {
+    ...pluckProps(
+      isoDateFieldNamesDesc,
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
+    ),
+    calendar: zonedDateTimeSlots0.calendar,
+    branding: PlainDateBranding,
   }
 }
 
@@ -120,40 +96,21 @@ export function zonedDateTimeToPlainMonthDay<C>(
   }
 }
 
-export function plainTimeToZonedDateTime<C, TA, T, PA>(
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
-  refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots<C>,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: PlainTimeSlots,
-  options: { timeZone: TA, plainDate: PA },
-): ZonedDateTimeSlots<C, T> {
-  const plainDateSlots = refinePlainDateArg(options.plainDate)
-  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-
+export function zonedDateTimeToPlainTime<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
+): PlainTimeSlots {
   return {
-    epochNanoseconds: getSingleInstantFor(
-      timeZoneOps,
-      { ...plainDateSlots, ...slots },
+    ...pluckProps(
+      isoTimeFieldNamesDesc,
+      zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
-    calendar: plainDateSlots.calendar,
-    timeZone: timeZoneSlot,
-    branding: ZonedDateTimeBranding,
+    branding: PlainTimeBranding,
   }
 }
 
-export function plainTimeToPlainDateTime<C>(
-  plainTimeSlots0: PlainTimeSlots,
-  plainDateSlots1: PlainDateSlots<C>,
-): PlainDateTimeSlots<C> {
-  return {
-    ...checkIsoDateTimeInBounds({
-      ...plainTimeSlots0,
-      ...plainDateSlots1,
-    }),
-    branding: PlainDateTimeBranding,
-  }
-}
+// PlainDateTime -> *
+// -------------------------------------------------------------------------------------------------
 
 export function plainDateTimeToZonedDateTime<C, TZ>(
   getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
@@ -214,6 +171,23 @@ export function plainDateTimeToPlainTime<C>(
     branding: PlainTimeBranding,
   }
 }
+
+function dateToEpochNano<TZ>(
+  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
+  timeZoneSlot: TZ,
+  isoFields: IsoDateTimeFields,
+  options?: EpochDisambigOptions,
+): DayTimeNano {
+  const epochDisambig = refineEpochDisambigOptions(options)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+
+  return checkEpochNanoInBounds(
+    getSingleInstantFor(timeZoneOps, isoFields, epochDisambig),
+  )
+}
+
+// PlainDate -> *
+// -------------------------------------------------------------------------------------------------
 
 export function plainDateToZonedDateTime<C, TA, T, PA>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
@@ -279,18 +253,82 @@ export function plainDateToPlainMonthDay<C>(
   }
 }
 
-export function instantToZonedDateTime<C, T>(
-  instantSlots: InstantSlots,
-  timeZoneSlot: T,
-  calendarSlot: C = isoCalendarId as any,
-): ZonedDateTimeSlots<C, T> {
+// PlainYearMonth -> *
+// -------------------------------------------------------------------------------------------------
+
+export function plainYearMonthToPlainDate<C>(
+  getCalendarOps: (calendar: C) => DateModOps<C>,
+  plainYearMonthSlots: PlainYearMonthSlots<C>,
+  plainYearMonthFields: YearMonthFieldsIntl,
+  bag: { day: number },
+): PlainDateSlots<C> {
+  const calendarSlot = plainYearMonthSlots.calendar
+  const calendarOps = getCalendarOps(calendarSlot)
+
   return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds: instantSlots.epochNanoseconds,
-    timeZone: timeZoneSlot,
-    calendar: calendarSlot,
+    ...convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag),
+    branding: PlainDateBranding,
   }
 }
+
+// PlainMonthDay -> *
+// -------------------------------------------------------------------------------------------------
+
+export function plainMonthDayToPlainDate<C>(
+  getCalendarOps: (calendar: C) => DateModOps<C>,
+  plainMonthDaySlots: PlainMonthDaySlots<C>,
+  plainMonthDayFields: MonthDayFields,
+  bag: YearFields,
+): PlainDateSlots<C> {
+  const calendarSlot = plainMonthDaySlots.calendar
+  const calendarOps = getCalendarOps(calendarSlot)
+
+  return {
+    ...convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag),
+    branding: PlainDateBranding,
+  }
+}
+
+// PlainTime -> *
+// -------------------------------------------------------------------------------------------------
+
+export function plainTimeToZonedDateTime<C, TA, T, PA>(
+  refineTimeZoneArg: (timeZoneArg: TA) => T,
+  refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots<C>,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  slots: PlainTimeSlots,
+  options: { timeZone: TA, plainDate: PA },
+): ZonedDateTimeSlots<C, T> {
+  const plainDateSlots = refinePlainDateArg(options.plainDate)
+  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+
+  return {
+    epochNanoseconds: getSingleInstantFor(
+      timeZoneOps,
+      { ...plainDateSlots, ...slots },
+    ),
+    calendar: plainDateSlots.calendar,
+    timeZone: timeZoneSlot,
+    branding: ZonedDateTimeBranding,
+  }
+}
+
+export function plainTimeToPlainDateTime<C>(
+  plainTimeSlots0: PlainTimeSlots,
+  plainDateSlots1: PlainDateSlots<C>,
+): PlainDateTimeSlots<C> {
+  return {
+    ...checkIsoDateTimeInBounds({
+      ...plainTimeSlots0,
+      ...plainDateSlots1,
+    }),
+    branding: PlainDateTimeBranding,
+  }
+}
+
+// Epoch-* -> Instant
+// -------------------------------------------------------------------------------------------------
 
 export function epochSecToInstant(epochSec: number): InstantSlots {
   return {
@@ -318,18 +356,4 @@ export function epochNanoToInstant(epochNano: bigint): InstantSlots {
     branding: InstantBranding,
     epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
   }
-}
-
-function dateToEpochNano<TZ>(
-  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
-  timeZoneSlot: TZ,
-  isoFields: IsoDateTimeFields,
-  options?: EpochDisambigOptions,
-): DayTimeNano {
-  const epochDisambig = refineEpochDisambigOptions(options)
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-
-  return checkEpochNanoInBounds(
-    getSingleInstantFor(timeZoneOps, isoFields, epochDisambig),
-  )
 }
