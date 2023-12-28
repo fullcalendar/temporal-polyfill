@@ -1,12 +1,12 @@
 import { DayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
-import { DurationFields, durationFieldsToDayTimeNano, durationFieldNamesAsc, clearDurationFields } from './durationFields'
+import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots } from './slots'
 import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
 import { clampRelativeDuration } from './round'
-import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, spanDuration, MarkerToEpochNano, MoveMarker, DiffMarkers, queryDurationSign } from './durationMath'
+import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, spanDuration, MarkerToEpochNano, MoveMarker, DiffMarkers, queryDurationSign, durationFieldsToDayTimeNano, clearDurationFields } from './durationMath'
 
 export function totalDuration<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,

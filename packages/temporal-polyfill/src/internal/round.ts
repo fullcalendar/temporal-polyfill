@@ -4,12 +4,17 @@ import {
   durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
+} from './durationFields'
+import {
+  DiffMarkers,
+  MarkerToEpochNano,
+  MoveMarker,
+  queryDurationSign,
   durationFieldsToDayTimeNano,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
   clearDurationFields,
-} from './durationFields'
-import { DiffMarkers, MarkerToEpochNano, MoveMarker, queryDurationSign } from './durationMath'
+} from './durationMath'
 import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './calendarIsoFields'
 import { checkIsoDateTimeInBounds, epochNanoToIso, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, RoundingMode, roundingModeFuncs } from './options'

@@ -2,10 +2,12 @@ import { DayTimeNano, compareDayTimeNanos, dayTimeNanoToNumber, diffDayTimeNanos
 import {
   DurationFields,
   durationFieldDefaults,
+} from './durationFields'
+import {
+  negateDurationFields,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
-} from './durationFields'
-import { negateDurationFields } from './durationMath'
+} from './durationMath'
 import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,

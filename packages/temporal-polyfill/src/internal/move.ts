@@ -3,11 +3,9 @@ import {
   DurationFields,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
-  durationTimeFieldsToLargeNanoStrict,
-  durationFieldsToDayTimeNano,
   durationFieldDefaults,
 } from './durationFields'
-import { durationHasDateParts, negateDuration, negateDurationFields, queryDurationSign } from './durationMath'
+import { durationFieldsToDayTimeNano, durationHasDateParts, durationTimeFieldsToLargeNanoStrict, negateDuration, negateDurationFields, queryDurationSign } from './durationMath'
 import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
