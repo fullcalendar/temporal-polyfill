@@ -8,7 +8,7 @@ import { DurationBranding, DurationSlots } from './slots'
 import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from './optionsRefine'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
-import { diffDateTimes2, diffZonedEpochNano2 } from './diff'
+import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
 import { isoToEpochNano } from './epochAndTime'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 
@@ -84,29 +84,31 @@ export function roundDuration<RA, C, T>(
     slots = { ...slots, weeks: 0 }
   }
 
-  const [balancedDuration, endEpochNano] = spanDuration(slots, undefined, largestUnit, ...markerSystem)
+  let [balancedDuration, endEpochNano] = spanDuration(slots, undefined, largestUnit, ...markerSystem)
 
-  const sign0 = queryDurationSign(slots)
-  const sign1 = queryDurationSign(balancedDuration)
-  if (sign0 && sign1 && sign0 !== sign1) {
+  const origSign = queryDurationSign(slots)
+  const balancedSign = queryDurationSign(balancedDuration)
+  if (origSign && balancedSign && origSign !== balancedSign) {
     throw new RangeError('Faulty Calendar rounding')
   }
 
-  const roundedDurationFields = roundRelativeDuration(
-    balancedDuration,
-    endEpochNano,
-    largestUnit,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-    ...markerSystem,
-  )
+  if (balancedSign && !(smallestUnit === Unit.Nanosecond && roundingInc === 1)) {
+    balancedDuration = roundRelativeDuration(
+      balancedDuration,
+      endEpochNano,
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      ...markerSystem,
+    )
+  }
 
-  roundedDurationFields.weeks += transplantedWeeks // HACK (mutating)
+  balancedDuration.weeks += transplantedWeeks // HACK (mutating)
 
   return {
     branding: DurationBranding,
-    ...roundedDurationFields,
+    ...balancedDuration,
   }
 }
 
@@ -267,7 +269,7 @@ export function createMarkerSystem<C, T>(
         return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields)
       },
       (epochNano0: DayTimeNano, epochNano1: DayTimeNano, largestUnit: Unit) => {
-        return diffZonedEpochNano2(calendarOps, timeZoneOps, epochNano0, epochNano1, largestUnit)
+        return diffZonedEpochNanoExact(calendarOps, timeZoneOps, epochNano0, epochNano1, largestUnit)
       },
     ]
   } else {
@@ -278,7 +280,7 @@ export function createMarkerSystem<C, T>(
         return moveDateTime(calendarOps, isoField, durationFields)
       },
       (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return diffDateTimes2(calendarOps, m0, m1, largeUnit)
+        return diffDateTimesExact(calendarOps, m0, m1, largeUnit)
       },
     ]
   }

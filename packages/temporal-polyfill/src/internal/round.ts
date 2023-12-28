@@ -269,6 +269,10 @@ export function balanceDayTimeDurationByInc(
   return partialDuration
 }
 
+/*
+TODO: caller should short-circuit if
+  !sign || (smallestUnit === Unit.Nanosecond && roundingInc === 1)
+*/
 export function roundRelativeDuration<M>(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   // ^has sign
@@ -283,18 +287,6 @@ export function roundRelativeDuration<M>(
   moveMarker: MoveMarker<M>,
   diffMarkers?: DiffMarkers<M>, // unused
 ): DurationFields {
-  const sign = queryDurationSign(durationFields)
-
-  // fast path, no rounding
-  if (
-    !sign || (
-      smallestUnit === Unit.Nanosecond &&
-      roundingInc === 1
-    )
-  ) {
-    return durationFields
-  }
-
   const nudgeFunc = (
     (markerToEpochNano === identityFunc) // is zoned?
       ? smallestUnit > Unit.Day
