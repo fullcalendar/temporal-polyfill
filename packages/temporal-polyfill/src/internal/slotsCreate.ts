@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { isoEpochFirstLeapYear } from './calendarIso'
-import { constrainIsoDateLike, constrainIsoTimeFields, refineIsoDateArgs, refineIsoDateTimeArgs } from './calendarIsoFields'
+import { constrainIsoDateLike, constrainIsoTimeFields, refineIsoDateArgs, refineIsoDateTimeArgs } from './constrain'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { bigIntToDayTimeNano } from './dayTimeNano'
 import { checkDurationFields } from './durationMath'

@@ -1,14 +1,15 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { DateBag, DateFields, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAsc, timeFieldsToIso, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
+import { DateBag, DateFields, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeFieldsToIso, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarId, getCalendarLeapMonthMeta, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields } from './calendarIsoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
+import { constrainIsoTimeFields } from './constrain'
 import { isoEpochFirstLeapYear } from './calendarIso'
 import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { Callable, clampEntity, mapPropNamesToConstant, pluckProps } from './utils'
 import { EpochDisambigOptions, OverflowOptions, ZonedFieldOptions, overflowMapNames, prepareOptions, refineEpochDisambigOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
-import { DurationFields, durationFieldDefaults, durationFieldNamesAsc } from './durationFields'
+import { DurationFields, durationFieldDefaults, durationFieldNamesAlpha, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
 import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, MonthDayRefineOps, YearMonthModOps, YearMonthRefineOps } from './calendarOps'
@@ -23,9 +24,6 @@ export type ZonedDateTimeBag<C, T> = PlainDateTimeBag<C> & { timeZone: T, offset
 export type PlainTimeBag = TimeBag
 export type PlainYearMonthBag<C> = YearMonthBag & { calendar?: C }
 export type PlainMonthDayBag<C> = MonthDayBag & { calendar?: C }
-
-const timeFieldNamesAlpha = timeFieldNamesAsc.slice().sort()
-const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
 
 // Config
 // -------------------------------------------------------------------------------------------------

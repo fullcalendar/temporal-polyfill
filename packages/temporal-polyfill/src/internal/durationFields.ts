@@ -37,6 +37,7 @@ export type DurationFields = DurationDateFields & DurationTimeFields
 // -------------------------------------------------------------------------------------------------
 
 export const durationFieldNamesAsc = unitNamesAsc.map((unitName) => unitName + 's') as (keyof DurationFields)[]
+export const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
 export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(0, Unit.Day)
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
 
