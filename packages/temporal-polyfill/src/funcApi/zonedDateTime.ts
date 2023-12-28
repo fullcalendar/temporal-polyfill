@@ -7,7 +7,8 @@ import { computeHoursInDay, computeStartOfDay, zonedInternalsToIso } from '../in
 import { LocalesArg, prepCachedZonedDateTimeFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, getPublicZonedDateTimeFields, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { PublicZonedDateTimeSlots, getPublicZonedDateTimeFields } from '../internal/slotsPublic'
 import * as Utils from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
@@ -55,7 +56,7 @@ export function fromFields(
 
 export function getISOFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-): IsoDateTimeFields & { calendar: string, timeZone: string, offset: string } {
+): PublicZonedDateTimeSlots<string, string> {
   return getPublicZonedDateTimeFields(queryNativeTimeZone, zonedDateTimeSlots)
 }
 

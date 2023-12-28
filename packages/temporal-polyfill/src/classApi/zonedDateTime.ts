@@ -14,7 +14,8 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { computeHoursInDay, computeStartOfDay, zonedInternalsToIso } from '../internal/timeZoneOps'
-import { DurationBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, getId, getPublicZonedDateTimeFields } from '../internal/slots'
+import { DurationBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, getId } from '../internal/slots'
+import { PublicZonedDateTimeSlots, getPublicZonedDateTimeFields } from '../internal/slotsPublic'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
@@ -257,7 +258,7 @@ export class ZonedDateTime {
     )
   }
 
-  getISOFields(): IsoDateTimeFields & { calendar: CalendarSlot, timeZone: TimeZoneSlot, offset: string } {
+  getISOFields(): PublicZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
     return getPublicZonedDateTimeFields(createSimpleTimeZoneOps, getZonedDateTimeSlots(this))
   }
 

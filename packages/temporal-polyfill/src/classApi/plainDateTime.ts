@@ -6,7 +6,7 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
 import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getId } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, setSlots, PublicDateTimeSlots, rejectInvalidBag } from './slotsForClasses'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { Calendar, CalendarArg } from './calendar'
@@ -34,6 +34,7 @@ import { formatPlainDateTimeIso } from '../internal/formatIso'
 import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 import { compareIsoDateTimeFields } from '../internal/epochAndTime'
 import { parsePlainDateTime } from '../internal/parseIso'
+import { PublicDateTimeSlots } from '../internal/slotsPublic'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 

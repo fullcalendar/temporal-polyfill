@@ -1,5 +1,3 @@
-import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
-import { CalendarSlot } from './calendarSlot'
 import { BrandingSlots } from '../internal/slots'
 
 // Lookup
@@ -40,9 +38,3 @@ export function rejectInvalidBag<B>(bag: B): B {
   }
   return bag
 }
-
-// Types for getISOFields()
-// -------------------------------------------------------------------------------------------------
-
-export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
-export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields

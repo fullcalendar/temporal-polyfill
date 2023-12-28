@@ -18,7 +18,7 @@ import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
-import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
+import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { dateCalendarGetters } from './mixins'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
@@ -32,6 +32,7 @@ import { formatPlainDateIso } from '../internal/formatIso'
 import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
 import { compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainDate } from '../internal/parseIso'
+import { PublicDateSlots } from '../internal/slotsPublic'
 
 export type PlainDateArg = PlainDate | PlainDateBag<CalendarArg> | string
 

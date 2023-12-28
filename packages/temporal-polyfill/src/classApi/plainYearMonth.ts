@@ -6,7 +6,7 @@ import { LocalesArg, prepPlainYearMonthFormat } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainYearMonthBranding, PlainYearMonthSlots, getId } from '../internal/slots'
-import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slotsForClasses'
+import { createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
 import { Calendar, CalendarArg } from './calendar'
 import { CalendarProtocol } from './calendarProtocol'
@@ -24,6 +24,7 @@ import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { compareIsoDateFields } from '../internal/epochAndTime'
 import { parsePlainYearMonth } from '../internal/parseIso'
+import { PublicDateSlots } from '../internal/slotsPublic'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
