@@ -1,4 +1,3 @@
-import { dateRefiners } from '../internal/refiners'
 import { PlainDateBranding } from '../internal/slots'
 import { IsoDateFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
@@ -6,6 +5,7 @@ import { Callable, mapProps } from '../internal/utils'
 import { CalendarProtocol } from './calendarProtocol'
 import { CalendarSlot } from './calendarSlot'
 import { createPlainDate } from './plainDate'
+import { dateRefiners } from './mixins'
 
 interface AdapterSimpleState {
   calendarProtocol: CalendarProtocol

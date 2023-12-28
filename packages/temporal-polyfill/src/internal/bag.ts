@@ -6,16 +6,15 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, constrainIsoTimeFields
 import { isoEpochFirstLeapYear } from './calendarIso'
 import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { Callable, clampEntity, pluckProps } from './utils'
+import { Callable, clampEntity, mapPropNamesToConstant, pluckProps } from './utils'
 import { EpochDisambigOptions, OverflowOptions, ZonedFieldOptions, overflowMapNames, prepareOptions, refineEpochDisambigOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor, getSingleInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
 import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, MonthDayRefineOps, YearMonthModOps, YearMonthRefineOps } from './calendarOps'
 import { parseOffsetNano } from './parseIso'
-import { ensureObjectlike } from './cast'
+import { ensureObjectlike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
 import { checkDurationFields } from './durationMath'
-import { builtinRefiners } from './refiners'
 import { DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
@@ -27,6 +26,31 @@ export type PlainMonthDayBag<C> = MonthDayBag & { calendar?: C }
 
 const timeFieldNamesAlpha = timeFieldNamesAsc.slice().sort()
 const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
+
+// Config
+// -------------------------------------------------------------------------------------------------
+// These should refine things on INPUT of user-entered fields and should allow {valueOf()}
+
+const dateFieldRefiners = {
+  era: toStringViaPrimitive,
+  eraYear: toInteger,
+  year: toInteger,
+  month: toPositiveInteger,
+  monthCode: toStringViaPrimitive,
+  day: toPositiveInteger,
+}
+
+const timeFieldRefiners = mapPropNamesToConstant(timeFieldNamesAsc, toInteger)
+
+const durationFieldRefiners = mapPropNamesToConstant(durationFieldNamesAsc, toStrictInteger)
+
+const builtinRefiners = {
+  ...dateFieldRefiners,
+  ...timeFieldRefiners,
+  ...durationFieldRefiners,
+  offset: toStringViaPrimitive,
+}
+
 
 // -------------------------------------------------------------------------------------------------
 
