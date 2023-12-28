@@ -69,6 +69,7 @@ export class Instant {
         getInstantSlots(this),
         toInstantSlots(otherArg),
         options,
+        true,
       ),
     )
   }

@@ -163,6 +163,7 @@ export class ZonedDateTime {
         getZonedDateTimeSlots(this),
         toZonedDateTimeSlots(otherArg),
         options,
+        true,
       ),
       branding: DurationBranding,
     })
