@@ -1,35 +1,35 @@
 import { Callable, isObjectlike } from './utils'
 
-// TODO: rename 'ensure' to 'require' ?
+// Require
 // -------------------------------------------------------------------------------------------------
 
-export function ensureObjectlike<O extends {}>(arg: O): O {
+export function requireObjectlike<O extends {}>(arg: O): O {
   if (!isObjectlike(arg)) {
     throw new TypeError('Must be object-like');
   }
   return arg;
 }
 
-function ensureType<A>(typeName: string, arg: A): A {
+function requireType<A>(typeName: string, arg: A): A {
   if (typeof arg !== typeName) {
     throw new TypeError(`Must be certain type ${typeName}`);
   }
   return arg;
 }
 
-export const ensureString = ensureType.bind(undefined, 'string') as (arg: string) => string
-export const ensureBoolean = ensureType.bind(undefined, 'boolean') as (arg: boolean) => boolean
-export const ensureNumber = ensureType.bind(undefined, 'number') as (arg: number) => number
-export const ensureFunction = ensureType.bind(undefined, 'function') as (arg: Callable) => Callable
+export const requireString = requireType.bind(undefined, 'string') as (arg: string) => string
+export const requireBoolean = requireType.bind(undefined, 'boolean') as (arg: boolean) => boolean
+export const requireNumber = requireType.bind(undefined, 'number') as (arg: number) => number
+export const requireFunction = requireType.bind(undefined, 'function') as (arg: Callable) => Callable
 
-export function ensureStringOrUndefined(input: string | undefined): string | undefined {
+export function requireStringOrUndefined(input: string | undefined): string | undefined {
   if (input !== undefined && typeof input !== 'string') {
     throw new TypeError('Must be string or undefined')
   }
   return input
 }
 
-export function ensureIntegerOrUndefined(input: number | undefined): number | undefined {
+export function requireIntegerOrUndefined(input: number | undefined): number | undefined {
   if (input === undefined) {
     // good
   } else if (typeof input === 'number') {
@@ -42,22 +42,22 @@ export function ensureIntegerOrUndefined(input: number | undefined): number | un
   return input
 }
 
-export function ensureInteger(arg: number): number {
-  return ensureNumberIsInteger(ensureNumber(arg));
+export function requireInteger(arg: number): number {
+  return requireNumberIsInteger(requireNumber(arg));
 }
 
-export function ensurePositiveInteger(arg: number): number {
-  return ensureNumberIsPositive(ensureInteger(arg))
+export function requirePositiveInteger(arg: number): number {
+  return requireNumberIsPositive(requireInteger(arg))
 }
 
-function ensureNumberIsInteger(num: number): number {
+function requireNumberIsInteger(num: number): number {
   if (!Number.isInteger(num)) {
     throw new RangeError('must be integer');
   }
   return num || 0; // ensure no -0... TODO: why???
 }
 
-function ensureNumberIsPositive(num: number): number {
+function requireNumberIsPositive(num: number): number {
   if (num <= 0) {
     throw new RangeError('Must be positive')
   }
@@ -78,7 +78,7 @@ export function toStringViaPrimitive(arg: string): string { // see ToPrimitiveAn
   if (isObjectlike(arg)) {
     return String(arg)
   }
-  return ensureString(arg)
+  return requireString(arg)
 }
 
 export function toBigInt(bi: bigint): bigint {
@@ -113,9 +113,9 @@ export function toInteger(arg: number): number {
 }
 
 export function toStrictInteger(arg: number): number {
-  return ensureNumberIsInteger(toNumber(arg))
+  return requireNumberIsInteger(toNumber(arg))
 }
 
 export function toPositiveInteger(arg: number): number {
-  return ensureNumberIsPositive(toInteger(arg))
+  return requireNumberIsPositive(toInteger(arg))
 }

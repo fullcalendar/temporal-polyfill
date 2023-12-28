@@ -1,31 +1,31 @@
-import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined } from '../internal/cast'
+import { requireBoolean, requireInteger, requireIntegerOrUndefined, requirePositiveInteger, requireString, requireStringOrUndefined } from '../internal/cast'
 
 export const yearMonthOnlyRefiners = {
-  era: ensureStringOrUndefined,
-  eraYear: ensureIntegerOrUndefined,
-  year: ensureInteger,
-  month: ensurePositiveInteger,
+  era: requireStringOrUndefined,
+  eraYear: requireIntegerOrUndefined,
+  year: requireInteger,
+  month: requirePositiveInteger,
 
-  daysInMonth: ensurePositiveInteger,
-  daysInYear: ensurePositiveInteger,
-  inLeapYear: ensureBoolean,
-  monthsInYear: ensurePositiveInteger,
+  daysInMonth: requirePositiveInteger,
+  daysInYear: requirePositiveInteger,
+  inLeapYear: requireBoolean,
+  monthsInYear: requirePositiveInteger,
 }
 
 export const monthOnlyRefiners = {
-  monthCode: ensureString,
+  monthCode: requireString,
 }
 
 export const dayOnlyRefiners = {
-  day: ensurePositiveInteger,
+  day: requirePositiveInteger,
 }
 
 export const dateOnlyRefiners = {
-  dayOfWeek: ensurePositiveInteger,
-  dayOfYear: ensurePositiveInteger,
-  weekOfYear: ensurePositiveInteger,
-  yearOfWeek: ensureInteger,
-  daysInWeek: ensurePositiveInteger,
+  dayOfWeek: requirePositiveInteger,
+  dayOfYear: requirePositiveInteger,
+  weekOfYear: requirePositiveInteger,
+  yearOfWeek: requireInteger,
+  daysInWeek: requirePositiveInteger,
 }
 
 export const dateRefiners = {

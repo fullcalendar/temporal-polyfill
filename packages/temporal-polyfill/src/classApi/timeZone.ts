@@ -18,7 +18,7 @@ import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
-import { ensureString } from '../internal/cast'
+import { requireString } from '../internal/cast'
 import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, isTimeZoneSlotsEqual } from '../internal/slots'
 
 // TimeZone Class
@@ -28,7 +28,7 @@ export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
 
 export class TimeZone implements TimeZoneProtocol {
   constructor(timeZoneId: string) {
-    const timeZoneNative = queryNativeTimeZone(ensureString(timeZoneId))
+    const timeZoneNative = queryNativeTimeZone(requireString(timeZoneId))
 
     setSlots(this, {
       branding: TimeZoneBranding,

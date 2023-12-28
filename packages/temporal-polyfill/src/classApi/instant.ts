@@ -1,6 +1,6 @@
 import { LocalesArg, prepInstantFormat } from '../internal/formatIntl'
 import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../internal/optionsRefine'
-import { ensureObjectlike } from '../internal/cast'
+import { requireObjectlike } from '../internal/cast'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
@@ -120,7 +120,7 @@ export class Instant {
 
   toZonedDateTime(options: { timeZone: TimeZoneArg, calendar: CalendarArg }): ZonedDateTime {
     const slots = getInstantSlots(this)
-    const refinedObj = ensureObjectlike(options)
+    const refinedObj = requireObjectlike(options)
 
     return createZonedDateTime(
       instantToZonedDateTime(

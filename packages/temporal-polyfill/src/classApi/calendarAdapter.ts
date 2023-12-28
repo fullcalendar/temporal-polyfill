@@ -1,6 +1,6 @@
 import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/calendarFields'
-import { ensureObjectlike, ensurePositiveInteger } from '../internal/cast'
+import { requireObjectlike, requirePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/calendarIsoFields'
 import { Unit, unitNamesAsc } from '../internal/units'
@@ -30,7 +30,7 @@ function mergeFieldsAdapter(
   fields: any,
   additionalFields: any,
 ) {
-  return ensureObjectlike(
+  return requireObjectlike(
     mergeFields.call(
       calendarProtocol,
       Object.assign(Object.create(null), fields),
@@ -143,7 +143,7 @@ function dayAdapter(
   dayMethod: CalendarProtocol['day'],
   isoFields: IsoDateFields,
 ): number {
-  return ensurePositiveInteger(
+  return requirePositiveInteger(
     dayMethod.call(
       calendarProtocol,
       createPlainDate({

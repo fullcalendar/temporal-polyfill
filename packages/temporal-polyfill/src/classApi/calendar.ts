@@ -1,5 +1,5 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
-import { ensureString } from '../internal/cast'
+import { requireString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
 import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
@@ -26,7 +26,7 @@ export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime 
 
 export class Calendar implements CalendarProtocol {
   constructor(id: string) {
-    id = normalizeCalendarId(ensureString(id))
+    id = normalizeCalendarId(requireString(id))
     const calendarNative = createNativeStandardOps(id)
 
     setSlots(this, {
@@ -116,7 +116,7 @@ export class Calendar implements CalendarProtocol {
     const fieldNamesArray: string[] = []
 
     for (const fieldName of fieldNames) {
-      ensureString(fieldName)
+      requireString(fieldName)
 
       if (!allowed.has(fieldName)) {
         throw new RangeError('Invalid field name')

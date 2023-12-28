@@ -1,7 +1,7 @@
 import { DayTimeNano } from './dayTimeNano'
 import { DurationFields } from './durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
-import { ensureString } from './cast'
+import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseMaybeOffsetNano, parseTimeZoneId, realizeCalendarId, realizeTimeZoneId } from './parseIso'
 import { utcTimeZoneId } from './timeZoneNative'
@@ -67,7 +67,7 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
 }
 
 export function refineCalendarSlotString(calendarArg: string): string {
-  return realizeCalendarId(parseCalendarId(ensureString(calendarArg)))
+  return realizeCalendarId(parseCalendarId(requireString(calendarArg)))
 }
 
 // bag
@@ -118,7 +118,7 @@ function getTimeZoneSlotRaw(slot: IdLike, loose?: boolean): string | number {
 }
 
 export function refineTimeZoneSlotString(arg: string): string {
-  return realizeTimeZoneId(parseTimeZoneId(ensureString(arg)))
+  return realizeTimeZoneId(parseTimeZoneId(requireString(arg)))
 }
 
 // ID-like
@@ -127,7 +127,7 @@ export function refineTimeZoneSlotString(arg: string): string {
 export type IdLike = string | { id: string }
 
 export function getId(idLike: IdLike): string {
-  return typeof idLike === 'string' ? idLike : ensureString(idLike.id)
+  return typeof idLike === 'string' ? idLike : requireString(idLike.id)
 }
 
 export function isIdLikeEqual(

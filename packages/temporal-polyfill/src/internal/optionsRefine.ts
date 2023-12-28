@@ -1,5 +1,5 @@
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { toString, ensureObjectlike, toInteger } from './cast'
+import { toString, requireObjectlike, toInteger } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import { BoundArg, clampEntity, isObjectlike } from './utils'
 import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './options'
@@ -670,7 +670,7 @@ export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
     return {} as O
   }
-  return ensureObjectlike(options)
+  return requireObjectlike(options)
 }
 
 function normalizeUnitNameOptions<O extends {}>(
@@ -680,7 +680,7 @@ function normalizeUnitNameOptions<O extends {}>(
   if (typeof options === 'string') {
     return { [optionName]: options } as O
   }
-  return ensureObjectlike(options)
+  return requireObjectlike(options)
 }
 
 /*

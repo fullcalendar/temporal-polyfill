@@ -5,7 +5,7 @@ import { Callable } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { ensureFunction, ensureNumber } from '../internal/cast'
+import { requireFunction, requireNumber } from '../internal/cast'
 import { nanoInUtcDay } from '../internal/units'
 import { InstantBranding, PlainDateTimeBranding } from '../internal/slots'
 
@@ -49,7 +49,7 @@ function adapterGetPossibleInstantsFor(
 
 export function validateOffsetNano(offsetNano: number): number {
   // TODO: use util for this?
-  if (!Number.isInteger(ensureNumber(offsetNano))) {
+  if (!Number.isInteger(requireNumber(offsetNano))) {
     throw new RangeError('must be integer number')
   }
 
@@ -96,7 +96,7 @@ export function createAdapterOps<KV extends {} = typeof timeZoneAdapters>(
     boundFuncs[key] = (adapterFuncs as any)[key].bind(
       undefined,
       timeZoneProtocol,
-      ensureFunction((timeZoneProtocol as any)[key]),
+      requireFunction((timeZoneProtocol as any)[key]),
     )
   }
 

@@ -308,7 +308,6 @@ export function computeMonthCode(
 
 // Operations enacted upon passed-in CalendarNative object
 // -------------------------------------------------------------------------------------------------
-// TODO: use in fns api ONLY?
 
 export function computeYearMonthFields(
   calendarNative: NativePartOps,

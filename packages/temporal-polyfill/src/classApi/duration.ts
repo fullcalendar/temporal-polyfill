@@ -21,7 +21,7 @@ import { MarkerSlots, absDuration, addToDuration, negateDuration, queryDurationB
 import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
-import { ensureString } from '../internal/cast'
+import { requireString } from '../internal/cast'
 import { parseDuration, parseZonedOrPlainDateTime } from '../internal/parseIso'
 import { ZonedDateTimeBag, durationWithFields, refineDurationBag, refineMaybeZonedDateTimeBag } from '../internal/bag'
 import { createDurationSlots } from '../internal/slotsCreate'
@@ -226,6 +226,6 @@ function refinePublicRelativeTo(
       return { ...res, calendar }
     }
 
-    return parseZonedOrPlainDateTime(ensureString(relativeTo))
+    return parseZonedOrPlainDateTime(requireString(relativeTo))
   }
 }

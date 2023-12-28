@@ -46,7 +46,7 @@ import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNativ
 import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
-import { ensureString, toStringViaPrimitive } from './cast'
+import { requireString, toStringViaPrimitive } from './cast'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ export function parseZonedDateTime(
   s: string,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<string, string> {
-  const organized = parseMaybeGenericDateTime(ensureString(s))
+  const organized = parseMaybeGenericDateTime(requireString(s))
 
   if (!organized || !organized.timeZone) {
     throw new RangeError()
@@ -114,7 +114,7 @@ export function parseZonedDateTime(
 }
 
 export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
-  const organized = parseMaybeGenericDateTime(ensureString(s))
+  const organized = parseMaybeGenericDateTime(requireString(s))
 
   if (!organized || organized.hasZ) {
     throw new RangeError()
@@ -132,7 +132,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
 }
 
 export function parsePlainDate(s: string): PlainDateSlots<string> {
-  const organized = parseMaybeGenericDateTime(ensureString(s))
+  const organized = parseMaybeGenericDateTime(requireString(s))
 
   if (!organized || organized.hasZ) {
     throw new RangeError()
@@ -155,7 +155,7 @@ export function parsePlainYearMonth(
   getCalendarOps: (calendarId: string) => NativeYearMonthParseOps,
   s: string,
 ): PlainYearMonthSlots<string> {
-  s = ensureString(s)
+  s = requireString(s)
   let organized = parseMaybeYearMonth(s)
 
   if (organized) {
@@ -184,7 +184,7 @@ export function parsePlainMonthDay(
   getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
   s: string,
 ): PlainMonthDaySlots<string> {
-  s = ensureString(s)
+  s = requireString(s)
   const organized = parseMaybeMonthDay(s)
 
   if (organized) {
@@ -216,7 +216,7 @@ export function parsePlainMonthDay(
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
-  s = ensureString(s)
+  s = requireString(s)
   let organized: IsoTimeFields | GenericDateTimeOrganized | undefined = parseMaybeTime(s)
 
   if (!organized) {
@@ -252,7 +252,7 @@ export function parsePlainTime(s: string): PlainTimeSlots {
 }
 
 export function parseDuration(s: string): DurationSlots {
-  const parsed = parseMaybeDurationInternals(ensureString(s))
+  const parsed = parseMaybeDurationInternals(requireString(s))
 
   if (!parsed) {
     throw new RangeError()
