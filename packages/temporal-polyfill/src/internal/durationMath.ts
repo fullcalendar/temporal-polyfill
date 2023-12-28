@@ -12,6 +12,11 @@ import { diffDateTimes2, diffZonedEpochNano2 } from './diff'
 import { isoToEpochNano } from './epochAndTime'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 
+export type MarkerSlotsNoCalendar<T> = {
+  epochNanoseconds: DayTimeNano,
+  timeZone: T,
+} | IsoDateTimeFields
+
 export type MarkerSlots<C, T> =
   { epochNanoseconds: DayTimeNano, timeZone: T, calendar: C } |
   (IsoDateFields & { calendar: C })

@@ -1,12 +1,12 @@
-import { convertPlainDateTimeToZoned, convertPlainMonthDayToDate, convertPlainYearMonthToDate, convertToPlainMonthDay, convertToPlainYearMonth } from './bag'
+import { convertPlainMonthDayToDate, convertPlainYearMonthToDate, convertToPlainMonthDay, convertToPlainYearMonth } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, MonthDayFields, YearFields, YearMonthFieldsIntl } from './calendarFields'
-import { IsoTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
+import { IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
 import { DateModOps, MonthDayRefineOps, YearMonthRefineOps } from './calendarOps'
 import { toBigInt } from './cast'
-import { bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
+import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
-import { EpochDisambigOptions } from './optionsRefine'
+import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
 import { InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 import { SimpleTimeZoneOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIso } from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
@@ -164,7 +164,7 @@ export function plainDateTimeToZonedDateTime<C, TZ>(
   return {
     calendar: plainDateTimeSlots.calendar,
     timeZone: timeZoneSlot,
-    epochNanoseconds: convertPlainDateTimeToZoned(getTimeZoneOps, timeZoneSlot, plainDateTimeSlots, options),
+    epochNanoseconds: dateToEpochNano(getTimeZoneOps, timeZoneSlot, plainDateTimeSlots, options),
     branding: ZonedDateTimeBranding,
   }
 }
@@ -318,4 +318,18 @@ export function epochNanoToInstant(epochNano: bigint): InstantSlots {
     branding: InstantBranding,
     epochNanoseconds: checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
   }
+}
+
+function dateToEpochNano<TZ>(
+  getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
+  timeZoneSlot: TZ,
+  isoFields: IsoDateTimeFields,
+  options?: EpochDisambigOptions,
+): DayTimeNano {
+  const epochDisambig = refineEpochDisambigOptions(options)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+
+  return checkEpochNanoInBounds(
+    getSingleInstantFor(timeZoneOps, isoFields, epochDisambig),
+  )
 }

@@ -1,5 +1,4 @@
-import { IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
-import { BoundArg, mapPropNamesToConstant, remapProps } from './utils'
+import { mapPropNamesToConstant } from './utils'
 import { DurationFields } from './durationFields'
 import { Unit, unitNamesAsc } from './units'
 
@@ -128,15 +127,6 @@ export const dateFieldNamesAlpha = [...dayFieldNames, ...yearMonthFieldNames]
 
 export const monthDayFieldNames = [...dayFieldNames, ...monthFieldNames] // day/month/monthCode
 export const monthCodeDayFieldNames = [...dayFieldNames, ...monthCodeFieldNames] // day/monthCode
-
-// Conversion
-// -------------------------------------------------------------------------------------------------
-
-export const timeFieldsToIso = remapProps.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [TimeFields], // unbound
-  IsoTimeFields // return
->(undefined, timeFieldNamesAsc, isoTimeFieldNamesAsc)
 
 // Defaults
 // -------------------------------------------------------------------------------------------------
