@@ -5,7 +5,7 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg } from './duration'
 import { createProtocolChecker } from './utils'
-import { dateRefiners } from './mixins'
+import { dateRefiners } from './calendarRefiners'
 
 interface CalendarProtocolMethods {
   year(dateArg: PlainYearMonth | PlainDateArg): number

@@ -5,7 +5,7 @@ import { Callable, mapProps } from '../internal/utils'
 import { CalendarProtocol } from './calendarProtocol'
 import { CalendarSlot } from './calendarSlot'
 import { createPlainDate } from './plainDate'
-import { dateRefiners } from './mixins'
+import { dateRefiners } from './calendarRefiners'
 
 interface AdapterSimpleState {
   calendarProtocol: CalendarProtocol

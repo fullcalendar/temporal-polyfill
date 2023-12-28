@@ -9,46 +9,7 @@ import { createSimpleOps } from './calendarSimpleOps'
 import { toPlainDateSlots } from './plainDate'
 import { getSlots, getSpecificSlots } from './slotsForClasses'
 import { timeFieldNamesAsc } from '../internal/calendarFields'
-import { ensureBoolean, ensureInteger, ensureIntegerOrUndefined, ensurePositiveInteger, ensureString, ensureStringOrUndefined } from '../internal/cast'
-
-// Refiner Config
-// -------------------------------------------------------------------------------------------------
-// These refine things on OUTPUT of CalendarProtocol queries
-
-const yearMonthOnlyRefiners = {
-  era: ensureStringOrUndefined,
-  eraYear: ensureIntegerOrUndefined,
-  year: ensureInteger,
-  month: ensurePositiveInteger,
-
-  daysInMonth: ensurePositiveInteger,
-  daysInYear: ensurePositiveInteger,
-  inLeapYear: ensureBoolean,
-  monthsInYear: ensurePositiveInteger,
-}
-
-const monthOnlyRefiners = {
-  monthCode: ensureString,
-}
-
-const dayOnlyRefiners = {
-  day: ensurePositiveInteger,
-}
-
-const dateOnlyRefiners = {
-  dayOfWeek: ensurePositiveInteger,
-  dayOfYear: ensurePositiveInteger,
-  weekOfYear: ensurePositiveInteger,
-  yearOfWeek: ensureInteger,
-  daysInWeek: ensurePositiveInteger,
-}
-
-export const dateRefiners = {
-  ...yearMonthOnlyRefiners,
-  ...monthOnlyRefiners,
-  ...dayOnlyRefiners,
-  ...dateOnlyRefiners,
-}
+import { yearMonthOnlyRefiners, dateOnlyRefiners, monthOnlyRefiners, dayOnlyRefiners, dateRefiners } from './calendarRefiners'
 
 // For Calendar
 // -------------------------------------------------------------------------------------------------
