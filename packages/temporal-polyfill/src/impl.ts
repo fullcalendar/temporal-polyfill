@@ -1,3 +1,3 @@
-export { Temporal } from './public/temporal'
-export { DateTimeFormat } from './public/dateTimeFormat' // NOT CORRECT w/ temporal-spec, need Intl
-export { toTemporalInstant } from './public/instant'
+export { Temporal } from './classApi/temporal'
+export { DateTimeFormat } from './classApi/dateTimeFormat' // NOT CORRECT w/ temporal-spec, need Intl
+export { toTemporalInstant } from './classApi/instant'

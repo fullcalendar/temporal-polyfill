@@ -6,8 +6,8 @@ import { epochNanoToMilli } from './epochAndTime'
 import { createLazyGenerator, excludePropsByName, hasAnyPropsByName } from './utils'
 import { getSingleInstantFor } from './timeZoneOps'
 import { queryNativeTimeZone } from './timeZoneNative'
-import { Formattable } from '../public/dateTimeFormat'
-import { getSlots } from '../public/slotsForClasses'
+import { Formattable } from '../classApi/dateTimeFormat'
+import { getSlots } from '../classApi/slotsForClasses'
 import { BrandingSlots, IdLike, getId } from './slots'
 
 export type LocalesArg = string | string[]

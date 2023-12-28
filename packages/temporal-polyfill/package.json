@@ -27,7 +27,7 @@
     "tsc": "tsc --build",
     "tsc:dev": "tsc --build --watch --pretty",
     "tsc:clean": "rm -rf dist/.tsc dist/tsconfig.tsbuildinfo",
-    "type-overrides": "cp src/type-overrides/*.d.ts dist",
+    "type-overrides": "cp src/typeOverrides/*.d.ts dist",
     "bundle": "./scripts/bundle.js",
     "bundle:dev": "./scripts/bundle.js --dev",
     "bundle:clean": "rm -rf dist/*.js dist/*.cjs dist/*.map dist/*.d.ts",
