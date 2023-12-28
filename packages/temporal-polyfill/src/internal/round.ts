@@ -35,13 +35,37 @@ import { totalDayTimeNano } from './total'
 import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 
+// High-Level
+// -------------------------------------------------------------------------------------------------
+
+export function roundInstant(
+  instantSlots: InstantSlots,
+  options: RoundingOptions | UnitName
+): InstantSlots {
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions( // TODO: inline this
+    options,
+    Unit.Hour,
+    true, // solarMode
+  )
+
+  return {
+    branding: InstantBranding,
+    epochNanoseconds: roundDayTimeNano(
+      instantSlots.epochNanoseconds,
+      smallestUnit as TimeUnit,
+      roundingInc,
+      roundingMode,
+      true, // useDayOrigin
+    ),
+  }
+}
+
 export function roundZonedDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   options: RoundingOptions | UnitName,
 ): ZonedDateTimeSlots<C, T> {
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const timeZoneOps = getTimeZoneOps(timeZone)
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
 
   // short circuit (elsewhere? consolidate somehow?)
@@ -49,6 +73,7 @@ export function roundZonedDateTime<C, T>(
     return zonedDateTimeSlots
   }
 
+  const timeZoneOps = getTimeZoneOps(timeZone)
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
   let isoDateTimeFields = {
     ...epochNanoToIso(epochNanoseconds, offsetNano),
@@ -113,32 +138,10 @@ export function roundPlainTime(
   }
 }
 
-export function roundInstant(
-  instantSlots: InstantSlots,
-  options: RoundingOptions | UnitName
-): InstantSlots {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions( // TODO: inline this
-    options,
-    Unit.Hour,
-    true, // solarMode
-  )
-
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: roundDayTimeNano(
-      instantSlots.epochNanoseconds,
-      smallestUnit as TimeUnit,
-      roundingInc,
-      roundingMode,
-      true, // useDayOrigin
-    ),
-  }
-}
-
-// Rounding Dates
+// Low-Level
 // -------------------------------------------------------------------------------------------------
 
-export function roundDateTime(
+function roundDateTime(
   isoFields: IsoDateTimeFields,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
@@ -156,7 +159,7 @@ export function roundDateTime(
   )
 }
 
-export function roundTime(
+function roundTime(
   isoFields: IsoTimeFields,
   smallestUnit: TimeUnit,
   roundingInc: number,
@@ -169,7 +172,6 @@ export function roundTime(
   )[0]
 }
 
-// TODO: break into two separate functions?
 function roundDateTimeToDay(
   isoFields: IsoDateTimeFields,
   timeZoneOps: TimeZoneOps | undefined,
@@ -233,40 +235,31 @@ export function roundDayTimeDuration(
       smallestUnit,
       roundingInc,
       roundingMode,
-      Unit.Day,
     ),
   }
 }
 
-// TODO: more DRY
-export function balanceDayTimeDuration(
+function balanceDayTimeDuration(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  largestReadUnit: DayTimeUnit = largestUnit,
 ): Partial<DurationFields> {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestReadUnit)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
   const roundedLargeNano = roundDayTimeNano(dayTimeNano, smallestUnit, roundingInc, roundingMode)
-  const partialDuration = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
-
-  return partialDuration
+  return nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
 }
 
-// TODO: more DRY
 export function balanceDayTimeDurationByInc(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit,
   nanoInc: number, // REQUIRED: not larger than a day
   roundingMode: RoundingMode,
-  largestReadUnit: DayTimeUnit = largestUnit,
 ): Partial<DurationFields> {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestReadUnit)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, largestUnit)
   const roundedLargeNano = roundDayTimeNanoByInc(dayTimeNano, nanoInc, roundingMode)
-  const partialDuration = nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
-
-  return partialDuration
+  return nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
 }
 
 /*
@@ -348,7 +341,10 @@ export function roundDayTimeNano(
   useDayOrigin?: boolean
 ): DayTimeNano {
   if (smallestUnit === Unit.Day) {
-    return [roundByInc(totalDayTimeNano(dayTimeNano, Unit.Day), roundingInc, roundingMode), 0]
+    return [
+      roundByInc(totalDayTimeNano(dayTimeNano, Unit.Day), roundingInc, roundingMode),
+      0,
+    ]
   }
 
   return roundDayTimeNanoByInc(
