@@ -32,8 +32,8 @@ export function formatInstantIso<TA, T>(
 ): string {
   const [
     timeZoneArg,
-    nanoInc,
     roundingMode,
+    nanoInc,
     subsecDigits,
   ] = refineInstantDisplayOptions(options)
 
@@ -48,8 +48,8 @@ export function formatInstantIso<TA, T>(
     providedTimeZone,
     timeZoneOps,
     instantSlots.epochNanoseconds,
-    nanoInc,
     roundingMode,
+    nanoInc,
     subsecDigits,
   )
 }
@@ -114,7 +114,7 @@ export function formatPlainTimeIso(
 }
 
 export function formatDurationIso(slots: DurationSlots, options?: TimeDisplayOptions): string {
-  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
+  const [roundingMode, nanoInc, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
 
   // for performance AND for not losing precision when no rounding
   if (nanoInc > 1) {
@@ -142,8 +142,8 @@ function formatEpochNanoIso(
   providedTimeZone: boolean,
   timeZoneOps: SimpleTimeZoneOps,
   epochNano: DayTimeNano,
-  nanoInc: number,
   roundingMode: RoundingMode,
+  nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   epochNano = roundDayTimeNanoByInc(
@@ -171,8 +171,8 @@ function formatZonedEpochNanoIso<T extends IdLike>(
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
   offsetDisplay: OffsetDisplay,
-  nanoInc: number,
   roundingMode: RoundingMode,
+  nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
@@ -190,8 +190,8 @@ function formatDateTimeIso(
   calendarIdLike: IdLike,
   isoFields: IsoDateTimeFields,
   calendarDisplay: CalendarDisplay,
-  nanoInc: number,
   roundingMode: RoundingMode,
+  nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
@@ -234,8 +234,8 @@ function formatDateLikeIso(
 
 function formatTimeIso(
   fields: IsoTimeFields,
-  nanoInc: number,
   roundingMode: RoundingMode,
+  nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   return formatIsoTimeFields(
