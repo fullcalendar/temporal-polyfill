@@ -56,9 +56,8 @@ async function buildConfigs(pkgDir, isDev) {
             sourcemapExcludeSources: true,
             plugins: [
               !isDev && buildTerserPlugin({
-                temporalReservedWords,
-                compress: true,
-                beautify: true,
+                humanReadable: true,
+                optimize: true,
               })
             ],
           },
@@ -67,9 +66,9 @@ async function buildConfigs(pkgDir, isDev) {
             file: joinPaths('dist', shortName + '.min' + extensions.iife),
             plugins: [
               buildTerserPlugin({
-                temporalReservedWords,
-                compress: true,
-                mangle: true,
+                optimize: true,
+                mangleProps: true,
+                manglePropsExcept: temporalReservedWords,
               }),
             ]
           }
@@ -97,9 +96,9 @@ async function buildConfigs(pkgDir, isDev) {
           chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.esm,
           plugins: [
             !isDev && buildTerserPlugin({
-              temporalReservedWords,
-              mangle: true,
-              beautify: true,
+              humanReadable: true,
+              mangleProps: true,
+              manglePropsExcept: temporalReservedWords,
             })
           ],
         }
@@ -166,20 +165,21 @@ function arrayify(input) {
 const terserNameCache = {} // for keeping prop mangling consistent across files
 
 function buildTerserPlugin({
-  temporalReservedWords,
-  compress = false, // optimization algorithms?
-  mangle = false, // rename props and variables?
-  beautify = false, // keep whitespace and function/class names?
+  humanReadable = false,
+  optimize = false,
+  mangleProps = false,
+  manglePropsExcept,
 }) {
   return terser({
-    compress: compress && {
+    compress: optimize && {
       ecma: 2018,
       passes: 3, // enough to remove dead object assignment, get lower size
-      keep_fargs: false,
+      keep_fargs: false, // remove unused function args
     },
-    mangle: mangle && {
-      keep_fnames: beautify,
-      keep_classnames: beautify,
+    // Unfortunately can't just mangle props and nothing else
+    mangle: mangleProps && {
+      keep_fnames: humanReadable,
+      keep_classnames: humanReadable,
       reserved: [
         'Calendar',
         'Duration',
@@ -194,12 +194,13 @@ function buildTerserPlugin({
         'ZonedDateTime',
       ],
       properties: {
-        reserved: temporalReservedWords, // everything, including property/method names
+        reserved: manglePropsExcept,
         keep_quoted: true,
       },
     },
     format: {
-      beautify,
+      beautify: humanReadable,
+      // comments: humanReadable ? 'all' : 'some', // never do comments. always out of order
       indent_level: 2,
     },
     nameCache: terserNameCache,
