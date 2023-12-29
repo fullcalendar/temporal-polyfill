@@ -35,6 +35,12 @@ yargs(hideBin(process.argv))
         type: 'number',
         description: 'Maxiumum allowed number of failures before aborting'
       })
+      builder.option('min', { // for "minify"
+        requiresArg: false,
+        default: false,
+        type: 'boolean',
+        description: 'Whether to test the minified bundle'
+      })
     },
     (parsedArgv) => {
       const expectedFailureFiles = [
@@ -48,7 +54,12 @@ yargs(hideBin(process.argv))
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
-        polyfillCodeFile: joinPaths(pkgDir, 'dist/global.js'),
+        polyfillCodeFile: joinPaths(
+          pkgDir,
+          parsedArgv.min
+            ? 'dist/global.min.js'
+            : 'dist/global.js'
+        ),
         expectedFailureFiles: expectedFailureFiles.map((filename) => (
           joinPaths(scriptsDir, 'test-config', filename)
         )),
