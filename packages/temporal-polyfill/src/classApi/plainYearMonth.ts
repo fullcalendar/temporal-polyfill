@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/calendarIsoFields'
-import { LocalesArg, prepPlainYearMonthFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainYearMonthBranding, PlainYearMonthSlots, getId } from '../internal/slots'
@@ -23,6 +23,7 @@ import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { parsePlainYearMonth } from '../internal/parseIso'
+import { prepPlainYearMonthFormat } from './dateTimeFormat'
 
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 

@@ -1,5 +1,5 @@
 import { DateTimeBag } from '../internal/calendarFields'
-import { LocalesArg, prepPlainDateTimeFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
@@ -33,6 +33,7 @@ import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compa
 import { formatPlainDateTimeIso } from '../internal/formatIso'
 import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 import { parsePlainDateTime } from '../internal/parseIso'
+import { prepPlainDateTimeFormat } from './dateTimeFormat'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 

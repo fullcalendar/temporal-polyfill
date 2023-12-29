@@ -3,12 +3,10 @@ import { DayTimeNano } from './dayTimeNano'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { isoEpochOriginYear } from './calendarIso'
 import { epochNanoToMilli } from './epochAndTime'
-import { createLazyGenerator, excludePropsByName, hasAnyPropsByName } from './utils'
+import { excludePropsByName, hasAnyPropsByName } from './utils'
 import { getSingleInstantFor } from './timeZoneOps'
 import { queryNativeTimeZone } from './timeZoneNative'
-import { Formattable } from '../classApi/dateTimeFormat'
-import { getSlots } from '../classApi/slotsForClasses'
-import { BrandingSlots, IdLike, getId } from './slots'
+import { IdLike, getId } from './slots'
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat
@@ -87,7 +85,7 @@ const monthDayExclusions: OptionNames = [
 slots0 is only provided if doing toLocaleString/etc
 slots1 is only provided if doing toLocaleString/etc AND formatting a range
 */
-type OptionsTransformer<S> = (
+export type OptionsTransformer<S> = (
   options: Intl.DateTimeFormatOptions,
   slots0?: S,
   slots1?: S
@@ -181,33 +179,17 @@ type EpochNanoConverter<S> = (
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ) => DayTimeNano
 
-// TODO: move elsewhere
-type BasicInstantSlots = { epochNanoseconds: DayTimeNano }
-type BasicZonedDateTimeSlots = { timeZone: IdLike, epochNanoseconds: DayTimeNano }
+// TODO: weird
+export type BasicInstantSlots = { epochNanoseconds: DayTimeNano }
+export type BasicZonedDateTimeSlots = { timeZone: IdLike, epochNanoseconds: DayTimeNano }
 
-const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [transformYearMonthOptions, isoDateFieldsToEpochNano, true]
-const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [transformMonthDayOptions, isoDateFieldsToEpochNano, true]
-const plainDateConfig: ClassFormatConfig<IsoDateFields> = [transformDateOptions, isoDateFieldsToEpochNano]
-const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [transformDateTimeOptions, isoDateFieldsToEpochNano]
-const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [transformTimeOptions, isoTimeFieldsToEpochNano]
-const instantConfig: ClassFormatConfig<BasicInstantSlots> = [transformEpochOptions, extractEpochNano]
-const zonedDateTimeConfig: ClassFormatConfig<BasicZonedDateTimeSlots> = [transformZonedEpochOptions, extractEpochNano]
-
-/*
-For Intl.DateTimeFormat
-*/
-export const classFormatConfigs: Record<string, ClassFormatConfig<any>> = {
-  PlainYearMonth: plainYearMonthConfig,
-  PlainMonthDay: plainMonthDayConfig,
-  PlainDate: plainDateConfig,
-  PlainDateTime: plainDateTimeConfig,
-  PlainTime: plainTimeConfig,
-  Instant: instantConfig,
-  // ZonedDateTime not allowed to be formatted by Intl.DateTimeFormat
-}
-
-// For Class::toLocaleString/etc
-// -------------------------------------------------------------------------------------------------
+export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [transformYearMonthOptions, isoDateFieldsToEpochNano, true]
+export const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [transformMonthDayOptions, isoDateFieldsToEpochNano, true]
+export const plainDateConfig: ClassFormatConfig<IsoDateFields> = [transformDateOptions, isoDateFieldsToEpochNano]
+export const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [transformDateTimeOptions, isoDateFieldsToEpochNano]
+export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [transformTimeOptions, isoTimeFieldsToEpochNano]
+export const instantConfig: ClassFormatConfig<BasicInstantSlots> = [transformEpochOptions, extractEpochNano]
+export const zonedDateTimeConfig: ClassFormatConfig<BasicZonedDateTimeSlots> = [transformZonedEpochOptions, extractEpochNano]
 
 const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
 
@@ -238,7 +220,7 @@ export function createFormatPrepper<S>(
   }
 }
 
-function createFormat<S>(
+export function createFormat<S>( // TODO: better name b/c public
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer<S>,
@@ -246,113 +228,6 @@ function createFormat<S>(
   slots1?: S,
 ): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(locales, transformOptions(options, slots0, slots1))
-}
-
-export const prepPlainYearMonthFormat = createFormatPrepper(plainYearMonthConfig)
-export const prepPlainMonthDayFormat = createFormatPrepper(plainMonthDayConfig)
-export const prepPlainDateFormat = createFormatPrepper(plainDateConfig)
-export const prepPlainDateTimeFormat = createFormatPrepper(plainDateTimeConfig)
-export const prepPlainTimeFormat = createFormatPrepper(plainTimeConfig)
-export const prepInstantFormat = createFormatPrepper(instantConfig)
-export const prepZonedDateTimeFormat = createFormatPrepper(zonedDateTimeConfig)
-
-// For fns-api toLocaleString/etc (with caching)
-// -------------------------------------------------------------------------------------------------
-
-export function createFormatCache<S>(
-  hashSlots?: (slots0: S, slots1?: S) => string,
-): FormatQuerier<S> {
-  const queryFormatFactory = createLazyGenerator((options: Intl.DateTimeFormatOptions) => {
-    const map = new Map<string, Intl.DateTimeFormat>()
-
-    return (
-      locales: LocalesArg | undefined,
-      transformOptions: OptionsTransformer<S>,
-      slots0: S,
-      slots1?: S,
-    ) => {
-      const key = ([] as string[]).concat(
-        hashSlots ? [hashSlots(slots0, slots1)] : [],
-        locales || [],
-      ).join()
-
-      let format = map.get(key)
-      if (!format) {
-        format = createFormat(locales, options, transformOptions, slots0, slots1)
-        map.set(key, format)
-      }
-
-      return format
-    }
-  }, WeakMap)
-
-  return (locales, options, transformOptions, slots0, slots1) => {
-    return queryFormatFactory(options)(locales, transformOptions, slots0, slots1)
-  }
-}
-
-export const prepCachedPlainYearMonthFormat = createFormatPrepper(plainYearMonthConfig, createFormatCache())
-export const prepCachedPlainMonthDayFormat = createFormatPrepper(plainMonthDayConfig, createFormatCache())
-export const prepCachedPlainDateFormat = createFormatPrepper(plainDateConfig, createFormatCache())
-export const prepCachedPlainDateTimeFormat = createFormatPrepper(plainDateTimeConfig, createFormatCache())
-export const prepCachedPlainTimeFormat = createFormatPrepper(plainTimeConfig, createFormatCache())
-export const prepCachedInstantFormat = createFormatPrepper(instantConfig, createFormatCache())
-export const prepCachedZonedDateTimeFormat = createFormatPrepper(zonedDateTimeConfig, createFormatCache<BasicZonedDateTimeSlots>(getCommonTimeZoneId))
-
-// Intl.DateTimeFormat
-// -------------------------------------------------------------------------------------------------
-// TODO: move to public dir?
-
-export type BoundFormatPrepFunc = ( // already bound to locale/options
-  arg0?: Formattable,
-  arg1?: Formattable
-) => BoundFormatPrepFuncRes
-
-export type BoundFormatPrepFuncRes = [
-  Intl.DateTimeFormat | undefined,
-  number | undefined,
-  number | undefined,
-]
-
-export function createBoundFormatPrepFunc(
-  origOptions: Intl.DateTimeFormatOptions,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): BoundFormatPrepFunc {
-  const resolvedLocale = resolvedOptions.locale
-
-  const queryFormat = createLazyGenerator((branding: string) => {
-    const [transformOptions] = classFormatConfigs[branding]
-    const transformedOptions = transformOptions(origOptions)
-    return new OrigDateTimeFormat(resolvedLocale, transformedOptions)
-  })
-
-  return (arg0, arg1) => {
-    const slots0 = getSlots(arg0)
-    const { branding } = slots0 || {}
-    let slots1: BrandingSlots | undefined
-
-    if (arg1 !== undefined) {
-      slots1 = getSlots(arg1)
-
-      if (branding !== (slots1 || {}).branding) {
-        throw new TypeError('Mismatched types')
-      }
-    }
-
-    if (branding) {
-      const config = classFormatConfigs[branding]
-      if (!config) {
-        throw new TypeError('Cannot format ' + branding)
-      }
-
-      return [
-        queryFormat(branding)!,
-        ...toEpochMillis(config, resolvedOptions, slots0, slots1),
-      ] as BoundFormatPrepFuncRes
-    }
-
-    return [] as unknown as BoundFormatPrepFuncRes
-  }
 }
 
 // General Epoch Conversion
@@ -421,7 +296,7 @@ export function hashIntlFormatParts(
   return hash
 }
 
-function getCommonTimeZoneId(
+export function getCommonTimeZoneId(
   slots0: { timeZone: IdLike },
   slots1?: { timeZone: IdLike },
 ): string {

@@ -1,5 +1,5 @@
 import { DateTimeBag } from '../internal/calendarFields'
-import { LocalesArg, prepZonedDateTimeFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
 import {
   DiffOptions,
@@ -43,6 +43,7 @@ import { roundZonedDateTime } from '../internal/round'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 import { parseZonedDateTime } from '../internal/parseIso'
+import { prepZonedDateTimeFormat } from './dateTimeFormat'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 

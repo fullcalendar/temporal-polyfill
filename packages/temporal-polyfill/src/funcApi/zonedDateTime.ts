@@ -3,7 +3,7 @@ import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
 import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
-import { LocalesArg, prepCachedZonedDateTimeFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
@@ -20,6 +20,7 @@ import { diffZonedDateTimes } from '../internal/diff'
 import { roundZonedDateTime } from '../internal/round'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
+import { prepCachedZonedDateTimeFormat } from './formatIntlCached'
 
 export function create(
   epochNano: bigint,

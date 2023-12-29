@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
-import { LocalesArg, prepCachedPlainMonthDayFormat } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, OverflowOptions } from '../internal/optionsRefine'
+import { LocalesArg } from '../internal/formatIntl'
+import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
 import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { computeMonthDayFields } from '../internal/calendarNative'
@@ -11,6 +11,7 @@ import { plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag
 import { plainMonthDaysEqual } from '../internal/compare'
 import { formatPlainMonthDayIso } from '../internal/formatIso'
 import { plainMonthDayToPlainDate } from '../internal/convert'
+import { prepCachedPlainMonthDayFormat } from './formatIntlCached'
 
 export function create(
   isoMonth: number,

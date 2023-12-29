@@ -1,6 +1,6 @@
 import { TimeBag } from '../internal/calendarFields'
 import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
-import { LocalesArg, prepPlainTimeFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import {
   DiffOptions,
   OverflowOptions,
@@ -31,6 +31,7 @@ import { plainTimesEqual, compareIsoTimeFields } from '../internal/compare'
 import { formatPlainTimeIso } from '../internal/formatIso'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
 import { parsePlainTime } from '../internal/parseIso'
+import { prepPlainTimeFormat } from './dateTimeFormat'
 
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 

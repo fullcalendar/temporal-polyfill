@@ -1,7 +1,6 @@
 import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } from '../internal/calendarFields'
-import { NumSign } from '../internal/utils'
-import { LocalesArg, prepCachedPlainYearMonthFormat } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../internal/optionsRefine'
+import { LocalesArg } from '../internal/formatIntl'
+import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
 import * as Utils from './utils'
 import { createNativeDateModOps, createNativePartOps, createNativeYearMonthDiffOps, createNativeYearMonthModOps, createNativeYearMonthMoveOps, createNativeYearMonthParseOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
@@ -14,6 +13,7 @@ import { diffPlainYearMonth } from '../internal/diff'
 import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
+import { prepCachedPlainYearMonthFormat } from './formatIntlCached'
 
 export function create(
   isoYear: number,

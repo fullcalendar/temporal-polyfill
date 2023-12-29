@@ -1,9 +1,9 @@
 import { DateBag } from '../internal/calendarFields'
-import { NumSign, identityFunc } from '../internal/utils'
-import { LocalesArg, prepCachedPlainDateFormat } from '../internal/formatIntl'
+import { identityFunc } from '../internal/utils'
+import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
+import { DurationSlots, PlainDateSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
 import * as Utils from './utils'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { createPlainDateSlots } from '../internal/slotsCreate'
@@ -15,6 +15,7 @@ import { diffPlainDates } from '../internal/diff'
 import { plainDatesEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainDateIso } from '../internal/formatIso'
 import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
+import { prepCachedPlainDateFormat } from './formatIntlCached'
 
 // TODO: do Readonly<> everywhere?
 

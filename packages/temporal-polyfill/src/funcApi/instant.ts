@@ -1,4 +1,4 @@
-import { LocalesArg, prepCachedInstantFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, InstantDisplayOptions } from '../internal/optionsRefine'
 import { DurationSlots, InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
@@ -10,6 +10,7 @@ import { compareInstants, instantsEqual } from '../internal/compare'
 import { formatInstantIso } from '../internal/formatIso'
 import { diffInstants } from '../internal/diff'
 import { roundInstant } from '../internal/round'
+import { prepCachedInstantFormat } from './formatIntlCached'
 
 export const create = createInstantSlots
 

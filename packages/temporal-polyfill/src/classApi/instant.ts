@@ -1,4 +1,4 @@
-import { LocalesArg, prepInstantFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../internal/optionsRefine'
 import { requireObjectlike } from '../internal/cast'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
@@ -22,6 +22,7 @@ import { compareInstants, instantsEqual } from '../internal/compare'
 import { formatInstantIso } from '../internal/formatIso'
 import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
 import { parseInstant } from '../internal/parseIso'
+import { prepInstantFormat } from './dateTimeFormat'
 
 export type InstantArg = Instant | string
 

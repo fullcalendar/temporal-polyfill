@@ -1,5 +1,5 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
-import { LocalesArg, prepCachedPlainTimeFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
@@ -13,6 +13,7 @@ import { roundPlainTime } from '../internal/round'
 import { plainTimesEqual, compareIsoTimeFields } from '../internal/compare'
 import { formatPlainTimeIso } from '../internal/formatIso'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
+import { prepCachedPlainTimeFormat } from './formatIntlCached'
 
 export const create = createPlainTimeSlots
 

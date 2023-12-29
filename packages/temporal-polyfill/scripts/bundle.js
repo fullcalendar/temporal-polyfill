@@ -165,10 +165,6 @@ function arrayify(input) {
 
 const terserNameCache = {} // for keeping prop mangling consistent across files
 
-/*
-TODO: kill extra createFormatPrepper calls. Just move to separate src file? Yes,
-because other minifiers w/ esm won't be so smart
-*/
 function buildTerserPlugin({
   temporalReservedWords,
   compress = false, // optimization algorithms?

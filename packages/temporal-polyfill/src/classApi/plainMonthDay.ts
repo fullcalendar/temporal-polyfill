@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, YearFields } from '../internal/calendarFields'
-import { LocalesArg, prepPlainMonthDayFormat } from '../internal/formatIntl'
+import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/calendarIsoFields'
@@ -20,6 +20,7 @@ import { plainMonthDaysEqual } from '../internal/compare'
 import { formatPlainMonthDayIso } from '../internal/formatIso'
 import { plainMonthDayToPlainDate } from '../internal/convert'
 import { parsePlainMonthDay } from '../internal/parseIso'
+import { prepPlainMonthDayFormat } from './dateTimeFormat'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
