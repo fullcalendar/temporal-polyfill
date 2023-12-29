@@ -64,11 +64,24 @@ function requireNumberIsPositive(num: number): number {
   return num
 }
 
-export function requireNotNullOrUndefined<T>(o: T): T {
-  if (o == null) { // null or undefined
+/*
+Disallows undefined/null
+*/
+export function requireDefined<T>(o: T): T {
+  if (o == null) {
     throw TypeError('Cannot be null or undefined')
   }
   return o
+}
+
+/*
+Disallows undefined/null. Does RangeError
+*/
+export function requirePropDefined<V>(optionName: string, optionVal: V | null | undefined): V {
+  if (optionVal == null) {
+    throw new RangeError('Must specify ' + optionName)
+  }
+  return optionVal
 }
 
 

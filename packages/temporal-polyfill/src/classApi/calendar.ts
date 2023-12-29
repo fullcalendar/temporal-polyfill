@@ -1,5 +1,5 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
-import { requireNotNullOrUndefined, requireString } from '../internal/cast'
+import { requireDefined, requireString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
 import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
@@ -140,8 +140,8 @@ export class Calendar implements CalendarProtocol {
     const { native } = getCalendarSlots(this)
 
     return native.mergeFields(
-      excludeUndefinedProps(requireNotNullOrUndefined(fields0)),
-      excludeUndefinedProps(requireNotNullOrUndefined(fields1)),
+      excludeUndefinedProps(requireDefined(fields0)),
+      excludeUndefinedProps(requireDefined(fields1)),
     )
   }
 

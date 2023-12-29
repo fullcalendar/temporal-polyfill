@@ -1,5 +1,5 @@
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { toString, requireObjectlike, toInteger } from './cast'
+import { toString, requireObjectlike, toInteger, requirePropDefined } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import { BoundArg, clampEntity, isObjectlike } from './utils'
 import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './options'
@@ -294,7 +294,7 @@ export function refineRoundOptions(
   const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
   let smallestUnit = refineSmallestUnit(options, maxUnit)
 
-  smallestUnit = requireDefined(smallestUnitStr, smallestUnit)
+  smallestUnit = requirePropDefined(smallestUnitStr, smallestUnit)
   roundingInc = refineRoundingInc(roundingInc, smallestUnit as DayTimeUnit, undefined, solarMode)
 
   return [smallestUnit, roundingInc, roundingMode]
@@ -312,7 +312,7 @@ export function refineTotalOptions<RA, R>(
   // alphabetical
   const relativeToInternals = refineRelativeTo(options.relativeTo)
   let totalUnit = refineTotalUnit(options)
-  totalUnit = requireDefined(totalUnitStr, totalUnit)
+  totalUnit = requirePropDefined(totalUnitStr, totalUnit)
 
   return [
     totalUnit, // required
@@ -637,16 +637,6 @@ function refineChoiceOption<O>(
     throw new RangeError('Must be one of the choices')
   }
   return enumNum
-}
-
-// Errors
-// -------------------------------------------------------------------------------------------------
-
-function requireDefined<V>(optionName: string, optionVal: V | null | undefined): V {
-  if (optionVal == null) {
-    throw new RangeError('Must specify ' + optionName)
-  }
-  return optionVal
 }
 
 function checkLargestSmallestUnit(largestUnit: Unit, smallestUnit: Unit): void {
