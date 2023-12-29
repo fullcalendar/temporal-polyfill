@@ -7,7 +7,6 @@ import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import * as Utils from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { DurationFields } from '../internal/durationFields'
@@ -21,6 +20,7 @@ import { roundZonedDateTime } from '../internal/round'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 import { prepCachedZonedDateTimeFormat } from './formatIntlCached'
+import { getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear, getDateFields } from './utils'
 
 export function create(
   epochNano: bigint,
@@ -68,7 +68,7 @@ export function getFields(
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   return {
-    ...Utils.getDateFields({ ...isoFields, calendar: zonedDateTimeSlots.calendar }),
+    ...getDateFields({ ...isoFields, calendar: zonedDateTimeSlots.calendar }),
     // TODO: util for time...
     hour: isoFields.isoHour,
     minute: isoFields.isoMinute,
@@ -102,27 +102,27 @@ export function yearOfWeek(zonedDateTimeSlots: ZonedDateTimeSlots<string, string
 
 export function dayOfYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryNativeTimeZone(zonedDateTimeSlots.timeZone))
-  return Utils.dayOfYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+  return getDayOfYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
 }
 
 export function daysInMonth(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryNativeTimeZone(zonedDateTimeSlots.timeZone))
-  return Utils.daysInMonth({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+  return getDaysInMonth({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
 }
 
 export function daysInYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryNativeTimeZone(zonedDateTimeSlots.timeZone))
-  return Utils.daysInYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+  return getDaysInYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
 }
 
 export function monthsInYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): number {
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryNativeTimeZone(zonedDateTimeSlots.timeZone))
-  return Utils.monthsInYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+  return getMonthsInYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
 }
 
 export function inLeapYear(zonedDateTimeSlots: ZonedDateTimeSlots<string, string>): boolean {
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryNativeTimeZone(zonedDateTimeSlots.timeZone))
-  return Utils.inLeapYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
+  return getInLeapYear({ ...isoFields, calendar: zonedDateTimeSlots.calendar })
 }
 
 export function withFields(

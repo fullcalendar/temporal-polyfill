@@ -2,7 +2,6 @@ import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } fro
 import { LocalesArg } from '../internal/formatIntl'
 import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
-import * as Utils from './utils'
 import { createNativeDateModOps, createNativePartOps, createNativeYearMonthDiffOps, createNativeYearMonthModOps, createNativeYearMonthMoveOps, createNativeYearMonthParseOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { computeYearMonthFields } from '../internal/calendarNative'
 import { createPlainYearMonthSlots } from '../internal/slotsCreate'
@@ -14,6 +13,7 @@ import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { prepCachedPlainYearMonthFormat } from './formatIntlCached'
+import { getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
 
 export function create(
   isoYear: number,
@@ -46,10 +46,10 @@ export function getFields(slots: PlainYearMonthSlots<string>): YearMonthFields &
 }
 
 // TODO: add specific types
-export const daysInMonth = Utils.daysInMonth
-export const daysInYear = Utils.daysInYear
-export const monthsInYear = Utils.monthsInYear
-export const inLeapYear = Utils.inLeapYear
+export const daysInMonth = getDaysInMonth
+export const daysInYear = getDaysInYear
+export const monthsInYear = getMonthsInYear
+export const inLeapYear = getInLeapYear
 
 export function withFields(
   plainYearMonthSlots: PlainYearMonthSlots<string>,

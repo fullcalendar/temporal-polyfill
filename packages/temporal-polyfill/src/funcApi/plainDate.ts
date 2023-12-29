@@ -4,7 +4,6 @@ import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import * as Utils from './utils'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { createPlainDateSlots } from '../internal/slotsCreate'
 import { parsePlainDate } from '../internal/parseIso'
@@ -16,6 +15,8 @@ import { plainDatesEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainDateIso } from '../internal/formatIso'
 import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
 import { prepCachedPlainDateFormat } from './formatIntlCached'
+import { getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear, getDateFields } from './utils'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 
 // TODO: do Readonly<> everywhere?
 
@@ -42,18 +43,16 @@ export function fromFields(
 }
 
 // TODO: add specific types
-export const getFields = Utils.getDateFields
-
-// TODO: add specific types
-export const dayOfWeek = Utils.dayOfWeek
-export const daysInWeek = Utils.daysInWeek
-export const weekOfYear = Utils.weekOfYear
-export const yearOfWeek = Utils.yearOfWeek
-export const dayOfYear = Utils.dayOfYear
-export const daysInMonth = Utils.daysInMonth
-export const daysInYear = Utils.daysInYear
-export const monthsInYear = Utils.monthsInYear
-export const inLeapYear = Utils.inLeapYear
+export const getFields = getDateFields
+export const dayOfWeek = computeIsoDayOfWeek
+export const daysInWeek = computeIsoDaysInWeek
+export const weekOfYear = computeIsoWeekOfYear
+export const yearOfWeek = computeIsoYearOfWeek
+export const dayOfYear = getDayOfYear
+export const daysInMonth = getDaysInMonth
+export const daysInYear = getDaysInYear
+export const monthsInYear = getMonthsInYear
+export const inLeapYear = getInLeapYear
 
 export function withFields(
   slots: PlainDateSlots<string>,
