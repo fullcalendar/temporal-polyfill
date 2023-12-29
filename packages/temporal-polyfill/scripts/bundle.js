@@ -152,13 +152,26 @@ const terserNameCache = {} // for keeping prop mangling consistent across files
 
 function buildTerserPlugin(temporalReservedWords, humanReadable = false) {
   return terser({
-    compress: {
+    compress: !humanReadable && {
       ecma: 2018,
     },
     mangle: {
       keep_fnames: humanReadable,
+      reserved: [
+        'Calendar',
+        'Duration',
+        'Instant',
+        'Now',
+        'PlainDate',
+        'PlainDateTime',
+        'PlainMonthDay',
+        'PlainTime',
+        'PlainYearMonth',
+        'TimeZone',
+        'ZonedDateTime',
+      ],
       properties: {
-        reserved: temporalReservedWords,
+        reserved: temporalReservedWords, // everything, including property/method names
         keep_quoted: true,
       },
     },
@@ -179,5 +192,6 @@ async function readTemporalReservedWords(pkgDir) {
     .concat([
       'resolvedOptions',
       'useGrouping',
+      'relatedYear',
     ])
 }
