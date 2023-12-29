@@ -54,12 +54,23 @@ async function buildConfigs(pkgDir, isDev) {
             file: joinPaths('dist', shortName + extensions.iife),
             sourcemap: isDev,
             sourcemapExcludeSources: true,
+            plugins: [
+              !isDev && buildTerserPlugin({
+                temporalReservedWords,
+                compress: true,
+                beautify: true,
+              })
+            ],
           },
           !isDev && {
             format: 'iife',
             file: joinPaths('dist', shortName + '.min' + extensions.iife),
             plugins: [
-              buildTerserPlugin(temporalReservedWords),
+              buildTerserPlugin({
+                temporalReservedWords,
+                compress: true,
+                mangle: true,
+              }),
             ]
           }
         ],
@@ -85,7 +96,11 @@ async function buildConfigs(pkgDir, isDev) {
           entryFileNames: '[name]' + extensions.esm,
           chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.esm,
           plugins: [
-            !isDev && buildTerserPlugin(temporalReservedWords, true)
+            !isDev && buildTerserPlugin({
+              temporalReservedWords,
+              mangle: true,
+              beautify: true,
+            })
           ],
         }
       ],
@@ -150,13 +165,25 @@ function arrayify(input) {
 
 const terserNameCache = {} // for keeping prop mangling consistent across files
 
-function buildTerserPlugin(temporalReservedWords, humanReadable = false) {
+/*
+TODO: kill extra createFormatPrepper calls. Just move to separate src file? Yes,
+because other minifiers w/ esm won't be so smart
+*/
+function buildTerserPlugin({
+  temporalReservedWords,
+  compress = false, // optimization algorithms?
+  mangle = false, // rename props and variables?
+  beautify = false, // keep whitespace and function/class names?
+}) {
   return terser({
-    compress: !humanReadable && {
+    compress: compress && {
       ecma: 2018,
+      passes: 3, // enough to remove dead object assignment, get lower size
+      keep_fargs: false,
     },
-    mangle: {
-      keep_fnames: humanReadable,
+    mangle: mangle && {
+      keep_fnames: beautify,
+      keep_classnames: beautify,
       reserved: [
         'Calendar',
         'Duration',
@@ -176,7 +203,7 @@ function buildTerserPlugin(temporalReservedWords, humanReadable = false) {
       },
     },
     format: {
-      beautify: humanReadable,
+      beautify,
       indent_level: 2,
     },
     nameCache: terserNameCache,
