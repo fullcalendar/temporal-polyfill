@@ -268,16 +268,16 @@ function formatDurationFields(
     subsecNanoString
 
   return (sign < 0 ? '-' : '') + 'P' + formatDurationFragments({
-    Y: formatNumberUnscientific(abs.years),
-    M: formatNumberUnscientific(abs.months),
-    W: formatNumberUnscientific(abs.weeks),
-    D: formatNumberUnscientific(abs.days),
+    'Y': formatNumberUnscientific(abs.years),
+    'M': formatNumberUnscientific(abs.months),
+    'W': formatNumberUnscientific(abs.weeks),
+    'D': formatNumberUnscientific(abs.days),
   }) + (
     (hours || minutes || wholeSeconds || forceSeconds)
       ? 'T' + formatDurationFragments({
-        H: formatNumberUnscientific(hours),
-        M: formatNumberUnscientific(minutes),
-        S: formatNumberUnscientific(wholeSeconds, forceSeconds) + subsecNanoString
+        'H': formatNumberUnscientific(hours),
+        'M': formatNumberUnscientific(minutes),
+        'S': formatNumberUnscientific(wholeSeconds, forceSeconds) + subsecNanoString
       })
       : ''
   )
