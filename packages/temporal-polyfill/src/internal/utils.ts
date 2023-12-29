@@ -1,11 +1,6 @@
 import { Overflow } from './options'
 
 /*
-Is this making this more complex at cost of no lower min size?
-*/
-export type Reused = any
-
-/*
 Will linter make [any] for bind okay? If so, this is unnecessary
 */
 export type BoundArg = any
@@ -36,18 +31,6 @@ export function mapProps<P, R, E = undefined>(
 
   return res
 }
-
-export const mapPropsWithRefiners = mapProps.bind(
-  undefined,
-  (propVal: any, propName: string, refinerMap: any) => refinerMap[propName](propVal, propName),
-) as (
-  <P, M extends { [K in keyof P]: (propVal: P[K], propName: K) => any }>(
-    props: P,
-    refinerMap: M,
-  ) => {
-    [K in keyof P]: ReturnType<M[K]>
-  }
-)
 
 export function mapPropNames<P, R, E = undefined>(
   generator: (propName: keyof P, i: number, extraArg?: E) => R,
@@ -100,20 +83,6 @@ export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
   }
 
   return res
-}
-
-export function pluckPropsTuple<P>(propNames: (keyof P)[], props: P): any {
-  const res = []
-
-  for (const propName of propNames) {
-    res.push(props[propName])
-  }
-
-  return res
-}
-
-export function excludeArrayDuplicates<V>(a: V[]): V[] {
-  return [...new Set(a)]
 }
 
 function filterProps<P, E = undefined>(
@@ -196,7 +165,7 @@ export function hasAllPropsByName<P extends {}>(
 
 export function createLazyGenerator<K, V, A extends any[]>(
   generator: (key: K, ...otherArgs: A) => V,
-  MapClass: { new(): any } = Map,
+  MapClass: { new(): any } = Map, // TODO: better type
 ): (
   (key: K, ...otherArgs: A) => V
 ) {
@@ -285,7 +254,7 @@ export function noop(): void {
   // return undefined
 }
 
-export function padNumber(digits: number, num: number): string { // TODO: rename `padNum`
+export function padNumber(digits: number, num: number): string {
   return String(num).padStart(digits, '0')
 }
 
