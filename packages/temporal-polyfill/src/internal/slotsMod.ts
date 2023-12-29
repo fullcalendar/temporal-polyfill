@@ -2,29 +2,8 @@ import { OffsetDisambig } from './options'
 import { IdLike, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot } from './slots'
 import { TimeZoneOps, getMatchingInstantFor, zonedInternalsToIso } from './timeZoneOps'
 
-export function plainDateTimeWithPlainTime<C>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainTimeSlots: PlainTimeSlots,
-): PlainDateTimeSlots<C> {
-  return {
-    ...plainDateTimeSlots,
-    ...plainTimeSlots,
-    branding: PlainDateTimeBranding,
-  }
-}
-
-export function plainDateTimeWithPlainDate<C extends IdLike>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainDateSlots: PlainDateSlots<C>,
-) {
-  return {
-    ...plainDateTimeSlots,
-    ...plainDateSlots,
-    // TODO: more DRY with other datetime types
-    calendar: getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar),
-    branding: PlainDateTimeBranding,
-  }
-}
+// ZonedDateTime with *
+// -------------------------------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
@@ -88,6 +67,36 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
     calendar,
   }
 }
+
+// PlainDateTime with *
+// -------------------------------------------------------------------------------------------------
+
+export function plainDateTimeWithPlainTime<C>(
+  plainDateTimeSlots: PlainDateTimeSlots<C>,
+  plainTimeSlots: PlainTimeSlots,
+): PlainDateTimeSlots<C> {
+  return {
+    ...plainDateTimeSlots,
+    ...plainTimeSlots,
+    branding: PlainDateTimeBranding,
+  }
+}
+
+export function plainDateTimeWithPlainDate<C extends IdLike>(
+  plainDateTimeSlots: PlainDateTimeSlots<C>,
+  plainDateSlots: PlainDateSlots<C>,
+) {
+  return {
+    ...plainDateTimeSlots,
+    ...plainDateSlots,
+    // TODO: more DRY with other datetime types
+    calendar: getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar),
+    branding: PlainDateTimeBranding,
+  }
+}
+
+// Anything with calendar/timeZone
+// -------------------------------------------------------------------------------------------------
 
 export function slotsWithCalendar<C, S extends { calendar: C }>(
   slots: S,
