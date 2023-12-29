@@ -1,11 +1,10 @@
 import { DayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
-import { DurationFields, durationFieldNamesAsc } from './durationFields'
+import { DurationFields, durationFieldDefaults, durationFieldNamesAsc } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots } from './slots'
 import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
-import { clampRelativeDuration } from './round'
 import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, spanDuration, MarkerToEpochNano, MoveMarker, DiffMarkers, queryDurationSign, durationFieldsToDayTimeNano, clearDurationFields } from './durationMath'
 
 export function totalDuration<RA, C, T>(
@@ -19,11 +18,12 @@ export function totalDuration<RA, C, T>(
   const [totalUnit, markerSlots] = refineTotalOptions(options, refineRelativeTo)
   const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
 
-  if (maxLargestUnit < Unit.Day || (
-    maxLargestUnit === Unit.Day &&
-    // has uniform days?
-    !(markerSlots && (markerSlots as any).epochNanoseconds)
-  )) {
+  if (
+    maxLargestUnit < Unit.Day || (
+      maxLargestUnit === Unit.Day &&
+      !(markerSlots && (markerSlots as any).epochNanoseconds) // has uniform days?
+    )
+  ) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
 
@@ -37,16 +37,6 @@ export function totalDuration<RA, C, T>(
     ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
     totalUnit,
     ...markerSystem
-  )
-}
-
-function totalDayTimeDuration(
-  durationFields: DurationFields,
-  totalUnit: DayTimeUnit
-): number {
-  return totalDayTimeNano(
-    durationFieldsToDayTimeNano(durationFields, Unit.Day),
-    totalUnit
   )
 }
 
@@ -72,19 +62,59 @@ function totalRelativeDuration<M>(
     moveMarker
   )
 
-  // TODO: more DRY
-  const frac = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) /
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
-  if (!Number.isFinite(frac)) {
-    throw new RangeError('Faulty Calendar rounding')
-  }
-
+  const frac = computeEpochNanoFrac(epochNano0, epochNano1, endEpochNano)
   return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
 }
+
+function totalDayTimeDuration(
+  durationFields: DurationFields,
+  totalUnit: DayTimeUnit
+): number {
+  return totalDayTimeNano(
+    durationFieldsToDayTimeNano(durationFields, Unit.Day),
+    totalUnit
+  )
+}
+
+// Utils for points-within-intervals
+// -------------------------------------------------------------------------------------------------
 
 export function totalDayTimeNano(
   dayTimeNano: DayTimeNano,
   totalUnit: DayTimeUnit,
 ): number {
   return dayTimeNanoToNumber(dayTimeNano, unitNanoMap[totalUnit], true) // exact
+}
+
+export function clampRelativeDuration<M>(
+  durationFields: DurationFields,
+  clampUnit: Unit,
+  clampDistance: number,
+  // marker system...
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
+) {
+  const clampDurationFields = {
+    ...durationFieldDefaults,
+    [durationFieldNamesAsc[clampUnit]]: clampDistance,
+  }
+  const marker0 = moveMarker(marker, durationFields)
+  const marker1 = moveMarker(marker0, clampDurationFields)
+  const epochNano0 = markerToEpochNano(marker0)
+  const epochNano1 = markerToEpochNano(marker1)
+  return [epochNano0, epochNano1]
+}
+
+export function computeEpochNanoFrac(
+  epochNano0: DayTimeNano,
+  epochNano1: DayTimeNano,
+  epochNanoProgress: DayTimeNano,
+): number {
+  const denom = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
+  if (!denom) {
+    throw new RangeError('Faulty Calendar rounding')
+  }
+  const numer = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNanoProgress))
+  return numer / denom
 }

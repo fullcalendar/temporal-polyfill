@@ -31,7 +31,7 @@ import {
 } from './units'
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
-import { totalDayTimeNano } from './total'
+import { clampRelativeDuration, computeEpochNanoFrac, totalDayTimeNano } from './total'
 import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 
@@ -519,14 +519,8 @@ function nudgeRelativeDuration<M>(
     moveMarker,
   )
 
-  // TODO: more DRY
   // usually between 0-1, however can be higher when weeks aren't bounded by months
-  const frac =
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, endEpochNano)) / // distance travelled
-    dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1)) // entire possible distance
-  if (!Number.isFinite(frac)) {
-    throw new RangeError('Faulty Calendar rounding')
-  }
+  const frac = computeEpochNanoFrac(epochNano0, epochNano1, endEpochNano)
 
   const exactVal = truncedVal + (frac * sign * roundingInc)
   const roundedVal = roundByInc(exactVal, roundingInc, roundingMode)
@@ -539,26 +533,6 @@ function nudgeRelativeDuration<M>(
     expanded ? epochNano1 : epochNano0,
     expanded, // guaranteed to be a big unit because of big smallestUnit
   ]
-}
-
-export function clampRelativeDuration<M>(
-  durationFields: DurationFields,
-  clampUnit: Unit,
-  clampDistance: number,
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
-) {
-  const clampDurationFields = {
-    ...durationFieldDefaults,
-    [durationFieldNamesAsc[clampUnit]]: clampDistance,
-  }
-  const marker0 = moveMarker(marker, durationFields)
-  const marker1 = moveMarker(marker0, clampDurationFields)
-  const epochNano0 = markerToEpochNano(marker0)
-  const epochNano1 = markerToEpochNano(marker1)
-  return [epochNano0, epochNano1]
 }
 
 // Bubbling
