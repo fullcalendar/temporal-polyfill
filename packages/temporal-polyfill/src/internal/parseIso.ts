@@ -1,5 +1,5 @@
 import { unitNanoMap, nanoInSec, nanoInUtcDay } from './units'
-import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
+import { isoCalendarId } from './calendarConfig'
 import {
   DurationFields,
   durationFieldNamesAsc,
@@ -39,12 +39,12 @@ import {
 import { divModFloor, pluckProps } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 import { utcTimeZoneId } from './timeZoneNative'
-import { queryIntlCalendar } from './calendarIntl'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
 import { requireString, toStringViaPrimitive } from './cast'
+import { realizeCalendarId } from './calendarNativeQuery'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -302,27 +302,6 @@ export function parseCalendarId(s: string): string {
   return res ? res.calendar : s
 }
 
-export function realizeCalendarId(calendarId: string): string {
-  calendarId = normalizeCalendarId(calendarId)
-
-  // check that it's valid. DRY enough with createNativeOpsCreator?
-  if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
-    queryIntlCalendar(calendarId)
-  }
-
-  return calendarId // return original instead of using queried-result. keeps id extensions
-}
-
-export function normalizeCalendarId(calendarId: string): string {
-  calendarId = calendarId.toLocaleLowerCase()
-
-  if (calendarId === 'islamicc') {
-    calendarId = 'islamic-civil'
-  }
-
-  return calendarId
-}
-
 export function parseTimeZoneId(s: string): string {
   const parsed = parseMaybeGenericDateTime(s)
 
@@ -339,10 +318,6 @@ export function parseTimeZoneId(s: string): string {
   }
 
   return s
-}
-
-export function realizeTimeZoneId(calendarId: string): string {
-  return queryNativeTimeZone(calendarId).id // queryTimeZoneImpl will normalize the id
 }
 
 // Post-processing organized result
@@ -370,7 +345,7 @@ function postProcessZonedDateTime(
   return {
     epochNanoseconds,
     timeZone: timeZoneImpl.id,
-    calendar: realizeCalendarId(organized.calendar), // TODO: use timeZoneImpl.id somehow???
+    calendar: realizeCalendarId(organized.calendar),
   }
 }
 

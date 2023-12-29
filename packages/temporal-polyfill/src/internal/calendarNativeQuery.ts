@@ -402,3 +402,26 @@ function createNativeOpsCreator<O extends {}>(isoOps: O, intlOps: O): (
     return Object.assign(Object.create(intlOps), queryIntlCalendar(calendarId))
   }
 }
+
+// -------------------------------------------------------------------------------------------------
+
+export function realizeCalendarId(calendarId: string): string {
+  calendarId = normalizeCalendarId(calendarId)
+
+  // check that it's valid. DRY enough with createNativeOpsCreator?
+  if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
+    queryIntlCalendar(calendarId)
+  }
+
+  return calendarId // return original instead of using queried-result. keeps id extensions
+}
+
+export function normalizeCalendarId(calendarId: string): string {
+  calendarId = calendarId.toLocaleLowerCase()
+
+  if (calendarId === 'islamicc') {
+    calendarId = 'islamic-civil'
+  }
+
+  return calendarId
+}

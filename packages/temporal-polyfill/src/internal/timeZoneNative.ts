@@ -50,6 +50,10 @@ export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
   return queryNonFixedTimeZone(timeZoneId)
 }
 
+export function realizeTimeZoneId(calendarId: string): string {
+  return queryNativeTimeZone(calendarId).id // queryNativeTimeZone will normalize the id
+}
+
 // Fixed
 // -------------------------------------------------------------------------------------------------
 

@@ -3,8 +3,9 @@ import { DurationFields } from './durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
-import { parseCalendarId, parseMaybeOffsetNano, parseTimeZoneId, realizeCalendarId, realizeTimeZoneId } from './parseIso'
-import { utcTimeZoneId } from './timeZoneNative'
+import { parseCalendarId, parseMaybeOffsetNano, parseTimeZoneId } from './parseIso'
+import { realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
+import { realizeCalendarId } from './calendarNativeQuery'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
