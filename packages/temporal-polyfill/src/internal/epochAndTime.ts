@@ -17,7 +17,7 @@ import {
   nanoInUtcDay,
   nanoToGivenFields
 } from './units'
-import { NumSign, divModFloor, clampProp, compareNumbers, divModTrunc } from './utils'
+import { divModFloor, clampProp, divModTrunc } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, compareDayTimeNanos, dayTimeNanoToBigInt, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, numberToDayTimeNano } from './dayTimeNano'
 
 const maxDays = 100000000
@@ -233,6 +233,7 @@ export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
     return epochMilli - nudge * milliInDay
   }
 }
+
 export function isoToLegacyDate(
   isoYear: number,
   isoMonth: number = 1,
@@ -255,6 +256,7 @@ export function isoToLegacyDate(
 
   return [legacyDate, nudge]
 }
+
 // Epoch -> ISO Fields
 
 export function epochNanoToIso(epochNano: DayTimeNano, offsetNano: number): IsoDateTimeFields {

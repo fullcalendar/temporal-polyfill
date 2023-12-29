@@ -1,11 +1,12 @@
 import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './epochAndTime'
-import { IsoDateFields, isoTimeFieldDefaults } from './calendarIsoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { diffEpochMilliByDay } from './diff'
-import { createLazyGenerator, modFloor } from './utils'
+import { clampProp, createLazyGenerator, isClamped, modFloor } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
 import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
 import { buildIntlFormat, parseIntlYear } from './calendarIntl'
 import { hashIntlFormatParts } from './formatIntl'
+import { Overflow } from './options'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
@@ -185,4 +186,46 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
   const intlPartsHash = hashIntlFormatParts(japeneseEraFormat, epochMilli)
   const { era, eraYear } = parseIntlYear(intlPartsHash, japaneseCalendarId)
   return [era, eraYear]
+}
+
+// Checking Fields
+// -------------------------------------------------------------------------------------------------
+
+export function checkIsoDateTimeFields<P extends IsoDateTimeFields>(isoDateTimeFields: P): P {
+  checkIsoDateFields(isoDateTimeFields)
+  constrainIsoTimeFields(isoDateTimeFields, Overflow.Reject)
+  return isoDateTimeFields
+}
+
+export function checkIsoDateFields<P extends IsoDateFields>(isoInternals: P): P {
+  if (!isIsoDateFieldsValid(isoInternals)) {
+    throw new RangeError('Invalid iso date') // TODO: more DRY
+  }
+  return isoInternals
+}
+
+export function isIsoDateFieldsValid(isoFields: IsoDateFields): boolean {
+  const { isoYear, isoMonth, isoDay } = isoFields
+
+  return isClamped(isoMonth, 1, computeIsoMonthsInYear(isoYear)) && // TODO: use just 12
+    isClamped(isoDay, 1, computeIsoDaysInMonth(isoYear, isoMonth))
+}
+
+// Constraining
+// -------------------------------------------------------------------------------------------------
+
+export function constrainIsoTimeFields(
+  isoTimeFields: IsoTimeFields,
+  overflow: Overflow | undefined,
+): IsoTimeFields {
+  // TODO: clever way to compress this, using functional programming
+  // Will this kill need for clampProp?
+  return {
+    isoHour: clampProp(isoTimeFields, 'isoHour', 0, 23, overflow),
+    isoMinute: clampProp(isoTimeFields, 'isoMinute', 0, 59, overflow),
+    isoSecond: clampProp(isoTimeFields, 'isoSecond', 0, 59, overflow),
+    isoMillisecond: clampProp(isoTimeFields, 'isoMillisecond', 0, 999, overflow),
+    isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflow),
+    isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflow),
+  }
 }

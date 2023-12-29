@@ -14,11 +14,9 @@ import {
 } from './calendarIsoFields'
 import {
   constrainIsoTimeFields,
-  constrainIsoDateLike,
-  constrainIsoDateTimeLike,
-  isIsoDateFieldsValid
-} from './constrain'
-import {
+  checkIsoDateFields,
+  checkIsoDateTimeFields,
+  isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './calendarIso'
 import {
@@ -76,7 +74,7 @@ export function parseInstant(s: string): InstantSlots {
   }
 
   const epochNanoseconds = isoToEpochNanoWithOffset(
-    constrainIsoDateTimeLike(organized),
+    checkIsoDateTimeFields(organized),
     offsetNano,
   )
 
@@ -193,7 +191,7 @@ export function parsePlainMonthDay(
     }
 
     return {
-      ...constrainIsoDateLike(organized), // `organized` has isoEpochFirstLeapYear
+      ...checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
       branding: PlainMonthDayBranding,
     }
   }
@@ -286,7 +284,7 @@ export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calenda
 }
 
 function postProcessYearMonthOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
-  return checkIsoYearMonthInBounds(constrainIsoDateLike(organized))
+  return checkIsoYearMonthInBounds(checkIsoDateFields(organized))
 }
 
 export function parseOffsetNano(s: string): number {
@@ -360,7 +358,7 @@ function postProcessZonedDateTime(
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
-    constrainIsoDateTimeLike(organized),
+    checkIsoDateTimeFields(organized),
     offsetNano,
     organized.hasZ,
     offsetDisambig,
@@ -377,11 +375,11 @@ function postProcessZonedDateTime(
 }
 
 function postProcessDateTime(organized: GenericDateTimeOrganized): IsoDateTimeFields & { calendar: string } {
-  return normalizeCalendarStr(checkIsoDateTimeInBounds(constrainIsoDateTimeLike(organized)))
+  return normalizeCalendarStr(checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)))
 }
 
 function postProcessDate(organized: DateOrganized): IsoDateFields & { calendar: string } {
-  return normalizeCalendarStr(checkIsoDateInBounds(constrainIsoDateLike(organized)))
+  return normalizeCalendarStr(checkIsoDateInBounds(checkIsoDateFields(organized)))
 }
 
 function normalizeCalendarStr<T extends { calendar: string }>(organized: T): T {

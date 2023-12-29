@@ -1,6 +1,6 @@
 import { isoCalendarId } from './calendarConfig'
 import { isoEpochFirstLeapYear } from './calendarIso'
-import { constrainIsoDateLike, constrainIsoDateTimeLike, constrainIsoTimeFields } from './constrain'
+import { checkIsoDateFields, checkIsoDateTimeFields, constrainIsoTimeFields } from './calendarIso'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { bigIntToDayTimeNano } from './dayTimeNano'
 import { checkDurationFields } from './durationMath'
@@ -93,7 +93,7 @@ export function createPlainMonthDaySlots<CA, C>(
 
   return {
     ...checkIsoDateInBounds(
-      constrainIsoDateLike({
+      checkIsoDateFields({
         isoYear: isoYearInt,
         isoMonth: isoMonthInt,
         isoDay: isoDayInt
@@ -142,7 +142,7 @@ export function createPlainYearMonthSlots<CA, C>(
 
   return {
     ...checkIsoYearMonthInBounds(
-      constrainIsoDateLike({
+      checkIsoDateFields({
         isoYear: isoYearInt,
         isoMonth: isoMonthInt,
         isoDay: isoDayInt
@@ -173,7 +173,7 @@ export function createZonedDateTimeSlots<CA, C, TA, T>(
 
 function refineIsoDateArgs(isoYear: number, isoMonth: number, isoDay: number): IsoDateFields {
   return checkIsoDateInBounds(
-    constrainIsoDateLike({
+    checkIsoDateFields({
       isoYear: toInteger(isoYear),
       isoMonth: toInteger(isoMonth),
       isoDay: toInteger(isoDay),
@@ -187,7 +187,7 @@ function refineIsoDateTimeArgs(
   isoMillisecond: number, isoMicrosecond: number, isoNanosecond: number,
 ): IsoDateTimeFields {
   return checkIsoDateTimeInBounds(
-    constrainIsoDateTimeLike({
+    checkIsoDateTimeFields({
       isoYear: toInteger(isoYear),
       isoMonth: toInteger(isoMonth),
       isoDay: toInteger(isoDay),
