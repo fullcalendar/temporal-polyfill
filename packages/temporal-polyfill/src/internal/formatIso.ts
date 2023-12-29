@@ -24,42 +24,6 @@ import { utcTimeZoneId } from './timeZoneNative'
 // High-level
 // -------------------------------------------------------------------------------------------------
 
-export function formatDurationIso(slots: DurationSlots, options?: TimeDisplayOptions): string {
-  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
-
-  // for performance AND for not losing precision when no rounding
-  if (nanoInc > 1) {
-    slots = {
-      ...slots,
-      ...balanceDayTimeDurationByInc(
-        slots,
-        Math.min(getLargestDurationUnit(slots), Unit.Day),
-        nanoInc,
-        roundingMode,
-      ),
-    }
-  }
-
-  return formatDurationInternals(
-    slots,
-    subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
-  )
-}
-
-export function formatZonedDateTimeIso<C extends IdLike, T extends IdLike>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-  options?: ZonedDateTimeDisplayOptions,
-): string {
-  return formatZonedEpochNanoIso(
-    getTimeZoneOps,
-    zonedDateTimeSlots0.calendar,
-    zonedDateTimeSlots0.timeZone,
-    zonedDateTimeSlots0.epochNanoseconds,
-    ...refineZonedDateTimeDisplayOptions(options),
-  )
-}
-
 export function formatInstantIso<TA, T>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,
@@ -90,15 +54,17 @@ export function formatInstantIso<TA, T>(
   )
 }
 
-export function formatPlainYearMonthIso(
-  plainYearMonthSlots: PlainYearMonthSlots<IdLike>,
-  options?: DateTimeDisplayOptions,
+export function formatZonedDateTimeIso<C extends IdLike, T extends IdLike>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
+  options?: ZonedDateTimeDisplayOptions,
 ): string {
-  return formatPossibleDate(
-    plainYearMonthSlots.calendar,
-    formatIsoYearMonthFields,
-    plainYearMonthSlots,
-    refineDateDisplayOptions(options),
+  return formatZonedEpochNanoIso(
+    getTimeZoneOps,
+    zonedDateTimeSlots0.calendar,
+    zonedDateTimeSlots0.timeZone,
+    zonedDateTimeSlots0.epochNanoseconds,
+    ...refineZonedDateTimeDisplayOptions(options),
   )
 }
 
@@ -116,18 +82,23 @@ export function formatPlainDateIso<C extends IdLike>(
   return formatDateIso(plainDateSlots.calendar, plainDateSlots, refineDateDisplayOptions(options))
 }
 
-export function formatPlainTimeIso(
-  slots: PlainTimeSlots,
-  options?: TimeDisplayOptions
+export function formatPlainYearMonthIso(
+  plainYearMonthSlots: PlainYearMonthSlots<IdLike>,
+  options?: DateTimeDisplayOptions,
 ): string {
-  return formatTimeIso(slots, ...refineTimeDisplayOptions(options))
+  return formatDateLikeIso(
+    plainYearMonthSlots.calendar,
+    formatIsoYearMonthFields,
+    plainYearMonthSlots,
+    refineDateDisplayOptions(options),
+  )
 }
 
 export function formatPlainMonthDayIso(
   plainMonthDaySlots: PlainMonthDaySlots<IdLike>,
   options?: DateTimeDisplayOptions,
 ): string {
-  return formatPossibleDate(
+  return formatDateLikeIso(
     plainMonthDaySlots.calendar,
     formatIsoMonthDayFields,
     plainMonthDaySlots,
@@ -135,54 +106,39 @@ export function formatPlainMonthDayIso(
   )
 }
 
+export function formatPlainTimeIso(
+  slots: PlainTimeSlots,
+  options?: TimeDisplayOptions
+): string {
+  return formatTimeIso(slots, ...refineTimeDisplayOptions(options))
+}
+
+export function formatDurationIso(slots: DurationSlots, options?: TimeDisplayOptions): string {
+  const [nanoInc, roundingMode, subsecDigits] = refineTimeDisplayOptions(options, Unit.Second)
+
+  // for performance AND for not losing precision when no rounding
+  if (nanoInc > 1) {
+    slots = {
+      ...slots,
+      ...balanceDayTimeDurationByInc(
+        slots,
+        Math.min(getLargestDurationUnit(slots), Unit.Day),
+        nanoInc,
+        roundingMode,
+      ),
+    }
+  }
+
+  return formatDurationFields(
+    slots,
+    subsecDigits as (SubsecDigits | undefined), // -1 won't happen (units can't be minutes)
+  )
+}
+
+// Medium-Level (receives refined options, also for formatDateLikeIso meta)
 // -------------------------------------------------------------------------------------------------
 
-export function formatDateTimeIso(
-  calendarIdLike: IdLike,
-  isoFields: IsoDateTimeFields,
-  calendarDisplay: CalendarDisplay,
-  nanoInc: number,
-  roundingMode: RoundingMode,
-  subsecDigits: SubsecDigits | -1 | undefined,
-): string {
-  const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
-
-  return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
-    formatCalendar(calendarIdLike, calendarDisplay)
-}
-
-export function formatDateIso(
-  calendarIdLike: IdLike,
-  isoFields: IsoDateFields,
-  calendarDisplay: CalendarDisplay,
-): string {
-  return formatIsoDateFields(isoFields) + formatCalendar(calendarIdLike, calendarDisplay)
-}
-
-export function formatZonedEpochNanoIso<T extends IdLike>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
-  calendarSlot: IdLike,
-  timeZoneSlot: T,
-  epochNano: DayTimeNano,
-  calendarDisplay: CalendarDisplay,
-  timeZoneDisplay: TimeZoneDisplay,
-  offsetDisplay: OffsetDisplay,
-  nanoInc: number,
-  roundingMode: RoundingMode,
-  subsecDigits: SubsecDigits | -1 | undefined,
-): string {
-  epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
-  const isoFields = epochNanoToIso(epochNano, offsetNano)
-
-  return formatIsoDateTimeFields(isoFields, subsecDigits) +
-    formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
-    formatTimeZone(timeZoneSlot, timeZoneDisplay) +
-    formatCalendar(calendarSlot, calendarDisplay)
-}
-
-export function formatEpochNanoIso(
+function formatEpochNanoIso(
   providedTimeZone: boolean,
   timeZoneOps: SimpleTimeZoneOps,
   epochNano: DayTimeNano,
@@ -207,27 +163,52 @@ export function formatEpochNanoIso(
     )
 }
 
-export function formatTimeIso(
-  fields: IsoTimeFields,
+function formatZonedEpochNanoIso<T extends IdLike>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  calendarSlot: IdLike,
+  timeZoneSlot: T,
+  epochNano: DayTimeNano,
+  calendarDisplay: CalendarDisplay,
+  timeZoneDisplay: TimeZoneDisplay,
+  offsetDisplay: OffsetDisplay,
   nanoInc: number,
   roundingMode: RoundingMode,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  return formatIsoTimeFields(
-    roundTimeToNano(fields, nanoInc, roundingMode)[0],
-    subsecDigits,
-  )
+  epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
+  const timeZoneOps = getTimeZoneOps(timeZoneSlot)
+  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
+  const isoFields = epochNanoToIso(epochNano, offsetNano)
+
+  return formatIsoDateTimeFields(isoFields, subsecDigits) +
+    formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
+    formatTimeZone(timeZoneSlot, timeZoneDisplay) +
+    formatCalendar(calendarSlot, calendarDisplay)
 }
 
-// Other Stuff
-// -------------------------------------------------------------------------------------------------
+function formatDateTimeIso(
+  calendarIdLike: IdLike,
+  isoFields: IsoDateTimeFields,
+  calendarDisplay: CalendarDisplay,
+  nanoInc: number,
+  roundingMode: RoundingMode,
+  subsecDigits: SubsecDigits | -1 | undefined,
+): string {
+  const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
 
-/*
-High-level. Refined options.
-For PlainYearMonth and PlainMonthDay
-TODO: possible to simplify this function
-*/
-export function formatPossibleDate(
+  return formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
+    formatCalendar(calendarIdLike, calendarDisplay)
+}
+
+function formatDateIso(
+  calendarIdLike: IdLike,
+  isoFields: IsoDateFields,
+  calendarDisplay: CalendarDisplay,
+): string {
+  return formatIsoDateFields(isoFields) + formatCalendar(calendarIdLike, calendarDisplay)
+}
+
+function formatDateLikeIso(
   calendarIdLike: IdLike,
   formatSimple: (isoFields: IsoDateFields) => string,
   isoFields: IsoDateFields,
@@ -251,80 +232,19 @@ export function formatPossibleDate(
   }
 }
 
-/*
-Rounding already happened with these...
-*/
-
-export function formatIsoDateTimeFields(
-  isoDateTimeFields: IsoDateTimeFields,
-  subsecDigits: SubsecDigits | -1 | undefined,
-) {
-  return formatIsoDateFields(isoDateTimeFields) +
-    'T' + formatIsoTimeFields(isoDateTimeFields, subsecDigits)
-}
-
-export function formatIsoDateFields(isoDateFields: IsoDateFields): string {
-  return formatIsoYearMonthFields(isoDateFields) + '-' + padNumber2(isoDateFields.isoDay)
-}
-
-export function formatIsoYearMonthFields(isoDateFields: IsoDateFields): string {
-  const { isoYear } = isoDateFields
-  return (
-    (isoYear < 0 || isoYear > 9999)
-      ? getSignStr(isoYear) + padNumber(6, Math.abs(isoYear))
-      : padNumber(4, isoYear)
-  ) + '-' + padNumber2(isoDateFields.isoMonth)
-}
-
-export function formatIsoMonthDayFields(isoDateFields: IsoDateFields): string {
-  return padNumber2(isoDateFields.isoMonth) + '-' + padNumber2(isoDateFields.isoDay)
-}
-
-export function formatIsoTimeFields(
-  isoTimeFields: IsoTimeFields,
+function formatTimeIso(
+  fields: IsoTimeFields,
+  nanoInc: number,
+  roundingMode: RoundingMode,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  const parts = [
-    padNumber2(isoTimeFields.isoHour),
-    padNumber2(isoTimeFields.isoMinute),
-  ]
-
-  if (subsecDigits !== -1) { // show seconds?
-    parts.push(
-      padNumber2(isoTimeFields.isoSecond) +
-      formatSubsec(
-        isoTimeFields.isoMillisecond,
-        isoTimeFields.isoMicrosecond,
-        isoTimeFields.isoNanosecond,
-        subsecDigits,
-      ),
-    )
-  }
-
-  return parts.join(':')
+  return formatIsoTimeFields(
+    roundTimeToNano(fields, nanoInc, roundingMode)[0],
+    subsecDigits,
+  )
 }
 
-export function formatOffsetNano(
-  offsetNano: number,
-  offsetDisplay: OffsetDisplay = OffsetDisplay.Auto,
-): string {
-  if (offsetDisplay === OffsetDisplay.Never) {
-    return ''
-  }
-
-  const [hour, nanoRemainder0] = divModFloor(Math.abs(offsetNano), nanoInHour)
-  const [minute, nanoRemainder1] = divModFloor(nanoRemainder0, nanoInMinute)
-  const [second, nanoRemainder2] = divModFloor(nanoRemainder1, nanoInSec)
-
-  return getSignStr(offsetNano) +
-    padNumber2(hour) + ':' +
-    padNumber2(minute) +
-    ((second || nanoRemainder2)
-      ? ':' + padNumber2(second) + formatSubsecNano(nanoRemainder2)
-      : '')
-}
-
-export function formatDurationInternals(
+function formatDurationFields(
   durationFields: DurationFields, // already balanced
   subsecDigits: SubsecDigits | undefined,
 ): string {
@@ -379,9 +299,80 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
   return parts.join('')
 }
 
-//
-// complex objs
-//
+// Low-Level (Rounding already happened. Just fields)
+// -------------------------------------------------------------------------------------------------
+
+function formatIsoDateTimeFields(
+  isoDateTimeFields: IsoDateTimeFields,
+  subsecDigits: SubsecDigits | -1 | undefined,
+) {
+  return formatIsoDateFields(isoDateTimeFields) +
+    'T' + formatIsoTimeFields(isoDateTimeFields, subsecDigits)
+}
+
+function formatIsoDateFields(isoDateFields: IsoDateFields): string {
+  return formatIsoYearMonthFields(isoDateFields) + '-' + padNumber2(isoDateFields.isoDay)
+}
+
+function formatIsoYearMonthFields(isoDateFields: IsoDateFields): string {
+  const { isoYear } = isoDateFields
+  return (
+    (isoYear < 0 || isoYear > 9999)
+      ? getSignStr(isoYear) + padNumber(6, Math.abs(isoYear))
+      : padNumber(4, isoYear)
+  ) + '-' + padNumber2(isoDateFields.isoMonth)
+}
+
+function formatIsoMonthDayFields(isoDateFields: IsoDateFields): string {
+  return padNumber2(isoDateFields.isoMonth) + '-' + padNumber2(isoDateFields.isoDay)
+}
+
+function formatIsoTimeFields(
+  isoTimeFields: IsoTimeFields,
+  subsecDigits: SubsecDigits | -1 | undefined,
+): string {
+  const parts = [
+    padNumber2(isoTimeFields.isoHour),
+    padNumber2(isoTimeFields.isoMinute),
+  ]
+
+  if (subsecDigits !== -1) { // show seconds?
+    parts.push(
+      padNumber2(isoTimeFields.isoSecond) +
+      formatSubsec(
+        isoTimeFields.isoMillisecond,
+        isoTimeFields.isoMicrosecond,
+        isoTimeFields.isoNanosecond,
+        subsecDigits,
+      ),
+    )
+  }
+
+  return parts.join(':')
+}
+
+export function formatOffsetNano(
+  offsetNano: number,
+  offsetDisplay: OffsetDisplay = OffsetDisplay.Auto,
+): string {
+  if (offsetDisplay === OffsetDisplay.Never) {
+    return ''
+  }
+
+  const [hour, nanoRemainder0] = divModFloor(Math.abs(offsetNano), nanoInHour)
+  const [minute, nanoRemainder1] = divModFloor(nanoRemainder0, nanoInMinute)
+  const [second, nanoRemainder2] = divModFloor(nanoRemainder1, nanoInSec)
+
+  return getSignStr(offsetNano) +
+    padNumber2(hour) + ':' +
+    padNumber2(minute) +
+    ((second || nanoRemainder2)
+      ? ':' + padNumber2(second) + formatSubsecNano(nanoRemainder2)
+      : '')
+}
+
+// TimeZone / Calendar
+// -------------------------------------------------------------------------------------------------
 
 function formatTimeZone(
   timeZoneNative: IdLike,
@@ -396,7 +387,7 @@ function formatTimeZone(
   return ''
 }
 
-export function formatCalendar(
+function formatCalendar(
   calendarIdLike: IdLike,
   calendarDisplay: CalendarDisplay,
 ): string {
@@ -421,9 +412,8 @@ function formatCalendarId(calendarId: string, isCritical: boolean): string {
     ']'
 }
 
-//
-// utils
-//
+// Utils
+// -------------------------------------------------------------------------------------------------
 
 function formatSubsec(
   isoMillisecond: number,
