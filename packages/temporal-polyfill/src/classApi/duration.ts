@@ -17,7 +17,7 @@ import { createTimeZoneOps } from './timeZoneOpsQuery'
 import { LocalesArg } from '../internal/formatIntl'
 import { TimeZoneSlot, refineTimeZoneSlot } from './timeZoneSlot'
 import { CalendarSlot, getCalendarSlotFromBag } from './calendarSlot'
-import { MarkerSlots, absDuration, addToDuration, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
+import { MarkerSlots, absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
 import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
@@ -64,7 +64,7 @@ export class Duration {
 
   add(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
     return createDuration(
-      addToDuration(
+      addDurations(
         refinePublicRelativeTo,
         createDiffOps,
         createTimeZoneOps,
@@ -78,7 +78,7 @@ export class Duration {
 
   subtract(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
     return createDuration(
-      addToDuration(
+      addDurations(
         refinePublicRelativeTo,
         createDiffOps,
         createTimeZoneOps,

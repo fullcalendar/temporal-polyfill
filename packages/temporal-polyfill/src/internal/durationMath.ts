@@ -12,6 +12,9 @@ import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
 import { isoToEpochNano } from './epochAndTime'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 
+// Marker System
+// -------------------------------------------------------------------------------------------------
+
 export type MarkerSlotsNoCalendar<T> = {
   epochNanoseconds: DayTimeNano,
   timeZone: T,
@@ -30,224 +33,6 @@ export type MarkerSystem<M> = [
   MoveMarker<M>,
   DiffMarkers<M>
 ]
-
-export function roundDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: DurationSlots,
-  options: DurationRoundOptions<RA>,
-): DurationSlots {
-  const durationLargestUnit = getLargestDurationUnit(slots)
-  const [
-    largestUnit,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-    markerSlots,
-  ] = refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
-
-  const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
-
-  // TODO: move to round.js?
-
-  if (
-    maxLargestUnit < Unit.Day || (
-      maxLargestUnit === Unit.Day &&
-      // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds)
-    )
-  ) {
-    return {
-      branding: DurationBranding,
-      ...roundDayTimeDuration(
-        slots,
-        largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
-        smallestUnit as DayTimeUnit,
-        roundingInc,
-        roundingMode,
-      ),
-    }
-  }
-
-  if (!markerSlots) {
-    throw new RangeError('need relativeTo')
-  }
-
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
-    MarkerSystem<any>
-
-  // TODO: do this in roundRelativeDuration?
-  let transplantedWeeks = 0
-  if (slots.weeks && smallestUnit === Unit.Week) {
-    transplantedWeeks = slots.weeks
-    slots = { ...slots, weeks: 0 }
-  }
-
-  let [balancedDuration, endEpochNano] = spanDuration(slots, undefined, largestUnit, ...markerSystem)
-
-  const origSign = queryDurationSign(slots)
-  const balancedSign = queryDurationSign(balancedDuration)
-  if (origSign && balancedSign && origSign !== balancedSign) {
-    throw new RangeError('Faulty Calendar rounding')
-  }
-
-  if (balancedSign && !(smallestUnit === Unit.Nanosecond && roundingInc === 1)) {
-    balancedDuration = roundRelativeDuration(
-      balancedDuration,
-      endEpochNano,
-      largestUnit,
-      smallestUnit,
-      roundingInc,
-      roundingMode,
-      ...markerSystem,
-    )
-  }
-
-  balancedDuration.weeks += transplantedWeeks // HACK (mutating)
-
-  return {
-    branding: DurationBranding,
-    ...balancedDuration,
-  }
-}
-
-export function addToDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  doSubtract: boolean,
-  slots: DurationSlots,
-  otherSlots: DurationSlots,
-  options?: RelativeToOptions<RA>,
-): DurationSlots {
-  const normalOptions = normalizeOptions(options)
-  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
-  const largestUnit = Math.max(
-    getLargestDurationUnit(slots),
-    getLargestDurationUnit(otherSlots),
-  ) as Unit
-
-  if (
-    largestUnit < Unit.Day || (
-      largestUnit === Unit.Day &&
-      // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds)
-    )
-  ) {
-    return {
-      branding: DurationBranding,
-      ...addDayTimeDuration(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
-    }
-  }
-
-  if (!markerSlots) {
-    throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
-  }
-
-  if (doSubtract) {
-    otherSlots = negateDurationFields(otherSlots) as any // !!!
-  }
-
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
-    MarkerSystem<any>
-
-  return {
-    branding: DurationBranding,
-    ...spanDuration(
-      slots,
-      otherSlots,
-      largestUnit,
-      ...markerSystem,
-    )[0]
-  }
-}
-
-function addDayTimeDuration(
-  doSubtract: boolean,
-  a: DurationFields,
-  b: DurationFields,
-  largestUnit: DayTimeUnit
-): DurationFields {
-  const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
-  const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
-  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, doSubtract ? -1 : 1)
-
-  if (!Number.isFinite(combined[0])) {
-    throw new RangeError('Too much')
-  }
-
-  return {
-    ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(combined, largestUnit)
-  }
-}
-
-export function negateDuration(slots: DurationSlots): DurationSlots {
-  return {
-    ...negateDurationFields(slots),
-    branding: DurationBranding,
-  }
-}
-
-export function negateDurationFields(fields: DurationFields): DurationFields {
-  const res = {} as DurationFields
-
-  for (const fieldName of durationFieldNamesAsc) {
-    res[fieldName] = fields[fieldName] * -1 || 0
-  }
-
-  return res
-}
-
-export function absDuration(slots: DurationSlots): DurationSlots {
-  return {
-    ...absDurationFields(slots),
-    branding: DurationBranding,
-  }
-}
-
-export function absDurationFields(fields: DurationFields): DurationFields {
-  if (queryDurationSign(fields) === -1) {
-    return negateDurationFields(fields)
-  }
-  return fields
-}
-
-export function durationHasDateParts(fields: DurationFields): boolean {
-  return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))
-}
-
-function computeDurationSign(
-  fields: DurationFields,
-  fieldNames = durationFieldNamesAsc
-): NumSign {
-  let sign: NumSign = 0
-
-  for (const fieldName of fieldNames) {
-    const fieldSign = Math.sign(fields[fieldName]) as NumSign
-
-    if (fieldSign) {
-      if (sign && sign !== fieldSign) {
-        throw new RangeError('Cant have mixed signs')
-      }
-      sign = fieldSign
-    }
-  }
-
-  return sign
-}
-
-export function queryDurationBlank(durationFields: DurationFields): boolean {
-  return !queryDurationSign(durationFields)
-}
-
-export const queryDurationSign = createLazyGenerator(computeDurationSign, WeakMap)
-
-export function checkDurationFields(fields: DurationFields): DurationFields {
-  queryDurationSign(fields) // check and prime cache
-  return fields
-}
 
 export function createMarkerSystem<C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
@@ -317,16 +102,225 @@ export function spanDuration<M>(
   ]
 }
 
-export function getLargestDurationUnit(fields: DurationFields): Unit {
-  let unit: Unit = Unit.Year
+// Adding
+// -------------------------------------------------------------------------------------------------
 
-  for (; unit > Unit.Nanosecond; unit--) {
-    if (fields[durationFieldNamesAsc[unit]]) {
-      break
+export function addDurations<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  doSubtract: boolean,
+  slots: DurationSlots,
+  otherSlots: DurationSlots,
+  options?: RelativeToOptions<RA>,
+): DurationSlots {
+  const normalOptions = normalizeOptions(options)
+  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
+  const largestUnit = Math.max(
+    getLargestDurationUnit(slots),
+    getLargestDurationUnit(otherSlots),
+  ) as Unit
+
+  if (
+    largestUnit < Unit.Day || (
+      largestUnit === Unit.Day &&
+      // has uniform days?
+      !(markerSlots && (markerSlots as any).epochNanoseconds)
+    )
+  ) {
+    return {
+      ...addDayTimeDurations(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
+      branding: DurationBranding,
     }
   }
 
-  return unit
+  if (!markerSlots) {
+    throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
+  }
+
+  if (doSubtract) {
+    otherSlots = negateDurationFields(otherSlots) as any // !!!
+  }
+
+  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
+    MarkerSystem<any>
+
+  return {
+    branding: DurationBranding,
+    ...spanDuration(
+      slots,
+      otherSlots,
+      largestUnit,
+      ...markerSystem,
+    )[0]
+  }
+}
+
+function addDayTimeDurations(
+  doSubtract: boolean,
+  a: DurationFields,
+  b: DurationFields,
+  largestUnit: DayTimeUnit
+): DurationFields {
+  const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
+  const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
+  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, doSubtract ? -1 : 1)
+
+  if (!Number.isFinite(combined[0])) {
+    throw new RangeError('Too much')
+  }
+
+  return {
+    ...durationFieldDefaults,
+    ...nanoToDurationDayTimeFields(combined, largestUnit)
+  }
+}
+
+// Rounding
+// -------------------------------------------------------------------------------------------------
+
+export function roundDuration<RA, C, T>(
+  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
+  getCalendarOps: (calendarSlot: C) => DiffOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  slots: DurationSlots,
+  options: DurationRoundOptions<RA>,
+): DurationSlots {
+  const durationLargestUnit = getLargestDurationUnit(slots)
+  const [
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+    markerSlots,
+  ] = refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
+
+  const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
+
+  if (
+    maxLargestUnit < Unit.Day || (
+      maxLargestUnit === Unit.Day &&
+      // has uniform days?
+      !(markerSlots && (markerSlots as any).epochNanoseconds)
+    )
+  ) {
+    return {
+      branding: DurationBranding,
+      ...roundDayTimeDuration(
+        slots,
+        largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
+        smallestUnit as DayTimeUnit,
+        roundingInc,
+        roundingMode,
+      ),
+    }
+  }
+
+  if (!markerSlots) {
+    throw new RangeError('need relativeTo')
+  }
+
+  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
+    MarkerSystem<any>
+
+  let transplantedWeeks = 0
+  if (slots.weeks && smallestUnit === Unit.Week) {
+    transplantedWeeks = slots.weeks
+    slots = { ...slots, weeks: 0 }
+  }
+
+  let [balancedDuration, endEpochNano] = spanDuration(slots, undefined, largestUnit, ...markerSystem)
+
+  const origSign = queryDurationSign(slots)
+  const balancedSign = queryDurationSign(balancedDuration)
+  if (origSign && balancedSign && origSign !== balancedSign) {
+    throw new RangeError('Faulty Calendar rounding')
+  }
+
+  if (balancedSign && !(smallestUnit === Unit.Nanosecond && roundingInc === 1)) {
+    balancedDuration = roundRelativeDuration(
+      balancedDuration,
+      endEpochNano,
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      ...markerSystem,
+    )
+  }
+
+  balancedDuration.weeks += transplantedWeeks // HACK (mutating)
+
+  return {
+    branding: DurationBranding,
+    ...balancedDuration,
+  }
+}
+
+// Sign / Abs / Blank
+// -------------------------------------------------------------------------------------------------
+
+export function negateDuration(slots: DurationSlots): DurationSlots {
+  return {
+    ...negateDurationFields(slots),
+    branding: DurationBranding,
+  }
+}
+
+export function negateDurationFields(fields: DurationFields): DurationFields {
+  const res = {} as DurationFields
+
+  for (const fieldName of durationFieldNamesAsc) {
+    res[fieldName] = fields[fieldName] * -1 || 0
+  }
+
+  return res
+}
+
+export function absDuration(slots: DurationSlots): DurationSlots {
+  return {
+    ...absDurationFields(slots),
+    branding: DurationBranding,
+  }
+}
+
+export function absDurationFields(fields: DurationFields): DurationFields {
+  if (queryDurationSign(fields) === -1) {
+    return negateDurationFields(fields)
+  }
+
+  return fields
+}
+
+export function queryDurationBlank(durationFields: DurationFields): boolean {
+  return !queryDurationSign(durationFields)
+}
+
+export const queryDurationSign = createLazyGenerator(computeDurationSign, WeakMap)
+
+function computeDurationSign(
+  fields: DurationFields,
+  fieldNames = durationFieldNamesAsc
+): NumSign {
+  let sign: NumSign = 0
+
+  for (const fieldName of fieldNames) {
+    const fieldSign = Math.sign(fields[fieldName]) as NumSign
+
+    if (fieldSign) {
+      if (sign && sign !== fieldSign) {
+        throw new RangeError('Cant have mixed signs')
+      }
+      sign = fieldSign
+    }
+  }
+
+  return sign
+}
+
+export function checkDurationFields(fields: DurationFields): DurationFields {
+  queryDurationSign(fields) // check and prime cache
+  return fields
 }
 
 // Field <-> Nanosecond Conversion
@@ -387,6 +381,25 @@ export function clearDurationFields(
   }
 
   return copy
+}
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+export function durationHasDateParts(fields: DurationFields): boolean {
+  return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))
+}
+
+export function getLargestDurationUnit(fields: DurationFields): Unit {
+  let unit: Unit = Unit.Year
+
+  for (; unit > Unit.Nanosecond; unit--) {
+    if (fields[durationFieldNamesAsc[unit]]) {
+      break
+    }
+  }
+
+  return unit
 }
 
 export function isDurationsEqual(

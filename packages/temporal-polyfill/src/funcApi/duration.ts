@@ -7,7 +7,7 @@ import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import { createDurationSlots } from '../internal/slotsCreate'
 import { parseDuration } from '../internal/parseIso'
 import { durationWithFields, refineDurationBag } from '../internal/bag'
-import { absDuration, addToDuration, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
+import { absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
 import { totalDuration } from '../internal/total'
 import { formatDurationIso } from '../internal/formatIso'
 import { compareDurations } from '../internal/compare'
@@ -27,7 +27,7 @@ export function add(
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RelativeToArg>,
 ): DurationSlots {
-  return addToDuration(
+  return addDurations(
     identityFunc,
     createNativeDiffOps,
     queryNativeTimeZone,
@@ -43,7 +43,7 @@ export function subtract(
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RelativeToArg>,
 ): DurationSlots {
-  return addToDuration(
+  return addDurations(
     identityFunc,
     createNativeDiffOps,
     queryNativeTimeZone,
