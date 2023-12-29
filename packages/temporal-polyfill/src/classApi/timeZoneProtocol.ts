@@ -6,7 +6,12 @@ import { createProtocolChecker } from './utils'
 import { TimeZoneArg } from './timeZone'
 import { timeZoneAdapters } from './timeZoneAdapter'
 
-interface TimeZoneProtocolMethods {
+/*
+TODO: eventually use temporal-spec
+See problems mentioned in calendarProtocol
+*/
+export interface TimeZoneProtocol {
+  id: string
   getOffsetNanosecondsFor(instant: InstantArg): number
   getOffsetStringFor?(instant: InstantArg): string
   getPlainDateTimeFor?(instant: InstantArg, calendarArg?: CalendarArg): PlainDateTime
@@ -19,9 +24,4 @@ interface TimeZoneProtocolMethods {
   equals?(otherArg: TimeZoneArg): boolean
 }
 
-export interface TimeZoneProtocol extends TimeZoneProtocolMethods {
-  id: string
-}
-
-const requiredMethodNames = Object.keys(timeZoneAdapters)
-export const checkTimeZoneProtocol = createProtocolChecker(requiredMethodNames)
+export const checkTimeZoneProtocol = createProtocolChecker(Object.keys(timeZoneAdapters))

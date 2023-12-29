@@ -1,12 +1,12 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
-import { requireString } from '../internal/cast'
+import { requireNotNullOrUndefined, requireString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
 import { defineProps, defineStringTag, excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
 import { createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
-import { refineCalendarSlot } from './calendarSlot'
-import type { PlainDateTime } from './plainDateTime'
-import type { ZonedDateTime } from './zonedDateTime'
+import { refineCalendarSlot } from './slotsForClasses'
+import { PlainDateTime } from './plainDateTime'
+import { ZonedDateTime } from './zonedDateTime'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
@@ -16,12 +16,17 @@ import { calendarMethods } from './mixins'
 import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding } from '../internal/slots'
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding } from '../internal/slots'
+
+export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
 
 // Calendar Class
 // -------------------------------------------------------------------------------------------------
 
-export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
+export type CalendarClassSlots = BrandingSlots & {
+  id: string,
+  native: NativeStandardOps
+}
 
 export class Calendar implements CalendarProtocol {
   constructor(id: string) {
@@ -135,8 +140,8 @@ export class Calendar implements CalendarProtocol {
     const { native } = getCalendarSlots(this)
 
     return native.mergeFields(
-      excludeUndefinedProps(ensureNotNullOrUndefined(fields0)),
-      excludeUndefinedProps(ensureNotNullOrUndefined(fields1)),
+      excludeUndefinedProps(requireNotNullOrUndefined(fields0)),
+      excludeUndefinedProps(requireNotNullOrUndefined(fields1)),
     )
   }
 
@@ -177,23 +182,10 @@ defineStringTag(Calendar.prototype, CalendarBranding)
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export type CalendarClassSlots = BrandingSlots & { // TODO: move to top
-  id: string,
-  native: NativeStandardOps
-}
-
 export function createCalendar(slots: CalendarClassSlots): Calendar {
   return createViaSlots(Calendar, slots)
 }
 
 export function getCalendarSlots(calendar: Calendar): CalendarClassSlots {
   return getSpecificSlots(CalendarBranding, calendar) as CalendarClassSlots
-}
-
-// HACK
-function ensureNotNullOrUndefined<T>(o: T): T {
-  if (o == null) { // null or undefined
-    throw TypeError('Cannot be null or undefined')
-  }
-  return o
 }

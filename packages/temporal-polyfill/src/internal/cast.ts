@@ -64,6 +64,14 @@ function requireNumberIsPositive(num: number): number {
   return num
 }
 
+export function requireNotNullOrUndefined<T>(o: T): T {
+  if (o == null) { // null or undefined
+    throw TypeError('Cannot be null or undefined')
+  }
+  return o
+}
+
+
 // Casting
 // -------------------------------------------------------------------------------------------------
 

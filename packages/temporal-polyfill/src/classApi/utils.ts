@@ -1,7 +1,5 @@
 import { IsoTimeFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { hasAllPropsByName } from '../internal/utils'
-
-// public
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 
 export function createProtocolChecker(
@@ -17,7 +15,6 @@ export function createProtocolChecker(
   }
 }
 
-// kill?
 export function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
   return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
 }

@@ -2,13 +2,11 @@ import { DateBag, DateTimeBag, DateTimeFields, EraYearFields } from '../internal
 import { UnitName } from '../internal/units'
 import { NumSign } from '../internal/utils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
-import { IsoDateTimeFields } from '../internal/calendarIsoFields'
-import { computeHoursInDay, computeStartOfDay, zonedInternalsToIso } from '../internal/timeZoneOps'
+import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
 import { LocalesArg, prepCachedZonedDateTimeFormat } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions, RoundingOptions, ZonedDateTimeDisplayOptions, ZonedFieldOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { PublicZonedDateTimeSlots, getPublicZonedDateTimeFields } from '../internal/slotsPublic'
 import * as Utils from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
@@ -16,7 +14,7 @@ import { DurationFields } from '../internal/durationFields'
 import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
 import { createZonedDateTimeSlots } from '../internal/slotsCreate'
 import { parseZonedDateTime } from '../internal/parseIso'
-import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
+import { slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
 import { moveZonedDateTime } from '../internal/move'
 import { diffZonedDateTimes } from '../internal/diff'
 import { roundZonedDateTime } from '../internal/round'
@@ -56,8 +54,8 @@ export function fromFields(
 
 export function getISOFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-): PublicZonedDateTimeSlots<string, string> {
-  return getPublicZonedDateTimeFields(queryNativeTimeZone, zonedDateTimeSlots)
+): ZonedIsoDateTimeSlots<string, string> {
+  return getZonedIsoDateTimeSlots(queryNativeTimeZone, zonedDateTimeSlots)
 }
 
 export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { offset: string }

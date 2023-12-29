@@ -10,7 +10,7 @@ import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { CalendarSlot } from './calendarSlot'
+import { CalendarSlot } from './slotsForClasses'
 import { DurationBranding, PlainDateBranding } from '../internal/slots'
 
 // Compound Adapter Functions

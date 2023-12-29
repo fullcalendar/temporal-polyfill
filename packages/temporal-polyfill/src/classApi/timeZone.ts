@@ -7,10 +7,8 @@ import { DayTimeNano } from '../internal/dayTimeNano'
 import { defineStringTag } from '../internal/utils'
 import { getSingleInstantFor } from '../internal/timeZoneOps'
 import { epochNanoToIso } from '../internal/epochAndTime'
-
-// public
-import { refineCalendarSlot } from './calendarSlot'
-import { refineTimeZoneSlot } from './timeZoneSlot'
+import { refineCalendarSlot } from './slotsForClasses'
+import { refineTimeZoneSlot } from './slotsForClasses'
 import { createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
@@ -21,10 +19,15 @@ import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
 import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, isTimeZoneSlotsEqual } from '../internal/slots'
 
+export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
+
 // TimeZone Class
 // -------------------------------------------------------------------------------------------------
 
-export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
+export type TimeZoneClassSlots = BrandingSlots & {
+  id: string
+  native: NativeTimeZone
+}
 
 export class TimeZone implements TimeZoneProtocol {
   constructor(timeZoneId: string) {
@@ -140,11 +143,6 @@ defineStringTag(TimeZone.prototype, TimeZoneBranding)
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export type TimeZoneClassSlots = BrandingSlots & { // TODO: move to top
-  id: string
-  native: NativeTimeZone
-}
 
 export function createTimeZone(slots: TimeZoneClassSlots): TimeZone { // not used
   return createViaSlots(TimeZone, slots)

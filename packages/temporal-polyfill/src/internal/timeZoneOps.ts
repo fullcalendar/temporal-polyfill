@@ -1,12 +1,13 @@
 import { DayTimeNano, addDayTimeNanoAndNumber, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
-import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
+import { IsoDateFields, IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoTimeFieldDefaults } from './calendarIsoFields'
 import { epochNanoToIso, isoToEpochNano, isoToEpochNanoWithOffset } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
 import { nanoInHour, nanoInUtcDay } from './units'
-import { createLazyGenerator } from './utils'
+import { createLazyGenerator, pluckProps } from './utils'
 import { moveByIsoDays } from './move'
 import { ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { formatOffsetNano } from './formatIso'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
 export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
@@ -19,6 +20,8 @@ export type TimeZoneOps = {
 export type SimpleTimeZoneOps = {
   getOffsetNanosecondsFor: OffsetNanosecondsOp,
 }
+
+export type ZonedIsoDateTimeSlots<C, T> = IsoDateTimeFields & { calendar: C, timeZone: T, offset: string }
 
 // ISO <-> Epoch conversions (on passed-in instances)
 // -------------------------------------------------------------------------------------------------
@@ -40,6 +43,20 @@ function _zonedInternalsToIso(
   return {
     ...isoDateTimeFields,
     offsetNanoseconds,
+  }
+}
+
+export function getZonedIsoDateTimeSlots<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>
+): ZonedIsoDateTimeSlots<C, T> {
+  const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any, getTimeZoneOps(zonedDateTimeSlots.timeZone))
+
+  return {
+    calendar: zonedDateTimeSlots.calendar,
+    ...pluckProps(isoDateTimeFieldNamesAlpha, isoFields),
+    offset: formatOffsetNano(isoFields.offsetNanoseconds),
+    timeZone: zonedDateTimeSlots.timeZone,
   }
 }
 

@@ -7,7 +7,12 @@ import { Duration, DurationArg } from './duration'
 import { createProtocolChecker } from './utils'
 import { dateRefiners } from './calendarRefiners'
 
-interface CalendarProtocolMethods {
+/*
+TODO: eventually use temporal-spec
+We need to fill-out ambient declarations on classes like PlainDate to they match for PlainDateLike, etc
+*/
+export interface CalendarProtocol {
+  id: string
   year(dateArg: PlainYearMonth | PlainDateArg): number
   month(dateArg: PlainYearMonth | PlainDateArg): number
   monthCode(dateArg: PlainYearMonth | PlainMonthDay | PlainDateArg): string
@@ -34,10 +39,6 @@ interface CalendarProtocolMethods {
   toJSON?(): string
 }
 
-export interface CalendarProtocol extends CalendarProtocolMethods {
-  id: string
-}
-
 const requiredMethodNames: string[] = [
   ...Object.keys(dateRefiners).slice(2), // remove era/eraYear
   // TODO: use adapter keys? (might result in more complexity and larger size)
@@ -49,4 +50,5 @@ const requiredMethodNames: string[] = [
   'fields',
   'mergeFields',
 ]
+
 export const checkCalendarProtocol = createProtocolChecker(requiredMethodNames)

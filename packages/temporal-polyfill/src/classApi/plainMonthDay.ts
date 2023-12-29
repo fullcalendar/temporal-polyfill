@@ -5,9 +5,9 @@ import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflow
 import { defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { PlainMonthDayBranding, PlainMonthDaySlots, getId } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
+import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDate, createPlainDate } from './plainDate'
-import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './calendarSlot'
+import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { Calendar, CalendarArg } from './calendar'
 import { CalendarProtocol } from './calendarProtocol'
 import { neverValueOf } from './mixins'
@@ -20,7 +20,6 @@ import { plainMonthDaysEqual } from '../internal/compare'
 import { formatPlainMonthDayIso } from '../internal/formatIso'
 import { plainMonthDayToPlainDate } from '../internal/convert'
 import { parsePlainMonthDay } from '../internal/parseIso'
-import { PublicDateSlots } from '../internal/slotsPublic'
 
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
