@@ -159,19 +159,6 @@ function roundDateTime(
   )
 }
 
-function roundTime(
-  isoFields: IsoTimeFields,
-  smallestUnit: TimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingMode,
-): IsoTimeFields {
-  return roundTimeToNano(
-    isoFields,
-    computeNanoInc(smallestUnit, roundingInc),
-    roundingMode,
-  )[0]
-}
-
 function roundDateTimeToDay(
   isoFields: IsoDateTimeFields,
   timeZoneOps: TimeZoneOps | undefined,
@@ -204,6 +191,19 @@ export function roundDateTimeToNano(
   })
 }
 
+function roundTime(
+  isoFields: IsoTimeFields,
+  smallestUnit: TimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingMode,
+): IsoTimeFields {
+  return roundTimeToNano(
+    isoFields,
+    computeNanoInc(smallestUnit, roundingInc),
+    roundingMode,
+  )[0]
+}
+
 export function roundTimeToNano(
   isoFields: IsoTimeFields,
   nanoInc: number,
@@ -218,6 +218,7 @@ export function roundTimeToNano(
 }
 
 // Rounding Duration
+// TODO: consolidate with durationMath?
 // -------------------------------------------------------------------------------------------------
 
 export function roundDayTimeDuration(
@@ -331,6 +332,10 @@ export function computeNanoInc(smallestUnit: DayTimeUnit, roundingInc: number): 
 
 export function roundByInc(num: number, inc: number, roundingMode: RoundingMode): number {
   return roundWithMode(num / inc, roundingMode) * inc
+}
+
+export function roundToMinute(offsetNano: number): number {
+  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
 }
 
 export function roundDayTimeNano(
@@ -536,12 +541,29 @@ function nudgeRelativeDuration<M>(
   ]
 }
 
-// Utils
-// -------------------------------------------------------------------------------------------------
-
-export function roundToMinute(offsetNano: number): number {
-  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
+export function clampRelativeDuration<M>(
+  durationFields: DurationFields,
+  clampUnit: Unit,
+  clampDistance: number,
+  // marker system...
+  marker: M,
+  markerToEpochNano: MarkerToEpochNano<M>,
+  moveMarker: MoveMarker<M>,
+) {
+  const clampDurationFields = {
+    ...durationFieldDefaults,
+    [durationFieldNamesAsc[clampUnit]]: clampDistance,
+  }
+  const marker0 = moveMarker(marker, durationFields)
+  const marker1 = moveMarker(marker0, clampDurationFields)
+  const epochNano0 = markerToEpochNano(marker0)
+  const epochNano1 = markerToEpochNano(marker1)
+  return [epochNano0, epochNano1]
 }
+
+// Bubbling
+// (for when larger units might bubble up)
+// -------------------------------------------------------------------------------------------------
 
 function bubbleRelativeDuration<M>(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
@@ -586,24 +608,4 @@ function bubbleRelativeDuration<M>(
   }
 
   return durationFields
-}
-
-export function clampRelativeDuration<M>(
-  durationFields: DurationFields,
-  clampUnit: Unit,
-  clampDistance: number,
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
-) {
-  const clampDurationFields = {
-    ...durationFieldDefaults,
-    [durationFieldNamesAsc[clampUnit]]: clampDistance,
-  }
-  const marker0 = moveMarker(marker, durationFields)
-  const marker1 = moveMarker(marker0, clampDurationFields)
-  const epochNano0 = markerToEpochNano(marker0)
-  const epochNano1 = markerToEpochNano(marker1)
-  return [epochNano0, epochNano1]
 }
