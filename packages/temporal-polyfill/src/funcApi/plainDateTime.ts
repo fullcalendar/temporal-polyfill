@@ -6,7 +6,7 @@ import { DurationSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainYearMonthSl
 import { createNativeDateModOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { createPlainDateTimeSlots } from '../internal/slotsCreate'
 import { parsePlainDateTime } from '../internal/parseIso'
-import { plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
+import { isoTimeFieldsToCal, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
 import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
 import { movePlainDateTime } from '../internal/move'
 import { diffPlainDateTimes } from '../internal/diff'
@@ -48,13 +48,7 @@ export const fromFields = refinePlainDateTimeBag
 export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields & Partial<EraYearFields> {
   return {
     ...getDateFields(slots),
-    // TODO: util for time...
-    hour: slots.isoHour,
-    minute: slots.isoMinute,
-    second: slots.isoSecond,
-    millisecond: slots.isoMillisecond,
-    microsecond: slots.isoMicrosecond,
-    nanosecond: slots.isoNanosecond,
+    ...isoTimeFieldsToCal(slots),
   }
 }
 

@@ -5,7 +5,7 @@ import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
 import { identityFunc } from '../internal/utils'
 import { createPlainTimeSlots } from '../internal/slotsCreate'
-import { plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
+import { isoTimeFieldsToCal, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
 import { parsePlainTime } from '../internal/parseIso'
 import { movePlainTime } from '../internal/move'
 import { diffPlainTimes } from '../internal/diff'
@@ -21,17 +21,7 @@ export const fromFields = refinePlainTimeBag
 
 export const fromString = parsePlainTime
 
-// TODO: use util
-export function getFields(slots: PlainTimeSlots): TimeFields {
-  return {
-    hour: slots.isoHour,
-    minute: slots.isoMinute,
-    second: slots.isoSecond,
-    millisecond: slots.isoMillisecond,
-    microsecond: slots.isoMicrosecond,
-    nanosecond: slots.isoNanosecond,
-  }
-}
+export const getFields = isoTimeFieldsToCal // TODO: improve type
 
 export function withFields(
   slots: PlainTimeSlots,

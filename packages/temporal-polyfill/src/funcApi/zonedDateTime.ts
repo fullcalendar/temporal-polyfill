@@ -10,7 +10,7 @@ import { DurationSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, 
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { DurationFields } from '../internal/durationFields'
-import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
+import { ZonedDateTimeBag, isoTimeFieldsToCal, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
 import { createZonedDateTimeSlots } from '../internal/slotsCreate'
 import { parseZonedDateTime } from '../internal/parseIso'
 import { slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
@@ -69,13 +69,7 @@ export function getFields(
 
   return {
     ...getDateFields({ ...isoFields, calendar: zonedDateTimeSlots.calendar }),
-    // TODO: util for time...
-    hour: isoFields.isoHour,
-    minute: isoFields.isoMinute,
-    second: isoFields.isoSecond,
-    millisecond: isoFields.isoMillisecond,
-    microsecond: isoFields.isoMicrosecond,
-    nanosecond: isoFields.isoNanosecond,
+    ...isoTimeFieldsToCal(isoFields),
     offset: offsetString,
   }
 }

@@ -341,6 +341,12 @@ const timeFieldsToIso = remapProps.bind<
   IsoTimeFields // return
 >(undefined, timeFieldNamesAsc, isoTimeFieldNamesAsc)
 
+export const isoTimeFieldsToCal = remapProps.bind<
+  undefined, [BoundArg, BoundArg], // bound
+  [IsoTimeFields], // unbound
+  TimeFields // return
+>(undefined, isoTimeFieldNamesAsc, timeFieldNamesAsc)
+
 // High-Level Mod
 // -------------------------------------------------------------------------------------------------
 
