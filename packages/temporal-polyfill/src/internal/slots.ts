@@ -3,7 +3,7 @@ import { DurationFields } from './durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
-import { parseCalendarId, parseMaybeOffsetNano, parseTimeZoneId } from './parseIso'
+import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseIso'
 import { realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 
@@ -110,7 +110,7 @@ function getTimeZoneSlotRaw(slot: IdLike, loose?: boolean): string | number {
     return 0
   }
 
-  const offsetNano = parseMaybeOffsetNano(id)
+  const offsetNano = parseOffsetNanoMaybe(id)
   if (offsetNano !== undefined) {
     return offsetNano
   }

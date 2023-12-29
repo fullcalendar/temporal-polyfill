@@ -12,7 +12,7 @@ import {
   isoToEpochNanoWithOffset,
   isoToEpochSec
 } from './epochAndTime'
-import { parseMaybeOffsetNano } from './parseIso'
+import { parseOffsetNanoMaybe } from './parseIso'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
@@ -42,7 +42,7 @@ export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
   // normalize for cache-key. choose uppercase for 'UTC'
   timeZoneId = timeZoneId.toLocaleUpperCase()
 
-  const offsetNano = parseMaybeOffsetNano(timeZoneId, true) // onlyHourMinute=true
+  const offsetNano = parseOffsetNanoMaybe(timeZoneId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
     return new FixedTimeZone(offsetNano)
   }
