@@ -1,6 +1,6 @@
 import { DateBag, DateFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
+import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateX, getId, removeBranding } from '../internal/slots'
 import { CalendarSlot, PublicDateSlots, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
@@ -232,7 +232,7 @@ export function getPlainDateSlots(plainDate: PlainDate): PlainDateSlots<Calendar
 }
 
 export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): PlainDateSlots<CalendarSlot> {
-  options = prepareOptions(options)
+  options = copyOptions(options)
 
   if (isObjectlike(arg)) {
     const slots = (getSlots(arg) || {}) as { branding?: string, calendar?: CalendarSlot }

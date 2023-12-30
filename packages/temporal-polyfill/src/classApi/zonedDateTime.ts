@@ -7,7 +7,7 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-  prepareOptions,
+  copyOptions,
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
@@ -353,7 +353,7 @@ export function getZonedDateTimeSlots(zonedDateTime: ZonedDateTime): ZonedDateTi
 }
 
 export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedFieldOptions): ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
-  options = prepareOptions(options)
+  options = copyOptions(options)
 
   if (isObjectlike(arg)) {
     const slots = (getSlots(arg) || {}) as { branding?: string, calendar?: CalendarSlot }

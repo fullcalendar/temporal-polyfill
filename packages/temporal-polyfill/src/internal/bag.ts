@@ -7,7 +7,7 @@ import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { BoundArg, Callable, bindArgs, clampEntity, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
-import { OverflowOptions, ZonedFieldOptions, overflowMapNames, overrideOverflowOptions, prepareOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
+import { OverflowOptions, ZonedFieldOptions, overflowMapNames, overrideOverflowOptions, copyOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAlpha, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
@@ -342,7 +342,7 @@ export function zonedDateTimeWithFields<C, T>(
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<C, T> {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const { calendar, timeZone } = zonedDateTimeSlots
   const calendarOps = getCalendarOps(calendar)
   const timeZoneOps = getTimeZoneOps(timeZone)
@@ -367,7 +367,7 @@ export function plainDateTimeWithFields<C>(
   modFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<C> {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const calendarSlot = plainDateTimeSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
@@ -388,7 +388,7 @@ export function plainDateWithFields<C>(
   modFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const calendarSlot = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
@@ -402,7 +402,7 @@ export function plainYearMonthWithFields<C>(
   mod: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
@@ -418,7 +418,7 @@ export function plainMonthDayWithFields<C>(
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots<C> {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const calendarSlot = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 

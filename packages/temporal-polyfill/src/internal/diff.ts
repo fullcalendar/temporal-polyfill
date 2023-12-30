@@ -34,7 +34,7 @@ import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createDurationX, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
-import { DiffOptions, prepareOptions, refineDiffOptions } from './optionsRefine'
+import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ export function diffInstants(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(invert, optionsCopy, Unit.Second, Unit.Hour) as
     [TimeUnit, TimeUnit, number, RoundingMode]
 
@@ -71,7 +71,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] = refineDiffOptions(invert, optionsCopy, Unit.Hour)
 
   const startEpochNano = zonedDateTimeSlots0.epochNanoseconds
@@ -135,7 +135,7 @@ export function diffPlainDateTimes<C extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] = refineDiffOptions(invert, optionsCopy, Unit.Day)
 
   const startEpochNano = isoToEpochNano(plainDateTimeSlots0)!
@@ -196,7 +196,7 @@ export function diffPlainDates<C extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(invert, optionsCopy, Unit.Day, Unit.Year, Unit.Day)
 
   return diffDateLike(
@@ -217,7 +217,7 @@ export function diffPlainYearMonth<C extends IdLike>(
   invert?: boolean,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(invert, optionsCopy, Unit.Year, Unit.Year, Unit.Month)
   const calendarOps = getCalendarOps(calendarSlot)
 
@@ -288,7 +288,7 @@ export function diffPlainTimes(
   options: DiffOptions | undefined,
   invert?: boolean,
 ): DurationSlots {
-  const optionsCopy = prepareOptions(options)
+  const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] = refineDiffOptions(invert, optionsCopy, Unit.Hour, Unit.Hour)
 
   const startTimeNano = isoTimeFieldsToNano(plainTimeSlots0)

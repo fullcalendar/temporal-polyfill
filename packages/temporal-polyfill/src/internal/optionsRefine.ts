@@ -524,7 +524,7 @@ function normalizeUnitNameOptions<O extends {}>(
 For validating and copying. If undefined, leave as undefined
 Used for to* and diff* and `with` functions
 */
-export function prepareOptions<O>(options: O): O {
+export function copyOptions<O>(options: O): O {
   if (options === undefined) {
     return undefined as any
   }

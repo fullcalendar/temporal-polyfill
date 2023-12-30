@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, YearFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
+import { DateTimeDisplayOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { PlainMonthDayBranding, PlainMonthDaySlots, getId, removeBranding } from '../internal/slots'
 import { PublicDateSlots, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
@@ -119,7 +119,7 @@ export function getPlainMonthDaySlots(plainMonthDay: PlainMonthDay): PlainMonthD
 }
 
 export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDaySlots<CalendarSlot> {
-  options = prepareOptions(options)
+  options = copyOptions(options)
 
   if (isObjectlike(arg)) {
     const slots = (getSlots(arg) || {}) as { branding?: string, calendar?: CalendarSlot }
