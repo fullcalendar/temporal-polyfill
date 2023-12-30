@@ -40,7 +40,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
-import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationX, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX } from './slots'
+import { DateSlots, DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createDurationX, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX, createZonedDateTimeX } from './slots'
 import { requireString, toStringViaPrimitive } from './cast'
 import { realizeCalendarId } from './calendarNativeQuery'
 
@@ -79,7 +79,10 @@ export function parseInstant(s: string): InstantSlots {
   return createInstantX(epochNanoseconds)
 }
 
-export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calendar: string }) | { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
+export function parseZonedOrPlainDateTime(s: string): (
+  DateSlots<string> |
+  ZonedEpochSlots<string, string>
+) {
   const organized = parseDateTimeLike(s)
 
   if (!organized) {
@@ -95,7 +98,7 @@ export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calenda
     throw new RangeError('Only Z cannot be parsed for this') // PlainDate doesn't accept it
   }
 
-  return finalizeDateTime(organized)
+  return finalizeDate(organized)
 }
 
 export function parseZonedDateTime(
@@ -112,18 +115,12 @@ export function parseZonedDateTime(
   const offsetNano = offset ? parseOffsetNano(offset) : undefined
   const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
 
-  const isoFields = finalizeZonedDateTime(
+  return finalizeZonedDateTime(
     organized as ZonedDateTimeOrganized,
     offsetNano, // HACK
     offsetDisambig,
     epochDisambig,
   )
-
-  // TODO: have finalizeZonedDateTime create the slots?
-  return {
-    branding: ZonedDateTimeBranding,
-    ...isoFields,
-  }
 }
 
 export function parseOffsetNano(s: string): number {
@@ -175,7 +172,7 @@ export function parsePlainYearMonth(
     }
 
     return createPlainYearMonthX(
-      finalizeYearMonthOnly(organized),
+      checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
     )
   }
 
@@ -288,12 +285,15 @@ export function parseTimeZoneId(s: string): string {
 // Finalizing 'organized' structs to slots
 // -------------------------------------------------------------------------------------------------
 
+/*
+Unlike others, return slots
+*/
 function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
   offsetNano: number | undefined, // HACK
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
-): { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
+): ZonedDateTimeSlots<string, string> {
   const timeZoneImpl = queryNativeTimeZone(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
@@ -307,23 +307,19 @@ function finalizeZonedDateTime(
       // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
   )
 
-  return {
+  return createZonedDateTimeX(
     epochNanoseconds,
-    timeZone: timeZoneImpl.id,
-    calendar: realizeCalendarId(organized.calendar),
-  }
+    timeZoneImpl.id,
+    realizeCalendarId(organized.calendar),
+  )
 }
 
 function finalizeDateTime(organized: DateTimeLikeOrganized): IsoDateTimeFields & { calendar: string } {
   return realizeCalendarSlot(checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)))
 }
 
-function finalizeDate(organized: DateOrganized): IsoDateFields & { calendar: string } {
+function finalizeDate(organized: DateOrganized): DateSlots<string> {
   return realizeCalendarSlot(checkIsoDateInBounds(checkIsoDateFields(organized)))
-}
-
-function finalizeYearMonthOnly(organized: DateOrganized): IsoDateFields & { calendar: string } {
-  return checkIsoYearMonthInBounds(checkIsoDateFields(organized))
 }
 
 function realizeCalendarSlot<T extends { calendar: string }>(organized: T): T {
@@ -479,7 +475,7 @@ function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
 /*
 Result assumed to be ISO
 */
-function organizeYearMonthParts(parts: string[]): IsoDateFields & { calendar: string } {
+function organizeYearMonthParts(parts: string[]): DateSlots<string> {
   return {
     isoYear: organizeIsoYearParts(parts),
     isoMonth: parseInt(parts[4]),
@@ -488,7 +484,7 @@ function organizeYearMonthParts(parts: string[]): IsoDateFields & { calendar: st
   }
 }
 
-function organizeMonthDayParts(parts: string[]): IsoDateFields & { calendar: string } {
+function organizeMonthDayParts(parts: string[]): DateSlots<string> {
   return {
     isoYear: isoEpochFirstLeapYear,
     isoMonth: parseInt(parts[1]),

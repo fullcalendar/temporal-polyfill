@@ -132,6 +132,7 @@ export interface EpochSlots {
 }
 
 export type DateSlots<C> = IsoDateFields & { calendar: C }
+export type ZonedEpochSlots<C, T> = EpochSlots & { timeZone: T, calendar: C }
 
 export type PlainDateSlots<C> = IsoDateFields & { calendar: C, branding: typeof PlainDateBranding }
 export type PlainTimeSlots = IsoTimeFields & { branding: typeof PlainTimeBranding }
