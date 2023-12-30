@@ -3,14 +3,15 @@ import { DurationFields } from './durationFields'
 import { IsoDateFields } from './calendarIsoFields'
 import { Unit } from './units'
 import { DiffOptions, OverflowOptions } from './optionsRefine'
+import { PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots } from './slots'
 
 // Operations for internal use!
 
 // Function Types
 // (Must always be called from a CalendarOps object)
-export type DateFromFieldsOp<C> = (fields: DateBag, options?: OverflowOptions) => IsoDateFields & { calendar: C }
-export type YearMonthFromFieldsOp<C> = (fields: YearMonthBag, options?: OverflowOptions) => IsoDateFields & { calendar: C }
-export type MonthDayFromFieldsOp<C> = (fields: DateBag, options?: OverflowOptions) => IsoDateFields & { calendar: C }
+export type DateFromFieldsOp<C> = (fields: DateBag, options?: OverflowOptions) => PlainDateSlots<C>
+export type YearMonthFromFieldsOp<C> = (fields: YearMonthBag, options?: OverflowOptions) => PlainYearMonthSlots<C>
+export type MonthDayFromFieldsOp<C> = (fields: DateBag, options?: OverflowOptions) => PlainMonthDaySlots<C>
 export type FieldsOp = (fieldNames: string[]) => string[]
 export type MergeFieldsOp = (fields: DateBag, additionalFields: DateBag) => DateBag
 export type DateAddOp = (isoFields: IsoDateFields, durationFields: DurationFields, options?: OverflowOptions) => IsoDateFields

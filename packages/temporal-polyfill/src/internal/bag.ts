@@ -178,9 +178,7 @@ export function refinePlainDateBag<C>(
     requireFields,
   )
 
-  return createPlainDateX(
-    calendarOps.dateFromFields(fields as any, options),
-  )
+  return calendarOps.dateFromFields(fields as any, options)
 }
 
 export function refinePlainYearMonthBag<C>(
@@ -196,9 +194,7 @@ export function refinePlainYearMonthBag<C>(
     requireFields,
   )
 
-  return createPlainYearMonthX(
-    calendarOps.yearMonthFromFields(fields, options)
-  )
+  return calendarOps.yearMonthFromFields(fields, options)
 }
 
 export function refinePlainMonthDayBag<C>(
@@ -222,9 +218,7 @@ export function refinePlainMonthDayBag<C>(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return createPlainMonthDayX(
-    calendarOps.monthDayFromFields(fields, options),
-  )
+  return calendarOps.monthDayFromFields(fields, options)
 }
 
 export function refinePlainTimeBag(
@@ -398,9 +392,7 @@ export function plainDateWithFields<C>(
   const calendarSlot = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainDateX(
-    mergePlainDateBag(calendarOps, initialFields, modFields, optionsCopy),
-  )
+  return mergePlainDateBag(calendarOps, initialFields, modFields, optionsCopy)
 }
 
 export function plainYearMonthWithFields<C>(
@@ -430,9 +422,7 @@ export function plainMonthDayWithFields<C>(
   const calendarSlot = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainMonthDayX(
-    mergePlainMonthDayBag(calendarOps, initialFields, modFields, optionsCopy),
-  )
+  return mergePlainMonthDayBag(calendarOps, initialFields, modFields, optionsCopy)
 }
 
 export function plainTimeWithFields(
@@ -523,7 +513,7 @@ function mergePlainDateBag<C>(
   plainDate: any,
   mod: DateBag,
   options: OverflowOptions | undefined,
-): DateSlots<C> {
+): PlainDateSlots<C> {
   const fields = mergeCalendarFields(
     calendarOps,
     plainDate,
@@ -539,7 +529,7 @@ function mergePlainYearMonthBag<C>(
   plainYearMonth: any,
   bag: YearMonthBag,
   options: OverflowOptions | undefined,
-): DateSlots<C> {
+): PlainYearMonthSlots<C> {
   const fields = mergeCalendarFields(
     calendarOps,
     plainYearMonth,
@@ -555,7 +545,7 @@ function mergePlainMonthDayBag<C>(
   plainMonthDay: any,
   bag: MonthDayBag,
   options: OverflowOptions | undefined,
-): DateSlots<C> {
+): PlainMonthDaySlots<C> {
   const fields = mergeCalendarFields(
     calendarOps,
     plainMonthDay,
@@ -615,7 +605,7 @@ function mergeCalendarFields(
 export function convertToPlainMonthDay<C>(
   calendarOps: MonthDayRefineOps<C>,
   input: any,
-): DateSlots<C> {
+): PlainMonthDaySlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
     input as any,
@@ -629,7 +619,7 @@ export function convertToPlainYearMonth<C>(
   calendarOps: YearMonthRefineOps<C>,
   input: any,
   options?: OverflowOptions,
-): DateSlots<C> {
+): PlainYearMonthSlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
     input as any,
@@ -646,7 +636,7 @@ export function convertPlainMonthDayToDate<C>(
   calendarOps: DateModOps<C>,
   plainMonthDay: any,
   bag: YearFields,
-): DateSlots<C> {
+): PlainDateSlots<C> {
   return convertToIso(
     calendarOps,
     plainMonthDay, // input
@@ -663,7 +653,7 @@ export function convertPlainYearMonthToDate<C>(
   calendarOps: DateModOps<C>,
   plainYearMonth: any,
   bag: DayFields,
-): DateSlots<C> {
+): PlainDateSlots<C> {
   return convertToIso(
     calendarOps,
     plainYearMonth, // input
@@ -679,7 +669,7 @@ function convertToIso<C>(
   inputFieldNames: string[], // must be alphabetized!!!
   extra: {},
   extraFieldNames: string[], // must be alphabetized!!!
-): DateSlots<C> {
+): PlainDateSlots<C> {
   inputFieldNames = calendarOps.fields(inputFieldNames)
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
@@ -699,40 +689,40 @@ export function nativeDateFromFields(
   this: NativeDateRefineDeps,
   fields: DateBag,
   options?: OverflowOptions,
-): DateSlots<string> {
+): PlainDateSlots<string> {
   const overflow = refineOverflowOptions(options)
   const year = refineYear(this, fields)
   const month = refineMonth(this, fields, year, overflow)
   const day = refineDay(this, fields as DayFields, month, year, overflow)
   const isoFields = this.isoFields(year, month, day)
 
-  return {
-    ...checkIsoDateInBounds(isoFields),
-    calendar: getCalendarId(this),
-  }
+  return createPlainDateX(
+    checkIsoDateInBounds(isoFields),
+    getCalendarId(this),
+  )
 }
 
 export function nativeYearMonthFromFields(
   this: NativeYearMonthRefineDeps,
   fields: YearMonthBag,
   options?: OverflowOptions,
-): DateSlots<string> {
+): PlainYearMonthSlots<string> {
   const overflow = refineOverflowOptions(options)
   const year = refineYear(this, fields)
   const month = refineMonth(this, fields, year, overflow)
   const isoFields = this.isoFields(year, month, 1)
 
-  return {
-    ...checkIsoYearMonthInBounds(isoFields),
-    calendar: getCalendarId(this),
-  }
+  return createPlainYearMonthX(
+    checkIsoYearMonthInBounds(isoFields),
+    getCalendarId(this),
+  )
 }
 
 export function nativeMonthDayFromFields(
   this: NativeMonthDayRefineOps,
   fields: DateBag,
   options?: OverflowOptions
-): DateSlots<string> {
+): PlainMonthDaySlots<string> {
   const overflow = refineOverflowOptions(options)
   let isIso = getCalendarId(this) === isoCalendarId // HACK
   let { monthCode } = fields as Partial<MonthFields>
@@ -802,10 +792,10 @@ export function nativeMonthDayFromFields(
     [year, month] = res
   }
 
-  return {
-    ...this.isoFields(year, month, day),
-    calendar: getCalendarId(this),
-  }
+  return createPlainMonthDayX(
+    this.isoFields(year, month, day),
+    getCalendarId(this),
+  )
 }
 
 export function nativeFieldsMethod(

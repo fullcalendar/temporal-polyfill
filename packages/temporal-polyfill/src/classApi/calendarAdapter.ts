@@ -11,7 +11,7 @@ import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './slotsForClasses'
-import { DurationBranding, PlainDateBranding, createDurationX, createPlainDateX } from '../internal/slots'
+import { DurationBranding, PlainDateBranding, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationX, createPlainDateX } from '../internal/slots'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ function dateFromFieldsAdapter(
   dateFromFields: CalendarProtocol['dateFromFields'],
   fields: DateBag,
   options?: OverflowOptions,
-): IsoDateFields & { calendar: CalendarSlot } {
+): PlainDateSlots<CalendarSlot> {
   return getPlainDateSlots(
     dateFromFields.call(
       calendarProtocol,
@@ -59,7 +59,7 @@ function yearMonthFromFieldsAdapter(
   yearMonthFromFields: CalendarProtocol['yearMonthFromFields'],
   fields: YearMonthBag,
   options?: OverflowOptions,
-): IsoDateFields & { calendar: CalendarSlot } {
+): PlainYearMonthSlots<CalendarSlot> {
   return getPlainYearMonthSlots(
     yearMonthFromFields.call(
       calendarProtocol,
@@ -74,7 +74,7 @@ function monthDayFromFieldsAdapter(
   monthDayFromFields: CalendarProtocol['monthDayFromFields'],
   fields: MonthDayBag,
   options?: OverflowOptions,
-): IsoDateFields & { calendar: CalendarSlot } {
+): PlainMonthDaySlots<CalendarSlot> {
   return getPlainMonthDaySlots(
     monthDayFromFields.call(
       calendarProtocol,

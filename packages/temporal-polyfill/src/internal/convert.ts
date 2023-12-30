@@ -63,9 +63,7 @@ export function zonedDateTimeToPlainYearMonth<C>(
   const calendarSlot = zonedDateTimeSlots0.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainYearMonthX(
-    convertToPlainYearMonth(calendarOps, zonedDateTimeFields)
-  )
+  return convertToPlainYearMonth(calendarOps, zonedDateTimeFields)
 }
 
 export function zonedDateTimeToPlainMonthDay<C>(
@@ -76,9 +74,7 @@ export function zonedDateTimeToPlainMonthDay<C>(
   const calendarSlot = zonedDateTimeSlots0.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainMonthDayX(
-    convertToPlainMonthDay(calendarOps, zonedDateTimeFields),
-  )
+  return convertToPlainMonthDay(calendarOps, zonedDateTimeFields)
 }
 
 export function zonedDateTimeToPlainTime<C, T>(
@@ -129,10 +125,7 @@ export function plainDateTimeToPlainMonthDay<C>(
 ): PlainMonthDaySlots<C> {
   const calendarOps = getCalendarOps(plainDateTimeSlots.calendar)
 
-  return createPlainMonthDayX({
-    ...plainDateTimeSlots, // isoTimeFields and calendar
-    ...convertToPlainMonthDay(calendarOps, plainDateFields),
-  })
+  return convertToPlainMonthDay(calendarOps, plainDateFields)
 }
 
 function dateToEpochNano<TZ>(
@@ -194,9 +187,7 @@ export function plainDateToPlainYearMonth<C>(
   const calendarSlot = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainYearMonthX(
-    convertToPlainYearMonth(calendarOps, plainDateFields)
-  )
+  return convertToPlainYearMonth(calendarOps, plainDateFields)
 }
 
 export function plainDateToPlainMonthDay<C>(
@@ -207,9 +198,7 @@ export function plainDateToPlainMonthDay<C>(
   const calendarSlot = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainMonthDayX(
-    convertToPlainMonthDay(calendarOps, plainDateFields),
-  )
+  return convertToPlainMonthDay(calendarOps, plainDateFields)
 }
 
 // PlainYearMonth -> *
@@ -224,9 +213,7 @@ export function plainYearMonthToPlainDate<C>(
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainDateX(
-    convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag),
-  )
+  return convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag)
 }
 
 // PlainMonthDay -> *
@@ -241,9 +228,7 @@ export function plainMonthDayToPlainDate<C>(
   const calendarSlot = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainDateX(
-    convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag),
-  )
+  return convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag)
 }
 
 // PlainTime -> *
