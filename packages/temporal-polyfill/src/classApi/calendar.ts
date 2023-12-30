@@ -56,7 +56,7 @@ export class Calendar implements CalendarProtocol {
           toDurationSlots(durationArg),
           options,
         ),
-        id, // TODO: have calendarNative include this in the results, like dateFromFields?
+        id,
       )
     )
   }
@@ -69,7 +69,7 @@ export class Calendar implements CalendarProtocol {
     const { native } = getCalendarSlots(this)
 
     return createDuration(
-      createDurationX( // TODO: have calendarNative do this?
+      createDurationX(
         native.dateUntil(
           toPlainDateSlots(plainDateArg0),
           toPlainDateSlots(plainDateArg1),
