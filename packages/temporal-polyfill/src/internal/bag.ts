@@ -15,8 +15,8 @@ import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, Mon
 import { parseOffsetNano } from './parseIso'
 import { requireObjectlike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
 import { MarkerSlotsNoCalendar, checkDurationFields } from './durationMath'
-import { DateSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX, createZonedDateTimeX } from './slots'
-import { createZonedDateTimeSlots } from './slotsCreate'
+import { DateSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
+import { constructZonedDateTimeSlots } from './construct'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
 export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }
@@ -130,7 +130,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
     false, // fuzzy
   )
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     epochNanoseconds,
     timeZoneSlot,
     calendarSlot,
@@ -162,7 +162,7 @@ export function refinePlainDateTimeBag<C>(
     ...isoTimeFields,
   })
 
-  return createPlainDateTimeX(isoFields)
+  return createPlainDateTimeSlots(isoFields)
 }
 
 export function refinePlainDateBag<C>(
@@ -228,14 +228,14 @@ export function refinePlainTimeBag(
   const overflow = refineOverflowOptions(options) // spec says overflow parsed first
   const fields = refineFields(bag, timeFieldNamesAlpha, [], true) as TimeBag // disallowEmpty
 
-  return createPlainTimeX(refineTimeBag(fields, overflow))
+  return createPlainTimeSlots(refineTimeBag(fields, overflow))
 }
 
 export function refineDurationBag(bag: DurationBag): DurationSlots {
   // refine in 'partial' mode
   const durationFields = refineFields(bag, durationFieldNamesAlpha) as DurationBag
 
-  return createDurationX(
+  return createDurationSlots(
     checkDurationFields({
       ...durationFieldDefaults,
       ...durationFields
@@ -347,7 +347,7 @@ export function zonedDateTimeWithFields<C, T>(
   const calendarOps = getCalendarOps(calendar)
   const timeZoneOps = getTimeZoneOps(timeZone)
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     mergeZonedDateTimeBag(
       calendarOps,
       timeZoneOps,
@@ -371,7 +371,7 @@ export function plainDateTimeWithFields<C>(
   const calendarSlot = plainDateTimeSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     mergePlainDateTimeBag(
       calendarOps,
       initialFields,
@@ -406,7 +406,7 @@ export function plainYearMonthWithFields<C>(
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return createPlainYearMonthX(
+  return createPlainYearMonthSlots(
     mergePlainYearMonthBag(calendarOps, initialFields, mod, optionsCopy)
   )
 }
@@ -430,14 +430,14 @@ export function plainTimeWithFields(
   mod: TimeBag,
   options?: OverflowOptions,
 ): PlainTimeSlots {
-  return createPlainTimeX(mergePlainTimeBag(initialFields, mod, options))
+  return createPlainTimeSlots(mergePlainTimeBag(initialFields, mod, options))
 }
 
 export function durationWithFields(
   slots: DurationSlots,
   fields: DurationBag,
 ): DurationSlots {
-  return createDurationX(
+  return createDurationSlots(
     mergeDurationBag(slots, fields),
   )
 }
@@ -696,7 +696,7 @@ export function nativeDateFromFields(
   const day = refineDay(this, fields as DayFields, month, year, overflow)
   const isoFields = this.isoFields(year, month, day)
 
-  return createPlainDateX(
+  return createPlainDateSlots(
     checkIsoDateInBounds(isoFields),
     getCalendarId(this),
   )
@@ -712,7 +712,7 @@ export function nativeYearMonthFromFields(
   const month = refineMonth(this, fields, year, overflow)
   const isoFields = this.isoFields(year, month, 1)
 
-  return createPlainYearMonthX(
+  return createPlainYearMonthSlots(
     checkIsoYearMonthInBounds(isoFields),
     getCalendarId(this),
   )
@@ -792,7 +792,7 @@ export function nativeMonthDayFromFields(
     [year, month] = res
   }
 
-  return createPlainMonthDayX(
+  return createPlainMonthDaySlots(
     this.isoFields(year, month, day),
     getCalendarId(this),
   )

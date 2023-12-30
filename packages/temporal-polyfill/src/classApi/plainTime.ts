@@ -11,7 +11,7 @@ import {
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeX, removeBranding } from '../internal/slots'
+import { PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeSlots, removeBranding } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -23,7 +23,7 @@ import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { CalendarSlot } from './slotsForClasses'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { PlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
-import { createPlainTimeSlots } from '../internal/slotsCreate'
+import { constructPlainTimeSlots } from '../internal/construct'
 import { movePlainTime } from '../internal/move'
 import { diffPlainTimes } from '../internal/diff'
 import { roundPlainTime } from '../internal/round'
@@ -46,7 +46,7 @@ export class PlainTime {
   ) {
     setSlots(
       this,
-      createPlainTimeSlots(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond),
+      constructPlainTimeSlots(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond),
     )
   }
 
@@ -171,7 +171,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainTimeX(slots as PlainDateTimeSlots<CalendarSlot>)
+        return createPlainTimeSlots(slots as PlainDateTimeSlots<CalendarSlot>)
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options

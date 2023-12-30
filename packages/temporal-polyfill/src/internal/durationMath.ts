@@ -4,7 +4,7 @@ import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc, durationDateFieldNamesAsc, DurationTimeFields } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
-import { DurationBranding, DurationSlots, createDurationX } from './slots'
+import { DurationBranding, DurationSlots, createDurationSlots } from './slots'
 import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from './optionsRefine'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
@@ -120,7 +120,7 @@ export function addDurations<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
-    return createDurationX(
+    return createDurationSlots(
       addDayTimeDurations(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
     )
   }
@@ -136,7 +136,7 @@ export function addDurations<RA, C, T>(
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
-  return createDurationX(
+  return createDurationSlots(
     spanDuration(
       slots,
       otherSlots,
@@ -194,7 +194,7 @@ export function roundDuration<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
-    return createDurationX(
+    return createDurationSlots(
       roundDayTimeDuration(
         slots,
         largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
@@ -240,14 +240,14 @@ export function roundDuration<RA, C, T>(
 
   balancedDuration.weeks += transplantedWeeks // HACK (mutating)
 
-  return createDurationX(balancedDuration)
+  return createDurationSlots(balancedDuration)
 }
 
 // Sign / Abs / Blank
 // -------------------------------------------------------------------------------------------------
 
 export function negateDuration(slots: DurationSlots): DurationSlots {
-  return createDurationX(negateDurationFields(slots))
+  return createDurationSlots(negateDurationFields(slots))
 }
 
 export function negateDurationFields(fields: DurationFields): DurationFields {
@@ -261,7 +261,7 @@ export function negateDurationFields(fields: DurationFields): DurationFields {
 }
 
 export function absDuration(slots: DurationSlots): DurationSlots {
-  return createDurationX(absDurationFields(slots))
+  return createDurationSlots(absDurationFields(slots))
 }
 
 export function absDurationFields(fields: DurationFields): DurationFields {

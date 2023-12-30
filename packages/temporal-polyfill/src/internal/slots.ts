@@ -19,9 +19,10 @@ export const DurationBranding = 'Duration' as const
 export const CalendarBranding = 'Calendar' as const
 export const TimeZoneBranding = 'TimeZone' as const
 
+// Slot-creation helpers
 // -------------------------------------------------------------------------------------------------
 
-export function createInstantX(epochNano: DayTimeNano): InstantSlots {
+export function createInstantSlots(epochNano: DayTimeNano): InstantSlots {
   return {
     branding: InstantBranding,
     epochNanoseconds: epochNano,
@@ -31,7 +32,7 @@ export function createInstantX(epochNano: DayTimeNano): InstantSlots {
 /*
 NOTE: parseZonedDateTime still uses ZonedDateTimeBranding
 */
-export function createZonedDateTimeX<C, T>(
+export function createZonedDateTimeSlots<C, T>(
   epochNano: DayTimeNano,
   timeZone: T,
   calendar: C,
@@ -44,9 +45,9 @@ export function createZonedDateTimeX<C, T>(
   }
 }
 
-export function createPlainDateTimeX<C>(isoFields: IsoDateTimeFields & { calendar: C }): PlainDateTimeSlots<C>
-export function createPlainDateTimeX<C>(isoFields: IsoDateTimeFields, calendar: C): PlainDateTimeSlots<C>
-export function createPlainDateTimeX<C>(
+export function createPlainDateTimeSlots<C>(isoFields: IsoDateTimeFields & { calendar: C }): PlainDateTimeSlots<C>
+export function createPlainDateTimeSlots<C>(isoFields: IsoDateTimeFields, calendar: C): PlainDateTimeSlots<C>
+export function createPlainDateTimeSlots<C>(
   isoFields: IsoDateTimeFields & { calendar?: C },
   calendar = isoFields.calendar,
 ): PlainDateTimeSlots<C> {
@@ -57,9 +58,9 @@ export function createPlainDateTimeX<C>(
   }
 }
 
-export function createPlainDateX<C>(isoFields: IsoDateFields & { calendar: C }): PlainDateSlots<C>
-export function createPlainDateX<C>(isoFields: IsoDateFields, calendar: C): PlainDateSlots<C>
-export function createPlainDateX<C>(
+export function createPlainDateSlots<C>(isoFields: IsoDateFields & { calendar: C }): PlainDateSlots<C>
+export function createPlainDateSlots<C>(isoFields: IsoDateFields, calendar: C): PlainDateSlots<C>
+export function createPlainDateSlots<C>(
   isoFields: IsoDateFields & { calendar?: C },
   calendar = isoFields.calendar,
 ): PlainDateSlots<C> {
@@ -70,9 +71,9 @@ export function createPlainDateX<C>(
   }
 }
 
-export function createPlainYearMonthX<C>(isoFields: IsoDateFields & { calendar: C }): PlainYearMonthSlots<C>
-export function createPlainYearMonthX<C>(isoFields: IsoDateFields, calendar: C): PlainYearMonthSlots<C>
-export function createPlainYearMonthX<C>(
+export function createPlainYearMonthSlots<C>(isoFields: IsoDateFields & { calendar: C }): PlainYearMonthSlots<C>
+export function createPlainYearMonthSlots<C>(isoFields: IsoDateFields, calendar: C): PlainYearMonthSlots<C>
+export function createPlainYearMonthSlots<C>(
   isoFields: IsoDateFields & { calendar?: C },
   calendar = isoFields.calendar,
 ): PlainYearMonthSlots<C> {
@@ -83,9 +84,9 @@ export function createPlainYearMonthX<C>(
   }
 }
 
-export function createPlainMonthDayX<C>(isoFields: IsoDateFields & { calendar: C }): PlainMonthDaySlots<C>
-export function createPlainMonthDayX<C>(isoFields: IsoDateFields, calendar: C): PlainMonthDaySlots<C>
-export function createPlainMonthDayX<C>(
+export function createPlainMonthDaySlots<C>(isoFields: IsoDateFields & { calendar: C }): PlainMonthDaySlots<C>
+export function createPlainMonthDaySlots<C>(isoFields: IsoDateFields, calendar: C): PlainMonthDaySlots<C>
+export function createPlainMonthDaySlots<C>(
   isoFields: IsoDateFields & { calendar?: C },
   calendar = isoFields.calendar,
 ): PlainMonthDaySlots<C> {
@@ -96,7 +97,7 @@ export function createPlainMonthDayX<C>(
   }
 }
 
-export function createPlainTimeX(isoFields: IsoTimeFields): PlainTimeSlots {
+export function createPlainTimeSlots(isoFields: IsoTimeFields): PlainTimeSlots {
   return {
     branding: PlainTimeBranding,
     ...pluckProps(isoTimeFieldNamesAlpha, isoFields),
@@ -106,13 +107,14 @@ export function createPlainTimeX(isoFields: IsoTimeFields): PlainTimeSlots {
 /*
 TODO: have Calendar dateUntil return this? and many other places that return DurationFields?
 */
-export function createDurationX(durationFields: DurationFields): DurationSlots {
+export function createDurationSlots(durationFields: DurationFields): DurationSlots {
   return {
     branding: DurationBranding,
     ...pluckProps(durationFieldNamesAlpha, durationFields)
   }
 }
 
+// getISOFields
 // -------------------------------------------------------------------------------------------------
 
 export function removeBranding<S>(slots: S): Omit<S, 'branding'> {

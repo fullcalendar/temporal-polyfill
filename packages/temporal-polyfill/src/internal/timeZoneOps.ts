@@ -6,7 +6,7 @@ import { roundToMinute } from './round'
 import { nanoInHour, nanoInUtcDay } from './units'
 import { createLazyGenerator, pluckProps } from './utils'
 import { moveByIsoDays } from './move'
-import { ZonedDateTimeBranding, ZonedDateTimeSlots, createZonedDateTimeX } from './slots'
+import { ZonedDateTimeBranding, ZonedDateTimeSlots, createZonedDateTimeSlots } from './slots'
 import { formatOffsetNano } from './formatIso'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
@@ -224,7 +224,7 @@ export function computeStartOfDay<C, T>(
     true, // fuzzy
   )
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     epochNanoseconds,
     timeZone,
     calendar,

@@ -16,7 +16,7 @@ import { calendarMethods } from './mixins'
 import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, createDurationX, createPlainDateX } from '../internal/slots'
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, createDurationSlots, createPlainDateSlots } from '../internal/slots'
 
 export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
 
@@ -50,7 +50,7 @@ export class Calendar implements CalendarProtocol {
     const { id, native } = getCalendarSlots(this)
 
     return createPlainDate(
-      createPlainDateX(
+      createPlainDateSlots(
         native.dateAdd(
           toPlainDateSlots(plainDateArg),
           toDurationSlots(durationArg),
@@ -69,7 +69,7 @@ export class Calendar implements CalendarProtocol {
     const { native } = getCalendarSlots(this)
 
     return createDuration(
-      createDurationX(
+      createDurationSlots(
         native.dateUntil(
           toPlainDateSlots(plainDateArg0),
           toPlainDateSlots(plainDateArg1),

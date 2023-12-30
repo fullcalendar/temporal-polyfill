@@ -5,7 +5,7 @@ import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
 import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { computeMonthDayFields } from '../internal/calendarNative'
-import { createPlainMonthDaySlots } from '../internal/slotsCreate'
+import { constructPlainMonthDaySlots } from '../internal/construct'
 import { parsePlainMonthDay } from '../internal/parseIso'
 import { plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
 import { plainMonthDaysEqual } from '../internal/compare'
@@ -19,7 +19,7 @@ export function create(
   calendar?: string,
   referenceIsoYear?: number,
 ): PlainMonthDaySlots<string> {
-  return createPlainMonthDaySlots(
+  return constructPlainMonthDaySlots(
     refineCalendarSlotString,
     isoMonth,
     isoDay,

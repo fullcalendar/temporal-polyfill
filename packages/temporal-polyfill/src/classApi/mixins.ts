@@ -1,4 +1,4 @@
-import { BrandingSlots, DurationBranding, DurationSlots, EpochSlots, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, createPlainDateX } from '../internal/slots'
+import { BrandingSlots, DurationBranding, DurationSlots, EpochSlots, PlainDateBranding, PlainDateTimeBranding, PlainMonthDayBranding, PlainYearMonthBranding, createPlainDateSlots } from '../internal/slots'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from '../internal/durationFields'
 import { IsoDateFields, IsoTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
@@ -104,7 +104,7 @@ const adapterSimpleOps = mapProps(
       return refiner(
         (calendarProtocol as any)[methodName](
           createPlainDate(
-            createPlainDateX(isoFields, calendarProtocol),
+            createPlainDateSlots(isoFields, calendarProtocol),
           )
         )
       )

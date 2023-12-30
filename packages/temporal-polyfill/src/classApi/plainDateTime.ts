@@ -4,7 +4,7 @@ import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOpti
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateTimeX, createPlainDateX, createPlainTimeX, getId, removeBranding } from '../internal/slots'
+import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getId, removeBranding } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag, PublicDateTimeSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
@@ -23,8 +23,8 @@ import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRef
 import { dateTimeCalendarGetters } from './mixins'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { PlainDateBag, PlainDateTimeBag, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
-import { createPlainDateTimeSlots } from '../internal/slotsCreate'
-import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
+import { constructPlainDateTimeSlots } from '../internal/construct'
+import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/mod'
 import { movePlainDateTime } from '../internal/move'
 import { diffPlainDateTimes } from '../internal/diff'
 import { roundPlainDateTime } from '../internal/round'
@@ -52,7 +52,7 @@ export class PlainDateTime {
   ) {
     setSlots(
       this,
-      createPlainDateTimeSlots(
+      constructPlainDateTimeSlots(
         refineCalendarSlot,
         isoYear, isoMonth, isoDay,
         isoHour, isoMinute, isoSecond,
@@ -190,7 +190,7 @@ export class PlainDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate(
-      createPlainDateX(getPlainDateTimeSlots(this))
+      createPlainDateSlots(getPlainDateTimeSlots(this))
     )
   }
 
@@ -216,7 +216,7 @@ export class PlainDateTime {
 
   toPlainTime(): PlainTime {
     return createPlainTime(
-      createPlainTimeX(getPlainDateTimeSlots(this)),
+      createPlainTimeSlots(getPlainDateTimeSlots(this)),
     )
   }
 
@@ -285,7 +285,7 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
 
       case PlainDateBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainDateTimeX({
+        return createPlainDateTimeSlots({
           ...(slots as PlainDateSlots<CalendarSlot>),
           ...isoTimeFieldDefaults,
         })

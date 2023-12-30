@@ -4,7 +4,7 @@ import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../internal/slots'
 import { createNativeDiffOps } from '../internal/calendarNativeQuery'
-import { createDurationSlots } from '../internal/slotsCreate'
+import { constructDurationSlots } from '../internal/construct'
 import { parseDuration } from '../internal/parseIso'
 import { durationWithFields, refineDurationBag } from '../internal/bag'
 import { absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
@@ -14,7 +14,7 @@ import { compareDurations } from '../internal/compare'
 
 type RelativeToArg = ZonedDateTimeSlots<string, string> | PlainDateSlots<string>
 
-export const create = createDurationSlots
+export const create = constructDurationSlots
 
 export const fromString = parseDuration
 

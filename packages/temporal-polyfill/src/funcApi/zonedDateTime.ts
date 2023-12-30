@@ -11,9 +11,9 @@ import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, comput
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { DurationFields } from '../internal/durationFields'
 import { ZonedDateTimeBag, isoTimeFieldsToCal, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
-import { createZonedDateTimeSlots } from '../internal/slotsCreate'
+import { constructZonedDateTimeSlots } from '../internal/construct'
 import { parseZonedDateTime } from '../internal/parseIso'
-import { slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
+import { slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/mod'
 import { moveZonedDateTime } from '../internal/move'
 import { diffZonedDateTimes } from '../internal/diff'
 import { roundZonedDateTime } from '../internal/round'
@@ -27,7 +27,7 @@ export function create(
   timeZoneArg: string,
   calendarArg?: string,
 ): ZonedDateTimeSlots<string, string> {
-  return createZonedDateTimeSlots(
+  return constructZonedDateTimeSlots(
     refineCalendarSlotString,
     refineTimeZoneSlotString,
     epochNano,

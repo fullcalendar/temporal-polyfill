@@ -15,7 +15,7 @@ import { createDateModOps, createYearMonthDiffOps, createYearMonthModOps, create
 import { yearMonthGetters } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { PlainYearMonthBag, plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bag'
-import { createPlainYearMonthSlots } from '../internal/slotsCreate'
+import { constructPlainYearMonthSlots } from '../internal/construct'
 import { movePlainYearMonth } from '../internal/move'
 import { diffPlainYearMonth } from '../internal/diff'
 import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
@@ -35,7 +35,7 @@ export class PlainYearMonth {
   ) {
     setSlots(
       this,
-      createPlainYearMonthSlots(refineCalendarSlot, isoYear, isoMonth, calendar, referenceIsoDay)
+      constructPlainYearMonthSlots(refineCalendarSlot, isoYear, isoMonth, calendar, referenceIsoDay)
     )
   }
 

@@ -40,7 +40,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
-import { DateSlots, DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createDurationX, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX, createZonedDateTimeX } from './slots'
+import { DateSlots, DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createDurationSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import { requireString, toStringViaPrimitive } from './cast'
 import { realizeCalendarId } from './calendarNativeQuery'
 
@@ -76,7 +76,7 @@ export function parseInstant(s: string): InstantSlots {
     offsetNano,
   )
 
-  return createInstantX(epochNanoseconds)
+  return createInstantSlots(epochNanoseconds)
 }
 
 export function parseZonedOrPlainDateTime(s: string): (
@@ -140,7 +140,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
     throw new RangeError()
   }
 
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     finalizeDateTime(organized),
   )
 }
@@ -152,7 +152,7 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
     throw new RangeError()
   }
 
-  return createPlainDateX(
+  return createPlainDateSlots(
     organized.hasTime
       ? finalizeDateTime(organized)
       : finalizeDate(organized)
@@ -171,7 +171,7 @@ export function parsePlainYearMonth(
       throw new RangeError('Invalid calendar')
     }
 
-    return createPlainYearMonthX(
+    return createPlainYearMonthSlots(
       checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
     )
   }
@@ -180,7 +180,7 @@ export function parsePlainYearMonth(
   const calendarOps = getCalendarOps(isoFields.calendar)
   const movedIsoFields = moveToMonthStart(calendarOps, isoFields)
 
-  return createPlainYearMonthX({
+  return createPlainYearMonthSlots({
     ...isoFields, // has calendar
     ...movedIsoFields,
   })
@@ -198,7 +198,7 @@ export function parsePlainMonthDay(
       throw new RangeError('Invalid calendar')
     }
 
-    return createPlainMonthDayX(
+    return createPlainMonthDaySlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
     )
   }
@@ -213,7 +213,7 @@ export function parsePlainMonthDay(
   const [year, month] = calendarOps.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)! // !HACK
   const isoFields = calendarOps.isoFields(year, month, day)
 
-  return createPlainMonthDayX(isoFields, calendar)
+  return createPlainMonthDaySlots(isoFields, calendar)
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
@@ -246,7 +246,7 @@ export function parsePlainTime(s: string): PlainTimeSlots {
     throw new RangeError()
   }
 
-  return createPlainTimeX(constrainIsoTimeFields(organized, Overflow.Reject))
+  return createPlainTimeSlots(constrainIsoTimeFields(organized, Overflow.Reject))
 }
 
 export function parseDuration(s: string): DurationSlots {
@@ -256,7 +256,7 @@ export function parseDuration(s: string): DurationSlots {
     throw new RangeError()
   }
 
-  return createDurationX(parsed)
+  return createDurationSlots(parsed)
 }
 
 export function parseCalendarId(s: string): string {
@@ -307,7 +307,7 @@ function finalizeZonedDateTime(
       // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
   )
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     epochNanoseconds,
     timeZoneImpl.id,
     realizeCalendarId(organized.calendar),

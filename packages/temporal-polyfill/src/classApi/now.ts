@@ -9,7 +9,7 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
 import { getCurrentEpochNanoseconds, getCurrentIsoDateTime, getCurrentTimeZoneId } from '../internal/current'
-import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainTimeX, createZonedDateTimeX } from '../internal/slots'
+import { InstantBranding, PlainDateBranding, PlainDateTimeBranding, PlainTimeBranding, ZonedDateTimeBranding, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, createZonedDateTimeSlots } from '../internal/slots'
 
 export const Now = Object.defineProperties({}, {
   ...createTemporalNameDescriptors('Now'),
@@ -19,7 +19,7 @@ export const Now = Object.defineProperties({}, {
 
     instant(): Instant {
       return createInstant(
-        createInstantX(
+        createInstantSlots(
           getCurrentEpochNanoseconds(),
         ),
       )
@@ -30,7 +30,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): ZonedDateTime {
       return createZonedDateTime(
-        createZonedDateTimeX(
+        createZonedDateTimeSlots(
           getCurrentEpochNanoseconds(),
           refineTimeZoneSlot(timeZone),
           refineCalendarSlot(calendar),
@@ -42,7 +42,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): ZonedDateTime {
       return createZonedDateTime(
-        createZonedDateTimeX(
+        createZonedDateTimeSlots(
           getCurrentEpochNanoseconds(),
           refineTimeZoneSlot(timeZone),
           isoCalendarId,
@@ -55,7 +55,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): PlainDateTime {
       return createPlainDateTime(
-        createPlainDateTimeX(
+        createPlainDateTimeSlots(
           getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
           refineCalendarSlot(calendar),
         )
@@ -66,7 +66,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): PlainDateTime {
       return createPlainDateTime(
-        createPlainDateTimeX(
+        createPlainDateTimeSlots(
           getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
           isoCalendarId,
         )
@@ -78,7 +78,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): PlainDate {
       return createPlainDate(
-        createPlainDateX(
+        createPlainDateSlots(
           getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
           refineCalendarSlot(calendar),
         )
@@ -89,7 +89,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): PlainDate {
       return createPlainDate(
-        createPlainDateX(
+        createPlainDateSlots(
           getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
           isoCalendarId,
         )
@@ -100,7 +100,7 @@ export const Now = Object.defineProperties({}, {
       timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
     ): PlainTime {
       return createPlainTime(
-        createPlainTimeX(
+        createPlainTimeSlots(
           getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone)))
         )
       )

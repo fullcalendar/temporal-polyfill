@@ -7,7 +7,7 @@ import { toBigInt } from './cast'
 import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
-import { InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX, createZonedDateTimeX } from './slots'
+import { InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import { SimpleTimeZoneOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIso } from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 
@@ -19,7 +19,7 @@ export function instantToZonedDateTime<C, T>(
   timeZoneSlot: T,
   calendarSlot: C = isoCalendarId as any,
 ): ZonedDateTimeSlots<C, T> {
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     instantSlots.epochNanoseconds,
     timeZoneSlot,
     calendarSlot,
@@ -32,14 +32,14 @@ export function instantToZonedDateTime<C, T>(
 export function zonedDateTimeToInstant(
   zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>
 ): InstantSlots {
-  return createInstantX(zonedDateTimeSlots0.epochNanoseconds)
+  return createInstantSlots(zonedDateTimeSlots0.epochNanoseconds)
 }
 
 export function zonedDateTimeToPlainDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     zonedDateTimeSlots0.calendar,
   )
@@ -49,7 +49,7 @@ export function zonedDateTimeToPlainDate<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateSlots<C> {
-  return createPlainDateX(
+  return createPlainDateSlots(
     zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     zonedDateTimeSlots0.calendar,
   )
@@ -81,7 +81,7 @@ export function zonedDateTimeToPlainTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainTimeSlots {
-  return createPlainTimeX(
+  return createPlainTimeSlots(
     zonedInternalsToIso(
       zonedDateTimeSlots0 as any, // !!!
       getTimeZoneOps(zonedDateTimeSlots0.timeZone)
@@ -98,7 +98,7 @@ export function plainDateTimeToZonedDateTime<C, TZ>(
   timeZoneSlot: TZ,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots<C, TZ> {
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     dateToEpochNano(getTimeZoneOps, timeZoneSlot, plainDateTimeSlots, options),
     timeZoneSlot,
     plainDateTimeSlots.calendar,
@@ -112,7 +112,7 @@ export function plainDateTimeToPlainYearMonth<C>(
 ): PlainYearMonthSlots<C> {
   const calendarOps = getCalendarOps(plainDateTimeSlots.calendar)
 
-  return createPlainYearMonthX({
+  return createPlainYearMonthSlots({
     ...plainDateTimeSlots, // isoTimeFields and calendar
     ...convertToPlainYearMonth(calendarOps, plainDateFields),
   })
@@ -160,7 +160,7 @@ export function plainDateToZonedDateTime<C, TA, T, PA>(
 
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...isoTimeFields }),
     timeZoneSlot,
     plainDateSlots.calendar,
@@ -171,7 +171,7 @@ export function plainDateToPlainDateTime<C>(
   plainDateSlots: PlainDateSlots<C>,
   plainTimeFields: IsoTimeFields = isoTimeFieldDefaults,
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     checkIsoDateTimeInBounds({
       ...plainDateSlots,
       ...plainTimeFields,
@@ -245,7 +245,7 @@ export function plainTimeToZonedDateTime<C, TA, T, PA>(
   const timeZoneSlot = refineTimeZoneArg(options.timeZone)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     getSingleInstantFor(
       timeZoneOps,
       { ...plainDateSlots, ...slots },
@@ -259,7 +259,7 @@ export function plainTimeToPlainDateTime<C>(
   plainTimeSlots0: PlainTimeSlots,
   plainDateSlots1: PlainDateSlots<C>,
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     checkIsoDateTimeInBounds({
       ...plainTimeSlots0,
       ...plainDateSlots1,
@@ -271,25 +271,25 @@ export function plainTimeToPlainDateTime<C>(
 // -------------------------------------------------------------------------------------------------
 
 export function epochSecToInstant(epochSec: number): InstantSlots {
-  return createInstantX(
+  return createInstantSlots(
     checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec))
   )
 }
 
 export function epochMilliToInstant(epochMilli: number): InstantSlots {
-  return createInstantX(
+  return createInstantSlots(
     checkEpochNanoInBounds(numberToDayTimeNano(epochMilli, nanoInMilli)),
   )
 }
 
 export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
-  return createInstantX(
+  return createInstantSlots(
     checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro))
   )
 }
 
 export function epochNanoToInstant(epochNano: bigint): InstantSlots {
-  return createInstantX(
+  return createInstantSlots(
     checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
   )
 }

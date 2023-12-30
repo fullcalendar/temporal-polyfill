@@ -6,32 +6,31 @@ import { bigIntToDayTimeNano } from './dayTimeNano'
 import { checkDurationFields } from './durationMath'
 import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { Overflow } from './options'
-import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationX, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX, createZonedDateTimeX } from './slots'
+import { DurationSlots, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createDurationSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import { isoDateFieldNamesAsc, isoDateTimeFieldNamesAsc, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { durationFieldNamesAsc } from './durationFields'
-import { create } from '../funcApi/plainDate'
 
-export function createInstantSlots(epochNano: bigint): InstantSlots {
-  return createInstantX(
+export function constructInstantSlots(epochNano: bigint): InstantSlots {
+  return createInstantSlots(
     checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
   )
 }
 
-export function createZonedDateTimeSlots<CA, C, TA, T>(
+export function constructZonedDateTimeSlots<CA, C, TA, T>(
   refineCalendarArg: (calendarArg: CA) => C,
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   epochNano: bigint,
   timeZoneArg: TA,
   calendarArg: CA = isoCalendarId as any,
 ): ZonedDateTimeSlots<C, T> {
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
     refineTimeZoneArg(timeZoneArg),
     refineCalendarArg(calendarArg),
   )
 }
 
-export function createPlainDateTimeSlots<CA, C>(
+export function constructPlainDateTimeSlots<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
   isoYear: number,
   isoMonth: number,
@@ -44,7 +43,7 @@ export function createPlainDateTimeSlots<CA, C>(
   isoNanosecond: number = 0,
   calendarArg: CA = isoCalendarId as any,
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     checkIsoDateTimeInBounds(
       checkIsoDateTimeFields(
         zipProps(isoDateTimeFieldNamesAsc, [
@@ -58,14 +57,14 @@ export function createPlainDateTimeSlots<CA, C>(
   )
 }
 
-export function createPlainDateSlots<CA, C>(
+export function constructPlainDateSlots<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
   isoYear: number,
   isoMonth: number,
   isoDay: number,
   calendarArg: CA = isoCalendarId as any,
 ): PlainDateSlots<C> {
-  return createPlainDateX(
+  return createPlainDateSlots(
     checkIsoDateInBounds(
       checkIsoDateFields(
         zipProps(isoDateFieldNamesAsc, [isoYear, isoMonth, isoDay])
@@ -75,7 +74,7 @@ export function createPlainDateSlots<CA, C>(
   )
 }
 
-export function createPlainYearMonthSlots<CA, C>(
+export function constructPlainYearMonthSlots<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
   isoYear: number,
   isoMonth: number,
@@ -87,7 +86,7 @@ export function createPlainYearMonthSlots<CA, C>(
   const calendarSlot = refineCalendarArg(calendar)
   const isoDayInt = toInteger(referenceIsoDay)
 
-  return createPlainYearMonthX(
+  return createPlainYearMonthSlots(
     checkIsoYearMonthInBounds(
       checkIsoDateFields({
         isoYear: isoYearInt,
@@ -99,7 +98,7 @@ export function createPlainYearMonthSlots<CA, C>(
   )
 }
 
-export function createPlainMonthDaySlots<CA, C>(
+export function constructPlainMonthDaySlots<CA, C>(
   refineCalendarArg: (calendarArg: CA) => C,
   isoMonth: number,
   isoDay: number,
@@ -111,7 +110,7 @@ export function createPlainMonthDaySlots<CA, C>(
   const calendarSlot = refineCalendarArg(calendar)
   const isoYearInt = toInteger(referenceIsoYear)
 
-  return createPlainMonthDayX(
+  return createPlainMonthDaySlots(
     checkIsoDateInBounds(
       checkIsoDateFields({
         isoYear: isoYearInt,
@@ -123,7 +122,7 @@ export function createPlainMonthDaySlots<CA, C>(
   )
 }
 
-export function createPlainTimeSlots(
+export function constructPlainTimeSlots(
   isoHour: number = 0,
   isoMinute: number = 0,
   isoSecond: number = 0,
@@ -131,7 +130,7 @@ export function createPlainTimeSlots(
   isoMicrosecond: number = 0,
   isoNanosecond: number = 0,
 ): PlainTimeSlots {
-  return createPlainTimeX(
+  return createPlainTimeSlots(
     constrainIsoTimeFields(
       zipProps(isoTimeFieldNamesAsc, [
         isoHour, isoMinute, isoSecond,
@@ -142,7 +141,7 @@ export function createPlainTimeSlots(
   )
 }
 
-export function createDurationSlots(
+export function constructDurationSlots(
   years: number = 0,
   months: number = 0,
   weeks: number = 0,
@@ -154,7 +153,7 @@ export function createDurationSlots(
   microseconds: number = 0,
   nanoseconds: number = 0,
 ): DurationSlots {
-  return createDurationX(
+  return createDurationSlots(
     checkDurationFields(
       zipProps(durationFieldNamesAsc, [
         years, months, weeks, days,

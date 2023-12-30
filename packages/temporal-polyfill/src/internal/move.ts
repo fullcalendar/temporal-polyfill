@@ -27,7 +27,7 @@ import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calenda
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
-import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantX, createPlainDateTimeX, createPlainTimeX, createPlainYearMonthX } from './slots'
+import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainTimeSlots, createPlainYearMonthSlots } from './slots'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ export function moveInstant(
   instantSlots: InstantSlots,
   durationSlots: DurationSlots,
 ): InstantSlots {
-  return createInstantX(
+  return createInstantSlots(
     moveEpochNano(
       instantSlots.epochNanoseconds,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
@@ -78,7 +78,7 @@ export function movePlainDateTime<C>(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeX({
+  return createPlainDateTimeSlots({
     ...plainDateTimeSlots,
     ...moveDateTime(
       getCalendarOps(plainDateTimeSlots.calendar),
@@ -134,7 +134,7 @@ export function movePlainYearMonth<C>(
     options,
   )
 
-  return createPlainYearMonthX(
+  return createPlainYearMonthSlots(
     moveToMonthStart(calendarOps, movedIsoDateFields),
     calendarSlot,
   )
@@ -145,7 +145,7 @@ export function movePlainTime(
   slots: PlainTimeSlots,
   durationSlots: DurationFields,
 ): PlainTimeSlots {
-  return createPlainTimeX(
+  return createPlainTimeSlots(
     moveTime(slots, doSubtract ? negateDurationFields(durationSlots) : durationSlots)[0],
   )
 }

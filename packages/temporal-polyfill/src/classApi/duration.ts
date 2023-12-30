@@ -7,7 +7,7 @@ import {
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
-import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateX } from '../internal/slots'
+import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { durationGettersMethods, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
@@ -23,7 +23,7 @@ import { TimeZoneArg } from './timeZone'
 import { requireString } from '../internal/cast'
 import { parseDuration, parseZonedOrPlainDateTime } from '../internal/parseIso'
 import { ZonedDateTimeBag, durationWithFields, refineDurationBag, refineMaybeZonedDateTimeBag } from '../internal/bag'
-import { createDurationSlots } from '../internal/slotsCreate'
+import { constructDurationSlots } from '../internal/construct'
 import { totalDuration } from '../internal/total'
 import { formatDurationIso } from '../internal/formatIso'
 import { compareDurations } from '../internal/compare'
@@ -43,7 +43,7 @@ export class Duration {
     microseconds?: number,
     nanoseconds?: number,
   ) {
-    setSlots(this, createDurationSlots(
+    setSlots(this, constructDurationSlots(
       years,
       months,
       weeks,
@@ -209,7 +209,7 @@ function refinePublicRelativeTo(
           return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
 
         case PlainDateTimeBranding:
-          return createPlainDateX(slots as PlainDateTimeSlots<CalendarSlot>)
+          return createPlainDateSlots(slots as PlainDateTimeSlots<CalendarSlot>)
       }
 
       const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!

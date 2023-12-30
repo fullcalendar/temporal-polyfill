@@ -32,7 +32,7 @@ import {
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
 import { clampRelativeDuration, computeEpochNanoFrac, totalDayTimeNano } from './total'
-import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantX, createPlainDateTimeX, createPlainTimeX, createZonedDateTimeX } from './slots'
+import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainTimeSlots, createZonedDateTimeSlots } from './slots'
 import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 
 // High-Level
@@ -48,7 +48,7 @@ export function roundInstant(
     true, // solarMode
   )
 
-  return createInstantX(
+  return createInstantSlots(
     roundDayTimeNano(
       instantSlots.epochNanoseconds,
       smallestUnit as TimeUnit,
@@ -100,7 +100,7 @@ export function roundZonedDateTime<C, T>(
     true, // fuzzy
   )
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     epochNanoseconds,
     timeZone,
     calendar,
@@ -116,7 +116,7 @@ export function roundPlainDateTime<C>(
     ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
   )
 
-  return createPlainDateTimeX(
+  return createPlainDateTimeSlots(
     roundedIsoFields,
     plainDateTimeSlots.calendar,
   )
@@ -126,7 +126,7 @@ export function roundPlainTime(
   slots: PlainTimeSlots,
   options: RoundingOptions | UnitName,
 ): PlainTimeSlots {
-  return createPlainTimeX(
+  return createPlainTimeSlots(
     roundTime(
       slots,
       ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])

@@ -1,6 +1,6 @@
 import { IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { OffsetDisambig } from './options'
-import { IdLike, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots, createPlainDateTimeX, createZonedDateTimeX, getPreferredCalendarSlot } from './slots'
+import { IdLike, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots, createPlainDateTimeSlots, createZonedDateTimeSlots, getPreferredCalendarSlot } from './slots'
 import { TimeZoneOps, getMatchingInstantFor, zonedInternalsToIso } from './timeZoneOps'
 
 // ZonedDateTime with *
@@ -29,7 +29,7 @@ export function zonedDateTimeWithPlainTime<C, T>(
     false, // fuzzy
   )
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     epochNano,
     timeZoneSlot,
     zonedDateTimeSlots.calendar,
@@ -60,7 +60,7 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
     false, // fuzzy
   )
 
-  return createZonedDateTimeX(
+  return createZonedDateTimeSlots(
     epochNano,
     timeZoneSlot,
     calendar,
@@ -74,7 +74,7 @@ export function plainDateTimeWithPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainTimeSlots: IsoTimeFields = isoTimeFieldDefaults,
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeX({
+  return createPlainDateTimeSlots({
     ...plainDateTimeSlots,
     ...plainTimeSlots,
   })
@@ -84,7 +84,7 @@ export function plainDateTimeWithPlainDate<C extends IdLike>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainDateSlots: PlainDateSlots<C>,
 ) {
-  return createPlainDateTimeX({
+  return createPlainDateTimeSlots({
     ...plainDateTimeSlots,
     ...plainDateSlots,
   }, getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar))

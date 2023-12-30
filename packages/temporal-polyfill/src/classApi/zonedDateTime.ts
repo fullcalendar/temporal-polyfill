@@ -14,7 +14,7 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
-import { DurationBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationX, getId } from '../internal/slots'
+import { DurationBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, getId } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
@@ -35,8 +35,8 @@ import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
-import { createZonedDateTimeSlots } from '../internal/slotsCreate'
-import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/slotsMod'
+import { constructZonedDateTimeSlots } from '../internal/construct'
+import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/mod'
 import { moveZonedDateTime } from '../internal/move'
 import { diffZonedDateTimes } from '../internal/diff'
 import { roundZonedDateTime } from '../internal/round'
@@ -55,7 +55,7 @@ export class ZonedDateTime {
   ) {
     setSlots(
       this,
-      createZonedDateTimeSlots(
+      constructZonedDateTimeSlots(
         refineCalendarSlot,
         refineTimeZoneSlot,
         epochNano,
@@ -144,7 +144,7 @@ export class ZonedDateTime {
 
   until(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      createDurationX(
+      createDurationSlots(
         diffZonedDateTimes(
           createDiffOps,
           createTimeZoneOps,
@@ -158,7 +158,7 @@ export class ZonedDateTime {
 
   since(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
     return createDuration(
-      createDurationX(
+      createDurationSlots(
         diffZonedDateTimes(
           createDiffOps,
           createTimeZoneOps,

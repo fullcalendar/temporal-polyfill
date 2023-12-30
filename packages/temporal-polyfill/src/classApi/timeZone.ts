@@ -17,7 +17,7 @@ import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSl
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
-import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createInstantX, createPlainDateTimeX, isTimeZoneSlotsEqual } from '../internal/slots'
+import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
 
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
 
@@ -45,7 +45,7 @@ export class TimeZone implements TimeZoneProtocol {
     return native.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
       .map((epochNano: DayTimeNano) => {
         return createInstant(
-          createInstantX(epochNano)
+          createInstantSlots(epochNano)
         )
       })
   }
@@ -76,7 +76,7 @@ export class TimeZone implements TimeZoneProtocol {
     const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
 
     return createPlainDateTime(
-      createPlainDateTimeX(
+      createPlainDateTimeSlots(
         epochNanoToIso(epochNano, offsetNano),
         refineCalendarSlot(calendarArg),
       )
@@ -94,7 +94,7 @@ export class TimeZone implements TimeZoneProtocol {
     const calendarOps = createAdapterOps(this) // for accessing own methods
 
     return createInstant(
-      createInstantX(getSingleInstantFor(calendarOps, isoFields, epochDisambig))
+      createInstantSlots(getSingleInstantFor(calendarOps, isoFields, epochDisambig))
     )
   }
 
@@ -154,6 +154,6 @@ export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneClassSlots {
 function getImplTransition(direction: -1 | 1, impl: NativeTimeZone, instantArg: InstantArg): Instant | null {
   const epochNano = impl.getTransition(toInstantSlots(instantArg).epochNanoseconds, direction)
   return epochNano ?
-    createInstant(createInstantX(epochNano)) :
+    createInstant(createInstantSlots(epochNano)) :
     null
 }

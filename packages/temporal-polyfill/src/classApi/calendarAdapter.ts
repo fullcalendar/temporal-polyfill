@@ -11,7 +11,7 @@ import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './slotsForClasses'
-import { DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationX, createPlainDateX } from '../internal/slots'
+import { DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
@@ -95,13 +95,13 @@ function dateAddAdapter(
     dateAdd.call(
       calendarProtocol,
       createPlainDate(
-        createPlainDateX(
+        createPlainDateSlots(
           isoFields,
           calendarProtocol,
         ),
       ),
       createDuration(
-        createDurationX(durationFields),
+        createDurationSlots(durationFields),
       ),
       options,
     )
@@ -120,13 +120,13 @@ function dateUntilAdapter(
     dateUntil.call(
       calendarProtocol,
       createPlainDate(
-        createPlainDateX(
+        createPlainDateSlots(
           isoFields0,
           calendarProtocol,
         ),
       ),
       createPlainDate(
-        createPlainDateX(
+        createPlainDateSlots(
           isoFields1,
           calendarProtocol,
         ),
@@ -149,7 +149,7 @@ function dayAdapter(
     dayMethod.call(
       calendarProtocol,
       createPlainDate(
-        createPlainDateX(
+        createPlainDateSlots(
           isoFields,
           calendarProtocol,
         )

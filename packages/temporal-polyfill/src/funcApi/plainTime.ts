@@ -4,7 +4,7 @@ import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
 import { identityFunc } from '../internal/utils'
-import { createPlainTimeSlots } from '../internal/slotsCreate'
+import { constructPlainTimeSlots } from '../internal/construct'
 import { isoTimeFieldsToCal, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
 import { parsePlainTime } from '../internal/parseIso'
 import { movePlainTime } from '../internal/move'
@@ -15,7 +15,7 @@ import { formatPlainTimeIso } from '../internal/formatIso'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
 import { prepCachedPlainTimeFormat } from './formatIntlCached'
 
-export const create = createPlainTimeSlots
+export const create = constructPlainTimeSlots
 
 export const fromFields = refinePlainTimeBag
 

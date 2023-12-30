@@ -2,12 +2,12 @@ import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendar
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, EpochDisambigOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateX, createPlainTimeX, refineCalendarSlotString } from '../internal/slots'
+import { DurationSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, refineCalendarSlotString } from '../internal/slots'
 import { createNativeDateModOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
-import { createPlainDateTimeSlots } from '../internal/slotsCreate'
+import { constructPlainDateTimeSlots } from '../internal/construct'
 import { parsePlainDateTime } from '../internal/parseIso'
 import { isoTimeFieldsToCal, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
-import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/slotsMod'
+import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/mod'
 import { movePlainDateTime } from '../internal/move'
 import { diffPlainDateTimes } from '../internal/diff'
 import { roundPlainDateTime } from '../internal/round'
@@ -32,7 +32,7 @@ export function create(
   isoNanosecond?: number,
   calendar?: string,
 ): PlainDateTimeSlots<string> {
-  return createPlainDateTimeSlots(
+  return constructPlainDateTimeSlots(
     refineCalendarSlotString,
     isoYear, isoMonth, isoDay,
     isoHour, isoMinute, isoSecond,
@@ -139,7 +139,7 @@ export function toZonedDateTime(
   return plainDateTimeToZonedDateTime(queryNativeTimeZone, plainDateTimeSlots, timeZoneId, options)
 }
 
-export const toPlainDate = createPlainDateX // TODO: better type
+export const toPlainDate = createPlainDateSlots // TODO: better type
 
 export function toPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
@@ -167,7 +167,7 @@ export function toPlainMonthDay(
   )
 }
 
-export const toPlainTime = createPlainTimeX // TODO: better type
+export const toPlainTime = createPlainTimeSlots // TODO: better type
 
 export function toLocaleString(
   slots: PlainDateTimeSlots<string>,

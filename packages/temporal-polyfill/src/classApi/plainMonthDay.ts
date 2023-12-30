@@ -14,7 +14,7 @@ import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from 
 import { monthDayGetters } from './mixins'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { PlainMonthDayBag, plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
-import { createPlainMonthDaySlots } from '../internal/slotsCreate'
+import { constructPlainMonthDaySlots } from '../internal/construct'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { formatPlainMonthDayIso } from '../internal/formatIso'
 import { plainMonthDayToPlainDate } from '../internal/convert'
@@ -32,7 +32,7 @@ export class PlainMonthDay {
   ) {
     setSlots(
       this,
-      createPlainMonthDaySlots(refineCalendarSlot, isoMonth, isoDay, calendar, referenceIsoYear)
+      constructPlainMonthDaySlots(refineCalendarSlot, isoMonth, isoDay, calendar, referenceIsoYear)
     )
   }
 

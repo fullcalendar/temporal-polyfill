@@ -2,7 +2,7 @@ import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, InstantDisplayOptions } from '../internal/optionsRefine'
 import { DurationSlots, InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { createInstantSlots } from '../internal/slotsCreate'
+import { constructInstantSlots } from '../internal/construct'
 import { parseInstant } from '../internal/parseIso'
 import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
 import { moveInstant } from '../internal/move'
@@ -12,7 +12,7 @@ import { diffInstants } from '../internal/diff'
 import { roundInstant } from '../internal/round'
 import { prepCachedInstantFormat } from './formatIntlCached'
 
-export const create = createInstantSlots
+export const create = constructInstantSlots
 
 export const fromString = parseInstant
 
