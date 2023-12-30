@@ -78,7 +78,7 @@ export class PlainDateTime {
     return createPlainDateTime(
       plainDateTimeWithPlainTime(
         getPlainDateTimeSlots(this),
-        optionalToPlainTimeFields(plainTimeArg) as any, // TODO!!!!
+        optionalToPlainTimeFields(plainTimeArg),
       )
     )
   }

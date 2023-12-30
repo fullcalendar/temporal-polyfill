@@ -83,7 +83,7 @@ export class ZonedDateTime {
       zonedDateTimeWithPlainTime(
         createTimeZoneOps,
         getZonedDateTimeSlots(this),
-        optionalToPlainTimeFields(plainTimeArg) as any, // TODO!!!
+        optionalToPlainTimeFields(plainTimeArg),
       )
     )
   }

@@ -1,3 +1,4 @@
+import { IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { OffsetDisambig } from './options'
 import { IdLike, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot } from './slots'
 import { TimeZoneOps, getMatchingInstantFor, zonedInternalsToIso } from './timeZoneOps'
@@ -8,7 +9,7 @@ import { TimeZoneOps, getMatchingInstantFor, zonedInternalsToIso } from './timeZ
 export function zonedDateTimeWithPlainTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  plainTimeSlots: PlainTimeSlots,
+  plainTimeSlots: IsoTimeFields = isoTimeFieldDefaults,
 ): ZonedDateTimeSlots<C, T> {
   const timeZoneSlot = zonedDateTimeSlots.timeZone
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
@@ -73,7 +74,7 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
 
 export function plainDateTimeWithPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainTimeSlots: PlainTimeSlots,
+  plainTimeSlots: IsoTimeFields = isoTimeFieldDefaults,
 ): PlainDateTimeSlots<C> {
   return {
     ...plainDateTimeSlots,

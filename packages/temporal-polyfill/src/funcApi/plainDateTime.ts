@@ -77,7 +77,7 @@ export function withFields(
   )
 }
 
-export const withPlainTime = plainDateTimeWithPlainTime
+export const withPlainTime = plainDateTimeWithPlainTime // TODO: more specific type for PlainTimeSlots
 
 export const withPlainDate = plainDateTimeWithPlainDate
 

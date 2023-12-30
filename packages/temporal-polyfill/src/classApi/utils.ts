@@ -1,12 +1,13 @@
-import { IsoTimeFields, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
+import { IsoTimeFields } from '../internal/calendarIsoFields'
 import { hasAllPropsByName } from '../internal/utils'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 
 export function createProtocolChecker(
   propNames: string[]
 ) {
-  propNames = propNames.concat('id')
-  propNames.sort() // TODO: order matters?
+  propNames = propNames
+    .concat('id')
+    .sort()
 
   return (obj: any) => {
     if (!hasAllPropsByName(obj, propNames)) {
@@ -15,6 +16,6 @@ export function createProtocolChecker(
   }
 }
 
-export function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields {
-  return timeArg === undefined ? isoTimeFieldDefaults : toPlainTimeSlots(timeArg)
+export function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields | undefined {
+  return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
 }

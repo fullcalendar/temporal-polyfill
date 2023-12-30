@@ -136,7 +136,7 @@ export function withFields(
 
 export function withPlainTime(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-  plainTimeSlots: PlainTimeSlots,
+  plainTimeSlots?: PlainTimeSlots,
 ): ZonedDateTimeSlots<string, string> {
   return zonedDateTimeWithPlainTime(
     queryNativeTimeZone,

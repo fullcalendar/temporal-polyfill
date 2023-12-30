@@ -28,7 +28,7 @@ const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
 export function checkIsoYearMonthInBounds<T extends IsoDateFields>(isoFields: T): T {
   // TODO: just authenticate based on hardcoded min/max isoYear/Month/Day. for other types too
-  clampProp(isoFields, 'isoYear' as any, -271821, 275760, Overflow.Reject)
+  clampProp(isoFields, 'isoYear' as any, isoYearMin, isoYearMax, Overflow.Reject)
 
   if (isoFields.isoYear === isoYearMin) {
     clampProp(isoFields, 'isoMonth' as any, 4, 12, Overflow.Reject)
@@ -69,7 +69,8 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(isoFields:
 }
 
 export function checkEpochNanoInBounds(epochNano: DayTimeNano | undefined): DayTimeNano {
-  if (epochNano === undefined ||
+  if (
+    epochNano === undefined ||
     compareDayTimeNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
     compareDayTimeNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {

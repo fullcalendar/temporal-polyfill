@@ -41,7 +41,7 @@ export interface CalendarProtocol {
 
 const requiredMethodNames: string[] = [
   ...Object.keys(dateRefiners).slice(2), // remove era/eraYear
-  // TODO: use adapter keys? (might result in more complexity and larger size)
+  // TODO: eventually scrape these from Calendar class method names
   'dateAdd',
   'dateUntil',
   'dateFromFields',
