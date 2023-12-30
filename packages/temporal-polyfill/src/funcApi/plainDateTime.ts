@@ -2,7 +2,7 @@ import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendar
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DiffOptions, EpochDisambigOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainYearMonthSlots, ZonedDateTimeSlots, refineCalendarSlotString } from '../internal/slots'
+import { DurationSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateX, createPlainTimeX, refineCalendarSlotString } from '../internal/slots'
 import { createNativeDateModOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { createPlainDateTimeSlots } from '../internal/slotsCreate'
 import { parsePlainDateTime } from '../internal/parseIso'
@@ -13,7 +13,7 @@ import { diffPlainDateTimes } from '../internal/diff'
 import { roundPlainDateTime } from '../internal/round'
 import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compare'
 import { formatPlainDateTimeIso } from '../internal/formatIso'
-import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
+import { plainDateTimeToPlainMonthDay, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 import { prepCachedPlainDateTimeFormat } from './formatIntlCached'
 import { getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear, getDateFields } from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
@@ -139,7 +139,7 @@ export function toZonedDateTime(
   return plainDateTimeToZonedDateTime(queryNativeTimeZone, plainDateTimeSlots, timeZoneId, options)
 }
 
-export const toPlainDate = plainDateTimeToPlainDate
+export const toPlainDate = createPlainDateX // TODO: better type
 
 export function toPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
@@ -167,7 +167,7 @@ export function toPlainMonthDay(
   )
 }
 
-export const toPlainTime = plainDateTimeToPlainTime
+export const toPlainTime = createPlainTimeX // TODO: better type
 
 export function toLocaleString(
   slots: PlainDateTimeSlots<string>,

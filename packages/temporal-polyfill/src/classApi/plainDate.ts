@@ -1,10 +1,8 @@
 import { DateBag, DateFields } from '../internal/calendarFields'
-import { IsoDateFields, isoDateFieldNamesAlpha, isoDateFieldNamesAsc } from '../internal/calendarIsoFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, getId } from '../internal/slots'
+import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateX, getId, removeBranding } from '../internal/slots'
 import { CalendarSlot, PublicDateSlots, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
@@ -29,7 +27,7 @@ import { movePlainDate } from '../internal/move'
 import { diffPlainDates } from '../internal/diff'
 import { plainDatesEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainDateIso } from '../internal/formatIso'
-import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
+import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime, zonedDateTimeToPlainDate } from '../internal/convert'
 import { parsePlainDate } from '../internal/parseIso'
 import { prepPlainDateFormat } from './dateTimeFormat'
 
@@ -184,11 +182,7 @@ export class PlainDate {
 
   // not DRY
   getISOFields(): PublicDateSlots {
-    const slots = getPlainDateSlots(this)
-    return { // alphabetical
-      calendar: slots.calendar,
-      ...pluckProps<IsoDateFields>(isoDateFieldNamesAlpha, slots),
-    }
+    return removeBranding(getPlainDateSlots(this))
   }
 
   // not DRY
@@ -250,24 +244,14 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return {
-          ...pluckProps([...isoDateFieldNamesAsc, 'calendar'], slots as PlainDateSlots<CalendarSlot>),
-          branding: PlainDateBranding
-        }
+        return createPlainDateX(slots as PlainDateTimeSlots<CalendarSlot>)
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return {
-          ...pluckProps(
-            isoDateFieldNamesAsc,
-            zonedInternalsToIso(
-              slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-              createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone),
-            ),
-          ),
-          calendar: (slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).calendar,
-          branding: PlainDateBranding,
-        }
+        return zonedDateTimeToPlainDate(
+          createSimpleTimeZoneOps,
+          slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
+        )
     }
 
     return refinePlainDateBag(

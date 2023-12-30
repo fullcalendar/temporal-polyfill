@@ -16,7 +16,7 @@ import { calendarMethods } from './mixins'
 import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding } from '../internal/slots'
+import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, createDurationX, createPlainDateX } from '../internal/slots'
 
 export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
 
@@ -49,15 +49,16 @@ export class Calendar implements CalendarProtocol {
   ): PlainDate {
     const { id, native } = getCalendarSlots(this)
 
-    return createPlainDate({
-      ...native.dateAdd(
-        toPlainDateSlots(plainDateArg),
-        toDurationSlots(durationArg),
-        options,
-      ),
-      calendar: id,
-      branding: PlainDateBranding,
-    })
+    return createPlainDate(
+      createPlainDateX(
+        native.dateAdd(
+          toPlainDateSlots(plainDateArg),
+          toDurationSlots(durationArg),
+          options,
+        ),
+        id, // TODO: have calendarNative include this in the results, like dateFromFields?
+      )
+    )
   }
 
   dateUntil(
@@ -67,14 +68,15 @@ export class Calendar implements CalendarProtocol {
   ): Duration {
     const { native } = getCalendarSlots(this)
 
-    return createDuration({
-      branding: DurationBranding,
-      ...native.dateUntil(
-        toPlainDateSlots(plainDateArg0),
-        toPlainDateSlots(plainDateArg1),
-        refineCalendarDiffOptions(options),
+    return createDuration(
+      createDurationX( // TODO: have calendarNative do this?
+        native.dateUntil(
+          toPlainDateSlots(plainDateArg0),
+          toPlainDateSlots(plainDateArg1),
+          refineCalendarDiffOptions(options),
+        )
       )
-    })
+    )
   }
 
   dateFromFields(

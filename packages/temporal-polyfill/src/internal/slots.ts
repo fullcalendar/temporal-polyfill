@@ -1,11 +1,12 @@
 import { DayTimeNano } from './dayTimeNano'
-import { DurationFields } from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
+import { DurationFields, durationFieldNamesAlpha } from './durationFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha, isoDateTimeFieldNamesAlpha, isoTimeFieldNamesAlpha } from './calendarIsoFields'
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseIso'
 import { realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
+import { pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
@@ -17,6 +18,110 @@ export const InstantBranding = 'Instant' as const
 export const DurationBranding = 'Duration' as const
 export const CalendarBranding = 'Calendar' as const
 export const TimeZoneBranding = 'TimeZone' as const
+
+// -------------------------------------------------------------------------------------------------
+
+export function createInstantX(epochNano: DayTimeNano): InstantSlots {
+  return {
+    branding: InstantBranding,
+    epochNanoseconds: epochNano,
+  }
+}
+
+/*
+NOTE: parseZonedDateTime still uses ZonedDateTimeBranding
+*/
+export function createZonedDateTimeX<C, T>(
+  epochNano: DayTimeNano,
+  timeZone: T,
+  calendar: C,
+): ZonedDateTimeSlots<C, T> {
+  return {
+    branding: ZonedDateTimeBranding,
+    calendar,
+    timeZone,
+    epochNanoseconds: epochNano,
+  }
+}
+
+export function createPlainDateTimeX<C>(isoFields: IsoDateTimeFields & { calendar: C }): PlainDateTimeSlots<C>
+export function createPlainDateTimeX<C>(isoFields: IsoDateTimeFields, calendar: C): PlainDateTimeSlots<C>
+export function createPlainDateTimeX<C>(
+  isoFields: IsoDateTimeFields & { calendar?: C },
+  calendar = isoFields.calendar,
+): PlainDateTimeSlots<C> {
+  return {
+    branding: PlainDateTimeBranding,
+    calendar: calendar!,
+    ...pluckProps(isoDateTimeFieldNamesAlpha, isoFields),
+  }
+}
+
+export function createPlainDateX<C>(isoFields: IsoDateFields & { calendar: C }): PlainDateSlots<C>
+export function createPlainDateX<C>(isoFields: IsoDateFields, calendar: C): PlainDateSlots<C>
+export function createPlainDateX<C>(
+  isoFields: IsoDateFields & { calendar?: C },
+  calendar = isoFields.calendar,
+): PlainDateSlots<C> {
+  return {
+    branding: PlainDateBranding,
+    calendar: calendar!,
+    ...pluckProps(isoDateFieldNamesAlpha, isoFields),
+  }
+}
+
+export function createPlainYearMonthX<C>(isoFields: IsoDateFields & { calendar: C }): PlainYearMonthSlots<C>
+export function createPlainYearMonthX<C>(isoFields: IsoDateFields, calendar: C): PlainYearMonthSlots<C>
+export function createPlainYearMonthX<C>(
+  isoFields: IsoDateFields & { calendar?: C },
+  calendar = isoFields.calendar,
+): PlainYearMonthSlots<C> {
+  return {
+    branding: PlainYearMonthBranding,
+    calendar: calendar!,
+    ...pluckProps(isoDateFieldNamesAlpha, isoFields),
+  }
+}
+
+export function createPlainMonthDayX<C>(isoFields: IsoDateFields & { calendar: C }): PlainMonthDaySlots<C>
+export function createPlainMonthDayX<C>(isoFields: IsoDateFields, calendar: C): PlainMonthDaySlots<C>
+export function createPlainMonthDayX<C>(
+  isoFields: IsoDateFields & { calendar?: C },
+  calendar = isoFields.calendar,
+): PlainMonthDaySlots<C> {
+  return {
+    branding: PlainMonthDayBranding,
+    calendar: calendar!,
+    ...pluckProps(isoDateFieldNamesAlpha, isoFields),
+  }
+}
+
+export function createPlainTimeX(isoFields: IsoTimeFields): PlainTimeSlots {
+  return {
+    branding: PlainTimeBranding,
+    ...pluckProps(isoTimeFieldNamesAlpha, isoFields),
+  }
+}
+
+/*
+TODO: have Calendar dateUntil return this? and many other places that return DurationFields?
+*/
+export function createDurationX(durationFields: DurationFields): DurationSlots {
+  return {
+    branding: DurationBranding,
+    ...pluckProps(durationFieldNamesAlpha, durationFields)
+  }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+export function removeBranding<S>(slots: S): Omit<S, 'branding'> {
+  slots = { ...slots }
+  delete (slots as any).branding
+  return slots
+}
+
+// -------------------------------------------------------------------------------------------------
 
 export interface BrandingSlots {
   branding: string

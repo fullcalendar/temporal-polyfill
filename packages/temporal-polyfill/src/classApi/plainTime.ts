@@ -1,5 +1,5 @@
 import { TimeBag } from '../internal/calendarFields'
-import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
+import { IsoTimeFields } from '../internal/calendarIsoFields'
 import { LocalesArg } from '../internal/formatIntl'
 import {
   DiffOptions,
@@ -11,7 +11,7 @@ import {
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
+import { PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeX, removeBranding } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -29,7 +29,7 @@ import { diffPlainTimes } from '../internal/diff'
 import { roundPlainTime } from '../internal/round'
 import { plainTimesEqual, compareIsoTimeFields } from '../internal/compare'
 import { formatPlainTimeIso } from '../internal/formatIso'
-import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
+import { plainTimeToPlainDateTime, plainTimeToZonedDateTime, zonedDateTimeToPlainTime } from '../internal/convert'
 import { parsePlainTime } from '../internal/parseIso'
 import { prepPlainTimeFormat } from './dateTimeFormat'
 
@@ -123,8 +123,7 @@ export class PlainTime {
   }
 
   getISOFields(): IsoTimeFields {
-    // TODO: make util
-    return pluckProps(isoTimeFieldNamesAlpha, getPlainTimeSlots(this))
+    return removeBranding(getPlainTimeSlots(this))
   }
 
   static from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
@@ -172,23 +171,14 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return {
-          ...pluckProps([...isoTimeFieldNamesAsc, 'calendar'], slots as PlainDateTimeSlots<CalendarSlot>),
-          branding: PlainTimeBranding,
-        }
+        return createPlainTimeX(slots as PlainDateTimeSlots<CalendarSlot>)
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return {
-          ...pluckProps(
-            isoTimeFieldNamesAsc,
-            zonedInternalsToIso(
-              slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-              createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone)
-            ),
-          ),
-          branding: PlainTimeBranding,
-        }
+        return zonedDateTimeToPlainTime(
+          createSimpleTimeZoneOps,
+          slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+        )
     }
 
     return refinePlainTimeBag(arg as PlainTimeBag, options)

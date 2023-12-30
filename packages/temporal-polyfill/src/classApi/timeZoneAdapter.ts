@@ -7,7 +7,7 @@ import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { requireFunction, requireNumber } from '../internal/cast'
 import { nanoInUtcDay } from '../internal/units'
-import { InstantBranding, PlainDateTimeBranding } from '../internal/slots'
+import { InstantBranding, PlainDateTimeBranding, createInstantX, createPlainDateTimeX } from '../internal/slots'
 
 // Individual Adapters
 // -------------------------------------------------------------------------------------------------
@@ -20,10 +20,7 @@ function adapterGetOffsetNanosecondsFor(
   return validateOffsetNano(
     getOffsetNanosecondsFor.call(
       timeZoneProtocol,
-      createInstant({
-        branding: InstantBranding,
-        epochNanoseconds: epochNano
-      })
+      createInstant(createInstantX(epochNano))
     )
   )
 }
@@ -36,11 +33,9 @@ function adapterGetPossibleInstantsFor(
   return [
     ...getPossibleInstantsFor.call(
       timeZoneProtocol,
-      createPlainDateTime({
-        ...isoFields,
-        branding: PlainDateTimeBranding,
-        calendar: isoCalendarId, // BAD, will need original slot
-      })
+      createPlainDateTime(
+        createPlainDateTimeX(isoFields, isoCalendarId)
+      )
     )
   ].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds

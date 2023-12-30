@@ -33,7 +33,7 @@ import { NumSign, bindArgs, divModTrunc, identityFunc, pluckProps } from './util
 import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
-import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
+import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createDurationX, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
 import { DiffOptions, prepareOptions, refineDiffOptions } from './optionsRefine'
 
 // High-level
@@ -59,10 +59,7 @@ export function diffInstants(
     durationFields = negateDurationFields(durationFields)
   }
 
-  return {
-    ...durationFields,
-    branding: DurationBranding,
-  }
+  return createDurationX(durationFields)
 }
 
 export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
@@ -127,10 +124,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
     durationFields = negateDurationFields(durationFields)
   }
 
-  return {
-    ...durationFields,
-    branding: DurationBranding,
-  }
+  return createDurationX(durationFields)
 }
 
 export function diffPlainDateTimes<C extends IdLike>(
@@ -191,10 +185,7 @@ export function diffPlainDateTimes<C extends IdLike>(
     durationFields = negateDurationFields(durationFields)
   }
 
-  return {
-    ...durationFields,
-    branding: DurationBranding,
-  }
+  return createDurationX(durationFields)
 }
 
 export function diffPlainDates<C extends IdLike>(
@@ -288,10 +279,7 @@ function diffDateLike(
     }
   }
 
-  return {
-    ...durationFields,
-    branding: DurationBranding,
-  }
+  return createDurationX(durationFields)
 }
 
 export function diffPlainTimes(
@@ -317,10 +305,7 @@ export function diffPlainTimes(
     durationFields = negateDurationFields(durationFields)
   }
 
-  return {
-    ...durationFields,
-    branding: DurationBranding
-  }
+  return createDurationX(durationFields)
 }
 
 // Exact Diffing

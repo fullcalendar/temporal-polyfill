@@ -11,7 +11,7 @@ import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './slotsForClasses'
-import { DurationBranding, PlainDateBranding } from '../internal/slots'
+import { DurationBranding, PlainDateBranding, createDurationX, createPlainDateX } from '../internal/slots'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
@@ -94,15 +94,15 @@ function dateAddAdapter(
   return getPlainDateSlots(
     dateAdd.call(
       calendarProtocol,
-      createPlainDate({
-        ...isoFields,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding, // go at to override what isoDateFields might provide!
-      }),
-      createDuration({
-        ...durationFields,
-        branding: DurationBranding,
-      }),
+      createPlainDate(
+        createPlainDateX(
+          isoFields,
+          calendarProtocol,
+        ),
+      ),
+      createDuration(
+        createDurationX(durationFields),
+      ),
       options,
     )
   )
@@ -119,16 +119,18 @@ function dateUntilAdapter(
   return getDurationSlots(
     dateUntil.call(
       calendarProtocol,
-      createPlainDate({
-        ...isoFields0,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding,
-      }),
-      createPlainDate({
-        ...isoFields1,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding,
-      }),
+      createPlainDate(
+        createPlainDateX(
+          isoFields0,
+          calendarProtocol,
+        ),
+      ),
+      createPlainDate(
+        createPlainDateX(
+          isoFields1,
+          calendarProtocol,
+        ),
+      ),
       Object.assign(
         Object.create(null),
         origOptions,
@@ -146,11 +148,12 @@ function dayAdapter(
   return requirePositiveInteger(
     dayMethod.call(
       calendarProtocol,
-      createPlainDate({
-        ...isoFields,
-        calendar: calendarProtocol,
-        branding: PlainDateBranding,
-      })
+      createPlainDate(
+        createPlainDateX(
+          isoFields,
+          calendarProtocol,
+        )
+      )
     )
   )
 }

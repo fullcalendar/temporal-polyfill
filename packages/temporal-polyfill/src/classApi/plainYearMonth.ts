@@ -1,11 +1,10 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { YearMonthBag } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/calendarIsoFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { PlainYearMonthBranding, PlainYearMonthSlots, getId } from '../internal/slots'
+import { PlainYearMonthBranding, PlainYearMonthSlots, getId, removeBranding } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag, PublicDateSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { Calendar, CalendarArg } from './calendar'
@@ -132,11 +131,7 @@ export class PlainYearMonth {
 
   // not DRY
   getISOFields(): PublicDateSlots {
-    const slots = getPlainYearMonthSlots(this)
-    return { // alphabetical
-      calendar: slots.calendar,
-      ...pluckProps<IsoDateFields>(isoDateFieldNamesAlpha, slots),
-    }
+    return removeBranding(getPlainYearMonthSlots(this))
   }
 
   // not DRY

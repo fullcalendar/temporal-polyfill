@@ -1,11 +1,10 @@
 import { DateTimeBag } from '../internal/calendarFields'
-import { LocalesArg } from '../internal/formatIntl'
-import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesAsc, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
+import { isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { zonedInternalsToIso } from '../internal/timeZoneOps'
-import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getId } from '../internal/slots'
+import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateTimeX, createPlainDateX, createPlainTimeX, getId, removeBranding } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag, PublicDateTimeSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
@@ -31,9 +30,10 @@ import { diffPlainDateTimes } from '../internal/diff'
 import { roundPlainDateTime } from '../internal/round'
 import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compare'
 import { formatPlainDateTimeIso } from '../internal/formatIso'
-import { plainDateTimeToPlainDate, plainDateTimeToPlainMonthDay, plainDateTimeToPlainTime, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
+import { plainDateTimeToPlainMonthDay, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime, zonedDateTimeToPlainDateTime } from '../internal/convert'
 import { parsePlainDateTime } from '../internal/parseIso'
 import { prepPlainDateTimeFormat } from './dateTimeFormat'
+import { LocalesArg } from '../internal/formatIntl'
 
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
@@ -190,7 +190,7 @@ export class PlainDateTime {
 
   toPlainDate(): PlainDate {
     return createPlainDate(
-      plainDateTimeToPlainDate(getPlainDateTimeSlots(this))
+      createPlainDateX(getPlainDateTimeSlots(this))
     )
   }
 
@@ -216,17 +216,13 @@ export class PlainDateTime {
 
   toPlainTime(): PlainTime {
     return createPlainTime(
-      plainDateTimeToPlainTime(getPlainDateTimeSlots(this)),
+      createPlainTimeX(getPlainDateTimeSlots(this)),
     )
   }
 
   // not DRY
   getISOFields(): PublicDateTimeSlots {
-    const slots = getPlainDateTimeSlots(this)
-    return { // alphabetical
-      calendar: slots.calendar,
-      ...pluckProps<IsoDateTimeFields>(isoDateTimeFieldNamesAlpha, slots),
-    }
+    return removeBranding(getPlainDateTimeSlots(this))
   }
 
   // not DRY
@@ -289,21 +285,17 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
 
       case PlainDateBranding:
         refineOverflowOptions(options) // parse unused options
-        return { ...(slots as PlainDateSlots<CalendarSlot>), ...isoTimeFieldDefaults, branding: PlainDateTimeBranding}
+        return createPlainDateTimeX({
+          ...(slots as PlainDateSlots<CalendarSlot>),
+          ...isoTimeFieldDefaults,
+        })
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return {
-          ...pluckProps(
-            isoDateTimeFieldNamesAsc,
-            zonedInternalsToIso(
-              slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-              createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone),
-            ),
-          ),
-          calendar: (slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).calendar,
-          branding: PlainDateTimeBranding,
-        }
+        return zonedDateTimeToPlainDateTime(
+          createSimpleTimeZoneOps,
+          slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+        )
     }
 
     return refinePlainDateTimeBag(

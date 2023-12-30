@@ -32,7 +32,7 @@ import {
 import { divModFloor, divTrunc, identityFunc } from './utils'
 import { moveByIsoDays } from './move'
 import { clampRelativeDuration, computeEpochNanoFrac, totalDayTimeNano } from './total'
-import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { InstantBranding, InstantSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantX, createPlainDateTimeX, createPlainTimeX, createZonedDateTimeX } from './slots'
 import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 
 // High-Level
@@ -48,16 +48,15 @@ export function roundInstant(
     true, // solarMode
   )
 
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: roundDayTimeNano(
+  return createInstantX(
+    roundDayTimeNano(
       instantSlots.epochNanoseconds,
       smallestUnit as TimeUnit,
       roundingInc,
       roundingMode,
       true, // useDayOrigin
     ),
-  }
+  )
 }
 
 export function roundZonedDateTime<C, T>(
@@ -101,12 +100,11 @@ export function roundZonedDateTime<C, T>(
     true, // fuzzy
   )
 
-  return {
+  return createZonedDateTimeX(
     epochNanoseconds,
     timeZone,
     calendar,
-    branding: ZonedDateTimeBranding,
-  }
+  )
 }
 
 export function roundPlainDateTime<C>(
@@ -118,24 +116,22 @@ export function roundPlainDateTime<C>(
     ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
   )
 
-  return {
-    ...roundedIsoFields,
-    calendar: plainDateTimeSlots.calendar,
-    branding: PlainDateTimeBranding,
-  }
+  return createPlainDateTimeX(
+    roundedIsoFields,
+    plainDateTimeSlots.calendar,
+  )
 }
 
 export function roundPlainTime(
   slots: PlainTimeSlots,
   options: RoundingOptions | UnitName,
 ): PlainTimeSlots {
-  return {
-    ...roundTime(
+  return createPlainTimeX(
+    roundTime(
       slots,
       ...(refineRoundOptions(options, Unit.Hour) as [TimeUnit, number, RoundingMode])
     ),
-    branding: PlainTimeBranding,
-  }
+  )
 }
 
 // Low-Level

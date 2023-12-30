@@ -4,7 +4,7 @@ import { requireObjectlike } from '../internal/cast'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
-import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
+import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantX } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { CalendarSlot, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
@@ -186,8 +186,9 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
       switch (slots.branding) {
         case InstantBranding:
           return slots as InstantSlots
+
         case ZonedDateTimeBranding:
-          return { epochNanoseconds: (slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).epochNanoseconds, branding: InstantBranding }
+          return createInstantX((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).epochNanoseconds)
       }
     }
   }
@@ -199,8 +200,9 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
 
 // TODO: more DRY
 export function toTemporalInstant(this: Date): Instant {
-  return createInstant({
-    branding: InstantBranding,
-    epochNanoseconds: numberToDayTimeNano(this.valueOf(), nanoInMilli),
-  })
+  return createInstant(
+    createInstantX(
+      numberToDayTimeNano(this.valueOf(), nanoInMilli),
+    )
+  )
 }

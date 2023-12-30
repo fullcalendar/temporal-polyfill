@@ -10,16 +10,6 @@ export function getCurrentIsoDateTime(timeZoneOps: SimpleTimeZoneOps): IsoDateTi
   return pluckProps(isoDateTimeFieldNamesAsc, zonedInternalsToIso(zonedSlots, timeZoneOps))
 }
 
-export function getCurrentIsoDate(timeZoneOps: SimpleTimeZoneOps): IsoDateFields {
-  const zonedSlots = { epochNanoseconds: getCurrentEpochNanoseconds() }
-  return pluckProps(isoDateFieldNamesAsc, zonedInternalsToIso(zonedSlots, timeZoneOps))
-}
-
-export function getCurrentIsoTime(timeZoneOps: SimpleTimeZoneOps): IsoTimeFields {
-  const zonedSlots = { epochNanoseconds: getCurrentEpochNanoseconds() }
-  return pluckProps(isoTimeFieldNamesAsc, zonedInternalsToIso(zonedSlots, timeZoneOps))
-}
-
 export function getCurrentEpochNanoseconds(): DayTimeNano {
   return epochMilliToNano(Date.now())
 }

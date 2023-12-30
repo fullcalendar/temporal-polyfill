@@ -1,85 +1,77 @@
-import { getCurrentEpochNanoseconds, getCurrentIsoDate, getCurrentIsoDateTime, getCurrentIsoTime, getCurrentTimeZoneId } from '../internal/current'
-import { InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { getCurrentEpochNanoseconds, getCurrentIsoDateTime, getCurrentTimeZoneId } from '../internal/current'
+import { InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainTimeX, createZonedDateTimeX, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 
 export const timeZoneId = getCurrentTimeZoneId
 
 export function instant(): InstantSlots {
-  return {
-    epochNanoseconds: getCurrentEpochNanoseconds(),
-    branding: InstantBranding,
-  }
+  return createInstantX(
+    getCurrentEpochNanoseconds(),
+  )
 }
 
 export function zonedDateTime(
   calendarId: string,
   timeZoneId: string = getCurrentTimeZoneId(),
 ): ZonedDateTimeSlots<string, string> {
-  return {
-    epochNanoseconds: getCurrentEpochNanoseconds(),
-    timeZone: refineTimeZoneSlotString(timeZoneId),
-    calendar: refineCalendarSlotString(calendarId),
-    branding: ZonedDateTimeBranding,
-  }
+  return createZonedDateTimeX(
+    getCurrentEpochNanoseconds(),
+    refineTimeZoneSlotString(timeZoneId),
+    refineCalendarSlotString(calendarId),
+  )
 }
 
 export function zonedDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): ZonedDateTimeSlots<string, string> {
-  return {
-    epochNanoseconds: getCurrentEpochNanoseconds(),
-    timeZone: refineTimeZoneSlotString(timeZoneId),
-    calendar: isoCalendarId,
-    branding: ZonedDateTimeBranding,
-  }
+  return createZonedDateTimeX(
+    getCurrentEpochNanoseconds(),
+    refineTimeZoneSlotString(timeZoneId),
+    isoCalendarId,
+  )
 }
 
 export function plainDateTime(
   calendarId: string,
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateTimeSlots<string> {
-  return {
-    ...getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
-    calendar: refineCalendarSlotString(calendarId),
-    branding: PlainDateTimeBranding,
-  }
+  return createPlainDateTimeX(
+    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
+    refineCalendarSlotString(calendarId),
+  )
 }
 
 export function plainDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateTimeSlots<string> {
-  return {
-    ...getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
-    calendar: isoCalendarId,
-    branding: PlainDateTimeBranding,
-  }
+  return createPlainDateTimeX(
+    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
+    isoCalendarId,
+  )
 }
 
 export function plainDate(
   calendarId: string,
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateSlots<string> {
-  return {
-    ...getCurrentIsoDate(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
-    calendar: refineCalendarSlotString(calendarId),
-    branding: PlainDateBranding,
-  }
+  return createPlainDateX(
+    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
+    refineCalendarSlotString(calendarId),
+  )
 }
 
 export function plainDateISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateSlots<string> {
-  return {
-    ...getCurrentIsoDate(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
-    calendar: isoCalendarId,
-    branding: PlainDateBranding,
-  }
+  return createPlainDateX(
+    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
+    isoCalendarId,
+  )
 }
 
 export function plainTimeISO(timeZoneId: string): PlainTimeSlots {
-  return {
-    ...getCurrentIsoTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
-    branding: PlainTimeBranding,
-  }
+  return createPlainTimeX(
+    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneSlotString(timeZoneId))),
+  )
 }

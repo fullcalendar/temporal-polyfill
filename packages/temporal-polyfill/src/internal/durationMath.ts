@@ -4,7 +4,7 @@ import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc, durationDateFieldNamesAsc, DurationTimeFields } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
-import { DurationBranding, DurationSlots } from './slots'
+import { DurationBranding, DurationSlots, createDurationX } from './slots'
 import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from './optionsRefine'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
@@ -120,10 +120,9 @@ export function addDurations<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
-    return {
-      ...addDayTimeDurations(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
-      branding: DurationBranding,
-    }
+    return createDurationX(
+      addDayTimeDurations(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
+    )
   }
 
   if (!markerSlots) {
@@ -137,15 +136,14 @@ export function addDurations<RA, C, T>(
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
     MarkerSystem<any>
 
-  return {
-    branding: DurationBranding,
-    ...spanDuration(
+  return createDurationX(
+    spanDuration(
       slots,
       otherSlots,
       largestUnit,
       ...markerSystem,
     )[0]
-  }
+  )
 }
 
 function addDayTimeDurations(
@@ -196,16 +194,15 @@ export function roundDuration<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds)
     )
   ) {
-    return {
-      branding: DurationBranding,
-      ...roundDayTimeDuration(
+    return createDurationX(
+      roundDayTimeDuration(
         slots,
         largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
         smallestUnit as DayTimeUnit,
         roundingInc,
         roundingMode,
       ),
-    }
+    )
   }
 
   if (!markerSlots) {
@@ -243,20 +240,14 @@ export function roundDuration<RA, C, T>(
 
   balancedDuration.weeks += transplantedWeeks // HACK (mutating)
 
-  return {
-    branding: DurationBranding,
-    ...balancedDuration,
-  }
+  return createDurationX(balancedDuration)
 }
 
 // Sign / Abs / Blank
 // -------------------------------------------------------------------------------------------------
 
 export function negateDuration(slots: DurationSlots): DurationSlots {
-  return {
-    ...negateDurationFields(slots),
-    branding: DurationBranding,
-  }
+  return createDurationX(negateDurationFields(slots))
 }
 
 export function negateDurationFields(fields: DurationFields): DurationFields {
@@ -270,10 +261,7 @@ export function negateDurationFields(fields: DurationFields): DurationFields {
 }
 
 export function absDuration(slots: DurationSlots): DurationSlots {
-  return {
-    ...absDurationFields(slots),
-    branding: DurationBranding,
-  }
+  return createDurationX(absDurationFields(slots))
 }
 
 export function absDurationFields(fields: DurationFields): DurationFields {

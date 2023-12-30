@@ -19,6 +19,7 @@ export type DayOp = (isoFields: IsoDateFields) => number
 
 // Refine
 // (assumes received fields are ALREADY refined)
+// TODO: have these functions return the branding too???
 export type DateRefineOps<C> = { dateFromFields: DateFromFieldsOp<C>, fields: FieldsOp }
 export type YearMonthRefineOps<C> = { yearMonthFromFields: YearMonthFromFieldsOp<C>, fields: FieldsOp }
 export type MonthDayRefineOps<C> = { monthDayFromFields: MonthDayFromFieldsOp<C>, fields: FieldsOp }

@@ -7,7 +7,7 @@ import {
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
-import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, ZonedDateTimeBranding, ZonedDateTimeSlots } from '../internal/slots'
+import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateX } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
 import { durationGettersMethods, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
@@ -18,7 +18,6 @@ import { LocalesArg } from '../internal/formatIntl'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag } from './slotsForClasses'
 import { MarkerSlots, absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
-import { isoDateFieldNamesAsc } from '../internal/calendarIsoFields'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { requireString } from '../internal/cast'
@@ -210,7 +209,7 @@ function refinePublicRelativeTo(
           return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
 
         case PlainDateTimeBranding:
-          return pluckProps([...isoDateFieldNamesAsc, 'calendar'], slots as any)
+          return createPlainDateX(slots as PlainDateTimeSlots<CalendarSlot>)
       }
 
       const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!

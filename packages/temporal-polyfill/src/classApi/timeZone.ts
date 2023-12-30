@@ -17,7 +17,7 @@ import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSl
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
-import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, isTimeZoneSlotsEqual } from '../internal/slots'
+import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createInstantX, createPlainDateTimeX, isTimeZoneSlotsEqual } from '../internal/slots'
 
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
 
@@ -44,10 +44,9 @@ export class TimeZone implements TimeZoneProtocol {
     const { native } = getTimeZoneSlots(this)
     return native.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
       .map((epochNano: DayTimeNano) => {
-        return createInstant({
-          branding: InstantBranding,
-          epochNanoseconds: epochNano,
-        })
+        return createInstant(
+          createInstantX(epochNano)
+        )
       })
   }
 
@@ -76,11 +75,12 @@ export class TimeZone implements TimeZoneProtocol {
     const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
     const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
 
-    return createPlainDateTime({
-      calendar: refineCalendarSlot(calendarArg),
-      ...epochNanoToIso(epochNano, offsetNano),
-      branding: PlainDateTimeBranding,
-    })
+    return createPlainDateTime(
+      createPlainDateTimeX(
+        epochNanoToIso(epochNano, offsetNano),
+        refineCalendarSlot(calendarArg),
+      )
+    )
   }
 
   getInstantFor(
@@ -93,10 +93,9 @@ export class TimeZone implements TimeZoneProtocol {
     const epochDisambig = refineEpochDisambigOptions(options)
     const calendarOps = createAdapterOps(this) // for accessing own methods
 
-    return createInstant({
-      branding: InstantBranding,
-      epochNanoseconds: getSingleInstantFor(calendarOps, isoFields, epochDisambig),
-    })
+    return createInstant(
+      createInstantX(getSingleInstantFor(calendarOps, isoFields, epochDisambig))
+    )
   }
 
   getNextTransition(instantArg: InstantArg): Instant | null {
@@ -155,9 +154,6 @@ export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneClassSlots {
 function getImplTransition(direction: -1 | 1, impl: NativeTimeZone, instantArg: InstantArg): Instant | null {
   const epochNano = impl.getTransition(toInstantSlots(instantArg).epochNanoseconds, direction)
   return epochNano ?
-    createInstant({
-      branding: InstantBranding,
-      epochNanoseconds: epochNano,
-    }) :
+    createInstant(createInstantX(epochNano)) :
     null
 }

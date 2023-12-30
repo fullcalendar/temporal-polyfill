@@ -9,8 +9,6 @@ import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
-  isoDateFieldNamesAsc,
-  isoDateTimeFieldNamesAsc,
 } from './calendarIsoFields'
 import {
   constrainIsoTimeFields,
@@ -42,7 +40,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
 import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
-import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
+import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationX, createInstantX, createPlainDateTimeX, createPlainDateX, createPlainMonthDayX, createPlainTimeX, createPlainYearMonthX } from './slots'
 import { requireString, toStringViaPrimitive } from './cast'
 import { realizeCalendarId } from './calendarNativeQuery'
 
@@ -78,10 +76,7 @@ export function parseInstant(s: string): InstantSlots {
     offsetNano,
   )
 
-  return {
-    branding: InstantBranding,
-    epochNanoseconds,
-  }
+  return createInstantX(epochNanoseconds)
 }
 
 export function parseZonedOrPlainDateTime(s: string): (IsoDateFields & { calendar: string }) | { epochNanoseconds: DayTimeNano, timeZone: string, calendar: string } {
@@ -124,9 +119,10 @@ export function parseZonedDateTime(
     epochDisambig,
   )
 
+  // TODO: have finalizeZonedDateTime create the slots?
   return {
-    ...isoFields,
     branding: ZonedDateTimeBranding,
+    ...isoFields,
   }
 }
 
@@ -147,15 +143,9 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
     throw new RangeError()
   }
 
-  const isoFields = pluckProps(
-    [...isoDateTimeFieldNamesAsc, 'calendar'],
+  return createPlainDateTimeX(
     finalizeDateTime(organized),
   )
-
-  return {
-    ...isoFields,
-    branding: PlainDateTimeBranding,
-  }
 }
 
 export function parsePlainDate(s: string): PlainDateSlots<string> {
@@ -165,17 +155,11 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
     throw new RangeError()
   }
 
-  const isoFields = pluckProps(
-    [...isoDateFieldNamesAsc, 'calendar'],
+  return createPlainDateX(
     organized.hasTime
       ? finalizeDateTime(organized)
       : finalizeDate(organized)
   )
-
-  return {
-    ...isoFields,
-    branding: PlainDateBranding,
-  }
 }
 
 export function parsePlainYearMonth(
@@ -190,21 +174,19 @@ export function parsePlainYearMonth(
       throw new RangeError('Invalid calendar')
     }
 
-    return {
-      ...finalizeYearMonthOnly(organized),
-      branding: PlainYearMonthBranding,
-    }
+    return createPlainYearMonthX(
+      finalizeYearMonthOnly(organized),
+    )
   }
 
   const isoFields = parsePlainDate(s)
   const calendarOps = getCalendarOps(isoFields.calendar)
   const movedIsoFields = moveToMonthStart(calendarOps, isoFields)
 
-  return {
+  return createPlainYearMonthX({
     ...isoFields, // has calendar
     ...movedIsoFields,
-    branding: PlainYearMonthBranding,
-  }
+  })
 }
 
 export function parsePlainMonthDay(
@@ -219,10 +201,9 @@ export function parsePlainMonthDay(
       throw new RangeError('Invalid calendar')
     }
 
-    return {
-      ...checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
-      branding: PlainMonthDayBranding,
-    }
+    return createPlainMonthDayX(
+      checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
+    )
   }
 
   const dateSlots = parsePlainDate(s)
@@ -235,11 +216,7 @@ export function parsePlainMonthDay(
   const [year, month] = calendarOps.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)! // !HACK
   const isoFields = calendarOps.isoFields(year, month, day)
 
-  return {
-    ...isoFields,
-    calendar,
-    branding: PlainMonthDayBranding,
-  }
+  return createPlainMonthDayX(isoFields, calendar)
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
@@ -272,10 +249,7 @@ export function parsePlainTime(s: string): PlainTimeSlots {
     throw new RangeError()
   }
 
-  return {
-    ...constrainIsoTimeFields(organized, Overflow.Reject),
-    branding: PlainTimeBranding,
-  }
+  return createPlainTimeX(constrainIsoTimeFields(organized, Overflow.Reject))
 }
 
 export function parseDuration(s: string): DurationSlots {
@@ -285,10 +259,7 @@ export function parseDuration(s: string): DurationSlots {
     throw new RangeError()
   }
 
-  return {
-    ...parsed,
-    branding: DurationBranding,
-  }
+  return createDurationX(parsed)
 }
 
 export function parseCalendarId(s: string): string {

@@ -14,7 +14,7 @@ import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
-import { DurationBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, getId } from '../internal/slots'
+import { DurationBranding, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationX, getId } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
@@ -143,30 +143,32 @@ export class ZonedDateTime {
   }
 
   until(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return createDuration({
-      ...diffZonedDateTimes(
-        createDiffOps,
-        createTimeZoneOps,
-        getZonedDateTimeSlots(this),
-        toZonedDateTimeSlots(otherArg),
-        options,
-      ),
-      branding: DurationBranding,
-    })
+    return createDuration(
+      createDurationX(
+        diffZonedDateTimes(
+          createDiffOps,
+          createTimeZoneOps,
+          getZonedDateTimeSlots(this),
+          toZonedDateTimeSlots(otherArg),
+          options,
+        ),
+      )
+    )
   }
 
   since(otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
-    return createDuration({
-      ...diffZonedDateTimes(
-        createDiffOps,
-        createTimeZoneOps,
-        getZonedDateTimeSlots(this),
-        toZonedDateTimeSlots(otherArg),
-        options,
-        true,
-      ),
-      branding: DurationBranding,
-    })
+    return createDuration(
+      createDurationX(
+        diffZonedDateTimes(
+          createDiffOps,
+          createTimeZoneOps,
+          getZonedDateTimeSlots(this),
+          toZonedDateTimeSlots(otherArg),
+          options,
+          true,
+        ),
+      )
+    )
   }
 
   round(options: RoundingOptions | UnitName): ZonedDateTime {

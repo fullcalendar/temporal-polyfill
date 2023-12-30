@@ -1,6 +1,6 @@
 import { IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { OffsetDisambig } from './options'
-import { IdLike, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, getPreferredCalendarSlot } from './slots'
+import { IdLike, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateTimeX, createZonedDateTimeX, getPreferredCalendarSlot } from './slots'
 import { TimeZoneOps, getMatchingInstantFor, zonedInternalsToIso } from './timeZoneOps'
 
 // ZonedDateTime with *
@@ -29,12 +29,11 @@ export function zonedDateTimeWithPlainTime<C, T>(
     false, // fuzzy
   )
 
-  return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds: epochNano,
-    timeZone: timeZoneSlot,
-    calendar: zonedDateTimeSlots.calendar,
-  }
+  return createZonedDateTimeX(
+    epochNano,
+    timeZoneSlot,
+    zonedDateTimeSlots.calendar,
+  )
 }
 
 export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
@@ -61,12 +60,11 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
     false, // fuzzy
   )
 
-  return {
-    branding: ZonedDateTimeBranding,
-    epochNanoseconds: epochNano,
-    timeZone: timeZoneSlot,
+  return createZonedDateTimeX(
+    epochNano,
+    timeZoneSlot,
     calendar,
-  }
+  )
 }
 
 // PlainDateTime with *
@@ -76,24 +74,20 @@ export function plainDateTimeWithPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainTimeSlots: IsoTimeFields = isoTimeFieldDefaults,
 ): PlainDateTimeSlots<C> {
-  return {
+  return createPlainDateTimeX({
     ...plainDateTimeSlots,
     ...plainTimeSlots,
-    branding: PlainDateTimeBranding,
-  }
+  })
 }
 
 export function plainDateTimeWithPlainDate<C extends IdLike>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainDateSlots: PlainDateSlots<C>,
 ) {
-  return {
+  return createPlainDateTimeX({
     ...plainDateTimeSlots,
     ...plainDateSlots,
-    // TODO: more DRY with other datetime types
-    calendar: getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar),
-    branding: PlainDateTimeBranding,
-  }
+  }, getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar))
 }
 
 // Anything with calendar/timeZone

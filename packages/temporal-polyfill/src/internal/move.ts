@@ -27,7 +27,7 @@ import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calenda
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
-import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots } from './slots'
+import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantX, createPlainDateTimeX, createPlainTimeX, createPlainYearMonthX } from './slots'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
@@ -37,13 +37,12 @@ export function moveInstant(
   instantSlots: InstantSlots,
   durationSlots: DurationSlots,
 ): InstantSlots {
-  return {
-    branding: InstantBranding,
-    epochNanoseconds: moveEpochNano(
+  return createInstantX(
+    moveEpochNano(
       instantSlots.epochNanoseconds,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     ),
-  }
+  )
 }
 
 export function moveZonedDateTime<C, T>(
@@ -79,7 +78,7 @@ export function movePlainDateTime<C>(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots<C> {
-  return {
+  return createPlainDateTimeX({
     ...plainDateTimeSlots,
     ...moveDateTime(
       getCalendarOps(plainDateTimeSlots.calendar),
@@ -87,8 +86,7 @@ export function movePlainDateTime<C>(
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     ),
-    branding: PlainDateTimeBranding, // YUCK. all because checkIsoDateTimeInBounds too liberal
-  }
+  })
 }
 
 export function movePlainDate<C>(
@@ -136,11 +134,10 @@ export function movePlainYearMonth<C>(
     options,
   )
 
-  return {
-    ...moveToMonthStart(calendarOps, movedIsoDateFields),
-    calendar: calendarSlot,
-    branding: PlainYearMonthBranding,
-  }
+  return createPlainYearMonthX(
+    moveToMonthStart(calendarOps, movedIsoDateFields),
+    calendarSlot,
+  )
 }
 
 export function movePlainTime(
@@ -148,10 +145,9 @@ export function movePlainTime(
   slots: PlainTimeSlots,
   durationSlots: DurationFields,
 ): PlainTimeSlots {
-  return {
-    ...moveTime(slots, doSubtract ? negateDurationFields(durationSlots) : durationSlots)[0],
-    branding: PlainTimeBranding,
-  }
+  return createPlainTimeX(
+    moveTime(slots, doSubtract ? negateDurationFields(durationSlots) : durationSlots)[0],
+  )
 }
 
 // Low-Level
