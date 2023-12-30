@@ -9,8 +9,8 @@ import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
-  isoDateFieldNamesDesc,
-  isoDateTimeFieldNamesDesc,
+  isoDateFieldNamesAsc,
+  isoDateTimeFieldNamesAsc,
 } from './calendarIsoFields'
 import {
   constrainIsoTimeFields,
@@ -148,7 +148,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
   }
 
   const isoFields = pluckProps(
-    [...isoDateTimeFieldNamesDesc, 'calendar'],
+    [...isoDateTimeFieldNamesAsc, 'calendar'],
     finalizeDateTime(organized),
   )
 
@@ -166,7 +166,7 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
   }
 
   const isoFields = pluckProps(
-    [...isoDateFieldNamesDesc, 'calendar'],
+    [...isoDateFieldNamesAsc, 'calendar'],
     organized.hasTime
       ? finalizeDateTime(organized)
       : finalizeDate(organized)

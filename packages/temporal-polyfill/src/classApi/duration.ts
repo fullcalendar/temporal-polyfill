@@ -18,7 +18,7 @@ import { LocalesArg } from '../internal/formatIntl'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag } from './slotsForClasses'
 import { MarkerSlots, absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
-import { isoDateFieldNamesDesc } from '../internal/calendarIsoFields'
+import { isoDateFieldNamesAsc } from '../internal/calendarIsoFields'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { requireString } from '../internal/cast'
@@ -212,7 +212,7 @@ function refinePublicRelativeTo(
           return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
 
         case PlainDateTimeBranding:
-          return pluckProps([...isoDateFieldNamesDesc, 'calendar'], slots as any)
+          return pluckProps([...isoDateFieldNamesAsc, 'calendar'], slots as any)
       }
 
       const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!

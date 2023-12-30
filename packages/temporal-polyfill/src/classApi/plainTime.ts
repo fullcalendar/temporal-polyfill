@@ -1,5 +1,5 @@
 import { TimeBag } from '../internal/calendarFields'
-import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesDesc } from '../internal/calendarIsoFields'
+import { IsoTimeFields, isoTimeFieldNamesAlpha, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
 import { LocalesArg } from '../internal/formatIntl'
 import {
   DiffOptions,
@@ -173,7 +173,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return {
-          ...pluckProps([...isoTimeFieldNamesDesc, 'calendar'], slots as PlainDateTimeSlots<CalendarSlot>),
+          ...pluckProps([...isoTimeFieldNamesAsc, 'calendar'], slots as PlainDateTimeSlots<CalendarSlot>),
           branding: PlainTimeBranding,
         }
 
@@ -181,7 +181,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
         refineOverflowOptions(options) // parse unused options
         return {
           ...pluckProps(
-            isoTimeFieldNamesDesc,
+            isoTimeFieldNamesAsc,
             zonedInternalsToIso(
               slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
               createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone)

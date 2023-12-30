@@ -1,7 +1,7 @@
 import { convertPlainMonthDayToDate, convertPlainYearMonthToDate, convertToPlainMonthDay, convertToPlainYearMonth } from './bag'
 import { isoCalendarId } from './calendarConfig'
 import { DateBag, MonthDayFields, YearFields, YearMonthFieldsIntl } from './calendarFields'
-import { IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesDesc, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
+import { IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoDateTimeFieldNamesAsc, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { DateModOps, MonthDayRefineOps, YearMonthRefineOps } from './calendarOps'
 import { toBigInt } from './cast'
 import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
@@ -46,7 +46,7 @@ export function zonedDateTimeToPlainDateTime<C, T>(
 ): PlainDateTimeSlots<C> {
   return {
     ...pluckProps(
-      isoDateTimeFieldNamesDesc,
+      isoDateTimeFieldNamesAsc,
       zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
     calendar: zonedDateTimeSlots0.calendar,
@@ -60,7 +60,7 @@ export function zonedDateTimeToPlainDate<C, T>(
 ): PlainDateSlots<C> {
   return {
     ...pluckProps(
-      isoDateFieldNamesDesc,
+      isoDateFieldNamesAsc,
       zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
     calendar: zonedDateTimeSlots0.calendar,
@@ -102,7 +102,7 @@ export function zonedDateTimeToPlainTime<C, T>(
 ): PlainTimeSlots {
   return {
     ...pluckProps(
-      isoTimeFieldNamesDesc,
+      isoTimeFieldNamesAsc,
       zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
     ),
     branding: PlainTimeBranding,
@@ -130,7 +130,7 @@ export function plainDateTimeToPlainDate<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
 ): PlainDateSlots<C> {
   return {
-    ...pluckProps([...isoDateFieldNamesDesc, 'calendar'], plainDateTimeSlots),
+    ...pluckProps([...isoDateFieldNamesAsc, 'calendar'], plainDateTimeSlots),
     branding: PlainDateBranding,
   }
 }
@@ -167,7 +167,7 @@ export function plainDateTimeToPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
 ): PlainTimeSlots {
   return {
-    ...pluckProps(isoTimeFieldNamesDesc, plainDateTimeSlots),
+    ...pluckProps(isoTimeFieldNamesAsc, plainDateTimeSlots),
     branding: PlainTimeBranding,
   }
 }

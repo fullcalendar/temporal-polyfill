@@ -6,7 +6,7 @@ import {
   durationFieldDefaults,
 } from './durationFields'
 import { durationFieldsToDayTimeNano, durationHasDateParts, durationTimeFieldsToLargeNanoStrict, negateDuration, negateDurationFields, queryDurationSign } from './durationMath'
-import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesDesc } from './calendarIsoFields'
+import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
@@ -191,7 +191,7 @@ export function moveZonedEpochNano(
     )
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
-      ...pluckProps(isoTimeFieldNamesDesc, isoDateTimeFields), // time parts
+      ...pluckProps(isoTimeFieldNamesAsc, isoDateTimeFields), // time parts
       calendar: isoCalendarId, // NOT USED but whatever
     }
     epochNano = addDayTimeNanos(

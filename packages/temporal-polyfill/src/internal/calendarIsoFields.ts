@@ -20,33 +20,30 @@ export type IsoDateTimeFields = IsoDateFields & IsoTimeFields
 // Property Names
 // -------------------------------------------------------------------------------------------------
 
-// descending by unit (for internal plucking to slots)
-// ACTUALLY no point. Debuggers show alhpabetized props anyway
-export const isoDateFieldNamesDesc: (keyof IsoDateFields)[] = [
-  'isoYear',
-  'isoMonth',
-  'isoDay',
-]
-export const isoTimeFieldNamesDesc: (keyof IsoTimeFields)[] = [
-  'isoHour',
-  'isoMinute',
-  'isoSecond',
-  'isoMillisecond',
-  'isoMicrosecond',
+export const isoTimeFieldNamesAsc: (keyof IsoTimeFields)[] = [
   'isoNanosecond',
-]
-export const isoDateTimeFieldNamesDesc: (keyof IsoDateTimeFields)[] = [
-  ...isoDateFieldNamesDesc,
-  ...isoTimeFieldNamesDesc,
+  'isoMicrosecond',
+  'isoMillisecond',
+  'isoSecond',
+  'isoMinute',
+  'isoHour',
 ]
 
-// ascending by unit (for converting to/from non-iso)
-export const isoTimeFieldNamesAsc = isoTimeFieldNamesDesc.slice().reverse()
+export const isoDateFieldNamesAsc: (keyof IsoDateFields)[] = [
+  'isoDay',
+  'isoMonth',
+  'isoYear',
+]
+
+export const isoDateTimeFieldNamesAsc: (keyof IsoDateTimeFields)[] = [
+  ...isoTimeFieldNamesAsc,
+  ...isoDateFieldNamesAsc,
+]
 
 // alphabetical (for getISOFields)
-export const isoDateFieldNamesAlpha = isoDateFieldNamesDesc.slice().sort()
-export const isoTimeFieldNamesAlpha = isoTimeFieldNamesDesc.slice().sort()
-export const isoDateTimeFieldNamesAlpha = isoDateTimeFieldNamesDesc.slice().sort()
+export const isoDateFieldNamesAlpha = isoDateFieldNamesAsc.slice().sort()
+export const isoTimeFieldNamesAlpha = isoTimeFieldNamesAsc.slice().sort()
+export const isoDateTimeFieldNamesAlpha = isoDateTimeFieldNamesAsc.slice().sort()
 
 // Defaults
 // -------------------------------------------------------------------------------------------------

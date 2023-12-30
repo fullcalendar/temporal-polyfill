@@ -8,7 +8,7 @@ import {
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
-import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesDesc } from './calendarIsoFields'
+import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
@@ -395,7 +395,7 @@ function diffZonedEpochNanoViaCalendar(
   origOptions?: DiffOptions,
 ): DurationFields {
   const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
-  const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
+  const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
   const isoToZonedEpochNano = bindArgs(getSingleInstantFor, timeZoneOps)
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }

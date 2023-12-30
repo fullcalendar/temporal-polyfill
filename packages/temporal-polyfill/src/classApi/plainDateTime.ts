@@ -1,6 +1,6 @@
 import { DateTimeBag } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
-import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesDesc, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
+import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha, isoDateTimeFieldNamesAsc, isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, prepareOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
@@ -295,7 +295,7 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
         refineOverflowOptions(options) // parse unused options
         return {
           ...pluckProps(
-            isoDateTimeFieldNamesDesc,
+            isoDateTimeFieldNamesAsc,
             zonedInternalsToIso(
               slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
               createSimpleTimeZoneOps((slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>).timeZone),
