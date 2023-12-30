@@ -129,8 +129,6 @@ export class Duration {
     return new (Intl as any).DurationFormat(locales, options).format(this)
   }
 
-  // TODO: toLocaleString
-
   toJSON(): string {
     return formatDurationIso(getDurationSlots(this))
   }
