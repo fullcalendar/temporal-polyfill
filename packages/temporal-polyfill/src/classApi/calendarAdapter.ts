@@ -11,7 +11,7 @@ import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './slotsForClasses'
-import { DurationBranding, PlainDateBranding, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationX, createPlainDateX } from '../internal/slots'
+import { DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationX, createPlainDateX } from '../internal/slots'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ function dateAddAdapter(
   isoFields: IsoDateFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
-) {
+): PlainDateSlots<CalendarSlot> {
   return getPlainDateSlots(
     dateAdd.call(
       calendarProtocol,
@@ -115,7 +115,7 @@ function dateUntilAdapter(
   isoFields1: IsoDateFields,
   largestUnit: Unit,
   origOptions?: DiffOptions
-) {
+): DurationSlots {
   return getDurationSlots(
     dateUntil.call(
       calendarProtocol,
