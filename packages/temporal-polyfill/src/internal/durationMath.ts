@@ -4,7 +4,7 @@ import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc, durationDateFieldNamesAsc, DurationTimeFields } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
-import { DurationBranding, DurationSlots, createDurationSlots } from './slots'
+import { DurationSlots, createDurationSlots } from './slots'
 import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from './optionsRefine'
 import { moveDateTime, moveZonedEpochNano } from './move'
 import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
@@ -386,14 +386,9 @@ export function isDurationsEqual(
   a: DurationFields,
   b: DurationFields,
 ): boolean {
-  return a.years === b.years &&
-    a.months === b.months &&
-    a.weeks === b.weeks &&
-    a.days === b.days &&
-    a.hours === b.hours &&
-    a.minutes === b.minutes &&
-    a.seconds === b.seconds &&
-    a.milliseconds === b.milliseconds &&
-    a.microseconds === b.microseconds &&
-    a.nanoseconds === b.nanoseconds
+  // less efficient than simply ===&& on all props, because doesn't short-circuit,
+  // but minified better
+  return durationFieldNamesAsc.reduce((prev, curr) => {
+    return prev && a[curr] === b[curr]
+  }, true)
 }
