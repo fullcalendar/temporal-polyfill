@@ -1,4 +1,4 @@
-import { Callable, isObjectlike } from './utils'
+import { Callable, bindArgs, isObjectlike } from './utils'
 
 // Require
 // -------------------------------------------------------------------------------------------------
@@ -17,10 +17,10 @@ function requireType<A>(typeName: string, arg: A): A {
   return arg;
 }
 
-export const requireString = requireType.bind(undefined, 'string') as (arg: string) => string
-export const requireBoolean = requireType.bind(undefined, 'boolean') as (arg: boolean) => boolean
-export const requireNumber = requireType.bind(undefined, 'number') as (arg: number) => number
-export const requireFunction = requireType.bind(undefined, 'function') as (arg: Callable) => Callable
+export const requireString = bindArgs(requireType<string>, 'string')
+export const requireBoolean = bindArgs(requireType<boolean>, 'boolean')
+export const requireNumber = bindArgs(requireType<number>, 'number')
+export const requireFunction = bindArgs(requireType<Callable>, 'function')
 
 export function requireStringOrUndefined(input: string | undefined): string | undefined {
   if (input !== undefined && typeof input !== 'string') {

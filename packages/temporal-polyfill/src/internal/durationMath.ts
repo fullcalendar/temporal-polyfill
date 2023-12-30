@@ -1,6 +1,6 @@
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import { DayTimeUnit, TimeUnit, Unit, givenFieldsToDayTimeNano, nanoInUtcDay, nanoToGivenFields, unitNanoMap } from './units'
-import { NumSign, createLazyGenerator, identityFunc } from './utils'
+import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAsc, durationDateFieldNamesAsc, DurationTimeFields } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
@@ -50,23 +50,15 @@ export function createMarkerSystem<C, T>(
     return [
       epochNanoseconds,
       identityFunc as MarkerToEpochNano<DayTimeNano>,
-      (epochNano: DayTimeNano, durationFields: DurationFields) => {
-        return moveZonedEpochNano(calendarOps, timeZoneOps, epochNano, durationFields)
-      },
-      (epochNano0: DayTimeNano, epochNano1: DayTimeNano, largestUnit: Unit) => {
-        return diffZonedEpochNanoExact(calendarOps, timeZoneOps, epochNano0, epochNano1, largestUnit)
-      },
+      bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps),
+      bindArgs(diffZonedEpochNanoExact, calendarOps, timeZoneOps),
     ]
   } else {
     return [
       { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
       isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
-      (isoField: IsoDateTimeFields, durationFields: DurationFields) => {
-        return moveDateTime(calendarOps, isoField, durationFields)
-      },
-      (m0: IsoDateTimeFields, m1: IsoDateTimeFields, largeUnit: Unit) => {
-        return diffDateTimesExact(calendarOps, m0, m1, largeUnit)
-      },
+      bindArgs(moveDateTime, calendarOps),
+      bindArgs(diffDateTimesExact, calendarOps),
     ]
   }
 }

@@ -1,7 +1,7 @@
 import { DurationFields, durationFieldIndexes } from './durationFields'
 import { toString, requireObjectlike, toInteger, requirePropDefined } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
-import { BoundArg, clampEntity, isObjectlike } from './utils'
+import { BoundArg, bindArgs, clampEntity, isObjectlike } from './utils'
 import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './options'
 
 // Types
@@ -419,66 +419,16 @@ function refineSmallestUnitAndSubsecDigits(
 // Individual Refining (simple)
 // -------------------------------------------------------------------------------------------------
 
-const refineSmallestUnit = refineUnitOption.bind<
-  undefined, [BoundArg], // bound
-  [SmallestUnitOptions, Unit?, Unit?], // unbound
-  Unit | null | undefined
->(undefined, smallestUnitStr)
-
-const refineLargestUnit = refineUnitOption.bind<
-  undefined, [BoundArg], // bound
-  [LargestUnitOptions, Unit?, Unit?], // unbound
-  Unit | null | undefined
->(undefined, largestUnitStr)
-
-const refineTotalUnit = refineUnitOption.bind<
-  undefined, [BoundArg], // bound
-  [TotalUnitOptions, Unit?, Unit?], // unbound
-  Unit | null | undefined
->(undefined, totalUnitStr)
-
-const refineOverflow = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [OverflowOptions, Overflow?], // unbound
-  Overflow // return
->(undefined, 'overflow', overflowMap)
-
-const refineEpochDisambig = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [EpochDisambigOptions, EpochDisambig?], // unbound
-  EpochDisambig // return
->(undefined, 'disambiguation', epochDisambigMap)
-
-const refineOffsetDisambig = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [OffsetDisambigOptions, OffsetDisambig?], // unbound
-  OffsetDisambig // return
->(undefined, 'offset', offsetDisambigMap)
-
-const refineCalendarDisplay = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [CalendarDisplayOptions, CalendarDisplay?], // unbound
-  CalendarDisplay // return
->(undefined, 'calendarName', calendarDisplayMap)
-
-const refineTimeZoneDisplay = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [TimeZoneDisplayOptions, TimeZoneDisplay?], // unbound
-  TimeZoneDisplay // return
->(undefined, 'timeZoneName', timeZoneDisplayMap) // TODO: reuse string name
-
-const refineOffsetDisplay = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [OffsetDisplayOptions, OffsetDisplay?], // unbound
-  OffsetDisplay // return
->(undefined, 'offset', offsetDisplayMap)
-
-// Caller should always supply default
-const refineRoundingMode = refineChoiceOption.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [RoundingModeOptions, RoundingMode?], // unbound
-  RoundingMode // return
->(undefined, 'roundingMode', roundingModeMap)
+const refineSmallestUnit = bindArgs(refineUnitOption<SmallestUnitOptions>, smallestUnitStr)
+const refineLargestUnit = bindArgs(refineUnitOption<LargestUnitOptions>, largestUnitStr)
+const refineTotalUnit = bindArgs(refineUnitOption<TotalUnitOptions>, totalUnitStr)
+const refineOverflow = bindArgs(refineChoiceOption<OverflowOptions>, 'overflow', overflowMap)
+const refineEpochDisambig = bindArgs(refineChoiceOption<EpochDisambigOptions>, 'disambiguation', epochDisambigMap)
+const refineOffsetDisambig = bindArgs(refineChoiceOption<OffsetDisambigOptions>, 'offset', offsetDisambigMap)
+const refineCalendarDisplay = bindArgs(refineChoiceOption<CalendarDisplayOptions>, 'calendarName', calendarDisplayMap)
+const refineTimeZoneDisplay = bindArgs(refineChoiceOption<TimeZoneDisplayOptions>, 'timeZoneName', timeZoneDisplayMap)
+const refineOffsetDisplay = bindArgs(refineChoiceOption<OffsetDisplayOptions>, 'offset', offsetDisplayMap)
+const refineRoundingMode = bindArgs(refineChoiceOption<RoundingModeOptions>, 'roundingMode', roundingModeMap) // Caller should always supply default
 
 // Individual Refining (custom logic)
 // -------------------------------------------------------------------------------------------------
@@ -625,7 +575,7 @@ function refineChoiceOption<O>(
   optionName: keyof O,
   enumNameMap: Record<string, number>,
   options: O,
-  defaultChoice = 0,
+  defaultChoice = 0, // TODO: improve this type?
 ): number {
   const enumName = options[optionName]
   if (enumName === undefined) {

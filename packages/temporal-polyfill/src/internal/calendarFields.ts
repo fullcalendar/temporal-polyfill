@@ -101,7 +101,7 @@ export interface DateStats extends YearMonthStats {
 // Field Names
 // -------------------------------------------------------------------------------------------------
 
-export const timeFieldNamesAsc = unitNamesAsc.slice(0, Unit.Day)
+export const timeFieldNamesAsc = unitNamesAsc.slice(0, Unit.Day) as (keyof TimeFields)[]
 export const timeFieldNamesAlpha = timeFieldNamesAsc.slice().sort()
 
 export const offsetFieldNames = ['offset']

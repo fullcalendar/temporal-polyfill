@@ -29,7 +29,7 @@ import {
   milliInDay,
   nanoInUtcDay,
 } from './units'
-import { NumSign, divModTrunc, identityFunc, pluckProps } from './utils'
+import { NumSign, bindArgs, divModTrunc, identityFunc, pluckProps } from './utils'
 import { NativeDiffOps } from './calendarNative'
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
@@ -397,7 +397,7 @@ function diffZonedEpochNanoViaCalendar(
   const startIsoFields = zonedEpochNanoToIso(timeZoneOps, startEpochNano)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesDesc, startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
-  const isoToZonedEpochNano = getSingleInstantFor.bind(undefined, timeZoneOps) // necessary to bind?
+  const isoToZonedEpochNano = bindArgs(getSingleInstantFor, timeZoneOps)
   let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
   let midEpochNano = isoToZonedEpochNano(midIsoFields)
   let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)

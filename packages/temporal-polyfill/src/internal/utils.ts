@@ -1,5 +1,14 @@
 import { Overflow } from './options'
 
+export function bindArgs<BA extends any[], DA extends any[], R>(
+  f: (...args: [...BA, ...DA]) => R,
+  ...boundArgs: BA
+): (...dynamicArgs: DA) => R {
+  return (...dynamicArgs: DA) => {
+    return f(...boundArgs, ...dynamicArgs)
+  }
+}
+
 /*
 Will linter make [any] for bind okay? If so, this is unnecessary
 */
@@ -47,15 +56,15 @@ export function mapPropNames<P, R, E = undefined>(
   return props
 }
 
-export const mapPropNamesToIndex = mapPropNames.bind(
-  undefined,
+export const mapPropNamesToIndex = bindArgs(
+  mapPropNames,
   (propVal: any, i: number) => i,
 ) as (
   <P>(propNames: (keyof P)[]) => { [K in keyof P]: number }
 )
 
-export const mapPropNamesToConstant = mapPropNames.bind(
-  undefined,
+export const mapPropNamesToConstant = bindArgs(
+  mapPropNames,
   (propVal: unknown, i: number, constant: unknown) => constant,
 ) as (
   <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
@@ -103,17 +112,10 @@ function filterProps<P, E = undefined>(
   return filteredProps
 }
 
-export const excludePropsByName = filterProps.bind<
-  undefined, [BoundArg], // bound
-  [any, Set<string>], // unbound
-  any // return
->(undefined, (
-  propVal: unknown,
-  propName: string,
-  nameSet: Set<string>
-) => {
-  return !nameSet.has(propName)
-}) as (
+export const excludePropsByName = bindArgs(
+  filterProps<Record<string, unknown>, Set<string>>,
+  (propVal, propName, nameSet) => !nameSet.has(propName),
+) as (
   <P, K extends keyof P>(props: P, propNames: Set<string>) => Omit<P, K>
 )
 
@@ -258,7 +260,7 @@ export function padNumber(digits: number, num: number): string {
   return String(num).padStart(digits, '0')
 }
 
-export const padNumber2 = padNumber.bind(undefined, 2)
+export const padNumber2 = bindArgs(padNumber, 2)
 
 export type NumSign = -1 | 0 | 1
 

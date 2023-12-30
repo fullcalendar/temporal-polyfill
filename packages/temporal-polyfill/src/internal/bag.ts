@@ -6,7 +6,7 @@ import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calend
 import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { BoundArg, Callable, clampEntity, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
+import { BoundArg, Callable, bindArgs, clampEntity, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
 import { OverflowOptions, ZonedFieldOptions, overflowMapNames, prepareOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAlpha, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
@@ -335,17 +335,17 @@ function refineTimeBag(fields: TimeBag, overflow?: Overflow): IsoTimeFields {
   )
 }
 
-const timeFieldsToIso = remapProps.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [TimeFields], // unbound
-  IsoTimeFields // return
->(undefined, timeFieldNamesAsc, isoTimeFieldNamesAsc)
+const timeFieldsToIso = bindArgs(
+  remapProps<TimeFields, IsoTimeFields>,
+  timeFieldNamesAsc,
+  isoTimeFieldNamesAsc,
+)
 
-export const isoTimeFieldsToCal = remapProps.bind<
-  undefined, [BoundArg, BoundArg], // bound
-  [IsoTimeFields], // unbound
-  TimeFields // return
->(undefined, isoTimeFieldNamesAsc, timeFieldNamesAsc)
+export const isoTimeFieldsToCal = bindArgs(
+  remapProps<IsoTimeFields, TimeFields>,
+  isoTimeFieldNamesAsc,
+  timeFieldNamesAsc,
+)
 
 // High-Level Mod
 // -------------------------------------------------------------------------------------------------

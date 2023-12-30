@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
-import { Callable } from '../internal/utils'
+import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
@@ -93,8 +93,8 @@ export function createAdapterOps<KV extends {} = typeof timeZoneAdapters>(
 
   // TODO: use mapProps?
   for (const key of keys) {
-    boundFuncs[key] = (adapterFuncs as any)[key].bind(
-      undefined,
+    boundFuncs[key] = bindArgs(
+      (adapterFuncs as any)[key],
       timeZoneProtocol,
       requireFunction((timeZoneProtocol as any)[key]),
     )

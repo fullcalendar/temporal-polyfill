@@ -4,7 +4,7 @@ import { requireObjectlike, requirePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/calendarIsoFields'
 import { Unit, unitNamesAsc } from '../internal/units'
-import { Callable } from '../internal/utils'
+import { Callable, bindArgs } from '../internal/utils'
 import { CalendarProtocol } from './calendarProtocol'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
@@ -192,8 +192,8 @@ export function createAdapterCompoundOps<KV extends {}>(
 
   // TODO: use mapProps?
   for (const key of keys) {
-    boundFuncs[key] = (adapterFuncs as any)[key].bind(
-      undefined,
+    boundFuncs[key] = bindArgs(
+      (adapterFuncs as any)[key],
       calendarProtocol,
       (calendarProtocol as any)[key],
     )
