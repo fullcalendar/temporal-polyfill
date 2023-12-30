@@ -530,6 +530,13 @@ export function prepareOptions<O>(options: O): O {
   throw new TypeError('Options must be object')
 }
 
+export function overrideOverflowOptions(
+  options: OverflowOptions | undefined,
+  overflow: Overflow,
+): OverflowOptions {
+  return options && Object.assign(Object.create(null), options, { overflow: overflowMapNames[overflow] })
+}
+
 // Utils
 // -------------------------------------------------------------------------------------------------
 

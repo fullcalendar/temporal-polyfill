@@ -7,7 +7,7 @@ import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { BoundArg, Callable, bindArgs, clampEntity, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
-import { OverflowOptions, ZonedFieldOptions, overflowMapNames, prepareOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
+import { OverflowOptions, ZonedFieldOptions, overflowMapNames, overrideOverflowOptions, prepareOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAlpha, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
@@ -115,7 +115,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
-    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
+    overrideOverflowOptions(options, overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
@@ -153,7 +153,7 @@ export function refinePlainDateTimeBag<C>(
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
-    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
+    overrideOverflowOptions(options, overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -465,7 +465,7 @@ function mergeZonedDateTimeBag<C>(
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options, OffsetDisambig.Prefer)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
-    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
+    overrideOverflowOptions(options, overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -498,7 +498,7 @@ function mergePlainDateTimeBag<C>(
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
-    options && Object.assign(Object.create(null), { ...options, overflow: overflowMapNames[overflow] }),
+    overrideOverflowOptions(options, overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
