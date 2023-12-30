@@ -7,7 +7,8 @@ import { checkDurationFields } from './durationMath'
 import { checkEpochNanoInBounds, checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { Overflow } from './options'
 import { DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots } from './slots'
-import { IsoDateFields, IsoDateTimeFields } from './calendarIsoFields'
+import { isoDateFieldNamesAsc, isoDateTimeFieldNamesAsc, isoTimeFieldNamesAsc } from './calendarIsoFields'
+import { durationFieldNamesAsc } from './durationFields'
 
 export function createInstantSlots(epochNano: bigint): InstantSlots {
   return {
@@ -36,15 +37,23 @@ export function createPlainDateTimeSlots<CA, C>(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  isoHour: number = 0, isoMinute: number = 0, isoSecond: number = 0,
-  isoMillisecond: number = 0, isoMicrosecond: number = 0, isoNanosecond: number = 0,
+  isoHour: number = 0,
+  isoMinute: number = 0,
+  isoSecond: number = 0,
+  isoMillisecond: number = 0,
+  isoMicrosecond: number = 0,
+  isoNanosecond: number = 0,
   calendarArg: CA = isoCalendarId as any,
 ): PlainDateTimeSlots<C> {
   return {
-    ...refineIsoDateTimeArgs(
-      isoYear, isoMonth, isoDay,
-      isoHour, isoMinute, isoSecond,
-      isoMillisecond, isoMicrosecond, isoNanosecond,
+    ...checkIsoDateTimeInBounds(
+      checkIsoDateTimeFields(
+        zipProps(isoDateTimeFieldNamesAsc, [
+          isoYear, isoMonth, isoDay,
+          isoHour, isoMinute, isoSecond,
+          isoMillisecond, isoMicrosecond, isoNanosecond,
+        ])
+      )
     ),
     calendar: refineCalendarArg(calendarArg),
     branding: PlainDateTimeBranding,
@@ -59,7 +68,11 @@ export function createPlainDateSlots<CA, C>(
   calendarArg: CA = isoCalendarId as any,
 ): PlainDateSlots<C> {
   return {
-    ...refineIsoDateArgs(isoYear, isoMonth, isoDay),
+    ...checkIsoDateInBounds(
+      checkIsoDateFields(
+        zipProps(isoDateFieldNamesAsc, [isoYear, isoMonth, isoDay])
+      )
+    ),
     calendar: refineCalendarArg(calendarArg),
     branding: PlainDateBranding,
   }
@@ -125,14 +138,10 @@ export function createPlainTimeSlots(
 ): PlainTimeSlots {
   return {
     ...constrainIsoTimeFields(
-      {
-        isoHour: toInteger(isoHour),
-        isoMinute: toInteger(isoMinute),
-        isoSecond: toInteger(isoSecond),
-        isoMillisecond: toInteger(isoMillisecond),
-        isoMicrosecond: toInteger(isoMicrosecond),
-        isoNanosecond: toInteger(isoNanosecond),
-      },
+      zipProps(isoTimeFieldNamesAsc, [
+        isoHour, isoMinute, isoSecond,
+        isoMillisecond, isoMicrosecond, isoNanosecond,
+      ]),
       Overflow.Reject,
     ),
     branding: PlainTimeBranding,
@@ -152,18 +161,13 @@ export function createDurationSlots(
   nanoseconds: number = 0,
 ): DurationSlots {
   return {
-    ...checkDurationFields({
-      years: toStrictInteger(years),
-      months: toStrictInteger(months),
-      weeks: toStrictInteger(weeks),
-      days: toStrictInteger(days),
-      hours: toStrictInteger(hours),
-      minutes: toStrictInteger(minutes),
-      seconds: toStrictInteger(seconds),
-      milliseconds: toStrictInteger(milliseconds),
-      microseconds: toStrictInteger(microseconds),
-      nanoseconds: toStrictInteger(nanoseconds),
-    }),
+    ...checkDurationFields(
+      zipProps(durationFieldNamesAsc, [
+        years, months, weeks, days,
+        hours, minutes, seconds,
+        milliseconds, microseconds, nanoseconds,
+      ], toStrictInteger)
+    ),
     branding: DurationBranding,
   }
 }
@@ -171,32 +175,19 @@ export function createDurationSlots(
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-function refineIsoDateTimeArgs(
-  isoYear: number, isoMonth: number, isoDay: number,
-  isoHour: number, isoMinute: number, isoSecond: number,
-  isoMillisecond: number, isoMicrosecond: number, isoNanosecond: number,
-): IsoDateTimeFields {
-  return checkIsoDateTimeInBounds(
-    checkIsoDateTimeFields({
-      isoYear: toInteger(isoYear),
-      isoMonth: toInteger(isoMonth),
-      isoDay: toInteger(isoDay),
-      isoHour: toInteger(isoHour),
-      isoMinute: toInteger(isoMinute),
-      isoSecond: toInteger(isoSecond),
-      isoMillisecond: toInteger(isoMillisecond),
-      isoMicrosecond: toInteger(isoMicrosecond),
-      isoNanosecond: toInteger(isoNanosecond),
-    })
-  )
-}
+// TODO: more reusable?
+// TODO: better types
+function zipProps(
+  propNames: any[],
+  propValues: any[],
+  propValueTransform: any = toInteger,
+) {
+  const res = {} as any
+  const len = propNames.length
 
-function refineIsoDateArgs(isoYear: number, isoMonth: number, isoDay: number): IsoDateFields {
-  return checkIsoDateInBounds(
-    checkIsoDateFields({
-      isoYear: toInteger(isoYear),
-      isoMonth: toInteger(isoMonth),
-      isoDay: toInteger(isoDay),
-    })
-  )
+  for (let i = 0; i < len; i++) {
+    res[propNames[len - 1 - i]] = propValueTransform(propValues[i])
+  }
+
+  return res
 }
