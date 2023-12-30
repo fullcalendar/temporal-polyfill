@@ -281,7 +281,7 @@ export function computeIntlDayOfYear(
 ): number {
   const dayEpochMilli = isoToEpochMilli({
     ...isoFields,
-    ...isoTimeFieldDefaults, // needed?
+    ...isoTimeFieldDefaults,
   })!
   const { year } = this.queryFields(isoFields)
   const yearStartEpochMilli = computeIntlEpochMilli.call(this, year)

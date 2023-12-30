@@ -436,8 +436,8 @@ function diffDateTimesViaCalendar(
   }
 
   const dateDiff = calendarOps.dateUntil(
-    { ...midIsoFields, ...isoTimeFieldDefaults }, // hack
-    { ...endIsoFields, ...isoTimeFieldDefaults }, // hack
+    { ...midIsoFields, ...isoTimeFieldDefaults },
+    { ...endIsoFields, ...isoTimeFieldDefaults },
     largestUnit,
     origOptions,
   )

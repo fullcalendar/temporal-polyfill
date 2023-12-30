@@ -104,10 +104,7 @@ const adapterSimpleOps = mapProps(
       return refiner(
         (calendarProtocol as any)[methodName](
           createPlainDate(
-            createPlainDateX({
-              ...isoFields,
-              ...isoTimeFieldDefaults, // yuck. why?
-            }, calendarProtocol),
+            createPlainDateX(isoFields, calendarProtocol),
           )
         )
       )
