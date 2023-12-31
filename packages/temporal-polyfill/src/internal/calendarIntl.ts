@@ -2,7 +2,7 @@ import { eraOriginsByCalendarId, eraRemaps, japaneseCalendarId } from './calenda
 import { diffEpochMilliByDay } from './diff'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './formatIntl'
 import { IsoDateFields, isoTimeFieldDefaults } from './calendarIsoFields'
-import { isoEpochFirstLeapYear, isoEpochOriginYear } from './calendarIso'
+import { isoEpochFirstLeapYear, isoEpochOriginYear, isoMonthsInYear } from './calendarIso'
 import { checkIsoDateInBounds, epochMilliToIso, isoArgsToEpochMilli, isoToEpochMilli } from './epochAndTime'
 import { utcTimeZoneId } from './timeZoneNative'
 import { milliInDay } from './units'
@@ -306,16 +306,15 @@ export function computeIntlYearMonthForMonthDay(
 ): YearMonthParts | undefined {
   let [startYear, startMonth, startDay] = computeIntlDateParts.call(this, {
     isoYear: isoEpochFirstLeapYear,
-    isoMonth: 12,
+    isoMonth: isoMonthsInYear,
     isoDay: 31,
   })
   const startYearLeapMonth = computeIntlLeapMonth.call(this, startYear)
   const startMonthCodeNumber = monthToMonthCodeNumber(startMonth, startYearLeapMonth)
   const startMonthIsLeap = startMonth === startYearLeapMonth
 
-  // ensure monthCodeNumber/isLeapMonth/day is within `isoEpochFirstLeapYear`
-  // TODO: use general-purpose array-comparison util later
-  // TODO: look at official IntlCalendarImpl::monthDayFromFields()
+  // If startYear doesn't span isoEpochFirstLeapYear, walk backwards
+  // TODO: smaller way to do this with epochMilli comparison?
   if (
     (
       compareNumbers(monthCodeNumber, startMonthCodeNumber) ||
@@ -326,16 +325,18 @@ export function computeIntlYearMonthForMonthDay(
     startYear--
   }
 
+  // Walk backwards until finding a year with monthCode/day
   for (let yearMove = 0; yearMove < 100; yearMove++) {
-    const yearTry = startYear - yearMove // move backwards
-    const leapMonthTry = computeIntlLeapMonth.call(this, yearTry)
-    const monthTry = monthCodeNumberToMonth(monthCodeNumber, isLeapMonth, leapMonthTry)
+    const tryYear = startYear - yearMove
+    const tryLeapMonth = computeIntlLeapMonth.call(this, tryYear)
+    const tryMonth = monthCodeNumberToMonth(monthCodeNumber, isLeapMonth, tryLeapMonth)
+    const tryMonthIsLeap = tryMonth === tryLeapMonth
 
     if (
-      (!isLeapMonth || monthTry === leapMonthTry) &&
-      day <= computeIntlDaysInMonth.call(this, yearTry, monthTry)
+      isLeapMonth === tryMonthIsLeap &&
+      day <= computeIntlDaysInMonth.call(this, tryYear, tryMonth)
     ) {
-      return [yearTry, monthTry]
+      return [tryYear, tryMonth]
     }
   }
 }
