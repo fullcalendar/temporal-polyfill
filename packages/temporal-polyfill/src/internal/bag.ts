@@ -737,7 +737,6 @@ export function nativeMonthDayFromFields(
 
     // simulate refineDay :(
     // TODO: DRY
-    requireNumberIsPositive(monthCodeNumber)
     if (fields.day === undefined) {
       throw new TypeError(errorMessages.missingDay)
     }
@@ -888,9 +887,6 @@ function refineMonth(
     throw new TypeError(errorMessages.missingMonth)
   }
 
-  // TODO: do this earlier, in refiner
-  requireNumberIsPositive(month)
-
   return clampEntity(
     'month',
     month,
@@ -962,9 +958,6 @@ function refineDay(
   if (day === undefined) {
     throw new TypeError(errorMessages.missingDay)
   }
-
-  // TODO: do this earlier, in refiner
-  requireNumberIsPositive(day)
 
   return clampEntity(
     'day',
