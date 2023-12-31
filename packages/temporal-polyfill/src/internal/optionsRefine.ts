@@ -126,11 +126,13 @@ export interface SubsecDigitsOptions {
 // Config
 // -------------------------------------------------------------------------------------------------
 
+// TODO: rename to 'label'?
 const smallestUnitStr = 'smallestUnit'
 const largestUnitStr = 'largestUnit'
 const totalUnitStr = 'unit'
 const roundingIncName = 'roundingIncrement'
 const subsecDigitsName = 'fractionalSecondDigits'
+const relativeToName = 'relativeTo'
 
 const overflowMap = {
   constrain: Overflow.Constrain,
@@ -263,7 +265,7 @@ export function refineDurationRoundOptions<RA, R>(
 
   // alphabetcal
   let largestUnit = refineLargestUnit(options)
-  const relativeToInternals = refineRelativeTo(options.relativeTo)
+  const relativeToInternals = refineRelativeTo(options[relativeToName])
   let roundingInc = parseRoundingIncInteger(options)
   const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
   let smallestUnit = refineSmallestUnit(options)
@@ -311,7 +313,7 @@ export function refineTotalOptions<RA, R>(
   options = normalizeUnitNameOptions(options, totalUnitStr)
 
   // alphabetical
-  const relativeToInternals = refineRelativeTo(options.relativeTo)
+  const relativeToInternals = refineRelativeTo(options[relativeToName])
   let totalUnit = refineTotalUnit(options)
   totalUnit = requirePropDefined(totalUnitStr, totalUnit)
 
