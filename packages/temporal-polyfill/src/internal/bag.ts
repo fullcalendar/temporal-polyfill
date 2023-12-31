@@ -2,7 +2,7 @@ import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { DateBag, DateFields, DateFieldsIntl, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
-import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
+import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
@@ -85,9 +85,7 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
     return { epochNanoseconds, timeZone: timeZoneSlot }
   } else {
     const isoDateInternals = calendarOps.dateFromFields(fields as any)
-    const isoTimeFields = refineTimeBag(fields)
-
-    return { ...isoDateInternals, ...isoTimeFields }
+    return { ...isoDateInternals, ...isoTimeFieldDefaults }
   }
 }
 
