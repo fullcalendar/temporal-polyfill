@@ -735,55 +735,43 @@ export function nativeMonthDayFromFields(
   if (monthCode !== undefined) {
     [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
 
-    // simulate refineDay :(
-    // TODO: DRY
+    // TODO: DRY with refineDay
     if (fields.day === undefined) {
       throw new TypeError(errorMessages.missingDay)
     }
     day = fields.day
 
+    // query calendar for year/month
     const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
-    if (!res) {
-      throw new RangeError(errorMessages.failedYearGuess)
-    }
+    if (!res) { throw new RangeError(errorMessages.failedYearGuess) }
     [year, month] = res
 
+    // monthCode conflicts with month?
     if (fields.month !== undefined && fields.month !== month) {
       throw new RangeError(errorMessages.mismatchingMonthAndCode)
     }
-    if (isIso) {
-      month = clampEntity(
-        'month',
-        month,
-        1,
-        isoMonthsInYear,
-        Overflow.Reject, // always reject bad iso months
-      )
-      day = clampEntity(
-        'day',
-        day,
-        1,
-        computeIsoDaysInMonth(fields.year ?? year, month),
-        overflow,
-      )
-    }
 
+    // constrain (what refineMonth/refineDay would normally do)
+    if (isIso) {
+      month = clampEntity('month', month, 1, isoMonthsInYear, Overflow.Reject) // reject because never leap months
+      day = clampEntity('day', day, 1, computeIsoDaysInMonth(fields.year ?? year, month), overflow)
+    }
   } else {
+    // refine year/month/day
     year = (fields.year === undefined && isIso)
       ? isoEpochFirstLeapYear
       : refineYear(this, fields as EraYearOrYear)
-
     month = refineMonth(this, fields, year, overflow)
     day = refineDay(this, fields as DayFields, month, year, overflow)
 
+    // compute monthCode
     const leapMonth = this.leapMonth(year)
     isLeapMonth = month === leapMonth
     monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
 
+    // query calendar for normalized year/month
     const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
-    if (!res) {
-      throw new RangeError(errorMessages.failedYearGuess)
-    }
+    if (!res) { throw new RangeError(errorMessages.failedYearGuess) }
     [year, month] = res
   }
 
