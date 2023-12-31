@@ -313,7 +313,15 @@ export function clampProp<P>(
   max: number,
   overflow?: Overflow,
 ): number {
-  return clampEntity(propName, props[propName] as number, min, max, overflow)
+  return clampEntity(propName, getDefinedProp(props, propName), min, max, overflow)
+}
+
+export function getDefinedProp(props: any, propName: string): any {
+  const propVal = props[propName]
+  if (propVal === undefined) {
+    throw new TypeError(errorMessages.missingField(propName))
+  }
+  return propVal
 }
 
 export function divModFloor(num: number, divisor: number): [number, number] {

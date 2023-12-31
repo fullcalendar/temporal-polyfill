@@ -6,7 +6,7 @@ import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calend
 import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { BoundArg, Callable, bindArgs, clampEntity, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
+import { BoundArg, Callable, bindArgs, clampEntity, clampProp, getDefinedProp, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
 import { OverflowOptions, ZonedFieldOptions, overflowMapNames, overrideOverflowOptions, copyOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DurationFields, durationFieldDefaults, durationFieldNamesAlpha, durationFieldNamesAsc } from './durationFields'
 import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
@@ -734,12 +734,7 @@ export function nativeMonthDayFromFields(
 
   if (monthCode !== undefined) {
     [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-
-    // TODO: DRY with refineDay
-    if (fields.day === undefined) {
-      throw new TypeError(errorMessages.missingDay)
-    }
-    day = fields.day
+    day = getDefinedProp(fields, 'day')
 
     // query calendar for year/month
     const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
@@ -941,15 +936,9 @@ function refineDay(
   year: number,
   overflow?: Overflow
 ): number {
-  const { day } = fields
-
-  if (day === undefined) {
-    throw new TypeError(errorMessages.missingDay)
-  }
-
-  return clampEntity(
+  return clampProp(
+    fields,
     'day',
-    day,
     1,
     calendarNative.daysInMonthParts(year, month),
     overflow

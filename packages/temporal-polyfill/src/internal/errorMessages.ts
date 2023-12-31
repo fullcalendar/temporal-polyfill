@@ -36,7 +36,6 @@ export const mismatchingMonthAndCode = 'Mismatching month/monthCode'
 export const missingMonth = 'Missing month/monthCode'
 export const failedYearGuess = 'Cannot guess year'
 export const invalidLeapMonth = 'Invalid leap month'
-export const missingDay = 'Missing day'
 
 // Calendar/TimeZone-PROTOCOL (very vague, I know, but rare)
 export const invalidProtocol = 'Invalid protocol'
