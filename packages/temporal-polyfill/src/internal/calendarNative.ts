@@ -42,7 +42,7 @@ export type GetLeapMonthMeta = () => number | undefined
 
 // Internal State
 export interface NativeCalendar {
-  id?: string
+  id?: string // if not defined, then iso calendar
 }
 
 // Refine
@@ -396,12 +396,8 @@ export function eraYearToYear(eraYear: number, eraOrigin: number): number {
 
 // -------------------------------------------------------------------------------------------------
 
-export function getCalendarId(native: NativeCalendar): string {
-  return native.id || isoCalendarId
-}
-
 export function getCalendarIdBase(native: NativeCalendar): string {
-  return computeCalendarIdBase(getCalendarId(native))
+  return computeCalendarIdBase(native.id || isoCalendarId)
 }
 
 export function computeCalendarIdBase(calendarId: string): string {

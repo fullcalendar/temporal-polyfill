@@ -15,7 +15,6 @@ import { noop } from './utils'
 // ------
 
 const isoYearMonthRefineDeps = {
-  id: isoCalendarId,
   leapMonth: noop as LeapMonthOp,
   monthsInYearPart: computeIsoMonthsInYear,
   isoFields: computeIsoFieldsFromParts,
@@ -154,7 +153,6 @@ export const isoMonthDayParseOps: NativeMonthDayParseOps = {
 
 export const isoStandardOps: NativeStandardOps = {
   ...nativeStandardBase,
-  id: isoCalendarId,
   dateParts: computeIsoDateParts,
   eraParts: computeIsoEraParts,
   monthCodeParts: computeIsoMonthCodeParts,

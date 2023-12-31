@@ -1,7 +1,7 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { DateBag, DateFields, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
-import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarId, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
+import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
 import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
@@ -698,7 +698,7 @@ export function nativeDateFromFields(
 
   return createPlainDateSlots(
     checkIsoDateInBounds(isoFields),
-    getCalendarId(this),
+    this.id || isoCalendarId,
   )
 }
 
@@ -714,7 +714,7 @@ export function nativeYearMonthFromFields(
 
   return createPlainYearMonthSlots(
     checkIsoYearMonthInBounds(isoFields),
-    getCalendarId(this),
+    this.id || isoCalendarId,
   )
 }
 
@@ -724,7 +724,7 @@ export function nativeMonthDayFromFields(
   options?: OverflowOptions
 ): PlainMonthDaySlots<string> {
   const overflow = refineOverflowOptions(options)
-  let isIso = getCalendarId(this) === isoCalendarId // HACK
+  let isIso = !this.id
   let { monthCode } = fields as Partial<MonthFields>
   let monthCodeNumber: number
   let isLeapMonth: boolean
@@ -790,7 +790,7 @@ export function nativeMonthDayFromFields(
 
   return createPlainMonthDaySlots(
     this.isoFields(year, month, day),
-    getCalendarId(this),
+    this.id || isoCalendarId,
   )
 }
 
@@ -817,7 +817,7 @@ export function nativeMergeFields(
     spliceFields(merged, additionalFields, allYearFieldNames)
 
     // eras begin mid-year?
-    if (getCalendarId(this) === japaneseCalendarId) {
+    if (this.id === japaneseCalendarId) {
       spliceFields(
         merged,
         additionalFields,
