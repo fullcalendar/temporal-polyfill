@@ -2,7 +2,7 @@ import { DateBag, DateFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots, getId, removeBranding } from '../internal/slots'
+import { BrandingSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots, getId, removeBranding } from '../internal/slots'
 import { CalendarSlot, PublicDateSlots, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
@@ -235,7 +235,7 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
   options = copyOptions(options)
 
   if (isObjectlike(arg)) {
-    const slots = (getSlots(arg) || {}) as { branding?: string, calendar?: CalendarSlot }
+    const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
 
     switch (slots.branding) {
       case PlainDateBranding:

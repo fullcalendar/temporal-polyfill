@@ -4,7 +4,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { PlainYearMonthBranding, PlainYearMonthSlots, getId, removeBranding } from '../internal/slots'
+import { BrandingSlots, PlainYearMonthBranding, PlainYearMonthSlots, getId, removeBranding } from '../internal/slots'
 import { createViaSlots, getSlots, getSpecificSlots, setSlots, rejectInvalidBag, PublicDateSlots } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { Calendar, CalendarArg } from './calendar'
@@ -184,9 +184,9 @@ export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: Overflow
   options = copyOptions(options)
 
   if (isObjectlike(arg)) {
-    const slots = (getSlots(arg) || {}) as { branding?: string, calendar?: CalendarSlot }
+    const slots = getSlots(arg)
 
-    if (slots.branding === PlainYearMonthBranding) {
+    if (slots && slots.branding === PlainYearMonthBranding) {
       refineOverflowOptions(options) // parse unused options
       return slots as PlainYearMonthSlots<CalendarSlot>
     }

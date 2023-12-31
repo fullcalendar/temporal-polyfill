@@ -351,9 +351,9 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
   options = copyOptions(options)
 
   if (isObjectlike(arg)) {
-    const slots = (getSlots(arg) || {}) as { branding?: string, calendar?: CalendarSlot }
+    const slots = getSlots(arg)
 
-    if (slots.branding === ZonedDateTimeBranding) {
+    if (slots && slots.branding === ZonedDateTimeBranding) {
       refineZonedFieldOptions(options) // parse unused options
       return slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
     }
