@@ -77,11 +77,10 @@ export function getMatchingInstantFor(
   timeZoneOps: TimeZoneOps,
   isoFields: IsoDateTimeFields,
   offsetNano: number | undefined,
-  hasZ: boolean,
-  // need these defaults?
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
-  epochFuzzy = false
+  epochFuzzy?: boolean,
+  hasZ?: boolean,
 ): DayTimeNano {
   if (offsetNano !== undefined && offsetDisambig === OffsetDisambig.Use) {
     // we ALWAYS use Z as a zero offset
@@ -164,7 +163,7 @@ function findMatchingEpochNano(
   possibleEpochNanos: DayTimeNano[],
   isoDateTimeFields: IsoDateTimeFields,
   offsetNano: number,
-  fuzzy: boolean
+  fuzzy?: boolean
 ): DayTimeNano | undefined {
   const zonedEpochNano = isoToEpochNano(isoDateTimeFields)!
 
@@ -219,7 +218,6 @@ export function computeStartOfDay<C, T>(
     timeZoneOps,
     isoFields,
     undefined, // offsetNanoseconds
-    false, // z
     OffsetDisambig.Reject,
     EpochDisambig.Compat,
     true, // fuzzy

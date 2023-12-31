@@ -80,10 +80,6 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
       timeZoneOps,
       { ...isoDateFields, ...isoTimeFields },
       fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
-      false, // z?
-      OffsetDisambig.Reject, // TODO: is default already?
-      EpochDisambig.Compat, // TODO: is default already?
-      false, // fuzzy
     )
 
     return { epochNanoseconds, timeZone: timeZoneSlot }
@@ -124,10 +120,8 @@ export function refineZonedDateTimeBag<C, TA, T>(
     timeZoneOps,
     { ...isoDateFields, ...isoTimeFields },
     fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
-    false, // z?
     offsetDisambig,
     epochDisambig,
-    false, // fuzzy
   )
 
   return createZonedDateTimeSlots(
@@ -473,10 +467,8 @@ function mergeZonedDateTimeBag<C>(
     timeZoneOps,
     { ...isoDateFields, ...isoTimeFields },
     parseOffsetNano(fields.offset!), // guaranteed via mergeCalendarFields
-    false, // z?
     offsetDisambig,
     epochDisambig,
-    false, // fuzzy
   )
 }
 

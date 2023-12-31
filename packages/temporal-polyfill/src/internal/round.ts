@@ -94,7 +94,6 @@ export function roundZonedDateTime<C, T>(
     timeZoneOps,
     isoDateTimeFields,
     offsetNano,
-    false, // z
     OffsetDisambig.Prefer, // keep old offsetNano if possible
     EpochDisambig.Compat,
     true, // fuzzy

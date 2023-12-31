@@ -299,11 +299,11 @@ function finalizeZonedDateTime(
     timeZoneImpl,
     checkIsoDateTimeFields(organized),
     offsetNano,
-    organized.hasZ,
     offsetDisambig,
     epochDisambig,
     !(timeZoneImpl instanceof FixedTimeZone), // only allow fuzzy minute-rounding matching if named-timezone
       // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
+    organized.hasZ,
   )
 
   return createZonedDateTimeSlots(

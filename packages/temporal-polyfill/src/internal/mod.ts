@@ -23,10 +23,7 @@ export function zonedDateTimeWithPlainTime<C, T>(
     timeZoneOps,
     isoFields,
     isoFields.offsetNanoseconds,
-    false, // hasZ
     OffsetDisambig.Prefer, // OffsetDisambig
-    undefined, // EpochDisambig
-    false, // fuzzy
   )
 
   return createZonedDateTimeSlots(
@@ -54,10 +51,7 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
     timeZoneOps,
     isoFields,
     isoFields.offsetNanoseconds,
-    false, // hasZ
     OffsetDisambig.Prefer, // OffsetDisambig
-    undefined, // EpochDisambig
-    false, // fuzzy
   )
 
   return createZonedDateTimeSlots(
