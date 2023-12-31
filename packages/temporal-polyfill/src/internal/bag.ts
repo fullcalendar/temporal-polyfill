@@ -1,5 +1,5 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { DateBag, DateFields, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
+import { DateBag, DateFields, DateFieldsIntl, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
 import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
@@ -725,53 +725,51 @@ export function nativeMonthDayFromFields(
 ): PlainMonthDaySlots<string> {
   const overflow = refineOverflowOptions(options)
   let isIso = !this.id
-  let { monthCode } = fields as Partial<MonthFields>
+  let { monthCode, year, month } = fields as Partial<DateFieldsIntl> // correct type?
   let monthCodeNumber: number
   let isLeapMonth: boolean
-  let year: number | undefined
-  let month: number | undefined
-  let day: number
+  let normalYear: number | undefined
+  let normalMonth: number | undefined
+  let normalDay: number
 
   if (monthCode !== undefined) {
     [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-    day = getDefinedProp(fields, 'day')
+    normalDay = getDefinedProp(fields, 'day')
 
     // query calendar for year/month
-    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, normalDay)
     if (!res) { throw new RangeError(errorMessages.failedYearGuess) }
-    [year, month] = res
+    [normalYear, normalMonth] = res
 
     // monthCode conflicts with month?
-    if (fields.month !== undefined && fields.month !== month) {
+    if (month !== undefined && month !== normalMonth) {
       throw new RangeError(errorMessages.mismatchingMonthAndCode)
     }
 
     // constrain (what refineMonth/refineDay would normally do)
     if (isIso) {
-      month = clampEntity('month', month, 1, isoMonthsInYear, Overflow.Reject) // reject because never leap months
-      day = clampEntity('day', day, 1, computeIsoDaysInMonth(fields.year ?? year, month), overflow)
+      normalMonth = clampEntity('month', normalMonth, 1, isoMonthsInYear, Overflow.Reject) // reject because never leap months
+      normalDay = clampEntity('day', normalDay, 1, computeIsoDaysInMonth(year ?? normalYear, normalMonth), overflow)
     }
   } else {
     // refine year/month/day
-    year = (fields.year === undefined && isIso)
-      ? isoEpochFirstLeapYear
-      : refineYear(this, fields as EraYearOrYear)
-    month = refineMonth(this, fields, year, overflow)
-    day = refineDay(this, fields as DayFields, month, year, overflow)
+    normalYear = (year === undefined && isIso) ? isoEpochFirstLeapYear : refineYear(this, fields as EraYearOrYear)
+    normalMonth = refineMonth(this, fields, normalYear, overflow)
+    normalDay = refineDay(this, fields as DayFields, normalMonth, normalYear, overflow)
 
     // compute monthCode
-    const leapMonth = this.leapMonth(year)
-    isLeapMonth = month === leapMonth
-    monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
+    const leapMonth = this.leapMonth(normalYear)
+    isLeapMonth = normalMonth === leapMonth
+    monthCodeNumber = monthToMonthCodeNumber(normalMonth, leapMonth)
 
     // query calendar for normalized year/month
-    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, normalDay)
     if (!res) { throw new RangeError(errorMessages.failedYearGuess) }
-    [year, month] = res
+    [normalYear, normalMonth] = res
   }
 
   return createPlainMonthDaySlots(
-    this.isoFields(year, month, day),
+    this.isoFields(normalYear, normalMonth, normalDay),
     this.id || isoCalendarId,
   )
 }
