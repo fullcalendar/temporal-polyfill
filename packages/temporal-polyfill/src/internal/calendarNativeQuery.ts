@@ -409,7 +409,7 @@ function createNativeOpsCreator<O extends {}>(isoOps: O, intlOps: O): (
 export function realizeCalendarId(calendarId: string): string {
   calendarId = normalizeCalendarId(calendarId)
 
-  // check that it's valid. DRY enough with createNativeOpsCreator?
+  // check that it's valid. similar to switch in createNativeOpsCreator
   if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
     queryIntlCalendar(calendarId)
   }

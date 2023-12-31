@@ -198,7 +198,6 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
 // Legacy Date
 // -------------------------------------------------------------------------------------------------
 
-// TODO: more DRY
 export function toTemporalInstant(this: Date): Instant {
   return createInstant(
     createInstantSlots(

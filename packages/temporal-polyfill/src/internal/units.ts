@@ -51,7 +51,7 @@ export const unitNamesAsc = Object.keys(unitNameMap) as (keyof typeof unitNameMa
 // -------------------------------------------------------------------------------------------------
 
 export const secInDay = 86400
-export const milliInDay = 86400000 // TODO: not DRY... milliInUtcDay?
+export const milliInDay = 86400000
 export const milliInSec = 1000
 
 export const nanoInMicro = 1000 // consolidate with other 1000 units

@@ -130,7 +130,7 @@ export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOp
     }
 
     const calendarMaybe = extractCalendarSlotFromBag(arg as PlainMonthDaySlots<CalendarSlot>)
-    const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
+    const calendar = calendarMaybe || isoCalendarId
 
     return refinePlainMonthDayBag(
       createMonthDayRefineOps(calendar),

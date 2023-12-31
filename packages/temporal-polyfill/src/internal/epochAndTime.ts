@@ -51,8 +51,6 @@ export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
 
 export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(isoFields: T): T {
   const isoYear = clampProp(isoFields as IsoDateFields, 'isoYear', isoYearMin, isoYearMax, Overflow.Reject)
-
-  // TODO: more DRY
   const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   if (nudge) {
@@ -247,7 +245,6 @@ export function isoToLegacyDate(
 ): [Date, number] {
   // allows this function to accept values beyond valid Instants
   // (PlainDateTime allows values within 24hrs)
-  // TODO: more DRY
   const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   // Note: Date.UTC() interprets one and two-digit years as being in the

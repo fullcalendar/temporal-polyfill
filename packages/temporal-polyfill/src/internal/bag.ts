@@ -1,7 +1,7 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { DateBag, DateFields, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
-import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarId, getCalendarLeapMonthMeta, monthCodeNumberToMonth, parseMonthCode } from './calendarNative'
+import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarId, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
 import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './calendarIso'
 import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './epochAndTime'
@@ -779,10 +779,7 @@ export function nativeMonthDayFromFields(
 
     const leapMonth = this.leapMonth(year)
     isLeapMonth = month === leapMonth
-    monthCodeNumber = month - ( // TODO: more DRY with formatMonthCode
-      (leapMonth && month >= leapMonth)
-        ? 1
-        : 0)
+    monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
 
     const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
     if (!res) {

@@ -31,7 +31,6 @@ export type RoundTuple = [
   RoundingMode,
 ]
 
-// TODO: DRY with DiffOptions?
 export type RoundingOptions = SmallestUnitOptions & RoundingIncOptions & RoundingModeOptions
 
 export type DurationRoundOptions<RA> = DiffOptions & RelativeToOptions<RA>

@@ -293,17 +293,12 @@ export class ZonedDateTime {
     )
   }
 
-  // TODO: more DRY
   get offsetNanoseconds(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return slotsToIsoFields(slots).offsetNanoseconds
+    return getOffsetNanoseconds(getZonedDateTimeSlots(this))
   }
 
-  // TODO: more DRY
   get offset(): string {
-    const slots = getZonedDateTimeSlots(this)
-    const offsetNano = slotsToIsoFields(slots).offsetNanoseconds
-    return formatOffsetNano(offsetNano)
+    return getOffsetStr(getZonedDateTimeSlots(this))
   }
 
   get timeZoneId(): string {
@@ -376,4 +371,12 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
   }
 
   return parseZonedDateTime(arg, options)
+}
+
+function getOffsetNanoseconds(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
+  return slotsToIsoFields(slots).offsetNanoseconds
+}
+
+function getOffsetStr(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
+  return formatOffsetNano(getOffsetNanoseconds(slots))
 }

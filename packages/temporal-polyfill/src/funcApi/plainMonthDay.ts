@@ -37,7 +37,7 @@ export function fromFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots<string> {
   const calendarMaybe = extractCalendarIdFromBag(fields)
-  const calendar = calendarMaybe || isoCalendarId // TODO: DRY-up this logic
+  const calendar = calendarMaybe || isoCalendarId
 
   return refinePlainMonthDayBag(
     createNativeMonthDayRefineOps(calendar),
