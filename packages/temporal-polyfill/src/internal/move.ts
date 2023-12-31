@@ -206,7 +206,7 @@ export function moveDateTime(
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): IsoDateTimeFields {
-  // could have over 24 hours!!!
+  // could have over 24 hours in certain zones
   const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
 
   const movedIsoDateFields = moveDateEfficient(
@@ -314,8 +314,6 @@ export function nativeDateAdd(
 
   epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay
 
-  // TODO: use epochMilli for in-bounds-ness instead?
-  // TODO: inefficient that PlainDateTime will call in-bounds twice?
   return checkIsoDateInBounds(epochMilliToIso(epochMilli!))
 }
 

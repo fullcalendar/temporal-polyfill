@@ -28,6 +28,9 @@ export function isObjectlike(arg: unknown): arg is {} {
   return arg !== null && objectlikeRE.test(typeof arg)
 }
 
+/*
+TODO: abandon this? See mapPropNames note.
+*/
 export function mapProps<P, R, E = undefined>(
   transformer: (propVal: P[keyof P], propName: keyof P, extraArg?: E) => R,
   props: P,
@@ -42,6 +45,10 @@ export function mapProps<P, R, E = undefined>(
   return res
 }
 
+/*
+TODO: audit uses of this contributing to HIGHER bundle size. Just inline? Often more readable.
+See createAdapterCompoundOps/createAdapterOps. Bigger after using mapPropNames.
+*/
 export function mapPropNames<P, R, E = undefined>(
   generator: (propName: keyof P, i: number, extraArg?: E) => R,
   propNames: (keyof P)[],

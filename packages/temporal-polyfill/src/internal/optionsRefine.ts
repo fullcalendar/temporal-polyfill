@@ -373,7 +373,7 @@ export function refineInstantDisplayOptions<TA>(
   const timeZoneArg: TA = options.timeZone
 
   return [
-    timeZoneArg, // TODO: possibly not needed after moving away from Record
+    timeZoneArg,
     ...timeDisplayTuple,
   ]
 }

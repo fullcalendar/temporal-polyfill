@@ -193,7 +193,6 @@ export function createAdapterCompoundOps<KV extends {}>(
   const keys = Object.keys(adapterFuncs).sort()
   const boundFuncs = {} as any
 
-  // TODO: use mapProps?
   for (const key of keys) {
     boundFuncs[key] = bindArgs(
       (adapterFuncs as any)[key],

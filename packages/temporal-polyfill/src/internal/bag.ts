@@ -453,7 +453,6 @@ function mergeZonedDateTimeBag<C>(
     offsetFieldNames, // requiredObjFieldNames
   ) as ZonedDateTimeBag<unknown, unknown>
 
-  // TODO: do simpler options-copy?
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options, OffsetDisambig.Prefer)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
@@ -484,7 +483,6 @@ function mergePlainDateTimeBag<C>(
     timeFieldNamesAsc, // forcedValidFieldNames
   ) as DateTimeBag
 
-  // TODO: do simpler options-copy?
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,

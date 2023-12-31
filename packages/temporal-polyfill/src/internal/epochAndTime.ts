@@ -291,7 +291,6 @@ export function epochMilliToIso(epochMilli: number): {
   isoSecond: number
   isoMillisecond: number
 } {
-  // TODO: use cmp?
   const nudge = epochMilli < -milliInDay * maxDays ? 1 : epochMilli > milliInDay * maxDays ? -1 : 0
   const legacyDate = new Date(epochMilli + nudge * milliInDay)
 
