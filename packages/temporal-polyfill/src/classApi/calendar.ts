@@ -16,7 +16,8 @@ import { calendarMethods } from './mixins'
 import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
-import { BrandingSlots, CalendarBranding, DurationBranding, PlainDateBranding, createDurationSlots, createPlainDateSlots } from '../internal/slots'
+import { BrandingSlots, CalendarBranding, createDurationSlots, createPlainDateSlots } from '../internal/slots'
+import * as errorMessages from '../internal/errorMessages'
 
 export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
 
@@ -125,7 +126,7 @@ export class Calendar implements CalendarProtocol {
       requireString(fieldName)
 
       if (!allowed.has(fieldName)) {
-        throw new RangeError('Invalid field name')
+        throw new RangeError(errorMessages.forbiddenField(fieldName))
       }
 
       allowed.delete(fieldName) // prevents duplicates! can this be done somewhere else?

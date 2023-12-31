@@ -8,6 +8,7 @@ import { createLazyGenerator, pluckProps } from './utils'
 import { moveByIsoDays } from './move'
 import { ZonedDateTimeBranding, ZonedDateTimeSlots, createZonedDateTimeSlots } from './slots'
 import { formatOffsetNano } from './formatIso'
+import * as errorMessages from './errorMessages'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
 export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
@@ -104,7 +105,7 @@ export function getMatchingInstantFor(
     }
 
     if (offsetDisambig === OffsetDisambig.Reject) {
-      throw new RangeError('Mismatching offset/timezone')
+      throw new RangeError(errorMessages.invalidOffsetForTimeZone)
     }
     // else (offsetDisambig === 'prefer') ...
   }
@@ -127,7 +128,7 @@ export function getSingleInstantFor(
   }
 
   if (disambig === EpochDisambig.Reject) {
-    throw new RangeError('Ambiguous offset')
+    throw new RangeError(errorMessages.ambigOffset)
   }
 
   // within a transition that jumps back
@@ -258,8 +259,18 @@ export function computeNanosecondsInDay(
   )
 
   if (nanoInDay <= 0) {
-    throw new RangeError('Bad nanoseconds in day')
+    throw new RangeError(errorMessages.invalidProtocolResults) // 'Bad nanoseconds in day'
   }
 
   return nanoInDay
+}
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+export function validateTimeZoneOffset(offsetNano: number): number {
+  if (Math.abs(offsetNano) >= nanoInUtcDay) {
+    throw new RangeError(errorMessages.outOfBoundsOffset)
+  }
+  return offsetNano
 }

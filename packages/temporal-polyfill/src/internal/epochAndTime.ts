@@ -19,6 +19,7 @@ import {
 } from './units'
 import { divModFloor, clampProp, divModTrunc } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, compareDayTimeNanos, dayTimeNanoToBigInt, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, numberToDayTimeNano } from './dayTimeNano'
+import * as errorMessages from './errorMessages'
 
 const maxDays = 100000000
 const epochNanoMax: DayTimeNano = [maxDays, 0]
@@ -74,7 +75,7 @@ export function checkEpochNanoInBounds(epochNano: DayTimeNano | undefined): DayT
     compareDayTimeNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
     compareDayTimeNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {
-    throw new RangeError('epochNanoseconds out of range')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
   return epochNano
 }

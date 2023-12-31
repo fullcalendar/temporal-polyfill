@@ -13,10 +13,10 @@ import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
 import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, MonthDayRefineOps, YearMonthModOps, YearMonthRefineOps } from './calendarOps'
 import { parseOffsetNano } from './parseIso'
-import { requireObjectlike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
+import { requireNumberIsPositive, requireObjectlike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
 import { MarkerSlotsNoCalendar, checkDurationFields } from './durationMath'
 import { DateSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
-import { constructZonedDateTimeSlots } from './construct'
+import * as errorMessages from './errorMessages'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
 export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }
@@ -276,10 +276,10 @@ function refineFields(
 
   for (const fieldName of validFieldNames) {
     if (fieldName === prevFieldName) {
-      throw new RangeError('Duplicate field names')
+      throw new RangeError(errorMessages.duplicateFields(fieldName))
     }
     if (fieldName === 'constructor' || fieldName === '__proto__') {
-      throw new RangeError('Invalid field name')
+      throw new RangeError(errorMessages.forbiddenField(fieldName))
     }
 
     let fieldVal = bag[fieldName]
@@ -288,13 +288,13 @@ function refineFields(
       anyMatching = true
 
       if (builtinRefiners[fieldName as keyof typeof builtinRefiners]) {
-        fieldVal = (builtinRefiners[fieldName as keyof typeof builtinRefiners] as Callable)(fieldVal)
+        fieldVal = (builtinRefiners[fieldName as keyof typeof builtinRefiners] as Callable)(fieldVal, fieldName)
       }
 
       res[fieldName] = fieldVal
     } else if (requiredFieldNames) {
       if (requiredFieldNames.includes(fieldName)) { // TODO: have caller use a Set
-        throw new TypeError('Missing required field name')
+        throw new TypeError(errorMessages.missingField(fieldName))
       }
 
       res[fieldName] = timeFieldDefaults[fieldName as keyof typeof timeFieldDefaults]
@@ -306,7 +306,7 @@ function refineFields(
   // only check zero fields during .with() calls
   // for .from() calls, empty-bag-checking will happen within the CalendarImpl
   if (disallowEmpty && !anyMatching) {
-    throw new TypeError('No valid fields')
+    throw new TypeError(errorMessages.noValidFields)
   }
 
   return res
@@ -736,22 +736,21 @@ export function nativeMonthDayFromFields(
     [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
 
     // simulate refineDay :(
-    if (monthCodeNumber <= 0) {
-      throw new RangeError('Below zero')
-    }
+    // TODO: DRY
+    requireNumberIsPositive(monthCodeNumber)
     if (fields.day === undefined) {
-      throw new TypeError('Must specify day')
+      throw new TypeError(errorMessages.missingDay)
     }
     day = fields.day
 
     const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
     if (!res) {
-      throw new RangeError('Could not guess year')
+      throw new RangeError(errorMessages.failedYearGuess)
     }
     [year, month] = res
 
     if (fields.month !== undefined && fields.month !== month) {
-      throw new RangeError('Inconsistent month/monthCode')
+      throw new RangeError(errorMessages.mismatchingMonthAndCode)
     }
     if (isIso) {
       month = clampEntity(
@@ -787,7 +786,7 @@ export function nativeMonthDayFromFields(
 
     const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
     if (!res) {
-      throw new RangeError('Could not guess year')
+      throw new RangeError(errorMessages.failedYearGuess)
     }
     [year, month] = res
   }
@@ -846,27 +845,26 @@ function refineYear(
 
   if (era !== undefined || eraYear !== undefined) {
     if (era === undefined || eraYear === undefined) {
-      throw new TypeError('Must define both era and eraYear')
+      throw new TypeError(errorMessages.mismatchingEraParts)
     }
 
     if (!eraOrigins) {
-      throw new RangeError('Does not accept era/eraYear')
+      throw new RangeError(errorMessages.forbiddenEraParts)
     }
 
     const eraOrigin = eraOrigins[era]
     if (eraOrigin === undefined) {
-      throw new RangeError('Unknown era')
+      throw new RangeError(errorMessages.invalidEra(era))
     }
 
     const yearByEra = eraYearToYear(eraYear, eraOrigin)
-
     if (year !== undefined && year !== yearByEra) {
-      throw new RangeError('The year and era/eraYear must agree')
+      throw new RangeError(errorMessages.mismatchingYearAndEra)
     }
 
     year = yearByEra
   } else if (year === undefined) {
-    throw new TypeError('Must specify year' + (eraOrigins ? ' or era/eraYear' : ''))
+    throw new TypeError(errorMessages.missingYear(eraOrigins))
   }
 
   return year
@@ -884,19 +882,17 @@ function refineMonth(
     const monthByCode = refineMonthCode(calendarNative, monthCode, year, overflow)
 
     if (month !== undefined && month !== monthByCode) {
-      throw new RangeError('The month and monthCode do not agree')
+      throw new RangeError(errorMessages.mismatchingMonthAndCode)
     }
 
     month = monthByCode
     overflow = Overflow.Reject // monthCode parsing doesn't constrain
   } else if (month === undefined) {
-    throw new TypeError('Must specify either month or monthCode')
+    throw new TypeError(errorMessages.missingMonth)
   }
 
-  // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
-  if (month <= 0) {
-    throw new RangeError('Below zero')
-  }
+  // TODO: do this earlier, in refiner
+  requireNumberIsPositive(month)
 
   return clampEntity(
     'month',
@@ -922,17 +918,17 @@ function refineMonthCode(
 
     // calendar does not support leap years
     if (leapMonthMeta === undefined) {
-      throw new RangeError('Calendar system doesnt support leap months')
+      throw new RangeError(errorMessages.invalidLeapMonth)
     }
 
     // leap year has a maximum
     else if (leapMonthMeta > 0) {
       if (month > leapMonthMeta) {
-        throw new RangeError('Invalid leap-month month code')
+        throw new RangeError(errorMessages.invalidLeapMonth)
       }
       if (leapMonth === undefined) {
         if (overflow === Overflow.Reject) {
-          throw new RangeError('Invalid leap-month month code')
+          throw new RangeError(errorMessages.invalidLeapMonth)
         } else {
           month-- // M05L -> M05
         }
@@ -942,11 +938,11 @@ function refineMonthCode(
     // leap year is constant
     else {
       if (month !== -leapMonthMeta) {
-        throw new RangeError('Invalid leap-month month code')
+        throw new RangeError(errorMessages.invalidLeapMonth)
       }
       if (leapMonth === undefined) {
         if (overflow === Overflow.Reject) {
-          throw new RangeError('Invalid leap-month month code')
+          throw new RangeError(errorMessages.invalidLeapMonth)
         } else {
            // ex: M05L -> M06
         }
@@ -967,13 +963,11 @@ function refineDay(
   const { day } = fields
 
   if (day === undefined) {
-    throw new TypeError('Must specify day')
+    throw new TypeError(errorMessages.missingDay)
   }
 
-  // TODO: do this earlier, in refiner (toPositiveNonZeroInteger)
-  if (day <= 0) {
-    throw new RangeError('Below zero')
-  }
+  // TODO: do this earlier, in refiner
+  requireNumberIsPositive(day)
 
   return clampEntity(
     'day',

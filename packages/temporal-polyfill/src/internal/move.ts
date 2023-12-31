@@ -28,6 +28,7 @@ import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainTimeSlots, createPlainYearMonthSlots } from './slots'
+import * as errorMessages from './errorMessages'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
@@ -347,14 +348,14 @@ export function intlMonthAdd(
 
     if (monthDelta < 0) {
       if (month < Number.MIN_SAFE_INTEGER) {
-        throw new RangeError('Months out of range')
+        throw new RangeError(errorMessages.outOfBoundsDate)
       }
       while (month < 1) {
         month += computeIntlMonthsInYear.call(this, --year)
       }
     } else {
       if (month > Number.MAX_SAFE_INTEGER) {
-        throw new RangeError('Months out of range')
+        throw new RangeError(errorMessages.outOfBoundsDate)
       }
       let monthsInYear
       while (month > (monthsInYear = computeIntlMonthsInYear.call(this, year))) {

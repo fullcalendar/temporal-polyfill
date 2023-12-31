@@ -11,6 +11,7 @@ import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './calend
 import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
 import { isoToEpochNano } from './epochAndTime'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
+import * as errorMessages from './errorMessages'
 
 // Marker System
 // -------------------------------------------------------------------------------------------------
@@ -126,7 +127,7 @@ export function addDurations<RA, C, T>(
   }
 
   if (!markerSlots) {
-    throw new RangeError('relativeTo is required for years, months, or weeks arithmetic')
+    throw new RangeError(errorMessages.missingRelativeTo)
   }
 
   if (doSubtract) {
@@ -157,7 +158,7 @@ function addDayTimeDurations(
   const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, doSubtract ? -1 : 1)
 
   if (!Number.isFinite(combined[0])) {
-    throw new RangeError('Too much')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
   return {
@@ -206,7 +207,7 @@ export function roundDuration<RA, C, T>(
   }
 
   if (!markerSlots) {
-    throw new RangeError('need relativeTo')
+    throw new RangeError(errorMessages.missingRelativeTo)
   }
 
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
@@ -223,7 +224,7 @@ export function roundDuration<RA, C, T>(
   const origSign = queryDurationSign(slots)
   const balancedSign = queryDurationSign(balancedDuration)
   if (origSign && balancedSign && origSign !== balancedSign) {
-    throw new RangeError('Faulty Calendar rounding')
+    throw new RangeError(errorMessages.invalidProtocolResults)
   }
 
   if (balancedSign && !(smallestUnit === Unit.Nanosecond && roundingInc === 1)) {
@@ -289,7 +290,7 @@ function computeDurationSign(
 
     if (fieldSign) {
       if (sign && sign !== fieldSign) {
-        throw new RangeError('Cant have mixed signs')
+        throw new RangeError(errorMessages.forbiddenDurationSigns)
       }
       sign = fieldSign
     }
@@ -308,7 +309,7 @@ export function checkDurationFields(fields: DurationFields): DurationFields {
 
 export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): DayTimeNano {
   if (durationHasDateParts(fields)) {
-    throw new RangeError('Operation not allowed') // correct error?
+    throw new RangeError(errorMessages.invalidLargeUnits)
   }
 
   return durationFieldsToDayTimeNano(fields, Unit.Hour)
@@ -331,7 +332,7 @@ export function nanoToDurationDayTimeFields(
     days * (nanoInUtcDay / unitNanoMap[largestUnit])
 
   if (!Number.isFinite(dayTimeFields[durationFieldNamesAsc[largestUnit]]!)) {
-    throw new RangeError('Too big')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
   return dayTimeFields
@@ -380,15 +381,4 @@ export function getLargestDurationUnit(fields: DurationFields): Unit {
   }
 
   return unit
-}
-
-export function isDurationsEqual(
-  a: DurationFields,
-  b: DurationFields,
-): boolean {
-  // less efficient than simply ===&& on all props, because doesn't short-circuit,
-  // but minified better
-  return durationFieldNamesAsc.reduce((prev, curr) => {
-    return prev && a[curr] === b[curr]
-  }, true)
 }

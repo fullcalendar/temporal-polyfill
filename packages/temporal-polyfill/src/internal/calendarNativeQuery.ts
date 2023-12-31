@@ -1,9 +1,10 @@
 import { nativeMergeFields } from './bag'
 import { gregoryCalendarId, isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, queryIntlCalendar } from './calendarIntl'
-import { computeIsoDateParts, computeIsoDay, computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoEpochMilli, computeIsoEraParts, computeIsoFieldsFromParts, computeIsoInLeapYear, computeIsoMonth, computeIsoMonthCodeParts, computeIsoMonthsInYear, computeIsoYear, computeIsoYearMonthForMonthDay } from './calendarIso'
-import { LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeInLeapYear, computeMonthCode, computeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
+import { computeIsoDateParts, computeIsoDay, computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoEraParts, computeIsoFieldsFromParts, computeIsoInLeapYear, computeIsoMonth, computeIsoMonthCodeParts, computeIsoMonthsInYear, computeIsoYear, computeIsoYearMonthForMonthDay } from './calendarIso'
+import { EpochMilliOp, LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeInLeapYear, computeMonthCode, computeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
+import { isoArgsToEpochMilli } from './epochAndTime'
 import { intlMonthAdd, isoMonthAdd } from './move'
 import { noop } from './utils'
 
@@ -78,7 +79,7 @@ export const isoMoveOps: NativeMoveOps = {
   ...nativeMoveBase,
   ...isoMathOps,
   leapMonth: noop as LeapMonthOp,
-  epochMilli: computeIsoEpochMilli,
+  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
 }
 
 export const isoDiffOps: NativeDiffOps = {
@@ -166,7 +167,7 @@ export const isoStandardOps: NativeStandardOps = {
   daysInYearPart: computeIsoDaysInYear,
   dayOfYear: computeIsoDayOfYear,
   isoFields: computeIsoFieldsFromParts,
-  epochMilli: computeIsoEpochMilli,
+  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
   monthAdd: isoMonthAdd,
   year: computeIsoYear,
   month: computeIsoMonth,

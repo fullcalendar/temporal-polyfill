@@ -1,7 +1,7 @@
 import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './epochAndTime'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoTimeFieldDefaults } from './calendarIsoFields'
 import { diffEpochMilliByDay } from './diff'
-import { clampProp, createLazyGenerator, isClamped, modFloor } from './utils'
+import { allFieldsEqual, clampProp, createLazyGenerator, modFloor } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
 import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
 import { buildIntlFormat, parseIntlYear } from './calendarIntl'
@@ -45,14 +45,6 @@ export function computeIsoYearMonthForMonthDay(
 
 export function computeIsoFieldsFromParts(year: number, month: number, day: number): IsoDateFields {
   return { isoYear: year, isoMonth: month, isoDay: day }
-}
-
-export function computeIsoEpochMilli(year: number, month?: number, day?: number): number {
-  const epochMilli = isoArgsToEpochMilli(year, month, day)
-  if (epochMilli === undefined) { // YUCK!!!
-    throw new RangeError('Out of range')
-  }
-  return epochMilli
 }
 
 export function computeIsoDaysInWeek(isoDateFields: IsoDateFields) {
@@ -198,25 +190,30 @@ export function checkIsoDateTimeFields<P extends IsoDateTimeFields>(isoDateTimeF
 }
 
 export function checkIsoDateFields<P extends IsoDateFields>(isoInternals: P): P {
-  if (!isIsoDateFieldsValid(isoInternals)) {
-    throw new RangeError('Invalid iso date') // TODO: more DRY
-  }
+  constrainIsoDateFields(isoInternals, Overflow.Reject)
   return isoInternals
 }
 
 export function isIsoDateFieldsValid(isoFields: IsoDateFields): boolean {
-  const { isoYear, isoMonth, isoDay } = isoFields
-
-  return isClamped(isoMonth, 1, computeIsoMonthsInYear(isoYear)) && // TODO: use just 12
-    isClamped(isoDay, 1, computeIsoDaysInMonth(isoYear, isoMonth))
+  return allFieldsEqual(isoDateFieldNamesAsc, isoFields, constrainIsoDateFields(isoFields))
 }
 
 // Constraining
 // -------------------------------------------------------------------------------------------------
 
+function constrainIsoDateFields(
+  isoFields: IsoDateFields,
+  overflow?: Overflow,
+): IsoDateFields {
+  const { isoYear } = isoFields
+  const isoMonth = clampProp(isoFields, 'isoMonth', 1, computeIsoMonthsInYear(isoYear), overflow)
+  const isoDay = clampProp(isoFields, 'isoDay', 1, computeIsoDaysInMonth(isoYear, isoMonth), overflow)
+  return { isoYear, isoMonth, isoDay }
+}
+
 export function constrainIsoTimeFields(
   isoTimeFields: IsoTimeFields,
-  overflow: Overflow | undefined,
+  overflow?: Overflow,
 ): IsoTimeFields {
   // TODO: clever way to compress this, using functional programming
   // Will this kill need for clampProp?

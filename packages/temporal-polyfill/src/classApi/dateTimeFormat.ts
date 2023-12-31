@@ -9,6 +9,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { Instant } from './instant'
 import { getSlots } from './slotsForClasses'
 import { BrandingSlots } from '../internal/slots'
+import * as errorMessages from '../internal/errorMessages'
 
 type OrigFormattable = number | Date
 type TemporalFormattable = Instant |
@@ -130,14 +131,14 @@ function createBoundFormatPrepFunc(
       slots1 = getSlots(arg1)
 
       if (branding !== (slots1 || {}).branding) {
-        throw new TypeError('Mismatched types')
+        throw new TypeError(errorMessages.mismatchingFormatTypes)
       }
     }
 
     if (branding) {
       const config = classFormatConfigs[branding]
       if (!config) {
-        throw new TypeError('Cannot format ' + branding)
+        throw new TypeError(errorMessages.invalidFormatType(branding))
       }
 
       return [

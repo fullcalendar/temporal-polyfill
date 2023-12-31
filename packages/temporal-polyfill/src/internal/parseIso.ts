@@ -26,7 +26,7 @@ import {
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { FixedTimeZone } from './timeZoneNative'
 import { queryNativeTimeZone } from './timeZoneNative'
-import { getMatchingInstantFor } from './timeZoneOps'
+import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
 import {
   TimeUnit,
   Unit,
@@ -43,17 +43,19 @@ import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DateSlots, DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createDurationSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import { requireString, toStringViaPrimitive } from './cast'
 import { realizeCalendarId } from './calendarNativeQuery'
+import * as errorMessages from './errorMessages'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
 
 export function parseInstant(s: string): InstantSlots {
-  const organized = parseDateTimeLike(toStringViaPrimitive(s))
   // instead of 'requiring' like other types,
   // coerce, because there's no fromFields, so no need to differentiate param type
+  s = toStringViaPrimitive(s)
 
+  const organized = parseDateTimeLike(s)
   if (!organized) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   let offsetNano
@@ -63,7 +65,7 @@ export function parseInstant(s: string): InstantSlots {
   } else if (organized.offset) {
     offsetNano = parseOffsetNano(organized.offset)
   } else {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   // validate timezone
@@ -83,19 +85,20 @@ export function parseZonedOrPlainDateTime(s: string): (
   DateSlots<string> |
   ZonedEpochSlots<string, string>
 ) {
-  const organized = parseDateTimeLike(s)
+  const organized = parseDateTimeLike(requireString(s))
 
   if (!organized) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
   if (organized.timeZone) {
     return finalizeZonedDateTime(
       organized as ZonedDateTimeOrganized,
-      organized.offset ? parseOffsetNano(organized.offset) : undefined, // HACK
+      organized.offset ? parseOffsetNano(organized.offset) : undefined,
     )
   }
   if (organized.hasZ) {
-    throw new RangeError('Only Z cannot be parsed for this') // PlainDate doesn't accept it
+    // PlainDate doesn't support Z
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   return finalizeDate(organized)
@@ -108,7 +111,7 @@ export function parseZonedDateTime(
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || !organized.timeZone) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   const { offset } = organized
@@ -123,13 +126,14 @@ export function parseZonedDateTime(
   )
 }
 
+/*
+`s` already validated as a string
+*/
 export function parseOffsetNano(s: string): number {
   const offsetNano = parseOffsetNanoMaybe(s)
-
   if (offsetNano === undefined) {
-    throw new RangeError('Invalid offset string')
+    throw new RangeError(errorMessages.failedParse(s)) // Invalid offset string
   }
-
   return offsetNano
 }
 
@@ -137,7 +141,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   return createPlainDateTimeSlots(
@@ -149,7 +153,7 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   return createPlainDateSlots(
@@ -163,14 +167,10 @@ export function parsePlainYearMonth(
   getCalendarOps: (calendarId: string) => NativeYearMonthParseOps,
   s: string,
 ): PlainYearMonthSlots<string> {
-  s = requireString(s)
-  let organized = parseYearMonthOnly(s)
+  const organized = parseYearMonthOnly(requireString(s))
 
   if (organized) {
-    if (organized.calendar !== isoCalendarId) {
-      throw new RangeError('Invalid calendar')
-    }
-
+    requireIsoCalendar(organized)
     return createPlainYearMonthSlots(
       checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
     )
@@ -186,18 +186,20 @@ export function parsePlainYearMonth(
   })
 }
 
+function requireIsoCalendar(organized: { calendar: string }): void {
+  if (organized.calendar !== isoCalendarId) {
+    throw new RangeError(errorMessages.invalidSubstring(organized.calendar))
+  }
+}
+
 export function parsePlainMonthDay(
   getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
   s: string,
 ): PlainMonthDaySlots<string> {
-  s = requireString(s)
-  const organized = parseMonthDayOnly(s)
+  const organized = parseMonthDayOnly(requireString(s))
 
   if (organized) {
-    if (organized.calendar !== isoCalendarId) {
-      throw new RangeError('Invalid calendar')
-    }
-
+    requireIsoCalendar(organized)
     return createPlainMonthDaySlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
     )
@@ -217,33 +219,30 @@ export function parsePlainMonthDay(
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
-  s = requireString(s)
-  let organized: IsoTimeFields | DateTimeLikeOrganized | undefined = parseTimeOnly(s)
+  let organized: IsoTimeFields | DateTimeLikeOrganized | undefined = parseTimeOnly(requireString(s))
 
   if (!organized) {
     organized = parseDateTimeLike(s)
 
     if (organized) {
       if (!(organized as DateTimeLikeOrganized).hasTime) {
-        throw new RangeError()
+        throw new RangeError(errorMessages.failedParse(s)) // Must have time for PlainTime
       }
       if ((organized as DateTimeLikeOrganized).hasZ) {
-        throw new RangeError()
+        throw new RangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
       }
-      if ((organized as DateTimeLikeOrganized).calendar !== isoCalendarId) {
-        throw new RangeError()
-      }
+      requireIsoCalendar(organized as DateTimeLikeOrganized)
     } else {
-      throw new RangeError('Invalid time string')
+      throw new RangeError(errorMessages.failedParse(s))
     }
   }
 
   let altParsed: DateOrganized | undefined
   if ((altParsed = parseYearMonthOnly(s)) && isIsoDateFieldsValid(altParsed)) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
   if ((altParsed = parseMonthDayOnly(s)) && isIsoDateFieldsValid(altParsed)) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   return createPlainTimeSlots(constrainIsoTimeFields(organized, Overflow.Reject))
@@ -253,7 +252,7 @@ export function parseDuration(s: string): DurationSlots {
   const parsed = parseDurationFields(requireString(s))
 
   if (!parsed) {
-    throw new RangeError()
+    throw new RangeError(errorMessages.failedParse(s))
   }
 
   return createDurationSlots(parsed)
@@ -290,7 +289,7 @@ Unlike others, return slots
 */
 function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
-  offsetNano: number | undefined, // HACK
+  offsetNano: number | undefined,
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedDateTimeSlots<string, string> {
@@ -498,7 +497,7 @@ function organizeIsoYearParts(parts: string[]): number {
   const year = parseInt(parts[2] || parts[3])
 
   if (yearSign < 0 && !year) {
-    throw new RangeError('Negative zero not allowed')
+    throw new RangeError(errorMessages.invalidSubstring(-0 as unknown as string))
   }
 
   return yearSign * year
@@ -516,8 +515,10 @@ function organizeTimeParts(parts: string[]): IsoTimeFields {
 }
 
 function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number {
-  if (onlyHourMinute && (parts[4] || parts[5])) {
-    throw new RangeError('Does not accept sub-minute')
+  const firstSubMinutePart = parts[4] || parts[5]
+
+  if (onlyHourMinute && firstSubMinutePart) {
+    throw new RangeError(errorMessages.invalidSubstring(firstSubMinutePart))
   }
 
   const offsetNanoPos = (
@@ -527,12 +528,9 @@ function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number 
     parseSubsecNano(parts[5] || '')
   )
 
-  // TODO: DRY with timeZoneSlot util?
-  if (offsetNanoPos >= nanoInUtcDay) {
-    throw new RangeError('Offset too large')
-  }
-
-  return parseSign(parts[1]) * offsetNanoPos
+  return validateTimeZoneOffset(
+    offsetNanoPos * parseSign(parts[1])
+  )
 }
 
 function organizeDurationParts(parts: string[]): DurationFields {
@@ -551,7 +549,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
   } as DurationFields
 
   if (!hasAny) {
-    throw new RangeError('Duration string must have at least one field')
+    throw new RangeError(errorMessages.noValidFields)
   }
 
   if (parseSign(parts[1]) < 0) {
@@ -572,7 +570,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
 
     if (wholeStr !== undefined) {
       if (hasAnyFrac) {
-        throw new RangeError('Fraction must be last one')
+        throw new RangeError(errorMessages.invalidSubstring(wholeStr)) // Fraction must be last one
       }
 
       wholeUnits = parseIntSafe(wholeStr)
@@ -610,21 +608,21 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
 
     if (!name) {
       if (timeZoneId) {
-        throw new RangeError('Cannot specify timeZone multiple times')
+        throw new RangeError(errorMessages.invalidSubstring(whole)) // Cannot specify timeZone multiple times
       }
       timeZoneId = val
     } else if (name === 'u-ca') {
       calendarIds.push(val)
       calendarIsCritical ||= isCritical
     } else if (isCritical) {
-      throw new RangeError(`Critical annotation '${name}' not used`)
+      throw new RangeError(errorMessages.invalidSubstring(whole)) // Critical annotation not used
     }
 
     return ''
   })
 
   if (calendarIds.length > 1 && calendarIsCritical) {
-    throw new RangeError('Multiple calendar when one is critical')
+    throw new RangeError(errorMessages.invalidSubstring(s)) // Multiple calendars when one is critical
   }
 
   return {
@@ -660,7 +658,7 @@ function parseIntSafe(s: string): number {
   const n = parseInt(s)
 
   if (!Number.isFinite(n)) {
-    throw new RangeError('Number out of range')
+    throw new RangeError(errorMessages.invalidSubstring(s))
   }
 
   return n

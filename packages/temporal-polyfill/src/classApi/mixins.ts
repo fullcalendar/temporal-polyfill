@@ -12,6 +12,7 @@ import { yearMonthOnlyRefiners, dateOnlyRefiners, monthOnlyRefiners, dayOnlyRefi
 import { CalendarProtocol } from './calendarProtocol'
 import { CalendarSlot } from './slotsForClasses'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
+import * as errorMessages from '../internal/errorMessages'
 
 // For Calendar
 // -------------------------------------------------------------------------------------------------
@@ -184,5 +185,5 @@ export function createEpochGetterMethods(branding: string) {
 // -------------------------------------------------------------------------------------------------
 
 export function neverValueOf() {
-  throw new TypeError('Cannot convert object using valueOf')
+  throw new TypeError(errorMessages.forbiddenValueOf)
 }

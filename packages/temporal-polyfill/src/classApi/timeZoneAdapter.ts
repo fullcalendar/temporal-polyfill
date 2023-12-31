@@ -5,9 +5,10 @@ import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { requireFunction, requireNumber } from '../internal/cast'
+import { requireFunction, requireInteger } from '../internal/cast'
 import { nanoInUtcDay } from '../internal/units'
-import { InstantBranding, PlainDateTimeBranding, createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
+import { createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
+import { validateTimeZoneOffset } from '../internal/timeZoneOps'
 
 // Individual Adapters
 // -------------------------------------------------------------------------------------------------
@@ -17,7 +18,7 @@ function adapterGetOffsetNanosecondsFor(
   getOffsetNanosecondsFor: TimeZoneProtocol['getOffsetNanosecondsFor'],
   epochNano: DayTimeNano,
 ): number {
-  return validateOffsetNano(
+  return validateTimeZoneOffsetRes(
     getOffsetNanosecondsFor.call(
       timeZoneProtocol,
       createInstant(createInstantSlots(epochNano))
@@ -42,18 +43,8 @@ function adapterGetPossibleInstantsFor(
   })
 }
 
-export function validateOffsetNano(offsetNano: number): number {
-  // TODO: use util for this?
-  if (!Number.isInteger(requireNumber(offsetNano))) {
-    throw new RangeError('must be integer number')
-  }
-
-  // TODO: DRY with string parsing?
-  if (Math.abs(offsetNano) >= nanoInUtcDay) {
-    throw new RangeError('out of range')
-  }
-
-  return offsetNano
+function validateTimeZoneOffsetRes(offsetNano: number): number {
+  return validateTimeZoneOffset(requireInteger(offsetNano))
 }
 
 // Adapter Sets

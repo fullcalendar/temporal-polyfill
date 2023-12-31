@@ -7,6 +7,7 @@ import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseI
 import { realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
+import * as errorMessages from './errorMessages'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
@@ -150,7 +151,7 @@ export type InstantSlots = { epochNanoseconds: DayTimeNano, branding: typeof Ins
 
 export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   if (!isIdLikeEqual(a, b)) {
-    throw new RangeError('Calendars must be the same')
+    throw new RangeError(errorMessages.mismatchingCalendars)
   }
 
   return a
@@ -172,7 +173,7 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
     return a
   }
 
-  throw new RangeError('Incompatible calendars')
+  throw new RangeError(errorMessages.mismatchingCalendars)
 }
 
 export function refineCalendarSlotString(calendarArg: string): string {
@@ -198,7 +199,7 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }): string | u
 
 export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
   if (!isTimeZoneSlotsEqual(a, b, true)) {
-    throw new RangeError('TimeZones must be the same')
+    throw new RangeError(errorMessages.mismatchingTimeZones)
   }
 
   return a

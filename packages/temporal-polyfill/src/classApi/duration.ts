@@ -20,7 +20,6 @@ import { CalendarSlot, getCalendarSlotFromBag } from './slotsForClasses'
 import { MarkerSlots, absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
 import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
-import { requireString } from '../internal/cast'
 import { parseDuration, parseZonedOrPlainDateTime } from '../internal/parseIso'
 import { ZonedDateTimeBag, durationWithFields, refineDurationBag, refineMaybeZonedDateTimeBag } from '../internal/bag'
 import { constructDurationSlots } from '../internal/construct'
@@ -223,6 +222,6 @@ function refinePublicRelativeTo(
       return { ...res, calendar }
     }
 
-    return parseZonedOrPlainDateTime(requireString(relativeTo))
+    return parseZonedOrPlainDateTime(relativeTo)
   }
 }

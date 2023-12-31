@@ -1,14 +1,15 @@
 import { compareDayTimeNanos } from './dayTimeNano'
 import { Unit, givenFieldsToDayTimeNano } from './units'
-import { NumSign, compareNumbers } from './utils'
+import { NumSign, allFieldsEqual, compareNumbers } from './utils'
 import { durationFieldNamesAsc } from './durationFields'
 import { DiffOps } from './calendarOps'
 import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, isIdLikeEqual, isTimeZoneSlotsEqual } from './slots'
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
-import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, isDurationsEqual } from './durationMath'
+import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem } from './durationMath'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './epochAndTime'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
+import * as errorMessages from './errorMessages'
 
 // High-Level Compare
 // -------------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ export function compareDurations<RA, C, T>(
   ) as Unit
 
   // fast-path if fields identical
-  if (isDurationsEqual(durationSlots0, durationSlots1)) {
+  if (allFieldsEqual(durationFieldNamesAsc, durationSlots0, durationSlots1)) {
     return 0
   }
 
@@ -62,7 +63,7 @@ export function compareDurations<RA, C, T>(
   }
 
   if (!markerSlots) {
-    throw new RangeError('need relativeTo')
+    throw new RangeError(errorMessages.missingRelativeTo)
   }
 
   const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as MarkerSystem<any>

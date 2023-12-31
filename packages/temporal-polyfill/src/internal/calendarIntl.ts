@@ -8,6 +8,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { milliInDay } from './units'
 import { compareNumbers, createLazyGenerator, mapPropNamesToIndex } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts, computeCalendarIdBase, eraYearToYear, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber } from './calendarNative'
+import * as errorMessages from './errorMessages'
 
 interface IntlDateFields {
   era: string | undefined
@@ -39,7 +40,7 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   const calendarIdBase = computeCalendarIdBase(calendarId)
 
   if (calendarIdBase !== computeCalendarIdBase(intlFormat.resolvedOptions().calendar)) {
-    throw new RangeError('Invalid calendar: ' + calendarId)
+    throw new RangeError(errorMessages.invalidCalendar(calendarId))
   }
 
   function epochMilliToIntlFields(epochMilli: number) {

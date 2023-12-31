@@ -6,6 +6,7 @@ import { CalendarArg } from './calendar'
 import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
 import { TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
+import * as errorMessages from '../internal/errorMessages'
 
 // Lookup
 // -------------------------------------------------------------------------------------------------
@@ -25,7 +26,7 @@ export function createViaSlots(Class: any, slots: BrandingSlots): any {
 export function getSpecificSlots(branding: string, obj: any): BrandingSlots {
   const slots = getSlots(obj)
   if (!slots || slots.branding !== branding) {
-    throw new TypeError('Bad')
+    throw new TypeError(errorMessages.invalidMethodContext)
   }
   return slots
 }
@@ -34,14 +35,12 @@ export function getSpecificSlots(branding: string, obj: any): BrandingSlots {
 // -------------------------------------------------------------------------------------------------
 
 export function rejectInvalidBag<B>(bag: B): B {
-  if (getSlots(bag)) {
-    throw new TypeError('Cant pass a Temporal object')
-  }
-  if ((bag as any).calendar !== undefined) {
-    throw new TypeError('Ah')
-  }
-  if ((bag as any).timeZone !== undefined) {
-    throw new TypeError('Ah')
+  if (
+    getSlots(bag) ||
+    (bag as any).calendar !== undefined ||
+    (bag as any).timeZone !== undefined
+  ) {
+    throw new TypeError(errorMessages.invalidBag)
   }
   return bag
 }

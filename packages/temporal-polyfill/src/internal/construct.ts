@@ -172,13 +172,14 @@ export function constructDurationSlots(
 function zipProps(
   propNames: any[],
   propValues: any[],
-  propValueTransform: any = toInteger,
+  propValueTransform: ((val: any, entityName?: string) => any) = toInteger,
 ) {
   const res = {} as any
   const len = propNames.length
 
   for (let i = 0; i < len; i++) {
-    res[propNames[len - 1 - i]] = propValueTransform(propValues[i])
+    const propName = propNames[len - 1 - i]
+    res[propName] = propValueTransform(propValues[i], propName)
   }
 
   return res

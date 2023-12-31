@@ -3,6 +3,7 @@ import { toString, requireObjectlike, toInteger, requirePropDefined } from './ca
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import { BoundArg, bindArgs, clampEntity, isObjectlike } from './utils'
 import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './options'
+import * as errorMessages from './errorMessages'
 
 // Types
 // -------------------------------------------------------------------------------------------------
@@ -268,7 +269,7 @@ export function refineDurationRoundOptions<RA, R>(
   let smallestUnit = refineSmallestUnit(options)
 
   if (largestUnit === undefined && smallestUnit === undefined) {
-    throw new RangeError('Must have either smallestUnit or largestUnit')
+    throw new RangeError(errorMessages.missingSmallestLargestUnit)
   }
 
   smallestUnit ??= Unit.Nanosecond
@@ -435,12 +436,10 @@ const refineRoundingMode = bindArgs(refineChoiceOption<RoundingModeOptions>, 'ro
 
 function parseRoundingIncInteger(options: RoundingIncOptions): number {
   let roundingInc = options[roundingIncName]
-
   if (roundingInc === undefined) {
     return 1
   }
-
-  return toInteger(roundingInc)
+  return toInteger(roundingInc, roundingIncName)
 }
 
 function refineRoundingInc(
@@ -464,7 +463,7 @@ function refineRoundingInc(
 
     // % is dangerous, but -0 will be falsy just like 0
     if (upUnitNano % (roundingInc * unitNano)) {
-      throw new RangeError('Must be multiple')
+      throw new RangeError(errorMessages.invalidEntity(roundingIncName, roundingInc))
     }
   } else {
     roundingInc = clampEntity(
@@ -487,8 +486,7 @@ function refineSubsecDigits(options: SubsecDigitsOptions): SubsecDigits | undefi
       if (toString(subsecDigits) === 'auto') {
         return
       }
-
-      throw new RangeError(`fractionalSecondDigits must be 'auto' or 0 through 9`)
+      throw new RangeError(errorMessages.invalidEntity(subsecDigitsName, subsecDigits))
     }
 
     subsecDigits = clampEntity(subsecDigitsName, Math.floor(subsecDigits), 0, 9, Overflow.Reject) as SubsecDigits
@@ -531,7 +529,7 @@ export function copyOptions<O>(options: O): O {
   if (isObjectlike(options)) {
     return Object.assign(Object.create(null), options)
   }
-  throw new TypeError('Options must be object')
+  throw new TypeError(errorMessages.invalidObject)
 }
 
 export function overrideOverflowOptions(
@@ -551,6 +549,9 @@ function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
   return roundingMode
 }
 
+/*
+`null` means 'auto'
+*/
 function refineUnitOption<O>(
   optionName: (keyof O) & string,
   options: O,
@@ -573,35 +574,35 @@ function refineUnitOption<O>(
     durationFieldIndexes[unitStr as (keyof DurationFields)]
 
   if (unit === undefined) {
-    throw new RangeError('Invalid unit ' + optionName)
+    throw new RangeError(errorMessages.invalidEntity(optionName, unitStr))
   }
-  if (unit < minUnit || unit > maxUnit) { // TODO: use clamp?
-    throw new RangeError('Out of bounds' + optionName)
-  }
+
+  clampEntity(optionName, unit, minUnit, maxUnit, Overflow.Reject)
 
   return unit
 }
 
 function refineChoiceOption<O>(
-  optionName: keyof O,
+  optionName: keyof O & string,
   enumNameMap: Record<string, number>,
   options: O,
   defaultChoice = 0, // TODO: improve this type?
 ): number {
-  const enumName = options[optionName]
-  if (enumName === undefined) {
+  const enumArg = options[optionName]
+  if (enumArg === undefined) {
     return defaultChoice
   }
 
-  const enumNum = enumNameMap[toString(enumName as string)]
+  const enumStr = toString(enumArg as string)
+  const enumNum = enumNameMap[enumStr]
   if (enumNum === undefined) {
-    throw new RangeError('Must be one of the choices')
+    throw new RangeError(errorMessages.invalidEntity(optionName, enumStr))
   }
   return enumNum
 }
 
 function checkLargestSmallestUnit(largestUnit: Unit, smallestUnit: Unit): void {
   if (smallestUnit > largestUnit) {
-    throw new RangeError('smallestUnit must be smaller than largestUnit')
+    throw new RangeError(errorMessages.flippedSmallestLargestUnit)
   }
 }

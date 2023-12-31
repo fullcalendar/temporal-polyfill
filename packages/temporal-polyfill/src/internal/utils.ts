@@ -1,4 +1,5 @@
 import { Overflow } from './options'
+import * as errorMessages from './errorMessages'
 
 export function bindArgs<BA extends any[], DA extends any[], R>(
   f: (...args: [...BA, ...DA]) => R,
@@ -280,8 +281,13 @@ export function clampNumber(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
 }
 
-export function isClamped(num: number, min: number, max: number): boolean {
-  return num === clampNumber(num, min, max)
+export function allFieldsEqual(fieldNames: string[], obj0: any, obj1: any): boolean {
+  for (const fieldName of fieldNames) {
+    if (obj0[fieldName] !== obj1[fieldName]) {
+      return false
+    }
+  }
+  return true
 }
 
 export function clampEntity(
@@ -294,7 +300,7 @@ export function clampEntity(
   const clamped = clampNumber(num, min, max)
 
   if (overflow && num !== clamped) {
-    throw new RangeError(`${entityName} must be between ${min}-${max}`)
+    throw new RangeError(errorMessages.numberOutOfRange(entityName, num, min, max))
   }
 
   return clamped

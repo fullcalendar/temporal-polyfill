@@ -6,6 +6,7 @@ import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, comput
 import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
 import { eraOriginsByCalendarId, isoCalendarId, leapMonthMetas } from './calendarConfig'
+import * as errorMessages from './errorMessages'
 
 // Struct Types
 export type DateParts = [year: number, month: number, day: number]
@@ -352,7 +353,7 @@ export function parseMonthCode(monthCode: string): [
 ] {
   const m = monthCodeRegExp.exec(monthCode)
   if (!m) {
-    throw new RangeError('Invalid monthCode format')
+    throw new RangeError(errorMessages.invalidMonthCode(monthCode))
   }
 
   return [

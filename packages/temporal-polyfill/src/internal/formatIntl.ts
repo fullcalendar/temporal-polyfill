@@ -7,6 +7,7 @@ import { excludePropsByName, hasAnyPropsByName } from './utils'
 import { getSingleInstantFor } from './timeZoneOps'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { IdLike, getId } from './slots'
+import * as errorMessages from './errorMessages'
 
 export type LocalesArg = string | string[]
 export const OrigDateTimeFormat = Intl.DateTimeFormat
@@ -125,7 +126,7 @@ function transformZonedEpochOptions(
 ): Intl.DateTimeFormatOptions {
   options = transformZonedEpochOptionsBasic(options)
   if (options.timeZone !== undefined) {
-    throw new TypeError('Cannot specify timeZone in Intl.DateTimeFormat options')
+    throw new TypeError(errorMessages.forbiddenFormatTimeZone)
   }
   options.timeZone = getCommonTimeZoneId(slots0!, slots1)
   return options
@@ -273,7 +274,7 @@ function checkCalendarsCompatible(
     (strictCalendarCheck || internalCalendarId !== isoCalendarId) &&
     (internalCalendarId !== resolveCalendarId)
   ) {
-    throw new RangeError('Mismatching calendars')
+    throw new RangeError(errorMessages.mismatchingCalendars)
   }
 }
 
@@ -302,7 +303,7 @@ export function getCommonTimeZoneId(
 ): string {
   const timeZoneId = getId(slots0!.timeZone)
   if (slots1 && getId(slots1.timeZone) !== timeZoneId) {
-    throw new RangeError('Mismatching timeZones')
+    throw new RangeError(errorMessages.mismatchingTimeZones)
   }
   return timeZoneId
 }

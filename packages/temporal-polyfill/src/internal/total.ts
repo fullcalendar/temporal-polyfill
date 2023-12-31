@@ -6,6 +6,7 @@ import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots } from './slots'
 import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
 import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, spanDuration, MarkerToEpochNano, MoveMarker, DiffMarkers, queryDurationSign, durationFieldsToDayTimeNano, clearDurationFields } from './durationMath'
+import * as errorMessages from './errorMessages'
 
 export function totalDuration<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
@@ -28,7 +29,7 @@ export function totalDuration<RA, C, T>(
   }
 
   if (!markerSlots) {
-    throw new RangeError('need relativeTo')
+    throw new RangeError(errorMessages.missingRelativeTo)
   }
 
   const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as MarkerSystem<any>
@@ -113,7 +114,7 @@ export function computeEpochNanoFrac(
 ): number {
   const denom = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
   if (!denom) {
-    throw new RangeError('Faulty Calendar rounding')
+    throw new RangeError(errorMessages.invalidProtocolResults)
   }
   const numer = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNanoProgress))
   return numer / denom

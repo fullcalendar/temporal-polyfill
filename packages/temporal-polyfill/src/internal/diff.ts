@@ -35,6 +35,7 @@ import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createDurationSlots, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
 import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'
+import * as errorMessages from './errorMessages'
 
 // High-level
 // -------------------------------------------------------------------------------------------------
@@ -392,7 +393,7 @@ function diffZonedEpochNanoViaCalendar(
   let cnt = 0
   while (midSign === -sign) {
     if (cnt++ > 1) {
-      throw new RangeError('Invalid TimeZoneProtocol results')
+      throw new RangeError(errorMessages.invalidProtocolResults)
     }
     midIsoFields = {
       ...moveByIsoDays(midIsoFields, -sign),
