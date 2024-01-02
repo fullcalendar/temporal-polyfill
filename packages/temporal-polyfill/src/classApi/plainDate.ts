@@ -77,9 +77,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     equals(slots: PlainDateSlots<CalendarSlot>, otherArg: PlainDateArg): boolean {
       return plainDatesEqual(slots, toPlainDateSlots(otherArg))
     },
-    toString(slots: PlainDateSlots<CalendarSlot>, options?: DateTimeDisplayOptions): string { // TODO: correct options type? time??
-      return formatPlainDateIso(slots, options)
-    },
+    toString: formatPlainDateIso,
     toJSON(slots: PlainDateSlots<CalendarSlot>): string {
       return formatPlainDateIso(slots)
     },

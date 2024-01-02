@@ -71,9 +71,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     total(slots: DurationSlots, options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
       return totalDuration(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, options)
     },
-    toString(slots: DurationSlots, options?: TimeDisplayOptions): string {
-      return formatDurationIso(slots, options)
-    },
+    toString: formatDurationIso,
     toLocaleString(slots: DurationSlots, locales?: LocalesArg, options?: any): string {
       return new (Intl as any).DurationFormat(locales, options).format(this)
     },

@@ -62,9 +62,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = cr
     equals(slots: PlainYearMonthSlots<CalendarSlot>, otherArg: PlainYearMonthArg): boolean {
       return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
     },
-    toString(slots: PlainYearMonthSlots<CalendarSlot>, options?: DateTimeDisplayOptions) {
-      return formatPlainYearMonthIso(slots, options)
-    },
+    toString: formatPlainYearMonthIso,
     toJSON(slots: PlainYearMonthSlots<CalendarSlot>) {
       return formatPlainYearMonthIso(slots)
     },

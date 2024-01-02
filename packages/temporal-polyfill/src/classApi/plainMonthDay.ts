@@ -40,9 +40,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] = creat
     equals(slots: PlainMonthDaySlots<CalendarSlot>, otherArg: PlainMonthDayArg): boolean {
       return plainMonthDaysEqual(slots, toPlainMonthDaySlots(otherArg))
     },
-    toString(slots: PlainMonthDaySlots<CalendarSlot>, options?: DateTimeDisplayOptions): string {
-      return formatPlainMonthDayIso(slots, options)
-    },
+    toString: formatPlainMonthDayIso,
     toJSON(slots: PlainMonthDaySlots<CalendarSlot>): string {
       return formatPlainMonthDayIso(slots)
     },

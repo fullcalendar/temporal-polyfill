@@ -73,9 +73,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     equals(slots: PlainTimeSlots, other: PlainTimeArg): boolean {
       return plainTimesEqual(slots, toPlainTimeSlots(other))
     },
-    toString(slots: PlainTimeSlots, options?: TimeDisplayOptions): string {
-      return formatPlainTimeIso(slots, options)
-    },
+    toString: formatPlainTimeIso,
     toJSON(slots: PlainTimeSlots): string {
       return formatPlainTimeIso(slots)
     },
