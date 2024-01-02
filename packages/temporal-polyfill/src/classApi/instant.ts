@@ -1,18 +1,18 @@
 import { LocalesArg } from '../internal/formatIntl'
 import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../internal/optionsRefine'
 import { requireObjectlike } from '../internal/cast'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike } from '../internal/utils'
+import { NumSign, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
+import { createSlotClass, createViaSlots, getSlots, getSpecificSlots } from './slotsForClasses'
 import { CalendarSlot, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createEpochGetterMethods, neverValueOf } from './mixins'
+import { epochGetters, neverValueOf } from './mixins'
 import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
 import { constructInstantSlots } from '../internal/construct'
 import { moveInstant } from '../internal/move'
@@ -24,148 +24,94 @@ import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecT
 import { parseInstant } from '../internal/parseIso'
 import { prepInstantFormat } from './dateTimeFormat'
 
+export type Instant = any
 export type InstantArg = Instant | string
 
-export class Instant {
-  constructor(epochNano: bigint) {
-    setSlots(
-      this,
-      constructInstantSlots(epochNano),
-    )
-  }
-
-  add(durationArg: DurationArg): Instant {
-    return createInstant(
-      moveInstant(
-        false,
-        getInstantSlots(this),
-        toDurationSlots(durationArg),
-      ),
-    )
-  }
-
-  subtract(durationArg: DurationArg): Instant {
-    return createInstant(
-      moveInstant(
-        true,
-        getInstantSlots(this),
-        toDurationSlots(durationArg),
-      ),
-    )
-  }
-
-  until(otherArg: InstantArg, options?: DiffOptions): Duration {
-    return createDuration(
-      diffInstants(
-        getInstantSlots(this),
-        toInstantSlots(otherArg),
-        options,
-      ),
-    )
-  }
-
-  since(otherArg: InstantArg, options?: DiffOptions): Duration {
-    return createDuration(
-      diffInstants(
-        getInstantSlots(this),
-        toInstantSlots(otherArg),
-        options,
-        true,
-      ),
-    )
-  }
-
-  round(options: RoundingOptions | UnitName): Instant {
-    return createInstant(
-      roundInstant(
-        getInstantSlots(this),
-        options,
-      ),
-    )
-  }
-
-  equals(otherArg: InstantArg): boolean {
-    return instantsEqual(getInstantSlots(this), toInstantSlots(otherArg))
-  }
-
-  toString(options?: InstantDisplayOptions<TimeZoneSlot>): string {
-    return formatInstantIso(
-      refineTimeZoneSlot,
-      createSimpleTimeZoneOps,
-      getInstantSlots(this),
-      options,
-    )
-  }
-
-  toJSON(): string {
-    return formatInstantIso(
-      refineTimeZoneSlot,
-      createSimpleTimeZoneOps,
-      getInstantSlots(this),
-    )
-  }
-
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const [format, epochMilli] =  prepInstantFormat(locales, options, getInstantSlots(this))
-    return format.format(epochMilli)
-  }
-
-  toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
-    return createZonedDateTime(
-      instantToZonedDateTime(
-        getInstantSlots(this),
-        refineTimeZoneSlot(timeZoneArg),
-      ),
-    )
-  }
-
-  toZonedDateTime(options: { timeZone: TimeZoneArg, calendar: CalendarArg }): ZonedDateTime {
-    const slots = getInstantSlots(this)
-    const refinedObj = requireObjectlike(options)
-
-    return createZonedDateTime(
-      instantToZonedDateTime(
-        slots,
-        refineTimeZoneSlot(refinedObj.timeZone),
-        refineCalendarSlot(refinedObj.calendar),
+export const Instant = createSlotClass(
+  InstantBranding,
+  constructInstantSlots,
+  epochGetters,
+  {
+    add(slots: InstantSlots, durationArg: DurationArg): Instant {
+      return createInstant(
+        moveInstant(false, slots, toDurationSlots(durationArg)),
       )
-    )
+    },
+    subtract(slots: InstantSlots, durationArg: DurationArg): Instant {
+      return createInstant(
+        moveInstant(true, slots, toDurationSlots(durationArg)),
+      )
+    },
+    until(slots: InstantSlots, otherArg: InstantArg, options?: DiffOptions): Duration {
+      return createDuration(
+        diffInstants(
+          slots,
+          toInstantSlots(otherArg),
+          options,
+        ),
+      )
+    },
+    since(slots: InstantSlots, otherArg: InstantArg, options?: DiffOptions): Duration {
+      return createDuration(
+        diffInstants(slots, toInstantSlots(otherArg), options, true),
+      )
+    },
+    round(slots: InstantSlots, options: RoundingOptions | UnitName): Instant {
+      return createInstant(
+        roundInstant(slots, options),
+      )
+    },
+    equals(slots: InstantSlots, otherArg: InstantArg): boolean {
+      return instantsEqual(slots, toInstantSlots(otherArg))
+    },
+    toString(slots: InstantSlots, options?: InstantDisplayOptions<TimeZoneSlot>): string {
+      return formatInstantIso(refineTimeZoneSlot, createSimpleTimeZoneOps, slots, options)
+    },
+    toJSON(slots: InstantSlots): string {
+      return formatInstantIso(refineTimeZoneSlot, createSimpleTimeZoneOps, slots)
+    },
+    toLocaleString(slots: InstantSlots, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+      const [format, epochMilli] =  prepInstantFormat(locales, options, slots)
+      return format.format(epochMilli)
+    },
+    toZonedDateTimeISO(slots: InstantSlots, timeZoneArg: TimeZoneArg): ZonedDateTime {
+      return createZonedDateTime(
+        instantToZonedDateTime(slots, refineTimeZoneSlot(timeZoneArg)),
+      )
+    },
+    toZonedDateTime(slots: InstantSlots, options: { timeZone: TimeZoneArg, calendar: CalendarArg }): ZonedDateTime {
+      const refinedObj = requireObjectlike(options)
+
+      return createZonedDateTime(
+        instantToZonedDateTime(
+          slots,
+          refineTimeZoneSlot(refinedObj.timeZone),
+          refineCalendarSlot(refinedObj.calendar),
+        )
+      )
+    },
+    valueOf: neverValueOf,
+  },
+  {
+    from(arg: InstantArg) {
+      return createInstant(toInstantSlots(arg))
+    },
+    fromEpochSeconds(epochSec: number): Instant {
+      return createInstant(epochSecToInstant(epochSec))
+    },
+    fromEpochMilliseconds(epochMilli: number): Instant {
+      return createInstant(epochMilliToInstant(epochMilli))
+    },
+    fromEpochMicroseconds(epochMicro: bigint): Instant {
+      return createInstant(epochMicroToInstant(epochMicro))
+    },
+    fromEpochNanoseconds(epochNano: bigint): Instant {
+      return createInstant(epochNanoToInstant(epochNano))
+    },
+    compare(a: InstantArg, b: InstantArg): NumSign {
+      return compareInstants(toInstantSlots(a), toInstantSlots(b))
+    }
   }
-
-  static from(arg: InstantArg) {
-    return createInstant(toInstantSlots(arg))
-  }
-
-  static fromEpochSeconds(epochSec: number): Instant {
-    return createInstant(epochSecToInstant(epochSec))
-  }
-
-  static fromEpochMilliseconds(epochMilli: number): Instant {
-    return createInstant(epochMilliToInstant(epochMilli))
-  }
-
-  static fromEpochMicroseconds(epochMicro: bigint): Instant {
-    return createInstant(epochMicroToInstant(epochMicro))
-  }
-
-  static fromEpochNanoseconds(epochNano: bigint): Instant {
-    return createInstant(epochNanoToInstant(epochNano))
-  }
-
-  static compare(a: InstantArg, b: InstantArg): NumSign {
-    return compareInstants(toInstantSlots(a), toInstantSlots(b))
-  }
-}
-
-defineStringTag(Instant.prototype, InstantBranding)
-
-defineProps(Instant.prototype, {
-  valueOf: neverValueOf,
-})
-
-defineGetters(
-  Instant.prototype,
-  createEpochGetterMethods(InstantBranding),
 )
 
 // Utils

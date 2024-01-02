@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { isObjectlike } from '../internal/utils'
+import { defineGetters, defineProps, defineStringTag, isObjectlike, mapProps } from '../internal/utils'
 import { CalendarArg } from './calendar'
 import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
 import { TimeZoneArg } from './timeZone'
@@ -26,9 +26,58 @@ export function createViaSlots(Class: any, slots: BrandingSlots): any {
 export function getSpecificSlots(branding: string, obj: any): BrandingSlots {
   const slots = getSlots(obj)
   if (!slots || slots.branding !== branding) {
-    throw new TypeError(errorMessages.invalidMethodContext)
+    throw new TypeError(errorMessages.invalidCallingContext)
   }
   return slots
+}
+
+// Class
+// -------------------------------------------------------------------------------------------------
+
+export function createSlotClass(
+  branding: string,
+  construct: any,
+  getters: any,
+  methods: any,
+  staticMethods: any,
+): any {
+  function Class(this: any, ...args: any[]) {
+    if (this instanceof Class) {
+      setSlots(this, construct(...args))
+    } else {
+      throw new TypeError(errorMessages.invalidCallingContext)
+    }
+  }
+
+  defineStringTag(Class.prototype, branding)
+  defineGetters(Class.prototype, mapProps(curryMethod as any, getters))
+  defineProps(Class.prototype, mapProps(curryMethod as any, methods))
+  defineProps(Class, staticMethods)
+
+  function curryMethod(method: any, methodName: string) {
+    const newMethod = function(this: any, ...args: any[]) {
+      const slots = getSlots(this)
+      if (slots?.branding !== branding) {
+        throw new TypeError(errorMessages.invalidCallingContext)
+      }
+      return method.call(this, slots, ...args)
+    }
+    Object.defineProperty(newMethod, 'name', {
+      value: methodName,
+      // writable: false,
+      // enumerable: false,
+      configurable: true,
+    })
+    return newMethod
+  }
+
+  Object.defineProperty(Class, 'name', {
+    value: branding,
+    // writable: false,
+    // enumerable: false,
+    configurable: true,
+  })
+  return Class
 }
 
 // Reject

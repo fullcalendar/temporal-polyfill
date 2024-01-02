@@ -1,4 +1,4 @@
-import { TimeBag } from '../internal/calendarFields'
+import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { IsoTimeFields } from '../internal/calendarIsoFields'
 import { LocalesArg } from '../internal/formatIntl'
 import {
@@ -9,16 +9,15 @@ import {
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
-import { zonedInternalsToIso } from '../internal/timeZoneOps'
+import { NumSign, isObjectlike } from '../internal/utils'
 import { BrandingSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeSlots, removeBranding } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
+import { createSlotClass, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { createTimeGetterMethods, neverValueOf } from './mixins'
+import { neverValueOf, timeGetters } from './mixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { CalendarSlot } from './slotsForClasses'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
@@ -33,120 +32,85 @@ import { plainTimeToPlainDateTime, plainTimeToZonedDateTime, zonedDateTimeToPlai
 import { parsePlainTime } from '../internal/parseIso'
 import { prepPlainTimeFormat } from './dateTimeFormat'
 
+export type PlainTime = any & TimeFields
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 
-export class PlainTime {
-  constructor(
-    isoHour?: number,
-    isoMinute?: number,
-    isoSecond?: number,
-    isoMillisecond?: number,
-    isoMicrosecond?: number,
-    isoNanosecond?: number,
-  ) {
-    setSlots(
-      this,
-      constructPlainTimeSlots(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond),
-    )
-  }
-
-  with(mod: TimeBag, options?: OverflowOptions): PlainTime {
-    getPlainTimeSlots(this) // validate this
-    return createPlainTime(
-      plainTimeWithFields(this as any, rejectInvalidBag(mod), options) // any!!!
-    )
-  }
-
-  add(durationArg: DurationArg): PlainTime {
-    return createPlainTime(
-      movePlainTime(false, getPlainTimeSlots(this), toDurationSlots(durationArg))
-    )
-  }
-
-  subtract(durationArg: DurationArg): PlainTime {
-    return createPlainTime(
-      movePlainTime(true, getPlainTimeSlots(this), toDurationSlots(durationArg))
-    )
-  }
-
-  until(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-    return createDuration(
-      diffPlainTimes(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options)
-    )
-  }
-
-  since(otherArg: PlainTimeArg, options?: DiffOptions): Duration {
-    return createDuration(
-      diffPlainTimes(getPlainTimeSlots(this), toPlainTimeSlots(otherArg), options, true)
-    )
-  }
-
-  round(options: RoundingOptions | UnitName): PlainTime {
-    return createPlainTime(
-      roundPlainTime(getPlainTimeSlots(this), options)
-    )
-  }
-
-  equals(other: PlainTimeArg): boolean {
-    return plainTimesEqual(getPlainTimeSlots(this), toPlainTimeSlots(other))
-  }
-
-  toString(options?: TimeDisplayOptions): string {
-    return formatPlainTimeIso(getPlainTimeSlots(this), options)
-  }
-
-  toJSON(): string {
-    return formatPlainTimeIso(getPlainTimeSlots(this))
-  }
-
-  toLocaleString(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-    const [format, epochMilli] = prepPlainTimeFormat(locales, options, getPlainTimeSlots(this))
-    return format.format(epochMilli)
-  }
-
-  toZonedDateTime(options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
-    return createZonedDateTime(
-      plainTimeToZonedDateTime(
-        refineTimeZoneSlot,
-        toPlainDateSlots,
-        createTimeZoneOps,
-        getPlainTimeSlots(this),
-        options,
+export const PlainTime = createSlotClass(
+  PlainTimeBranding,
+  constructPlainTimeSlots,
+  timeGetters,
+  {
+    with(slots: PlainTimeSlots, mod: TimeBag, options?: OverflowOptions): PlainTime {
+      return createPlainTime(
+        plainTimeWithFields(this, rejectInvalidBag(mod), options)
       )
-    )
+    },
+    add(slots: PlainTimeSlots, durationArg: DurationArg): PlainTime {
+      return createPlainTime(
+        movePlainTime(false, slots, toDurationSlots(durationArg))
+      )
+    },
+    subtract(slots: PlainTimeSlots,  durationArg: DurationArg): PlainTime {
+      return createPlainTime(
+        movePlainTime(true, slots, toDurationSlots(durationArg))
+      )
+    },
+    until(slots: PlainTimeSlots,  otherArg: PlainTimeArg, options?: DiffOptions): Duration {
+      return createDuration(
+        diffPlainTimes(slots, toPlainTimeSlots(otherArg), options)
+      )
+    },
+    since(slots: PlainTimeSlots, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
+      return createDuration(
+        diffPlainTimes(slots, toPlainTimeSlots(otherArg), options, true)
+      )
+    },
+    round(slots: PlainTimeSlots, options: RoundingOptions | UnitName): PlainTime {
+      return createPlainTime(
+        roundPlainTime(slots, options)
+      )
+    },
+    equals(slots: PlainTimeSlots, other: PlainTimeArg): boolean {
+      return plainTimesEqual(slots, toPlainTimeSlots(other))
+    },
+    toString(slots: PlainTimeSlots, options?: TimeDisplayOptions): string {
+      return formatPlainTimeIso(slots, options)
+    },
+    toJSON(slots: PlainTimeSlots): string {
+      return formatPlainTimeIso(slots)
+    },
+    toLocaleString(slots: PlainTimeSlots, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
+      const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
+      return format.format(epochMilli)
+    },
+    toZonedDateTime(slots: PlainTimeSlots, options: { timeZone: TimeZoneArg, plainDate: PlainDateArg }): ZonedDateTime {
+      return createZonedDateTime(
+        plainTimeToZonedDateTime(refineTimeZoneSlot, toPlainDateSlots, createTimeZoneOps, slots, options)
+      )
+    },
+    toPlainDateTime(slots: PlainTimeSlots, plainDateArg: PlainDateArg): PlainDateTime {
+      return createPlainDateTime(
+        plainTimeToPlainDateTime(slots, toPlainDateSlots(plainDateArg))
+      )
+    },
+    getISOFields(slots: PlainTimeSlots): IsoTimeFields {
+      return removeBranding(slots)
+    },
+    valueOf: neverValueOf,
+  },
+  {
+    from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
+      return createPlainTime(
+        toPlainTimeSlots(arg, options)
+      )
+    },
+    compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumSign {
+      return compareIsoTimeFields(
+        toPlainTimeSlots(arg0),
+        toPlainTimeSlots(arg1),
+      )
+    }
   }
-
-  toPlainDateTime(plainDateArg: PlainDateArg): PlainDateTime {
-    return createPlainDateTime(
-      plainTimeToPlainDateTime(getPlainTimeSlots(this), toPlainDateSlots(plainDateArg))
-    )
-  }
-
-  getISOFields(): IsoTimeFields {
-    return removeBranding(getPlainTimeSlots(this))
-  }
-
-  static from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
-    return createPlainTime(toPlainTimeSlots(arg, options))
-  }
-
-  static compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumSign {
-    return compareIsoTimeFields(
-      toPlainTimeSlots(arg0),
-      toPlainTimeSlots(arg1),
-    )
-  }
-}
-
-defineStringTag(PlainTime.prototype, PlainTimeBranding)
-
-defineProps(PlainTime.prototype, {
-  valueOf: neverValueOf,
-})
-
-defineGetters(
-  PlainTime.prototype,
-  createTimeGetterMethods(PlainTimeBranding),
 )
 
 // Utils

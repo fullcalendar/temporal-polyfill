@@ -4,12 +4,12 @@ import {
   TimeDisplayOptions,
   TotalUnitOptionsWithRel,
 } from '../internal/optionsRefine'
-import { NumSign, defineGetters, defineProps, defineStringTag, isObjectlike, pluckProps } from '../internal/utils'
+import { NumSign, isObjectlike } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
 import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, setSlots } from './slotsForClasses'
-import { durationGettersMethods, neverValueOf } from './mixins'
+import { createSlotClass, createViaSlots, getSlots, getSpecificSlots } from './slotsForClasses'
+import { durationGetters, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
 import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
@@ -26,148 +26,81 @@ import { constructDurationSlots } from '../internal/construct'
 import { totalDuration } from '../internal/total'
 import { formatDurationIso } from '../internal/formatIso'
 import { compareDurations } from '../internal/compare'
+import { DurationFields } from '../internal/durationFields'
 
+export type Duration = any & DurationFields
 export type DurationArg = Duration | DurationBag | string
 
-export class Duration {
-  constructor(
-    years?: number,
-    months?: number,
-    weeks?: number,
-    days?: number,
-    hours?: number,
-    minutes?: number,
-    seconds?: number,
-    milliseconds?: number,
-    microseconds?: number,
-    nanoseconds?: number,
-  ) {
-    setSlots(this, constructDurationSlots(
-      years,
-      months,
-      weeks,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds,
-      microseconds,
-      nanoseconds,
-    ))
-  }
-
-  with(mod: DurationBag): Duration {
-    return createDuration(durationWithFields(getDurationSlots(this), mod))
-  }
-
-  add(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
-    return createDuration(
-      addDurations(
+export const Duration = createSlotClass(
+  DurationBranding,
+  constructDurationSlots,
+  {
+    blank(slots: DurationSlots): boolean {
+      return queryDurationBlank(slots)
+    },
+    sign(slots: DurationSlots): NumSign {
+      return queryDurationSign(slots)
+    },
+    ...durationGetters,
+  },
+  {
+    with(slots: DurationSlots, mod: DurationBag): Duration {
+      return createDuration(durationWithFields(slots, mod))
+    },
+    add(slots: DurationSlots, otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
+      return createDuration(
+        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, false, slots, toDurationSlots(otherArg), options)
+      )
+    },
+    subtract(slots: DurationSlots, otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
+      return createDuration(
+        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, true, slots, toDurationSlots(otherArg), options)
+      )
+    },
+    negated(slots: DurationSlots): Duration {
+      return createDuration(negateDuration(slots))
+    },
+    abs(slots: DurationSlots): Duration {
+      return createDuration(absDuration(slots))
+    },
+    round(slots: DurationSlots, options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>): Duration {
+      return createDuration(
+        roundDuration(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, options)
+      )
+    },
+    total(slots: DurationSlots, options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
+      return totalDuration(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, options)
+    },
+    toString(slots: DurationSlots, options?: TimeDisplayOptions): string {
+      return formatDurationIso(slots, options)
+    },
+    toLocaleString(slots: DurationSlots, locales?: LocalesArg, options?: any): string {
+      return new (Intl as any).DurationFormat(locales, options).format(this)
+    },
+    toJSON(slots: DurationSlots): string {
+      return formatDurationIso(slots)
+    },
+    valueOf: neverValueOf,
+  },
+  {
+    from(arg: DurationArg): Duration {
+      return createDuration(toDurationSlots(arg))
+    },
+    compare(
+      durationArg0: DurationArg,
+      durationArg1: DurationArg,
+      options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+    ): NumSign {
+      return compareDurations(
         refinePublicRelativeTo,
         createDiffOps,
         createTimeZoneOps,
-        false,
-        getDurationSlots(this),
-        toDurationSlots(otherArg),
+        toDurationSlots(durationArg0),
+        toDurationSlots(durationArg1),
         options,
       )
-    )
-  }
-
-  subtract(otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
-    return createDuration(
-      addDurations(
-        refinePublicRelativeTo,
-        createDiffOps,
-        createTimeZoneOps,
-        true,
-        getDurationSlots(this),
-        toDurationSlots(otherArg),
-        options,
-      )
-    )
-  }
-
-  negated(): Duration {
-    return createDuration(negateDuration(getDurationSlots(this)))
-  }
-
-  abs(): Duration {
-    return createDuration(absDuration(getDurationSlots(this)))
-  }
-
-  round(options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>): Duration {
-    return createDuration(
-      roundDuration(
-        refinePublicRelativeTo,
-        createDiffOps,
-        createTimeZoneOps,
-        getDurationSlots(this),
-        options,
-      )
-    )
-  }
-
-  total(options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
-    return totalDuration(
-      refinePublicRelativeTo,
-      createDiffOps,
-      createTimeZoneOps,
-      getDurationSlots(this),
-      options,
-    )
-  }
-
-  toString(options?: TimeDisplayOptions): string {
-    return formatDurationIso(getDurationSlots(this), options)
-  }
-
-  toLocaleString(locales?: LocalesArg, options?: any): string {
-    getDurationSlots(this) // check type
-    return new (Intl as any).DurationFormat(locales, options).format(this)
-  }
-
-  toJSON(): string {
-    return formatDurationIso(getDurationSlots(this))
-  }
-
-  get blank(): boolean {
-    return queryDurationBlank(getDurationSlots(this))
-  }
-
-  get sign(): NumSign {
-    return queryDurationSign(getDurationSlots(this))
-  }
-
-  static from(arg: DurationArg): Duration {
-    return createDuration(toDurationSlots(arg))
-  }
-
-  static compare(
-    durationArg0: DurationArg,
-    durationArg1: DurationArg,
-    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
-  ): NumSign {
-    return compareDurations(
-      refinePublicRelativeTo,
-      createDiffOps,
-      createTimeZoneOps,
-      toDurationSlots(durationArg0),
-      toDurationSlots(durationArg1),
-      options,
-    )
-  }
-}
-
-defineStringTag(Duration.prototype, DurationBranding)
-
-defineProps(Duration.prototype, {
-  valueOf: neverValueOf,
-})
-
-defineGetters(
-  Duration.prototype,
-  durationGettersMethods,
+    }
+  },
 )
 
 // Utils

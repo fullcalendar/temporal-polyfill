@@ -23,7 +23,7 @@ export const invalidBag = 'Invalid bag'
 
 // Class-related
 export const forbiddenValueOf = 'Cannot use valueOf'
-export const invalidMethodContext = 'Invalid calling context'
+export const invalidCallingContext = 'Invalid calling context'
 
 // Calendar Fields/Parts
 export const forbiddenEraParts = 'Forbidden era/eraYear'

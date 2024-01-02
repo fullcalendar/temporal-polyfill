@@ -4,12 +4,11 @@ import { formatOffsetNano } from '../internal/formatIso'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from '../internal/optionsRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { defineStringTag } from '../internal/utils'
 import { getSingleInstantFor } from '../internal/timeZoneOps'
 import { epochNanoToIso } from '../internal/epochAndTime'
-import { refineCalendarSlot } from './slotsForClasses'
+import { createSlotClass, refineCalendarSlot } from './slotsForClasses'
 import { refineTimeZoneSlot } from './slotsForClasses'
-import { createViaSlots, getSpecificSlots, setSlots } from './slotsForClasses'
+import { createViaSlots, getSpecificSlots } from './slotsForClasses'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
@@ -17,128 +16,104 @@ import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSl
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
-import { BrandingSlots, InstantBranding, PlainDateTimeBranding, TimeZoneBranding, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
+import { BrandingSlots, TimeZoneBranding, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
 
+export type TimeZone = any
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
-
-// TimeZone Class
-// -------------------------------------------------------------------------------------------------
-
 export type TimeZoneClassSlots = BrandingSlots & {
   id: string
   native: NativeTimeZone
 }
 
-export class TimeZone implements TimeZoneProtocol {
-  constructor(timeZoneId: string) {
+export const TimeZone = createSlotClass(
+  TimeZoneBranding,
+  (timeZoneId: string): TimeZoneClassSlots => {
     const timeZoneNative = queryNativeTimeZone(requireString(timeZoneId))
-
-    setSlots(this, {
+    return {
       branding: TimeZoneBranding,
       id: timeZoneNative.id,
       native: timeZoneNative,
-    } as TimeZoneClassSlots)
-  }
+    }
+  },
+  {
+    id(slots: TimeZoneClassSlots): string {
+      return slots.id
+    }
+  },
+  {
+    getPossibleInstantsFor({ native }: TimeZoneClassSlots, plainDateTimeArg: PlainDateTimeArg): Instant[]  {
+      return native.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
+        .map((epochNano: DayTimeNano) => {
+          return createInstant(
+            createInstantSlots(epochNano)
+          )
+        })
+    },
+    getOffsetNanosecondsFor({ native }: TimeZoneClassSlots, instantArg: InstantArg): number {
+      return native.getOffsetNanosecondsFor(toInstantSlots(instantArg).epochNanoseconds)
+    },
+    getOffsetStringFor(slots: TimeZoneClassSlots, instantArg: InstantArg): string {
+      const epochNano = toInstantSlots(instantArg).epochNanoseconds
+      const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
+      const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
 
-  getPossibleInstantsFor(plainDateTimeArg: PlainDateTimeArg): Instant[]  {
-    const { native } = getTimeZoneSlots(this)
-    return native.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
-      .map((epochNano: DayTimeNano) => {
-        return createInstant(
-          createInstantSlots(epochNano)
+      return formatOffsetNano(offsetNano)
+    },
+    getPlainDateTimeFor(
+      slots: TimeZoneClassSlots,
+      instantArg: InstantArg,
+      calendarArg: CalendarArg = isoCalendarId
+    ): PlainDateTime {
+      const epochNano = toInstantSlots(instantArg).epochNanoseconds
+      const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
+      const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
+
+      return createPlainDateTime(
+        createPlainDateTimeSlots(
+          epochNanoToIso(epochNano, offsetNano),
+          refineCalendarSlot(calendarArg),
         )
-      })
-  }
-
-  getOffsetNanosecondsFor(instantArg: InstantArg): number {
-    const { native } = getTimeZoneSlots(this)
-    return native.getOffsetNanosecondsFor(toInstantSlots(instantArg).epochNanoseconds)
-  }
-
-  getOffsetStringFor(instantArg: InstantArg): string {
-    getTimeZoneSlots(this) // validate `this`
-
-    const epochNano = toInstantSlots(instantArg).epochNanoseconds
-    const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
-    const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
-
-    return formatOffsetNano(offsetNano)
-  }
-
-  getPlainDateTimeFor(
-    instantArg: InstantArg,
-    calendarArg: CalendarArg = isoCalendarId
-  ): PlainDateTime {
-    getTimeZoneSlots(this) // validate `this`
-
-    const epochNano = toInstantSlots(instantArg).epochNanoseconds
-    const calendarOps = createAdapterOps(this, simpleTimeZoneAdapters) // for accessing own methods
-    const offsetNano = calendarOps.getOffsetNanosecondsFor(epochNano)
-
-    return createPlainDateTime(
-      createPlainDateTimeSlots(
-        epochNanoToIso(epochNano, offsetNano),
-        refineCalendarSlot(calendarArg),
       )
-    )
+    },
+    getInstantFor(
+      slots: TimeZoneClassSlots,
+      plainDateTimeArg: PlainDateTimeArg,
+      options?: EpochDisambigOptions,
+    ): Instant {
+      const isoFields = toPlainDateTimeSlots(plainDateTimeArg)
+      const epochDisambig = refineEpochDisambigOptions(options)
+      const calendarOps = createAdapterOps(this) // for accessing own methods
+
+      return createInstant(
+        createInstantSlots(getSingleInstantFor(calendarOps, isoFields, epochDisambig))
+      )
+    },
+    getNextTransition({ native }: TimeZoneClassSlots, instantArg: InstantArg): Instant | null {
+      return getImplTransition(1, native, instantArg)
+    },
+    getPreviousTransition({ native }: TimeZoneClassSlots, instantArg: InstantArg): Instant | null {
+      return getImplTransition(-1, native, instantArg)
+    },
+    equals(slots: TimeZoneClassSlots, otherArg: TimeZoneArg): boolean {
+      // weird: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
+      return isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
+    },
+    toString(slots: TimeZoneClassSlots): string {
+      return slots.id
+    },
+    toJSON(slots: TimeZoneClassSlots): string {
+      return slots.id
+    }
+  },
+  {
+    from(arg: TimeZoneArg): TimeZoneProtocol {
+      const timeZoneSlot = refineTimeZoneSlot(arg)
+      return typeof timeZoneSlot === 'string'
+        ? new TimeZone(timeZoneSlot)
+        : timeZoneSlot
+    }
   }
-
-  getInstantFor(
-    plainDateTimeArg: PlainDateTimeArg,
-    options?: EpochDisambigOptions
-  ): Instant {
-    getTimeZoneSlots(this) // validate `this`
-
-    const isoFields = toPlainDateTimeSlots(plainDateTimeArg)
-    const epochDisambig = refineEpochDisambigOptions(options)
-    const calendarOps = createAdapterOps(this) // for accessing own methods
-
-    return createInstant(
-      createInstantSlots(getSingleInstantFor(calendarOps, isoFields, epochDisambig))
-    )
-  }
-
-  getNextTransition(instantArg: InstantArg): Instant | null {
-    const { native } = getTimeZoneSlots(this)
-    return getImplTransition(1, native, instantArg)
-  }
-
-  getPreviousTransition(instantArg: InstantArg): Instant | null {
-    const { native } = getTimeZoneSlots(this)
-    return getImplTransition(-1, native, instantArg)
-  }
-
-  equals(otherArg: TimeZoneArg): boolean {
-    getTimeZoneSlots(this) // validate `this`
-    // weird: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
-    return isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
-  }
-
-  // TODO: more DRY
-  toString(): string {
-    return getTimeZoneSlots(this).id
-  }
-
-  // TODO: more DRY
-  toJSON(): string {
-    return getTimeZoneSlots(this).id
-  }
-
-  // TODO: more DRY
-  get id(): string {
-    return getTimeZoneSlots(this).id
-  }
-
-  // TODO: more DRY with constructor, Calendar
-  static from(arg: TimeZoneArg): TimeZoneProtocol {
-    const timeZoneSlot = refineTimeZoneSlot(arg)
-    return typeof timeZoneSlot === 'string'
-      ? new TimeZone(timeZoneSlot)
-      : timeZoneSlot
-  }
-}
-
-defineStringTag(TimeZone.prototype, TimeZoneBranding)
+)
 
 // Utils
 // -------------------------------------------------------------------------------------------------
