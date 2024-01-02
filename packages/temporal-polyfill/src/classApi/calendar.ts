@@ -16,7 +16,7 @@ import { calendarMethods } from './mixins'
 import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
 import { CalendarProtocol } from './calendarProtocol'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
-import { BrandingSlots, CalendarBranding, createDurationSlots, createPlainDateSlots } from '../internal/slots'
+import { BrandingSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
 import * as errorMessages from '../internal/errorMessages'
 
 export type Calendar = any
@@ -27,12 +27,12 @@ export type CalendarClassSlots = BrandingSlots & {
 }
 
 export const Calendar = createSlotClass(
-  CalendarBranding,
+  'Calendar',
   (id: string): CalendarClassSlots => {
     id = normalizeCalendarId(requireString(id))
     const calendarNative = createNativeStandardOps(id)
     return {
-      branding: CalendarBranding,
+      branding: 'Calendar',
       id,
       native: calendarNative,
     }
@@ -159,5 +159,5 @@ export function createCalendar(slots: CalendarClassSlots): Calendar {
 }
 
 export function getCalendarSlots(calendar: Calendar): CalendarClassSlots {
-  return getSpecificSlots(CalendarBranding, calendar) as CalendarClassSlots
+  return getSpecificSlots('Calendar', calendar) as CalendarClassSlots
 }
