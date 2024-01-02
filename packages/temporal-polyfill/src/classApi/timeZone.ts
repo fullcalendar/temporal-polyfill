@@ -16,7 +16,7 @@ import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSl
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
-import { BrandingSlots, TimeZoneBranding, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
+import { BrandingSlots, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
 
 export type TimeZone = any
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
@@ -26,11 +26,11 @@ export type TimeZoneClassSlots = BrandingSlots & {
 }
 
 export const TimeZone = createSlotClass(
-  TimeZoneBranding,
+  'TimeZone',
   (timeZoneId: string): TimeZoneClassSlots => {
     const timeZoneNative = queryNativeTimeZone(requireString(timeZoneId))
     return {
-      branding: TimeZoneBranding,
+      branding: 'TimeZone',
       id: timeZoneNative.id,
       native: timeZoneNative,
     }
@@ -123,7 +123,7 @@ export function createTimeZone(slots: TimeZoneClassSlots): TimeZone { // not use
 }
 
 export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneClassSlots {
-  return getSpecificSlots(TimeZoneBranding, timeZone) as TimeZoneClassSlots
+  return getSpecificSlots('TimeZone', timeZone) as TimeZoneClassSlots
 }
 
 function getImplTransition(direction: -1 | 1, impl: NativeTimeZone, instantArg: InstantArg): Instant | null {

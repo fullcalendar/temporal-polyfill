@@ -18,7 +18,6 @@ export const ZonedDateTimeBranding = 'ZonedDateTime' as const
 export const InstantBranding = 'Instant' as const
 export const DurationBranding = 'Duration' as const
 export const CalendarBranding = 'Calendar' as const
-export const TimeZoneBranding = 'TimeZone' as const
 
 // Slot-creation helpers
 // -------------------------------------------------------------------------------------------------
