@@ -10,7 +10,7 @@ import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Calendar, CalendarArg } from './calendar'
 import { CalendarProtocol } from './calendarProtocol'
-import { dateGetters, neverValueOf } from './mixins'
+import { dateGetters, getCalendarFromSlots, neverValueOf } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -119,11 +119,7 @@ export const PlainDate = createSlotClass(
     getISOFields(slots: PlainDateSlots<CalendarSlot>): PublicDateSlots {
       return removeBranding(slots)
     },
-    getCalendar({ calendar }: PlainDateSlots<CalendarSlot>): CalendarProtocol {
-      return typeof calendar === 'string'
-        ? new Calendar(calendar)
-        : calendar
-    },
+    getCalendar: getCalendarFromSlots,
     valueOf: neverValueOf,
   },
   {

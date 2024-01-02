@@ -9,7 +9,7 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { Calendar, CalendarArg } from './calendar'
 import { CalendarProtocol } from './calendarProtocol'
-import { monthDayGetters, neverValueOf } from './mixins'
+import { getCalendarFromSlots, monthDayGetters, neverValueOf } from './mixins'
 import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from './calendarOpsQuery'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { PlainMonthDayBag, plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
@@ -59,11 +59,7 @@ export const PlainMonthDay = createSlotClass(
     getISOFields(slots: PlainMonthDaySlots<CalendarSlot>): PublicDateSlots {
       return removeBranding(slots)
     },
-    getCalendar({ calendar }: PlainMonthDaySlots<CalendarSlot>): CalendarProtocol {
-      return typeof calendar === 'string'
-        ? new Calendar(calendar)
-        : calendar
-    },
+    getCalendar: getCalendarFromSlots,
     valueOf: neverValueOf,
   },
   {

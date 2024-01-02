@@ -12,6 +12,7 @@ import { CalendarProtocol } from './calendarProtocol'
 import { CalendarSlot } from './slotsForClasses'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import * as errorMessages from '../internal/errorMessages'
+import { Calendar } from './calendar'
 
 // For Calendar
 // -------------------------------------------------------------------------------------------------
@@ -159,4 +160,10 @@ export const epochGetters = {
 
 export function neverValueOf() {
   throw new TypeError(errorMessages.forbiddenValueOf)
+}
+
+export function getCalendarFromSlots({ calendar }: { calendar: CalendarSlot }): Calendar {
+  return typeof calendar === 'string'
+    ? new Calendar(calendar)
+    : calendar
 }

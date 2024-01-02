@@ -29,7 +29,7 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { neverValueOf, dateGetters, timeGetters, epochGetters } from './mixins'
+import { neverValueOf, dateGetters, timeGetters, epochGetters, getCalendarFromSlots } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
@@ -203,11 +203,7 @@ export const ZonedDateTime = createSlotClass(
     getISOFields(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedIsoDateTimeSlots<CalendarSlot, TimeZoneSlot> {
       return getZonedIsoDateTimeSlots(createSimpleTimeZoneOps, slots)
     },
-    getCalendar({ calendar }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): CalendarProtocol {
-      return typeof calendar === 'string'
-        ? new Calendar(calendar)
-        : calendar
-    },
+    getCalendar: getCalendarFromSlots,
     getTimeZone({ timeZone }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): TimeZoneProtocol {
       return typeof timeZone === 'string'
         ? new TimeZone(timeZone)
