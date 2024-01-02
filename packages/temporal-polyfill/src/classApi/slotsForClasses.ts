@@ -57,7 +57,7 @@ export function createSlotClass(
   function curryMethod(method: any, methodName: string) {
     const newMethod = function(this: any, ...args: any[]) {
       const slots = getSlots(this)
-      if (slots?.branding !== branding) {
+      if (slots && slots.branding !== branding) {
         throw new TypeError(errorMessages.invalidCallingContext)
       }
       return method.call(this, slots, ...args)
