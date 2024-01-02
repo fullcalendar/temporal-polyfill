@@ -93,9 +93,7 @@ export const PlainTime = createSlotClass(
         plainTimeToPlainDateTime(slots, toPlainDateSlots(plainDateArg))
       )
     },
-    getISOFields(slots: PlainTimeSlots): IsoTimeFields {
-      return removeBranding(slots)
-    },
+    getISOFields: removeBranding,
     valueOf: neverValueOf,
   },
   {

@@ -130,9 +130,7 @@ export const PlainDateTime = createSlotClass(
         createPlainTimeSlots(slots),
       )
     },
-    getISOFields(slots: PlainDateTimeSlots<CalendarSlot>): PublicDateTimeSlots {
-      return removeBranding(slots)
-    },
+    getISOFields: removeBranding,
     getCalendar: getCalendarFromSlots,
     valueOf: neverValueOf,
   },

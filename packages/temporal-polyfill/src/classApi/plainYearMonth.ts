@@ -78,9 +78,7 @@ export const PlainYearMonth = createSlotClass(
         plainYearMonthToPlainDate(createDateModOps, slots, this, bag)
       )
     },
-    getISOFields(slots: PlainYearMonthSlots<CalendarSlot>): PublicDateSlots {
-      return removeBranding(slots)
-    },
+    getISOFields: removeBranding,
     getCalendar: getCalendarFromSlots,
     valueOf: neverValueOf,
   },

@@ -116,9 +116,7 @@ export const PlainDate = createSlotClass(
         plainDateToPlainMonthDay(createMonthDayRefineOps, slots, this)
       )
     },
-    getISOFields(slots: PlainDateSlots<CalendarSlot>): PublicDateSlots {
-      return removeBranding(slots)
-    },
+    getISOFields: removeBranding,
     getCalendar: getCalendarFromSlots,
     valueOf: neverValueOf,
   },

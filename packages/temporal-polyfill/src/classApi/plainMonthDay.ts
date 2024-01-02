@@ -56,9 +56,7 @@ export const PlainMonthDay = createSlotClass(
         plainMonthDayToPlainDate(createDateModOps, slots, this, bag)
       )
     },
-    getISOFields(slots: PlainMonthDaySlots<CalendarSlot>): PublicDateSlots {
-      return removeBranding(slots)
-    },
+    getISOFields: removeBranding,
     getCalendar: getCalendarFromSlots,
     valueOf: neverValueOf,
   },
