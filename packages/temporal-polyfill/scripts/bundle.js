@@ -181,19 +181,6 @@ function buildTerserPlugin({
     mangle: mangleProps && {
       keep_fnames: humanReadable,
       keep_classnames: humanReadable,
-      reserved: [
-        'Calendar',
-        'Duration',
-        'Instant',
-        'Now',
-        'PlainDate',
-        'PlainDateTime',
-        'PlainMonthDay',
-        'PlainTime',
-        'PlainYearMonth',
-        'TimeZone',
-        'ZonedDateTime',
-      ],
       properties: {
         reserved: manglePropsExcept,
         keep_quoted: true,
