@@ -3,7 +3,7 @@ import { requireDefined, requireString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
 import { excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
-import { createSlotClass, createViaSlots, getSpecificSlots } from './slotsForClasses'
+import { createSlotClass } from './slotsForClasses'
 import { refineCalendarSlot } from './slotsForClasses'
 import { PlainDateTime } from './plainDateTime'
 import { ZonedDateTime } from './zonedDateTime'
@@ -26,7 +26,7 @@ export type CalendarClassSlots = BrandingSlots & {
   native: NativeStandardOps
 }
 
-export const Calendar = createSlotClass(
+export const [Calendar, createCalendar] = createSlotClass(
   'Calendar',
   (id: string): CalendarClassSlots => {
     id = normalizeCalendarId(requireString(id))
@@ -150,14 +150,3 @@ export const Calendar = createSlotClass(
     }
   }
 )
-
-// Utils
-// -------------------------------------------------------------------------------------------------
-
-export function createCalendar(slots: CalendarClassSlots): Calendar {
-  return createViaSlots(Calendar, slots)
-}
-
-export function getCalendarSlots(calendar: Calendar): CalendarClassSlots {
-  return getSpecificSlots('Calendar', calendar) as CalendarClassSlots
-}

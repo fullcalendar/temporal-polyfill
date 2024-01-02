@@ -4,11 +4,10 @@ import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOpti
 import { UnitName } from '../internal/units'
 import { NumSign, bindArgs, isObjectlike } from '../internal/utils'
 import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getId, removeBranding, BrandingSlots } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, PublicDateTimeSlots, createSlotClass } from './slotsForClasses'
+import { getSlots, rejectInvalidBag, createSlotClass } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
-import { Calendar, CalendarArg } from './calendar'
-import { CalendarProtocol } from './calendarProtocol'
+import { CalendarArg } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
@@ -36,7 +35,7 @@ import { LocalesArg } from '../internal/formatIntl'
 export type PlainDateTime = any & DateFields & TimeFields
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
-export const PlainDateTime = createSlotClass(
+export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
   bindArgs(constructPlainDateTimeSlots, refineCalendarSlot),
   {
@@ -151,14 +150,6 @@ export const PlainDateTime = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createPlainDateTime(slots: PlainDateTimeSlots<CalendarSlot>): PlainDateTime {
-  return createViaSlots(PlainDateTime, slots)
-}
-
-export function getPlainDateTimeSlots(plainDateTime: PlainDateTime): PlainDateTimeSlots<CalendarSlot> {
-  return getSpecificSlots(PlainDateTimeBranding, plainDateTime) as PlainDateTimeSlots<CalendarSlot>
-}
 
 export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOptions): PlainDateTimeSlots<CalendarSlot> {
   options = copyOptions(options)

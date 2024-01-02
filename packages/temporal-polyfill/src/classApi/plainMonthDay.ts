@@ -4,11 +4,10 @@ import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { bindArgs, isObjectlike } from '../internal/utils'
 import { PlainMonthDayBranding, PlainMonthDaySlots, getId, removeBranding } from '../internal/slots'
-import { PublicDateSlots, createSlotClass, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
-import { Calendar, CalendarArg } from './calendar'
-import { CalendarProtocol } from './calendarProtocol'
+import { CalendarArg } from './calendar'
 import { getCalendarFromSlots, monthDayGetters, neverValueOf } from './mixins'
 import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from './calendarOpsQuery'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
@@ -23,7 +22,7 @@ import { prepPlainMonthDayFormat } from './dateTimeFormat'
 export type PlainMonthDay = any & MonthDayFieldsIntl
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
-export const PlainMonthDay = createSlotClass(
+export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] = createSlotClass(
   PlainMonthDayBranding,
   bindArgs(constructPlainMonthDaySlots, refineCalendarSlot),
   {
@@ -71,14 +70,6 @@ export const PlainMonthDay = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createPlainMonthDay(slots: PlainMonthDaySlots<CalendarSlot>): PlainMonthDay {
-  return createViaSlots(PlainMonthDay, slots)
-}
-
-export function getPlainMonthDaySlots(plainMonthDay: PlainMonthDay): PlainMonthDaySlots<CalendarSlot> {
-  return getSpecificSlots(PlainMonthDayBranding, plainMonthDay) as PlainMonthDaySlots<CalendarSlot>
-}
 
 export function toPlainMonthDaySlots(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDaySlots<CalendarSlot> {
   options = copyOptions(options)

@@ -8,7 +8,7 @@ import { NumSign, isObjectlike } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
 import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots } from '../internal/slots'
-import { createSlotClass, createViaSlots, getSlots, getSpecificSlots } from './slotsForClasses'
+import { createSlotClass, getSlots } from './slotsForClasses'
 import { durationGetters, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { ZonedDateTimeArg } from './zonedDateTime'
@@ -31,7 +31,7 @@ import { DurationFields } from '../internal/durationFields'
 export type Duration = any & DurationFields
 export type DurationArg = Duration | DurationBag | string
 
-export const Duration = createSlotClass(
+export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   DurationBranding,
   constructDurationSlots,
   {
@@ -105,14 +105,6 @@ export const Duration = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createDuration(slots: DurationSlots): Duration {
-  return createViaSlots(Duration, slots)
-}
-
-export function getDurationSlots(duration: Duration): DurationSlots {
-  return getSpecificSlots(DurationBranding, duration) as DurationSlots
-}
 
 export function toDurationSlots(arg: DurationArg): DurationSlots {
   if (isObjectlike(arg)) {

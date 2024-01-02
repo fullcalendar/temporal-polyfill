@@ -4,10 +4,9 @@ import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, bindArgs, isObjectlike } from '../internal/utils'
 import { PlainYearMonthBranding, PlainYearMonthSlots, getId, removeBranding } from '../internal/slots'
-import { createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, PublicDateSlots, createSlotClass } from './slotsForClasses'
+import { getSlots, rejectInvalidBag, createSlotClass } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
-import { Calendar, CalendarArg } from './calendar'
-import { CalendarProtocol } from './calendarProtocol'
+import { CalendarArg } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
 import { getCalendarFromSlots, neverValueOf, yearMonthGetters } from './mixins'
 import { createDateModOps, createYearMonthDiffOps, createYearMonthModOps, createYearMonthMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
@@ -25,7 +24,7 @@ import { prepPlainYearMonthFormat } from './dateTimeFormat'
 export type PlainYearMonth = any & YearMonthFieldsIntl
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
-export const PlainYearMonth = createSlotClass(
+export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = createSlotClass(
   PlainYearMonthBranding,
   bindArgs(constructPlainYearMonthSlots, refineCalendarSlot),
   {
@@ -99,14 +98,6 @@ export const PlainYearMonth = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createPlainYearMonth(slots: PlainYearMonthSlots<CalendarSlot>): PlainYearMonth {
-  return createViaSlots(PlainYearMonth, slots)
-}
-
-export function getPlainYearMonthSlots(plainYearMonth: PlainYearMonth): PlainYearMonthSlots<CalendarSlot> {
-  return getSpecificSlots(PlainYearMonthBranding, plainYearMonth) as PlainYearMonthSlots<CalendarSlot>
-}
 
 export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: OverflowOptions) {
   options = copyOptions(options)

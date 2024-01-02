@@ -15,11 +15,10 @@ import { NumSign, bindArgs, isObjectlike, mapProps } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
 import { ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, getId } from '../internal/slots'
-import { createSlotClass, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
-import { Calendar, CalendarArg } from './calendar'
-import { CalendarProtocol } from './calendarProtocol'
+import { CalendarArg } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { Instant, createInstant } from './instant'
 import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
@@ -47,7 +46,7 @@ import { prepZonedDateTimeFormat } from './dateTimeFormat'
 export type ZonedDateTime = any
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
 
-export const ZonedDateTime = createSlotClass(
+export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
   bindArgs(constructZonedDateTimeSlots, refineCalendarSlot, refineTimeZoneSlot),
   {
@@ -247,14 +246,6 @@ function slotsToIsoFields(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createZonedDateTime(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedDateTime {
-  return createViaSlots(ZonedDateTime, slots)
-}
-
-export function getZonedDateTimeSlots(zonedDateTime: ZonedDateTime): ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
-  return getSpecificSlots(ZonedDateTimeBranding, zonedDateTime) as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
-}
 
 export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedFieldOptions): ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
   options = copyOptions(options)

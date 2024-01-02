@@ -5,7 +5,7 @@ import { NumSign, isObjectlike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots } from '../internal/slots'
-import { createSlotClass, createViaSlots, getSlots, getSpecificSlots } from './slotsForClasses'
+import { createSlotClass, getSlots } from './slotsForClasses'
 import { CalendarSlot, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
@@ -27,7 +27,7 @@ import { prepInstantFormat } from './dateTimeFormat'
 export type Instant = any
 export type InstantArg = Instant | string
 
-export const Instant = createSlotClass(
+export const [Instant, createInstant, getInstantSlots] = createSlotClass(
   InstantBranding,
   constructInstantSlots,
   epochGetters,
@@ -116,14 +116,6 @@ export const Instant = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createInstant(slots: InstantSlots): Instant {
-  return createViaSlots(Instant, slots)
-}
-
-export function getInstantSlots(instant: Instant): InstantSlots {
-  return getSpecificSlots(InstantBranding, instant) as InstantSlots
-}
 
 export function toInstantSlots(arg: InstantArg): InstantSlots {
   if (isObjectlike(arg)) {

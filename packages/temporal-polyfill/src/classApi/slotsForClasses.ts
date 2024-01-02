@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { defineGetters, defineProps, defineStringTag, isObjectlike, mapProps } from '../internal/utils'
+import { bindArgs, defineGetters, defineProps, defineStringTag, isObjectlike, mapProps } from '../internal/utils'
 import { CalendarArg } from './calendar'
 import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
 import { TimeZoneArg } from './timeZone'
@@ -17,13 +17,13 @@ const slotsMap = new WeakMap<any, BrandingSlots>()
 export const getSlots = slotsMap.get.bind(slotsMap)
 export const setSlots = slotsMap.set.bind(slotsMap)
 
-export function createViaSlots(Class: any, slots: BrandingSlots): any {
+function createViaSlots(Class: any, slots: BrandingSlots): any {
   const instance = Object.create(Class.prototype)
   setSlots(instance, slots)
   return instance
 }
 
-export function getSpecificSlots(branding: string, obj: any): BrandingSlots {
+function getSpecificSlots(branding: string, obj: any): BrandingSlots {
   const slots = getSlots(obj)
   if (!slots || slots.branding !== branding) {
     throw new TypeError(errorMessages.invalidCallingContext)
@@ -77,7 +77,12 @@ export function createSlotClass(
     // enumerable: false,
     configurable: true,
   })
-  return Class
+
+  return [
+    Class,
+    bindArgs(createViaSlots, branding),
+    bindArgs(getSpecificSlots, branding),
+  ]
 }
 
 // Reject

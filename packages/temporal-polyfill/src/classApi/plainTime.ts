@@ -11,7 +11,7 @@ import {
 import { UnitName } from '../internal/units'
 import { NumSign, isObjectlike } from '../internal/utils'
 import { BrandingSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeSlots, removeBranding } from '../internal/slots'
-import { createSlotClass, createViaSlots, getSlots, getSpecificSlots, rejectInvalidBag, setSlots } from './slotsForClasses'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
@@ -35,7 +35,7 @@ import { prepPlainTimeFormat } from './dateTimeFormat'
 export type PlainTime = any & TimeFields
 export type PlainTimeArg = PlainTime | PlainTimeBag | string
 
-export const PlainTime = createSlotClass(
+export const [PlainTime, createPlainTime] = createSlotClass(
   PlainTimeBranding,
   constructPlainTimeSlots,
   timeGetters,
@@ -113,14 +113,6 @@ export const PlainTime = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createPlainTime(slots: PlainTimeSlots): PlainTime {
-  return createViaSlots(PlainTime, slots)
-}
-
-export function getPlainTimeSlots(plainTime: PlainTime): PlainTimeSlots {
-  return getSpecificSlots(PlainTimeBranding, plainTime) as PlainTimeSlots
-}
 
 export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): PlainTimeSlots {
   if (isObjectlike(arg)) {

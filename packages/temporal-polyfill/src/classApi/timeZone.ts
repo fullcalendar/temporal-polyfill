@@ -8,7 +8,6 @@ import { getSingleInstantFor } from '../internal/timeZoneOps'
 import { epochNanoToIso } from '../internal/epochAndTime'
 import { createSlotClass, refineCalendarSlot } from './slotsForClasses'
 import { refineTimeZoneSlot } from './slotsForClasses'
-import { createViaSlots, getSpecificSlots } from './slotsForClasses'
 import { ZonedDateTime } from './zonedDateTime'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
@@ -25,7 +24,7 @@ export type TimeZoneClassSlots = BrandingSlots & {
   native: NativeTimeZone
 }
 
-export const TimeZone = createSlotClass(
+export const [TimeZone, createTimeZone] = createSlotClass(
   'TimeZone',
   (timeZoneId: string): TimeZoneClassSlots => {
     const timeZoneNative = queryNativeTimeZone(requireString(timeZoneId))
@@ -117,14 +116,6 @@ export const TimeZone = createSlotClass(
 
 // Utils
 // -------------------------------------------------------------------------------------------------
-
-export function createTimeZone(slots: TimeZoneClassSlots): TimeZone { // not used
-  return createViaSlots(TimeZone, slots)
-}
-
-export function getTimeZoneSlots(timeZone: TimeZone): TimeZoneClassSlots {
-  return getSpecificSlots('TimeZone', timeZone) as TimeZoneClassSlots
-}
 
 function getImplTransition(direction: -1 | 1, impl: NativeTimeZone, instantArg: InstantArg): Instant | null {
   const epochNano = impl.getTransition(toInstantSlots(instantArg).epochNanoseconds, direction)
