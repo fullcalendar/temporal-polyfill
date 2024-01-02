@@ -15,21 +15,7 @@ const slotsMap = new WeakMap<any, BrandingSlots>()
 
 // TODO: allow type-input, so caller doesn't need to cast so much
 export const getSlots = slotsMap.get.bind(slotsMap)
-export const setSlots = slotsMap.set.bind(slotsMap)
-
-function createViaSlots(Class: any, slots: BrandingSlots): any {
-  const instance = Object.create(Class.prototype)
-  setSlots(instance, slots)
-  return instance
-}
-
-function getSpecificSlots(branding: string, obj: any): BrandingSlots {
-  const slots = getSlots(obj)
-  if (!slots || slots.branding !== branding) {
-    throw new TypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
-}
+const setSlots = slotsMap.set.bind(slotsMap)
 
 // Class
 // -------------------------------------------------------------------------------------------------
@@ -80,8 +66,22 @@ export function createSlotClass(
 
   return [
     Class,
-    bindArgs(createViaSlots, branding),
-    bindArgs(getSpecificSlots, branding),
+
+    // createViaSlots
+    (slots: BrandingSlots) => {
+      const instance = Object.create(Class.prototype)
+      setSlots(instance, slots)
+      return instance
+    },
+
+    // getSpecificSlots
+    (obj: any) => {
+      const slots = getSlots(obj)
+      if (!slots || slots.branding !== branding) {
+        throw new TypeError(errorMessages.invalidCallingContext)
+      }
+      return slots
+    },
   ]
 }
 
