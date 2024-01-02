@@ -17,7 +17,7 @@ yargs(hideBin(process.argv))
     '*',
     'Run test262 tests',
     (builder) => {
-      builder.option('update-expected-failure-files', {
+      builder.option('update', {
         requiresArg: false,
         default: false,
         type: 'boolean',
@@ -65,7 +65,7 @@ yargs(hideBin(process.argv))
         )),
         testGlobs: parsedArgv._,
         timeoutMsecs: parsedArgv.timeout || 86400000,
-        updateExpectedFailureFiles: parsedArgv.updateExpectedFailureFiles,
+        updateExpectedFailureFiles: parsedArgv.update,
         maxFailures: parsedArgv.max,
         fullPath: true
       });
