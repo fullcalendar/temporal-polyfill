@@ -6,6 +6,7 @@ export const expectedFinite = (entityName: string, num: number) => `Non-finite $
 export const forbiddenBigIntToNumber = (entityName: string) => `Cannot convert bigint to ${entityName}`
 export const invalidBigInt = (arg: any) => `Invalid bigint: ${arg}`
 export const forbiddenSymbolToString = 'Cannot convert Symbol to string'
+export const forbiddenNullish = 'Cannot be null or undefined'
 export const expectedStringOrUndefined = 'Expected string or undefined'
 export const expectedIntegerOrUndefined = 'Expected integer or undefined'
 export const invalidObject = 'Invalid object'

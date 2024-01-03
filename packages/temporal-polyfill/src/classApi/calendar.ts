@@ -1,5 +1,5 @@
 import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/calendarFields'
-import { requireDefined, requireString } from '../internal/cast'
+import { requireNonNullish, requireString } from '../internal/cast'
 import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
 import { excludeUndefinedProps } from '../internal/utils'
 import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
@@ -115,8 +115,8 @@ const calendarMethods = {
     fields1: Record<string, unknown>
   ): Record<string, unknown> {
     return native.mergeFields(
-      excludeUndefinedProps(requireDefined(fields0)),
-      excludeUndefinedProps(requireDefined(fields1)),
+      excludeUndefinedProps(requireNonNullish(fields0)),
+      excludeUndefinedProps(requireNonNullish(fields1)),
     )
   },
 }

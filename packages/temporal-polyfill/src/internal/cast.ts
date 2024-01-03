@@ -65,12 +65,9 @@ export function requireNumberIsPositive(num: number, entityName: string = 'numbe
   return num
 }
 
-/*
-Disallows undefined/null
-*/
-export function requireDefined<T>(o: T): T {
+export function requireNonNullish<T>(o: T): T {
   if (o == null) {
-    throw TypeError('Cannot be null or undefined')
+    throw new TypeError(errorMessages.forbiddenNullish)
   }
   return o
 }
