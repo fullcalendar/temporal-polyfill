@@ -50,6 +50,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
   bindArgs(constructZonedDateTimeSlots, refineCalendarSlot, refineTimeZoneSlot),
   {
+    ...epochGetters,
+    ...calendarIdGetters,
+    ...adaptToIsoFields(dateGetters),
+    ...adaptToIsoFields(timeGetters),
     hoursInDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
       return computeHoursInDay(createTimeZoneOps, slots)
     },
@@ -60,10 +64,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     timeZoneId(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
       return getId(slots.timeZone)
     },
-    ...calendarIdGetters,
-    ...adaptToIsoFields(dateGetters),
-    ...adaptToIsoFields(timeGetters),
-    ...epochGetters,
   },
   {
     with(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, mod: DateTimeBag, options?: ZonedFieldOptions): ZonedDateTime {

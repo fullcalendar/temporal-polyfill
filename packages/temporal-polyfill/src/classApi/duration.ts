@@ -35,13 +35,13 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   DurationBranding,
   constructDurationSlots,
   {
+    ...durationGetters,
     blank(slots: DurationSlots): boolean {
       return queryDurationBlank(slots)
     },
     sign(slots: DurationSlots): NumSign {
       return queryDurationSign(slots)
     },
-    ...durationGetters,
   },
   {
     with(slots: DurationSlots, mod: DurationBag): Duration {

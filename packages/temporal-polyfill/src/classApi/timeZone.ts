@@ -16,7 +16,7 @@ import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
 import { BrandingSlots, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
-import { idGetters } from './mixins'
+import { idGetters, stringLikeMethods } from './mixins'
 
 export type TimeZone = any
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
@@ -37,6 +37,7 @@ export const [TimeZone, createTimeZone] = createSlotClass(
   },
   idGetters,
   {
+    ...stringLikeMethods,
     getPossibleInstantsFor({ native }: TimeZoneClassSlots, plainDateTimeArg: PlainDateTimeArg): Instant[]  {
       return native.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
         .map((epochNano: DayTimeNano) => {
@@ -94,12 +95,6 @@ export const [TimeZone, createTimeZone] = createSlotClass(
       // weird: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
       return isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
     },
-    toString(slots: TimeZoneClassSlots): string {
-      return slots.id
-    },
-    toJSON(slots: TimeZoneClassSlots): string {
-      return slots.id
-    }
   },
   {
     from(arg: TimeZoneArg): TimeZoneProtocol {
