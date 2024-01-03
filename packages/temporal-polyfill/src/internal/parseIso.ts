@@ -265,20 +265,11 @@ export function parseCalendarId(s: string): string {
 
 export function parseTimeZoneId(s: string): string {
   const parsed = parseDateTimeLike(s)
-
-  if (parsed !== undefined) {
-    if (parsed.timeZone) {
-      return parsed.timeZone
-    }
-    if (parsed.hasZ) {
-      return utcTimeZoneId
-    }
-    if (parsed.offset) {
-      return parsed.offset
-    }
-  }
-
-  return s
+  return parsed && (
+    parsed.timeZone ||
+    (parsed.hasZ && utcTimeZoneId) ||
+    parsed.offset
+  ) || s
 }
 
 // Finalizing 'organized' structs to slots
