@@ -4,7 +4,7 @@ import {
   TimeDisplayOptions,
   TotalUnitOptionsWithRel,
 } from '../internal/optionsRefine'
-import { NumSign, isObjectlike } from '../internal/utils'
+import { NumSign, isObjectLike } from '../internal/utils'
 import { UnitName } from '../internal/units'
 import { DurationBag } from '../internal/calendarFields'
 import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots } from '../internal/slots'
@@ -105,7 +105,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
 // -------------------------------------------------------------------------------------------------
 
 export function toDurationSlots(arg: DurationArg): DurationSlots {
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = getSlots(arg)
 
     if (slots && slots.branding === DurationBranding) {
@@ -122,7 +122,7 @@ function refinePublicRelativeTo(
   relativeTo: ZonedDateTimeArg | PlainDateArg | undefined,
 ): MarkerSlots<CalendarSlot, TimeZoneSlot> | undefined {
   if (relativeTo !== undefined) {
-    if (isObjectlike(relativeTo)) {
+    if (isObjectLike(relativeTo)) {
       const slots = (getSlots(relativeTo) || {}) as Partial<BrandingSlots>
 
       switch (slots.branding) {

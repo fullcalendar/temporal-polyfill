@@ -1,7 +1,7 @@
 import { DateBag, DateFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
-import { NumSign, bindArgs, isObjectlike } from '../internal/utils'
+import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
 import { BrandingSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots, getId, removeBranding } from '../internal/slots'
 import { CalendarSlot, createSlotClass, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -88,7 +88,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options: TimeZoneArg | { timeZone: TimeZoneArg, plainTime?: PlainTimeArg },
     ): ZonedDateTime {
       const optionsObj =
-        (!isObjectlike(options) || options instanceof TimeZone)
+        (!isObjectLike(options) || options instanceof TimeZone)
           ? { timeZone: options }
           : options as { timeZone: TimeZoneArg, plainTime?: PlainTimeArg }
 
@@ -136,7 +136,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
 export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): PlainDateSlots<CalendarSlot> {
   options = copyOptions(options)
 
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
 
     switch (slots.branding) {

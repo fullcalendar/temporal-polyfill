@@ -1,7 +1,7 @@
 import { LocalesArg } from '../internal/formatIntl'
 import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../internal/optionsRefine'
 import { requireObjectlike } from '../internal/cast'
-import { NumSign, isObjectlike } from '../internal/utils'
+import { NumSign, isObjectLike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { InstantBranding, InstantSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots } from '../internal/slots'
@@ -118,7 +118,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
 // -------------------------------------------------------------------------------------------------
 
 export function toInstantSlots(arg: InstantArg): InstantSlots {
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = getSlots(arg)
     if (slots) {
       switch (slots.branding) {

@@ -2,7 +2,7 @@ import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { LocalesArg } from '../internal/formatIntl'
 import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
-import { NumSign, bindArgs, isObjectlike } from '../internal/utils'
+import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
 import { PlainYearMonthBranding, PlainYearMonthSlots, getId, removeBranding } from '../internal/slots'
 import { getSlots, rejectInvalidBag, createSlotClass } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
@@ -98,7 +98,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = cr
 export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: OverflowOptions) {
   options = copyOptions(options)
 
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = getSlots(arg)
 
     if (slots && slots.branding === PlainYearMonthBranding) {

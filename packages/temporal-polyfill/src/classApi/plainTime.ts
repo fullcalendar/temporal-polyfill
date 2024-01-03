@@ -9,7 +9,7 @@ import {
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
-import { NumSign, isObjectlike } from '../internal/utils'
+import { NumSign, isObjectLike } from '../internal/utils'
 import { BrandingSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeSlots, removeBranding } from '../internal/slots'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
@@ -113,7 +113,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
 // -------------------------------------------------------------------------------------------------
 
 export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): PlainTimeSlots {
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
 
     switch (slots.branding) {

@@ -11,7 +11,7 @@ import {
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
-import { NumSign, bindArgs, isObjectlike, mapProps } from '../internal/utils'
+import { NumSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
 import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
 import { ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, getId } from '../internal/slots'
@@ -245,7 +245,7 @@ function slotsToIsoFields(
 export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedFieldOptions): ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
   options = copyOptions(options)
 
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = getSlots(arg)
 
     if (slots && slots.branding === ZonedDateTimeBranding) {

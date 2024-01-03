@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { createGetterDescriptors, createNameDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectlike, mapProps } from '../internal/utils'
+import { createGetterDescriptors, createNameDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectLike, mapProps } from '../internal/utils'
 import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
@@ -105,7 +105,7 @@ export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
 export type CalendarSlot = CalendarProtocol | string
 
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
-  if (isObjectlike(calendarArg)) {
+  if (isObjectLike(calendarArg)) {
     // look at other date-like objects
     const { calendar } = (getSlots(calendarArg) || {}) as { calendar?: CalendarSlot }
     if (calendar) {
@@ -139,7 +139,7 @@ export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }): Cal
 export type TimeZoneSlot = TimeZoneProtocol | string
 
 export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const { timeZone } = (getSlots(arg) || {}) as { timeZone?: TimeZoneSlot }
 
     if (timeZone) {

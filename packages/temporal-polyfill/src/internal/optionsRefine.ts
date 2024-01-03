@@ -1,7 +1,7 @@
 import { DurationFields, durationFieldIndexes } from './durationFields'
 import { toString, requireObjectlike, toInteger, requirePropDefined } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
-import { BoundArg, bindArgs, clampEntity, isObjectlike } from './utils'
+import { BoundArg, bindArgs, clampEntity, isObjectLike } from './utils'
 import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './options'
 import * as errorMessages from './errorMessages'
 
@@ -527,7 +527,7 @@ export function copyOptions<O>(options: O): O {
   if (options === undefined) {
     return undefined as any
   }
-  if (isObjectlike(options)) {
+  if (isObjectLike(options)) {
     return Object.assign(Object.create(null), options)
   }
   throw new TypeError(errorMessages.invalidObject)

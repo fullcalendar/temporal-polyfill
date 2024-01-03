@@ -26,10 +26,10 @@ export type Callable = (...args: any[]) => any
 
 export type Classlike = any
 
-const objectlikeRE = /object|function/
+const objectLikeRE = /object|function/
 
-export function isObjectlike(arg: unknown): arg is {} {
-  return arg !== null && objectlikeRE.test(typeof arg)
+export function isObjectLike(arg: unknown): arg is {} {
+  return arg !== null && objectLikeRE.test(typeof arg)
 }
 
 /*

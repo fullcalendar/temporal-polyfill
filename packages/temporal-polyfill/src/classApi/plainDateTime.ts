@@ -2,7 +2,7 @@ import { DateFields, DateTimeBag, TimeFields } from '../internal/calendarFields'
 import { isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
-import { NumSign, bindArgs, isObjectlike } from '../internal/utils'
+import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
 import { PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getId, removeBranding, BrandingSlots } from '../internal/slots'
 import { getSlots, rejectInvalidBag, createSlotClass } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
@@ -152,7 +152,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
 export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOptions): PlainDateTimeSlots<CalendarSlot> {
   options = copyOptions(options)
 
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
 
     switch (slots.branding) {

@@ -397,7 +397,6 @@ const durationRegExp = createRegExp(
 
 // Maybe-parsing
 // -------------------------------------------------------------------------------------------------
-// TODO: use new `Falsy` type instead of ternary operator?
 
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
   const parts = dateTimeRegExp.exec(s)

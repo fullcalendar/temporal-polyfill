@@ -1,11 +1,11 @@
-import { Callable, bindArgs, isObjectlike } from './utils'
+import { Callable, bindArgs, isObjectLike } from './utils'
 import * as errorMessages from './errorMessages'
 
 // Require
 // -------------------------------------------------------------------------------------------------
 
 export function requireObjectlike<O extends {}>(arg: O): O {
-  if (!isObjectlike(arg)) {
+  if (!isObjectLike(arg)) {
     throw new TypeError(errorMessages.invalidObject)
   }
   return arg
@@ -97,7 +97,7 @@ export function toString(arg: string): string {
 see ToPrimitiveAndRequireString
 */
 export function toStringViaPrimitive(arg: string, entityName?: string): string {
-  if (isObjectlike(arg)) {
+  if (isObjectLike(arg)) {
     return String(arg)
   }
   return requireString(arg, entityName)
