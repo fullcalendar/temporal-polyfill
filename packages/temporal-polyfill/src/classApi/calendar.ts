@@ -12,7 +12,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { NativeStandardOps } from '../internal/calendarNative'
-import { calendarFieldMethods, idGetters, stringLikeMethods } from './mixins'
+import { calendarFieldMethods } from './mixins'
 import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bag'
 import { BrandingSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
@@ -27,7 +27,12 @@ export type CalendarClassSlots = BrandingSlots & {
 }
 
 const calendarMethods = {
-  ...stringLikeMethods,
+  toString(slots: CalendarClassSlots) {
+    return slots.id
+  },
+  toJSON(slots: CalendarClassSlots) {
+    return slots.id
+  },
   ...calendarFieldMethods,
   dateAdd(
     { id, native }: CalendarClassSlots,
@@ -132,7 +137,11 @@ export const [Calendar] = createSlotClass(
       native: calendarNative,
     }
   },
-  idGetters,
+  {
+    id(slots: CalendarClassSlots) {
+      return slots.id
+    }
+  },
   calendarMethods,
   {
     from(arg: CalendarArg): CalendarProtocol {

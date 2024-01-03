@@ -78,19 +78,6 @@ export const calendarIdGetters = {
     return getId(slots.calendar)
   },
 }
-export const idGetters = {
-  id(slots: any) {
-    return slots.id
-  }
-}
-export const stringLikeMethods = {
-  toString(slots: any) {
-    return slots.id
-  },
-  toJSON(slots: any) {
-    return slots.id
-  },
-}
 
 // Calendar "Simple" Ops
 // -------------------------------------------------------------------------------------------------
