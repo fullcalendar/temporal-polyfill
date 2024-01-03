@@ -1,6 +1,10 @@
 import { Overflow } from './options'
 import * as errorMessages from './errorMessages'
 
+export type FilterPropValues<P, F> = {
+  [K in keyof P as (P[K] extends F ? K : never)]: P[K]
+}
+
 export function bindArgs<BA extends any[], DA extends any[], R>(
   f: (...args: [...BA, ...DA]) => R,
   ...boundArgs: BA
@@ -167,6 +171,15 @@ export function hasAllPropsByName<P extends {}>(
   return true
 }
 
+export function allFieldsEqual(fieldNames: string[], obj0: any, obj1: any): boolean {
+  for (const fieldName of fieldNames) {
+    if (obj0[fieldName] !== obj1[fieldName]) {
+      return false
+    }
+  }
+  return true
+}
+
 // interface MapInterface<K, V> {
 //   has(key: K): boolean
 //   get(key: K): V,
@@ -267,15 +280,6 @@ min/max are inclusive
 */
 export function clampNumber(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
-}
-
-export function allFieldsEqual(fieldNames: string[], obj0: any, obj1: any): boolean {
-  for (const fieldName of fieldNames) {
-    if (obj0[fieldName] !== obj1[fieldName]) {
-      return false
-    }
-  }
-  return true
 }
 
 export function clampEntity(
@@ -381,10 +385,4 @@ export function roundHalfEven(num: number): number {
 
 function hasHalf(num: number): boolean {
   return Math.abs(num % 1) === 0.5
-}
-
-// types
-
-export type FilterPropValues<P, F> = {
-  [K in keyof P as (P[K] extends F ? K : never)]: P[K]
 }

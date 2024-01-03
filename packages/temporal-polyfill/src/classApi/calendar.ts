@@ -189,5 +189,5 @@ export interface CalendarProtocol {
 }
 
 export const checkCalendarProtocol = createProtocolChecker(
-  Object.keys(calendarMethods).slice(4), // remove toString/toJson/era/eraYear
+  Object.keys(calendarMethods).slice(4), // remove toString/toJSON/era/eraYear
 )
