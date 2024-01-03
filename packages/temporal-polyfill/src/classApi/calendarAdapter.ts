@@ -5,13 +5,13 @@ import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/calendarIsoFields'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Callable, bindArgs } from '../internal/utils'
-import { CalendarProtocol } from './calendarProtocol'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './slotsForClasses'
-import { DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
+import { DurationSlots, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
+import { CalendarProtocol } from './calendar'
 
 // Compound Adapter Functions
 // -------------------------------------------------------------------------------------------------

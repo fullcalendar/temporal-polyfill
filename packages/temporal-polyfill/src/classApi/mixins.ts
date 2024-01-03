@@ -8,17 +8,16 @@ import { createPlainDate, toPlainDateSlots } from './plainDate'
 import { getSlots } from './slotsForClasses'
 import { timeFieldNamesAsc } from '../internal/calendarFields'
 import { yearMonthOnlyRefiners, dateOnlyRefiners, monthOnlyRefiners, dayOnlyRefiners, dateRefiners } from './calendarRefiners'
-import { CalendarProtocol } from './calendarProtocol'
 import { CalendarSlot } from './slotsForClasses'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import * as errorMessages from '../internal/errorMessages'
-import { Calendar } from './calendar'
+import { Calendar, CalendarProtocol } from './calendar'
 
 // For Calendar
 // -------------------------------------------------------------------------------------------------
 // Always assumes underlying Native calendar `ops`
 
-function createCalendarMethods<M>(methodNameMap: M, alsoAccept: string[]): {
+function createCalendarFieldMethods<M>(methodNameMap: M, alsoAccept: string[]): {
   [K in keyof M]: (dateArg: any) => any
 } {
   const methods = {} as any // TODO: use mapProps?
@@ -38,11 +37,11 @@ function createCalendarMethods<M>(methodNameMap: M, alsoAccept: string[]): {
   return methods
 }
 
-export const calendarMethods = { // TODO: rename calendarFieldMethods?
-  ...createCalendarMethods(yearMonthOnlyRefiners, [PlainYearMonthBranding]),
-  ...createCalendarMethods(dateOnlyRefiners, []),
-  ...createCalendarMethods(monthOnlyRefiners, [PlainYearMonthBranding, PlainMonthDayBranding]),
-  ...createCalendarMethods(dayOnlyRefiners, [PlainMonthDayBranding]),
+export const calendarFieldMethods = {
+  ...createCalendarFieldMethods(yearMonthOnlyRefiners, [PlainYearMonthBranding]),
+  ...createCalendarFieldMethods(dateOnlyRefiners, []),
+  ...createCalendarFieldMethods(monthOnlyRefiners, [PlainYearMonthBranding, PlainMonthDayBranding]),
+  ...createCalendarFieldMethods(dayOnlyRefiners, [PlainMonthDayBranding]),
 }
 
 // For PlainDate/etc
