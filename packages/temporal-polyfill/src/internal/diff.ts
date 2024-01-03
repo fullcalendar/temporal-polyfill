@@ -112,7 +112,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
         roundingMode,
         startEpochNano, // marker
         identityFunc, // markerToEpochNano
-        (m: DayTimeNano, d: DurationFields) => moveZonedEpochNano(calendarOps, timeZoneOps, m, d), // moveMarker
+        bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps), // moveMarker
       )
     }
   }
@@ -169,7 +169,7 @@ export function diffPlainDateTimes<C extends IdLike>(
         roundingMode,
         plainDateTimeSlots0, // marker
         isoToEpochNano as (isoFields: IsoDateTimeFields) => DayTimeNano, // markerToEpochNano
-        (m: IsoDateTimeFields, d: DurationFields) => moveDateTime(calendarOps, m, d), // moveMarker
+        bindArgs(moveDateTime, calendarOps), // moveMarker
       )
     }
   }
