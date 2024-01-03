@@ -103,9 +103,6 @@ export function createPlainTimeSlots(isoFields: IsoTimeFields): PlainTimeSlots {
   }
 }
 
-/*
-TODO: have Calendar dateUntil return this? and many other places that return DurationFields?
-*/
 export function createDurationSlots(durationFields: DurationFields): DurationSlots {
   return {
     branding: DurationBranding,

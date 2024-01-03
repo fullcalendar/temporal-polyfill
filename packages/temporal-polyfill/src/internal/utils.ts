@@ -106,30 +106,20 @@ export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
   return res
 }
 
-function filterProps<P, E = undefined>(
-  filterFunc: (propVal: P[keyof P], propName: keyof P, extraArg: E) => boolean,
+export function excludePropsByName<P, K extends keyof P>(
   props: P,
-  extraArg?: any,
-): Partial<P> {
-  const filteredProps = {} as Partial<P>
+  propNames: Set<string>
+): Omit<P, K> {
+  const filteredProps = {} as any
 
   for (const propName in props) {
-    const propVal = props[propName]
-
-    if (filterFunc(propVal, propName, extraArg)) {
-      filteredProps[propName] = propVal
+    if (!propNames.has(propName)) {
+      filteredProps[propName] = props[propName]
     }
   }
 
   return filteredProps
 }
-
-export const excludePropsByName = bindArgs(
-  filterProps<Record<string, unknown>, Set<string>>,
-  (propVal, propName, nameSet) => !nameSet.has(propName),
-) as (
-  <P, K extends keyof P>(props: P, propNames: Set<string>) => Omit<P, K>
-)
 
 /*
 Maintains Symbols keys
@@ -255,7 +245,6 @@ export function identityFunc<T>(arg: T): T {
 }
 
 export function noop(): void {
-  // return undefined
 }
 
 export function padNumber(digits: number, num: number): string {
