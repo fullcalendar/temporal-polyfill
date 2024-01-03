@@ -1,4 +1,4 @@
-import { EpochSlots, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createPlainDateSlots } from '../internal/slots'
+import { EpochSlots, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createPlainDateSlots, getId } from '../internal/slots'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from '../internal/durationFields'
 import { IsoDateFields, isoTimeFieldNamesAsc } from '../internal/calendarIsoFields'
@@ -73,6 +73,11 @@ export const monthDayGetters = createCalendarGetters({
   ...monthOnlyRefiners,
   ...dayOnlyRefiners,
 })
+export const calendarIdGetters = {
+  calendarId(slots: any): string {
+    return getId(slots.calendar)
+  },
+}
 
 // Calendar "Simple" Ops
 // -------------------------------------------------------------------------------------------------

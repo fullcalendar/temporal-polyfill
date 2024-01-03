@@ -9,7 +9,7 @@ import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { CalendarArg } from './calendar'
-import { dateGetters, getCalendarFromSlots, neverValueOf } from './mixins'
+import { calendarIdGetters, dateGetters, getCalendarFromSlots, neverValueOf } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -38,9 +38,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   PlainDateBranding,
   bindArgs(constructPlainDateSlots, refineCalendarSlot),
   {
-    calendarId(slots: PlainDateSlots<CalendarSlot>): string {
-      return getId(slots.calendar)
-    },
+    ...calendarIdGetters,
     ...dateGetters,
   },
   {

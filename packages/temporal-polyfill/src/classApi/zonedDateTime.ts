@@ -28,7 +28,7 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { neverValueOf, dateGetters, timeGetters, epochGetters, getCalendarFromSlots } from './mixins'
+import { neverValueOf, dateGetters, timeGetters, epochGetters, getCalendarFromSlots, calendarIdGetters } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
@@ -50,9 +50,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
   bindArgs(constructZonedDateTimeSlots, refineCalendarSlot, refineTimeZoneSlot),
   {
-    calendarId(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
-      return getId(slots.calendar)
-    },
     hoursInDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
       return computeHoursInDay(createTimeZoneOps, slots)
     },
@@ -63,6 +60,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     timeZoneId(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
       return getId(slots.timeZone)
     },
+    ...calendarIdGetters,
     ...adaptToIsoFields(dateGetters),
     ...adaptToIsoFields(timeGetters),
     ...epochGetters,

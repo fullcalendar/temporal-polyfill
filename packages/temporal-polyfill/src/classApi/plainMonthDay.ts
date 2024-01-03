@@ -8,7 +8,7 @@ import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
 import { PlainDate, createPlainDate } from './plainDate'
 import { CalendarSlot, extractCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { CalendarArg } from './calendar'
-import { getCalendarFromSlots, monthDayGetters, neverValueOf } from './mixins'
+import { calendarIdGetters, getCalendarFromSlots, monthDayGetters, neverValueOf } from './mixins'
 import { createDateModOps, createMonthDayModOps, createMonthDayRefineOps } from './calendarOpsQuery'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { PlainMonthDayBag, plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bag'
@@ -26,9 +26,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] = creat
   PlainMonthDayBranding,
   bindArgs(constructPlainMonthDaySlots, refineCalendarSlot),
   {
-    calendarId(slots: PlainMonthDaySlots<CalendarSlot>): string {
-      return getId(slots.calendar)
-    },
+    ...calendarIdGetters,
     ...monthDayGetters,
   },
   {
