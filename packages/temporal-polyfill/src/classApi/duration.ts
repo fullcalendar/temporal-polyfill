@@ -49,12 +49,12 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     },
     add(slots: DurationSlots, otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
       return createDuration(
-        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, false, slots, toDurationSlots(otherArg), options)
+        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, toDurationSlots(otherArg), options)
       )
     },
     subtract(slots: DurationSlots, otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
       return createDuration(
-        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, true, slots, toDurationSlots(otherArg), options)
+        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, toDurationSlots(otherArg), options, true)
       )
     },
     negated(slots: DurationSlots): Duration {

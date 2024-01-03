@@ -102,10 +102,10 @@ export function addDurations<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  doSubtract: boolean,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
+  doSubtract?: boolean,
 ): DurationSlots {
   const normalOptions = normalizeOptions(options)
   const markerSlots = refineRelativeTo(normalOptions.relativeTo)
@@ -122,7 +122,7 @@ export function addDurations<RA, C, T>(
     )
   ) {
     return createDurationSlots(
-      addDayTimeDurations(doSubtract, slots, otherSlots, largestUnit as DayTimeUnit),
+      addDayTimeDurations(slots, otherSlots, largestUnit as DayTimeUnit, doSubtract),
     )
   }
 
@@ -148,10 +148,10 @@ export function addDurations<RA, C, T>(
 }
 
 function addDayTimeDurations(
-  doSubtract: boolean,
   a: DurationFields,
   b: DurationFields,
-  largestUnit: DayTimeUnit
+  largestUnit: DayTimeUnit,
+  doSubtract?: boolean,
 ): DurationFields {
   const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
   const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)

@@ -31,7 +31,6 @@ export function add(
     identityFunc,
     createNativeDiffOps,
     queryNativeTimeZone,
-    false,
     slots,
     otherSlots,
     options,
@@ -47,10 +46,10 @@ export function subtract(
     identityFunc,
     createNativeDiffOps,
     queryNativeTimeZone,
-    true,
     slots,
     otherSlots,
     options,
+    true,
   )
 }
 
