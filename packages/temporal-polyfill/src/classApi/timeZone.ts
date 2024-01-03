@@ -16,6 +16,7 @@ import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { requireString } from '../internal/cast'
 import { BrandingSlots, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
+import { idGetters } from './mixins'
 
 export type TimeZone = any
 export type TimeZoneArg = TimeZoneProtocol | string | ZonedDateTime
@@ -34,11 +35,7 @@ export const [TimeZone, createTimeZone] = createSlotClass(
       native: timeZoneNative,
     }
   },
-  {
-    id(slots: TimeZoneClassSlots): string {
-      return slots.id
-    }
-  },
+  idGetters,
   {
     getPossibleInstantsFor({ native }: TimeZoneClassSlots, plainDateTimeArg: PlainDateTimeArg): Instant[]  {
       return native.getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
