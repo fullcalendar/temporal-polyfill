@@ -35,7 +35,7 @@
     "pkg-json:clean": "rm -rf dist/package.json",
     "test": "./scripts/test.js",
     "lint": "eslint .",
-    "size": "./scripts/size.js",
+    "size": "gzip-size --include-original --raw dist/global.min.js",
     "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean"
   },
   "type": "module",
@@ -61,6 +61,7 @@
     "@types/node": "^16.9.1",
     "concurrently": "^8.2.0",
     "eslint": "^7.25.0",
+    "gzip-size": "^7.0.0",
     "rollup": "^3.27.2",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "terser": "^5.19.2",
