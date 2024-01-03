@@ -87,7 +87,13 @@ async function buildConfigs(pkgDir, isDev) {
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
           chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.cjs,
-          // terser property rename doesn't work for cjs
+          plugins: [
+            !isDev && buildTerserPlugin({
+              humanReadable: true,
+              optimize: true,
+              // don't mangleProps. CJS export names are affected
+            })
+          ]
         },
         {
           format: 'es',
@@ -97,6 +103,7 @@ async function buildConfigs(pkgDir, isDev) {
           plugins: [
             !isDev && buildTerserPlugin({
               humanReadable: true,
+              optimize: true,
               mangleProps: true,
               manglePropsExcept: temporalReservedWords,
             })
