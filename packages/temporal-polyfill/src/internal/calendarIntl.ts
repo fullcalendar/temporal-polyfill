@@ -1,4 +1,4 @@
-import { eraOriginsByCalendarId, eraRemaps, japaneseCalendarId } from './calendarConfig'
+import { eraOriginsByCalendarId, eraRemaps } from './calendarConfig'
 import { diffEpochMilliByDay } from './diff'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './formatIntl'
 import { IsoDateFields, isoTimeFieldDefaults } from './calendarIsoFields'

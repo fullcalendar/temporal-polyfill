@@ -70,7 +70,6 @@ export const leapMonthMetas: Record<string, number> = {
 
 // only used by calendar
 // ---------------------
-// TODO: move to calendarNative?, like getCalendarEraOrigins/getCalendarLeapMonthMeta
 
 export function getRequiredYearMonthFields(calendarId: string): string[] {
   return calendarId === isoCalendarId ? yearFieldNames : []

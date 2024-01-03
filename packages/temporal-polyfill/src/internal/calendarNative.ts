@@ -396,18 +396,18 @@ export function eraYearToYear(eraYear: number, eraOrigin: number): number {
 
 // -------------------------------------------------------------------------------------------------
 
-export function getCalendarIdBase(native: NativeCalendar): string {
-  return computeCalendarIdBase(native.id || isoCalendarId)
-}
-
-export function computeCalendarIdBase(calendarId: string): string {
-  return calendarId.split('-')[0]
-}
-
 export function getCalendarEraOrigins(native: NativeCalendar): Record<string, number> | undefined {
   return eraOriginsByCalendarId[getCalendarIdBase(native)]
 }
 
 export function getCalendarLeapMonthMeta(native: NativeCalendar): number | undefined {
   return leapMonthMetas[getCalendarIdBase(native)]
+}
+
+function getCalendarIdBase(native: NativeCalendar): string {
+  return computeCalendarIdBase(native.id || isoCalendarId)
+}
+
+export function computeCalendarIdBase(calendarId: string): string {
+  return calendarId.split('-')[0]
 }
