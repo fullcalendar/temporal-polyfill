@@ -126,7 +126,7 @@ const calendarMethods = {
   },
 }
 
-export const [Calendar, createCalendar] = createSlotClass(
+export const [Calendar] = createSlotClass(
   'Calendar',
   (id: string): CalendarClassSlots => {
     id = normalizeCalendarId(requireString(id))

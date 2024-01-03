@@ -177,6 +177,7 @@ function buildTerserPlugin({
       keep_fargs: false, // remove unused function args
       unsafe_arrows: true,
       booleans_as_integers: true,
+      hoist_funs: true,
     },
     // Unfortunately can't just mangle props and nothing else
     mangle: mangleProps && {
@@ -189,7 +190,7 @@ function buildTerserPlugin({
     },
     format: {
       beautify: humanReadable,
-      // comments: humanReadable ? 'all' : 'some', // never do comments. always out of order
+      braces: humanReadable,
       indent_level: 2,
     },
     nameCache: terserNameCache,
