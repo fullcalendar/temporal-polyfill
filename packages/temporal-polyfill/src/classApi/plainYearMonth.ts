@@ -41,12 +41,12 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = cr
     },
     add(slots: PlainYearMonthSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
       return createPlainYearMonth(
-        movePlainYearMonth(createYearMonthMoveOps, false, slots, toDurationSlots(durationArg), options)
+        movePlainYearMonth(createYearMonthMoveOps, slots, toDurationSlots(durationArg), options)
       )
     },
     subtract(slots: PlainYearMonthSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
       return createPlainYearMonth(
-        movePlainYearMonth(createYearMonthMoveOps, true, slots, toDurationSlots(durationArg), options)
+        movePlainYearMonth(createYearMonthMoveOps, slots, toDurationSlots(durationArg), options, true)
       )
     },
     until(slots: PlainYearMonthSlots<CalendarSlot>, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {

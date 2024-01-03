@@ -25,11 +25,11 @@ export const fromEpochMicroseconds = epochMicroToInstant
 export const fromEpochNanoseconds = epochNanoToInstant
 
 export function add(instantSlots: InstantSlots, durationSlots: DurationSlots): InstantSlots {
-  return moveInstant(false, instantSlots, durationSlots)
+  return moveInstant(instantSlots, durationSlots)
 }
 
 export function subtract(instantSlots: InstantSlots, durationSlots: DurationSlots): InstantSlots {
-  return moveInstant(true, instantSlots, durationSlots)
+  return moveInstant(instantSlots, durationSlots, true)
 }
 
 export function until(

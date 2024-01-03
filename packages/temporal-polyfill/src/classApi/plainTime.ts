@@ -47,12 +47,12 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     },
     add(slots: PlainTimeSlots, durationArg: DurationArg): PlainTime {
       return createPlainTime(
-        movePlainTime(false, slots, toDurationSlots(durationArg))
+        movePlainTime(slots, toDurationSlots(durationArg))
       )
     },
     subtract(slots: PlainTimeSlots,  durationArg: DurationArg): PlainTime {
       return createPlainTime(
-        movePlainTime(true, slots, toDurationSlots(durationArg))
+        movePlainTime(slots, toDurationSlots(durationArg), true)
       )
     },
     until(slots: PlainTimeSlots,  otherArg: PlainTimeArg, options?: DiffOptions): Duration {

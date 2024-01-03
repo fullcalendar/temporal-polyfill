@@ -96,7 +96,7 @@ export function add(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return movePlainDateTime(createNativeMoveOps, false, plainDateTimeSlots, durationSlots, options)
+  return movePlainDateTime(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
 }
 
 export function subtract(
@@ -104,7 +104,7 @@ export function subtract(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<string> {
-  return movePlainDateTime(createNativeMoveOps, true, plainDateTimeSlots, durationSlots, options)
+  return movePlainDateTime(createNativeMoveOps, plainDateTimeSlots, durationSlots, options, true)
 }
 
 export function until(

@@ -73,7 +73,6 @@ export function add(
 ): PlainYearMonthSlots<string> {
   return movePlainYearMonth(
     createNativeYearMonthMoveOps,
-    false,
     plainYearMonthSlots,
     durationSlots,
     options,
@@ -87,10 +86,10 @@ export function subtract(
 ): PlainYearMonthSlots<string> {
   return movePlainYearMonth(
     createNativeYearMonthMoveOps,
-    true,
     plainYearMonthSlots,
     durationSlots,
     options,
+    true,
   )
 }
 

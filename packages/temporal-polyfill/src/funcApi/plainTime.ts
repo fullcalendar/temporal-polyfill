@@ -35,14 +35,14 @@ export function add(
   slots: PlainTimeSlots,
   durationSlots: DurationSlots,
 ): PlainTimeSlots {
-  return movePlainTime(false, slots, durationSlots)
+  return movePlainTime(slots, durationSlots)
 }
 
 export function subtract(
   slots: PlainTimeSlots,
   durationSlots: DurationSlots,
 ): PlainTimeSlots {
-  return movePlainTime(true, slots, durationSlots)
+  return movePlainTime(slots, durationSlots, true)
 }
 
 export function until(

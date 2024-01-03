@@ -56,12 +56,12 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     },
     add(slots: PlainDateSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
       return createPlainDate(
-        movePlainDate(createMoveOps, false, slots, toDurationSlots(durationArg), options)
+        movePlainDate(createMoveOps, slots, toDurationSlots(durationArg), options)
       )
     },
     subtract(slots: PlainDateSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
       return createPlainDate(
-        movePlainDate(createMoveOps, true, slots, toDurationSlots(durationArg), options)
+        movePlainDate(createMoveOps, slots, toDurationSlots(durationArg), options, true)
       )
     },
     until(slots: PlainDateSlots<CalendarSlot>, otherArg: PlainDateArg, options?: DiffOptions): Duration {

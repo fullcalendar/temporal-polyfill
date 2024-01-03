@@ -82,7 +82,6 @@ export function add(
 ): PlainDateSlots<string> {
   return movePlainDate(
     createNativeMoveOps,
-    false,
     slots,
     durationSlots,
     options,
@@ -96,10 +95,10 @@ export function subtract(
 ): PlainDateSlots<string> {
   return movePlainDate(
     createNativeMoveOps,
-    true,
     slots,
     durationSlots,
     options,
+    true,
   )
 }
 

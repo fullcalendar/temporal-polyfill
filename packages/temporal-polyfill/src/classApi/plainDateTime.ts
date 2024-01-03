@@ -68,12 +68,12 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     },
     add(slots: PlainDateTimeSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
       return createPlainDateTime(
-        movePlainDateTime(createMoveOps, false, slots, toDurationSlots(durationArg), options)
+        movePlainDateTime(createMoveOps, slots, toDurationSlots(durationArg), options)
       )
     },
     subtract(slots: PlainDateTimeSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
       return createPlainDateTime(
-        movePlainDateTime(createMoveOps, true, slots, toDurationSlots(durationArg), options)
+        movePlainDateTime(createMoveOps, slots, toDurationSlots(durationArg), options, true)
       )
     },
     until(slots: PlainDateTimeSlots<CalendarSlot>, otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {

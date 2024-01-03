@@ -168,7 +168,6 @@ export function add(
   return moveZonedDateTime(
     createNativeMoveOps,
     queryNativeTimeZone,
-    false,
     zonedDateTimeSlots,
     durationSlots,
     options,
@@ -183,10 +182,10 @@ export function subtract(
   return moveZonedDateTime(
     createNativeMoveOps,
     queryNativeTimeZone,
-    true,
     zonedDateTimeSlots,
     durationSlots,
     options,
+    true,
   )
 }
 

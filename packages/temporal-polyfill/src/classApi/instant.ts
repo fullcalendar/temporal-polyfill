@@ -34,12 +34,12 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
   {
     add(slots: InstantSlots, durationArg: DurationArg): Instant {
       return createInstant(
-        moveInstant(false, slots, toDurationSlots(durationArg)),
+        moveInstant(slots, toDurationSlots(durationArg)),
       )
     },
     subtract(slots: InstantSlots, durationArg: DurationArg): Instant {
       return createInstant(
-        moveInstant(true, slots, toDurationSlots(durationArg)),
+        moveInstant(slots, toDurationSlots(durationArg), true),
       )
     },
     until(slots: InstantSlots, otherArg: InstantArg, options?: DiffOptions): Duration {
