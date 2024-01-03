@@ -195,13 +195,18 @@ export function createLazyGenerator<K, V, A extends any[]>(
 // descriptor stuff
 // ----------------
 
+export function createNameDescriptors(name: string) {
+  return createPropDescriptors({ name }, true)
+}
+
 export function createPropDescriptors(
   propVals: { [propName: string]: unknown },
+  readonly?: boolean,
 ): PropertyDescriptorMap {
   return mapProps((value) => ({
     value,
     configurable: true,
-    writable: true,
+    writable: !readonly,
   }), propVals)
 }
 

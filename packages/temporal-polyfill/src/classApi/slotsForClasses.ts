@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { createGetterDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectlike, mapProps } from '../internal/utils'
+import { createGetterDescriptors, createNameDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectlike, mapProps } from '../internal/utils'
 import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
@@ -35,36 +35,28 @@ export function createSlotClass(
   }
 
   Object.defineProperties(Class.prototype, {
-    ...createStringTagDescriptors('Temporal.' + branding),
     ...createGetterDescriptors(mapProps(curryMethod as any, getters) as any), // !!!
     ...createPropDescriptors(mapProps(curryMethod as any, methods)),
+    ...createStringTagDescriptors('Temporal.' + branding),
   })
 
-  Object.defineProperties(Class, createPropDescriptors(staticMethods))
+  Object.defineProperties(Class, {
+    ...createPropDescriptors(staticMethods),
+    ...createNameDescriptors(branding),
+  })
 
   function curryMethod(method: any, methodName: string) {
-    const newMethod = function(this: any, ...args: any[]) {
-      const slots = getSlots(this)
-      if (!slots || slots.branding !== branding) {
-        throw new TypeError(errorMessages.invalidCallingContext)
-      }
-      return method.call(this, slots, ...args)
-    }
-    Object.defineProperty(newMethod, 'name', {
-      value: methodName,
-      // writable: false,
-      // enumerable: false,
-      configurable: true,
-    })
-    return newMethod
+    return Object.defineProperties(
+      function(this: any, ...args: any[]) {
+        const slots = getSlots(this)
+        if (!slots || slots.branding !== branding) {
+          throw new TypeError(errorMessages.invalidCallingContext)
+        }
+        return method.call(this, slots, ...args)
+      },
+      createNameDescriptors(methodName),
+    )
   }
-
-  Object.defineProperty(Class, 'name', {
-    value: branding,
-    // writable: false,
-    // enumerable: false,
-    configurable: true,
-  })
 
   return [
     Class,
