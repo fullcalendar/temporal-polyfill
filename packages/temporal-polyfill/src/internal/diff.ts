@@ -384,24 +384,21 @@ function diffZonedEpochNanoViaCalendar(
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
   const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
   const isoToZonedEpochNano = bindArgs(getSingleInstantFor, timeZoneOps)
-  let midIsoFields = { ...endIsoFields, ...startIsoTimeFields }
-  let midEpochNano = isoToZonedEpochNano(midIsoFields)
-  let midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
+  let midIsoFields: IsoDateTimeFields
+  let midEpochNano: DayTimeNano
+  let midSign: NumSign
+  let cnt = 0
 
   // Might need multiple backoffs: one for simple time overage, other for end being in DST gap
-  // TODO: use a do-while loop?
-  let cnt = 0
-  while (midSign === -sign) {
-    if (cnt++ > 1) {
+  do {
+    if (cnt > 2) {
       throw new RangeError(errorMessages.invalidProtocolResults)
     }
-    midIsoFields = {
-      ...moveByIsoDays(midIsoFields, -sign),
-      ...startIsoTimeFields,
-    }
+
+    midIsoFields = { ...moveByIsoDays(endIsoFields, cnt++ * -sign), ...startIsoTimeFields }
     midEpochNano = isoToZonedEpochNano(midIsoFields)
     midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
-  }
+  } while (midSign === -sign)
 
   const dateDiff = largestUnit === Unit.Day
     ? diffByDay(startIsoFields, midIsoFields)
