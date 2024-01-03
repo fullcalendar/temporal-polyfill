@@ -56,11 +56,7 @@ export function diffInstants(
     ...optionsTuple,
   )
 
-  if (invert) {
-    durationFields = negateDurationFields(durationFields)
-  }
-
-  return createDurationSlots(durationFields)
+  return createDurationSlots(invert ? negateDurationFields(durationFields): durationFields)
 }
 
 export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
@@ -121,11 +117,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
     }
   }
 
-  if (invert) {
-    durationFields = negateDurationFields(durationFields)
-  }
-
-  return createDurationSlots(durationFields)
+  return createDurationSlots(invert ? negateDurationFields(durationFields): durationFields)
 }
 
 export function diffPlainDateTimes<C extends IdLike>(
@@ -182,11 +174,7 @@ export function diffPlainDateTimes<C extends IdLike>(
     }
   }
 
-  if (invert) {
-    durationFields = negateDurationFields(durationFields)
-  }
-
-  return createDurationSlots(durationFields)
+  return createDurationSlots(invert ? negateDurationFields(durationFields): durationFields)
 }
 
 export function diffPlainDates<C extends IdLike>(
@@ -274,13 +262,9 @@ function diffDateLike(
         (m: IsoDateFields, d: DurationFields) => calendarOps.dateAdd(m, d), // moveMarker
       )
     }
-
-    if (invert) {
-      durationFields = negateDurationFields(durationFields)
-    }
   }
 
-  return createDurationSlots(durationFields)
+  return createDurationSlots(invert ? negateDurationFields(durationFields): durationFields)
 }
 
 export function diffPlainTimes(
@@ -302,11 +286,7 @@ export function diffPlainTimes(
     ...nanoToDurationTimeFields(timeNano, largestUnit as TimeUnit),
   }
 
-  if (invert) {
-    durationFields = negateDurationFields(durationFields)
-  }
-
-  return createDurationSlots(durationFields)
+  return createDurationSlots(invert ? negateDurationFields(durationFields): durationFields)
 }
 
 // Exact Diffing
