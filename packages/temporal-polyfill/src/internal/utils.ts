@@ -195,30 +195,6 @@ export function createLazyGenerator<K, V, A extends any[]>(
 // descriptor stuff
 // ----------------
 
-export function defineProps<Target, NewProps extends { [propName: string]: unknown }>(
-  target: Target,
-  propVals: NewProps,
-): Target & NewProps {
-  return Object.defineProperties(
-    target,
-    createPropDescriptors(propVals),
-  ) as (Target & NewProps)
-}
-
-export function defineGetters(target: any, getters: any) { // TODO: better type
-  return Object.defineProperties(
-    target,
-    createGetterDescriptors(getters),
-  )
-}
-
-export function defineStringTag(target: any, temporalName: string) {
-  return Object.defineProperties(
-    target,
-    createTemporalNameDescriptors(temporalName),
-  )
-}
-
 export function createPropDescriptors(
   propVals: { [propName: string]: unknown },
 ): PropertyDescriptorMap {
@@ -238,7 +214,7 @@ export function createGetterDescriptors(
   }), getters)
 }
 
-export function createTemporalNameDescriptors(temporalName: string): {
+export function createStringTagDescriptors(value: string): {
   // crazy
   [Symbol.toStringTag]: {
     value: string,
@@ -247,7 +223,7 @@ export function createTemporalNameDescriptors(temporalName: string): {
 } {
   return {
     [Symbol.toStringTag]: {
-      value: 'Temporal' + (temporalName ? '.' + temporalName : ''),
+      value,
       configurable: true,
     },
   }

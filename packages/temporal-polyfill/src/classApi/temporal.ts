@@ -1,4 +1,4 @@
-import { defineProps, defineStringTag } from '../internal/utils'
+import { createPropDescriptors, createStringTagDescriptors } from '../internal/utils'
 
 // public
 import { Calendar } from './calendar'
@@ -13,18 +13,19 @@ import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
 import { ZonedDateTime } from './zonedDateTime'
 
-export const Temporal = defineProps({}, {
-  PlainYearMonth,
-  PlainMonthDay,
-  PlainDate,
-  PlainTime,
-  PlainDateTime,
-  ZonedDateTime,
-  Instant,
-  Calendar,
-  TimeZone,
-  Duration,
-  Now,
+export const Temporal = Object.defineProperties({}, {
+  ...createStringTagDescriptors('Temporal'),
+  ...createPropDescriptors({
+    PlainYearMonth,
+    PlainMonthDay,
+    PlainDate,
+    PlainTime,
+    PlainDateTime,
+    ZonedDateTime,
+    Instant,
+    Calendar,
+    TimeZone,
+    Duration,
+    Now,
+  })
 })
-
-defineStringTag(Temporal, '') // results in 'Temporal'. weird

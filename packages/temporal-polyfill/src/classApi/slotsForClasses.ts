@@ -1,7 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
 import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { bindArgs, defineGetters, defineProps, defineStringTag, isObjectlike, mapProps } from '../internal/utils'
+import { createGetterDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectlike, mapProps } from '../internal/utils'
 import { CalendarArg } from './calendar'
 import { CalendarProtocol, checkCalendarProtocol } from './calendarProtocol'
 import { TimeZoneArg } from './timeZone'
@@ -35,10 +35,13 @@ export function createSlotClass(
     }
   }
 
-  defineStringTag(Class.prototype, branding)
-  defineGetters(Class.prototype, mapProps(curryMethod as any, getters))
-  defineProps(Class.prototype, mapProps(curryMethod as any, methods))
-  defineProps(Class, staticMethods)
+  Object.defineProperties(Class.prototype, {
+    ...createStringTagDescriptors('Temporal.' + branding),
+    ...createGetterDescriptors(mapProps(curryMethod as any, getters) as any), // !!!
+    ...createPropDescriptors(mapProps(curryMethod as any, methods)),
+  })
+
+  Object.defineProperties(Class, createPropDescriptors(staticMethods))
 
   function curryMethod(method: any, methodName: string) {
     const newMethod = function(this: any, ...args: any[]) {

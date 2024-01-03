@@ -1,6 +1,6 @@
-import { defineProps } from './internal/utils'
+import { createPropDescriptors } from './internal/utils'
 import { DateTimeFormat, Temporal, toTemporalInstant } from './impl'
 
-defineProps(globalThis, { Temporal })
-defineProps(Intl, { DateTimeFormat })
-defineProps(Date.prototype, { toTemporalInstant })
+Object.defineProperties(globalThis, createPropDescriptors({ Temporal }))
+Object.defineProperties(Intl, createPropDescriptors({ DateTimeFormat }))
+Object.defineProperties(Date.prototype, createPropDescriptors({ toTemporalInstant }))

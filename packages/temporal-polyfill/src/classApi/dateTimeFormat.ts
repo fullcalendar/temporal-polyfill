@@ -1,4 +1,4 @@
-import { Classlike, createLazyGenerator, defineProps, pluckProps } from '../internal/utils'
+import { Classlike, createLazyGenerator, createPropDescriptors, pluckProps } from '../internal/utils'
 import { OrigDateTimeFormat, LocalesArg, OptionNames, ClassFormatConfig, plainYearMonthConfig, plainMonthDayConfig, plainDateConfig, plainDateTimeConfig, plainTimeConfig, instantConfig, createFormatPrepper, zonedDateTimeConfig, toEpochMillis } from '../internal/formatIntl'
 import { ZonedDateTime } from './zonedDateTime'
 import { PlainDate } from './plainDate'
@@ -73,7 +73,7 @@ export interface DateTimeFormat {
   const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
 
   if (origMethod) {
-    defineProps(DateTimeFormat.prototype, {
+    Object.defineProperties(DateTimeFormat.prototype, createPropDescriptors({
       [methodName]: function (this: DateTimeFormat, arg0: Formattable, arg1: Formattable) {
         const prepSubformat = prepSubformatMap.get(this)!
         const [format, epochMilli0, epochMilli1] = prepSubformat(arg0, arg1)
@@ -82,7 +82,7 @@ export interface DateTimeFormat {
           ? origMethod.call(format, epochMilli0, epochMilli1)
           : origMethod.call(this, arg0, arg1)
       }
-    })
+    }))
   }
 })
 

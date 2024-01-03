@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { createPropDescriptors, createTemporalNameDescriptors } from '../internal/utils'
+import { createPropDescriptors, createStringTagDescriptors } from '../internal/utils'
 import { CalendarSlot, refineCalendarSlot } from './slotsForClasses'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { Instant, createInstant } from './instant'
@@ -12,11 +12,11 @@ import { getCurrentEpochNanoseconds, getCurrentIsoDateTime, getCurrentTimeZoneId
 import { createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, createZonedDateTimeSlots } from '../internal/slots'
 
 export const Now = Object.defineProperties({}, {
-  ...createTemporalNameDescriptors('Now'),
+  ...createStringTagDescriptors('Temporal.Now'),
   ...createPropDescriptors({
 
-    timeZoneId() { // can't be anonymous because of .name
-      return getCurrentTimeZoneId()
+    timeZoneId() {
+      return getCurrentTimeZoneId() // we call separately to return function.name
     },
 
     instant(): Instant {
