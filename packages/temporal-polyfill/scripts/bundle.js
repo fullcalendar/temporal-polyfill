@@ -176,6 +176,7 @@ function buildTerserPlugin({
       passes: 3, // enough to remove dead object assignment, get lower size
       keep_fargs: false, // remove unused function args
       unsafe_arrows: true,
+      booleans_as_integers: true,
     },
     // Unfortunately can't just mangle props and nothing else
     mangle: mangleProps && {
