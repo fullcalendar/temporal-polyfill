@@ -20,7 +20,7 @@ import { Calendar, CalendarProtocol } from './calendar'
 function createCalendarFieldMethods<M>(methodNameMap: M, alsoAccept: string[]): {
   [K in keyof M]: (dateArg: any) => any
 } {
-  const methods = {} as any // TODO: use mapProps?
+  const methods = {} as any
 
   for (const methodName in methodNameMap) {
     methods[methodName] = function(this: any, { native }: any, dateArg: any) {
@@ -51,7 +51,7 @@ export const calendarFieldMethods = {
 function createCalendarGetters<M>(methodNameMap: M): {
   [K in keyof M]: () => any
 } {
-  const methods = {} as any // TODO: use mapProps?
+  const methods = {} as any
 
   for (const methodName in methodNameMap) {
     methods[methodName] = function(this: any, slots: any) {
