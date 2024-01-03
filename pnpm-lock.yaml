@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  export-size@0.7.0:
+    hash: 36ampj2krjxtpfv2uprri4al4q
+    path: patches/export-size@0.7.0.patch
+
 importers:
 
   .:
@@ -106,7 +111,7 @@ importers:
         version: 7.32.0
       export-size:
         specifier: ^0.7.0
-        version: 0.7.0
+        version: 0.7.0(patch_hash=36ampj2krjxtpfv2uprri4al4q)
       gzip-size:
         specifier: ^7.0.0
         version: 7.0.0
@@ -1497,7 +1502,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /export-size@0.7.0:
+  /export-size@0.7.0(patch_hash=36ampj2krjxtpfv2uprri4al4q):
     resolution: {integrity: sha512-nmKKVLL+oQDOaPMAm0rxhdXYR3pmbL9vTCBuvYAKpn12TPYdKJYUVfvLFgVRVgsLoSKVVd7xwLrHBdPlro0WwQ==}
     hasBin: true
     dependencies:
@@ -1517,6 +1522,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+    patched: true
 
   /fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
