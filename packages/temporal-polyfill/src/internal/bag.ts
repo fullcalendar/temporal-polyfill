@@ -737,7 +737,7 @@ export function nativeMonthDayFromFields(
     // constrain (what refineMonth/refineDay would normally do)
     if (isIso) {
       normalMonth = clampEntity('month', normalMonth, 1, isoMonthsInYear, Overflow.Reject) // reject because never leap months
-      normalDay = clampEntity('day', normalDay, 1, computeIsoDaysInMonth(year ?? normalYear, normalMonth), overflow)
+      normalDay = clampEntity('day', normalDay, 1, computeIsoDaysInMonth(year !== undefined ? year : normalYear, normalMonth), overflow)
     }
   } else {
     // refine year/month/day

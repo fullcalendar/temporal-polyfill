@@ -220,9 +220,9 @@ For simple Calendar class diffing (only y/m/w/d units)
 */
 export function refineCalendarDiffOptions(
   options: LargestUnitOptions | undefined, // TODO: definitely make large-unit type via generics
-): Unit { // TODO: only year/month/week/day???
+): Unit { // TODO: only year/month/week/day?
   options = normalizeOptions(options)
-  return refineLargestUnit(options, Unit.Year, Unit.Day) ?? Unit.Day
+  return refineLargestUnit(options, Unit.Year, Unit.Day, true)!
 }
 
 export function refineDiffOptions(
@@ -238,7 +238,7 @@ export function refineDiffOptions(
   let largestUnit = refineLargestUnit(options, maxUnit, minUnit)
   let roundingInc = parseRoundingIncInteger(options)
   let roundingMode = refineRoundingMode(options, defaultRoundingMode)
-  let smallestUnit = refineSmallestUnit(options, maxUnit, minUnit) ?? minUnit
+  let smallestUnit = refineSmallestUnit(options, maxUnit, minUnit, true)!
 
   if (largestUnit == null) {
     largestUnit = Math.max(defaultLargestUnit, smallestUnit)
@@ -273,8 +273,13 @@ export function refineDurationRoundOptions<RA, R>(
     throw new RangeError(errorMessages.missingSmallestLargestUnit)
   }
 
-  smallestUnit ??= Unit.Nanosecond
-  largestUnit ??= Math.max(smallestUnit, defaultLargestUnit)
+  if (smallestUnit == null) {
+    smallestUnit = Unit.Nanosecond
+  }
+  if (largestUnit == null) {
+    largestUnit = Math.max(smallestUnit, defaultLargestUnit)
+  }
+
   checkLargestSmallestUnit(largestUnit, smallestUnit)
   roundingInc = refineRoundingInc(roundingInc, smallestUnit as DayTimeUnit, true)
 
@@ -552,26 +557,30 @@ function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
 
 /*
 `null` means 'auto'
+TODO: create better type where if ensureDefined, then return-type is non null/defined
 */
 function refineUnitOption<O>(
   optionName: (keyof O) & string,
   options: O,
   maxUnit: Unit = Unit.Year,
   minUnit: Unit = Unit.Nanosecond, // used less frequently than maxUnit
+  ensureDefined?: boolean, // will return minUnit if undefined or auto
 ): Unit | null | undefined {
   let unitStr = options[optionName] as (string | undefined)
   if (unitStr === undefined) {
-    return undefined
+    return ensureDefined ? minUnit : undefined
   }
 
   unitStr = toString(unitStr)
   if (unitStr === 'auto') {
-    return null
+    return ensureDefined ? minUnit : null
   }
 
-  const unit = unitNameMap[unitStr as UnitName] ??
-    durationFieldIndexes[unitStr as (keyof DurationFields)]
+  let unit = unitNameMap[unitStr as UnitName]
 
+  if (unit === undefined) {
+    unit = durationFieldIndexes[unitStr as (keyof DurationFields)]
+  }
   if (unit === undefined) {
     throw new RangeError(errorMessages.invalidEntity(optionName, unitStr))
   }

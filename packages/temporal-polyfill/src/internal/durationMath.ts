@@ -82,7 +82,7 @@ export function spanDuration<M>(
 ] {
   let endMarker = moveMarker(marker, durationFields0)
 
-  // better way to do this???
+  // better way to do this?
   if (durationFields1) {
     endMarker = moveMarker(endMarker, durationFields1)
   }

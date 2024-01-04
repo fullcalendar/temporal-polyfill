@@ -44,7 +44,7 @@ export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
   checkIsoDateTimeInBounds({
     ...isoFields,
     ...isoTimeFieldDefaults,
-    isoHour: 12, // Noon avoids trouble at edges of DateTime range (excludes midnight) ???
+    isoHour: 12, // Noon avoids trouble at edges of DateTime range (excludes midnight) ?
   })
   return isoFields
 }

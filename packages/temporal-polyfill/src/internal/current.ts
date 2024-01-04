@@ -19,7 +19,7 @@ export function getCurrentEpochNanoseconds(): DayTimeNano {
 let currentTimeZoneId: string | undefined
 
 export function getCurrentTimeZoneId(): string {
-  return currentTimeZoneId ?? (currentTimeZoneId = computeCurrentTimeZoneId())
+  return currentTimeZoneId || (currentTimeZoneId = computeCurrentTimeZoneId())
 }
 
 function computeCurrentTimeZoneId(): string {
