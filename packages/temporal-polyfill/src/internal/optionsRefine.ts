@@ -560,13 +560,11 @@ function refineUnitOption<O>(
   minUnit: Unit = Unit.Nanosecond, // used less frequently than maxUnit
 ): Unit | null | undefined {
   let unitStr = options[optionName] as (string | undefined)
-
   if (unitStr === undefined) {
     return undefined
   }
 
   unitStr = toString(unitStr)
-
   if (unitStr === 'auto') {
     return null
   }
@@ -579,7 +577,6 @@ function refineUnitOption<O>(
   }
 
   clampEntity(optionName, unit, minUnit, maxUnit, Overflow.Reject)
-
   return unit
 }
 

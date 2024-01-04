@@ -250,11 +250,9 @@ export function parsePlainTime(s: string): PlainTimeSlots {
 
 export function parseDuration(s: string): DurationSlots {
   const parsed = parseDurationFields(requireString(s))
-
   if (!parsed) {
     throw new RangeError(errorMessages.failedParse(s))
   }
-
   return createDurationSlots(parsed)
 }
 
