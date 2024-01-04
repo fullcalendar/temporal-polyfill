@@ -8,6 +8,3 @@ intl402/Temporal/ZonedDateTime/prototype/toLocaleString/options-conflict.js
 # Not sure why these tests fail in Node 14, but it's EOL so not worth investigating.
 built-ins/Temporal/PlainYearMonth/prototype/toLocaleString/builtin-calendar-no-observable-calls.js
 built-ins/Temporal/PlainMonthDay/prototype/toLocaleString/builtin-calendar-no-observable-calls.js
-
-# "Before R.O.C." not normalized to "B.R.O.C."
-staging/Intl402/Temporal/old/non-iso-calendars.js
