@@ -21,11 +21,11 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
-    "build": "cd ./packages/temporal-polyfill && pnpm run build",
-    "dev": "cd ./packages/temporal-polyfill && pnpm run dev",
-    "test": "cd ./packages/temporal-polyfill && pnpm run test",
-    "lint": "cd ./packages/temporal-polyfill && pnpm run lint",
-    "clean": "cd ./packages/temporal-polyfill && pnpm run clean"
+    "build": "pnpm --filter temporal-polyfill run build",
+    "dev": "pnpm --filter temporal-polyfill run dev",
+    "test": "pnpm --filter temporal-polyfill run test",
+    "lint": "pnpm --filter temporal-polyfill run lint",
+    "clean": "pnpm --filter temporal-polyfill run clean"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.22.1",
