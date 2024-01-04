@@ -57,9 +57,11 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     hoursInDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
       return computeHoursInDay(createTimeZoneOps, slots)
     },
-    offsetNanoseconds: getOffsetNanoseconds,
+    offsetNanoseconds(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>) {
+      return slotsToIsoFields(slots).offsetNanoseconds
+    },
     offset(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
-      return formatOffsetNano(getOffsetNanoseconds(slots))
+      return formatOffsetNano(slotsToIsoFields(slots).offsetNanoseconds)
     },
     timeZoneId(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
       return getId(slots.timeZone)
@@ -266,8 +268,4 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
   }
 
   return parseZonedDateTime(arg, options)
-}
-
-function getOffsetNanoseconds(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
-  return slotsToIsoFields(slots).offsetNanoseconds
 }
