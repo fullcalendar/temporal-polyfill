@@ -48,10 +48,13 @@ yargs(hideBin(process.argv))
         'expected-failures-surface.txt',
       ];
 
-      const nodeVersion = parseInt(process.versions.node.split('.')[0]);
-      if (nodeVersion < 18) expectedFailureFiles.push('expected-failures-before-node18.txt');
-      if (nodeVersion < 16) expectedFailureFiles.push('expected-failures-before-node16.txt');
-      if (nodeVersion === 20) expectedFailureFiles.push('expected-failures-node20.txt');
+      const nodeVersion = process.versions.node
+      const nodeMajorVersion = parseInt(nodeVersion.split('.')[0]);
+      if (nodeMajorVersion >= 18) expectedFailureFiles.push('expected-failures-intl-format-norm.txt');
+      if (nodeMajorVersion < 18) expectedFailureFiles.push('expected-failures-before-node18.txt');
+      if (nodeMajorVersion < 16) expectedFailureFiles.push('expected-failures-before-node16.txt');
+
+      console.log(`Testing with Node v${nodeVersion}...`)
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
