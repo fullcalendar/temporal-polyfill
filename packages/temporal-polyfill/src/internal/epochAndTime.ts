@@ -70,7 +70,7 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(isoFields:
 
 export function checkEpochNanoInBounds(epochNano: DayTimeNano | undefined): DayTimeNano {
   if (
-    epochNano === undefined ||
+    !epochNano ||
     compareDayTimeNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
     compareDayTimeNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {
