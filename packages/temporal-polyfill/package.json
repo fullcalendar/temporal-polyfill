@@ -36,8 +36,7 @@
     "test": "./scripts/test.js",
     "lint": "eslint .",
     "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean",
-    "size": "gzip-size --include-original --raw dist/global.min.js && pnpm export-size ./dist",
-    "z": "pnpm run clean && pnpm run build && pnpm run size"
+    "size": "gzip-size --include-original --raw dist/global.min.js && pnpm export-size ./dist"
   },
   "type": "module",
   "buildConfig": {

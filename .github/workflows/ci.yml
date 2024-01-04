@@ -27,7 +27,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.2.4
         with:
-          version: 7.33.6
+          version: 8.6.3
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -45,4 +45,4 @@ jobs:
         run: pnpm run build
 
       - name: Test
-        run: NODE_VERSION=${{ matrix.node }} pnpm run test
+        run: NODE_VERSION=${{ matrix.node }} cd packages/temporal-polyfill && pnpm run test
