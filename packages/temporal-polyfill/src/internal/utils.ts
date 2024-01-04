@@ -134,8 +134,8 @@ export function excludePropsByName<P, K extends keyof P>(
 }
 
 export function excludeUndefinedProps<P extends {}>(props: P): Partial<P> {
-  const propNames = Object.keys(props) as (keyof P)[]
   props = { ...props }
+  const propNames = Object.keys(props) as (keyof P)[]
 
   for (const propName of propNames) {
     if (props[propName] === undefined) {
