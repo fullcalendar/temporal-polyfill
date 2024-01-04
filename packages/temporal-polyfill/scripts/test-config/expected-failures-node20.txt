@@ -1,0 +1,8 @@
+
+# Really picky about whitespace between characters
+# Nothing we can do about this since it relies on Intl.DateTimeFormat
+staging/Intl402/Temporal/old/date-time-format.js
+staging/Intl402/Temporal/old/datetime-toLocaleString.js
+staging/Intl402/Temporal/old/instant-toLocaleString.js
+staging/Intl402/Temporal/old/time-toLocaleString.js
+intl402/DateTimeFormat/prototype/format/temporal-objects-resolved-time-zone.js

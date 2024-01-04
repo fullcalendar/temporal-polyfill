@@ -51,6 +51,7 @@ yargs(hideBin(process.argv))
       const nodeVersion = parseInt(process.versions.node.split('.')[0]);
       if (nodeVersion < 18) expectedFailureFiles.push('expected-failures-before-node18.txt');
       if (nodeVersion < 16) expectedFailureFiles.push('expected-failures-before-node16.txt');
+      if (nodeVersion === 20) expectedFailureFiles.push('expected-failures-node20.txt');
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
