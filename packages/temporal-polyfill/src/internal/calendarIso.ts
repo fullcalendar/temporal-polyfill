@@ -1,7 +1,7 @@
 import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './epochAndTime'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoTimeFieldDefaults } from './calendarIsoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
 import { diffEpochMilliByDay } from './diff'
-import { allFieldsEqual, clampProp, createLazyGenerator, modFloor } from './utils'
+import { allFieldsEqual, clampProp, createLazyGenerator, modFloor, zipProps } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
 import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
 import { buildIntlFormat, parseIntlYear } from './calendarIntl'
@@ -215,14 +215,12 @@ export function constrainIsoTimeFields(
   isoTimeFields: IsoTimeFields,
   overflow?: Overflow,
 ): IsoTimeFields {
-  // TODO: clever way to compress this, using functional programming
-  // Will this kill need for clampProp?
-  return {
-    isoHour: clampProp(isoTimeFields, 'isoHour', 0, 23, overflow),
-    isoMinute: clampProp(isoTimeFields, 'isoMinute', 0, 59, overflow),
-    isoSecond: clampProp(isoTimeFields, 'isoSecond', 0, 59, overflow),
-    isoMillisecond: clampProp(isoTimeFields, 'isoMillisecond', 0, 999, overflow),
-    isoMicrosecond: clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflow),
-    isoNanosecond: clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflow),
-  }
+  return zipProps(isoTimeFieldNamesAsc, [
+    clampProp(isoTimeFields, 'isoHour', 0, 23, overflow),
+    clampProp(isoTimeFields, 'isoMinute', 0, 59, overflow),
+    clampProp(isoTimeFields, 'isoSecond', 0, 59, overflow),
+    clampProp(isoTimeFields, 'isoMillisecond', 0, 999, overflow),
+    clampProp(isoTimeFields, 'isoMicrosecond', 0, 999, overflow),
+    clampProp(isoTimeFields, 'isoNanosecond', 0, 999, overflow),
+  ])
 }
