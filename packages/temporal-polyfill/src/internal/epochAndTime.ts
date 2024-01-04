@@ -4,7 +4,8 @@ import {
   IsoDateFields,
   IsoTimeFields,
   isoTimeFieldNamesAsc,
-  isoTimeFieldDefaults
+  isoTimeFieldDefaults,
+  isoDateTimeFieldNamesAsc
 } from './calendarIsoFields'
 import {
   Unit,
@@ -17,7 +18,7 @@ import {
   nanoInUtcDay,
   nanoToGivenFields
 } from './units'
-import { divModFloor, clampProp, divModTrunc } from './utils'
+import { divModFloor, clampProp, divModTrunc, zipProps } from './utils'
 import { DayTimeNano, addDayTimeNanoAndNumber, compareDayTimeNanos, dayTimeNanoToBigInt, dayTimeNanoToNumber, dayTimeNanoToNumberRemainder, numberToDayTimeNano } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
 
@@ -294,13 +295,13 @@ export function epochMilliToIso(epochMilli: number): {
   const nudge = epochMilli < -milliInDay * maxDays ? 1 : epochMilli > milliInDay * maxDays ? -1 : 0
   const legacyDate = new Date(epochMilli + nudge * milliInDay)
 
-  return {
-    isoYear: legacyDate.getUTCFullYear(),
-    isoMonth: legacyDate.getUTCMonth() + 1,
-    isoDay: legacyDate.getUTCDate() - nudge,
-    isoHour: legacyDate.getUTCHours(),
-    isoMinute: legacyDate.getUTCMinutes(),
-    isoSecond: legacyDate.getUTCSeconds(),
-    isoMillisecond: legacyDate.getUTCMilliseconds(),
-  }
+  return zipProps(isoDateTimeFieldNamesAsc as any, [
+    legacyDate.getUTCFullYear(),
+    legacyDate.getUTCMonth() + 1,
+    legacyDate.getUTCDate() - nudge,
+    legacyDate.getUTCHours(),
+    legacyDate.getUTCMinutes(),
+    legacyDate.getUTCSeconds(),
+    legacyDate.getUTCMilliseconds(),
+  ])
 }

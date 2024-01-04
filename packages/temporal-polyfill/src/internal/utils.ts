@@ -49,6 +49,18 @@ export function mapProps<P, R, E = undefined>(
   return res
 }
 
+
+export function zipProps<P>(propNamesRev: (keyof P)[], args: (P[keyof P])[]): P {
+  const res = {} as any
+  let i = propNamesRev.length
+
+  for (const arg of args) {
+    res[propNamesRev[--i]] = arg
+  }
+
+  return res
+}
+
 /*
 TODO: audit uses of this contributing to HIGHER bundle size. Just inline? Often more readable.
 See createAdapterCompoundOps/createAdapterOps. Bigger after using mapPropNames.

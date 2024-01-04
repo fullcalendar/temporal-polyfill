@@ -34,7 +34,7 @@ import {
   nanoInMinute,
   nanoToGivenFields,
 } from './units'
-import { divModFloor, pluckProps } from './utils'
+import { divModFloor, pluckProps, zipProps } from './utils'
 import { DayTimeNano } from './dayTimeNano'
 import { utcTimeZoneId } from './timeZoneNative'
 import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
@@ -526,13 +526,15 @@ function organizeDurationParts(parts: string[]): DurationFields {
   let hasAnyFrac = false
   let leftoverNano = 0
   let durationFields = {
-    years: parseUnit(parts[2]),
-    months: parseUnit(parts[3]),
-    weeks: parseUnit(parts[4]),
-    days: parseUnit(parts[5]),
-    hours: parseUnit(parts[6], parts[7], Unit.Hour),
-    minutes: parseUnit(parts[8], parts[9], Unit.Minute),
-    seconds: parseUnit(parts[10], parts[11], Unit.Second),
+    ...zipProps(durationFieldNamesAsc, [
+      parseUnit(parts[2]),
+      parseUnit(parts[3]),
+      parseUnit(parts[4]),
+      parseUnit(parts[5]),
+      parseUnit(parts[6], parts[7], Unit.Hour),
+      parseUnit(parts[8], parts[9], Unit.Minute),
+      parseUnit(parts[10], parts[11], Unit.Second),
+    ]),
     ...nanoToGivenFields(leftoverNano, Unit.Millisecond, durationFieldNamesAsc),
   } as DurationFields
 
