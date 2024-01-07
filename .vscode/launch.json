@@ -1,56 +1,11 @@
 {
   "configurations": [
     {
-      "name": "Jest: Debug All",
-      "type": "node",
-      "request": "launch",
-      "runtimeArgs": [
-        "--inspect-brk",
-        "${workspaceRoot}/node_modules/jest/bin/jest.js",
-        "--runInBand",
-        // NOTE: keep following args in sync with settings.json
-        "--no-cache",
-        "--watchAll=false"
-      ],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "sourceMaps": true
-    },
-    {
-      "name": "Jest: Debug File",
-      "type": "node",
-      "request": "launch",
-      // NOTE: keep args in sync with settings.json
-      "runtimeArgs": [
-        "--inspect-brk",
-        "${workspaceRoot}/node_modules/jest/bin/jest.js",
-        "--runInBand",
-        // NOTE: keep following args in sync with settings.json
-        "--no-cache",
-        "--watchAll=false",
-        // specific file
-        "${file}"
-      ],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "sourceMaps": true
-    },
-    {
-      "name": "Test262: Run All",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test262"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "autoAttachChildProcesses": true
-    },
-    {
       "name": "Test262: Debug File",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test262", "--no-timeout", "${file}"],
+      "runtimeArgs": ["run", "test", "--no-timeout", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true

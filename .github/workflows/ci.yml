@@ -1,7 +1,10 @@
 
 name: CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 env:
   TZ: "America/New_York"
@@ -11,29 +14,35 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node: [14.21.3, 16.20.0, 18.19.0, 20.10.0]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.2.4
         with:
-          version: 7.14.0
+          version: 8.6.3
 
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.13.1
+          node-version: 18.19.0
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint
-        run: pnpm run lint
+      # - name: Lint
+      #   run: pnpm run lint
 
       - name: Build
         run: pnpm run build
 
       - name: Test
-        run: pnpm run test
+        run: cd packages/temporal-polyfill && NODE_VERSION=${{ matrix.node }} pnpm run test

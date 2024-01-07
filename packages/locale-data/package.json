@@ -1,0 +1,9 @@
+{
+  "name": "locale-data",
+  "version": "0.0.0",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "deepmerge": "^4.2.2",
+    "yargs": "^17.0.1"
+  }
+}

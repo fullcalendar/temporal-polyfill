@@ -1,9 +1,12 @@
 [submodule "scripts/data/moment"]
-	path = scripts/data/moment
+	path = packages/locale-data/data/moment
 	url = https://github.com/moment/moment.git
 [submodule "scripts/data/fullcalendar"]
-	path = scripts/data/fullcalendar
+	path = packages/locale-data/data/fullcalendar
 	url = https://github.com/fullcalendar/fullcalendar.git
 [submodule "packages/temporal-polyfill/test262"]
-	path = packages/temporal-polyfill/test262
+	path = test262
 	url = https://github.com/tc39/test262
+[submodule "packages/temporal-test262-runner"]
+	path = packages/temporal-test262-runner
+	url = git@github.com:fullcalendar/temporal-test262-runner.git

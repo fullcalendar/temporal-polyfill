@@ -1,8 +1,8 @@
 {
   "name": "temporal-polyfill",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "title": "Temporal Polyfill",
-  "description": "A spec-compliant Temporal JavaScript polyfill in 16kb",
+  "description": "A lightweight polyfill for Temporal, successor to the JavaScript Date object",
   "author": {
     "name": "Adam Shaw",
     "email": "arshaw@users.noreply.github.com",
@@ -18,75 +18,55 @@
   "copyright": "2022 Adam Shaw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal.git",
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
-    "build": "pnpm run types && pnpm run bundle",
-    "build:dev": "pnpm run types && NO_MIN=1 pnpm run bundle",
-    "watch": "concurrently npm:types:watch npm:bundle:watch",
-    "types": "tsc --build --preserveWatchOutput",
-    "types:watch": "tsc --build --preserveWatchOutput --watch",
-    "bundle": "rollup -c ../../scripts/config/pkgBundle.cjs",
-    "bundle:watch": "rollup -c ../../scripts/config/pkgBundle.cjs --watch",
-    "test": "jest .",
-    "test262": "node ./runtest262.js",
+    "build": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && pnpm run bundle",
+    "dev": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
+    "tsc": "tsc --build",
+    "tsc:dev": "tsc --build --watch --pretty",
+    "tsc:clean": "rm -rf dist/.tsc dist/tsconfig.tsbuildinfo",
+    "type-overrides": "cp src/typeOverrides/*.d.ts dist",
+    "bundle": "./scripts/bundle.js",
+    "bundle:dev": "./scripts/bundle.js --dev",
+    "bundle:clean": "rm -rf dist/*.js dist/*.cjs dist/*.map dist/*.d.ts",
+    "pkg-json": "./scripts/pkg-json.js",
+    "pkg-json:clean": "rm -rf dist/package.json",
+    "test": "./scripts/test.js",
     "lint": "eslint .",
-    "size": "node ../../scripts/pkgSize.cjs",
-    "clean": "node ../../scripts/pkgClean.cjs"
+    "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean",
+    "size": "gzip-size --include-original dist/global.min.js && pnpm export-size ./dist"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./impl": {
-      "types": "./dist/impl.d.ts",
-      "require": "./dist/impl.cjs",
-      "import": "./dist/impl.mjs"
-    },
-    "./shim": {
-      "types": "./dist/shim.d.ts",
-      "require": "./dist/shim.cjs",
-      "import": "./dist/shim.mjs"
-    },
-    "./global": {
-      "types": "./dist/global.d.ts",
-      "require": "./dist/global.cjs",
-      "import": "./dist/global.mjs"
+  "buildConfig": {
+    "exports": {
+      ".": {},
+      "./impl": {},
+      "./global": {
+        "iife": true
+      }
     }
   },
-  "sideEffects": [
-    "./dist/global.*"
-  ],
-  "files": [
-    "/src",
-    "/dist",
-    "/*.d.ts"
-  ],
+  "publishConfig": {
+    "directory": "./dist",
+    "linkDirectory": true
+  },
   "dependencies": {
-    "temporal-spec": "~0.1.0"
+    "temporal-spec": "~0.2.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.22",
-    "@types/jest": "^26.0.24",
+    "@js-temporal/temporal-test262-runner": "workspace:*",
+    "@rollup/plugin-terser": "^0.4.4",
     "@types/node": "^16.9.1",
-    "@js-temporal/temporal-test262-runner": "^0.9.0",
-    "ansi-colors": "^4.1.3",
-    "chai": "^4.3.4",
-    "concurrently": "^7.6.0",
+    "concurrently": "^8.2.0",
     "eslint": "^7.25.0",
-    "jest": "^27.0.6",
-    "jest-date-mock": "^1.0.8",
-    "js-yaml": "^4.1.0",
-    "progress": "^2.0.3",
-    "rollup": "^2.55.1",
-    "tiny-glob": "^0.2.9",
-    "typescript": "^4.3.5"
+    "export-size": "^0.7.0",
+    "gzip-size": "^7.0.0",
+    "rollup": "^3.27.2",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "terser": "^5.19.2",
+    "typescript": "^5.1.6",
+    "yargs": "^17.7.2"
   }
 }

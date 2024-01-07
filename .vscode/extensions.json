@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "firsttris.vscode-jest-runner"
+    "dbaeumer.vscode-eslint"
   ]
 }

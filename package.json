@@ -21,46 +21,26 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
-    "build": "cd ./packages/temporal-polyfill && pnpm run build",
-    "build:dev": "cd ./packages/temporal-polyfill && pnpm run build:dev",
-    "watch": "cd ./packages/temporal-polyfill && pnpm run watch",
-    "test": "cd ./packages/temporal-polyfill && pnpm run test",
-    "test262": "cd ./packages/temporal-polyfill && pnpm run test262",
-    "lint": "cd ./packages/temporal-polyfill && pnpm run lint",
-    "size": "cd ./packages/temporal-polyfill && pnpm run size",
-    "clean": "cd ./packages/temporal-polyfill && pnpm run clean",
-    "locales-scrape": "node ./scripts/localesScrape.cjs",
-    "locales-compile": "echo 'TODO: recursively execute locales-compile'"
+    "build": "pnpm --filter temporal-polyfill run build",
+    "dev": "pnpm --filter temporal-polyfill run dev",
+    "test": "pnpm --filter temporal-polyfill run test",
+    "lint": "pnpm --filter temporal-polyfill run lint",
+    "clean": "pnpm --filter temporal-polyfill run clean"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.6",
-    "@babel/preset-env": "^7.14.5",
-    "@babel/preset-typescript": "^7.15.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
-    "colors": "^1.4.0",
-    "deepmerge": "^4.2.2",
-    "esbuild": "^0.14.38",
     "eslint": "^7.25.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-import-resolver-node": "^0.3.6",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "jest": "^27.0.4",
-    "minimatch": "^5.0.1",
-    "rollup": "^2.55.1",
-    "rollup-plugin-dts": "^3.0.2",
-    "rollup-plugin-esbuild": "^4.9.1",
-    "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^4.3.5",
-    "yargs": "^17.0.1"
+    "typescript": "^5.1.6"
   },
   "pnpm": {
     "patchedDependencies": {
-      "@js-temporal/temporal-test262-runner@0.9.0": "patches/@js-temporal__temporal-test262-runner@0.9.0.patch"
+      "export-size@0.7.0": "patches/export-size@0.7.0.patch"
     }
   }
 }

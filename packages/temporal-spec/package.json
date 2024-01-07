@@ -1,6 +1,6 @@
 {
   "name": "temporal-spec",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "title": "TypeScript types for Temporal",
   "author": {
     "name": "Adam Shaw",
@@ -10,7 +10,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal.git",
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
     "directory": "packages/temporal-spec"
   },
   "type": "module",

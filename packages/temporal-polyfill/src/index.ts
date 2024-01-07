@@ -1,1 +1,1 @@
-export * from 'temporal-spec'
+export * from './impl'
