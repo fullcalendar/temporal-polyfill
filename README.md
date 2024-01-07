@@ -64,12 +64,12 @@ Use a `<script>` tags with a CDN link:
     <td>Repo</td>
     <td>
       <a href='https://github.com/fullcalendar/temporal-polyfill'>
-        github.com/fullcalendar/temporal-polyfill
+        fullcalendar/temporal-polyfill
       </a>
     </td>
     <td>
       <a href='https://github.com/js-temporal/temporal-polyfill'>
-        github.com/js-temporal/temporal-polyfill
+        js-temporal/temporal-polyfill
       </a>
     </td>
   </tr>
@@ -92,7 +92,7 @@ Use a `<script>` tags with a CDN link:
     <td>Spec compliance</td>
     <td>
       Strict compliance for common API.<br />
-      Relaxed compliance for subclassing built-in types.
+      Relaxed compliance for subclassing<br />built-in types.
     </td>
     <td>
       Strict compliance for entire API.
@@ -118,15 +118,6 @@ Use a `<script>` tags with a CDN link:
       <code>import 'temporal-polyfill/global'</code>
     </td>
     <td>Not currently possible</td>
-  </tr>
-  <tr>
-    <td>Global usage directly in browser</td>
-    <td>
-      <code>Temporal.Now.zonedDateTimeISO()</code>
-    </td>
-    <td>
-      <code>temporal.Temporal.Now.zonedDateTimeISO()</code>
-    </td>
   </tr>
 </table>
 
