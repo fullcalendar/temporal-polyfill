@@ -92,8 +92,7 @@ Use a `<script>` tags with a CDN link:
     <td>Spec compliance</td>
     <td>
       Strict compliance for common API.<br />
-      Functional compliance for <i>custom-implemented</i> Calendar/TimeZone,<br />
-      though internal calling order may differ (<a href='#spec-compliance'>more info</a>).
+      Relaxed compliance for subclassing built-in types.
     </td>
     <td>
       Strict compliance for entire API.
@@ -114,10 +113,9 @@ Use a `<script>` tags with a CDN link:
     <td>Internally relies on <a href='https://github.com/GoogleChromeLabs/jsbi'>JSBI</a></td>
   </tr>
   <tr>
-    <td>Global usage in ESM/CJS</td>
+    <td>Global usage in ESM</td>
     <td>
-      <code>import 'temporal-polyfill/global'; // ESM</code><br />
-      <code>require('temporal-polyfill/global'); // CJS</code>
+      <code>import 'temporal-polyfill/global'</code>
     </td>
     <td>Not currently possible</td>
   </tr>
