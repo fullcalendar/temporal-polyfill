@@ -91,7 +91,7 @@ importers:
   packages/temporal-polyfill:
     dependencies:
       temporal-spec:
-        specifier: ~0.2.0
+        specifier: ^0.2.0
         version: link:../temporal-spec
     devDependencies:
       '@js-temporal/temporal-test262-runner':
