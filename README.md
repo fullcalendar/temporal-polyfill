@@ -116,22 +116,18 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Global usage in ESM/CJS</td>
     <td>
-      <pre><code>import 'temporal-polyfill/global'; // ESM
-require('temporal-polyfill/global'); // CJS</code></pre>
+      <code>import 'temporal-polyfill/global'; // ESM</code><br />
+      <code>require('temporal-polyfill/global'); // CJS</code>
     </td>
     <td>Not currently possible</td>
   </tr>
   <tr>
     <td>Global usage directly in browser</td>
     <td>
-      <pre><code>&lt;script&gt;
-&nbsp;&nbsp;Temporal.Now.zonedDateTimeISO()
-&lt;/script&gt;</code></pre>
+      <code>Temporal.Now.zonedDateTimeISO()</code>
     </td>
     <td>
-      <pre><code>&lt;script&gt;
-&nbsp;&nbsp;temporal.Temporal.Now.zonedDateTimeISO()
-&lt;/script&gt;</code></pre>
+      <code>temporal.Temporal.Now.zonedDateTimeISO()</code>
     </td>
   </tr>
 </table>
@@ -164,9 +160,9 @@ The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262
 
 <table>
   <tr>
-    <th colspan='6'>
-      Minimum required browsers:
-    </th>
+    <td colspan='6'>
+      <strong>Minimum required browsers:</strong>
+    </td>
   </tr>
   <tr>
     <!-- Computed from Libraries+Syntax in worksheet below  -->
@@ -178,9 +174,10 @@ The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262
     <td>Node.js 14<br />(Apr 2020)</td>
   </tr>
   <tr>
-    <th colspan='6'>
-      If you transpile, you can support older browsers down to:
-    </th>
+    <td colspan='6'>
+      <br />
+      <strong>If you transpile, you can support older browsers down to:</strong>
+    </td>
   </tr>
   <tr>
     <!-- Computed from Libraries in worksheet below  -->
@@ -265,15 +262,12 @@ Here's how to sidestep this browser compatibility issue:
   </tr>
   <tr>
     <td>
-      <code>
-        new Temporal.ZonedDateTime(nano, tz, cal)
-      </code>
+      <pre><code>new Temporal.ZonedDateTime(nano, tz, cal)
+&nbsp;</code></pre>
     </td>
     <td>
-      <code>
-        Temporal.Instant.fromEpochMilliseconds(milli)<br />
-        &nbsp;&nbsp;.toZonedDateTimeISO() // or toZonedDateTime
-      </code>
+      <pre><code>Temporal.Instant.fromEpochMilliseconds(milli)
+&nbsp;&nbsp;.toZonedDateTimeISO() // or toZonedDateTime</code></pre>
     </td>
 </table>
 
