@@ -22,7 +22,7 @@ Only 20.0 kB, with near-perfect [spec compliance](#spec-compliance).
 npm install temporal-polyfill
 ```
 
-**Import as an ES module** without side effects:
+Import as an ES module without side effects:
 
 ```js
 import { Temporal } from 'temporal-polyfill'
@@ -30,7 +30,7 @@ import { Temporal } from 'temporal-polyfill'
 console.log(Temporal.Now.zonedDateTimeISO().toString())
 ```
 
-Or, **import globally:**
+Or, import globally:
 
 ```js
 import 'temporal-polyfill/global'
@@ -116,28 +116,22 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Global usage in ESM/CJS</td>
     <td>
-      <code>
-        import 'temporal-polyfill/global'; // ESM<br />
-        require('temporal-polyfill/global'); // CJS
-      </code>
+      <pre><code>import 'temporal-polyfill/global'; // ESM
+require('temporal-polyfill/global'); // CJS</code></pre>
     </td>
     <td>Not currently possible</td>
   </tr>
   <tr>
     <td>Global usage directly in browser</td>
     <td>
-      <code>
-        &lt;script&gt;<br />
-        &nbsp;&nbsp;Temporal.Now.zonedDateTimeISO()<br />
-        &lt;/script&gt;
-      </code>
+      <pre><code>&lt;script&gt;
+&nbsp;&nbsp;Temporal.Now.zonedDateTimeISO()
+&lt;/script&gt;</code></pre>
     </td>
     <td>
-      <code>
-        &lt;script&gt;<br />
-        &nbsp;&nbsp;temporal.Temporal.Now.zonedDateTimeISO()<br />
-        &lt;/script&gt;
-      </code>
+      <pre><code>&lt;script&gt;
+&nbsp;&nbsp;temporal.Temporal.Now.zonedDateTimeISO()
+&lt;/script&gt;</code></pre>
     </td>
   </tr>
 </table>
