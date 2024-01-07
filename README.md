@@ -108,7 +108,7 @@ Use a `<script>` tags with a CDN link:
     </td>
   </tr>
   <tr>
-    <td>BigInt Approach</td>
+    <td>BigInt approach</td>
     <td>Internally avoids BigInt operations altogether</td>
     <td>Internally relies on <a href='https://github.com/GoogleChromeLabs/jsbi'>JSBI</a></td>
   </tr>
@@ -131,8 +131,8 @@ All calendar systems (ex: `chinese`, `persian`) and time zones are supported.
 Compliance with the latest version of the Temporal spec (Nov 2023) is near-perfect with the following intentional deviations:
 
 - `Duration::toString` does not display units greater than `Number.MAX_SAFE_INTEGER` according to spec. Precision is chosen differently.
-- *Custom implementations* of Calendars and TimeZones are queried differently. Only affects those subclassing built-in classes, which is extremely rare. See the CALLING entries in the [test-ignore file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
-- There are believed to be 3 bugs in the Temporal spec itself, one of which [has been filed](https://github.com/tc39/proposal-temporal/issues/2742). See SPEC-BUG entries in the [test-ignore file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
+- *Custom implementations* of Calendars and TimeZones are queried differently. Only affects those subclassing built-in classes, which is extremely rare. See the CALLING entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
+- There are believed to be 3 bugs in the Temporal spec itself, one of which [has been reported](https://github.com/tc39/proposal-temporal/issues/2742). See SPEC-BUG entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
 - Canonicalization of time zone IDs is simplified, leveraging the built-in `Intl` API.
 - `Intl.DateTimeFormat` has not been polyfilled to accept number-offset values for the `timeZone` option.
 - Method descriptors and `Function::length` are not strictly compliant due to ES-related space-saving techniques.
@@ -141,8 +141,8 @@ The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262
 
 - 6811 *total* Temporal-related test files
 - 6138 *passed* by `temporal-polyfill`
-- 495 *ignored* due to superficial method descriptor compliance
-- 178 *ignored* due to other aforementioned intentional deviations
+- 495 *skipped* due to superficial method descriptor non-compliance
+- 178 *skipped* due to other aforementioned intentional deviations
 
 
 ## Browser Support
