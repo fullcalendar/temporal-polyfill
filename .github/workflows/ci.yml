@@ -4,7 +4,7 @@ name: CI
 on:
   push:
     branches:
-      - refactor-ci
+      - main
 
 env:
   TZ: "America/New_York"

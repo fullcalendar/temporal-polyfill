@@ -1,8 +1,8 @@
 {
   "name": "temporal-polyfill",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "title": "Temporal Polyfill",
-  "description": "A spec-compliant Temporal JavaScript polyfill in 16kb",
+  "description": "A lightweight polyfill for Temporal, successor to the JavaScript Date object",
   "author": {
     "name": "Adam Shaw",
     "email": "arshaw@users.noreply.github.com",
@@ -18,7 +18,7 @@
   "copyright": "2022 Adam Shaw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal.git",
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
@@ -36,7 +36,7 @@
     "test": "./scripts/test.js",
     "lint": "eslint .",
     "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean",
-    "size": "gzip-size --include-original --raw dist/global.min.js && pnpm export-size ./dist"
+    "size": "gzip-size --include-original dist/global.min.js && pnpm export-size ./dist"
   },
   "type": "module",
   "buildConfig": {
@@ -53,7 +53,7 @@
     "linkDirectory": true
   },
   "dependencies": {
-    "temporal-spec": "~0.1.0"
+    "temporal-spec": "~0.2.0"
   },
   "devDependencies": {
     "@js-temporal/temporal-test262-runner": "workspace:*",
