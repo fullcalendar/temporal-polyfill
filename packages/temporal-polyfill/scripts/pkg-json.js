@@ -34,6 +34,7 @@ async function writePkgJson(pkgDir) {
   distPkgJson.unpkg = distPkgJson.jsdelivr = './global.min.js'
   distPkgJson.exports = distExportMap
 
+  delete distPkgJson.private
   delete distPkgJson.scripts
   delete distPkgJson.buildConfig
   delete distPkgJson.publishConfig
