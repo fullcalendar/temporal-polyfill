@@ -11,6 +11,7 @@ most notably changes to "user-visible operations".
 - In NPM directory, all files are now top-level as opposed to within `dist/`. Thus, the [jsDelivr URL](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.2.0/global.min.js) has changed.
 - Fixed bugs: #9, #12, #13, #21
 - Improved README content, including comparison with @js-temporal (#22)
+- Renamed github repo to fullcalendar/temporal-polyfill
 
 
 v0.1.1 (2023-02-15)
