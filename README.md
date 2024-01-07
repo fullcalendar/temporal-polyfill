@@ -251,12 +251,11 @@ Here's how to sidestep this browser compatibility issue:
   </tr>
   <tr>
     <td>
-      <pre><code>new Temporal.ZonedDateTime(nano, tz, cal)
-&nbsp;</code></pre>
+      <code>new Temporal.ZonedDateTime(nano, tz, cal)</code>
     </td>
     <td>
-      <pre><code>Temporal.Instant.fromEpochMilliseconds(milli)
-&nbsp;&nbsp;.toZonedDateTimeISO() // or toZonedDateTime</code></pre>
+      <code>Temporal.Instant.fromEpochMilliseconds(milli)</code><br />
+      <code>&nbsp;&nbsp;.toZonedDateTimeISO() // or toZonedDateTime</code>
     </td>
 </table>
 
