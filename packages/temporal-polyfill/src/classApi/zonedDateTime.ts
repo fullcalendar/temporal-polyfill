@@ -110,7 +110,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
         moveZonedDateTime(
           createMoveOps,
           createTimeZoneOps,
-          false,
+          true,
           slots,
           toDurationSlots(durationArg),
           options,

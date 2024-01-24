@@ -388,7 +388,7 @@ export function plainYearMonthWithFields<C>(
   getCalendarOps: (calendar: C) => YearMonthModOps<C>,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   initialFields: YearMonthBag,
-  mod: YearMonthBag,
+  modFields: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   const optionsCopy = copyOptions(options)
@@ -396,7 +396,7 @@ export function plainYearMonthWithFields<C>(
   const calendarOps = getCalendarOps(calendarSlot)
 
   return createPlainYearMonthSlots(
-    mergePlainYearMonthBag(calendarOps, initialFields, mod, optionsCopy)
+    mergePlainYearMonthBag(calendarOps, initialFields, modFields, optionsCopy)
   )
 }
 

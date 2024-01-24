@@ -82,7 +82,6 @@ export function createSlotClass(
 // Reject
 // -------------------------------------------------------------------------------------------------
 
-// TODO: ensure this is used in both class and func apis
 export function rejectInvalidBag<B>(bag: B): B {
   if (
     getSlots(bag) ||
