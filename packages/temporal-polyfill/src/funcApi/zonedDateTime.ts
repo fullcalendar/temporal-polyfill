@@ -1,7 +1,7 @@
 import { DateTimeBag, DateTimeFields } from '../internal/calendarFields'
 import { bindArgs } from '../internal/utils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
-import { computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
+import { ZonedDateTimeFields, computeHoursInDay, computeStartOfDay, buildZonedIsoFields, zonedEpochSlotsToIso } from '../internal/timeZoneOps'
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { ZonedFieldOptions } from '../internal/optionsRefine'
@@ -19,9 +19,6 @@ import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 import { prepCachedZonedDateTimeFormat } from './formatIntlCached'
 import { computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
-
-// TODO: better place for this?
-export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { offset: string }
 
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
@@ -47,18 +44,18 @@ export function fromFields(
 }
 
 export const getISOFields = bindArgs(
-  getZonedIsoDateTimeSlots<string, string>,
+  buildZonedIsoFields<string, string>,
   queryNativeTimeZone,
 )
 
 export function getFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): ZonedDateTimeFields {
-  const isoFields = zonedInternalsToIso(zonedDateTimeSlots, queryNativeTimeZone(zonedDateTimeSlots.timeZone))
+  const isoFields = zonedEpochSlotsToIso(zonedDateTimeSlots, queryNativeTimeZone)
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   return {
-    ...computeDateFields({ ...isoFields, calendar: zonedDateTimeSlots.calendar }),
+    ...computeDateFields(isoFields),
     ...isoTimeFieldsToCal(isoFields),
     offset: offsetString,
   }
@@ -227,9 +224,6 @@ function adaptDateFunc<R>(
   dateFunc: (dateSlots: DateSlots<string>) => R,
 ): (slots: ZonedDateTimeSlots<string, string>) => R {
   return (slots: ZonedDateTimeSlots<string, string>) => {
-    const isoFields = zonedInternalsToIso(slots, queryNativeTimeZone(slots.timeZone))
-    const dateSlots = { ...isoFields, calendar: slots.calendar }
-
-    return dateFunc(dateSlots)
+    return dateFunc(zonedEpochSlotsToIso(slots, queryNativeTimeZone))
   }
 }

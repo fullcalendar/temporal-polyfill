@@ -13,7 +13,7 @@ import {
 import { UnitName } from '../internal/units'
 import { NumSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import { IsoDateTimeFields } from '../internal/calendarIsoFields'
-import { ZonedIsoDateTimeSlots, computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'
+import { ZonedIsoFields, computeHoursInDay, computeStartOfDay, buildZonedIsoFields, zonedEpochSlotsToIso, FixedIsoFields } from '../internal/timeZoneOps'
 import { ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, getId } from '../internal/slots'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
@@ -52,16 +52,16 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   {
     ...epochGetters,
     ...calendarIdGetters,
-    ...adaptToIsoFields(dateGetters),
-    ...adaptToIsoFields(timeGetters),
+    ...adaptDateMethods(dateGetters),
+    ...adaptDateMethods(timeGetters),
     hoursInDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
       return computeHoursInDay(createTimeZoneOps, slots)
     },
     offsetNanoseconds(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>) {
-      return slotsToIsoFields(slots).offsetNanoseconds
+      return slotsToIso(slots).offsetNanoseconds
     },
     offset(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
-      return formatOffsetNano(slotsToIsoFields(slots).offsetNanoseconds)
+      return formatOffsetNano(slotsToIso(slots).offsetNanoseconds)
     },
     timeZoneId(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
       return getId(slots.timeZone)
@@ -198,8 +198,8 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
         zonedDateTimeToPlainMonthDay(createMonthDayRefineOps, slots, this)
       )
     },
-    getISOFields(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedIsoDateTimeSlots<CalendarSlot, TimeZoneSlot> {
-      return getZonedIsoDateTimeSlots(createTimeZoneOffsetOps, slots)
+    getISOFields(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedIsoFields<CalendarSlot, TimeZoneSlot> {
+      return buildZonedIsoFields(createTimeZoneOffsetOps, slots)
     },
     getCalendar: getCalendarFromSlots,
     getTimeZone({ timeZone }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): TimeZoneProtocol {
@@ -221,27 +221,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     }
   }
 )
-
-function adaptToIsoFields(methods: any) {
-  return mapProps(
-    (method: any) => {
-      return (slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>) => {
-        return method(slotsToIsoFields(slots))
-      }
-    },
-    methods,
-  )
-}
-
-function slotsToIsoFields(
-  slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
-): IsoDateTimeFields & { offsetNanoseconds: number, calendar: CalendarSlot } {
-  const timeZoneNative = createTimeZoneOffsetOps(slots.timeZone)
-  return {
-    ...zonedInternalsToIso(slots, timeZoneNative),
-    calendar: slots.calendar, // TODO: have zonedInternalsToIso do this?
-  }
-}
 
 // Utils
 // -------------------------------------------------------------------------------------------------
@@ -270,4 +249,21 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
   }
 
   return parseZonedDateTime(arg, options)
+}
+
+function slotsToIso(
+  slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
+): FixedIsoFields<CalendarSlot> {
+  return zonedEpochSlotsToIso(slots, createTimeZoneOffsetOps)
+}
+
+function adaptDateMethods(methods: any) {
+  return mapProps(
+    (method: any) => {
+      return (slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>) => {
+        return method(slotsToIso(slots))
+      }
+    },
+    methods,
+  )
 }

@@ -8,7 +8,7 @@ import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTime
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
-import { TimeZoneOffsetOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIso } from './timeZoneOps'
+import { TimeZoneOffsetOps, TimeZoneOps, getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 
 // Instant -> *
@@ -40,8 +40,7 @@ export function zonedDateTimeToPlainDateTime<C, T>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateTimeSlots<C> {
   return createPlainDateTimeSlots(
-    zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    zonedDateTimeSlots0.calendar,
+    zonedEpochSlotsToIso(zonedDateTimeSlots0, getTimeZoneOps),
   )
 }
 
@@ -50,8 +49,7 @@ export function zonedDateTimeToPlainDate<C, T>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateSlots<C> {
   return createPlainDateSlots(
-    zonedInternalsToIso(zonedDateTimeSlots0 as any, getTimeZoneOps(zonedDateTimeSlots0.timeZone)),
-    zonedDateTimeSlots0.calendar,
+    zonedEpochSlotsToIso(zonedDateTimeSlots0, getTimeZoneOps),
   )
 }
 
@@ -82,10 +80,7 @@ export function zonedDateTimeToPlainTime<C, T>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
-    zonedInternalsToIso(
-      zonedDateTimeSlots0 as any, // !!!
-      getTimeZoneOps(zonedDateTimeSlots0.timeZone)
-    ),
+    zonedEpochSlotsToIso(zonedDateTimeSlots0, getTimeZoneOps),
   )
 }
 
