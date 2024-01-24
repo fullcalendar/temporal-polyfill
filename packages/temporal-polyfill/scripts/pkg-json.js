@@ -25,6 +25,7 @@ async function writePkgJson(pkgDir) {
       types: shortName + '.d.ts',
       require: shortName + '.cjs',
       import: shortName + '.esm.js',
+      default: shortName + '.esm.js'
     }
   }
 
