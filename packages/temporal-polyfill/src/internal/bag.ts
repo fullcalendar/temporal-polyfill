@@ -1,5 +1,5 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { DateBag, DateFields, DateFieldsIntl, DateTimeBag, DateTimeFields, DayFields, DurationBag, EraYearFields, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, YearMonthFieldsIntl, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
+import { DateBag, DateTimeBag, DayFields, DurationBag, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './calendarFields'
 import { computeIsoDaysInMonth, isoMonthsInYear } from './calendarIso'
 import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
 import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
@@ -710,7 +710,7 @@ export function nativeMonthDayFromFields(
 ): PlainMonthDaySlots<string> {
   const overflow = refineOverflowOptions(options)
   let isIso = !this.id
-  let { monthCode, year, month } = fields as Partial<DateFieldsIntl> // correct type?
+  let { monthCode, year, month } = fields as DateBag
   let monthCodeNumber: number
   let isLeapMonth: boolean
   let normalYear: number | undefined

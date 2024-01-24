@@ -1,13 +1,13 @@
 import { convertPlainMonthDayToDate, convertPlainYearMonthToDate, convertToPlainMonthDay, convertToPlainYearMonth } from './bag'
 import { isoCalendarId } from './calendarConfig'
-import { DateBag, MonthDayFields, YearFields, YearMonthFieldsIntl } from './calendarFields'
+import { DateBag, MonthDayFields, YearFields, YearMonthFields } from './calendarFields'
 import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { DateModOps, MonthDayRefineOps, YearMonthRefineOps } from './calendarOps'
 import { toBigInt } from './cast'
 import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
-import { InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
+import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import { SimpleTimeZoneOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIso } from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 
@@ -207,7 +207,7 @@ export function plainDateToPlainMonthDay<C>(
 export function plainYearMonthToPlainDate<C>(
   getCalendarOps: (calendar: C) => DateModOps<C>,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  plainYearMonthFields: YearMonthFieldsIntl,
+  plainYearMonthFields: YearMonthFields,
   bag: { day: number },
 ): PlainDateSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar

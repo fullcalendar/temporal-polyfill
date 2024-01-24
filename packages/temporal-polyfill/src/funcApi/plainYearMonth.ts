@@ -1,4 +1,4 @@
-import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } from '../internal/calendarFields'
+import { YearMonthBag, YearMonthFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
@@ -41,7 +41,7 @@ export function fromFields(
 
 export const getFields = computeYearMonthFields as (
   slots: PlainYearMonthSlots<string>
-) => YearMonthFields & Partial<EraYearFields>
+) => YearMonthFields
 
 export const daysInMonth = computeDaysInMonth as (slots: PlainYearMonthSlots<string>) => number
 export const daysInYear = computeDaysInYear as (slots: PlainYearMonthSlots<string>) => number
@@ -78,7 +78,7 @@ export const toString = formatPlainYearMonthIso<string>
 
 export function toPlainDate(
   plainYearMonthSlots: PlainYearMonthSlots<string>,
-  plainYearMonthFields: YearMonthFieldsIntl,
+  plainYearMonthFields: YearMonthFields,
   bag: { day: number },
 ): PlainDateSlots<string> {
   return plainYearMonthToPlainDate(

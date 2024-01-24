@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { MonthDayBag, MonthDayFieldsIntl, YearFields } from '../internal/calendarFields'
+import { MonthDayBag, MonthDayFields, YearFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { bindArgs, isObjectLike } from '../internal/utils'
@@ -19,7 +19,7 @@ import { plainMonthDayToPlainDate } from '../internal/convert'
 import { parsePlainMonthDay } from '../internal/parseIso'
 import { prepPlainMonthDayFormat } from './dateTimeFormat'
 
-export type PlainMonthDay = any & MonthDayFieldsIntl
+export type PlainMonthDay = any & MonthDayFields
 export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag<CalendarArg> | string
 
 export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] = createSlotClass(

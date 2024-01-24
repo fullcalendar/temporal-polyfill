@@ -1,9 +1,9 @@
-import { YearMonthBag, YearMonthFieldsIntl } from '../internal/calendarFields'
+import { YearMonthBag, YearMonthFields } from '../internal/calendarFields'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { LocalesArg } from '../internal/formatIntl'
-import { DateTimeDisplayOptions, DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
+import { DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
-import { PlainYearMonthBranding, PlainYearMonthSlots, getId, removeBranding } from '../internal/slots'
+import { PlainYearMonthBranding, PlainYearMonthSlots, removeBranding } from '../internal/slots'
 import { getSlots, rejectInvalidBag, createSlotClass } from './slotsForClasses'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
 import { CalendarArg } from './calendar'
@@ -21,7 +21,7 @@ import { plainYearMonthToPlainDate } from '../internal/convert'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { prepPlainYearMonthFormat } from './dateTimeFormat'
 
-export type PlainYearMonth = any & YearMonthFieldsIntl
+export type PlainYearMonth = any & YearMonthFields
 export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
 
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = createSlotClass(

@@ -1,4 +1,4 @@
-import { DateFields, DateTimeBag, TimeFields } from '../internal/calendarFields'
+import { DateTimeBag, DateTimeFields } from '../internal/calendarFields'
 import { isoTimeFieldDefaults } from '../internal/calendarIsoFields'
 import { DateTimeDisplayOptions, DiffOptions, EpochDisambigOptions, OverflowOptions, RoundingOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
@@ -32,7 +32,7 @@ import { parsePlainDateTime } from '../internal/parseIso'
 import { prepPlainDateTimeFormat } from './dateTimeFormat'
 import { LocalesArg } from '../internal/formatIntl'
 
-export type PlainDateTime = any & DateFields & TimeFields
+export type PlainDateTime = any & DateTimeFields
 export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag<CalendarArg> | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(

@@ -1,4 +1,4 @@
-import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
+import { DateTimeBag, DateTimeFields } from '../internal/calendarFields'
 import { bindArgs } from '../internal/utils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
 import { computeHoursInDay, computeStartOfDay, getZonedIsoDateTimeSlots, zonedInternalsToIso } from '../internal/timeZoneOps'

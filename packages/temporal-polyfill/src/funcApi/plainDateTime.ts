@@ -1,4 +1,4 @@
-import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
+import { DateTimeBag, DateTimeFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { OverflowOptions } from '../internal/optionsRefine'
@@ -37,7 +37,7 @@ export function fromFields(
   )
 }
 
-export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields & Partial<EraYearFields> {
+export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields {
   return {
     ...computeDateFields(slots),
     ...isoTimeFieldsToCal(slots),

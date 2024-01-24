@@ -1,4 +1,4 @@
-import { DateBag, DateFields, EraYearFields } from '../internal/calendarFields'
+import { DateBag, DateFields } from '../internal/calendarFields'
 import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
@@ -42,7 +42,7 @@ export function fromFields(
 
 export const getFields = computeDateFields as (
   slots: PlainDateSlots<string>
-) => DateFields & Partial<EraYearFields>
+) => DateFields
 
 export const dayOfWeek = computeIsoDayOfWeek as (slots: PlainDateSlots<string>) => number
 export const daysInWeek = computeIsoDaysInWeek as (slots: PlainDateSlots<string>) => number
