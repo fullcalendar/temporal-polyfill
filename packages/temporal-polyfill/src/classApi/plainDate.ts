@@ -17,7 +17,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { getSlots, rejectInvalidBag } from './slotsForClasses'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
-import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { PlainDateBag, plainDateWithFields, refinePlainDateBag } from '../internal/bag'
 import { constructPlainDateSlots } from '../internal/construct'
 import { slotsWithCalendar } from '../internal/mod'
@@ -151,7 +151,7 @@ export function toPlainDateSlots(arg: PlainDateArg, options?: OverflowOptions): 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return zonedDateTimeToPlainDate(
-          createSimpleTimeZoneOps,
+          createTimeZoneOffsetOps,
           slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
         )
     }

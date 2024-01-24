@@ -18,8 +18,8 @@ export type TimeZoneOps = {
   getPossibleInstantsFor: PossibleInstantsOp,
 }
 
-export type SimpleTimeZoneOps = {
-  getOffsetNanosecondsFor: OffsetNanosecondsOp,
+export type TimeZoneOffsetOps = {
+  getOffsetNanosecondsFor: OffsetNanosecondsOp
 }
 
 export type ZonedIsoDateTimeSlots<C, T> = IsoDateTimeFields & { calendar: C, timeZone: T, offset: string }
@@ -36,7 +36,7 @@ IMPORTANT: given timeZoneOps must be associated with the `internal` timeZone (ev
 */
 function _zonedInternalsToIso(
   internals: { epochNanoseconds: DayTimeNano }, // goes first because key
-  timeZoneOps: SimpleTimeZoneOps,
+  timeZoneOps: TimeZoneOffsetOps,
 ): IsoDateTimeFields & { offsetNanoseconds: number } {
   const { epochNanoseconds } = internals
   const offsetNanoseconds = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
@@ -52,7 +52,7 @@ function _zonedInternalsToIso(
 for getISOFields()
 */
 export function getZonedIsoDateTimeSlots<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>
 ): ZonedIsoDateTimeSlots<C, T> {
   const isoFields = zonedInternalsToIso(zonedDateTimeSlots as any, getTimeZoneOps(zonedDateTimeSlots.timeZone))
@@ -187,7 +187,7 @@ function findMatchingEpochNano(
 }
 
 function computeGapNear(
-  timeZoneOps: SimpleTimeZoneOps,
+  timeZoneOps: TimeZoneOffsetOps,
   zonedEpochNano: DayTimeNano
 ): number {
   const startOffsetNano = timeZoneOps.getOffsetNanosecondsFor(

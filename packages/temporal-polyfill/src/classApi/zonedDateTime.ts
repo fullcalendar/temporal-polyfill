@@ -31,7 +31,7 @@ import { TimeZoneProtocol } from './timeZoneProtocol'
 import { neverValueOf, dateGetters, timeGetters, epochGetters, getCalendarFromSlots, calendarIdGetters } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
-import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/mod'
@@ -159,10 +159,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return zonedDateTimesEqual(slots, toZonedDateTimeSlots(otherArg))
     },
     toString(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, options?: ZonedDateTimeDisplayOptions): string {
-      return formatZonedDateTimeIso(createSimpleTimeZoneOps, slots, options)
+      return formatZonedDateTimeIso(createTimeZoneOffsetOps, slots, options)
     },
     toJSON(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
-      return formatZonedDateTimeIso(createSimpleTimeZoneOps, slots)
+      return formatZonedDateTimeIso(createTimeZoneOffsetOps, slots)
     },
     toLocaleString(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}): string {
       const [format, epochMilli] = prepZonedDateTimeFormat(locales, options, slots)
@@ -175,17 +175,17 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     },
     toPlainDate(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainDate {
       return createPlainDate(
-        zonedDateTimeToPlainDate(createSimpleTimeZoneOps, slots)
+        zonedDateTimeToPlainDate(createTimeZoneOffsetOps, slots)
       )
     },
     toPlainTime(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainTime {
       return createPlainTime(
-        zonedDateTimeToPlainTime(createSimpleTimeZoneOps, slots)
+        zonedDateTimeToPlainTime(createTimeZoneOffsetOps, slots)
       )
     },
     toPlainDateTime(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainDateTime {
       return createPlainDateTime(
-        zonedDateTimeToPlainDateTime(createSimpleTimeZoneOps, slots)
+        zonedDateTimeToPlainDateTime(createTimeZoneOffsetOps, slots)
       )
     },
     toPlainYearMonth(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainYearMonth {
@@ -199,7 +199,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     getISOFields(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedIsoDateTimeSlots<CalendarSlot, TimeZoneSlot> {
-      return getZonedIsoDateTimeSlots(createSimpleTimeZoneOps, slots)
+      return getZonedIsoDateTimeSlots(createTimeZoneOffsetOps, slots)
     },
     getCalendar: getCalendarFromSlots,
     getTimeZone({ timeZone }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): TimeZoneProtocol {
@@ -236,7 +236,7 @@ function adaptToIsoFields(methods: any) {
 function slotsToIsoFields(
   slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
 ): IsoDateTimeFields & { offsetNanoseconds: number, calendar: CalendarSlot } {
-  const timeZoneNative = createSimpleTimeZoneOps(slots.timeZone)
+  const timeZoneNative = createTimeZoneOffsetOps(slots.timeZone)
   return {
     ...zonedInternalsToIso(slots, timeZoneNative),
     calendar: slots.calendar, // TODO: have zonedInternalsToIso do this?

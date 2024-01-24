@@ -1,5 +1,5 @@
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { SimpleTimeZoneOps, TimeZoneOps } from '../internal/timeZoneOps'
+import { TimeZoneOffsetOps, TimeZoneOps } from '../internal/timeZoneOps'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 import { TimeZoneSlot } from './slotsForClasses'
 
@@ -13,6 +13,6 @@ export function createTimeZoneOps(
   return createAdapterOps(timeZoneSlot, adapterFuncs) as any
 }
 
-export function createSimpleTimeZoneOps(timeZoneSlot: TimeZoneSlot): SimpleTimeZoneOps {
+export function createTimeZoneOffsetOps(timeZoneSlot: TimeZoneSlot): TimeZoneOffsetOps {
   return createTimeZoneOps(timeZoneSlot, simpleTimeZoneAdapters as any)
 }

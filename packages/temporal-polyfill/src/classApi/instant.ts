@@ -13,7 +13,7 @@ import { TimeZoneArg } from './timeZone'
 import { CalendarArg } from './calendar'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { epochGetters, neverValueOf } from './mixins'
-import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
+import { createTimeZoneOffsetOps } from './timeZoneOpsQuery'
 import { constructInstantSlots } from '../internal/construct'
 import { moveInstant } from '../internal/move'
 import { diffInstants } from '../internal/diff'
@@ -61,10 +61,10 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       return instantsEqual(slots, toInstantSlots(otherArg))
     },
     toString(slots: InstantSlots, options?: InstantDisplayOptions<TimeZoneSlot>): string {
-      return formatInstantIso(refineTimeZoneSlot, createSimpleTimeZoneOps, slots, options)
+      return formatInstantIso(refineTimeZoneSlot, createTimeZoneOffsetOps, slots, options)
     },
     toJSON(slots: InstantSlots): string {
-      return formatInstantIso(refineTimeZoneSlot, createSimpleTimeZoneOps, slots)
+      return formatInstantIso(refineTimeZoneSlot, createTimeZoneOffsetOps, slots)
     },
     toLocaleString(slots: InstantSlots, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
       const [format, epochMilli] =  prepInstantFormat(locales, options, slots)

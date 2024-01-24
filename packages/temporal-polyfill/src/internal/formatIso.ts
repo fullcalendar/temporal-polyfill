@@ -16,7 +16,7 @@ import {
   Unit,
 } from './units'
 import { divModFloor, padNumber, padNumber2 } from './utils'
-import { SimpleTimeZoneOps } from './timeZoneOps'
+import { TimeZoneOffsetOps } from './timeZoneOps'
 import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getId } from './slots'
 import { DateTimeDisplayOptions, InstantDisplayOptions, TimeDisplayOptions, ZonedDateTimeDisplayOptions, refineDateDisplayOptions, refineDateTimeDisplayOptions, refineInstantDisplayOptions, refineTimeDisplayOptions, refineZonedDateTimeDisplayOptions } from './optionsRefine'
 import { utcTimeZoneId } from './timeZoneNative'
@@ -26,7 +26,7 @@ import { utcTimeZoneId } from './timeZoneNative'
 
 export function formatInstantIso<TA, T>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
-  getTimeZoneOps: (timeSlotSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeSlotSlot: T) => TimeZoneOffsetOps,
   instantSlots: InstantSlots,
   options?: InstantDisplayOptions<TA>,
 ): string {
@@ -55,7 +55,7 @@ export function formatInstantIso<TA, T>(
 }
 
 export function formatZonedDateTimeIso<C extends IdLike, T extends IdLike>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
@@ -140,7 +140,7 @@ export function formatDurationIso(slots: DurationSlots, options?: TimeDisplayOpt
 
 function formatEpochNanoIso(
   providedTimeZone: boolean,
-  timeZoneOps: SimpleTimeZoneOps,
+  timeZoneOps: TimeZoneOffsetOps,
   epochNano: DayTimeNano,
   roundingMode: RoundingMode,
   nanoInc: number,
@@ -164,7 +164,7 @@ function formatEpochNanoIso(
 }
 
 function formatZonedEpochNanoIso<T extends IdLike>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   calendarSlot: IdLike,
   timeZoneSlot: T,
   epochNano: DayTimeNano,

@@ -2,10 +2,10 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, 
 import { DayTimeNano } from './dayTimeNano'
 import { epochMilliToNano } from './epochAndTime'
 import { OrigDateTimeFormat } from './formatIntl'
-import { SimpleTimeZoneOps, zonedInternalsToIso } from './timeZoneOps'
+import { TimeZoneOffsetOps, zonedInternalsToIso } from './timeZoneOps'
 import { pluckProps } from './utils'
 
-export function getCurrentIsoDateTime(timeZoneOps: SimpleTimeZoneOps): IsoDateTimeFields {
+export function getCurrentIsoDateTime(timeZoneOps: TimeZoneOffsetOps): IsoDateTimeFields {
   const zonedSlots = { epochNanoseconds: getCurrentEpochNanoseconds() }
   return pluckProps(isoDateTimeFieldNamesAsc, zonedInternalsToIso(zonedSlots, timeZoneOps))
 }

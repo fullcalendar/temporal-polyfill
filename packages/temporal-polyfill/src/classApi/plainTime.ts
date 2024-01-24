@@ -20,7 +20,7 @@ import { Duration, DurationArg, createDuration, toDurationSlots } from './durati
 import { neverValueOf, timeGetters } from './mixins'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
 import { CalendarSlot } from './slotsForClasses'
-import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { PlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
 import { constructPlainTimeSlots } from '../internal/construct'
 import { movePlainTime } from '../internal/move'
@@ -128,7 +128,7 @@ export function toPlainTimeSlots(arg: PlainTimeArg, options?: OverflowOptions): 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return zonedDateTimeToPlainTime(
-          createSimpleTimeZoneOps,
+          createTimeZoneOffsetOps,
           slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
         )
     }

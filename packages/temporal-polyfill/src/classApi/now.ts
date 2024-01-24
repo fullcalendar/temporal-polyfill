@@ -7,7 +7,7 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { PlainTime, createPlainTime } from './plainTime'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { createSimpleTimeZoneOps } from './timeZoneOpsQuery'
+import { createTimeZoneOffsetOps } from './timeZoneOpsQuery'
 import { getCurrentEpochNanoseconds, getCurrentIsoDateTime, getCurrentTimeZoneId } from '../internal/current'
 import { createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, createZonedDateTimeSlots } from '../internal/slots'
 
@@ -58,7 +58,7 @@ export const Now = Object.defineProperties({}, {
     ): PlainDateTime {
       return createPlainDateTime(
         createPlainDateTimeSlots(
-          getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
+          getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone))),
           refineCalendarSlot(calendar),
         )
       )
@@ -69,7 +69,7 @@ export const Now = Object.defineProperties({}, {
     ): PlainDateTime {
       return createPlainDateTime(
         createPlainDateTimeSlots(
-          getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
+          getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone))),
           isoCalendarId,
         )
       )
@@ -81,7 +81,7 @@ export const Now = Object.defineProperties({}, {
     ): PlainDate {
       return createPlainDate(
         createPlainDateSlots(
-          getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
+          getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone))),
           refineCalendarSlot(calendar),
         )
       )
@@ -92,7 +92,7 @@ export const Now = Object.defineProperties({}, {
     ): PlainDate {
       return createPlainDate(
         createPlainDateSlots(
-          getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone))),
+          getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone))),
           isoCalendarId,
         )
       )
@@ -103,7 +103,7 @@ export const Now = Object.defineProperties({}, {
     ): PlainTime {
       return createPlainTime(
         createPlainTimeSlots(
-          getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(timeZone)))
+          getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone)))
         )
       )
     },

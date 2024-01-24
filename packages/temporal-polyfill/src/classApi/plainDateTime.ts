@@ -18,7 +18,7 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { calendarIdGetters, dateGetters, getCalendarFromSlots, neverValueOf, timeGetters } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
-import { createSimpleTimeZoneOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
 import { PlainDateBag, PlainDateTimeBag, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
 import { constructPlainDateTimeSlots } from '../internal/construct'
 import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/mod'
@@ -170,7 +170,7 @@ export function toPlainDateTimeSlots(arg: PlainDateTimeArg, options?: OverflowOp
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return zonedDateTimeToPlainDateTime(
-          createSimpleTimeZoneOps,
+          createTimeZoneOffsetOps,
           slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
         )
     }

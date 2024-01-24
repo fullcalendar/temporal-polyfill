@@ -8,7 +8,7 @@ import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTime
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
 import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
-import { SimpleTimeZoneOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIso } from './timeZoneOps'
+import { TimeZoneOffsetOps, TimeZoneOps, getSingleInstantFor, zonedInternalsToIso } from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 
 // Instant -> *
@@ -36,7 +36,7 @@ export function zonedDateTimeToInstant(
 }
 
 export function zonedDateTimeToPlainDateTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateTimeSlots<C> {
   return createPlainDateTimeSlots(
@@ -46,7 +46,7 @@ export function zonedDateTimeToPlainDateTime<C, T>(
 }
 
 export function zonedDateTimeToPlainDate<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainDateSlots<C> {
   return createPlainDateSlots(
@@ -78,7 +78,7 @@ export function zonedDateTimeToPlainMonthDay<C>(
 }
 
 export function zonedDateTimeToPlainTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => SimpleTimeZoneOps,
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
