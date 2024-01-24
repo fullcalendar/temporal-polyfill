@@ -4,7 +4,7 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseIso'
-import { realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
+import { queryNativeTimeZone, realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
 import * as errorMessages from './errorMessages'
@@ -207,8 +207,8 @@ export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike, loose?: boolean): boo
 /*
 TODO: pre-parse offset somehow? not very performant
 */
-function getTimeZoneSlotRaw(slot: IdLike, loose?: boolean): string | number {
-  const id = getId(slot)
+function getTimeZoneSlotRaw(slots: IdLike, loose?: boolean): string | number {
+  const id = getId(slots)
 
   if (loose && id === utcTimeZoneId) {
     return 0

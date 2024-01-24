@@ -14,7 +14,7 @@ import {
 } from './epochAndTime'
 import { parseOffsetNanoMaybe } from './parseIso'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
+import { capitalize, clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
 export const utcTimeZoneId = 'UTC'
 
@@ -38,6 +38,9 @@ const queryNonFixedTimeZone = createLazyGenerator((timeZoneId: string): NativeTi
     : new IntlTimeZone(timeZoneId)
 })
 
+/*
+ID does NOT need to be normalized
+*/
 export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
   // normalize for cache-key. choose uppercase for 'UTC'
   timeZoneId = timeZoneId.toLocaleUpperCase()
@@ -50,8 +53,30 @@ export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
   return queryNonFixedTimeZone(timeZoneId)
 }
 
-export function realizeTimeZoneId(calendarId: string): string {
-  return queryNativeTimeZone(calendarId).id // queryNativeTimeZone will normalize the id
+export function realizeTimeZoneId(timeZoneId: string): string {
+  queryNativeTimeZone(timeZoneId) // ensure it's real
+  return normalizeTimeZoneId(timeZoneId)
+}
+
+export function normalizeTimeZoneId(s: string): string {
+  const lower = s.toLowerCase()
+  const parts = lower.split('/')
+
+  return parts.map((part, partI) => {
+    const forceUpper = (part.length <= 3 || part.match(/\d/)) && !part.match(/etc|yap/)
+
+    return part.replace(/baja|dumont|[a-z]+/g, (a, i) => {
+      if (forceUpper || a === 'chat' || a.length <= 2 && (!partI || a === 'in')) {
+        // abbreviation-like
+        return a.toUpperCase()
+      }
+      if (a.length > 2 || !i) {
+        // word-like
+        return capitalize(a).replace(/island|noronha|murdo|rivadavia|urville/, capitalize)
+      }
+      return a // lowercase (au/of/es)
+    })
+  }).join('/')
 }
 
 // Fixed
