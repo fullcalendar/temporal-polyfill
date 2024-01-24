@@ -254,21 +254,6 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
 intl402/Temporal/TimeZone/prototype/equals/argument-object.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
-intl402/Temporal/TimeZone/basic.js
-intl402/Temporal/TimeZone/from/argument-valid.js
-intl402/Temporal/TimeZone/etc-timezone.js
-intl402/Temporal/TimeZone/from/etc-timezone.js
-intl402/Temporal/TimeZone/from/iana-legacy-names.js
-intl402/Temporal/TimeZone/iana-legacy-names.js
-intl402/Temporal/TimeZone/non-canonical-utc.js
-intl402/Temporal/TimeZone/links-etcetera.js
-intl402/Temporal/TimeZone/links-northamerica.js
-intl402/Temporal/TimeZone/links-europe.js
-intl402/Temporal/TimeZone/links-backzone.js
-intl402/Temporal/TimeZone/links-backward.js
-intl402/Temporal/TimeZone/links-asia.js
-intl402/Temporal/TimeZone/links-africa.js
-intl402/Temporal/TimeZone/from/timezone-case-insensitive.js
 intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
 
