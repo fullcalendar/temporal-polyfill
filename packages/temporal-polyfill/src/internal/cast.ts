@@ -4,7 +4,7 @@ import * as errorMessages from './errorMessages'
 // Require
 // -------------------------------------------------------------------------------------------------
 
-export function requireObjectlike<O extends {}>(arg: O): O {
+export function requireObjectLike<O extends {}>(arg: O): O {
   if (!isObjectLike(arg)) {
     throw new TypeError(errorMessages.invalidObject)
   }

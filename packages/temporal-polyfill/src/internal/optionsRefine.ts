@@ -1,5 +1,5 @@
 import { DurationFields, durationFieldIndexes } from './durationFields'
-import { toString, requireObjectlike, toInteger, requirePropDefined } from './cast'
+import { toString, requireObjectLike, toInteger, requirePropDefined } from './cast'
 import { DayTimeUnit, TimeUnit, Unit, UnitName, nanoInUtcDay, unitNameMap, unitNanoMap } from './units'
 import { BoundArg, bindArgs, clampEntity, isObjectLike } from './utils'
 import { Overflow, OffsetDisambig, EpochDisambig, RoundingMode, CalendarDisplay, TimeZoneDisplay, OffsetDisplay, SubsecDigits } from './options'
@@ -190,7 +190,7 @@ const roundingModeMap = {
 export function refineOverflowOptions(
   options: OverflowOptions | undefined,
 ): Overflow {
-  return options === undefined ? Overflow.Constrain : refineOverflow(requireObjectlike(options))
+  return options === undefined ? Overflow.Constrain : refineOverflow(requireObjectLike(options))
 }
 
 export function refineZonedFieldOptions(
@@ -511,7 +511,7 @@ export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
     return {} as O
   }
-  return requireObjectlike(options)
+  return requireObjectLike(options)
 }
 
 function normalizeUnitNameOptions<O extends {}>(
@@ -521,7 +521,7 @@ function normalizeUnitNameOptions<O extends {}>(
   if (typeof options === 'string') {
     return { [optionName]: options } as O
   }
-  return requireObjectlike(options)
+  return requireObjectLike(options)
 }
 
 /*

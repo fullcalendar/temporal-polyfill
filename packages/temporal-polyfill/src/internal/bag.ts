@@ -13,7 +13,7 @@ import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
 import { DayTimeNano } from './dayTimeNano'
 import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, MonthDayRefineOps, YearMonthModOps, YearMonthRefineOps } from './calendarOps'
 import { parseOffsetNano } from './parseIso'
-import { requireNumberIsPositive, requireObjectlike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
+import { requireNumberIsPositive, requireObjectLike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
 import { MarkerSlotsNoCalendar, checkDurationFields } from './durationMath'
 import { DateSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import * as errorMessages from './errorMessages'
@@ -626,7 +626,7 @@ export function convertPlainMonthDayToDate<C>(
     calendarOps,
     plainMonthDay, // input
     monthCodeDayFieldNames, // inputFieldNames
-    requireObjectlike(bag), // extra
+    requireObjectLike(bag), // extra
     yearFieldNames, // extraFieldNames
   )
 }
@@ -643,7 +643,7 @@ export function convertPlainYearMonthToDate<C>(
     calendarOps,
     plainYearMonth, // input
     yearMonthCodeFieldNames, // inputFieldNames
-    requireObjectlike(bag), // extra
+    requireObjectLike(bag), // extra
     dayFieldNames, // extraFieldNames
   )
 }

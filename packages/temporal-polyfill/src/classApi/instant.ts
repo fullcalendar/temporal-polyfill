@@ -1,6 +1,6 @@
 import { LocalesArg } from '../internal/formatIntl'
 import { DiffOptions, InstantDisplayOptions, RoundingOptions } from '../internal/optionsRefine'
-import { requireObjectlike } from '../internal/cast'
+import { requireObjectLike } from '../internal/cast'
 import { NumSign, isObjectLike } from '../internal/utils'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
@@ -76,7 +76,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       )
     },
     toZonedDateTime(slots: InstantSlots, options: { timeZone: TimeZoneArg, calendar: CalendarArg }): ZonedDateTime {
-      const refinedObj = requireObjectlike(options)
+      const refinedObj = requireObjectLike(options)
 
       return createZonedDateTime(
         instantToZonedDateTime(

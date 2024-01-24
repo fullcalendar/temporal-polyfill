@@ -12,7 +12,7 @@ import { roundInstant } from '../internal/round'
 import { prepCachedInstantFormat } from './formatIntlCached'
 import { bindArgs } from '../internal/utils'
 import { getEpochMicroseconds, getEpochMilliseconds, getEpochNanoseconds, getEpochSeconds } from '../classApi/mixins'
-import { requireObjectlike } from '../internal/cast'
+import { requireObjectLike } from '../internal/cast'
 
 export const create = constructInstantSlots
 export const fromString = parseInstant
@@ -59,7 +59,7 @@ export function toZonedDateTime(
   instantSlots: InstantSlots,
   options: { timeZone: string, calendar: string }
 ): ZonedDateTimeSlots<string, string> {
-  const refinedObj = requireObjectlike(options)
+  const refinedObj = requireObjectLike(options)
 
   return instantToZonedDateTime(
     instantSlots,
