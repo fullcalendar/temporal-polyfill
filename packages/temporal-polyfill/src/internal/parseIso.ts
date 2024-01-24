@@ -200,6 +200,7 @@ export function parsePlainMonthDay(
 
   if (organized) {
     requireIsoCalendar(organized)
+
     return createPlainMonthDaySlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
     )

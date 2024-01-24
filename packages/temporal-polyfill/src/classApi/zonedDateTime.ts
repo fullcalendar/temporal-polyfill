@@ -98,6 +98,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
         moveZonedDateTime(
           createMoveOps,
           createTimeZoneOps,
+          false,
           slots,
           toDurationSlots(durationArg),
           options,
@@ -109,10 +110,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
         moveZonedDateTime(
           createMoveOps,
           createTimeZoneOps,
+          false,
           slots,
           toDurationSlots(durationArg),
           options,
-          true,
         )
       )
     },
@@ -122,6 +123,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
           diffZonedDateTimes(
             createDiffOps,
             createTimeZoneOps,
+            false,
             slots,
             toZonedDateTimeSlots(otherArg),
             options,
@@ -135,10 +137,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
           diffZonedDateTimes(
             createDiffOps,
             createTimeZoneOps,
+            true,
             slots,
             toZonedDateTimeSlots(otherArg),
             options,
-            true,
           ),
         )
       )

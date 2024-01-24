@@ -27,16 +27,16 @@ import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calenda
 import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
-import { DurationSlots, InstantBranding, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainTimeSlots, createPlainYearMonthSlots } from './slots'
+import { DurationSlots, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainTimeSlots, createPlainYearMonthSlots } from './slots'
 import * as errorMessages from './errorMessages'
 
 // High-Level
 // -------------------------------------------------------------------------------------------------
 
 export function moveInstant(
+  doSubtract: boolean,
   instantSlots: InstantSlots,
   durationSlots: DurationSlots,
-  doSubtract?: boolean,
 ): InstantSlots {
   return createInstantSlots(
     moveEpochNano(
@@ -49,10 +49,10 @@ export function moveInstant(
 export function moveZonedDateTime<C, T>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  doSubtract: boolean,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-  doSubtract?: boolean,
 ): ZonedDateTimeSlots<C, T> {
   // correct calling order. switch moveZonedEpochNano arg order?
   const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
@@ -74,10 +74,10 @@ export function moveZonedDateTime<C, T>(
 
 export function movePlainDateTime<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
+  doSubtract: boolean,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-  doSubtract?: boolean,
 ): PlainDateTimeSlots<C> {
   return createPlainDateTimeSlots({
     ...plainDateTimeSlots,
@@ -92,10 +92,10 @@ export function movePlainDateTime<C>(
 
 export function movePlainDate<C>(
   getCalendarOps: (calendarSlot: C) => MoveOps,
+  doSubtract: boolean,
   plainDateSlots: PlainDateSlots<C>,
   durationSlots: DurationSlots,
   options?: OverflowOptions,
-  doSubtract?: boolean,
 ): PlainDateSlots<C> {
   return {
     ...plainDateSlots,
@@ -110,10 +110,10 @@ export function movePlainDate<C>(
 
 export function movePlainYearMonth<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
+  doSubtract: boolean,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
   durationFields: DurationSlots,
   options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object,
-  doSubtract?: boolean,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
@@ -142,9 +142,9 @@ export function movePlainYearMonth<C>(
 }
 
 export function movePlainTime(
+  doSubtract: boolean,
   slots: PlainTimeSlots,
   durationSlots: DurationFields,
-  doSubtract?: boolean,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
     moveTime(slots, doSubtract ? negateDurationFields(durationSlots) : durationSlots)[0],

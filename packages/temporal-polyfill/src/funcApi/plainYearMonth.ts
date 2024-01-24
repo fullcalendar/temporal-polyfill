@@ -1,9 +1,8 @@
 import { EraYearFields, YearMonthBag, YearMonthFields, YearMonthFieldsIntl } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
-import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
-import { createNativeDateModOps, createNativePartOps, createNativeYearMonthDiffOps, createNativeYearMonthModOps, createNativeYearMonthMoveOps, createNativeYearMonthParseOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
-import { computeYearMonthFields } from '../internal/calendarNative'
+import { OverflowOptions } from '../internal/optionsRefine'
+import { PlainDateSlots, PlainYearMonthSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
+import { createNativeDateModOps, createNativeYearMonthDiffOps, createNativeYearMonthModOps, createNativeYearMonthMoveOps, createNativeYearMonthParseOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { constructPlainYearMonthSlots } from '../internal/construct'
 import { parsePlainYearMonth } from '../internal/parseIso'
 import { plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bag'
@@ -13,7 +12,8 @@ import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { prepCachedPlainYearMonthFormat } from './formatIntlCached'
-import { getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
+import { computeYearMonthFields, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
+import { NumSign, bindArgs } from '../internal/utils'
 
 export function create(
   isoYear: number,
@@ -39,92 +39,42 @@ export function fromFields(
   )
 }
 
-// TODO: put this in utils
-export function getFields(slots: PlainYearMonthSlots<string>): YearMonthFields & Partial<EraYearFields> {
-  const calendarOps = createNativePartOps(slots.calendar)
-  return computeYearMonthFields(calendarOps, slots)
-}
+export const getFields = computeYearMonthFields as (
+  slots: PlainYearMonthSlots<string>
+) => YearMonthFields & Partial<EraYearFields>
 
-// TODO: add specific types
-export const daysInMonth = getDaysInMonth
-export const daysInYear = getDaysInYear
-export const monthsInYear = getMonthsInYear
-export const inLeapYear = getInLeapYear
+export const daysInMonth = getDaysInMonth as (slots: PlainYearMonthSlots<string>) => number
+export const daysInYear = getDaysInYear as (slots: PlainYearMonthSlots<string>) => number
+export const monthsInYear = getMonthsInYear as (slots: PlainYearMonthSlots<string>) => number
+export const inLeapYear = getInLeapYear as (slots: PlainYearMonthSlots<string>) => boolean
 
 export function withFields(
-  plainYearMonthSlots: PlainYearMonthSlots<string>,
-  initialFields: YearMonthFieldsIntl,
-  mod: YearMonthBag,
+  slots: PlainYearMonthSlots<string>,
+  fields: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<string> {
   return plainYearMonthWithFields(
     createNativeYearMonthModOps,
-    plainYearMonthSlots,
-    initialFields,
-    mod,
+    slots,
+    computeYearMonthFields(slots),
+    fields,
     options,
   )
 }
 
-export function add(
-  plainYearMonthSlots: PlainYearMonthSlots<string>,
-  durationSlots: DurationSlots,
-  options?: OverflowOptions,
-): PlainYearMonthSlots<string> {
-  return movePlainYearMonth(
-    createNativeYearMonthMoveOps,
-    plainYearMonthSlots,
-    durationSlots,
-    options,
-  )
-}
+export const add = bindArgs(movePlainYearMonth<string>, createNativeYearMonthMoveOps, false)
+export const subtract = bindArgs(movePlainYearMonth<string>, createNativeYearMonthMoveOps, true)
 
-export function subtract(
-  plainYearMonthSlots: PlainYearMonthSlots<string>,
-  durationSlots: DurationSlots,
-  options?: OverflowOptions,
-): PlainYearMonthSlots<string> {
-  return movePlainYearMonth(
-    createNativeYearMonthMoveOps,
-    plainYearMonthSlots,
-    durationSlots,
-    options,
-    true,
-  )
-}
+export const until = bindArgs(diffPlainYearMonth<string>, createNativeYearMonthDiffOps, false)
+export const since = bindArgs(diffPlainYearMonth<string>, createNativeYearMonthDiffOps, true)
 
-export function until(
-  plainYearMonthSlots0: PlainYearMonthSlots<string>,
-  plainYearMonthSlots1: PlainYearMonthSlots<string>,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffPlainYearMonth(
-    createNativeYearMonthDiffOps,
-    plainYearMonthSlots0,
-    plainYearMonthSlots1,
-    options,
-  )
-}
+export const equals = plainYearMonthsEqual<string>
+export const compare = compareIsoDateFields as (
+  slots0: PlainYearMonthSlots<string>,
+  slots1: PlainYearMonthSlots<string>,
+) => NumSign
 
-export function since(
-  plainYearMonthSlots0: PlainYearMonthSlots<string>,
-  plainYearMonthSlots1: PlainYearMonthSlots<string>,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffPlainYearMonth(
-    createNativeYearMonthDiffOps,
-    plainYearMonthSlots0,
-    plainYearMonthSlots1,
-    options,
-    true,
-  )
-}
-
-export const compare = compareIsoDateFields
-
-export const equals = plainYearMonthsEqual
-
-export const toString = formatPlainYearMonthIso
+export const toString = formatPlainYearMonthIso<string>
 
 export function toPlainDate(
   plainYearMonthSlots: PlainYearMonthSlots<string>,

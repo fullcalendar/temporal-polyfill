@@ -47,22 +47,22 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     },
     add(slots: PlainTimeSlots, durationArg: DurationArg): PlainTime {
       return createPlainTime(
-        movePlainTime(slots, toDurationSlots(durationArg))
+        movePlainTime(false, slots, toDurationSlots(durationArg))
       )
     },
     subtract(slots: PlainTimeSlots,  durationArg: DurationArg): PlainTime {
       return createPlainTime(
-        movePlainTime(slots, toDurationSlots(durationArg), true)
+        movePlainTime(true, slots, toDurationSlots(durationArg))
       )
     },
     until(slots: PlainTimeSlots,  otherArg: PlainTimeArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffPlainTimes(slots, toPlainTimeSlots(otherArg), options)
+        diffPlainTimes(false, slots, toPlainTimeSlots(otherArg), options)
       )
     },
     since(slots: PlainTimeSlots, otherArg: PlainTimeArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffPlainTimes(slots, toPlainTimeSlots(otherArg), options, true)
+        diffPlainTimes(true, slots, toPlainTimeSlots(otherArg), options)
       )
     },
     round(slots: PlainTimeSlots, options: RoundingOptions | UnitName): PlainTime {

@@ -70,13 +70,9 @@ export type TimeBag = Partial<TimeFields>
 export type DateTimeBag = DateBag & TimeBag // TODO: use for PlainDateTime?
 export type DateTimeFields = DateFields & TimeFields
 
-export interface YearMonthBasics {
+export interface DateBasics {
   year: number
   month: number
-}
-
-export interface MonthDayBasics {
-  monthCode: string
   day: number
 }
 

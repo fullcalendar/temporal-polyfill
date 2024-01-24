@@ -1,7 +1,6 @@
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DiffOptions, InstantDisplayOptions } from '../internal/optionsRefine'
-import { DurationSlots, InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
 import { constructInstantSlots } from '../internal/construct'
 import { parseInstant } from '../internal/parseIso'
 import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
@@ -11,42 +10,27 @@ import { formatInstantIso } from '../internal/formatIso'
 import { diffInstants } from '../internal/diff'
 import { roundInstant } from '../internal/round'
 import { prepCachedInstantFormat } from './formatIntlCached'
+import { bindArgs } from '../internal/utils'
+import { getEpochMicroseconds, getEpochMilliseconds, getEpochNanoseconds, getEpochSeconds } from '../classApi/mixins'
 
 export const create = constructInstantSlots
-
 export const fromString = parseInstant
 
 export const fromEpochSeconds = epochSecToInstant
-
 export const fromEpochMilliseconds = epochMilliToInstant
-
 export const fromEpochMicroseconds = epochMicroToInstant
-
 export const fromEpochNanoseconds = epochNanoToInstant
 
-export function add(instantSlots: InstantSlots, durationSlots: DurationSlots): InstantSlots {
-  return moveInstant(instantSlots, durationSlots)
-}
+export const epochSeconds = getEpochSeconds as (slots: InstantSlots) => number
+export const epochMilliseconds = getEpochMilliseconds as (slots: InstantSlots) => number
+export const epochMicroseconds = getEpochMicroseconds as (slots: InstantSlots) => bigint
+export const epochNanoseconds = getEpochNanoseconds as (slots: InstantSlots) => bigint
 
-export function subtract(instantSlots: InstantSlots, durationSlots: DurationSlots): InstantSlots {
-  return moveInstant(instantSlots, durationSlots, true)
-}
+export const add = bindArgs(moveInstant, false)
+export const subtract = bindArgs(moveInstant, true)
 
-export function until(
-  instantSlots0: InstantSlots,
-  instantSlots1: InstantSlots,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffInstants(instantSlots0, instantSlots1, options)
-}
-
-export function since(
-  instantSlots0: InstantSlots,
-  instantSlots1: InstantSlots,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffInstants(instantSlots0, instantSlots1, options, true)
-}
+export const until = bindArgs(diffInstants, false)
+export const since = bindArgs(diffInstants, true)
 
 export const round = roundInstant
 
@@ -54,27 +38,11 @@ export const equals = instantsEqual
 
 export const compare = compareInstants
 
-export function toString(
-  instantSlots: InstantSlots,
-  options?: InstantDisplayOptions<string>,
-): string {
-  return formatInstantIso(
-    refineTimeZoneSlotString,
-    queryNativeTimeZone,
-    instantSlots,
-    options,
-  )
-}
-
-export function toJSON(
-  instantSlots: InstantSlots,
-): string {
-  return formatInstantIso(
-    refineTimeZoneSlotString,
-    queryNativeTimeZone,
-    instantSlots,
-  )
-}
+export const toString = bindArgs(
+  formatInstantIso<string, string>,
+  refineTimeZoneSlotString,
+  queryNativeTimeZone,
+)
 
 export function toZonedDateTimeISO(
   instantSlots: InstantSlots,
@@ -134,4 +102,3 @@ export function rangeToLocaleStringParts(
   const [format, epochMilli0, epochMilli1] = prepCachedInstantFormat(locales, options, slots0, slots1)
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
-

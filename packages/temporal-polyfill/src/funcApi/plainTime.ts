@@ -1,9 +1,9 @@
 import { TimeBag, TimeFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
-import { identityFunc } from '../internal/utils'
+import { OverflowOptions } from '../internal/optionsRefine'
+import { PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
+import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 import { constructPlainTimeSlots } from '../internal/construct'
 import { isoTimeFieldsToCal, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
 import { parsePlainTime } from '../internal/parseIso'
@@ -21,7 +21,9 @@ export const fromFields = refinePlainTimeBag
 
 export const fromString = parsePlainTime
 
-export const getFields = isoTimeFieldsToCal // TODO: improve type
+export const getFields = isoTimeFieldsToCal as (
+  slots: PlainTimeSlots
+) => TimeFields
 
 export function withFields(
   slots: PlainTimeSlots,
@@ -31,59 +33,29 @@ export function withFields(
   return plainTimeWithFields(getFields(slots), mod, options)
 }
 
-export function add(
-  slots: PlainTimeSlots,
-  durationSlots: DurationSlots,
-): PlainTimeSlots {
-  return movePlainTime(slots, durationSlots)
-}
+export const add = bindArgs(movePlainTime, false)
+export const subtract = bindArgs(movePlainTime, true)
 
-export function subtract(
-  slots: PlainTimeSlots,
-  durationSlots: DurationSlots,
-): PlainTimeSlots {
-  return movePlainTime(slots, durationSlots, true)
-}
-
-export function until(
-  plainTimeSlots0: PlainTimeSlots,
-  plainTimeSlots1: PlainTimeSlots,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options)
-}
-
-export function since(
-  plainTimeSlots0: PlainTimeSlots,
-  plainTimeSlots1: PlainTimeSlots,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffPlainTimes(plainTimeSlots0, plainTimeSlots1, options, true)
-}
+export const until = bindArgs(diffPlainTimes, false)
+export const since = bindArgs(diffPlainTimes, true)
 
 export const round = roundPlainTime
-
-export const compare = compareIsoTimeFields
-
 export const equals = plainTimesEqual
+export const compare = compareIsoTimeFields as (
+  slots0: PlainTimeSlots,
+  slots1: PlainTimeSlots,
+) => NumSign
 
 export const toString = formatPlainTimeIso
 
-// TODO: ensure options isn't undefined before accessing
-export function toZonedDateTime(
-  slots: PlainTimeSlots,
-  options: { timeZone: string, plainDate: PlainDateSlots<string> },
-) {
-  return plainTimeToZonedDateTime(
-    refineTimeZoneSlotString,
-    identityFunc,
-    queryNativeTimeZone,
-    slots,
-    options,
-  )
-}
+export const toZonedDateTime = bindArgs(
+  plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
+  refineTimeZoneSlotString,
+  identityFunc,
+  queryNativeTimeZone,
+)
 
-export const toPlainDateTime = plainTimeToPlainDateTime
+export const toPlainDateTime = plainTimeToPlainDateTime<string>
 
 export function toLocaleString(
   slots: PlainTimeSlots,

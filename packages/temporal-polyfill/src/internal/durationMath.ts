@@ -102,10 +102,10 @@ export function addDurations<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  doSubtract: boolean,
   slots: DurationSlots,
   otherSlots: DurationSlots,
   options?: RelativeToOptions<RA>,
-  doSubtract?: boolean,
 ): DurationSlots {
   const normalOptions = normalizeOptions(options)
   const markerSlots = refineRelativeTo(normalOptions.relativeTo)

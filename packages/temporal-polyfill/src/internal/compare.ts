@@ -21,9 +21,9 @@ export function compareInstants(
   return compareDayTimeNanos(instantSlots0.epochNanoseconds, instantSlots1.epochNanoseconds)
 }
 
-export function compareZonedDateTimes(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>,
-  zonedDateTimeSlots1: ZonedDateTimeSlots<unknown, unknown>,
+export function compareZonedDateTimes<C, T>(
+  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
+  zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
 ): NumSign {
   return compareDayTimeNanos(
     zonedDateTimeSlots0.epochNanoseconds,
@@ -135,14 +135,14 @@ export function plainDateTimesEqual<C extends IdLike>(
 export function plainDatesEqual<C extends IdLike>(
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
-):  boolean {
+): boolean {
   return !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
     isIdLikeEqual(plainDateSlots0.calendar, plainDateSlots1.calendar)
 }
 
-export function plainYearMonthsEqual(
-  plainYearMonthSlots0: PlainYearMonthSlots<IdLike>,
-  plainYearMonthSlots1: PlainYearMonthSlots<IdLike>,
+export function plainYearMonthsEqual<C extends IdLike>(
+  plainYearMonthSlots0: PlainYearMonthSlots<C>,
+  plainYearMonthSlots1: PlainYearMonthSlots<C>,
 ): boolean {
   return !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
     isIdLikeEqual(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)

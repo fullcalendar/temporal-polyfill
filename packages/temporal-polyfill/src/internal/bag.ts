@@ -215,7 +215,7 @@ export function refinePlainMonthDayBag<C>(
 
 export function refinePlainTimeBag(
   bag: TimeBag,
-  options: OverflowOptions | undefined,
+  options?: OverflowOptions, // optional b/c func API can use directly
 ): PlainTimeSlots {
   const overflow = refineOverflowOptions(options) // spec says overflow parsed first
   const fields = refineFields(bag, timeFieldNamesAlpha, [], true) as TimeBag // disallowEmpty
@@ -330,7 +330,7 @@ export function zonedDateTimeWithFields<C, T>(
   getCalendarOps: (calendarSlot: C) => DateModOps<C>,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  initialFields: DateTimeFields & Partial<EraYearFields>, // TODO: allow offset
+  initialFields: DateTimeBag,
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots<C, T> {
@@ -355,7 +355,7 @@ export function zonedDateTimeWithFields<C, T>(
 export function plainDateTimeWithFields<C>(
   getCalendarOps: (calendarSlot: C) => DateModOps<C>,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  initialFields: DateTimeFields & Partial<EraYearFields>,
+  initialFields: DateTimeBag,
   modFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots<C> {
@@ -376,7 +376,7 @@ export function plainDateTimeWithFields<C>(
 export function plainDateWithFields<C>(
   getCalendarOps: (calendarSlot: C) => DateModOps<C>,
   plainDateSlots: PlainDateSlots<C>,
-  initialFields: DateFields & Partial<EraYearFields>,
+  initialFields: DateBag,
   modFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
@@ -390,7 +390,7 @@ export function plainDateWithFields<C>(
 export function plainYearMonthWithFields<C>(
   getCalendarOps: (calendar: C) => YearMonthModOps<C>,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  initialFields: YearMonthFieldsIntl,
+  initialFields: YearMonthBag,
   mod: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {

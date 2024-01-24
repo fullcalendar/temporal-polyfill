@@ -41,10 +41,10 @@ import * as errorMessages from './errorMessages'
 // -------------------------------------------------------------------------------------------------
 
 export function diffInstants(
+  invert: boolean,
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
-  options: DiffOptions | undefined,
-  invert?: boolean,
+  options?: DiffOptions,
 ): DurationSlots {
   const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(invert, optionsCopy, Unit.Second, Unit.Hour) as
@@ -62,10 +62,10 @@ export function diffInstants(
 export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  invert: boolean,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
-  options: DiffOptions | undefined,
-  invert?: boolean,
+  options?: DiffOptions,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
   const optionsCopy = copyOptions(options)
@@ -122,10 +122,10 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
 
 export function diffPlainDateTimes<C extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
+  invert: boolean,
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
-  options: DiffOptions | undefined,
-  invert?: boolean,
+  options?: DiffOptions,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
   const optionsCopy = copyOptions(options)
@@ -179,10 +179,10 @@ export function diffPlainDateTimes<C extends IdLike>(
 
 export function diffPlainDates<C extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
+  invert: boolean,
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
-  options: DiffOptions | undefined,
-  invert?: boolean,
+  options?: DiffOptions,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainDateSlots0.calendar, plainDateSlots1.calendar)
   const optionsCopy = copyOptions(options)
@@ -200,10 +200,10 @@ export function diffPlainDates<C extends IdLike>(
 
 export function diffPlainYearMonth<C extends IdLike>(
   getCalendarOps: (calendar: C) => YearMonthDiffOps,
+  invert: boolean,
   plainYearMonthSlots0: PlainYearMonthSlots<C>,
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
-  options: DiffOptions | undefined,
-  invert?: boolean,
+  options?: DiffOptions,
 ): DurationSlots {
   const calendarSlot = getCommonCalendarSlot(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
   const optionsCopy = copyOptions(options)
@@ -268,10 +268,10 @@ function diffDateLike(
 }
 
 export function diffPlainTimes(
+  invert: boolean,
   plainTimeSlots0: IsoTimeFields,
   plainTimeSlots1: IsoTimeFields,
-  options: DiffOptions | undefined,
-  invert?: boolean,
+  options?: DiffOptions,
 ): DurationSlots {
   const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] = refineDiffOptions(invert, optionsCopy, Unit.Hour, Unit.Hour)

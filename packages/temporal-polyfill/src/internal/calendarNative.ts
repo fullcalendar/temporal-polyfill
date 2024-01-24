@@ -7,6 +7,7 @@ import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
 import { eraOriginsByCalendarId, isoCalendarId, leapMonthMetas } from './calendarConfig'
 import * as errorMessages from './errorMessages'
+import { DateBasics, DateFields, DateFieldsIntl, EraYearFields, MonthDayFields, YearMonthFields } from './calendarFields'
 
 // Struct Types
 export type DateParts = [year: number, month: number, day: number]
@@ -305,41 +306,6 @@ export function computeMonthCode(
   const [year, month] = this.dateParts(isoFields)
   const [monthCodeNumber, isLeapMonth] = this.monthCodeParts(year, month)
   return formatMonthCode(monthCodeNumber, isLeapMonth)
-}
-
-// Operations enacted upon passed-in CalendarNative object
-// -------------------------------------------------------------------------------------------------
-
-export function computeYearMonthFields(
-  calendarNative: NativePartOps,
-  isoFields: IsoDateFields,
-) { // TODO: type
-  const [year, month] = calendarNative.dateParts(isoFields)
-  const [era, eraYear] = calendarNative.eraParts(isoFields)
-  const [monthCodeNumber, isLeapMonth] = calendarNative.monthCodeParts(year, month)
-  const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
-  return { era, eraYear, year, monthCode, month }
-}
-
-export function computeDateFields(
-  calendarNative: NativePartOps,
-  isoFields: IsoDateFields,
-) { // TODO: type
-  const [year, month, day] = calendarNative.dateParts(isoFields)
-  const [era, eraYear] = calendarNative.eraParts(isoFields)
-  const [monthCodeNumber, isLeapMonth] = calendarNative.monthCodeParts(year, month)
-  const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
-  return { era, eraYear, year, monthCode, month, day }
-}
-
-export function computeMonthDayFields(
-  calendarNative: NativePartOps,
-  isoFields: IsoDateFields,
-) { // TODO: type
-  const [year, month, day] = calendarNative.dateParts(isoFields)
-  const [monthCodeNumber, isLeapMonth] = calendarNative.monthCodeParts(year, month)
-  const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
-  return { monthCode, month, day }
 }
 
 // Month Code Utils

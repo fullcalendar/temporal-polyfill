@@ -82,8 +82,8 @@ export function formatPlainDateIso<C extends IdLike>(
   return formatDateIso(plainDateSlots.calendar, plainDateSlots, refineDateDisplayOptions(options))
 }
 
-export function formatPlainYearMonthIso(
-  plainYearMonthSlots: PlainYearMonthSlots<IdLike>,
+export function formatPlainYearMonthIso<C extends IdLike>(
+  plainYearMonthSlots: PlainYearMonthSlots<C>,
   options?: DateTimeDisplayOptions,
 ): string {
   return formatDateLikeIso(
@@ -94,8 +94,8 @@ export function formatPlainYearMonthIso(
   )
 }
 
-export function formatPlainMonthDayIso(
-  plainMonthDaySlots: PlainMonthDaySlots<IdLike>,
+export function formatPlainMonthDayIso<C extends IdLike>(
+  plainMonthDaySlots: PlainMonthDaySlots<C>,
   options?: DateTimeDisplayOptions,
 ): string {
   return formatDateLikeIso(

@@ -1,9 +1,9 @@
 import { DateTimeBag, DateTimeFields, EraYearFields } from '../internal/calendarFields'
 import { LocalesArg } from '../internal/formatIntl'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DiffOptions, EpochDisambigOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DurationSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, refineCalendarSlotString } from '../internal/slots'
-import { createNativeDateModOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
+import { OverflowOptions } from '../internal/optionsRefine'
+import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
+import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { constructPlainDateTimeSlots } from '../internal/construct'
 import { parsePlainDateTime } from '../internal/parseIso'
 import { isoTimeFieldsToCal, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bag'
@@ -15,53 +15,44 @@ import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compa
 import { formatPlainDateTimeIso } from '../internal/formatIso'
 import { plainDateTimeToPlainMonthDay, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 import { prepCachedPlainDateTimeFormat } from './formatIntlCached'
-import { getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear, getDateFields } from './utils'
+import { computeDateBasics, computeDateFields, getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
+import { NumSign, bindArgs } from '../internal/utils'
 
-// TODO: do Readonly<> everywhere?
-
-export function create(
-  isoYear: number,
-  isoMonth: number,
-  isoDay: number,
-  isoHour?: number,
-  isoMinute?: number,
-  isoSecond?: number,
-  isoMillisecond?: number,
-  isoMicrosecond?: number,
-  isoNanosecond?: number,
-  calendar?: string,
-): PlainDateTimeSlots<string> {
-  return constructPlainDateTimeSlots(
-    refineCalendarSlotString,
-    isoYear, isoMonth, isoDay,
-    isoHour, isoMinute, isoSecond,
-    isoMillisecond, isoMicrosecond, isoNanosecond,
-    calendar,
-  )
-}
+export const create = bindArgs(
+  constructPlainDateTimeSlots<string, string>,
+  refineCalendarSlotString,
+)
 
 export const fromString = parsePlainDateTime
 
-export const fromFields = refinePlainDateTimeBag
+export function fromFields(
+  fields: DateTimeBag & { calendar?: string },
+  options?: OverflowOptions,
+): PlainDateTimeSlots<string> {
+  return refinePlainDateTimeBag(
+    createNativeDateRefineOps(getCalendarIdFromBag(fields)),
+    fields,
+    options,
+  )
+}
 
 export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields & Partial<EraYearFields> {
   return {
-    ...getDateFields(slots),
+    ...computeDateFields(slots),
     ...isoTimeFieldsToCal(slots),
   }
 }
 
-// TODO: add specific types
-export const dayOfWeek = computeIsoDayOfWeek
-export const daysInWeek = computeIsoDaysInWeek
-export const weekOfYear = computeIsoWeekOfYear
-export const yearOfWeek = computeIsoYearOfWeek
-export const dayOfYear = getDayOfYear
-export const daysInMonth = getDaysInMonth
-export const daysInYear = getDaysInYear
-export const monthsInYear = getMonthsInYear
-export const inLeapYear = getInLeapYear
+export const dayOfWeek = computeIsoDayOfWeek as (slots: PlainDateTimeSlots<string>) => number
+export const daysInWeek = computeIsoDaysInWeek as (slots: PlainDateTimeSlots<string>) => number
+export const weekOfYear = computeIsoWeekOfYear as (slots: PlainDateTimeSlots<string>) => number
+export const yearOfWeek = computeIsoYearOfWeek as (slots: PlainDateTimeSlots<string>) => number
+export const dayOfYear = getDayOfYear as (slots: PlainDateTimeSlots<string>) => number
+export const daysInMonth = getDaysInMonth as (slots: PlainDateTimeSlots<string>) => number
+export const daysInYear = getDaysInYear as (slots: PlainDateTimeSlots<string>) => number
+export const monthsInYear = getMonthsInYear as (slots: PlainDateTimeSlots<string>) => number
+export const inLeapYear = getInLeapYear as (slots: PlainDateTimeSlots<string>) => boolean
 
 export function withFields(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
@@ -71,15 +62,21 @@ export function withFields(
   return plainDateTimeWithFields(
     createNativeDateModOps,
     plainDateTimeSlots,
-    getFields(plainDateTimeSlots), // TODO: just use y/m/d?
+    computeDateBasics(plainDateTimeSlots),
     newFields,
     options,
   )
 }
 
-export const withPlainTime = plainDateTimeWithPlainTime // TODO: more specific type for PlainTimeSlots
+export const withPlainTime = plainDateTimeWithPlainTime as (
+  plainDateTimeSlots: PlainDateTimeSlots<string>,
+  plainTimeSlots: PlainTimeSlots,
+) => PlainDateTimeSlots<string>
 
-export const withPlainDate = plainDateTimeWithPlainDate
+export const withPlainDate = plainDateTimeWithPlainDate as (
+  plainDateTimeSlots: PlainDateTimeSlots<string>,
+  plainDateSlots: PlainDateSlots<string>,
+) => PlainDateTimeSlots<string>
 
 export function withCalendar(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
@@ -91,83 +88,53 @@ export function withCalendar(
   )
 }
 
-export function add(
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-  durationSlots: DurationSlots,
-  options?: OverflowOptions,
-): PlainDateTimeSlots<string> {
-  return movePlainDateTime(createNativeMoveOps, plainDateTimeSlots, durationSlots, options)
-}
+export const add = bindArgs(movePlainDateTime<string>, createNativeMoveOps, false)
+export const subtract = bindArgs(movePlainDateTime<string>, createNativeMoveOps, true)
 
-export function subtract(
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-  durationSlots: DurationSlots,
-  options?: OverflowOptions,
-): PlainDateTimeSlots<string> {
-  return movePlainDateTime(createNativeMoveOps, plainDateTimeSlots, durationSlots, options, true)
-}
+export const until = bindArgs(diffPlainDateTimes<string>, createNativeDiffOps, false)
+export const since = bindArgs(diffPlainDateTimes<string>, createNativeDiffOps, true)
 
-export function until(
+export const round = roundPlainDateTime<string>
+export const equals = plainDateTimesEqual<string>
+export const compare = compareIsoDateTimeFields as (
   plainDateTimeSlots0: PlainDateTimeSlots<string>,
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffPlainDateTimes(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options)
-}
+) => NumSign
 
-export function since(
-  plainDateTimeSlots0: PlainDateTimeSlots<string>,
-  plainDateTimeSlots1: PlainDateTimeSlots<string>,
-  options?: DiffOptions,
-): DurationSlots {
-  return diffPlainDateTimes(createNativeDiffOps, plainDateTimeSlots0, plainDateTimeSlots1, options, true)
-}
+export const toString = formatPlainDateTimeIso<string>
 
-export const round = roundPlainDateTime
+export const toZonedDateTime = bindArgs(
+  plainDateTimeToZonedDateTime<string, string>,
+  queryNativeTimeZone,
+)
 
-export const compare = compareIsoDateTimeFields
-
-export const equals = plainDateTimesEqual
-
-export const toString = formatPlainDateTimeIso
-
-export function toZonedDateTime(
+export const toPlainDate = createPlainDateSlots as (
   plainDateTimeSlots: PlainDateTimeSlots<string>,
-  timeZoneId: string,
-  options?: EpochDisambigOptions,
-): ZonedDateTimeSlots<string, string> {
-  return plainDateTimeToZonedDateTime(queryNativeTimeZone, plainDateTimeSlots, timeZoneId, options)
-}
-
-export const toPlainDate = createPlainDateSlots // TODO: better type
+) => PlainDateSlots<string>
 
 export function toPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
 ): PlainYearMonthSlots<string> {
-  const calendarOps = createNativePartOps(plainDateTimeSlots.calendar)
-  const [year, month, day] = calendarOps.dateParts(plainDateTimeSlots) // TODO: DRY
-
   return plainDateTimeToPlainYearMonth(
     createNativeYearMonthRefineOps,
     plainDateTimeSlots,
-    { year, month, day },
+    computeDateBasics(plainDateTimeSlots),
   )
 }
 
 export function toPlainMonthDay(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
 ): PlainMonthDaySlots<string> {
-  const calendarOps = createNativePartOps(plainDateTimeSlots.calendar)
-  const [year, month, day] = calendarOps.dateParts(plainDateTimeSlots) // TODO: DRY
-
   return plainDateTimeToPlainMonthDay(
     createNativeMonthDayRefineOps,
     plainDateTimeSlots,
-    { year, month, day },
+    computeDateBasics(plainDateTimeSlots),
   )
 }
 
-export const toPlainTime = createPlainTimeSlots // TODO: better type
+export const toPlainTime = createPlainTimeSlots as (
+  slots: PlainDateTimeSlots<string>,
+) => PlainTimeSlots
 
 export function toLocaleString(
   slots: PlainDateTimeSlots<string>,

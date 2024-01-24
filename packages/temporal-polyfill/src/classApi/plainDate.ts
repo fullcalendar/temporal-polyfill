@@ -54,22 +54,22 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     },
     add(slots: PlainDateSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
       return createPlainDate(
-        movePlainDate(createMoveOps, slots, toDurationSlots(durationArg), options)
+        movePlainDate(createMoveOps, false, slots, toDurationSlots(durationArg), options)
       )
     },
     subtract(slots: PlainDateSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDate {
       return createPlainDate(
-        movePlainDate(createMoveOps, slots, toDurationSlots(durationArg), options, true)
+        movePlainDate(createMoveOps, true, slots, toDurationSlots(durationArg), options)
       )
     },
     until(slots: PlainDateSlots<CalendarSlot>, otherArg: PlainDateArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffPlainDates(createDiffOps, slots, toPlainDateSlots(otherArg), options)
+        diffPlainDates(createDiffOps, false, slots, toPlainDateSlots(otherArg), options)
       )
     },
     since(slots: PlainDateSlots<CalendarSlot>, otherArg: PlainDateArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffPlainDates(createDiffOps, slots, toPlainDateSlots(otherArg), options, true)
+        diffPlainDates(createDiffOps, true, slots, toPlainDateSlots(otherArg), options)
       )
     },
     equals(slots: PlainDateSlots<CalendarSlot>, otherArg: PlainDateArg): boolean {

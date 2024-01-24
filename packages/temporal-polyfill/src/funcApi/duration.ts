@@ -1,7 +1,5 @@
-import { NumSign, identityFunc } from '../internal/utils'
-import { UnitName } from '../internal/units'
+import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DurationRoundOptions, RelativeToOptions, TotalUnitOptionsWithRel } from '../internal/optionsRefine'
 import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../internal/slots'
 import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import { constructDurationSlots } from '../internal/construct'
@@ -12,7 +10,7 @@ import { totalDuration } from '../internal/total'
 import { formatDurationIso } from '../internal/formatIso'
 import { compareDurations } from '../internal/compare'
 
-type RelativeToArg = ZonedDateTimeSlots<string, string> | PlainDateSlots<string>
+export type RelativeToArg = ZonedDateTimeSlots<string, string> | PlainDateSlots<string>
 
 export const create = constructDurationSlots
 
@@ -22,88 +20,51 @@ export const fromFields = refineDurationBag
 
 export const withFields = durationWithFields
 
-export function add(
-  slots: DurationSlots,
-  otherSlots: DurationSlots,
-  options?: RelativeToOptions<RelativeToArg>,
-): DurationSlots {
-  return addDurations(
-    identityFunc,
-    createNativeDiffOps,
-    queryNativeTimeZone,
-    slots,
-    otherSlots,
-    options,
-  )
-}
+export const add = bindArgs(
+  addDurations<RelativeToArg, string, string>,
+  identityFunc,
+  createNativeDiffOps,
+  queryNativeTimeZone,
+  false,
+)
 
-export function subtract(
-  slots: DurationSlots,
-  otherSlots: DurationSlots,
-  options?: RelativeToOptions<RelativeToArg>,
-): DurationSlots {
-  return addDurations(
-    identityFunc,
-    createNativeDiffOps,
-    queryNativeTimeZone,
-    slots,
-    otherSlots,
-    options,
-    true,
-  )
-}
+export const subtract = bindArgs(
+  addDurations<RelativeToArg, string, string>,
+  identityFunc,
+  createNativeDiffOps,
+  queryNativeTimeZone,
+  true,
+)
 
 export const negated = negateDuration
 
 export const abs = absDuration
 
-export function round(
-  slots: DurationSlots,
-  options: DurationRoundOptions<RelativeToArg>,
-): DurationSlots {
-  return roundDuration(
-    identityFunc,
-    createNativeDiffOps,
-    queryNativeTimeZone,
-    slots,
-    options,
-  )
-}
+export const round = bindArgs(
+  roundDuration<RelativeToArg, string, string>,
+  identityFunc,
+  createNativeDiffOps,
+  queryNativeTimeZone,
+)
 
-export function total(
-  slots: DurationSlots,
-  options: TotalUnitOptionsWithRel<RelativeToArg> | UnitName,
-): number {
-  return totalDuration(
-    identityFunc,
-    createNativeDiffOps,
-    queryNativeTimeZone,
-    slots,
-    options,
-  )
-}
+export const total = bindArgs(
+  totalDuration<RelativeToArg, string, string>,
+  identityFunc,
+  createNativeDiffOps,
+  queryNativeTimeZone,
+)
 
 export const toString = formatDurationIso
 
-export function toJSON(slots: DurationSlots): string {
-  return toString(slots)
-}
+// TODO: toLocaleString
 
-export const sign = queryDurationSign // TODO: prevent other args
+export const sign = queryDurationSign as (slots: DurationSlots) => NumSign
 
-export const blank = queryDurationBlank // TODO: prevent other args
+export const blank = queryDurationBlank as (slots: DurationSlots) => boolean
 
-export function compare(
-  durationSlots0: DurationSlots,
-  durationSlots1: DurationSlots,
-  options?: RelativeToOptions<RelativeToArg>,
-): NumSign {
-  return compareDurations(
-    identityFunc,
-    createNativeDiffOps,
-    queryNativeTimeZone,
-    durationSlots0,
-    durationSlots1,
-    options,
-  )
-}
+export const compare = bindArgs(
+  compareDurations<RelativeToArg, string, string>,
+  identityFunc,
+  createNativeDiffOps,
+  queryNativeTimeZone,
+)

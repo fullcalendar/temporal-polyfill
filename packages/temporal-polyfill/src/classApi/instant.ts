@@ -34,26 +34,22 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
   {
     add(slots: InstantSlots, durationArg: DurationArg): Instant {
       return createInstant(
-        moveInstant(slots, toDurationSlots(durationArg)),
+        moveInstant(false, slots, toDurationSlots(durationArg)),
       )
     },
     subtract(slots: InstantSlots, durationArg: DurationArg): Instant {
       return createInstant(
-        moveInstant(slots, toDurationSlots(durationArg), true),
+        moveInstant(true, slots, toDurationSlots(durationArg)),
       )
     },
     until(slots: InstantSlots, otherArg: InstantArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffInstants(
-          slots,
-          toInstantSlots(otherArg),
-          options,
-        ),
+        diffInstants(false, slots, toInstantSlots(otherArg), options),
       )
     },
     since(slots: InstantSlots, otherArg: InstantArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffInstants(slots, toInstantSlots(otherArg), options, true),
+        diffInstants(true, slots, toInstantSlots(otherArg), options),
       )
     },
     round(slots: InstantSlots, options: RoundingOptions | UnitName): Instant {

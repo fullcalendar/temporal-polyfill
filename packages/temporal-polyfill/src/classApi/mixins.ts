@@ -144,19 +144,27 @@ export const timeGetters = mapPropNames((name, i) => {
 // Epoch
 // -------------------------------------------------------------------------------------------------
 
+export function getEpochSeconds(slots: EpochSlots) {
+  return epochNanoToSec(slots.epochNanoseconds)
+}
+
+export function getEpochMilliseconds(slots: EpochSlots) {
+  return epochNanoToMilli(slots.epochNanoseconds)
+}
+
+export function getEpochMicroseconds(slots: EpochSlots) {
+  return epochNanoToMicro(slots.epochNanoseconds)
+}
+
+export function getEpochNanoseconds(slots: EpochSlots) {
+  return dayTimeNanoToBigInt(slots.epochNanoseconds)
+}
+
 export const epochGetters = {
-  epochSeconds(slots: EpochSlots) {
-    return epochNanoToSec(slots.epochNanoseconds)
-  },
-  epochMilliseconds(slots: EpochSlots) {
-    return epochNanoToMilli(slots.epochNanoseconds)
-  },
-  epochMicroseconds(slots: EpochSlots) {
-    return epochNanoToMicro(slots.epochNanoseconds)
-  },
-  epochNanoseconds(slots: EpochSlots) {
-    return dayTimeNanoToBigInt(slots.epochNanoseconds)
-  },
+  epochSeconds: getEpochSeconds,
+  epochMilliseconds: getEpochMilliseconds,
+  epochMicroseconds: getEpochMicroseconds,
+  epochNanoseconds: getEpochNanoseconds,
 }
 
 // Misc

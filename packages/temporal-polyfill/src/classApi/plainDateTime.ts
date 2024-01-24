@@ -66,22 +66,22 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     },
     add(slots: PlainDateTimeSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
       return createPlainDateTime(
-        movePlainDateTime(createMoveOps, slots, toDurationSlots(durationArg), options)
+        movePlainDateTime(createMoveOps, false, slots, toDurationSlots(durationArg), options)
       )
     },
     subtract(slots: PlainDateTimeSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
       return createPlainDateTime(
-        movePlainDateTime(createMoveOps, slots, toDurationSlots(durationArg), options, true)
+        movePlainDateTime(createMoveOps, true, slots, toDurationSlots(durationArg), options)
       )
     },
     until(slots: PlainDateTimeSlots<CalendarSlot>, otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffPlainDateTimes(createDiffOps, slots, toPlainDateTimeSlots(otherArg), options)
+        diffPlainDateTimes(createDiffOps, false, slots, toPlainDateTimeSlots(otherArg), options)
       )
     },
     since(slots: PlainDateTimeSlots<CalendarSlot>, otherArg: PlainDateTimeArg, options?: DiffOptions): Duration {
       return createDuration(
-        diffPlainDateTimes(createDiffOps, slots, toPlainDateTimeSlots(otherArg), options, true)
+        diffPlainDateTimes(createDiffOps, true, slots, toPlainDateTimeSlots(otherArg), options)
       )
     },
     round(slots: PlainDateTimeSlots<CalendarSlot>, options: RoundingOptions | UnitName): PlainDateTime {
