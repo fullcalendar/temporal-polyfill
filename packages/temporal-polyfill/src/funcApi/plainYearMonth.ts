@@ -12,7 +12,7 @@ import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainYearMonthIso } from '../internal/formatIso'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { prepCachedPlainYearMonthFormat } from './formatIntlCached'
-import { computeYearMonthFields, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
+import { computeYearMonthFields, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
 import { NumSign, bindArgs } from '../internal/utils'
 
 export function create(
@@ -43,10 +43,10 @@ export const getFields = computeYearMonthFields as (
   slots: PlainYearMonthSlots<string>
 ) => YearMonthFields & Partial<EraYearFields>
 
-export const daysInMonth = getDaysInMonth as (slots: PlainYearMonthSlots<string>) => number
-export const daysInYear = getDaysInYear as (slots: PlainYearMonthSlots<string>) => number
-export const monthsInYear = getMonthsInYear as (slots: PlainYearMonthSlots<string>) => number
-export const inLeapYear = getInLeapYear as (slots: PlainYearMonthSlots<string>) => boolean
+export const daysInMonth = computeDaysInMonth as (slots: PlainYearMonthSlots<string>) => number
+export const daysInYear = computeDaysInYear as (slots: PlainYearMonthSlots<string>) => number
+export const monthsInYear = computeMonthsInYear as (slots: PlainYearMonthSlots<string>) => number
+export const inLeapYear = computeInLeapYear as (slots: PlainYearMonthSlots<string>) => boolean
 
 export function withFields(
   slots: PlainYearMonthSlots<string>,

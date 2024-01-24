@@ -15,7 +15,7 @@ import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compa
 import { formatPlainDateTimeIso } from '../internal/formatIso'
 import { plainDateTimeToPlainMonthDay, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
 import { prepCachedPlainDateTimeFormat } from './formatIntlCached'
-import { computeDateBasics, computeDateFields, getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
+import { computeDateBasics, computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 import { NumSign, bindArgs } from '../internal/utils'
 
@@ -48,11 +48,11 @@ export const dayOfWeek = computeIsoDayOfWeek as (slots: PlainDateTimeSlots<strin
 export const daysInWeek = computeIsoDaysInWeek as (slots: PlainDateTimeSlots<string>) => number
 export const weekOfYear = computeIsoWeekOfYear as (slots: PlainDateTimeSlots<string>) => number
 export const yearOfWeek = computeIsoYearOfWeek as (slots: PlainDateTimeSlots<string>) => number
-export const dayOfYear = getDayOfYear as (slots: PlainDateTimeSlots<string>) => number
-export const daysInMonth = getDaysInMonth as (slots: PlainDateTimeSlots<string>) => number
-export const daysInYear = getDaysInYear as (slots: PlainDateTimeSlots<string>) => number
-export const monthsInYear = getMonthsInYear as (slots: PlainDateTimeSlots<string>) => number
-export const inLeapYear = getInLeapYear as (slots: PlainDateTimeSlots<string>) => boolean
+export const dayOfYear = computeDayOfYear as (slots: PlainDateTimeSlots<string>) => number
+export const daysInMonth = computeDaysInMonth as (slots: PlainDateTimeSlots<string>) => number
+export const daysInYear = computeDaysInYear as (slots: PlainDateTimeSlots<string>) => number
+export const monthsInYear = computeMonthsInYear as (slots: PlainDateTimeSlots<string>) => number
+export const inLeapYear = computeInLeapYear as (slots: PlainDateTimeSlots<string>) => boolean
 
 export function withFields(
   plainDateTimeSlots: PlainDateTimeSlots<string>,

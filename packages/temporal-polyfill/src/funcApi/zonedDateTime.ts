@@ -18,7 +18,7 @@ import { roundZonedDateTime } from '../internal/round'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
 import { prepCachedZonedDateTimeFormat } from './formatIntlCached'
-import { computeDateFields, getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
+import { computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
 
 // TODO: better place for this?
 export type ZonedDateTimeFields = DateTimeFields & Partial<EraYearFields> & { offset: string }
@@ -68,11 +68,11 @@ export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
 export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek)
 export const weekOfYear = adaptDateFunc(computeIsoWeekOfYear)
 export const yearOfWeek = adaptDateFunc(computeIsoYearOfWeek)
-export const dayOfYear = adaptDateFunc(getDayOfYear)
-export const daysInMonth = adaptDateFunc(getDaysInMonth)
-export const daysInYear = adaptDateFunc(getDaysInYear)
-export const monthsInYear = adaptDateFunc(getMonthsInYear)
-export const inLeapYear = adaptDateFunc(getInLeapYear)
+export const dayOfYear = adaptDateFunc(computeDayOfYear)
+export const daysInMonth = adaptDateFunc(computeDaysInMonth)
+export const daysInYear = adaptDateFunc(computeDaysInYear)
+export const monthsInYear = adaptDateFunc(computeMonthsInYear)
+export const inLeapYear = adaptDateFunc(computeInLeapYear)
 
 export const startOfDay = bindArgs(computeStartOfDay<string, string>, queryNativeTimeZone)
 export const hoursInDay = bindArgs(computeHoursInDay<string, string>, queryNativeTimeZone)

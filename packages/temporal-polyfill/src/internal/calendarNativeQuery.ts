@@ -2,7 +2,7 @@ import { nativeMergeFields } from './bag'
 import { gregoryCalendarId, isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, queryIntlCalendar } from './calendarIntl'
 import { computeIsoDateParts, computeIsoDay, computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoEraParts, computeIsoFieldsFromParts, computeIsoInLeapYear, computeIsoMonth, computeIsoMonthCodeParts, computeIsoMonthsInYear, computeIsoYear, computeIsoYearMonthForMonthDay } from './calendarIso'
-import { EpochMilliOp, LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeDaysInMonth, computeDaysInYear, computeEra, computeEraYear, computeInLeapYear, computeMonthCode, computeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
+import { EpochMilliOp, LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeNativeDaysInMonth, computeNativeDaysInYear, computeNativeEra, computeNativeEraYear, computeNativeInLeapYear, computeNativeMonthCode, computeNativeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
 import { isoArgsToEpochMilli } from './epochAndTime'
 import { intlMonthAdd, isoMonthAdd } from './move'
@@ -107,25 +107,25 @@ export const isoPartOps: NativePartOps = {
 }
 
 export const isoInLeapYearOps: NativeInLeapYearOps = {
-  inLeapYear: computeInLeapYear,
+  inLeapYear: computeNativeInLeapYear,
   dateParts: computeIsoDateParts,
   inLeapYearPart: computeIsoInLeapYear,
 }
 
 export const isoMonthsInYearOps: NativeMonthsInYearOps = {
-  monthsInYear: computeMonthsInYear,
+  monthsInYear: computeNativeMonthsInYear,
   dateParts: computeIsoDateParts,
   monthsInYearPart: computeIsoMonthsInYear,
 }
 
 export const isoDaysInMonthOps: NativeDaysInMonthOps = {
-  daysInMonth: computeDaysInMonth,
+  daysInMonth: computeNativeDaysInMonth,
   dateParts: computeIsoDateParts,
   daysInMonthParts: computeIsoDaysInMonth,
 }
 
 export const isoDaysInYearOps: NativeDaysInYearOps = {
-  daysInYear: computeDaysInYear,
+  daysInYear: computeNativeDaysInYear,
   dateParts: computeIsoDateParts,
   daysInYearPart: computeIsoDaysInYear,
 }
@@ -265,25 +265,25 @@ export const intlYearMonthDiffOps: NativeYearMonthDiffOps = {
 // -------------
 
 export const intlInLeapYearOps: NativeInLeapYearOps = {
-  inLeapYear: computeInLeapYear,
+  inLeapYear: computeNativeInLeapYear,
   dateParts: computeIntlDateParts,
   inLeapYearPart: computeIntlInLeapYear,
 }
 
 export const intlMonthsInYearOps: NativeMonthsInYearOps = {
-  monthsInYear: computeMonthsInYear,
+  monthsInYear: computeNativeMonthsInYear,
   dateParts: computeIntlDateParts,
   monthsInYearPart: computeIntlMonthsInYear,
 }
 
 export const intlDaysInMonthOps: NativeDaysInMonthOps = {
-  daysInMonth: computeDaysInMonth,
+  daysInMonth: computeNativeDaysInMonth,
   dateParts: computeIntlDateParts,
   daysInMonthParts: computeIntlDaysInMonth,
 }
 
 export const intlDaysInYearOps: NativeDaysInYearOps = {
-  daysInYear: computeDaysInYear,
+  daysInYear: computeNativeDaysInYear,
   dateParts: computeIntlDateParts,
   daysInYearPart: computeIntlDaysInYear,
 }
@@ -293,17 +293,17 @@ export const intlDayOfYearOps: NativeDayOfYearOps = {
 }
 
 export const intlEraOps: NativeEraOps = {
-  era: computeEra,
+  era: computeNativeEra,
   eraParts: computeIntlEraParts,
 }
 
 export const intlEraYearOps: NativeEraYearOps = {
-  eraYear: computeEraYear,
+  eraYear: computeNativeEraYear,
   eraParts: computeIntlEraParts,
 }
 
 export const intlMonthCodeOps: NativeMonthCodeOps = {
-  monthCode: computeMonthCode,
+  monthCode: computeNativeMonthCode,
   monthCodeParts: computeIntlMonthCodeParts,
   dateParts: computeIntlDateParts,
 }

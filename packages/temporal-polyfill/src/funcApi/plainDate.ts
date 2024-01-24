@@ -15,7 +15,7 @@ import { plainDatesEqual, compareIsoDateFields } from '../internal/compare'
 import { formatPlainDateIso } from '../internal/formatIso'
 import { plainDateToPlainDateTime, plainDateToPlainMonthDay, plainDateToPlainYearMonth, plainDateToZonedDateTime } from '../internal/convert'
 import { prepCachedPlainDateFormat } from './formatIntlCached'
-import { computeDateBasics, computeDateFields, getDayOfYear, getDaysInMonth, getDaysInYear, getInLeapYear, getMonthsInYear } from './utils'
+import { computeDateBasics, computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/calendarIso'
 
 // TODO: do Readonly<> everywhere?
@@ -48,11 +48,11 @@ export const dayOfWeek = computeIsoDayOfWeek as (slots: PlainDateSlots<string>) 
 export const daysInWeek = computeIsoDaysInWeek as (slots: PlainDateSlots<string>) => number
 export const weekOfYear = computeIsoWeekOfYear as (slots: PlainDateSlots<string>) => number
 export const yearOfWeek = computeIsoYearOfWeek as (slots: PlainDateSlots<string>) => number
-export const dayOfYear = getDayOfYear as (slots: PlainDateSlots<string>) => number
-export const daysInMonth = getDaysInMonth as (slots: PlainDateSlots<string>) => number
-export const daysInYear = getDaysInYear as (slots: PlainDateSlots<string>) => number
-export const monthsInYear = getMonthsInYear as (slots: PlainDateSlots<string>) => number
-export const inLeapYear = getInLeapYear as (slots: PlainDateSlots<string>) => boolean
+export const dayOfYear = computeDayOfYear as (slots: PlainDateSlots<string>) => number
+export const daysInMonth = computeDaysInMonth as (slots: PlainDateSlots<string>) => number
+export const daysInYear = computeDaysInYear as (slots: PlainDateSlots<string>) => number
+export const monthsInYear = computeMonthsInYear as (slots: PlainDateSlots<string>) => number
+export const inLeapYear = computeInLeapYear as (slots: PlainDateSlots<string>) => boolean
 
 export function withFields(
   slots: PlainDateSlots<string>,

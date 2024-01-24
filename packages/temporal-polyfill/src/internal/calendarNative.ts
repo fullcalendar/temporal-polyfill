@@ -236,13 +236,13 @@ export const nativeStandardBase = {
   fields: nativeFieldsMethod,
   mergeFields: nativeMergeFields,
 
-  inLeapYear: computeInLeapYear,
-  monthsInYear: computeMonthsInYear,
-  daysInMonth: computeDaysInMonth,
-  daysInYear: computeDaysInYear,
-  era: computeEra,
-  eraYear: computeEraYear,
-  monthCode: computeMonthCode,
+  inLeapYear: computeNativeInLeapYear,
+  monthsInYear: computeNativeMonthsInYear,
+  daysInMonth: computeNativeDaysInMonth,
+  daysInYear: computeNativeDaysInYear,
+  era: computeNativeEra,
+  eraYear: computeNativeEraYear,
+  monthCode: computeNativeMonthCode,
 
   dayOfWeek: computeIsoDayOfWeek,
   weekOfYear: computeIsoWeekOfYear,
@@ -253,7 +253,7 @@ export const nativeStandardBase = {
 // 'Super' methods that all native implementations use
 // -------------------------------------------------------------------------------------------------
 
-export function computeInLeapYear(
+export function computeNativeInLeapYear(
   this: NativeInLeapYearOps,
   isoFields: IsoDateFields,
 ): boolean {
@@ -261,7 +261,7 @@ export function computeInLeapYear(
   return this.inLeapYearPart(year)
 }
 
-export function computeMonthsInYear(
+export function computeNativeMonthsInYear(
   this: NativeMonthsInYearOps,
   isoFields: IsoDateFields,
 ): number {
@@ -269,7 +269,7 @@ export function computeMonthsInYear(
   return this.monthsInYearPart(year)
 }
 
-export function computeDaysInMonth(
+export function computeNativeDaysInMonth(
   this: NativeDaysInMonthOps,
   isoFields: IsoDateFields,
 ): number {
@@ -277,7 +277,7 @@ export function computeDaysInMonth(
   return this.daysInMonthParts(year, month)
 }
 
-export function computeDaysInYear(
+export function computeNativeDaysInYear(
   this: NativeDaysInYearOps,
   isoFields: IsoDateFields,
 ): number {
@@ -285,21 +285,21 @@ export function computeDaysInYear(
   return this.daysInYearPart(year)
 }
 
-export function computeEra(
+export function computeNativeEra(
   this: NativeEraOps,
   isoFields: IsoDateFields,
 ): string | undefined {
   return this.eraParts(isoFields)[0]
 }
 
-export function computeEraYear(
+export function computeNativeEraYear(
   this: NativeEraYearOps,
   isoFields: IsoDateFields,
 ): number | undefined {
   return this.eraParts(isoFields)[1]
 }
 
-export function computeMonthCode(
+export function computeNativeMonthCode(
   this: NativeMonthCodeOps,
   isoFields: IsoDateFields,
 ): string {

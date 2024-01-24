@@ -43,30 +43,27 @@ export function computeMonthDayFields(
   return { monthCode, month, day }
 }
 
-//
-// TODO: why not rename these?
-
-export function getInLeapYear(slots: DateSlots<string>): boolean {
+export function computeInLeapYear(slots: DateSlots<string>): boolean {
   const calendarOps = createNativeInLeapYearOps(slots.calendar)
   return calendarOps.inLeapYear(slots)
 }
 
-export function getMonthsInYear(slots: DateSlots<string>): number {
+export function computeMonthsInYear(slots: DateSlots<string>): number {
   const calendarOps = createNativeMonthsInYearOps(slots.calendar)
   return calendarOps.monthsInYear(slots)
 }
 
-export function getDaysInMonth(slots: DateSlots<string>): number {
+export function computeDaysInMonth(slots: DateSlots<string>): number {
   const calendarOps = createNativeDaysInMonthOps(slots.calendar)
   return calendarOps.daysInMonth(slots)
 }
 
-export function getDaysInYear(slots: DateSlots<string>): number {
+export function computeDaysInYear(slots: DateSlots<string>): number {
   const calendarOps = createNativeDaysInYearOps(slots.calendar)
   return calendarOps.daysInYear(slots)
 }
 
-export function getDayOfYear(slots: DateSlots<string>): number {
+export function computeDayOfYear(slots: DateSlots<string>): number {
   const calendarOps = createNativeDayOfYearOps(slots.calendar)
   return calendarOps.dayOfYear(slots)
 }
