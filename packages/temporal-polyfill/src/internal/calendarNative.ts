@@ -7,7 +7,6 @@ import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
 import { eraOriginsByCalendarId, isoCalendarId, leapMonthMetas } from './calendarConfig'
 import * as errorMessages from './errorMessages'
-import { DateBasics, DateFields, DateFieldsIntl, EraYearFields, MonthDayFields, YearMonthFields } from './calendarFields'
 
 // Struct Types
 export type DateParts = [year: number, month: number, day: number]
@@ -328,7 +327,7 @@ export function parseMonthCode(monthCode: string): [
   ]
 }
 
-function formatMonthCode(monthCodeNumber: number, isLeapMonth: boolean): string {
+export function formatMonthCode(monthCodeNumber: number, isLeapMonth: boolean): string {
   return 'M' + padNumber2(monthCodeNumber) + (isLeapMonth ? 'L' : '')
 }
 

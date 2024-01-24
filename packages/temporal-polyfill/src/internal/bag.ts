@@ -51,9 +51,6 @@ const builtinRefiners = {
 // High-Level Refining
 // -------------------------------------------------------------------------------------------------
 
-/*
-TODO: make more DRY with other methods
-*/
 export function refineMaybeZonedDateTimeBag<C, TA, T>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   getTimeZoneOps: (timeZoneArg: T) => TimeZoneOps,
