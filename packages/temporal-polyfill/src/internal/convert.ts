@@ -3,7 +3,7 @@ import { isoCalendarId } from './calendarConfig'
 import { DateBag, MonthDayFields, YearFields, YearMonthFields } from './calendarFields'
 import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
 import { DateModOps, MonthDayRefineOps, YearMonthRefineOps } from './calendarOps'
-import { toBigInt } from './cast'
+import { requireObjectlike, toBigInt } from './cast'
 import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './epochAndTime'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
@@ -236,8 +236,9 @@ export function plainTimeToZonedDateTime<C, TA, T, PA>(
   slots: PlainTimeSlots,
   options: { timeZone: TA, plainDate: PA },
 ): ZonedDateTimeSlots<C, T> {
-  const plainDateSlots = refinePlainDateArg(options.plainDate)
-  const timeZoneSlot = refineTimeZoneArg(options.timeZone)
+  const refinedOptions = requireObjectlike(options)
+  const plainDateSlots = refinePlainDateArg(refinedOptions.plainDate)
+  const timeZoneSlot = refineTimeZoneArg(refinedOptions.timeZone)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   return createZonedDateTimeSlots(
