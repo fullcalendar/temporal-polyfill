@@ -6,14 +6,13 @@ import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { requireFunction, requireInteger } from '../internal/cast'
-import { nanoInUtcDay } from '../internal/units'
 import { createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
 import { validateTimeZoneOffset } from '../internal/timeZoneOps'
 
 // Individual Adapters
 // -------------------------------------------------------------------------------------------------
 
-function adapterGetOffsetNanosecondsFor(
+function getOffsetNanosecondsForAdapter(
   timeZoneProtocol: TimeZoneProtocol,
   getOffsetNanosecondsFor: TimeZoneProtocol['getOffsetNanosecondsFor'],
   epochNano: DayTimeNano,
@@ -26,7 +25,7 @@ function adapterGetOffsetNanosecondsFor(
   )
 }
 
-function adapterGetPossibleInstantsFor(
+function getPossibleInstantsForAdapter(
   timeZoneProtocol: TimeZoneProtocol,
   getPossibleInstantsFor: TimeZoneProtocol['getPossibleInstantsFor'],
   isoFields: IsoDateTimeFields,
@@ -51,13 +50,13 @@ function validateTimeZoneOffsetRes(offsetNano: number): number {
 // -------------------------------------------------------------------------------------------------
 
 export const timeZoneAdapters = {
-  getOffsetNanosecondsFor: adapterGetOffsetNanosecondsFor,
-  getPossibleInstantsFor: adapterGetPossibleInstantsFor,
+  getOffsetNanosecondsFor: getOffsetNanosecondsForAdapter,
+  getPossibleInstantsFor: getPossibleInstantsForAdapter,
 }
 
 // TODO: rename to be about 'offset'
 export const simpleTimeZoneAdapters = {
-  getOffsetNanosecondsFor: adapterGetOffsetNanosecondsFor,
+  getOffsetNanosecondsFor: getOffsetNanosecondsForAdapter,
 }
 
 // Adapter Instantiation
