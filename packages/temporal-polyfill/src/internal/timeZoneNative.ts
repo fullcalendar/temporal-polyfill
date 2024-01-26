@@ -63,18 +63,28 @@ function normalizeNamedTimeZoneId(s: string): string {
   const parts = lower.split('/')
 
   return parts.map((part, partI) => {
-    const forceUpper = (part.length <= 3 || part.match(/\d/)) && !part.match(/etc|yap/)
+    // abbreviation-like (big parts, like 'ACT' in 'Australia/ACT')
+    // OR numeric-offset-like
+    // OR Pacific/YAP
+    if ((part.length <= 3 || part.match(/\d/)) && !part.match(/etc|yap/)) {
+      return part.toUpperCase()
+    }
 
     return part.replace(/baja|dumont|[a-z]+/g, (a, i) => {
-      if (forceUpper || a === 'chat' || a.length <= 2 && (!partI || a === 'in')) {
-        // abbreviation-like
+      // abbreviation-like (small parts)
+      // - starts with 1-or-2-letters?
+      // - Knox_IN, NZ-CHAT
+      if (a.length <= 2 && !partI || a === 'in' || a === 'chat') {
         return a.toUpperCase()
       }
+
+      // word-like
       if (a.length > 2 || !i) {
-        // word-like
         return capitalize(a).replace(/island|noronha|murdo|rivadavia|urville/, capitalize)
       }
-      return a // lowercase (au/of/es)
+
+      // lowercase (au/of/es)
+      return a
     })
   }).join('/')
 }
