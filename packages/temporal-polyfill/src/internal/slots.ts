@@ -28,9 +28,6 @@ export function createInstantSlots(epochNano: DayTimeNano): InstantSlots {
   }
 }
 
-/*
-NOTE: parseZonedDateTime still uses ZonedDateTimeBranding
-*/
 export function createZonedDateTimeSlots<C, T>(
   epochNano: DayTimeNano,
   timeZone: T,
@@ -153,8 +150,6 @@ export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
 }
 
 export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
-  // fast path. doesn't read IDs
-  // similar to isIdLikeEqual
   if (a === b) {
     return a
   }

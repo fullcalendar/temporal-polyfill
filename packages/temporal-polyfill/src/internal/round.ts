@@ -212,8 +212,7 @@ export function roundTimeToNano(
   )
 }
 
-// Rounding Duration
-// TODO: consolidate with durationMath?
+// Duration (w/o marker system)
 // -------------------------------------------------------------------------------------------------
 
 export function roundDayTimeDuration(
