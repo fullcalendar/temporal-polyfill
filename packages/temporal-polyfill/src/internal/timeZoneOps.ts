@@ -249,7 +249,7 @@ export function computeHoursInDay<C, T>(
 
   return computeNanosecondsInDay(
     timeZoneOps,
-    zonedEpochSlotsToIso(zonedDateTimeSlots, getTimeZoneOps),
+    zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
   ) / nanoInHour
 }
 

@@ -1,5 +1,4 @@
 import { NativeTimeZone, normalizeTimeZoneId } from '../internal/timeZoneNative'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { formatOffsetNano } from '../internal/formatIso'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from '../internal/optionsRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
@@ -14,7 +13,6 @@ import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import { PlainDateTime, PlainDateTimeArg, createPlainDateTime, toPlainDateTimeSlots } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
-import { requireString } from '../internal/cast'
 import { BrandingSlots, createInstantSlots, createPlainDateTimeSlots, isTimeZoneSlotsEqual } from '../internal/slots'
 
 export type TimeZone = any
@@ -27,11 +25,10 @@ export type TimeZoneClassSlots = BrandingSlots & {
 export const [TimeZone, createTimeZone] = createSlotClass(
   'TimeZone',
   (id: string): TimeZoneClassSlots => {
-    id = normalizeTimeZoneId(requireString(id))
-    const timeZoneNative = queryNativeTimeZone(id)
+    const [normalizedId, timeZoneNative] = normalizeTimeZoneId(id)
     return {
       branding: 'TimeZone',
-      id,
+      id: normalizedId,
       native: timeZoneNative,
     }
   },

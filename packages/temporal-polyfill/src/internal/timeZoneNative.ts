@@ -56,12 +56,16 @@ export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
 /*
 TODO: audit inefficient callers
 */
-export function realizeTimeZoneId(timeZoneId: string): string {
-  queryNativeTimeZone(timeZoneId) // ensure it's real
-  return normalizeTimeZoneId(timeZoneId)
+export function normalizeTimeZoneId(id: string): [string, NativeTimeZone] {
+  const timeZoneNative = queryNativeTimeZone(id)
+  const normalizedId = (timeZoneNative instanceof FixedTimeZone)
+    ? timeZoneNative.id
+    : normalizeNamedTimeZoneId(id)
+
+  return [normalizedId, timeZoneNative]
 }
 
-export function normalizeTimeZoneId(s: string): string {
+function normalizeNamedTimeZoneId(s: string): string {
   const lower = s.toLowerCase()
   const parts = lower.split('/')
 

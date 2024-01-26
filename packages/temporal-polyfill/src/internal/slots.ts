@@ -4,7 +4,7 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseIso'
-import { queryNativeTimeZone, realizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
+import { normalizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
 import * as errorMessages from './errorMessages'
@@ -223,7 +223,7 @@ function getTimeZoneSlotRaw(slots: IdLike, loose?: boolean): string | number {
 }
 
 export function refineTimeZoneSlotString(arg: string): string {
-  return realizeTimeZoneId(parseTimeZoneId(requireString(arg)))
+  return normalizeTimeZoneId(parseTimeZoneId(requireString(arg)))[0]
 }
 
 // ID-like

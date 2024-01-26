@@ -249,9 +249,6 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 # Intl
 ####################################################################################################
 
-# TODO: FIX: TimeZone ID canonicalization with TimeZone::equals
-intl402/Temporal/TimeZone/prototype/equals/argument-object.js
-
 # NOT-IMPLEMENTED
 # TimeZone ID canonicalization for Intl.DateTimeFormat
 intl402/DateTimeFormat/timezone-case-insensitive.js
