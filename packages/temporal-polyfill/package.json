@@ -24,7 +24,7 @@
   },
   "scripts": {
     "build": "./scripts/clean.js && pnpm run pkg-json && pnpm run tsc && pnpm run bundle && pnpm run readme",
-    "dev": "./scripts/clean.js && pnpm run pkg-json && pnpm run tsc && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
+    "dev": "./scripts/clean.js && pnpm run pkg-json --dev && pnpm run tsc && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build",
     "tsc:dev": "tsc --build --watch --pretty",
     "bundle": "./scripts/bundle.js",

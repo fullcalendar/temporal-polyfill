@@ -2,30 +2,34 @@
 
 import { join as joinPaths } from 'path'
 import { readFile, writeFile } from 'fs/promises'
+import { extensions } from './config.js'
 
 writePkgJson(
-  joinPaths(process.argv[1], '../..')
+  joinPaths(process.argv[1], '../..'),
+  process.argv.slice(2).includes('--dev'),
 )
 
-async function writePkgJson(pkgDir) {
+async function writePkgJson(pkgDir, isDev) {
   const srcPkgJsonPath = joinPaths(pkgDir, 'package.json')
   const distPkgJsonPath = joinPaths(pkgDir, 'dist/package.json')
 
   const srcPkgJson = JSON.parse(await readFile(srcPkgJsonPath))
   const distPkgJson = { ...srcPkgJson }
 
-  const srcExportMap = srcPkgJson.buildConfig.exports
+  const exportMap = srcPkgJson.buildConfig.exports
   const distExportMap = {}
 
-  for (const exportPath in srcExportMap) {
-    const shortName = exportPath === '.' ? './index' : exportPath
+  for (const exportPath in exportMap) {
+    const exportConfig = exportMap[exportPath]
+    const exportName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
-    // TODO: make DRY with bundle.js
     distExportMap[exportPath] = {
-      types: shortName + '.d.ts',
-      require: shortName + '.cjs',
-      import: shortName + '.esm.js',
-      default: shortName + '.esm.js'
+      types: !isDev || exportConfig.types
+        ? './' + exportName + extensions.dts
+        : './.tsc/' + (exportConfig.src || exportName) + extensions.dts,
+      require: './' + exportName + extensions.cjs,
+      import: './' + exportName + extensions.esm,
+      default: './' + exportName + extensions.esm,
     }
   }
 

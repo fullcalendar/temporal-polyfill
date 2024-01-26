@@ -6,14 +6,7 @@ import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import sourcemaps from 'rollup-plugin-sourcemaps'
 import { dts } from 'rollup-plugin-dts'
 import terser from '@rollup/plugin-terser'
-
-// TODO: make DRY with pkg-json.js
-const extensions = {
-  esm: '.esm.js',
-  cjs: '.cjs',
-  iife: '.js',
-  dts: '.d.ts',
-}
+import { extensions } from './config.js'
 
 writeBundles(
   joinPaths(process.argv[1], '../..'),
@@ -40,9 +33,6 @@ async function buildConfigs(pkgDir, isDev) {
     const exportConfig = exportMap[exportPath]
     const exportName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
     const srcPath = joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + '.js')
-    const dtsPath = exportConfig.types
-      ? joinPaths(pkgDir, 'src', exportConfig.types + extensions.dts)
-      : joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + extensions.dts)
 
     moduleInputs[exportName] = srcPath
 
