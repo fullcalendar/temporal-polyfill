@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { join as joinPaths, basename } from 'path'
-import { readFile } from 'fs/promises'
+import { readFile, copyFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import sourcemaps from 'rollup-plugin-sourcemaps'
+import { dts } from 'rollup-plugin-dts'
 import terser from '@rollup/plugin-terser'
 
 // TODO: make DRY with pkg-json.js
@@ -11,6 +12,7 @@ const extensions = {
   esm: '.esm.js',
   cjs: '.cjs',
   iife: '.js',
+  dts: '.d.ts',
 }
 
 writeBundles(
@@ -31,18 +33,32 @@ async function buildConfigs(pkgDir, isDev) {
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
+  const dtsInputs = {}
   const iifeConfigs = []
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
-    const shortName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
-    const inputPath = joinPaths(pkgDir, 'dist/.tsc', shortName + '.js')
+    const exportName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+    const srcPath = joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + '.js')
+    const dtsPath = exportConfig.types
+      ? joinPaths(pkgDir, 'src', exportConfig.types + extensions.dts)
+      : joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + extensions.dts)
 
-    moduleInputs[shortName] = inputPath
+    moduleInputs[exportName] = srcPath
+
+    if (exportConfig.types) {
+      // HACK because running global side-effects through dts causes weird imports
+      await copyFile(
+        joinPaths(pkgDir, 'src', exportConfig.types + extensions.dts),
+        joinPaths(pkgDir, 'dist', exportName + extensions.dts),
+      )
+    } else {
+      dtsInputs[exportName] = joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + extensions.dts)
+    }
 
     if (exportConfig.iife) {
       iifeConfigs.push({
-        input: inputPath,
+        input: srcPath,
         onwarn,
         plugins: [
           // for reading sourcemaps from tsc
@@ -51,7 +67,7 @@ async function buildConfigs(pkgDir, isDev) {
         output: [
           {
             format: 'iife',
-            file: joinPaths('dist', shortName + extensions.iife),
+            file: joinPaths('dist', exportName + extensions.iife),
             sourcemap: isDev,
             sourcemapExcludeSources: true,
             plugins: [
@@ -63,7 +79,7 @@ async function buildConfigs(pkgDir, isDev) {
           },
           !isDev && {
             format: 'iife',
-            file: joinPaths('dist', shortName + '.min' + extensions.iife),
+            file: joinPaths('dist', exportName + '.min' + extensions.iife),
             plugins: [
               buildTerserPlugin({
                 optimize: true,
@@ -86,7 +102,7 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
-          chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.cjs,
+          chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.cjs,
           plugins: [
             !isDev && buildTerserPlugin({
               humanReadable: true,
@@ -99,7 +115,7 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'es',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
-          chunkFileNames: `chunk-[${isDev ? 'name' : 'hash'}]` + extensions.esm,
+          chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.esm,
           plugins: [
             !isDev && buildTerserPlugin({
               humanReadable: true,
@@ -108,8 +124,19 @@ async function buildConfigs(pkgDir, isDev) {
               manglePropsExcept: temporalReservedWords,
             })
           ],
-        }
+        },
       ],
+    },
+    !isDev && {
+      input: dtsInputs,
+      onwarn,
+      plugins: [dts()],
+      output: {
+        format: 'es',
+        dir: 'dist',
+        entryFileNames: '[name]' + extensions.dts,
+        chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.dts,
+      }
     },
     ...iifeConfigs,
   ]

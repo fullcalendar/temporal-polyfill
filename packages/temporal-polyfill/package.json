@@ -23,30 +23,55 @@
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
-    "build": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && pnpm run bundle && pnpm run readme",
-    "dev": "pnpm run bundle:clean && pnpm run pkg-json && pnpm run tsc && pnpm run type-overrides && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
+    "build": "./scripts/clean.js && pnpm run pkg-json && pnpm run tsc && pnpm run bundle && pnpm run readme",
+    "dev": "./scripts/clean.js && pnpm run pkg-json && pnpm run tsc && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build",
     "tsc:dev": "tsc --build --watch --pretty",
-    "tsc:clean": "rm -rf dist/.tsc dist/tsconfig.tsbuildinfo",
-    "type-overrides": "cp src/typeOverrides/*.d.ts dist",
     "bundle": "./scripts/bundle.js",
     "bundle:dev": "./scripts/bundle.js --dev",
-    "bundle:clean": "rm -rf dist/*.js dist/*.cjs dist/*.map dist/*.d.ts",
     "pkg-json": "./scripts/pkg-json.js",
-    "pkg-json:clean": "rm -rf dist/package.json",
     "test": "./scripts/test.js",
     "lint": "eslint .",
     "readme": "cp ../../README.md dist",
-    "clean": "pnpm run tsc:clean && pnpm run bundle:clean && pnpm run pkg-json:clean",
+    "clean": "./scripts/clean.js --all",
     "size": "gzip-size --include-original --raw dist/global.min.js && pnpm export-size ./dist"
   },
   "type": "module",
   "buildConfig": {
     "exports": {
-      ".": {},
-      "./impl": {},
+      ".": {
+        "types": "typeOverrides/index"
+      },
+      "./impl": {
+        "types": "typeOverrides/impl"
+      },
       "./global": {
+        "types": "typeOverrides/global",
         "iife": true
+      },
+      "./fns/instant": {
+        "src": "funcApi/instant"
+      },
+      "./fns/zoneddatetime": {
+        "src": "funcApi/zonedDateTime"
+      },
+      "./fns/plaindatetime": {
+        "src": "funcApi/plainDateTime"
+      },
+      "./fns/plaindate": {
+        "src": "funcApi/plainDate"
+      },
+      "./fns/plainyearmonth": {
+        "src": "funcApi/plainYearMonth"
+      },
+      "./fns/plainmonthday": {
+        "src": "funcApi/plainMonthDay"
+      },
+      "./fns/plaintime": {
+        "src": "funcApi/plainTime"
+      },
+      "./fns/duration": {
+        "src": "funcApi/duration"
       }
     }
   },
@@ -65,7 +90,8 @@
     "eslint": "^7.25.0",
     "export-size": "^0.7.0",
     "gzip-size": "^7.0.0",
-    "rollup": "^3.27.2",
+    "rollup": "^3.29.4",
+    "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "terser": "^5.19.2",
     "typescript": "^5.1.6",

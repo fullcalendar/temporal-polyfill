@@ -15,6 +15,6 @@
     "src/**/*"
   ],
   "exclude": [
-    "src/typeOverrides/**"
+    "src/**/*.d.ts"
   ]
 }
