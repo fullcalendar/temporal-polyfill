@@ -4,7 +4,7 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseIso'
-import { normalizeTimeZoneId, utcTimeZoneId } from './timeZoneNative'
+import { normalizeNativeTimeZoneId, queryNativeTimeZone, utcTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
 import * as errorMessages from './errorMessages'
@@ -193,37 +193,37 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }): string | u
 // -------------------------------------------------------------------------------------------------
 
 export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
-  if (!isTimeZoneSlotsEqual(a, b, true)) {
+  if (!isTimeZoneSlotsEqual(a, b)) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }
 
   return a
 }
 
-export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike, loose?: boolean): boolean {
-  return a === b || getTimeZoneSlotRaw(a, loose) === getTimeZoneSlotRaw(b, loose)
-}
-
-/*
-TODO: pre-parse offset somehow? not very performant
-*/
-function getTimeZoneSlotRaw(slots: IdLike, loose?: boolean): string | number {
-  const id = getId(slots)
-
-  if (loose && id === utcTimeZoneId) {
-    return 0
+export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
+  if (a === b) {
+    return true
   }
 
-  const offsetNano = parseOffsetNanoMaybe(id)
-  if (offsetNano !== undefined) {
-    return offsetNano
+  const aId = getId(a)
+  const bId = getId(b)
+
+  if (aId === bId) {
+    return true
   }
 
-  return id
+  // really inefficient!
+  try {
+    if (queryNativeTimeZone(aId).id === queryNativeTimeZone(bId).id) {
+      return true
+    }
+  } catch {}
+
+  return false
 }
 
 export function refineTimeZoneSlotString(arg: string): string {
-  return normalizeTimeZoneId(parseTimeZoneId(requireString(arg)))[0]
+  return normalizeNativeTimeZoneId(parseTimeZoneId(requireString(arg)))[0]
 }
 
 // ID-like

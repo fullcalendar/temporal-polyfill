@@ -24,7 +24,7 @@ import {
   nanoToIsoTimeAndDay
 } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { FixedTimeZone, normalizeTimeZoneId } from './timeZoneNative'
+import { FixedTimeZone, normalizeNativeTimeZoneId } from './timeZoneNative'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
 import {
@@ -282,7 +282,7 @@ function finalizeZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedDateTimeSlots<string, string> {
-  const [normalTimeZoneId, timeZoneImpl] = normalizeTimeZoneId(organized.timeZone)
+  const [normalTimeZoneId, timeZoneImpl] = normalizeNativeTimeZoneId(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,

@@ -32,7 +32,7 @@ export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
 // Query
 // -------------------------------------------------------------------------------------------------
 
-const queryNonFixedTimeZone = createLazyGenerator((timeZoneId: string): NativeTimeZone => {
+const queryNamedTimeZone = createLazyGenerator((timeZoneId: string): NativeTimeZone => {
   return timeZoneId === utcTimeZoneId
     ? new FixedTimeZone(0, timeZoneId) // override ID
     : new IntlTimeZone(timeZoneId)
@@ -50,13 +50,13 @@ export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
     return new FixedTimeZone(offsetNano)
   }
 
-  return queryNonFixedTimeZone(timeZoneId)
+  return queryNamedTimeZone(timeZoneId)
 }
 
 /*
 TODO: audit inefficient callers
 */
-export function normalizeTimeZoneId(id: string): [string, NativeTimeZone] {
+export function normalizeNativeTimeZoneId(id: string): [string, NativeTimeZone] {
   const timeZoneNative = queryNativeTimeZone(id)
   const normalizedId = (timeZoneNative instanceof FixedTimeZone)
     ? timeZoneNative.id
