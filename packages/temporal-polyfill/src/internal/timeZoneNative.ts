@@ -32,38 +32,31 @@ export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
 // Query
 // -------------------------------------------------------------------------------------------------
 
-const queryNamedTimeZone = createLazyGenerator((timeZoneId: string): NativeTimeZone => {
-  return timeZoneId === utcTimeZoneId
-    ? new FixedTimeZone(0, timeZoneId) // override ID
-    : new IntlTimeZone(timeZoneId)
-})
+export function resolveTimeZoneId(timeZoneId: string): [string, NativeTimeZone, boolean] {
+  const timeZoneNative = queryNativeTimeZone(timeZoneId)
+  const isFixed = timeZoneNative instanceof FixedTimeZone
+  const normalizedId = isFixed ? timeZoneNative.id : normalizeNamedTimeZoneId(timeZoneId)
+  return [normalizedId, timeZoneNative, isFixed]
+}
 
 /*
 ID does NOT need to be normalized
 */
 export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
-  // normalize for cache-key. choose uppercase for 'UTC'
-  timeZoneId = timeZoneId.toLocaleUpperCase()
-
   const offsetNano = parseOffsetNanoMaybe(timeZoneId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
     return new FixedTimeZone(offsetNano)
   }
 
-  return queryNamedTimeZone(timeZoneId)
+  // normalize for cache-key. choose uppercase for 'UTC'
+  return queryNamedTimeZone(timeZoneId.toUpperCase())
 }
 
-/*
-TODO: audit inefficient callers
-*/
-export function normalizeNativeTimeZoneId(id: string): [string, NativeTimeZone] {
-  const timeZoneNative = queryNativeTimeZone(id)
-  const normalizedId = (timeZoneNative instanceof FixedTimeZone)
-    ? timeZoneNative.id
-    : normalizeNamedTimeZoneId(id)
-
-  return [normalizedId, timeZoneNative]
-}
+const queryNamedTimeZone = createLazyGenerator((timeZoneId: string): NativeTimeZone => {
+  return timeZoneId === utcTimeZoneId
+    ? new FixedTimeZone(0, timeZoneId) // override ID
+    : new IntlTimeZone(timeZoneId)
+})
 
 function normalizeNamedTimeZoneId(s: string): string {
   const lower = s.toLowerCase()

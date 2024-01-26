@@ -24,8 +24,7 @@ import {
   nanoToIsoTimeAndDay
 } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { FixedTimeZone, normalizeNativeTimeZoneId } from './timeZoneNative'
-import { queryNativeTimeZone } from './timeZoneNative'
+import { resolveTimeZoneId } from './timeZoneNative'
 import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
 import {
   TimeUnit,
@@ -282,7 +281,7 @@ function finalizeZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedDateTimeSlots<string, string> {
-  const [normalTimeZoneId, timeZoneImpl] = normalizeNativeTimeZoneId(organized.timeZone)
+  const [normalizedTimeZoneId, timeZoneImpl, isFixed] = resolveTimeZoneId(organized.timeZone)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
@@ -290,14 +289,14 @@ function finalizeZonedDateTime(
     offsetNano,
     offsetDisambig,
     epochDisambig,
-    !(timeZoneImpl instanceof FixedTimeZone), // only allow fuzzy minute-rounding matching if named-timezone
+    !isFixed, // only allow fuzzy minute-rounding matching if named-timezone
       // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
     organized.hasZ,
   )
 
   return createZonedDateTimeSlots(
     epochNanoseconds,
-    normalTimeZoneId,
+    normalizedTimeZoneId,
     realizeCalendarId(organized.calendar),
   )
 }

@@ -3,8 +3,8 @@ import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha, isoDateTimeFieldNamesAlpha, isoTimeFieldNamesAlpha } from './calendarIsoFields'
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
-import { parseCalendarId, parseOffsetNanoMaybe, parseTimeZoneId } from './parseIso'
-import { normalizeNativeTimeZoneId, queryNativeTimeZone, utcTimeZoneId } from './timeZoneNative'
+import { parseCalendarId, parseTimeZoneId } from './parseIso'
+import { queryNativeTimeZone, resolveTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
 import * as errorMessages from './errorMessages'
@@ -212,7 +212,8 @@ export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
     return true
   }
 
-  // really inefficient!
+  // If either is an unresolvable, return false
+  // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
     if (queryNativeTimeZone(aId).id === queryNativeTimeZone(bId).id) {
       return true
@@ -223,7 +224,7 @@ export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
 }
 
 export function refineTimeZoneSlotString(arg: string): string {
-  return normalizeNativeTimeZoneId(parseTimeZoneId(requireString(arg)))[0]
+  return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))[0]
 }
 
 // ID-like
