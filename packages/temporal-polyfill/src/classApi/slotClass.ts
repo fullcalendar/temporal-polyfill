@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { IsoDateFields, IsoTimeFields } from '../internal/calendarIsoFields'
+import { IsoDateFields, IsoTimeFields } from '../internal/isoFields'
 import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
 import { createGetterDescriptors, createNameDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectLike, mapProps } from '../internal/utils'
 import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'

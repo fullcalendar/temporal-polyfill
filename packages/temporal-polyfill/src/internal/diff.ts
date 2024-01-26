@@ -8,16 +8,16 @@ import {
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
-import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
+import { IsoDateFields, IsoTimeFields, IsoDateTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './isoFields'
 import {
   isoDaysInWeek,
   isoMonthsInYear,
-} from './calendarIso'
+} from './isoMath'
 import {
   isoTimeFieldsToNano,
   isoToEpochMilli,
   isoToEpochNano
-} from './epochAndTime'
+} from './timeMath'
 import { moveByIsoDays, moveDateTime, moveToMonthStart, moveZonedEpochNano } from './move'
 import { RoundingMode } from './options'
 import { computeNanoInc, roundByInc, roundDayTimeNano, roundRelativeDuration } from './round'
@@ -31,7 +31,7 @@ import {
 } from './units'
 import { NumSign, bindArgs, divModTrunc, identityFunc, pluckProps } from './utils'
 import { NativeDiffOps } from './calendarNative'
-import { IntlCalendar, computeIntlMonthsInYear } from './calendarIntl'
+import { IntlCalendar, computeIntlMonthsInYear } from './intlMath'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { DurationBranding, DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createDurationSlots, getCommonCalendarSlot, getCommonTimeZoneSlot } from './slots'
 import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'

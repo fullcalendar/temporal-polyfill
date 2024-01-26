@@ -1,6 +1,6 @@
-import { TimeBag, TimeFields } from '../internal/calendarFields'
-import { IsoTimeFields } from '../internal/calendarIsoFields'
-import { LocalesArg } from '../internal/formatIntl'
+import { TimeBag, TimeFields } from '../internal/fields'
+import { IsoTimeFields } from '../internal/isoFields'
+import { LocalesArg } from '../internal/intlFormat'
 import {
   DiffOptions,
   OverflowOptions,
@@ -11,26 +11,26 @@ import {
 import { UnitName } from '../internal/units'
 import { NumSign, isObjectLike } from '../internal/utils'
 import { BrandingSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainTimeSlots, removeBranding } from '../internal/slots'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { neverValueOf, timeGetters } from './mixins'
-import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
-import { CalendarSlot } from './slotsForClasses'
+import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
+import { CalendarSlot } from './slotClass'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { PlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bag'
+import { PlainTimeBag, plainTimeWithFields, refinePlainTimeBag } from '../internal/bagRefine'
 import { constructPlainTimeSlots } from '../internal/construct'
 import { movePlainTime } from '../internal/move'
 import { diffPlainTimes } from '../internal/diff'
 import { roundPlainTime } from '../internal/round'
 import { plainTimesEqual, compareIsoTimeFields } from '../internal/compare'
-import { formatPlainTimeIso } from '../internal/formatIso'
+import { formatPlainTimeIso } from '../internal/isoFormat'
 import { plainTimeToPlainDateTime, plainTimeToZonedDateTime, zonedDateTimeToPlainTime } from '../internal/convert'
-import { parsePlainTime } from '../internal/parseIso'
-import { prepPlainTimeFormat } from './dateTimeFormat'
+import { parsePlainTime } from '../internal/isoParse'
+import { prepPlainTimeFormat } from './intlDateTimeFormat'
 
 export type PlainTime = any & TimeFields
 export type PlainTimeArg = PlainTime | PlainTimeBag | string

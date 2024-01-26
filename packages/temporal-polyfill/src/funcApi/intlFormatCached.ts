@@ -1,4 +1,4 @@
-import { BasicZonedDateTimeSlots, FormatQuerier, LocalesArg, OptionsTransformer, createFormat, createFormatPrepper, getCommonTimeZoneId, instantConfig, plainDateConfig, plainDateTimeConfig, plainMonthDayConfig, plainTimeConfig, plainYearMonthConfig, zonedDateTimeConfig } from '../internal/formatIntl'
+import { BasicZonedDateTimeSlots, FormatQuerier, LocalesArg, OptionsTransformer, createFormat, createFormatPrepper, getCommonTimeZoneId, instantConfig, plainDateConfig, plainDateTimeConfig, plainMonthDayConfig, plainTimeConfig, plainYearMonthConfig, zonedDateTimeConfig } from '../internal/intlFormat'
 import { createLazyGenerator } from '../internal/utils'
 
 function createFormatCache<S>(

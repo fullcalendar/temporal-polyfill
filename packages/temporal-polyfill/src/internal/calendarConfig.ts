@@ -1,4 +1,4 @@
-import { dayFieldNames, yearFieldNames } from "./calendarFields"
+import { dayFieldNames, yearFieldNames } from "./fields"
 
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'

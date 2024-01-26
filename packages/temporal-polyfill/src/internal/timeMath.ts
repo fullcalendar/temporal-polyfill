@@ -6,7 +6,7 @@ import {
   isoTimeFieldNamesAsc,
   isoTimeFieldDefaults,
   isoDateTimeFieldNamesAsc
-} from './calendarIsoFields'
+} from './isoFields'
 import {
   Unit,
   givenFieldsToDayTimeNano,

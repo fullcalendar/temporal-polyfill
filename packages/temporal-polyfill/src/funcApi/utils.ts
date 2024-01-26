@@ -1,4 +1,4 @@
-import { DateBasics, DateFields, MonthDayFields, YearMonthFields } from '../internal/calendarFields'
+import { DateBasics, DateFields, MonthDayFields, YearMonthFields } from '../internal/fields'
 import { createNativeDayOfYearOps, createNativeDaysInMonthOps, createNativeDaysInYearOps, createNativeInLeapYearOps, createNativeMonthsInYearOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { formatMonthCode } from '../internal/calendarNative'
 import { DateSlots } from '../internal/slots'

@@ -1,6 +1,6 @@
-import { DateTimeBag } from '../internal/calendarFields'
-import { LocalesArg } from '../internal/formatIntl'
-import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/formatIso'
+import { DateTimeBag } from '../internal/fields'
+import { LocalesArg } from '../internal/intlFormat'
+import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import {
   DiffOptions,
   OverflowOptions,
@@ -12,12 +12,12 @@ import {
 } from '../internal/optionsRefine'
 import { UnitName } from '../internal/units'
 import { NumSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
-import { IsoDateTimeFields } from '../internal/calendarIsoFields'
+import { IsoDateTimeFields } from '../internal/isoFields'
 import { ZonedIsoFields, computeHoursInDay, computeStartOfDay, buildZonedIsoFields, zonedEpochSlotsToIso, FixedIsoFields } from '../internal/timeZoneOps'
 import { ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, getId } from '../internal/slots'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotsForClasses'
-import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotsForClasses'
-import { TimeZoneSlot, refineTimeZoneSlot } from './slotsForClasses'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
+import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotClass'
+import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
 import { CalendarArg } from './calendar'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { Instant, createInstant } from './instant'
@@ -32,16 +32,16 @@ import { neverValueOf, dateGetters, timeGetters, epochGetters, buildCalendarFrom
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bag'
+import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bagRefine'
 import { constructZonedDateTimeSlots } from '../internal/construct'
-import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/mod'
+import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/modify'
 import { moveZonedDateTime } from '../internal/move'
 import { diffZonedDateTimes } from '../internal/diff'
 import { roundZonedDateTime } from '../internal/round'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
-import { parseZonedDateTime } from '../internal/parseIso'
-import { prepZonedDateTimeFormat } from './dateTimeFormat'
+import { parseZonedDateTime } from '../internal/isoParse'
+import { prepZonedDateTimeFormat } from './intlDateTimeFormat'
 
 export type ZonedDateTime = any
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string

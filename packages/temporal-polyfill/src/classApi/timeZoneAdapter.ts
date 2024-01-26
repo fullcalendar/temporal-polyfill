@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { DayTimeNano } from '../internal/dayTimeNano'
-import { IsoDateTimeFields } from '../internal/calendarIsoFields'
+import { IsoDateTimeFields } from '../internal/isoFields'
 import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'

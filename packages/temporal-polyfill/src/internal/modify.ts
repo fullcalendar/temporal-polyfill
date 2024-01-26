@@ -1,4 +1,4 @@
-import { IsoTimeFields, isoTimeFieldDefaults } from './calendarIsoFields'
+import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { OffsetDisambig } from './options'
 import { IdLike, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots, createPlainDateTimeSlots, createZonedDateTimeSlots, getPreferredCalendarSlot } from './slots'
 import { TimeZoneOps, getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneOps'

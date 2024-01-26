@@ -1,4 +1,4 @@
-import { IsoTimeFields } from '../internal/calendarIsoFields'
+import { IsoTimeFields } from '../internal/isoFields'
 import { hasAllPropsByName } from '../internal/utils'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import * as errorMessages from '../internal/errorMessages'

@@ -1,11 +1,11 @@
-import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './epochAndTime'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './calendarIsoFields'
+import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './timeMath'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './isoFields'
 import { diffEpochMilliByDay } from './diff'
 import { allFieldsEqual, clampProp, createLazyGenerator, modFloor, zipProps } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
 import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
-import { buildIntlFormat, parseIntlYear } from './calendarIntl'
-import { hashIntlFormatParts } from './formatIntl'
+import { buildIntlFormat, parseIntlYear } from './intlMath'
+import { hashIntlFormatParts } from './intlFormat'
 import { Overflow } from './options'
 
 export const isoEpochOriginYear = 1970

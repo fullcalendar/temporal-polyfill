@@ -1,6 +1,6 @@
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { AdapterCompoundOps, createAdapterCompoundOps, dateModAdapters, dateRefineAdapters, diffAdapters, monthDayModAdapters, monthDayRefineAdapters, moveAdapters, yearMonthDiffAdapters, yearMonthModAdapters, yearMonthMoveAdapters, yearMonthRefineAdapters } from './calendarAdapter'
-import { CalendarSlot } from './slotsForClasses'
+import { CalendarSlot } from './slotClass'
 
 // Refine
 export const createYearMonthRefineOps = createCompoundOpsCreator(yearMonthRefineAdapters)

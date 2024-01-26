@@ -15,8 +15,8 @@ import {
   nanoToDurationTimeFields,
   clearDurationFields,
 } from './durationMath'
-import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './calendarIsoFields'
-import { checkIsoDateTimeInBounds, epochNanoToIso, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './epochAndTime'
+import { IsoTimeFields, isoTimeFieldDefaults, IsoDateTimeFields } from './isoFields'
+import { checkIsoDateTimeInBounds, epochNanoToIso, isoTimeFieldsToNano, nanoToIsoTimeAndDay } from './timeMath'
 import { EpochDisambig, OffsetDisambig, RoundingMode, roundingModeFuncs } from './options'
 import { TimeZoneOps, computeNanosecondsInDay, getMatchingInstantFor } from './timeZoneOps'
 import {

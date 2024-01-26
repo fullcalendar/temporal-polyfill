@@ -7,8 +7,8 @@ import { TimeZoneOps } from './timeZoneOps'
 import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, isIdLikeEqual, isTimeZoneSlotsEqual } from './slots'
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem } from './durationMath'
-import { isoTimeFieldsToNano, isoToEpochMilli } from './epochAndTime'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './calendarIsoFields'
+import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import * as errorMessages from './errorMessages'
 
 // High-Level Compare
