@@ -200,6 +200,9 @@ export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
   return a
 }
 
+/*
+HACK: Callers should !! the result because minification forces literal true/false to 1/0
+*/
 export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
   if (a === b) {
     return true
@@ -215,9 +218,7 @@ export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
   // If either is an unresolvable, return false
   // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
-    if (queryNativeTimeZone(aId).id === queryNativeTimeZone(bId).id) {
-      return true
-    }
+    return queryNativeTimeZone(aId).id === queryNativeTimeZone(bId).id
   } catch {}
 
   return false

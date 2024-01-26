@@ -15,7 +15,7 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZoneArg } from './timeZone'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
-import { calendarIdGetters, dateGetters, getCalendarFromSlots, neverValueOf, timeGetters } from './mixins'
+import { calendarIdGetters, dateGetters, buildCalendarFromSlots, neverValueOf, timeGetters } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
@@ -128,7 +128,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     getISOFields: removeBranding,
-    getCalendar: getCalendarFromSlots,
+    getCalendar: buildCalendarFromSlots,
     valueOf: neverValueOf,
   },
   {

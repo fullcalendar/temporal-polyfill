@@ -289,8 +289,7 @@ function finalizeZonedDateTime(
     offsetNano,
     offsetDisambig,
     epochDisambig,
-    !isFixed, // only allow fuzzy minute-rounding matching if named-timezone
-      // TODO: ^^^ do this for 'UTC'? (which is normalized to FixedTimeZoneImpl?). Probably not.
+    !isFixed, // epochFuzzy
     organized.hasZ,
   )
 

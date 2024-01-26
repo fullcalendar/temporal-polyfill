@@ -98,8 +98,9 @@ export const [TimeZone, createTimeZone] = createSlotClass(
       return getImplTransition(-1, native, instantArg)
     },
     equals(slots: TimeZoneClassSlots, otherArg: TimeZoneArg): boolean {
-      // weird: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
-      return isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
+      // WEIRD: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
+      // HACK: minification force's isTimeZoneSlotsEqual to 1/0. Ensure boolean.
+      return !!isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
     },
   },
   {

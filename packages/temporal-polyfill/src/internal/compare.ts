@@ -120,7 +120,8 @@ export function zonedDateTimesEqual<C extends IdLike, T extends IdLike>(
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
 ): boolean {
   return !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
-    isTimeZoneSlotsEqual(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone) &&
+    // HACK: minification force's isTimeZoneSlotsEqual to 1/0. Ensure boolean.
+    !!isTimeZoneSlotsEqual(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone) &&
     isIdLikeEqual(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
 }
 
