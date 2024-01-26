@@ -186,8 +186,6 @@ function arrayify(input) {
 // Terser
 // -------------------------------------------------------------------------------------------------
 
-const terserNameCache = {} // for keeping prop mangling consistent across files
-
 function buildTerserPlugin({
   humanReadable = false,
   optimize = false,
@@ -218,7 +216,8 @@ function buildTerserPlugin({
       braces: humanReadable,
       indent_level: 2,
     },
-    nameCache: terserNameCache,
+    // You'd think nameCache is necessary across chunks, but it isn't.
+    // In fact, it causes duplicate identifiers.
   })
 }
 
