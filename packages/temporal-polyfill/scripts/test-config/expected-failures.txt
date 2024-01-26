@@ -251,6 +251,9 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 
 # NOT-IMPLEMENTED
 # TimeZone ID canonicalization for Intl.DateTimeFormat
+# Polyfilling this is hard for format/formatToParts. The reference-polyfill doesn't even do it.
+# The reference-polyfill DOES polyfill resolveOptions (used by tests below), but that will result
+# in inconsistent results with format/formatToParts, so best not to polyfill either.
 intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 
