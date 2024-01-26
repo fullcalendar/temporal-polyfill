@@ -249,13 +249,13 @@ built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinsta
 # Intl
 ####################################################################################################
 
-# NOT-IMPLEMENTED
-# Spec says we should NOT canonicalize time zone IDs, but that's too hard while also normalizing them.
-intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
+# TODO: FIX: TimeZone ID canonicalization with TimeZone::equals
 intl402/Temporal/TimeZone/prototype/equals/argument-object.js
-intl402/DateTimeFormat/timezone-not-canonicalized.js
-intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
+
+# NOT-IMPLEMENTED
+# TimeZone ID canonicalization for Intl.DateTimeFormat
 intl402/DateTimeFormat/timezone-case-insensitive.js
+intl402/DateTimeFormat/timezone-not-canonicalized.js
 
 # NOT-IMPLEMENTED
 # Intl.DateTimeFormat does not accept numeric-offset `timeZones`s and we are okay with that

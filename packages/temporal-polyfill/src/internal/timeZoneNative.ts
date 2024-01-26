@@ -53,6 +53,9 @@ export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
   return queryNonFixedTimeZone(timeZoneId)
 }
 
+/*
+TODO: audit inefficient callers
+*/
 export function realizeTimeZoneId(timeZoneId: string): string {
   queryNativeTimeZone(timeZoneId) // ensure it's real
   return normalizeTimeZoneId(timeZoneId)

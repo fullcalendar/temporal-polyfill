@@ -24,7 +24,7 @@ import {
   nanoToIsoTimeAndDay
 } from './epochAndTime'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { FixedTimeZone } from './timeZoneNative'
+import { FixedTimeZone, realizeTimeZoneId } from './timeZoneNative'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
 import {
@@ -283,7 +283,8 @@ function finalizeZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedDateTimeSlots<string, string> {
-  const timeZoneImpl = queryNativeTimeZone(organized.timeZone)
+  const realTimeZoneId = realizeTimeZoneId(organized.timeZone) // TODO: inefficient!!!
+  const timeZoneImpl = queryNativeTimeZone(realTimeZoneId)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
@@ -298,7 +299,7 @@ function finalizeZonedDateTime(
 
   return createZonedDateTimeSlots(
     epochNanoseconds,
-    timeZoneImpl.id,
+    realTimeZoneId,
     realizeCalendarId(organized.calendar),
   )
 }
