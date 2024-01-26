@@ -90,7 +90,7 @@
     "eslint": "^7.25.0",
     "export-size": "^0.7.0",
     "gzip-size": "^7.0.0",
-    "rollup": "^3.29.4",
+    "rollup": "^4.9.6",
     "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "terser": "^5.19.2",
