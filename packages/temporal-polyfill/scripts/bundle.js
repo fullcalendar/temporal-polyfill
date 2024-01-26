@@ -117,7 +117,7 @@ async function buildConfigs(pkgDir, isDev) {
         },
       ],
     },
-    !isDev && {
+    ...(isDev || !Object.keys(dtsInputs).length ? [] : [{
       input: dtsInputs,
       onwarn,
       plugins: [dts()],
@@ -127,7 +127,7 @@ async function buildConfigs(pkgDir, isDev) {
         entryFileNames: '[name]' + extensions.dts,
         chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.dts,
       }
-    },
+    }]),
     ...iifeConfigs,
   ]
 }
