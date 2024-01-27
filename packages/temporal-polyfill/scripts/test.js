@@ -1,16 +1,14 @@
 #!/usr/bin/env node
-/*
-Based on https://github.com/js-temporal/temporal-polyfill/blob/main/runtest262.mjs
-*/
+// Based on https://github.com/js-temporal/temporal-polyfill/blob/main/runtest262.mjs
 
-import runTest262 from '@js-temporal/temporal-test262-runner';
-import { join as joinPaths } from 'path';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+import runTest262 from '@js-temporal/temporal-test262-runner'
+import { join as joinPaths } from 'path'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
-const scriptsDir = joinPaths(process.argv[1], '..');
-const pkgDir = joinPaths(scriptsDir, '..');
-const monorepoDir = joinPaths(pkgDir, '../..');
+const scriptsDir = joinPaths(process.argv[1], '..')
+const pkgDir = joinPaths(scriptsDir, '..')
+const monorepoDir = joinPaths(pkgDir, '../..')
 
 yargs(hideBin(process.argv))
   .command(
@@ -22,7 +20,7 @@ yargs(hideBin(process.argv))
         default: false,
         type: 'boolean',
         description: 'Whether to update the existing expected-failure files on-disk and remove tests that now pass.'
-      });
+      })
       builder.option('timeout', {
         requiresArg: false,
         default: 30000,
@@ -46,13 +44,19 @@ yargs(hideBin(process.argv))
       const expectedFailureFiles = [
         'expected-failures.txt',
         'expected-failures-surface.txt',
-      ];
+      ]
 
       const nodeVersion = process.versions.node
-      const nodeMajorVersion = parseInt(nodeVersion.split('.')[0]);
-      if (nodeMajorVersion >= 18) expectedFailureFiles.push('expected-failures-intl-format-norm.txt');
-      if (nodeMajorVersion < 18) expectedFailureFiles.push('expected-failures-before-node18.txt');
-      if (nodeMajorVersion < 16) expectedFailureFiles.push('expected-failures-before-node16.txt');
+      const nodeMajorVersion = parseInt(nodeVersion.split('.')[0])
+      if (nodeMajorVersion >= 18) {
+        expectedFailureFiles.push('expected-failures-intl-format-norm.txt')
+      }
+      if (nodeMajorVersion < 18) {
+        expectedFailureFiles.push('expected-failures-before-node18.txt')
+      }
+      if (nodeMajorVersion < 16) {
+        expectedFailureFiles.push('expected-failures-before-node16.txt')
+      }
 
       console.log(`Testing with Node v${nodeVersion}...`)
 
@@ -72,9 +76,9 @@ yargs(hideBin(process.argv))
         updateExpectedFailureFiles: parsedArgv.update,
         maxFailures: parsedArgv.max,
         fullPath: true
-      });
+      })
 
-      process.exit(result ? 0 : 1);
+      process.exit(result ? 0 : 1)
     }
   )
-  .help().argv;
+  .help().argv
