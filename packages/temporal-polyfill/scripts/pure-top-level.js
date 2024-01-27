@@ -1,47 +1,34 @@
 
-export const pureTopLevelCommentFakeRe = /__PURE__/
-const pureTopLevelCommentFake = '/* __PURE__ */'
-const pureTopLevelCommentReal = '/* @__PURE__ */'
+// groups: -------12-----------3----------------------------45-------------6------------7------------------
+const chunkRe = /^((export\s+)?(const|var|let)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\}|new\s+)/smg
 
-// groups: -------12-----------3----------------------------45-------------6------------7-----------
-const chunkRe = /^((export\s+)?(const|var|let)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\})/smg
+const pureComment = '/*@__PURE__*/ '
 
-export function pureTopLevelPre() {
+export function pureTopLevel() {
   return {
     name: 'pure-top-level-pre',
     renderChunk(code) {
       return code.replace(chunkRe, (g0, g1, g2, g3, g4, g5, g6, g7) => {
-        // function call
         if (g5) {
-          return g1 + pureTopLevelCommentFake + g5
-        }
-
-        // array literal
-        if (g6) {
-          if (g6.includes('...') && !g6.includes('[')) { // no nested brackets
+          // function call
+          return g1 + pureComment + g5
+        } else if (g6) {
+          // array literal
+          if (g6.includes('...') && !g6.includes('[')) { // with spread, no nested brackets
             return g1 + transformArraySpread(g6)
           }
-        }
-
-        // object literal
-        if (g7) {
-          if (g7.includes('...') && !g7.includes('{')) { // no nested brackets
+        } else if (g7) {
+          // object literal
+          if (g7.includes('...') && !g7.includes('{')) { // with spread, no nested brackets
             return g1 + transformObjectSpread(g7)
           }
+        } else {
+          // `new` operator (no specific capture)
+          return g1 + pureComment + g4
         }
-
         // no replacement, return whole match
         return g0
       })
-    }
-  }
-}
-
-export function pureTopLevelPost() {
-  return {
-    name: 'pure-top-level-post',
-    renderChunk(code) {
-      return code.replaceAll(pureTopLevelCommentFake, pureTopLevelCommentReal)
     }
   }
 }
@@ -57,7 +44,7 @@ function transformArraySpread(s) {
     return formatTokenAsArray(tokens[0])
   }
 
-  return pureTopLevelCommentFake + ' ' +
+  return pureComment +
     formatTokenAsArray(tokens.shift()) +
     '.concat(' +
     tokens.map(formatTokenAsArray).join(', ') +
@@ -72,7 +59,7 @@ function transformObjectSpread(s) {
     return formatTokenAsObject(tokens[0])
   }
 
-  return pureTopLevelCommentFake + ' ' +
+  return pureComment +
     'Object.assign(' +
     (Array.isArray(tokens[0]) ? '' : '{}, ') +
     tokens.map(formatTokenAsObject).join(', ') +
@@ -111,30 +98,27 @@ function consolidateTokens(tokens) {
   const consolidated = []
   let currentGroup
 
+  function depositCurrentGroup() {
+    if (currentGroup) {
+      consolidated.push(currentGroup)
+      currentGroup = undefined
+    }
+  }
+
   for (let token of tokens) {
     if (Array.isArray(token)) {
-      // add to current group
       if (currentGroup) {
         currentGroup.push(...token)
       } else {
         currentGroup = token
       }
     } else {
-      // deposit prior group
-      if (currentGroup) {
-        consolidated.push(currentGroup)
-        currentGroup = undefined
-      }
-
+      depositCurrentGroup()
       consolidated.push(token)
     }
   }
 
-  // deposit dangling group
-  if (currentGroup) {
-    consolidated.push(currentGroup)
-  }
-
+  depositCurrentGroup()
   return consolidated
 }
 
