@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { join as joinPaths, basename } from 'path'
+import { join as joinPaths, basename, resolve as resolvePath, sep as pathSep } from 'path'
 import { readFile, copyFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import sourcemaps from 'rollup-plugin-sourcemaps'
@@ -27,8 +27,10 @@ async function buildConfigs(pkgDir, isDev) {
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
-  const dtsInputs = {}
   const iifeConfigs = []
+  const dtsInputs = {}
+  const dtsConfigs = []
+  const useChunkNames = isDev
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -84,6 +86,30 @@ async function buildConfigs(pkgDir, isDev) {
     }
   }
 
+  const fullTscInternalPath = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
+
+  function manuallyResolveChunk(id) {
+    if (id.startsWith(fullTscInternalPath)) {
+      return 'internal'
+    }
+  }
+
+  if (!isDev && Object.keys(dtsInputs).length) {
+    dtsConfigs.push({
+      input: dtsInputs,
+      onwarn,
+      plugins: [dts()],
+      output: {
+        format: 'es',
+        dir: 'dist',
+        entryFileNames: '[name]' + extensions.dts,
+        chunkFileNames: 'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.dts,
+        minifyInternalExports: false,
+        manualChunks: manuallyResolveChunk,
+      }
+    })
+  }
+
   return [
     {
       input: moduleInputs,
@@ -93,7 +119,9 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
-          chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.cjs,
+          chunkFileNames: 'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.cjs,
+          minifyInternalExports: false,
+          manualChunks: manuallyResolveChunk,
           plugins: [
             !isDev && buildTerserPlugin({
               humanReadable: true,
@@ -106,7 +134,9 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'es',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
-          chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.esm,
+          chunkFileNames: 'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.esm,
+          minifyInternalExports: false,
+          manualChunks: manuallyResolveChunk,
           plugins: [
             pureTopLevel(),
             !isDev && buildTerserPlugin({
@@ -119,18 +149,8 @@ async function buildConfigs(pkgDir, isDev) {
         },
       ],
     },
-    ...(isDev || !Object.keys(dtsInputs).length ? [] : [{
-      input: dtsInputs,
-      onwarn,
-      plugins: [dts()],
-      output: {
-        format: 'es',
-        dir: 'dist',
-        entryFileNames: '[name]' + extensions.dts,
-        chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.dts,
-      }
-    }]),
     ...iifeConfigs,
+    ...dtsConfigs,
   ]
 }
 
