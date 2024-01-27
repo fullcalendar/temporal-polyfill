@@ -33,13 +33,33 @@ function createFormatCache<S>(
   }
 }
 
-export const prepCachedPlainYearMonthFormat = createFormatPrepper(plainYearMonthConfig, createFormatCache())
-export const prepCachedPlainMonthDayFormat = createFormatPrepper(plainMonthDayConfig, createFormatCache())
-export const prepCachedPlainDateFormat = createFormatPrepper(plainDateConfig, createFormatCache())
-export const prepCachedPlainDateTimeFormat = createFormatPrepper(plainDateTimeConfig, createFormatCache())
-export const prepCachedPlainTimeFormat = createFormatPrepper(plainTimeConfig, createFormatCache())
-export const prepCachedInstantFormat = createFormatPrepper(instantConfig, createFormatCache())
+// TODO: these pure statements necessary?
+
+export const prepCachedPlainYearMonthFormat = createFormatPrepper(
+  plainYearMonthConfig,
+  /*@__PURE__*/ createFormatCache()
+)
+export const prepCachedPlainMonthDayFormat = createFormatPrepper(
+  plainMonthDayConfig,
+  /*@__PURE__*/ createFormatCache()
+)
+export const prepCachedPlainDateFormat = createFormatPrepper(
+  plainDateConfig,
+  /*@__PURE__*/ createFormatCache()
+)
+export const prepCachedPlainDateTimeFormat = createFormatPrepper(
+  plainDateTimeConfig,
+  /*@__PURE__*/ createFormatCache()
+)
+export const prepCachedPlainTimeFormat = createFormatPrepper(
+  plainTimeConfig,
+  /*@__PURE__*/ createFormatCache()
+)
+export const prepCachedInstantFormat = createFormatPrepper(
+  instantConfig,
+  /*@__PURE__*/ createFormatCache()
+)
 export const prepCachedZonedDateTimeFormat = createFormatPrepper(
   zonedDateTimeConfig,
-  createFormatCache<BasicZonedDateTimeSlots>(getCommonTimeZoneId),
+  /*@__PURE__*/ createFormatCache<BasicZonedDateTimeSlots>(getCommonTimeZoneId),
 )
