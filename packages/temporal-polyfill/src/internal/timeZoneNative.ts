@@ -20,7 +20,11 @@ export const utcTimeZoneId = 'UTC'
 
 const periodDur = secInDay * 60
 const minPossibleTransition = isoArgsToEpochSec(1847)
-const maxPossibleTransition = isoArgsToEpochSec(new Date().getUTCFullYear() + 10)
+const maxPossibleTransition = isoArgsToEpochSec(/*@__PURE__*/ getCurrentYearPlus10())
+
+function getCurrentYearPlus10() {
+  return new Date().getUTCFullYear() + 10
+}
 
 export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
   id: string
