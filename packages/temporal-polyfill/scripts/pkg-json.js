@@ -18,6 +18,8 @@ async function writePkgJson(pkgDir, isDev) {
 
   const exportMap = srcPkgJson.buildConfig.exports
   const distExportMap = {}
+  const sideEffectsList = []
+  let iifeMinPath
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -27,17 +29,38 @@ async function writePkgJson(pkgDir, isDev) {
       types: !isDev || exportConfig.types
         ? './' + exportName + extensions.dts
         : './.tsc/' + (exportConfig.src || exportName) + extensions.dts,
+
       require: './' + exportName + extensions.cjs,
       import: './' + exportName + extensions.esm,
       default: './' + exportName + extensions.esm,
+    }
+
+    if (exportConfig.iife) {
+      sideEffectsList.push(
+        './' + exportName + extensions.cjs,
+        './' + exportName + extensions.esm,
+        './' + exportName + extensions.iife,
+        './' + exportName + extensions.iifeMin,
+      )
+      if (!iifeMinPath) {
+        iifeMinPath = './' + exportName + extensions.iifeMin
+      }
     }
   }
 
   distPkgJson.types = distExportMap['.'].types
   distPkgJson.main = distExportMap['.'].require
   distPkgJson.module = distExportMap['.'].import
-  distPkgJson.unpkg = distPkgJson.jsdelivr = './global.min.js'
+
+  if (iifeMinPath) {
+    distPkgJson.unpkg =
+      distPkgJson.jsdelivr = iifeMinPath
+  }
+
   distPkgJson.exports = distExportMap
+  distPkgJson.sideEffects = sideEffectsList.length
+    ? sideEffectsList
+    : false
 
   delete distPkgJson.private
   delete distPkgJson.scripts

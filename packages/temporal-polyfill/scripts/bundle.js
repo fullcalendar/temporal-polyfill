@@ -70,7 +70,7 @@ async function buildConfigs(pkgDir, isDev) {
           },
           !isDev && {
             format: 'iife',
-            file: joinPaths('dist', exportName + '.min' + extensions.iife),
+            file: joinPaths('dist', exportName + extensions.iifeMin),
             plugins: [
               buildTerserPlugin({
                 optimize: true,
