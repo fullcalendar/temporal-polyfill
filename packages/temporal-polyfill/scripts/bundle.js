@@ -7,6 +7,7 @@ import sourcemaps from 'rollup-plugin-sourcemaps'
 import { dts } from 'rollup-plugin-dts'
 import terser from '@rollup/plugin-terser'
 import { extensions } from './config.js'
+import { pureTopLevelPre, pureTopLevelPost, pureTopLevelCommentFakeRe } from './pure-top-level.js'
 
 writeBundles(
   joinPaths(process.argv[1], '../..'),
@@ -107,12 +108,14 @@ async function buildConfigs(pkgDir, isDev) {
           entryFileNames: '[name]' + extensions.esm,
           chunkFileNames: 'chunks/' + (isDev ? '[name]' : '[hash]') + extensions.esm,
           plugins: [
+            pureTopLevelPre(),
             !isDev && buildTerserPlugin({
               humanReadable: true,
               optimize: true,
               mangleProps: true,
               manglePropsExcept: temporalReservedWords,
-            })
+            }),
+            pureTopLevelPost(),
           ],
         },
       ],
@@ -214,7 +217,8 @@ function buildTerserPlugin({
     format: {
       beautify: humanReadable,
       braces: humanReadable,
-      indent_level: 2,
+      comments: pureTopLevelCommentFakeRe,
+      indent_level: 2
     },
     // You'd think nameCache is necessary across chunks, but it isn't.
     // In fact, it causes duplicate identifiers.
