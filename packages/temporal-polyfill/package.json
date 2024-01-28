@@ -84,7 +84,6 @@
   },
   "devDependencies": {
     "@js-temporal/temporal-test262-runner": "workspace:*",
-    "@rollup/plugin-terser": "^0.4.4",
     "@types/node": "^16.9.1",
     "concurrently": "^8.2.0",
     "eslint": "^7.25.0",

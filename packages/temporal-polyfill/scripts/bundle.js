@@ -5,9 +5,9 @@ import { readFile, copyFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import sourcemaps from 'rollup-plugin-sourcemaps'
 import { dts } from 'rollup-plugin-dts'
-import terser from '@rollup/plugin-terser'
-import { extensions } from './config.js'
 import { pureTopLevel } from './pure-top-level.js'
+import { terserSimple } from './terser-simple.js'
+import { extensions } from './config.js'
 
 writeBundles(
   joinPaths(process.argv[1], '../..'),
@@ -208,13 +208,15 @@ function arrayify(input) {
 // Terser
 // -------------------------------------------------------------------------------------------------
 
+const terserNameCache = {}
+
 function buildTerserPlugin({
   humanReadable = false,
   optimize = false,
   mangleProps = false,
   manglePropsExcept,
 }) {
-  return terser({
+  return terserSimple({
     compress: optimize && {
       ecma: 2018,
       passes: 3, // enough to remove dead object assignment, get lower size
@@ -239,10 +241,12 @@ function buildTerserPlugin({
       indent_level: 2,
       preserve_annotations: true,
     },
-    // You'd think nameCache is necessary across chunks, but it isn't.
-    // In fact, it causes duplicate identifiers.
+    nameCache: terserNameCache,
   })
 }
+
+// Temporal Reserved Words
+// -------------------------------------------------------------------------------------------------
 
 const startsWithLetterRegExp = /^[a-zA-Z]/
 

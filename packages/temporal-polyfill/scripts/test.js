@@ -6,7 +6,7 @@ import { join as joinPaths } from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { rollup } from 'rollup'
-import terser from '@rollup/plugin-terser'
+import { terserSimple } from './terser-simple.js'
 import { extensions } from './config.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
@@ -109,7 +109,7 @@ async function bundleEsm(dir, exportName, minify) {
     file: dir + '/' + outputFilename,
     format: 'iife',
     plugins: [
-      minify && terser()
+      minify && terserSimple()
     ]
   })
 
