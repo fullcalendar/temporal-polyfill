@@ -47,6 +47,12 @@ yargs(hideBin(process.argv))
         default: false,
         type: 'boolean',
         description: 'Whether to test the minified bundle'
+      })
+      .option('ci', {
+        requiresArg: false,
+        default: false,
+        type: 'boolean',
+        description: 'Indicate esm/min can be varied for CI'
       }),
     async (options) => {
       const expectedFailureFiles = [
@@ -66,12 +72,20 @@ yargs(hideBin(process.argv))
         expectedFailureFiles.push('expected-failures-before-node16.txt')
       }
 
+      let { esm, min, ci } = options
+
+      // Varies the two settings across major version (2x2 matrix)
+      if (ci) {
+        esm = Boolean(Math.floor(nodeMajorVersion / 2) % 2)
+        min = Boolean(Math.floor(nodeMajorVersion / 4) % 2)
+      }
+
       let polyfillPath // from package root
 
-      if (options.esm) {
+      if (esm) {
         console.log('Bundling ESM...')
-        polyfillPath = await bundleEsm('./dist', 'global', options.min)
-      } else if (options.min) {
+        polyfillPath = await bundleEsm('./dist', 'global', min)
+      } else if (min) {
         polyfillPath = './dist/global' + extensions.iifeMin
       } else {
         polyfillPath = './dist/global' + extensions.iife

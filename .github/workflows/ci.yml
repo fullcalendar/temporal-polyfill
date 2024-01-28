@@ -4,7 +4,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - dev
 
 env:
   TZ: "America/New_York"
@@ -45,4 +45,4 @@ jobs:
         run: pnpm run build
 
       - name: Test
-        run: cd packages/temporal-polyfill && NODE_VERSION=${{ matrix.node }} pnpm run test
+        run: cd packages/temporal-polyfill && NODE_VERSION=${{ matrix.node }} pnpm run test --ci
