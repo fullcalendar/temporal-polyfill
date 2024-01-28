@@ -75,9 +75,10 @@ yargs(hideBin(process.argv))
       let { esm, min, ci } = options
 
       // Varies the two settings across major version (2x2 matrix)
+      // Ensure lowest versions have esm=false because old Node can't use new Rollup
       if (ci) {
-        esm = Boolean(Math.floor(nodeMajorVersion / 2) % 2)
-        min = Boolean(Math.floor(nodeMajorVersion / 4) % 2)
+        min = Boolean(Math.floor(nodeMajorVersion - 14 / 2) % 2)
+        esm = Boolean(Math.floor(nodeMajorVersion - 14 / 4) % 2)
       }
 
       let polyfillPath // from package root
