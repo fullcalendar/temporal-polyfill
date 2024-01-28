@@ -126,7 +126,7 @@ async function buildConfigs(pkgDir, isDev) {
             !isDev && buildTerserPlugin({
               humanReadable: true,
               optimize: true,
-              // don't mangleProps. CJS export names are affected
+              // don't mangleProps. CJS require/exports names are affected
             })
           ]
         },
@@ -138,7 +138,7 @@ async function buildConfigs(pkgDir, isDev) {
           minifyInternalExports: false,
           manualChunks: manuallyResolveChunk,
           plugins: [
-            pureTopLevel(),
+            !isDev && pureTopLevel(),
             !isDev && buildTerserPlugin({
               humanReadable: true,
               optimize: true,
@@ -216,6 +216,23 @@ function buildTerserPlugin({
   mangleProps = false,
   manglePropsExcept,
 }) {
+  const mangleOptions = mangleProps && {
+    properties: {
+      reserved: manglePropsExcept,
+      keep_quoted: true,
+    },
+    // Unfortunately can't just mangle props and nothing else, so retain:
+    keep_fnames: humanReadable,
+    keep_classnames: humanReadable,
+  }
+
+  if (mangleProps && humanReadable) {
+    // Don't mangle top-level var/funcs, especially ESM imports
+    // Must force module:false to allow toplevel to take effect
+    mangleOptions.module = false
+    mangleOptions.toplevel = false
+  }
+
   return terserSimple({
     compress: optimize && {
       ecma: 2018,
@@ -226,22 +243,14 @@ function buildTerserPlugin({
       booleans_as_integers: true,
       hoist_funs: true,
     },
-    // Unfortunately can't just mangle props and nothing else
-    mangle: mangleProps && {
-      keep_fnames: humanReadable,
-      keep_classnames: humanReadable,
-      properties: {
-        reserved: manglePropsExcept,
-        keep_quoted: true,
-      },
-    },
+    mangle: mangleOptions,
+    nameCache: terserNameCache, // for consistent mangling across chunks/files
     format: {
       beautify: humanReadable,
       braces: humanReadable,
       indent_level: 2,
-      preserve_annotations: true,
+      preserve_annotations: true, // like PURE annotations
     },
-    nameCache: terserNameCache,
   })
 }
 

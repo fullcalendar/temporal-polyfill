@@ -1,12 +1,12 @@
 
 // groups: -------12-----------3----------------------------45-------------6------------7------------------
-const chunkRe = /^((export\s+)?(const|var|let)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\}|new\s+)/smg
+const chunkRe = /^((export\s+)?(const|let|var)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\}|new\s+)/smg
 
 const pureComment = '/*@__PURE__*/ '
 
 export function pureTopLevel() {
   return {
-    name: 'pure-top-level-pre',
+    name: 'pure-top-level',
     renderChunk(code) {
       return code.replace(chunkRe, (g0, g1, g2, g3, g4, g5, g6, g7) => {
         if (g5) {
