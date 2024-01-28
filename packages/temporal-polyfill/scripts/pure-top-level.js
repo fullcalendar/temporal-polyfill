@@ -2,6 +2,7 @@
 // groups: -------12-----------3----------------------------45-------------6------------7------------------
 const chunkRe = /^((export\s+)?(const|let|var)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\}|new\s+)/smg
 
+const openingRe = /\{|\[|\(/
 const pureComment = '/*@__PURE__*/ '
 
 export function pureTopLevel() {
@@ -14,13 +15,21 @@ export function pureTopLevel() {
           return g1 + pureComment + g5
         } else if (g6) {
           // array literal
-          if (g6.includes('...') && !g6.includes('[')) { // with spread, no nested brackets
-            return g1 + transformArraySpread(g6)
+          if (g6.includes('...')) {
+            if (openingRe.test(g6)) {
+              // console.warn('Complicated spread', g6)
+            } else {
+              return g1 + transformArraySpread(g6)
+            }
           }
         } else if (g7) {
           // object literal
-          if (g7.includes('...') && !g7.includes('{')) { // with spread, no nested brackets
-            return g1 + transformObjectSpread(g7)
+          if (g7.includes('...')) {
+            if (openingRe.test(g7)) {
+              // console.warn('Complicated spread', g7)
+            } else {
+              return g1 + transformObjectSpread(g7)
+            }
           }
         } else {
           // `new` operator (no specific capture)
@@ -70,19 +79,15 @@ function transformObjectSpread(s) {
 // -------------------------------------------------------------------------------------------------
 
 function parseTokens(s) {
-  let [tokens, isMultiline] = parseIndividualTokens(s)
-  tokens = consolidateTokens(tokens)
+  const tokens = consolidateTokens(parseIndividualTokens(s))
+  const isMultiline = Boolean(s.match(/[\n\r]/))
   return [tokens, isMultiline]
 }
 
 function parseIndividualTokens(s) {
-  const isMultiline = Boolean(s.match(/[\n\r]/))
-  const parts = s.split(
-    isMultiline
-      ? /,\s*$/m
-      : ','
-  ).map((part) => part.trim())
-  .filter((part) => Boolean(part))
+  const parts = s.split(',')
+    .map((part) => part.trim())
+    .filter((part) => Boolean(part))
 
   const tokens = parts.map((part) => {
     const m = part.match(/^\.\.\.(.*)$/)
@@ -91,7 +96,7 @@ function parseIndividualTokens(s) {
       : [part] // individual item
   })
 
-  return [tokens, isMultiline]
+  return tokens
 }
 
 function consolidateTokens(tokens) {
