@@ -7,17 +7,41 @@ import sourcemaps from 'rollup-plugin-sourcemaps'
 import { dts } from 'rollup-plugin-dts'
 import { pureTopLevel } from './pure-top-level.js'
 import { terserSimple } from './terser-simple.js'
-import { extensions } from './config.js'
+import { ciRunning, ciConfig, extensions } from './config.js'
 
+const argv = process.argv.slice(2)
 writeBundles(
   joinPaths(process.argv[1], '../..'),
-  process.argv.slice(2).includes('--dev'),
+  argv.includes('--dev'),
+  argv.includes('--esm'),
+  argv.includes('--min'),
 )
 
-async function writeBundles(pkgDir, isDev) {
+async function writeBundles(pkgDir, isDev, alsoEsm, alsoEsmMin) {
   const configs = await buildConfigs(pkgDir, isDev)
 
   await (isDev ? watchWithConfigs : buildWithConfigs)(configs)
+
+  alsoEsm ||= !isDev && ciRunning && ciConfig.esm
+  alsoEsmMin ||= !isDev && ciRunning && ciConfig.min
+
+  if (alsoEsm) {
+    const esmBundle = await rollupBuild({
+      input: joinPaths(pkgDir, 'dist', 'global' + extensions.esm)
+    })
+    await esmBundle.write({
+      file: joinPaths(
+        pkgDir,
+        'dist',
+        '.bundled',
+        'global' + (alsoEsmMin ? extensions.iifeMin : extensions.iife)
+      ),
+      format: 'iife',
+      plugins: [
+        alsoEsmMin && terserSimple()
+      ]
+    })
+  }
 }
 
 async function buildConfigs(pkgDir, isDev) {

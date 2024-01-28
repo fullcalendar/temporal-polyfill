@@ -5,9 +5,7 @@ import runTest262 from '@js-temporal/temporal-test262-runner'
 import { join as joinPaths } from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { rollup } from 'rollup'
-import { terserSimple } from './terser-simple.js'
-import { extensions } from './config.js'
+import { ciRunning, ciConfig, extensions, currentNodeVersion, currentNodeMajorVersion } from './config.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')
@@ -47,12 +45,6 @@ yargs(hideBin(process.argv))
         default: false,
         type: 'boolean',
         description: 'Whether to test the minified bundle'
-      })
-      .option('ci', {
-        requiresArg: false,
-        default: false,
-        type: 'boolean',
-        description: 'Indicate esm/min can be varied for CI'
       }),
     async (options) => {
       const expectedFailureFiles = [
@@ -60,39 +52,32 @@ yargs(hideBin(process.argv))
         'expected-failures-surface.txt',
       ]
 
-      const nodeVersion = process.versions.node
-      const nodeMajorVersion = parseInt(nodeVersion.split('.')[0])
-      if (nodeMajorVersion >= 18) {
+      if (currentNodeMajorVersion >= 18) {
         expectedFailureFiles.push('expected-failures-intl-format-norm.txt')
       }
-      if (nodeMajorVersion < 18) {
+      if (currentNodeMajorVersion < 18) {
         expectedFailureFiles.push('expected-failures-before-node18.txt')
       }
-      if (nodeMajorVersion < 16) {
+      if (currentNodeMajorVersion < 16) {
         expectedFailureFiles.push('expected-failures-before-node16.txt')
       }
 
-      let { esm, min, ci } = options
+      let { esm, min } = options
 
-      // Varies the two settings across major version (2x2 matrix)
-      // Ensure lowest versions have esm=false because old Node can't use new Rollup
-      if (ci) {
-        min = Boolean(Math.floor((nodeMajorVersion - 14) / 2) % 2)
-        esm = Boolean(Math.floor((nodeMajorVersion - 14) / 4) % 2)
+      if (ciRunning) {
+        esm ||= ciConfig.esm
+        min ||= ciConfig.min
       }
 
-      let polyfillPath // from package root
+      let polyfillPath = // from package root
+        (esm
+          ? './dist/.bundled/global'
+          : './dist/global') +
+        (min
+          ? extensions.iifeMin
+          : extensions.iife)
 
-      if (esm) {
-        console.log('Bundling ESM...')
-        polyfillPath = await bundleEsm('./dist', 'global', min)
-      } else if (min) {
-        polyfillPath = './dist/global' + extensions.iifeMin
-      } else {
-        polyfillPath = './dist/global' + extensions.iife
-      }
-
-      console.log(`Testing ${polyfillPath} with Node v${nodeVersion}...`)
+      console.log(`Testing ${polyfillPath} with Node v${currentNodeVersion}...`)
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
@@ -112,21 +97,3 @@ yargs(hideBin(process.argv))
   )
   .showHelpOnFail(false)
   .help().argv
-
-async function bundleEsm(dir, exportName, minify) {
-  const inputFilename = exportName + extensions.esm
-  const outputFilename = '.bundled.' + (minify ? 'min.' : '') + inputFilename
-
-  const bundle = await rollup({
-    input: dir + '/' + inputFilename,
-  })
-  await bundle.write({
-    file: dir + '/' + outputFilename,
-    format: 'iife',
-    plugins: [
-      minify && terserSimple()
-    ]
-  })
-
-  return dir + '/' + outputFilename
-}
