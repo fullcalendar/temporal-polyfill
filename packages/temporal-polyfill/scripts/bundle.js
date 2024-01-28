@@ -66,7 +66,6 @@ async function buildConfigs(pkgDir, isDev) {
             plugins: [
               !isDev && buildTerserPlugin({
                 humanReadable: true,
-                optimize: true,
               })
             ],
           },
@@ -75,7 +74,6 @@ async function buildConfigs(pkgDir, isDev) {
             file: joinPaths('dist', exportName + extensions.iifeMin),
             plugins: [
               buildTerserPlugin({
-                optimize: true,
                 mangleProps: true,
                 manglePropsExcept: temporalReservedWords,
               }),
@@ -125,7 +123,6 @@ async function buildConfigs(pkgDir, isDev) {
           plugins: [
             !isDev && buildTerserPlugin({
               humanReadable: true,
-              optimize: true,
               // don't mangleProps. CJS require/exports names are affected
             })
           ]
@@ -141,7 +138,6 @@ async function buildConfigs(pkgDir, isDev) {
             !isDev && pureTopLevel(),
             !isDev && buildTerserPlugin({
               humanReadable: true,
-              optimize: true,
               mangleProps: true,
               manglePropsExcept: temporalReservedWords,
             }),
@@ -212,12 +208,11 @@ const terserNameCache = {}
 
 function buildTerserPlugin({
   humanReadable = false,
-  optimize = false,
   mangleProps = false,
   manglePropsExcept,
 }) {
   return terserSimple({
-    compress: optimize && {
+    compress: {
       ecma: 2018,
       passes: 3, // enough to remove dead object assignment, get lower size
       keep_fargs: false, // remove unused function args
