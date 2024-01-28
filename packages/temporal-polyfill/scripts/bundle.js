@@ -216,23 +216,6 @@ function buildTerserPlugin({
   mangleProps = false,
   manglePropsExcept,
 }) {
-  const mangleOptions = mangleProps && {
-    properties: {
-      reserved: manglePropsExcept,
-      keep_quoted: true,
-    },
-    // Unfortunately can't just mangle props and nothing else, so retain:
-    keep_fnames: humanReadable,
-    keep_classnames: humanReadable,
-  }
-
-  if (mangleProps && humanReadable) {
-    // Don't mangle top-level var/funcs, especially ESM imports
-    // Must force module:false to allow toplevel to take effect
-    mangleOptions.module = false
-    mangleOptions.toplevel = false
-  }
-
   return terserSimple({
     compress: optimize && {
       ecma: 2018,
@@ -243,7 +226,15 @@ function buildTerserPlugin({
       booleans_as_integers: true,
       hoist_funs: true,
     },
-    mangle: mangleOptions,
+    mangle: mangleProps && {
+      properties: {
+        reserved: manglePropsExcept,
+        keep_quoted: true,
+      },
+      // Unfortunately can't just mangle props and nothing else, so retain:
+      keep_fnames: humanReadable,
+      keep_classnames: humanReadable,
+    },
     nameCache: terserNameCache, // for consistent mangling across chunks/files
     format: {
       beautify: humanReadable,
