@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-// TODO: clean export-size-output
-
 import fs from 'fs/promises'
 import path from 'path'
 

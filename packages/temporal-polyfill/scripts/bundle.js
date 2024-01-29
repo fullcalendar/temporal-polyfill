@@ -18,7 +18,6 @@ writeBundles(
 
 async function writeBundles(pkgDir, isDev, bundleDistEsm) {
   const configs = await buildConfigs(pkgDir, isDev)
-
   await (isDev ? watchWithConfigs : buildWithConfigs)(configs)
 
   if (bundleDistEsm) {

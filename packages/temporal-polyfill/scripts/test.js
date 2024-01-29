@@ -50,6 +50,7 @@ yargs(hideBin(process.argv))
       .option('node-version', {
         requiresArg: true,
         type: 'string',
+        description: 'Force a specific version of Node'
       }),
     async (options) => {
       const currentNodeVersion = process.versions.node
@@ -103,7 +104,7 @@ yargs(hideBin(process.argv))
           ? extensions.iifeMin
           : extensions.iife)
 
-      console.log(`Testing ${polyfillPath} with Node v${currentNodeVersion}...`)
+      console.log(`Testing ${polyfillPath} with Node v${currentNodeVersion} ...`)
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
