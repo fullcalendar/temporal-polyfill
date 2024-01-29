@@ -15,3 +15,10 @@ export const ciConfig = {
   esm: Boolean(Math.floor(currentNodeMajorVersion / 4) % 2),
   min: Boolean(Math.floor(currentNodeMajorVersion / 2) % 2),
 }
+
+console.log('CONFIG', {
+  currentNodeVersion,
+  currentNodeMajorVersion,
+  ciRunning,
+  ciConfig,
+})
