@@ -5,9 +5,9 @@ import { readFile, copyFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import sourcemaps from 'rollup-plugin-sourcemaps'
 import { dts } from 'rollup-plugin-dts'
-import { pureTopLevel } from './pure-top-level.js'
-import { terserSimple } from './terser-simple.js'
-import { extensions } from './config.js'
+import { pureTopLevel } from './lib/pure-top-level.js'
+import { terserSimple } from './lib/terser-simple.js'
+import { extensions } from './lib/config.js'
 
 const argv = process.argv.slice(2)
 writeBundles(

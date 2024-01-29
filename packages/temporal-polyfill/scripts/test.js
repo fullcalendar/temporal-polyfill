@@ -6,7 +6,7 @@ import { join as joinPaths } from 'path'
 import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { extensions } from './config.js'
+import { extensions } from './lib/config.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')

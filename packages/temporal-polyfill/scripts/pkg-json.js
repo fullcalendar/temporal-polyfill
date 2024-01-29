@@ -2,7 +2,7 @@
 
 import { join as joinPaths } from 'path'
 import { readFile, writeFile } from 'fs/promises'
-import { extensions } from './config.js'
+import { extensions } from './lib/config.js'
 
 writePkgJson(
   joinPaths(process.argv[1], '../..'),
