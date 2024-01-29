@@ -21,11 +21,10 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
-    "build": "pnpm --filter temporal-polyfill run build",
-    "dev": "pnpm --filter temporal-polyfill run dev",
-    "test": "pnpm --filter temporal-polyfill run test",
-    "lint": "pnpm --filter temporal-polyfill run lint",
-    "clean": "pnpm --filter temporal-polyfill run clean"
+    "lint": "pnpm -r run lint",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r --filter=!@js-temporal/temporal-test262-runner run test",
+    "clean": "pnpm -r run clean"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.22.1",

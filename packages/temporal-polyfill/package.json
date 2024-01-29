@@ -23,6 +23,7 @@
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
+    "lint": "eslint .",
     "build": "./scripts/clean.js && pnpm run pkg-json && pnpm run tsc && pnpm run bundle && pnpm run readme",
     "dev": "./scripts/clean.js && pnpm run pkg-json --dev && pnpm run tsc && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build",
@@ -30,9 +31,8 @@
     "bundle": "./scripts/bundle.js",
     "bundle:dev": "./scripts/bundle.js --dev",
     "pkg-json": "./scripts/pkg-json.js",
-    "test": "./scripts/test.js",
-    "lint": "eslint .",
     "readme": "cp ../../README.md dist",
+    "test": "./scripts/test.js",
     "clean": "./scripts/clean.js --tsc",
     "size": "gzip-size --include-original --raw dist/global.min.js && pnpm export-size ./dist --output --bundler rollup"
   },

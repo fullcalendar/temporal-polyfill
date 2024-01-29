@@ -1,2 +1,5 @@
 packages:
-  - ./packages/*
+  - ./packages/temporal-polyfill
+  - ./packages/temporal-spec
+  - ./packages/temporal-test262-runner
+  - ./packages/export-size

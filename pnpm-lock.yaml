@@ -36,29 +36,6 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6
 
-  packages/datetimeformat-tokens:
-    dependencies:
-      temporal-spec:
-        specifier: workspace:*
-        version: link:../temporal-spec
-    devDependencies:
-      locale-data:
-        specifier: workspace:*
-        version: link:../locale-data
-      temporal-polyfill:
-        specifier: workspace:*
-        version: link:../temporal-polyfill/dist
-
-  packages/durationformat-polyfill:
-    dependencies:
-      temporal-spec:
-        specifier: workspace:*
-        version: link:../temporal-spec
-    devDependencies:
-      temporal-polyfill:
-        specifier: workspace:*
-        version: link:../temporal-polyfill/dist
-
   packages/export-size:
     dependencies:
       '@babel/parser':
@@ -134,30 +111,6 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
-
-  packages/locale-data:
-    dependencies:
-      colors:
-        specifier: ^1.4.0
-        version: 1.4.0
-      deepmerge:
-        specifier: ^4.2.2
-        version: 4.3.0
-      yargs:
-        specifier: ^17.0.1
-        version: 17.7.1
-
-  packages/locale-textinfo:
-    devDependencies:
-      locale-data:
-        specifier: workspace:*
-        version: link:../locale-data
-
-  packages/locale-weekinfo:
-    devDependencies:
-      locale-data:
-        specifier: workspace:*
-        version: link:../locale-data
 
   packages/temporal-polyfill:
     dependencies:
@@ -1853,11 +1806,6 @@ packages:
 
   /color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
-
-  /colors@1.4.0:
-    resolution: {integrity: sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==}
-    engines: {node: '>=0.1.90'}
-    dev: false
 
   /commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
@@ -4901,19 +4849,6 @@ packages:
   /yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
-
-  /yargs@17.7.1:
-    resolution: {integrity: sha512-cwiTb08Xuv5fqF4AovYacTFNxk62th7LKJ6BL9IGUpTJrWoU7/7WdQGTP2SjKf1dUNBGzDd28p/Yfs/GI6JrLw==}
-    engines: {node: '>=12'}
-    dependencies:
-      cliui: 8.0.1
-      escalade: 3.1.1
-      get-caller-file: 2.0.5
-      require-directory: 2.1.1
-      string-width: 4.2.3
-      y18n: 5.0.8
-      yargs-parser: 21.1.1
-    dev: false
 
   /yargs@17.7.2:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
