@@ -33,8 +33,6 @@ function createFormatCache<S>(
   }
 }
 
-// TODO: these pure statements necessary?
-
 export const prepCachedPlainYearMonthFormat = createFormatPrepper(
   plainYearMonthConfig,
   /*@__PURE__*/ createFormatCache()

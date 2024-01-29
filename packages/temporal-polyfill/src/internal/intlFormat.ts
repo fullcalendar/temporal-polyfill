@@ -46,13 +46,16 @@ const zonedFallbacks: Intl.DateTimeFormatOptions = { ...dateTimeFallbacks, timeZ
 
 const monthDayValidNames = Object.keys(monthDayFallbacks) as OptionNames
 const yearMonthValidNames = Object.keys(yearMonthFallbacks) as OptionNames
+const dateFallbackNames = Object.keys(dateFallbacks) as OptionNames
+const timeFallbackNames = Object.keys(timeFallbacks) as OptionNames
+
 const dateValidNames: OptionNames = [
-  ...(/*@__PURE__*/ Object.keys(dateFallbacks) as OptionNames),
+  ...dateFallbackNames,
   'weekday',
   'dateStyle',
 ]
 const timeValidNames: OptionNames = [
-  ...(/*@__PURE__*/ Object.keys(timeFallbacks) as OptionNames),
+  ...timeFallbackNames,
   'dayPeriod',
   'timeStyle',
 ]
