@@ -1,4 +1,4 @@
-import { DayTimeNano } from './dayTimeNano'
+import { DayTimeNano, dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha, isoDateTimeFieldNamesAlpha, isoTimeFieldNamesAlpha } from './isoFields'
 import { requireString } from './cast'
@@ -7,6 +7,7 @@ import { parseCalendarId, parseTimeZoneId } from './isoParse'
 import { queryNativeTimeZone, resolveTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
+import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
 import * as errorMessages from './errorMessages'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
@@ -137,6 +138,25 @@ export type PlainMonthDaySlots<C> = IsoDateFields & { calendar: C, branding: typ
 export type PlainYearMonthSlots<C> = IsoDateFields & { calendar: C, branding: typeof PlainYearMonthBranding }
 export type DurationSlots = DurationFields & { branding: typeof DurationBranding }
 export type InstantSlots = { epochNanoseconds: DayTimeNano, branding: typeof InstantBranding }
+
+// Epoch Slot Getters (best place for this?)
+// -------------------------------------------------------------------------------------------------
+
+export function getEpochSeconds(slots: EpochSlots) {
+  return epochNanoToSec(slots.epochNanoseconds)
+}
+
+export function getEpochMilliseconds(slots: EpochSlots) {
+  return epochNanoToMilli(slots.epochNanoseconds)
+}
+
+export function getEpochMicroseconds(slots: EpochSlots) {
+  return epochNanoToMicro(slots.epochNanoseconds)
+}
+
+export function getEpochNanoseconds(slots: EpochSlots) {
+  return dayTimeNanoToBigInt(slots.epochNanoseconds)
+}
 
 // Calendar
 // -------------------------------------------------------------------------------------------------

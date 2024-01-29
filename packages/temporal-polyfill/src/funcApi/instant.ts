@@ -11,7 +11,7 @@ import { diffInstants } from '../internal/diff'
 import { roundInstant } from '../internal/round'
 import { prepCachedInstantFormat } from './intlFormatCached'
 import { bindArgs } from '../internal/utils'
-import { getEpochMicroseconds, getEpochMilliseconds, getEpochNanoseconds, getEpochSeconds } from '../classApi/mixins'
+import { getEpochMicroseconds, getEpochMilliseconds, getEpochNanoseconds, getEpochSeconds } from '../internal/slots'
 import { requireObjectLike } from '../internal/cast'
 
 export const create = constructInstantSlots

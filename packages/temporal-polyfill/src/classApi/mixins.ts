@@ -1,4 +1,4 @@
-import { EpochSlots, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createPlainDateSlots, getId } from '../internal/slots'
+import { EpochSlots, PlainDateBranding, PlainMonthDayBranding, PlainYearMonthBranding, createPlainDateSlots, getEpochMicroseconds, getEpochMilliseconds, getEpochNanoseconds, getEpochSeconds, getId } from '../internal/slots'
 import { dayTimeNanoToBigInt } from '../internal/dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from '../internal/durationFields'
 import { IsoDateFields, isoTimeFieldNamesAsc } from '../internal/isoFields'
@@ -143,22 +143,6 @@ export const timeGetters = mapPropNames((name, i) => {
 
 // Epoch
 // -------------------------------------------------------------------------------------------------
-
-export function getEpochSeconds(slots: EpochSlots) {
-  return epochNanoToSec(slots.epochNanoseconds)
-}
-
-export function getEpochMilliseconds(slots: EpochSlots) {
-  return epochNanoToMilli(slots.epochNanoseconds)
-}
-
-export function getEpochMicroseconds(slots: EpochSlots) {
-  return epochNanoToMicro(slots.epochNanoseconds)
-}
-
-export function getEpochNanoseconds(slots: EpochSlots) {
-  return dayTimeNanoToBigInt(slots.epochNanoseconds)
-}
 
 export const epochGetters = {
   epochSeconds: getEpochSeconds,
