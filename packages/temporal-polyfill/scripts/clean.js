@@ -1,28 +1,34 @@
 #!/usr/bin/env node
 
-import fs from 'fs/promises'
-import path from 'path'
+import { join as joinPaths } from 'path'
+import { readdir, rm } from 'fs/promises'
 
-const shouldDeleteTsc = process.argv.slice(2).includes('--tsc')
+cleanPkg(
+  joinPaths(process.argv[1], '../..'),
+  process.argv.slice(2).includes('--tsc'),
+)
 
-async function clean() {
-  const files = await fs.readdir('./dist')
+async function cleanPkg(pkgDir, cleanTsc) {
+  const distDir = joinPaths(pkgDir, 'dist')
+  const files = await readdir(distDir)
 
   for (const file of files) {
-    const filePath = path.join('./dist', file)
-
     if (
       file !== '.npmignore' &&
-      (shouldDeleteTsc || (
+      (cleanTsc || (
         file !== '.tsc' &&
         file !== 'tsconfig.tsbuildinfo'
       ))
     ) {
-      await fs.rm(filePath, { recursive: true })
+      await rm(
+        joinPaths(distDir, file),
+        { recursive: true },
+      )
     }
   }
 
-  await fs.rm('./export-size-output', { recursive: true, force: true })
+  await rm(
+    joinPaths(pkgDir, 'export-size-output'),
+    { recursive: true, force: true },
+  )
 }
-
-clean()
