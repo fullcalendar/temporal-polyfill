@@ -87,8 +87,8 @@ yargs(hideBin(process.argv))
       let { esm, min } = options
 
       if (ciRunning) {
-        esm ||= ciConfig.esm
-        min ||= ciConfig.min
+        esm = esm || ciConfig.esm
+        min = min || ciConfig.min
       }
 
       let polyfillPath = // from package root
