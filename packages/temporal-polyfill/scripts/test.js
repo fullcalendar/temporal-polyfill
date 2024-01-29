@@ -65,10 +65,9 @@ yargs(hideBin(process.argv))
         ], {
           cwd: process.cwd(),
           env: {
+            ...filterEnv(process.env),
             // will force PNPM to use a specific version (see .npmrc)
             NODE_VERSION: options.nodeVersion,
-            PATH: process.env.PATH,
-            CI: process.env.CI,
           }
         })
       }
@@ -141,4 +140,16 @@ function liveExec(cmdParts, options = {}) {
       }
     })
   })
+}
+
+function filterEnv(oldEnv) {
+  const newEnv = {}
+
+  for (const key in oldEnv) {
+    if (!/node|npm|nvm/i.test(key)) {
+      newEnv[key] = oldEnv[key]
+    }
+  }
+
+  return newEnv
 }
