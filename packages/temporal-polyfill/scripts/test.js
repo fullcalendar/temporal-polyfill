@@ -86,7 +86,7 @@ yargs(hideBin(process.argv))
 
       let { esm, min } = options
 
-      if (ciRunning) {
+      if (ciRunning || process.env.NODE_VERSION) {
         esm = esm || ciConfig.esm
         min = min || ciConfig.min
       }
