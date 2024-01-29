@@ -33,7 +33,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20.10.0
+          # NOTE: keep synced with .npmrc
+          node-version: 18.19.0
           cache: 'pnpm'
 
       - name: Install dependencies
