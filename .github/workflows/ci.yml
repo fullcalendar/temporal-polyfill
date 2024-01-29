@@ -46,4 +46,4 @@ jobs:
         run: pnpm run build
 
       - name: Test
-        run: cd packages/temporal-polyfill && NODE_VERSION=${{ matrix.node }} pnpm run test --ci
+        run: pnpm run test --node-version=${{ matrix.node }}

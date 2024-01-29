@@ -3,6 +3,7 @@
 
 import runTest262 from '@js-temporal/temporal-test262-runner'
 import { join as joinPaths } from 'path'
+import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { ciRunning, ciConfig, extensions, currentNodeVersion, currentNodeMajorVersion } from './config.js'
@@ -45,8 +46,29 @@ yargs(hideBin(process.argv))
         default: false,
         type: 'boolean',
         description: 'Whether to test the minified bundle'
+      })
+      .option('node-version', {
+        requiresArg: true,
+        type: 'string',
       }),
     async (options) => {
+      if (
+        options.nodeVersion &&
+        options.nodeVersion !== currentNodeVersion &&
+        !process.env.NODE_VERSION // not already executing a forced-version call
+      ) {
+        return await liveExec([
+          'pnpm', 'exec', 'node', ...process.argv.slice(1),
+        ], {
+          cwd: process.cwd(),
+          env: {
+            // will force PNPM to use a specific version (see .npmrc)
+            NODE_VERSION: options.nodeVersion,
+            PATH: process.env.PATH,
+          }
+        })
+      }
+
       const expectedFailureFiles = [
         'expected-failures.txt',
         'expected-failures-surface.txt',
@@ -97,3 +119,22 @@ yargs(hideBin(process.argv))
   )
   .showHelpOnFail(false)
   .help().argv
+
+// Utils
+// -------------------------------------------------------------------------------------------------
+
+function liveExec(cmdParts, options = {}) {
+  return new Promise((resolve, reject) => {
+    spawn(cmdParts[0], cmdParts.slice(1), {
+      shell: false,
+      stdio: 'inherit',
+      ...options,
+    }).on('close', (status) => {
+      if (status === 0) {
+        resolve()
+      } else {
+        reject(new Error(`Command failed with status code ${status}`))
+      }
+    })
+  })
+}
