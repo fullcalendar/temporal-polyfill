@@ -104,7 +104,7 @@ yargs(hideBin(process.argv))
           ? extensions.iifeMin
           : extensions.iife)
 
-      console.log(`Testing ${polyfillPath} with Node v${currentNodeVersion} ...`)
+      console.log(`Testing ${polyfillPath} with Node ${currentNodeVersion} ...`)
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
