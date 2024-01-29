@@ -37,10 +37,5 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "typescript": "^5.1.6"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "export-size@0.7.0": "patches/export-size@0.7.0.patch"
-    }
   }
 }

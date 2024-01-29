@@ -87,7 +87,7 @@
     "@types/node": "^16.9.1",
     "concurrently": "^8.2.0",
     "eslint": "^7.25.0",
-    "export-size": "^0.7.0",
+    "export-size": "workspace:*",
     "gzip-size": "^7.0.0",
     "rollup": "^4.9.6",
     "rollup-plugin-dts": "^6.1.0",

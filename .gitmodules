@@ -10,3 +10,6 @@
 [submodule "packages/temporal-test262-runner"]
 	path = packages/temporal-test262-runner
 	url = git@github.com:fullcalendar/temporal-test262-runner.git
+[submodule "packages/export-size"]
+	path = packages/export-size
+	url = git@github.com:fullcalendar/export-size.git
