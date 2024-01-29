@@ -4,7 +4,7 @@ import { diffEpochMilliByDay } from './diff'
 import { allFieldsEqual, clampProp, createLazyGenerator, modFloor, zipProps } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
 import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
-import { buildIntlFormat, parseIntlYear } from './intlMath'
+import { createFormatForCalendar, parseIntlYear } from './intlMath'
 import { hashIntlFormatParts } from './intlFormat'
 import { Overflow } from './options'
 
@@ -174,7 +174,7 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
     return computeGregoryEraParts(isoFields)
   }
 
-  japeneseEraFormat ||= buildIntlFormat(japaneseCalendarId)
+  japeneseEraFormat ||= createFormatForCalendar(japaneseCalendarId)
   const intlPartsHash = hashIntlFormatParts(japeneseEraFormat, epochMilli)
   const { era, eraYear } = parseIntlYear(intlPartsHash, japaneseCalendarId)
   return [era, eraYear]

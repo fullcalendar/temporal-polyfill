@@ -1,4 +1,4 @@
-import { NativeTimeZone, resolveTimeZoneId } from '../internal/timeZoneNative'
+import { NativeTimeZone, resolveTimeZoneId, queryNativeTimeZone } from '../internal/timeZoneNative'
 import { formatOffsetNano } from '../internal/isoFormat'
 import { EpochDisambigOptions, refineEpochDisambigOptions } from '../internal/optionsRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
@@ -25,10 +25,11 @@ export type TimeZoneClassSlots = BrandingSlots & {
 export const [TimeZone, createTimeZone] = createSlotClass(
   'TimeZone',
   (id: string): TimeZoneClassSlots => {
-    const [normalizedId, timeZoneNative] = resolveTimeZoneId(id)
+    const [slotId] = resolveTimeZoneId(id)
+    const timeZoneNative = queryNativeTimeZone(slotId)
     return {
       branding: 'TimeZone',
-      id: normalizedId,
+      id: slotId,
       native: timeZoneNative,
     }
   },

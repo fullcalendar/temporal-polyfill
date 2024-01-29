@@ -27,7 +27,6 @@ function getCurrentYearPlus10() {
 }
 
 export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
-  id: string
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number
   getPossibleInstantsFor(isoFields: IsoDateTimeFields): DayTimeNano[]
   getTransition(epochNano: DayTimeNano, direction: -1 | 1): DayTimeNano | undefined
@@ -36,30 +35,32 @@ export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
 // Query
 // -------------------------------------------------------------------------------------------------
 
-export function resolveTimeZoneId(timeZoneId: string): [string, NativeTimeZone, boolean] {
-  const timeZoneNative = queryNativeTimeZone(timeZoneId)
-  const isFixed = timeZoneNative instanceof FixedTimeZone
-  const normalizedId = isFixed ? timeZoneNative.id : normalizeNamedTimeZoneId(timeZoneId)
-  return [normalizedId, timeZoneNative, isFixed]
+export type TimeZoneIdResolution = [
+  slotId: string,
+  intlId?: string, // if not defined, assume fixed
+]
+
+export function resolveTimeZoneId(id: string): TimeZoneIdResolution {
+  const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
+  if (offsetNano !== undefined) {
+    return [formatOffsetNano(offsetNano)]
+  }
+  id = normalizeNamedTimeZoneId(id) // becomes a slotId
+  if (id === utcTimeZoneId) {
+    return [id]
+  }
+  return [id, queryFormatForTimeZone(id).resolvedOptions().timeZone]
 }
 
-/*
-ID does NOT need to be normalized
-*/
-export function queryNativeTimeZone(timeZoneId: string): NativeTimeZone {
-  const offsetNano = parseOffsetNanoMaybe(timeZoneId, true) // onlyHourMinute=true
+export const queryNativeTimeZone = createLazyGenerator((slotId: string) => {
+  const offsetNano = parseOffsetNanoMaybe(slotId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
     return new FixedTimeZone(offsetNano)
   }
-
-  // normalize for cache-key. choose uppercase for 'UTC'
-  return queryNamedTimeZone(timeZoneId.toUpperCase())
-}
-
-const queryNamedTimeZone = createLazyGenerator((timeZoneId: string): NativeTimeZone => {
-  return timeZoneId === utcTimeZoneId
-    ? new FixedTimeZone(0, timeZoneId) // override ID
-    : new IntlTimeZone(timeZoneId)
+  if (slotId === utcTimeZoneId) {
+    return new FixedTimeZone(0)
+  }
+  return new IntlTimeZone(queryFormatForTimeZone(slotId))
 })
 
 function normalizeNamedTimeZoneId(s: string): string {
@@ -98,8 +99,7 @@ function normalizeNamedTimeZoneId(s: string): string {
 
 export class FixedTimeZone implements NativeTimeZone {
   constructor(
-    public offsetNano: number,
-    public id: string = formatOffsetNano(offsetNano)
+    private offsetNano: number,
   ) {}
 
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number {
@@ -127,12 +127,9 @@ interface IntlTimeZoneStore {
 }
 
 export class IntlTimeZone implements NativeTimeZone {
-  id: string
   store: IntlTimeZoneStore
 
-  constructor(id: string) {
-    const format = buildIntlFormat(id)
-    this.id = format.resolvedOptions().timeZone
+  constructor(format: Intl.DateTimeFormat) {
     this.store = createIntlTimeZoneStore(createComputeOffsetSec(format))
   }
 
@@ -326,8 +323,9 @@ function createComputeOffsetSec(format: Intl.DateTimeFormat): (
   }
 }
 
-function buildIntlFormat(timeZoneId: string): Intl.DateTimeFormat {
-  // format will ALWAYS do gregorian. need to parse year
+const queryFormatForTimeZone = createLazyGenerator(createFormatForTimeZone)
+
+function createFormatForTimeZone(timeZoneId: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {
     timeZone: timeZoneId,
     era: 'short',

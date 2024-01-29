@@ -4,7 +4,7 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha
 import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseTimeZoneId } from './isoParse'
-import { queryNativeTimeZone, resolveTimeZoneId } from './timeZoneNative'
+import { resolveTimeZoneId } from './timeZoneNative'
 import { realizeCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
@@ -233,7 +233,7 @@ export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
   // If either is an unresolvable, return false
   // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
-    return queryNativeTimeZone(aId).id === queryNativeTimeZone(bId).id
+    return resolveTimeZoneId(aId)[1] === resolveTimeZoneId(bId)[1] // compare intlId
   } catch {}
 
   return false

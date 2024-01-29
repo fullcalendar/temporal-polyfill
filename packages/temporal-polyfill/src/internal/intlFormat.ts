@@ -284,7 +284,7 @@ function checkCalendarsCompatible(
 // Utils
 // -------------------------------------------------------------------------------------------------
 
-export const standardLocaleId = 'en-GB' // gives 24-hour clock
+export const standardLocaleId = 'en-GB' // 24-hour clock, gregorian by default
 
 export function hashIntlFormatParts(
   intlFormat: Intl.DateTimeFormat,

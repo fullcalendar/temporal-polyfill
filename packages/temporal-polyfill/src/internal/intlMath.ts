@@ -36,7 +36,7 @@ Expects an already-normalized calendarId
 export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
-  const intlFormat = buildIntlFormat(calendarId)
+  const intlFormat = createFormatForCalendar(calendarId)
   const calendarIdBase = computeCalendarIdBase(calendarId)
 
   if (calendarIdBase !== computeCalendarIdBase(intlFormat.resolvedOptions().calendar)) {
@@ -147,8 +147,7 @@ export function parseIntlYear(
   return { era, eraYear, year }
 }
 
-// TODO: rename to be about calendar
-export function buildIntlFormat(calendarId: string): Intl.DateTimeFormat {
+export function createFormatForCalendar(calendarId: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {
     calendar: calendarId,
     timeZone: utcTimeZoneId,
