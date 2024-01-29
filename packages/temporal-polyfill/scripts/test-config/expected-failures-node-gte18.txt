@@ -1,4 +1,3 @@
-
 # Really picky about whitespace between characters
 # Nothing we can do about this since it relies on Intl.DateTimeFormat
 staging/Intl402/Temporal/old/date-time-format.js

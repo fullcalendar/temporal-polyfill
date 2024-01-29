@@ -55,6 +55,7 @@ yargs(hideBin(process.argv))
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
 
+      // If different version of Node requested, spawn a new process
       if (
         options.nodeVersion &&
         options.nodeVersion !== currentNodeVersion &&
@@ -66,8 +67,7 @@ yargs(hideBin(process.argv))
           cwd: process.cwd(),
           env: {
             ...filterEnv(process.env),
-            // will force PNPM to use a specific version (see .npmrc)
-            NODE_VERSION: options.nodeVersion,
+            NODE_VERSION: options.nodeVersion, // forces PNPM to use specific version (see .npmrc)
           }
         })
       }
@@ -78,17 +78,18 @@ yargs(hideBin(process.argv))
       ]
 
       if (currentNodeMajorVersion >= 18) {
-        expectedFailureFiles.push('expected-failures-intl-format-norm.txt')
+        expectedFailureFiles.push('expected-failures-node-gte18.txt')
       }
       if (currentNodeMajorVersion < 18) {
-        expectedFailureFiles.push('expected-failures-before-node18.txt')
+        expectedFailureFiles.push('expected-failures-node-lt18.txt')
       }
       if (currentNodeMajorVersion < 16) {
-        expectedFailureFiles.push('expected-failures-before-node16.txt')
+        expectedFailureFiles.push('expected-failures-node-lt16.txt')
       }
 
       let { esm, min } = options
 
+      // Let CI decide. Try all permutations based on Node LTS version
       if (process.env.CI) {
         esm = esm || Boolean(Math.floor(currentNodeMajorVersion / 4) % 2)
         min = min || Boolean(Math.floor(currentNodeMajorVersion / 2) % 2)
@@ -142,6 +143,8 @@ function liveExec(cmdParts, options = {}) {
   })
 }
 
+// Filter away Node-related environment variables because prevents
+// PNPM's use-node-version from being reset
 function filterEnv(oldEnv) {
   const newEnv = {}
 
