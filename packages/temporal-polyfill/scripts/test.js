@@ -3,9 +3,9 @@
 
 import runTest262 from '@js-temporal/temporal-test262-runner'
 import { join as joinPaths } from 'path'
-import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import { execLive } from './lib/utils.js'
 import { extensions } from './lib/config.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
@@ -62,7 +62,7 @@ yargs(hideBin(process.argv))
         options.nodeVersion !== currentNodeVersion &&
         !process.env.NODE_VERSION // not already executing a forced-version call
       ) {
-        return await liveExec([
+        return await execLive([
           'pnpm', 'exec', 'node', ...process.argv.slice(1),
         ], {
           cwd: process.cwd(),
@@ -124,25 +124,6 @@ yargs(hideBin(process.argv))
   )
   .showHelpOnFail(false)
   .parse()
-
-// Utils
-// -------------------------------------------------------------------------------------------------
-
-function liveExec(cmdParts, options = {}) {
-  return new Promise((resolve, reject) => {
-    spawn(cmdParts[0], cmdParts.slice(1), {
-      shell: false,
-      stdio: 'inherit',
-      ...options,
-    }).on('close', (status) => {
-      if (status === 0) {
-        resolve()
-      } else {
-        reject(new Error(`Command failed with status code ${status}`))
-      }
-    })
-  })
-}
 
 // Filter away Node-related environment variables because prevents
 // PNPM's use-node-version from being reset
