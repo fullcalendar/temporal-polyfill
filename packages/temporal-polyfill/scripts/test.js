@@ -6,7 +6,7 @@ import { join as joinPaths } from 'path'
 import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { ciRunning, ciConfig, extensions, currentNodeVersion, currentNodeMajorVersion } from './config.js'
+import { extensions } from './config.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')
@@ -52,6 +52,9 @@ yargs(hideBin(process.argv))
         type: 'string',
       }),
     async (options) => {
+      const currentNodeVersion = process.versions.node
+      const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
+
       if (
         options.nodeVersion &&
         options.nodeVersion !== currentNodeVersion &&
@@ -65,6 +68,7 @@ yargs(hideBin(process.argv))
             // will force PNPM to use a specific version (see .npmrc)
             NODE_VERSION: options.nodeVersion,
             PATH: process.env.PATH,
+            CI: process.env.CI,
           }
         })
       }
@@ -86,9 +90,9 @@ yargs(hideBin(process.argv))
 
       let { esm, min } = options
 
-      if (ciRunning || process.env.NODE_VERSION) {
-        esm = esm || ciConfig.esm
-        min = min || ciConfig.min
+      if (process.env.CI) {
+        esm = esm || Boolean(Math.floor(currentNodeMajorVersion / 4) % 2)
+        min = min || Boolean(Math.floor(currentNodeMajorVersion / 2) % 2)
       }
 
       let polyfillPath = // from package root
