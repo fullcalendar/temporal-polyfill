@@ -186,22 +186,27 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
   throw new RangeError(errorMessages.mismatchingCalendars)
 }
 
-export function refineCalendarSlotString(calendarArg: string): string {
-  return resolveCalendarId(parseCalendarId(requireString(calendarArg)))
-}
-
-// bag
-// ---
-
+// NOTE: only used by funcApi (circ dep?)
 export function getCalendarIdFromBag(bag: { calendar?: string }): string {
   return extractCalendarIdFromBag(bag) || isoCalendarId
 }
 
+// NOTE: only used by funcApi (circ dep?)
 export function extractCalendarIdFromBag(bag: { calendar?: string }): string | undefined {
   const { calendar } = bag
   if (calendar !== undefined) {
-    return refineCalendarSlotString(calendar)
+    return refineCalendarIdString(calendar)
   }
+}
+
+// NOTE: only used by funcApi (circ dep?)
+export function refineCalendarIdString(id: string): string {
+  return resolveCalendarId(requireString(id))
+}
+
+// NOTE: only used by classApi (circ dep?)
+export function refineCalendarSlotString(arg: string): string {
+  return resolveCalendarId(parseCalendarId(requireString(arg)))
 }
 
 // TimeZone
@@ -239,6 +244,12 @@ export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
   return false
 }
 
+// NOTE: only used by funcApi (circ dep?)
+export function refineTimeZoneIdString(id: string): string {
+  return resolveTimeZoneId(requireString(id))
+}
+
+// TODO: only used by classApi (circ dep?)
 export function refineTimeZoneSlotString(arg: string): string {
   return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))
 }

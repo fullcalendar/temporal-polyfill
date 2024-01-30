@@ -5,7 +5,7 @@ import { ZonedDateTimeFields, computeHoursInDay, computeStartOfDay, buildZonedIs
 import { LocalesArg } from '../internal/intlFormat'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { ZonedFieldOptions } from '../internal/optionsRefine'
-import { DateSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { DateSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarIdString, refineTimeZoneIdString } from '../internal/slots'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/isoMath'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { ZonedDateTimeBag, isoTimeFieldsToCal, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bagRefine'
@@ -22,8 +22,8 @@ import { computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInY
 
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
-  refineCalendarSlotString,
-  refineTimeZoneSlotString,
+  refineCalendarIdString,
+  refineTimeZoneIdString,
 )
 
 export const fromString = parseZonedDateTime
@@ -34,7 +34,7 @@ export function fromFields(
 ): ZonedDateTimeSlots<string, string> {
   const calendarId = getCalendarIdFromBag(fields)
   return refineZonedDateTimeBag(
-    refineTimeZoneSlotString,
+    refineTimeZoneIdString,
     queryNativeTimeZone,
     createNativeDateRefineOps(calendarId),
     calendarId,
@@ -103,14 +103,14 @@ export function withTimeZone(
   slots: ZonedDateTimeSlots<string, string>,
   timeZoneId: string,
 ): ZonedDateTimeSlots<string, string> {
-  return slotsWithTimeZone(slots, refineTimeZoneSlotString(timeZoneId))
+  return slotsWithTimeZone(slots, refineTimeZoneIdString(timeZoneId))
 }
 
 export function withCalendar(
   slots: ZonedDateTimeSlots<string, string>,
   calendarId: string,
 ): ZonedDateTimeSlots<string, string> {
-  return slotsWithCalendar(slots, refineCalendarSlotString(calendarId))
+  return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
 }
 
 export const add = bindArgs(

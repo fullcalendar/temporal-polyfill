@@ -3,7 +3,7 @@ import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 import { LocalesArg } from '../internal/intlFormat'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarIdString, refineTimeZoneIdString } from '../internal/slots'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { constructPlainDateSlots } from '../internal/construct'
 import { parsePlainDate } from '../internal/isoParse'
@@ -24,7 +24,7 @@ import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, comput
 
 export const create = bindArgs(
   constructPlainDateSlots<string, string>,
-  refineCalendarSlotString,
+  refineCalendarIdString,
 )
 
 export const fromString = parsePlainDate
@@ -72,7 +72,7 @@ export function withCalendar(
   slots: PlainDateSlots<string>,
   calendarId: string,
 ): PlainDateSlots<string> {
-  return slotsWithCalendar(slots, refineCalendarSlotString(calendarId))
+  return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
 }
 
 export const add = bindArgs(movePlainDate<string>, createNativeMoveOps, false)
@@ -98,7 +98,7 @@ export function toZonedDateTime(
     : options
 
   return plainDateToZonedDateTime(
-    refineTimeZoneSlotString,
+    refineTimeZoneIdString,
     identityFunc,
     queryNativeTimeZone,
     slots,

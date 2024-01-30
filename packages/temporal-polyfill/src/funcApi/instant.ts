@@ -1,6 +1,6 @@
 import { LocalesArg } from '../internal/intlFormat'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { InstantSlots, ZonedDateTimeSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
+import { InstantSlots, ZonedDateTimeSlots, refineCalendarIdString, refineTimeZoneIdString } from '../internal/slots'
 import { constructInstantSlots } from '../internal/construct'
 import { parseInstant } from '../internal/isoParse'
 import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
@@ -41,7 +41,7 @@ export const compare = compareInstants
 
 export const toString = bindArgs(
   formatInstantIso<string, string>,
-  refineTimeZoneSlotString,
+  refineTimeZoneIdString,
   queryNativeTimeZone,
 )
 
@@ -51,7 +51,7 @@ export function toZonedDateTimeISO(
 ): ZonedDateTimeSlots<string, string> {
   return instantToZonedDateTime(
     instantSlots,
-    refineTimeZoneSlotString(timeZoneSlot),
+    refineTimeZoneIdString(timeZoneSlot),
   )
 }
 
@@ -63,8 +63,8 @@ export function toZonedDateTime(
 
   return instantToZonedDateTime(
     instantSlots,
-    refineTimeZoneSlotString(refinedObj.timeZone),
-    refineCalendarSlotString(refinedObj.calendar),
+    refineTimeZoneIdString(refinedObj.timeZone),
+    refineCalendarIdString(refinedObj.calendar),
   )
 }
 

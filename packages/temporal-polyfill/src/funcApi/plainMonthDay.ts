@@ -2,7 +2,7 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
 import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
+import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarIdString } from '../internal/slots'
 import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { constructPlainMonthDaySlots } from '../internal/construct'
 import { parsePlainMonthDay } from '../internal/isoParse'
@@ -16,7 +16,7 @@ import { computeMonthDayFields } from './utils'
 
 export const create = bindArgs(
   constructPlainMonthDaySlots<string, string>,
-  refineCalendarSlotString,
+  refineCalendarIdString,
 )
 
 export const fromString = bindArgs(

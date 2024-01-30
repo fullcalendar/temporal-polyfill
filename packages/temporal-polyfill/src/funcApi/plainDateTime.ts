@@ -2,7 +2,7 @@ import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getCalendarIdFromBag, refineCalendarSlotString } from '../internal/slots'
+import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getCalendarIdFromBag, refineCalendarIdString } from '../internal/slots'
 import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
 import { constructPlainDateTimeSlots } from '../internal/construct'
 import { parsePlainDateTime } from '../internal/isoParse'
@@ -21,7 +21,7 @@ import { NumSign, bindArgs } from '../internal/utils'
 
 export const create = bindArgs(
   constructPlainDateTimeSlots<string, string>,
-  refineCalendarSlotString,
+  refineCalendarIdString,
 )
 
 export const fromString = parsePlainDateTime
@@ -84,7 +84,7 @@ export function withCalendar(
 ): PlainDateTimeSlots<string> {
   return slotsWithCalendar(
     plainDateTimeSlots,
-    refineCalendarSlotString(calendarId),
+    refineCalendarIdString(calendarId),
   )
 }
 

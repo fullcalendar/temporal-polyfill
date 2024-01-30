@@ -2,7 +2,7 @@ import { TimeBag, TimeFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainTimeSlots, refineTimeZoneSlotString } from '../internal/slots'
+import { PlainDateSlots, PlainTimeSlots, refineTimeZoneIdString } from '../internal/slots'
 import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 import { constructPlainTimeSlots } from '../internal/construct'
 import { isoTimeFieldsToCal, plainTimeWithFields, refinePlainTimeBag } from '../internal/bagRefine'
@@ -50,7 +50,7 @@ export const toString = formatPlainTimeIso
 
 export const toZonedDateTime = bindArgs(
   plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
-  refineTimeZoneSlotString,
+  refineTimeZoneIdString,
   identityFunc,
   queryNativeTimeZone,
 )
