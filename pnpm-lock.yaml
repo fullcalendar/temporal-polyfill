@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  rollup-plugin-sourcemaps@0.6.3:
+    hash: pv36xcczr5gjtywakxwkjo5sue
+    path: patches/rollup-plugin-sourcemaps@0.6.3.patch
+
 importers:
 
   .:
@@ -144,7 +149,7 @@ importers:
         version: 6.1.0(rollup@4.9.6)(typescript@5.1.6)
       rollup-plugin-sourcemaps:
         specifier: ^0.6.3
-        version: 0.6.3(@types/node@16.18.14)(rollup@4.9.6)
+        version: 0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@16.18.14)(rollup@4.9.6)
       terser:
         specifier: ^5.27.0
         version: 5.27.0
@@ -4307,7 +4312,7 @@ packages:
       '@babel/code-frame': 7.23.5
     dev: true
 
-  /rollup-plugin-sourcemaps@0.6.3(@types/node@16.18.14)(rollup@4.9.6):
+  /rollup-plugin-sourcemaps@0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@16.18.14)(rollup@4.9.6):
     resolution: {integrity: sha512-paFu+nT1xvuO1tPFYXGe+XnQvg4Hjqv/eIhG8i5EspfYYPBKL57X7iVbfv55aNVASg3dzWvES9dmWsL2KhfByw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
@@ -4322,6 +4327,7 @@ packages:
       rollup: 4.9.6
       source-map-resolve: 0.6.0
     dev: true
+    patched: true
 
   /rollup@3.29.4:
     resolution: {integrity: sha512-oWzmBZwvYrU0iJHtDmhsm662rC15FRXmcjCk1xD771dFDx5jJ02ufAQQTn0etB2emNk4J9EZg/yWKpsn9BWGRw==}

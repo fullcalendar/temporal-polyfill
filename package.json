@@ -36,5 +36,10 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "typescript": "^5.1.6"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "rollup-plugin-sourcemaps@0.6.3": "patches/rollup-plugin-sourcemaps@0.6.3.patch"
+    }
   }
 }
