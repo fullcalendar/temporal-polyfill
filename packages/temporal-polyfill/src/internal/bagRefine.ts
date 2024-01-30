@@ -1,32 +1,139 @@
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { DateBag, DateTimeBag, DayFields, DurationBag, EraYearOrYear, MonthDayBag, MonthDayFields, MonthFields, TimeBag, TimeFields, YearFields, YearMonthBag, allYearFieldNames, dateFieldNamesAlpha, dayFieldNames, eraYearFieldNames, monthCodeDayFieldNames, monthDayFieldNames, monthFieldNames, offsetFieldNames, timeAndOffsetFieldNames, timeAndZoneFieldNames, timeFieldDefaults, timeFieldNamesAlpha, timeFieldNamesAsc, timeZoneFieldNames, yearFieldNames, yearMonthCodeFieldNames, yearMonthFieldNames } from './fields'
-import { computeIsoDaysInMonth, isoMonthsInYear } from './isoMath'
-import { NativeDateRefineDeps, NativeMonthDayRefineOps, NativeYearMonthRefineDeps, eraYearToYear, getCalendarEraOrigins, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber, parseMonthCode } from './calendarNative'
-import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './isoFields'
-import { isoEpochFirstLeapYear, constrainIsoTimeFields } from './isoMath'
-import { checkIsoDateInBounds, checkIsoDateTimeInBounds, checkIsoYearMonthInBounds } from './timeMath'
-import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { BoundArg, Callable, bindArgs, clampEntity, clampProp, getDefinedProp, mapPropNamesToConstant, pluckProps, remapProps } from './utils'
-import { OverflowOptions, ZonedFieldOptions, overflowMapNames, overrideOverflowOptions, copyOptions, refineOverflowOptions, refineZonedFieldOptions } from './optionsRefine'
-import { DurationFields, durationFieldDefaults, durationFieldNamesAlpha, durationFieldNamesAsc } from './durationFields'
-import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
+import {
+  NativeDateRefineDeps,
+  NativeMonthDayRefineOps,
+  NativeYearMonthRefineDeps,
+  eraYearToYear,
+  getCalendarEraOrigins,
+  getCalendarLeapMonthMeta,
+  monthCodeNumberToMonth,
+  monthToMonthCodeNumber,
+  parseMonthCode,
+} from './calendarNative'
+import {
+  DateModOps,
+  DateRefineOps,
+  FieldsOp,
+  MergeFieldsOp,
+  MonthDayModOps,
+  MonthDayRefineOps,
+  YearMonthModOps,
+  YearMonthRefineOps,
+} from './calendarOps'
+import {
+  requireObjectLike,
+  toInteger,
+  toPositiveInteger,
+  toStrictInteger,
+  toStringViaPrimitive,
+} from './cast'
 import { DayTimeNano } from './dayTimeNano'
-import { DateModOps, DateRefineOps, FieldsOp, MergeFieldsOp, MonthDayModOps, MonthDayRefineOps, YearMonthModOps, YearMonthRefineOps } from './calendarOps'
-import { parseOffsetNano } from './isoParse'
-import { requireNumberIsPositive, requireObjectLike, toInteger, toPositiveInteger, toStrictInteger, toStringViaPrimitive } from './cast'
+import {
+  DurationFields,
+  durationFieldDefaults,
+  durationFieldNamesAlpha,
+  durationFieldNamesAsc,
+} from './durationFields'
 import { MarkerSlotsNoCalendar, checkDurationFields } from './durationMath'
-import { DateSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import * as errorMessages from './errorMessages'
+import {
+  DateBag,
+  DateTimeBag,
+  DayFields,
+  DurationBag,
+  EraYearOrYear,
+  MonthDayBag,
+  MonthDayFields,
+  MonthFields,
+  TimeBag,
+  TimeFields,
+  YearFields,
+  YearMonthBag,
+  allYearFieldNames,
+  dateFieldNamesAlpha,
+  dayFieldNames,
+  eraYearFieldNames,
+  monthCodeDayFieldNames,
+  monthDayFieldNames,
+  monthFieldNames,
+  offsetFieldNames,
+  timeAndOffsetFieldNames,
+  timeAndZoneFieldNames,
+  timeFieldDefaults,
+  timeFieldNamesAlpha,
+  timeFieldNamesAsc,
+  timeZoneFieldNames,
+  yearFieldNames,
+  yearMonthCodeFieldNames,
+  yearMonthFieldNames,
+} from './fields'
+import {
+  IsoDateTimeFields,
+  IsoTimeFields,
+  isoTimeFieldDefaults,
+  isoTimeFieldNamesAsc,
+} from './isoFields'
+import {
+  computeIsoDaysInMonth,
+  constrainIsoTimeFields,
+  isoEpochFirstLeapYear,
+  isoMonthsInYear,
+} from './isoMath'
+import { parseOffsetNano } from './isoParse'
+import { OffsetDisambig, Overflow } from './options'
+import {
+  OverflowOptions,
+  ZonedFieldOptions,
+  copyOptions,
+  overrideOverflowOptions,
+  refineOverflowOptions,
+  refineZonedFieldOptions,
+} from './optionsRefine'
+import {
+  DurationSlots,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainMonthDaySlots,
+  PlainTimeSlots,
+  PlainYearMonthSlots,
+  ZonedDateTimeSlots,
+  createDurationSlots,
+  createPlainDateSlots,
+  createPlainDateTimeSlots,
+  createPlainMonthDaySlots,
+  createPlainTimeSlots,
+  createPlainYearMonthSlots,
+  createZonedDateTimeSlots,
+} from './slots'
+import {
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+  checkIsoYearMonthInBounds,
+} from './timeMath'
+import { TimeZoneOps, getMatchingInstantFor } from './timeZoneOps'
+import {
+  Callable,
+  bindArgs,
+  clampEntity,
+  clampProp,
+  getDefinedProp,
+  mapPropNamesToConstant,
+  pluckProps,
+  remapProps,
+} from './utils'
 
 export type PlainDateBag<C> = DateBag & { calendar?: C }
 export type PlainDateTimeBag<C> = DateBag & TimeBag & { calendar?: C }
-export type ZonedDateTimeBag<C, T> = PlainDateTimeBag<C> & { timeZone: T, offset?: string }
+export type ZonedDateTimeBag<C, T> = PlainDateTimeBag<C> & {
+  timeZone: T
+  offset?: string
+}
 export type PlainTimeBag = TimeBag
 export type PlainYearMonthBag<C> = YearMonthBag & { calendar?: C }
 export type PlainMonthDayBag<C> = MonthDayBag & { calendar?: C }
 
 // Config
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const dateFieldRefiners = {
   era: toStringViaPrimitive,
@@ -39,7 +146,10 @@ const dateFieldRefiners = {
 
 const timeFieldRefiners = mapPropNamesToConstant(timeFieldNamesAsc, toInteger)
 
-const durationFieldRefiners = mapPropNamesToConstant(durationFieldNamesAsc, toStrictInteger)
+const durationFieldRefiners = mapPropNamesToConstant(
+  durationFieldNamesAsc,
+  toStrictInteger,
+)
 
 const builtinRefiners = {
   ...dateFieldRefiners,
@@ -49,7 +159,7 @@ const builtinRefiners = {
 }
 
 // High-Level Refining
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function refineMaybeZonedDateTimeBag<C, TA, T>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
@@ -80,10 +190,10 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
     )
 
     return { epochNanoseconds, timeZone: timeZoneSlot }
-  } else {
-    const isoDateInternals = calendarOps.dateFromFields(fields as any)
-    return { ...isoDateInternals, ...isoTimeFieldDefaults }
   }
+
+  const isoDateInternals = calendarOps.dateFromFields(fields as any)
+  return { ...isoDateInternals, ...isoTimeFieldDefaults }
 }
 
 export function refineZonedDateTimeBag<C, TA, T>(
@@ -102,8 +212,11 @@ export function refineZonedDateTimeBag<C, TA, T>(
     timeAndZoneFieldNames, // forcedValidFieldNames
   ) as ZonedDateTimeBag<unknown, TA>
 
-  const timeZoneSlot = refineTimeZoneArg(fields.timeZone!) // guaranteed via refineCalendarFields
-  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
+  // guaranteed via refineCalendarFields
+  const timeZoneSlot = refineTimeZoneArg(fields.timeZone!)
+
+  const [overflow, offsetDisambig, epochDisambig] =
+    refineZonedFieldOptions(options)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
     overrideOverflowOptions(options, overflow),
@@ -119,11 +232,7 @@ export function refineZonedDateTimeBag<C, TA, T>(
     epochDisambig,
   )
 
-  return createZonedDateTimeSlots(
-    epochNanoseconds,
-    timeZoneSlot,
-    calendarSlot,
-  )
+  return createZonedDateTimeSlots(epochNanoseconds, timeZoneSlot, calendarSlot)
 }
 
 export function refinePlainDateTimeBag<C>(
@@ -203,7 +312,12 @@ export function refinePlainMonthDayBag<C>(
   // Callers who omit the calendar are not writing calendar-independent
   // code. In that case, `monthCode`/`year` can be omitted; `month` and
   // `day` are sufficient. Add a `year` to satisfy calendar validation.
-  if (calendarAbsent && fields.month !== undefined && fields.monthCode === undefined && fields.year === undefined) {
+  if (
+    calendarAbsent &&
+    fields.month !== undefined &&
+    fields.monthCode === undefined &&
+    fields.year === undefined
+  ) {
     fields.year = isoEpochFirstLeapYear
   }
 
@@ -214,26 +328,32 @@ export function refinePlainTimeBag(
   bag: TimeBag,
   options?: OverflowOptions, // optional b/c func API can use directly
 ): PlainTimeSlots {
-  const overflow = refineOverflowOptions(options) // spec says overflow parsed first
-  const fields = refineFields(bag, timeFieldNamesAlpha, [], true) as TimeBag // disallowEmpty
+  // spec says overflow parsed first
+  const overflow = refineOverflowOptions(options)
+
+  // disallowEmpty
+  const fields = refineFields(bag, timeFieldNamesAlpha, [], true) as TimeBag
 
   return createPlainTimeSlots(refineTimeBag(fields, overflow))
 }
 
 export function refineDurationBag(bag: DurationBag): DurationSlots {
   // refine in 'partial' mode
-  const durationFields = refineFields(bag, durationFieldNamesAlpha) as DurationBag
+  const durationFields = refineFields(
+    bag,
+    durationFieldNamesAlpha,
+  ) as DurationBag
 
   return createDurationSlots(
     checkDurationFields({
       ...durationFieldDefaults,
-      ...durationFields
+      ...durationFields,
     }),
   )
 }
 
 // Low-level Refining
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function refineCalendarFields(
   calendarOps: { fields: FieldsOp },
@@ -251,13 +371,14 @@ function refineCalendarFields(
 }
 
 /*
-If `requiredFieldNames` is undefined, assume 'partial' mode where defaults don't apply
+If `requiredFieldNames` is undefined, assume 'partial' mode where defaults
+don't apply
 */
 function refineFields(
   bag: Record<string, unknown>,
   validFieldNames: string[], // must be alphabetized!!!
   requiredFieldNames?: string[],
-  disallowEmpty: boolean = !requiredFieldNames,
+  disallowEmpty = !requiredFieldNames,
 ): Record<string, unknown> {
   const res: Record<string, unknown> = {}
   let anyMatching = false
@@ -277,16 +398,20 @@ function refineFields(
       anyMatching = true
 
       if (builtinRefiners[fieldName as keyof typeof builtinRefiners]) {
-        fieldVal = (builtinRefiners[fieldName as keyof typeof builtinRefiners] as Callable)(fieldVal, fieldName)
+        fieldVal = (
+          builtinRefiners[fieldName as keyof typeof builtinRefiners] as Callable
+        )(fieldVal, fieldName)
       }
 
       res[fieldName] = fieldVal
     } else if (requiredFieldNames) {
-      if (requiredFieldNames.includes(fieldName)) { // TODO: have caller use a Set
+      if (requiredFieldNames.includes(fieldName)) {
+        // TODO: have caller use a Set
         throw new TypeError(errorMessages.missingField(fieldName))
       }
 
-      res[fieldName] = timeFieldDefaults[fieldName as keyof typeof timeFieldDefaults]
+      res[fieldName] =
+        timeFieldDefaults[fieldName as keyof typeof timeFieldDefaults]
     }
 
     prevFieldName = fieldName
@@ -321,7 +446,7 @@ export const isoTimeFieldsToCal = bindArgs(
 )
 
 // High-Level Mod
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithFields<C, T>(
   getCalendarOps: (calendarSlot: C) => DateModOps<C>,
@@ -361,12 +486,7 @@ export function plainDateTimeWithFields<C>(
   const calendarOps = getCalendarOps(calendarSlot)
 
   return createPlainDateTimeSlots(
-    mergePlainDateTimeBag(
-      calendarOps,
-      initialFields,
-      modFields,
-      optionsCopy,
-    ),
+    mergePlainDateTimeBag(calendarOps, initialFields, modFields, optionsCopy),
   )
 }
 
@@ -396,7 +516,7 @@ export function plainYearMonthWithFields<C>(
   const calendarOps = getCalendarOps(calendarSlot)
 
   return createPlainYearMonthSlots(
-    mergePlainYearMonthBag(calendarOps, initialFields, modFields, optionsCopy)
+    mergePlainYearMonthBag(calendarOps, initialFields, modFields, optionsCopy),
   )
 }
 
@@ -411,7 +531,12 @@ export function plainMonthDayWithFields<C>(
   const calendarSlot = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
 
-  return mergePlainMonthDayBag(calendarOps, initialFields, modFields, optionsCopy)
+  return mergePlainMonthDayBag(
+    calendarOps,
+    initialFields,
+    modFields,
+    optionsCopy,
+  )
 }
 
 export function plainTimeWithFields(
@@ -426,13 +551,11 @@ export function durationWithFields(
   slots: DurationSlots,
   fields: DurationBag,
 ): DurationSlots {
-  return createDurationSlots(
-    mergeDurationBag(slots, fields),
-  )
+  return createDurationSlots(mergeDurationBag(slots, fields))
 }
 
 // Low-Level Mod ("merging")
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function mergeZonedDateTimeBag<C>(
   calendarOps: DateModOps<C>,
@@ -450,7 +573,10 @@ function mergeZonedDateTimeBag<C>(
     offsetFieldNames, // requiredObjFieldNames
   ) as ZonedDateTimeBag<unknown, unknown>
 
-  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options, OffsetDisambig.Prefer)
+  const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(
+    options,
+    OffsetDisambig.Prefer,
+  )
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
     overrideOverflowOptions(options, overflow),
@@ -556,7 +682,7 @@ function mergePlainTimeBag(
 
 function mergeDurationBag(
   durationFields: DurationFields,
-  bag: DurationBag
+  bag: DurationBag,
 ): DurationFields {
   const newFields = refineFields(bag, durationFieldNamesAlpha)
   const mergedFields = { ...durationFields, ...newFields }
@@ -565,7 +691,7 @@ function mergeDurationBag(
 }
 
 function mergeCalendarFields(
-  calendarOps: { fields: FieldsOp, mergeFields: MergeFieldsOp },
+  calendarOps: { fields: FieldsOp; mergeFields: MergeFieldsOp },
   obj: Record<string, unknown>,
   bag: Record<string, unknown>,
   validFieldNames: string[], // does NOT need to be alphabetized
@@ -574,18 +700,20 @@ function mergeCalendarFields(
 ): Record<string, unknown> {
   const fieldNames = [
     ...calendarOps.fields(validFieldNames),
-    ...forcedValidFieldNames
+    ...forcedValidFieldNames,
   ].sort()
 
   let fields = refineFields(obj, fieldNames, requiredObjFieldNames)
   const partialFields = refineFields(bag, fieldNames)
 
   fields = calendarOps.mergeFields(fields, partialFields)
-  return refineFields(fields, fieldNames, []) // guard against ridiculous .mergeField results
+
+  // guard against ridiculous .mergeField results
+  return refineFields(fields, fieldNames, [])
 }
 
 // Conversion that involves bags
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function convertToPlainMonthDay<C>(
   calendarOps: MonthDayRefineOps<C>,
@@ -652,7 +780,7 @@ function convertToIso<C>(
   calendarOps: DateModOps<C>,
   input: any,
   inputFieldNames: string[], // must be alphabetized!!!
-  extra: {},
+  extra: any,
   extraFieldNames: string[], // must be alphabetized!!!
 ): PlainDateSlots<C> {
   inputFieldNames = calendarOps.fields(inputFieldNames)
@@ -662,13 +790,17 @@ function convertToIso<C>(
   extra = refineFields(extra, extraFieldNames, [])
 
   let mergedFields = calendarOps.mergeFields(input, extra)
-  mergedFields = refineFields(mergedFields, [...inputFieldNames, ...extraFieldNames].sort(), [])
+  mergedFields = refineFields(
+    mergedFields,
+    [...inputFieldNames, ...extraFieldNames].sort(),
+    [],
+  )
 
   return calendarOps.dateFromFields(mergedFields as any)
 }
 
 // Native *-from-fields
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function nativeDateFromFields(
   this: NativeDateRefineDeps,
@@ -706,11 +838,11 @@ export function nativeYearMonthFromFields(
 export function nativeMonthDayFromFields(
   this: NativeMonthDayRefineOps,
   fields: DateBag,
-  options?: OverflowOptions
+  options?: OverflowOptions,
 ): PlainMonthDaySlots<string> {
   const overflow = refineOverflowOptions(options)
-  let isIso = !this.id
-  let { monthCode, year, month } = fields as DateBag
+  const isIso = !this.id
+  const { monthCode, year, month } = fields as DateBag
   let monthCodeNumber: number
   let isLeapMonth: boolean
   let normalYear: number | undefined
@@ -718,13 +850,19 @@ export function nativeMonthDayFromFields(
   let normalDay: number
 
   if (monthCode !== undefined) {
-    [monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
+    ;[monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
     normalDay = getDefinedProp(fields, 'day')
 
     // query calendar for year/month
-    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, normalDay)
-    if (!res) { throw new RangeError(errorMessages.failedYearGuess) }
-    [normalYear, normalMonth] = res
+    const res = this.yearMonthForMonthDay(
+      monthCodeNumber,
+      isLeapMonth,
+      normalDay,
+    )
+    if (!res) {
+      throw new RangeError(errorMessages.failedYearGuess)
+    }
+    ;[normalYear, normalMonth] = res
 
     // monthCode conflicts with month?
     if (month !== undefined && month !== normalMonth) {
@@ -733,14 +871,38 @@ export function nativeMonthDayFromFields(
 
     // constrain (what refineMonth/refineDay would normally do)
     if (isIso) {
-      normalMonth = clampEntity('month', normalMonth, 1, isoMonthsInYear, Overflow.Reject) // reject because never leap months
-      normalDay = clampEntity('day', normalDay, 1, computeIsoDaysInMonth(year !== undefined ? year : normalYear, normalMonth), overflow)
+      normalMonth = clampEntity(
+        'month',
+        normalMonth,
+        1,
+        isoMonthsInYear,
+        Overflow.Reject,
+      ) // reject because never leap months
+      normalDay = clampEntity(
+        'day',
+        normalDay,
+        1,
+        computeIsoDaysInMonth(
+          year !== undefined ? year : normalYear,
+          normalMonth,
+        ),
+        overflow,
+      )
     }
   } else {
     // refine year/month/day
-    normalYear = (year === undefined && isIso) ? isoEpochFirstLeapYear : refineYear(this, fields as EraYearOrYear)
+    normalYear =
+      year === undefined && isIso
+        ? isoEpochFirstLeapYear
+        : refineYear(this, fields as EraYearOrYear)
     normalMonth = refineMonth(this, fields, normalYear, overflow)
-    normalDay = refineDay(this, fields as DayFields, normalMonth, normalYear, overflow)
+    normalDay = refineDay(
+      this,
+      fields as DayFields,
+      normalMonth,
+      normalYear,
+      overflow,
+    )
 
     // compute monthCode
     const leapMonth = this.leapMonth(normalYear)
@@ -748,9 +910,15 @@ export function nativeMonthDayFromFields(
     monthCodeNumber = monthToMonthCodeNumber(normalMonth, leapMonth)
 
     // query calendar for normalized year/month
-    const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, normalDay)
-    if (!res) { throw new RangeError(errorMessages.failedYearGuess) }
-    [normalYear, normalMonth] = res
+    const res = this.yearMonthForMonthDay(
+      monthCodeNumber,
+      isLeapMonth,
+      normalDay,
+    )
+    if (!res) {
+      throw new RangeError(errorMessages.failedYearGuess)
+    }
+    ;[normalYear, normalMonth] = res
   }
 
   return createPlainMonthDaySlots(
@@ -772,7 +940,7 @@ export function nativeFieldsMethod(
 export function nativeMergeFields(
   this: NativeYearMonthRefineDeps,
   baseFields: Record<string, unknown>,
-  additionalFields: Record<string, unknown>
+  additionalFields: Record<string, unknown>,
 ): Record<string, unknown> {
   const merged = Object.assign(Object.create(null), baseFields)
 
@@ -796,11 +964,11 @@ export function nativeMergeFields(
 }
 
 // Low-level Native Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function refineYear(
   calendarNative: NativeYearMonthRefineDeps,
-  fields: DateBag
+  fields: DateBag,
 ): number {
   let { era, eraYear, year } = fields
   const eraOrigins = getCalendarEraOrigins(calendarNative)
@@ -836,12 +1004,17 @@ function refineMonth(
   calendarNative: NativeYearMonthRefineDeps,
   fields: Partial<MonthFields>,
   year: number,
-  overflow: Overflow
+  overflow: Overflow,
 ): number {
   let { month, monthCode } = fields
 
   if (monthCode !== undefined) {
-    const monthByCode = refineMonthCode(calendarNative, monthCode, year, overflow)
+    const monthByCode = refineMonthCode(
+      calendarNative,
+      monthCode,
+      year,
+      overflow,
+    )
 
     if (month !== undefined && month !== monthByCode) {
       throw new RangeError(errorMessages.mismatchingMonthAndCode)
@@ -858,7 +1031,7 @@ function refineMonth(
     month,
     1,
     calendarNative.monthsInYearPart(year),
-    overflow
+    overflow,
   )
 }
 
@@ -881,30 +1054,26 @@ function refineMonthCode(
     }
 
     // leap year has a maximum
-    else if (leapMonthMeta > 0) {
+    if (leapMonthMeta > 0) {
       if (month > leapMonthMeta) {
         throw new RangeError(errorMessages.invalidLeapMonth)
       }
       if (leapMonth === undefined) {
         if (overflow === Overflow.Reject) {
           throw new RangeError(errorMessages.invalidLeapMonth)
-        } else {
-          month-- // M05L -> M05
         }
+        month-- // M05L -> M05
       }
-    }
-
-    // leap year is constant
-    else {
+    } else {
+      // leap year is constant
       if (month !== -leapMonthMeta) {
         throw new RangeError(errorMessages.invalidLeapMonth)
       }
       if (leapMonth === undefined) {
         if (overflow === Overflow.Reject) {
           throw new RangeError(errorMessages.invalidLeapMonth)
-        } else {
-           // ex: M05L -> M06
         }
+        // else, ex: M05L -> M06
       }
     }
   }
@@ -917,14 +1086,14 @@ function refineDay(
   fields: DayFields,
   month: number,
   year: number,
-  overflow?: Overflow
+  overflow?: Overflow,
 ): number {
   return clampProp(
     fields,
     'day',
     1,
     calendarNative.daysInMonthParts(year, month),
-    overflow
+    overflow,
   )
 }
 
@@ -948,7 +1117,8 @@ function spliceFields(
   Object.assign(dest, additional)
 
   if (anyMatching) {
-    for (const deletablePropName of (deletablePropNames || nonMatchingPropNames)) {
+    for (const deletablePropName of deletablePropNames ||
+      nonMatchingPropNames) {
       delete dest[deletablePropName]
     }
   }

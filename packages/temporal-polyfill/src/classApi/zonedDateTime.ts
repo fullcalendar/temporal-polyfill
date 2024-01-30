@@ -1,6 +1,30 @@
+import {
+  ZonedDateTimeBag,
+  refineZonedDateTimeBag,
+  zonedDateTimeWithFields,
+} from '../internal/bagRefine'
+import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
+import { constructZonedDateTimeSlots } from '../internal/construct'
+import {
+  zonedDateTimeToInstant,
+  zonedDateTimeToPlainDate,
+  zonedDateTimeToPlainDateTime,
+  zonedDateTimeToPlainMonthDay,
+  zonedDateTimeToPlainTime,
+  zonedDateTimeToPlainYearMonth,
+} from '../internal/convert'
+import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
+import { parseZonedDateTime } from '../internal/isoParse'
+import {
+  slotsWithCalendar,
+  slotsWithTimeZone,
+  zonedDateTimeWithPlainDate,
+  zonedDateTimeWithPlainTime,
+} from '../internal/modify'
+import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
@@ -10,41 +34,78 @@ import {
   copyOptions,
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
+import { roundZonedDateTime } from '../internal/round'
+import {
+  ZonedDateTimeBranding,
+  ZonedDateTimeSlots,
+  createDurationSlots,
+  getId,
+} from '../internal/slots'
+import {
+  FixedIsoFields,
+  ZonedIsoFields,
+  buildZonedIsoFields,
+  computeHoursInDay,
+  computeStartOfDay,
+  zonedEpochSlotsToIso,
+} from '../internal/timeZoneOps'
 import { UnitName } from '../internal/units'
 import { NumSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
-import { IsoDateTimeFields } from '../internal/isoFields'
-import { ZonedIsoFields, computeHoursInDay, computeStartOfDay, buildZonedIsoFields, zonedEpochSlotsToIso, FixedIsoFields } from '../internal/timeZoneOps'
-import { ZonedDateTimeBranding, ZonedDateTimeSlots, createDurationSlots, getId } from '../internal/slots'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
-import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotClass'
-import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
 import { CalendarArg } from './calendar'
-import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
+import {
+  createDateModOps,
+  createDateRefineOps,
+  createDiffOps,
+  createMonthDayRefineOps,
+  createMoveOps,
+  createYearMonthRefineOps,
+} from './calendarOpsQuery'
+import {
+  Duration,
+  DurationArg,
+  createDuration,
+  toDurationSlots,
+} from './duration'
 import { Instant, createInstant } from './instant'
-import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
+import { prepZonedDateTimeFormat } from './intlDateTimeFormat'
+import {
+  calendarIdGetters,
+  createCalendarFromSlots,
+  dateGetters,
+  epochGetters,
+  neverValueOf,
+  timeGetters,
+} from './mixins'
+import {
+  PlainDate,
+  PlainDateArg,
+  createPlainDate,
+  toPlainDateSlots,
+} from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
+import {
+  CalendarSlot,
+  TimeZoneSlot,
+  createSlotClass,
+  getCalendarSlotFromBag,
+  getSlots,
+  refineCalendarSlot,
+  refineTimeZoneSlot,
+  rejectInvalidBag,
+} from './slotClass'
 import { TimeZone, TimeZoneArg } from './timeZone'
-import { TimeZoneProtocol } from './timeZoneProtocol'
-import { neverValueOf, dateGetters, timeGetters, epochGetters, createCalendarFromSlots, calendarIdGetters } from './mixins'
-import { optionalToPlainTimeFields } from './utils'
-import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { ZonedDateTimeBag, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bagRefine'
-import { constructZonedDateTimeSlots } from '../internal/construct'
-import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/modify'
-import { moveZonedDateTime } from '../internal/move'
-import { diffZonedDateTimes } from '../internal/diff'
-import { roundZonedDateTime } from '../internal/round'
-import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
-import { zonedDateTimeToInstant, zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
-import { parseZonedDateTime } from '../internal/isoParse'
-import { prepZonedDateTimeFormat } from './intlDateTimeFormat'
+import { TimeZoneProtocol } from './timeZoneProtocol'
+import { optionalToPlainTimeFields } from './utils'
 
 export type ZonedDateTime = any
-export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag<CalendarArg, TimeZoneArg> | string
+export type ZonedDateTimeArg =
+  | ZonedDateTime
+  | ZonedDateTimeBag<CalendarArg, TimeZoneArg>
+  | string
 
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
@@ -68,32 +129,67 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     },
   },
   {
-    with(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, mod: DateTimeBag, options?: ZonedFieldOptions): ZonedDateTime {
+    with(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      mod: DateTimeBag,
+      options?: ZonedFieldOptions,
+    ): ZonedDateTime {
       return createZonedDateTime(
-        zonedDateTimeWithFields(createDateModOps, createTimeZoneOps, slots, this, rejectInvalidBag(mod), options),
+        zonedDateTimeWithFields(
+          createDateModOps,
+          createTimeZoneOps,
+          slots,
+          this,
+          rejectInvalidBag(mod),
+          options,
+        ),
       )
     },
-    withPlainTime(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, plainTimeArg?: PlainTimeArg): ZonedDateTime {
+    withPlainTime(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      plainTimeArg?: PlainTimeArg,
+    ): ZonedDateTime {
       return createZonedDateTime(
-        zonedDateTimeWithPlainTime(createTimeZoneOps, slots, optionalToPlainTimeFields(plainTimeArg))
+        zonedDateTimeWithPlainTime(
+          createTimeZoneOps,
+          slots,
+          optionalToPlainTimeFields(plainTimeArg),
+        ),
       )
     },
-    withPlainDate(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, plainDateArg: PlainDateArg): ZonedDateTime {
+    withPlainDate(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      plainDateArg: PlainDateArg,
+    ): ZonedDateTime {
       return createZonedDateTime(
-        zonedDateTimeWithPlainDate(createTimeZoneOps, slots, toPlainDateSlots(plainDateArg))
+        zonedDateTimeWithPlainDate(
+          createTimeZoneOps,
+          slots,
+          toPlainDateSlots(plainDateArg),
+        ),
       )
     },
-    withTimeZone(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, timeZoneArg: TimeZoneArg): ZonedDateTime {
+    withTimeZone(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      timeZoneArg: TimeZoneArg,
+    ): ZonedDateTime {
       return createZonedDateTime(
-        slotsWithTimeZone(slots, refineTimeZoneSlot(timeZoneArg))
+        slotsWithTimeZone(slots, refineTimeZoneSlot(timeZoneArg)),
       )
     },
-    withCalendar(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, calendarArg: CalendarArg): ZonedDateTime {
+    withCalendar(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      calendarArg: CalendarArg,
+    ): ZonedDateTime {
       return createZonedDateTime(
-        slotsWithCalendar(slots, refineCalendarSlot(calendarArg))
+        slotsWithCalendar(slots, refineCalendarSlot(calendarArg)),
       )
     },
-    add(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
+    add(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      durationArg: DurationArg,
+      options?: OverflowOptions,
+    ): ZonedDateTime {
       return createZonedDateTime(
         moveZonedDateTime(
           createMoveOps,
@@ -102,10 +198,14 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
           slots,
           toDurationSlots(durationArg),
           options,
-        )
+        ),
       )
     },
-    subtract(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
+    subtract(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      durationArg: DurationArg,
+      options?: OverflowOptions,
+    ): ZonedDateTime {
       return createZonedDateTime(
         moveZonedDateTime(
           createMoveOps,
@@ -114,10 +214,14 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
           slots,
           toDurationSlots(durationArg),
           options,
-        )
+        ),
       )
     },
-    until(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
+    until(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      otherArg: ZonedDateTimeArg,
+      options?: DiffOptions,
+    ): Duration {
       return createDuration(
         createDurationSlots(
           diffZonedDateTimes(
@@ -128,10 +232,14 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
             toZonedDateTimeSlots(otherArg),
             options,
           ),
-        )
+        ),
       )
     },
-    since(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, otherArg: ZonedDateTimeArg, options?: DiffOptions): Duration {
+    since(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      otherArg: ZonedDateTimeArg,
+      options?: DiffOptions,
+    ): Duration {
       return createDuration(
         createDurationSlots(
           diffZonedDateTimes(
@@ -142,70 +250,97 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
             toZonedDateTimeSlots(otherArg),
             options,
           ),
-        )
+        ),
       )
     },
-    round(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, options: RoundingOptions | UnitName): ZonedDateTime {
+    round(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      options: RoundingOptions | UnitName,
+    ): ZonedDateTime {
       return createZonedDateTime(
-        roundZonedDateTime(createTimeZoneOps, slots, options)
+        roundZonedDateTime(createTimeZoneOps, slots, options),
       )
     },
-    startOfDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedDateTime {
-      return createZonedDateTime(
-        computeStartOfDay(createTimeZoneOps, slots)
-      )
+    startOfDay(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): ZonedDateTime {
+      return createZonedDateTime(computeStartOfDay(createTimeZoneOps, slots))
     },
-    equals(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, otherArg: ZonedDateTimeArg): boolean {
+    equals(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      otherArg: ZonedDateTimeArg,
+    ): boolean {
       return zonedDateTimesEqual(slots, toZonedDateTimeSlots(otherArg))
     },
-    toString(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, options?: ZonedDateTimeDisplayOptions): string {
+    toString(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      options?: ZonedDateTimeDisplayOptions,
+    ): string {
       return formatZonedDateTimeIso(createTimeZoneOffsetOps, slots, options)
     },
     toJSON(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): string {
       return formatZonedDateTimeIso(createTimeZoneOffsetOps, slots)
     },
-    toLocaleString(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>, locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}): string {
-      const [format, epochMilli] = prepZonedDateTimeFormat(locales, options, slots)
+    toLocaleString(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+      locales: LocalesArg,
+      options: Intl.DateTimeFormatOptions = {},
+    ): string {
+      const [format, epochMilli] = prepZonedDateTimeFormat(
+        locales,
+        options,
+        slots,
+      )
       return format.format(epochMilli)
     },
     toInstant(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): Instant {
-      return createInstant(
-        zonedDateTimeToInstant(slots)
-      )
+      return createInstant(zonedDateTimeToInstant(slots))
     },
-    toPlainDate(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainDate {
+    toPlainDate(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): PlainDate {
       return createPlainDate(
-        zonedDateTimeToPlainDate(createTimeZoneOffsetOps, slots)
+        zonedDateTimeToPlainDate(createTimeZoneOffsetOps, slots),
       )
     },
-    toPlainTime(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainTime {
+    toPlainTime(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): PlainTime {
       return createPlainTime(
-        zonedDateTimeToPlainTime(createTimeZoneOffsetOps, slots)
+        zonedDateTimeToPlainTime(createTimeZoneOffsetOps, slots),
       )
     },
-    toPlainDateTime(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainDateTime {
+    toPlainDateTime(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): PlainDateTime {
       return createPlainDateTime(
-        zonedDateTimeToPlainDateTime(createTimeZoneOffsetOps, slots)
+        zonedDateTimeToPlainDateTime(createTimeZoneOffsetOps, slots),
       )
     },
-    toPlainYearMonth(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainYearMonth {
+    toPlainYearMonth(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): PlainYearMonth {
       return createPlainYearMonth(
-        zonedDateTimeToPlainYearMonth(createYearMonthRefineOps, slots, this)
+        zonedDateTimeToPlainYearMonth(createYearMonthRefineOps, slots, this),
       )
     },
-    toPlainMonthDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): PlainMonthDay {
+    toPlainMonthDay(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): PlainMonthDay {
       return createPlainMonthDay(
-        zonedDateTimeToPlainMonthDay(createMonthDayRefineOps, slots, this)
+        zonedDateTimeToPlainMonthDay(createMonthDayRefineOps, slots, this),
       )
     },
-    getISOFields(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedIsoFields<CalendarSlot, TimeZoneSlot> {
+    getISOFields(
+      slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+    ): ZonedIsoFields<CalendarSlot, TimeZoneSlot> {
       return buildZonedIsoFields(createTimeZoneOffsetOps, slots)
     },
     getCalendar: createCalendarFromSlots,
-    getTimeZone({ timeZone }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): TimeZoneProtocol {
-      return typeof timeZone === 'string'
-        ? new TimeZone(timeZone)
-        : timeZone
+    getTimeZone({
+      timeZone,
+    }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): TimeZoneProtocol {
+      return typeof timeZone === 'string' ? new TimeZone(timeZone) : timeZone
     },
     valueOf: neverValueOf,
   },
@@ -218,14 +353,17 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
         toZonedDateTimeSlots(arg0),
         toZonedDateTimeSlots(arg1),
       )
-    }
-  }
+    },
+  },
 )
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedFieldOptions): ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
+export function toZonedDateTimeSlots(
+  arg: ZonedDateTimeArg,
+  options?: ZonedFieldOptions,
+): ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> {
   options = copyOptions(options)
 
   if (isObjectLike(arg)) {
@@ -252,18 +390,15 @@ export function toZonedDateTimeSlots(arg: ZonedDateTimeArg, options?: ZonedField
 }
 
 function slotsToIso(
-  slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
+  slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
 ): FixedIsoFields<CalendarSlot> {
   return zonedEpochSlotsToIso(slots, createTimeZoneOffsetOps)
 }
 
 function adaptDateMethods(methods: any) {
-  return mapProps(
-    (method: any) => {
-      return (slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>) => {
-        return method(slotsToIso(slots))
-      }
-    },
-    methods,
-  )
+  return mapProps((method: any) => {
+    return (slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>) => {
+      return method(slotsToIso(slots))
+    }
+  }, methods)
 }

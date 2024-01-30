@@ -1,14 +1,29 @@
 import { isoCalendarId } from '../internal/calendarConfig'
+import * as errorMessages from '../internal/errorMessages'
 import { IsoDateFields, IsoTimeFields } from '../internal/isoFields'
-import { BrandingSlots, refineCalendarSlotString, refineTimeZoneSlotString } from '../internal/slots'
-import { createGetterDescriptors, createNameDescriptors, createPropDescriptors, createStringTagDescriptors, isObjectLike, mapProps } from '../internal/utils'
-import { CalendarArg, CalendarProtocol, checkCalendarProtocol } from './calendar'
+import {
+  BrandingSlots,
+  refineCalendarSlotString,
+  refineTimeZoneSlotString,
+} from '../internal/slots'
+import {
+  createGetterDescriptors,
+  createNameDescriptors,
+  createPropDescriptors,
+  createStringTagDescriptors,
+  isObjectLike,
+  mapProps,
+} from '../internal/utils'
+import {
+  CalendarArg,
+  CalendarProtocol,
+  checkCalendarProtocol,
+} from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
-import * as errorMessages from '../internal/errorMessages'
 
 // Lookup
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const slotsMap = new WeakMap<any, BrandingSlots>()
 
@@ -17,7 +32,7 @@ export const getSlots = slotsMap.get.bind(slotsMap)
 const setSlots = slotsMap.set.bind(slotsMap)
 
 // Class
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function createSlotClass(
   branding: string,
@@ -46,16 +61,13 @@ export function createSlotClass(
   })
 
   function curryMethod(method: any, methodName: string) {
-    return Object.defineProperties(
-      function(this: any, ...args: any[]) {
-        const slots = getSlots(this)
-        if (!slots || slots.branding !== branding) {
-          throw new TypeError(errorMessages.invalidCallingContext)
-        }
-        return method.call(this, slots, ...args)
-      },
-      createNameDescriptors(methodName),
-    )
+    return Object.defineProperties(function (this: any, ...args: any[]) {
+      const slots = getSlots(this)
+      if (!slots || slots.branding !== branding) {
+        throw new TypeError(errorMessages.invalidCallingContext)
+      }
+      return method.call(this, slots, ...args)
+    }, createNameDescriptors(methodName))
   }
 
   return [
@@ -80,7 +92,7 @@ export function createSlotClass(
 }
 
 // Reject
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function rejectInvalidBag<B>(bag: B): B {
   if (
@@ -94,20 +106,22 @@ export function rejectInvalidBag<B>(bag: B): B {
 }
 
 // getISOFields
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
 export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
 
 // Calendar
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type CalendarSlot = CalendarProtocol | string
 
 export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
   if (isObjectLike(calendarArg)) {
     // look at other date-like objects
-    const { calendar } = (getSlots(calendarArg) || {}) as { calendar?: CalendarSlot }
+    const { calendar } = (getSlots(calendarArg) || {}) as {
+      calendar?: CalendarSlot
+    }
     if (calendar) {
       return calendar
     }
@@ -122,11 +136,15 @@ export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
 // bag
 // ---
 
-export function getCalendarSlotFromBag(bag: { calendar?: CalendarArg }): CalendarSlot {
+export function getCalendarSlotFromBag(bag: {
+  calendar?: CalendarArg
+}): CalendarSlot {
   return extractCalendarSlotFromBag(bag) || isoCalendarId
 }
 
-export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }): CalendarSlot | undefined {
+export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }):
+  | CalendarSlot
+  | undefined {
   const { calendar } = bag
   if (calendar !== undefined) {
     return refineCalendarSlot(calendar)
@@ -134,7 +152,7 @@ export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }): Cal
 }
 
 // TimeZone
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type TimeZoneSlot = TimeZoneProtocol | string
 

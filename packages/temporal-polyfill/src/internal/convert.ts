@@ -1,18 +1,57 @@
-import { convertPlainMonthDayToDate, convertPlainYearMonthToDate, convertToPlainMonthDay, convertToPlainYearMonth } from './bagRefine'
+import {
+  convertPlainMonthDayToDate,
+  convertPlainYearMonthToDate,
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
+} from './bagRefine'
 import { isoCalendarId } from './calendarConfig'
-import { DateBag, MonthDayFields, YearFields, YearMonthFields } from './fields'
-import { IsoDateTimeFields, IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
-import { DateModOps, MonthDayRefineOps, YearMonthRefineOps } from './calendarOps'
+import {
+  DateModOps,
+  MonthDayRefineOps,
+  YearMonthRefineOps,
+} from './calendarOps'
 import { requireObjectLike, toBigInt } from './cast'
-import { DayTimeNano, bigIntToDayTimeNano, numberToDayTimeNano } from './dayTimeNano'
+import {
+  DayTimeNano,
+  bigIntToDayTimeNano,
+  numberToDayTimeNano,
+} from './dayTimeNano'
+import { DateBag, MonthDayFields, YearFields, YearMonthFields } from './fields'
+import {
+  IsoDateTimeFields,
+  IsoTimeFields,
+  isoTimeFieldDefaults,
+} from './isoFields'
+import {
+  EpochDisambigOptions,
+  refineEpochDisambigOptions,
+} from './optionsRefine'
+import {
+  InstantSlots,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainMonthDaySlots,
+  PlainTimeSlots,
+  PlainYearMonthSlots,
+  ZonedDateTimeSlots,
+  createInstantSlots,
+  createPlainDateSlots,
+  createPlainDateTimeSlots,
+  createPlainTimeSlots,
+  createPlainYearMonthSlots,
+  createZonedDateTimeSlots,
+} from './slots'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './timeMath'
-import { EpochDisambigOptions, refineEpochDisambigOptions } from './optionsRefine'
-import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
-import { TimeZoneOffsetOps, TimeZoneOps, getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneOps'
+import {
+  TimeZoneOffsetOps,
+  TimeZoneOps,
+  getSingleInstantFor,
+  zonedEpochSlotsToIso,
+} from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 
 // Instant -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function instantToZonedDateTime<C, T>(
   instantSlots: InstantSlots,
@@ -27,10 +66,10 @@ export function instantToZonedDateTime<C, T>(
 }
 
 // ZonedDateTime -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function zonedDateTimeToInstant(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>
+  zonedDateTimeSlots0: ZonedDateTimeSlots<unknown, unknown>,
 ): InstantSlots {
   return createInstantSlots(zonedDateTimeSlots0.epochNanoseconds)
 }
@@ -85,7 +124,7 @@ export function zonedDateTimeToPlainTime<C, T>(
 }
 
 // PlainDateTime -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function plainDateTimeToZonedDateTime<C, TZ>(
   getTimeZoneOps: (timeZoneSlot: TZ) => TimeZoneOps,
@@ -138,20 +177,21 @@ function dateToEpochNano<TZ>(
 }
 
 // PlainDate -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function plainDateToZonedDateTime<C, TA, T, PA>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   refinePlainTimeArg: (plainTimeArg: PA) => IsoTimeFields,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   plainDateSlots: PlainDateSlots<C>,
-  options: { timeZone: TA, plainTime?: PA },
+  options: { timeZone: TA; plainTime?: PA },
 ): ZonedDateTimeSlots<C, T> {
   const timeZoneSlot = refineTimeZoneArg(options.timeZone)
   const plainTimeArg = options.plainTime
-  const isoTimeFields = plainTimeArg !== undefined
-    ? refinePlainTimeArg(plainTimeArg)
-    : isoTimeFieldDefaults
+  const isoTimeFields =
+    plainTimeArg !== undefined
+      ? refinePlainTimeArg(plainTimeArg)
+      : isoTimeFieldDefaults
 
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
@@ -197,7 +237,7 @@ export function plainDateToPlainMonthDay<C>(
 }
 
 // PlainYearMonth -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function plainYearMonthToPlainDate<C>(
   getCalendarOps: (calendar: C) => DateModOps<C>,
@@ -212,7 +252,7 @@ export function plainYearMonthToPlainDate<C>(
 }
 
 // PlainMonthDay -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function plainMonthDayToPlainDate<C>(
   getCalendarOps: (calendar: C) => DateModOps<C>,
@@ -227,14 +267,14 @@ export function plainMonthDayToPlainDate<C>(
 }
 
 // PlainTime -> *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function plainTimeToZonedDateTime<C, TA, T, PA>(
   refineTimeZoneArg: (timeZoneArg: TA) => T,
   refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots<C>,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: PlainTimeSlots,
-  options: { timeZone: TA, plainDate: PA },
+  options: { timeZone: TA; plainDate: PA },
 ): ZonedDateTimeSlots<C, T> {
   const refinedOptions = requireObjectLike(options)
   const plainDateSlots = refinePlainDateArg(refinedOptions.plainDate)
@@ -242,10 +282,7 @@ export function plainTimeToZonedDateTime<C, TA, T, PA>(
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
   return createZonedDateTimeSlots(
-    getSingleInstantFor(
-      timeZoneOps,
-      { ...plainDateSlots, ...slots },
-    ),
+    getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...slots }),
     timeZoneSlot,
     plainDateSlots.calendar,
   )
@@ -264,11 +301,11 @@ export function plainTimeToPlainDateTime<C>(
 }
 
 // Epoch-* -> Instant
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function epochSecToInstant(epochSec: number): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec))
+    checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec)),
   )
 }
 
@@ -280,7 +317,9 @@ export function epochMilliToInstant(epochMilli: number): InstantSlots {
 
 export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro))
+    checkEpochNanoInBounds(
+      bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro),
+    ),
   )
 }
 

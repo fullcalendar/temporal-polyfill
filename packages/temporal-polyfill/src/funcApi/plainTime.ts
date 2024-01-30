@@ -1,18 +1,29 @@
+import {
+  isoTimeFieldsToCal,
+  plainTimeWithFields,
+  refinePlainTimeBag,
+} from '../internal/bagRefine'
+import { compareIsoTimeFields, plainTimesEqual } from '../internal/compare'
+import { constructPlainTimeSlots } from '../internal/construct'
+import {
+  plainTimeToPlainDateTime,
+  plainTimeToZonedDateTime,
+} from '../internal/convert'
+import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainTimeSlots, refineTimeZoneIdString } from '../internal/slots'
-import { NumSign, bindArgs, identityFunc } from '../internal/utils'
-import { constructPlainTimeSlots } from '../internal/construct'
-import { isoTimeFieldsToCal, plainTimeWithFields, refinePlainTimeBag } from '../internal/bagRefine'
+import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
-import { diffPlainTimes } from '../internal/diff'
+import { OverflowOptions } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
-import { plainTimesEqual, compareIsoTimeFields } from '../internal/compare'
-import { formatPlainTimeIso } from '../internal/isoFormat'
-import { plainTimeToPlainDateTime, plainTimeToZonedDateTime } from '../internal/convert'
+import {
+  PlainDateSlots,
+  PlainTimeSlots,
+  refineTimeZoneIdString,
+} from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 import { prepCachedPlainTimeFormat } from './intlFormatCached'
 
 export const create = constructPlainTimeSlots
@@ -22,7 +33,7 @@ export const fromFields = refinePlainTimeBag
 export const fromString = parsePlainTime
 
 export const getFields = isoTimeFieldsToCal as (
-  slots: PlainTimeSlots
+  slots: PlainTimeSlots,
 ) => TimeFields
 
 export function withFields(
@@ -62,7 +73,11 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedPlainTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainTimeFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.format(epochMilli)
 }
 
@@ -71,7 +86,11 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedPlainTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainTimeFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.formatToParts(epochMilli)
 }
 
@@ -81,7 +100,12 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -90,7 +114,12 @@ export function rangeToLocaleStringParts(
   slots1: PlainTimeSlots,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-  ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(locales, options, slots0, slots1)
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

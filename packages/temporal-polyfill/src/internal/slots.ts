@@ -1,14 +1,21 @@
+import { isoCalendarId } from './calendarConfig'
+import { resolveCalendarId } from './calendarNativeQuery'
+import { requireString } from './cast'
 import { DayTimeNano, dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAlpha, isoDateTimeFieldNamesAlpha, isoTimeFieldNamesAlpha } from './isoFields'
-import { requireString } from './cast'
-import { isoCalendarId } from './calendarConfig'
-import { parseCalendarId, parseTimeZoneId } from './isoParse'
-import { getTimeZoneComparator, resolveTimeZoneId } from './timeZoneNative'
-import { resolveCalendarId } from './calendarNativeQuery'
-import { pluckProps } from './utils'
-import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
 import * as errorMessages from './errorMessages'
+import {
+  IsoDateFields,
+  IsoDateTimeFields,
+  IsoTimeFields,
+  isoDateFieldNamesAlpha,
+  isoDateTimeFieldNamesAlpha,
+  isoTimeFieldNamesAlpha,
+} from './isoFields'
+import { parseCalendarId, parseTimeZoneId } from './isoParse'
+import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
+import { getTimeZoneComparator, resolveTimeZoneId } from './timeZoneNative'
+import { bindArgs, excludePropsByName, pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
@@ -20,7 +27,7 @@ export const InstantBranding = 'Instant' as const
 export const DurationBranding = 'Duration' as const
 
 // Slot-creation helpers
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function createInstantSlots(epochNano: DayTimeNano): InstantSlots {
   return {
@@ -42,8 +49,13 @@ export function createZonedDateTimeSlots<C, T>(
   }
 }
 
-export function createPlainDateTimeSlots<C>(isoFields: IsoDateTimeFields & { calendar: C }): PlainDateTimeSlots<C>
-export function createPlainDateTimeSlots<C>(isoFields: IsoDateTimeFields, calendar: C): PlainDateTimeSlots<C>
+export function createPlainDateTimeSlots<C>(
+  isoFields: IsoDateTimeFields & { calendar: C },
+): PlainDateTimeSlots<C>
+export function createPlainDateTimeSlots<C>(
+  isoFields: IsoDateTimeFields,
+  calendar: C,
+): PlainDateTimeSlots<C>
 export function createPlainDateTimeSlots<C>(
   isoFields: IsoDateTimeFields & { calendar?: C },
   calendar = isoFields.calendar,
@@ -55,8 +67,13 @@ export function createPlainDateTimeSlots<C>(
   }
 }
 
-export function createPlainDateSlots<C>(isoFields: IsoDateFields & { calendar: C }): PlainDateSlots<C>
-export function createPlainDateSlots<C>(isoFields: IsoDateFields, calendar: C): PlainDateSlots<C>
+export function createPlainDateSlots<C>(
+  isoFields: IsoDateFields & { calendar: C },
+): PlainDateSlots<C>
+export function createPlainDateSlots<C>(
+  isoFields: IsoDateFields,
+  calendar: C,
+): PlainDateSlots<C>
 export function createPlainDateSlots<C>(
   isoFields: IsoDateFields & { calendar?: C },
   calendar = isoFields.calendar,
@@ -68,8 +85,13 @@ export function createPlainDateSlots<C>(
   }
 }
 
-export function createPlainYearMonthSlots<C>(isoFields: IsoDateFields & { calendar: C }): PlainYearMonthSlots<C>
-export function createPlainYearMonthSlots<C>(isoFields: IsoDateFields, calendar: C): PlainYearMonthSlots<C>
+export function createPlainYearMonthSlots<C>(
+  isoFields: IsoDateFields & { calendar: C },
+): PlainYearMonthSlots<C>
+export function createPlainYearMonthSlots<C>(
+  isoFields: IsoDateFields,
+  calendar: C,
+): PlainYearMonthSlots<C>
 export function createPlainYearMonthSlots<C>(
   isoFields: IsoDateFields & { calendar?: C },
   calendar = isoFields.calendar,
@@ -81,8 +103,13 @@ export function createPlainYearMonthSlots<C>(
   }
 }
 
-export function createPlainMonthDaySlots<C>(isoFields: IsoDateFields & { calendar: C }): PlainMonthDaySlots<C>
-export function createPlainMonthDaySlots<C>(isoFields: IsoDateFields, calendar: C): PlainMonthDaySlots<C>
+export function createPlainMonthDaySlots<C>(
+  isoFields: IsoDateFields & { calendar: C },
+): PlainMonthDaySlots<C>
+export function createPlainMonthDaySlots<C>(
+  isoFields: IsoDateFields,
+  calendar: C,
+): PlainMonthDaySlots<C>
 export function createPlainMonthDaySlots<C>(
   isoFields: IsoDateFields & { calendar?: C },
   calendar = isoFields.calendar,
@@ -101,23 +128,24 @@ export function createPlainTimeSlots(isoFields: IsoTimeFields): PlainTimeSlots {
   }
 }
 
-export function createDurationSlots(durationFields: DurationFields): DurationSlots {
+export function createDurationSlots(
+  durationFields: DurationFields,
+): DurationSlots {
   return {
     branding: DurationBranding,
-    ...pluckProps(durationFieldNamesAlpha, durationFields)
+    ...pluckProps(durationFieldNamesAlpha, durationFields),
   }
 }
 
 // getISOFields
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function removeBranding<S>(slots: S): Omit<S, 'branding'> {
-  slots = { ...slots }
-  delete (slots as any).branding
-  return slots
-}
+export const removeBranding = bindArgs(
+  excludePropsByName,
+  new Set(['branding']),
+)
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export interface BrandingSlots {
   branding: string
@@ -128,19 +156,40 @@ export interface EpochSlots {
 }
 
 export type DateSlots<C> = IsoDateFields & { calendar: C }
-export type ZonedEpochSlots<C, T> = EpochSlots & { timeZone: T, calendar: C }
+export type ZonedEpochSlots<C, T> = EpochSlots & { timeZone: T; calendar: C }
 
-export type PlainDateSlots<C> = IsoDateFields & { calendar: C, branding: typeof PlainDateBranding }
-export type PlainTimeSlots = IsoTimeFields & { branding: typeof PlainTimeBranding }
-export type PlainDateTimeSlots<C> = IsoDateTimeFields & { calendar: C, branding: typeof PlainDateTimeBranding }
-export type ZonedDateTimeSlots<C, T> = ZonedEpochSlots<C, T> & { branding: typeof ZonedDateTimeBranding }
-export type PlainMonthDaySlots<C> = IsoDateFields & { calendar: C, branding: typeof PlainMonthDayBranding }
-export type PlainYearMonthSlots<C> = IsoDateFields & { calendar: C, branding: typeof PlainYearMonthBranding }
-export type DurationSlots = DurationFields & { branding: typeof DurationBranding }
-export type InstantSlots = { epochNanoseconds: DayTimeNano, branding: typeof InstantBranding }
+export type PlainDateSlots<C> = IsoDateFields & {
+  calendar: C
+  branding: typeof PlainDateBranding
+}
+export type PlainTimeSlots = IsoTimeFields & {
+  branding: typeof PlainTimeBranding
+}
+export type PlainDateTimeSlots<C> = IsoDateTimeFields & {
+  calendar: C
+  branding: typeof PlainDateTimeBranding
+}
+export type ZonedDateTimeSlots<C, T> = ZonedEpochSlots<C, T> & {
+  branding: typeof ZonedDateTimeBranding
+}
+export type PlainMonthDaySlots<C> = IsoDateFields & {
+  calendar: C
+  branding: typeof PlainMonthDayBranding
+}
+export type PlainYearMonthSlots<C> = IsoDateFields & {
+  calendar: C
+  branding: typeof PlainYearMonthBranding
+}
+export type DurationSlots = DurationFields & {
+  branding: typeof DurationBranding
+}
+export type InstantSlots = {
+  epochNanoseconds: DayTimeNano
+  branding: typeof InstantBranding
+}
 
 // Epoch Slot Getters (best place for this?)
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function getEpochSeconds(slots: EpochSlots) {
   return epochNanoToSec(slots.epochNanoseconds)
@@ -159,7 +208,7 @@ export function getEpochNanoseconds(slots: EpochSlots) {
 }
 
 // Calendar
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   if (!isIdLikeEqual(a, b)) {
@@ -179,7 +228,8 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
 
   if (aId === bId || aId === isoCalendarId) {
     return b
-  } else if (bId === isoCalendarId) {
+  }
+  if (bId === isoCalendarId) {
     return a
   }
 
@@ -192,7 +242,9 @@ export function getCalendarIdFromBag(bag: { calendar?: string }): string {
 }
 
 // NOTE: only used by funcApi (circ dep?)
-export function extractCalendarIdFromBag(bag: { calendar?: string }): string | undefined {
+export function extractCalendarIdFromBag(bag: { calendar?: string }):
+  | string
+  | undefined {
   const { calendar } = bag
   if (calendar !== undefined) {
     return refineCalendarIdString(calendar)
@@ -210,7 +262,7 @@ export function refineCalendarSlotString(arg: string): string {
 }
 
 // TimeZone
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
   if (!isTimeZoneSlotsEqual(a, b)) {
@@ -255,7 +307,7 @@ export function refineTimeZoneSlotString(arg: string): string {
 }
 
 // ID-like
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type IdLike = string | { id: string }
 
@@ -267,5 +319,8 @@ export function isIdLikeEqual(
   calendarSlot0: IdLike,
   calendarSlot1: IdLike,
 ): boolean {
-  return calendarSlot0 === calendarSlot1 || getId(calendarSlot0) === getId(calendarSlot1)
+  return (
+    calendarSlot0 === calendarSlot1 ||
+    getId(calendarSlot0) === getId(calendarSlot1)
+  )
 }

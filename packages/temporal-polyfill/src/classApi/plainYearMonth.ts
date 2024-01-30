@@ -1,101 +1,203 @@
-import { YearMonthBag, YearMonthFields } from '../internal/fields'
-import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { LocalesArg } from '../internal/intlFormat'
-import { DiffOptions, OverflowOptions, copyOptions, refineOverflowOptions } from '../internal/optionsRefine'
-import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
-import { PlainYearMonthBranding, PlainYearMonthSlots, removeBranding } from '../internal/slots'
-import { getSlots, rejectInvalidBag, createSlotClass } from './slotClass'
-import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotClass'
-import { CalendarArg } from './calendar'
-import { PlainDate, createPlainDate } from './plainDate'
-import { calendarIdGetters, createCalendarFromSlots, neverValueOf, yearMonthGetters } from './mixins'
-import { createDateModOps, createYearMonthDiffOps, createYearMonthModOps, createYearMonthMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
+import {
+  PlainYearMonthBag,
+  plainYearMonthWithFields,
+  refinePlainYearMonthBag,
+} from '../internal/bagRefine'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
-import { PlainYearMonthBag, plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bagRefine'
+import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
-import { movePlainYearMonth } from '../internal/move'
-import { diffPlainYearMonth } from '../internal/diff'
-import { plainYearMonthsEqual, compareIsoDateFields } from '../internal/compare'
-import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { plainYearMonthToPlainDate } from '../internal/convert'
+import { diffPlainYearMonth } from '../internal/diff'
+import { YearMonthBag, YearMonthFields } from '../internal/fields'
+import { LocalesArg } from '../internal/intlFormat'
+import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
+import { movePlainYearMonth } from '../internal/move'
+import {
+  DiffOptions,
+  OverflowOptions,
+  copyOptions,
+  refineOverflowOptions,
+} from '../internal/optionsRefine'
+import {
+  PlainYearMonthBranding,
+  PlainYearMonthSlots,
+  removeBranding,
+} from '../internal/slots'
+import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
+import { CalendarArg } from './calendar'
+import {
+  createDateModOps,
+  createYearMonthDiffOps,
+  createYearMonthModOps,
+  createYearMonthMoveOps,
+  createYearMonthRefineOps,
+} from './calendarOpsQuery'
+import {
+  Duration,
+  DurationArg,
+  createDuration,
+  toDurationSlots,
+} from './duration'
 import { prepPlainYearMonthFormat } from './intlDateTimeFormat'
+import {
+  calendarIdGetters,
+  createCalendarFromSlots,
+  neverValueOf,
+  yearMonthGetters,
+} from './mixins'
+import { PlainDate, createPlainDate } from './plainDate'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
+import {
+  CalendarSlot,
+  getCalendarSlotFromBag,
+  refineCalendarSlot,
+} from './slotClass'
 
 export type PlainYearMonth = any & YearMonthFields
-export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag<CalendarArg> | string
+export type PlainYearMonthArg =
+  | PlainYearMonth
+  | PlainYearMonthBag<CalendarArg>
+  | string
 
-export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = createSlotClass(
-  PlainYearMonthBranding,
-  bindArgs(constructPlainYearMonthSlots, refineCalendarSlot),
-  {
-    ...calendarIdGetters,
-    ...yearMonthGetters,
-  },
-  {
-    with(slots: PlainYearMonthSlots<CalendarSlot>, mod: YearMonthBag, options?: OverflowOptions): PlainYearMonth {
-      return createPlainYearMonth(
-        plainYearMonthWithFields(createYearMonthModOps, slots, this, rejectInvalidBag(mod), options)
-      )
+export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
+  createSlotClass(
+    PlainYearMonthBranding,
+    bindArgs(constructPlainYearMonthSlots, refineCalendarSlot),
+    {
+      ...calendarIdGetters,
+      ...yearMonthGetters,
     },
-    add(slots: PlainYearMonthSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-      return createPlainYearMonth(
-        movePlainYearMonth(createYearMonthMoveOps, false, slots, toDurationSlots(durationArg), options)
-      )
+    {
+      with(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        mod: YearMonthBag,
+        options?: OverflowOptions,
+      ): PlainYearMonth {
+        return createPlainYearMonth(
+          plainYearMonthWithFields(
+            createYearMonthModOps,
+            slots,
+            this,
+            rejectInvalidBag(mod),
+            options,
+          ),
+        )
+      },
+      add(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        durationArg: DurationArg,
+        options?: OverflowOptions,
+      ): PlainYearMonth {
+        return createPlainYearMonth(
+          movePlainYearMonth(
+            createYearMonthMoveOps,
+            false,
+            slots,
+            toDurationSlots(durationArg),
+            options,
+          ),
+        )
+      },
+      subtract(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        durationArg: DurationArg,
+        options?: OverflowOptions,
+      ): PlainYearMonth {
+        return createPlainYearMonth(
+          movePlainYearMonth(
+            createYearMonthMoveOps,
+            true,
+            slots,
+            toDurationSlots(durationArg),
+            options,
+          ),
+        )
+      },
+      until(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        otherArg: PlainYearMonthArg,
+        options?: DiffOptions,
+      ): Duration {
+        return createDuration(
+          diffPlainYearMonth(
+            createYearMonthDiffOps,
+            false,
+            slots,
+            toPlainYearMonthSlots(otherArg),
+            options,
+          ),
+        )
+      },
+      since(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        otherArg: PlainYearMonthArg,
+        options?: DiffOptions,
+      ): Duration {
+        return createDuration(
+          diffPlainYearMonth(
+            createYearMonthDiffOps,
+            true,
+            slots,
+            toPlainYearMonthSlots(otherArg),
+            options,
+          ),
+        )
+      },
+      equals(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        otherArg: PlainYearMonthArg,
+      ): boolean {
+        return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
+      },
+      toString: formatPlainYearMonthIso,
+      toJSON(slots: PlainYearMonthSlots<CalendarSlot>) {
+        return formatPlainYearMonthIso(slots)
+      },
+      toLocaleString(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        locales?: LocalesArg,
+        options?: Intl.DateTimeFormatOptions,
+      ): string {
+        const [format, epochMilli] = prepPlainYearMonthFormat(
+          locales,
+          options,
+          slots,
+        )
+        return format.format(epochMilli)
+      },
+      toPlainDate(
+        slots: PlainYearMonthSlots<CalendarSlot>,
+        bag: { day: number },
+      ): PlainDate {
+        return createPlainDate(
+          plainYearMonthToPlainDate(createDateModOps, slots, this, bag),
+        )
+      },
+      getISOFields: removeBranding,
+      getCalendar: createCalendarFromSlots,
+      valueOf: neverValueOf,
     },
-    subtract(slots: PlainYearMonthSlots<CalendarSlot>, durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
-      return createPlainYearMonth(
-        movePlainYearMonth(createYearMonthMoveOps, true, slots, toDurationSlots(durationArg), options)
-      )
+    {
+      from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {
+        return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
+      },
+      compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumSign {
+        return compareIsoDateFields(
+          toPlainYearMonthSlots(arg0),
+          toPlainYearMonthSlots(arg1),
+        )
+      },
     },
-    until(slots: PlainYearMonthSlots<CalendarSlot>, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
-      return createDuration(
-        diffPlainYearMonth(createYearMonthDiffOps, false, slots, toPlainYearMonthSlots(otherArg), options)
-      )
-    },
-    since(slots: PlainYearMonthSlots<CalendarSlot>, otherArg: PlainYearMonthArg, options?: DiffOptions): Duration {
-      return createDuration(
-        diffPlainYearMonth(createYearMonthDiffOps, true, slots, toPlainYearMonthSlots(otherArg), options)
-      )
-    },
-    equals(slots: PlainYearMonthSlots<CalendarSlot>, otherArg: PlainYearMonthArg): boolean {
-      return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
-    },
-    toString: formatPlainYearMonthIso,
-    toJSON(slots: PlainYearMonthSlots<CalendarSlot>) {
-      return formatPlainYearMonthIso(slots)
-    },
-    toLocaleString(slots: PlainYearMonthSlots<CalendarSlot>, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions): string {
-      const [format, epochMilli] = prepPlainYearMonthFormat(locales, options, slots)
-      return format.format(epochMilli)
-    },
-    toPlainDate(slots: PlainYearMonthSlots<CalendarSlot>, bag: { day: number }): PlainDate {
-      return createPlainDate(
-        plainYearMonthToPlainDate(createDateModOps, slots, this, bag)
-      )
-    },
-    getISOFields: removeBranding,
-    getCalendar: createCalendarFromSlots,
-    valueOf: neverValueOf,
-  },
-  {
-    from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {
-      return createPlainYearMonth(
-        toPlainYearMonthSlots(arg, options)
-      )
-    },
-    compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumSign {
-      return compareIsoDateFields(
-        toPlainYearMonthSlots(arg0),
-        toPlainYearMonthSlots(arg1),
-      )
-    },
-  }
-)
+  )
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function toPlainYearMonthSlots(arg: PlainYearMonthArg, options?: OverflowOptions) {
+export function toPlainYearMonthSlots(
+  arg: PlainYearMonthArg,
+  options?: OverflowOptions,
+) {
   options = copyOptions(options)
 
   if (isObjectLike(arg)) {

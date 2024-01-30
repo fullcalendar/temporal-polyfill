@@ -1,10 +1,22 @@
 import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { OffsetDisambig } from './options'
-import { IdLike, PlainDateSlots, PlainDateTimeSlots, ZonedDateTimeSlots, createPlainDateTimeSlots, createZonedDateTimeSlots, getPreferredCalendarSlot } from './slots'
-import { TimeZoneOps, getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneOps'
+import {
+  IdLike,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  ZonedDateTimeSlots,
+  createPlainDateTimeSlots,
+  createZonedDateTimeSlots,
+  getPreferredCalendarSlot,
+} from './slots'
+import {
+  TimeZoneOps,
+  getMatchingInstantFor,
+  zonedEpochSlotsToIso,
+} from './timeZoneOps'
 
 // ZonedDateTime with *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
@@ -45,7 +57,10 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
     ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
     ...plainDateSlots,
   }
-  const calendar = getPreferredCalendarSlot(zonedDateTimeSlots.calendar, plainDateSlots.calendar)
+  const calendar = getPreferredCalendarSlot(
+    zonedDateTimeSlots.calendar,
+    plainDateSlots.calendar,
+  )
 
   const epochNano = getMatchingInstantFor(
     timeZoneOps,
@@ -54,15 +69,11 @@ export function zonedDateTimeWithPlainDate<C extends IdLike, T>(
     OffsetDisambig.Prefer, // OffsetDisambig
   )
 
-  return createZonedDateTimeSlots(
-    epochNano,
-    timeZoneSlot,
-    calendar,
-  )
+  return createZonedDateTimeSlots(epochNano, timeZoneSlot, calendar)
 }
 
 // PlainDateTime with *
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function plainDateTimeWithPlainTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
@@ -78,14 +89,20 @@ export function plainDateTimeWithPlainDate<C extends IdLike>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
   plainDateSlots: PlainDateSlots<C>,
 ) {
-  return createPlainDateTimeSlots({
-    ...plainDateTimeSlots,
-    ...plainDateSlots,
-  }, getPreferredCalendarSlot(plainDateTimeSlots.calendar, plainDateSlots.calendar))
+  return createPlainDateTimeSlots(
+    {
+      ...plainDateTimeSlots,
+      ...plainDateSlots,
+    },
+    getPreferredCalendarSlot(
+      plainDateTimeSlots.calendar,
+      plainDateSlots.calendar,
+    ),
+  )
 }
 
 // Anything with calendar/timeZone
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function slotsWithCalendar<C, S extends { calendar: C }>(
   slots: S,

@@ -1,16 +1,16 @@
 import { isoCalendarId } from '../internal/calendarConfig'
+import { requireFunction, requireInteger } from '../internal/cast'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
+import { createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
+import { validateTimeZoneOffset } from '../internal/timeZoneOps'
 import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { requireFunction, requireInteger } from '../internal/cast'
-import { createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
-import { validateTimeZoneOffset } from '../internal/timeZoneOps'
 
 // Individual Adapters
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function getOffsetNanosecondsForAdapter(
   timeZoneProtocol: TimeZoneProtocol,
@@ -20,8 +20,8 @@ function getOffsetNanosecondsForAdapter(
   return validateTimeZoneOffsetRes(
     getOffsetNanosecondsFor.call(
       timeZoneProtocol,
-      createInstant(createInstantSlots(epochNano))
-    )
+      createInstant(createInstantSlots(epochNano)),
+    ),
   )
 }
 
@@ -33,10 +33,8 @@ function getPossibleInstantsForAdapter(
   return [
     ...getPossibleInstantsFor.call(
       timeZoneProtocol,
-      createPlainDateTime(
-        createPlainDateTimeSlots(isoFields, isoCalendarId)
-      )
-    )
+      createPlainDateTime(createPlainDateTimeSlots(isoFields, isoCalendarId)),
+    ),
   ].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds
   })
@@ -47,7 +45,7 @@ function validateTimeZoneOffsetRes(offsetNano: number): number {
 }
 
 // Adapter Sets
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export const timeZoneAdapters = {
   getOffsetNanosecondsFor: getOffsetNanosecondsForAdapter,
@@ -60,13 +58,16 @@ export const simpleTimeZoneAdapters = {
 }
 
 // Adapter Instantiation
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type AdapterOps<KV> = {
-  [K in keyof KV]:
-    KV[K] extends (tz: TimeZoneProtocol, m: Callable, ...args: infer Args) => infer Return
-      ? (...args: Args) => Return
-      : never
+  [K in keyof KV]: KV[K] extends (
+    tz: TimeZoneProtocol,
+    m: Callable,
+    ...args: infer Args
+  ) => infer Return
+    ? (...args: Args) => Return
+    : never
 }
 
 export function createAdapterOps<KV extends {} = typeof timeZoneAdapters>(

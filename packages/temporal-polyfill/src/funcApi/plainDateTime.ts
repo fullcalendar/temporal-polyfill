@@ -1,23 +1,68 @@
+import {
+  isoTimeFieldsToCal,
+  plainDateTimeWithFields,
+  refinePlainDateTimeBag,
+} from '../internal/bagRefine'
+import {
+  createNativeDateModOps,
+  createNativeDateRefineOps,
+  createNativeDiffOps,
+  createNativeMonthDayRefineOps,
+  createNativeMoveOps,
+  createNativeYearMonthRefineOps,
+} from '../internal/calendarNativeQuery'
+import {
+  compareIsoDateTimeFields,
+  plainDateTimesEqual,
+} from '../internal/compare'
+import { constructPlainDateTimeSlots } from '../internal/construct'
+import {
+  plainDateTimeToPlainMonthDay,
+  plainDateTimeToPlainYearMonth,
+  plainDateTimeToZonedDateTime,
+} from '../internal/convert'
+import { diffPlainDateTimes } from '../internal/diff'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, getCalendarIdFromBag, refineCalendarIdString } from '../internal/slots'
-import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativePartOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
-import { constructPlainDateTimeSlots } from '../internal/construct'
-import { parsePlainDateTime } from '../internal/isoParse'
-import { isoTimeFieldsToCal, plainDateTimeWithFields, refinePlainDateTimeBag } from '../internal/bagRefine'
-import { plainDateTimeWithPlainDate, plainDateTimeWithPlainTime, slotsWithCalendar } from '../internal/modify'
-import { movePlainDateTime } from '../internal/move'
-import { diffPlainDateTimes } from '../internal/diff'
-import { roundPlainDateTime } from '../internal/round'
-import { plainDateTimesEqual, compareIsoDateTimeFields } from '../internal/compare'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
-import { plainDateTimeToPlainMonthDay, plainDateTimeToPlainYearMonth, plainDateTimeToZonedDateTime } from '../internal/convert'
-import { prepCachedPlainDateTimeFormat } from './intlFormatCached'
-import { computeDateBasics, computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/isoMath'
+import {
+  computeIsoDayOfWeek,
+  computeIsoDaysInWeek,
+  computeIsoWeekOfYear,
+  computeIsoYearOfWeek,
+} from '../internal/isoMath'
+import { parsePlainDateTime } from '../internal/isoParse'
+import {
+  plainDateTimeWithPlainDate,
+  plainDateTimeWithPlainTime,
+  slotsWithCalendar,
+} from '../internal/modify'
+import { movePlainDateTime } from '../internal/move'
+import { OverflowOptions } from '../internal/optionsRefine'
+import { roundPlainDateTime } from '../internal/round'
+import {
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainMonthDaySlots,
+  PlainTimeSlots,
+  PlainYearMonthSlots,
+  createPlainDateSlots,
+  createPlainTimeSlots,
+  getCalendarIdFromBag,
+  refineCalendarIdString,
+} from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumSign, bindArgs } from '../internal/utils'
+import { prepCachedPlainDateTimeFormat } from './intlFormatCached'
+import {
+  computeDateBasics,
+  computeDateFields,
+  computeDayOfYear,
+  computeDaysInMonth,
+  computeDaysInYear,
+  computeInLeapYear,
+  computeMonthsInYear,
+} from './utils'
 
 export const create = bindArgs(
   constructPlainDateTimeSlots<string, string>,
@@ -44,15 +89,33 @@ export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields {
   }
 }
 
-export const dayOfWeek = computeIsoDayOfWeek as (slots: PlainDateTimeSlots<string>) => number
-export const daysInWeek = computeIsoDaysInWeek as (slots: PlainDateTimeSlots<string>) => number
-export const weekOfYear = computeIsoWeekOfYear as (slots: PlainDateTimeSlots<string>) => number
-export const yearOfWeek = computeIsoYearOfWeek as (slots: PlainDateTimeSlots<string>) => number
-export const dayOfYear = computeDayOfYear as (slots: PlainDateTimeSlots<string>) => number
-export const daysInMonth = computeDaysInMonth as (slots: PlainDateTimeSlots<string>) => number
-export const daysInYear = computeDaysInYear as (slots: PlainDateTimeSlots<string>) => number
-export const monthsInYear = computeMonthsInYear as (slots: PlainDateTimeSlots<string>) => number
-export const inLeapYear = computeInLeapYear as (slots: PlainDateTimeSlots<string>) => boolean
+export const dayOfWeek = computeIsoDayOfWeek as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const daysInWeek = computeIsoDaysInWeek as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const weekOfYear = computeIsoWeekOfYear as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const yearOfWeek = computeIsoYearOfWeek as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const dayOfYear = computeDayOfYear as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const daysInMonth = computeDaysInMonth as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const daysInYear = computeDaysInYear as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const monthsInYear = computeMonthsInYear as (
+  slots: PlainDateTimeSlots<string>,
+) => number
+export const inLeapYear = computeInLeapYear as (
+  slots: PlainDateTimeSlots<string>,
+) => boolean
 
 export function withFields(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
@@ -88,11 +151,27 @@ export function withCalendar(
   )
 }
 
-export const add = bindArgs(movePlainDateTime<string>, createNativeMoveOps, false)
-export const subtract = bindArgs(movePlainDateTime<string>, createNativeMoveOps, true)
+export const add = bindArgs(
+  movePlainDateTime<string>,
+  createNativeMoveOps,
+  false,
+)
+export const subtract = bindArgs(
+  movePlainDateTime<string>,
+  createNativeMoveOps,
+  true,
+)
 
-export const until = bindArgs(diffPlainDateTimes<string>, createNativeDiffOps, false)
-export const since = bindArgs(diffPlainDateTimes<string>, createNativeDiffOps, true)
+export const until = bindArgs(
+  diffPlainDateTimes<string>,
+  createNativeDiffOps,
+  false,
+)
+export const since = bindArgs(
+  diffPlainDateTimes<string>,
+  createNativeDiffOps,
+  true,
+)
 
 export const round = roundPlainDateTime<string>
 export const equals = plainDateTimesEqual<string>
@@ -141,7 +220,11 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedPlainDateTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainDateTimeFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.format(epochMilli)
 }
 
@@ -150,7 +233,11 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedPlainDateTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainDateTimeFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.formatToParts(epochMilli)
 }
 
@@ -160,7 +247,12 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateTimeFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -169,7 +261,12 @@ export function rangeToLocaleStringParts(
   slots1: PlainDateTimeSlots<string>,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-  ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateTimeFormat(locales, options, slots0, slots1)
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateTimeFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

@@ -1,12 +1,11 @@
+import * as errorMessages from '../internal/errorMessages'
 import { IsoTimeFields } from '../internal/isoFields'
 import { hasAllPropsByName } from '../internal/utils'
 import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
-import * as errorMessages from '../internal/errorMessages'
 
+// TODO: return type
 export function createProtocolChecker(propNames: string[]) {
-  propNames = propNames
-    .concat('id')
-    .sort()
+  propNames = propNames.concat('id').sort()
 
   return (obj: any) => {
     if (!hasAllPropsByName(obj, propNames)) {
@@ -15,6 +14,8 @@ export function createProtocolChecker(propNames: string[]) {
   }
 }
 
-export function optionalToPlainTimeFields(timeArg: PlainTimeArg | undefined): IsoTimeFields | undefined {
+export function optionalToPlainTimeFields(
+  timeArg: PlainTimeArg | undefined,
+): IsoTimeFields | undefined {
   return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
 }

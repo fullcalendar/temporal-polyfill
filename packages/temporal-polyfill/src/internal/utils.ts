@@ -1,8 +1,8 @@
-import { Overflow } from './options'
 import * as errorMessages from './errorMessages'
+import { Overflow } from './options'
 
 export type FilterPropValues<P, F> = {
-  [K in keyof P as (P[K] extends F ? K : never)]: P[K]
+  [K in keyof P as P[K] extends F ? K : never]: P[K]
 }
 
 export function bindArgs<BA extends any[], DA extends any[], R>(
@@ -28,6 +28,7 @@ export type Classlike = any
 
 const objectLikeRE = /object|function/
 
+// biome-ignore lint/complexity/noBannedTypes: TODO: fix later
 export function isObjectLike(arg: unknown): arg is {} {
   return arg !== null && objectLikeRE.test(typeof arg)
 }
@@ -38,7 +39,7 @@ TODO: abandon this? See mapPropNames note.
 export function mapProps<P, R, E = undefined>(
   transformer: (propVal: P[keyof P], propName: keyof P, extraArg?: E) => R,
   props: P,
-  extraArg?: E
+  extraArg?: E,
 ): { [K in keyof P]: R } {
   const res = {} as { [K in keyof P]: R }
 
@@ -49,8 +50,7 @@ export function mapProps<P, R, E = undefined>(
   return res
 }
 
-
-export function zipProps<P>(propNamesRev: (keyof P)[], args: (P[keyof P])[]): P {
+export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
   const res = {} as any
   let i = propNamesRev.length
 
@@ -68,7 +68,7 @@ See createAdapterCompoundOps/createAdapterOps. Bigger after using mapPropNames.
 export function mapPropNames<P, R, E = undefined>(
   generator: (propName: keyof P, i: number, extraArg?: E) => R,
   propNames: (keyof P)[],
-  extraArg?: E
+  extraArg?: E,
 ): { [K in keyof P]: R } {
   const props = {} as { [K in keyof P]: R }
 
@@ -82,22 +82,18 @@ export function mapPropNames<P, R, E = undefined>(
 
 export const mapPropNamesToIndex = bindArgs(
   mapPropNames,
-  (propVal: any, i: number) => i,
-) as (
-  <P>(propNames: (keyof P)[]) => { [K in keyof P]: number }
-)
+  (_propVal: any, i: number) => i,
+) as <P>(propNames: (keyof P)[]) => { [K in keyof P]: number }
 
 export const mapPropNamesToConstant = bindArgs(
   mapPropNames,
-  (propVal: unknown, i: number, constant: unknown) => constant,
-) as (
-  <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
-)
+  (_propVal: unknown, _i: number, constant: unknown) => constant,
+) as <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
 
 export function remapProps<O, N>(
   oldNames: (keyof O)[],
   newNames: (keyof N)[],
-  oldProps: O
+  oldProps: O,
 ): N {
   const newProps = {} as N
 
@@ -119,8 +115,8 @@ export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
 }
 
 export function excludePropsByName<P, K extends keyof P>(
+  propNames: Set<string>,
   props: P,
-  propNames: Set<string>
 ): Omit<P, K> {
   const filteredProps = {} as any
 
@@ -148,7 +144,7 @@ export function excludeUndefinedProps<P extends {}>(props: P): Partial<P> {
 
 export function hasAnyPropsByName<P extends {}>(
   props: P,
-  names: (keyof P)[]
+  names: (keyof P)[],
 ): boolean {
   for (const name of names) {
     if (name in props) {
@@ -160,7 +156,7 @@ export function hasAnyPropsByName<P extends {}>(
 
 export function hasAllPropsByName<P extends {}>(
   props: P,
-  names: (keyof P)[]
+  names: (keyof P)[],
 ): boolean {
   for (const name of names) {
     if (!(name in props)) {
@@ -170,7 +166,11 @@ export function hasAllPropsByName<P extends {}>(
   return true
 }
 
-export function allFieldsEqual(fieldNames: string[], obj0: any, obj1: any): boolean {
+export function allFieldsEqual(
+  fieldNames: string[],
+  obj0: any,
+  obj1: any,
+): boolean {
   for (const fieldName of fieldNames) {
     if (obj0[fieldName] !== obj1[fieldName]) {
       return false
@@ -187,20 +187,17 @@ export function allFieldsEqual(fieldNames: string[], obj0: any, obj1: any): bool
 
 export function createLazyGenerator<K, V, A extends any[]>(
   generator: (key: K, ...otherArgs: A) => V,
-  MapClass: { new(): any } = Map, // TODO: better type
-): (
-  (key: K, ...otherArgs: A) => V
-) {
+  MapClass: { new (): any } = Map, // TODO: better type
+): (key: K, ...otherArgs: A) => V {
   const map = new MapClass()
 
   return (key: K, ...otherArgs: A) => {
     if (map.has(key)) {
       return map.get(key) as V
-    } else {
-      const val = generator(key, ...otherArgs)
-      map.set(key, val)
-      return val
     }
+    const val = generator(key, ...otherArgs)
+    map.set(key, val)
+    return val
   }
 }
 
@@ -215,28 +212,34 @@ export function createPropDescriptors(
   propVals: { [propName: string]: unknown },
   readonly?: boolean,
 ): PropertyDescriptorMap {
-  return mapProps((value) => ({
-    value,
-    configurable: true,
-    writable: !readonly,
-  }), propVals)
+  return mapProps(
+    (value) => ({
+      value,
+      configurable: true,
+      writable: !readonly,
+    }),
+    propVals,
+  )
 }
 
-export function createGetterDescriptors(
-  getters: { [propName: string]: () => unknown },
-): PropertyDescriptorMap {
-  return mapProps((getter) => ({
-    get: getter,
-    configurable: true,
-  }), getters)
+export function createGetterDescriptors(getters: {
+  [propName: string]: () => unknown
+}): PropertyDescriptorMap {
+  return mapProps(
+    (getter) => ({
+      get: getter,
+      configurable: true,
+    }),
+    getters,
+  )
 }
 
 export function createStringTagDescriptors(value: string): {
   // crazy
   [Symbol.toStringTag]: {
-    value: string,
-    configurable: true,
-  },
+    value: string
+    configurable: true
+  }
 } {
   return {
     [Symbol.toStringTag]: {
@@ -253,8 +256,7 @@ export function identityFunc<T>(arg: T): T {
   return arg
 }
 
-export function noop(): void {
-}
+export function noop(): void {}
 
 export function padNumber(digits: number, num: number): string {
   return String(num).padStart(digits, '0')
@@ -290,7 +292,9 @@ export function clampEntity(
   const clamped = clampNumber(num, min, max)
 
   if (overflow && num !== clamped) {
-    throw new RangeError(errorMessages.numberOutOfRange(entityName, num, min, max))
+    throw new RangeError(
+      errorMessages.numberOutOfRange(entityName, num, min, max),
+    )
   }
 
   return clamped
@@ -303,7 +307,13 @@ export function clampProp<P>(
   max: number,
   overflow?: Overflow,
 ): number {
-  return clampEntity(propName, getDefinedProp(props, propName), min, max, overflow)
+  return clampEntity(
+    propName,
+    getDefinedProp(props, propName),
+    min,
+    max,
+    overflow,
+  )
 }
 
 export function getDefinedProp(props: any, propName: string): any {
@@ -321,14 +331,11 @@ export function divModFloor(num: number, divisor: number): [number, number] {
 }
 
 export function modFloor(num: number, divisor: number): number {
-  return (num % divisor + divisor) % divisor
+  return ((num % divisor) + divisor) % divisor
 }
 
 export function divModTrunc(num: number, divisor: number): [number, number] {
-  return [
-    divTrunc(num, divisor),
-    modTrunc(num, divisor),
-  ]
+  return [divTrunc(num, divisor), modTrunc(num, divisor)]
 }
 
 /*
@@ -346,7 +353,7 @@ Only useful for Numbers. BigInts don't have this problem
 NOTE: anywhere else % is directly used, do ||0
 */
 export function modTrunc(num: number, divisor: number): number {
-  return (num % divisor) || 0
+  return num % divisor || 0
 }
 
 // rounding
@@ -372,7 +379,7 @@ export function roundHalfCeil(num: number): number {
 }
 
 export function roundHalfTrunc(num: number): number {
-  return hasHalf(num) ? (Math.trunc(num) || 0) : Math.round(num)
+  return hasHalf(num) ? Math.trunc(num) || 0 : Math.round(num)
 }
 
 export function roundHalfEven(num: number): number {

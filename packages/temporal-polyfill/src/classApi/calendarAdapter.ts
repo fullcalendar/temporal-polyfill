@@ -1,20 +1,34 @@
-import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
-import { DateBag, DateBagStrict, MonthDayBag, MonthDayBagStrict, YearMonthBag, YearMonthBagStrict } from '../internal/fields'
 import { requireObjectLike, requirePositiveInteger } from '../internal/cast'
 import { DurationFields } from '../internal/durationFields'
+import {
+  DateBag,
+  DateBagStrict,
+  MonthDayBag,
+  MonthDayBagStrict,
+  YearMonthBag,
+  YearMonthBagStrict,
+} from '../internal/fields'
 import { IsoDateFields } from '../internal/isoFields'
+import { DiffOptions, OverflowOptions } from '../internal/optionsRefine'
+import {
+  DurationSlots,
+  PlainDateSlots,
+  PlainMonthDaySlots,
+  PlainYearMonthSlots,
+  createDurationSlots,
+  createPlainDateSlots,
+} from '../internal/slots'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Callable, bindArgs } from '../internal/utils'
+import { CalendarProtocol } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
 import { CalendarSlot } from './slotClass'
-import { DurationSlots, PlainDateSlots, PlainMonthDaySlots, PlainYearMonthSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
-import { CalendarProtocol } from './calendar'
 
 // Compound Adapter Functions
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function fieldsAdapter(
   calendarProtocol: CalendarProtocol,
@@ -50,7 +64,7 @@ function dateFromFieldsAdapter(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as DateBagStrict,
       options,
-    )
+    ),
   )
 }
 
@@ -65,7 +79,7 @@ function yearMonthFromFieldsAdapter(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as YearMonthBagStrict,
       options,
-    )
+    ),
   )
 }
 
@@ -80,7 +94,7 @@ function monthDayFromFieldsAdapter(
       calendarProtocol,
       Object.assign(Object.create(null), fields) as MonthDayBagStrict,
       options,
-    )
+    ),
   )
 }
 
@@ -94,17 +108,10 @@ function dateAddAdapter(
   return getPlainDateSlots(
     dateAdd.call(
       calendarProtocol,
-      createPlainDate(
-        createPlainDateSlots(
-          isoFields,
-          calendarProtocol,
-        ),
-      ),
-      createDuration(
-        createDurationSlots(durationFields),
-      ),
+      createPlainDate(createPlainDateSlots(isoFields, calendarProtocol)),
+      createDuration(createDurationSlots(durationFields)),
       options,
-    )
+    ),
   )
 }
 
@@ -114,28 +121,16 @@ function dateUntilAdapter(
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
   largestUnit: Unit,
-  origOptions?: DiffOptions
+  origOptions?: DiffOptions,
 ): DurationSlots {
   return getDurationSlots(
     dateUntil.call(
       calendarProtocol,
-      createPlainDate(
-        createPlainDateSlots(
-          isoFields0,
-          calendarProtocol,
-        ),
-      ),
-      createPlainDate(
-        createPlainDateSlots(
-          isoFields1,
-          calendarProtocol,
-        ),
-      ),
-      Object.assign(
-        Object.create(null),
-        origOptions,
-        { largestUnit: unitNamesAsc[largestUnit] },
-      )
+      createPlainDate(createPlainDateSlots(isoFields0, calendarProtocol)),
+      createPlainDate(createPlainDateSlots(isoFields1, calendarProtocol)),
+      Object.assign(Object.create(null), origOptions, {
+        largestUnit: unitNamesAsc[largestUnit],
+      }),
     ),
   )
 }
@@ -148,27 +143,34 @@ function dayAdapter(
   return requirePositiveInteger(
     dayMethod.call(
       calendarProtocol,
-      createPlainDate(
-        createPlainDateSlots(
-          isoFields,
-          calendarProtocol,
-        )
-      )
-    )
+      createPlainDate(createPlainDateSlots(isoFields, calendarProtocol)),
+    ),
   )
 }
 
 // Compound Adapter Sets
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const refineAdapters = { fields: fieldsAdapter }
-export const dateRefineAdapters = { dateFromFields: dateFromFieldsAdapter, ...refineAdapters }
-export const yearMonthRefineAdapters = { yearMonthFromFields: yearMonthFromFieldsAdapter, ...refineAdapters }
-export const monthDayRefineAdapters = { monthDayFromFields: monthDayFromFieldsAdapter, ...refineAdapters }
+export const dateRefineAdapters = {
+  dateFromFields: dateFromFieldsAdapter,
+  ...refineAdapters,
+}
+export const yearMonthRefineAdapters = {
+  yearMonthFromFields: yearMonthFromFieldsAdapter,
+  ...refineAdapters,
+}
+export const monthDayRefineAdapters = {
+  monthDayFromFields: monthDayFromFieldsAdapter,
+  ...refineAdapters,
+}
 
 const modAdapters = { mergeFields: mergeFieldsAdapter }
 export const dateModAdapters = { ...dateRefineAdapters, ...modAdapters }
-export const yearMonthModAdapters = { ...yearMonthRefineAdapters, ...modAdapters }
+export const yearMonthModAdapters = {
+  ...yearMonthRefineAdapters,
+  ...modAdapters,
+}
 export const monthDayModAdapters = { ...monthDayRefineAdapters, ...modAdapters }
 
 export const moveAdapters = { dateAdd: dateAddAdapter }
@@ -177,13 +179,16 @@ export const yearMonthMoveAdapters = { ...moveAdapters, day: dayAdapter }
 export const yearMonthDiffAdapters = { ...diffAdapters, day: dayAdapter }
 
 // Compound Adapter Instantiation
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type AdapterCompoundOps<KV> = {
-  [K in keyof KV]:
-    KV[K] extends (c: CalendarProtocol, m: Callable, ...args: infer Args) => infer Return
-      ? (...args: Args) => Return
-      : never
+  [K in keyof KV]: KV[K] extends (
+    c: CalendarProtocol,
+    m: Callable,
+    ...args: infer Args
+  ) => infer Return
+    ? (...args: Args) => Return
+    : never
 }
 
 export function createAdapterCompoundOps<KV extends {}>(

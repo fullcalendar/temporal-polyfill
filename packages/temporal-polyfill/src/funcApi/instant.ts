@@ -1,18 +1,34 @@
-import { LocalesArg } from '../internal/intlFormat'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { InstantSlots, ZonedDateTimeSlots, refineCalendarIdString, refineTimeZoneIdString } from '../internal/slots'
-import { constructInstantSlots } from '../internal/construct'
-import { parseInstant } from '../internal/isoParse'
-import { epochMicroToInstant, epochMilliToInstant, epochNanoToInstant, epochSecToInstant, instantToZonedDateTime } from '../internal/convert'
-import { moveInstant } from '../internal/move'
-import { compareInstants, instantsEqual } from '../internal/compare'
-import { formatInstantIso } from '../internal/isoFormat'
-import { diffInstants } from '../internal/diff'
-import { roundInstant } from '../internal/round'
-import { prepCachedInstantFormat } from './intlFormatCached'
-import { bindArgs } from '../internal/utils'
-import { getEpochMicroseconds, getEpochMilliseconds, getEpochNanoseconds, getEpochSeconds } from '../internal/slots'
 import { requireObjectLike } from '../internal/cast'
+import { compareInstants, instantsEqual } from '../internal/compare'
+import { constructInstantSlots } from '../internal/construct'
+import {
+  epochMicroToInstant,
+  epochMilliToInstant,
+  epochNanoToInstant,
+  epochSecToInstant,
+  instantToZonedDateTime,
+} from '../internal/convert'
+import { diffInstants } from '../internal/diff'
+import { LocalesArg } from '../internal/intlFormat'
+import { formatInstantIso } from '../internal/isoFormat'
+import { parseInstant } from '../internal/isoParse'
+import { moveInstant } from '../internal/move'
+import { roundInstant } from '../internal/round'
+import {
+  InstantSlots,
+  ZonedDateTimeSlots,
+  refineCalendarIdString,
+  refineTimeZoneIdString,
+} from '../internal/slots'
+import {
+  getEpochMicroseconds,
+  getEpochMilliseconds,
+  getEpochNanoseconds,
+  getEpochSeconds,
+} from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { bindArgs } from '../internal/utils'
+import { prepCachedInstantFormat } from './intlFormatCached'
 
 export const create = constructInstantSlots
 export const fromString = parseInstant
@@ -23,9 +39,15 @@ export const fromEpochMicroseconds = epochMicroToInstant
 export const fromEpochNanoseconds = epochNanoToInstant
 
 export const epochSeconds = getEpochSeconds as (slots: InstantSlots) => number
-export const epochMilliseconds = getEpochMilliseconds as (slots: InstantSlots) => number
-export const epochMicroseconds = getEpochMicroseconds as (slots: InstantSlots) => bigint
-export const epochNanoseconds = getEpochNanoseconds as (slots: InstantSlots) => bigint
+export const epochMilliseconds = getEpochMilliseconds as (
+  slots: InstantSlots,
+) => number
+export const epochMicroseconds = getEpochMicroseconds as (
+  slots: InstantSlots,
+) => bigint
+export const epochNanoseconds = getEpochNanoseconds as (
+  slots: InstantSlots,
+) => bigint
 
 export const add = bindArgs(moveInstant, false)
 export const subtract = bindArgs(moveInstant, true)
@@ -57,7 +79,7 @@ export function toZonedDateTimeISO(
 
 export function toZonedDateTime(
   instantSlots: InstantSlots,
-  options: { timeZone: string, calendar: string }
+  options: { timeZone: string; calendar: string },
 ): ZonedDateTimeSlots<string, string> {
   const refinedObj = requireObjectLike(options)
 
@@ -92,7 +114,12 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedInstantFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedInstantFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -101,7 +128,12 @@ export function rangeToLocaleStringParts(
   slots1: InstantSlots,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-  ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedInstantFormat(locales, options, slots0, slots1)
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepCachedInstantFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

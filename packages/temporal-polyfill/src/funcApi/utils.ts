@@ -1,19 +1,27 @@
-import { DateBasics, DateFields, MonthDayFields, YearMonthFields } from '../internal/fields'
-import { createNativeDayOfYearOps, createNativeDaysInMonthOps, createNativeDaysInYearOps, createNativeInLeapYearOps, createNativeMonthsInYearOps, createNativePartOps } from '../internal/calendarNativeQuery'
 import { formatMonthCode } from '../internal/calendarNative'
+import {
+  createNativeDayOfYearOps,
+  createNativeDaysInMonthOps,
+  createNativeDaysInYearOps,
+  createNativeInLeapYearOps,
+  createNativeMonthsInYearOps,
+  createNativePartOps,
+} from '../internal/calendarNativeQuery'
+import {
+  DateBasics,
+  DateFields,
+  MonthDayFields,
+  YearMonthFields,
+} from '../internal/fields'
 import { DateSlots } from '../internal/slots'
 
-export function computeDateBasics(
-  slots: DateSlots<string>,
-): DateBasics {
+export function computeDateBasics(slots: DateSlots<string>): DateBasics {
   const calendarOps = createNativePartOps(slots.calendar)
   const [year, month, day] = calendarOps.dateParts(slots)
   return { year, month, day }
 }
 
-export function computeDateFields(
-  slots: DateSlots<string>,
-): DateFields {
+export function computeDateFields(slots: DateSlots<string>): DateFields {
   const calendarOps = createNativePartOps(slots.calendar)
   const [year, month, day] = calendarOps.dateParts(slots)
   const [era, eraYear] = calendarOps.eraParts(slots)

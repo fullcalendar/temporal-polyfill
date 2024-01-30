@@ -1,29 +1,48 @@
-import { DayTimeNano, dayTimeNanoToNumber, diffDayTimeNanos } from './dayTimeNano'
-import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
-import { DurationFields, durationFieldDefaults, durationFieldNamesAsc } from './durationFields'
 import { DiffOps } from './calendarOps'
-import { TimeZoneOps } from './timeZoneOps'
-import { DurationSlots } from './slots'
-import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
-import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem, spanDuration, MarkerToEpochNano, MoveMarker, DiffMarkers, queryDurationSign, durationFieldsToDayTimeNano, clearDurationFields } from './durationMath'
+import {
+  DayTimeNano,
+  dayTimeNanoToNumber,
+  diffDayTimeNanos,
+} from './dayTimeNano'
+import {
+  DurationFields,
+  durationFieldDefaults,
+  durationFieldNamesAsc,
+} from './durationFields'
+import {
+  DiffMarkers,
+  MarkerSlots,
+  MarkerSystem,
+  MarkerToEpochNano,
+  MoveMarker,
+  clearDurationFields,
+  createMarkerSystem,
+  durationFieldsToDayTimeNano,
+  getLargestDurationUnit,
+  queryDurationSign,
+  spanDuration,
+} from './durationMath'
 import * as errorMessages from './errorMessages'
+import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
+import { DurationSlots } from './slots'
+import { TimeZoneOps } from './timeZoneOps'
+import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
 export function totalDuration<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
-  options: TotalUnitOptionsWithRel<RA> | UnitName
+  options: TotalUnitOptionsWithRel<RA> | UnitName,
 ): number {
   const durationLargestUnit = getLargestDurationUnit(slots)
   const [totalUnit, markerSlots] = refineTotalOptions(options, refineRelativeTo)
   const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
 
   if (
-    maxLargestUnit < Unit.Day || (
-      maxLargestUnit === Unit.Day &&
-      !(markerSlots && (markerSlots as any).epochNanoseconds) // has uniform days?
-    )
+    maxLargestUnit < Unit.Day ||
+    (maxLargestUnit === Unit.Day &&
+      !(markerSlots && (markerSlots as any).epochNanoseconds)) // has uniform days?
   ) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
@@ -32,12 +51,16 @@ export function totalDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as MarkerSystem<any>
+  const markerSystem = createMarkerSystem(
+    getCalendarOps,
+    getTimeZoneOps,
+    markerSlots,
+  ) as MarkerSystem<any>
 
   return totalRelativeDuration(
     ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
     totalUnit,
-    ...markerSystem
+    ...markerSystem,
   )
 }
 
@@ -49,7 +72,7 @@ function totalRelativeDuration<M>(
   marker: M,
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
-  diffMarkers?: DiffMarkers<M>
+  _diffMarkers?: DiffMarkers<M>,
 ): number {
   const sign = queryDurationSign(durationFields)
 
@@ -60,7 +83,7 @@ function totalRelativeDuration<M>(
     // marker system...
     marker,
     markerToEpochNano,
-    moveMarker
+    moveMarker,
   )
 
   const frac = computeEpochNanoFrac(epochNano0, epochNano1, endEpochNano)
@@ -69,16 +92,16 @@ function totalRelativeDuration<M>(
 
 function totalDayTimeDuration(
   durationFields: DurationFields,
-  totalUnit: DayTimeUnit
+  totalUnit: DayTimeUnit,
 ): number {
   return totalDayTimeNano(
     durationFieldsToDayTimeNano(durationFields, Unit.Day),
-    totalUnit
+    totalUnit,
   )
 }
 
 // Utils for points-within-intervals
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function totalDayTimeNano(
   dayTimeNano: DayTimeNano,
@@ -116,6 +139,8 @@ export function computeEpochNanoFrac(
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const numer = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNanoProgress))
+  const numer = dayTimeNanoToNumber(
+    diffDayTimeNanos(epochNano0, epochNanoProgress),
+  )
   return numer / denom
 }

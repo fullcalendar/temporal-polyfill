@@ -1,31 +1,51 @@
-import { Classlike, createLazyGenerator, createPropDescriptors, pluckProps } from '../internal/utils'
-import { OrigDateTimeFormat, LocalesArg, OptionNames, ClassFormatConfig, plainYearMonthConfig, plainMonthDayConfig, plainDateConfig, plainDateTimeConfig, plainTimeConfig, instantConfig, createFormatPrepper, zonedDateTimeConfig, toEpochMillis } from '../internal/intlFormat'
-import { ZonedDateTime } from './zonedDateTime'
+import * as errorMessages from '../internal/errorMessages'
+import {
+  ClassFormatConfig,
+  LocalesArg,
+  OptionNames,
+  OrigDateTimeFormat,
+  createFormatPrepper,
+  instantConfig,
+  plainDateConfig,
+  plainDateTimeConfig,
+  plainMonthDayConfig,
+  plainTimeConfig,
+  plainYearMonthConfig,
+  toEpochMillis,
+  zonedDateTimeConfig,
+} from '../internal/intlFormat'
+import { BrandingSlots } from '../internal/slots'
+import {
+  Classlike,
+  createLazyGenerator,
+  createPropDescriptors,
+  pluckProps,
+} from '../internal/utils'
+import { Instant } from './instant'
 import { PlainDate } from './plainDate'
-import { PlainTime } from './plainTime'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
+import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { Instant } from './instant'
 import { getSlots } from './slotClass'
-import { BrandingSlots } from '../internal/slots'
-import * as errorMessages from '../internal/errorMessages'
+import { ZonedDateTime } from './zonedDateTime'
 
 type OrigFormattable = number | Date
-type TemporalFormattable = Instant |
-  PlainDate |
-  PlainDateTime |
-  ZonedDateTime |
-  PlainYearMonth |
-  PlainMonthDay |
-  PlainTime
+type TemporalFormattable =
+  | Instant
+  | PlainDate
+  | PlainDateTime
+  | ZonedDateTime
+  | PlainYearMonth
+  | PlainMonthDay
+  | PlainTime
 
 export type Formattable = TemporalFormattable | OrigFormattable
 
 const prepSubformatMap = new WeakMap<DateTimeFormat, BoundFormatPrepFunc>()
 
 // Intl.DateTimeFormat
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export class DateTimeFormat extends OrigDateTimeFormat {
   constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
@@ -37,10 +57,13 @@ export class DateTimeFormat extends OrigDateTimeFormat {
     const resolvedOptions = this.resolvedOptions()
     const origOptions = pluckProps(
       Object.keys(options) as OptionNames,
-      resolvedOptions as Intl.DateTimeFormatOptions
+      resolvedOptions as Intl.DateTimeFormatOptions,
     )
 
-    prepSubformatMap.set(this, createBoundFormatPrepFunc(origOptions, resolvedOptions))
+    prepSubformatMap.set(
+      this,
+      createBoundFormatPrepFunc(origOptions, resolvedOptions),
+    )
   }
 
   format(arg?: Formattable): string {
@@ -66,32 +89,43 @@ export class DateTimeFormat extends OrigDateTimeFormat {
 
 export interface DateTimeFormat {
   formatRange(arg0: Formattable, arg1: Formattable): string
-  formatRangeToParts(arg0: Formattable, arg1: Formattable): Intl.DateTimeFormatPart[]
+  formatRangeToParts(
+    arg0: Formattable,
+    arg1: Formattable,
+  ): Intl.DateTimeFormatPart[]
 }
 
-;['formatRange', 'formatRangeToParts'].forEach((methodName) => {
+for (const methodName of ['formatRange', 'formatRangeToParts']) {
   const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
 
   if (origMethod) {
-    Object.defineProperties(DateTimeFormat.prototype, createPropDescriptors({
-      [methodName]: function (this: DateTimeFormat, arg0: Formattable, arg1: Formattable) {
-        const prepSubformat = prepSubformatMap.get(this)!
-        const [format, epochMilli0, epochMilli1] = prepSubformat(arg0, arg1)
+    Object.defineProperties(
+      DateTimeFormat.prototype,
+      createPropDescriptors({
+        [methodName]: function (
+          this: DateTimeFormat,
+          arg0: Formattable,
+          arg1: Formattable,
+        ) {
+          const prepSubformat = prepSubformatMap.get(this)!
+          const [format, epochMilli0, epochMilli1] = prepSubformat(arg0, arg1)
 
-        return format
-          ? origMethod.call(format, epochMilli0, epochMilli1)
-          : origMethod.call(this, arg0, arg1)
-      }
-    }))
+          return format
+            ? origMethod.call(format, epochMilli0, epochMilli1)
+            : origMethod.call(this, arg0, arg1)
+        },
+      }),
+    )
   }
-})
+}
 
 // Format Prepping for Intl.DateTimeFormat ("Bound")
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-type BoundFormatPrepFunc = ( // already bound to locale/options
+type BoundFormatPrepFunc = (
+  // already bound to locale/options
   arg0?: Formattable,
-  arg1?: Formattable
+  arg1?: Formattable,
 ) => BoundFormatPrepFuncRes
 
 type BoundFormatPrepFuncRes = [
@@ -153,9 +187,10 @@ function createBoundFormatPrepFunc(
 
 // Format Prepping for each class' toLocaleString
 // (best place for this?)
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export const prepPlainYearMonthFormat = createFormatPrepper(plainYearMonthConfig)
+export const prepPlainYearMonthFormat =
+  createFormatPrepper(plainYearMonthConfig)
 export const prepPlainMonthDayFormat = createFormatPrepper(plainMonthDayConfig)
 export const prepPlainDateFormat = createFormatPrepper(plainDateConfig)
 export const prepPlainDateTimeFormat = createFormatPrepper(plainDateTimeConfig)

@@ -7,18 +7,18 @@ export interface IsoDateFields {
 }
 
 export interface IsoTimeFields {
-  isoNanosecond: number,
-  isoMicrosecond: number,
-  isoMillisecond: number,
-  isoSecond: number,
-  isoMinute: number,
-  isoHour: number,
+  isoNanosecond: number
+  isoMicrosecond: number
+  isoMillisecond: number
+  isoSecond: number
+  isoMinute: number
+  isoHour: number
 }
 
 export type IsoDateTimeFields = IsoDateFields & IsoTimeFields
 
 // Property Names
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export const isoTimeFieldNamesAsc: (keyof IsoTimeFields)[] = [
   'isoNanosecond',
@@ -43,9 +43,14 @@ export const isoDateTimeFieldNamesAsc: (keyof IsoDateTimeFields)[] = [
 // alphabetical (for getISOFields)
 export const isoDateFieldNamesAlpha = isoDateFieldNamesAsc.slice().sort()
 export const isoTimeFieldNamesAlpha = isoTimeFieldNamesAsc.slice().sort()
-export const isoDateTimeFieldNamesAlpha = isoDateTimeFieldNamesAsc.slice().sort()
+export const isoDateTimeFieldNamesAlpha = isoDateTimeFieldNamesAsc
+  .slice()
+  .sort()
 
 // Defaults
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export const isoTimeFieldDefaults = mapPropNamesToConstant(isoTimeFieldNamesAlpha, 0)
+export const isoTimeFieldDefaults = mapPropNamesToConstant(
+  isoTimeFieldNamesAlpha,
+  0,
+)

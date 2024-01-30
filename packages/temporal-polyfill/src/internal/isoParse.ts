@@ -1,50 +1,71 @@
-import { unitNanoMap, nanoInSec, nanoInUtcDay } from './units'
 import { isoCalendarId } from './calendarConfig'
 import {
-  DurationFields,
-  durationFieldNamesAsc,
-} from './durationFields'
+  NativeMonthDayParseOps,
+  NativeYearMonthParseOps,
+} from './calendarNative'
+import { resolveCalendarId } from './calendarNativeQuery'
+import { requireString, toStringViaPrimitive } from './cast'
+import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { negateDurationFields } from './durationMath'
+import * as errorMessages from './errorMessages'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  IsoTimeFields,
-} from './isoFields'
-import {
-  constrainIsoTimeFields,
   checkIsoDateFields,
   checkIsoDateTimeFields,
+  constrainIsoTimeFields,
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './isoMath'
+import { moveToMonthStart } from './move'
+import { EpochDisambig, OffsetDisambig, Overflow } from './options'
+import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
+import {
+  DateSlots,
+  DurationSlots,
+  InstantSlots,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainMonthDaySlots,
+  PlainTimeSlots,
+  PlainYearMonthSlots,
+  ZonedDateTimeSlots,
+  ZonedEpochSlots,
+  createDurationSlots,
+  createInstantSlots,
+  createPlainDateSlots,
+  createPlainDateTimeSlots,
+  createPlainMonthDaySlots,
+  createPlainTimeSlots,
+  createPlainYearMonthSlots,
+  createZonedDateTimeSlots,
+} from './slots'
 import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
-  checkIsoYearMonthInBounds, isoToEpochNanoWithOffset,
-  nanoToIsoTimeAndDay
+  checkIsoYearMonthInBounds,
+  isoToEpochNanoWithOffset,
+  nanoToIsoTimeAndDay,
 } from './timeMath'
-import { EpochDisambig, OffsetDisambig, Overflow } from './options'
-import { resolveTimeZoneId, queryNativeTimeZone, FixedTimeZone } from './timeZoneNative'
+import {
+  FixedTimeZone,
+  queryNativeTimeZone,
+  resolveTimeZoneId,
+  utcTimeZoneId,
+} from './timeZoneNative'
 import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
 import {
   TimeUnit,
   Unit,
   nanoInHour,
   nanoInMinute,
+  nanoInSec,
   nanoToGivenFields,
+  unitNanoMap,
 } from './units'
 import { divModFloor, zipProps } from './utils'
-import { utcTimeZoneId } from './timeZoneNative'
-import { NativeMonthDayParseOps, NativeYearMonthParseOps } from './calendarNative'
-import { moveToMonthStart } from './move'
-import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
-import { DateSlots, DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createDurationSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
-import { requireString, toStringViaPrimitive } from './cast'
-import { resolveCalendarId } from './calendarNativeQuery'
-import * as errorMessages from './errorMessages'
 
 // High-level
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function parseInstant(s: string): InstantSlots {
   // instead of 'requiring' like other types,
@@ -56,7 +77,7 @@ export function parseInstant(s: string): InstantSlots {
     throw new RangeError(errorMessages.failedParse(s))
   }
 
-  let offsetNano
+  let offsetNano: number
 
   if (organized.hasZ) {
     offsetNano = 0
@@ -79,10 +100,9 @@ export function parseInstant(s: string): InstantSlots {
   return createInstantSlots(epochNanoseconds)
 }
 
-export function parseZonedOrPlainDateTime(s: string): (
-  DateSlots<string> |
-  ZonedEpochSlots<string, string>
-) {
+export function parseZonedOrPlainDateTime(
+  s: string,
+): DateSlots<string> | ZonedEpochSlots<string, string> {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized) {
@@ -142,9 +162,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
     throw new RangeError(errorMessages.failedParse(s))
   }
 
-  return createPlainDateTimeSlots(
-    finalizeDateTime(organized),
-  )
+  return createPlainDateTimeSlots(finalizeDateTime(organized))
 }
 
 export function parsePlainDate(s: string): PlainDateSlots<string> {
@@ -155,9 +173,7 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
   }
 
   return createPlainDateSlots(
-    organized.hasTime
-      ? finalizeDateTime(organized)
-      : finalizeDate(organized)
+    organized.hasTime ? finalizeDateTime(organized) : finalizeDate(organized),
   )
 }
 
@@ -210,15 +226,23 @@ export function parsePlainMonthDay(
 
   // normalize year&month to be as close as possible to epoch
   const [origYear, origMonth, day] = calendarOps.dateParts(dateSlots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(origYear, origMonth)
-  const [year, month] = calendarOps.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)! // !HACK
+  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(
+    origYear,
+    origMonth,
+  )
+  const [year, month] = calendarOps.yearMonthForMonthDay(
+    monthCodeNumber,
+    isLeapMonth,
+    day,
+  )! // !HACK
   const isoFields = calendarOps.isoFields(year, month, day)
 
   return createPlainMonthDaySlots(isoFields, calendar)
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
-  let organized: IsoTimeFields | DateTimeLikeOrganized | undefined = parseTimeOnly(requireString(s))
+  let organized: IsoTimeFields | DateTimeLikeOrganized | undefined =
+    parseTimeOnly(requireString(s))
 
   if (!organized) {
     organized = parseDateTimeLike(s)
@@ -244,7 +268,9 @@ export function parsePlainTime(s: string): PlainTimeSlots {
     throw new RangeError(errorMessages.failedParse(s))
   }
 
-  return createPlainTimeSlots(constrainIsoTimeFields(organized, Overflow.Reject))
+  return createPlainTimeSlots(
+    constrainIsoTimeFields(organized, Overflow.Reject),
+  )
 }
 
 export function parseDuration(s: string): DurationSlots {
@@ -256,21 +282,22 @@ export function parseDuration(s: string): DurationSlots {
 }
 
 export function parseCalendarId(s: string): string {
-  const res = parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
+  const res =
+    parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
   return res ? res.calendar : s
 }
 
 export function parseTimeZoneId(s: string): string {
   const parsed = parseDateTimeLike(s)
-  return parsed && (
-    parsed.timeZone ||
-    (parsed.hasZ && utcTimeZoneId) ||
-    parsed.offset
-  ) || s
+  return (
+    (parsed &&
+      (parsed.timeZone || (parsed.hasZ && utcTimeZoneId) || parsed.offset)) ||
+    s
+  )
 }
 
 // Finalizing 'organized' structs to slots
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 /*
 Unlike others, return slots
@@ -301,12 +328,18 @@ function finalizeZonedDateTime(
   )
 }
 
-function finalizeDateTime(organized: DateTimeLikeOrganized): IsoDateTimeFields & { calendar: string } {
-  return realizeCalendarSlot(checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)))
+function finalizeDateTime(
+  organized: DateTimeLikeOrganized,
+): IsoDateTimeFields & { calendar: string } {
+  return realizeCalendarSlot(
+    checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)),
+  )
 }
 
 function finalizeDate(organized: DateOrganized): DateSlots<string> {
-  return realizeCalendarSlot(checkIsoDateInBounds(checkIsoDateFields(organized)))
+  return realizeCalendarSlot(
+    checkIsoDateInBounds(checkIsoDateFields(organized)),
+  )
 }
 
 function realizeCalendarSlot<T extends { calendar: string }>(organized: T): T {
@@ -317,7 +350,7 @@ function realizeCalendarSlot<T extends { calendar: string }>(organized: T): T {
 }
 
 // RegExp
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const signRegExpStr = '([+\u2212-])' // outer captures
 const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
@@ -363,28 +396,30 @@ const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
 const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
 const timeRegExp = createRegExp(
   'T?' +
-  timeRegExpStr + // 1-4
-  '(?:' + offsetRegExpStr + ')?' + // 5-9
-  annotationsRegExpStr, // 10
+    timeRegExpStr + // 1-4
+    '(?:' +
+    offsetRegExpStr +
+    ')?' + // 5-9
+    annotationsRegExpStr, // 10
 )
 const offsetRegExp = createRegExp(offsetRegExpStr)
 const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
 
 const durationRegExp = createRegExp(
   `${signRegExpStr}?P` + // 1:sign
-  '(\\d+Y)?' + // 2:years
-  '(\\d+M)?' + // 3:months
-  '(\\d+W)?' + // 4:weeks
-  '(\\d+D)?' + // 5:days
-  '(?:T' +
-  `(?:(\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
-  `(?:(\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
-  `(?:(\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
-  ')?',
+    '(\\d+Y)?' + // 2:years
+    '(\\d+M)?' + // 3:months
+    '(\\d+W)?' + // 4:weeks
+    '(\\d+D)?' + // 5:days
+    '(?:T' +
+    `(?:(\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
+    `(?:(\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
+    `(?:(\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
+    ')?',
 )
 
 // Maybe-parsing
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
   const parts = dateTimeRegExp.exec(s)
@@ -413,13 +448,16 @@ function parseDurationFields(s: string): DurationFields | undefined {
   return parts ? organizeDurationParts(parts) : undefined
 }
 
-export function parseOffsetNanoMaybe(s: string, onlyHourMinute?: boolean): number | undefined {
+export function parseOffsetNanoMaybe(
+  s: string,
+  onlyHourMinute?: boolean,
+): number | undefined {
   const parts = offsetRegExp.exec(s)
   return parts ? organizeOffsetParts(parts, onlyHourMinute) : undefined
 }
 
 // Parts Organization
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 type DateTimeLikeOrganized = IsoDateTimeFields & {
   hasTime: boolean
@@ -484,7 +522,9 @@ function organizeIsoYearParts(parts: string[]): number {
   const year = parseInt(parts[2] || parts[3])
 
   if (yearSign < 0 && !year) {
-    throw new RangeError(errorMessages.invalidSubstring(-0 as unknown as string))
+    throw new RangeError(
+      errorMessages.invalidSubstring(-0 as unknown as string),
+    )
   }
 
   return yearSign * year
@@ -501,23 +541,23 @@ function organizeTimeParts(parts: string[]): IsoTimeFields {
   }
 }
 
-function organizeOffsetParts(parts: string[], onlyHourMinute?: boolean): number {
+function organizeOffsetParts(
+  parts: string[],
+  onlyHourMinute?: boolean,
+): number {
   const firstSubMinutePart = parts[4] || parts[5]
 
   if (onlyHourMinute && firstSubMinutePart) {
     throw new RangeError(errorMessages.invalidSubstring(firstSubMinutePart))
   }
 
-  const offsetNanoPos = (
+  const offsetNanoPos =
     parseInt0(parts[2]) * nanoInHour +
     parseInt0(parts[3]) * nanoInMinute +
     parseInt0(parts[4]) * nanoInSec +
     parseSubsecNano(parts[5] || '')
-  )
 
-  return validateTimeZoneOffset(
-    offsetNanoPos * parseSign(parts[1])
-  )
+  return validateTimeZoneOffset(offsetNanoPos * parseSign(parts[1]))
 }
 
 function organizeDurationParts(parts: string[]): DurationFields {
@@ -548,13 +588,24 @@ function organizeDurationParts(parts: string[]): DurationFields {
   return durationFields
 
   function parseUnit(wholeStr: string): number
-  function parseUnit(wholeStr: string, fracStr: string, timeUnit: TimeUnit): number
-  function parseUnit(wholeStr: string, fracStr?: string, timeUnit?: TimeUnit): number {
+  function parseUnit(
+    wholeStr: string,
+    fracStr: string,
+    timeUnit: TimeUnit,
+  ): number
+  function parseUnit(
+    wholeStr: string,
+    fracStr?: string,
+    timeUnit?: TimeUnit,
+  ): number {
     let leftoverUnits = 0 // from previous round
     let wholeUnits = 0
 
     if (timeUnit) {
-      [leftoverUnits, leftoverNano] = divModFloor(leftoverNano, unitNanoMap[timeUnit])
+      ;[leftoverUnits, leftoverNano] = divModFloor(
+        leftoverNano,
+        unitNanoMap[timeUnit],
+      )
     }
 
     if (wholeStr !== undefined) {
@@ -568,7 +619,8 @@ function organizeDurationParts(parts: string[]): DurationFields {
       if (fracStr) {
         // convert seconds to other units
         // more precise version of `frac / nanoInSec * nanoInUnit`
-        leftoverNano = parseSubsecNano(fracStr) * (unitNanoMap[timeUnit!] / nanoInSec)
+        leftoverNano =
+          parseSubsecNano(fracStr) * (unitNanoMap[timeUnit!] / nanoInSec)
         hasAnyFrac = true
       }
     }
@@ -578,11 +630,11 @@ function organizeDurationParts(parts: string[]): DurationFields {
 }
 
 // Annotations
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 interface AnnotationsOrganized {
-  calendar: string,
-  timeZone: string | undefined,
+  calendar: string
+  timeZone: string | undefined
 }
 
 function organizeAnnotationParts(s: string): AnnotationsOrganized {
@@ -621,7 +673,7 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
 }
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function parseSubsecNano(fracStr: string): number {
   return parseInt(fracStr.padEnd(9, '0'))

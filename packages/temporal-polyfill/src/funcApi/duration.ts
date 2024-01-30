@@ -1,16 +1,29 @@
-import { NumSign, bindArgs, identityFunc } from '../internal/utils'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DurationSlots, PlainDateSlots, ZonedDateTimeSlots } from '../internal/slots'
-import { createNativeDiffOps } from '../internal/calendarNativeQuery'
-import { constructDurationSlots } from '../internal/construct'
-import { parseDuration } from '../internal/isoParse'
 import { durationWithFields, refineDurationBag } from '../internal/bagRefine'
-import { absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
-import { totalDuration } from '../internal/total'
-import { formatDurationIso } from '../internal/isoFormat'
+import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import { compareDurations } from '../internal/compare'
+import { constructDurationSlots } from '../internal/construct'
+import {
+  absDuration,
+  addDurations,
+  negateDuration,
+  queryDurationBlank,
+  queryDurationSign,
+  roundDuration,
+} from '../internal/durationMath'
+import { formatDurationIso } from '../internal/isoFormat'
+import { parseDuration } from '../internal/isoParse'
+import {
+  DurationSlots,
+  PlainDateSlots,
+  ZonedDateTimeSlots,
+} from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { totalDuration } from '../internal/total'
+import { NumSign, bindArgs, identityFunc } from '../internal/utils'
 
-export type RelativeToArg = ZonedDateTimeSlots<string, string> | PlainDateSlots<string>
+export type RelativeToArg =
+  | ZonedDateTimeSlots<string, string>
+  | PlainDateSlots<string>
 
 export const create = constructDurationSlots
 
@@ -55,8 +68,6 @@ export const total = bindArgs(
 )
 
 export const toString = formatDurationIso
-
-// TODO: toLocaleString
 
 export const sign = queryDurationSign as (slots: DurationSlots) => NumSign
 

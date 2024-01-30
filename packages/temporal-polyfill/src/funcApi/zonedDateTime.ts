@@ -1,24 +1,71 @@
-import { DateTimeBag, DateTimeFields } from '../internal/fields'
-import { bindArgs } from '../internal/utils'
-import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
-import { ZonedDateTimeFields, computeHoursInDay, computeStartOfDay, buildZonedIsoFields, zonedEpochSlotsToIso } from '../internal/timeZoneOps'
-import { LocalesArg } from '../internal/intlFormat'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { ZonedFieldOptions } from '../internal/optionsRefine'
-import { DateSlots, ZonedDateTimeSlots, getCalendarIdFromBag, refineCalendarIdString, refineTimeZoneIdString } from '../internal/slots'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from '../internal/isoMath'
-import { createNativeDateModOps, createNativeDateRefineOps, createNativeDiffOps, createNativeMonthDayRefineOps, createNativeMoveOps, createNativeYearMonthRefineOps } from '../internal/calendarNativeQuery'
-import { ZonedDateTimeBag, isoTimeFieldsToCal, refineZonedDateTimeBag, zonedDateTimeWithFields } from '../internal/bagRefine'
-import { constructZonedDateTimeSlots } from '../internal/construct'
-import { parseZonedDateTime } from '../internal/isoParse'
-import { slotsWithCalendar, slotsWithTimeZone, zonedDateTimeWithPlainDate, zonedDateTimeWithPlainTime } from '../internal/modify'
-import { moveZonedDateTime } from '../internal/move'
-import { diffZonedDateTimes } from '../internal/diff'
-import { roundZonedDateTime } from '../internal/round'
+import {
+  ZonedDateTimeBag,
+  isoTimeFieldsToCal,
+  refineZonedDateTimeBag,
+  zonedDateTimeWithFields,
+} from '../internal/bagRefine'
+import {
+  createNativeDateModOps,
+  createNativeDateRefineOps,
+  createNativeDiffOps,
+  createNativeMonthDayRefineOps,
+  createNativeMoveOps,
+  createNativeYearMonthRefineOps,
+} from '../internal/calendarNativeQuery'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
-import { zonedDateTimeToPlainDate, zonedDateTimeToPlainDateTime, zonedDateTimeToPlainMonthDay, zonedDateTimeToPlainTime, zonedDateTimeToPlainYearMonth } from '../internal/convert'
+import { constructZonedDateTimeSlots } from '../internal/construct'
+import {
+  zonedDateTimeToPlainDate,
+  zonedDateTimeToPlainDateTime,
+  zonedDateTimeToPlainMonthDay,
+  zonedDateTimeToPlainTime,
+  zonedDateTimeToPlainYearMonth,
+} from '../internal/convert'
+import { diffZonedDateTimes } from '../internal/diff'
+import { DateTimeBag } from '../internal/fields'
+import { LocalesArg } from '../internal/intlFormat'
+import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
+import {
+  computeIsoDayOfWeek,
+  computeIsoDaysInWeek,
+  computeIsoWeekOfYear,
+  computeIsoYearOfWeek,
+} from '../internal/isoMath'
+import { parseZonedDateTime } from '../internal/isoParse'
+import {
+  slotsWithCalendar,
+  slotsWithTimeZone,
+  zonedDateTimeWithPlainDate,
+  zonedDateTimeWithPlainTime,
+} from '../internal/modify'
+import { moveZonedDateTime } from '../internal/move'
+import { ZonedFieldOptions } from '../internal/optionsRefine'
+import { roundZonedDateTime } from '../internal/round'
+import {
+  DateSlots,
+  ZonedDateTimeSlots,
+  getCalendarIdFromBag,
+  refineCalendarIdString,
+  refineTimeZoneIdString,
+} from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import {
+  ZonedDateTimeFields,
+  buildZonedIsoFields,
+  computeHoursInDay,
+  computeStartOfDay,
+  zonedEpochSlotsToIso,
+} from '../internal/timeZoneOps'
+import { bindArgs } from '../internal/utils'
 import { prepCachedZonedDateTimeFormat } from './intlFormatCached'
-import { computeDateFields, computeDayOfYear, computeDaysInMonth, computeDaysInYear, computeInLeapYear, computeMonthsInYear } from './utils'
+import {
+  computeDateFields,
+  computeDayOfYear,
+  computeDaysInMonth,
+  computeDaysInYear,
+  computeInLeapYear,
+  computeMonthsInYear,
+} from './utils'
 
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
@@ -51,7 +98,10 @@ export const getISOFields = bindArgs(
 export function getFields(
   zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
 ): ZonedDateTimeFields {
-  const isoFields = zonedEpochSlotsToIso(zonedDateTimeSlots, queryNativeTimeZone)
+  const isoFields = zonedEpochSlotsToIso(
+    zonedDateTimeSlots,
+    queryNativeTimeZone,
+  )
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   return {
@@ -71,8 +121,14 @@ export const daysInYear = adaptDateFunc(computeDaysInYear)
 export const monthsInYear = adaptDateFunc(computeMonthsInYear)
 export const inLeapYear = adaptDateFunc(computeInLeapYear)
 
-export const startOfDay = bindArgs(computeStartOfDay<string, string>, queryNativeTimeZone)
-export const hoursInDay = bindArgs(computeHoursInDay<string, string>, queryNativeTimeZone)
+export const startOfDay = bindArgs(
+  computeStartOfDay<string, string>,
+  queryNativeTimeZone,
+)
+export const hoursInDay = bindArgs(
+  computeHoursInDay<string, string>,
+  queryNativeTimeZone,
+)
 
 export function withFields(
   slots: ZonedDateTimeSlots<string, string>,
@@ -176,7 +232,7 @@ export const toPlainYearMonth = bindArgs(
 
 export const toPlainMonthDay = bindArgs(
   zonedDateTimeToPlainMonthDay<string>,
-  createNativeMonthDayRefineOps
+  createNativeMonthDayRefineOps,
 )
 
 export function toLocaleString(
@@ -184,7 +240,11 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedZonedDateTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedZonedDateTimeFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.format(epochMilli)
 }
 
@@ -193,7 +253,11 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedZonedDateTimeFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedZonedDateTimeFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.formatToParts(epochMilli)
 }
 
@@ -203,7 +267,12 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedZonedDateTimeFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedZonedDateTimeFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -212,13 +281,18 @@ export function rangeToLocaleStringParts(
   slots1: ZonedDateTimeSlots<string, string>,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-  ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedZonedDateTimeFormat(locales, options, slots0, slots1)
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepCachedZonedDateTimeFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function adaptDateFunc<R>(
   dateFunc: (dateSlots: DateSlots<string>) => R,

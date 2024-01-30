@@ -1,16 +1,92 @@
 import { nativeMergeFields } from './bagRefine'
-import { gregoryCalendarId, isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, queryFormatForCalendar, queryIntlCalendar } from './intlMath'
-import { computeIsoDateParts, computeIsoDay, computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoEraParts, computeIsoFieldsFromParts, computeIsoInLeapYear, computeIsoMonth, computeIsoMonthCodeParts, computeIsoMonthsInYear, computeIsoYear, computeIsoYearMonthForMonthDay } from './isoMath'
-import { EpochMilliOp, LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeCalendarIdBase, computeNativeDaysInMonth, computeNativeDaysInYear, computeNativeEra, computeNativeEraYear, computeNativeInLeapYear, computeNativeMonthCode, computeNativeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
+import {
+  gregoryCalendarId,
+  isoCalendarId,
+  japaneseCalendarId,
+} from './calendarConfig'
+import {
+  EpochMilliOp,
+  LeapMonthOp,
+  NativeCalendar,
+  NativeDateModOps,
+  NativeDateRefineOps,
+  NativeDayOfYearOps,
+  NativeDaysInMonthOps,
+  NativeDaysInYearOps,
+  NativeDiffOps,
+  NativeEraOps,
+  NativeEraYearOps,
+  NativeInLeapYearOps,
+  NativeMonthCodeOps,
+  NativeMonthDayModOps,
+  NativeMonthDayParseOps,
+  NativeMonthDayRefineOps,
+  NativeMonthsInYearOps,
+  NativeMoveOps,
+  NativePartOps,
+  NativeStandardOps,
+  NativeYearMonthDiffOps,
+  NativeYearMonthModOps,
+  NativeYearMonthMoveOps,
+  NativeYearMonthParseOps,
+  NativeYearMonthRefineOps,
+  computeCalendarIdBase,
+  computeNativeDaysInMonth,
+  computeNativeDaysInYear,
+  computeNativeEra,
+  computeNativeEraYear,
+  computeNativeInLeapYear,
+  computeNativeMonthCode,
+  computeNativeMonthsInYear,
+  nativeDateRefineBase,
+  nativeDiffBase,
+  nativeMonthDayRefineBase,
+  nativeMoveBase,
+  nativeStandardBase,
+  nativeYearMonthRefineBase,
+} from './calendarNative'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
-import { isoArgsToEpochMilli } from './timeMath'
-import { intlMonthAdd, isoMonthAdd } from './move'
-import { noop } from './utils'
 import * as errorMessages from './errorMessages'
+import {
+  computeIntlDateParts,
+  computeIntlDay,
+  computeIntlDayOfYear,
+  computeIntlDaysInMonth,
+  computeIntlDaysInYear,
+  computeIntlEpochMilli,
+  computeIntlEraParts,
+  computeIntlInLeapYear,
+  computeIntlLeapMonth,
+  computeIntlMonth,
+  computeIntlMonthCodeParts,
+  computeIntlMonthsInYear,
+  computeIntlYear,
+  computeIntlYearMonthForMonthDay,
+  computeIsoFieldsFromIntlParts,
+  queryFormatForCalendar,
+  queryIntlCalendar,
+} from './intlMath'
+import {
+  computeIsoDateParts,
+  computeIsoDay,
+  computeIsoDayOfYear,
+  computeIsoDaysInMonth,
+  computeIsoDaysInYear,
+  computeIsoEraParts,
+  computeIsoFieldsFromParts,
+  computeIsoInLeapYear,
+  computeIsoMonth,
+  computeIsoMonthCodeParts,
+  computeIsoMonthsInYear,
+  computeIsoYear,
+  computeIsoYearMonthForMonthDay,
+} from './isoMath'
+import { intlMonthAdd, isoMonthAdd } from './move'
+import { isoArgsToEpochMilli } from './timeMath'
+import { noop } from './utils'
 
 // ISO
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // Refine
 // ------
@@ -174,7 +250,7 @@ export const isoStandardOps: NativeStandardOps = {
 }
 
 // Intl
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // Refine
 // ------
@@ -353,57 +429,116 @@ export const intlStandardOps: Omit<NativeStandardOps, 'id'> = {
   day: computeIntlDay,
 }
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 /*
 All functions expect realized/normalized calendarId
 */
 
 // Refine
-export const createNativeYearMonthRefineOps = createNativeOpsCreator(isoYearMonthRefineOps, intlYearMonthRefineOps)
-export const createNativeDateRefineOps = createNativeOpsCreator(isoDateRefineOps, intlDateRefineOps)
-export const createNativeMonthDayRefineOps = createNativeOpsCreator(isoMonthDayRefineOps, intlMonthDayRefineOps)
+export const createNativeYearMonthRefineOps = createNativeOpsCreator(
+  isoYearMonthRefineOps,
+  intlYearMonthRefineOps,
+)
+export const createNativeDateRefineOps = createNativeOpsCreator(
+  isoDateRefineOps,
+  intlDateRefineOps,
+)
+export const createNativeMonthDayRefineOps = createNativeOpsCreator(
+  isoMonthDayRefineOps,
+  intlMonthDayRefineOps,
+)
 
 // Mod
-export const createNativeYearMonthModOps = createNativeOpsCreator(isoYearMonthModOps, intlYearMonthModOps)
-export const createNativeDateModOps = createNativeOpsCreator(isoDateModOps, intlDateModOps)
-export const createNativeMonthDayModOps = createNativeOpsCreator(isoMonthDayModOps, intlMonthDayModOps)
+export const createNativeYearMonthModOps = createNativeOpsCreator(
+  isoYearMonthModOps,
+  intlYearMonthModOps,
+)
+export const createNativeDateModOps = createNativeOpsCreator(
+  isoDateModOps,
+  intlDateModOps,
+)
+export const createNativeMonthDayModOps = createNativeOpsCreator(
+  isoMonthDayModOps,
+  intlMonthDayModOps,
+)
 
 // Math
-export const createNativeMoveOps = createNativeOpsCreator(isoMoveOps, intlMoveOps)
-export const createNativeDiffOps = createNativeOpsCreator(isoDiffOps, intlDiffOps)
-export const createNativeYearMonthMoveOps = createNativeOpsCreator(isoYearMonthMoveOps, intlYearMonthMoveOps)
-export const createNativeYearMonthDiffOps = createNativeOpsCreator(isoYearMonthDiffOps, intlYearMonthDiffOps)
+export const createNativeMoveOps = createNativeOpsCreator(
+  isoMoveOps,
+  intlMoveOps,
+)
+export const createNativeDiffOps = createNativeOpsCreator(
+  isoDiffOps,
+  intlDiffOps,
+)
+export const createNativeYearMonthMoveOps = createNativeOpsCreator(
+  isoYearMonthMoveOps,
+  intlYearMonthMoveOps,
+)
+export const createNativeYearMonthDiffOps = createNativeOpsCreator(
+  isoYearMonthDiffOps,
+  intlYearMonthDiffOps,
+)
 
 // Parts & Stats
-export const createNativeInLeapYearOps = createNativeOpsCreator(isoInLeapYearOps, intlInLeapYearOps)
-export const createNativeMonthsInYearOps = createNativeOpsCreator(isoMonthsInYearOps, intlMonthsInYearOps)
-export const createNativeDaysInMonthOps = createNativeOpsCreator(isoDaysInMonthOps, intlDaysInMonthOps)
-export const createNativeDaysInYearOps = createNativeOpsCreator(isoDaysInYearOps, intlDaysInYearOps)
-export const createNativeDayOfYearOps = createNativeOpsCreator(isoDayOfYearOps, intlDayOfYearOps)
-export const createNativePartOps = createNativeOpsCreator(isoPartOps, intlPartOps)
+export const createNativeInLeapYearOps = createNativeOpsCreator(
+  isoInLeapYearOps,
+  intlInLeapYearOps,
+)
+export const createNativeMonthsInYearOps = createNativeOpsCreator(
+  isoMonthsInYearOps,
+  intlMonthsInYearOps,
+)
+export const createNativeDaysInMonthOps = createNativeOpsCreator(
+  isoDaysInMonthOps,
+  intlDaysInMonthOps,
+)
+export const createNativeDaysInYearOps = createNativeOpsCreator(
+  isoDaysInYearOps,
+  intlDaysInYearOps,
+)
+export const createNativeDayOfYearOps = createNativeOpsCreator(
+  isoDayOfYearOps,
+  intlDayOfYearOps,
+)
+export const createNativePartOps = createNativeOpsCreator(
+  isoPartOps,
+  intlPartOps,
+)
 
 // String Parsing
-export const createNativeYearMonthParseOps = createNativeOpsCreator(isoYearMonthParseOps, intlYearMonthParseOps)
-export const createNativeMonthDayParseOps = createNativeOpsCreator(isoMonthDayParseOps, intlMonthDayParseOps)
+export const createNativeYearMonthParseOps = createNativeOpsCreator(
+  isoYearMonthParseOps,
+  intlYearMonthParseOps,
+)
+export const createNativeMonthDayParseOps = createNativeOpsCreator(
+  isoMonthDayParseOps,
+  intlMonthDayParseOps,
+)
 
 // Standard
-export const createNativeStandardOps = createNativeOpsCreator(isoStandardOps, intlStandardOps)
+export const createNativeStandardOps = createNativeOpsCreator(
+  isoStandardOps,
+  intlStandardOps,
+)
 
-function createNativeOpsCreator<O extends {}>(isoOps: O, intlOps: O): (
-  (calendarId: string) => O & NativeCalendar
-) {
+function createNativeOpsCreator<O extends {}>(
+  isoOps: O,
+  intlOps: O,
+): (calendarId: string) => O & NativeCalendar {
   return (calendarId) => {
     if (calendarId === isoCalendarId) {
       return isoOps
-    } else if (calendarId === gregoryCalendarId || calendarId === japaneseCalendarId) {
+    }
+    if (calendarId === gregoryCalendarId || calendarId === japaneseCalendarId) {
       return Object.assign(Object.create(isoOps), { id: calendarId })
     }
     return Object.assign(Object.create(intlOps), queryIntlCalendar(calendarId))
   }
 }
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function resolveCalendarId(calendarId: string): string {
   calendarId = normalizeCalendarId(calendarId)
@@ -411,7 +546,9 @@ export function resolveCalendarId(calendarId: string): string {
   if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
     if (
       computeCalendarIdBase(calendarId) !==
-      computeCalendarIdBase(queryFormatForCalendar(calendarId).resolvedOptions().calendar)
+      computeCalendarIdBase(
+        queryFormatForCalendar(calendarId).resolvedOptions().calendar,
+      )
     ) {
       throw new RangeError(errorMessages.invalidCalendar(calendarId))
     }

@@ -1,16 +1,39 @@
-import { nativeDateFromFields, nativeMonthDayFromFields, nativeYearMonthFromFields, nativeFieldsMethod, nativeMergeFields } from './bagRefine'
-import { DateRefineOps, DayOp, DiffOps, MergeFieldsOp, MonthDayRefineOps, MoveOps, YearMonthRefineOps } from './calendarOps'
+import {
+  nativeDateFromFields,
+  nativeFieldsMethod,
+  nativeMergeFields,
+  nativeMonthDayFromFields,
+  nativeYearMonthFromFields,
+} from './bagRefine'
+import {
+  eraOriginsByCalendarId,
+  isoCalendarId,
+  leapMonthMetas,
+} from './calendarConfig'
+import {
+  DateRefineOps,
+  DayOp,
+  DiffOps,
+  MergeFieldsOp,
+  MonthDayRefineOps,
+  MoveOps,
+  YearMonthRefineOps,
+} from './calendarOps'
 import { nativeDateUntil } from './diff'
+import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek, computeIsoWeekOfYear, computeIsoYearOfWeek } from './isoMath'
+import {
+  computeIsoDayOfWeek,
+  computeIsoDaysInWeek,
+  computeIsoWeekOfYear,
+  computeIsoYearOfWeek,
+} from './isoMath'
 import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
-import { eraOriginsByCalendarId, isoCalendarId, leapMonthMetas } from './calendarConfig'
-import * as errorMessages from './errorMessages'
 
 // Struct Types
 export type DateParts = [year: number, month: number, day: number]
-export type EraParts = [era: string | undefined, eraYear: number | undefined ]
+export type EraParts = [era: string | undefined, eraYear: number | undefined]
 export type MonthCodeParts = [monthCodeNumber: number, isLeapMonth: boolean]
 export type YearMonthParts = [year: number, month: number]
 
@@ -22,21 +45,41 @@ export type EraYearOp = (isoFields: IsoDateFields) => number | undefined
 export type EraPartsOp = (isoFields: IsoDateFields) => EraParts
 export type MonthCodeOp = (isoFields: IsoDateFields) => string
 export type MonthCodePartsOp = (year: number, month: number) => MonthCodeParts
-export type YearMonthForMonthDayOp = (monthCodeNumber: number, isLeapMonth: boolean, day: number) => YearMonthParts | undefined // receives positive monthCode integer
+export type YearMonthForMonthDayOp = (
+  // receives positive monthCode integer
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  day: number,
+) => YearMonthParts | undefined
 export type InLeapYearOp = (isoFields: IsoDateFields) => boolean
 export type InLeapYearPartOp = (year: number) => boolean
 export type LeapMonthOp = (year: number) => number | undefined
 export type MonthsInYearOp = (isoDateFields: IsoDateFields) => number
 export type MonthsInYearPartOp = (year: number) => number
-export type MonthsInYearSpanOp = (yearDelta: number, yearStart: number) => number
+export type MonthsInYearSpanOp = (
+  yearDelta: number,
+  yearStart: number,
+) => number
 export type DaysInMonthOp = (isoFields: IsoDateFields) => number
 export type DaysInMonthPartsOp = (year: number, month: number) => number
 export type DaysInYearOp = (isoFields: IsoDateFields) => number
 export type DaysInYearPartOp = (year: number) => number
 export type DayOfYearOp = (isoFields: IsoDateFields) => number
-export type EpochMilliOp = (year: number, month?: number, day?: number) => number
-export type IsoFieldsOp = (year: number, month: number, day: number) => IsoDateFields
-export type MonthAddOp = (year: number, month: number, monthDelta: number) => YearMonthParts
+export type EpochMilliOp = (
+  year: number,
+  month?: number,
+  day?: number,
+) => number
+export type IsoFieldsOp = (
+  year: number,
+  month: number,
+  day: number,
+) => IsoDateFields
+export type MonthAddOp = (
+  year: number,
+  month: number,
+  monthDelta: number,
+) => YearMonthParts
 export type GetEraOrigins = () => Record<string, number> | undefined
 export type GetLeapMonthMeta = () => number | undefined
 
@@ -46,7 +89,7 @@ export interface NativeCalendar {
 }
 
 // Refine
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export type NativeYearMonthRefineDeps = NativeCalendar & {
   leapMonth: LeapMonthOp
@@ -62,9 +105,11 @@ export type NativeMonthDayRefineDeps = NativeDateRefineDeps & {
   yearMonthForMonthDay: YearMonthForMonthDayOp
 }
 
-export type NativeYearMonthRefineOps = YearMonthRefineOps<string> & NativeYearMonthRefineDeps
+export type NativeYearMonthRefineOps = YearMonthRefineOps<string> &
+  NativeYearMonthRefineDeps
 export type NativeDateRefineOps = DateRefineOps<string> & NativeDateRefineDeps
-export type NativeMonthDayRefineOps = MonthDayRefineOps<string> & NativeMonthDayRefineDeps
+export type NativeMonthDayRefineOps = MonthDayRefineOps<string> &
+  NativeMonthDayRefineDeps
 
 // Base
 
@@ -84,14 +129,20 @@ export const nativeMonthDayRefineBase: MonthDayRefineOps<string> = {
 }
 
 // Mod
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export type NativeYearMonthModOps = NativeYearMonthRefineOps & { mergeFields: MergeFieldsOp }
-export type NativeDateModOps = NativeDateRefineOps & { mergeFields: MergeFieldsOp }
-export type NativeMonthDayModOps = NativeMonthDayRefineOps & { mergeFields: MergeFieldsOp }
+export type NativeYearMonthModOps = NativeYearMonthRefineOps & {
+  mergeFields: MergeFieldsOp
+}
+export type NativeDateModOps = NativeDateRefineOps & {
+  mergeFields: MergeFieldsOp
+}
+export type NativeMonthDayModOps = NativeMonthDayRefineOps & {
+  mergeFields: MergeFieldsOp
+}
 
 // Math
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export interface NativeMathOps {
   dateParts: DatePartsOp
@@ -101,14 +152,16 @@ export interface NativeMathOps {
   monthAdd: MonthAddOp
 }
 
-export type NativeMoveOps = MoveOps & NativeMathOps & {
-  leapMonth: LeapMonthOp
-  epochMilli: EpochMilliOp
-}
+export type NativeMoveOps = MoveOps &
+  NativeMathOps & {
+    leapMonth: LeapMonthOp
+    epochMilli: EpochMilliOp
+  }
 
-export type NativeDiffOps = DiffOps & NativeMathOps & {
-  monthsInYearSpan: MonthsInYearSpanOp
-}
+export type NativeDiffOps = DiffOps &
+  NativeMathOps & {
+    monthsInYearSpan: MonthsInYearSpanOp
+  }
 
 export type NativeYearMonthMoveOps = NativeMoveOps & { day: DayOp }
 export type NativeYearMonthDiffOps = NativeDiffOps & { day: DayOp }
@@ -125,7 +178,7 @@ export const nativeDiffBase: DiffOps = {
 }
 
 // Parts & Stats
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export interface NativeInLeapYearOps {
   inLeapYear: InLeapYearOp
@@ -178,7 +231,7 @@ export interface NativePartOps {
 }
 
 // String Parsing
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export interface NativeYearMonthParseOps {
   day: DayOp
@@ -192,10 +245,9 @@ export interface NativeMonthDayParseOps {
 }
 
 // Standard
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export type NativeStandardOps =
-  NativeYearMonthRefineOps &
+export type NativeStandardOps = NativeYearMonthRefineOps &
   NativeDateRefineOps &
   NativeMonthDayRefineOps &
   NativeMoveOps &
@@ -212,8 +264,7 @@ export type NativeStandardOps =
   NativeMonthCodeOps &
   NativePartOps &
   NativeYearMonthParseOps &
-  NativeMonthDayParseOps &
-  {
+  NativeMonthDayParseOps & {
     mergeFields: MergeFieldsOp // for 'mod' ops
 
     dayOfWeek(isoFields: IsoDateFields): number
@@ -250,7 +301,7 @@ export const nativeStandardBase = {
 }
 
 // 'Super' methods that all native implementations use
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function computeNativeInLeapYear(
   this: NativeInLeapYearOps,
@@ -308,14 +359,13 @@ export function computeNativeMonthCode(
 }
 
 // Month Code Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const monthCodeRegExp = /^M(\d{2})(L?)$/
 
-export function parseMonthCode(monthCode: string): [
-  monthCodeNumber: number,
-  isLeapMonth: boolean,
-] {
+export function parseMonthCode(
+  monthCode: string,
+): [monthCodeNumber: number, isLeapMonth: boolean] {
   const m = monthCodeRegExp.exec(monthCode)
   if (!m) {
     throw new RangeError(errorMessages.invalidMonthCode(monthCode))
@@ -327,7 +377,10 @@ export function parseMonthCode(monthCode: string): [
   ]
 }
 
-export function formatMonthCode(monthCodeNumber: number, isLeapMonth: boolean): string {
+export function formatMonthCode(
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+): string {
   return 'M' + padNumber2(monthCodeNumber) + (isLeapMonth ? 'L' : '')
 }
 
@@ -336,36 +389,39 @@ export function monthCodeNumberToMonth(
   isLeapMonth: boolean | undefined,
   leapMonth: number | undefined,
 ): number {
-  return monthCodeNumber + (
-    (isLeapMonth || (leapMonth && monthCodeNumber >= leapMonth))
-      ? 1
-      : 0
+  return (
+    monthCodeNumber +
+    (isLeapMonth || (leapMonth && monthCodeNumber >= leapMonth) ? 1 : 0)
   )
 }
 
-export function monthToMonthCodeNumber(month: number, leapMonth?: number): number {
-  return month - (
-    (leapMonth && month >= leapMonth)
-      ? 1
-      : 0
-  )
+export function monthToMonthCodeNumber(
+  month: number,
+  leapMonth?: number,
+): number {
+  return month - (leapMonth && month >= leapMonth ? 1 : 0)
 }
 
 // Era Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function eraYearToYear(eraYear: number, eraOrigin: number): number {
   // see the origin format in calendarConfig
-  return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1) || 0 // protect against -0
+  // ||0 protects against -0
+  return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1) || 0
 }
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function getCalendarEraOrigins(native: NativeCalendar): Record<string, number> | undefined {
+export function getCalendarEraOrigins(
+  native: NativeCalendar,
+): Record<string, number> | undefined {
   return eraOriginsByCalendarId[getCalendarIdBase(native)]
 }
 
-export function getCalendarLeapMonthMeta(native: NativeCalendar): number | undefined {
+export function getCalendarLeapMonthMeta(
+  native: NativeCalendar,
+): number | undefined {
   return leapMonthMetas[getCalendarIdBase(native)]
 }
 

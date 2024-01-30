@@ -1,54 +1,61 @@
-import { roundExpand, roundHalfCeil, roundHalfEven, roundHalfExpand, roundHalfFloor, roundHalfTrunc } from './utils'
+import {
+  roundExpand,
+  roundHalfCeil,
+  roundHalfEven,
+  roundHalfExpand,
+  roundHalfFloor,
+  roundHalfTrunc,
+} from './utils'
 
-export const enum Overflow {
-  Constrain,
-  Reject
+export enum Overflow {
+  Constrain = 0,
+  Reject = 1,
 }
 
-export const enum EpochDisambig {
-  Compat,
-  Reject,
-  Earlier,
-  Later
+export enum EpochDisambig {
+  Compat = 0,
+  Reject = 1,
+  Earlier = 2,
+  Later = 3,
 }
 
-export const enum OffsetDisambig {
-  Reject,
-  Use,
-  Prefer,
-  Ignore
+export enum OffsetDisambig {
+  Reject = 0,
+  Use = 1,
+  Prefer = 2,
+  Ignore = 3,
 }
 
-export const enum CalendarDisplay {
-  Auto,
-  Never,
-  Critical,
-  Always
+export enum CalendarDisplay {
+  Auto = 0,
+  Never = 1,
+  Critical = 2,
+  Always = 3,
 }
 
-export const enum TimeZoneDisplay {
-  Auto,
-  Never,
-  Critical
+export enum TimeZoneDisplay {
+  Auto = 0,
+  Never = 1,
+  Critical = 2,
 }
 
-export const enum OffsetDisplay {
-  Auto,
-  Never
+export enum OffsetDisplay {
+  Auto = 0,
+  Never = 1,
 }
 
-export const enum RoundingMode {
+export enum RoundingMode {
   // modes that get inverted (see invertRoundingMode)
-  Floor,
-  HalfFloor,
-  Ceil,
-  HalfCeil,
+  Floor = 0,
+  HalfFloor = 1,
+  Ceil = 2,
+  HalfCeil = 3,
   // other modes
-  Trunc,
-  HalfTrunc,
-  Expand,
-  HalfExpand,
-  HalfEven
+  Trunc = 4,
+  HalfTrunc = 5,
+  Expand = 6,
+  HalfExpand = 7,
+  HalfEven = 8,
 }
 
 export const roundingModeFuncs = [

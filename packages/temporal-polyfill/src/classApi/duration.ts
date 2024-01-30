@@ -1,32 +1,55 @@
 import {
+  ZonedDateTimeBag,
+  durationWithFields,
+  refineDurationBag,
+  refineMaybeZonedDateTimeBag,
+} from '../internal/bagRefine'
+import { compareDurations } from '../internal/compare'
+import { constructDurationSlots } from '../internal/construct'
+import { DurationFields } from '../internal/durationFields'
+import {
+  MarkerSlots,
+  absDuration,
+  addDurations,
+  negateDuration,
+  queryDurationBlank,
+  queryDurationSign,
+  roundDuration,
+} from '../internal/durationMath'
+import { DurationBag } from '../internal/fields'
+import { LocalesArg } from '../internal/intlFormat'
+import { formatDurationIso } from '../internal/isoFormat'
+import { parseDuration, parseZonedOrPlainDateTime } from '../internal/isoParse'
+import {
   DurationRoundOptions,
   RelativeToOptions,
-  TimeDisplayOptions,
   TotalUnitOptionsWithRel,
 } from '../internal/optionsRefine'
-import { NumSign, isObjectLike } from '../internal/utils'
+import {
+  BrandingSlots,
+  DurationBranding,
+  DurationSlots,
+  PlainDateBranding,
+  PlainDateSlots,
+  PlainDateTimeBranding,
+  PlainDateTimeSlots,
+  ZonedDateTimeBranding,
+  ZonedDateTimeSlots,
+  createPlainDateSlots,
+} from '../internal/slots'
+import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
-import { DurationBag } from '../internal/fields'
-import { BrandingSlots, DurationBranding, DurationSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, createPlainDateSlots } from '../internal/slots'
-import { createSlotClass, getSlots } from './slotClass'
+import { NumSign, isObjectLike } from '../internal/utils'
+import { CalendarArg } from './calendar'
+import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
 import { durationGetters, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
-import { ZonedDateTimeArg } from './zonedDateTime'
-import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
-import { createTimeZoneOps } from './timeZoneOpsQuery'
-import { LocalesArg } from '../internal/intlFormat'
+import { createSlotClass, getSlots } from './slotClass'
 import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
 import { CalendarSlot, getCalendarSlotFromBag } from './slotClass'
-import { MarkerSlots, absDuration, addDurations, negateDuration, queryDurationBlank, queryDurationSign, roundDuration } from '../internal/durationMath'
-import { CalendarArg } from './calendar'
 import { TimeZoneArg } from './timeZone'
-import { parseDuration, parseZonedOrPlainDateTime } from '../internal/isoParse'
-import { ZonedDateTimeBag, durationWithFields, refineDurationBag, refineMaybeZonedDateTimeBag } from '../internal/bagRefine'
-import { constructDurationSlots } from '../internal/construct'
-import { totalDuration } from '../internal/total'
-import { formatDurationIso } from '../internal/isoFormat'
-import { compareDurations } from '../internal/compare'
-import { DurationFields } from '../internal/durationFields'
+import { createTimeZoneOps } from './timeZoneOpsQuery'
+import { ZonedDateTimeArg } from './zonedDateTime'
 
 export type Duration = any & DurationFields
 export type DurationArg = Duration | DurationBag | string
@@ -47,14 +70,38 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     with(slots: DurationSlots, mod: DurationBag): Duration {
       return createDuration(durationWithFields(slots, mod))
     },
-    add(slots: DurationSlots, otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
+    add(
+      slots: DurationSlots,
+      otherArg: DurationArg,
+      options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+    ) {
       return createDuration(
-        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, false, slots, toDurationSlots(otherArg), options)
+        addDurations(
+          refinePublicRelativeTo,
+          createDiffOps,
+          createTimeZoneOps,
+          false,
+          slots,
+          toDurationSlots(otherArg),
+          options,
+        ),
       )
     },
-    subtract(slots: DurationSlots, otherArg: DurationArg, options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>) {
+    subtract(
+      slots: DurationSlots,
+      otherArg: DurationArg,
+      options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+    ) {
       return createDuration(
-        addDurations(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, true, slots, toDurationSlots(otherArg), options)
+        addDurations(
+          refinePublicRelativeTo,
+          createDiffOps,
+          createTimeZoneOps,
+          true,
+          slots,
+          toDurationSlots(otherArg),
+          options,
+        ),
       )
     },
     negated(slots: DurationSlots): Duration {
@@ -63,16 +110,40 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     abs(slots: DurationSlots): Duration {
       return createDuration(absDuration(slots))
     },
-    round(slots: DurationSlots, options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>): Duration {
+    round(
+      slots: DurationSlots,
+      options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>,
+    ): Duration {
       return createDuration(
-        roundDuration(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, options)
+        roundDuration(
+          refinePublicRelativeTo,
+          createDiffOps,
+          createTimeZoneOps,
+          slots,
+          options,
+        ),
       )
     },
-    total(slots: DurationSlots, options: TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg> | UnitName): number {
-      return totalDuration(refinePublicRelativeTo, createDiffOps, createTimeZoneOps, slots, options)
+    total(
+      slots: DurationSlots,
+      options:
+        | TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg>
+        | UnitName,
+    ): number {
+      return totalDuration(
+        refinePublicRelativeTo,
+        createDiffOps,
+        createTimeZoneOps,
+        slots,
+        options,
+      )
     },
     toString: formatDurationIso,
-    toLocaleString(slots: DurationSlots, locales?: LocalesArg, options?: any): string {
+    toLocaleString(
+      _slots: DurationSlots,
+      locales?: LocalesArg,
+      options?: any,
+    ): string {
       return new (Intl as any).DurationFormat(locales, options).format(this)
     },
     toJSON(slots: DurationSlots): string {
@@ -97,12 +168,12 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
         toDurationSlots(durationArg1),
         options,
       )
-    }
+    },
   },
 )
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function toDurationSlots(arg: DurationArg): DurationSlots {
   if (isObjectLike(arg)) {
@@ -128,7 +199,9 @@ function refinePublicRelativeTo(
       switch (slots.branding) {
         case ZonedDateTimeBranding:
         case PlainDateBranding:
-          return slots as (ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot> | PlainDateSlots<CalendarSlot>)
+          return slots as
+            | ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
+            | PlainDateSlots<CalendarSlot>
 
         case PlainDateTimeBranding:
           return createPlainDateSlots(slots as PlainDateTimeSlots<CalendarSlot>)

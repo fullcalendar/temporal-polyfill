@@ -1,37 +1,67 @@
+import { isoCalendarId } from './calendarConfig'
+import {
+  NativeMoveOps,
+  YearMonthParts,
+  monthCodeNumberToMonth,
+} from './calendarNative'
+import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
 import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
+  durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
-  durationFieldDefaults,
 } from './durationFields'
-import { durationFieldsToDayTimeNano, durationHasDateParts, durationTimeFieldsToLargeNanoStrict, negateDuration, negateDurationFields, queryDurationSign } from './durationMath'
-import { IsoDateTimeFields, IsoDateFields, IsoTimeFields, isoTimeFieldNamesAsc } from './isoFields'
 import {
-  isoDaysInWeek,
-  isoMonthsInYear,
-} from './isoMath'
+  durationFieldsToDayTimeNano,
+  durationHasDateParts,
+  durationTimeFieldsToLargeNanoStrict,
+  negateDuration,
+  negateDurationFields,
+  queryDurationSign,
+} from './durationMath'
+import * as errorMessages from './errorMessages'
+import { IntlCalendar, computeIntlMonthsInYear } from './intlMath'
+import {
+  IsoDateFields,
+  IsoDateTimeFields,
+  IsoTimeFields,
+  isoTimeFieldNamesAsc,
+} from './isoFields'
+import { isoDaysInWeek, isoMonthsInYear } from './isoMath'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
+import {
+  DurationSlots,
+  InstantSlots,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainTimeSlots,
+  PlainYearMonthSlots,
+  ZonedDateTimeSlots,
+  createInstantSlots,
+  createPlainDateTimeSlots,
+  createPlainTimeSlots,
+  createPlainYearMonthSlots,
+} from './slots'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
-  epochMilliToIso, isoTimeFieldsToNano,
+  epochMilliToIso,
+  isoTimeFieldsToNano,
   isoToEpochMilli,
-  nanoToIsoTimeAndDay
+  nanoToIsoTimeAndDay,
 } from './timeMath'
-import { TimeZoneOps, getSingleInstantFor, zonedEpochNanoToIso } from './timeZoneOps'
+import {
+  TimeZoneOps,
+  getSingleInstantFor,
+  zonedEpochNanoToIso,
+} from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
-import { isoCalendarId } from './calendarConfig'
-import { NativeMoveOps, YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
-import { IntlCalendar, computeIntlMonthsInYear } from './intlMath'
-import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
-import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
-import { DurationSlots, InstantSlots, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainTimeSlots, createPlainYearMonthSlots } from './slots'
-import * as errorMessages from './errorMessages'
 
 // High-Level
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function moveInstant(
   doSubtract: boolean,
@@ -104,7 +134,7 @@ export function movePlainDate<C>(
       plainDateSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
-    )
+    ),
   }
 }
 
@@ -125,7 +155,10 @@ export function movePlainYearMonth<C>(
 
   // if moving backwards in time, set to last day of month
   if (queryDurationSign(durationFields) < 0) {
-    isoDateFields = calendarOps.dateAdd(isoDateFields, { ...durationFieldDefaults, months: 1 })
+    isoDateFields = calendarOps.dateAdd(isoDateFields, {
+      ...durationFieldDefaults,
+      months: 1,
+    })
     isoDateFields = moveByIsoDays(isoDateFields, -1)
   }
 
@@ -147,14 +180,20 @@ export function movePlainTime(
   durationSlots: DurationFields,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
-    moveTime(slots, doSubtract ? negateDurationFields(durationSlots) : durationSlots)[0],
+    moveTime(
+      slots,
+      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+    )[0],
   )
 }
 
 // Low-Level
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-function moveEpochNano(epochNano: DayTimeNano, durationFields: DurationFields): DayTimeNano {
+function moveEpochNano(
+  epochNano: DayTimeNano,
+  durationFields: DurationFields,
+): DayTimeNano {
   return checkEpochNanoInBounds(
     addDayTimeNanos(
       epochNano,
@@ -193,7 +232,7 @@ export function moveZonedEpochNano(
     }
     epochNano = addDayTimeNanos(
       getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
-      dayTimeNano
+      dayTimeNano,
     )
   }
 
@@ -207,7 +246,10 @@ export function moveDateTime(
   options?: OverflowOptions,
 ): IsoDateTimeFields {
   // could have over 24 hours in certain zones
-  const [movedIsoTimeFields, dayDelta] = moveTime(isoDateTimeFields, durationFields)
+  const [movedIsoTimeFields, dayDelta] = moveTime(
+    isoDateTimeFields,
+    durationFields,
+  )
 
   const movedIsoDateFields = moveDateEfficient(
     calendarOps,
@@ -236,16 +278,18 @@ function moveDateEfficient(
   options?: OverflowOptions,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return calendarOps.dateAdd(
-      isoDateFields,
-      durationFields,
-      options
-    )
+    return calendarOps.dateAdd(isoDateFields, durationFields, options)
   }
 
   refineOverflowOptions(options) // for validation only
 
-  const days = durationFields.days + givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
+  const days =
+    durationFields.days +
+    givenFieldsToDayTimeNano(
+      durationFields,
+      Unit.Hour,
+      durationFieldNamesAsc,
+    )[0]
   if (days) {
     return checkIsoDateInBounds(moveByIsoDays(isoDateFields, days))
   }
@@ -264,17 +308,20 @@ function moveTime(
   isoFields: IsoTimeFields,
   durationFields: DurationFields,
 ): [IsoTimeFields, number] {
-  const [durDays, durTimeNano] = givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)
-  const [newIsoFields, overflowDays] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(isoFields) + durTimeNano)
+  const [durDays, durTimeNano] = givenFieldsToDayTimeNano(
+    durationFields,
+    Unit.Hour,
+    durationFieldNamesAsc,
+  )
+  const [newIsoFields, overflowDays] = nanoToIsoTimeAndDay(
+    isoTimeFieldsToNano(isoFields) + durTimeNano,
+  )
 
-  return [
-    newIsoFields,
-    durDays + overflowDays,
-  ]
+  return [newIsoFields, durDays + overflowDays]
 }
 
 // Native
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function nativeDateAdd(
   this: NativeMoveOps,
@@ -287,7 +334,11 @@ export function nativeDateAdd(
   let epochMilli: number | undefined
 
   // convert time fields to days
-  days += givenFieldsToDayTimeNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
+  days += givenFieldsToDayTimeNano(
+    durationFields,
+    Unit.Hour,
+    durationFieldNamesAsc,
+  )[0]
 
   if (years || months) {
     let [year, month, day] = this.dateParts(isoDateFields)
@@ -295,15 +346,31 @@ export function nativeDateAdd(
     if (years) {
       const [monthCodeNumber, isLeapMonth] = this.monthCodeParts(year, month)
       year += years
-      month = monthCodeNumberToMonth(monthCodeNumber, isLeapMonth, this.leapMonth(year))
-      month = clampEntity('month', month, 1, this.monthsInYearPart(year), overflow)
+      month = monthCodeNumberToMonth(
+        monthCodeNumber,
+        isLeapMonth,
+        this.leapMonth(year),
+      )
+      month = clampEntity(
+        'month',
+        month,
+        1,
+        this.monthsInYearPart(year),
+        overflow,
+      )
     }
 
     if (months) {
-      ([year, month] = this.monthAdd(year, month, months))
+      ;[year, month] = this.monthAdd(year, month, months)
     }
 
-    day = clampEntity('day', day, 1, this.daysInMonthParts(year, month), overflow)
+    day = clampEntity(
+      'day',
+      day,
+      1,
+      this.daysInMonthParts(year, month),
+      overflow,
+    )
 
     epochMilli = this.epochMilli(year, month, day)
   } else if (weeks || days) {
@@ -318,9 +385,13 @@ export function nativeDateAdd(
 }
 
 // ISO / Intl Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function isoMonthAdd(year: number, month: number, monthDelta: number): YearMonthParts {
+export function isoMonthAdd(
+  year: number,
+  month: number,
+  monthDelta: number,
+): YearMonthParts {
   year += divTrunc(monthDelta, isoMonthsInYear)
   month += modTrunc(monthDelta, isoMonthsInYear)
 
@@ -355,8 +426,11 @@ export function intlMonthAdd(
       if (month > Number.MAX_SAFE_INTEGER) {
         throw new RangeError(errorMessages.outOfBoundsDate)
       }
-      let monthsInYear
-      while (month > (monthsInYear = computeIntlMonthsInYear.call(this, year))) {
+
+      let monthsInYear: number
+      while (
+        month > (monthsInYear = computeIntlMonthsInYear.call(this, year))
+      ) {
         month -= monthsInYear
         year++
       }
@@ -371,7 +445,9 @@ export function moveByIsoDays(
   days: number,
 ): IsoDateFields {
   if (days) {
-    isoDateFields = epochMilliToIso(isoToEpochMilli(isoDateFields)! + days * milliInDay)
+    isoDateFields = epochMilliToIso(
+      isoToEpochMilli(isoDateFields)! + days * milliInDay,
+    )
   }
   return isoDateFields
 }

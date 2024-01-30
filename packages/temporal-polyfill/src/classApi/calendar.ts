@@ -1,28 +1,70 @@
-import { DateBagStrict, MonthDayBagStrict, YearMonthBagStrict, dateFieldNamesAlpha } from '../internal/fields'
+import {
+  refinePlainDateBag,
+  refinePlainMonthDayBag,
+  refinePlainYearMonthBag,
+} from '../internal/bagRefine'
+import {
+  getRequiredDateFields,
+  getRequiredMonthDayFields,
+  getRequiredYearMonthFields,
+} from '../internal/calendarConfig'
+import { NativeStandardOps } from '../internal/calendarNative'
+import {
+  createNativeStandardOps,
+  resolveCalendarId,
+} from '../internal/calendarNativeQuery'
 import { requireNonNullish, requireString } from '../internal/cast'
-import { LargestUnitOptions, OverflowOptions, refineCalendarDiffOptions } from '../internal/optionsRefine'
+import * as errorMessages from '../internal/errorMessages'
+import {
+  DateBagStrict,
+  MonthDayBagStrict,
+  YearMonthBagStrict,
+  dateFieldNamesAlpha,
+} from '../internal/fields'
+import {
+  LargestUnitOptions,
+  OverflowOptions,
+  refineCalendarDiffOptions,
+} from '../internal/optionsRefine'
+import {
+  BrandingSlots,
+  createDurationSlots,
+  createPlainDateSlots,
+} from '../internal/slots'
 import { excludeUndefinedProps } from '../internal/utils'
-import { getRequiredDateFields, getRequiredMonthDayFields, getRequiredYearMonthFields } from '../internal/calendarConfig'
-import { createSlotClass } from './slotClass'
-import { refineCalendarSlot } from './slotClass'
+import {
+  Duration,
+  DurationArg,
+  createDuration,
+  toDurationSlots,
+} from './duration'
+import { calendarFieldMethods } from './mixins'
+import {
+  PlainDate,
+  PlainDateArg,
+  createPlainDate,
+  toPlainDateSlots,
+} from './plainDate'
 import { PlainDateTime } from './plainDateTime'
-import { ZonedDateTime } from './zonedDateTime'
-import { PlainDate, PlainDateArg, createPlainDate, toPlainDateSlots } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
-import { NativeStandardOps } from '../internal/calendarNative'
-import { calendarFieldMethods } from './mixins'
-import { createNativeStandardOps, resolveCalendarId } from '../internal/calendarNativeQuery'
-import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bagRefine'
-import { BrandingSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
-import * as errorMessages from '../internal/errorMessages'
+import { createSlotClass } from './slotClass'
+import { refineCalendarSlot } from './slotClass'
 import { createProtocolChecker } from './utils'
+import { ZonedDateTime } from './zonedDateTime'
 
 export type Calendar = any
-export type CalendarArg = CalendarProtocol | string | PlainDate | PlainDateTime | ZonedDateTime | PlainMonthDay | PlainYearMonth
+export type CalendarArg =
+  | CalendarProtocol
+  | string
+  | PlainDate
+  | PlainDateTime
+  | ZonedDateTime
+  | PlainMonthDay
+  | PlainYearMonth
+
 export type CalendarClassSlots = BrandingSlots & {
-  id: string,
+  id: string
   native: NativeStandardOps
 }
 
@@ -48,7 +90,7 @@ const calendarMethods = {
           options,
         ),
         id,
-      )
+      ),
     )
   },
   dateUntil(
@@ -63,8 +105,8 @@ const calendarMethods = {
           toPlainDateSlots(plainDateArg0),
           toPlainDateSlots(plainDateArg1),
           refineCalendarDiffOptions(options),
-        )
-      )
+        ),
+      ),
     )
   },
   dateFromFields(
@@ -82,7 +124,12 @@ const calendarMethods = {
     options?: OverflowOptions,
   ): PlainYearMonth {
     return createPlainYearMonth(
-      refinePlainYearMonthBag(native, fields, options, getRequiredYearMonthFields(id)),
+      refinePlainYearMonthBag(
+        native,
+        fields,
+        options,
+        getRequiredYearMonthFields(id),
+      ),
     )
   },
   monthDayFromFields(
@@ -91,10 +138,19 @@ const calendarMethods = {
     options?: OverflowOptions,
   ): PlainMonthDay {
     return createPlainMonthDay(
-      refinePlainMonthDayBag(native, false, fields, options, getRequiredMonthDayFields(id)),
+      refinePlainMonthDayBag(
+        native,
+        false,
+        fields,
+        options,
+        getRequiredMonthDayFields(id),
+      ),
     )
   },
-  fields({ native }: CalendarClassSlots, fieldNames: Iterable<string>): Iterable<string> {
+  fields(
+    { native }: CalendarClassSlots,
+    fieldNames: Iterable<string>,
+  ): Iterable<string> {
     /*
     Bespoke logic for converting Iterable to string[], while doing some validation
     */
@@ -140,7 +196,7 @@ export const [Calendar] = createSlotClass(
   {
     id(slots: CalendarClassSlots) {
       return slots.id
-    }
+    },
   },
   calendarMethods,
   {
@@ -149,12 +205,12 @@ export const [Calendar] = createSlotClass(
       return typeof calendarSlot === 'string'
         ? new Calendar(calendarSlot)
         : calendarSlot
-    }
-  }
+    },
+  },
 )
 
 // CalendarProtocol
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 /*
 TODO: eventually use temporal-spec
@@ -178,12 +234,29 @@ export interface CalendarProtocol {
   monthsInYear(dateArg: PlainYearMonth | PlainDateArg): number
   inLeapYear(dateArg: PlainYearMonth | PlainDateArg): boolean
   dateFromFields(fields: DateBagStrict, options?: OverflowOptions): PlainDate
-  yearMonthFromFields(fields: YearMonthBagStrict, options?: OverflowOptions): PlainYearMonth
-  monthDayFromFields(fields: MonthDayBagStrict, options?: OverflowOptions): PlainMonthDay
-  dateAdd(dateArg: PlainDateArg, duration: DurationArg, options?: OverflowOptions): PlainDate
-  dateUntil(dateArg0: PlainDateArg, dateArg1: PlainDateArg, options?: LargestUnitOptions): Duration
+  yearMonthFromFields(
+    fields: YearMonthBagStrict,
+    options?: OverflowOptions,
+  ): PlainYearMonth
+  monthDayFromFields(
+    fields: MonthDayBagStrict,
+    options?: OverflowOptions,
+  ): PlainMonthDay
+  dateAdd(
+    dateArg: PlainDateArg,
+    duration: DurationArg,
+    options?: OverflowOptions,
+  ): PlainDate
+  dateUntil(
+    dateArg0: PlainDateArg,
+    dateArg1: PlainDateArg,
+    options?: LargestUnitOptions,
+  ): Duration
   fields(fieldNames: Iterable<string>): Iterable<string>
-  mergeFields(fields0: Record<string, unknown>, fields1: Record<string, unknown>): Record<string, unknown>
+  mergeFields(
+    fields0: Record<string, unknown>,
+    fields1: Record<string, unknown>,
+  ): Record<string, unknown>
   toString?(): string
   toJSON?(): string
 }

@@ -1,17 +1,30 @@
+import {
+  plainMonthDayWithFields,
+  refinePlainMonthDayBag,
+} from '../internal/bagRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
+import {
+  createNativeDateModOps,
+  createNativeMonthDayModOps,
+  createNativeMonthDayParseOps,
+  createNativeMonthDayRefineOps,
+} from '../internal/calendarNativeQuery'
+import { plainMonthDaysEqual } from '../internal/compare'
+import { constructPlainMonthDaySlots } from '../internal/construct'
+import { plainMonthDayToPlainDate } from '../internal/convert'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormat'
-import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainMonthDaySlots, extractCalendarIdFromBag, refineCalendarIdString } from '../internal/slots'
-import { createNativeDateModOps, createNativeMonthDayModOps, createNativeMonthDayParseOps, createNativeMonthDayRefineOps, createNativePartOps } from '../internal/calendarNativeQuery'
-import { constructPlainMonthDaySlots } from '../internal/construct'
-import { parsePlainMonthDay } from '../internal/isoParse'
-import { plainMonthDayWithFields, refinePlainMonthDayBag } from '../internal/bagRefine'
-import { plainMonthDaysEqual } from '../internal/compare'
 import { formatPlainMonthDayIso } from '../internal/isoFormat'
-import { plainMonthDayToPlainDate } from '../internal/convert'
-import { prepCachedPlainMonthDayFormat } from './intlFormatCached'
+import { parsePlainMonthDay } from '../internal/isoParse'
+import { OverflowOptions } from '../internal/optionsRefine'
+import {
+  PlainDateSlots,
+  PlainMonthDaySlots,
+  extractCalendarIdFromBag,
+  refineCalendarIdString,
+} from '../internal/slots'
 import { bindArgs } from '../internal/utils'
+import { prepCachedPlainMonthDayFormat } from './intlFormatCached'
 import { computeMonthDayFields } from './utils'
 
 export const create = bindArgs(
@@ -40,7 +53,7 @@ export function fromFields(
 }
 
 export const getFields = computeMonthDayFields as (
-  slots: PlainMonthDaySlots<string>
+  slots: PlainMonthDaySlots<string>,
 ) => MonthDayFields
 
 export function withFields(
@@ -78,7 +91,11 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedPlainMonthDayFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainMonthDayFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.format(epochMilli)
 }
 
@@ -87,7 +104,11 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedPlainMonthDayFormat(locales, options, slots)
+  const [format, epochMilli] = prepCachedPlainMonthDayFormat(
+    locales,
+    options,
+    slots,
+  )
   return format.formatToParts(epochMilli)
 }
 
@@ -97,7 +118,12 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainMonthDayFormat(locales, options, slots0, slots1)
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainMonthDayFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
@@ -106,7 +132,12 @@ export function rangeToLocaleStringParts(
   slots1: PlainMonthDaySlots<string>,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-  ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainMonthDayFormat(locales, options, slots0, slots1)
+): Intl.DateTimeFormatPart[] {
+  const [format, epochMilli0, epochMilli1] = prepCachedPlainMonthDayFormat(
+    locales,
+    options,
+    slots0,
+    slots1,
+  )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

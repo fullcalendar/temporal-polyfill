@@ -1,14 +1,29 @@
-import { getCurrentEpochNanoseconds, getCurrentIsoDateTime, getCurrentTimeZoneId } from '../internal/current'
-import { InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainTimeSlots, ZonedDateTimeSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainTimeSlots, createZonedDateTimeSlots, refineCalendarIdString, refineTimeZoneIdString } from '../internal/slots'
 import { isoCalendarId } from '../internal/calendarConfig'
+import {
+  getCurrentEpochNanoseconds,
+  getCurrentIsoDateTime,
+  getCurrentTimeZoneId,
+} from '../internal/current'
+import {
+  InstantSlots,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainTimeSlots,
+  ZonedDateTimeSlots,
+  createInstantSlots,
+  createPlainDateSlots,
+  createPlainDateTimeSlots,
+  createPlainTimeSlots,
+  createZonedDateTimeSlots,
+  refineCalendarIdString,
+  refineTimeZoneIdString,
+} from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 
 export const timeZoneId = getCurrentTimeZoneId
 
 export function instant(): InstantSlots {
-  return createInstantSlots(
-    getCurrentEpochNanoseconds(),
-  )
+  return createInstantSlots(getCurrentEpochNanoseconds())
 }
 
 export function zonedDateTime(
@@ -37,7 +52,9 @@ export function plainDateTime(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateTimeSlots<string> {
   return createPlainDateTimeSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneIdString(timeZoneId))),
+    getCurrentIsoDateTime(
+      queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
+    ),
     refineCalendarIdString(calendarId),
   )
 }
@@ -46,7 +63,9 @@ export function plainDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateTimeSlots<string> {
   return createPlainDateTimeSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneIdString(timeZoneId))),
+    getCurrentIsoDateTime(
+      queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
+    ),
     isoCalendarId,
   )
 }
@@ -56,7 +75,9 @@ export function plainDate(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateSlots<string> {
   return createPlainDateSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneIdString(timeZoneId))),
+    getCurrentIsoDateTime(
+      queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
+    ),
     refineCalendarIdString(calendarId),
   )
 }
@@ -65,13 +86,17 @@ export function plainDateISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): PlainDateSlots<string> {
   return createPlainDateSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneIdString(timeZoneId))),
+    getCurrentIsoDateTime(
+      queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
+    ),
     isoCalendarId,
   )
 }
 
 export function plainTimeISO(timeZoneId: string): PlainTimeSlots {
   return createPlainTimeSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneIdString(timeZoneId))),
+    getCurrentIsoDateTime(
+      queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
+    ),
   )
 }

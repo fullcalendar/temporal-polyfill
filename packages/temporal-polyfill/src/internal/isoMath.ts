@@ -1,12 +1,35 @@
-import { isoArgsToEpochMilli, isoToEpochMilli, isoToLegacyDate } from './timeMath'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields, isoDateFieldNamesAsc, isoTimeFieldDefaults, isoTimeFieldNamesAsc } from './isoFields'
-import { diffEpochMilliByDay } from './diff'
-import { allFieldsEqual, clampProp, createLazyGenerator, modFloor, zipProps } from './utils'
-import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts } from './calendarNative'
 import { gregoryCalendarId, japaneseCalendarId } from './calendarConfig'
-import { queryFormatForCalendar, parseIntlYear } from './intlMath'
+import {
+  DateParts,
+  EraParts,
+  MonthCodeParts,
+  NativeCalendar,
+  YearMonthParts,
+} from './calendarNative'
+import { diffEpochMilliByDay } from './diff'
 import { hashIntlFormatParts } from './intlFormat'
+import { parseIntlYear, queryFormatForCalendar } from './intlMath'
+import {
+  IsoDateFields,
+  IsoDateTimeFields,
+  IsoTimeFields,
+  isoDateFieldNamesAsc,
+  isoTimeFieldDefaults,
+  isoTimeFieldNamesAsc,
+} from './isoFields'
 import { Overflow } from './options'
+import {
+  isoArgsToEpochMilli,
+  isoToEpochMilli,
+  isoToLegacyDate,
+} from './timeMath'
+import {
+  allFieldsEqual,
+  clampProp,
+  createLazyGenerator,
+  modFloor,
+  zipProps,
+} from './utils'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
@@ -29,33 +52,44 @@ export function computeIsoDateParts(isoFields: IsoDateFields): DateParts {
   return [isoFields.isoYear, isoFields.isoMonth, isoFields.isoDay]
 }
 
-export function computeIsoMonthCodeParts(isoYear: number, isoMonth: number): MonthCodeParts {
+export function computeIsoMonthCodeParts(
+  _isoYear: number,
+  isoMonth: number,
+): MonthCodeParts {
   return [isoMonth, false]
 }
 
 export function computeIsoYearMonthForMonthDay(
   monthCodeNumber: number,
   isLeapMonth: boolean,
-  day: number,
+  _day: number,
 ): YearMonthParts | undefined {
   if (!isLeapMonth) {
     return [isoEpochFirstLeapYear, monthCodeNumber]
   }
 }
 
-export function computeIsoFieldsFromParts(year: number, month: number, day: number): IsoDateFields {
+export function computeIsoFieldsFromParts(
+  year: number,
+  month: number,
+  day: number,
+): IsoDateFields {
   return { isoYear: year, isoMonth: month, isoDay: day }
 }
 
-export function computeIsoDaysInWeek(isoDateFields: IsoDateFields) {
+export function computeIsoDaysInWeek(_isoDateFields: IsoDateFields) {
   return isoDaysInWeek
 }
 
-export function computeIsoMonthsInYear(isoYear: number): number { // for methods
+export function computeIsoMonthsInYear(_isoYear: number): number {
+  // for methods
   return isoMonthsInYear
 }
 
-export function computeIsoDaysInMonth(isoYear: number, isoMonth: number): number {
+export function computeIsoDaysInMonth(
+  isoYear: number,
+  isoMonth: number,
+): number {
   switch (isoMonth) {
     case 2:
       return computeIsoInLeapYear(isoYear) ? 29 : 28
@@ -78,10 +112,12 @@ export function computeIsoInLeapYear(isoYear: number): boolean {
 }
 
 export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
-  return diffEpochMilliByDay(
-    isoToEpochMilli(isoDateYearStart(isoDateFields))!,
-    isoToEpochMilli({ ...isoDateFields, ...isoTimeFieldDefaults })!,
-  ) + 1
+  return (
+    diffEpochMilliByDay(
+      isoToEpochMilli(isoDateYearStart(isoDateFields))!,
+      isoToEpochMilli({ ...isoDateFields, ...isoTimeFieldDefaults })!,
+    ) + 1
+  )
 }
 
 export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
@@ -102,10 +138,7 @@ export function computeIsoWeekOfYear(isoDateFields: IsoDateFields): number {
   return computeIsoWeekParts(isoDateFields)[1]
 }
 
-type WeekParts = [
-  isoYear: number,
-  isoWeek: number,
-]
+type WeekParts = [isoYear: number, isoWeek: number]
 
 function computeIsoWeekParts(isoDateFields: IsoDateFields): WeekParts {
   const doy = computeIsoDayOfYear(isoDateFields)
@@ -117,15 +150,12 @@ function computeIsoWeekParts(isoDateFields: IsoDateFields): WeekParts {
   if (isoWeek < 1) {
     return [
       isoYear - 1,
-      (doj === 5 || (doj === 6 && computeIsoInLeapYear(isoYear - 1))) ? 53 : 52,
+      doj === 5 || (doj === 6 && computeIsoInLeapYear(isoYear - 1)) ? 53 : 52,
     ]
   }
   if (isoWeek === 53) {
     if (computeIsoDaysInYear(isoYear) - doy < 4 - dow) {
-      return [
-        isoYear + 1,
-        1,
-      ]
+      return [isoYear + 1, 1]
     }
   }
 
@@ -142,9 +172,18 @@ function isoDateYearStart(isoDateFields: IsoDateFields): IsoDateFields {
 }
 
 // Era (complicated stuff)
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function computeIsoEraParts(this: NativeCalendar, isoFields: IsoDateFields): EraParts {
+const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
+const queryJapaneseEraParts = createLazyGenerator(
+  computeJapaneseEraParts,
+  WeakMap,
+)
+
+export function computeIsoEraParts(
+  this: NativeCalendar,
+  isoFields: IsoDateFields,
+): EraParts {
   if (this.id === gregoryCalendarId) {
     return computeGregoryEraParts(isoFields)
   }
@@ -163,9 +202,6 @@ function computeGregoryEraParts({ isoYear }: IsoDateFields): EraParts {
   return ['ce', isoYear]
 }
 
-const queryJapaneseEraParts = createLazyGenerator(computeJapaneseEraParts, WeakMap)
-const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
-
 function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
   const epochMilli = isoToEpochMilli(isoFields)!
 
@@ -173,39 +209,62 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
     return computeGregoryEraParts(isoFields)
   }
 
-  const intlParts = hashIntlFormatParts(queryFormatForCalendar(japaneseCalendarId), epochMilli)
+  const intlParts = hashIntlFormatParts(
+    queryFormatForCalendar(japaneseCalendarId),
+    epochMilli,
+  )
   const { era, eraYear } = parseIntlYear(intlParts, japaneseCalendarId)
   return [era, eraYear]
 }
 
 // Checking Fields
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function checkIsoDateTimeFields<P extends IsoDateTimeFields>(isoDateTimeFields: P): P {
+export function checkIsoDateTimeFields<P extends IsoDateTimeFields>(
+  isoDateTimeFields: P,
+): P {
   checkIsoDateFields(isoDateTimeFields)
   constrainIsoTimeFields(isoDateTimeFields, Overflow.Reject)
   return isoDateTimeFields
 }
 
-export function checkIsoDateFields<P extends IsoDateFields>(isoInternals: P): P {
+export function checkIsoDateFields<P extends IsoDateFields>(
+  isoInternals: P,
+): P {
   constrainIsoDateFields(isoInternals, Overflow.Reject)
   return isoInternals
 }
 
 export function isIsoDateFieldsValid(isoFields: IsoDateFields): boolean {
-  return allFieldsEqual(isoDateFieldNamesAsc, isoFields, constrainIsoDateFields(isoFields))
+  return allFieldsEqual(
+    isoDateFieldNamesAsc,
+    isoFields,
+    constrainIsoDateFields(isoFields),
+  )
 }
 
 // Constraining
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function constrainIsoDateFields(
   isoFields: IsoDateFields,
   overflow?: Overflow,
 ): IsoDateFields {
   const { isoYear } = isoFields
-  const isoMonth = clampProp(isoFields, 'isoMonth', 1, computeIsoMonthsInYear(isoYear), overflow)
-  const isoDay = clampProp(isoFields, 'isoDay', 1, computeIsoDaysInMonth(isoYear, isoMonth), overflow)
+  const isoMonth = clampProp(
+    isoFields,
+    'isoMonth',
+    1,
+    computeIsoMonthsInYear(isoYear),
+    overflow,
+  )
+  const isoDay = clampProp(
+    isoFields,
+    'isoDay',
+    1,
+    computeIsoDaysInMonth(isoYear, isoMonth),
+    overflow,
+  )
   return { isoYear, isoMonth, isoDay }
 }
 

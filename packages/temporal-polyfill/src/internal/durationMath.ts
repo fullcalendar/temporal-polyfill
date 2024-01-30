@@ -1,38 +1,67 @@
-import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
-import { DayTimeUnit, TimeUnit, Unit, givenFieldsToDayTimeNano, nanoInUtcDay, nanoToGivenFields, unitNanoMap } from './units'
-import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
-import { DurationFields, durationFieldDefaults, durationFieldNamesAsc, durationDateFieldNamesAsc, DurationTimeFields } from './durationFields'
 import { DiffOps } from './calendarOps'
-import { TimeZoneOps } from './timeZoneOps'
-import { DurationSlots, createDurationSlots } from './slots'
-import { DurationRoundOptions, RelativeToOptions, normalizeOptions, refineDurationRoundOptions } from './optionsRefine'
-import { moveDateTime, moveZonedEpochNano } from './move'
-import { IsoDateFields, IsoDateTimeFields, isoTimeFieldDefaults } from './isoFields'
+import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
-import { isoToEpochNano } from './timeMath'
-import { roundDayTimeDuration, roundRelativeDuration } from './round'
+import {
+  DurationFields,
+  DurationTimeFields,
+  durationDateFieldNamesAsc,
+  durationFieldDefaults,
+  durationFieldNamesAsc,
+} from './durationFields'
 import * as errorMessages from './errorMessages'
+import {
+  IsoDateFields,
+  IsoDateTimeFields,
+  isoTimeFieldDefaults,
+} from './isoFields'
+import { moveDateTime, moveZonedEpochNano } from './move'
+import {
+  DurationRoundOptions,
+  RelativeToOptions,
+  normalizeOptions,
+  refineDurationRoundOptions,
+} from './optionsRefine'
+import { roundDayTimeDuration, roundRelativeDuration } from './round'
+import { DurationSlots, createDurationSlots } from './slots'
+import { isoToEpochNano } from './timeMath'
+import { TimeZoneOps } from './timeZoneOps'
+import {
+  DayTimeUnit,
+  TimeUnit,
+  Unit,
+  givenFieldsToDayTimeNano,
+  nanoInUtcDay,
+  nanoToGivenFields,
+  unitNanoMap,
+} from './units'
+import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
 
 // Marker System
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export type MarkerSlotsNoCalendar<T> = {
-  epochNanoseconds: DayTimeNano,
-  timeZone: T,
-} | IsoDateTimeFields
+export type MarkerSlotsNoCalendar<T> =
+  | {
+      epochNanoseconds: DayTimeNano
+      timeZone: T
+    }
+  | IsoDateTimeFields
 
 export type MarkerSlots<C, T> =
-  { epochNanoseconds: DayTimeNano, timeZone: T, calendar: C } |
-  (IsoDateFields & { calendar: C })
+  | { epochNanoseconds: DayTimeNano; timeZone: T; calendar: C }
+  | (IsoDateFields & { calendar: C })
 
 export type MarkerToEpochNano<M> = (marker: M) => DayTimeNano
 export type MoveMarker<M> = (marker: M, durationFields: DurationFields) => M
-export type DiffMarkers<M> = (marker0: M, marker1: M, largeUnit: Unit) => DurationFields
+export type DiffMarkers<M> = (
+  marker0: M,
+  marker1: M,
+  largeUnit: Unit,
+) => DurationFields
 export type MarkerSystem<M> = [
   M,
   MarkerToEpochNano<M>,
   MoveMarker<M>,
-  DiffMarkers<M>
+  DiffMarkers<M>,
 ]
 
 export function createMarkerSystem<C, T>(
@@ -40,8 +69,11 @@ export function createMarkerSystem<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   markerSlots: MarkerSlots<C, T>,
 ): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
-  const { calendar, timeZone, epochNanoseconds } = markerSlots as
-    { calendar: C, timeZone?: T, epochNanoseconds?: DayTimeNano }
+  const { calendar, timeZone, epochNanoseconds } = markerSlots as {
+    calendar: C
+    timeZone?: T
+    epochNanoseconds?: DayTimeNano
+  }
 
   const calendarOps = getCalendarOps(calendar)
 
@@ -54,14 +86,14 @@ export function createMarkerSystem<C, T>(
       bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps),
       bindArgs(diffZonedEpochNanoExact, calendarOps, timeZoneOps),
     ]
-  } else {
-    return [
-      { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
-      isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
-      bindArgs(moveDateTime, calendarOps),
-      bindArgs(diffDateTimesExact, calendarOps),
-    ]
   }
+
+  return [
+    { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
+    isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
+    bindArgs(moveDateTime, calendarOps),
+    bindArgs(diffDateTimesExact, calendarOps),
+  ]
 }
 
 /*
@@ -76,10 +108,7 @@ export function spanDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
   diffMarkers: DiffMarkers<M>,
-): [
-  DurationFields,
-  DayTimeNano,
-] {
+): [DurationFields, DayTimeNano] {
   let endMarker = moveMarker(marker, durationFields0)
 
   // better way to do this?
@@ -87,16 +116,13 @@ export function spanDuration<M>(
     endMarker = moveMarker(endMarker, durationFields1)
   }
 
-  let balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
 
-  return [
-    balancedDuration,
-    markerToEpochNano(endMarker),
-  ]
+  return [balancedDuration, markerToEpochNano(endMarker)]
 }
 
 // Adding
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function addDurations<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
@@ -115,14 +141,18 @@ export function addDurations<RA, C, T>(
   ) as Unit
 
   if (
-    largestUnit < Unit.Day || (
-      largestUnit === Unit.Day &&
+    largestUnit < Unit.Day ||
+    (largestUnit === Unit.Day &&
       // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds)
-    )
+      !(markerSlots && (markerSlots as any).epochNanoseconds))
   ) {
     return createDurationSlots(
-      addDayTimeDurations(slots, otherSlots, largestUnit as DayTimeUnit, doSubtract),
+      addDayTimeDurations(
+        slots,
+        otherSlots,
+        largestUnit as DayTimeUnit,
+        doSubtract,
+      ),
     )
   }
 
@@ -134,16 +164,14 @@ export function addDurations<RA, C, T>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
-    MarkerSystem<any>
+  const markerSystem = createMarkerSystem(
+    getCalendarOps,
+    getTimeZoneOps,
+    markerSlots,
+  ) as MarkerSystem<any>
 
   return createDurationSlots(
-    spanDuration(
-      slots,
-      otherSlots,
-      largestUnit,
-      ...markerSystem,
-    )[0]
+    spanDuration(slots, otherSlots, largestUnit, ...markerSystem)[0],
   )
 }
 
@@ -155,7 +183,11 @@ function addDayTimeDurations(
 ): DurationFields {
   const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
   const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
-  const combined = addDayTimeNanos(dayTimeNano0, dayTimeNano1, doSubtract ? -1 : 1)
+  const combined = addDayTimeNanos(
+    dayTimeNano0,
+    dayTimeNano1,
+    doSubtract ? -1 : 1,
+  )
 
   if (!Number.isFinite(combined[0])) {
     throw new RangeError(errorMessages.outOfBoundsDate)
@@ -163,12 +195,12 @@ function addDayTimeDurations(
 
   return {
     ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(combined, largestUnit)
+    ...nanoToDurationDayTimeFields(combined, largestUnit),
   }
 }
 
 // Rounding (with marker system)
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function roundDuration<RA, C, T>(
   refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
@@ -178,22 +210,16 @@ export function roundDuration<RA, C, T>(
   options: DurationRoundOptions<RA>,
 ): DurationSlots {
   const durationLargestUnit = getLargestDurationUnit(slots)
-  const [
-    largestUnit,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-    markerSlots,
-  ] = refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
+  const [largestUnit, smallestUnit, roundingInc, roundingMode, markerSlots] =
+    refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
 
   const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
   if (
-    maxLargestUnit < Unit.Day || (
-      maxLargestUnit === Unit.Day &&
+    maxLargestUnit < Unit.Day ||
+    (maxLargestUnit === Unit.Day &&
       // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds)
-    )
+      !(markerSlots && (markerSlots as any).epochNanoseconds))
   ) {
     return createDurationSlots(
       roundDayTimeDuration(
@@ -210,8 +236,11 @@ export function roundDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const markerSystem = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as
-    MarkerSystem<any>
+  const markerSystem = createMarkerSystem(
+    getCalendarOps,
+    getTimeZoneOps,
+    markerSlots,
+  ) as MarkerSystem<any>
 
   let transplantedWeeks = 0
   if (slots.weeks && smallestUnit === Unit.Week) {
@@ -219,7 +248,12 @@ export function roundDuration<RA, C, T>(
     slots = { ...slots, weeks: 0 }
   }
 
-  let [balancedDuration, endEpochNano] = spanDuration(slots, undefined, largestUnit, ...markerSystem)
+  let [balancedDuration, endEpochNano] = spanDuration(
+    slots,
+    undefined,
+    largestUnit,
+    ...markerSystem,
+  )
 
   const origSign = queryDurationSign(slots)
   const balancedSign = queryDurationSign(balancedDuration)
@@ -227,7 +261,10 @@ export function roundDuration<RA, C, T>(
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
 
-  if (balancedSign && !(smallestUnit === Unit.Nanosecond && roundingInc === 1)) {
+  if (
+    balancedSign &&
+    !(smallestUnit === Unit.Nanosecond && roundingInc === 1)
+  ) {
     balancedDuration = roundRelativeDuration(
       balancedDuration,
       endEpochNano,
@@ -245,7 +282,7 @@ export function roundDuration<RA, C, T>(
 }
 
 // Sign / Abs / Blank
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function negateDuration(slots: DurationSlots): DurationSlots {
   return createDurationSlots(negateDurationFields(slots))
@@ -277,11 +314,14 @@ export function queryDurationBlank(durationFields: DurationFields): boolean {
   return !queryDurationSign(durationFields)
 }
 
-export const queryDurationSign = createLazyGenerator(computeDurationSign, WeakMap)
+export const queryDurationSign = createLazyGenerator(
+  computeDurationSign,
+  WeakMap,
+)
 
 function computeDurationSign(
   fields: DurationFields,
-  fieldNames = durationFieldNamesAsc
+  fieldNames = durationFieldNamesAsc,
 ): NumSign {
   let sign: NumSign = 0
 
@@ -305,9 +345,11 @@ export function checkDurationFields(fields: DurationFields): DurationFields {
 }
 
 // Field <-> Nanosecond Conversion
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): DayTimeNano {
+export function durationTimeFieldsToLargeNanoStrict(
+  fields: DurationFields,
+): DayTimeNano {
   if (durationHasDateParts(fields)) {
     throw new RangeError(errorMessages.invalidLargeUnits)
   }
@@ -315,18 +357,30 @@ export function durationTimeFieldsToLargeNanoStrict(fields: DurationFields): Day
   return durationFieldsToDayTimeNano(fields, Unit.Hour)
 }
 
-export function durationFieldsToDayTimeNano(fields: DurationFields, largestUnit: DayTimeUnit): DayTimeNano {
+export function durationFieldsToDayTimeNano(
+  fields: DurationFields,
+  largestUnit: DayTimeUnit,
+): DayTimeNano {
   return givenFieldsToDayTimeNano(fields, largestUnit, durationFieldNamesAsc)
 }
 
-export function nanoToDurationDayTimeFields(largeNano: DayTimeNano): { days: number } & DurationTimeFields
-export function nanoToDurationDayTimeFields(largeNano: DayTimeNano, largestUnit?: DayTimeUnit): Partial<DurationFields>
+export function nanoToDurationDayTimeFields(
+  largeNano: DayTimeNano,
+): { days: number } & DurationTimeFields
+export function nanoToDurationDayTimeFields(
+  largeNano: DayTimeNano,
+  largestUnit?: DayTimeUnit,
+): Partial<DurationFields>
 export function nanoToDurationDayTimeFields(
   dayTimeNano: DayTimeNano,
   largestUnit: DayTimeUnit = Unit.Day,
 ): Partial<DurationFields> {
   const [days, timeNano] = dayTimeNano
-  const dayTimeFields = nanoToGivenFields(timeNano, largestUnit, durationFieldNamesAsc)
+  const dayTimeFields = nanoToGivenFields(
+    timeNano,
+    largestUnit,
+    durationFieldNamesAsc,
+  )
 
   dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
     days * (nanoInUtcDay / unitNanoMap[largestUnit])
@@ -340,12 +394,19 @@ export function nanoToDurationDayTimeFields(
 
 // audit
 export function nanoToDurationTimeFields(nano: number): DurationTimeFields
-export function nanoToDurationTimeFields(nano: number, largestUnit: TimeUnit): Partial<DurationTimeFields>
+export function nanoToDurationTimeFields(
+  nano: number,
+  largestUnit: TimeUnit,
+): Partial<DurationTimeFields>
 export function nanoToDurationTimeFields(
   nano: number,
   largestUnit: TimeUnit = Unit.Hour,
 ): Partial<DurationTimeFields> {
-  return nanoToGivenFields(nano, largestUnit, durationFieldNamesAsc as (keyof DurationTimeFields)[])
+  return nanoToGivenFields(
+    nano,
+    largestUnit,
+    durationFieldNamesAsc as (keyof DurationTimeFields)[],
+  )
 }
 
 /*
@@ -365,7 +426,7 @@ export function clearDurationFields(
 }
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function durationHasDateParts(fields: DurationFields): boolean {
   return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))

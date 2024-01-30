@@ -4,33 +4,33 @@ import { divModTrunc, divTrunc, modTrunc } from './utils'
 /*
 TODO: use short names?
 */
-export const enum Unit {
-  Nanosecond, // 0
-  Microsecond, // 1
-  Millisecond, // 2
-  Second, // 3
-  Minute, // 4
-  Hour, // 5
-  Day, // 6
-  Week, // 7
-  Month, // 8
-  Year, // 9
+export enum Unit {
+  Nanosecond = 0,
+  Microsecond = 1,
+  Millisecond = 2,
+  Second = 3,
+  Minute = 4,
+  Hour = 5,
+  Day = 6,
+  Week = 7,
+  Month = 8,
+  Year = 9,
 }
 
-export type UnitName = keyof typeof unitNameMap
 // TODO: more convenient type for OR-ing with DurationFields (for plural?)
+export type UnitName = keyof typeof unitNameMap
 
 export type TimeUnit =
-  Unit.Nanosecond |
-  Unit.Microsecond |
-  Unit.Millisecond |
-  Unit.Second |
-  Unit.Minute |
-  Unit.Hour
+  | Unit.Nanosecond
+  | Unit.Microsecond
+  | Unit.Millisecond
+  | Unit.Second
+  | Unit.Minute
+  | Unit.Hour
 
 export type DayTimeUnit = Unit.Day | TimeUnit
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export const unitNameMap = {
   nanosecond: Unit.Nanosecond,
@@ -45,10 +45,12 @@ export const unitNameMap = {
   year: Unit.Year,
 }
 
-export const unitNamesAsc = Object.keys(unitNameMap) as (keyof typeof unitNameMap)[]
+export const unitNamesAsc = Object.keys(
+  unitNameMap,
+) as (keyof typeof unitNameMap)[]
 
 // Nanoseconds
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export const secInDay = 86400
 export const milliInDay = 86400000
@@ -72,7 +74,7 @@ export const unitNanoMap = [
 ]
 
 // Utils
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 /*
 When largestUnit=hour, returned `Day` value is "days worth of hours"

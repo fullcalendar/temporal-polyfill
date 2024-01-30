@@ -1,24 +1,44 @@
+import { DiffOps } from './calendarOps'
 import { compareDayTimeNanos } from './dayTimeNano'
+import { durationFieldNamesAsc } from './durationFields'
+import {
+  MarkerSlots,
+  MarkerSystem,
+  createMarkerSystem,
+  getLargestDurationUnit,
+} from './durationMath'
+import * as errorMessages from './errorMessages'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import { RelativeToOptions, normalizeOptions } from './optionsRefine'
+import {
+  DurationSlots,
+  IdLike,
+  InstantSlots,
+  PlainDateSlots,
+  PlainDateTimeSlots,
+  PlainMonthDaySlots,
+  PlainTimeSlots,
+  PlainYearMonthSlots,
+  ZonedDateTimeSlots,
+  isIdLikeEqual,
+  isTimeZoneSlotsEqual,
+} from './slots'
+import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
+import { TimeZoneOps } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano } from './units'
 import { NumSign, allFieldsEqual, compareNumbers } from './utils'
-import { durationFieldNamesAsc } from './durationFields'
-import { DiffOps } from './calendarOps'
-import { TimeZoneOps } from './timeZoneOps'
-import { DurationSlots, IdLike, InstantSlots, PlainDateSlots, PlainDateTimeSlots, PlainMonthDaySlots, PlainTimeSlots, PlainYearMonthSlots, ZonedDateTimeSlots, isIdLikeEqual, isTimeZoneSlotsEqual } from './slots'
-import { RelativeToOptions, normalizeOptions } from './optionsRefine'
-import { MarkerSlots, getLargestDurationUnit, createMarkerSystem, MarkerSystem } from './durationMath'
-import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
-import * as errorMessages from './errorMessages'
 
 // High-Level Compare
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function compareInstants(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
 ): NumSign {
-  return compareDayTimeNanos(instantSlots0.epochNanoseconds, instantSlots1.epochNanoseconds)
+  return compareDayTimeNanos(
+    instantSlots0.epochNanoseconds,
+    instantSlots1.epochNanoseconds,
+  )
 }
 
 export function compareZonedDateTimes<C, T>(
@@ -37,13 +57,13 @@ export function compareDurations<RA, C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
-  options?: RelativeToOptions<RA>
+  options?: RelativeToOptions<RA>,
 ): NumSign {
   const normalOptions = normalizeOptions(options)
   const markerSlots = refineRelativeTo(normalOptions.relativeTo)
   const largestUnit = Math.max(
     getLargestDurationUnit(durationSlots0),
-    getLargestDurationUnit(durationSlots1)
+    getLargestDurationUnit(durationSlots1),
   ) as Unit
 
   // fast-path if fields identical
@@ -51,14 +71,15 @@ export function compareDurations<RA, C, T>(
     return 0
   }
 
-  if (largestUnit < Unit.Day || (
-    largestUnit === Unit.Day &&
-    // has uniform days?
-    !(markerSlots && (markerSlots as any).epochNanoseconds)
-  )) {
+  if (
+    largestUnit < Unit.Day ||
+    (largestUnit === Unit.Day &&
+      // has uniform days?
+      !(markerSlots && (markerSlots as any).epochNanoseconds))
+  ) {
     return compareDayTimeNanos(
       givenFieldsToDayTimeNano(durationSlots0, Unit.Day, durationFieldNamesAsc),
-      givenFieldsToDayTimeNano(durationSlots1, Unit.Day, durationFieldNamesAsc)
+      givenFieldsToDayTimeNano(durationSlots1, Unit.Day, durationFieldNamesAsc),
     )
   }
 
@@ -66,23 +87,29 @@ export function compareDurations<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(getCalendarOps, getTimeZoneOps, markerSlots) as MarkerSystem<any>
+  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(
+    getCalendarOps,
+    getTimeZoneOps,
+    markerSlots,
+  ) as MarkerSystem<any>
 
   return compareDayTimeNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),
-    markerToEpochNano(moveMarker(marker, durationSlots1))
+    markerToEpochNano(moveMarker(marker, durationSlots1)),
   )
 }
 
 // Low-Level Compare
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function compareIsoDateTimeFields(
   isoFields0: IsoDateTimeFields,
   isoFields1: IsoDateTimeFields,
 ): NumSign {
-  return compareIsoDateFields(isoFields0, isoFields1) ||
+  return (
+    compareIsoDateFields(isoFields0, isoFields1) ||
     compareIsoTimeFields(isoFields0, isoFields1)
+  )
 }
 
 export function compareIsoDateFields(
@@ -91,7 +118,7 @@ export function compareIsoDateFields(
 ): NumSign {
   return compareNumbers(
     isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields1)!
+    isoToEpochMilli(isoFields1)!,
   )
 }
 
@@ -106,7 +133,7 @@ export function compareIsoTimeFields(
 }
 
 // Is-equal
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 export function instantsEqual(
   instantSlots0: InstantSlots,
@@ -119,42 +146,55 @@ export function zonedDateTimesEqual<C extends IdLike, T extends IdLike>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
 ): boolean {
-  return !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
+  return (
+    !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
     // HACK: minification force's isTimeZoneSlotsEqual to 1/0. Ensure boolean.
-    !!isTimeZoneSlotsEqual(zonedDateTimeSlots0.timeZone, zonedDateTimeSlots1.timeZone) &&
+    !!isTimeZoneSlotsEqual(
+      zonedDateTimeSlots0.timeZone,
+      zonedDateTimeSlots1.timeZone,
+    ) &&
     isIdLikeEqual(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
+  )
 }
 
 export function plainDateTimesEqual<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   plainDateTimeSlots1: PlainDateTimeSlots<C>,
 ): boolean {
-  return !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
+  return (
+    !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
     isIdLikeEqual(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
+  )
 }
 
 export function plainDatesEqual<C extends IdLike>(
   plainDateSlots0: PlainDateSlots<C>,
   plainDateSlots1: PlainDateSlots<C>,
 ): boolean {
-  return !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
+  return (
+    !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
     isIdLikeEqual(plainDateSlots0.calendar, plainDateSlots1.calendar)
+  )
 }
 
 export function plainYearMonthsEqual<C extends IdLike>(
   plainYearMonthSlots0: PlainYearMonthSlots<C>,
   plainYearMonthSlots1: PlainYearMonthSlots<C>,
 ): boolean {
-  return !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
+  return (
+    !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
     isIdLikeEqual(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
+  )
 }
 
 export function plainMonthDaysEqual<C extends IdLike>(
   plainMonthDaySlots0: PlainMonthDaySlots<C>,
   plainMonthDaySlots1: PlainMonthDaySlots<C>,
 ): boolean {
-  return !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
+  return (
+    !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
     isIdLikeEqual(plainMonthDaySlots0.calendar, plainMonthDaySlots1.calendar)
+  )
 }
 
 export function plainTimesEqual(
