@@ -11,16 +11,18 @@
   "linter": {
     "rules": {
       "complexity": {
-        "useLiteralKeys": "off"
+        "useLiteralKeys": "off",
+        "useOptionalChain": "off"
       },
       "correctness": {
         "noUnusedVariables": "error"
       },
       "suspicious": {
+        "noAssignInExpressions": "off",
         "noExplicitAny": "off",
         "noGlobalIsNan": "off",
         "noShadowRestrictedNames": "off",
-        "noAssignInExpressions": "off"
+        "noUnsafeDeclarationMerging": "off"
       },
       "style": {
         "noCommaOperator": "off",

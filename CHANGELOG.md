@@ -2,6 +2,7 @@
 Unreleased
 ----------
 
+- TODO: DurationFns.toLocaleString
 - TODO: should index/impl export `Intl` instead of `DateTimeFormat`?: yes
 - TODO: document *fns* api non-conformance:
   - calendar/timeZone args don't accept full datetime strings, only ID
