@@ -1,5 +1,4 @@
-import { isoCalendarId } from './calendarConfig'
-import { parseIntlYear } from './intlMath'
+import { parseIntlPartsYear } from './intlMath'
 import { DayTimeNano, addDayTimeNanoAndNumber, numberToDayTimeNano } from './dayTimeNano'
 import { OrigDateTimeFormat, hashIntlFormatParts, standardLocaleId } from './intlFormat'
 import { IsoDateTimeFields } from './isoFields'
@@ -317,7 +316,7 @@ function createComputeOffsetSec(format: Intl.DateTimeFormat): (
   return (epochSec: number) => {
     const intlParts = hashIntlFormatParts(format, epochSec * milliInSec)
     const zonedEpochSec = isoArgsToEpochSec(
-      parseIntlYear(intlParts, isoCalendarId).year,
+      parseIntlPartsYear(intlParts),
       parseInt(intlParts.month),
       parseInt(intlParts.day),
       parseInt(intlParts.hour),

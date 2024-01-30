@@ -173,8 +173,8 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
     return computeGregoryEraParts(isoFields)
   }
 
-  const intlPartsHash = hashIntlFormatParts(queryFormatForCalendar(japaneseCalendarId), epochMilli)
-  const { era, eraYear } = parseIntlYear(intlPartsHash, japaneseCalendarId)
+  const intlParts = hashIntlFormatParts(queryFormatForCalendar(japaneseCalendarId), epochMilli)
+  const { era, eraYear } = parseIntlYear(intlParts, japaneseCalendarId)
   return [era, eraYear]
 }
 

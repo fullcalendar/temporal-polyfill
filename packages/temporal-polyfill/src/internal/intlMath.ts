@@ -39,8 +39,8 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   const calendarIdBase = computeCalendarIdBase(calendarId)
 
   function epochMilliToIntlFields(epochMilli: number) {
-    const intlPartsHash = hashIntlFormatParts(intlFormat, epochMilli)
-    return parseIntlDateFields(intlPartsHash, calendarIdBase)
+    const intlParts = hashIntlFormatParts(intlFormat, epochMilli)
+    return parseIntlDateFields(intlParts, calendarIdBase)
   }
 
   return {
@@ -108,38 +108,42 @@ function createIntlYearMonthCache(
 // -------------------------------------------------------------------------------------------------
 
 function parseIntlDateFields(
-  intlPartsHash: Record<string, string>,
+  intlParts: Record<string, string>,
   calendarIdBase: string,
 ): IntlDateFields {
   return {
-    ...parseIntlYear(intlPartsHash, calendarIdBase),
-    month: intlPartsHash.month, // a short month string
-    day: parseInt(intlPartsHash.day),
+    ...parseIntlYear(intlParts, calendarIdBase),
+    month: intlParts.month, // a short month string
+    day: parseInt(intlParts.day),
   }
 }
 
 export function parseIntlYear(
-  intlPartsHash: Record<string, string>,
+  intlParts: Record<string, string>,
   calendarIdBase: string,
 ): {
   era: string | undefined
   eraYear: number | undefined
   year: number
 } {
-  let year = parseInt(intlPartsHash.relatedYear || intlPartsHash.year)
+  let year = parseIntlPartsYear(intlParts)
   let era: string | undefined
   let eraYear: number | undefined
 
-  if (intlPartsHash.era) {
+  if (intlParts.era) {
     const eraOrigins = eraOriginsByCalendarId[calendarIdBase]
     if (eraOrigins !== undefined) {
-      era = normalizeShortEra(intlPartsHash.era)
+      era = normalizeShortEra(intlParts.era)
       eraYear = year // TODO: will this get optimized to next line?
       year = eraYearToYear(eraYear, eraOrigins[era] || 0)
     }
   }
 
   return { era, eraYear, year }
+}
+
+export function parseIntlPartsYear(intlParts: Record<string, string>): number {
+  return parseInt(intlParts.relatedYear || intlParts.year)
 }
 
 export const queryFormatForCalendar = createLazyGenerator(createFormatForCalendar)
