@@ -27,7 +27,5 @@ writeFileSync(resolve('src/localeOrdinalsData.ts'), templateCode(ordinals), {
 console.log('Wrote localeOrdinalsData.ts')
 
 function templateCode(obj) {
-  return `/* eslint-disable */
-export const localeOrdinalsData = ${JSON.stringify(obj, null, 2)}
-`
+  return `export const localeOrdinalsData = ${JSON.stringify(obj, null, 2)}`
 }

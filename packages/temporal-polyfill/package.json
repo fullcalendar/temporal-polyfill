@@ -23,7 +23,6 @@
     "directory": "packages/temporal-polyfill"
   },
   "scripts": {
-    "lint": "eslint .",
     "build": "./scripts/clean.js && pnpm run pkg-json && pnpm run tsc && pnpm run bundle && pnpm run readme",
     "dev": "./scripts/clean.js && pnpm run pkg-json --dev && pnpm run tsc && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build",
@@ -89,7 +88,6 @@
     "@js-temporal/temporal-test262-runner": "workspace:*",
     "@types/node": "^16.9.1",
     "concurrently": "^8.2.0",
-    "eslint": "^7.25.0",
     "export-size": "workspace:*",
     "gzip-size-cli": "^5.1.0",
     "rollup": "^4.9.6",

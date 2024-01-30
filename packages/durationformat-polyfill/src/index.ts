@@ -3,7 +3,6 @@ import { Temporal } from 'temporal-spec'
 // Unfortunately neccesary as typescript does not include typings for ecma drafts
 // TODO: Remove when ListFormat becomes part of the official spec
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Intl {
     interface ListFormatOptions {
       localeMatcher?: 'best fit' | 'lookup'

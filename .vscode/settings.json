@@ -1,11 +1,3 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
-  },
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "jestrunner.changeDirectoryToWorkspaceRoot": false, // allows entering sub-workspace, is faster
-  "jestrunner.codeLensSelector": "**/tests/**/*.{js,jsx,ts,tsx}",
-  "jestrunner.debugOptions": {
-    "args": ["--no-cache", "--watchAll=false"] // NOTE: keep in sync with launch.json
-  }
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }
