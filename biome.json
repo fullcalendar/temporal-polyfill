@@ -1,12 +1,13 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.5.1/schema.json",
   "files": {
-    "ignore": ["packages/export-size", "packages/temporal-test262-runner"]
-  },
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
+    "ignore": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/export-size-output/**",
+      "packages/export-size",
+      "packages/temporal-test262-runner"
+    ]
   },
   "linter": {
     "rules": {
