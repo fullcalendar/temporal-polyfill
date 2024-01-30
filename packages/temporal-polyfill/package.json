@@ -72,6 +72,9 @@
       },
       "./fns/duration": {
         "src": "funcApi/duration"
+      },
+      "./fns/now": {
+        "src": "funcApi/now"
       }
     }
   },
