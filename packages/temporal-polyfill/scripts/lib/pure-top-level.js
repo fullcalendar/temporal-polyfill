@@ -1,6 +1,6 @@
-
-// groups: -------12-----------3----------------------------45-------------6------------7------------------
-const chunkRe = /^((export\s+)?(const|let|var)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\}|new\s+)/smg
+const chunkRe = // groups:
+  //12-----------3----------------------------45-------------6------------7------------------
+  /^((export\s+)?(const|let|var)\s+\w+\s*=\s*)(([\w\.]+\()|\[([^\]]+)\]|\{([^\}]+)\}|new\s+)/gms
 
 const openingRe = /\{|\[|\(/
 const pureComment = '/*@__PURE__*/ '
@@ -9,11 +9,12 @@ export function pureTopLevel() {
   return {
     name: 'pure-top-level',
     renderChunk(code) {
-      return code.replace(chunkRe, (g0, g1, g2, g3, g4, g5, g6, g7) => {
+      return code.replace(chunkRe, (g0, g1, _g2, _g3, g4, g5, g6, g7) => {
         if (g5) {
           // function call
           return g1 + pureComment + g5
-        } else if (g6) {
+        }
+        if (g6) {
           // array literal
           if (g6.includes('...')) {
             if (openingRe.test(g6)) {
@@ -38,12 +39,12 @@ export function pureTopLevel() {
         // no replacement, return whole match
         return g0
       })
-    }
+    },
   }
 }
 
 // Transform
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function transformArraySpread(s) {
   const [tokens, isMultiline] = parseTokens(s)
@@ -53,11 +54,13 @@ function transformArraySpread(s) {
     return formatTokenAsArray(tokens[0])
   }
 
-  return pureComment +
+  return (
+    pureComment +
     formatTokenAsArray(tokens.shift()) +
     '.concat(' +
     tokens.map(formatTokenAsArray).join(', ') +
     ')'
+  )
 }
 
 function transformObjectSpread(s) {
@@ -68,15 +71,17 @@ function transformObjectSpread(s) {
     return formatTokenAsObject(tokens[0])
   }
 
-  return pureComment +
+  return (
+    pureComment +
     'Object.assign(' +
     (Array.isArray(tokens[0]) ? '' : '{}, ') +
     tokens.map(formatTokenAsObject).join(', ') +
     ')'
+  )
 }
 
 // Token Parsing
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function parseTokens(s) {
   const tokens = consolidateTokens(parseIndividualTokens(s))
@@ -85,7 +90,8 @@ function parseTokens(s) {
 }
 
 function parseIndividualTokens(s) {
-  const parts = s.split(',')
+  const parts = s
+    .split(',')
     .map((part) => part.trim())
     .filter((part) => Boolean(part))
 
@@ -110,7 +116,7 @@ function consolidateTokens(tokens) {
     }
   }
 
-  for (let token of tokens) {
+  for (const token of tokens) {
     if (Array.isArray(token)) {
       if (currentGroup) {
         currentGroup.push(...token)
@@ -128,7 +134,7 @@ function consolidateTokens(tokens) {
 }
 
 // Formatting
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 function formatToken(open, close, isMultiline, token) {
   if (!Array.isArray(token)) {

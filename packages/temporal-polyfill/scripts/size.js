@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { readFile } from 'fs/promises'
-import { popFlag, execLive } from './lib/utils.js'
+import { execLive, popFlag } from './lib/utils.js'
 
 const argv = process.argv.slice(2)
 displaySizes(
@@ -14,7 +14,12 @@ displaySizes(
 /*
 Only works when run from PNPM-run context, for bin paths
 */
-async function displaySizes(debugOutput, rawSizes, allEntryPoints, entryPoints) {
+async function displaySizes(
+  debugOutput,
+  rawSizes,
+  allEntryPoints,
+  entryPoints,
+) {
   if (allEntryPoints) {
     const pkgJson = JSON.parse(await readFile('./package.json'))
     entryPoints = Object.keys(pkgJson.buildConfig.exports)
@@ -46,8 +51,10 @@ async function displaySizes(debugOutput, rawSizes, allEntryPoints, entryPoints) 
   for (const entryPoint of entryPoints) {
     await execLive([
       'export-size',
-      '--bundler', 'rollup',
-      '--compression', 'gzip',
+      '--bundler',
+      'rollup',
+      '--compression',
+      'gzip',
       ...(debugOutput ? ['--output'] : []),
       ...(rawSizes ? ['--raw'] : []),
       './dist' + (entryPoint === '.' ? '' : `:${entryPoint}`),

@@ -1,4 +1,3 @@
-
 export const extensions = {
   esm: '.esm.js',
   cjs: '.cjs',

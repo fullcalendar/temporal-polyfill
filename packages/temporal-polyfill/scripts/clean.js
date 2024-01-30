@@ -15,20 +15,14 @@ async function cleanPkg(pkgDir, cleanTsc) {
   for (const file of files) {
     if (
       file !== '.npmignore' &&
-      (cleanTsc || (
-        file !== '.tsc' &&
-        file !== 'tsconfig.tsbuildinfo'
-      ))
+      (cleanTsc || (file !== '.tsc' && file !== 'tsconfig.tsbuildinfo'))
     ) {
-      await rm(
-        joinPaths(distDir, file),
-        { recursive: true },
-      )
+      await rm(joinPaths(distDir, file), { recursive: true })
     }
   }
 
-  await rm(
-    joinPaths(pkgDir, 'export-size-output'),
-    { recursive: true, force: true },
-  )
+  await rm(joinPaths(pkgDir, 'export-size-output'), {
+    recursive: true,
+    force: true,
+  })
 }

@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 
-import { join as joinPaths, basename, resolve as resolvePath, sep as pathSep } from 'path'
-import { readFile, copyFile } from 'fs/promises'
+import {
+  basename,
+  join as joinPaths,
+  resolve as resolvePath,
+  sep as pathSep,
+} from 'path'
+import { copyFile, readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
-import sourcemaps from 'rollup-plugin-sourcemaps'
 import { dts } from 'rollup-plugin-dts'
+import sourcemaps from 'rollup-plugin-sourcemaps'
+import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
 import { terserSimple } from './lib/terser-simple.js'
-import { extensions } from './lib/config.js'
 
 const argv = process.argv.slice(2)
 writeBundles(
@@ -22,7 +27,7 @@ async function writeBundles(pkgDir, isDev, bundleDistEsm) {
 
   if (bundleDistEsm) {
     const esmBundle = await rollupBuild({
-      input: joinPaths(pkgDir, 'dist', 'global' + extensions.esm)
+      input: joinPaths(pkgDir, 'dist', 'global' + extensions.esm),
     })
     await Promise.all([
       esmBundle.write({
@@ -31,8 +36,13 @@ async function writeBundles(pkgDir, isDev, bundleDistEsm) {
       }),
       esmBundle.write({
         format: 'iife',
-        file: joinPaths(pkgDir, 'dist', '.bundled', 'global' + extensions.iifeMin),
-        plugins: [terserSimple()]
+        file: joinPaths(
+          pkgDir,
+          'dist',
+          '.bundled',
+          'global' + extensions.iifeMin,
+        ),
+        plugins: [terserSimple()],
       }),
     ])
   }
@@ -52,8 +62,13 @@ async function buildConfigs(pkgDir, isDev) {
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
-    const exportName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
-    const srcPath = joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + '.js')
+    const exportName =
+      exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+    const srcPath = joinPaths(
+      pkgDir,
+      'dist/.tsc',
+      (exportConfig.src || exportName) + '.js',
+    )
 
     moduleInputs[exportName] = srcPath
 
@@ -64,7 +79,11 @@ async function buildConfigs(pkgDir, isDev) {
         joinPaths(pkgDir, 'dist', exportName + extensions.dts),
       )
     } else {
-      dtsInputs[exportName] = joinPaths(pkgDir, 'dist/.tsc', (exportConfig.src || exportName) + extensions.dts)
+      dtsInputs[exportName] = joinPaths(
+        pkgDir,
+        'dist/.tsc',
+        (exportConfig.src || exportName) + extensions.dts,
+      )
     }
 
     if (exportConfig.iife) {
@@ -82,9 +101,10 @@ async function buildConfigs(pkgDir, isDev) {
             sourcemap: isDev,
             sourcemapExcludeSources: true,
             plugins: [
-              !isDev && buildTerserPlugin({
-                humanReadable: true,
-              })
+              !isDev &&
+                buildTerserPlugin({
+                  humanReadable: true,
+                }),
             ],
           },
           !isDev && {
@@ -95,14 +115,15 @@ async function buildConfigs(pkgDir, isDev) {
                 mangleProps: true,
                 manglePropsExcept: temporalReservedWords,
               }),
-            ]
-          }
+            ],
+          },
         ],
       })
     }
   }
 
-  const fullTscInternalPath = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
+  const fullTscInternalPath =
+    resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
 
   function manuallyResolveChunk(id) {
     if (id.startsWith(fullTscInternalPath)) {
@@ -119,10 +140,11 @@ async function buildConfigs(pkgDir, isDev) {
         format: 'es',
         dir: 'dist',
         entryFileNames: '[name]' + extensions.dts,
-        chunkFileNames: 'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.dts,
+        chunkFileNames:
+          'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.dts,
         minifyInternalExports: false,
         manualChunks: manuallyResolveChunk,
-      }
+      },
     })
   }
 
@@ -135,30 +157,34 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
-          chunkFileNames: 'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.cjs,
+          chunkFileNames:
+            'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.cjs,
           minifyInternalExports: false,
           manualChunks: manuallyResolveChunk,
           plugins: [
-            !isDev && buildTerserPlugin({
-              humanReadable: true,
-              // don't mangleProps. CJS require/exports names are affected
-            })
-          ]
+            !isDev &&
+              buildTerserPlugin({
+                humanReadable: true,
+                // don't mangleProps. CJS require/exports names are affected
+              }),
+          ],
         },
         {
           format: 'es',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
-          chunkFileNames: 'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.esm,
+          chunkFileNames:
+            'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.esm,
           minifyInternalExports: false,
           manualChunks: manuallyResolveChunk,
           plugins: [
             !isDev && pureTopLevel(),
-            !isDev && buildTerserPlugin({
-              humanReadable: true,
-              mangleProps: true,
-              manglePropsExcept: temporalReservedWords,
-            }),
+            !isDev &&
+              buildTerserPlugin({
+                humanReadable: true,
+                mangleProps: true,
+                manglePropsExcept: temporalReservedWords,
+              }),
           ],
         },
       ],
@@ -176,9 +202,9 @@ function buildWithConfigs(configs) {
       return Promise.all(
         arrayify(config.output).map((outputConfig) => {
           return bundle.write(outputConfig)
-        })
+        }),
       )
-    })
+    }),
   )
 }
 
@@ -217,11 +243,11 @@ function onwarn(warning) {
 }
 
 function arrayify(input) {
-  return Array.isArray(input) ? input : (input == null ? [] : [input])
+  return Array.isArray(input) ? input : input == null ? [] : [input]
 }
 
 // Terser
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const terserNameCache = {}
 
@@ -260,17 +286,17 @@ function buildTerserPlugin({
 }
 
 // Temporal Reserved Words
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const startsWithLetterRegExp = /^[a-zA-Z]/
 
 async function readTemporalReservedWords(pkgDir) {
-  const code = await readFile(joinPaths(pkgDir, '../temporal-spec/global.d.ts'), 'utf-8')
-  return code.split(/\W+/)
+  const code = await readFile(
+    joinPaths(pkgDir, '../temporal-spec/global.d.ts'),
+    'utf-8',
+  )
+  return code
+    .split(/\W+/)
     .filter((symbol) => symbol && startsWithLetterRegExp.test(symbol))
-    .concat([
-      'resolvedOptions',
-      'useGrouping',
-      'relatedYear',
-    ])
+    .concat(['resolvedOptions', 'useGrouping', 'relatedYear'])
 }

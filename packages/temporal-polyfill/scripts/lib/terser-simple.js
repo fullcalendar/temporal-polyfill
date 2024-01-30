@@ -8,9 +8,11 @@ https://github.com/rollup/plugins/blob/master/packages/terser/src/module.ts
 export function terserSimple(options) {
   return {
     name: 'terser-simple',
-    async renderChunk(code, chunk, outputOptions) {
+    async renderChunk(code, _chunk, outputOptions) {
       const defaultOptions = {
-        sourceMap: outputOptions.sourcemap === true || typeof outputOptions.sourcemap === 'string'
+        sourceMap:
+          outputOptions.sourcemap === true ||
+          typeof outputOptions.sourcemap === 'string',
       }
       if (outputOptions.format === 'es') {
         defaultOptions.module = true
@@ -30,6 +32,6 @@ export function terserSimple(options) {
       }
 
       return result
-    }
+    },
   }
 }

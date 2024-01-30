@@ -23,12 +23,14 @@ async function writePkgJson(pkgDir, isDev) {
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
-    const exportName = exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+    const exportName =
+      exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
     distExportMap[exportPath] = {
-      types: !isDev || exportConfig.types
-        ? './' + exportName + extensions.dts
-        : './.tsc/' + (exportConfig.src || exportName) + extensions.dts,
+      types:
+        !isDev || exportConfig.types
+          ? './' + exportName + extensions.dts
+          : './.tsc/' + (exportConfig.src || exportName) + extensions.dts,
 
       require: './' + exportName + extensions.cjs,
       import: './' + exportName + extensions.esm,
@@ -53,20 +55,17 @@ async function writePkgJson(pkgDir, isDev) {
   distPkgJson.module = distExportMap['.'].import
 
   if (iifeMinPath) {
-    distPkgJson.unpkg =
-      distPkgJson.jsdelivr = iifeMinPath
+    distPkgJson.unpkg = distPkgJson.jsdelivr = iifeMinPath
   }
 
   distPkgJson.exports = distExportMap
-  distPkgJson.sideEffects = sideEffectsList.length
-    ? sideEffectsList
-    : false
+  distPkgJson.sideEffects = sideEffectsList.length ? sideEffectsList : false
 
-  delete distPkgJson.private
-  delete distPkgJson.scripts
-  delete distPkgJson.buildConfig
-  delete distPkgJson.publishConfig
-  delete distPkgJson.devDependencies
+  distPkgJson.private = undefined
+  distPkgJson.scripts = undefined
+  distPkgJson.buildConfig = undefined
+  distPkgJson.publishConfig = undefined
+  distPkgJson.devDependencies = undefined
 
   await writeFile(distPkgJsonPath, JSON.stringify(distPkgJson, undefined, 2))
 }
