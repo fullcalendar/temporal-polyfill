@@ -13,7 +13,7 @@ import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { Duration, DurationArg, createDuration, toDurationSlots } from './duration'
 import { NativeStandardOps } from '../internal/calendarNative'
 import { calendarFieldMethods } from './mixins'
-import { createNativeStandardOps, normalizeCalendarId } from '../internal/calendarNativeQuery'
+import { createNativeStandardOps, resolveCalendarId } from '../internal/calendarNativeQuery'
 import { refinePlainDateBag, refinePlainMonthDayBag, refinePlainYearMonthBag } from '../internal/bagRefine'
 import { BrandingSlots, createDurationSlots, createPlainDateSlots } from '../internal/slots'
 import * as errorMessages from '../internal/errorMessages'
@@ -117,7 +117,7 @@ const calendarMethods = {
   mergeFields(
     { native }: CalendarClassSlots,
     fields0: Record<string, unknown>,
-    fields1: Record<string, unknown>
+    fields1: Record<string, unknown>,
   ): Record<string, unknown> {
     return native.mergeFields(
       excludeUndefinedProps(requireNonNullish(fields0)),
@@ -129,7 +129,7 @@ const calendarMethods = {
 export const [Calendar] = createSlotClass(
   'Calendar',
   (id: string): CalendarClassSlots => {
-    id = normalizeCalendarId(requireString(id))
+    id = resolveCalendarId(requireString(id))
     const calendarNative = createNativeStandardOps(id)
     return {
       branding: 'Calendar',

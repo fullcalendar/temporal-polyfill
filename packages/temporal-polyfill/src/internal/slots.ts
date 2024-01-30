@@ -5,7 +5,7 @@ import { requireString } from './cast'
 import { isoCalendarId } from './calendarConfig'
 import { parseCalendarId, parseTimeZoneId } from './isoParse'
 import { getTimeZoneComparator, resolveTimeZoneId } from './timeZoneNative'
-import { realizeCalendarId } from './calendarNativeQuery'
+import { resolveCalendarId } from './calendarNativeQuery'
 import { pluckProps } from './utils'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
 import * as errorMessages from './errorMessages'
@@ -187,7 +187,7 @@ export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
 }
 
 export function refineCalendarSlotString(calendarArg: string): string {
-  return realizeCalendarId(parseCalendarId(requireString(calendarArg)))
+  return resolveCalendarId(parseCalendarId(requireString(calendarArg)))
 }
 
 // bag

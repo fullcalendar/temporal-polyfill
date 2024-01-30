@@ -40,7 +40,7 @@ import { moveToMonthStart } from './move'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import { DateSlots, DurationBranding, DurationSlots, InstantBranding, InstantSlots, PlainDateBranding, PlainDateSlots, PlainDateTimeBranding, PlainDateTimeSlots, PlainMonthDayBranding, PlainMonthDaySlots, PlainTimeBranding, PlainTimeSlots, PlainYearMonthBranding, PlainYearMonthSlots, ZonedDateTimeBranding, ZonedDateTimeSlots, ZonedEpochSlots, createDurationSlots, createInstantSlots, createPlainDateTimeSlots, createPlainDateSlots, createPlainMonthDaySlots, createPlainTimeSlots, createPlainYearMonthSlots, createZonedDateTimeSlots } from './slots'
 import { requireString, toStringViaPrimitive } from './cast'
-import { realizeCalendarId } from './calendarNativeQuery'
+import { resolveCalendarId } from './calendarNativeQuery'
 import * as errorMessages from './errorMessages'
 
 // High-level
@@ -297,7 +297,7 @@ function finalizeZonedDateTime(
   return createZonedDateTimeSlots(
     epochNanoseconds,
     slotId,
-    realizeCalendarId(organized.calendar),
+    resolveCalendarId(organized.calendar),
   )
 }
 
@@ -312,7 +312,7 @@ function finalizeDate(organized: DateOrganized): DateSlots<string> {
 function realizeCalendarSlot<T extends { calendar: string }>(organized: T): T {
   return {
     ...organized,
-    calendar: realizeCalendarId(organized.calendar),
+    calendar: resolveCalendarId(organized.calendar),
   }
 }
 

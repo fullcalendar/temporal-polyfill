@@ -1,12 +1,13 @@
 import { nativeMergeFields } from './bagRefine'
 import { gregoryCalendarId, isoCalendarId, japaneseCalendarId } from './calendarConfig'
-import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, queryIntlCalendar } from './intlMath'
+import { computeIntlDateParts, computeIntlDay, computeIntlDayOfYear, computeIntlDaysInMonth, computeIntlDaysInYear, computeIntlEpochMilli, computeIntlEraParts, computeIntlInLeapYear, computeIntlLeapMonth, computeIntlMonth, computeIntlMonthCodeParts, computeIntlMonthsInYear, computeIntlYear, computeIntlYearMonthForMonthDay, computeIsoFieldsFromIntlParts, queryFormatForCalendar, queryIntlCalendar } from './intlMath'
 import { computeIsoDateParts, computeIsoDay, computeIsoDayOfYear, computeIsoDaysInMonth, computeIsoDaysInYear, computeIsoEraParts, computeIsoFieldsFromParts, computeIsoInLeapYear, computeIsoMonth, computeIsoMonthCodeParts, computeIsoMonthsInYear, computeIsoYear, computeIsoYearMonthForMonthDay } from './isoMath'
-import { EpochMilliOp, LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeNativeDaysInMonth, computeNativeDaysInYear, computeNativeEra, computeNativeEraYear, computeNativeInLeapYear, computeNativeMonthCode, computeNativeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
+import { EpochMilliOp, LeapMonthOp, NativeCalendar, NativeDateModOps, NativeDateRefineOps, NativeDayOfYearOps, NativeDaysInMonthOps, NativeDaysInYearOps, NativeDiffOps, NativeEraOps, NativeEraYearOps, NativeInLeapYearOps, NativeMonthCodeOps, NativeMonthDayModOps, NativeMonthDayParseOps, NativeMonthDayRefineOps, NativeMonthsInYearOps, NativeMoveOps, NativePartOps, NativeStandardOps, NativeYearMonthDiffOps, NativeYearMonthModOps, NativeYearMonthMoveOps, NativeYearMonthParseOps, NativeYearMonthRefineOps, computeCalendarIdBase, computeNativeDaysInMonth, computeNativeDaysInYear, computeNativeEra, computeNativeEraYear, computeNativeInLeapYear, computeNativeMonthCode, computeNativeMonthsInYear, nativeDateRefineBase, nativeDiffBase, nativeMonthDayRefineBase, nativeMoveBase, nativeStandardBase, nativeYearMonthRefineBase } from './calendarNative'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
 import { isoArgsToEpochMilli } from './timeMath'
 import { intlMonthAdd, isoMonthAdd } from './move'
 import { noop } from './utils'
+import * as errorMessages from './errorMessages'
 
 // ISO
 // -------------------------------------------------------------------------------------------------
@@ -404,18 +405,22 @@ function createNativeOpsCreator<O extends {}>(isoOps: O, intlOps: O): (
 
 // -------------------------------------------------------------------------------------------------
 
-export function realizeCalendarId(calendarId: string): string {
+export function resolveCalendarId(calendarId: string): string {
   calendarId = normalizeCalendarId(calendarId)
 
-  // check that it's valid. similar to switch in createNativeOpsCreator
   if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
-    queryIntlCalendar(calendarId)
+    if (
+      computeCalendarIdBase(calendarId) !==
+      computeCalendarIdBase(queryFormatForCalendar(calendarId).resolvedOptions().calendar)
+    ) {
+      throw new RangeError(errorMessages.invalidCalendar(calendarId))
+    }
   }
 
-  return calendarId // return original instead of using queried-result. keeps id extensions
+  return calendarId
 }
 
-export function normalizeCalendarId(calendarId: string): string {
+function normalizeCalendarId(calendarId: string): string {
   calendarId = calendarId.toLocaleLowerCase()
 
   if (calendarId === 'islamicc') {

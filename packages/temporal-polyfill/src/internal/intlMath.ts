@@ -8,7 +8,6 @@ import { utcTimeZoneId } from './timeZoneNative'
 import { milliInDay } from './units'
 import { compareNumbers, createLazyGenerator, mapPropNamesToIndex } from './utils'
 import { DateParts, EraParts, MonthCodeParts, NativeCalendar, YearMonthParts, computeCalendarIdBase, eraYearToYear, getCalendarLeapMonthMeta, monthCodeNumberToMonth, monthToMonthCodeNumber } from './calendarNative'
-import * as errorMessages from './errorMessages'
 
 interface IntlDateFields {
   era: string | undefined
@@ -36,12 +35,8 @@ Expects an already-normalized calendarId
 export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
-  const intlFormat = createFormatForCalendar(calendarId)
+  const intlFormat = queryFormatForCalendar(calendarId)
   const calendarIdBase = computeCalendarIdBase(calendarId)
-
-  if (calendarIdBase !== computeCalendarIdBase(intlFormat.resolvedOptions().calendar)) {
-    throw new RangeError(errorMessages.invalidCalendar(calendarId))
-  }
 
   function epochMilliToIntlFields(epochMilli: number) {
     const intlPartsHash = hashIntlFormatParts(intlFormat, epochMilli)
@@ -147,7 +142,9 @@ export function parseIntlYear(
   return { era, eraYear, year }
 }
 
-export function createFormatForCalendar(calendarId: string): Intl.DateTimeFormat {
+export const queryFormatForCalendar = createLazyGenerator(createFormatForCalendar)
+
+function createFormatForCalendar(calendarId: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {
     calendar: calendarId,
     timeZone: utcTimeZoneId,

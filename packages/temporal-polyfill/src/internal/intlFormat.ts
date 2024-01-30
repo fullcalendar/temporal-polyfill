@@ -270,12 +270,12 @@ function toEpochMilli<S>(
 
 function checkCalendarsCompatible(
   internalCalendarId: string,
-  resolveCalendarId: string,
+  resolvedCalendarId: string,
   strictCalendarCheck: boolean | undefined,
 ): void {
   if (
     (strictCalendarCheck || internalCalendarId !== isoCalendarId) &&
-    (internalCalendarId !== resolveCalendarId)
+    (internalCalendarId !== resolvedCalendarId)
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
