@@ -15,9 +15,6 @@
   "license": "MIT",
   "copyright": "2022 Adam Shaw",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
