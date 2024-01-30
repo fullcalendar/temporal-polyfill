@@ -193,6 +193,7 @@ async function watchWithConfigs(configs) {
           break
         case 'BUNDLE_END':
           console.log(formatWriteMessage(ev.input))
+          ev.result.close() // our responsibility to call this
           break
         case 'END':
           resolve()

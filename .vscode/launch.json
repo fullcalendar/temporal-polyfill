@@ -6,6 +6,7 @@
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "test", "--no-timeout", "${file}"],
+      "cwd": "${workspaceFolder}/packages/temporal-polyfill",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true
