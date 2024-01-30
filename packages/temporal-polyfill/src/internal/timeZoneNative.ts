@@ -35,33 +35,38 @@ export interface NativeTimeZone { // TODO: rename to NativeTimeZoneOps?
 // Query
 // -------------------------------------------------------------------------------------------------
 
-export type TimeZoneIdResolution = [
-  slotId: string,
-  intlId?: string, // if not defined, assume fixed
-]
-
-export function resolveTimeZoneId(id: string): TimeZoneIdResolution {
-  const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
-  if (offsetNano !== undefined) {
-    return [formatOffsetNano(offsetNano)]
-  }
-  id = normalizeNamedTimeZoneId(id) // becomes a slotId
-  if (id === utcTimeZoneId) {
-    return [id]
-  }
-  return [id, queryFormatForTimeZone(id).resolvedOptions().timeZone]
+export function resolveTimeZoneId(id: string): string {
+  const spirit = getTimeZoneSpirit(id)
+  return typeof spirit === 'number'
+    ? formatOffsetNano(spirit)
+    : (spirit ? normalizeNamedTimeZoneId(id) : utcTimeZoneId)
 }
 
-export const queryNativeTimeZone = createLazyGenerator((slotId: string) => {
-  const offsetNano = parseOffsetNanoMaybe(slotId, true) // onlyHourMinute=true
-  if (offsetNano !== undefined) {
-    return new FixedTimeZone(offsetNano)
-  }
-  if (slotId === utcTimeZoneId) {
-    return new FixedTimeZone(0)
-  }
-  return new IntlTimeZone(queryFormatForTimeZone(slotId))
+export function getTimeZoneComparator(slotId: string): string | number {
+  const spirit = getTimeZoneSpirit(slotId)
+  return typeof spirit === 'number'
+    ? spirit
+    : (spirit ? spirit.resolvedOptions().timeZone : utcTimeZoneId)
+}
+
+export const queryNativeTimeZone = createLazyGenerator((slotId: string): NativeTimeZone => {
+  const spirit = getTimeZoneSpirit(slotId)
+  return typeof spirit === 'object'
+    ? new IntlTimeZone(spirit)
+    : new FixedTimeZone(spirit || 0)
 })
+
+function getTimeZoneSpirit(
+  id: string // id or slotId
+): number | Intl.DateTimeFormat | undefined { // undefined means utcTimeZoneId
+  const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
+  if (offsetNano !== undefined) {
+    return offsetNano
+  }
+  if (id.toUpperCase() !== utcTimeZoneId) {
+    return queryFormatForTimeZone(id) // case-agnostic
+  }
+}
 
 function normalizeNamedTimeZoneId(s: string): string {
   const lower = s.toLowerCase()
@@ -99,7 +104,7 @@ function normalizeNamedTimeZoneId(s: string): string {
 
 export class FixedTimeZone implements NativeTimeZone {
   constructor(
-    private offsetNano: number,
+    public offsetNano: number,
   ) {}
 
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number {

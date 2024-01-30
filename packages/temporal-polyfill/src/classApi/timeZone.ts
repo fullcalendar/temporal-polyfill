@@ -25,7 +25,7 @@ export type TimeZoneClassSlots = BrandingSlots & {
 export const [TimeZone, createTimeZone] = createSlotClass(
   'TimeZone',
   (id: string): TimeZoneClassSlots => {
-    const [slotId] = resolveTimeZoneId(id)
+    const slotId = resolveTimeZoneId(id)
     const timeZoneNative = queryNativeTimeZone(slotId)
     return {
       branding: 'TimeZone',
