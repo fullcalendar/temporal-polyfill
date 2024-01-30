@@ -26,6 +26,17 @@
     "test": "pnpm -r --filter=!@js-temporal/temporal-test262-runner run test",
     "clean": "pnpm -r run clean"
   },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.1"
+  },
+  "devDependenciesNotes": {
+    "@biomejs/biome": [
+      "NOTE: Specifically for IDE. Command line uses versions in sub-packages",
+      "NOTE: Always keep sub-packages up-to-date",
+      "BUG: Pinned on 1.5.1 due to this regression in 1.5.3:",
+      "https://github.com/biomejs/biome/issues/1654"
+    ]
+  },
   "pnpm": {
     "patchedDependencies": {
       "rollup-plugin-sourcemaps@0.6.3": "patches/rollup-plugin-sourcemaps@0.6.3.patch"

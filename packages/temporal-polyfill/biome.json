@@ -1,21 +1,7 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "extends": ["../../biome.json"],
   "files": {
     "include": ["*.json", "src", "scripts"]
-  },
-  "vcs": {
-    "enabled": true,
-    "useIgnoreFile": true
-  },
-  "formatter": {
-    "indentStyle": "space",
-    "lineWidth": 100
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "quoteProperties": "preserve",
-      "semicolons": "asNeeded"
-    }
   }
 }
