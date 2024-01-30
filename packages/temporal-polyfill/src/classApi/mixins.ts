@@ -158,7 +158,7 @@ export function neverValueOf() {
   throw new TypeError(errorMessages.forbiddenValueOf)
 }
 
-export function buildCalendarFromSlots({ calendar }: { calendar: CalendarSlot }): Calendar {
+export function createCalendarFromSlots({ calendar }: { calendar: CalendarSlot }): Calendar {
   return typeof calendar === 'string'
     ? new Calendar(calendar)
     : calendar

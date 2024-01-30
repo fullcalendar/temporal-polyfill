@@ -8,7 +8,7 @@ import { getSlots, rejectInvalidBag, createSlotClass } from './slotClass'
 import { CalendarSlot, getCalendarSlotFromBag, refineCalendarSlot } from './slotClass'
 import { CalendarArg } from './calendar'
 import { PlainDate, createPlainDate } from './plainDate'
-import { calendarIdGetters, buildCalendarFromSlots, neverValueOf, yearMonthGetters } from './mixins'
+import { calendarIdGetters, createCalendarFromSlots, neverValueOf, yearMonthGetters } from './mixins'
 import { createDateModOps, createYearMonthDiffOps, createYearMonthModOps, createYearMonthMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { PlainYearMonthBag, plainYearMonthWithFields, refinePlainYearMonthBag } from '../internal/bagRefine'
@@ -74,7 +74,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] = cr
       )
     },
     getISOFields: removeBranding,
-    getCalendar: buildCalendarFromSlots,
+    getCalendar: createCalendarFromSlots,
     valueOf: neverValueOf,
   },
   {

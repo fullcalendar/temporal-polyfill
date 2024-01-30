@@ -28,7 +28,7 @@ import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { TimeZone, TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol } from './timeZoneProtocol'
-import { neverValueOf, dateGetters, timeGetters, epochGetters, buildCalendarFromSlots, calendarIdGetters } from './mixins'
+import { neverValueOf, dateGetters, timeGetters, epochGetters, createCalendarFromSlots, calendarIdGetters } from './mixins'
 import { optionalToPlainTimeFields } from './utils'
 import { createDateModOps, createDateRefineOps, createDiffOps, createMonthDayRefineOps, createMoveOps, createYearMonthRefineOps } from './calendarOpsQuery'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
@@ -201,7 +201,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     getISOFields(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): ZonedIsoFields<CalendarSlot, TimeZoneSlot> {
       return buildZonedIsoFields(createTimeZoneOffsetOps, slots)
     },
-    getCalendar: buildCalendarFromSlots,
+    getCalendar: createCalendarFromSlots,
     getTimeZone({ timeZone }: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): TimeZoneProtocol {
       return typeof timeZone === 'string'
         ? new TimeZone(timeZone)
