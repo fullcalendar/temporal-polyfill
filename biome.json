@@ -10,8 +10,23 @@
   },
   "linter": {
     "rules": {
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
       "correctness": {
         "noUnusedVariables": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noGlobalIsNan": "off",
+        "noShadowRestrictedNames": "off",
+        "noAssignInExpressions": "off"
+      },
+      "style": {
+        "noCommaOperator": "off",
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "off",
+        "useTemplate": "off"
       }
     }
   },

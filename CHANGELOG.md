@@ -1,4 +1,12 @@
 
+Unreleased
+----------
+
+- TODO: should index/impl export `Intl` instead of `DateTimeFormat`?: yes
+- TODO: document *fns* api non-conformance:
+  - calendar/timeZone args don't accept full datetime strings, only ID
+
+
 v0.2.0 (2024-01-07)
 -------------------
 
