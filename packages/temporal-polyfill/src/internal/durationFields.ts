@@ -1,5 +1,5 @@
 import { Unit, unitNamesAsc } from './units'
-import { mapPropNamesToConstant, mapPropNamesToIndex } from './utils'
+import { mapPropNamesToConstant, mapPropNamesToIndex, sortStrs } from './utils'
 
 export interface DurationDateFields {
   days: number
@@ -26,7 +26,7 @@ export const durationFieldNamesAsc = unitNamesAsc.map(
   (unitName) => unitName + 's',
 ) as (keyof DurationFields)[]
 
-export const durationFieldNamesAlpha = durationFieldNamesAsc.slice().sort()
+export const durationFieldNamesAlpha = sortStrs(durationFieldNamesAsc)
 
 export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
   0,

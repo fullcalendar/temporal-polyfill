@@ -395,3 +395,8 @@ function hasHalf(num: number): boolean {
 export function capitalize(s: string): string {
   return s[0].toUpperCase() + s.substring(1)
 }
+
+export function sortStrs<T extends string>(strs: T[]): T[]
+export function sortStrs(strs: string[]): string[] {
+  return strs.slice().sort()
+}

@@ -1,6 +1,6 @@
 import { DurationFields } from './durationFields'
 import { Unit, unitNamesAsc } from './units'
-import { mapPropNamesToConstant } from './utils'
+import { mapPropNamesToConstant, sortStrs } from './utils'
 
 // Basics
 // -----------------------------------------------------------------------------
@@ -99,7 +99,8 @@ export const timeFieldNamesAsc = unitNamesAsc.slice(
   0,
   Unit.Day,
 ) as (keyof TimeFields)[]
-export const timeFieldNamesAlpha = timeFieldNamesAsc.slice().sort()
+
+export const timeFieldNamesAlpha = sortStrs(timeFieldNamesAsc)
 
 export const offsetFieldNames = ['offset']
 export const timeZoneFieldNames = ['timeZone']
