@@ -15,12 +15,12 @@ import {
   createPropDescriptors,
   createStringTagDescriptors,
 } from '../internal/utils'
+import { CalendarSlot, refineCalendarSlot } from './calendar'
 import { Instant, createInstant } from './instant'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainTime, createPlainTime } from './plainTime'
-import { CalendarSlot, refineCalendarSlot } from './slotClass'
-import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
+import { TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOffsetOps } from './timeZoneOpsQuery'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 

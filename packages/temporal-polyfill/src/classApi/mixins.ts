@@ -17,8 +17,14 @@ import {
   getEpochSeconds,
   getId,
 } from '../internal/slots'
-import { Callable, mapPropNames, mapProps } from '../internal/utils'
-import { Calendar, CalendarProtocol } from './calendar'
+import {
+  Callable,
+  bindArgs,
+  excludePropsByName,
+  mapPropNames,
+  mapProps,
+} from '../internal/utils'
+import { Calendar, CalendarProtocol, CalendarSlot } from './calendar'
 import {
   dateOnlyRefiners,
   dateRefiners,
@@ -27,7 +33,7 @@ import {
   yearMonthOnlyRefiners,
 } from './calendarRefiners'
 import { createPlainDate, toPlainDateSlots } from './plainDate'
-import { CalendarSlot, getSlots } from './slotClass'
+import { getSlots } from './slotClass'
 
 // For Calendar
 // -----------------------------------------------------------------------------
@@ -187,3 +193,9 @@ export function createCalendarFromSlots({
 }: { calendar: CalendarSlot }): Calendar {
   return typeof calendar === 'string' ? new Calendar(calendar) : calendar
 }
+
+// for getISOFields
+export const removeBranding = bindArgs(
+  excludePropsByName,
+  new Set(['branding']),
+)

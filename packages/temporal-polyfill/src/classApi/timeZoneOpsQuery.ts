@@ -1,6 +1,6 @@
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeZoneOffsetOps, TimeZoneOps } from '../internal/timeZoneOps'
-import { TimeZoneSlot } from './slotClass'
+import { TimeZoneSlot } from './timeZone'
 import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
 
 export function createTimeZoneOps(

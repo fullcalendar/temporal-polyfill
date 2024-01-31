@@ -19,13 +19,14 @@ import {
   copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
-import {
-  PlainYearMonthBranding,
-  PlainYearMonthSlots,
-  removeBranding,
-} from '../internal/slots'
+import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
-import { CalendarArg } from './calendar'
+import {
+  CalendarArg,
+  CalendarSlot,
+  getCalendarSlotFromBag,
+  refineCalendarSlot,
+} from './calendar'
 import {
   createDateModOps,
   createYearMonthDiffOps,
@@ -44,15 +45,12 @@ import {
   calendarIdGetters,
   createCalendarFromSlots,
   neverValueOf,
+  removeBranding,
   yearMonthGetters,
 } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
-import {
-  CalendarSlot,
-  getCalendarSlotFromBag,
-  refineCalendarSlot,
-} from './slotClass'
+import { createSlotClass, getSlots } from './slotClass'
+import { rejectInvalidBag } from './utils'
 
 export type PlainYearMonth = any & YearMonthFields
 export type PlainYearMonthArg =

@@ -1,7 +1,6 @@
 import * as errorMessages from '../internal/errorMessages'
 import {
   ClassFormatConfig,
-  OptionNames,
   createFormatPrepper,
   instantConfig,
   plainDateConfig,
@@ -12,7 +11,11 @@ import {
   toEpochMillis,
   zonedDateTimeConfig,
 } from '../internal/intlFormatPrep'
-import { LocalesArg, OrigDateTimeFormat } from '../internal/intlFormatUtils'
+import {
+  LocalesArg,
+  OptionNames,
+  OrigDateTimeFormat,
+} from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
 import {
   Classlike,

@@ -7,7 +7,7 @@ import { validateTimeZoneOffset } from '../internal/timeZoneOps'
 import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
-import { TimeZoneProtocol } from './timeZoneProtocol'
+import { TimeZoneProtocol } from './timeZone'
 
 // Individual Adapters
 // -----------------------------------------------------------------------------

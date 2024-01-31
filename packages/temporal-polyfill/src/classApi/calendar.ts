@@ -7,6 +7,7 @@ import {
   getRequiredDateFields,
   getRequiredMonthDayFields,
   getRequiredYearMonthFields,
+  isoCalendarId,
 } from '../internal/calendarConfig'
 import { resolveCalendarId } from '../internal/calendarId'
 import { NativeStandardOps } from '../internal/calendarNative'
@@ -19,6 +20,7 @@ import {
   YearMonthBagStrict,
   dateFieldNamesAlpha,
 } from '../internal/fields'
+import { parseCalendarId } from '../internal/isoParse'
 import {
   LargestUnitOptions,
   OverflowOptions,
@@ -29,7 +31,7 @@ import {
   createDurationSlots,
   createPlainDateSlots,
 } from '../internal/slots'
-import { excludeUndefinedProps } from '../internal/utils'
+import { excludeUndefinedProps, isObjectLike } from '../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -46,8 +48,7 @@ import {
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { createSlotClass } from './slotClass'
-import { refineCalendarSlot } from './slotClass'
+import { createSlotClass, getSlots } from './slotClass'
 import { createProtocolChecker } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
@@ -66,6 +67,7 @@ export type CalendarClassSlots = BrandingSlots & {
   native: NativeStandardOps
 }
 
+// Order matters. See call to createProtocolChecker
 const calendarMethods = {
   toString(slots: CalendarClassSlots) {
     return slots.id
@@ -207,13 +209,56 @@ export const [Calendar] = createSlotClass(
   },
 )
 
-// CalendarProtocol
+// Slot
 // -----------------------------------------------------------------------------
 
-/*
-TODO: eventually use temporal-spec
-We need to fill-out ambient declarations on classes like PlainDate to they match for PlainDateLike, etc
-*/
+export type CalendarSlot = CalendarProtocol | string
+
+export function getCalendarSlotFromBag(bag: {
+  calendar?: CalendarArg
+}): CalendarSlot {
+  return extractCalendarSlotFromBag(bag) || isoCalendarId
+}
+
+export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }):
+  | CalendarSlot
+  | undefined {
+  const { calendar } = bag
+  if (calendar !== undefined) {
+    return refineCalendarSlot(calendar)
+  }
+}
+
+export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
+  if (isObjectLike(calendarArg)) {
+    // look at other date-like objects
+    const { calendar } = (getSlots(calendarArg) || {}) as {
+      calendar?: CalendarSlot
+    }
+    if (calendar) {
+      return calendar
+    }
+
+    checkCalendarProtocol(calendarArg as CalendarProtocol)
+    return calendarArg as CalendarProtocol
+  }
+
+  return refineCalendarSlotString(calendarArg)
+}
+
+function refineCalendarSlotString(arg: string): string {
+  return resolveCalendarId(parseCalendarId(requireString(arg)))
+}
+
+const checkCalendarProtocol = createProtocolChecker(
+  // remove toString/toJSON/era/eraYear
+  Object.keys(calendarMethods).slice(4),
+)
+
+// Protocol
+// -----------------------------------------------------------------------------
+// TODO: eventually use temporal-spec
+
 export interface CalendarProtocol {
   id: string
   year(dateArg: PlainYearMonth | PlainDateArg): number
@@ -258,7 +303,3 @@ export interface CalendarProtocol {
   toString?(): string
   toJSON?(): string
 }
-
-export const checkCalendarProtocol = createProtocolChecker(
-  Object.keys(calendarMethods).slice(4), // remove toString/toJSON/era/eraYear
-)

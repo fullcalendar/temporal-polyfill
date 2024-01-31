@@ -1,7 +1,9 @@
 import { isoCalendarId } from '../internal/calendarConfig'
+import { requireString } from '../internal/cast'
 import { isTimeZoneSlotsEqual } from '../internal/compare'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { formatOffsetNano } from '../internal/isoFormat'
+import { parseTimeZoneId } from '../internal/isoParse'
 import {
   EpochDisambigOptions,
   refineEpochDisambigOptions,
@@ -15,7 +17,8 @@ import { epochNanoToIso } from '../internal/timeMath'
 import { resolveTimeZoneId } from '../internal/timeZoneId'
 import { NativeTimeZone, queryNativeTimeZone } from '../internal/timeZoneNative'
 import { getSingleInstantFor } from '../internal/timeZoneOps'
-import { CalendarArg } from './calendar'
+import { isObjectLike } from '../internal/utils'
+import { CalendarArg, refineCalendarSlot } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'
 import {
   PlainDateTime,
@@ -23,10 +26,13 @@ import {
   createPlainDateTime,
   toPlainDateTimeSlots,
 } from './plainDateTime'
-import { createSlotClass, refineCalendarSlot } from './slotClass'
-import { refineTimeZoneSlot } from './slotClass'
-import { createAdapterOps, simpleTimeZoneAdapters } from './timeZoneAdapter'
-import { TimeZoneProtocol } from './timeZoneProtocol'
+import { createSlotClass, getSlots } from './slotClass'
+import {
+  createAdapterOps,
+  simpleTimeZoneAdapters,
+  timeZoneAdapters,
+} from './timeZoneAdapter'
+import { createProtocolChecker } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type TimeZone = any
@@ -159,4 +165,55 @@ function getImplTransition(
     direction,
   )
   return epochNano ? createInstant(createInstantSlots(epochNano)) : null
+}
+
+// Slot
+// -----------------------------------------------------------------------------
+
+export type TimeZoneSlot = TimeZoneProtocol | string
+
+export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
+  if (isObjectLike(arg)) {
+    const { timeZone } = (getSlots(arg) || {}) as { timeZone?: TimeZoneSlot }
+
+    if (timeZone) {
+      return timeZone // TimeZoneOps
+    }
+
+    checkTimeZoneProtocol(arg as TimeZoneProtocol)
+    return arg as TimeZoneProtocol
+  }
+  return refineTimeZoneSlotString(arg)
+}
+
+export function refineTimeZoneSlotString(arg: string): string {
+  return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))
+}
+
+export const checkTimeZoneProtocol = createProtocolChecker(
+  Object.keys(timeZoneAdapters),
+)
+
+// Protocol
+// -----------------------------------------------------------------------------
+// TODO: eventually use temporal-spec
+
+export interface TimeZoneProtocol {
+  id: string
+  getOffsetNanosecondsFor(instant: InstantArg): number
+  getOffsetStringFor?(instant: InstantArg): string
+  getPlainDateTimeFor?(
+    instant: InstantArg,
+    calendarArg?: CalendarArg,
+  ): PlainDateTime
+  getInstantFor?(
+    dateTime: PlainDateTimeArg,
+    options?: EpochDisambigOptions,
+  ): Instant
+  getNextTransition?(startingPoint: InstantArg): Instant | null
+  getPreviousTransition?(startingPoint: InstantArg): Instant | null
+  getPossibleInstantsFor(dateTime: PlainDateTimeArg): Instant[]
+  toString?(): string
+  toJSON?(): string
+  equals?(otherArg: TimeZoneArg): boolean
 }

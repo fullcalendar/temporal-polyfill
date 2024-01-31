@@ -48,11 +48,15 @@ import {
   createPlainDateSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
-  removeBranding,
 } from '../internal/slots'
 import { UnitName } from '../internal/units'
 import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
-import { CalendarArg } from './calendar'
+import {
+  CalendarArg,
+  CalendarSlot,
+  getCalendarSlotFromBag,
+  refineCalendarSlot,
+} from './calendar'
 import {
   createDateModOps,
   createDateRefineOps,
@@ -73,6 +77,7 @@ import {
   createCalendarFromSlots,
   dateGetters,
   neverValueOf,
+  removeBranding,
   timeGetters,
 } from './mixins'
 import {
@@ -84,16 +89,10 @@ import {
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
-import {
-  CalendarSlot,
-  getCalendarSlotFromBag,
-  refineCalendarSlot,
-} from './slotClass'
-import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
-import { TimeZoneArg } from './timeZone'
+import { createSlotClass, getSlots } from './slotClass'
+import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { optionalToPlainTimeFields } from './utils'
+import { optionalToPlainTimeFields, rejectInvalidBag } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTime = any & DateTimeFields

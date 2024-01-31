@@ -32,10 +32,10 @@ import {
   ZonedDateTimeBranding,
   ZonedDateTimeSlots,
   createPlainTimeSlots,
-  removeBranding,
 } from '../internal/slots'
 import { UnitName } from '../internal/units'
 import { NumSign, isObjectLike } from '../internal/utils'
+import { CalendarSlot } from './calendar'
 import {
   Duration,
   DurationArg,
@@ -43,19 +43,13 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepPlainTimeFormat } from './intlDateTimeFormat'
-import { neverValueOf, timeGetters } from './mixins'
+import { neverValueOf, removeBranding, timeGetters } from './mixins'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
-import {
-  CalendarSlot,
-  TimeZoneSlot,
-  createSlotClass,
-  getSlots,
-  refineTimeZoneSlot,
-  rejectInvalidBag,
-} from './slotClass'
-import { TimeZoneArg } from './timeZone'
+import { createSlotClass, getSlots } from './slotClass'
+import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { rejectInvalidBag } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainTime = any & TimeFields

@@ -51,7 +51,12 @@ import {
 } from '../internal/timeZoneOps'
 import { UnitName } from '../internal/units'
 import { NumSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
-import { CalendarArg } from './calendar'
+import {
+  CalendarArg,
+  CalendarSlot,
+  getCalendarSlotFromBag,
+  refineCalendarSlot,
+} from './calendar'
 import {
   createDateModOps,
   createDateRefineOps,
@@ -86,20 +91,16 @@ import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
+import { createSlotClass, getSlots } from './slotClass'
 import {
-  CalendarSlot,
+  TimeZone,
+  TimeZoneArg,
+  TimeZoneProtocol,
   TimeZoneSlot,
-  createSlotClass,
-  getCalendarSlotFromBag,
-  getSlots,
-  refineCalendarSlot,
   refineTimeZoneSlot,
-  rejectInvalidBag,
-} from './slotClass'
-import { TimeZone, TimeZoneArg } from './timeZone'
+} from './timeZone'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { TimeZoneProtocol } from './timeZoneProtocol'
-import { optionalToPlainTimeFields } from './utils'
+import { optionalToPlainTimeFields, rejectInvalidBag } from './utils'
 
 export type ZonedDateTime = any
 export type ZonedDateTimeArg =

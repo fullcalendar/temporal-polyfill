@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
-import { LocalesArg, OrigDateTimeFormat } from './intlFormatUtils'
+import { LocalesArg, OptionNames, OrigDateTimeFormat } from './intlFormatUtils'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -23,8 +23,6 @@ However, for ZonedDateTimeFormat::toLocaleString, timeZone is forced by obj and 
 
 // Options Transformers
 // -----------------------------------------------------------------------------
-
-export type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
 
 const numericStr = 'numeric'
 const timeZoneNameStrs: OptionNames = ['timeZoneName']
@@ -372,7 +370,7 @@ function checkCalendarsCompatible(
 
 // -----------------------------------------------------------------------------
 
-// specifically for formatting
+// specifically for formatting... rename
 export function getCommonTimeZoneId(
   slots0: { timeZone: IdLike },
   slots1?: { timeZone: IdLike }, // optional!

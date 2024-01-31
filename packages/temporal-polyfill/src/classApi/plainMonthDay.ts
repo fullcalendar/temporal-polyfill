@@ -17,13 +17,14 @@ import {
   copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
-import {
-  PlainMonthDayBranding,
-  PlainMonthDaySlots,
-  removeBranding,
-} from '../internal/slots'
+import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { bindArgs, isObjectLike } from '../internal/utils'
-import { CalendarArg } from './calendar'
+import {
+  CalendarArg,
+  CalendarSlot,
+  extractCalendarSlotFromBag,
+  refineCalendarSlot,
+} from './calendar'
 import {
   createDateModOps,
   createMonthDayModOps,
@@ -35,14 +36,11 @@ import {
   createCalendarFromSlots,
   monthDayGetters,
   neverValueOf,
+  removeBranding,
 } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
-import {
-  CalendarSlot,
-  extractCalendarSlotFromBag,
-  refineCalendarSlot,
-} from './slotClass'
+import { createSlotClass, getSlots } from './slotClass'
+import { rejectInvalidBag } from './utils'
 
 export type PlainMonthDay = any & MonthDayFields
 export type PlainMonthDayArg =

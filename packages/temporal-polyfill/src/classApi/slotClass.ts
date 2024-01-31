@@ -1,35 +1,18 @@
-import { isoCalendarId } from '../internal/calendarConfig'
-import { resolveCalendarId } from '../internal/calendarId'
-import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
-import { IsoDateFields, IsoTimeFields } from '../internal/isoFields'
-import { parseCalendarId, parseTimeZoneId } from '../internal/isoParse'
 import { BrandingSlots } from '../internal/slots'
-import { resolveTimeZoneId } from '../internal/timeZoneId'
 import {
   createGetterDescriptors,
   createNameDescriptors,
   createPropDescriptors,
   createStringTagDescriptors,
-  isObjectLike,
   mapProps,
 } from '../internal/utils'
-import {
-  CalendarArg,
-  CalendarProtocol,
-  checkCalendarProtocol,
-} from './calendar'
-import { TimeZoneArg } from './timeZone'
-import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
 
 const slotsMap = new WeakMap<any, BrandingSlots>()
 
 // TODO: allow type-input, so caller doesn't need to cast so much
 export const getSlots = slotsMap.get.bind(slotsMap)
 const setSlots = slotsMap.set.bind(slotsMap)
-
-// Class
-// -----------------------------------------------------------------------------
 
 export function createSlotClass(
   branding: string,
@@ -86,94 +69,4 @@ export function createSlotClass(
       return slots
     },
   ]
-}
-
-// getISOFields
-// -----------------------------------------------------------------------------
-
-export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
-export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
-
-// Utils
-// -----------------------------------------------------------------------------
-
-export function rejectInvalidBag<B>(bag: B): B {
-  if (
-    getSlots(bag) ||
-    (bag as any).calendar !== undefined ||
-    (bag as any).timeZone !== undefined
-  ) {
-    throw new TypeError(errorMessages.invalidBag)
-  }
-  return bag
-}
-
-// Calendar
-// -----------------------------------------------------------------------------
-
-export type CalendarSlot = CalendarProtocol | string
-
-export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
-  if (isObjectLike(calendarArg)) {
-    // look at other date-like objects
-    const { calendar } = (getSlots(calendarArg) || {}) as {
-      calendar?: CalendarSlot
-    }
-    if (calendar) {
-      return calendar
-    }
-
-    checkCalendarProtocol(calendarArg as CalendarProtocol)
-    return calendarArg as CalendarProtocol
-  }
-
-  return refineCalendarSlotString(calendarArg)
-}
-
-// bag
-// ---
-
-export function getCalendarSlotFromBag(bag: {
-  calendar?: CalendarArg
-}): CalendarSlot {
-  return extractCalendarSlotFromBag(bag) || isoCalendarId
-}
-
-export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }):
-  | CalendarSlot
-  | undefined {
-  const { calendar } = bag
-  if (calendar !== undefined) {
-    return refineCalendarSlot(calendar)
-  }
-}
-
-// TimeZone
-// -----------------------------------------------------------------------------
-
-export type TimeZoneSlot = TimeZoneProtocol | string
-
-export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
-  if (isObjectLike(arg)) {
-    const { timeZone } = (getSlots(arg) || {}) as { timeZone?: TimeZoneSlot }
-
-    if (timeZone) {
-      return timeZone // TimeZoneOps
-    }
-
-    checkTimeZoneProtocol(arg as TimeZoneProtocol)
-    return arg as TimeZoneProtocol
-  }
-  return refineTimeZoneSlotString(arg)
-}
-
-// best place?
-// -----------------------------------------------------------------------------
-
-export function refineCalendarSlotString(arg: string): string {
-  return resolveCalendarId(parseCalendarId(requireString(arg)))
-}
-
-export function refineTimeZoneSlotString(arg: string): string {
-  return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))
 }

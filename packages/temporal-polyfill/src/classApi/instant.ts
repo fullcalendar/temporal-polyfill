@@ -29,7 +29,7 @@ import {
 } from '../internal/slots'
 import { UnitName, nanoInMilli } from '../internal/units'
 import { NumSign, isObjectLike } from '../internal/utils'
-import { CalendarArg } from './calendar'
+import { CalendarArg, CalendarSlot, refineCalendarSlot } from './calendar'
 import {
   Duration,
   DurationArg,
@@ -39,9 +39,7 @@ import {
 import { prepInstantFormat } from './intlDateTimeFormat'
 import { epochGetters, neverValueOf } from './mixins'
 import { createSlotClass, getSlots } from './slotClass'
-import { CalendarSlot, refineCalendarSlot } from './slotClass'
-import { TimeZoneSlot, refineTimeZoneSlot } from './slotClass'
-import { TimeZoneArg } from './timeZone'
+import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOffsetOps } from './timeZoneOpsQuery'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 

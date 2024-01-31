@@ -20,12 +20,11 @@ import {
 } from '../internal/slots'
 import { Unit, unitNamesAsc } from '../internal/units'
 import { Callable, bindArgs } from '../internal/utils'
-import { CalendarProtocol } from './calendar'
+import { CalendarProtocol, CalendarSlot } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
 import { createPlainDate, getPlainDateSlots } from './plainDate'
 import { getPlainMonthDaySlots } from './plainMonthDay'
 import { getPlainYearMonthSlots } from './plainYearMonth'
-import { CalendarSlot } from './slotClass'
 
 // Compound Adapter Functions
 // -----------------------------------------------------------------------------

@@ -10,7 +10,7 @@ import {
   isoTimeFieldNamesAlpha,
 } from './isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
-import { bindArgs, excludePropsByName, pluckProps } from './utils'
+import { pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
@@ -131,14 +131,6 @@ export function createDurationSlots(
     ...pluckProps(durationFieldNamesAlpha, durationFields),
   }
 }
-
-// getISOFields
-// -----------------------------------------------------------------------------
-
-export const removeBranding = bindArgs(
-  excludePropsByName,
-  new Set(['branding']),
-)
 
 // -----------------------------------------------------------------------------
 
