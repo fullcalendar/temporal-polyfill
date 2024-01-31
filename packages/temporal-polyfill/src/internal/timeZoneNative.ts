@@ -51,7 +51,7 @@ export const queryNativeTimeZone = createLazyGenerator(
 export class FixedTimeZone implements NativeTimeZone {
   constructor(public offsetNano: number) {}
 
-  getOffsetNanosecondsFor(_epochNano: DayTimeNano): number {
+  getOffsetNanosecondsFor(): number {
     return this.offsetNano
   }
 
@@ -59,10 +59,7 @@ export class FixedTimeZone implements NativeTimeZone {
     return [isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)]
   }
 
-  getTransition(
-    _epochNano: DayTimeNano,
-    _direction: -1 | 1,
-  ): DayTimeNano | undefined {
+  getTransition(): DayTimeNano | undefined {
     return undefined // hopefully minifier will remove
   }
 }
