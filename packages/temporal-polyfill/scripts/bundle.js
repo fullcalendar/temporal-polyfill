@@ -184,6 +184,7 @@ async function buildConfigs(pkgDir, isDev) {
                 humanReadable: true,
                 mangleProps: true,
                 manglePropsExcept: temporalReservedWords,
+                preserveAnnotations: true,
               }),
           ],
         },
@@ -254,6 +255,7 @@ const terserNameCache = {}
 function buildTerserPlugin({
   humanReadable = false,
   mangleProps = false,
+  preserveAnnotations = false,
   manglePropsExcept,
 }) {
   return terserSimple({
@@ -280,7 +282,7 @@ function buildTerserPlugin({
       beautify: humanReadable,
       braces: humanReadable,
       indent_level: 2,
-      preserve_annotations: true, // like PURE annotations
+      preserve_annotations: preserveAnnotations, // like PURE annotations
     },
   })
 }
