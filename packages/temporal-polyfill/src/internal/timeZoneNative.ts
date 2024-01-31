@@ -74,20 +74,20 @@ interface IntlTimeZoneStore {
 }
 
 export class IntlTimeZone implements NativeTimeZone {
-  store: IntlTimeZoneStore
+  tzStore: IntlTimeZoneStore // NOTE: `store` is a reserved prop and won't be mangled
 
   constructor(format: Intl.DateTimeFormat) {
-    this.store = createIntlTimeZoneStore(createComputeOffsetSec(format))
+    this.tzStore = createIntlTimeZoneStore(createComputeOffsetSec(format))
   }
 
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number {
-    return this.store.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
+    return this.tzStore.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
   getPossibleInstantsFor(isoFields: IsoDateTimeFields): DayTimeNano[] {
     const [zonedEpochSec, subsecNano] = isoToEpochSec(isoFields)
 
-    return this.store.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
+    return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
       return checkEpochNanoInBounds(
         addDayTimeNanoAndNumber(
           numberToDayTimeNano(epochSec, nanoInSec),
@@ -105,7 +105,7 @@ export class IntlTimeZone implements NativeTimeZone {
     direction: -1 | 1,
   ): DayTimeNano | undefined {
     const [epochSec, subsecNano] = epochNanoToSecRemainder(epochNano)
-    const resEpochSec = this.store.getTransition(
+    const resEpochSec = this.tzStore.getTransition(
       epochSec + (direction > 0 || subsecNano ? 1 : 0),
       direction,
     )
