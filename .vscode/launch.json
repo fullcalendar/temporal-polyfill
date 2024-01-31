@@ -4,12 +4,29 @@
       "name": "Test262: Debug File",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}/packages/temporal-polyfill",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "test", "--no-timeout", "${file}"],
-      "cwd": "${workspaceFolder}/packages/temporal-polyfill",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true
+    },
+    {
+      "name": "Vitest: Debug File",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${fileDirname}",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "run",
+        "test:own",
+        "--test-timeout",
+        "3600000",
+        "${file}"
+      ],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "smartStep": true
     }
   ]
 }
