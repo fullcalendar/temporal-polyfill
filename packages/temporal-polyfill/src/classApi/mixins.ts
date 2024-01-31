@@ -197,5 +197,5 @@ export function createCalendarFromSlots({
 // for getISOFields
 export const removeBranding = bindArgs(
   excludePropsByName,
-  new Set(['branding']),
+  new Set([/*@__KEY__*/ 'branding']),
 )
