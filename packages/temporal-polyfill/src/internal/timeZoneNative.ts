@@ -23,7 +23,7 @@ import {
   minPossibleTransition,
   periodDur,
 } from './timeZoneConfig'
-import { getTimeZoneSpirit } from './timeZoneId'
+import { getTimeZoneEssence } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
@@ -38,7 +38,7 @@ export interface NativeTimeZone {
 
 export const queryNativeTimeZone = createLazyGenerator(
   (slotId: string): NativeTimeZone => {
-    const spirit = getTimeZoneSpirit(slotId)
+    const spirit = getTimeZoneEssence(slotId)
     return typeof spirit === 'object'
       ? new IntlTimeZone(spirit)
       : new FixedTimeZone(spirit || 0)
@@ -290,9 +290,10 @@ export const queryFormatForTimeZone = createLazyGenerator(
   createFormatForTimeZone,
 )
 
-function createFormatForTimeZone(timeZoneId: string): Intl.DateTimeFormat {
+// Case-agnostic
+function createFormatForTimeZone(id: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {
-    timeZone: timeZoneId,
+    timeZone: id,
     era: 'short',
     year: 'numeric',
     month: 'numeric',

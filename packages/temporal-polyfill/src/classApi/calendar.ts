@@ -49,7 +49,7 @@ import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { createSlotClass, getSlots } from './slotClass'
-import { createProtocolChecker } from './utils'
+import { createProtocolValidator } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type Calendar = any
@@ -185,11 +185,11 @@ const calendarMethods = {
 export const [Calendar] = createSlotClass(
   'Calendar',
   (id: string): CalendarClassSlots => {
-    id = resolveCalendarId(requireString(id))
-    const calendarNative = createNativeStandardOps(id)
+    const slotId = resolveCalendarId(requireString(id))
+    const calendarNative = createNativeStandardOps(slotId)
     return {
       branding: 'Calendar',
-      id,
+      id: slotId,
       native: calendarNative,
     }
   },
@@ -229,28 +229,21 @@ export function extractCalendarSlotFromBag(bag: { calendar?: CalendarArg }):
   }
 }
 
-export function refineCalendarSlot(calendarArg: CalendarArg): CalendarSlot {
-  if (isObjectLike(calendarArg)) {
-    // look at other date-like objects
-    const { calendar } = (getSlots(calendarArg) || {}) as {
-      calendar?: CalendarSlot
-    }
-    if (calendar) {
-      return calendar
-    }
-
-    checkCalendarProtocol(calendarArg as CalendarProtocol)
-    return calendarArg as CalendarProtocol
+export function refineCalendarSlot(arg: CalendarArg): CalendarSlot {
+  if (isObjectLike(arg)) {
+    return (
+      ((getSlots(arg) || {}) as { calendar?: CalendarSlot }).calendar ||
+      validateCalendarProtocol(arg)
+    )
   }
-
-  return refineCalendarSlotString(calendarArg)
+  return refineCalendarSlotString(arg)
 }
 
 function refineCalendarSlotString(arg: string): string {
   return resolveCalendarId(parseCalendarId(requireString(arg)))
 }
 
-const checkCalendarProtocol = createProtocolChecker(
+const validateCalendarProtocol = createProtocolValidator(
   // remove toString/toJSON/era/eraYear
   Object.keys(calendarMethods).slice(4),
 )

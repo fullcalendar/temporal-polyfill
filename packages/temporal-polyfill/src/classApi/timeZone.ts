@@ -32,7 +32,7 @@ import {
   simpleTimeZoneAdapters,
   timeZoneAdapters,
 } from './timeZoneAdapter'
-import { createProtocolChecker } from './utils'
+import { createProtocolValidator } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type TimeZone = any
@@ -137,8 +137,6 @@ export const [TimeZone, createTimeZone] = createSlotClass(
       return getImplTransition(-1, native, instantArg)
     },
     equals(_slots: TimeZoneClassSlots, otherArg: TimeZoneArg): boolean {
-      // WEIRD: pass-in `this` as a CalendarProtocol in case subclasses override `id` getter
-      // HACK: minification force's isTimeZoneSlotsEqual to 1/0. Ensure boolean.
       return !!isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
     },
   },
@@ -174,23 +172,19 @@ export type TimeZoneSlot = TimeZoneProtocol | string
 
 export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
   if (isObjectLike(arg)) {
-    const { timeZone } = (getSlots(arg) || {}) as { timeZone?: TimeZoneSlot }
-
-    if (timeZone) {
-      return timeZone // TimeZoneOps
-    }
-
-    checkTimeZoneProtocol(arg as TimeZoneProtocol)
-    return arg as TimeZoneProtocol
+    return (
+      ((getSlots(arg) || {}) as { timeZone?: TimeZoneSlot }).timeZone ||
+      validateTimeZoneProtocol(arg)
+    )
   }
   return refineTimeZoneSlotString(arg)
 }
 
-export function refineTimeZoneSlotString(arg: string): string {
+function refineTimeZoneSlotString(arg: string): string {
   return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))
 }
 
-export const checkTimeZoneProtocol = createProtocolChecker(
+const validateTimeZoneProtocol = createProtocolValidator(
   Object.keys(timeZoneAdapters),
 )
 

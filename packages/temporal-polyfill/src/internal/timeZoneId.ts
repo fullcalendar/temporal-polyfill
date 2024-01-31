@@ -5,25 +5,25 @@ import { queryFormatForTimeZone } from './timeZoneNative'
 import { capitalize } from './utils'
 
 export function resolveTimeZoneId(id: string): string {
-  const spirit = getTimeZoneSpirit(id)
-  return typeof spirit === 'number'
-    ? formatOffsetNano(spirit)
-    : spirit
+  const essence = getTimeZoneEssence(id)
+  return typeof essence === 'number'
+    ? formatOffsetNano(essence)
+    : essence
       ? normalizeNamedTimeZoneId(id)
       : utcTimeZoneId
 }
 
-export function getTimeZoneComparator(id: string): string | number {
-  const spirit = getTimeZoneSpirit(id)
-  return typeof spirit === 'number'
-    ? spirit
-    : spirit
-      ? spirit.resolvedOptions().timeZone
+export function getTimeZoneAtomic(id: string): string | number {
+  const essence = getTimeZoneEssence(id)
+  return typeof essence === 'number'
+    ? essence
+    : essence
+      ? essence.resolvedOptions().timeZone
       : utcTimeZoneId
 }
 
 // returning undefined means utcTimeZoneId
-export function getTimeZoneSpirit(
+export function getTimeZoneEssence(
   id: string,
 ): number | Intl.DateTimeFormat | undefined {
   const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
@@ -35,11 +35,10 @@ export function getTimeZoneSpirit(
   }
 }
 
-function normalizeNamedTimeZoneId(s: string): string {
-  const lower = s.toLowerCase()
-  const parts = lower.split('/')
-
-  return parts
+function normalizeNamedTimeZoneId(id: string): string {
+  return id
+    .toLowerCase()
+    .split('/')
     .map((part, partI) => {
       // abbreviation-like (big parts, like 'ACT' in 'Australia/ACT')
       // OR numeric-offset-like

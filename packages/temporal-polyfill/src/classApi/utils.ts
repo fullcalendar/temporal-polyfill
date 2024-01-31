@@ -5,13 +5,14 @@ import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
 import { getSlots } from './slotClass'
 
 // TODO: return type
-export function createProtocolChecker(propNames: string[]) {
+export function createProtocolValidator(propNames: string[]): any {
   propNames = propNames.concat('id').sort()
 
   return (obj: any) => {
     if (!hasAllPropsByName(obj, propNames)) {
       throw new TypeError(errorMessages.invalidProtocol)
     }
+    return obj
   }
 }
 

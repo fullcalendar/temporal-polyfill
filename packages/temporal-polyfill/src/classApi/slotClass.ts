@@ -30,8 +30,8 @@ export function createSlotClass(
   }
 
   Object.defineProperties(Class.prototype, {
-    ...createGetterDescriptors(mapProps(curryMethod as any, getters) as any), // !!!
-    ...createPropDescriptors(mapProps(curryMethod as any, methods)),
+    ...createGetterDescriptors(mapProps(bindMethod as any, getters) as any), // !!!
+    ...createPropDescriptors(mapProps(bindMethod as any, methods)),
     ...createStringTagDescriptors('Temporal.' + branding),
   })
 
@@ -40,33 +40,25 @@ export function createSlotClass(
     ...createNameDescriptors(branding),
   })
 
-  function curryMethod(method: any, methodName: string) {
+  function bindMethod(method: any, methodName: string) {
     return Object.defineProperties(function (this: any, ...args: any[]) {
-      const slots = getSlots(this)
-      if (!slots || slots.branding !== branding) {
-        throw new TypeError(errorMessages.invalidCallingContext)
-      }
-      return method.call(this, slots, ...args)
+      return method.call(this, getSpecificSlots(this), ...args)
     }, createNameDescriptors(methodName))
   }
 
-  return [
-    Class,
+  function getSpecificSlots(obj: any): any {
+    const slots = getSlots(obj)
+    if (!slots || slots.branding !== branding) {
+      throw new TypeError(errorMessages.invalidCallingContext)
+    }
+    return slots
+  }
 
-    // createViaSlots
-    (slots: BrandingSlots) => {
-      const instance = Object.create(Class.prototype)
-      setSlots(instance, slots)
-      return instance
-    },
+  function createViaSlots(slots: BrandingSlots) {
+    const instance = Object.create(Class.prototype)
+    setSlots(instance, slots)
+    return instance
+  }
 
-    // getSpecificSlots
-    (obj: any) => {
-      const slots = getSlots(obj)
-      if (!slots || slots.branding !== branding) {
-        throw new TypeError(errorMessages.invalidCallingContext)
-      }
-      return slots
-    },
-  ]
+  return [Class, createViaSlots, getSpecificSlots]
 }

@@ -20,7 +20,7 @@ export function resolveCalendarId(calendarId: string): string {
 }
 
 function normalizeCalendarId(calendarId: string): string {
-  calendarId = calendarId.toLocaleLowerCase()
+  calendarId = calendarId.toLowerCase()
 
   if (calendarId === 'islamicc') {
     calendarId = 'islamic-civil'
