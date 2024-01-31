@@ -17,6 +17,7 @@
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "lefthook install",
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
     "lint": "pnpm -r run lint",
     "build": "pnpm -r run build",
@@ -24,7 +25,8 @@
     "clean": "pnpm -r run clean"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.5.1"
+    "@biomejs/biome": "1.5.1",
+    "lefthook": "^1.6.1"
   },
   "devDependenciesNotes": {
     "@biomejs/biome": [

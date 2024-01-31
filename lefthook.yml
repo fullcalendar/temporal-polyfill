@@ -1,0 +1,4 @@
+pre-push:
+  commands:
+    lint:
+      run: pnpm run lint
