@@ -18,6 +18,9 @@
       "correctness": {
         "noUnusedVariables": "error"
       },
+      "performance": {
+        "noDelete": "off"
+      },
       "suspicious": {
         "noAssignInExpressions": "off",
         "noConstEnum": "off",

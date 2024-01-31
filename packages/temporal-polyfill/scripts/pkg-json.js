@@ -61,11 +61,11 @@ async function writePkgJson(pkgDir, isDev) {
   distPkgJson.exports = distExportMap
   distPkgJson.sideEffects = sideEffectsList.length ? sideEffectsList : false
 
-  distPkgJson.private = undefined
-  distPkgJson.scripts = undefined
-  distPkgJson.buildConfig = undefined
-  distPkgJson.publishConfig = undefined
-  distPkgJson.devDependencies = undefined
+  delete distPkgJson.private
+  delete distPkgJson.scripts
+  delete distPkgJson.buildConfig
+  delete distPkgJson.publishConfig
+  delete distPkgJson.devDependencies
 
   await writeFile(distPkgJsonPath, JSON.stringify(distPkgJson, undefined, 2))
 }
