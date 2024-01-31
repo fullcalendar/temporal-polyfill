@@ -40,8 +40,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # - name: Lint
-      #   run: pnpm run lint
+      - name: Lint
+        # Only for the first Node version
+        if: matrix.node == '14.21.3'
+        run: pnpm run lint
 
       - name: Build
         run: pnpm run build
