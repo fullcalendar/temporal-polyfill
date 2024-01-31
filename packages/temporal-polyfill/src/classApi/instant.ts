@@ -10,7 +10,7 @@ import {
 } from '../internal/convert'
 import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffInstants } from '../internal/diff'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
 import { parseInstant } from '../internal/isoParse'
 import { moveInstant } from '../internal/move'

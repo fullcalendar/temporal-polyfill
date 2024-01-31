@@ -15,10 +15,9 @@ import {
   createPlainDateTimeSlots,
   createPlainTimeSlots,
   createZonedDateTimeSlots,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 
 export const timeZoneId = getCurrentTimeZoneId
 

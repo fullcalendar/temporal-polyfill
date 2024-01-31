@@ -17,7 +17,7 @@ import {
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
 import { DateBag, DateFields } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import {
   computeIsoDayOfWeek,
@@ -36,13 +36,10 @@ import {
   PlainTimeSlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
-  getCalendarIdFromBag,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumSign, bindArgs, identityFunc } from '../internal/utils'
-import { prepCachedPlainDateFormat } from './intlFormatCached'
+import { prepCachedPlainDateFormat } from './intlFormatCache'
 import {
   computeDateBasics,
   computeDateFields,
@@ -51,6 +48,9 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
+  getCalendarIdFromBag,
+  refineCalendarIdString,
+  refineTimeZoneIdString,
 } from './utils'
 
 // TODO: do Readonly<> everywhere?

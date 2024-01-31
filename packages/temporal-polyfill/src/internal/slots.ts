@@ -1,9 +1,6 @@
-import { isoCalendarId } from './calendarConfig'
-import { resolveCalendarId } from './calendarNativeQuery'
 import { requireString } from './cast'
 import { DayTimeNano, dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
-import * as errorMessages from './errorMessages'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -12,9 +9,7 @@ import {
   isoDateTimeFieldNamesAlpha,
   isoTimeFieldNamesAlpha,
 } from './isoFields'
-import { parseCalendarId, parseTimeZoneId } from './isoParse'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
-import { getTimeZoneComparator, resolveTimeZoneId } from './timeZoneNative'
 import { bindArgs, excludePropsByName, pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
@@ -188,7 +183,7 @@ export type InstantSlots = {
   branding: typeof InstantBranding
 }
 
-// Epoch Slot Getters (best place for this?)
+// Epoch Slot Getters
 // -----------------------------------------------------------------------------
 
 export function getEpochSeconds(slots: EpochSlots) {
@@ -207,105 +202,6 @@ export function getEpochNanoseconds(slots: EpochSlots) {
   return dayTimeNanoToBigInt(slots.epochNanoseconds)
 }
 
-// Calendar
-// -----------------------------------------------------------------------------
-
-export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
-  if (!isIdLikeEqual(a, b)) {
-    throw new RangeError(errorMessages.mismatchingCalendars)
-  }
-
-  return a
-}
-
-export function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
-  if (a === b) {
-    return a
-  }
-
-  const aId = getId(a)
-  const bId = getId(b)
-
-  if (aId === bId || aId === isoCalendarId) {
-    return b
-  }
-  if (bId === isoCalendarId) {
-    return a
-  }
-
-  throw new RangeError(errorMessages.mismatchingCalendars)
-}
-
-// NOTE: only used by funcApi (circ dep?)
-export function getCalendarIdFromBag(bag: { calendar?: string }): string {
-  return extractCalendarIdFromBag(bag) || isoCalendarId
-}
-
-// NOTE: only used by funcApi (circ dep?)
-export function extractCalendarIdFromBag(bag: { calendar?: string }):
-  | string
-  | undefined {
-  const { calendar } = bag
-  if (calendar !== undefined) {
-    return refineCalendarIdString(calendar)
-  }
-}
-
-// NOTE: only used by funcApi (circ dep?)
-export function refineCalendarIdString(id: string): string {
-  return resolveCalendarId(requireString(id))
-}
-
-// NOTE: only used by classApi (circ dep?)
-export function refineCalendarSlotString(arg: string): string {
-  return resolveCalendarId(parseCalendarId(requireString(arg)))
-}
-
-// TimeZone
-// -----------------------------------------------------------------------------
-
-export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
-  if (!isTimeZoneSlotsEqual(a, b)) {
-    throw new RangeError(errorMessages.mismatchingTimeZones)
-  }
-
-  return a
-}
-
-/*
-HACK: Callers should !! the result because minification forces literal true/false to 1/0
-*/
-export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
-  if (a === b) {
-    return true
-  }
-
-  const aId = getId(a)
-  const bId = getId(b)
-
-  if (aId === bId) {
-    return true
-  }
-
-  // If either is an unresolvable, return false
-  // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
-  try {
-    return getTimeZoneComparator(aId) === getTimeZoneComparator(bId)
-  } catch {}
-
-  return false
-}
-
-// NOTE: only used by funcApi (circ dep?)
-export function refineTimeZoneIdString(id: string): string {
-  return resolveTimeZoneId(requireString(id))
-}
-
-// TODO: only used by classApi (circ dep?)
-export function refineTimeZoneSlotString(arg: string): string {
-  return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))
-}
-
 // ID-like
 // -----------------------------------------------------------------------------
 
@@ -315,12 +211,6 @@ export function getId(idLike: IdLike): string {
   return typeof idLike === 'string' ? idLike : requireString(idLike.id)
 }
 
-export function isIdLikeEqual(
-  calendarSlot0: IdLike,
-  calendarSlot1: IdLike,
-): boolean {
-  return (
-    calendarSlot0 === calendarSlot1 ||
-    getId(calendarSlot0) === getId(calendarSlot1)
-  )
+export function isIdLikeEqual(idLike0: IdLike, idLike1: IdLike): boolean {
+  return idLike0 === idLike1 || getId(idLike0) === getId(idLike1)
 }

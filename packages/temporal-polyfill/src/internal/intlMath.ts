@@ -1,11 +1,11 @@
 import { eraOriginsByCalendarId, eraRemaps } from './calendarConfig'
+import { computeCalendarIdBase } from './calendarId'
 import {
   DateParts,
   EraParts,
   MonthCodeParts,
   NativeCalendar,
   YearMonthParts,
-  computeCalendarIdBase,
   eraYearToYear,
   getCalendarLeapMonthMeta,
   monthCodeNumberToMonth,
@@ -16,7 +16,7 @@ import {
   OrigDateTimeFormat,
   hashIntlFormatParts,
   standardLocaleId,
-} from './intlFormat'
+} from './intlFormatUtils'
 import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
 import {
   isoEpochFirstLeapYear,
@@ -29,7 +29,7 @@ import {
   isoArgsToEpochMilli,
   isoToEpochMilli,
 } from './timeMath'
-import { utcTimeZoneId } from './timeZoneNative'
+import { utcTimeZoneId } from './timeZoneConfig'
 import { milliInDay } from './units'
 import {
   compareNumbers,

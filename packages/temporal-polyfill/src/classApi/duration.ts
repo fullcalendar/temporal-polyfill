@@ -17,7 +17,7 @@ import {
   roundDuration,
 } from '../internal/durationMath'
 import { DurationBag } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseZonedOrPlainDateTime } from '../internal/isoParse'
 import {

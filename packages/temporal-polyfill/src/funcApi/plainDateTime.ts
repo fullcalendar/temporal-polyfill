@@ -23,7 +23,7 @@ import {
 } from '../internal/convert'
 import { diffPlainDateTimes } from '../internal/diff'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import {
   computeIsoDayOfWeek,
@@ -48,12 +48,10 @@ import {
   PlainYearMonthSlots,
   createPlainDateSlots,
   createPlainTimeSlots,
-  getCalendarIdFromBag,
-  refineCalendarIdString,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumSign, bindArgs } from '../internal/utils'
-import { prepCachedPlainDateTimeFormat } from './intlFormatCached'
+import { prepCachedPlainDateTimeFormat } from './intlFormatCache'
 import {
   computeDateBasics,
   computeDateFields,
@@ -62,6 +60,8 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
+  getCalendarIdFromBag,
+  refineCalendarIdString,
 } from './utils'
 
 export const create = bindArgs(

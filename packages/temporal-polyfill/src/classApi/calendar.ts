@@ -8,11 +8,9 @@ import {
   getRequiredMonthDayFields,
   getRequiredYearMonthFields,
 } from '../internal/calendarConfig'
+import { resolveCalendarId } from '../internal/calendarId'
 import { NativeStandardOps } from '../internal/calendarNative'
-import {
-  createNativeStandardOps,
-  resolveCalendarId,
-} from '../internal/calendarNativeQuery'
+import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { requireNonNullish, requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import {

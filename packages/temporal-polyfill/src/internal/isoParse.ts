@@ -1,9 +1,9 @@
 import { isoCalendarId } from './calendarConfig'
+import { resolveCalendarId } from './calendarId'
 import {
   NativeMonthDayParseOps,
   NativeYearMonthParseOps,
 } from './calendarNative'
-import { resolveCalendarId } from './calendarNativeQuery'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { negateDurationFields } from './durationMath'
@@ -46,12 +46,9 @@ import {
   isoToEpochNanoWithOffset,
   nanoToIsoTimeAndDay,
 } from './timeMath'
-import {
-  FixedTimeZone,
-  queryNativeTimeZone,
-  resolveTimeZoneId,
-  utcTimeZoneId,
-} from './timeZoneNative'
+import { utcTimeZoneId } from './timeZoneConfig'
+import { resolveTimeZoneId } from './timeZoneId'
+import { FixedTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
 import {
   TimeUnit,
@@ -331,18 +328,18 @@ function finalizeZonedDateTime(
 function finalizeDateTime(
   organized: DateTimeLikeOrganized,
 ): IsoDateTimeFields & { calendar: string } {
-  return realizeCalendarSlot(
+  return resolveSlotsCalendar(
     checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)),
   )
 }
 
 function finalizeDate(organized: DateOrganized): DateSlots<string> {
-  return realizeCalendarSlot(
+  return resolveSlotsCalendar(
     checkIsoDateInBounds(checkIsoDateFields(organized)),
   )
 }
 
-function realizeCalendarSlot<T extends { calendar: string }>(organized: T): T {
+function resolveSlotsCalendar<T extends { calendar: string }>(organized: T): T {
   return {
     ...organized,
     calendar: resolveCalendarId(organized.calendar),

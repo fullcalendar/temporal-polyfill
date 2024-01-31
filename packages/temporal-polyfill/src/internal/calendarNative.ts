@@ -10,6 +10,7 @@ import {
   isoCalendarId,
   leapMonthMetas,
 } from './calendarConfig'
+import { computeCalendarIdBase } from './calendarId'
 import {
   DateRefineOps,
   DayOp,
@@ -427,8 +428,4 @@ export function getCalendarLeapMonthMeta(
 
 function getCalendarIdBase(native: NativeCalendar): string {
   return computeCalendarIdBase(native.id || isoCalendarId)
-}
-
-export function computeCalendarIdBase(calendarId: string): string {
-  return calendarId.split('-')[0]
 }

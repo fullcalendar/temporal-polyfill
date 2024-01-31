@@ -1,3 +1,5 @@
+import { isoCalendarId } from '../internal/calendarConfig'
+import { resolveCalendarId } from '../internal/calendarId'
 import { formatMonthCode } from '../internal/calendarNative'
 import {
   createNativeDayOfYearOps,
@@ -7,6 +9,7 @@ import {
   createNativeMonthsInYearOps,
   createNativePartOps,
 } from '../internal/calendarNativeQuery'
+import { requireString } from '../internal/cast'
 import {
   DateBasics,
   DateFields,
@@ -14,6 +17,34 @@ import {
   YearMonthFields,
 } from '../internal/fields'
 import { DateSlots } from '../internal/slots'
+import { resolveTimeZoneId } from '../internal/timeZoneId'
+
+// Calendar / TimeZone ID
+// -----------------------------------------------------------------------------
+
+export function getCalendarIdFromBag(bag: { calendar?: string }): string {
+  return extractCalendarIdFromBag(bag) || isoCalendarId
+}
+
+export function extractCalendarIdFromBag(bag: { calendar?: string }):
+  | string
+  | undefined {
+  const { calendar } = bag
+  if (calendar !== undefined) {
+    return refineCalendarIdString(calendar)
+  }
+}
+
+export function refineCalendarIdString(id: string): string {
+  return resolveCalendarId(requireString(id))
+}
+
+export function refineTimeZoneIdString(id: string): string {
+  return resolveTimeZoneId(requireString(id))
+}
+
+// Fields
+// -----------------------------------------------------------------------------
 
 export function computeDateBasics(slots: DateSlots<string>): DateBasics {
   const calendarOps = createNativePartOps(slots.calendar)
@@ -50,6 +81,9 @@ export function computeMonthDayFields(
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { monthCode, month, day }
 }
+
+// Stats
+// -----------------------------------------------------------------------------
 
 export function computeInLeapYear(slots: DateSlots<string>): boolean {
   const calendarOps = createNativeInLeapYearOps(slots.calendar)

@@ -1,11 +1,11 @@
 import { isoCalendarId } from '../internal/calendarConfig'
+import { resolveCalendarId } from '../internal/calendarId'
+import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import { IsoDateFields, IsoTimeFields } from '../internal/isoFields'
-import {
-  BrandingSlots,
-  refineCalendarSlotString,
-  refineTimeZoneSlotString,
-} from '../internal/slots'
+import { parseCalendarId, parseTimeZoneId } from '../internal/isoParse'
+import { BrandingSlots } from '../internal/slots'
+import { resolveTimeZoneId } from '../internal/timeZoneId'
 import {
   createGetterDescriptors,
   createNameDescriptors,
@@ -21,9 +21,6 @@ import {
 } from './calendar'
 import { TimeZoneArg } from './timeZone'
 import { TimeZoneProtocol, checkTimeZoneProtocol } from './timeZoneProtocol'
-
-// Lookup
-// -----------------------------------------------------------------------------
 
 const slotsMap = new WeakMap<any, BrandingSlots>()
 
@@ -91,7 +88,13 @@ export function createSlotClass(
   ]
 }
 
-// Reject
+// getISOFields
+// -----------------------------------------------------------------------------
+
+export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
+export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
+
+// Utils
 // -----------------------------------------------------------------------------
 
 export function rejectInvalidBag<B>(bag: B): B {
@@ -104,12 +107,6 @@ export function rejectInvalidBag<B>(bag: B): B {
   }
   return bag
 }
-
-// getISOFields
-// -----------------------------------------------------------------------------
-
-export type PublicDateSlots = IsoDateFields & { calendar: CalendarSlot }
-export type PublicDateTimeSlots = PublicDateSlots & IsoTimeFields
 
 // Calendar
 // -----------------------------------------------------------------------------
@@ -168,4 +165,15 @@ export function refineTimeZoneSlot(arg: TimeZoneArg): TimeZoneSlot {
     return arg as TimeZoneProtocol
   }
   return refineTimeZoneSlotString(arg)
+}
+
+// best place?
+// -----------------------------------------------------------------------------
+
+export function refineCalendarSlotString(arg: string): string {
+  return resolveCalendarId(parseCalendarId(requireString(arg)))
+}
+
+export function refineTimeZoneSlotString(arg: string): string {
+  return resolveTimeZoneId(parseTimeZoneId(requireString(arg)))
 }

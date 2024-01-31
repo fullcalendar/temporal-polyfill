@@ -45,7 +45,7 @@ import {
   getId,
 } from './slots'
 import { epochNanoToIso } from './timeMath'
-import { utcTimeZoneId } from './timeZoneNative'
+import { utcTimeZoneId } from './timeZoneConfig'
 import { TimeZoneOffsetOps } from './timeZoneOps'
 import {
   Unit,

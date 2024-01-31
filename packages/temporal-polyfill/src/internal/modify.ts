@@ -1,3 +1,5 @@
+import { isoCalendarId } from './calendarConfig'
+import * as errorMessages from './errorMessages'
 import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { OffsetDisambig } from './options'
 import {
@@ -7,7 +9,7 @@ import {
   ZonedDateTimeSlots,
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
-  getPreferredCalendarSlot,
+  getId,
 } from './slots'
 import {
   TimeZoneOps,
@@ -116,4 +118,24 @@ export function slotsWithTimeZone<T, S extends { timeZone: T }>(
   timeZoneSlot: T,
 ): S {
   return { ...slots, timeZone: timeZoneSlot }
+}
+
+// -----------------------------------------------------------------------------
+
+function getPreferredCalendarSlot<C extends IdLike>(a: C, b: C): C {
+  if (a === b) {
+    return a
+  }
+
+  const aId = getId(a)
+  const bId = getId(b)
+
+  if (aId === bId || aId === isoCalendarId) {
+    return b
+  }
+  if (bId === isoCalendarId) {
+    return a
+  }
+
+  throw new RangeError(errorMessages.mismatchingCalendars)
 }

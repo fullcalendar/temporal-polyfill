@@ -14,7 +14,7 @@ import {
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
 import { DateBag, DateFields } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { parsePlainDate } from '../internal/isoParse'
 import { slotsWithCalendar } from '../internal/modify'

@@ -7,11 +7,9 @@ import {
   OrigDateTimeFormat,
   hashIntlFormatParts,
   standardLocaleId,
-} from './intlFormat'
+} from './intlFormatUtils'
 import { parseIntlPartsYear } from './intlMath'
 import { IsoDateTimeFields } from './isoFields'
-import { formatOffsetNano } from './isoFormat'
-import { parseOffsetNanoMaybe } from './isoParse'
 import {
   checkEpochNanoInBounds,
   epochNanoToSec,
@@ -20,27 +18,15 @@ import {
   isoToEpochNanoWithOffset,
   isoToEpochSec,
 } from './timeMath'
-import { milliInSec, nanoInSec, secInDay } from './units'
 import {
-  capitalize,
-  clampNumber,
-  compareNumbers,
-  createLazyGenerator,
-} from './utils'
+  maxPossibleTransition,
+  minPossibleTransition,
+  periodDur,
+} from './timeZoneConfig'
+import { getTimeZoneSpirit } from './timeZoneId'
+import { milliInSec, nanoInSec, secInDay } from './units'
+import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
 
-export const utcTimeZoneId = 'UTC'
-
-const periodDur = secInDay * 60
-const minPossibleTransition = isoArgsToEpochSec(1847)
-const maxPossibleTransition = isoArgsToEpochSec(
-  /*@__PURE__*/ getCurrentYearPlus10(),
-)
-
-function getCurrentYearPlus10() {
-  return new Date().getUTCFullYear() + 10
-}
-
-// TODO: rename to NativeTimeZoneOps?
 export interface NativeTimeZone {
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number
   getPossibleInstantsFor(isoFields: IsoDateTimeFields): DayTimeNano[]
@@ -48,27 +34,6 @@ export interface NativeTimeZone {
     epochNano: DayTimeNano,
     direction: -1 | 1,
   ): DayTimeNano | undefined
-}
-
-// Query
-// -----------------------------------------------------------------------------
-
-export function resolveTimeZoneId(id: string): string {
-  const spirit = getTimeZoneSpirit(id)
-  return typeof spirit === 'number'
-    ? formatOffsetNano(spirit)
-    : spirit
-      ? normalizeNamedTimeZoneId(id)
-      : utcTimeZoneId
-}
-
-export function getTimeZoneComparator(slotId: string): string | number {
-  const spirit = getTimeZoneSpirit(slotId)
-  return typeof spirit === 'number'
-    ? spirit
-    : spirit
-      ? spirit.resolvedOptions().timeZone
-      : utcTimeZoneId
 }
 
 export const queryNativeTimeZone = createLazyGenerator(
@@ -79,55 +44,6 @@ export const queryNativeTimeZone = createLazyGenerator(
       : new FixedTimeZone(spirit || 0)
   },
 )
-
-function getTimeZoneSpirit(
-  id: string, // id or slotId
-): number | Intl.DateTimeFormat | undefined {
-  // undefined means utcTimeZoneId
-  const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
-  if (offsetNano !== undefined) {
-    return offsetNano
-  }
-  if (id.toUpperCase() !== utcTimeZoneId) {
-    return queryFormatForTimeZone(id) // case-agnostic
-  }
-}
-
-function normalizeNamedTimeZoneId(s: string): string {
-  const lower = s.toLowerCase()
-  const parts = lower.split('/')
-
-  return parts
-    .map((part, partI) => {
-      // abbreviation-like (big parts, like 'ACT' in 'Australia/ACT')
-      // OR numeric-offset-like
-      // OR Pacific/YAP
-      if ((part.length <= 3 || part.match(/\d/)) && !part.match(/etc|yap/)) {
-        return part.toUpperCase()
-      }
-
-      return part.replace(/baja|dumont|[a-z]+/g, (a, i) => {
-        // abbreviation-like (small parts)
-        // - starts with 1-or-2-letters?
-        // - Knox_IN, NZ-CHAT
-        if ((a.length <= 2 && !partI) || a === 'in' || a === 'chat') {
-          return a.toUpperCase()
-        }
-
-        // word-like
-        if (a.length > 2 || !i) {
-          return capitalize(a).replace(
-            /island|noronha|murdo|rivadavia|urville/,
-            capitalize,
-          )
-        }
-
-        // lowercase (au/of/es)
-        return a
-      })
-    })
-    .join('/')
-}
 
 // Fixed
 // -----------------------------------------------------------------------------
@@ -373,7 +289,9 @@ function createComputeOffsetSec(
   }
 }
 
-const queryFormatForTimeZone = createLazyGenerator(createFormatForTimeZone)
+export const queryFormatForTimeZone = createLazyGenerator(
+  createFormatForTimeZone,
+)
 
 function createFormatForTimeZone(timeZoneId: string): Intl.DateTimeFormat {
   return new OrigDateTimeFormat(standardLocaleId, {

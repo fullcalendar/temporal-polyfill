@@ -15,7 +15,7 @@ import {
 } from '../internal/convert'
 import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { parseZonedDateTime } from '../internal/isoParse'
 import {

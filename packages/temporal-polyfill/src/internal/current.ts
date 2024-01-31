@@ -1,5 +1,5 @@
 import { DayTimeNano } from './dayTimeNano'
-import { OrigDateTimeFormat } from './intlFormat'
+import { OrigDateTimeFormat } from './intlFormatUtils'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAsc } from './isoFields'
 import { epochMilliToNano } from './timeMath'
 import { TimeZoneOffsetOps, zonedEpochNanoToIso } from './timeZoneOps'

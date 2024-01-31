@@ -1,9 +1,8 @@
 import {
   BasicZonedDateTimeSlots,
   FormatQuerier,
-  LocalesArg,
   OptionsTransformer,
-  createFormat,
+  createFormatForPrep,
   createFormatPrepper,
   getCommonTimeZoneId,
   instantConfig,
@@ -13,7 +12,8 @@ import {
   plainTimeConfig,
   plainYearMonthConfig,
   zonedDateTimeConfig,
-} from '../internal/intlFormat'
+} from '../internal/intlFormatPrep'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { createLazyGenerator } from '../internal/utils'
 
 function createFormatCache<S>(
@@ -35,7 +35,7 @@ function createFormatCache<S>(
 
         let format = map.get(key)
         if (!format) {
-          format = createFormat(
+          format = createFormatForPrep(
             locales,
             options,
             transformOptions,

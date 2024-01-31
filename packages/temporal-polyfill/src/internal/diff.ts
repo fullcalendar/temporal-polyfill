@@ -1,5 +1,6 @@
 import { NativeDiffOps } from './calendarNative'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
+import { isTimeZoneSlotsEqual } from './compare'
 import {
   DayTimeNano,
   compareDayTimeNanos,
@@ -45,8 +46,7 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
   createDurationSlots,
-  getCommonCalendarSlot,
-  getCommonTimeZoneSlot,
+  isIdLikeEqual,
 } from './slots'
 import {
   isoTimeFieldsToNano,
@@ -729,4 +729,22 @@ export function computeIntlMonthsInYearSpan(
   }
 
   return months
+}
+
+// -----------------------------------------------------------------------------
+
+function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
+  if (!isIdLikeEqual(a, b)) {
+    throw new RangeError(errorMessages.mismatchingCalendars)
+  }
+
+  return a
+}
+
+function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
+  if (!isTimeZoneSlotsEqual(a, b)) {
+    throw new RangeError(errorMessages.mismatchingTimeZones)
+  }
+
+  return a
 }

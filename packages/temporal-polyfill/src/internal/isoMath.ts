@@ -7,7 +7,7 @@ import {
   YearMonthParts,
 } from './calendarNative'
 import { diffEpochMilliByDay } from './diff'
-import { hashIntlFormatParts } from './intlFormat'
+import { hashIntlFormatParts } from './intlFormatUtils'
 import { parseIntlYear, queryFormatForCalendar } from './intlMath'
 import {
   IsoDateFields,

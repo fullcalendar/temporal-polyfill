@@ -1,4 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
+import { isTimeZoneSlotsEqual } from '../internal/compare'
 import { DayTimeNano } from '../internal/dayTimeNano'
 import { formatOffsetNano } from '../internal/isoFormat'
 import {
@@ -9,14 +10,10 @@ import {
   BrandingSlots,
   createInstantSlots,
   createPlainDateTimeSlots,
-  isTimeZoneSlotsEqual,
 } from '../internal/slots'
 import { epochNanoToIso } from '../internal/timeMath'
-import {
-  NativeTimeZone,
-  queryNativeTimeZone,
-  resolveTimeZoneId,
-} from '../internal/timeZoneNative'
+import { resolveTimeZoneId } from '../internal/timeZoneId'
+import { NativeTimeZone, queryNativeTimeZone } from '../internal/timeZoneNative'
 import { getSingleInstantFor } from '../internal/timeZoneOps'
 import { CalendarArg } from './calendar'
 import { Instant, InstantArg, createInstant, toInstantSlots } from './instant'

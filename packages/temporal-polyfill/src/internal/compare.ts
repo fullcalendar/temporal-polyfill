@@ -20,10 +20,11 @@ import {
   PlainTimeSlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
+  getId,
   isIdLikeEqual,
-  isTimeZoneSlotsEqual,
 } from './slots'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
+import { getTimeZoneComparator } from './timeZoneId'
 import { TimeZoneOps } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano } from './units'
 import { NumSign, allFieldsEqual, compareNumbers } from './utils'
@@ -202,4 +203,31 @@ export function plainTimesEqual(
   plainTimeSlots1: PlainTimeSlots,
 ): boolean {
   return !compareIsoTimeFields(plainTimeSlots0, plainTimeSlots1)
+}
+
+// TimeZone
+// -----------------------------------------------------------------------------
+
+/*
+HACK: Callers should !! the result because minification forces literal true/false to 1/0
+*/
+export function isTimeZoneSlotsEqual(a: IdLike, b: IdLike): boolean {
+  if (a === b) {
+    return true
+  }
+
+  const aId = getId(a)
+  const bId = getId(b)
+
+  if (aId === bId) {
+    return true
+  }
+
+  // If either is an unresolvable, return false
+  // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
+  try {
+    return getTimeZoneComparator(aId) === getTimeZoneComparator(bId)
+  } catch {}
+
+  return false
 }

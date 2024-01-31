@@ -1,6 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
+import { LocalesArg, OrigDateTimeFormat } from './intlFormatUtils'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -13,9 +14,6 @@ import { epochNanoToMilli } from './timeMath'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { getSingleInstantFor } from './timeZoneOps'
 import { excludePropsByName, hasAnyPropsByName } from './utils'
-
-export type LocalesArg = string | string[]
-export const OrigDateTimeFormat = Intl.DateTimeFormat
 
 /*
 RULES:
@@ -290,7 +288,7 @@ export type FormatQuerier<S> = (
 
 export function createFormatPrepper<S>(
   config: ClassFormatConfig<S>,
-  queryFormat: FormatQuerier<S> = createFormat,
+  queryFormat: FormatQuerier<S> = createFormatForPrep,
 ): FormatPrepper<S> {
   const [transformOptions] = config
 
@@ -311,8 +309,7 @@ export function createFormatPrepper<S>(
   }
 }
 
-export function createFormat<S>(
-  // TODO: better name b/c public
+export function createFormatForPrep<S>(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer<S>,
@@ -373,28 +370,12 @@ function checkCalendarsCompatible(
   }
 }
 
-// Utils
 // -----------------------------------------------------------------------------
 
-export const standardLocaleId = 'en-GB' // 24-hour clock, gregorian by default
-
-export function hashIntlFormatParts(
-  intlFormat: Intl.DateTimeFormat,
-  epochMilliseconds: number,
-): Record<string, string> {
-  const parts = intlFormat.formatToParts(epochMilliseconds)
-  const hash = {} as Record<string, string>
-
-  for (const part of parts) {
-    hash[part.type] = part.value
-  }
-
-  return hash
-}
-
+// specifically for formatting
 export function getCommonTimeZoneId(
   slots0: { timeZone: IdLike },
-  slots1?: { timeZone: IdLike },
+  slots1?: { timeZone: IdLike }, // optional!
 ): string {
   const timeZoneId = getId(slots0!.timeZone)
   if (slots1 && getId(slots1.timeZone) !== timeZoneId) {

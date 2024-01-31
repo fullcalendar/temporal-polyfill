@@ -15,25 +15,22 @@ import { constructPlainYearMonthSlots } from '../internal/construct'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { diffPlainYearMonth } from '../internal/diff'
 import { YearMonthBag, YearMonthFields } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
 import { movePlainYearMonth } from '../internal/move'
 import { OverflowOptions } from '../internal/optionsRefine'
-import {
-  PlainDateSlots,
-  PlainYearMonthSlots,
-  getCalendarIdFromBag,
-  refineCalendarIdString,
-} from '../internal/slots'
+import { PlainDateSlots, PlainYearMonthSlots } from '../internal/slots'
 import { NumSign, bindArgs } from '../internal/utils'
-import { prepCachedPlainYearMonthFormat } from './intlFormatCached'
+import { prepCachedPlainYearMonthFormat } from './intlFormatCache'
 import {
   computeDaysInMonth,
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
   computeYearMonthFields,
+  getCalendarIdFromBag,
+  refineCalendarIdString,
 } from './utils'
 
 export function create(

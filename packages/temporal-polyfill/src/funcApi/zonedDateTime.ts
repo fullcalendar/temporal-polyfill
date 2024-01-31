@@ -23,7 +23,7 @@ import {
 } from '../internal/convert'
 import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import {
   computeIsoDayOfWeek,
@@ -41,13 +41,7 @@ import {
 import { moveZonedDateTime } from '../internal/move'
 import { ZonedFieldOptions } from '../internal/optionsRefine'
 import { roundZonedDateTime } from '../internal/round'
-import {
-  DateSlots,
-  ZonedDateTimeSlots,
-  getCalendarIdFromBag,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
-} from '../internal/slots'
+import { DateSlots, ZonedDateTimeSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   ZonedDateTimeFields,
@@ -57,7 +51,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
 import { bindArgs } from '../internal/utils'
-import { prepCachedZonedDateTimeFormat } from './intlFormatCached'
+import { prepCachedZonedDateTimeFormat } from './intlFormatCache'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -65,6 +59,9 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
+  getCalendarIdFromBag,
+  refineCalendarIdString,
+  refineTimeZoneIdString,
 } from './utils'
 
 export const create = bindArgs(

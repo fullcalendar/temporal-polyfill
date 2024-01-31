@@ -11,20 +11,17 @@ import {
 } from '../internal/convert'
 import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
-import {
-  PlainDateSlots,
-  PlainTimeSlots,
-  refineTimeZoneIdString,
-} from '../internal/slots'
+import { PlainDateSlots, PlainTimeSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumSign, bindArgs, identityFunc } from '../internal/utils'
-import { prepCachedPlainTimeFormat } from './intlFormatCached'
+import { prepCachedPlainTimeFormat } from './intlFormatCache'
+import { refineTimeZoneIdString } from './utils'
 
 export const create = constructPlainTimeSlots
 

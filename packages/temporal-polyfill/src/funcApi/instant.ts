@@ -9,7 +9,7 @@ import {
   instantToZonedDateTime,
 } from '../internal/convert'
 import { diffInstants } from '../internal/diff'
-import { LocalesArg } from '../internal/intlFormat'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
 import { parseInstant } from '../internal/isoParse'
 import { moveInstant } from '../internal/move'
@@ -17,10 +17,6 @@ import { roundInstant } from '../internal/round'
 import {
   InstantSlots,
   ZonedDateTimeSlots,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
-} from '../internal/slots'
-import {
   getEpochMicroseconds,
   getEpochMilliseconds,
   getEpochNanoseconds,
@@ -28,7 +24,8 @@ import {
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { bindArgs } from '../internal/utils'
-import { prepCachedInstantFormat } from './intlFormatCached'
+import { prepCachedInstantFormat } from './intlFormatCache'
+import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 
 export const create = constructInstantSlots
 export const fromString = parseInstant

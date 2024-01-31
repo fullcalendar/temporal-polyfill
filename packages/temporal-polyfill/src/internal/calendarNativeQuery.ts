@@ -30,7 +30,6 @@ import {
   NativeYearMonthMoveOps,
   NativeYearMonthParseOps,
   NativeYearMonthRefineOps,
-  computeCalendarIdBase,
   computeNativeDaysInMonth,
   computeNativeDaysInYear,
   computeNativeEra,
@@ -46,7 +45,6 @@ import {
   nativeYearMonthRefineBase,
 } from './calendarNative'
 import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
-import * as errorMessages from './errorMessages'
 import {
   computeIntlDateParts,
   computeIntlDay,
@@ -63,7 +61,6 @@ import {
   computeIntlYear,
   computeIntlYearMonthForMonthDay,
   computeIsoFieldsFromIntlParts,
-  queryFormatForCalendar,
   queryIntlCalendar,
 } from './intlMath'
 import {
@@ -536,33 +533,4 @@ function createNativeOpsCreator<O extends {}>(
     }
     return Object.assign(Object.create(intlOps), queryIntlCalendar(calendarId))
   }
-}
-
-// -----------------------------------------------------------------------------
-
-export function resolveCalendarId(calendarId: string): string {
-  calendarId = normalizeCalendarId(calendarId)
-
-  if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
-    if (
-      computeCalendarIdBase(calendarId) !==
-      computeCalendarIdBase(
-        queryFormatForCalendar(calendarId).resolvedOptions().calendar,
-      )
-    ) {
-      throw new RangeError(errorMessages.invalidCalendar(calendarId))
-    }
-  }
-
-  return calendarId
-}
-
-function normalizeCalendarId(calendarId: string): string {
-  calendarId = calendarId.toLocaleLowerCase()
-
-  if (calendarId === 'islamicc') {
-    calendarId = 'islamic-civil'
-  }
-
-  return calendarId
 }
