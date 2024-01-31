@@ -300,5 +300,13 @@ async function readTemporalReservedWords(pkgDir) {
   return code
     .split(/\W+/)
     .filter((symbol) => symbol && startsWithLetterRegExp.test(symbol))
-    .concat(['resolvedOptions', 'useGrouping', 'relatedYear'])
+    .concat([
+      // exposed in func API
+      'branding',
+
+      // JS props Rollup doesn't know about
+      'resolvedOptions',
+      'useGrouping',
+      'relatedYear',
+    ])
 }
