@@ -20,6 +20,7 @@
       },
       "suspicious": {
         "noAssignInExpressions": "off",
+        "noConstEnum": "off",
         "noExplicitAny": "off",
         "noGlobalIsNan": "off",
         "noShadowRestrictedNames": "off",

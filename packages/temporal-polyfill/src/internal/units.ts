@@ -1,10 +1,7 @@
 import { DayTimeNano } from './dayTimeNano'
 import { divModTrunc, divTrunc, modTrunc } from './utils'
 
-/*
-TODO: use short names?
-*/
-export enum Unit {
+export const enum Unit {
   Nanosecond = 0,
   Microsecond = 1,
   Millisecond = 2,
