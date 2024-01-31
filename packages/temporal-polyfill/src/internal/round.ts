@@ -71,7 +71,7 @@ import {
   nanoInUtcDay,
   unitNanoMap,
 } from './units'
-import { divModFloor, divTrunc, identityFunc } from './utils'
+import { divModFloor, divTrunc, identity } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -325,7 +325,7 @@ export function roundRelativeDuration<M>(
   _diffMarkers?: DiffMarkers<M>,
 ): DurationFields {
   const nudgeFunc = (
-    markerToEpochNano === identityFunc // is zoned?
+    markerToEpochNano === identity // is zoned?
       ? smallestUnit > Unit.Day
         ? nudgeRelativeDuration
         : smallestUnit === Unit.Day

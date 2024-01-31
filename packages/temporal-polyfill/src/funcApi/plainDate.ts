@@ -38,7 +38,7 @@ import {
   ZonedDateTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumSign, bindArgs, identityFunc } from '../internal/utils'
+import { NumberSign, bindArgs, identity } from '../internal/utils'
 import { prepCachedPlainDateFormat } from './intlFormatCache'
 import {
   computeDateBasics,
@@ -146,7 +146,7 @@ export const equals = plainDatesEqual<string>
 export const compare = compareIsoDateFields as (
   slots0: PlainDateSlots<string>,
   slots1: PlainDateSlots<string>,
-) => NumSign
+) => NumberSign
 
 export const toString = formatPlainDateIso<string>
 
@@ -159,7 +159,7 @@ export function toZonedDateTime(
 
   return plainDateToZonedDateTime(
     refineTimeZoneIdString,
-    identityFunc,
+    identity,
     queryNativeTimeZone,
     slots,
     optionsObj,

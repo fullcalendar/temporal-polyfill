@@ -20,7 +20,7 @@ import {
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
-import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
   CalendarSlot,
@@ -180,7 +180,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {
         return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
       },
-      compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumSign {
+      compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumberSign {
         return compareIsoDateFields(
           toPlainYearMonthSlots(arg0),
           toPlainYearMonthSlots(arg1),

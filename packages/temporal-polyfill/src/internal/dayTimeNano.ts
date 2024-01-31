@@ -1,5 +1,5 @@
 import { nanoInUtcDay } from './units'
-import { NumSign, compareNumbers, divModFloor, divModTrunc } from './utils'
+import { NumberSign, compareNumbers, divModFloor, divModTrunc } from './utils'
 
 export type DayTimeNano = [days: number, timeNano: number]
 
@@ -34,7 +34,7 @@ export function addDayTimeNanoAndNumber(
 export function addDayTimeNanos(
   a: DayTimeNano,
   b: DayTimeNano,
-  sign: NumSign = 1,
+  sign: NumberSign = 1,
 ): DayTimeNano {
   return createDayTimeNano(a[0] + b[0] * sign, a[1] + b[1] * sign)
 }
@@ -46,7 +46,10 @@ export function diffDayTimeNanos(a: DayTimeNano, b: DayTimeNano): DayTimeNano {
 // Compare
 // -----------------------------------------------------------------------------
 
-export function compareDayTimeNanos(a: DayTimeNano, b: DayTimeNano): NumSign {
+export function compareDayTimeNanos(
+  a: DayTimeNano,
+  b: DayTimeNano,
+): NumberSign {
   return compareNumbers(a[0], b[0]) || compareNumbers(a[1], b[1])
 }
 

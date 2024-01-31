@@ -16,9 +16,6 @@ export function createProtocolValidator(propNames: string[]): any {
   }
 }
 
-// Input-processing
-// -----------------------------------------------------------------------------
-
 export function optionalToPlainTimeFields(
   timeArg: PlainTimeArg | undefined,
 ): IsoTimeFields | undefined {

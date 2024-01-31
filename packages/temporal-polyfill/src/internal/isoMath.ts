@@ -24,7 +24,7 @@ import {
   isoToLegacyDate,
 } from './timeMath'
 import {
-  allFieldsEqual,
+  allPropsEqual,
   clampProp,
   createLazyGenerator,
   modFloor,
@@ -236,7 +236,7 @@ export function checkIsoDateFields<P extends IsoDateFields>(
 }
 
 export function isIsoDateFieldsValid(isoFields: IsoDateFields): boolean {
-  return allFieldsEqual(
+  return allPropsEqual(
     isoDateFieldNamesAsc,
     isoFields,
     constrainIsoDateFields(isoFields),

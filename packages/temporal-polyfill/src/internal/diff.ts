@@ -60,10 +60,10 @@ import {
 } from './timeZoneOps'
 import { DayTimeUnit, TimeUnit, Unit, milliInDay, nanoInUtcDay } from './units'
 import {
-  NumSign,
+  NumberSign,
   bindArgs,
   divModTrunc,
-  identityFunc,
+  identity,
   pluckProps,
 } from './utils'
 
@@ -154,7 +154,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
         roundingInc,
         roundingMode,
         startEpochNano, // marker
-        identityFunc, // markerToEpochNano
+        identity, // markerToEpochNano
         bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps), // moveMarker
       )
     }
@@ -445,7 +445,7 @@ export function diffDateTimesExact(
 function diffZonedEpochNanoViaCalendar(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
-  sign: NumSign,
+  sign: NumberSign,
   startEpochNano: DayTimeNano,
   endEpochNano: DayTimeNano,
   largestUnit: Unit,
@@ -457,7 +457,7 @@ function diffZonedEpochNanoViaCalendar(
   const isoToZonedEpochNano = bindArgs(getSingleInstantFor, timeZoneOps)
   let midIsoFields: IsoDateTimeFields
   let midEpochNano: DayTimeNano
-  let midSign: NumSign
+  let midSign: NumberSign
   let cnt = 0
 
   // Might need multiple backoffs: one for simple time overage, other for end being in DST gap
@@ -495,7 +495,7 @@ function diffZonedEpochNanoViaCalendar(
 
 function diffDateTimesViaCalendar(
   calendarOps: DiffOps,
-  sign: NumSign,
+  sign: NumberSign,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
   largestUnit: Unit,
@@ -674,10 +674,10 @@ function diffYearMonthDay(
   }
 
   updateYearMonthDay()
-  const daySign = Math.sign(dayDiff) as NumSign
+  const daySign = Math.sign(dayDiff) as NumberSign
   const sign = (Math.sign(yearDiff) ||
     Math.sign(monthDiff) ||
-    daySign) as NumSign
+    daySign) as NumberSign
 
   if (sign) {
     // overshooting day? correct by moving to penultimate month
@@ -692,7 +692,7 @@ function diffYearMonthDay(
     }
 
     // overshooting month? correct by moving to penultimate year
-    const monthSign = Math.sign(monthDiff) as NumSign
+    const monthSign = Math.sign(monthDiff) as NumberSign
     if (monthSign === -sign) {
       const oldMonthsInYear1 = monthsInYear1
       year1 -= sign

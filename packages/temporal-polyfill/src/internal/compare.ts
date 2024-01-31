@@ -27,7 +27,7 @@ import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
 import { TimeZoneOps } from './timeZoneOps'
 import { Unit, givenFieldsToDayTimeNano } from './units'
-import { NumSign, allFieldsEqual, compareNumbers } from './utils'
+import { NumberSign, allPropsEqual, compareNumbers } from './utils'
 
 // High-Level Compare
 // -----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ import { NumSign, allFieldsEqual, compareNumbers } from './utils'
 export function compareInstants(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
-): NumSign {
+): NumberSign {
   return compareDayTimeNanos(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
@@ -45,7 +45,7 @@ export function compareInstants(
 export function compareZonedDateTimes<C, T>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
-): NumSign {
+): NumberSign {
   return compareDayTimeNanos(
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
@@ -59,7 +59,7 @@ export function compareDurations<RA, C, T>(
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
   options?: RelativeToOptions<RA>,
-): NumSign {
+): NumberSign {
   const normalOptions = normalizeOptions(options)
   const markerSlots = refineRelativeTo(normalOptions.relativeTo)
   const largestUnit = Math.max(
@@ -68,7 +68,7 @@ export function compareDurations<RA, C, T>(
   ) as Unit
 
   // fast-path if fields identical
-  if (allFieldsEqual(durationFieldNamesAsc, durationSlots0, durationSlots1)) {
+  if (allPropsEqual(durationFieldNamesAsc, durationSlots0, durationSlots1)) {
     return 0
   }
 
@@ -106,7 +106,7 @@ export function compareDurations<RA, C, T>(
 export function compareIsoDateTimeFields(
   isoFields0: IsoDateTimeFields,
   isoFields1: IsoDateTimeFields,
-): NumSign {
+): NumberSign {
   return (
     compareIsoDateFields(isoFields0, isoFields1) ||
     compareIsoTimeFields(isoFields0, isoFields1)
@@ -116,7 +116,7 @@ export function compareIsoDateTimeFields(
 export function compareIsoDateFields(
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
-): NumSign {
+): NumberSign {
   return compareNumbers(
     isoToEpochMilli(isoFields0)!,
     isoToEpochMilli(isoFields1)!,
@@ -126,7 +126,7 @@ export function compareIsoDateFields(
 export function compareIsoTimeFields(
   isoFields0: IsoTimeFields,
   isoFields1: IsoTimeFields,
-): NumSign {
+): NumberSign {
   return compareNumbers(
     isoTimeFieldsToNano(isoFields0),
     isoTimeFieldsToNano(isoFields1),

@@ -1,23 +1,8 @@
 import * as errorMessages from './errorMessages'
 import { Overflow } from './options'
 
-export type FilterPropValues<P, F> = {
-  [K in keyof P as P[K] extends F ? K : never]: P[K]
-}
-
-export function bindArgs<BA extends any[], DA extends any[], R>(
-  f: (...args: [...BA, ...DA]) => R,
-  ...boundArgs: BA
-): (...dynamicArgs: DA) => R {
-  return (...dynamicArgs: DA) => {
-    return f(...boundArgs, ...dynamicArgs)
-  }
-}
-
-/*
-Will linter make [any] for bind okay? If so, this is unnecessary
-*/
-export type BoundArg = any
+// Types
+// -----------------------------------------------------------------------------
 
 /*
 For programmatically-generated functions that have overly-complex inferred types
@@ -26,11 +11,145 @@ export type Callable = (...args: any[]) => any
 
 export type Classlike = any
 
-const objectLikeRE = /object|function/
+// Validation
+// -----------------------------------------------------------------------------
 
-// biome-ignore lint/complexity/noBannedTypes: TODO: fix later
+export function clampEntity(
+  entityName: string,
+  num: number,
+  min: number,
+  max: number,
+  overflow?: Overflow,
+): number {
+  const clamped = clampNumber(num, min, max)
+
+  if (overflow && num !== clamped) {
+    throw new RangeError(
+      errorMessages.numberOutOfRange(entityName, num, min, max),
+    )
+  }
+
+  return clamped
+}
+
+export function clampProp<P>(
+  props: P,
+  propName: keyof FilterPropValues<P, number> & string,
+  min: number,
+  max: number,
+  overflow?: Overflow,
+): number {
+  return clampEntity(
+    propName,
+    getDefinedProp(props, propName),
+    min,
+    max,
+    overflow,
+  )
+}
+
+export function getDefinedProp(props: any, propName: string): any {
+  const propVal = props[propName]
+  if (propVal === undefined) {
+    throw new TypeError(errorMessages.missingField(propName))
+  }
+  return propVal
+}
+
+// biome-ignore lint/complexity/noBannedTypes: improve types later
 export function isObjectLike(arg: unknown): arg is {} {
-  return arg !== null && objectLikeRE.test(typeof arg)
+  return arg !== null && /object|function/.test(typeof arg)
+}
+
+// Cache
+// -----------------------------------------------------------------------------
+
+// interface MapInterface<K, V> {
+//   has(key: K): boolean
+//   get(key: K): V,
+//   set(key: K, val: V): void
+// }
+
+export function createLazyGenerator<K, V, A extends any[]>(
+  generator: (key: K, ...otherArgs: A) => V,
+  MapClass: { new (): any } = Map, // TODO: better type
+): (key: K, ...otherArgs: A) => V {
+  const map = new MapClass()
+
+  return (key: K, ...otherArgs: A) => {
+    if (map.has(key)) {
+      return map.get(key) as V
+    }
+    const val = generator(key, ...otherArgs)
+    map.set(key, val)
+    return val
+  }
+}
+
+// Descriptor
+// -----------------------------------------------------------------------------
+
+export function createNameDescriptors(name: string) {
+  return createPropDescriptors({ name }, true)
+}
+
+export function createPropDescriptors(
+  propVals: { [propName: string]: unknown },
+  readonly?: boolean,
+): PropertyDescriptorMap {
+  return mapProps(
+    (value) => ({
+      value,
+      configurable: true,
+      writable: !readonly,
+    }),
+    propVals,
+  )
+}
+
+export function createGetterDescriptors(getters: {
+  [propName: string]: () => unknown
+}): PropertyDescriptorMap {
+  return mapProps(
+    (getter) => ({
+      get: getter,
+      configurable: true,
+    }),
+    getters,
+  )
+}
+
+export function createStringTagDescriptors(value: string): {
+  // crazy
+  [Symbol.toStringTag]: {
+    value: string
+    configurable: true
+  }
+} {
+  return {
+    [Symbol.toStringTag]: {
+      value,
+      configurable: true,
+    },
+  }
+}
+
+// Props
+// -----------------------------------------------------------------------------
+
+export type FilterPropValues<P, F> = {
+  [K in keyof P as P[K] extends F ? K : never]: P[K]
+}
+
+export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
+  const res = {} as any
+  let i = propNamesRev.length
+
+  for (const arg of args) {
+    res[propNamesRev[--i]] = arg
+  }
+
+  return res
 }
 
 /*
@@ -45,17 +164,6 @@ export function mapProps<P, R, E = undefined>(
 
   for (const propName in props) {
     res[propName] = transformer(props[propName], propName, extraArg)
-  }
-
-  return res
-}
-
-export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
-  const res = {} as any
-  let i = propNamesRev.length
-
-  for (const arg of args) {
-    res[propNamesRev[--i]] = arg
   }
 
   return res
@@ -166,97 +274,50 @@ export function hasAllPropsByName<P extends {}>(
   return true
 }
 
-export function allFieldsEqual(
-  fieldNames: string[],
-  obj0: any,
-  obj1: any,
+export function allPropsEqual(
+  propNames: string[],
+  props0: any,
+  props1: any,
 ): boolean {
-  for (const fieldName of fieldNames) {
-    if (obj0[fieldName] !== obj1[fieldName]) {
+  for (const propName of propNames) {
+    if (props0[propName] !== props1[propName]) {
       return false
     }
   }
   return true
 }
 
-// interface MapInterface<K, V> {
-//   has(key: K): boolean
-//   get(key: K): V,
-//   set(key: K, val: V): void
-// }
+// Function
+// -----------------------------------------------------------------------------
 
-export function createLazyGenerator<K, V, A extends any[]>(
-  generator: (key: K, ...otherArgs: A) => V,
-  MapClass: { new (): any } = Map, // TODO: better type
-): (key: K, ...otherArgs: A) => V {
-  const map = new MapClass()
-
-  return (key: K, ...otherArgs: A) => {
-    if (map.has(key)) {
-      return map.get(key) as V
-    }
-    const val = generator(key, ...otherArgs)
-    map.set(key, val)
-    return val
+export function bindArgs<BA extends any[], DA extends any[], R>(
+  f: (...args: [...BA, ...DA]) => R,
+  ...boundArgs: BA
+): (...dynamicArgs: DA) => R {
+  return (...dynamicArgs: DA) => {
+    return f(...boundArgs, ...dynamicArgs)
   }
 }
 
-// descriptor stuff
-// ----------------
-
-export function createNameDescriptors(name: string) {
-  return createPropDescriptors({ name }, true)
-}
-
-export function createPropDescriptors(
-  propVals: { [propName: string]: unknown },
-  readonly?: boolean,
-): PropertyDescriptorMap {
-  return mapProps(
-    (value) => ({
-      value,
-      configurable: true,
-      writable: !readonly,
-    }),
-    propVals,
-  )
-}
-
-export function createGetterDescriptors(getters: {
-  [propName: string]: () => unknown
-}): PropertyDescriptorMap {
-  return mapProps(
-    (getter) => ({
-      get: getter,
-      configurable: true,
-    }),
-    getters,
-  )
-}
-
-export function createStringTagDescriptors(value: string): {
-  // crazy
-  [Symbol.toStringTag]: {
-    value: string
-    configurable: true
-  }
-} {
-  return {
-    [Symbol.toStringTag]: {
-      value,
-      configurable: true,
-    },
-  }
-}
-
-// former lang
-// -----------
-
-export function identityFunc<T>(arg: T): T {
+export function identity<T>(arg: T): T {
   return arg
 }
 
 export function noop(): void {}
+
+// String / Formatting
+// -----------------------------------------------------------------------------
+
+export function capitalize(s: string): string {
+  return s[0].toUpperCase() + s.substring(1)
+}
+
+/*
+Easier to mark pure than calling .slice().sort() directly, which has 2 calls
+*/
+export function sortStrings<T extends string>(strs: T[]): T[] {
+  return strs.slice().sort()
+}
 
 export function padNumber(digits: number, num: number): string {
   return String(num).padStart(digits, '0')
@@ -264,15 +325,18 @@ export function padNumber(digits: number, num: number): string {
 
 export const padNumber2 = bindArgs(padNumber, 2)
 
-export type NumSign = -1 | 0 | 1
+// Number
+// -----------------------------------------------------------------------------
+
+export type NumberSign = -1 | 0 | 1
 
 /*
 -1 if a comes before b
  0 if equal
  1 if a comes after b
 */
-export function compareNumbers(a: number, b: number): NumSign {
-  return Math.sign(a - b) as NumSign
+export function compareNumbers(a: number, b: number): NumberSign {
+  return Math.sign(a - b) as NumberSign
 }
 
 /*
@@ -280,48 +344,6 @@ min/max are inclusive
 */
 export function clampNumber(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
-}
-
-export function clampEntity(
-  entityName: string,
-  num: number,
-  min: number,
-  max: number,
-  overflow?: Overflow,
-): number {
-  const clamped = clampNumber(num, min, max)
-
-  if (overflow && num !== clamped) {
-    throw new RangeError(
-      errorMessages.numberOutOfRange(entityName, num, min, max),
-    )
-  }
-
-  return clamped
-}
-
-export function clampProp<P>(
-  props: P,
-  propName: keyof FilterPropValues<P, number> & string,
-  min: number,
-  max: number,
-  overflow?: Overflow,
-): number {
-  return clampEntity(
-    propName,
-    getDefinedProp(props, propName),
-    min,
-    max,
-    overflow,
-  )
-}
-
-export function getDefinedProp(props: any, propName: string): any {
-  const propVal = props[propName]
-  if (propVal === undefined) {
-    throw new TypeError(errorMessages.missingField(propName))
-  }
-  return propVal
 }
 
 export function divModFloor(num: number, divisor: number): [number, number] {
@@ -356,9 +378,6 @@ export function modTrunc(num: number, divisor: number): number {
   return num % divisor || 0
 }
 
-// rounding
-// --------
-
 export function roundExpand(num: number): number {
   return num < 0 ? Math.floor(num) : Math.ceil(num)
 }
@@ -390,13 +409,4 @@ export function roundHalfEven(num: number): number {
 
 function hasHalf(num: number): boolean {
   return Math.abs(num % 1) === 0.5
-}
-
-export function capitalize(s: string): string {
-  return s[0].toUpperCase() + s.substring(1)
-}
-
-export function sortStrs<T extends string>(strs: T[]): T[]
-export function sortStrs(strs: string[]): string[] {
-  return strs.slice().sort()
 }

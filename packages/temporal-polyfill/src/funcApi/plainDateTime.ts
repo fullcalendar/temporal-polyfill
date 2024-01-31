@@ -50,7 +50,7 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumSign, bindArgs } from '../internal/utils'
+import { NumberSign, bindArgs } from '../internal/utils'
 import { prepCachedPlainDateTimeFormat } from './intlFormatCache'
 import {
   computeDateBasics,
@@ -178,7 +178,7 @@ export const equals = plainDateTimesEqual<string>
 export const compare = compareIsoDateTimeFields as (
   plainDateTimeSlots0: PlainDateTimeSlots<string>,
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
-) => NumSign
+) => NumberSign
 
 export const toString = formatPlainDateTimeIso<string>
 

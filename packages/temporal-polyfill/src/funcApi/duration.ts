@@ -19,7 +19,7 @@ import {
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
-import { NumSign, bindArgs, identityFunc } from '../internal/utils'
+import { NumberSign, bindArgs, identity } from '../internal/utils'
 
 export type RelativeToArg =
   | ZonedDateTimeSlots<string, string>
@@ -35,7 +35,7 @@ export const withFields = durationWithFields
 
 export const add = bindArgs(
   addDurations<RelativeToArg, string, string>,
-  identityFunc,
+  identity,
   createNativeDiffOps,
   queryNativeTimeZone,
   false,
@@ -43,7 +43,7 @@ export const add = bindArgs(
 
 export const subtract = bindArgs(
   addDurations<RelativeToArg, string, string>,
-  identityFunc,
+  identity,
   createNativeDiffOps,
   queryNativeTimeZone,
   true,
@@ -55,27 +55,27 @@ export const abs = absDuration
 
 export const round = bindArgs(
   roundDuration<RelativeToArg, string, string>,
-  identityFunc,
+  identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 )
 
 export const total = bindArgs(
   totalDuration<RelativeToArg, string, string>,
-  identityFunc,
+  identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 )
 
 export const toString = formatDurationIso
 
-export const sign = queryDurationSign as (slots: DurationSlots) => NumSign
+export const sign = queryDurationSign as (slots: DurationSlots) => NumberSign
 
 export const blank = queryDurationBlank as (slots: DurationSlots) => boolean
 
 export const compare = bindArgs(
   compareDurations<RelativeToArg, string, string>,
-  identityFunc,
+  identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 )

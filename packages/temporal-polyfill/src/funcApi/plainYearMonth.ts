@@ -21,7 +21,7 @@ import { parsePlainYearMonth } from '../internal/isoParse'
 import { movePlainYearMonth } from '../internal/move'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainYearMonthSlots } from '../internal/slots'
-import { NumSign, bindArgs } from '../internal/utils'
+import { NumberSign, bindArgs } from '../internal/utils'
 import { prepCachedPlainYearMonthFormat } from './intlFormatCache'
 import {
   computeDaysInMonth,
@@ -120,7 +120,7 @@ export const equals = plainYearMonthsEqual<string>
 export const compare = compareIsoDateFields as (
   slots0: PlainYearMonthSlots<string>,
   slots1: PlainYearMonthSlots<string>,
-) => NumSign
+) => NumberSign
 
 export const toString = formatPlainYearMonthIso<string>
 

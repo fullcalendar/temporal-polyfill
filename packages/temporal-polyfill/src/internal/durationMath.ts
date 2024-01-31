@@ -34,7 +34,7 @@ import {
   nanoToGivenFields,
   unitNanoMap,
 } from './units'
-import { NumSign, bindArgs, createLazyGenerator, identityFunc } from './utils'
+import { NumberSign, bindArgs, createLazyGenerator, identity } from './utils'
 
 // Marker System
 // -----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ export function createMarkerSystem<C, T>(
 
     return [
       epochNanoseconds,
-      identityFunc as MarkerToEpochNano<DayTimeNano>,
+      identity as MarkerToEpochNano<DayTimeNano>,
       bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps),
       bindArgs(diffZonedEpochNanoExact, calendarOps, timeZoneOps),
     ]
@@ -322,11 +322,11 @@ export const queryDurationSign = createLazyGenerator(
 function computeDurationSign(
   fields: DurationFields,
   fieldNames = durationFieldNamesAsc,
-): NumSign {
-  let sign: NumSign = 0
+): NumberSign {
+  let sign: NumberSign = 0
 
   for (const fieldName of fieldNames) {
-    const fieldSign = Math.sign(fields[fieldName]) as NumSign
+    const fieldSign = Math.sign(fields[fieldName]) as NumberSign
 
     if (fieldSign) {
       if (sign && sign !== fieldSign) {

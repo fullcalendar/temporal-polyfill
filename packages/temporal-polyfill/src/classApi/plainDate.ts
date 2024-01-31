@@ -35,7 +35,7 @@ import {
   ZonedDateTimeSlots,
   createPlainDateSlots,
 } from '../internal/slots'
-import { NumSign, bindArgs, isObjectLike } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
   CalendarSlot,
@@ -243,7 +243,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     from(arg: any, options?: OverflowOptions): PlainDate {
       return createPlainDate(toPlainDateSlots(arg, options))
     },
-    compare(arg0: PlainDateArg, arg1: PlainDateArg): NumSign {
+    compare(arg0: PlainDateArg, arg1: PlainDateArg): NumberSign {
       return compareIsoDateFields(
         toPlainDateSlots(arg0),
         toPlainDateSlots(arg1),

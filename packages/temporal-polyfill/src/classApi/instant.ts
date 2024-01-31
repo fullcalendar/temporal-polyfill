@@ -28,7 +28,7 @@ import {
   createInstantSlots,
 } from '../internal/slots'
 import { UnitName, nanoInMilli } from '../internal/units'
-import { NumSign, isObjectLike } from '../internal/utils'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import { CalendarArg, CalendarSlot, refineCalendarSlot } from './calendar'
 import {
   Duration,
@@ -151,7 +151,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
     fromEpochNanoseconds(epochNano: bigint): Instant {
       return createInstant(epochNanoToInstant(epochNano))
     },
-    compare(a: InstantArg, b: InstantArg): NumSign {
+    compare(a: InstantArg, b: InstantArg): NumberSign {
       return compareInstants(toInstantSlots(a), toInstantSlots(b))
     },
   },

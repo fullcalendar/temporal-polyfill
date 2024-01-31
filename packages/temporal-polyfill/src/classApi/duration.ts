@@ -39,7 +39,7 @@ import {
 } from '../internal/slots'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
-import { NumSign, isObjectLike } from '../internal/utils'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import { CalendarArg, CalendarSlot, getCalendarSlotFromBag } from './calendar'
 import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
 import { durationGetters, neverValueOf } from './mixins'
@@ -60,7 +60,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     blank(slots: DurationSlots): boolean {
       return queryDurationBlank(slots)
     },
-    sign(slots: DurationSlots): NumSign {
+    sign(slots: DurationSlots): NumberSign {
       return queryDurationSign(slots)
     },
   },
@@ -157,7 +157,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       durationArg0: DurationArg,
       durationArg1: DurationArg,
       options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
-    ): NumSign {
+    ): NumberSign {
       return compareDurations(
         refinePublicRelativeTo,
         createDiffOps,

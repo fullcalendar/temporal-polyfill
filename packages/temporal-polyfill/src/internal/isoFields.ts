@@ -1,4 +1,4 @@
-import { mapPropNamesToConstant, sortStrs } from './utils'
+import { mapPropNamesToConstant, sortStrings } from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -41,9 +41,9 @@ export const isoDateTimeFieldNamesAsc: (keyof IsoDateTimeFields)[] = [
 ]
 
 // alphabetical (for getISOFields)
-export const isoDateFieldNamesAlpha = sortStrs(isoDateFieldNamesAsc)
-export const isoTimeFieldNamesAlpha = sortStrs(isoTimeFieldNamesAsc)
-export const isoDateTimeFieldNamesAlpha = sortStrs(isoDateTimeFieldNamesAsc)
+export const isoDateFieldNamesAlpha = sortStrings(isoDateFieldNamesAsc)
+export const isoTimeFieldNamesAlpha = sortStrings(isoTimeFieldNamesAsc)
+export const isoDateTimeFieldNamesAlpha = sortStrings(isoDateTimeFieldNamesAsc)
 
 // Defaults
 // -----------------------------------------------------------------------------

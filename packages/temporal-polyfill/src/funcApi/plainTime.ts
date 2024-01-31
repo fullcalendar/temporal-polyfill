@@ -19,7 +19,7 @@ import { OverflowOptions } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumSign, bindArgs, identityFunc } from '../internal/utils'
+import { NumberSign, bindArgs, identity } from '../internal/utils'
 import { prepCachedPlainTimeFormat } from './intlFormatCache'
 import { refineTimeZoneIdString } from './utils'
 
@@ -52,14 +52,14 @@ export const equals = plainTimesEqual
 export const compare = compareIsoTimeFields as (
   slots0: PlainTimeSlots,
   slots1: PlainTimeSlots,
-) => NumSign
+) => NumberSign
 
 export const toString = formatPlainTimeIso
 
 export const toZonedDateTime = bindArgs(
   plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
   refineTimeZoneIdString,
-  identityFunc,
+  identity,
   queryNativeTimeZone,
 )
 

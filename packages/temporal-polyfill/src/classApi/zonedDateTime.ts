@@ -50,7 +50,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
 import { UnitName } from '../internal/units'
-import { NumSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import {
   CalendarArg,
   CalendarSlot,
@@ -349,7 +349,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     from(arg: any, options?: ZonedFieldOptions) {
       return createZonedDateTime(toZonedDateTimeSlots(arg, options))
     },
-    compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumSign {
+    compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumberSign {
       return compareZonedDateTimes(
         toZonedDateTimeSlots(arg0),
         toZonedDateTimeSlots(arg1),
