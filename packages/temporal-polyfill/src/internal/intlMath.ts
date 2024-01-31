@@ -63,7 +63,7 @@ Expects an already-normalized calendarId
 export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
-  const intlFormat = queryFormatForCalendar(calendarId)
+  const intlFormat = queryCalendarIntlFormat(calendarId)
   const calendarIdBase = computeCalendarIdBase(calendarId)
 
   function epochMilliToIntlFields(epochMilli: number) {
@@ -172,20 +172,20 @@ export function parseIntlPartsYear(intlParts: Record<string, string>): number {
   return parseInt(intlParts.relatedYear || intlParts.year)
 }
 
-export const queryFormatForCalendar = createLazyGenerator(
-  createFormatForCalendar,
+/*
+Expects already-normalized ID
+*/
+export const queryCalendarIntlFormat = createLazyGenerator(
+  (id: string): Intl.DateTimeFormat =>
+    new OrigDateTimeFormat(standardLocaleId, {
+      calendar: id,
+      timeZone: utcTimeZoneId,
+      era: 'short', // 'narrow' is too terse for japanese months
+      year: 'numeric',
+      month: 'short', // easier to identify monthCodes
+      day: 'numeric',
+    }),
 )
-
-function createFormatForCalendar(calendarId: string): Intl.DateTimeFormat {
-  return new OrigDateTimeFormat(standardLocaleId, {
-    calendar: calendarId,
-    timeZone: utcTimeZoneId,
-    era: 'short', // 'narrow' is too terse for japanese months
-    year: 'numeric',
-    month: 'short', // easier to identify monthCodes
-    day: 'numeric',
-  })
-}
 
 function normalizeShortEra(formattedEra: string): string {
   formattedEra = formattedEra

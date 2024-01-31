@@ -1,8 +1,8 @@
+import { OrigDateTimeFormat, standardLocaleId } from './intlFormatUtils'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './isoParse'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { queryFormatForTimeZone } from './timeZoneNative'
-import { capitalize } from './utils'
+import { capitalize, createLazyGenerator } from './utils'
 
 export function resolveTimeZoneId(id: string): string {
   const essence = getTimeZoneEssence(id)
@@ -22,18 +22,40 @@ export function getTimeZoneAtomic(id: string): string | number {
       : utcTimeZoneId
 }
 
-// returning undefined means utcTimeZoneId
+/*
+returning undefined means utcTimeZoneId
+*/
 export function getTimeZoneEssence(
   id: string,
 ): number | Intl.DateTimeFormat | undefined {
+  id = id.toUpperCase()
+
   const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
     return offsetNano
   }
-  if (id.toUpperCase() !== utcTimeZoneId) {
-    return queryFormatForTimeZone(id) // case-agnostic
+
+  if (id !== utcTimeZoneId) {
+    return queryTimeZoneIntlFormat(id)
   }
 }
+
+/*
+Expects UPPERCASE id
+*/
+const queryTimeZoneIntlFormat = createLazyGenerator(
+  (id: string): Intl.DateTimeFormat =>
+    new OrigDateTimeFormat(standardLocaleId, {
+      timeZone: id,
+      era: 'short',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    }),
+)
 
 function normalizeNamedTimeZoneId(id: string): string {
   return id
@@ -43,7 +65,7 @@ function normalizeNamedTimeZoneId(id: string): string {
       // abbreviation-like (big parts, like 'ACT' in 'Australia/ACT')
       // OR numeric-offset-like
       // OR Pacific/YAP
-      if ((part.length <= 3 || part.match(/\d/)) && !part.match(/etc|yap/)) {
+      if ((part.length <= 3 || /\d/.test(part)) && !/etc|yap/.test(part)) {
         return part.toUpperCase()
       }
 

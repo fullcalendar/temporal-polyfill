@@ -1,34 +1,34 @@
 import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
-import { queryFormatForCalendar } from './intlMath'
+import { queryCalendarIntlFormat } from './intlMath'
 
-export function resolveCalendarId(calendarId: string): string {
-  calendarId = normalizeCalendarId(calendarId)
+export function resolveCalendarId(id: string): string {
+  id = normalizeCalendarId(id)
 
-  if (calendarId !== isoCalendarId && calendarId !== gregoryCalendarId) {
+  if (id !== isoCalendarId && id !== gregoryCalendarId) {
     if (
-      computeCalendarIdBase(calendarId) !==
+      computeCalendarIdBase(id) !==
       computeCalendarIdBase(
-        queryFormatForCalendar(calendarId).resolvedOptions().calendar,
+        queryCalendarIntlFormat(id).resolvedOptions().calendar,
       )
     ) {
-      throw new RangeError(errorMessages.invalidCalendar(calendarId))
+      throw new RangeError(errorMessages.invalidCalendar(id))
     }
   }
 
-  return calendarId
+  return id
 }
 
-function normalizeCalendarId(calendarId: string): string {
-  calendarId = calendarId.toLowerCase()
+function normalizeCalendarId(id: string): string {
+  id = id.toLowerCase()
 
-  if (calendarId === 'islamicc') {
-    calendarId = 'islamic-civil'
+  if (id === 'islamicc') {
+    id = 'islamic-civil'
   }
 
-  return calendarId
+  return id
 }
 
-export function computeCalendarIdBase(calendarId: string): string {
-  return calendarId.split('-')[0]
+export function computeCalendarIdBase(id: string): string {
+  return id.split('-')[0]
 }

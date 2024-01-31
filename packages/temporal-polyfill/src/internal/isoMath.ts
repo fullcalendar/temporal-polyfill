@@ -8,7 +8,7 @@ import {
 } from './calendarNative'
 import { diffEpochMilliByDay } from './diff'
 import { hashIntlFormatParts } from './intlFormatUtils'
-import { parseIntlYear, queryFormatForCalendar } from './intlMath'
+import { parseIntlYear, queryCalendarIntlFormat } from './intlMath'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -210,9 +210,10 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
   }
 
   const intlParts = hashIntlFormatParts(
-    queryFormatForCalendar(japaneseCalendarId),
+    queryCalendarIntlFormat(japaneseCalendarId),
     epochMilli,
   )
+
   const { era, eraYear } = parseIntlYear(intlParts, japaneseCalendarId)
   return [era, eraYear]
 }

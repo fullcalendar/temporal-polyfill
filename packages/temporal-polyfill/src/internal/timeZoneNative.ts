@@ -3,11 +3,7 @@ import {
   addDayTimeNanoAndNumber,
   numberToDayTimeNano,
 } from './dayTimeNano'
-import {
-  OrigDateTimeFormat,
-  hashIntlFormatParts,
-  standardLocaleId,
-} from './intlFormatUtils'
+import { hashIntlFormatParts } from './intlFormatUtils'
 import { parseIntlPartsYear } from './intlMath'
 import { IsoDateTimeFields } from './isoFields'
 import {
@@ -38,10 +34,11 @@ export interface NativeTimeZone {
 
 export const queryNativeTimeZone = createLazyGenerator(
   (slotId: string): NativeTimeZone => {
-    const spirit = getTimeZoneEssence(slotId)
-    return typeof spirit === 'object'
-      ? new IntlTimeZone(spirit)
-      : new FixedTimeZone(spirit || 0)
+    const essence = getTimeZoneEssence(slotId)
+
+    return typeof essence === 'object'
+      ? new IntlTimeZone(essence)
+      : new FixedTimeZone(essence || 0)
   },
 )
 
@@ -284,22 +281,4 @@ function createComputeOffsetSec(
     )
     return zonedEpochSec - epochSec
   }
-}
-
-export const queryFormatForTimeZone = createLazyGenerator(
-  createFormatForTimeZone,
-)
-
-// Case-agnostic
-function createFormatForTimeZone(id: string): Intl.DateTimeFormat {
-  return new OrigDateTimeFormat(standardLocaleId, {
-    timeZone: id,
-    era: 'short',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-  })
 }
