@@ -12,6 +12,7 @@
   "linter": {
     "rules": {
       "complexity": {
+        "noBannedTypes": "off",
         "useLiteralKeys": "off",
         "useOptionalChain": "off"
       },

@@ -56,7 +56,6 @@ export function getDefinedProp(props: any, propName: string): any {
   return propVal
 }
 
-// biome-ignore lint/complexity/noBannedTypes: improve types later
 export function isObjectLike(arg: unknown): arg is {} {
   return arg !== null && /object|function/.test(typeof arg)
 }
