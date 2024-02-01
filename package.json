@@ -25,16 +25,7 @@
     "clean": "pnpm -r run clean"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.5.1",
     "lefthook": "^1.6.1"
-  },
-  "devDependenciesNotes": {
-    "@biomejs/biome": [
-      "NOTE: Specifically for IDE. Command line uses versions in sub-packages",
-      "NOTE: Always keep sub-packages up-to-date",
-      "BUG: Pinned on 1.5.1 due to this regression in 1.5.3:",
-      "https://github.com/biomejs/biome/issues/1654"
-    ]
   },
   "pnpm": {
     "patchedDependencies": {
