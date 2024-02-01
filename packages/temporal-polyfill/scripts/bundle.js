@@ -64,6 +64,8 @@ async function buildConfigs(pkgDir, isDev) {
     const exportConfig = exportMap[exportPath]
     const exportName =
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+
+    // TODO: rename to 'transpiled' path?
     const srcPath = joinPaths(
       pkgDir,
       'dist/.tsc',
