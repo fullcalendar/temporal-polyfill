@@ -6,7 +6,7 @@ import {
   resolve as resolvePath,
   sep as pathSep,
 } from 'path'
-import { copyFile, readFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import sourcemaps from 'rollup-plugin-sourcemaps'
@@ -72,19 +72,11 @@ async function buildConfigs(pkgDir, isDev) {
 
     moduleInputs[exportName] = srcPath
 
-    if (exportConfig.types) {
-      // HACK because running global side-effects through dts causes weird imports
-      await copyFile(
-        joinPaths(pkgDir, 'src', exportConfig.types + extensions.dts),
-        joinPaths(pkgDir, 'dist', exportName + extensions.dts),
-      )
-    } else {
-      dtsInputs[exportName] = joinPaths(
-        pkgDir,
-        'dist/.tsc',
-        (exportConfig.src || exportName) + extensions.dts,
-      )
-    }
+    dtsInputs[exportName] = joinPaths(
+      pkgDir,
+      'dist/.tsc',
+      (exportConfig.types || exportConfig.src || exportName) + extensions.dts,
+    )
 
     if (exportConfig.iife) {
       iifeConfigs.push({
@@ -135,7 +127,18 @@ async function buildConfigs(pkgDir, isDev) {
     dtsConfigs.push({
       input: dtsInputs,
       onwarn,
-      plugins: [dts()],
+      plugins: [
+        // Will not bundle external packages by default
+        dts(),
+        // WORKAROUND: dts plugin was including empty import statements,
+        // despite attempting hoistTransitiveImports:false. Especially bad
+        // because temporal-spec/global was being imported for index.
+        {
+          renderChunk(code) {
+            return code.replace(/^import ['"][^'"]*['"](;|$)/m, '')
+          },
+        },
+      ],
       output: {
         format: 'es',
         dir: 'dist',
@@ -159,8 +162,9 @@ async function buildConfigs(pkgDir, isDev) {
           entryFileNames: '[name]' + extensions.cjs,
           chunkFileNames:
             'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.cjs,
-          minifyInternalExports: false,
           manualChunks: manuallyResolveChunk,
+          minifyInternalExports: false,
+          hoistTransitiveImports: false,
           plugins: [
             !isDev &&
               buildTerserPlugin({
@@ -175,8 +179,9 @@ async function buildConfigs(pkgDir, isDev) {
           entryFileNames: '[name]' + extensions.esm,
           chunkFileNames:
             'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.esm,
-          minifyInternalExports: false,
           manualChunks: manuallyResolveChunk,
+          minifyInternalExports: false,
+          hoistTransitiveImports: false,
           plugins: [
             !isDev && pureTopLevel(),
             !isDev &&

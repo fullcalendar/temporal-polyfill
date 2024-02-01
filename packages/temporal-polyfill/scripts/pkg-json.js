@@ -27,10 +27,11 @@ async function writePkgJson(pkgDir, isDev) {
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
     distExportMap[exportPath] = {
-      types:
-        !isDev || exportConfig.types
-          ? './' + exportName + extensions.dts
-          : './.tsc/' + (exportConfig.src || exportName) + extensions.dts,
+      types: !isDev
+        ? './' + exportName + extensions.dts
+        : './.tsc/' +
+          (exportConfig.types || exportConfig.src || exportName) +
+          extensions.dts,
 
       require: './' + exportName + extensions.cjs,
       import: './' + exportName + extensions.esm,

@@ -5,5 +5,5 @@
     "lib": ["ES2017", "ES2021.Intl", "ES2020.BigInt"]
   },
   "include": ["src/**/*"],
-  "exclude": ["src/typeOverrides/**", "src/**/*.test.ts"]
+  "exclude": ["src/**/*.test.ts"]
 }

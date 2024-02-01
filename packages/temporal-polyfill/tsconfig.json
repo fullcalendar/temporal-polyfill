@@ -6,5 +6,5 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo",
   },
   "include": ["src/**/*"],
-  "exclude": ["src/typeOverrides/**"]
+  "exclude": ["src/typeOverrides/global.ts"]
 }
