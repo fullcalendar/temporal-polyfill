@@ -58,7 +58,9 @@ async function buildConfigs(pkgDir, isDev) {
   const iifeConfigs = []
   const dtsInputs = {}
   const dtsConfigs = []
-  const useChunkNames = isDev
+  const chunkNamesEnabled = isDev
+  const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
+  const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -71,14 +73,14 @@ async function buildConfigs(pkgDir, isDev) {
       'dist/.tsc',
       (exportConfig.src || exportName) + '.js',
     )
-
-    moduleInputs[exportName] = srcPath
-
-    dtsInputs[exportName] = joinPaths(
+    const dtsPath = joinPaths(
       pkgDir,
       'dist/.tsc',
       (exportConfig.types || exportConfig.src || exportName) + extensions.dts,
     )
+
+    moduleInputs[exportName] = srcPath
+    dtsInputs[exportName] = dtsPath
 
     if (exportConfig.iife) {
       iifeConfigs.push({
@@ -116,11 +118,8 @@ async function buildConfigs(pkgDir, isDev) {
     }
   }
 
-  const fullTscInternalPath =
-    resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
-
   function manuallyResolveChunk(id) {
-    if (id.startsWith(fullTscInternalPath)) {
+    if (id.startsWith(internalSrcBase)) {
       return 'internal'
     }
   }
@@ -134,7 +133,7 @@ async function buildConfigs(pkgDir, isDev) {
         dts(),
         // WORKAROUND: dts plugin was including empty import statements,
         // despite attempting hoistTransitiveImports:false. Especially bad
-        // because temporal-spec/global was being imported for index.
+        // because temporal-spec/global was being imported from index.
         {
           renderChunk(code) {
             return code.replace(/^import ['"][^'"]*['"](;|$)/m, '')
@@ -145,8 +144,7 @@ async function buildConfigs(pkgDir, isDev) {
         format: 'es',
         dir: 'dist',
         entryFileNames: '[name]' + extensions.dts,
-        chunkFileNames:
-          'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.dts,
+        chunkFileNames: chunkBase + extensions.dts,
         minifyInternalExports: false,
         manualChunks: manuallyResolveChunk,
       },
@@ -162,8 +160,7 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
-          chunkFileNames:
-            'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.cjs,
+          chunkFileNames: chunkBase + extensions.cjs,
           manualChunks: manuallyResolveChunk,
           minifyInternalExports: false,
           hoistTransitiveImports: false,
@@ -179,8 +176,7 @@ async function buildConfigs(pkgDir, isDev) {
           format: 'es',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
-          chunkFileNames:
-            'chunks/' + (useChunkNames ? '[name]' : '[hash]') + extensions.esm,
+          chunkFileNames: chunkBase + extensions.esm,
           manualChunks: manuallyResolveChunk,
           minifyInternalExports: false,
           hoistTransitiveImports: false,
