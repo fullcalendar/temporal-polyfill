@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist/.tsc"
+    "outDir": "dist/.tsc",
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
   },
   "include": ["src/**/*"],
   "exclude": ["src/typeOverrides/**"]
