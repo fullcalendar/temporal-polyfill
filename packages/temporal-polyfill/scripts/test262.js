@@ -79,7 +79,8 @@ yargs(hideBin(process.argv))
 
       const expectedFailureFiles = [
         'expected-failures.txt',
-        'expected-failures-surface.txt',
+        'expected-failures-builtin-calls.txt',
+        'expected-failures-descriptor.txt',
       ]
 
       if (currentNodeMajorVersion >= 18) {
