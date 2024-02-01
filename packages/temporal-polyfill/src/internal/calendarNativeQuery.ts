@@ -140,24 +140,24 @@ export const isoMonthDayModOps: NativeMonthDayModOps = {
 // Math
 // ----
 
-const isoMathOps = {
+const isoMoveOpsOnly = {
   dateParts: computeIsoDateParts,
   monthCodeParts: computeIsoMonthCodeParts,
   monthsInYearPart: computeIsoMonthsInYear,
   daysInMonthParts: computeIsoDaysInMonth,
   monthAdd: isoMonthAdd,
-}
-
-export const isoMoveOps: NativeMoveOps = {
-  ...nativeMoveBase,
-  ...isoMathOps,
   leapMonth: noop as LeapMonthOp,
   epochMilli: isoArgsToEpochMilli as EpochMilliOp,
 }
 
+export const isoMoveOps: NativeMoveOps = {
+  ...nativeMoveBase,
+  ...isoMoveOpsOnly,
+}
+
 export const isoDiffOps: NativeDiffOps = {
   ...nativeDiffBase,
-  ...isoMathOps,
+  ...isoMoveOps,
   monthsInYearSpan: computeIsoMonthsInYearSpan,
 }
 
@@ -304,24 +304,24 @@ export const intlMonthDayModOps: Omit<NativeMonthDayModOps, 'id'> = {
 // Math
 // ----
 
-const intlMathOps = {
+const intlMoveOpsOnly = {
   dateParts: computeIntlDateParts,
   monthCodeParts: computeIntlMonthCodeParts,
   monthsInYearPart: computeIntlMonthsInYear,
   daysInMonthParts: computeIntlDaysInMonth,
   monthAdd: intlMonthAdd,
-}
-
-export const intlMoveOps: NativeMoveOps = {
-  ...nativeMoveBase,
-  ...intlMathOps,
   leapMonth: computeIntlLeapMonth,
   epochMilli: computeIntlEpochMilli,
 }
 
+export const intlMoveOps: NativeMoveOps = {
+  ...nativeMoveBase,
+  ...intlMoveOpsOnly,
+}
+
 export const intlDiffOps: NativeDiffOps = {
   ...nativeDiffBase,
-  ...intlMathOps,
+  ...intlMoveOpsOnly,
   monthsInYearSpan: computeIntlMonthsInYearSpan,
 }
 

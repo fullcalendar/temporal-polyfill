@@ -145,22 +145,20 @@ export type NativeMonthDayModOps = NativeMonthDayRefineOps & {
 // Math
 // -----------------------------------------------------------------------------
 
-export interface NativeMathOps {
+export interface NativeMoveOpsOnly {
   dateParts: DatePartsOp
   monthCodeParts: MonthCodePartsOp
   monthsInYearPart: MonthsInYearPartOp
   daysInMonthParts: DaysInMonthPartsOp
   monthAdd: MonthAddOp
+  leapMonth: LeapMonthOp
+  epochMilli: EpochMilliOp
 }
 
-export type NativeMoveOps = MoveOps &
-  NativeMathOps & {
-    leapMonth: LeapMonthOp
-    epochMilli: EpochMilliOp
-  }
+export type NativeMoveOps = MoveOps & NativeMoveOpsOnly
 
 export type NativeDiffOps = DiffOps &
-  NativeMathOps & {
+  NativeMoveOpsOnly & {
     monthsInYearSpan: MonthsInYearSpanOp
   }
 
