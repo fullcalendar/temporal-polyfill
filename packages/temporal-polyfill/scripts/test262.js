@@ -110,7 +110,7 @@ yargs(hideBin(process.argv))
         test262Dir: joinPaths(monorepoDir, 'test262'),
         polyfillCodeFile: joinPaths(pkgDir, polyfillPath),
         expectedFailureFiles: expectedFailureFiles.map((filename) =>
-          joinPaths(scriptsDir, 'test-config', filename),
+          joinPaths(scriptsDir, 'test262-config', filename),
         ),
         testGlobs: options._,
         timeoutMsecs: options.timeout || 86400000,

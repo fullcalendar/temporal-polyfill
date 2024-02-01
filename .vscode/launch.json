@@ -6,7 +6,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}/packages/temporal-polyfill",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test", "--no-timeout", "${file}"],
+      "runtimeArgs": ["run", "test262", "--no-timeout", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true
@@ -17,13 +17,7 @@
       "request": "launch",
       "cwd": "${fileDirname}",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "run",
-        "test:own",
-        "--test-timeout",
-        "3600000",
-        "${file}"
-      ],
+      "runtimeArgs": ["run", "vitest", "--test-timeout", "3600000", "${file}"],
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "smartStep": true
