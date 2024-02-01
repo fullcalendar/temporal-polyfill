@@ -7,6 +7,6 @@
     "source.organizeImports.biome": "explicit"
   },
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsdk": "node_modules/.pnpm/typescript@5.3.3/node_modules/typescript/lib",
-  "biome.lspBin": "node_modules/.pnpm/@biomejs+biome@1.5.1/node_modules/@biomejs/biome/bin/biome"
+  "typescript.tsdk": "packages/temporal-polyfill/node_modules/typescript/lib",
+  "biome.lspBin": "packages/temporal-polyfill/node_modules/@biomejs/biome/bin/biome"
 }

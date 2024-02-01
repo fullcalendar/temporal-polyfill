@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
     "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
+    "resolveJsonModule": true,
     "composite": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "importHelpers": true,
-    "resolveJsonModule": true
+    "noEmit": true
   }
 }

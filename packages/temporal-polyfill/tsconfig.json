@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base",
+  "extends": "../../tsconfig.base.json",
   "include": ["src/**/*"],
   "exclude": ["src/typeOverrides/global.ts"]
 }

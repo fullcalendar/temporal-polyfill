@@ -1,11 +1,15 @@
 {
-  "extends": "../../tsconfig.base",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2018",
     "lib": ["ES2017", "ES2021.Intl", "ES2020.BigInt"],
     "rootDir": "src",
     "outDir": "dist/.tsc",
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "noEmit": false,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.ts"]
