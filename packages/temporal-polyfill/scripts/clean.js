@@ -15,7 +15,7 @@ async function cleanPkg(pkgDir, cleanTsc) {
   for (const file of files) {
     if (
       file !== '.npmignore' &&
-      (cleanTsc || (file !== '.tsc' && file !== 'tsconfig.tsbuildinfo'))
+      (cleanTsc || !(file === '.tsc' || file.endsWith('.tsbuildinfo')))
     ) {
       await rm(joinPaths(distDir, file), { recursive: true })
     }

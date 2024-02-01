@@ -2,10 +2,7 @@
   "extends": "../../tsconfig.base",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist/.tsc",
-    "target": "ES2018",
-    "lib": ["ES2017", "ES2020.Intl", "ES2020.BigInt"],
-    "skipLibCheck": true
+    "outDir": "dist/.tsc"
   },
   "include": ["src/**/*"],
   "exclude": ["src/typeOverrides/**"]

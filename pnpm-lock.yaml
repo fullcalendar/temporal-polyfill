@@ -125,7 +125,7 @@ importers:
         version: 4.9.6
       rollup-plugin-dts:
         specifier: ^6.1.0
-        version: 6.1.0(rollup@4.9.6)(typescript@5.1.6)
+        version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
       rollup-plugin-sourcemaps:
         specifier: ^0.6.3
         version: 0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@18.11.9)(rollup@4.9.6)
@@ -133,8 +133,8 @@ importers:
         specifier: ^5.27.0
         version: 5.27.0
       typescript:
-        specifier: ^5.1.6
-        version: 5.1.6
+        specifier: ^5.3.3
+        version: 5.3.3
       vitest:
         specifier: ^1.2.2
         version: 1.2.2(@types/node@18.11.9)(terser@5.27.0)
@@ -4112,7 +4112,7 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rollup-plugin-dts@6.1.0(rollup@4.9.6)(typescript@5.1.6):
+  /rollup-plugin-dts@6.1.0(rollup@4.9.6)(typescript@5.3.3):
     resolution: {integrity: sha512-ijSCPICkRMDKDLBK9torss07+8dl9UpY9z1N/zTeA1cIqdzMlpkV3MOOC7zukyvQfDyxa1s3Dl2+DeiP/G6DOw==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -4121,7 +4121,7 @@ packages:
     dependencies:
       magic-string: 0.30.5
       rollup: 4.9.6
-      typescript: 5.1.6
+      typescript: 5.3.3
     optionalDependencies:
       '@babel/code-frame': 7.23.5
     dev: true
@@ -4651,14 +4651,14 @@ packages:
       is-typed-array: 1.1.10
     dev: true
 
-  /typescript@5.1.6:
-    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+  /typescript@5.2.2:
+    resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: true
 
-  /typescript@5.2.2:
-    resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
+  /typescript@5.3.3:
+    resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: true

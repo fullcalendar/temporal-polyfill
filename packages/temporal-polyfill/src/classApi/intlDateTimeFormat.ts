@@ -94,7 +94,7 @@ export interface DateTimeFormat {
   formatRangeToParts(
     arg0: Formattable,
     arg1: Formattable,
-  ): Intl.DateTimeFormatPart[]
+  ): Intl.DateTimeRangeFormatPart[]
 }
 
 for (const methodName of ['formatRange', 'formatRangeToParts']) {
