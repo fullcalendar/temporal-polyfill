@@ -10,19 +10,24 @@ import {
   queryDurationSign,
   roundDuration,
 } from '../internal/durationMath'
+import { DurationBag } from '../internal/fields'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration } from '../internal/isoParse'
 import {
   DurationSlots,
   PlainDateSlots,
+  PlainDateTimeSlots,
   ZonedDateTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
 import { NumberSign, bindArgs, identity } from '../internal/utils'
 
+export type { DurationSlots, DurationBag }
+
 export type RelativeToArg =
   | ZonedDateTimeSlots<string, string>
+  | PlainDateTimeSlots<string>
   | PlainDateSlots<string>
 
 export const create = constructDurationSlots

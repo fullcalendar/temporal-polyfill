@@ -85,7 +85,7 @@ export type ZonedDateTimeDisplayTuple = [
   ...TimeDisplayTuple,
 ]
 
-export type RelativeToOptions<RA> = { relativeTo: RA }
+export type RelativeToOptions<RA> = { relativeTo?: RA }
 export type TotalUnitOptionsWithRel<RA> = TotalUnitOptions &
   RelativeToOptions<RA>
 
@@ -289,7 +289,7 @@ export function refineDiffOptions(
 export function refineDurationRoundOptions<RA, R>(
   options: DurationRoundOptions<RA>,
   defaultLargestUnit: Unit,
-  refineRelativeTo: (relativeTo: RA) => R,
+  refineRelativeTo: (relativeTo?: RA) => R,
 ): DurationRoundTuple<R> {
   options = normalizeUnitNameOptions(options, smallestUnitStr)
 
@@ -355,8 +355,8 @@ export function refineRoundOptions(
 
 export function refineTotalOptions<RA, R>(
   options: TotalUnitOptionsWithRel<RA> | UnitName,
-  refineRelativeTo: (relativeTo: RA) => R,
-): [Unit, R] {
+  refineRelativeTo: (relativeTo?: RA) => R | undefined,
+): [Unit, R | undefined] {
   options = normalizeUnitNameOptions(options, totalUnitStr)
 
   // alphabetical

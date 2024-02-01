@@ -29,7 +29,7 @@ import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
 export function totalDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,

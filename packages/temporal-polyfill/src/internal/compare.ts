@@ -53,7 +53,7 @@ export function compareZonedDateTimes<C, T>(
 }
 
 export function compareDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,

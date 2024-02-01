@@ -44,6 +44,7 @@ import { CalendarArg, CalendarSlot, getCalendarSlotFromBag } from './calendar'
 import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
 import { durationGetters, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
+import { PlainDateTimeArg } from './plainDateTime'
 import { createSlotClass, getSlots } from './slotClass'
 import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOps } from './timeZoneOpsQuery'
@@ -188,7 +189,7 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
 }
 
 function refinePublicRelativeTo(
-  relativeTo: ZonedDateTimeArg | PlainDateArg | undefined,
+  relativeTo: ZonedDateTimeArg | PlainDateTimeArg | PlainDateArg | undefined,
 ): MarkerSlots<CalendarSlot, TimeZoneSlot> | undefined {
   if (relativeTo !== undefined) {
     if (isObjectLike(relativeTo)) {

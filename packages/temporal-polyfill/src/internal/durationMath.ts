@@ -125,7 +125,7 @@ export function spanDuration<M>(
 // -----------------------------------------------------------------------------
 
 export function addDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   doSubtract: boolean,
@@ -203,7 +203,7 @@ function addDayTimeDurations(
 // -----------------------------------------------------------------------------
 
 export function roundDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
