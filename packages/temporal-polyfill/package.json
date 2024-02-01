@@ -89,7 +89,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
     "@js-temporal/temporal-test262-runner": "workspace:*",
-    "@types/node": "^16.9.1",
+    "@types/node": "^18.11.9",
     "concurrently": "^8.2.0",
     "export-size": "workspace:*",
     "gzip-size-cli": "^5.1.0",

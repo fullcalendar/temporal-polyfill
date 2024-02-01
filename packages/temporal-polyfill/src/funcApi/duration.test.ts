@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import * as DurationFns from '../dist/fns/duration.esm.js'
+import * as DurationFns from './duration'
 
 describe('create', () => {
   test('creates basic slots', () => {
