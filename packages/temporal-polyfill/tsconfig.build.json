@@ -7,7 +7,7 @@
     "outDir": "dist/.tsc",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "noEmit": false,
-    "sourceMap": true,
+    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },

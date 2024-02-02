@@ -8,7 +8,6 @@ import {
 } from 'path'
 import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
-import { dts as dtsPlugin } from 'rollup-plugin-dts'
 import esbuildPlugin from 'rollup-plugin-esbuild'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
@@ -56,12 +55,9 @@ async function buildConfigs(pkgDir, isDev) {
   const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
   const iifeConfigs = []
-  const dtsInputs = {}
-  const dtsConfigs = []
   const chunkNamesEnabled = isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
   const internalSrcBase = resolvePath(pkgDir, 'src', 'internal') + pathSep
-  const internalDtsBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -73,14 +69,8 @@ async function buildConfigs(pkgDir, isDev) {
       'src',
       (exportConfig.src || exportName) + '.ts',
     )
-    const dtsPath = joinPaths(
-      pkgDir,
-      'dist/.tsc',
-      (exportConfig.types || exportConfig.src || exportName) + extensions.dts,
-    )
 
     moduleInputs[exportName] = srcPath
-    dtsInputs[exportName] = dtsPath
 
     if (exportConfig.iife) {
       iifeConfigs.push({
@@ -113,37 +103,6 @@ async function buildConfigs(pkgDir, isDev) {
         ],
       })
     }
-  }
-
-  if (!isDev && Object.keys(dtsInputs).length) {
-    dtsConfigs.push({
-      input: dtsInputs,
-      onwarn,
-      plugins: [
-        // Will not bundle external packages by default
-        dtsPlugin(),
-        // WORKAROUND: dts plugin was including empty import statements,
-        // despite attempting hoistTransitiveImports:false. Especially bad
-        // because temporal-spec/global was being imported from index.
-        {
-          renderChunk(code) {
-            return code.replace(/^import ['"][^'"]*['"](;|$)/m, '')
-          },
-        },
-      ],
-      output: {
-        format: 'es',
-        dir: 'dist',
-        entryFileNames: '[name]' + extensions.dts,
-        chunkFileNames: chunkBase + extensions.dts,
-        minifyInternalExports: false,
-        manualChunks(id) {
-          if (id.startsWith(internalDtsBase)) {
-            return 'internal'
-          }
-        },
-      },
-    })
   }
 
   return [
@@ -198,7 +157,6 @@ async function buildConfigs(pkgDir, isDev) {
       ],
     },
     ...iifeConfigs,
-    ...dtsConfigs,
   ]
 }
 
