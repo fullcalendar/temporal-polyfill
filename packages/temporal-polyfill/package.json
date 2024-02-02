@@ -19,8 +19,7 @@
   "copyright": "2022 Adam Shaw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
-    "directory": "packages/temporal-polyfill"
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git"
   },
   "scripts": {
     "lint": "biome check .",
