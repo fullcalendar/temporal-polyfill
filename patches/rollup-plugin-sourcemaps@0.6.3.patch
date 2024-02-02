@@ -1,0 +1,27 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+deleted file mode 100644
+index ee8381d5054223d9655db6173864595fbed80d32..0000000000000000000000000000000000000000
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 3690559b27ccffeede30f45998af8e8c3a3fe5c9..6d5c47fcdb850b05604b11638969f44a6bc0d086 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -32,6 +32,7 @@ function sourcemaps({ include, exclude, readFile = fs__default['default'].readFi
+                 this.warn('Failed reading file');
+                 return null;
+             }
++            this.addWatchFile(id);
+             let map;
+             try {
+                 const result = await promisifiedResolveSourceMap(code, id, readFile);
+diff --git a/dist/index.js b/dist/index.js
+index 407a3b74d4471fae1c01f5eba7758bfd9e3c7a4c..7d35c6028441d9f7f60aa08a137b2c7635da41a6 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -24,6 +24,7 @@ function sourcemaps({ include, exclude, readFile = fs.readFile, } = {}) {
+                 this.warn('Failed reading file');
+                 return null;
+             }
++            this.addWatchFile(id);
+             let map;
+             try {
+                 const result = await promisifiedResolveSourceMap(code, id, readFile);

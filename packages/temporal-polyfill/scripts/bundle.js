@@ -8,7 +8,8 @@ import {
 } from 'path'
 import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
-import esbuildPlugin from 'rollup-plugin-esbuild'
+import { dts } from 'rollup-plugin-dts'
+import sourcemaps from 'rollup-plugin-sourcemaps'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
 import { terserSimple } from './lib/terser-simple.js'
@@ -55,31 +56,39 @@ async function buildConfigs(pkgDir, isDev) {
   const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
   const iifeConfigs = []
+  const dtsInputs = {}
+  const dtsConfigs = []
   const chunkNamesEnabled = isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
-  const internalSrcBase = resolvePath(pkgDir, 'src', 'internal') + pathSep
+  const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
     const exportName =
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
+    // TODO: rename to 'transpiled' path?
     const srcPath = joinPaths(
       pkgDir,
-      'src',
-      (exportConfig.src || exportName) + '.ts',
+      'dist/.tsc',
+      (exportConfig.src || exportName) + '.js',
+    )
+    const dtsPath = joinPaths(
+      pkgDir,
+      'dist/.tsc',
+      (exportConfig.types || exportConfig.src || exportName) + extensions.dts,
     )
 
     moduleInputs[exportName] = srcPath
+    dtsInputs[exportName] = dtsPath
 
     if (exportConfig.iife) {
       iifeConfigs.push({
         input: srcPath,
         onwarn,
         plugins: [
-          esbuildPlugin({
-            // TODO: configure
-          }),
+          // for reading sourcemaps from tsc
+          isDev && sourcemaps(),
         ],
         output: [
           {
@@ -109,26 +118,50 @@ async function buildConfigs(pkgDir, isDev) {
     }
   }
 
+  function manuallyResolveChunk(id) {
+    if (id.startsWith(internalSrcBase)) {
+      return 'internal'
+    }
+  }
+
+  if (!isDev && Object.keys(dtsInputs).length) {
+    dtsConfigs.push({
+      input: dtsInputs,
+      onwarn,
+      plugins: [
+        // Will not bundle external packages by default
+        dts(),
+        // WORKAROUND: dts plugin was including empty import statements,
+        // despite attempting hoistTransitiveImports:false. Especially bad
+        // because temporal-spec/global was being imported from index.
+        {
+          renderChunk(code) {
+            return code.replace(/^import ['"][^'"]*['"](;|$)/m, '')
+          },
+        },
+      ],
+      output: {
+        format: 'es',
+        dir: 'dist',
+        entryFileNames: '[name]' + extensions.dts,
+        chunkFileNames: chunkBase + extensions.dts,
+        minifyInternalExports: false,
+        manualChunks: manuallyResolveChunk,
+      },
+    })
+  }
+
   return [
     {
       input: moduleInputs,
       onwarn,
-      plugins: [
-        esbuildPlugin({
-          // TODO: configure
-        }),
-      ],
       output: [
         {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
           chunkFileNames: chunkBase + extensions.cjs,
-          manualChunks(id) {
-            if (id.startsWith(internalSrcBase)) {
-              return 'internal'
-            }
-          },
+          manualChunks: manuallyResolveChunk,
           minifyInternalExports: false,
           hoistTransitiveImports: false,
           plugins: [
@@ -144,11 +177,7 @@ async function buildConfigs(pkgDir, isDev) {
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
           chunkFileNames: chunkBase + extensions.esm,
-          manualChunks(id) {
-            if (id.startsWith(internalSrcBase)) {
-              return 'internal'
-            }
-          },
+          manualChunks: manuallyResolveChunk,
           minifyInternalExports: false,
           hoistTransitiveImports: false,
           plugins: [
@@ -165,6 +194,7 @@ async function buildConfigs(pkgDir, isDev) {
       ],
     },
     ...iifeConfigs,
+    ...dtsConfigs,
   ]
 }
 
