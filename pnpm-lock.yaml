@@ -123,6 +123,9 @@ importers:
       rollup-plugin-dts:
         specifier: ^6.1.0
         version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
+      rollup-plugin-esbuild:
+        specifier: ^6.1.1
+        version: 6.1.1(esbuild@0.19.11)(rollup@4.9.6)
       rollup-plugin-sourcemaps:
         specifier: ^0.6.3
         version: 0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@18.11.9)(rollup@4.9.6)
@@ -994,6 +997,21 @@ packages:
       picomatch: 2.3.1
       rollup: 3.29.4
     dev: false
+
+  /@rollup/pluginutils@5.1.0(rollup@4.9.6):
+    resolution: {integrity: sha512-XTIWOPPcpvyKI6L1NHo0lFlCyznUEyPmPY1mc3KpPVDYulHSTvyeLNVW00QTLIAFNhR3kYnJTQHeGqU4M3n09g==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@types/estree': 1.0.5
+      estree-walker: 2.0.2
+      picomatch: 2.3.1
+      rollup: 4.9.6
+    dev: true
 
   /@rollup/rollup-android-arm-eabi@4.9.6:
     resolution: {integrity: sha512-MVNXSSYN6QXOulbHpLMKYi60ppyO13W9my1qogeiAqtjb2yR4LSmfU2+POvDkLzhjYLXz9Rf9+9a3zFHW1Lecg==}
@@ -2020,6 +2038,10 @@ packages:
       which-typed-array: 1.1.9
     dev: true
 
+  /es-module-lexer@1.4.1:
+    resolution: {integrity: sha512-cXLGjP0c4T3flZJKQSuziYoq7MlT+rnvfZjfp7h+I7K9BNX54kP9nyWvdbwjQ4u1iWbOL4u96fgeZLToQlZC7w==}
+    dev: true
+
   /es-set-tostringtag@2.0.1:
     resolution: {integrity: sha512-g3OMbtlwY3QewlqAiMLI47KywjWZoEytKr8pf6iTC8uJq5bIAH52Z9pnQ8pVL6whrCto53JZDuUIsifGeLorTg==}
     engines: {node: '>= 0.4'}
@@ -2505,7 +2527,6 @@ packages:
 
   /estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
-    dev: false
 
   /estree-walker@3.0.3:
     resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
@@ -4121,6 +4142,23 @@ packages:
       typescript: 5.3.3
     optionalDependencies:
       '@babel/code-frame': 7.23.5
+    dev: true
+
+  /rollup-plugin-esbuild@6.1.1(esbuild@0.19.11)(rollup@4.9.6):
+    resolution: {integrity: sha512-CehMY9FAqJD5OUaE/Mi1r5z0kNeYxItmRO2zG4Qnv2qWKF09J2lTy5GUzjJR354ZPrLkCj4fiBN41lo8PzBUhw==}
+    engines: {node: '>=14.18.0'}
+    peerDependencies:
+      esbuild: '>=0.18.0'
+      rollup: ^1.20.0 || ^2.0.0 || ^3.0.0 || ^4.0.0
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.6)
+      debug: 4.3.4
+      es-module-lexer: 1.4.1
+      esbuild: 0.19.11
+      get-tsconfig: 4.7.2
+      rollup: 4.9.6
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /rollup-plugin-sourcemaps@0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@18.11.9)(rollup@4.9.6):

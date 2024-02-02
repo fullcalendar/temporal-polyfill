@@ -8,8 +8,8 @@ import {
 } from 'path'
 import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
-import { dts } from 'rollup-plugin-dts'
-import sourcemaps from 'rollup-plugin-sourcemaps'
+import { dts as dtsPlugin } from 'rollup-plugin-dts'
+import esbuildPlugin from 'rollup-plugin-esbuild'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
 import { terserSimple } from './lib/terser-simple.js'
@@ -60,18 +60,18 @@ async function buildConfigs(pkgDir, isDev) {
   const dtsConfigs = []
   const chunkNamesEnabled = isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
-  const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
+  const internalSrcBase = resolvePath(pkgDir, 'src', 'internal') + pathSep
+  const internalDtsBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
     const exportName =
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
-    // TODO: rename to 'transpiled' path?
     const srcPath = joinPaths(
       pkgDir,
-      'dist/.tsc',
-      (exportConfig.src || exportName) + '.js',
+      'src',
+      (exportConfig.src || exportName) + '.ts',
     )
     const dtsPath = joinPaths(
       pkgDir,
@@ -86,10 +86,7 @@ async function buildConfigs(pkgDir, isDev) {
       iifeConfigs.push({
         input: srcPath,
         onwarn,
-        plugins: [
-          // for reading sourcemaps from tsc
-          isDev && sourcemaps(),
-        ],
+        plugins: [esbuildPlugin()],
         output: [
           {
             format: 'iife',
@@ -118,19 +115,13 @@ async function buildConfigs(pkgDir, isDev) {
     }
   }
 
-  function manuallyResolveChunk(id) {
-    if (id.startsWith(internalSrcBase)) {
-      return 'internal'
-    }
-  }
-
   if (!isDev && Object.keys(dtsInputs).length) {
     dtsConfigs.push({
       input: dtsInputs,
       onwarn,
       plugins: [
         // Will not bundle external packages by default
-        dts(),
+        dtsPlugin(),
         // WORKAROUND: dts plugin was including empty import statements,
         // despite attempting hoistTransitiveImports:false. Especially bad
         // because temporal-spec/global was being imported from index.
@@ -146,7 +137,11 @@ async function buildConfigs(pkgDir, isDev) {
         entryFileNames: '[name]' + extensions.dts,
         chunkFileNames: chunkBase + extensions.dts,
         minifyInternalExports: false,
-        manualChunks: manuallyResolveChunk,
+        manualChunks(id) {
+          if (id.startsWith(internalDtsBase)) {
+            return 'internal'
+          }
+        },
       },
     })
   }
@@ -155,13 +150,18 @@ async function buildConfigs(pkgDir, isDev) {
     {
       input: moduleInputs,
       onwarn,
+      plugins: [esbuildPlugin()],
       output: [
         {
           format: 'cjs',
           dir: 'dist',
           entryFileNames: '[name]' + extensions.cjs,
           chunkFileNames: chunkBase + extensions.cjs,
-          manualChunks: manuallyResolveChunk,
+          manualChunks(id) {
+            if (id.startsWith(internalSrcBase)) {
+              return 'internal'
+            }
+          },
           minifyInternalExports: false,
           hoistTransitiveImports: false,
           plugins: [
@@ -177,7 +177,11 @@ async function buildConfigs(pkgDir, isDev) {
           dir: 'dist',
           entryFileNames: '[name]' + extensions.esm,
           chunkFileNames: chunkBase + extensions.esm,
-          manualChunks: manuallyResolveChunk,
+          manualChunks(id) {
+            if (id.startsWith(internalSrcBase)) {
+              return 'internal'
+            }
+          },
           minifyInternalExports: false,
           hoistTransitiveImports: false,
           plugins: [
