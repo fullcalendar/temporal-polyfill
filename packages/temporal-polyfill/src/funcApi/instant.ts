@@ -27,6 +27,8 @@ import { bindArgs } from '../internal/utils'
 import { prepCachedInstantFormat } from './intlFormatCache'
 import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 
+export type { InstantSlots }
+
 export const create = constructInstantSlots
 export const fromString = parseInstant
 

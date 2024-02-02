@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { expectPropsEqualStrict } from '../internal/testUtils'
 import { DurationBag, DurationSlots } from './duration'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
@@ -289,10 +290,6 @@ describe('toString', () => {
 // Utils
 // -----------------------------------------------------------------------------
 
-/*
-Spread this into every comparison
-Overriding values will still preserve order
-*/
 const defaultSlots = {
   branding: 'Duration',
   days: 0,
@@ -309,9 +306,4 @@ const defaultSlots = {
 
 function expectDurationEquals(d: DurationSlots, bag: DurationBag): void {
   expectPropsEqualStrict(d, { ...defaultSlots, ...bag })
-}
-
-function expectPropsEqualStrict(obj0: {}, obj1: {}): void {
-  expect(obj0).toStrictEqual(obj1)
-  expect(Object.keys(obj0)).toStrictEqual(Object.keys(obj1))
 }
