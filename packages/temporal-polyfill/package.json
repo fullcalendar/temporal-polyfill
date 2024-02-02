@@ -24,7 +24,7 @@
   },
   "scripts": {
     "lint": "biome check .",
-    "build": "./scripts/clean.js && pnpm run manifest && pnpm run readme && concurrently -c auto npm:build:dts npm:bundle",
+    "build": "./scripts/clean.js && concurrently -c auto npm:manifest npm:readme npm:build:dts npm:bundle",
     "build:dts": "pnpm run tsc && pnpm run bundle:dts",
     "dev": "./scripts/clean.js && pnpm run manifest --dev && concurrently -c auto npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build tsconfig.build.json",
