@@ -23,10 +23,10 @@
   },
   "scripts": {
     "lint": "biome check .",
-    "build": "./scripts/clean.js && pnpm run manifest && pnpm run tsc && pnpm run bundle && pnpm run readme",
-    "dev": "./scripts/clean.js && pnpm run manifest --dev && pnpm run tsc && concurrently --prefix-colors green npm:tsc:dev npm:bundle:dev",
+    "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:bundle",
+    "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build tsconfig.build.json",
-    "tsc:dev": "tsc --build tsconfig.build.json --watch --pretty",
+    "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
     "bundle": "./scripts/bundle.js",
     "bundle:dev": "./scripts/bundle.js --dev",
     "manifest": "./scripts/manifest.js",
