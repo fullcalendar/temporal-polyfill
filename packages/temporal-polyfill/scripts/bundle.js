@@ -76,7 +76,11 @@ async function buildConfigs(pkgDir, isDev) {
       iifeConfigs.push({
         input: srcPath,
         onwarn,
-        plugins: [esbuildPlugin()],
+        plugins: [
+          esbuildPlugin({
+            // TODO: configure
+          }),
+        ],
         output: [
           {
             format: 'iife',
@@ -109,7 +113,11 @@ async function buildConfigs(pkgDir, isDev) {
     {
       input: moduleInputs,
       onwarn,
-      plugins: [esbuildPlugin()],
+      plugins: [
+        esbuildPlugin({
+          // TODO: configure
+        }),
+      ],
       output: [
         {
           format: 'cjs',
