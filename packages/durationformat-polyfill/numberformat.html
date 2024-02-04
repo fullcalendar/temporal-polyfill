@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .tests {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2em;
+      }
+
+      .tests > * {
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      document.write('<p>User-agent: ' + window.navigator.userAgent + '</p>')
+      document.write('<div class="tests">')
+
+      const units = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second', 'millisecond', 'microsecond', 'nanosecond']
+      const unitDisplays = ['short', 'narrow', 'long']
+
+      for (const unit of units) {
+        document.write('<div>')
+        document.write('<h2>' + unit + '</h2>')
+
+        for (const unitDisplay of unitDisplays) {
+          const format = new Intl.NumberFormat('en-US', { style: 'unit', unit, unitDisplay })
+
+          document.write(
+            '<h3>' + unitDisplay + ': ' + format.format(1) + ' / ' + format.format(2) + '</h3>'
+          )
+        }
+
+        document.write('</div>')
+      }
+      document.write('</div>')
+    </script>
+  </body>
+</html>
