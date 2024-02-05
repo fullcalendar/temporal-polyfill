@@ -1,6 +1,8 @@
 import * as errorMessages from '../internal/errorMessages'
 import {
   ClassFormatConfig,
+  FormatPrepper,
+  createFormatForPrep,
   createFormatPrepper,
   instantConfig,
   plainDateConfig,
@@ -8,13 +10,13 @@ import {
   plainMonthDayConfig,
   plainTimeConfig,
   plainYearMonthConfig,
-  toEpochMillis,
   zonedDateTimeConfig,
 } from '../internal/intlFormatPrep'
 import {
   LocalesArg,
   OptionNames,
   OrigDateTimeFormat,
+  OrigFormattable,
 } from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
 import {
@@ -32,7 +34,6 @@ import { PlainYearMonth } from './plainYearMonth'
 import { getSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
-type OrigFormattable = number | Date
 type TemporalFormattable =
   | Instant
   | PlainDate
@@ -44,7 +45,7 @@ type TemporalFormattable =
 
 export type Formattable = TemporalFormattable | OrigFormattable
 
-const prepSubformatMap = new WeakMap<DateTimeFormat, BoundFormatPrepFunc>()
+const internalsMap = new WeakMap<DateTimeFormat, DateTimeFormatInternals>()
 
 // Intl.DateTimeFormat
 // -----------------------------------------------------------------------------
@@ -52,40 +53,31 @@ const prepSubformatMap = new WeakMap<DateTimeFormat, BoundFormatPrepFunc>()
 export class DateTimeFormat extends OrigDateTimeFormat {
   constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
     super(locales, options)
-
-    // Copy options so accessing doesn't cause side-effects
-    // Must store recursively flattened options because given `options` could mutate in future
-    // Algorithm: whitelist against resolved options
-    const resolvedOptions = this.resolvedOptions()
-    const origOptions = pluckProps(
-      Object.keys(options) as OptionNames,
-      resolvedOptions as Intl.DateTimeFormatOptions,
-    )
-
-    prepSubformatMap.set(
-      this,
-      createBoundFormatPrepFunc(origOptions, resolvedOptions),
-    )
+    internalsMap.set(this, new DateTimeFormatInternals(this, options))
   }
 
   format(arg?: Formattable): string {
-    const prepSubformat = prepSubformatMap.get(this)!
-    const [format, epochMilli] = prepSubformat(arg)
+    const internals = internalsMap.get(this)!
+    const [format, origFormattable] = internals.prepFormat(arg)
 
-    // can't use the origMethod.call() trick because .format() is always bound
-    // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
-    return format
-      ? format.format(epochMilli)
-      : super.format(arg as OrigFormattable)
+    // HACK for now
+    if (format === this) {
+      return super.format(arg)
+    }
+
+    return format.format(origFormattable)
   }
 
   formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
-    const prepSubformat = prepSubformatMap.get(this)!
-    const [format, epochMilli] = prepSubformat(arg)
+    const internals = internalsMap.get(this)!
+    const [format, origFormattable] = internals.prepFormat(arg)
 
-    return format
-      ? format.formatToParts(epochMilli)
-      : super.formatToParts(arg as OrigFormattable)
+    // HACK for now
+    if (format === this) {
+      return super.formatToParts(arg)
+    }
+
+    return format.formatToParts(origFormattable)
   }
 }
 
@@ -97,7 +89,10 @@ export interface DateTimeFormat {
   ): Intl.DateTimeRangeFormatPart[]
 }
 
-for (const methodName of ['formatRange', 'formatRangeToParts']) {
+for (const methodName of [
+  'formatRange',
+  'formatRangeToParts',
+] as (keyof Intl.DateTimeFormat)[]) {
   const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
 
   if (origMethod) {
@@ -109,32 +104,24 @@ for (const methodName of ['formatRange', 'formatRangeToParts']) {
           arg0: Formattable,
           arg1: Formattable,
         ) {
-          const prepSubformat = prepSubformatMap.get(this)!
-          const [format, epochMilli0, epochMilli1] = prepSubformat(arg0, arg1)
+          const internals = internalsMap.get(this)!
+          const [format, origFormattable0, origFormattable1] =
+            internals.prepFormat(arg0, arg1)
 
-          return format
-            ? origMethod.call(format, epochMilli0, epochMilli1)
-            : origMethod.call(this, arg0, arg1)
+          // HACK for now
+          if (format === this) {
+            return origMethod.call(format, arg0, arg1)
+          }
+
+          return format[methodName](origFormattable0, origFormattable1)
         },
       }),
     )
   }
 }
 
-// Format Prepping for Intl.DateTimeFormat ("Bound")
+// Config
 // -----------------------------------------------------------------------------
-
-type BoundFormatPrepFunc = (
-  // already bound to locale/options
-  arg0?: Formattable,
-  arg1?: Formattable,
-) => BoundFormatPrepFuncRes
-
-type BoundFormatPrepFuncRes = [
-  Intl.DateTimeFormat | undefined,
-  number | undefined,
-  number | undefined,
-]
 
 const classFormatConfigs: Record<string, ClassFormatConfig<any>> = {
   PlainYearMonth: plainYearMonthConfig,
@@ -146,45 +133,75 @@ const classFormatConfigs: Record<string, ClassFormatConfig<any>> = {
   // ZonedDateTime not allowed to be formatted by Intl.DateTimeFormat
 }
 
-function createBoundFormatPrepFunc(
-  origOptions: Intl.DateTimeFormatOptions,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): BoundFormatPrepFunc {
-  const resolvedLocale = resolvedOptions.locale
+// Internals
+// -----------------------------------------------------------------------------
 
-  const queryFormat = createLazyGenerator((branding: string) => {
-    const [transformOptions] = classFormatConfigs[branding]
-    const transformedOptions = transformOptions(origOptions)
-    return new OrigDateTimeFormat(resolvedLocale, transformedOptions)
-  })
+class DateTimeFormatInternals {
+  coreLocale: string
+  coreOptions: Intl.DateTimeFormatOptions
 
-  return (arg0, arg1) => {
-    const slots0 = getSlots(arg0)
-    const { branding } = slots0 || {}
-    let slots1: BrandingSlots | undefined
+  queryFormatPrepperForBranding = createLazyGenerator(
+    createFormatPrepperForBranding,
+  )
 
-    if (arg1 !== undefined) {
-      slots1 = getSlots(arg1)
+  constructor(
+    private coreFormat: Intl.DateTimeFormat,
+    options: Intl.DateTimeFormatOptions = {},
+  ) {
+    const resolveOptions = coreFormat.resolvedOptions()
+    this.coreLocale = resolveOptions.locale
 
-      if (branding !== (slots1 || {}).branding) {
+    // Copy options so accessing doesn't cause side-effects
+    // Must store recursively flattened options because given `options` could mutate in future
+    // Algorithm: whitelist against resolved options
+    this.coreOptions = pluckProps(
+      Object.keys(options) as OptionNames,
+      resolveOptions as Intl.DateTimeFormatOptions,
+    )
+  }
+
+  prepFormat(
+    ...formattables: Formattable[]
+  ): [Intl.DateTimeFormat, ...OrigFormattable[]] {
+    let branding: string | undefined
+
+    const slotsList = formattables.map((formattable, i) => {
+      const slots = getSlots(formattable)
+      const slotsBranding = (slots || {}).branding
+
+      if (i && branding && branding !== slotsBranding) {
         throw new TypeError(errorMessages.mismatchingFormatTypes)
       }
-    }
+
+      branding = slotsBranding
+      return slots
+    })
 
     if (branding) {
-      const config = classFormatConfigs[branding]
-      if (!config) {
-        throw new TypeError(errorMessages.invalidFormatType(branding))
-      }
-
-      return [
-        queryFormat(branding)!,
-        ...toEpochMillis(config, resolvedOptions, slots0, slots1),
-      ] as BoundFormatPrepFuncRes
+      return this.queryFormatPrepperForBranding(branding)(
+        this.coreLocale,
+        this.coreOptions,
+        ...(slotsList as BrandingSlots[]),
+      )
     }
 
-    return [] as unknown as BoundFormatPrepFuncRes
+    return [this.coreFormat, ...formattables]
   }
+}
+
+function createFormatPrepperForBranding<S extends BrandingSlots>(
+  branding: S['branding'],
+): FormatPrepper<S> {
+  const config = classFormatConfigs[branding]
+  if (!config) {
+    throw new TypeError(errorMessages.invalidFormatType(branding))
+  }
+
+  return createFormatPrepper(
+    config,
+    // a generator that conveniently caches by the first arg: forcedTimeZoneId
+    createLazyGenerator(createFormatForPrep),
+  )
 }
 
 // Format Prepping for each class' toLocaleString

@@ -104,21 +104,15 @@ const monthDayExclusions: OptionNames = [
 // Transformer Funcs
 // -----------------
 
-/*
-slots0 is only provided if doing toLocaleString/etc
-slots1 is only provided if doing toLocaleString/etc AND formatting a range
-*/
-export type OptionsTransformer<S> = (
+export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
-  slots0?: S,
-  slots1?: S,
 ) => Intl.DateTimeFormatOptions
 
-function createOptionsTransformer<S>(
+function createOptionsTransformer(
   validNames: OptionNames,
   fallbacks: Intl.DateTimeFormatOptions,
   excludedNames: OptionNames = [],
-): OptionsTransformer<S> {
+): OptionsTransformer {
   const excludedNameSet = new Set(excludedNames)
 
   return (options: Intl.DateTimeFormatOptions) => {
@@ -162,24 +156,10 @@ const transformEpochOptions = createOptionsTransformer(
   dateTimeValidNames,
   dateTimeFallbacks,
 )
-const transformZonedEpochOptionsBasic = createOptionsTransformer(
+const transformZonedEpochOptions = createOptionsTransformer(
   zonedValidNames,
   zonedFallbacks,
 )
-
-// HACK: only ever called with toLocaleString/etc, so can assume slots0
-function transformZonedEpochOptions(
-  options: Intl.DateTimeFormatOptions,
-  slots0?: { timeZone: IdLike },
-  slots1?: { timeZone: IdLike },
-): Intl.DateTimeFormatOptions {
-  options = transformZonedEpochOptionsBasic(options)
-  if (options.timeZone !== undefined) {
-    throw new TypeError(errorMessages.forbiddenFormatTimeZone)
-  }
-  options.timeZone = getCommonTimeZoneId(slots0!, slots1)
-  return options
-}
 
 // Specific Epoch Nano Converters
 // -----------------------------------------------------------------------------
@@ -219,9 +199,10 @@ function extractEpochNano(slots: BasicInstantSlots): DayTimeNano {
 // -----------------------------------------------------------------------------
 
 export type ClassFormatConfig<S> = [
-  OptionsTransformer<S>,
-  EpochNanoConverter<S>,
-  boolean?, // strictCalendarChecks
+  optionsTransformer: OptionsTransformer,
+  epochNanoConverter: EpochNanoConverter<S>,
+  strictCalendarChecks?: boolean,
+  getForcedTimeZoneId?: (...slotsList: S[]) => string,
 ]
 
 type EpochNanoConverter<S> = (
@@ -265,6 +246,8 @@ export const instantConfig: ClassFormatConfig<BasicInstantSlots> = [
 export const zonedDateTimeConfig: ClassFormatConfig<BasicZonedDateTimeSlots> = [
   transformZonedEpochOptions,
   extractEpochNano,
+  false,
+  getCommonTimeZoneId,
 ]
 
 const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
@@ -272,87 +255,75 @@ const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for ca
 export type FormatPrepper<S> = (
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
-  slots0: S,
-  slots1?: S,
-) => [Intl.DateTimeFormat, number, number?]
+  ...slotsList: S[]
+) => [Intl.DateTimeFormat, ...number[]]
 
-export type FormatQuerier<S> = (
+export type FormatQuerier = (
+  forcedTimeZoneId: string | undefined,
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
-  transformOptions: OptionsTransformer<S>,
-  slots0: S,
-  slots1?: S,
+  transformOptions: OptionsTransformer,
 ) => Intl.DateTimeFormat
 
 export function createFormatPrepper<S>(
   config: ClassFormatConfig<S>,
-  queryFormat: FormatQuerier<S> = createFormatForPrep,
+  queryFormat: FormatQuerier = createFormatForPrep,
 ): FormatPrepper<S> {
-  const [transformOptions] = config
+  const [transformOptions, , , getForcedTimeZoneId] = config
 
-  // biome-ignore lint/style/useDefaultParameterLast: by design
-  return (locales, options = emptyOptions, slots0, slots1) => {
+  return (locales, options = emptyOptions, ...slotsList: S[]) => {
     const subformat = queryFormat(
+      getForcedTimeZoneId ? getForcedTimeZoneId(...slotsList) : undefined,
       locales,
       options,
       transformOptions,
-      slots0,
-      slots1,
     )
+
     const resolvedOptions = subformat.resolvedOptions()
-    return [
-      subformat,
-      ...toEpochMillis(config, resolvedOptions, slots0, slots1),
-    ]
+    return [subformat, ...toEpochMillis(config, resolvedOptions, ...slotsList)]
   }
 }
 
-export function createFormatForPrep<S>(
+export function createFormatForPrep(
+  forcedTimeZoneId: string | undefined,
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
-  transformOptions: OptionsTransformer<S>,
-  slots0: S,
-  slots1?: S,
+  transformOptions: OptionsTransformer,
 ): Intl.DateTimeFormat {
-  return new OrigDateTimeFormat(
-    locales,
-    transformOptions(options, slots0, slots1),
-  )
+  options = transformOptions(options)
+
+  if (forcedTimeZoneId) {
+    if (options.timeZone !== undefined) {
+      throw new TypeError(errorMessages.forbiddenFormatTimeZone)
+    }
+    options.timeZone = forcedTimeZoneId
+  }
+
+  return new OrigDateTimeFormat(locales, options)
 }
 
 // General Epoch Conversion
 // -----------------------------------------------------------------------------
 
-export function toEpochMillis<S>(
+function toEpochMillis<S>(
   config: ClassFormatConfig<S>,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-  slots0: S,
-  slots1?: S,
-): [number, number?] {
-  const epochMilli0 = toEpochMilli(config, resolvedOptions, slots0)
-  const epochMilli1 =
-    slots1 !== undefined
-      ? toEpochMilli(config, resolvedOptions, slots1)
-      : undefined
+  ...slotsList: S[]
+): number[] {
+  const [, slotsToEpochNano, strictCalendarCheck] = config
 
-  return [epochMilli0, epochMilli1]
-}
+  return slotsList.map((slots: S) => {
+    if ((slots as any).calendar) {
+      checkCalendarsCompatible(
+        getId((slots as any).calendar),
+        resolvedOptions.calendar,
+        strictCalendarCheck,
+      )
+    }
 
-function toEpochMilli<S>(
-  [, slotsToEpochNano, strictCalendarCheck]: ClassFormatConfig<S>,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-  slots: S,
-): number {
-  if ((slots as any).calendar) {
-    checkCalendarsCompatible(
-      getId((slots as any).calendar),
-      resolvedOptions.calendar,
-      strictCalendarCheck,
-    )
-  }
-
-  const epochNano = slotsToEpochNano(slots, resolvedOptions)
-  return epochNanoToMilli(epochNano)
+    const epochNano = slotsToEpochNano(slots, resolvedOptions)
+    return epochNanoToMilli(epochNano)
+  })
 }
 
 function checkCalendarsCompatible(
@@ -371,8 +342,8 @@ function checkCalendarsCompatible(
 // -----------------------------------------------------------------------------
 
 // specifically for formatting... rename
-export function getCommonTimeZoneId(
-  slots0: { timeZone: IdLike },
+function getCommonTimeZoneId(
+  slots0?: { timeZone: IdLike }, // actually needed
   slots1?: { timeZone: IdLike }, // optional!
 ): string {
   const timeZoneId = getId(slots0!.timeZone)

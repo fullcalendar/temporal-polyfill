@@ -1,5 +1,6 @@
 export type LocalesArg = string | string[]
 export type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
+export type OrigFormattable = number | Date
 
 export const OrigDateTimeFormat = Intl.DateTimeFormat
 
