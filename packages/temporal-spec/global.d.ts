@@ -1,4 +1,3 @@
-
 export {} // treat as a module
 
 declare global {

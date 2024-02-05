@@ -6,6 +6,7 @@
       "**/dist/**",
       "**/export-size-output/**",
       "packages/export-size",
+      "packages/temporal-spec",
       "packages/temporal-test262-runner"
     ]
   },

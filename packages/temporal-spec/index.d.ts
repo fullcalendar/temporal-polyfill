@@ -1,6 +1,6 @@
 export namespace Temporal {
-  export type ComparisonResult = -1 | 0 | 1;
-  export type RoundingMode =
+  type ComparisonResult = -1 | 0 | 1;
+  type RoundingMode =
     | 'ceil'
     | 'floor'
     | 'expand'
@@ -15,7 +15,7 @@ export namespace Temporal {
    * Options for assigning fields using `with()` or entire objects with
    * `from()`.
    * */
-  export type AssignmentOptions = {
+  type AssignmentOptions = {
     /**
      * How to deal with out-of-range values
      *
@@ -34,7 +34,7 @@ export namespace Temporal {
    * objects with `Duration.from()`, and for arithmetic with
    * `Duration.prototype.add()` and `Duration.prototype.subtract()`.
    * */
-  export type DurationOptions = {
+  type DurationOptions = {
     /**
      * How to deal with out-of-range values
      *
@@ -51,7 +51,7 @@ export namespace Temporal {
   /**
    * Options for conversions of `Temporal.PlainDateTime` to `Temporal.Instant`
    * */
-  export type ToInstantOptions = {
+  type ToInstantOptions = {
     /**
      * Controls handling of invalid or ambiguous times caused by time zone
      * offset changes like Daylight Saving time (DST) transitions.
@@ -114,14 +114,14 @@ export namespace Temporal {
     offset?: 'use' | 'prefer' | 'ignore' | 'reject';
   };
 
-  export type ZonedDateTimeAssignmentOptions = Partial<
+  type ZonedDateTimeAssignmentOptions = Partial<
     AssignmentOptions & ToInstantOptions & OffsetDisambiguationOptions
   >;
 
   /**
    * Options for arithmetic operations like `add()` and `subtract()`
    * */
-  export type ArithmeticOptions = {
+  type ArithmeticOptions = {
     /**
      * Controls handling of out-of-range arithmetic results.
      *
@@ -133,16 +133,16 @@ export namespace Temporal {
     overflow?: 'constrain' | 'reject';
   };
 
-  export type DateUnit = 'year' | 'month' | 'week' | 'day';
-  export type TimeUnit = 'hour' | 'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond';
-  export type DateTimeUnit = DateUnit | TimeUnit;
+  type DateUnit = 'year' | 'month' | 'week' | 'day';
+  type TimeUnit = 'hour' | 'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond';
+  type DateTimeUnit = DateUnit | TimeUnit;
 
   /**
    * When the name of a unit is provided to a Temporal API as a string, it is
    * usually singular, e.g. 'day' or 'hour'. But plural unit names like 'days'
    * or 'hours' are aso accepted too.
    * */
-  export type PluralUnit<T extends DateTimeUnit> = {
+  type PluralUnit<T extends DateTimeUnit> = {
     year: 'years';
     month: 'months';
     week: 'weeks';
@@ -155,14 +155,14 @@ export namespace Temporal {
     nanosecond: 'nanoseconds';
   }[T];
 
-  export type LargestUnit<T extends DateTimeUnit> = 'auto' | T | PluralUnit<T>;
-  export type SmallestUnit<T extends DateTimeUnit> = T | PluralUnit<T>;
-  export type TotalUnit<T extends DateTimeUnit> = T | PluralUnit<T>;
+  type LargestUnit<T extends DateTimeUnit> = 'auto' | T | PluralUnit<T>;
+  type SmallestUnit<T extends DateTimeUnit> = T | PluralUnit<T>;
+  type TotalUnit<T extends DateTimeUnit> = T | PluralUnit<T>;
 
   /**
    * Options for outputting precision in toString() on types with seconds
    */
-  export type ToStringPrecisionOptions = {
+  type ToStringPrecisionOptions = {
     fractionalSecondDigits?: 'auto' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
     smallestUnit?: SmallestUnit<'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond'>;
 
@@ -183,20 +183,20 @@ export namespace Temporal {
     roundingMode?: RoundingMode;
   };
 
-  export type ShowCalendarOption = {
+  type ShowCalendarOption = {
     calendarName?: 'auto' | 'always' | 'never' | 'critical';
   };
 
-  export type CalendarTypeToStringOptions = Partial<ToStringPrecisionOptions & ShowCalendarOption>;
+  type CalendarTypeToStringOptions = Partial<ToStringPrecisionOptions & ShowCalendarOption>;
 
-  export type ZonedDateTimeToStringOptions = Partial<
+  type ZonedDateTimeToStringOptions = Partial<
     CalendarTypeToStringOptions & {
       timeZoneName?: 'auto' | 'never' | 'critical';
       offset?: 'auto' | 'never';
     }
   >;
 
-  export type InstantToStringOptions = Partial<
+  type InstantToStringOptions = Partial<
     ToStringPrecisionOptions & {
       timeZone: TimeZoneLike;
     }
@@ -206,7 +206,7 @@ export namespace Temporal {
    * Options to control the result of `until()` and `since()` methods in
    * `Temporal` types.
    */
-  export interface DifferenceOptions<T extends DateTimeUnit> {
+  interface DifferenceOptions<T extends DateTimeUnit> {
     /**
      * The unit to round to. For example, to round to the nearest minute, use
      * `smallestUnit: 'minute'`. This property is optional for `until()` and
@@ -266,7 +266,7 @@ export namespace Temporal {
    * properties are optional. A string is treated the same as an object whose
    * `smallestUnit` property value is that string.
    */
-  export type RoundTo<T extends DateTimeUnit> =
+  type RoundTo<T extends DateTimeUnit> =
     | SmallestUnit<T>
     | {
         /**
@@ -309,7 +309,7 @@ export namespace Temporal {
    * properties are optional. A string parameter is treated the same as an
    * object whose `smallestUnit` property value is that string.
    */
-  export type DurationRoundTo =
+  type DurationRoundTo =
     | SmallestUnit<DateTimeUnit>
     | ((
         | {
@@ -429,7 +429,7 @@ export namespace Temporal {
   /**
    * Options to control behavior of `Duration.prototype.total()`
    */
-  export type DurationTotalOf =
+  type DurationTotalOf =
     | TotalUnit<DateTimeUnit>
     | {
         /**
@@ -466,7 +466,7 @@ export namespace Temporal {
    * Options to control behavior of `Duration.compare()`, `Duration.add()`, and
    * `Duration.subtract()`
    */
-  export interface DurationArithmeticOptions {
+  interface DurationArithmeticOptions {
     /**
      * The starting point to use when variable-length units (years, months,
      * weeks depending on the calendar) are involved. This option is required if
@@ -490,7 +490,7 @@ export namespace Temporal {
     relativeTo?: Temporal.ZonedDateTime | Temporal.PlainDateTime | ZonedDateTimeLike | PlainDateTimeLike | string;
   }
 
-  export type DurationLike = {
+  type DurationLike = {
     years?: number;
     months?: number;
     weeks?: number;
@@ -510,7 +510,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/duration.html for more details.
    */
-  export class Duration {
+  class Duration {
     static from(item: Temporal.Duration | DurationLike | string): Temporal.Duration;
     static compare(
       one: Temporal.Duration | DurationLike | string,
@@ -569,7 +569,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/instant.html for more details.
    */
-  export class Instant {
+  class Instant {
     static fromEpochSeconds(epochSeconds: number): Temporal.Instant;
     static fromEpochMilliseconds(epochMilliseconds: number): Temporal.Instant;
     static fromEpochMicroseconds(epochMicroseconds: bigint): Temporal.Instant;
@@ -612,7 +612,7 @@ export namespace Temporal {
   type MonthCodeOrMonthAndYear = (YearOrEraAndEraYear & { month: number }) | { monthCode: string };
   type MonthOrMonthCode = { month: number } | { monthCode: string };
 
-  export interface CalendarProtocol {
+  interface CalendarProtocol {
     id: string;
     year(date: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainYearMonth | PlainDateLike | string): number;
     month(
@@ -684,7 +684,7 @@ export namespace Temporal {
   /**
    * Any of these types can be passed to Temporal methods instead of a Temporal.Calendar.
    * */
-  export type CalendarLike =
+  type CalendarLike =
     | string
     | CalendarProtocol
     | ZonedDateTime
@@ -701,7 +701,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/calendar.html for more details.
    */
-  export class Calendar implements CalendarProtocol {
+  class Calendar implements CalendarProtocol {
     static from(item: CalendarLike): Temporal.Calendar | CalendarProtocol;
     constructor(calendarIdentifier: string);
     readonly id: string;
@@ -773,7 +773,7 @@ export namespace Temporal {
     readonly [Symbol.toStringTag]: 'Temporal.Calendar';
   }
 
-  export type PlainDateLike = {
+  type PlainDateLike = {
     era?: string | undefined;
     eraYear?: number | undefined;
     year?: number;
@@ -799,7 +799,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/date.html for more details.
    */
-  export class PlainDate {
+  class PlainDate {
     static from(item: Temporal.PlainDate | PlainDateLike | string, options?: AssignmentOptions): Temporal.PlainDate;
     static compare(
       one: Temporal.PlainDate | PlainDateLike | string,
@@ -856,7 +856,7 @@ export namespace Temporal {
     readonly [Symbol.toStringTag]: 'Temporal.PlainDate';
   }
 
-  export type PlainDateTimeLike = {
+  type PlainDateTimeLike = {
     era?: string | undefined;
     eraYear?: number | undefined;
     year?: number;
@@ -895,7 +895,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/datetime.html for more details.
    */
-  export class PlainDateTime {
+  class PlainDateTime {
     static from(
       item: Temporal.PlainDateTime | PlainDateTimeLike | string,
       options?: AssignmentOptions
@@ -977,7 +977,7 @@ export namespace Temporal {
     readonly [Symbol.toStringTag]: 'Temporal.PlainDateTime';
   }
 
-  export type PlainMonthDayLike = {
+  type PlainMonthDayLike = {
     era?: string | undefined;
     eraYear?: number | undefined;
     year?: number;
@@ -994,7 +994,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/monthday.html for more details.
    */
-  export class PlainMonthDay {
+  class PlainMonthDay {
     static from(
       item: Temporal.PlainMonthDay | PlainMonthDayLike | string,
       options?: AssignmentOptions
@@ -1015,7 +1015,7 @@ export namespace Temporal {
     readonly [Symbol.toStringTag]: 'Temporal.PlainMonthDay';
   }
 
-  export type PlainTimeLike = {
+  type PlainTimeLike = {
     hour?: number;
     minute?: number;
     second?: number;
@@ -1048,7 +1048,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/time.html for more details.
    */
-  export class PlainTime {
+  class PlainTime {
     static from(item: Temporal.PlainTime | PlainTimeLike | string, options?: AssignmentOptions): Temporal.PlainTime;
     static compare(
       one: Temporal.PlainTime | PlainTimeLike | string,
@@ -1099,7 +1099,7 @@ export namespace Temporal {
   /**
    * A plain object implementing the protocol for a custom time zone.
    */
-  export interface TimeZoneProtocol {
+  interface TimeZoneProtocol {
     id: string;
     getOffsetNanosecondsFor(instant: Temporal.Instant | string): number;
     getOffsetStringFor?(instant: Temporal.Instant | string): string;
@@ -1118,7 +1118,7 @@ export namespace Temporal {
   /**
    * Any of these types can be passed to Temporal methods instead of a Temporal.TimeZone.
    * */
-  export type TimeZoneLike = string | TimeZoneProtocol | ZonedDateTime;
+  type TimeZoneLike = string | TimeZoneProtocol | ZonedDateTime;
 
   /**
    * A `Temporal.TimeZone` is a representation of a time zone: either an
@@ -1134,7 +1134,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/timezone.html for more details.
    */
-  export class TimeZone implements TimeZoneProtocol {
+  class TimeZone implements TimeZoneProtocol {
     static from(timeZone: TimeZoneLike): Temporal.TimeZone | TimeZoneProtocol;
     constructor(timeZoneIdentifier: string);
     readonly id: string;
@@ -1154,7 +1154,7 @@ export namespace Temporal {
     readonly [Symbol.toStringTag]: 'Temporal.TimeZone';
   }
 
-  export type PlainYearMonthLike = {
+  type PlainYearMonthLike = {
     era?: string | undefined;
     eraYear?: number | undefined;
     year?: number;
@@ -1170,7 +1170,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/yearmonth.html for more details.
    */
-  export class PlainYearMonth {
+  class PlainYearMonth {
     static from(
       item: Temporal.PlainYearMonth | PlainYearMonthLike | string,
       options?: AssignmentOptions
@@ -1215,7 +1215,7 @@ export namespace Temporal {
     readonly [Symbol.toStringTag]: 'Temporal.PlainYearMonth';
   }
 
-  export type ZonedDateTimeLike = {
+  type ZonedDateTimeLike = {
     era?: string | undefined;
     eraYear?: number | undefined;
     year?: number;
@@ -1248,7 +1248,7 @@ export namespace Temporal {
     calendar: string | CalendarProtocol;
   };
 
-  export class ZonedDateTime {
+  class ZonedDateTime {
     static from(
       item: Temporal.ZonedDateTime | ZonedDateTimeLike | string,
       options?: ZonedDateTimeAssignmentOptions
@@ -1337,7 +1337,7 @@ export namespace Temporal {
    *
    * See https://tc39.es/proposal-temporal/docs/now.html for more details.
    */
-  export const Now: {
+  const Now: {
     /**
      * Get the exact system date and time as a `Temporal.Instant`.
      *
@@ -1480,7 +1480,7 @@ export namespace Temporal {
   };
 }
 
-declare namespace Intl {
+export namespace Intl {
   type Formattable =
     | Date
     | Temporal.Instant
@@ -1495,7 +1495,7 @@ declare namespace Intl {
     source: 'shared' | 'startRange' | 'endRange';
   }
 
-  export interface DateTimeFormat extends globalThis.Intl.DateTimeFormat {
+  interface DateTimeFormat extends globalThis.Intl.DateTimeFormat {
     /**
      * Format a date into a string according to the locale and formatting
      * options of this `Intl.DateTimeFormat` object.
@@ -1535,7 +1535,7 @@ declare namespace Intl {
     formatRangeToParts(startDate: Date | number, endDate: Date | number): DateTimeFormatRangePart[];
   }
 
-  export interface DateTimeFormatOptions extends Omit<globalThis.Intl.DateTimeFormatOptions, 'timeZone' | 'calendar'> {
+  interface DateTimeFormatOptions extends Omit<globalThis.Intl.DateTimeFormatOptions, 'timeZone' | 'calendar'> {
     calendar?: string | Temporal.CalendarProtocol;
     timeZone?: string | Temporal.TimeZoneProtocol;
     // TODO: remove the props below after TS lib declarations are updated
@@ -1544,7 +1544,7 @@ declare namespace Intl {
     timeStyle?: 'full' | 'long' | 'medium' | 'short';
   }
 
-  export const DateTimeFormat: {
+  const DateTimeFormat: {
     /**
      * Creates `Intl.DateTimeFormat` objects that enable language-sensitive
      * date and time formatting.
@@ -1560,7 +1560,5 @@ declare namespace Intl {
     supportedLocalesOf(locales: string | string[], options?: DateTimeFormatOptions): string[];
   };
 }
-
-export { Intl as Intl };
 
 export function toTemporalInstant(this: Date): Temporal.Instant;
