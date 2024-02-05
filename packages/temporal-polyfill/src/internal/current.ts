@@ -1,5 +1,5 @@
 import { DayTimeNano } from './dayTimeNano'
-import { OrigDateTimeFormat } from './intlFormatUtils'
+import { RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAsc } from './isoFields'
 import { epochMilliToNano } from './timeMath'
 import { TimeZoneOffsetOps, zonedEpochNanoToIso } from './timeZoneOps'
@@ -28,5 +28,5 @@ export function getCurrentTimeZoneId(): string {
 }
 
 function computeCurrentTimeZoneId(): string {
-  return new OrigDateTimeFormat().resolvedOptions().timeZone
+  return new RawDateTimeFormat().resolvedOptions().timeZone
 }

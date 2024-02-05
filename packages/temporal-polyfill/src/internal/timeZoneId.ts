@@ -1,4 +1,4 @@
-import { OrigDateTimeFormat, standardLocaleId } from './intlFormatUtils'
+import { RawDateTimeFormat, standardLocaleId } from './intlFormatUtils'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './isoParse'
 import { utcTimeZoneId } from './timeZoneConfig'
@@ -45,7 +45,7 @@ export function getTimeZoneEssence(
  */
 const queryTimeZoneIntlFormat = createLazyGenerator(
   (id: string): Intl.DateTimeFormat =>
-    new OrigDateTimeFormat(standardLocaleId, {
+    new RawDateTimeFormat(standardLocaleId, {
       timeZone: id,
       era: 'short',
       year: 'numeric',

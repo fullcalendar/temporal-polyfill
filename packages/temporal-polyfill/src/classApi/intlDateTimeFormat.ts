@@ -15,8 +15,8 @@ import {
 import {
   LocalesArg,
   OptionNames,
-  OrigDateTimeFormat,
-  OrigFormattable,
+  RawDateTimeFormat,
+  RawFormattable,
 } from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
 import {
@@ -43,14 +43,14 @@ type TemporalFormattable =
   | PlainMonthDay
   | PlainTime
 
-export type Formattable = TemporalFormattable | OrigFormattable
+export type Formattable = TemporalFormattable | RawFormattable
 
 const internalsMap = new WeakMap<DateTimeFormat, DateTimeFormatInternals>()
 
 // Intl.DateTimeFormat
 // -----------------------------------------------------------------------------
 
-export class DateTimeFormat extends OrigDateTimeFormat {
+export class DateTimeFormat extends RawDateTimeFormat {
   constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
     super(locales, options)
     internalsMap.set(this, new DateTimeFormatInternals(this, options))
@@ -93,9 +93,9 @@ for (const methodName of [
   'formatRange',
   'formatRangeToParts',
 ] as (keyof Intl.DateTimeFormat)[]) {
-  const origMethod = (OrigDateTimeFormat as Classlike).prototype[methodName]
+  const rawMethod = (RawDateTimeFormat as Classlike).prototype[methodName]
 
-  if (origMethod) {
+  if (rawMethod) {
     Object.defineProperties(
       DateTimeFormat.prototype,
       createPropDescriptors({
@@ -110,7 +110,7 @@ for (const methodName of [
 
           // HACK for now
           if (format === this) {
-            return origMethod.call(format, arg0, arg1)
+            return rawMethod.call(format, arg0, arg1)
           }
 
           return format[methodName](origFormattable0, origFormattable1)
@@ -162,7 +162,7 @@ class DateTimeFormatInternals {
 
   prepFormat(
     ...formattables: Formattable[]
-  ): [Intl.DateTimeFormat, ...OrigFormattable[]] {
+  ): [Intl.DateTimeFormat, ...RawFormattable[]] {
     let branding: string | undefined
 
     const slotsList = formattables.map((formattable, i) => {

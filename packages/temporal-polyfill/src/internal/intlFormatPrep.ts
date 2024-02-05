@@ -1,7 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
-import { LocalesArg, OptionNames, OrigDateTimeFormat } from './intlFormatUtils'
+import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -299,7 +299,7 @@ export function createFormatForPrep(
     options.timeZone = forcedTimeZoneId
   }
 
-  return new OrigDateTimeFormat(locales, options)
+  return new RawDateTimeFormat(locales, options)
 }
 
 // General Epoch Conversion

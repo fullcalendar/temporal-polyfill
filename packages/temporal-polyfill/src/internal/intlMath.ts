@@ -13,7 +13,7 @@ import {
 } from './calendarNative'
 import { diffEpochMilliByDay } from './diff'
 import {
-  OrigDateTimeFormat,
+  RawDateTimeFormat,
   hashIntlFormatParts,
   standardLocaleId,
 } from './intlFormatUtils'
@@ -177,7 +177,7 @@ export function parseIntlPartsYear(intlParts: Record<string, string>): number {
  */
 export const queryCalendarIntlFormat = createLazyGenerator(
   (id: string): Intl.DateTimeFormat =>
-    new OrigDateTimeFormat(standardLocaleId, {
+    new RawDateTimeFormat(standardLocaleId, {
       calendar: id,
       timeZone: utcTimeZoneId,
       era: 'short', // 'narrow' is too terse for japanese months

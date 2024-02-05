@@ -1,8 +1,8 @@
 export type LocalesArg = string | string[]
 export type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
-export type OrigFormattable = number | Date
+export type RawFormattable = number | Date
 
-export const OrigDateTimeFormat = Intl.DateTimeFormat
+export const RawDateTimeFormat = Intl.DateTimeFormat
 
 export const standardLocaleId = 'en-GB' // 24-hour clock, gregorian by default
 
