@@ -5,6 +5,7 @@
       "**/node_modules/**",
       "**/dist/**",
       "**/export-size-output/**",
+      "test262",
       "packages/export-size",
       "packages/temporal-spec",
       "packages/temporal-test262-runner"
