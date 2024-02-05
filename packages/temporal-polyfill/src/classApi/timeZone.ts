@@ -26,13 +26,12 @@ import {
   createPlainDateTime,
   toPlainDateTimeSlots,
 } from './plainDateTime'
-import { createSlotClass, getSlots } from './slotClass'
+import { createProtocolValidator, createSlotClass, getSlots } from './slotClass'
 import {
   createAdapterOps,
   simpleTimeZoneAdapters,
   timeZoneAdapters,
 } from './timeZoneAdapter'
-import { createProtocolValidator } from './utils'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type TimeZone = any

@@ -66,9 +66,13 @@ import {
 } from './mixins'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
-import { PlainTimeArg, toPlainTimeSlots } from './plainTime'
+import {
+  PlainTimeArg,
+  optionalToPlainTimeFields,
+  toPlainTimeSlots,
+} from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { createSlotClass, getSlots } from './slotClass'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import {
   TimeZone,
   TimeZoneArg,
@@ -76,7 +80,6 @@ import {
   refineTimeZoneSlot,
 } from './timeZone'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { optionalToPlainTimeFields, rejectInvalidBag } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDate = any & DateFields

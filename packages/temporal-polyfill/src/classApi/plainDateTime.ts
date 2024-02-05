@@ -87,12 +87,16 @@ import {
   toPlainDateSlots,
 } from './plainDate'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
-import { PlainTime, PlainTimeArg, createPlainTime } from './plainTime'
+import {
+  PlainTime,
+  PlainTimeArg,
+  createPlainTime,
+  optionalToPlainTimeFields,
+} from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { createSlotClass, getSlots } from './slotClass'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { optionalToPlainTimeFields, rejectInvalidBag } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTime = any & DateTimeFields

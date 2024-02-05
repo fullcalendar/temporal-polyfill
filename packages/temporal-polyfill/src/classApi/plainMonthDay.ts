@@ -39,8 +39,7 @@ import {
   removeBranding,
 } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
-import { createSlotClass, getSlots } from './slotClass'
-import { rejectInvalidBag } from './utils'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
 export type PlainMonthDay = any & MonthDayFields
 export type PlainMonthDayArg =

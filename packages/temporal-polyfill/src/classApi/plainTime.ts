@@ -13,6 +13,7 @@ import {
 import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
@@ -46,10 +47,9 @@ import { prepPlainTimeFormat } from './intlDateTimeFormat'
 import { neverValueOf, removeBranding, timeGetters } from './mixins'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
-import { createSlotClass, getSlots } from './slotClass'
+import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
 import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
-import { rejectInvalidBag } from './utils'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainTime = any & TimeFields
@@ -188,4 +188,10 @@ export function toPlainTimeSlots(
 
   refineOverflowOptions(options) // parse unused options
   return parsePlainTime(arg)
+}
+
+export function optionalToPlainTimeFields(
+  timeArg: PlainTimeArg | undefined,
+): IsoTimeFields | undefined {
+  return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
 }

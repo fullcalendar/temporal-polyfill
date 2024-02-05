@@ -48,8 +48,7 @@ import {
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { createSlotClass, getSlots } from './slotClass'
-import { createProtocolValidator } from './utils'
+import { createProtocolValidator, createSlotClass, getSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type Calendar = any
