@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { bigIntToDayTimeNano } from '../internal/dayTimeNano'
 import { expectPropsEqualStrict } from '../internal/testUtils'
+import * as DurationFns from './duration'
 import { InstantSlots } from './instant'
 import * as InstantFns from './instant'
 
@@ -64,6 +65,24 @@ describe('epochMilliseconds', () => {
   it('works', () => {
     const inst = InstantFns.create(1000000n)
     expect(InstantFns.epochMilliseconds(inst)).toBe(1)
+  })
+})
+
+describe('add', () => {
+  it('advances by time units', () => {
+    const inst0 = InstantFns.create(0n)
+    const d = DurationFns.fromFields({ hours: 2 })
+    const inst1 = InstantFns.add(inst0, d)
+    expectInstantEquals(inst1, 7200000000000n)
+  })
+})
+
+describe('subtract', () => {
+  it('advances by time units', () => {
+    const inst0 = InstantFns.create(0n)
+    const d = DurationFns.fromFields({ hours: -2 })
+    const inst1 = InstantFns.subtract(inst0, d)
+    expectInstantEquals(inst1, 7200000000000n)
   })
 })
 

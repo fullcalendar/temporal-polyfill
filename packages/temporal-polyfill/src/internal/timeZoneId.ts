@@ -22,9 +22,9 @@ export function getTimeZoneAtomic(id: string): string | number {
       : utcTimeZoneId
 }
 
-/*
-returning undefined means utcTimeZoneId
-*/
+/**
+ * @returns Undefined means `utcTimeZoneId`
+ */
 export function getTimeZoneEssence(
   id: string,
 ): number | Intl.DateTimeFormat | undefined {
@@ -40,9 +40,9 @@ export function getTimeZoneEssence(
   }
 }
 
-/*
-Expects UPPERCASE id
-*/
+/**
+ * @param id Expects uppercase
+ */
 const queryTimeZoneIntlFormat = createLazyGenerator(
   (id: string): Intl.DateTimeFormat =>
     new OrigDateTimeFormat(standardLocaleId, {

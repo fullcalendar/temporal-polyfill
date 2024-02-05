@@ -34,4 +34,4 @@ export const Temporal = Object.defineProperties(
       Now,
     }),
   },
-)
+) as any // !!! (for tests)

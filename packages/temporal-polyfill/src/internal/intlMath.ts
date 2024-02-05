@@ -172,9 +172,9 @@ export function parseIntlPartsYear(intlParts: Record<string, string>): number {
   return parseInt(intlParts.relatedYear || intlParts.year)
 }
 
-/*
-Expects already-normalized ID
-*/
+/**
+ * @param id Expects already-normalized
+ */
 export const queryCalendarIntlFormat = createLazyGenerator(
   (id: string): Intl.DateTimeFormat =>
     new OrigDateTimeFormat(standardLocaleId, {
