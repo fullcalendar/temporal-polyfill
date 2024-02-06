@@ -67,6 +67,7 @@ async function writePkgJson(pkgDir, isDev) {
   delete distManifest.buildConfig
   delete distManifest.publishConfig
   delete distManifest.devDependencies
+  delete distManifest.devDependenciesNotes
   delete distManifest.disabledBuildConfig // temporary
 
   await writeFile(distManifestPath, JSON.stringify(distManifest, undefined, 2))
