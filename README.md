@@ -96,7 +96,7 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Spec date</td>
     <td>
-      Nov 2023 (latest)
+      Nov 2023
     </td>
     <td>
       May 2023
