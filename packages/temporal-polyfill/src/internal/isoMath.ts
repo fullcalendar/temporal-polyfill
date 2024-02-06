@@ -127,7 +127,7 @@ export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
     isoDateFields.isoDay,
   )
 
-  return modFloor(legacyDate.getUTCDay() + 1 - nudge, 7) || 7
+  return modFloor(legacyDate.getUTCDay() - nudge, 7) || 7
 }
 
 export function computeIsoYearOfWeek(isoDateFields: IsoDateFields): number {
