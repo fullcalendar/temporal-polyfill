@@ -67,6 +67,7 @@ async function writePkgJson(pkgDir, isDev) {
   delete distPkgJson.buildConfig
   delete distPkgJson.publishConfig
   delete distPkgJson.devDependencies
+  delete distPkgJson.disabledBuildConfig // temporary
 
   await writeFile(distPkgJsonPath, JSON.stringify(distPkgJson, undefined, 2))
 }
