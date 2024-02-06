@@ -2,6 +2,7 @@
 Unreleased
 ----------
 
+- fix: `dayOfWeek`/`yearOfWeek`/`weekOfYear` incorrectly using local time (#26, #27)
 - fix: Compliant string-level normalization of time zone IDs (mentioned in #3)
 - fix: `DateTimeFormat` constructor cannot be invoked without `new` (#25)
 - fix: `DateTimeFormat::format` correctly implemented as bound getter
