@@ -14,7 +14,7 @@
     }
   ],
   "license": "MIT",
-  "copyright": "2022 Adam Shaw",
+  "copyright": "2024 Adam Shaw",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -23,10 +23,7 @@
     "require": "./dist/index.cjs",
     "import": "./dist/index.mjs"
   },
-  "files": [
-    "/src",
-    "/dist"
-  ],
+  "files": ["/src", "/dist"],
   "scripts": {
     "compile-directions": "node ./scripts/compile-directions.cjs",
     "locales-compile": "pnpm run compile-directions"
