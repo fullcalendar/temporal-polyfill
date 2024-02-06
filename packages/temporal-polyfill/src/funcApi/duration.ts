@@ -11,6 +11,7 @@ import {
   roundDuration,
 } from '../internal/durationMath'
 import { DurationBag } from '../internal/fields'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration } from '../internal/isoParse'
 import {
@@ -73,6 +74,16 @@ export const total = bindArgs(
 )
 
 export const toString = formatDurationIso
+
+export function toLocaleString(
+  slots: DurationSlots,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return (Intl as any).DurationFormat
+    ? new (Intl as any).DurationFormat(locales, options).format(slots)
+    : formatDurationIso(slots)
+}
 
 export const sign = queryDurationSign as (slots: DurationSlots) => NumberSign
 

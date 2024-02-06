@@ -139,11 +139,13 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     },
     toString: formatDurationIso,
     toLocaleString(
-      _slots: DurationSlots,
+      slots: DurationSlots,
       locales?: LocalesArg,
       options?: any,
     ): string {
-      return new (Intl as any).DurationFormat(locales, options).format(this)
+      return (Intl as any).DurationFormat
+        ? new (Intl as any).DurationFormat(locales, options).format(this)
+        : formatDurationIso(slots)
     },
     toJSON(slots: DurationSlots): string {
       return formatDurationIso(slots)
