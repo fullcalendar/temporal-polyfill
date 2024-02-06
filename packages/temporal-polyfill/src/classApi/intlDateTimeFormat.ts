@@ -40,25 +40,54 @@ type TemporalFormattable =
 
 export type Formattable = TemporalFormattable | RawFormattable
 
-const internalsMap = new WeakMap<DateTimeFormat, DateTimeFormatInternals>()
-
 // Intl.DateTimeFormat
 // -----------------------------------------------------------------------------
 
-export interface DateTimeFormat extends Intl.DateTimeFormat {}
+export type DateTimeFormat = Intl.DateTimeFormat
+export const DateTimeFormat = createDateTimeFormatClass()
 
-export function DateTimeFormat(
-  this: any,
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions = {},
-): DateTimeFormat | undefined {
-  if (!(this instanceof DateTimeFormat)) {
-    return new (DateTimeFormat as Classlike)(locales, options)
+const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
+
+function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
+  const members = RawDateTimeFormat.prototype
+  const memberDescriptors = Object.getOwnPropertyDescriptors(members)
+  const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
+  const DateTimeFormat = function (
+    this: any,
+    locales: LocalesArg | undefined,
+    options: Intl.DateTimeFormatOptions = {},
+  ) {
+    if (!(this instanceof DateTimeFormat)) {
+      return new (DateTimeFormat as Classlike)(locales, options)
+    }
+    internalsMap.set(
+      this as DateTimeFormat,
+      createDateTimeFormatInternals(locales, options),
+    )
   }
-  internalsMap.set(
-    this as DateTimeFormat,
-    createDateTimeFormatInternals(locales, options),
-  )
+
+  for (const memberName in memberDescriptors) {
+    const memberDescriptor = memberDescriptors[memberName]
+    const formatLikeMethod =
+      memberName.startsWith('format') && createFormatMethod(memberName)
+
+    if (typeof memberDescriptor.value === 'function') {
+      memberDescriptor.value =
+        memberName === 'constructor'
+          ? DateTimeFormat
+          : formatLikeMethod || createProxiedMethod(memberName)
+    } else if (formatLikeMethod) {
+      // .format() is always bound to the instance. It's a getter
+      // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
+      memberDescriptor.get = function (this: DateTimeFormat) {
+        return formatLikeMethod.bind(this)
+      }
+    }
+  }
+
+  classDescriptors.prototype.value = Object.create(members, memberDescriptors)
+  Object.defineProperties(DateTimeFormat, classDescriptors)
+  return DateTimeFormat as Classlike
 }
 
 function createFormatMethod(methodName: string) {
@@ -75,35 +104,6 @@ function createProxiedMethod(methodName: string) {
     return (prepFormat.rawFormat as any)[methodName](...args)
   }
 }
-
-// Descriptors
-// -----------------------------------------------------------------------------
-
-const members = RawDateTimeFormat.prototype
-const memberDescriptors = Object.getOwnPropertyDescriptors(members)
-const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
-
-for (const memberName in memberDescriptors) {
-  const memberDescriptor = memberDescriptors[memberName]
-  const formatLikeMethod =
-    memberName.startsWith('format') && createFormatMethod(memberName)
-
-  if (typeof memberDescriptor.value === 'function') {
-    memberDescriptor.value =
-      memberName === 'constructor'
-        ? DateTimeFormat
-        : formatLikeMethod || createProxiedMethod(memberName)
-  } else if (formatLikeMethod) {
-    // .format() is always bound to the instance. It's a getter
-    // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
-    memberDescriptor.get = function (this: DateTimeFormat) {
-      return formatLikeMethod.bind(this)
-    }
-  }
-}
-
-classDescriptors.prototype.value = Object.create(members, memberDescriptors)
-Object.defineProperties(DateTimeFormat, classDescriptors)
 
 // Config
 // -----------------------------------------------------------------------------
