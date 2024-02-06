@@ -57,22 +57,22 @@ export function DateTimeFormat(
   }
   internalsMap.set(
     this as DateTimeFormat,
-    new DateTimeFormatInternals(locales, options),
+    createDateTimeFormatInternals(locales, options),
   )
 }
 
 function createFormatMethod(methodName: string) {
   return function (this: DateTimeFormat, ...formattables: Formattable[]) {
-    const internals = internalsMap.get(this)!
-    const [format, ...rawFormattables] = internals.prepFormat(...formattables)
+    const prepFormat = internalsMap.get(this)!
+    const [format, ...rawFormattables] = prepFormat(...formattables)
     return (format as any)[methodName](...rawFormattables)
   }
 }
 
 function createProxiedMethod(methodName: string) {
   return function (this: DateTimeFormat, ...args: any[]) {
-    const internals = internalsMap.get(this)!
-    return (internals.coreFormat as any)[methodName](...args)
+    const prepFormat = internalsMap.get(this)!
+    return (prepFormat.rawFormat as any)[methodName](...args)
   }
 }
 
@@ -85,23 +85,20 @@ const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
 
 for (const memberName in memberDescriptors) {
   const memberDescriptor = memberDescriptors[memberName]
+  const formatLikeMethod =
+    memberName.startsWith('format') && createFormatMethod(memberName)
 
-  if (memberName.startsWith('format')) {
-    const formatMethod = createFormatMethod(memberName)
-
+  if (typeof memberDescriptor.value === 'function') {
+    memberDescriptor.value =
+      memberName === 'constructor'
+        ? DateTimeFormat
+        : formatLikeMethod || createProxiedMethod(memberName)
+  } else if (formatLikeMethod) {
     // .format() is always bound to the instance. It's a getter
     // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
-    if (memberDescriptor.get) {
-      memberDescriptor.get = function (this: DateTimeFormat) {
-        return formatMethod.bind(this)
-      }
-    } else {
-      memberDescriptor.value = formatMethod
+    memberDescriptor.get = function (this: DateTimeFormat) {
+      return formatLikeMethod.bind(this)
     }
-  } else if (memberName === 'constructor') {
-    memberDescriptor.value = DateTimeFormat
-  } else if (typeof memberDescriptor.value === 'function') {
-    memberDescriptor.value = createProxiedMethod(memberName)
   }
 }
 
@@ -124,32 +121,32 @@ const classFormatConfigs: Record<string, ClassFormatConfig<any>> = {
 // Internals
 // -----------------------------------------------------------------------------
 
-class DateTimeFormatInternals {
-  coreFormat: Intl.DateTimeFormat
-  coreLocale: string
-  coreOptions: Intl.DateTimeFormatOptions
+type DateTimeFormatInternalPrepper = (
+  ...formattables: Formattable[]
+) => [Intl.DateTimeFormat, ...RawFormattable[]]
 
-  queryFormatPrepperForBranding = createLazyGenerator(
+type DateTimeFormatInternals = DateTimeFormatInternalPrepper & {
+  rawFormat: Intl.DateTimeFormat
+}
+
+function createDateTimeFormatInternals(
+  locales?: LocalesArg,
+  options: Intl.DateTimeFormatOptions = {},
+): DateTimeFormatInternals {
+  const rawFormat = new RawDateTimeFormat(locales, options)
+  const resolveOptions = rawFormat.resolvedOptions()
+  const resolvedLocale = resolveOptions.locale
+  const copiedOptions = pluckProps(
+    Object.keys(options) as OptionNames,
+    resolveOptions as Intl.DateTimeFormatOptions,
+  )
+  const queryFormatPrepperForBranding = createLazyGenerator(
     createFormatPrepperForBranding,
   )
 
-  constructor(locales?: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-    this.coreFormat = new RawDateTimeFormat(locales, options)
-    const resolveOptions = this.coreFormat.resolvedOptions()
-    this.coreLocale = resolveOptions.locale
-
-    // Copy options so accessing doesn't cause side-effects
-    // Must store recursively flattened options because given `options` could mutate in future
-    // Algorithm: whitelist against resolved options
-    this.coreOptions = pluckProps(
-      Object.keys(options) as OptionNames,
-      resolveOptions as Intl.DateTimeFormatOptions,
-    )
-  }
-
-  prepFormat(
+  const prepFormat: DateTimeFormatInternalPrepper = (
     ...formattables: Formattable[]
-  ): [Intl.DateTimeFormat, ...RawFormattable[]] {
+  ) => {
     let branding: string | undefined
 
     const slotsList = formattables.map((formattable, i) => {
@@ -165,15 +162,17 @@ class DateTimeFormatInternals {
     })
 
     if (branding) {
-      return this.queryFormatPrepperForBranding(branding)(
-        this.coreLocale,
-        this.coreOptions,
+      return queryFormatPrepperForBranding(branding)(
+        resolvedLocale,
+        copiedOptions,
         ...(slotsList as BrandingSlots[]),
       )
     }
 
-    return [this.coreFormat, ...formattables]
+    return [rawFormat, ...formattables]
   }
+  ;(prepFormat as DateTimeFormatInternals).rawFormat = rawFormat
+  return prepFormat as DateTimeFormatInternals
 }
 
 function createFormatPrepperForBranding<S extends BrandingSlots>(
