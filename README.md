@@ -13,7 +13,7 @@ Only 20.0 kB, with near-perfect [spec compliance](#spec-compliance).
 - [Spec Compliance](#spec-compliance)
 - [Browser Support](#browser-support)
 - [BigInt Considerations](#bigint-considerations)
-- [Tree-shakeable API](#tree-shakeable-api) (coming soon)
+- [Tree-shakable API](#tree-shakable-api) (coming soon)
 
 
 ## Installation
@@ -79,14 +79,9 @@ Use a `<script>` tags with a CDN link:
     <td>Champions of the <a href='https://github.com/tc39/proposal-temporal'>Temporal proposal</a></td>
   </tr>
   <tr>
-    <td>Minified+gzip size &#10013;</td>
-    <td>20.0 kB</td>
-    <td>43.2 kB (+116%)</td>
-  </tr>
-  <tr>
-    <td>Minified-only size &#10013;</td>
-    <td>58.7 kB</td>
-    <td>206.0 kB (+251%)</td>
+    <td>Minified+gzip size</td>
+    <td><a href='https://bundlephobia.com/package/temporal-polyfill'>20 KB<a></td>
+    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>56 KB</a> (+180%)</td>
   </tr>
   <tr>
     <td>Spec compliance</td>
@@ -121,8 +116,6 @@ Use a `<script>` tags with a CDN link:
   </tr>
 </table>
 
-&#10013; Compares [global.min.js](https://cdn.jsdelivr.net/npm/temporal-polyfill@0.2.0/global.min.js) with [index.esm.js](https://cdn.jsdelivr.net/npm/@js-temporal/polyfill@0.4.4/dist/index.esm.js), which are similarly transpiled.
-
 
 ## Spec Compliance
 
@@ -133,7 +126,6 @@ Compliance with the latest version of the Temporal spec (Nov 2023) is near-perfe
 - `Duration::toString` does not display units greater than `Number.MAX_SAFE_INTEGER` according to spec. Precision is chosen differently.
 - *Custom implementations* of Calendars and TimeZones are queried differently. Only affects those subclassing built-in classes, which is extremely rare. See the CALLING entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
 - There are believed to be 3 bugs in the Temporal spec itself, one of which [has been reported](https://github.com/tc39/proposal-temporal/issues/2742). See SPEC-BUG entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
-- Canonicalization of time zone IDs is simplified, leveraging the built-in `Intl` API.
 - `Intl.DateTimeFormat` has not been polyfilled to accept number-offset values for the `timeZone` option.
 - Method descriptors and `Function::length` are not strictly compliant due to ES-related space-saving techniques.
 
@@ -260,7 +252,7 @@ Here's how to sidestep this browser compatibility issue:
 </table>
 
 
-## Tree-shakeable API
+## Tree-shakable API
 
 🚧 Coming Soon
 
