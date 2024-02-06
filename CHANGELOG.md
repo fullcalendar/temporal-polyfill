@@ -1,12 +1,14 @@
 
-Unreleased
-----------
+v0.2.1 (2024-02-05)
+-------------------
 
 - fix: `dayOfWeek`/`yearOfWeek`/`weekOfYear` incorrectly using local time (#26, #27)
 - fix: Compliant string-level normalization of time zone IDs (mentioned in #3)
 - fix: `DateTimeFormat` constructor cannot be invoked without `new` (#25)
 - fix: `DateTimeFormat::format` correctly implemented as bound getter
 - fix: `Duration::toLocaleString` falls back to `toString`
+- feature: better tree-shakability for ESM
+
 
 v0.2.0 (2024-01-07)
 -------------------
