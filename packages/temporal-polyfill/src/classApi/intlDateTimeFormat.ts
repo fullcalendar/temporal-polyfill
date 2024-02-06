@@ -52,11 +52,14 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   const members = RawDateTimeFormat.prototype
   const memberDescriptors = Object.getOwnPropertyDescriptors(members)
   const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
+
   const DateTimeFormat = function (
     this: any,
     locales: LocalesArg | undefined,
     options: Intl.DateTimeFormatOptions = {},
   ) {
+    // Constructor can be called without `new`
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#return_value
     if (!(this instanceof DateTimeFormat)) {
       return new (DateTimeFormat as Classlike)(locales, options)
     }

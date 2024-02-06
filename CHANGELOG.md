@@ -2,11 +2,10 @@
 Unreleased
 ----------
 
-- TODO: DurationFns.toLocaleString
-- TODO: should index/impl export `Intl` instead of `DateTimeFormat`?: yes
-- TODO: document *fns* api non-conformance:
-  - calendar/timeZone args don't accept full datetime strings, only ID
-
+- fix: Compliant string-level normalization of time zone IDs (mentioned in #3)
+- fix: `DateTimeFormat` constructor cannot be invoked without `new` (#25)
+- fix: `DateTimeFormat::format` correctly implemented as bound getter
+- fix: `Duration::toLocaleString` falls back to `toString`
 
 v0.2.0 (2024-01-07)
 -------------------
