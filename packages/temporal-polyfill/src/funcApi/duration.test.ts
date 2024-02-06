@@ -287,6 +287,14 @@ describe('toString', () => {
   })
 })
 
+describe('toLocaleString', () => {
+  it('most likely falls back to toString', () => {
+    const d = DurationFns.fromFields({ days: 2 })
+    const s = DurationFns.toLocaleString(d)
+    expect(s).toBeTruthy()
+  })
+})
+
 // Utils
 // -----------------------------------------------------------------------------
 
