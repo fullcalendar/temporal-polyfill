@@ -10,13 +10,13 @@ writePkgJson(
 )
 
 async function writePkgJson(pkgDir, isDev) {
-  const srcPkgJsonPath = joinPaths(pkgDir, 'package.json')
-  const distPkgJsonPath = joinPaths(pkgDir, 'dist/package.json')
+  const srcManifestPath = joinPaths(pkgDir, 'package.json')
+  const distManifestPath = joinPaths(pkgDir, 'dist/package.json')
 
-  const srcPkgJson = JSON.parse(await readFile(srcPkgJsonPath))
-  const distPkgJson = { ...srcPkgJson }
+  const srcManifest = JSON.parse(await readFile(srcManifestPath))
+  const distManifest = { ...srcManifest }
 
-  const exportMap = srcPkgJson.buildConfig.exports
+  const exportMap = srcManifest.buildConfig.exports
   const distExportMap = {}
   const sideEffectsList = []
   let iifeMinPath
@@ -51,23 +51,23 @@ async function writePkgJson(pkgDir, isDev) {
     }
   }
 
-  distPkgJson.types = distExportMap['.'].types
-  distPkgJson.main = distExportMap['.'].require
-  distPkgJson.module = distExportMap['.'].import
+  distManifest.types = distExportMap['.'].types
+  distManifest.main = distExportMap['.'].require
+  distManifest.module = distExportMap['.'].import
 
   if (iifeMinPath) {
-    distPkgJson.unpkg = distPkgJson.jsdelivr = iifeMinPath
+    distManifest.unpkg = distManifest.jsdelivr = iifeMinPath
   }
 
-  distPkgJson.exports = distExportMap
-  distPkgJson.sideEffects = sideEffectsList.length ? sideEffectsList : false
+  distManifest.exports = distExportMap
+  distManifest.sideEffects = sideEffectsList.length ? sideEffectsList : false
 
-  delete distPkgJson.private
-  delete distPkgJson.scripts
-  delete distPkgJson.buildConfig
-  delete distPkgJson.publishConfig
-  delete distPkgJson.devDependencies
-  delete distPkgJson.disabledBuildConfig // temporary
+  delete distManifest.private
+  delete distManifest.scripts
+  delete distManifest.buildConfig
+  delete distManifest.publishConfig
+  delete distManifest.devDependencies
+  delete distManifest.disabledBuildConfig // temporary
 
-  await writeFile(distPkgJsonPath, JSON.stringify(distPkgJson, undefined, 2))
+  await writeFile(distManifestPath, JSON.stringify(distManifest, undefined, 2))
 }
