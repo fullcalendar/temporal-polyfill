@@ -19,12 +19,7 @@ import {
   RawFormattable,
 } from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
-import {
-  Classlike,
-  createLazyGenerator,
-  createPropDescriptors,
-  pluckProps,
-} from '../internal/utils'
+import { Classlike, createLazyGenerator, pluckProps } from '../internal/utils'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
@@ -50,75 +45,66 @@ const internalsMap = new WeakMap<DateTimeFormat, DateTimeFormatInternals>()
 // Intl.DateTimeFormat
 // -----------------------------------------------------------------------------
 
-export class DateTimeFormat extends RawDateTimeFormat {
-  constructor(locales: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
-    super(locales, options)
-    internalsMap.set(this, new DateTimeFormatInternals(this, options))
-  }
+export interface DateTimeFormat extends Intl.DateTimeFormat {}
 
-  format(arg?: Formattable): string {
+export function DateTimeFormat(
+  this: any,
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions = {},
+): DateTimeFormat | undefined {
+  if (!(this instanceof DateTimeFormat)) {
+    return new (DateTimeFormat as Classlike)(locales, options)
+  }
+  internalsMap.set(
+    this as DateTimeFormat,
+    new DateTimeFormatInternals(locales, options),
+  )
+}
+
+function createFormatMethod(methodName: string) {
+  return function (this: DateTimeFormat, ...formattables: Formattable[]) {
     const internals = internalsMap.get(this)!
-    const [format, origFormattable] = internals.prepFormat(arg)
-
-    // HACK for now
-    if (format === this) {
-      return super.format(arg)
-    }
-
-    return format.format(origFormattable)
+    const [format, ...rawFormattables] = internals.prepFormat(...formattables)
+    return (format as any)[methodName](...rawFormattables)
   }
+}
 
-  formatToParts(arg?: Formattable): Intl.DateTimeFormatPart[] {
+function createProxiedMethod(methodName: string) {
+  return function (this: DateTimeFormat, ...args: any[]) {
     const internals = internalsMap.get(this)!
-    const [format, origFormattable] = internals.prepFormat(arg)
+    return (internals.coreFormat as any)[methodName](...args)
+  }
+}
 
-    // HACK for now
-    if (format === this) {
-      return super.formatToParts(arg)
+// Descriptors
+// -----------------------------------------------------------------------------
+
+const members = RawDateTimeFormat.prototype
+const memberDescriptors = Object.getOwnPropertyDescriptors(members)
+const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
+
+for (const memberName in memberDescriptors) {
+  const memberDescriptor = memberDescriptors[memberName]
+
+  if (memberName.startsWith('format')) {
+    const formatMethod = createFormatMethod(memberName)
+
+    if (memberDescriptor.get) {
+      memberDescriptor.get = function (this: DateTimeFormat) {
+        return formatMethod.bind(this)
+      }
+    } else {
+      memberDescriptor.value = formatMethod
     }
-
-    return format.formatToParts(origFormattable)
+  } else if (memberName === 'constructor') {
+    memberDescriptor.value = DateTimeFormat
+  } else if (typeof memberDescriptor.value === 'function') {
+    memberDescriptor.value = createProxiedMethod(memberName)
   }
 }
 
-export interface DateTimeFormat {
-  formatRange(arg0: Formattable, arg1: Formattable): string
-  formatRangeToParts(
-    arg0: Formattable,
-    arg1: Formattable,
-  ): Intl.DateTimeRangeFormatPart[]
-}
-
-for (const methodName of [
-  'formatRange',
-  'formatRangeToParts',
-] as (keyof Intl.DateTimeFormat)[]) {
-  const rawMethod = (RawDateTimeFormat as Classlike).prototype[methodName]
-
-  if (rawMethod) {
-    Object.defineProperties(
-      DateTimeFormat.prototype,
-      createPropDescriptors({
-        [methodName]: function (
-          this: DateTimeFormat,
-          arg0: Formattable,
-          arg1: Formattable,
-        ) {
-          const internals = internalsMap.get(this)!
-          const [format, origFormattable0, origFormattable1] =
-            internals.prepFormat(arg0, arg1)
-
-          // HACK for now
-          if (format === this) {
-            return rawMethod.call(format, arg0, arg1)
-          }
-
-          return format[methodName](origFormattable0, origFormattable1)
-        },
-      }),
-    )
-  }
-}
+classDescriptors.prototype.value = Object.create(members, memberDescriptors)
+Object.defineProperties(DateTimeFormat, classDescriptors)
 
 // Config
 // -----------------------------------------------------------------------------
@@ -137,6 +123,7 @@ const classFormatConfigs: Record<string, ClassFormatConfig<any>> = {
 // -----------------------------------------------------------------------------
 
 class DateTimeFormatInternals {
+  coreFormat: Intl.DateTimeFormat
   coreLocale: string
   coreOptions: Intl.DateTimeFormatOptions
 
@@ -144,11 +131,9 @@ class DateTimeFormatInternals {
     createFormatPrepperForBranding,
   )
 
-  constructor(
-    private coreFormat: Intl.DateTimeFormat,
-    options: Intl.DateTimeFormatOptions = {},
-  ) {
-    const resolveOptions = coreFormat.resolvedOptions()
+  constructor(locales?: LocalesArg, options: Intl.DateTimeFormatOptions = {}) {
+    this.coreFormat = new RawDateTimeFormat(locales, options)
+    const resolveOptions = this.coreFormat.resolvedOptions()
     this.coreLocale = resolveOptions.locale
 
     // Copy options so accessing doesn't cause side-effects

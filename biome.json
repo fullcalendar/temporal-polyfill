@@ -29,6 +29,7 @@
         "noConstEnum": "off",
         "noExplicitAny": "off",
         "noGlobalIsNan": "off",
+        "noMisleadingInstantiator": "off",
         "noShadowRestrictedNames": "off",
         "noUnsafeDeclarationMerging": "off"
       },
