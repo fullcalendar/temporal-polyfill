@@ -89,6 +89,8 @@ for (const memberName in memberDescriptors) {
   if (memberName.startsWith('format')) {
     const formatMethod = createFormatMethod(memberName)
 
+    // .format() is always bound to the instance. It's a getter
+    // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
     if (memberDescriptor.get) {
       memberDescriptor.get = function (this: DateTimeFormat) {
         return formatMethod.bind(this)
