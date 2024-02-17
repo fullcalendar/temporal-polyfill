@@ -385,8 +385,14 @@ const dateTimeRegExpStr =
   ')?' +
   ')?'
 
+// Would _normally_ need to modify to prevent reDoS attack,
+// (like https://github.com/moment/moment/pull/6015#issuecomment-1152961973)
+// BUT, this regexp is only used directly by annotationRegExp,
+// which only ever runs on strings already parsed by annotationsRegExpStr
 const annotationRegExpStr = '\\[(!?)([^\\]]*)\\]' // critical:1, annotation:2
-const annotationsRegExpStr = `((?:${annotationRegExpStr})*)` // multiple
+
+// Limit the number of annotations (maximum 9) to prevet reDoS attack
+const annotationsRegExpStr = `((?:${annotationRegExpStr}){0,9})` // multiple
 
 const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationsRegExpStr)
 const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
@@ -414,6 +420,20 @@ const durationRegExp = createRegExp(
     `(?:(\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
     ')?',
 )
+
+// NOTE: when modifying regexps, check for reDoS vulnerabilities:
+// https://devina.io/redos-checker
+/*
+;[
+  yearMonthRegExp,
+  monthDayRegExp,
+  dateTimeRegExp,
+  timeRegExp,
+  offsetRegExp,
+  // annotationRegExp, // no need to check. see note above
+  durationRegExp,
+].forEach((re) => console.log(re.source))
+*/
 
 // Maybe-parsing
 // -----------------------------------------------------------------------------
