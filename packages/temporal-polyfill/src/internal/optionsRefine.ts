@@ -106,9 +106,9 @@ interface TotalUnitOptions {
   unit: UnitName | keyof DurationFields
 }
 
-export type InstantDisplayOptions<TA> = { timeZone: TA } & TimeDisplayOptions
+export type InstantDisplayOptions<TA> = { timeZone?: TA } & TimeDisplayOptions
 
-export type InstantDisplayTuple<TA> = [TA, ...TimeDisplayTuple]
+export type InstantDisplayTuple<TA> = [TA | undefined, ...TimeDisplayTuple]
 
 export interface OverflowOptions {
   overflow?: keyof typeof overflowMap
@@ -419,7 +419,7 @@ export function refineInstantDisplayOptions<TA>(
 
   // alphabetical
   const timeDisplayTuple = refineTimeDisplayTuple(options)
-  const timeZoneArg: TA = options.timeZone
+  const timeZoneArg: TA | undefined = options.timeZone
 
   return [timeZoneArg, ...timeDisplayTuple]
 }
