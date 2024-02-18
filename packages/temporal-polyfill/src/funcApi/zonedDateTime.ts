@@ -41,7 +41,14 @@ import {
 import { moveZonedDateTime } from '../internal/move'
 import { ZonedFieldOptions } from '../internal/optionsRefine'
 import { roundZonedDateTime } from '../internal/round'
-import { DateSlots, ZonedDateTimeSlots } from '../internal/slots'
+import {
+  DateSlots,
+  ZonedDateTimeSlots,
+  getEpochMicroseconds,
+  getEpochMilliseconds,
+  getEpochNanoseconds,
+  getEpochSeconds,
+} from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   ZonedDateTimeFields,
@@ -63,6 +70,9 @@ import {
   refineCalendarIdString,
   refineTimeZoneIdString,
 } from './utils'
+
+// TODO: rename to keep scope? Slots/Fields/Bag?
+export type { ZonedDateTimeSlots, ZonedDateTimeBag, DateTimeBag }
 
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
@@ -86,6 +96,19 @@ export function fromFields(
     options,
   )
 }
+
+export const epochSeconds = getEpochSeconds as (
+  slots: ZonedDateTimeSlots<string, string>,
+) => number
+export const epochMilliseconds = getEpochMilliseconds as (
+  slots: ZonedDateTimeSlots<string, string>,
+) => number
+export const epochMicroseconds = getEpochMicroseconds as (
+  slots: ZonedDateTimeSlots<string, string>,
+) => bigint
+export const epochNanoseconds = getEpochNanoseconds as (
+  slots: ZonedDateTimeSlots<string, string>,
+) => bigint
 
 export const getISOFields = bindArgs(
   buildZonedIsoFields<string, string>,

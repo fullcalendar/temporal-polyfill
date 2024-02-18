@@ -23,6 +23,9 @@ import { NumberSign, bindArgs, identity } from '../internal/utils'
 import { prepCachedPlainTimeFormat } from './intlFormatCache'
 import { refineTimeZoneIdString } from './utils'
 
+// TODO: rename to keep scope? Slots/Fields/Bag?
+export type { PlainTimeSlots, TimeBag }
+
 export const create = constructPlainTimeSlots
 
 export const fromFields = refinePlainTimeBag

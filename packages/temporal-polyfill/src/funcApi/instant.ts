@@ -27,6 +27,7 @@ import { bindArgs } from '../internal/utils'
 import { prepCachedInstantFormat } from './intlFormatCache'
 import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 
+// TODO: rename to keep scope? Slots?
 export type { InstantSlots }
 
 export const create = constructInstantSlots

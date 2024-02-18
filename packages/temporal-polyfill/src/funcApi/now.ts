@@ -92,7 +92,9 @@ export function plainDateISO(
   )
 }
 
-export function plainTimeISO(timeZoneId: string): PlainTimeSlots {
+export function plainTimeISO(
+  timeZoneId: string = getCurrentTimeZoneId(),
+): PlainTimeSlots {
   return createPlainTimeSlots(
     getCurrentIsoDateTime(
       queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),

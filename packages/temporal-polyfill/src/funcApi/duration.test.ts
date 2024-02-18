@@ -44,7 +44,13 @@ describe('fromFields', () => {
   })
 })
 
-// TODO: withFields
+describe('withFields', () => {
+  it('modifies fields and returns a new object', () => {
+    const d0 = DurationFns.fromFields({ years: 1, months: 1 })
+    const d1 = DurationFns.withFields(d0, { months: 2 })
+    expectDurationEquals(d1, { years: 1, months: 2 })
+  })
+})
 
 describe('blank', () => {
   it('gives true for blank duration', () => {

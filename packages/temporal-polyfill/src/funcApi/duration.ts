@@ -24,6 +24,7 @@ import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
 import { NumberSign, bindArgs, identity } from '../internal/utils'
 
+// TODO: rename to keep scope? Slots/Fields/Bag?
 export type { DurationSlots, DurationBag }
 
 export type RelativeToArg =

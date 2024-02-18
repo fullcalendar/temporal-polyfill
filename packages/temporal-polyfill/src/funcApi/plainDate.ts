@@ -57,6 +57,9 @@ import {
 // OR do it on the PlainDateSlots?
 // TODO: name all args properly like 'plainDateSlots'???
 
+// TODO: rename to keep scope? Slots/Fields/Bag?
+export type { PlainDateSlots, DateBag }
+
 export const create = bindArgs(
   constructPlainDateSlots<string, string>,
   refineCalendarIdString,

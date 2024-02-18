@@ -64,6 +64,9 @@ import {
   refineCalendarIdString,
 } from './utils'
 
+// TODO: rename to keep scope? Slots/Fields/Bag?
+export type { PlainDateTimeSlots, DateTimeBag }
+
 export const create = bindArgs(
   constructPlainDateTimeSlots<string, string>,
   refineCalendarIdString,
