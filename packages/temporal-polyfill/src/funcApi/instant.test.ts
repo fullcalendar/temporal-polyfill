@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { bigIntToDayTimeNano } from '../internal/dayTimeNano'
-import { expectPropsEqualStrict } from '../internal/testUtils'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
+import { expectDurationEquals, expectInstantEquals } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
@@ -334,44 +333,3 @@ describe('rangeToLocaleStringParts', () => {
     expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
   })
 })
-
-// Utils
-// -----------------------------------------------------------------------------
-
-const defaultSlots = {
-  branding: 'Instant',
-  epochNanoseconds: 0n,
-}
-
-function expectInstantEquals(
-  inst: InstantFns.InstantSlots,
-  epochNanoseconds: bigint,
-): void {
-  expectPropsEqualStrict(inst, {
-    ...defaultSlots,
-    epochNanoseconds: bigIntToDayTimeNano(epochNanoseconds),
-  })
-}
-
-// TODO: DRY!!!...
-
-const defaultDurationSlots = {
-  branding: 'Duration',
-  days: 0,
-  hours: 0,
-  microseconds: 0,
-  milliseconds: 0,
-  minutes: 0,
-  months: 0,
-  nanoseconds: 0,
-  seconds: 0,
-  weeks: 0,
-  years: 0,
-}
-
-function expectDurationEquals(
-  d: DurationFns.DurationSlots,
-  bag: DurationFns.DurationBag,
-): void {
-  expectPropsEqualStrict(d, { ...defaultDurationSlots, ...bag })
-}

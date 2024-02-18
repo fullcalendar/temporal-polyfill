@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { expectPropsEqualStrict } from '../internal/testUtils'
-import { DurationBag, DurationSlots } from './duration'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
+import { expectDurationEquals } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
@@ -300,24 +299,3 @@ describe('toLocaleString', () => {
     expect(s).toBeTruthy()
   })
 })
-
-// Utils
-// -----------------------------------------------------------------------------
-
-const defaultSlots = {
-  branding: 'Duration',
-  days: 0,
-  hours: 0,
-  microseconds: 0,
-  milliseconds: 0,
-  minutes: 0,
-  months: 0,
-  nanoseconds: 0,
-  seconds: 0,
-  weeks: 0,
-  years: 0,
-}
-
-function expectDurationEquals(d: DurationSlots, bag: DurationBag): void {
-  expectPropsEqualStrict(d, { ...defaultSlots, ...bag })
-}
