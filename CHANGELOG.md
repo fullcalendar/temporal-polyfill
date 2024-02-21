@@ -1,3 +1,13 @@
+v0.2.2 (2024-02-20)
+-------------------
+
+- fix: when importing `'temporal-polyfill'` or `'temporal-polyfill/impl'`,
+  the symbol `DateTimeFormat` is exported when in fact `Intl` should be exported
+  according to the `temporal-spec` package. (#28)
+  Potentially BREAKING CHANGE for vanilla JS users importing `DateTimeFormat`.
+- fix: closed off potential attack vector for ReDoS attacks on regular
+  expressions that parse ISO datetime strings (76a6aca)
+
 
 v0.2.1 (2024-02-05)
 -------------------
