@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DateTimeFormat, Temporal } from './impl'
+import { Intl, Temporal, toTemporalInstant } from './impl'
 
 describe('Temporal.Duration', () => {
   it('most likely falls back to toString', () => {
@@ -13,7 +13,7 @@ describe('Intl.DateTimeFormat', () => {
   describe('constructor', () => {
     // https://github.com/fullcalendar/temporal-polyfill/issues/25
     it('can be called without new', () => {
-      const format = DateTimeFormat('en-US', { year: 'numeric' })
+      const format = Intl.DateTimeFormat('en-US', { year: 'numeric' })
       const pd = Temporal.PlainDate.from('2024-01-01')
       const s = format.format(pd)
       expect(s).toBe('2024')
@@ -22,7 +22,7 @@ describe('Intl.DateTimeFormat', () => {
 
   describe('format', () => {
     it('is always bound', () => {
-      const format = new DateTimeFormat('en-US', { year: 'numeric' })
+      const format = new Intl.DateTimeFormat('en-US', { year: 'numeric' })
       const pd = Temporal.PlainDate.from('2024-01-01')
       const formatMethod = format.format
       const s = formatMethod(pd)
@@ -32,8 +32,22 @@ describe('Intl.DateTimeFormat', () => {
 
   describe('supportedLocalesOf', () => {
     it('works', () => {
-      const locales = DateTimeFormat.supportedLocalesOf(['en', 'es'])
+      const locales = Intl.DateTimeFormat.supportedLocalesOf(['en', 'es'])
       expect(locales.length).toBe(2)
     })
+  })
+})
+
+describe('Intl', () => {
+  it('Has members aside from DateTimeFormat', () => {
+    expect(Intl.NumberFormat).toBeTruthy()
+  })
+})
+
+describe('toTemporalInstant', () => {
+  it('works when call with Date as this-context', () => {
+    const legacyDate = new Date(1708485414855)
+    const inst = toTemporalInstant.call(legacyDate)
+    expect(inst.epochNanoseconds).toBe(1708485414855000000n)
   })
 })

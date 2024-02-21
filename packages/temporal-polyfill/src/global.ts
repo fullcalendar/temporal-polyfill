@@ -1,4 +1,6 @@
-import { DateTimeFormat, Temporal, toTemporalInstant } from './impl'
+import { toTemporalInstant } from './classApi/instant'
+import { DateTimeFormat } from './classApi/intlDateTimeFormat'
+import { Temporal } from './classApi/temporal'
 import { createPropDescriptors } from './internal/utils'
 
 Object.defineProperties(globalThis, createPropDescriptors({ Temporal }))
