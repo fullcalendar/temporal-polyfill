@@ -3,7 +3,7 @@ import * as errorMessages from './errorMessages'
 import { queryCalendarIntlFormat } from './intlMath'
 
 export function resolveCalendarId(id: string): string {
-  id = normalizeCalendarId(id)
+  id = id.toLowerCase() // normalize
 
   if (id !== isoCalendarId && id !== gregoryCalendarId) {
     if (
@@ -19,16 +19,9 @@ export function resolveCalendarId(id: string): string {
   return id
 }
 
-function normalizeCalendarId(id: string): string {
-  id = id.toLowerCase()
-
-  if (id === 'islamicc') {
-    id = 'islamic-civil'
-  }
-
-  return id
-}
-
 export function computeCalendarIdBase(id: string): string {
+  if (id === 'islamicc') {
+    id = 'islamic'
+  }
   return id.split('-')[0]
 }
