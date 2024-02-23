@@ -4,6 +4,7 @@ import {
   EraParts,
   MonthCodeParts,
   NativeCalendar,
+  WeekParts,
   YearMonthParts,
 } from './calendarNative'
 import { diffEpochMilliByDay } from './diff'
@@ -130,36 +131,57 @@ export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
   return modFloor(legacyDate.getUTCDay() - nudge, 7) || 7
 }
 
-export function computeIsoYearOfWeek(isoDateFields: IsoDateFields): number {
-  return computeIsoWeekParts(isoDateFields)[0]
-}
+export function computeIsoWeekParts(
+  this: NativeCalendar,
+  isoDateFields: IsoDateFields,
+): WeekParts {
+  const startOfWeek = 1
+  const minDaysInWeek = this.id ? 1 : 4 // iso=4, gregory/japanese=1
 
-export function computeIsoWeekOfYear(isoDateFields: IsoDateFields): number {
-  return computeIsoWeekParts(isoDateFields)[1]
-}
+  const isoDayOfWeek = computeIsoDayOfWeek(isoDateFields)
+  const isoDayOfYear = computeIsoDayOfYear(isoDateFields)
 
-type WeekParts = [isoYear: number, isoWeek: number]
+  // 0-based
+  // analyze current date, relative to calendar-decided start-of-week
+  const dayOfWeek = modFloor(isoDayOfWeek - startOfWeek, 7)
+  const dayOfYear = isoDayOfYear - 1
 
-function computeIsoWeekParts(isoDateFields: IsoDateFields): WeekParts {
-  const doy = computeIsoDayOfYear(isoDateFields)
-  const dow = computeIsoDayOfWeek(isoDateFields)
-  const doj = computeIsoDayOfWeek(isoDateYearStart(isoDateFields))
-  const isoWeek = Math.floor((doy - dow + 10) / isoDaysInWeek)
-  const { isoYear } = isoDateFields
+  // 0-based
+  // analyze current year-start
+  const y0DayOfWeek = modFloor(dayOfWeek - dayOfYear, 7)
+  const y0WeekShift = computeWeekShift(y0DayOfWeek)
 
-  if (isoWeek < 1) {
-    return [
-      isoYear - 1,
-      doj === 5 || (doj === 6 && computeIsoInLeapYear(isoYear - 1)) ? 53 : 52,
-    ]
+  // 1-based
+  // tentative result
+  let weekOfYear = Math.floor((dayOfYear - y0WeekShift) / 7) + 1
+  let yearOfWeek = isoDateFields.isoYear
+
+  // Compute the day-of-year (0-based) where first week begins
+  // Results can be negative indicating the first week begins in the prev year
+  function computeWeekShift(yDayOfWeek: number): number {
+    return (7 - yDayOfWeek < minDaysInWeek ? 7 : 0) - yDayOfWeek
   }
-  if (isoWeek === 53) {
-    if (computeIsoDaysInYear(isoYear) - doy < 4 - dow) {
-      return [isoYear + 1, 1]
-    }
+
+  // For a given year relative to `yearOfWeek`, compute the total # of weeks
+  function computeWeeksInYear(delta: 0 | -1): number {
+    const daysInYear = computeIsoDaysInYear(yearOfWeek + delta)
+    const sign = delta || 1
+    const y1DayOfWeek = modFloor(y0DayOfWeek + daysInYear * sign, 7)
+    const y1WeekShift = computeWeekShift(y1DayOfWeek)
+    return (daysInYear + (y1WeekShift - y0WeekShift) * sign) / 7
   }
 
-  return [isoYear, isoWeek]
+  if (!weekOfYear) {
+    // in previous year's last week
+    weekOfYear = computeWeeksInYear(-1)
+    yearOfWeek--
+  } else if (weekOfYear > computeWeeksInYear(0)) {
+    // in next year's first week
+    weekOfYear = 1
+    yearOfWeek++
+  }
+
+  return [weekOfYear, yearOfWeek]
 }
 
 function isoDateYearStart(isoDateFields: IsoDateFields): IsoDateFields {

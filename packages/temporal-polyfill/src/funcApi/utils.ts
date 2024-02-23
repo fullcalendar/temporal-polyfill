@@ -8,6 +8,7 @@ import {
   createNativeInLeapYearOps,
   createNativeMonthsInYearOps,
   createNativePartOps,
+  createNativeWeekOps,
 } from '../internal/calendarNativeQuery'
 import { requireString } from '../internal/cast'
 import {
@@ -108,4 +109,18 @@ export function computeDaysInYear(slots: DateSlots<string>): number {
 export function computeDayOfYear(slots: DateSlots<string>): number {
   const calendarOps = createNativeDayOfYearOps(slots.calendar)
   return calendarOps.dayOfYear(slots)
+}
+
+export function computeWeekOfYear(
+  slots: DateSlots<string>,
+): number | undefined {
+  const calendarOps = createNativeWeekOps(slots.calendar)
+  return calendarOps.weekOfYear(slots)
+}
+
+export function computeYearOfWeek(
+  slots: DateSlots<string>,
+): number | undefined {
+  const calendarOps = createNativeWeekOps(slots.calendar)
+  return calendarOps.yearOfWeek(slots)
 }

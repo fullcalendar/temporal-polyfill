@@ -23,12 +23,7 @@ import {
 import { nativeDateUntil } from './diff'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
-import {
-  computeIsoDayOfWeek,
-  computeIsoDaysInWeek,
-  computeIsoWeekOfYear,
-  computeIsoYearOfWeek,
-} from './isoMath'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek } from './isoMath'
 import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
 
@@ -37,6 +32,7 @@ export type DateParts = [year: number, month: number, day: number]
 export type EraParts = [era: string | undefined, eraYear: number | undefined]
 export type MonthCodeParts = [monthCodeNumber: number, isLeapMonth: boolean]
 export type YearMonthParts = [year: number, month: number]
+export type WeekParts = [weekOfYear: number, yearOfWeek: number]
 
 // Function Types
 // (Must always be called from a CalendarOps object)
@@ -66,6 +62,9 @@ export type DaysInMonthPartsOp = (year: number, month: number) => number
 export type DaysInYearOp = (isoFields: IsoDateFields) => number
 export type DaysInYearPartOp = (year: number) => number
 export type DayOfYearOp = (isoFields: IsoDateFields) => number
+export type WeekOfYearOp = (isoFields: IsoDateFields) => number | undefined
+export type YearOfWeekOp = (isoFields: IsoDateFields) => number | undefined
+export type WeekPartsOp = (isoFields: IsoDateFields) => WeekParts | []
 export type EpochMilliOp = (
   year: number,
   month?: number,
@@ -179,6 +178,28 @@ export const nativeDiffBase: DiffOps = {
 // Parts & Stats
 // -----------------------------------------------------------------------------
 
+export interface NativeEraOps {
+  era: EraOp
+  eraParts: EraPartsOp
+}
+
+export interface NativeEraYearOps {
+  eraYear: EraYearOp
+  eraParts: EraPartsOp
+}
+
+export interface NativeMonthCodeOps {
+  monthCode: MonthCodeOp
+  monthCodeParts: MonthCodePartsOp
+  dateParts: DatePartsOp
+}
+
+export interface NativePartOps {
+  dateParts: DatePartsOp
+  eraParts: EraPartsOp
+  monthCodeParts: MonthCodePartsOp
+}
+
 export interface NativeInLeapYearOps {
   inLeapYear: InLeapYearOp
   dateParts: DatePartsOp
@@ -207,26 +228,24 @@ export interface NativeDayOfYearOps {
   dayOfYear: DayOfYearOp
 }
 
-export interface NativeEraOps {
-  era: EraOp
-  eraParts: EraPartsOp
+export interface NativeWeekOps {
+  weekOfYear: WeekOfYearOp
+  yearOfWeek: YearOfWeekOp
+  weekParts: WeekPartsOp
 }
 
-export interface NativeEraYearOps {
-  eraYear: EraYearOp
-  eraParts: EraPartsOp
+export function computeNativeWeekOfYear(
+  this: NativeWeekOps,
+  isoFields: IsoDateFields,
+): number | undefined {
+  return this.weekParts(isoFields)[0]
 }
 
-export interface NativeMonthCodeOps {
-  monthCode: MonthCodeOp
-  monthCodeParts: MonthCodePartsOp
-  dateParts: DatePartsOp
-}
-
-export interface NativePartOps {
-  dateParts: DatePartsOp
-  eraParts: EraPartsOp
-  monthCodeParts: MonthCodePartsOp
+export function computeNativeYearOfWeek(
+  this: NativeWeekOps,
+  isoFields: IsoDateFields,
+): number | undefined {
+  return this.weekParts(isoFields)[1]
 }
 
 // String Parsing
@@ -263,12 +282,11 @@ export type NativeStandardOps = NativeYearMonthRefineOps &
   NativeMonthCodeOps &
   NativePartOps &
   NativeYearMonthParseOps &
-  NativeMonthDayParseOps & {
+  NativeMonthDayParseOps &
+  NativeWeekOps & {
     mergeFields: MergeFieldsOp // for 'mod' ops
 
     dayOfWeek(isoFields: IsoDateFields): number
-    weekOfYear(isoFields: IsoDateFields): number
-    yearOfWeek(isoFields: IsoDateFields): number
     daysInWeek(isoFields: IsoDateFields): number
 
     year(isoFields: IsoDateFields): number
@@ -294,8 +312,6 @@ export const nativeStandardBase = {
   monthCode: computeNativeMonthCode,
 
   dayOfWeek: computeIsoDayOfWeek,
-  weekOfYear: computeIsoWeekOfYear,
-  yearOfWeek: computeIsoYearOfWeek,
   daysInWeek: computeIsoDaysInWeek,
 }
 
@@ -401,7 +417,7 @@ export function monthToMonthCodeNumber(
   return month - (leapMonth && month >= leapMonth ? 1 : 0)
 }
 
-// Era Utils
+// Utils
 // -----------------------------------------------------------------------------
 
 export function eraYearToYear(eraYear: number, eraOrigin: number): number {
@@ -409,8 +425,6 @@ export function eraYearToYear(eraYear: number, eraOrigin: number): number {
   // ||0 protects against -0
   return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1) || 0
 }
-
-// -----------------------------------------------------------------------------
 
 export function getCalendarEraOrigins(
   native: NativeCalendar,

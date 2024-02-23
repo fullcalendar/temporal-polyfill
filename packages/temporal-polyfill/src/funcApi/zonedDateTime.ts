@@ -25,12 +25,7 @@ import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
-import {
-  computeIsoDayOfWeek,
-  computeIsoDaysInWeek,
-  computeIsoWeekOfYear,
-  computeIsoYearOfWeek,
-} from '../internal/isoMath'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import {
   slotsWithCalendar,
@@ -66,6 +61,8 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
+  computeWeekOfYear,
+  computeYearOfWeek,
   getCalendarIdFromBag,
   refineCalendarIdString,
   refineTimeZoneIdString,
@@ -133,8 +130,8 @@ export function getFields(
 
 export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
 export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek)
-export const weekOfYear = adaptDateFunc(computeIsoWeekOfYear)
-export const yearOfWeek = adaptDateFunc(computeIsoYearOfWeek)
+export const weekOfYear = adaptDateFunc(computeWeekOfYear)
+export const yearOfWeek = adaptDateFunc(computeYearOfWeek)
 export const dayOfYear = adaptDateFunc(computeDayOfYear)
 export const daysInMonth = adaptDateFunc(computeDaysInMonth)
 export const daysInYear = adaptDateFunc(computeDaysInYear)

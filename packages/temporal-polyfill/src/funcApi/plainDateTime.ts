@@ -25,12 +25,7 @@ import { diffPlainDateTimes } from '../internal/diff'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
-import {
-  computeIsoDayOfWeek,
-  computeIsoDaysInWeek,
-  computeIsoWeekOfYear,
-  computeIsoYearOfWeek,
-} from '../internal/isoMath'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
 import {
   plainDateTimeWithPlainDate,
@@ -60,6 +55,8 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
+  computeWeekOfYear,
+  computeYearOfWeek,
   getCalendarIdFromBag,
   refineCalendarIdString,
 } from './utils'
@@ -98,12 +95,12 @@ export const dayOfWeek = computeIsoDayOfWeek as (
 export const daysInWeek = computeIsoDaysInWeek as (
   slots: PlainDateTimeSlots<string>,
 ) => number
-export const weekOfYear = computeIsoWeekOfYear as (
+export const weekOfYear = computeWeekOfYear as (
   slots: PlainDateTimeSlots<string>,
-) => number
-export const yearOfWeek = computeIsoYearOfWeek as (
+) => number | undefined
+export const yearOfWeek = computeYearOfWeek as (
   slots: PlainDateTimeSlots<string>,
-) => number
+) => number | undefined
 export const dayOfYear = computeDayOfYear as (
   slots: PlainDateTimeSlots<string>,
 ) => number
