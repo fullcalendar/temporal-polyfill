@@ -31,6 +31,7 @@ import {
 import { clampProp, divModFloor, divModTrunc, zipProps } from './utils'
 
 const maxDays = 100000000
+const maxMilli = maxDays * milliInDay
 const epochNanoMax: DayTimeNano = [maxDays, 0]
 const epochNanoMin: DayTimeNano = [-maxDays, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
@@ -331,10 +332,9 @@ export function epochNanoToIso(
 }
 
 /*
-Given epochMilli assumed to be within PlainDateTime's range
+Accommodates epochMillis that are slightly out-of-range
 */
 export function epochMilliToIso(epochMilli: number): {
-  // return value
   isoYear: number
   isoMonth: number
   isoDay: number
@@ -343,18 +343,17 @@ export function epochMilliToIso(epochMilli: number): {
   isoSecond: number
   isoMillisecond: number
 } {
-  const nudge =
-    epochMilli < -milliInDay * maxDays
-      ? 1
-      : epochMilli > milliInDay * maxDays
-        ? -1
-        : 0
-  const legacyDate = new Date(epochMilli + nudge * milliInDay)
+  const daysOver = // beyond min/max
+    Math.ceil(Math.max(0, Math.abs(epochMilli) - maxMilli) / milliInDay) *
+    Math.sign(epochMilli)
+
+  // create a date that's forced within bounds
+  const legacyDate = new Date(epochMilli - daysOver * milliInDay)
 
   return zipProps(isoDateTimeFieldNamesAsc as any, [
     legacyDate.getUTCFullYear(),
     legacyDate.getUTCMonth() + 1,
-    legacyDate.getUTCDate() - nudge,
+    legacyDate.getUTCDate() + daysOver, // push of bounds again
     legacyDate.getUTCHours(),
     legacyDate.getUTCMinutes(),
     legacyDate.getUTCSeconds(),
