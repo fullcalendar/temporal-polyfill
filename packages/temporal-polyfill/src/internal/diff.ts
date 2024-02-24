@@ -1,4 +1,4 @@
-import { NativeDiffOps } from './calendarNative'
+import { NativeDiffOps, monthCodeNumberToMonth } from './calendarNative'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { isTimeZoneSlotsEqual } from './compare'
 import {
@@ -641,66 +641,72 @@ function diffYearMonthDay(
   month1: number,
   day1: number,
 ): [yearDiff: number, monthDiff: number, dayDiff: number] {
-  let yearDiff!: number
-  let monthsInYear1!: number
-  let monthDiff!: number
-  let daysInMonth1!: number
-  let dayDiff!: number
+  // These deltas are lexical at first, but will become real later
+  let yearDiff = year1 - year0
+  let monthDiff = month1 - month0
+  let dayDiff = day1 - day0
 
-  function updateYearMonth() {
-    const [monthCodeNumber0, isLeapYear0] = calendarNative.monthCodeParts(
-      year0,
-      month0,
-    )
-    const [monthCodeNumber1, isLeapYear1] = calendarNative.monthCodeParts(
-      year1,
-      month1,
-    )
+  // Moving across months?
+  if (yearDiff || monthDiff) {
+    const sign = Math.sign(yearDiff || monthDiff)
+    let daysInMonth1 = calendarNative.daysInMonthParts(year1, month1)
+    let dayCorrect = 0
 
-    yearDiff = year1 - year0
-    monthsInYear1 = calendarNative.monthsInYearPart(year1)
-    monthDiff = yearDiff
-      ? // crossing years
-        monthCodeNumber1 - monthCodeNumber0 ||
-        Number(isLeapYear1) - Number(isLeapYear0)
-      : // same year
-        month1 - Math.min(month0, monthsInYear1)
-  }
+    // Adding year0/month0/day0 + yearDiff/monthDiff will overshoot days
+    // Instead, simulate moving year0/month0/day0 + yearDiff/[monthDiff-sign]
+    // Store result in year1/month1 as the revised end point
+    if (Math.sign(dayDiff) === -sign) {
+      const origDaysInMonth1 = daysInMonth1
 
-  function updateYearMonthDay() {
-    updateYearMonth()
-    daysInMonth1 = calendarNative.daysInMonthParts(year1, month1)
-    dayDiff = day1 - Math.min(day0, daysInMonth1)
-  }
-
-  updateYearMonthDay()
-  const daySign = Math.sign(dayDiff) as NumberSign
-  const sign = (Math.sign(yearDiff) ||
-    Math.sign(monthDiff) ||
-    daySign) as NumberSign
-
-  if (sign) {
-    // overshooting day? correct by moving to penultimate month
-    if (daySign === -sign) {
-      const oldDaysInMonth1 = daysInMonth1
+      // Back up a month
       ;[year1, month1] = calendarNative.monthAdd(year1, month1, -sign)
-      updateYearMonthDay()
-      dayDiff +=
-        sign < 0 // correct with days-in-month further in past
-          ? -oldDaysInMonth1 // correcting from past -> future
-          : daysInMonth1 // correcting from future -> past
+      yearDiff = year1 - year0
+      monthDiff = month1 - month0
+      daysInMonth1 = calendarNative.daysInMonthParts(year1, month1)
+
+      dayCorrect = sign < 0 ? -origDaysInMonth1 : daysInMonth1
     }
 
-    // overshooting month? correct by moving to penultimate year
-    const monthSign = Math.sign(monthDiff) as NumberSign
-    if (monthSign === -sign) {
-      const oldMonthsInYear1 = monthsInYear1
-      year1 -= sign
-      updateYearMonth()
-      monthDiff +=
-        sign < 0 // correct with months-in-year further in past
-          ? -oldMonthsInYear1 // correcting from past -> future
-          : monthsInYear1 // correcting from future -> past
+    // Recompute dayDiff considering backed-up month and day truncation
+    const day0Trunc = Math.min(day0, daysInMonth1)
+    dayDiff = day1 - day0Trunc + dayCorrect
+
+    // Moving across years?
+    if (yearDiff) {
+      // Recompute monthDiff from monthCode
+      const [monthCodeNumber0, isLeapYear0] = calendarNative.monthCodeParts(
+        year0,
+        month0,
+      )
+      const [monthCodeNumber1, isLeapYear1] = calendarNative.monthCodeParts(
+        year1,
+        month1,
+      )
+      monthDiff =
+        monthCodeNumber1 - monthCodeNumber0 ||
+        Number(isLeapYear1) - Number(isLeapYear0)
+
+      // Adding year0/month0 + yearDiff will overshoot months
+      // Instead, simulate moving year0/month0 + [yearDiff-sign]
+      if (Math.sign(monthDiff) === -sign) {
+        // Needed for computing new monthDiff when moving towards past
+        const monthCorrect = sign < 0 && -calendarNative.monthsInYearPart(year1)
+
+        // Back up a year
+        year1 -= sign
+        yearDiff = year1 - year0
+
+        // Compute new monthDiff that spans across adjacent years
+        const month0Trunc = monthCodeNumberToMonth(
+          monthCodeNumber0,
+          isLeapYear0,
+          calendarNative.leapMonth(year1),
+        )
+        monthDiff =
+          month1 -
+          month0Trunc +
+          (monthCorrect || calendarNative.monthsInYearPart(year1))
+      }
     }
   }
 
