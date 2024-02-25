@@ -326,7 +326,7 @@ export function validateTimeZoneOffset(offsetNano: number): number {
 
 export function validateTimeZoneGap(gapNano: number): number {
   if (gapNano > nanoInUtcDay) {
-    throw new RangeError(errorMessages.invalidDstGap)
+    throw new RangeError(errorMessages.outOfBoundsDstGap)
   }
   return gapNano
 }

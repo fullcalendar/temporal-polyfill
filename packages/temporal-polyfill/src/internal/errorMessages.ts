@@ -51,18 +51,20 @@ export const invalidLeapMonth = 'Invalid leap month'
 export const invalidProtocol = 'Invalid protocol'
 export const invalidProtocolResults = 'Invalid protocol results'
 
-// Calendar/TimeZone
+// Calendar
+export const mismatchingCalendars = 'Mismatching Calendars'
 export const invalidCalendar = (calendarId: string) =>
   `Invalid Calendar: ${calendarId}`
-export const mismatchingCalendars = 'Mismatching Calendars'
+
+// TimeZone
 export const mismatchingTimeZones = 'Mismatching TimeZones'
+export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
 // TimeZone Offset/Gap
 export const outOfBoundsOffset = 'Out-of-bounds offset'
-export const invalidDstGap = 'Invalid TimeZone gap'
+export const outOfBoundsDstGap = 'Out-of-bounds TimeZone gap'
 export const invalidOffsetForTimeZone = 'Invalid TimeZone offset'
 export const ambigOffset = 'Ambiguous offset'
-export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
 // Date/Duration Math
 export const outOfBoundsDate = 'Out-of-bounds date'
