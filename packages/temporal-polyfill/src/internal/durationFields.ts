@@ -22,13 +22,14 @@ export interface DurationTimeFields {
 }
 
 export type DurationFields = DurationDateFields & DurationTimeFields
+export type DurationFieldName = keyof DurationFields
 
 // Field Names
 // -----------------------------------------------------------------------------
 
 export const durationFieldNamesAsc = unitNamesAsc.map(
   (unitName) => unitName + 's',
-) as (keyof DurationFields)[]
+) as DurationFieldName[]
 
 export const durationFieldNamesAlpha = sortStrings(durationFieldNamesAsc)
 

@@ -7,6 +7,7 @@ import {
   diffDayTimeNanos,
 } from './dayTimeNano'
 import {
+  DurationFieldName,
   DurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
@@ -78,7 +79,7 @@ import { divModFloor, divTrunc, identity } from './utils'
 
 export function roundInstant(
   instantSlots: InstantSlots,
-  options: RoundingOptions | UnitName,
+  options: RoundingOptions | UnitName | DurationFieldName,
 ): InstantSlots {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
     // TODO: inline this

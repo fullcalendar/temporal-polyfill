@@ -4,7 +4,7 @@ import {
   toInteger,
   toString,
 } from './cast'
-import { DurationFields, durationFieldIndexes } from './durationFields'
+import { DurationFieldName, durationFieldIndexes } from './durationFields'
 import * as errorMessages from './errorMessages'
 import {
   CalendarDisplay,
@@ -94,16 +94,16 @@ export type DateTimeDisplayOptions = CalendarDisplayOptions & TimeDisplayOptions
 export type DateTimeDisplayTuple = [CalendarDisplay, ...TimeDisplayTuple]
 
 interface SmallestUnitOptions {
-  smallestUnit?: UnitName | keyof DurationFields
+  smallestUnit?: UnitName | DurationFieldName
 }
 
 // TODO: rename to CalendarDiffOptions?
 export interface LargestUnitOptions {
-  largestUnit?: UnitName | keyof DurationFields
+  largestUnit?: UnitName | DurationFieldName
 }
 
 interface TotalUnitOptions {
-  unit: UnitName | keyof DurationFields
+  unit: UnitName | DurationFieldName
 }
 
 export type InstantDisplayOptions<TA> = { timeZone?: TA } & TimeDisplayOptions
@@ -331,7 +331,7 @@ export function refineDurationRoundOptions<RA, R>(
 Always related to time
 */
 export function refineRoundOptions(
-  options: RoundingOptions | UnitName,
+  options: RoundingOptions | UnitName | DurationFieldName,
   maxUnit: DayTimeUnit = Unit.Day,
   solarMode?: boolean,
 ): RoundTuple {
@@ -603,7 +603,7 @@ export function normalizeOptions<O extends {}>(options: O | undefined): O {
 }
 
 function normalizeUnitNameOptions<O extends {}>(
-  options: O | UnitName,
+  options: O | UnitName | DurationFieldName,
   optionName: keyof O,
 ): O {
   if (typeof options === 'string') {
@@ -672,7 +672,7 @@ function refineUnitOption<O>(
   let unit = unitNameMap[unitStr as UnitName]
 
   if (unit === undefined) {
-    unit = durationFieldIndexes[unitStr as keyof DurationFields]
+    unit = durationFieldIndexes[unitStr as DurationFieldName]
   }
   if (unit === undefined) {
     throw new RangeError(errorMessages.invalidEntity(optionName, unitStr))
