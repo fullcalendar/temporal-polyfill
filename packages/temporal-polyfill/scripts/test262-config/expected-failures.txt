@@ -1,4 +1,9 @@
 
+# Will start passing once bug is fixed
+# Bugfix PR: https://github.com/tc39/proposal-temporal/pull/2758
+built-ins/Temporal/Duration/prototype/round/dst-rounding-result.js
+built-ins/Temporal/Duration/prototype/total/dst-rounding-result.js
+
 # PRECISION
 # We do not "perform long division to calculate the fractional part of the quotient
 # remainder / n with more accuracy than 64-bit floating point division" because we don't
