@@ -38,6 +38,7 @@ export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
 )
 
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
+export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(1)
 
 export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
 

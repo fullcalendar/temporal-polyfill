@@ -4,6 +4,7 @@ import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
 import {
   DurationFields,
   DurationTimeFields,
+  durationCalendarFieldNamesAsc,
   durationDateFieldNamesAsc,
   durationFieldDefaults,
   durationFieldNamesAsc,
@@ -338,7 +339,7 @@ export function computeDurationSign(
 }
 
 export function checkDurationUnits(fields: DurationFields): DurationFields {
-  for (const calendarUnit of ['years', 'months', 'weeks'] as const) {
+  for (const calendarUnit of durationCalendarFieldNamesAsc) {
     clampEntity(
       calendarUnit,
       fields[calendarUnit],
