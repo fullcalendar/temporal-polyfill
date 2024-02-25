@@ -95,7 +95,7 @@ function totalDayTimeDuration(
   totalUnit: DayTimeUnit,
 ): number {
   return totalDayTimeNano(
-    durationFieldsToDayTimeNano(durationFields, Unit.Day),
+    durationFieldsToDayTimeNano(durationFields),
     totalUnit,
   )
 }

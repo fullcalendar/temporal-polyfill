@@ -192,8 +192,8 @@ function addDayTimeDurations(
   largestUnit: DayTimeUnit,
   doSubtract?: boolean,
 ): DurationFields {
-  const dayTimeNano0 = durationFieldsToDayTimeNano(a, Unit.Day)
-  const dayTimeNano1 = durationFieldsToDayTimeNano(b, Unit.Day)
+  const dayTimeNano0 = durationFieldsToDayTimeNano(a)
+  const dayTimeNano1 = durationFieldsToDayTimeNano(b)
   const combined = addDayTimeNanos(
     dayTimeNano0,
     dayTimeNano1,
@@ -353,7 +353,7 @@ export function checkDurationUnits(fields: DurationFields): DurationFields {
     )
   }
 
-  const dayTimeNano = durationFieldsToDayTimeNano(fields, Unit.Day)
+  const dayTimeNano = durationFieldsToDayTimeNano(fields)
   checkDurationTimeUnit(dayTimeNanoToNumber(dayTimeNano, nanoInSec))
 
   return fields
@@ -380,7 +380,7 @@ export function durationTimeFieldsToLargeNanoStrict(
 
 export function durationFieldsToDayTimeNano(
   fields: DurationFields,
-  largestUnit: DayTimeUnit,
+  largestUnit: DayTimeUnit = Unit.Day,
 ): DayTimeNano {
   return givenFieldsToDayTimeNano(fields, largestUnit, durationFieldNamesAsc)
 }

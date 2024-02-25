@@ -281,7 +281,7 @@ function balanceDayTimeDuration(
   roundingInc: number,
   roundingMode: RoundingMode,
 ): Partial<DurationFields> {
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields)
   const roundedLargeNano = roundDayTimeNano(
     dayTimeNano,
     smallestUnit,
@@ -459,7 +459,7 @@ function nudgeDurationDayTime(
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const sign = computeDurationSign(durationFields)
-  const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
+  const dayTimeNano = durationFieldsToDayTimeNano(durationFields)
   const roundedDayTimeNano = roundDayTimeNano(
     dayTimeNano,
     smallestUnit,
