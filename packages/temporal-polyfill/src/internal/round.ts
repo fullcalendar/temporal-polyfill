@@ -3,7 +3,7 @@ import {
   addDayTimeNanoAndNumber,
   addDayTimeNanos,
   createDayTimeNano,
-  dayTimeNanoToInt,
+  dayTimeNanoToNumber,
   diffDayTimeNanos,
 } from './dayTimeNano'
 import {
@@ -525,7 +525,7 @@ function nudgeRelativeDurationTime<M>(
     moveMarker,
   )
 
-  const daySpanEpochNanoseconds = dayTimeNanoToInt(
+  const daySpanEpochNanoseconds = dayTimeNanoToNumber(
     diffDayTimeNanos(dayEpochNano0, dayEpochNano1),
   )
   const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
@@ -639,7 +639,7 @@ function bubbleRelativeDuration<M>(
     const thresholdEpochNano = markerToEpochNano(
       moveMarker(marker, baseDurationFields),
     )
-    const beyondThreshold = dayTimeNanoToInt(
+    const beyondThreshold = dayTimeNanoToNumber(
       diffDayTimeNanos(thresholdEpochNano, endEpochNano),
     )
 

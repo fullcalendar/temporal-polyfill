@@ -96,30 +96,21 @@ export function dayTimeNanoToBigInt(
   return BigInt(days) * BigInt(timeUnitsInDay) + BigInt(timeUnits)
 }
 
-export function dayTimeNanoToInt(
+export function dayTimeNanoToNumber(
   dayTimeNano: DayTimeNano,
   divisorNano = 1,
-): number {
-  const [days, timeNano] = dayTimeNano
-  const [whole] = divModTrunc(timeNano, divisorNano)
-  const wholeInDay = nanoInUtcDay / divisorNano
-  return days * wholeInDay + whole
-}
-
-export function dayTimeNanoToFloat(
-  dayTimeNano: DayTimeNano,
-  divisorNano = 1,
+  exact?: boolean,
 ): number {
   const [days, timeNano] = dayTimeNano
   const [whole, remainderNano] = divModTrunc(timeNano, divisorNano)
   const wholeInDay = nanoInUtcDay / divisorNano
   // adding fraction to whole first results in better precision
-  return days * wholeInDay + (whole + remainderNano / divisorNano)
+  return days * wholeInDay + (whole + (exact ? remainderNano / divisorNano : 0))
 }
 
 export function divModDayTimeNano(
   dayTimeNano: DayTimeNano,
-  divisorNano = 1,
+  divisorNano: number,
   divModFunc = divModFloor,
 ): [whole: number, remainderNano: number] {
   const [days, timeNano] = dayTimeNano

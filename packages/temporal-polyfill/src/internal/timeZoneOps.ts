@@ -1,8 +1,7 @@
 import {
   DayTimeNano,
   addDayTimeNanoAndNumber,
-  dayTimeNanoToFloat,
-  dayTimeNanoToInt,
+  dayTimeNanoToNumber,
   diffDayTimeNanos,
 } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
@@ -215,7 +214,7 @@ function findMatchingEpochNano(
   }
 
   for (const possibleEpochNano of possibleEpochNanos) {
-    let possibleOffsetNano = dayTimeNanoToInt(
+    let possibleOffsetNano = dayTimeNanoToNumber(
       diffDayTimeNanos(possibleEpochNano, zonedEpochNano),
     )
 
@@ -302,9 +301,10 @@ export function computeTimeInDay(
     ...isoTimeFieldDefaults,
   })
 
-  const res = dayTimeNanoToFloat(
+  const res = dayTimeNanoToNumber(
     diffDayTimeNanos(epochNano0, epochNano1),
     divisorNano,
+    true, // exact
   )
 
   if (res <= 0) {

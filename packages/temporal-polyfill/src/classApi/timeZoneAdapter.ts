@@ -3,7 +3,7 @@ import { requireFunction, requireInteger } from '../internal/cast'
 import {
   DayTimeNano,
   compareDayTimeNanos,
-  dayTimeNanoToInt,
+  dayTimeNanoToNumber,
   diffDayTimeNanos,
 } from '../internal/dayTimeNano'
 import { IsoDateTimeFields } from '../internal/isoFields'
@@ -52,7 +52,7 @@ function getPossibleInstantsForAdapter(
   if (epochNanoLen > 1) {
     epochNanos.sort(compareDayTimeNanos)
     validateTimeZoneGap(
-      dayTimeNanoToInt(
+      dayTimeNanoToNumber(
         diffDayTimeNanos(epochNanos[0], epochNanos[epochNanoLen - 1]),
       ),
     )

@@ -4,7 +4,7 @@ import { isTimeZoneSlotsEqual } from './compare'
 import {
   DayTimeNano,
   compareDayTimeNanos,
-  dayTimeNanoToInt,
+  dayTimeNanoToNumber,
   diffDayTimeNanos,
 } from './dayTimeNano'
 import { DurationFields, durationFieldDefaults } from './durationFields'
@@ -484,7 +484,7 @@ function diffZonedEpochNanoViaCalendar(
           origOptions,
         )
 
-  const timeDiffNano = dayTimeNanoToInt(
+  const timeDiffNano = dayTimeNanoToNumber(
     diffDayTimeNanos(midEpochNano, endEpochNano),
   )
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
