@@ -1,4 +1,11 @@
 
+# PRECISION
+# We do not "perform long division to calculate the fractional part of the quotient
+# remainder / n with more accuracy than 64-bit floating point division" because we don't
+# use bigint, and even if we did, it's overly tedious to do string manipulation to simulate this
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values-2.js
+
 ####################################################################################################
 # Duration
 ####################################################################################################
@@ -223,6 +230,48 @@ built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefi
 built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
+#
+# above section might change too as ZonedDateTime diffing changes
+#
+built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
+built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
+#
+# current algorithm has multiple CalendarDateUntil calls and throws errors when they're inconsistent,
+# we only have 1 call
+built-ins/Temporal/Duration/prototype/round/date-and-time-durations-opposite-signs.js
+#
+# similar for rounding, which calls ZonedDateTime diffing, which calls getPossibleInstantsFor
+# (total calls to getPossibleInstantsFor for them is 5, ours is 2)
+built-ins/Temporal/Duration/prototype/round/normalized-time-duration-to-days-loop-arbitrarily.js
+built-ins/Temporal/Duration/prototype/subtract/normalized-time-duration-to-days-loop-arbitrarily.js
+#
+# SAME AS ABOVE
+# as ZonedDateTime diffing changes, the 'loop' error might change too
+# our diffZonedEpochNanoViaCalendar versus DifferenceZonedDateTime>NormalizedTimeDurationToDays
+built-ins/Temporal/Duration/prototype/add/normalized-time-duration-to-days-loop-arbitrarily.js
+#
+# opposite problem:
+# tho our zdt diffing algorithm has few overall user-code calls, it has MORE getPossibleInstantsFor calls
+# and those results need to be moving in the correct direction or else error should happen
+# the following test file doesn't care, so wants all to pass
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
+#
+# these precision value tests mock with very specific calls to getPossibleInstantsFor,
+# which won't mock for our superior algo
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-4.js
+#
+built-ins/Temporal/ZonedDateTime/prototype/since/date-and-time-durations-opposite-signs.js
+built-ins/Temporal/ZonedDateTime/prototype/since/normalized-time-duration-to-days-loop-arbitrarily.js
+built-ins/Temporal/ZonedDateTime/prototype/since/normalized-time-duration-to-days-range-errors.js
+built-ins/Temporal/ZonedDateTime/prototype/until/date-and-time-durations-opposite-signs.js
+built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-days-loop-arbitrarily.js
+built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-days-range-errors.js
+
+# our version of ::round() for ZDT calls TimeZone Protocol operations FEWER times
+built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum-forward-offset-shift.js
+built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-out-of-range-forward-offset-shift.js
 
 # CALLING
 # From/With/Round/Compare/Equals uses InterpretISODateTimeOffset which calls
@@ -258,8 +307,24 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 
 # NOT-IMPLEMENTED
+# We do not reject legacy ICU time zone IDs
+intl402/DateTimeFormat/timezone-legacy-non-iana.js
+
+# NOT-IMPLEMENTED
 # Intl.DateTimeFormat does not accept numeric-offset `timeZones`s and we are okay with that
 intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
 intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
 intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
 intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
+
+####################################################################################################
+# SHORTCOMING IN TESTS
+####################################################################################################
+# TODO: open PRs
+#
+# built-ins/Temporal/Duration/compare/argument-duration-out-of-range.js (line ~65)
+# ::compare not given relativeTo, so will throw RangeError even if behavior not implemented
+#
+# built-ins/Temporal/PlainDate/prototype/since/wrapping-at-end-of-month.js (line ~92)
+# "Dec 31st 1970 to Apr 30th 1973 is 27 months, 30 days, not 28 months" // typo!
+#
