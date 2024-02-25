@@ -1,3 +1,4 @@
+import * as errorMessages from './errorMessages'
 import { RawDateTimeFormat, standardLocaleId } from './intlFormatUtils'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './isoParse'
@@ -57,7 +58,14 @@ const queryTimeZoneIntlFormat = createLazyGenerator(
     }),
 )
 
+const icuRegExp =
+  /^(AC|AE|AG|AR|AS|BE|BS|CA|CN|CS|CT|EA|EC|IE|IS|JS|MI|NE|NS|PL|PN|PR|PS|SS|VS)T$/
+
 function normalizeNamedTimeZoneId(id: string): string {
+  if (icuRegExp.test(id)) {
+    throw new RangeError(errorMessages.forbiddenIcuTimeZone)
+  }
+
   return id
     .toLowerCase()
     .split('/')

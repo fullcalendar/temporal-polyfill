@@ -62,6 +62,7 @@ export const outOfBoundsOffset = 'Out-of-bounds offset'
 export const invalidDstGap = 'Invalid TimeZone gap'
 export const invalidOffsetForTimeZone = 'Invalid TimeZone offset'
 export const ambigOffset = 'Ambiguous offset'
+export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
 // Date/Duration Math
 export const outOfBoundsDate = 'Out-of-bounds date'
@@ -83,4 +84,4 @@ export const invalidSubstring = (substring: string) =>
 export const invalidFormatType = (branding: string) =>
   `Cannot format ${branding}`
 export const mismatchingFormatTypes = 'Mismatching types for formatting'
-export const forbiddenFormatTimeZone = 'Forbidden timeZone'
+export const forbiddenFormatTimeZone = 'Forbidden TimeZone'
