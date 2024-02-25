@@ -340,7 +340,7 @@ export function computeIntlDayOfYear(
   })!
   const { year } = this.queryFields(isoFields)
   const yearStartEpochMilli = computeIntlEpochMilli.call(this, year)
-  return diffEpochMilliByDay(yearStartEpochMilli, dayEpochMilli)
+  return diffEpochMilliByDay(yearStartEpochMilli, dayEpochMilli) + 1
 }
 
 export function computeIntlMonthsInYear(
