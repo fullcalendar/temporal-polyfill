@@ -3,8 +3,7 @@ import {
   addDayTimeNanoAndNumber,
   compareDayTimeNanos,
   dayTimeNanoToBigInt,
-  dayTimeNanoToNumber,
-  dayTimeNanoToNumberRemainder,
+  divModDayTimeNano,
   numberToDayTimeNano,
 } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
@@ -133,17 +132,15 @@ export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
 // nano -> [micro/milli/sec]
 
 export function epochNanoToSec(epochNano: DayTimeNano): number {
-  return dayTimeNanoToNumber(epochNano, nanoInSec)
+  return epochNanoToSecMod(epochNano)[0]
 }
 
-export function epochNanoToSecRemainder(
-  epochNano: DayTimeNano,
-): [number, number] {
-  return dayTimeNanoToNumberRemainder(epochNano, nanoInSec)
+export function epochNanoToSecMod(epochNano: DayTimeNano): [number, number] {
+  return divModDayTimeNano(epochNano, nanoInSec)
 }
 
 export function epochNanoToMilli(epochNano: DayTimeNano): number {
-  return dayTimeNanoToNumber(epochNano, nanoInMilli)
+  return divModDayTimeNano(epochNano, nanoInMilli)[0]
 }
 
 export function epochNanoToMicro(epochNano: DayTimeNano): bigint {

@@ -1,6 +1,11 @@
 import { nanoInUtcDay } from './units'
 import { NumberSign, compareNumbers, divModFloor, divModTrunc } from './utils'
 
+/*
+Given a raw nanoseconds value,
+`days` is truncated (towards 0)
+`timeNano` is the remainder (sign agrees with days)
+*/
 export type DayTimeNano = [days: number, timeNano: number]
 
 /*
@@ -30,7 +35,6 @@ export function addDayTimeNanoAndNumber(
   return createDayTimeNano(a[0], a[1] + b)
 }
 
-// TODO: converge with diffDayTimeNanos
 export function addDayTimeNanos(
   a: DayTimeNano,
   b: DayTimeNano,
@@ -40,7 +44,7 @@ export function addDayTimeNanos(
 }
 
 export function diffDayTimeNanos(a: DayTimeNano, b: DayTimeNano): DayTimeNano {
-  return createDayTimeNano(b[0] - a[0], b[1] - a[1])
+  return addDayTimeNanos(b, a, -1)
 }
 
 // Compare
@@ -66,7 +70,6 @@ export function bigIntToDayTimeNano(
   const wholeInDay = BigInt(nanoInUtcDay / multiplierNano)
   const days = Number(num / wholeInDay) // does trunc
   const remainder = Number(num % wholeInDay) // does trunc
-
   return [days, remainder * multiplierNano] // scaled. doesn't need balancing
 }
 
@@ -76,7 +79,6 @@ export function numberToDayTimeNano(
 ): DayTimeNano {
   const wholeInDay = nanoInUtcDay / multiplierNano
   const [days, remainder] = divModTrunc(num, wholeInDay)
-
   return [days, remainder * multiplierNano] // scaled. doesn't need balancing
 }
 
@@ -91,30 +93,37 @@ export function dayTimeNanoToBigInt(
   const [days, timeNano] = dayTimeNano
   const timeUnits = Math.floor(timeNano / divisorNano)
   const timeUnitsInDay = nanoInUtcDay / divisorNano
-
   return BigInt(days) * BigInt(timeUnitsInDay) + BigInt(timeUnits)
 }
 
-export function dayTimeNanoToNumber(
+export function dayTimeNanoToInt(
   dayTimeNano: DayTimeNano,
   divisorNano = 1,
-  exact?: boolean,
 ): number {
-  const [whole, remainder] = dayTimeNanoToNumberRemainder(
-    dayTimeNano,
-    divisorNano,
-  )
-
-  return whole + (exact ? remainder / divisorNano : 0)
+  const [days, timeNano] = dayTimeNano
+  const [whole] = divModTrunc(timeNano, divisorNano)
+  const wholeInDay = nanoInUtcDay / divisorNano
+  return days * wholeInDay + whole
 }
 
-export function dayTimeNanoToNumberRemainder(
+export function dayTimeNanoToFloat(
   dayTimeNano: DayTimeNano,
-  divisorNano: number,
-): [whole: number, remainder: number] {
+  divisorNano = 1,
+): number {
   const [days, timeNano] = dayTimeNano
-  const [whole, remainderNano] = divModFloor(timeNano, divisorNano)
+  const [whole, remainderNano] = divModTrunc(timeNano, divisorNano)
   const wholeInDay = nanoInUtcDay / divisorNano
+  // adding fraction to whole first results in better precision
+  return days * wholeInDay + (whole + remainderNano / divisorNano)
+}
 
+export function divModDayTimeNano(
+  dayTimeNano: DayTimeNano,
+  divisorNano = 1,
+  divModFunc = divModFloor,
+): [whole: number, remainderNano: number] {
+  const [days, timeNano] = dayTimeNano
+  const [whole, remainderNano] = divModFunc(timeNano, divisorNano)
+  const wholeInDay = nanoInUtcDay / divisorNano
   return [days * wholeInDay + whole, remainderNano]
 }

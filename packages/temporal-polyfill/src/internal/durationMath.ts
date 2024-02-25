@@ -1,5 +1,5 @@
 import { DiffOps } from './calendarOps'
-import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
+import { DayTimeNano, addDayTimeNanos, dayTimeNanoToInt } from './dayTimeNano'
 import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
 import {
   DurationFields,
@@ -392,7 +392,7 @@ export function nanoToDurationDayTimeFields(
   return dayTimeFields
 }
 
-// audit
+// TODO: audit
 export function nanoToDurationTimeFields(nano: number): DurationTimeFields
 export function nanoToDurationTimeFields(
   nano: number,

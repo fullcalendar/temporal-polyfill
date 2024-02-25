@@ -1,7 +1,8 @@
 import {
   DayTimeNano,
   addDayTimeNanoAndNumber,
-  dayTimeNanoToNumber,
+  dayTimeNanoToFloat,
+  dayTimeNanoToInt,
   diffDayTimeNanos,
 } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
@@ -212,7 +213,7 @@ function findMatchingEpochNano(
   }
 
   for (const possibleEpochNano of possibleEpochNanos) {
-    let possibleOffsetNano = dayTimeNanoToNumber(
+    let possibleOffsetNano = dayTimeNanoToInt(
       diffDayTimeNanos(possibleEpochNano, zonedEpochNano),
     )
 
@@ -272,17 +273,20 @@ export function computeHoursInDay<C, T>(
 ): number {
   const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
 
-  return (
-    computeNanosecondsInDay(
-      timeZoneOps,
-      zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
-    ) / nanoInHour
+  return computeTimeInDay(
+    timeZoneOps,
+    zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
+    nanoInHour,
   )
 }
 
-export function computeNanosecondsInDay(
+/*
+Defaults to returning nanoseconds, but can be custom
+*/
+export function computeTimeInDay(
   timeZoneOps: TimeZoneOps,
   isoFields: IsoDateFields,
+  divisorNano?: number,
 ): number {
   isoFields = { ...isoFields, ...isoTimeFieldDefaults }
 
@@ -296,15 +300,16 @@ export function computeNanosecondsInDay(
     ...isoTimeFieldDefaults,
   })
 
-  const nanoInDay = dayTimeNanoToNumber(
+  const res = dayTimeNanoToFloat(
     diffDayTimeNanos(epochNano0, epochNano1),
+    divisorNano,
   )
 
-  if (nanoInDay <= 0) {
-    throw new RangeError(errorMessages.invalidProtocolResults) // 'Bad nanoseconds in day'
+  if (res <= 0) {
+    throw new RangeError(errorMessages.invalidProtocolResults)
   }
 
-  return nanoInDay
+  return res
 }
 
 // Utils

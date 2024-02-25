@@ -3,7 +3,7 @@ import {
   addDayTimeNanoAndNumber,
   addDayTimeNanos,
   createDayTimeNano,
-  dayTimeNanoToNumber,
+  dayTimeNanoToInt,
   diffDayTimeNanos,
 } from './dayTimeNano'
 import {
@@ -53,7 +53,7 @@ import {
 } from './timeMath'
 import {
   TimeZoneOps,
-  computeNanosecondsInDay,
+  computeTimeInDay,
   getMatchingInstantFor,
 } from './timeZoneOps'
 import {
@@ -196,7 +196,7 @@ function roundDateTimeToDay(
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
   if (timeZoneOps) {
-    const nanoInDay = computeNanosecondsInDay(timeZoneOps, isoFields)
+    const nanoInDay = computeTimeInDay(timeZoneOps, isoFields)
     const roundedTimeNano = roundByInc(
       isoTimeFieldsToNano(isoFields),
       nanoInDay,
@@ -525,7 +525,7 @@ function nudgeRelativeDurationTime<M>(
     moveMarker,
   )
 
-  const daySpanEpochNanoseconds = dayTimeNanoToNumber(
+  const daySpanEpochNanoseconds = dayTimeNanoToInt(
     diffDayTimeNanos(dayEpochNano0, dayEpochNano1),
   )
   const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
@@ -639,7 +639,7 @@ function bubbleRelativeDuration<M>(
     const thresholdEpochNano = markerToEpochNano(
       moveMarker(marker, baseDurationFields),
     )
-    const beyondThreshold = dayTimeNanoToNumber(
+    const beyondThreshold = dayTimeNanoToInt(
       diffDayTimeNanos(thresholdEpochNano, endEpochNano),
     )
 

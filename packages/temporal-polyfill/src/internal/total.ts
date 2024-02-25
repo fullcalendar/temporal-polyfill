@@ -1,7 +1,8 @@
 import { DiffOps } from './calendarOps'
 import {
   DayTimeNano,
-  dayTimeNanoToNumber,
+  dayTimeNanoToFloat,
+  dayTimeNanoToInt,
   diffDayTimeNanos,
 } from './dayTimeNano'
 import {
@@ -107,7 +108,7 @@ export function totalDayTimeNano(
   dayTimeNano: DayTimeNano,
   totalUnit: DayTimeUnit,
 ): number {
-  return dayTimeNanoToNumber(dayTimeNano, unitNanoMap[totalUnit], true) // exact
+  return dayTimeNanoToFloat(dayTimeNano, unitNanoMap[totalUnit])
 }
 
 export function clampRelativeDuration<M>(
@@ -135,11 +136,11 @@ export function computeEpochNanoFrac(
   epochNano1: DayTimeNano,
   epochNanoProgress: DayTimeNano,
 ): number {
-  const denom = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
+  const denom = dayTimeNanoToInt(diffDayTimeNanos(epochNano0, epochNano1))
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const numer = dayTimeNanoToNumber(
+  const numer = dayTimeNanoToInt(
     diffDayTimeNanos(epochNano0, epochNanoProgress),
   )
   return numer / denom

@@ -1,5 +1,5 @@
 import { isoCalendarId } from './calendarConfig'
-import { DayTimeNano, dayTimeNanoToNumberRemainder } from './dayTimeNano'
+import { DayTimeNano, divModDayTimeNano } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import {
   getLargestDurationUnit,
@@ -56,7 +56,7 @@ import {
   nanoInMinute,
   nanoInSec,
 } from './units'
-import { divModFloor, padNumber, padNumber2 } from './utils'
+import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
 
 // High-level
 // -----------------------------------------------------------------------------
@@ -308,9 +308,10 @@ function formatDurationFields(
     sign === -1 ? negateDurationFields(durationFields) : durationFields
   const { hours, minutes } = abs
 
-  const [wholeSeconds, subsecNano] = dayTimeNanoToNumberRemainder(
+  const [wholeSeconds, subsecNano] = divModDayTimeNano(
     givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc),
     nanoInSec,
+    divModTrunc,
   )
 
   const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)

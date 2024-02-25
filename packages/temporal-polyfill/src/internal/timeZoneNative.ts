@@ -9,7 +9,7 @@ import { IsoDateTimeFields } from './isoFields'
 import {
   checkEpochNanoInBounds,
   epochNanoToSec,
-  epochNanoToSecRemainder,
+  epochNanoToSecMod,
   isoArgsToEpochSec,
   isoToEpochNanoWithOffset,
   isoToEpochSec,
@@ -101,7 +101,7 @@ export class IntlTimeZone implements NativeTimeZone {
     epochNano: DayTimeNano,
     direction: -1 | 1,
   ): DayTimeNano | undefined {
-    const [epochSec, subsecNano] = epochNanoToSecRemainder(epochNano)
+    const [epochSec, subsecNano] = epochNanoToSecMod(epochNano)
     const resEpochSec = this.tzStore.getTransition(
       epochSec + (direction > 0 || subsecNano ? 1 : 0),
       direction,
