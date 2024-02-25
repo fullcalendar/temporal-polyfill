@@ -6,11 +6,12 @@ import {
   dayTimeNanoToInt,
   diffDayTimeNanos,
 } from '../internal/dayTimeNano'
-import * as errorMessages from '../internal/errorMessages'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
-import { validateTimeZoneOffset } from '../internal/timeZoneOps'
-import { nanoInUtcDay } from '../internal/units'
+import {
+  validateTimeZoneGap,
+  validateTimeZoneOffset,
+} from '../internal/timeZoneOps'
 import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
@@ -50,13 +51,11 @@ function getPossibleInstantsForAdapter(
   const epochNanoLen = epochNanos.length
   if (epochNanoLen > 1) {
     epochNanos.sort(compareDayTimeNanos)
-    if (
+    validateTimeZoneGap(
       dayTimeNanoToInt(
         diffDayTimeNanos(epochNanos[0], epochNanos[epochNanoLen - 1]),
-      ) > nanoInUtcDay
-    ) {
-      throw new RangeError(errorMessages.invalidProtocolResults)
-    }
+      ),
+    )
   }
 
   return epochNanos

@@ -57,9 +57,10 @@ export const invalidCalendar = (calendarId: string) =>
 export const mismatchingCalendars = 'Mismatching Calendars'
 export const mismatchingTimeZones = 'Mismatching TimeZones'
 
-// TimeZone Offset
+// TimeZone Offset/Gap
 export const outOfBoundsOffset = 'Out-of-bounds offset'
-export const invalidOffsetForTimeZone = 'Invalid offset for TimeZone'
+export const invalidDstGap = 'Invalid TimeZone gap'
+export const invalidOffsetForTimeZone = 'Invalid TimeZone offset'
 export const ambigOffset = 'Ambiguous offset'
 
 // Date/Duration Math

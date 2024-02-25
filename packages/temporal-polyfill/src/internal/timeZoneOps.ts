@@ -189,14 +189,16 @@ export function getSingleInstantFor(
   const zonedEpochNano = isoToEpochNano(isoFields)!
   const gapNano = computeGapNear(timeZoneOps, zonedEpochNano)
 
-  const shiftNano = gapNano * (disambig === EpochDisambig.Earlier ? -1 : 1) // 'later' or 'compatible'
+  // 'later' or 'compatible'
+  const shiftNano = gapNano * (disambig === EpochDisambig.Earlier ? -1 : 1)
 
   possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(
     epochNanoToIso(zonedEpochNano, shiftNano),
   )
 
   return possibleEpochNanos[
-    disambig === EpochDisambig.Earlier ? 0 : possibleEpochNanos.length - 1 // 'later' or 'compatible'
+    // 'later' or 'compatible'
+    disambig === EpochDisambig.Earlier ? 0 : possibleEpochNanos.length - 1
   ]
 }
 
@@ -237,7 +239,7 @@ function computeGapNear(
   const endOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
     addDayTimeNanoAndNumber(zonedEpochNano, nanoInUtcDay),
   )
-  return endOffsetNano - startOffsetNano
+  return validateTimeZoneGap(endOffsetNano - startOffsetNano)
 }
 
 // Computations (on passed-in instances)
@@ -320,6 +322,13 @@ export function validateTimeZoneOffset(offsetNano: number): number {
     throw new RangeError(errorMessages.outOfBoundsOffset)
   }
   return offsetNano
+}
+
+export function validateTimeZoneGap(gapNano: number): number {
+  if (gapNano > nanoInUtcDay) {
+    throw new RangeError(errorMessages.invalidDstGap)
+  }
+  return gapNano
 }
 
 function isTimeZoneOffsetOps(input: any): input is TimeZoneOffsetOps {
