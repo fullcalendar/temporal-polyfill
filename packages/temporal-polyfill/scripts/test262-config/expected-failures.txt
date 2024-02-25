@@ -16,11 +16,6 @@ built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematic
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 
-# PRECISION
-# Duration::toString... we display super large duration units as Number would, not BigInt
-built-ins/Temporal/Duration/prototype/toString/precision-exact-mathematical-values.js
-built-ins/Temporal/Duration/prototype/toString/precision-formatted-as-decimal-number.js
-
 ####################################################################################################
 # ZonedDateTime
 ####################################################################################################
@@ -216,18 +211,6 @@ built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematic
 built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
 built-ins/Temporal/Duration/prototype/round/zero-day-length.js
 built-ins/Temporal/Duration/prototype/total/zero-day-length.js
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-range-errors.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-nanoseconds-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/add/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/Duration/prototype/round/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/Duration/prototype/subtract/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/Duration/prototype/total/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/ZonedDateTime/prototype/since/nanoseconds-to-days-loop-indefinitely.js
-built-ins/Temporal/ZonedDateTime/prototype/until/nanoseconds-to-days-loop-indefinitely.js
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
 #
