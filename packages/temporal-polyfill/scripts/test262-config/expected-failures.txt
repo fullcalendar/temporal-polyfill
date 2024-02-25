@@ -60,9 +60,7 @@ built-ins/Temporal/Duration/prototype/total/order-of-operations.js
 # We do not do UnbalanceDateDurationRelative+BalanceDateDurationRelative
 built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
-built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
-built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-options-undefined.js
 built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
 built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
@@ -221,9 +219,7 @@ built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
 #
 # above section might change too as ZonedDateTime diffing changes
 #
-built-ins/Temporal/Duration/prototype/add/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/subtract/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
 #
 # current algorithm has multiple CalendarDateUntil calls and throws errors when they're inconsistent,
@@ -233,12 +229,6 @@ built-ins/Temporal/Duration/prototype/round/date-and-time-durations-opposite-sig
 # similar for rounding, which calls ZonedDateTime diffing, which calls getPossibleInstantsFor
 # (total calls to getPossibleInstantsFor for them is 5, ours is 2)
 built-ins/Temporal/Duration/prototype/round/normalized-time-duration-to-days-loop-arbitrarily.js
-built-ins/Temporal/Duration/prototype/subtract/normalized-time-duration-to-days-loop-arbitrarily.js
-#
-# SAME AS ABOVE
-# as ZonedDateTime diffing changes, the 'loop' error might change too
-# our diffZonedEpochNanoViaCalendar versus DifferenceZonedDateTime>NormalizedTimeDurationToDays
-built-ins/Temporal/Duration/prototype/add/normalized-time-duration-to-days-loop-arbitrarily.js
 #
 # opposite problem:
 # tho our zdt diffing algorithm has few overall user-code calls, it has MORE getPossibleInstantsFor calls
