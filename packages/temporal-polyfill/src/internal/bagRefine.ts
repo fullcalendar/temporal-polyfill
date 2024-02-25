@@ -34,7 +34,7 @@ import {
   durationFieldNamesAlpha,
   durationFieldNamesAsc,
 } from './durationFields'
-import { MarkerSlotsNoCalendar, checkDurationFields } from './durationMath'
+import { MarkerSlotsNoCalendar, checkDurationUnits } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
   DateBag,
@@ -345,7 +345,7 @@ export function refineDurationBag(bag: DurationBag): DurationSlots {
   ) as DurationBag
 
   return createDurationSlots(
-    checkDurationFields({
+    checkDurationUnits({
       ...durationFieldDefaults,
       ...durationFields,
     }),
@@ -676,7 +676,6 @@ function mergePlainTimeBag(
   const origFields = pluckProps(timeFieldNamesAlpha, plainTime)
   const newFields = refineFields(bag, timeFieldNamesAlpha)
   const mergedFields = { ...origFields, ...newFields }
-
   return refineTimeBag(mergedFields, overflow)
 }
 
@@ -685,9 +684,7 @@ function mergeDurationBag(
   bag: DurationBag,
 ): DurationFields {
   const newFields = refineFields(bag, durationFieldNamesAlpha)
-  const mergedFields = { ...durationFields, ...newFields }
-
-  return checkDurationFields(mergedFields)
+  return checkDurationUnits({ ...durationFields, ...newFields })
 }
 
 function mergeCalendarFields(

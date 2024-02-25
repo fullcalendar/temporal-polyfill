@@ -17,10 +17,10 @@ import {
   MarkerToEpochNano,
   MoveMarker,
   clearDurationFields,
+  computeDurationSign,
   createMarkerSystem,
   durationFieldsToDayTimeNano,
   getLargestDurationUnit,
-  queryDurationSign,
   spanDuration,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
@@ -75,7 +75,7 @@ function totalRelativeDuration<M>(
   moveMarker: MoveMarker<M>,
   _diffMarkers?: DiffMarkers<M>,
 ): number {
-  const sign = queryDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields)
 
   const [epochNano0, epochNano1] = clampRelativeDuration(
     clearDurationFields(durationFields, totalUnit - 1),

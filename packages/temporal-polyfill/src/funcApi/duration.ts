@@ -5,9 +5,8 @@ import { constructDurationSlots } from '../internal/construct'
 import {
   absDuration,
   addDurations,
+  getDurationBlank,
   negateDuration,
-  queryDurationBlank,
-  queryDurationSign,
   roundDuration,
 } from '../internal/durationMath'
 import { DurationBag } from '../internal/fields'
@@ -22,7 +21,7 @@ import {
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
-import { NumberSign, bindArgs, identity } from '../internal/utils'
+import { bindArgs, identity } from '../internal/utils'
 
 // TODO: rename to keep scope? Slots/Fields/Bag?
 export type { DurationSlots, DurationBag }
@@ -86,9 +85,7 @@ export function toLocaleString(
     : formatDurationIso(slots)
 }
 
-export const sign = queryDurationSign as (slots: DurationSlots) => NumberSign
-
-export const blank = queryDurationBlank as (slots: DurationSlots) => boolean
+export const blank = getDurationBlank
 
 export const compare = bindArgs(
   compareDurations<RelativeToArg, string, string>,

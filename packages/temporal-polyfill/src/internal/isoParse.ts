@@ -6,7 +6,7 @@ import {
 } from './calendarNative'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
-import { negateDurationFields } from './durationMath'
+import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
@@ -275,7 +275,7 @@ export function parseDuration(s: string): DurationSlots {
   if (!parsed) {
     throw new RangeError(errorMessages.failedParse(s))
   }
-  return createDurationSlots(parsed)
+  return createDurationSlots(checkDurationUnits(parsed))
 }
 
 export function parseCalendarId(s: string): string {

@@ -1,12 +1,10 @@
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
-import {
-  DurationFields,
-  durationFieldNamesAsc,
-} from '../internal/durationFields'
+import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
 import { timeFieldNamesAsc } from '../internal/fields'
 import { IsoDateFields, isoTimeFieldNamesAsc } from '../internal/isoFields'
 import {
+  DurationSlots,
   PlainDateBranding,
   PlainMonthDayBranding,
   PlainYearMonthBranding,
@@ -154,12 +152,12 @@ function createSimpleOps(calendarSlot: CalendarSlot): AdapterSimpleOps {
 // -----------------------------------------------------------------------------
 
 export const durationGetters = mapPropNames(
-  (propName: keyof DurationFields) => {
+  (propName: keyof DurationSlots) => {
     return function (this: any, slots: any) {
       return slots[propName]
     }
   },
-  durationFieldNamesAsc,
+  (durationFieldNamesAsc as (keyof DurationSlots)[]).concat('sign'),
 )
 
 // Time

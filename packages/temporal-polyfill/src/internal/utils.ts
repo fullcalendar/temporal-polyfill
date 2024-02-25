@@ -14,6 +14,22 @@ export type Classlike = any
 // Validation
 // -----------------------------------------------------------------------------
 
+export function clampProp<P>(
+  props: P,
+  propName: keyof FilterPropValues<P, number> & string,
+  min: number,
+  max: number,
+  overflow?: Overflow,
+): number {
+  return clampEntity(
+    propName,
+    getDefinedProp(props, propName),
+    min,
+    max,
+    overflow,
+  )
+}
+
 export function clampEntity(
   entityName: string,
   num: number,
@@ -30,22 +46,6 @@ export function clampEntity(
   }
 
   return clamped
-}
-
-export function clampProp<P>(
-  props: P,
-  propName: keyof FilterPropValues<P, number> & string,
-  min: number,
-  max: number,
-  overflow?: Overflow,
-): number {
-  return clampEntity(
-    propName,
-    getDefinedProp(props, propName),
-    min,
-    max,
-    overflow,
-  )
 }
 
 export function getDefinedProp(props: any, propName: string): any {

@@ -3,6 +3,7 @@ import {
   bigIntToDayTimeNano,
   dayTimeNanoToBigInt,
 } from '../internal/dayTimeNano'
+import { computeDurationSign } from '../internal/durationMath'
 import { isoToEpochNano } from '../internal/timeMath'
 import { DurationBag, DurationSlots } from './duration'
 import * as InstantFns from './instant'
@@ -44,6 +45,7 @@ const instantSlotDefaults = {
 
 const durationSlotDefaults = {
   branding: 'Duration',
+  sign: 0,
   days: 0,
   hours: 0,
   microseconds: 0,
@@ -67,7 +69,14 @@ export function expectInstantEquals(
 }
 
 export function expectDurationEquals(d: DurationSlots, bag: DurationBag): void {
-  expectPropsEqualStrict(d, { ...durationSlotDefaults, ...bag })
+  const bagToSlots = {
+    ...durationSlotDefaults,
+    ...bag,
+  }
+  expectPropsEqualStrict(d, {
+    ...bagToSlots,
+    sign: computeDurationSign(bagToSlots),
+  })
 }
 
 function expectPropsEqualStrict(obj0: {}, obj1: {}): void {

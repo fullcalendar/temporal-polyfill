@@ -2,7 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { bigIntToDayTimeNano } from './dayTimeNano'
 import { durationFieldNamesAsc } from './durationFields'
-import { checkDurationFields } from './durationMath'
+import { checkDurationUnits } from './durationMath'
 import { isoDateTimeFieldNamesAsc, isoTimeFieldNamesAsc } from './isoFields'
 import { isoEpochFirstLeapYear } from './isoMath'
 import {
@@ -204,6 +204,6 @@ export function constructDurationSlots(
     nanoseconds,
   ])
   return createDurationSlots(
-    checkDurationFields(mapProps(toStrictInteger, durationFields)),
+    checkDurationUnits(mapProps(toStrictInteger, durationFields)),
   )
 }

@@ -1,6 +1,7 @@
 import { requireString } from './cast'
 import { DayTimeNano, dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
+import { computeDurationSign } from './durationMath'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -10,7 +11,7 @@ import {
   isoTimeFieldNamesAlpha,
 } from './isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
-import { pluckProps } from './utils'
+import { NumberSign, pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
 export const PlainMonthDayBranding = 'PlainMonthDay' as const
@@ -128,6 +129,7 @@ export function createDurationSlots(
 ): DurationSlots {
   return {
     branding: DurationBranding,
+    sign: computeDurationSign(durationFields),
     ...pluckProps(durationFieldNamesAlpha, durationFields),
   }
 }
@@ -169,6 +171,7 @@ export type PlainYearMonthSlots<C> = IsoDateFields & {
 }
 export type DurationSlots = DurationFields & {
   branding: typeof DurationBranding
+  sign: NumberSign // extra data
 }
 export type InstantSlots = {
   epochNanoseconds: DayTimeNano

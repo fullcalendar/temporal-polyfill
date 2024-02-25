@@ -1,11 +1,10 @@
 import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, divModDayTimeNano } from './dayTimeNano'
-import { DurationFields, durationFieldNamesAsc } from './durationFields'
+import { durationFieldNamesAsc } from './durationFields'
 import {
   checkDurationTimeUnit,
   getLargestDurationUnit,
   negateDurationFields,
-  queryDurationSign,
 } from './durationMath'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
@@ -175,7 +174,7 @@ export function formatDurationIso(
     }
   }
 
-  return formatDurationFields(
+  return formatDurationSlots(
     slots,
     subsecDigits as SubsecDigits | undefined, // -1 won't happen (units can't be minutes)
   )
@@ -300,13 +299,12 @@ function formatTimeIso(
   )
 }
 
-function formatDurationFields(
-  durationFields: DurationFields, // already balanced
+function formatDurationSlots(
+  durationSlots: DurationSlots,
   subsecDigits: SubsecDigits | undefined,
 ): string {
-  const sign = queryDurationSign(durationFields)
-  const abs =
-    sign === -1 ? negateDurationFields(durationFields) : durationFields
+  const { sign } = durationSlots
+  const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
   const [wholeSeconds, subsecNano] = divModDayTimeNano(

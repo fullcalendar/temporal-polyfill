@@ -18,7 +18,6 @@ import {
   durationTimeFieldsToLargeNanoStrict,
   negateDuration,
   negateDurationFields,
-  queryDurationSign,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IntlCalendar, computeIntlMonthsInYear } from './intlMath'
@@ -142,7 +141,7 @@ export function movePlainYearMonth<C>(
   getCalendarOps: (calendar: C) => YearMonthMoveOps,
   doSubtract: boolean,
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  durationFields: DurationSlots,
+  durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
@@ -150,11 +149,11 @@ export function movePlainYearMonth<C>(
   let isoDateFields = moveToMonthStart(calendarOps, plainYearMonthSlots)
 
   if (doSubtract) {
-    durationFields = negateDuration(durationFields)
+    durationSlots = negateDuration(durationSlots)
   }
 
   // if moving backwards in time, set to last day of month
-  if (queryDurationSign(durationFields) < 0) {
+  if (durationSlots.sign < 0) {
     isoDateFields = calendarOps.dateAdd(isoDateFields, {
       ...durationFieldDefaults,
       months: 1,
@@ -164,7 +163,7 @@ export function movePlainYearMonth<C>(
 
   const movedIsoDateFields = calendarOps.dateAdd(
     isoDateFields,
-    durationFields,
+    durationSlots,
     options,
   )
 

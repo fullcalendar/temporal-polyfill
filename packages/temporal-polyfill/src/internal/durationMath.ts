@@ -15,6 +15,7 @@ import {
   isoTimeFieldDefaults,
 } from './isoFields'
 import { moveDateTime, moveZonedEpochNano } from './move'
+import { Overflow } from './options'
 import {
   DurationRoundOptions,
   RelativeToOptions,
@@ -30,11 +31,14 @@ import {
   TimeUnit,
   Unit,
   givenFieldsToDayTimeNano,
+  nanoInSec,
   nanoInUtcDay,
   nanoToGivenFields,
   unitNanoMap,
 } from './units'
-import { NumberSign, bindArgs, createLazyGenerator, identity } from './utils'
+import { NumberSign, bindArgs, clampEntity, identity } from './utils'
+
+const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 
 // Marker System
 // -----------------------------------------------------------------------------
@@ -147,11 +151,13 @@ export function addDurations<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds))
   ) {
     return createDurationSlots(
-      addDayTimeDurations(
-        slots,
-        otherSlots,
-        largestUnit as DayTimeUnit,
-        doSubtract,
+      checkDurationUnits(
+        addDayTimeDurations(
+          slots,
+          otherSlots,
+          largestUnit as DayTimeUnit,
+          doSubtract,
+        ),
       ),
     )
   }
@@ -222,12 +228,14 @@ export function roundDuration<RA, C, T>(
       !(markerSlots && (markerSlots as any).epochNanoseconds))
   ) {
     return createDurationSlots(
-      roundDayTimeDuration(
-        slots,
-        largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
-        smallestUnit as DayTimeUnit,
-        roundingInc,
-        roundingMode,
+      checkDurationUnits(
+        roundDayTimeDuration(
+          slots,
+          largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
+          smallestUnit as DayTimeUnit,
+          roundingInc,
+          roundingMode,
+        ),
       ),
     )
   }
@@ -255,8 +263,8 @@ export function roundDuration<RA, C, T>(
     ...markerSystem,
   )
 
-  const origSign = queryDurationSign(slots)
-  const balancedSign = queryDurationSign(balancedDuration)
+  const origSign = slots.sign
+  const balancedSign = computeDurationSign(balancedDuration)
   if (origSign && balancedSign && origSign !== balancedSign) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
@@ -284,6 +292,13 @@ export function roundDuration<RA, C, T>(
 // Sign / Abs / Blank
 // -----------------------------------------------------------------------------
 
+export function absDuration(slots: DurationSlots): DurationSlots {
+  if (slots.sign === -1) {
+    return negateDuration(slots)
+  }
+  return slots
+}
+
 export function negateDuration(slots: DurationSlots): DurationSlots {
   return createDurationSlots(negateDurationFields(slots))
 }
@@ -298,28 +313,11 @@ export function negateDurationFields(fields: DurationFields): DurationFields {
   return res
 }
 
-export function absDuration(slots: DurationSlots): DurationSlots {
-  return createDurationSlots(absDurationFields(slots))
+export function getDurationBlank(slots: DurationSlots): boolean {
+  return !slots.sign
 }
 
-export function absDurationFields(fields: DurationFields): DurationFields {
-  if (queryDurationSign(fields) === -1) {
-    return negateDurationFields(fields)
-  }
-
-  return fields
-}
-
-export function queryDurationBlank(durationFields: DurationFields): boolean {
-  return !queryDurationSign(durationFields)
-}
-
-export const queryDurationSign = createLazyGenerator(
-  computeDurationSign,
-  WeakMap,
-)
-
-function computeDurationSign(
+export function computeDurationSign(
   fields: DurationFields,
   fieldNames = durationFieldNamesAsc,
 ): NumberSign {
@@ -339,8 +337,20 @@ function computeDurationSign(
   return sign
 }
 
-export function checkDurationFields(fields: DurationFields): DurationFields {
-  queryDurationSign(fields) // check and prime cache
+export function checkDurationUnits(fields: DurationFields): DurationFields {
+  for (const calendarUnit of ['years', 'months', 'weeks'] as const) {
+    clampEntity(
+      calendarUnit,
+      fields[calendarUnit],
+      -maxCalendarUnit,
+      maxCalendarUnit,
+      Overflow.Reject,
+    )
+  }
+
+  const dayTimeNano = durationFieldsToDayTimeNano(fields, Unit.Day)
+  checkDurationTimeUnit(dayTimeNanoToInt(dayTimeNano, nanoInSec))
+
   return fields
 }
 

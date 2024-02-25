@@ -25,6 +25,24 @@ describe('create', () => {
       microseconds: 9,
       nanoseconds: 10,
     })
+    expect(d.sign).toBe(1)
+  })
+
+  it('called with some args (negative)', () => {
+    const d = DurationFns.create(-1, -2, -3, -4, -5, -6, -7, -8, -9, -10)
+    expectDurationEquals(d, {
+      years: -1,
+      months: -2,
+      weeks: -3,
+      days: -4,
+      hours: -5,
+      minutes: -6,
+      seconds: -7,
+      milliseconds: -8,
+      microseconds: -9,
+      nanoseconds: -10,
+    })
+    expect(d.sign).toBe(-1)
   })
 })
 
@@ -60,18 +78,6 @@ describe('blank', () => {
   it('gives false for a non-blank duration', () => {
     const d = DurationFns.create(1)
     expect(DurationFns.blank(d)).toBe(false)
-  })
-})
-
-describe('sign', () => {
-  it('gives zero sign for blank duration', () => {
-    const d = DurationFns.create()
-    expect(DurationFns.sign(d)).toBe(0)
-  })
-
-  it('gives -1 sign for negative duration', () => {
-    const d = DurationFns.create(-1)
-    expect(DurationFns.sign(d)).toBe(-1)
   })
 })
 

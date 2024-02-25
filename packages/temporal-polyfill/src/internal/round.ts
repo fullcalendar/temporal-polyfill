@@ -17,10 +17,10 @@ import {
   MarkerToEpochNano,
   MoveMarker,
   clearDurationFields,
+  computeDurationSign,
   durationFieldsToDayTimeNano,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
-  queryDurationSign,
 } from './durationMath'
 import {
   IsoDateTimeFields,
@@ -458,7 +458,7 @@ function nudgeDurationDayTime(
   nudgedEpochNano: DayTimeNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const sign = queryDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields)
   const dayTimeNano = durationFieldsToDayTimeNano(durationFields, Unit.Day)
   const roundedDayTimeNano = roundDayTimeNano(
     dayTimeNano,
@@ -506,7 +506,7 @@ function nudgeRelativeDurationTime<M>(
   nudgedEpochNano: DayTimeNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const sign = queryDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields)
   let [dayDelta, timeNano] = givenFieldsToDayTimeNano(
     durationFields,
     Unit.Hour,
@@ -566,7 +566,7 @@ function nudgeRelativeDuration<M>(
   movedEpochNano: DayTimeNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const sign = queryDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields)
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
 
   const baseDurationFields = clearDurationFields(
@@ -618,7 +618,7 @@ function bubbleRelativeDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
 ): DurationFields {
-  const sign = queryDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields)
 
   for (
     let currentUnit: Unit = smallestUnit + 1;

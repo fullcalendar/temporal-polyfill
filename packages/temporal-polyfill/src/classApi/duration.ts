@@ -11,9 +11,8 @@ import {
   MarkerSlots,
   absDuration,
   addDurations,
+  getDurationBlank,
   negateDuration,
-  queryDurationBlank,
-  queryDurationSign,
   roundDuration,
 } from '../internal/durationMath'
 import { DurationBag } from '../internal/fields'
@@ -58,12 +57,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   constructDurationSlots,
   {
     ...durationGetters,
-    blank(slots: DurationSlots): boolean {
-      return queryDurationBlank(slots)
-    },
-    sign(slots: DurationSlots): NumberSign {
-      return queryDurationSign(slots)
-    },
+    blank: getDurationBlank,
   },
   {
     with(slots: DurationSlots, mod: DurationBag): Duration {
