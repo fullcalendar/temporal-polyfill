@@ -2,6 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import { DayTimeNano, divModDayTimeNano } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import {
+  checkDurationTimeUnit,
   getLargestDurationUnit,
   negateDurationFields,
   queryDurationSign,
@@ -313,9 +314,9 @@ function formatDurationFields(
     nanoInSec,
     divModTrunc,
   )
+  checkDurationTimeUnit(wholeSeconds)
 
   const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)
-
   const forceSeconds =
     // a numeric subsecDigits specified?
     // allow `undefined` in comparison - will evaluate to false

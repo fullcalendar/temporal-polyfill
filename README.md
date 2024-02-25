@@ -179,6 +179,7 @@ Use caniuse's star feature to find intersection of features.
 Libraries:
 - [Intl.DateTimeFormat IANA time zone names](https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_timezone_parameter_iana_time_zones)
 - [Number.isInteger](https://caniuse.com/mdn-javascript_builtins_number_isinteger)
+- [Number.isSafeInteger] (https://caniuse.com/mdn-javascript_builtins_number_issafeinteger)
 - [String::padStart](https://caniuse.com/mdn-javascript_builtins_string_padstart)
 - [WeakMap](https://caniuse.com/mdn-javascript_builtins_weakmap)
 

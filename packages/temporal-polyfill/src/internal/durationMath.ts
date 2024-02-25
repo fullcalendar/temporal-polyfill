@@ -344,6 +344,12 @@ export function checkDurationFields(fields: DurationFields): DurationFields {
   return fields
 }
 
+export function checkDurationTimeUnit(n: number): void {
+  if (!Number.isSafeInteger(n)) {
+    throw new RangeError(errorMessages.outOfBoundsDuration)
+  }
+}
+
 // Field <-> Nanosecond Conversion
 // -----------------------------------------------------------------------------
 
