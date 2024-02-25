@@ -83,14 +83,17 @@ yargs(hideBin(process.argv))
         'expected-failures-descriptor.txt',
       ]
 
-      if (currentNodeMajorVersion >= 18) {
-        expectedFailureFiles.push('expected-failures-node-gte18.txt')
+      if (currentNodeMajorVersion < 16) {
+        expectedFailureFiles.push('expected-failures-node-lt16.txt')
       }
       if (currentNodeMajorVersion < 18) {
         expectedFailureFiles.push('expected-failures-node-lt18.txt')
       }
-      if (currentNodeMajorVersion < 16) {
-        expectedFailureFiles.push('expected-failures-node-lt16.txt')
+      if (currentNodeMajorVersion >= 16) {
+        expectedFailureFiles.push('expected-failures-node-gte16.txt')
+      }
+      if (currentNodeMajorVersion >= 18) {
+        expectedFailureFiles.push('expected-failures-node-gte18.txt')
       }
 
       let { esm, min } = options

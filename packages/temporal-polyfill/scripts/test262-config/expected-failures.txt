@@ -290,10 +290,6 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 
 # NOT-IMPLEMENTED
-# We do not reject legacy ICU time zone IDs
-intl402/DateTimeFormat/timezone-legacy-non-iana.js
-
-# NOT-IMPLEMENTED
 # Intl.DateTimeFormat does not accept numeric-offset `timeZones`s and we are okay with that
 intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
 intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
