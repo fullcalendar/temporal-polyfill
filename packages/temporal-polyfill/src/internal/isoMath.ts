@@ -213,7 +213,7 @@ export function computeIsoEraParts(
     return queryJapaneseEraParts(isoFields)
   }
 
-  return [undefined, undefined] // iso
+  return [] as unknown as EraParts
 }
 
 function computeGregoryEraParts({ isoYear }: IsoDateFields): EraParts {

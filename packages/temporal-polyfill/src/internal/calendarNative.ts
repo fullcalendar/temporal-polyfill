@@ -32,7 +32,10 @@ export type DateParts = [year: number, month: number, day: number]
 export type EraParts = [era: string | undefined, eraYear: number | undefined]
 export type MonthCodeParts = [monthCodeNumber: number, isLeapMonth: boolean]
 export type YearMonthParts = [year: number, month: number]
-export type WeekParts = [weekOfYear: number, yearOfWeek: number]
+export type WeekParts = [
+  weekOfYear: number | undefined,
+  yearOfWeek: number | undefined,
+]
 
 // Function Types
 // (Must always be called from a CalendarOps object)
@@ -64,7 +67,7 @@ export type DaysInYearPartOp = (year: number) => number
 export type DayOfYearOp = (isoFields: IsoDateFields) => number
 export type WeekOfYearOp = (isoFields: IsoDateFields) => number | undefined
 export type YearOfWeekOp = (isoFields: IsoDateFields) => number | undefined
-export type WeekPartsOp = (isoFields: IsoDateFields) => WeekParts | []
+export type WeekPartsOp = (isoFields: IsoDateFields) => WeekParts
 export type EpochMilliOp = (
   year: number,
   month?: number,

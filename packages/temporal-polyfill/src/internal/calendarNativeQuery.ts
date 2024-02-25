@@ -28,6 +28,7 @@ import {
   NativeYearMonthMoveOps,
   NativeYearMonthParseOps,
   NativeYearMonthRefineOps,
+  WeekParts,
   computeNativeDaysInMonth,
   computeNativeDaysInYear,
   computeNativeInLeapYear,
@@ -380,7 +381,7 @@ export const intlDayOfYearOps: NativeDayOfYearOps = {
 export const intlWeekOps: NativeWeekOps = {
   weekOfYear: computeNativeWeekOfYear,
   yearOfWeek: computeNativeYearOfWeek,
-  weekParts: () => [],
+  weekParts: () => [] as unknown as WeekParts,
 }
 
 // String Parsing
