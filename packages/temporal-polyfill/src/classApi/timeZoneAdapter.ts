@@ -1,9 +1,16 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { requireFunction, requireInteger } from '../internal/cast'
-import { DayTimeNano } from '../internal/dayTimeNano'
+import {
+  DayTimeNano,
+  compareDayTimeNanos,
+  dayTimeNanoToInt,
+  diffDayTimeNanos,
+} from '../internal/dayTimeNano'
+import * as errorMessages from '../internal/errorMessages'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { createInstantSlots, createPlainDateTimeSlots } from '../internal/slots'
 import { validateTimeZoneOffset } from '../internal/timeZoneOps'
+import { nanoInUtcDay } from '../internal/units'
 import { Callable, bindArgs } from '../internal/utils'
 import { Instant, createInstant, getInstantSlots } from './instant'
 import { createPlainDateTime } from './plainDateTime'
@@ -30,7 +37,7 @@ function getPossibleInstantsForAdapter(
   getPossibleInstantsFor: TimeZoneProtocol['getPossibleInstantsFor'],
   isoFields: IsoDateTimeFields,
 ): DayTimeNano[] {
-  return [
+  const epochNanos: DayTimeNano[] = [
     ...getPossibleInstantsFor.call(
       timeZoneProtocol,
       createPlainDateTime(createPlainDateTimeSlots(isoFields, isoCalendarId)),
@@ -38,6 +45,21 @@ function getPossibleInstantsForAdapter(
   ].map((instant: Instant) => {
     return getInstantSlots(instant).epochNanoseconds
   })
+
+  // Ensure no two instants are more than 24hrs apart
+  const epochNanoLen = epochNanos.length
+  if (epochNanoLen > 1) {
+    epochNanos.sort(compareDayTimeNanos)
+    if (
+      dayTimeNanoToInt(
+        diffDayTimeNanos(epochNanos[0], epochNanos[epochNanoLen - 1]),
+      ) > nanoInUtcDay
+    ) {
+      throw new RangeError(errorMessages.invalidProtocolResults)
+    }
+  }
+
+  return epochNanos
 }
 
 function validateTimeZoneOffsetRes(offsetNano: number): number {
