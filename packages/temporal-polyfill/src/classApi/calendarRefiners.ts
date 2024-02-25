@@ -3,6 +3,7 @@ import {
   requireInteger,
   requireIntegerOrUndefined,
   requirePositiveInteger,
+  requirePositiveIntegerOrUndefined,
   requireString,
   requireStringOrUndefined,
 } from '../internal/cast'
@@ -30,8 +31,8 @@ export const dayOnlyRefiners = {
 export const dateOnlyRefiners = {
   dayOfWeek: requirePositiveInteger,
   dayOfYear: requirePositiveInteger,
-  weekOfYear: requirePositiveInteger,
-  yearOfWeek: requireInteger,
+  weekOfYear: requirePositiveIntegerOrUndefined,
+  yearOfWeek: requireIntegerOrUndefined,
   daysInWeek: requirePositiveInteger,
 }
 

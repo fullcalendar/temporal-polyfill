@@ -10,8 +10,6 @@ export const forbiddenBigIntToNumber = (entityName: string) =>
 export const invalidBigInt = (arg: any) => `Invalid bigint: ${arg}`
 export const forbiddenSymbolToString = 'Cannot convert Symbol to string'
 export const forbiddenNullish = 'Cannot be null or undefined'
-export const expectedStringOrUndefined = 'Expected string or undefined'
-export const expectedIntegerOrUndefined = 'Expected integer or undefined'
 export const invalidObject = 'Invalid object'
 export const numberOutOfRange = (
   entityName: string,

@@ -4,77 +4,36 @@ import { Callable, bindArgs, isObjectLike } from './utils'
 // Require
 // -----------------------------------------------------------------------------
 
-export function requireObjectLike<O extends {}>(arg: O): O {
-  if (!isObjectLike(arg)) {
-    throw new TypeError(errorMessages.invalidObject)
-  }
-  return arg
-}
-
-function requireType<A>(
-  typeName: string,
-  arg: A,
-  entityName: string = typeName,
-): A {
-  // biome-ignore lint/suspicious/useValidTypeof: dynamic by design
-  if (typeof arg !== typeName) {
-    throw new TypeError(errorMessages.invalidEntity(entityName, arg))
-  }
-  return arg
-}
-
-export const requireString = bindArgs(requireType<string>, 'string')
-export const requireBoolean = bindArgs(requireType<boolean>, 'boolean')
-export const requireNumber = bindArgs(requireType<number>, 'number')
-export const requireFunction = bindArgs(requireType<Callable>, 'function')
-
 export function requireStringOrUndefined(
   input: string | undefined,
 ): string | undefined {
-  if (input !== undefined && typeof input !== 'string') {
-    throw new TypeError(errorMessages.expectedStringOrUndefined)
+  if (input !== undefined) {
+    return requireString(input)
   }
-  return input
+}
+
+export function requirePositiveIntegerOrUndefined(
+  input: number | undefined,
+): number | undefined {
+  if (input !== undefined) {
+    return requirePositiveInteger(input)
+  }
 }
 
 export function requireIntegerOrUndefined(
   input: number | undefined,
 ): number | undefined {
-  if (typeof input === 'number') {
-    requireNumberIsInteger(input)
-  } else if (input !== undefined) {
-    throw new TypeError(errorMessages.expectedIntegerOrUndefined)
+  if (input !== undefined) {
+    return requireInteger(input)
   }
-  return input
-}
-
-export function requireInteger(arg: number): number {
-  return requireNumberIsInteger(requireNumber(arg))
 }
 
 export function requirePositiveInteger(arg: number): number {
   return requireNumberIsPositive(requireInteger(arg))
 }
 
-/*
-Also, responsible for ensuring not -0
-Other top-level funcs handle this themselves
-*/
-function requireNumberIsInteger(num: number, entityName = 'number'): number {
-  if (!Number.isInteger(num)) {
-    throw new RangeError(errorMessages.expectedInteger(entityName, num))
-  }
-  return num || 0 // ensure no -0
-}
-
-export function requireNumberIsPositive(
-  num: number,
-  entityName = 'number',
-): number {
-  if (num <= 0) {
-    throw new RangeError(errorMessages.expectedPositive(entityName, num))
-  }
-  return num
+export function requireInteger(arg: number): number {
+  return requireNumberIsInteger(requireNumber(arg))
 }
 
 export function requireNonNullish<T>(o: T): T {
@@ -95,6 +54,52 @@ export function requirePropDefined<V>(
     throw new RangeError(errorMessages.missingField(optionName))
   }
   return optionVal
+}
+
+export function requireObjectLike<O extends {}>(arg: O): O {
+  if (!isObjectLike(arg)) {
+    throw new TypeError(errorMessages.invalidObject)
+  }
+  return arg
+}
+
+export const requireString = bindArgs(requireType<string>, 'string')
+export const requireBoolean = bindArgs(requireType<boolean>, 'boolean')
+export const requireNumber = bindArgs(requireType<number>, 'number')
+export const requireFunction = bindArgs(requireType<Callable>, 'function')
+
+function requireType<A>(
+  typeName: string,
+  arg: A,
+  entityName: string = typeName,
+): A {
+  // biome-ignore lint/suspicious/useValidTypeof: dynamic by design
+  if (typeof arg !== typeName) {
+    throw new TypeError(errorMessages.invalidEntity(entityName, arg))
+  }
+  return arg
+}
+
+/*
+Already known to be number
+Also, responsible for ensuring not -0
+Other top-level funcs handle this themselves
+*/
+function requireNumberIsInteger(num: number, entityName = 'number'): number {
+  if (!Number.isInteger(num)) {
+    throw new RangeError(errorMessages.expectedInteger(entityName, num))
+  }
+  return num || 0 // ensure no -0
+}
+
+/*
+Already known to be number
+*/
+function requireNumberIsPositive(num: number, entityName = 'number'): number {
+  if (num <= 0) {
+    throw new RangeError(errorMessages.expectedPositive(entityName, num))
+  }
+  return num
 }
 
 // Casting
