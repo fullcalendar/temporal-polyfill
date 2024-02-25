@@ -27,7 +27,7 @@ import {
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { isoDaysInWeek, isoMonthsInYear } from './isoMath'
+import { isoMonthsInYear } from './isoMath'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
@@ -378,7 +378,7 @@ export function nativeDateAdd(
     return isoDateFields
   }
 
-  epochMilli! += (weeks * isoDaysInWeek + days) * milliInDay
+  epochMilli! += (weeks * 7 + days) * milliInDay
 
   return checkIsoDateInBounds(epochMilliToIso(epochMilli!))
 }

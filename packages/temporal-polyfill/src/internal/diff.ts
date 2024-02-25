@@ -22,7 +22,7 @@ import {
   isoTimeFieldDefaults,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { isoDaysInWeek, isoMonthsInYear } from './isoMath'
+import { isoMonthsInYear } from './isoMath'
 import {
   moveByIsoDays,
   moveDateTime,
@@ -610,7 +610,7 @@ export function nativeDateUntil(
     let days = diffDays(startIsoFields, endIsoFields)
 
     if (largestUnit === Unit.Week) {
-      ;[weeks, days] = divModTrunc(days, isoDaysInWeek)
+      ;[weeks, days] = divModTrunc(days, 7)
     }
 
     return { ...durationFieldDefaults, weeks, days }

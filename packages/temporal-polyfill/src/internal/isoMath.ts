@@ -35,7 +35,6 @@ import {
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
 export const isoMonthsInYear = 12
-export const isoDaysInWeek = 7
 
 export function computeIsoYear(isoFields: IsoDateFields): number {
   return isoFields.isoYear
@@ -79,7 +78,7 @@ export function computeIsoFieldsFromParts(
 }
 
 export function computeIsoDaysInWeek(_isoDateFields: IsoDateFields) {
-  return isoDaysInWeek
+  return 7
 }
 
 export function computeIsoMonthsInYear(_isoYear: number): number {
