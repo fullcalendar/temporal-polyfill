@@ -327,19 +327,18 @@ function formatDurationSlots(
     (sign < 0 ? '-' : '') +
     'P' +
     formatDurationFragments({
-      'Y': formatNumberUnscientific(abs.years),
-      'M': formatNumberUnscientific(abs.months),
-      'W': formatNumberUnscientific(abs.weeks),
-      'D': formatNumberUnscientific(abs.days),
+      'Y': formatDurationNumber(abs.years),
+      'M': formatDurationNumber(abs.months),
+      'W': formatDurationNumber(abs.weeks),
+      'D': formatDurationNumber(abs.days),
     }) +
     (hours || minutes || wholeSeconds || forceSeconds
       ? 'T' +
         formatDurationFragments({
-          'H': formatNumberUnscientific(hours),
-          'M': formatNumberUnscientific(minutes),
+          'H': formatDurationNumber(hours),
+          'M': formatDurationNumber(minutes),
           'S':
-            formatNumberUnscientific(wholeSeconds, forceSeconds) +
-            subsecNanoString,
+            formatDurationNumber(wholeSeconds, forceSeconds) + subsecNanoString,
         })
       : '')
   )
@@ -527,11 +526,11 @@ function getSignStr(num: number): string {
 }
 
 /*
-Only good at non-negative numbers, because of HACK
+Only accepts non-negative numbers
 */
-function formatNumberUnscientific(n: number, force?: any): string {
+function formatDurationNumber(n: number, force?: any): string {
   if (!n && !force) {
-    return '' // TODO: rename this whole func
+    return ''
   }
 
   // avoid outputting scientific notation
