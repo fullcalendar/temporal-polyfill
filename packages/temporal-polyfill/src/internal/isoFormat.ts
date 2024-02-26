@@ -321,6 +321,7 @@ function formatDurationSlots(
     (subsecDigits as number) >= 0 ||
     // completely empty? display 'PT0S'
     !sign ||
+    // subseconds require seconds to be displayed
     subsecNanoString
 
   return (
@@ -532,7 +533,6 @@ function formatDurationNumber(n: number, force?: any): string {
   if (!n && !force) {
     return ''
   }
-
   // avoid outputting scientific notation
   // https://stackoverflow.com/a/50978675/96342
   return n.toLocaleString('fullwide', { useGrouping: false })

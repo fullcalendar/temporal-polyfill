@@ -350,7 +350,7 @@ export function epochMilliToIso(epochMilli: number): {
   return zipProps(isoDateTimeFieldNamesAsc as any, [
     legacyDate.getUTCFullYear(),
     legacyDate.getUTCMonth() + 1,
-    legacyDate.getUTCDate() + daysOver, // push of bounds again
+    legacyDate.getUTCDate() + daysOver, // push back out-of-bounds
     legacyDate.getUTCHours(),
     legacyDate.getUTCMinutes(),
     legacyDate.getUTCSeconds(),

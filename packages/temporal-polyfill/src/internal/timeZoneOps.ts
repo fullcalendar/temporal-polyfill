@@ -130,6 +130,7 @@ export function getMatchingInstantFor(
 
   const possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(isoFields)
 
+  // Prefer or Reject
   if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
     const matchingEpochNano = findMatchingEpochNano(
       possibleEpochNanos,
@@ -144,7 +145,7 @@ export function getMatchingInstantFor(
     if (offsetDisambig === OffsetDisambig.Reject) {
       throw new RangeError(errorMessages.invalidOffsetForTimeZone)
     }
-    // else (offsetDisambig === 'prefer') ...
+    // else (offsetDisambig === OffsetDisambig.Prefer) ...
   }
 
   if (hasZ) {
