@@ -1,2 +1,5 @@
-Temporarily checked out https://github.com/tc39/test262/pull/4012
-because contains mods from https://github.com/tc39/proposal-temporal/pull/2760
+Fork: https://github.com/fullcalendar/test262
+Integration of:
+  - "Tests for correct intermediate value in ZonedDateTime difference/rounding"
+    https://github.com/tc39/test262/pull/4012
+    (for https://github.com/tc39/proposal-temporal/pull/2760)
