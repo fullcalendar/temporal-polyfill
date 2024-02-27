@@ -1,4 +1,4 @@
-import { DiffOps } from './calendarOps'
+import { MoveOps } from './calendarOps'
 import { compareDayTimeNanos } from './dayTimeNano'
 import { durationFieldNamesAsc } from './durationFields'
 import {
@@ -54,7 +54,7 @@ export function compareZonedDateTimes<C, T>(
 
 export function compareDurations<RA, C, T>(
   refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
+  getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
@@ -89,7 +89,7 @@ export function compareDurations<RA, C, T>(
   }
 
   const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(
-    getCalendarOps,
+    getCalendarOps as any, // any=HACK because don't need diffing
     getTimeZoneOps,
     markerSlots,
   ) as MarkerSystem<any>

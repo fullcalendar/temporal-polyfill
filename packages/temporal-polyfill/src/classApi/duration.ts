@@ -40,7 +40,11 @@ import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import { CalendarArg, CalendarSlot, getCalendarSlotFromBag } from './calendar'
-import { createDateRefineOps, createDiffOps } from './calendarOpsQuery'
+import {
+  createDateRefineOps,
+  createDiffOps,
+  createMoveOps,
+} from './calendarOpsQuery'
 import { durationGetters, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
@@ -157,7 +161,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     ): NumberSign {
       return compareDurations(
         refinePublicRelativeTo,
-        createDiffOps,
+        createMoveOps,
         createTimeZoneOps,
         toDurationSlots(durationArg0),
         toDurationSlots(durationArg1),
