@@ -1,11 +1,4 @@
 import {
-  nativeDateFromFields,
-  nativeFieldsMethod,
-  nativeMergeFields,
-  nativeMonthDayFromFields,
-  nativeYearMonthFromFields,
-} from './bagRefine'
-import {
   eraOriginsByCalendarId,
   isoCalendarId,
   leapMonthMetas,
@@ -20,11 +13,8 @@ import {
   MoveOps,
   YearMonthRefineOps,
 } from './calendarOps'
-import { nativeDateUntil } from './diff'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek } from './isoMath'
-import { nativeDateAdd } from './move'
 import { padNumber2 } from './utils'
 
 // Struct Types
@@ -114,23 +104,6 @@ export type NativeDateRefineOps = DateRefineOps<string> & NativeDateRefineDeps
 export type NativeMonthDayRefineOps = MonthDayRefineOps<string> &
   NativeMonthDayRefineDeps
 
-// Base
-
-export const nativeYearMonthRefineBase: YearMonthRefineOps<string> = {
-  yearMonthFromFields: nativeYearMonthFromFields,
-  fields: nativeFieldsMethod,
-}
-
-export const nativeDateRefineBase: DateRefineOps<string> = {
-  dateFromFields: nativeDateFromFields,
-  fields: nativeFieldsMethod,
-}
-
-export const nativeMonthDayRefineBase: MonthDayRefineOps<string> = {
-  monthDayFromFields: nativeMonthDayFromFields,
-  fields: nativeFieldsMethod,
-}
-
 // Mod
 // -----------------------------------------------------------------------------
 
@@ -166,17 +139,6 @@ export type NativeDiffOps = DiffOps &
 
 export type NativeYearMonthMoveOps = NativeMoveOps & { day: DayOp }
 export type NativeYearMonthDiffOps = NativeDiffOps & { day: DayOp }
-
-// Base
-
-export const nativeMoveBase: MoveOps = {
-  dateAdd: nativeDateAdd,
-}
-
-export const nativeDiffBase: DiffOps = {
-  dateAdd: nativeDateAdd,
-  dateUntil: nativeDateUntil,
-}
 
 // Parts & Stats
 // -----------------------------------------------------------------------------
@@ -296,27 +258,6 @@ export type NativeStandardOps = NativeYearMonthRefineOps &
     month(isoFields: IsoDateFields): number
     day(isoFields: IsoDateFields): number
   }
-
-export const nativeStandardBase = {
-  dateAdd: nativeDateAdd,
-  dateUntil: nativeDateUntil,
-  dateFromFields: nativeDateFromFields,
-  yearMonthFromFields: nativeYearMonthFromFields,
-  monthDayFromFields: nativeMonthDayFromFields,
-  fields: nativeFieldsMethod,
-  mergeFields: nativeMergeFields,
-
-  inLeapYear: computeNativeInLeapYear,
-  monthsInYear: computeNativeMonthsInYear,
-  daysInMonth: computeNativeDaysInMonth,
-  daysInYear: computeNativeDaysInYear,
-  era: computeNativeEra,
-  eraYear: computeNativeEraYear,
-  monthCode: computeNativeMonthCode,
-
-  dayOfWeek: computeIsoDayOfWeek,
-  daysInWeek: computeIsoDaysInWeek,
-}
 
 // 'Super' methods that all native implementations use
 // -----------------------------------------------------------------------------

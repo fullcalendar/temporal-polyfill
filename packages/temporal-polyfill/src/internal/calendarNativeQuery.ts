@@ -1,4 +1,10 @@
-import { nativeMergeFields } from './bagRefine'
+import {
+  nativeDateFromFields,
+  nativeFieldsMethod,
+  nativeMergeFields,
+  nativeMonthDayFromFields,
+  nativeYearMonthFromFields,
+} from './bagRefine'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -31,18 +37,26 @@ import {
   WeekParts,
   computeNativeDaysInMonth,
   computeNativeDaysInYear,
+  computeNativeEra,
+  computeNativeEraYear,
   computeNativeInLeapYear,
+  computeNativeMonthCode,
   computeNativeMonthsInYear,
   computeNativeWeekOfYear,
   computeNativeYearOfWeek,
-  nativeDateRefineBase,
-  nativeDiffBase,
-  nativeMonthDayRefineBase,
-  nativeMoveBase,
-  nativeStandardBase,
-  nativeYearMonthRefineBase,
 } from './calendarNative'
-import { computeIntlMonthsInYearSpan, computeIsoMonthsInYearSpan } from './diff'
+import {
+  DateRefineOps,
+  DiffOps,
+  MonthDayRefineOps,
+  MoveOps,
+  YearMonthRefineOps,
+} from './calendarOps'
+import {
+  computeIntlMonthsInYearSpan,
+  computeIsoMonthsInYearSpan,
+  nativeDateUntil,
+} from './diff'
 import {
   computeIntlDateParts,
   computeIntlDay,
@@ -64,8 +78,10 @@ import {
 import {
   computeIsoDateParts,
   computeIsoDay,
+  computeIsoDayOfWeek,
   computeIsoDayOfYear,
   computeIsoDaysInMonth,
+  computeIsoDaysInWeek,
   computeIsoDaysInYear,
   computeIsoEraParts,
   computeIsoFieldsFromParts,
@@ -77,9 +93,57 @@ import {
   computeIsoYear,
   computeIsoYearMonthForMonthDay,
 } from './isoMath'
-import { intlMonthAdd, isoMonthAdd } from './move'
+import { intlMonthAdd, isoMonthAdd, nativeDateAdd } from './move'
 import { isoArgsToEpochMilli } from './timeMath'
 import { noop } from './utils'
+
+// Common
+// -----------------------------------------------------------------------------
+
+const nativeYearMonthRefineBase: YearMonthRefineOps<string> = {
+  yearMonthFromFields: nativeYearMonthFromFields,
+  fields: nativeFieldsMethod,
+}
+
+const nativeDateRefineBase: DateRefineOps<string> = {
+  dateFromFields: nativeDateFromFields,
+  fields: nativeFieldsMethod,
+}
+
+const nativeMonthDayRefineBase: MonthDayRefineOps<string> = {
+  monthDayFromFields: nativeMonthDayFromFields,
+  fields: nativeFieldsMethod,
+}
+
+const nativeMoveBase: MoveOps = {
+  dateAdd: nativeDateAdd,
+}
+
+const nativeDiffBase: DiffOps = {
+  dateAdd: nativeDateAdd,
+  dateUntil: nativeDateUntil,
+}
+
+const nativeStandardBase = {
+  dateAdd: nativeDateAdd,
+  dateUntil: nativeDateUntil,
+  dateFromFields: nativeDateFromFields,
+  yearMonthFromFields: nativeYearMonthFromFields,
+  monthDayFromFields: nativeMonthDayFromFields,
+  fields: nativeFieldsMethod,
+  mergeFields: nativeMergeFields,
+
+  inLeapYear: computeNativeInLeapYear,
+  monthsInYear: computeNativeMonthsInYear,
+  daysInMonth: computeNativeDaysInMonth,
+  daysInYear: computeNativeDaysInYear,
+  era: computeNativeEra,
+  eraYear: computeNativeEraYear,
+  monthCode: computeNativeMonthCode,
+
+  dayOfWeek: computeIsoDayOfWeek,
+  daysInWeek: computeIsoDaysInWeek,
+}
 
 // ISO
 // -----------------------------------------------------------------------------
