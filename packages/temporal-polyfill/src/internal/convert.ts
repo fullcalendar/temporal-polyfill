@@ -16,7 +16,13 @@ import {
   bigIntToDayTimeNano,
   numberToDayTimeNano,
 } from './dayTimeNano'
-import { DateBag, MonthDayFields, YearFields, YearMonthFields } from './fields'
+import {
+  DateBag,
+  MonthDayFields,
+  YearFields,
+  YearMonthBag,
+  YearMonthFields,
+} from './fields'
 import {
   IsoDateTimeFields,
   IsoTimeFields,
@@ -95,7 +101,7 @@ export function zonedDateTimeToPlainDate<C, T>(
 export function zonedDateTimeToPlainYearMonth<C>(
   getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
-  zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
+  zonedDateTimeFields: YearMonthBag,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = zonedDateTimeSlots0.calendar
   const calendarOps = getCalendarOps(calendarSlot)
@@ -106,7 +112,7 @@ export function zonedDateTimeToPlainYearMonth<C>(
 export function zonedDateTimeToPlainMonthDay<C>(
   getCalendarOps: (calendarSlot: C) => MonthDayRefineOps<C>,
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, unknown>,
-  zonedDateTimeFields: DateBag, // TODO: DateBag correct type?
+  zonedDateTimeFields: DateBag,
 ): PlainMonthDaySlots<C> {
   const calendarSlot = zonedDateTimeSlots0.calendar
   const calendarOps = getCalendarOps(calendarSlot)
@@ -142,7 +148,7 @@ export function plainDateTimeToZonedDateTime<C, TZ>(
 export function plainDateTimeToPlainYearMonth<C>(
   getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainDateFields: DateBag, // TODO: DateBag correct type?
+  plainDateFields: DateBag,
 ): PlainYearMonthSlots<C> {
   const calendarOps = getCalendarOps(plainDateTimeSlots.calendar)
 
@@ -155,7 +161,7 @@ export function plainDateTimeToPlainYearMonth<C>(
 export function plainDateTimeToPlainMonthDay<C>(
   getCalendarOps: (calendarSlot: C) => MonthDayRefineOps<C>,
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  plainDateFields: DateBag, // TODO: DateBag correct type?
+  plainDateFields: DateBag,
 ): PlainMonthDaySlots<C> {
   const calendarOps = getCalendarOps(plainDateTimeSlots.calendar)
 
@@ -217,7 +223,7 @@ export function plainDateToPlainDateTime<C>(
 export function plainDateToPlainYearMonth<C>(
   getCalendarOps: (calendarSlot: C) => YearMonthRefineOps<C>,
   plainDateSlots: { calendar: C },
-  plainDateFields: DateBag, // TODO: DateBag correct type?
+  plainDateFields: DateBag,
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)

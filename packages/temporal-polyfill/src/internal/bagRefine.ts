@@ -43,7 +43,6 @@ import {
   DurationBag,
   EraYearOrYear,
   MonthDayBag,
-  MonthDayFields,
   MonthFields,
   TimeBag,
   TimeFields,
@@ -523,7 +522,7 @@ export function plainYearMonthWithFields<C>(
 export function plainMonthDayWithFields<C>(
   getCalendarOps: (calendarSlot: C) => MonthDayModOps<C>,
   plainMonthDaySlots: PlainMonthDaySlots<C>,
-  initialFields: MonthDayFields,
+  initialFields: MonthDayBag,
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots<C> {
@@ -560,14 +559,14 @@ export function durationWithFields(
 function mergeZonedDateTimeBag<C>(
   calendarOps: DateModOps<C>,
   timeZoneOps: TimeZoneOps,
-  zonedDateTime: any,
-  mod: DateTimeBag, // TODO: allow offset. correct base type tho?
+  initialFields: DateTimeBag & { offset?: string },
+  modFields: DateTimeBag & { offset?: string },
   options: ZonedFieldOptions | undefined,
 ): DayTimeNano {
   const fields = mergeCalendarFields(
     calendarOps,
-    zonedDateTime as any,
-    mod,
+    initialFields,
+    modFields,
     dateFieldNamesAlpha, // validFieldNames
     timeAndOffsetFieldNames, // forcedValidFieldNames
     offsetFieldNames, // requiredObjFieldNames
@@ -594,14 +593,14 @@ function mergeZonedDateTimeBag<C>(
 
 function mergePlainDateTimeBag<C>(
   calendarOps: DateModOps<C>,
-  plainDateTime: any,
-  mod: DateTimeBag,
+  initialFields: DateTimeBag,
+  modFields: DateTimeBag,
   options: OverflowOptions | undefined,
 ): IsoDateTimeFields & { calendar: C } {
   const fields = mergeCalendarFields(
     calendarOps,
-    plainDateTime,
-    mod,
+    initialFields,
+    modFields,
     dateFieldNamesAlpha, // validFieldNames
     timeFieldNamesAsc, // forcedValidFieldNames
   ) as DateTimeBag
@@ -621,14 +620,14 @@ function mergePlainDateTimeBag<C>(
 
 function mergePlainDateBag<C>(
   calendarOps: DateModOps<C>,
-  plainDate: any,
-  mod: DateBag,
+  initialFields: DateBag,
+  modFields: DateBag,
   options: OverflowOptions | undefined,
 ): PlainDateSlots<C> {
   const fields = mergeCalendarFields(
     calendarOps,
-    plainDate,
-    mod,
+    initialFields,
+    modFields,
     dateFieldNamesAlpha,
   )
 
@@ -637,14 +636,14 @@ function mergePlainDateBag<C>(
 
 function mergePlainYearMonthBag<C>(
   calendarOps: YearMonthModOps<C>,
-  plainYearMonth: any,
-  bag: YearMonthBag,
+  initialFields: YearMonthBag,
+  modFields: YearMonthBag,
   options: OverflowOptions | undefined,
 ): PlainYearMonthSlots<C> {
   const fields = mergeCalendarFields(
     calendarOps,
-    plainYearMonth,
-    bag,
+    initialFields,
+    modFields,
     yearMonthFieldNames,
   )
 
@@ -653,14 +652,14 @@ function mergePlainYearMonthBag<C>(
 
 function mergePlainMonthDayBag<C>(
   calendarOps: MonthDayModOps<C>,
-  plainMonthDay: any,
-  bag: MonthDayBag,
+  initialFields: MonthDayBag,
+  modFields: MonthDayBag,
   options: OverflowOptions | undefined,
 ): PlainMonthDaySlots<C> {
   const fields = mergeCalendarFields(
     calendarOps,
-    plainMonthDay,
-    bag,
+    initialFields,
+    modFields,
     dateFieldNamesAlpha,
   )
 
@@ -668,23 +667,23 @@ function mergePlainMonthDayBag<C>(
 }
 
 function mergePlainTimeBag(
-  plainTime: any,
-  bag: TimeBag,
+  initialFields: TimeFields,
+  modFields: TimeBag,
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
   const overflow = refineOverflowOptions(options) // spec says overflow parsed first
-  const origFields = pluckProps(timeFieldNamesAlpha, plainTime)
-  const newFields = refineFields(bag, timeFieldNamesAlpha)
+  const origFields = pluckProps(timeFieldNamesAlpha, initialFields)
+  const newFields = refineFields(modFields, timeFieldNamesAlpha)
   const mergedFields = { ...origFields, ...newFields }
   return refineTimeBag(mergedFields, overflow)
 }
 
 function mergeDurationBag(
-  durationFields: DurationFields,
-  bag: DurationBag,
+  initialFields: DurationFields,
+  modFields: DurationBag,
 ): DurationFields {
-  const newFields = refineFields(bag, durationFieldNamesAlpha)
-  return checkDurationUnits({ ...durationFields, ...newFields })
+  const newFields = refineFields(modFields, durationFieldNamesAlpha)
+  return checkDurationUnits({ ...initialFields, ...newFields })
 }
 
 function mergeCalendarFields(
@@ -714,7 +713,7 @@ function mergeCalendarFields(
 
 export function convertToPlainMonthDay<C>(
   calendarOps: MonthDayRefineOps<C>,
-  input: any,
+  input: DateBag,
 ): PlainMonthDaySlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
@@ -727,7 +726,7 @@ export function convertToPlainMonthDay<C>(
 
 export function convertToPlainYearMonth<C>(
   calendarOps: YearMonthRefineOps<C>,
-  input: any,
+  input: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   const fields = refineCalendarFields(
