@@ -19,8 +19,8 @@
 #     https://github.com/tc39/test262/pull/4012
 #     (for https://github.com/tc39/proposal-temporal/pull/2760)
 #   - https://github.com/fullcalendar/test262/tree/fewer-calls-offset-prefer-reject
-#   - https://github.com/fullcalendar/test262/tree/fewer-calls-rounding
-#   - https://github.com/fullcalendar/test262/tree/fewer-calls-zdt-round
+#   - https://github.com/fullcalendar/test262/tree/fewer-calls-rel-rounding
+#   - https://github.com/fullcalendar/test262/tree/fewer-calls-zdt-time-rounding
 
 ####################################################################################################
 # SPEC BUGS
@@ -69,7 +69,7 @@ built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-day
 # RoundDuration + (BalanceTimeDuration/AdjustRoundedDurationDays) + BalanceDateDurationRelative
 #
 # Updates in tests
-# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-rounding?expand=1
+# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-rel-rounding?expand=1
 ###built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
 ###built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
 ###built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
@@ -115,7 +115,7 @@ built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum
 built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-out-of-range-forward-offset-shift.js
 #
 # Updated in tests (WIP)
-# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-zdt-round?expand=1
+# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-zdt-time-rounding?expand=1
 ###built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 
 # SPEC-BUG (https://github.com/tc39/proposal-temporal/pull/2789)
