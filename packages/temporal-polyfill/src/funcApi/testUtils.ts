@@ -4,6 +4,7 @@ import {
   dayTimeNanoToBigInt,
 } from '../internal/dayTimeNano'
 import { computeDurationSign } from '../internal/durationMath'
+import { IsoDateFields } from '../internal/isoFields'
 import { isoToEpochNano } from '../internal/timeMath'
 import { DurationBag, DurationSlots } from './duration'
 import * as InstantFns from './instant'
@@ -33,9 +34,15 @@ export function getCurrentZonedDateTime(
 // -----------------------------------------------------------------------------
 
 const isoDateDefaults = {
-  isoYear: 0,
-  isoMonth: 0,
   isoDay: 0,
+  isoMonth: 0,
+  isoYear: 0,
+}
+
+const plainDateDefaults = {
+  branding: 'PlainDate',
+  calendar: 'iso8601',
+  ...isoDateDefaults,
 }
 
 const instantSlotDefaults = {
@@ -56,6 +63,16 @@ const durationSlotDefaults = {
   seconds: 0,
   weeks: 0,
   years: 0,
+}
+
+export function expectPlainDateEquals(
+  pd: PlainDateFns.PlainDateSlots<string>,
+  isoFields: Partial<IsoDateFields & { calendar: string }>,
+): void {
+  expectPropsEqualStrict(pd, {
+    ...plainDateDefaults,
+    ...isoFields,
+  })
 }
 
 export function expectInstantEquals(
