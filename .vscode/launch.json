@@ -17,7 +17,15 @@
       "request": "launch",
       "cwd": "${fileDirname}",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "vitest", "--test-timeout", "3600000", "${file}"],
+      "runtimeArgs": [
+        "run",
+        "vitest",
+        "--no-isolate",
+        "--no-file-parallelism",
+        "--test-timeout",
+        "3600000",
+        "${file}"
+      ],
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "smartStep": true
