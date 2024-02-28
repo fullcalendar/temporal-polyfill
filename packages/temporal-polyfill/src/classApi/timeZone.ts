@@ -1,7 +1,7 @@
+import { BigNano } from '../internal/bigNano'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { requireString } from '../internal/cast'
 import { isTimeZoneSlotsEqual } from '../internal/compare'
-import { DayTimeNano } from '../internal/dayTimeNano'
 import { formatOffsetNano } from '../internal/isoFormat'
 import { parseTimeZoneId } from '../internal/isoParse'
 import {
@@ -70,7 +70,7 @@ export const [TimeZone, createTimeZone] = createSlotClass(
     ): Instant[] {
       return native
         .getPossibleInstantsFor(toPlainDateTimeSlots(plainDateTimeArg))
-        .map((epochNano: DayTimeNano) => {
+        .map((epochNano: BigNano) => {
           return createInstant(createInstantSlots(epochNano))
         })
     },

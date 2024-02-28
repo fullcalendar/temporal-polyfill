@@ -1,3 +1,4 @@
+import { BigNano, addBigNanos } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import {
   NativeMoveOps,
@@ -5,7 +6,6 @@ import {
   monthCodeNumberToMonth,
 } from './calendarNative'
 import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
-import { DayTimeNano, addDayTimeNanos } from './dayTimeNano'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -13,7 +13,7 @@ import {
   durationTimeFieldDefaults,
 } from './durationFields'
 import {
-  durationFieldsToDayTimeNano,
+  durationFieldsToBigNano,
   durationHasDateParts,
   durationTimeFieldsToLargeNanoStrict,
   negateDuration,
@@ -57,7 +57,7 @@ import {
   getSingleInstantFor,
   zonedEpochNanoToIso,
 } from './timeZoneOps'
-import { Unit, givenFieldsToDayTimeNano, milliInDay } from './units'
+import { Unit, givenFieldsToBigNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 
 // High-Level
@@ -193,28 +193,25 @@ export function movePlainTime(
 // -----------------------------------------------------------------------------
 
 function moveEpochNano(
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
   durationFields: DurationFields,
-): DayTimeNano {
+): BigNano {
   return checkEpochNanoInBounds(
-    addDayTimeNanos(
-      epochNano,
-      durationTimeFieldsToLargeNanoStrict(durationFields),
-    ),
+    addBigNanos(epochNano, durationTimeFieldsToLargeNanoStrict(durationFields)),
   )
 }
 
 export function moveZonedEpochNano(
   calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps,
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
   durationFields: DurationFields,
   options?: OverflowOptions,
-): DayTimeNano {
-  const timeOnlyNano = durationFieldsToDayTimeNano(durationFields, Unit.Hour)
+): BigNano {
+  const timeOnlyNano = durationFieldsToBigNano(durationFields, Unit.Hour)
 
   if (!durationHasDateParts(durationFields)) {
-    epochNano = addDayTimeNanos(epochNano, timeOnlyNano)
+    epochNano = addBigNanos(epochNano, timeOnlyNano)
     refineOverflowOptions(options) // for validation only
   } else {
     const isoDateTimeFields = zonedEpochNanoToIso(timeZoneOps, epochNano)
@@ -232,7 +229,7 @@ export function moveZonedEpochNano(
       ...pluckProps(isoTimeFieldNamesAsc, isoDateTimeFields), // time parts
       calendar: isoCalendarId, // NOT USED but whatever
     }
-    epochNano = addDayTimeNanos(
+    epochNano = addBigNanos(
       getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
       timeOnlyNano,
     )
@@ -287,11 +284,7 @@ function moveDateEfficient(
 
   const days =
     durationFields.days +
-    givenFieldsToDayTimeNano(
-      durationFields,
-      Unit.Hour,
-      durationFieldNamesAsc,
-    )[0]
+    givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
   if (days) {
     return checkIsoDateInBounds(moveByIsoDays(isoDateFields, days))
   }
@@ -310,7 +303,7 @@ function moveTime(
   isoFields: IsoTimeFields,
   durationFields: DurationFields,
 ): [IsoTimeFields, number] {
-  const [durDays, durTimeNano] = givenFieldsToDayTimeNano(
+  const [durDays, durTimeNano] = givenFieldsToBigNano(
     durationFields,
     Unit.Hour,
     durationFieldNamesAsc,
@@ -336,7 +329,7 @@ export function nativeDateAdd(
   let epochMilli: number | undefined
 
   // convert time fields to days
-  days += givenFieldsToDayTimeNano(
+  days += givenFieldsToBigNano(
     durationFields,
     Unit.Hour,
     durationFieldNamesAsc,

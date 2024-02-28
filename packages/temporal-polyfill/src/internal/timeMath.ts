@@ -1,11 +1,11 @@
 import {
-  DayTimeNano,
-  addDayTimeNanoAndNumber,
-  compareDayTimeNanos,
-  dayTimeNanoToBigInt,
-  divModDayTimeNano,
-  numberToDayTimeNano,
-} from './dayTimeNano'
+  BigNano,
+  addBigNanoAndNumber,
+  bigNanoToBigInt,
+  compareBigNanos,
+  divModBigNano,
+  numberToBigNano,
+} from './bigNano'
 import * as errorMessages from './errorMessages'
 import {
   IsoDateFields,
@@ -18,7 +18,7 @@ import {
 import { Overflow } from './options'
 import {
   Unit,
-  givenFieldsToDayTimeNano,
+  givenFieldsToBigNano,
   milliInDay,
   milliInSec,
   nanoInMicro,
@@ -31,8 +31,8 @@ import { clampProp, divModFloor, divModTrunc, zipProps } from './utils'
 
 const maxDays = 100000000
 const maxMilli = maxDays * milliInDay
-const epochNanoMax: DayTimeNano = [maxDays, 0]
-const epochNanoMin: DayTimeNano = [-maxDays, 0]
+const epochNanoMax: BigNano = [maxDays, 0]
+const epochNanoMin: BigNano = [-maxDays, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
 
@@ -93,12 +93,12 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(
 }
 
 export function checkEpochNanoInBounds(
-  epochNano: DayTimeNano | undefined,
-): DayTimeNano {
+  epochNano: BigNano | undefined,
+): BigNano {
   if (
     !epochNano ||
-    compareDayTimeNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
-    compareDayTimeNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
+    compareBigNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
+    compareBigNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
   ) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
@@ -109,11 +109,7 @@ export function checkEpochNanoInBounds(
 // -----------------------------------------------------------------------------
 
 export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
-  return givenFieldsToDayTimeNano(
-    isoTimeFields,
-    Unit.Hour,
-    isoTimeFieldNamesAsc,
-  )[1]
+  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[1]
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
@@ -131,26 +127,26 @@ export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
 // -----------------------------------------------------------------------------
 // nano -> [micro/milli/sec]
 
-export function epochNanoToSec(epochNano: DayTimeNano): number {
+export function epochNanoToSec(epochNano: BigNano): number {
   return epochNanoToSecMod(epochNano)[0]
 }
 
-export function epochNanoToSecMod(epochNano: DayTimeNano): [number, number] {
-  return divModDayTimeNano(epochNano, nanoInSec)
+export function epochNanoToSecMod(epochNano: BigNano): [number, number] {
+  return divModBigNano(epochNano, nanoInSec)
 }
 
-export function epochNanoToMilli(epochNano: DayTimeNano): number {
-  return divModDayTimeNano(epochNano, nanoInMilli)[0]
+export function epochNanoToMilli(epochNano: BigNano): number {
+  return divModBigNano(epochNano, nanoInMilli)[0]
 }
 
-export function epochNanoToMicro(epochNano: DayTimeNano): bigint {
-  return dayTimeNanoToBigInt(epochNano, nanoInMicro)
+export function epochNanoToMicro(epochNano: BigNano): bigint {
+  return bigNanoToBigInt(epochNano, nanoInMicro)
 }
 
 // [micro/milli/sec] -> nano
 
-export function epochMilliToNano(epochMilli: number): DayTimeNano {
-  return numberToDayTimeNano(epochMilli, nanoInMilli)
+export function epochMilliToNano(epochMilli: number): BigNano {
+  return numberToBigNano(epochMilli, nanoInMilli)
 }
 
 // Epoch Getters
@@ -160,7 +156,7 @@ export const epochGetters = {
   epochSeconds: epochNanoToSec,
   epochMilliseconds: epochNanoToMilli,
   epochMicroseconds: epochNanoToMicro,
-  epochNanoseconds: dayTimeNanoToBigInt,
+  epochNanoseconds: bigNanoToBigInt,
 }
 
 // ISO <-> Epoch Conversion
@@ -212,7 +208,7 @@ If out-of-bounds, returns undefined
 */
 export function isoToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
-): DayTimeNano | undefined {
+): BigNano | undefined {
   const epochMilli = isoToEpochMilli(isoFields)
 
   if (epochMilli !== undefined) {
@@ -234,7 +230,7 @@ Ensures in bounds
 export function isoToEpochNanoWithOffset(
   isoFields: IsoDateTimeFields,
   offsetNano: number,
-): DayTimeNano {
+): BigNano {
   const [newIsoTimeFields, dayDelta] = nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoFields) - offsetNano,
   )
@@ -304,10 +300,10 @@ export function isoToLegacyDate(
 // Epoch -> ISO Fields
 
 export function epochNanoToIso(
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
   offsetNano: number,
 ): IsoDateTimeFields {
-  let [days, timeNano] = addDayTimeNanoAndNumber(epochNano, offsetNano)
+  let [days, timeNano] = addBigNanoAndNumber(epochNano, offsetNano)
 
   // convert to start-of-day and time-of-day
   if (timeNano < 0) {

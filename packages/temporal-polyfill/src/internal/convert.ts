@@ -4,6 +4,7 @@ import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
 } from './bagRefine'
+import { BigNano, bigIntToBigNano, numberToBigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import {
   DateModOps,
@@ -11,11 +12,6 @@ import {
   YearMonthRefineOps,
 } from './calendarOps'
 import { requireObjectLike, toBigInt } from './cast'
-import {
-  DayTimeNano,
-  bigIntToDayTimeNano,
-  numberToDayTimeNano,
-} from './dayTimeNano'
 import { MonthDayFields, YearFields, YearMonthFields } from './fields'
 import {
   IsoDateTimeFields,
@@ -166,7 +162,7 @@ function dateToEpochNano<TZ>(
   timeZoneSlot: TZ,
   isoFields: IsoDateTimeFields,
   options?: EpochDisambigOptions,
-): DayTimeNano {
+): BigNano {
   const epochDisambig = refineEpochDisambigOptions(options)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
 
@@ -302,26 +298,24 @@ export function plainTimeToPlainDateTime<C>(
 
 export function epochSecToInstant(epochSec: number): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(numberToDayTimeNano(epochSec, nanoInSec)),
+    checkEpochNanoInBounds(numberToBigNano(epochSec, nanoInSec)),
   )
 }
 
 export function epochMilliToInstant(epochMilli: number): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(numberToDayTimeNano(epochMilli, nanoInMilli)),
+    checkEpochNanoInBounds(numberToBigNano(epochMilli, nanoInMilli)),
   )
 }
 
 export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(
-      bigIntToDayTimeNano(toBigInt(epochMicro), nanoInMicro),
-    ),
+    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochMicro), nanoInMicro)),
   )
 }
 
 export function epochNanoToInstant(epochNano: bigint): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
+    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
   )
 }

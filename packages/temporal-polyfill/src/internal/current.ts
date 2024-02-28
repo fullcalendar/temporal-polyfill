@@ -1,4 +1,4 @@
-import { DayTimeNano } from './dayTimeNano'
+import { BigNano } from './bigNano'
 import { RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAsc } from './isoFields'
 import { epochMilliToNano } from './timeMath'
@@ -15,7 +15,7 @@ export function getCurrentIsoDateTime(
   return pluckProps(isoDateTimeFieldNamesAsc, isoFields)
 }
 
-export function getCurrentEpochNanoseconds(): DayTimeNano {
+export function getCurrentEpochNanoseconds(): BigNano {
   return epochMilliToNano(Date.now())
 }
 

@@ -1,5 +1,5 @@
+import { BigNano, divModBigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
-import { DayTimeNano, divModDayTimeNano } from './dayTimeNano'
 import { durationFieldNamesAsc } from './durationFields'
 import {
   checkDurationTimeUnit,
@@ -28,8 +28,8 @@ import {
 } from './optionsRefine'
 import {
   balanceDayTimeDurationByInc,
+  roundBigNanoByInc,
   roundDateTimeToNano,
-  roundDayTimeNanoByInc,
   roundTimeToNano,
   roundToMinute,
 } from './round'
@@ -50,7 +50,7 @@ import { utcTimeZoneId } from './timeZoneConfig'
 import { TimeZoneOffsetOps } from './timeZoneOps'
 import {
   Unit,
-  givenFieldsToDayTimeNano,
+  givenFieldsToBigNano,
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
@@ -187,12 +187,12 @@ export function formatDurationIso(
 function formatEpochNanoIso(
   providedTimeZone: boolean,
   timeZoneOps: TimeZoneOffsetOps,
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
   roundingMode: RoundingMode,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  epochNano = roundDayTimeNanoByInc(
+  epochNano = roundBigNanoByInc(
     epochNano,
     nanoInc,
     roundingMode,
@@ -212,7 +212,7 @@ function formatZonedEpochNanoIso<T extends IdLike>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
   calendarSlot: IdLike,
   timeZoneSlot: T,
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
   offsetDisplay: OffsetDisplay,
@@ -220,7 +220,7 @@ function formatZonedEpochNanoIso<T extends IdLike>(
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  epochNano = roundDayTimeNanoByInc(epochNano, nanoInc, roundingMode, true)
+  epochNano = roundBigNanoByInc(epochNano, nanoInc, roundingMode, true)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
@@ -308,8 +308,8 @@ function formatDurationSlots(
   const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
-  const [wholeSeconds, subsecNano] = divModDayTimeNano(
-    givenFieldsToDayTimeNano(abs, Unit.Second, durationFieldNamesAsc),
+  const [wholeSeconds, subsecNano] = divModBigNano(
+    givenFieldsToBigNano(abs, Unit.Second, durationFieldNamesAsc),
     nanoInSec,
     divModTrunc,
   )

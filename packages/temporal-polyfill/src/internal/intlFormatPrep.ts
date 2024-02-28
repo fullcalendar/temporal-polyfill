@@ -1,5 +1,5 @@
+import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
-import { DayTimeNano } from './dayTimeNano'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import {
@@ -167,7 +167,7 @@ const transformZonedEpochOptions = createOptionsTransformer(
 function isoDateFieldsToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): DayTimeNano {
+): BigNano {
   const timeZoneNative = queryNativeTimeZone(resolvedOptions.timeZone)
 
   return getSingleInstantFor(timeZoneNative, {
@@ -180,7 +180,7 @@ function isoDateFieldsToEpochNano(
 function isoTimeFieldsToEpochNano(
   internals: IsoTimeFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): DayTimeNano {
+): BigNano {
   const timeZoneNative = queryNativeTimeZone(resolvedOptions.timeZone)
 
   return getSingleInstantFor(timeZoneNative, {
@@ -191,7 +191,7 @@ function isoTimeFieldsToEpochNano(
   })
 }
 
-function extractEpochNano(slots: BasicInstantSlots): DayTimeNano {
+function extractEpochNano(slots: BasicInstantSlots): BigNano {
   return slots.epochNanoseconds
 }
 
@@ -208,13 +208,13 @@ export type ClassFormatConfig<S> = [
 type EpochNanoConverter<S> = (
   slots: S,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-) => DayTimeNano
+) => BigNano
 
 // TODO: weird
-export type BasicInstantSlots = { epochNanoseconds: DayTimeNano }
+export type BasicInstantSlots = { epochNanoseconds: BigNano }
 export type BasicZonedDateTimeSlots = {
   timeZone: IdLike
-  epochNanoseconds: DayTimeNano
+  epochNanoseconds: BigNano
 }
 
 export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [

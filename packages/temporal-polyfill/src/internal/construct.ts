@@ -1,6 +1,6 @@
+import { bigIntToBigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
-import { bigIntToDayTimeNano } from './dayTimeNano'
 import { durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { isoDateTimeFieldNamesAsc, isoTimeFieldNamesAsc } from './isoFields'
@@ -39,7 +39,7 @@ import { mapProps, zipProps } from './utils'
 
 export function constructInstantSlots(epochNano: bigint): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
+    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
   )
 }
 
@@ -51,7 +51,7 @@ export function constructZonedDateTimeSlots<CA, C, TA, T>(
   calendarArg: CA = isoCalendarId as any,
 ): ZonedDateTimeSlots<C, T> {
   return createZonedDateTimeSlots(
-    checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(epochNano))),
+    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
     refineTimeZoneArg(timeZoneArg),
     refineCalendarArg(calendarArg),
   )

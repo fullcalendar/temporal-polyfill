@@ -1,8 +1,5 @@
 import { expect } from 'vitest'
-import {
-  bigIntToDayTimeNano,
-  dayTimeNanoToBigInt,
-} from '../internal/dayTimeNano'
+import { bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
 import { IsoDateFields, IsoDateTimeFields } from '../internal/isoFields'
 import { isoToEpochNano } from '../internal/timeMath'
@@ -155,7 +152,7 @@ export function expectZonedDateTimeEquals(
   expectPropsEqualStrict(zdt, {
     ...zonedDateTimeDefaults,
     ...slots,
-    epochNanoseconds: bigIntToDayTimeNano(slots.epochNanoseconds),
+    epochNanoseconds: bigIntToBigNano(slots.epochNanoseconds),
   })
 }
 
@@ -165,7 +162,7 @@ export function expectInstantEquals(
 ): void {
   expectPropsEqualStrict(inst, {
     ...instantSlotDefaults,
-    epochNanoseconds: bigIntToDayTimeNano(epochNanoseconds),
+    epochNanoseconds: bigIntToBigNano(epochNanoseconds),
   })
 }
 
@@ -222,8 +219,8 @@ export function expectPlainDateTimesSimilar(
   expect(pdt1.branding).toBe('PlainDateTime')
   expect(pdt0.calendar).toBe(pdt1.calendar)
   expectEpochNanosSimilar(
-    dayTimeNanoToBigInt(isoToEpochNano(pdt0)!),
-    dayTimeNanoToBigInt(isoToEpochNano(pdt1)!),
+    bigNanoToBigInt(isoToEpochNano(pdt0)!),
+    bigNanoToBigInt(isoToEpochNano(pdt1)!),
   )
 }
 
@@ -235,8 +232,8 @@ export function expectPlainDatesSimilar(
   expect(pd1.branding).toBe('PlainDate')
   expect(pd0.calendar).toBe(pd1.calendar)
   expectEpochNanosSimilar(
-    dayTimeNanoToBigInt(isoToEpochNano(pd0)!),
-    dayTimeNanoToBigInt(isoToEpochNano(pd1)!),
+    bigNanoToBigInt(isoToEpochNano(pd0)!),
+    bigNanoToBigInt(isoToEpochNano(pd1)!),
   )
 }
 
@@ -247,8 +244,8 @@ export function expectPlainTimesSimilar(
   expect(pt0.branding).toBe('PlainTime')
   expect(pt1.branding).toBe('PlainTime')
   expectEpochNanosSimilar(
-    dayTimeNanoToBigInt(isoToEpochNano({ ...isoDateDefaults, ...pt0 })!),
-    dayTimeNanoToBigInt(isoToEpochNano({ ...isoDateDefaults, ...pt1 })!),
+    bigNanoToBigInt(isoToEpochNano({ ...isoDateDefaults, ...pt0 })!),
+    bigNanoToBigInt(isoToEpochNano({ ...isoDateDefaults, ...pt1 })!),
   )
 }
 

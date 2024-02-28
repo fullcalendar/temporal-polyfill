@@ -1,3 +1,4 @@
+import { numberToBigNano } from '../internal/bigNano'
 import { requireObjectLike } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { constructInstantSlots } from '../internal/construct'
@@ -8,7 +9,6 @@ import {
   epochSecToInstant,
   instantToZonedDateTime,
 } from '../internal/convert'
-import { numberToDayTimeNano } from '../internal/dayTimeNano'
 import { diffInstants } from '../internal/diff'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
@@ -184,6 +184,6 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
 
 export function toTemporalInstant(this: Date): Instant {
   return createInstant(
-    createInstantSlots(numberToDayTimeNano(this.valueOf(), nanoInMilli)),
+    createInstantSlots(numberToBigNano(this.valueOf(), nanoInMilli)),
   )
 }

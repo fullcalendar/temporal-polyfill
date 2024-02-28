@@ -1,5 +1,5 @@
+import { compareBigNanos } from './bigNano'
 import { MoveOps } from './calendarOps'
-import { compareDayTimeNanos } from './dayTimeNano'
 import { durationFieldNamesAsc } from './durationFields'
 import {
   MarkerSlots,
@@ -26,7 +26,7 @@ import {
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
 import { TimeZoneOps } from './timeZoneOps'
-import { Unit, givenFieldsToDayTimeNano } from './units'
+import { Unit, givenFieldsToBigNano } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'
 
 // High-Level Compare
@@ -36,7 +36,7 @@ export function compareInstants(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
 ): NumberSign {
-  return compareDayTimeNanos(
+  return compareBigNanos(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
   )
@@ -46,7 +46,7 @@ export function compareZonedDateTimes<C, T>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
 ): NumberSign {
-  return compareDayTimeNanos(
+  return compareBigNanos(
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
   )
@@ -78,9 +78,9 @@ export function compareDurations<RA, C, T>(
       // has uniform days?
       !(markerSlots && (markerSlots as any).epochNanoseconds))
   ) {
-    return compareDayTimeNanos(
-      givenFieldsToDayTimeNano(durationSlots0, Unit.Day, durationFieldNamesAsc),
-      givenFieldsToDayTimeNano(durationSlots1, Unit.Day, durationFieldNamesAsc),
+    return compareBigNanos(
+      givenFieldsToBigNano(durationSlots0, Unit.Day, durationFieldNamesAsc),
+      givenFieldsToBigNano(durationSlots1, Unit.Day, durationFieldNamesAsc),
     )
   }
 
@@ -94,7 +94,7 @@ export function compareDurations<RA, C, T>(
     markerSlots,
   ) as MarkerSystem<any>
 
-  return compareDayTimeNanos(
+  return compareBigNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),
     markerToEpochNano(moveMarker(marker, durationSlots1)),
   )

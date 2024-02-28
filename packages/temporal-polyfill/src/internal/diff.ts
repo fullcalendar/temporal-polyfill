@@ -1,12 +1,12 @@
+import {
+  BigNano,
+  bigNanoToNumber,
+  compareBigNanos,
+  diffBigNanos,
+} from './bigNano'
 import { NativeDiffOps, monthCodeNumberToMonth } from './calendarNative'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
 import { isTimeZoneSlotsEqual } from './compare'
-import {
-  DayTimeNano,
-  compareDayTimeNanos,
-  dayTimeNanoToNumber,
-  diffDayTimeNanos,
-} from './dayTimeNano'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
   nanoToDurationDayTimeFields,
@@ -33,8 +33,8 @@ import { RoundingMode } from './options'
 import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'
 import {
   computeNanoInc,
+  roundBigNano,
   roundByInc,
-  roundDayTimeNano,
   roundRelativeDuration,
 } from './round'
 import {
@@ -113,7 +113,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
 
   const startEpochNano = zonedDateTimeSlots0.epochNanoseconds
   const endEpochNano = zonedDateTimeSlots1.epochNanoseconds
-  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  const sign = compareBigNanos(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
   if (!sign) {
@@ -182,7 +182,7 @@ export function diffPlainDateTimes<C extends IdLike>(
 
   const startEpochNano = isoToEpochNano(plainDateTimeSlots0)!
   const endEpochNano = isoToEpochNano(plainDateTimeSlots1)!
-  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  const sign = compareBigNanos(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
   if (!sign) {
@@ -217,7 +217,7 @@ export function diffPlainDateTimes<C extends IdLike>(
         roundingInc,
         roundingMode,
         plainDateTimeSlots0, // marker
-        isoToEpochNano as (isoFields: IsoDateTimeFields) => DayTimeNano, // markerToEpochNano
+        isoToEpochNano as (isoFields: IsoDateTimeFields) => BigNano, // markerToEpochNano
         bindArgs(moveDateTime, calendarOps), // moveMarker
       )
     }
@@ -302,7 +302,7 @@ function diffDateLike(
 ): DurationSlots {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
-  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  const sign = compareBigNanos(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
   if (!sign) {
@@ -332,7 +332,7 @@ function diffDateLike(
         roundingInc,
         roundingMode,
         startIsoFields, // marker
-        isoToEpochNano as (isoFields: IsoDateFields) => DayTimeNano, // markerToEpochNano
+        isoToEpochNano as (isoFields: IsoDateFields) => BigNano, // markerToEpochNano
         (m: IsoDateFields, d: DurationFields) => calendarOps.dateAdd(m, d), // moveMarker
       )
     }
@@ -378,12 +378,12 @@ export function diffPlainTimes(
 export function diffZonedEpochNanoExact(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
-  startEpochNano: DayTimeNano,
-  endEpochNano: DayTimeNano,
+  startEpochNano: BigNano,
+  endEpochNano: BigNano,
   largestUnit: Unit,
   origOptions?: DiffOptions,
 ): DurationFields {
-  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  const sign = compareBigNanos(endEpochNano, startEpochNano)
 
   if (!sign) {
     return durationFieldDefaults
@@ -416,7 +416,7 @@ export function diffDateTimesExact(
 ): DurationFields {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
-  const sign = compareDayTimeNanos(endEpochNano, startEpochNano)
+  const sign = compareBigNanos(endEpochNano, startEpochNano)
 
   if (!sign) {
     return durationFieldDefaults
@@ -446,8 +446,8 @@ function diffZonedEpochNanoViaCalendar(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   sign: NumberSign,
-  startEpochNano: DayTimeNano,
-  endEpochNano: DayTimeNano,
+  startEpochNano: BigNano,
+  endEpochNano: BigNano,
   largestUnit: Unit,
   origOptions?: DiffOptions,
 ): DurationFields {
@@ -456,7 +456,7 @@ function diffZonedEpochNanoViaCalendar(
   const endIsoFields = zonedEpochNanoToIso(timeZoneOps, endEpochNano)
   const isoToZonedEpochNano = bindArgs(getSingleInstantFor, timeZoneOps)
   let midIsoFields: IsoDateTimeFields
-  let midEpochNano: DayTimeNano
+  let midEpochNano: BigNano
   let midSign: NumberSign
   let cnt = 0
 
@@ -471,7 +471,7 @@ function diffZonedEpochNanoViaCalendar(
       ...startIsoTimeFields,
     }
     midEpochNano = isoToZonedEpochNano(midIsoFields)
-    midSign = compareDayTimeNanos(endEpochNano, midEpochNano)
+    midSign = compareBigNanos(endEpochNano, midEpochNano)
   } while (midSign === -sign)
 
   const dateDiff =
@@ -484,9 +484,7 @@ function diffZonedEpochNanoViaCalendar(
           origOptions,
         )
 
-  const timeDiffNano = dayTimeNanoToNumber(
-    diffDayTimeNanos(midEpochNano, endEpochNano),
-  )
+  const timeDiffNano = bigNanoToNumber(diffBigNanos(midEpochNano, endEpochNano))
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
   const dateTimeDiff = { ...dateDiff, ...timeDiff }
 
@@ -531,8 +529,8 @@ function diffDateTimesViaCalendar(
 // -----------------------------------------------------------------------------
 
 function diffEpochNano(
-  startEpochNano: DayTimeNano,
-  endEpochNano: DayTimeNano,
+  startEpochNano: BigNano,
+  endEpochNano: BigNano,
   largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
@@ -541,8 +539,8 @@ function diffEpochNano(
   return {
     ...durationFieldDefaults,
     ...nanoToDurationDayTimeFields(
-      roundDayTimeNano(
-        diffDayTimeNanos(startEpochNano, endEpochNano),
+      roundBigNano(
+        diffBigNanos(startEpochNano, endEpochNano),
         smallestUnit,
         roundingInc,
         roundingMode,
@@ -553,14 +551,14 @@ function diffEpochNano(
 }
 
 function diffEpochNanoExact(
-  startEpochNano: DayTimeNano,
-  endEpochNano: DayTimeNano,
+  startEpochNano: BigNano,
+  endEpochNano: BigNano,
   largestUnit: DayTimeUnit,
 ): DurationFields {
   return {
     ...durationFieldDefaults,
     ...nanoToDurationDayTimeFields(
-      diffDayTimeNanos(startEpochNano, endEpochNano),
+      diffBigNanos(startEpochNano, endEpochNano),
       largestUnit as DayTimeUnit,
     ),
   }

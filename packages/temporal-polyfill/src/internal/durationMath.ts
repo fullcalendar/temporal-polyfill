@@ -1,9 +1,5 @@
+import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
 import { DiffOps } from './calendarOps'
-import {
-  DayTimeNano,
-  addDayTimeNanos,
-  dayTimeNanoToNumber,
-} from './dayTimeNano'
 import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
 import {
   DurationFields,
@@ -35,7 +31,7 @@ import {
   DayTimeUnit,
   TimeUnit,
   Unit,
-  givenFieldsToDayTimeNano,
+  givenFieldsToBigNano,
   nanoInSec,
   nanoInUtcDay,
   nanoToGivenFields,
@@ -50,16 +46,16 @@ const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 
 export type MarkerSlotsNoCalendar<T> =
   | {
-      epochNanoseconds: DayTimeNano
+      epochNanoseconds: BigNano
       timeZone: T
     }
   | IsoDateTimeFields
 
 export type MarkerSlots<C, T> =
-  | { epochNanoseconds: DayTimeNano; timeZone: T; calendar: C }
+  | { epochNanoseconds: BigNano; timeZone: T; calendar: C }
   | (IsoDateFields & { calendar: C })
 
-export type MarkerToEpochNano<M> = (marker: M) => DayTimeNano
+export type MarkerToEpochNano<M> = (marker: M) => BigNano
 export type MoveMarker<M> = (marker: M, durationFields: DurationFields) => M
 export type DiffMarkers<M> = (
   marker0: M,
@@ -77,11 +73,11 @@ export function createMarkerSystem<C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   markerSlots: MarkerSlots<C, T>,
-): MarkerSystem<DayTimeNano> | MarkerSystem<IsoDateTimeFields> {
+): MarkerSystem<BigNano> | MarkerSystem<IsoDateTimeFields> {
   const { calendar, timeZone, epochNanoseconds } = markerSlots as {
     calendar: C
     timeZone?: T
-    epochNanoseconds?: DayTimeNano
+    epochNanoseconds?: BigNano
   }
 
   const calendarOps = getCalendarOps(calendar)
@@ -91,7 +87,7 @@ export function createMarkerSystem<C, T>(
 
     return [
       epochNanoseconds,
-      identity as MarkerToEpochNano<DayTimeNano>,
+      identity as MarkerToEpochNano<BigNano>,
       bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps),
       bindArgs(diffZonedEpochNanoExact, calendarOps, timeZoneOps),
     ]
@@ -117,7 +113,7 @@ export function spanDuration<M>(
   markerToEpochNano: MarkerToEpochNano<M>,
   moveMarker: MoveMarker<M>,
   diffMarkers: DiffMarkers<M>,
-): [DurationFields, DayTimeNano] {
+): [DurationFields, BigNano] {
   let endMarker = moveMarker(marker, durationFields0)
 
   // better way to do this?
@@ -192,13 +188,9 @@ function addDayTimeDurations(
   largestUnit: DayTimeUnit,
   doSubtract?: boolean,
 ): DurationFields {
-  const dayTimeNano0 = durationFieldsToDayTimeNano(a)
-  const dayTimeNano1 = durationFieldsToDayTimeNano(b)
-  const combined = addDayTimeNanos(
-    dayTimeNano0,
-    dayTimeNano1,
-    doSubtract ? -1 : 1,
-  )
+  const bigNano0 = durationFieldsToBigNano(a)
+  const bigNano1 = durationFieldsToBigNano(b)
+  const combined = addBigNanos(bigNano0, bigNano1, doSubtract ? -1 : 1)
 
   if (!Number.isFinite(combined[0])) {
     throw new RangeError(errorMessages.outOfBoundsDate)
@@ -353,8 +345,8 @@ export function checkDurationUnits(fields: DurationFields): DurationFields {
     )
   }
 
-  const dayTimeNano = durationFieldsToDayTimeNano(fields)
-  checkDurationTimeUnit(dayTimeNanoToNumber(dayTimeNano, nanoInSec))
+  const bigNano = durationFieldsToBigNano(fields)
+  checkDurationTimeUnit(bigNanoToNumber(bigNano, nanoInSec))
 
   return fields
 }
@@ -370,33 +362,33 @@ export function checkDurationTimeUnit(n: number): void {
 
 export function durationTimeFieldsToLargeNanoStrict(
   fields: DurationFields,
-): DayTimeNano {
+): BigNano {
   if (durationHasDateParts(fields)) {
     throw new RangeError(errorMessages.invalidLargeUnits)
   }
 
-  return durationFieldsToDayTimeNano(fields, Unit.Hour)
+  return durationFieldsToBigNano(fields, Unit.Hour)
 }
 
-export function durationFieldsToDayTimeNano(
+export function durationFieldsToBigNano(
   fields: DurationFields,
   largestUnit: DayTimeUnit = Unit.Day,
-): DayTimeNano {
-  return givenFieldsToDayTimeNano(fields, largestUnit, durationFieldNamesAsc)
+): BigNano {
+  return givenFieldsToBigNano(fields, largestUnit, durationFieldNamesAsc)
 }
 
 export function nanoToDurationDayTimeFields(
-  largeNano: DayTimeNano,
+  largeNano: BigNano,
 ): { days: number } & DurationTimeFields
 export function nanoToDurationDayTimeFields(
-  largeNano: DayTimeNano,
+  largeNano: BigNano,
   largestUnit?: DayTimeUnit,
 ): Partial<DurationFields>
 export function nanoToDurationDayTimeFields(
-  dayTimeNano: DayTimeNano,
+  bigNano: BigNano,
   largestUnit: DayTimeUnit = Unit.Day,
 ): Partial<DurationFields> {
-  const [days, timeNano] = dayTimeNano
+  const [days, timeNano] = bigNano
   const dayTimeFields = nanoToGivenFields(
     timeNano,
     largestUnit,

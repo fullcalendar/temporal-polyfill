@@ -1,9 +1,5 @@
+import { BigNano, bigNanoToNumber, diffBigNanos } from './bigNano'
 import { DiffOps } from './calendarOps'
-import {
-  DayTimeNano,
-  dayTimeNanoToNumber,
-  diffDayTimeNanos,
-} from './dayTimeNano'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -18,7 +14,7 @@ import {
   clearDurationFields,
   computeDurationSign,
   createMarkerSystem,
-  durationFieldsToDayTimeNano,
+  durationFieldsToBigNano,
   getLargestDurationUnit,
   spanDuration,
 } from './durationMath'
@@ -66,7 +62,7 @@ export function totalDuration<RA, C, T>(
 
 function totalRelativeDuration<M>(
   durationFields: DurationFields,
-  endEpochNano: DayTimeNano,
+  endEpochNano: BigNano,
   totalUnit: Unit,
   // marker system...
   marker: M,
@@ -94,20 +90,14 @@ function totalDayTimeDuration(
   durationFields: DurationFields,
   totalUnit: DayTimeUnit,
 ): number {
-  return totalDayTimeNano(
-    durationFieldsToDayTimeNano(durationFields),
-    totalUnit,
-  )
+  return totalBigNano(durationFieldsToBigNano(durationFields), totalUnit)
 }
 
 // Utils for points-within-intervals
 // -----------------------------------------------------------------------------
 
-export function totalDayTimeNano(
-  dayTimeNano: DayTimeNano,
-  totalUnit: DayTimeUnit,
-): number {
-  return dayTimeNanoToNumber(dayTimeNano, unitNanoMap[totalUnit], true) // exact=true
+export function totalBigNano(bigNano: BigNano, totalUnit: DayTimeUnit): number {
+  return bigNanoToNumber(bigNano, unitNanoMap[totalUnit], true) // exact=true
 }
 
 export function clampRelativeDuration<M>(
@@ -131,16 +121,14 @@ export function clampRelativeDuration<M>(
 }
 
 export function computeEpochNanoFrac(
-  epochNano0: DayTimeNano,
-  epochNano1: DayTimeNano,
-  epochNanoProgress: DayTimeNano,
+  epochNano0: BigNano,
+  epochNano1: BigNano,
+  epochNanoProgress: BigNano,
 ): number {
-  const denom = dayTimeNanoToNumber(diffDayTimeNanos(epochNano0, epochNano1))
+  const denom = bigNanoToNumber(diffBigNanos(epochNano0, epochNano1))
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const numer = dayTimeNanoToNumber(
-    diffDayTimeNanos(epochNano0, epochNanoProgress),
-  )
+  const numer = bigNanoToNumber(diffBigNanos(epochNano0, epochNanoProgress))
   return numer / denom
 }

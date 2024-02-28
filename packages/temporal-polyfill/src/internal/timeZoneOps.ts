@@ -1,9 +1,9 @@
 import {
-  DayTimeNano,
-  addDayTimeNanoAndNumber,
-  dayTimeNanoToNumber,
-  diffDayTimeNanos,
-} from './dayTimeNano'
+  BigNano,
+  addBigNanoAndNumber,
+  bigNanoToNumber,
+  diffBigNanos,
+} from './bigNano'
 import * as errorMessages from './errorMessages'
 import { DateTimeFields } from './fields'
 import {
@@ -29,8 +29,8 @@ import {
 import { nanoInHour, nanoInUtcDay } from './units'
 import { memoize, pluckProps } from './utils'
 
-export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
-export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
+export type OffsetNanosecondsOp = (epochNano: BigNano) => number
+export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => BigNano[]
 
 export type TimeZoneOps = {
   getOffsetNanosecondsFor: OffsetNanosecondsOp
@@ -59,7 +59,7 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 
 export function zonedEpochNanoToIso(
   timeZoneOps: TimeZoneOffsetOps,
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
 ): IsoDateTimeFields {
   const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
   return epochNanoToIso(epochNano, offsetNano)
@@ -120,7 +120,7 @@ export function getMatchingInstantFor(
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
   epochFuzzy?: boolean,
   hasZ?: boolean,
-): DayTimeNano {
+): BigNano {
   if (offsetNano !== undefined && offsetDisambig === OffsetDisambig.Use) {
     // we ALWAYS use Z as a zero offset
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
@@ -164,10 +164,8 @@ export function getSingleInstantFor(
   timeZoneOps: TimeZoneOps,
   isoFields: IsoDateTimeFields,
   disambig: EpochDisambig = EpochDisambig.Compat,
-  possibleEpochNanos: DayTimeNano[] = timeZoneOps.getPossibleInstantsFor(
-    isoFields,
-  ),
-): DayTimeNano {
+  possibleEpochNanos: BigNano[] = timeZoneOps.getPossibleInstantsFor(isoFields),
+): BigNano {
   if (possibleEpochNanos.length === 1) {
     return possibleEpochNanos[0]
   }
@@ -203,11 +201,11 @@ export function getSingleInstantFor(
 }
 
 function findMatchingEpochNano(
-  possibleEpochNanos: DayTimeNano[],
+  possibleEpochNanos: BigNano[],
   isoDateTimeFields: IsoDateTimeFields,
   offsetNano: number,
   fuzzy?: boolean,
-): DayTimeNano | undefined {
+): BigNano | undefined {
   const zonedEpochNano = isoToEpochNano(isoDateTimeFields)!
 
   if (fuzzy) {
@@ -215,8 +213,8 @@ function findMatchingEpochNano(
   }
 
   for (const possibleEpochNano of possibleEpochNanos) {
-    let possibleOffsetNano = dayTimeNanoToNumber(
-      diffDayTimeNanos(possibleEpochNano, zonedEpochNano),
+    let possibleOffsetNano = bigNanoToNumber(
+      diffBigNanos(possibleEpochNano, zonedEpochNano),
     )
 
     if (fuzzy) {
@@ -231,13 +229,13 @@ function findMatchingEpochNano(
 
 function computeGapNear(
   timeZoneOps: TimeZoneOffsetOps,
-  zonedEpochNano: DayTimeNano,
+  zonedEpochNano: BigNano,
 ): number {
   const startOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    addDayTimeNanoAndNumber(zonedEpochNano, -nanoInUtcDay),
+    addBigNanoAndNumber(zonedEpochNano, -nanoInUtcDay),
   )
   const endOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    addDayTimeNanoAndNumber(zonedEpochNano, nanoInUtcDay),
+    addBigNanoAndNumber(zonedEpochNano, nanoInUtcDay),
   )
   return validateTimeZoneGap(endOffsetNano - startOffsetNano)
 }
@@ -302,8 +300,8 @@ export function computeTimeInDay(
     ...isoTimeFieldDefaults,
   })
 
-  const res = dayTimeNanoToNumber(
-    diffDayTimeNanos(epochNano0, epochNano1),
+  const res = bigNanoToNumber(
+    diffBigNanos(epochNano0, epochNano1),
     divisorNano,
     true, // exact
   )

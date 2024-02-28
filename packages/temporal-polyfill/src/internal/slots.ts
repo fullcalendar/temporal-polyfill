@@ -1,5 +1,5 @@
+import { BigNano, bigNanoToBigInt } from './bigNano'
 import { requireString } from './cast'
-import { DayTimeNano, dayTimeNanoToBigInt } from './dayTimeNano'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { computeDurationSign } from './durationMath'
 import {
@@ -25,7 +25,7 @@ export const DurationBranding = 'Duration' as const
 // Slot-creation helpers
 // -----------------------------------------------------------------------------
 
-export function createInstantSlots(epochNano: DayTimeNano): InstantSlots {
+export function createInstantSlots(epochNano: BigNano): InstantSlots {
   return {
     branding: InstantBranding,
     epochNanoseconds: epochNano,
@@ -33,7 +33,7 @@ export function createInstantSlots(epochNano: DayTimeNano): InstantSlots {
 }
 
 export function createZonedDateTimeSlots<C, T>(
-  epochNano: DayTimeNano,
+  epochNano: BigNano,
   timeZone: T,
   calendar: C,
 ): ZonedDateTimeSlots<C, T> {
@@ -141,7 +141,7 @@ export interface BrandingSlots {
 }
 
 export interface EpochSlots {
-  epochNanoseconds: DayTimeNano
+  epochNanoseconds: BigNano
 }
 
 export type DateSlots<C> = IsoDateFields & { calendar: C }
@@ -174,7 +174,7 @@ export type DurationSlots = DurationFields & {
   sign: NumberSign // extra data
 }
 export type InstantSlots = {
-  epochNanoseconds: DayTimeNano
+  epochNanoseconds: BigNano
   branding: typeof InstantBranding
 }
 
@@ -194,7 +194,7 @@ export function getEpochMicroseconds(slots: EpochSlots) {
 }
 
 export function getEpochNanoseconds(slots: EpochSlots) {
-  return dayTimeNanoToBigInt(slots.epochNanoseconds)
+  return bigNanoToBigInt(slots.epochNanoseconds)
 }
 
 // ID-like

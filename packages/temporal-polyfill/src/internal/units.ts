@@ -1,4 +1,4 @@
-import { DayTimeNano } from './dayTimeNano'
+import { BigNano } from './bigNano'
 import { divModTrunc, divTrunc, modTrunc } from './utils'
 
 export const enum Unit {
@@ -76,11 +76,11 @@ export const unitNanoMap = [
 /*
 When largestUnit=hour, returned `Day` value is "days worth of hours"
 */
-export function givenFieldsToDayTimeNano<K extends string>(
+export function givenFieldsToBigNano<K extends string>(
   fields: Record<K, number>,
   largestUnit: DayTimeUnit,
   fieldNames: K[],
-): DayTimeNano {
+): BigNano {
   let timeNano = 0
   let days = 0
 

@@ -1,3 +1,4 @@
+import { BigNano } from './bigNano'
 import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
 import {
   NativeDateRefineDeps,
@@ -27,7 +28,6 @@ import {
   toStrictInteger,
   toStringViaPrimitive,
 } from './cast'
-import { DayTimeNano } from './dayTimeNano'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -563,7 +563,7 @@ function mergeZonedDateTimeBag<C>(
   initialFields: DateTimeBag & { offset?: string },
   modFields: DateTimeBag & { offset?: string },
   options: ZonedFieldOptions | undefined,
-): DayTimeNano {
+): BigNano {
   const fields = mergeCalendarFields(
     calendarOps,
     initialFields,
