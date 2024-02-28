@@ -10,6 +10,7 @@ import {
   expectPlainTimeEquals,
   expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
+  testHotCache,
 } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
@@ -616,5 +617,184 @@ describe('toPlainMonthDay', () => {
       isoMonth: 2,
       isoDay: 27,
     })
+  })
+})
+
+describe('toString', () => {
+  it('works without options', () => {
+    const zdt = ZonedDateTimeFns.create(
+      1709055000000000000n,
+      'America/New_York',
+    )
+    const s = ZonedDateTimeFns.toString(zdt)
+    expect(s).toBe('2024-02-27T12:30:00-05:00[America/New_York]')
+  })
+
+  it('works with options', () => {
+    const zdt = ZonedDateTimeFns.create(
+      1709055000000000000n,
+      'America/New_York',
+    )
+    const s = ZonedDateTimeFns.toString(zdt, {
+      calendarName: 'always',
+      fractionalSecondDigits: 2,
+    })
+    expect(s).toBe(
+      '2024-02-27T12:30:00.00-05:00[America/New_York][u-ca=iso8601]',
+    )
+  })
+})
+
+describe('toLocaleString', () => {
+  it('works', () => {
+    const zdt = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/New_York',
+    })
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+    }
+    const s = testHotCache(() =>
+      ZonedDateTimeFns.toLocaleString(zdt, locale, options),
+    )
+    expect(s).toBe(
+      'Sunday, December 31, 2023 at 12:30:00 PM Eastern Standard Time',
+    )
+  })
+})
+
+describe('toLocaleStringParts', () => {
+  it('works', () => {
+    const zdt = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/New_York',
+    })
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+    }
+    const parts = testHotCache(() =>
+      ZonedDateTimeFns.toLocaleStringParts(zdt, locale, options),
+    )
+    expect(
+      // Hard to compare some weird whitespace characters
+      // Filter away whitespace-only parts
+      parts.filter((part) => part.value.trim()),
+    ).toEqual([
+      { type: 'weekday', value: 'Sunday' },
+      { type: 'literal', value: ', ' },
+      { type: 'month', value: 'December' },
+      { type: 'day', value: '31' },
+      { type: 'literal', value: ', ' },
+      { type: 'year', value: '2023' },
+      { type: 'literal', value: ' at ' },
+      { type: 'hour', value: '12' },
+      { type: 'literal', value: ':' },
+      { type: 'minute', value: '30' },
+      { type: 'literal', value: ':' },
+      { type: 'second', value: '00' },
+      { type: 'dayPeriod', value: 'PM' },
+      { type: 'timeZoneName', value: 'Eastern Standard Time' },
+    ])
+  })
+})
+
+describe('rangeToLocaleString', () => {
+  it('works', () => {
+    const zdt0 = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/New_York',
+    })
+    const zdt1 = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 14,
+      minute: 59,
+      timeZone: 'America/New_York',
+    })
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+    }
+    const s = testHotCache(() =>
+      ZonedDateTimeFns.rangeToLocaleString(zdt0, zdt1, locale, options),
+    )
+    expect(s).toBe(
+      'Sunday, December 31, 2023, 12:30:00 PM EST – 2:59:00 PM EST',
+    )
+  })
+})
+
+describe('rangeToLocaleStringParts', () => {
+  it('works', () => {
+    const zdt0 = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/New_York',
+    })
+    const zdt1 = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 14,
+      minute: 59,
+      timeZone: 'America/New_York',
+    })
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+    }
+    const parts = testHotCache(() =>
+      ZonedDateTimeFns.rangeToLocaleStringParts(zdt0, zdt1, locale, options),
+    )
+    expect(
+      // Hard to compare some weird whitespace characters
+      // Filter away whitespace-only parts
+      parts.filter((part) => part.value.trim()),
+    ).toEqual([
+      { source: 'shared', type: 'weekday', value: 'Sunday' },
+      { source: 'shared', type: 'literal', value: ', ' },
+      { source: 'shared', type: 'month', value: 'December' },
+      { source: 'shared', type: 'day', value: '31' },
+      { source: 'shared', type: 'literal', value: ', ' },
+      { source: 'shared', type: 'year', value: '2023' },
+      { source: 'shared', type: 'literal', value: ', ' },
+      { source: 'startRange', type: 'hour', value: '12' },
+      { source: 'startRange', type: 'literal', value: ':' },
+      { source: 'startRange', type: 'minute', value: '30' },
+      { source: 'startRange', type: 'literal', value: ':' },
+      { source: 'startRange', type: 'second', value: '00' },
+      { source: 'startRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'startRange', type: 'timeZoneName', value: 'EST' },
+      { source: 'shared', type: 'literal', value: ' – ' },
+      { source: 'endRange', type: 'hour', value: '2' },
+      { source: 'endRange', type: 'literal', value: ':' },
+      { source: 'endRange', type: 'minute', value: '59' },
+      { source: 'endRange', type: 'literal', value: ':' },
+      { source: 'endRange', type: 'second', value: '00' },
+      { source: 'endRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'endRange', type: 'timeZoneName', value: 'EST' },
+    ])
   })
 })
