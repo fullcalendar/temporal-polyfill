@@ -374,3 +374,148 @@ describe('toPlainMonthDay', () => {
     })
   })
 })
+
+describe('toString', () => {
+  it('works without options', () => {
+    const pd = PlainDateFns.create(2024, 2, 27)
+    const s = PlainDateFns.toString(pd)
+    expect(s).toBe('2024-02-27')
+  })
+
+  it('works with options', () => {
+    const pd = PlainDateFns.create(2024, 2, 27)
+    const s = PlainDateFns.toString(pd, { calendarName: 'always' })
+    expect(s).toBe('2024-02-27[u-ca=iso8601]')
+  })
+})
+
+describe('toLocaleString', () => {
+  it('is faster on repeated calls', () => {
+    const formatLocale = 'en'
+    const formatOptions = {
+      dateStyle: 'full' as const,
+      timeZone: 'America/New_York',
+    }
+    const output = 'Sunday, December 31, 2023'
+
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const t0 = performance.now()
+    const s0 = PlainDateFns.toLocaleString(pd, formatLocale, formatOptions)
+    const t1 = performance.now()
+    const s1 = PlainDateFns.toLocaleString(pd, formatLocale, formatOptions)
+    const t2 = performance.now()
+
+    expect(s0).toBe(output)
+    expect(s1).toBe(output)
+    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+  })
+})
+
+describe('toLocaleStringParts', () => {
+  it('is faster on repeated calls', () => {
+    const formatLocale = 'en'
+    const formatOptions = { dateStyle: 'full' as const }
+    const output = [
+      { type: 'weekday', value: 'Sunday' },
+      { type: 'literal', value: ', ' },
+      { type: 'month', value: 'December' },
+      { type: 'literal', value: ' ' },
+      { type: 'day', value: '31' },
+      { type: 'literal', value: ', ' },
+      { type: 'year', value: '2023' },
+    ]
+
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const t0 = performance.now()
+    const p0 = PlainDateFns.toLocaleStringParts(pd, formatLocale, formatOptions)
+    const t1 = performance.now()
+    const p1 = PlainDateFns.toLocaleStringParts(pd, formatLocale, formatOptions)
+    const t2 = performance.now()
+
+    expect(p0).toEqual(output)
+    expect(p1).toEqual(output)
+    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+  })
+})
+
+describe('rangeToLocaleString', () => {
+  it('is faster on repeated calls', () => {
+    const formatLocale = 'en'
+    const formatOptions = { dateStyle: 'full' as const }
+    const output = 'Sunday, December 31, 2023 – Monday, January 1, 2024'
+
+    const pd0 = PlainDateFns.create(2023, 12, 31)
+    const pd1 = PlainDateFns.create(2024, 1, 1)
+    const t0 = performance.now()
+    const s0 = PlainDateFns.rangeToLocaleString(
+      pd0,
+      pd1,
+      formatLocale,
+      formatOptions,
+    )
+    const t1 = performance.now()
+    const s1 = PlainDateFns.rangeToLocaleString(
+      pd0,
+      pd1,
+      formatLocale,
+      formatOptions,
+    )
+    const t2 = performance.now()
+
+    // should be more that twice as fast, but seems only marginal
+    // because of vitest somehow. when doing describe/it.only,
+    // it's about 10x as fast
+    expect(s0).toBe(output)
+    expect(s1).toBe(output)
+    expect(t2 - t1).toBeLessThan(t1 - t0)
+  })
+})
+
+describe('rangeToLocaleStringParts', () => {
+  it('is faster on repeated calls', () => {
+    const formatLocale = 'en'
+    const formatOptions = { dateStyle: 'full' as const }
+    const output = [
+      { source: 'startRange', type: 'weekday', value: 'Sunday' },
+      { source: 'startRange', type: 'literal', value: ', ' },
+      { source: 'startRange', type: 'month', value: 'December' },
+      { source: 'startRange', type: 'literal', value: ' ' },
+      { source: 'startRange', type: 'day', value: '31' },
+      { source: 'startRange', type: 'literal', value: ', ' },
+      { source: 'startRange', type: 'year', value: '2023' },
+      { source: 'shared', type: 'literal', value: ' – ' },
+      { source: 'endRange', type: 'weekday', value: 'Monday' },
+      { source: 'endRange', type: 'literal', value: ', ' },
+      { source: 'endRange', type: 'month', value: 'January' },
+      { source: 'endRange', type: 'literal', value: ' ' },
+      { source: 'endRange', type: 'day', value: '1' },
+      { source: 'endRange', type: 'literal', value: ', ' },
+      { source: 'endRange', type: 'year', value: '2024' },
+    ]
+
+    const pd0 = PlainDateFns.create(2023, 12, 31)
+    const pd1 = PlainDateFns.create(2024, 1, 1)
+    const t0 = performance.now()
+    const p0 = PlainDateFns.rangeToLocaleStringParts(
+      pd0,
+      pd1,
+      formatLocale,
+      formatOptions,
+    )
+    const t1 = performance.now()
+    const p1 = PlainDateFns.rangeToLocaleStringParts(
+      pd0,
+      pd1,
+      formatLocale,
+      formatOptions,
+    )
+    const t2 = performance.now()
+
+    // should be more that twice as fast, but seems only marginal
+    // because of vitest somehow. when doing describe/it.only,
+    // it's about 10x as fast
+    expect(p0).toEqual(output)
+    expect(p1).toEqual(output)
+    expect(t2 - t1).toBeLessThan(t1 - t0)
+  })
+})

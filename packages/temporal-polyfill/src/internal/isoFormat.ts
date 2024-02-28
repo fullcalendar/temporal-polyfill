@@ -15,6 +15,7 @@ import {
   TimeZoneDisplay,
 } from './options'
 import {
+  CalendarDisplayOptions,
   DateTimeDisplayOptions,
   InstantDisplayOptions,
   TimeDisplayOptions,
@@ -112,7 +113,7 @@ export function formatPlainDateTimeIso<C extends IdLike>(
 
 export function formatPlainDateIso<C extends IdLike>(
   plainDateSlots: PlainDateSlots<C>,
-  options?: DateTimeDisplayOptions,
+  options?: CalendarDisplayOptions,
 ): string {
   return formatDateIso(
     plainDateSlots.calendar,
@@ -123,7 +124,7 @@ export function formatPlainDateIso<C extends IdLike>(
 
 export function formatPlainYearMonthIso<C extends IdLike>(
   plainYearMonthSlots: PlainYearMonthSlots<C>,
-  options?: DateTimeDisplayOptions,
+  options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
     plainYearMonthSlots.calendar,
@@ -135,7 +136,7 @@ export function formatPlainYearMonthIso<C extends IdLike>(
 
 export function formatPlainMonthDayIso<C extends IdLike>(
   plainMonthDaySlots: PlainMonthDaySlots<C>,
-  options?: DateTimeDisplayOptions,
+  options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
     plainMonthDaySlots.calendar,
