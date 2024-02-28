@@ -12,6 +12,13 @@ import * as PlainTimeFns from './plainTime'
 import * as PlainYearMonthFns from './plainYearMonth'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
+// Repeated calls to toLocaleString/etc should be faster because the internal
+// Intl.DateTimeFormat is cached. However, these Vitest tests sometimes give
+// odd results. If tests are run with describe/it.only, then second run is
+// usually 0.1, but often there's no speedup when tests are run in parallel
+// and not in isolation. Disable for now.
+export const HOT_CACHE_FACTOR = 0 // 0.5
+
 // Current
 // -----------------------------------------------------------------------------
 

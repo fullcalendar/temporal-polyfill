@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
-import { expectDurationEquals, expectInstantEquals } from './testUtils'
+import {
+  HOT_CACHE_FACTOR,
+  expectDurationEquals,
+  expectInstantEquals,
+} from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
@@ -213,7 +217,10 @@ describe('toLocaleString', () => {
 
     expect(s0).toBe(output)
     expect(s1).toBe(output)
-    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
 
@@ -244,7 +251,10 @@ describe('toLocaleStringParts', () => {
 
     expect(p0).toEqual(output)
     expect(p1).toEqual(output)
-    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
 
@@ -279,7 +289,10 @@ describe('rangeToLocaleString', () => {
 
     expect(s0).toBe(output)
     expect(s1).toBe(output)
-    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
 
@@ -330,6 +343,9 @@ describe('rangeToLocaleStringParts', () => {
 
     expect(s0).toEqual(output)
     expect(s1).toEqual(output)
-    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
