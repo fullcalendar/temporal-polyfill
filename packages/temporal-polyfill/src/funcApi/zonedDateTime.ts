@@ -38,6 +38,8 @@ import { ZonedFieldOptions } from '../internal/optionsRefine'
 import { roundZonedDateTime } from '../internal/round'
 import {
   DateSlots,
+  PlainMonthDaySlots,
+  PlainYearMonthSlots,
   ZonedDateTimeSlots,
   getEpochMicroseconds,
   getEpochMilliseconds,
@@ -107,6 +109,13 @@ export const epochNanoseconds = getEpochNanoseconds as (
   slots: ZonedDateTimeSlots<string, string>,
 ) => bigint
 
+export function offsetNanoseconds(
+  slots: ZonedDateTimeSlots<string, string>,
+): number {
+  return zonedEpochSlotsToIso(slots, queryNativeTimeZone).offsetNanoseconds
+}
+
+// not memoized
 export const getISOFields = bindArgs(
   buildZonedIsoFields<string, string>,
   queryNativeTimeZone,
@@ -131,25 +140,6 @@ export const getFields = memoize(
   WeakMap,
 )
 
-export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
-export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek)
-export const weekOfYear = adaptDateFunc(computeWeekOfYear)
-export const yearOfWeek = adaptDateFunc(computeYearOfWeek)
-export const dayOfYear = adaptDateFunc(computeDayOfYear)
-export const daysInMonth = adaptDateFunc(computeDaysInMonth)
-export const daysInYear = adaptDateFunc(computeDaysInYear)
-export const monthsInYear = adaptDateFunc(computeMonthsInYear)
-export const inLeapYear = adaptDateFunc(computeInLeapYear)
-
-export const startOfDay = bindArgs(
-  computeStartOfDay<string, string>,
-  queryNativeTimeZone,
-)
-export const hoursInDay = bindArgs(
-  computeHoursInDay<string, string>,
-  queryNativeTimeZone,
-)
-
 export function withFields(
   slots: ZonedDateTimeSlots<string, string>,
   fields: DateTimeBag,
@@ -165,16 +155,6 @@ export function withFields(
   )
 }
 
-export const withPlainTime = bindArgs(
-  zonedDateTimeWithPlainTime<string, string>,
-  queryNativeTimeZone,
-)
-
-export const withPlainDate = bindArgs(
-  zonedDateTimeWithPlainDate<string, string>,
-  queryNativeTimeZone,
-)
-
 export function withTimeZone(
   slots: ZonedDateTimeSlots<string, string>,
   timeZoneId: string,
@@ -188,6 +168,36 @@ export function withCalendar(
 ): ZonedDateTimeSlots<string, string> {
   return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
 }
+
+export const withPlainDate = bindArgs(
+  zonedDateTimeWithPlainDate<string, string>,
+  queryNativeTimeZone,
+)
+
+export const withPlainTime = bindArgs(
+  zonedDateTimeWithPlainTime<string, string>,
+  queryNativeTimeZone,
+)
+
+export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
+export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek)
+export const weekOfYear = adaptDateFunc(computeWeekOfYear)
+export const yearOfWeek = adaptDateFunc(computeYearOfWeek)
+export const dayOfYear = adaptDateFunc(computeDayOfYear)
+export const daysInMonth = adaptDateFunc(computeDaysInMonth)
+export const daysInYear = adaptDateFunc(computeDaysInYear)
+export const monthsInYear = adaptDateFunc(computeMonthsInYear)
+export const inLeapYear = adaptDateFunc(computeInLeapYear)
+
+export const startOfDay = bindArgs(
+  computeStartOfDay<string, string>,
+  queryNativeTimeZone,
+)
+
+export const hoursInDay = bindArgs(
+  computeHoursInDay<string, string>,
+  queryNativeTimeZone,
+)
 
 export const add = bindArgs(
   moveZonedDateTime<string, string>,
@@ -222,11 +232,11 @@ export const round = bindArgs(
   queryNativeTimeZone,
 )
 
-export const compare = compareZonedDateTimes<string, string>
 export const equals = zonedDateTimesEqual<string, string>
+export const compare = compareZonedDateTimes<string, string>
 
-export const toString = bindArgs(
-  formatZonedDateTimeIso<string, string>,
+export const toPlainDateTime = bindArgs(
+  zonedDateTimeToPlainDateTime<string, string>,
   queryNativeTimeZone,
 )
 
@@ -240,19 +250,29 @@ export const toPlainTime = bindArgs(
   queryNativeTimeZone,
 )
 
-export const toPlainDateTime = bindArgs(
-  zonedDateTimeToPlainDateTime<string, string>,
+export function toPlainYearMonth(
+  slots: ZonedDateTimeSlots<string, string>,
+): PlainYearMonthSlots<string> {
+  return zonedDateTimeToPlainYearMonth(
+    createNativeYearMonthRefineOps,
+    slots,
+    getFields(slots),
+  )
+}
+
+export function toPlainMonthDay(
+  slots: ZonedDateTimeSlots<string, string>,
+): PlainMonthDaySlots<string> {
+  return zonedDateTimeToPlainMonthDay(
+    createNativeMonthDayRefineOps,
+    slots,
+    getFields(slots),
+  )
+}
+
+export const toString = bindArgs(
+  formatZonedDateTimeIso<string, string>,
   queryNativeTimeZone,
-)
-
-export const toPlainYearMonth = bindArgs(
-  zonedDateTimeToPlainYearMonth<string>,
-  createNativeYearMonthRefineOps,
-)
-
-export const toPlainMonthDay = bindArgs(
-  zonedDateTimeToPlainMonthDay<string>,
-  createNativeMonthDayRefineOps,
 )
 
 export function toLocaleString(

@@ -133,14 +133,14 @@ export function withFields(
   )
 }
 
-export const withPlainTime = plainDateTimeWithPlainTime as (
-  plainDateTimeSlots: PlainDateTimeSlots<string>,
-  plainTimeSlots: PlainTimeSlots,
-) => PlainDateTimeSlots<string>
-
 export const withPlainDate = plainDateTimeWithPlainDate as (
   plainDateTimeSlots: PlainDateTimeSlots<string>,
   plainDateSlots: PlainDateSlots<string>,
+) => PlainDateTimeSlots<string>
+
+export const withPlainTime = plainDateTimeWithPlainTime as (
+  plainDateTimeSlots: PlainDateTimeSlots<string>,
+  plainTimeSlots: PlainTimeSlots,
 ) => PlainDateTimeSlots<string>
 
 export function withCalendar(
@@ -193,6 +193,10 @@ export const toPlainDate = createPlainDateSlots as (
   plainDateTimeSlots: PlainDateTimeSlots<string>,
 ) => PlainDateSlots<string>
 
+export const toPlainTime = createPlainTimeSlots as (
+  slots: PlainDateTimeSlots<string>,
+) => PlainTimeSlots
+
 export function toPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots<string>,
 ): PlainYearMonthSlots<string> {
@@ -212,10 +216,6 @@ export function toPlainMonthDay(
     computeDateFields(plainDateTimeSlots),
   )
 }
-
-export const toPlainTime = createPlainTimeSlots as (
-  slots: PlainDateTimeSlots<string>,
-) => PlainTimeSlots
 
 export const toString = formatPlainDateTimeIso<string>
 

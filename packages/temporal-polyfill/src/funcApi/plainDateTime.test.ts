@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import * as DurationFns from './duration'
+import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
@@ -122,6 +124,35 @@ describe('withFields', () => {
       millisecond: 0,
       microsecond: 0,
       nanosecond: 5,
+    })
+  })
+})
+
+describe('withPlainDate', () => {
+  it('works', () => {
+    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
+    const pd = PlainDateFns.create(2009, 6, 1)
+    const pdt1 = PlainDateTimeFns.withPlainDate(pdt0, pd)
+    expectPlainDateTimeEquals(pdt1, {
+      isoYear: 2009,
+      isoMonth: 6,
+      isoDay: 1,
+      isoHour: 12,
+      isoMinute: 30,
+    })
+  })
+})
+
+describe('withPlainTime', () => {
+  it('works', () => {
+    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
+    const pt = PlainTimeFns.create(3) // 3:00
+    const pdt1 = PlainDateTimeFns.withPlainTime(pdt0, pt)
+    expectPlainDateTimeEquals(pdt1, {
+      isoYear: 2024,
+      isoMonth: 1,
+      isoDay: 1,
+      isoHour: 3,
     })
   })
 })
@@ -332,9 +363,8 @@ describe('round', () => {
 
 describe('equals', () => {
   it('works affirmatively', () => {
-    const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10, 30)
-    const pdt1 = PlainDateTimeFns.create(2024, 1, 25, 12, 45)
-    expect(PlainDateTimeFns.equals(pdt0, pdt1)).toBe(false)
+    const pdt = PlainDateTimeFns.create(2023, 1, 25, 10, 30)
+    expect(PlainDateTimeFns.equals(pdt, pdt)).toBe(true)
   })
 
   it('works negatively', () => {
