@@ -270,11 +270,11 @@ export function isoArgsToEpochSec(...args: IsoTuple): number {
 If out-of-bounds, returns undefined
 */
 export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
-  const [legacyDate, nudge] = isoToLegacyDate(...args)
+  const [legacyDate, daysNudged] = isoToLegacyDate(...args)
   const epochMilli = legacyDate.getTime()
 
   if (!isNaN(epochMilli)) {
-    return epochMilli - nudge * milliInDay
+    return epochMilli - daysNudged * milliInDay
   }
 }
 
@@ -289,15 +289,16 @@ export function isoToLegacyDate(
 ): [Date, number] {
   // allows this function to accept values beyond valid Instants
   // (PlainDateTime allows values within 24hrs)
-  const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
+  const daysNudged =
+    isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
 
   // Note: Date.UTC() interprets one and two-digit years as being in the
   // 20th century, so don't use it
   const legacyDate = new Date() // should throw out-of-range error here?
   legacyDate.setUTCHours(isoHour, isoMinute, isoSec, isoMilli)
-  legacyDate.setUTCFullYear(isoYear, isoMonth - 1, isoDay + nudge)
+  legacyDate.setUTCFullYear(isoYear, isoMonth - 1, isoDay + daysNudged)
 
-  return [legacyDate, nudge]
+  return [legacyDate, daysNudged]
 }
 
 // Epoch -> ISO Fields

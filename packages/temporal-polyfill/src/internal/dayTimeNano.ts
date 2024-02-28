@@ -91,9 +91,9 @@ export function dayTimeNanoToBigInt(
   divisorNano = 1,
 ): bigint {
   const [days, timeNano] = dayTimeNano
-  const timeUnits = Math.floor(timeNano / divisorNano)
-  const timeUnitsInDay = nanoInUtcDay / divisorNano
-  return BigInt(days) * BigInt(timeUnitsInDay) + BigInt(timeUnits)
+  const whole = Math.floor(timeNano / divisorNano)
+  const wholeInDay = nanoInUtcDay / divisorNano
+  return BigInt(days) * BigInt(wholeInDay) + BigInt(whole)
 }
 
 export function dayTimeNanoToNumber(

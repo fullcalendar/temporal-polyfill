@@ -423,6 +423,8 @@ export function roundDayTimeNanoByInc(
 ): DayTimeNano {
   let [days, timeNano] = dayTimeNano
 
+  // consider the start-of-day the origin?
+  // convert to start-of-day and time-of-day
   if (useDayOrigin && timeNano < 0) {
     timeNano += nanoInUtcDay
     days -= 1

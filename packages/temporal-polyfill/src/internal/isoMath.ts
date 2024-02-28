@@ -120,13 +120,13 @@ export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
 }
 
 export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
-  const [legacyDate, nudge] = isoToLegacyDate(
+  const [legacyDate, daysNudged] = isoToLegacyDate(
     isoDateFields.isoYear,
     isoDateFields.isoMonth,
     isoDateFields.isoDay,
   )
 
-  return modFloor(legacyDate.getUTCDay() - nudge, 7) || 7
+  return modFloor(legacyDate.getUTCDay() - daysNudged, 7) || 7
 }
 
 export function computeIsoWeekParts(
