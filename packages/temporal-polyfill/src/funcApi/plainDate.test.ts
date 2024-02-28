@@ -11,6 +11,13 @@ import {
   expectZonedDateTimeEquals,
 } from './testUtils'
 
+// Repeated calls to toLocaleString/etc should be faster because the internal
+// Intl.DateTimeFormat is cached. However, these Vitest tests sometimes give
+// odd results. If tests are run with describe/it.only, then second run is
+// usually 0.1, but often there's no speedup when tests are run in parallel
+// and not in isolation. Disable for now.
+const HOT_CACHE_FACTOR = 0 // 0.5
+
 describe('create', () => {
   it('works', () => {
     const pd = PlainDateFns.create(2024, 1, 1, 'hebrew')
@@ -407,7 +414,10 @@ describe('toLocaleString', () => {
 
     expect(s0).toBe(output)
     expect(s1).toBe(output)
-    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
 
@@ -434,7 +444,10 @@ describe('toLocaleStringParts', () => {
 
     expect(p0).toEqual(output)
     expect(p1).toEqual(output)
-    expect(t2 - t1).toBeLessThan((t1 - t0) / 2) // at least twice as fast
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
 
@@ -462,12 +475,12 @@ describe('rangeToLocaleString', () => {
     )
     const t2 = performance.now()
 
-    // should be more that twice as fast, but seems only marginal
-    // because of vitest somehow. when doing describe/it.only,
-    // it's about 10x as fast
     expect(s0).toBe(output)
     expect(s1).toBe(output)
-    expect(t2 - t1).toBeLessThan(t1 - t0)
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
 
@@ -511,11 +524,11 @@ describe('rangeToLocaleStringParts', () => {
     )
     const t2 = performance.now()
 
-    // should be more that twice as fast, but seems only marginal
-    // because of vitest somehow. when doing describe/it.only,
-    // it's about 10x as fast
     expect(p0).toEqual(output)
     expect(p1).toEqual(output)
-    expect(t2 - t1).toBeLessThan(t1 - t0)
+
+    if (HOT_CACHE_FACTOR) {
+      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+    }
   })
 })
