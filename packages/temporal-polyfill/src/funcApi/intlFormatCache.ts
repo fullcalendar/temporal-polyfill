@@ -12,7 +12,7 @@ import {
   zonedDateTimeConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { createLazyGenerator } from '../internal/utils'
+import { memoize } from '../internal/utils'
 
 export const prepCachedPlainYearMonthFormat = createFormatPrepper(
   plainYearMonthConfig,
@@ -47,35 +47,32 @@ export const prepCachedZonedDateTimeFormat = createFormatPrepper(
 Keyed by forcedTimeZoneId+locales+options
 */
 function createFormatCache(): FormatQuerier {
-  const queryFormatFactory = createLazyGenerator(
-    (options: Intl.DateTimeFormatOptions) => {
-      const map = new Map<string, Intl.DateTimeFormat>()
+  const queryFormatFactory = memoize((options: Intl.DateTimeFormatOptions) => {
+    const map = new Map<string, Intl.DateTimeFormat>()
 
-      return (
-        forcedTimeZoneId: string | undefined,
-        locales: LocalesArg | undefined,
-        transformOptions: OptionsTransformer,
-      ) => {
-        const key = ([] as string[])
-          .concat(forcedTimeZoneId || [], locales || [])
-          .join()
+    return (
+      forcedTimeZoneId: string | undefined,
+      locales: LocalesArg | undefined,
+      transformOptions: OptionsTransformer,
+    ) => {
+      const key = ([] as string[])
+        .concat(forcedTimeZoneId || [], locales || [])
+        .join()
 
-        let format = map.get(key)
-        if (!format) {
-          format = createFormatForPrep(
-            forcedTimeZoneId,
-            locales,
-            options,
-            transformOptions,
-          )
-          map.set(key, format)
-        }
-
-        return format
+      let format = map.get(key)
+      if (!format) {
+        format = createFormatForPrep(
+          forcedTimeZoneId,
+          locales,
+          options,
+          transformOptions,
+        )
+        map.set(key, format)
       }
-    },
-    WeakMap,
-  )
+
+      return format
+    }
+  }, WeakMap)
 
   return (forcedTimeZoneId, locales, options, transformOptions) => {
     return queryFormatFactory(options)(

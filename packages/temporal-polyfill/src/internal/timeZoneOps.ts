@@ -27,7 +27,7 @@ import {
   isoToEpochNanoWithOffset,
 } from './timeMath'
 import { nanoInHour, nanoInUtcDay } from './units'
-import { createLazyGenerator, pluckProps } from './utils'
+import { memoize, pluckProps } from './utils'
 
 export type OffsetNanosecondsOp = (epochNano: DayTimeNano) => number
 export type PossibleInstantsOp = (isoFields: IsoDateTimeFields) => DayTimeNano[]
@@ -65,7 +65,7 @@ export function zonedEpochNanoToIso(
   return epochNanoToIso(epochNano, offsetNano)
 }
 
-export const zonedEpochSlotsToIso = createLazyGenerator(
+export const zonedEpochSlotsToIso = memoize(
   _zonedEpochSlotsToIso,
   WeakMap,
 ) as typeof _zonedEpochSlotsToIso

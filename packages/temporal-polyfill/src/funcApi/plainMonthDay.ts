@@ -18,7 +18,7 @@ import { formatPlainMonthDayIso } from '../internal/isoFormat'
 import { parsePlainMonthDay } from '../internal/isoParse'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainMonthDaySlots } from '../internal/slots'
-import { bindArgs, createLazyGenerator } from '../internal/utils'
+import { bindArgs, memoize } from '../internal/utils'
 import { prepCachedPlainMonthDayFormat } from './intlFormatCache'
 import {
   computeMonthDayFields,
@@ -54,10 +54,9 @@ export function fromFields(
   )
 }
 
-export const getFields = createLazyGenerator(
-  computeMonthDayFields,
-  WeakMap,
-) as (slots: PlainMonthDaySlots<string>) => MonthDayFields
+export const getFields = memoize(computeMonthDayFields, WeakMap) as (
+  slots: PlainMonthDaySlots<string>,
+) => MonthDayFields
 
 export function withFields(
   plainMonthDaySlots: PlainMonthDaySlots<string>,

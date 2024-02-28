@@ -24,13 +24,7 @@ import {
   isoToEpochMilli,
   isoToLegacyDate,
 } from './timeMath'
-import {
-  allPropsEqual,
-  clampProp,
-  createLazyGenerator,
-  modFloor,
-  zipProps,
-} from './utils'
+import { allPropsEqual, clampProp, memoize, modFloor, zipProps } from './utils'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
@@ -195,10 +189,7 @@ function isoDateYearStart(isoDateFields: IsoDateFields): IsoDateFields {
 // -----------------------------------------------------------------------------
 
 const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
-const queryJapaneseEraParts = createLazyGenerator(
-  computeJapaneseEraParts,
-  WeakMap,
-)
+const queryJapaneseEraParts = memoize(computeJapaneseEraParts, WeakMap)
 
 export function computeIsoEraParts(
   this: NativeCalendar,

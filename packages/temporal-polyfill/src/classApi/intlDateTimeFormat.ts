@@ -19,7 +19,7 @@ import {
   RawFormattable,
 } from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
-import { Classlike, createLazyGenerator, pluckProps } from '../internal/utils'
+import { Classlike, memoize, pluckProps } from '../internal/utils'
 import { Instant } from './instant'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
@@ -143,9 +143,7 @@ function createDateTimeFormatInternals(
     Object.keys(options) as OptionNames,
     resolveOptions as Intl.DateTimeFormatOptions,
   )
-  const queryFormatPrepperForBranding = createLazyGenerator(
-    createFormatPrepperForBranding,
-  )
+  const queryFormatPrepperForBranding = memoize(createFormatPrepperForBranding)
 
   const prepFormat: DateTimeFormatInternalPrepper = (
     ...formattables: Formattable[]
@@ -189,7 +187,7 @@ function createFormatPrepperForBranding<S extends BrandingSlots>(
   return createFormatPrepper(
     config,
     // a generator that conveniently caches by the first arg: forcedTimeZoneId
-    createLazyGenerator(createFormatForPrep),
+    memoize(createFormatForPrep),
   )
 }
 

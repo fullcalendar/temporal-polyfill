@@ -31,11 +31,7 @@ import {
 } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { milliInDay } from './units'
-import {
-  compareNumbers,
-  createLazyGenerator,
-  mapPropNamesToIndex,
-} from './utils'
+import { compareNumbers, mapPropNamesToIndex, memoize } from './utils'
 
 interface IntlDateFields {
   era: string | undefined
@@ -60,7 +56,7 @@ export interface IntlCalendar extends NativeCalendar {
 /*
 Expects an already-normalized calendarId
 */
-export const queryIntlCalendar = createLazyGenerator(createIntlCalendar)
+export const queryIntlCalendar = memoize(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
   const intlFormat = queryCalendarIntlFormat(calendarId)
@@ -84,7 +80,7 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
 function createIntlFieldCache(
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
 ) {
-  return createLazyGenerator((isoDateFields: IsoDateFields) => {
+  return memoize((isoDateFields: IsoDateFields) => {
     const epochMilli = isoToEpochMilli(isoDateFields)!
     return epochMilliToIntlFields(epochMilli)
   }, WeakMap)
@@ -127,7 +123,7 @@ function createIntlYearMonthCache(
     }
   }
 
-  return createLazyGenerator(buildYear)
+  return memoize(buildYear)
 }
 
 // DateTimeFormat Utils
@@ -175,7 +171,7 @@ export function parseIntlPartsYear(intlParts: Record<string, string>): number {
 /**
  * @param id Expects already-normalized
  */
-export const queryCalendarIntlFormat = createLazyGenerator(
+export const queryCalendarIntlFormat = memoize(
   (id: string): Intl.DateTimeFormat =>
     new RawDateTimeFormat(standardLocaleId, {
       calendar: id,

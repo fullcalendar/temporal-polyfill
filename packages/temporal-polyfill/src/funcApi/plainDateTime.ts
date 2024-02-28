@@ -45,7 +45,7 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumberSign, bindArgs, createLazyGenerator } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import { prepCachedPlainDateTimeFormat } from './intlFormatCache'
 import {
   computeDateFields,
@@ -81,7 +81,7 @@ export function fromFields(
   )
 }
 
-export const getFields = createLazyGenerator(
+export const getFields = memoize(
   (slots: PlainDateTimeSlots<string>): DateTimeFields => {
     return {
       ...computeDateFields(slots),

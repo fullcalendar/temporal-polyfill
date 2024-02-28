@@ -69,7 +69,7 @@ export function isObjectLike(arg: unknown): arg is {} {
 //   set(key: K, val: V): void
 // }
 
-export function createLazyGenerator<K, V, A extends any[]>(
+export function memoize<K, V, A extends any[]>(
   generator: (key: K, ...otherArgs: A) => V,
   MapClass: { new (): any } = Map, // TODO: better type
 ): (key: K, ...otherArgs: A) => V {

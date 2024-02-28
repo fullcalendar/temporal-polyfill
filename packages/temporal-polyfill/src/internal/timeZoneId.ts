@@ -3,7 +3,7 @@ import { RawDateTimeFormat, standardLocaleId } from './intlFormatUtils'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './isoParse'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { capitalize, createLazyGenerator } from './utils'
+import { capitalize, memoize } from './utils'
 
 export function resolveTimeZoneId(id: string): string {
   const essence = getTimeZoneEssence(id)
@@ -44,7 +44,7 @@ export function getTimeZoneEssence(
 /**
  * @param id Expects uppercase
  */
-const queryTimeZoneIntlFormat = createLazyGenerator(
+const queryTimeZoneIntlFormat = memoize(
   (id: string): Intl.DateTimeFormat =>
     new RawDateTimeFormat(standardLocaleId, {
       timeZone: id,

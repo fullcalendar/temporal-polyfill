@@ -21,7 +21,7 @@ import { parsePlainYearMonth } from '../internal/isoParse'
 import { movePlainYearMonth } from '../internal/move'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainYearMonthSlots } from '../internal/slots'
-import { NumberSign, bindArgs, createLazyGenerator } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import { prepCachedPlainYearMonthFormat } from './intlFormatCache'
 import {
   computeDaysInMonth,
@@ -66,10 +66,9 @@ export function fromFields(
   )
 }
 
-export const getFields = createLazyGenerator(
-  computeYearMonthFields,
-  WeakMap,
-) as (slots: PlainYearMonthSlots<string>) => YearMonthFields
+export const getFields = memoize(computeYearMonthFields, WeakMap) as (
+  slots: PlainYearMonthSlots<string>,
+) => YearMonthFields
 
 export const daysInMonth = computeDaysInMonth as (
   slots: PlainYearMonthSlots<string>,

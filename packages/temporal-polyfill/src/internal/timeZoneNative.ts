@@ -21,7 +21,7 @@ import {
 } from './timeZoneConfig'
 import { getTimeZoneEssence } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clampNumber, compareNumbers, createLazyGenerator } from './utils'
+import { clampNumber, compareNumbers, memoize } from './utils'
 
 export interface NativeTimeZone {
   getOffsetNanosecondsFor(epochNano: DayTimeNano): number
@@ -32,15 +32,13 @@ export interface NativeTimeZone {
   ): DayTimeNano | undefined
 }
 
-export const queryNativeTimeZone = createLazyGenerator(
-  (slotId: string): NativeTimeZone => {
-    const essence = getTimeZoneEssence(slotId)
+export const queryNativeTimeZone = memoize((slotId: string): NativeTimeZone => {
+  const essence = getTimeZoneEssence(slotId)
 
-    return typeof essence === 'object'
-      ? new IntlTimeZone(essence)
-      : new FixedTimeZone(essence || 0)
-  },
-)
+  return typeof essence === 'object'
+    ? new IntlTimeZone(essence)
+    : new FixedTimeZone(essence || 0)
+})
 
 // Fixed
 // -----------------------------------------------------------------------------
@@ -117,8 +115,8 @@ function createIntlTimeZoneStore(
   computeOffsetSec: (epochSec: number) => number,
 ): IntlTimeZoneStore {
   // always given startEpochSec/endEpochSec
-  const getSample = createLazyGenerator(computeOffsetSec)
-  const getSplit = createLazyGenerator(createSplitTuple)
+  const getSample = memoize(computeOffsetSec)
+  const getSplit = memoize(createSplitTuple)
   let minTransition = minPossibleTransition
   let maxTransition = maxPossibleTransition
 

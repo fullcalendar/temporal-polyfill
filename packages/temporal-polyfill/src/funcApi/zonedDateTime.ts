@@ -52,7 +52,7 @@ import {
   computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
-import { bindArgs, createLazyGenerator } from '../internal/utils'
+import { bindArgs, memoize } from '../internal/utils'
 import { prepCachedZonedDateTimeFormat } from './intlFormatCache'
 import {
   computeDateFields,
@@ -112,7 +112,7 @@ export const getISOFields = bindArgs(
   queryNativeTimeZone,
 )
 
-export const getFields = createLazyGenerator(
+export const getFields = memoize(
   (
     zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
   ): ZonedDateTimeFields => {
