@@ -48,6 +48,7 @@ import {
   TimeFields,
   YearFields,
   YearMonthBag,
+  YearMonthFields,
   allYearFieldNames,
   dateFieldNamesAlpha,
   dayFieldNames,
@@ -713,42 +714,37 @@ function mergeCalendarFields(
 
 export function convertToPlainMonthDay<C>(
   calendarOps: MonthDayRefineOps<C>,
-  input: DateBag,
+  input: { monthCode: string; day: number },
 ): PlainMonthDaySlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
-    input as any,
+    input,
     monthCodeDayFieldNames,
   )
-
   return calendarOps.monthDayFromFields(fields)
 }
 
 export function convertToPlainYearMonth<C>(
   calendarOps: YearMonthRefineOps<C>,
-  input: YearMonthBag,
+  input: { year: number; monthCode: string },
   options?: OverflowOptions,
 ): PlainYearMonthSlots<C> {
   const fields = refineCalendarFields(
     calendarOps,
-    input as any,
+    input,
     yearMonthCodeFieldNames,
   )
-
   return calendarOps.yearMonthFromFields(fields, options)
 }
 
-/*
-Responsible for ensuring bag is an object. Best place?
-*/
 export function convertPlainMonthDayToDate<C>(
   calendarOps: DateModOps<C>,
-  plainMonthDay: any,
+  input: { monthCode: string; day: number },
   bag: YearFields,
 ): PlainDateSlots<C> {
   return convertToIso(
     calendarOps,
-    plainMonthDay, // input
+    input,
     monthCodeDayFieldNames, // inputFieldNames
     requireObjectLike(bag), // extra
     yearFieldNames, // extraFieldNames
@@ -760,12 +756,12 @@ Responsible for ensuring bag is an object. Best place?
 */
 export function convertPlainYearMonthToDate<C>(
   calendarOps: DateModOps<C>,
-  plainYearMonth: any,
+  input: YearMonthFields,
   bag: DayFields,
 ): PlainDateSlots<C> {
   return convertToIso(
     calendarOps,
-    plainYearMonth, // input
+    input,
     yearMonthCodeFieldNames, // inputFieldNames
     requireObjectLike(bag), // extra
     dayFieldNames, // extraFieldNames

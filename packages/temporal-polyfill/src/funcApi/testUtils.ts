@@ -4,13 +4,15 @@ import {
   dayTimeNanoToBigInt,
 } from '../internal/dayTimeNano'
 import { computeDurationSign } from '../internal/durationMath'
-import { IsoDateFields } from '../internal/isoFields'
+import { IsoDateFields, IsoDateTimeFields } from '../internal/isoFields'
 import { isoToEpochNano } from '../internal/timeMath'
 import { DurationBag, DurationSlots } from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainMonthDayFns from './plainMonthDay'
 import * as PlainTimeFns from './plainTime'
+import * as PlainYearMonthFns from './plainYearMonth'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 // Current
@@ -32,6 +34,8 @@ export function getCurrentZonedDateTime(
 
 // Equality
 // -----------------------------------------------------------------------------
+// All props should be alphabetized because they serve as a base for
+// constructing comparable slots, retaining order.
 
 const isoDateDefaults = {
   isoDay: 0,
@@ -39,10 +43,49 @@ const isoDateDefaults = {
   isoYear: 0,
 }
 
+const isoDateTimeDefaults = {
+  isoDay: 0,
+  isoHour: 0,
+  isoMicrosecond: 0,
+  isoMillisecond: 0,
+  isoMinute: 0,
+  isoMonth: 0,
+  isoNanosecond: 0,
+  isoSecond: 0,
+  isoYear: 0,
+}
+
 const plainDateDefaults = {
   branding: 'PlainDate',
   calendar: 'iso8601',
   ...isoDateDefaults,
+}
+
+const plainYearMonthDefaults = {
+  branding: 'PlainYearMonth',
+  calendar: 'iso8601',
+  ...isoDateDefaults,
+  isoDay: 1,
+}
+
+const plainMonthDayDefaults = {
+  branding: 'PlainMonthDay',
+  calendar: 'iso8601',
+  ...isoDateDefaults,
+  isoYear: 1972,
+}
+
+const plainDateTimeDefaults = {
+  branding: 'PlainDateTime',
+  calendar: 'iso8601',
+  ...isoDateTimeDefaults,
+}
+
+const zonedDateTimeDefaults = {
+  branding: 'ZonedDateTime',
+  calendar: 'iso8601',
+  timeZone: '',
+  epochNanoseconds: 0n,
 }
 
 const instantSlotDefaults = {
@@ -67,11 +110,52 @@ const durationSlotDefaults = {
 
 export function expectPlainDateEquals(
   pd: PlainDateFns.PlainDateSlots<string>,
-  isoFields: Partial<IsoDateFields & { calendar: string }>,
+  slots: Partial<IsoDateFields & { calendar: string }>,
 ): void {
   expectPropsEqualStrict(pd, {
     ...plainDateDefaults,
-    ...isoFields,
+    ...slots,
+  })
+}
+
+export function expectPlainYearMonthEquals(
+  pym: PlainYearMonthFns.PlainYearMonthSlots<string>,
+  slots: Partial<IsoDateFields & { calendar: string }>,
+): void {
+  expectPropsEqualStrict(pym, {
+    ...plainYearMonthDefaults,
+    ...slots,
+  })
+}
+
+export function expectPlainMonthDayEquals(
+  pym: PlainMonthDayFns.PlainMonthDaySlots<string>,
+  slots: Partial<IsoDateFields & { calendar: string }>,
+): void {
+  expectPropsEqualStrict(pym, {
+    ...plainMonthDayDefaults,
+    ...slots,
+  })
+}
+
+export function expectPlainDateTimeEquals(
+  pdt: PlainDateTimeFns.PlainDateTimeSlots<string>,
+  slots: Partial<IsoDateTimeFields & { calendar: string }>,
+): void {
+  expectPropsEqualStrict(pdt, {
+    ...plainDateTimeDefaults,
+    ...slots,
+  })
+}
+
+export function expectZonedDateTimeEquals(
+  zdt: ZonedDateTimeFns.ZonedDateTimeSlots<string, string>,
+  slots: { epochNanoseconds: bigint; timeZone: string; calendar?: string },
+): void {
+  expectPropsEqualStrict(zdt, {
+    ...zonedDateTimeDefaults,
+    ...slots,
+    epochNanoseconds: bigIntToDayTimeNano(slots.epochNanoseconds),
   })
 }
 

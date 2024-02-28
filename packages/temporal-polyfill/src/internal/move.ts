@@ -38,6 +38,7 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
   createInstantSlots,
+  createPlainDateSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
   createPlainYearMonthSlots,
@@ -96,7 +97,7 @@ export function moveZonedDateTime<C, T>(
   )
 
   return {
-    ...zonedDateTimeSlots,
+    ...zonedDateTimeSlots, // retain timeZone/calendar, order
     epochNanoseconds: movedEpochNanoseconds,
   }
 }
@@ -108,15 +109,16 @@ export function movePlainDateTime<C>(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots<C> {
-  return createPlainDateTimeSlots({
-    ...plainDateTimeSlots,
-    ...moveDateTime(
-      getCalendarOps(plainDateTimeSlots.calendar),
+  const { calendar } = plainDateTimeSlots
+  return createPlainDateTimeSlots(
+    moveDateTime(
+      getCalendarOps(calendar),
       plainDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     ),
-  })
+    calendar,
+  )
 }
 
 export function movePlainDate<C>(
@@ -126,15 +128,16 @@ export function movePlainDate<C>(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateSlots<C> {
-  return {
-    ...plainDateSlots,
-    ...moveDateEfficient(
-      getCalendarOps(plainDateSlots.calendar),
+  const { calendar } = plainDateSlots
+  return createPlainDateSlots(
+    moveDateEfficient(
+      getCalendarOps(calendar),
       plainDateSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     ),
-  }
+    calendar,
+  )
 }
 
 export function movePlainYearMonth<C>(

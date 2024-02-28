@@ -141,7 +141,7 @@ built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 #   - ours is generalized for ISO and Intl. smaller code size
 # - code smell in ref polyfill
 #   - NanosecondsToDays
-#   - NormalizedTimeDurationToDays
+#   - NormalizedTimeDurationToDays (related to #2758)
 #   - UnbalanceDateDurationRelative
 #     (in #2758, no longer used for Duration::round/total, just for Duration::compare)
 
@@ -166,27 +166,40 @@ built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematic
 built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values-2.js
 
 ####################################################################################################
-# ACCESSING OBJECTS AS BAGS
+# BAG STUFF
 ####################################################################################################
 
 # CALLING
-# for converting from ZonedDateTime -> PlainYearMonth, Calendar::year/monthCode is supposed to be queried.
-# for converting from ZonedDateTime -> PlainMonthDay, Calendar::monthCode/day is supposed to be queried.
-# Instead, we treat the incoming ZonedDateTime as a bag and access these parts as normal properties.
-# Better for code compactness.
-# (Same shortcoming for PlainDateTime but those tests are not written)
+# Conversion from ZonedDateTime -> PlainYearMonth/PlainMonthDay is supposed to
+# create an intermediate PlainDateTime which is then given to Calendar::monthFromFields.
+# Instead, we pass the ZonedDateTime directly to Calendar::monthFromFields to prevent
+# from needing to make an intermediate object. Also better for code compactness
+# because, if we created an intermediate IsoFields with zonedEpochSlotsToIso,
+# there's no convenient way to compute all calendar-based fields like year/month/day/etc.
+#
+# TODO: report this, citing that if the ZonedDateTime fields are already cached,
+# then fewer operations (https://github.com/tc39/proposal-temporal/issues/2788).
+#
 built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
 
 # CALLING
-# ZonedDateTime::with accesses its own props as a bag (`initialFields`) and thus
-# creates a TimeZone record when it shouldn't
+# ZonedDateTime is supposed to create an intermediate PlainDateTime which is then
+# given to Calendar::mergeFields. Instead, we pass the ZonedDateTime directly
+# to Calendar::mergeFields to prevent from needing to make an intermediate object.
+# Also better for code compactness because, if we created intermediate IsoFields
+# with zonedEpochSlotsToIso, there's no convenient way to compute all calendar-based
+# fields like year/month/day/etc.
+#
+# TODO: report this, citing that if the ZonedDateTime fields are already cached,
+# then fewer operations (https://github.com/tc39/proposal-temporal/issues/2788).
+#
 built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
 
 # CALLING
-# PlainDateTime::with is supposed to access time parts via internal slots.
+# PlainDateTime::with is supposed to access *time* parts via internal slots.
 # We treat the current PlainDateTime as a bag and access the time parts as normal properties,
-# Better for code compactness.
+# Better for code compactness, though a bit slower
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 ####################################################################################################
@@ -215,6 +228,11 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # CALLING
 # PlainYearMonth operations break spec because we don't convert to raw fields and then back
 # to PlainYearMonth. We leverage Calendar::day instead
+#
+# TODO: advocate for this change
+# Replaces lots of calls to Calendar::fields/dateFromFields for calls to Calendar::day
+# Huge difference. 39 vs 58 calls in subtract/order-of-operations.js
+#
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fromfields-called-with-null-prototype-fields.js

@@ -18,13 +18,16 @@ import { formatPlainMonthDayIso } from '../internal/isoFormat'
 import { parsePlainMonthDay } from '../internal/isoParse'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainMonthDaySlots } from '../internal/slots'
-import { bindArgs } from '../internal/utils'
+import { bindArgs, createLazyGenerator } from '../internal/utils'
 import { prepCachedPlainMonthDayFormat } from './intlFormatCache'
 import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
   refineCalendarIdString,
 } from './utils'
+
+// TODO: rename to keep scope? Slots/Fields/Bag?
+export type { PlainMonthDaySlots, MonthDayBag }
 
 export const create = bindArgs(
   constructPlainMonthDaySlots<string, string>,
@@ -51,7 +54,7 @@ export function fromFields(
   )
 }
 
-export const getFields = computeMonthDayFields as (
+export const getFields = createLazyGenerator(computeMonthDayFields) as (
   slots: PlainMonthDaySlots<string>,
 ) => MonthDayFields
 
@@ -63,7 +66,7 @@ export function withFields(
   return plainMonthDayWithFields(
     createNativeMonthDayModOps,
     plainMonthDaySlots,
-    computeMonthDayFields(plainMonthDaySlots),
+    getFields(plainMonthDaySlots),
     modFields,
     options,
   )

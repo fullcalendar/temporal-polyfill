@@ -21,7 +21,7 @@ import { parsePlainYearMonth } from '../internal/isoParse'
 import { movePlainYearMonth } from '../internal/move'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainYearMonthSlots } from '../internal/slots'
-import { NumberSign, bindArgs } from '../internal/utils'
+import { NumberSign, bindArgs, createLazyGenerator } from '../internal/utils'
 import { prepCachedPlainYearMonthFormat } from './intlFormatCache'
 import {
   computeDaysInMonth,
@@ -32,6 +32,9 @@ import {
   getCalendarIdFromBag,
   refineCalendarIdString,
 } from './utils'
+
+// TODO: rename to keep scope? Slots/Fields/Bag?
+export type { PlainYearMonthSlots, YearMonthBag }
 
 export function create(
   isoYear: number,
@@ -63,7 +66,7 @@ export function fromFields(
   )
 }
 
-export const getFields = computeYearMonthFields as (
+export const getFields = createLazyGenerator(computeYearMonthFields) as (
   slots: PlainYearMonthSlots<string>,
 ) => YearMonthFields
 
@@ -88,7 +91,7 @@ export function withFields(
   return plainYearMonthWithFields(
     createNativeYearMonthModOps,
     slots,
-    computeYearMonthFields(slots),
+    getFields(slots),
     fields,
     options,
   )

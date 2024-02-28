@@ -52,7 +52,7 @@ import {
   computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
-import { bindArgs } from '../internal/utils'
+import { bindArgs, createLazyGenerator } from '../internal/utils'
 import { prepCachedZonedDateTimeFormat } from './intlFormatCache'
 import {
   computeDateFields,
@@ -112,21 +112,23 @@ export const getISOFields = bindArgs(
   queryNativeTimeZone,
 )
 
-export function getFields(
-  zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-): ZonedDateTimeFields {
-  const isoFields = zonedEpochSlotsToIso(
-    zonedDateTimeSlots,
-    queryNativeTimeZone,
-  )
-  const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
+export const getFields = createLazyGenerator(
+  (
+    zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
+  ): ZonedDateTimeFields => {
+    const isoFields = zonedEpochSlotsToIso(
+      zonedDateTimeSlots,
+      queryNativeTimeZone,
+    )
+    const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
-  return {
-    ...computeDateFields(isoFields),
-    ...isoTimeFieldsToCal(isoFields),
-    offset: offsetString,
-  }
-}
+    return {
+      ...computeDateFields(isoFields),
+      ...isoTimeFieldsToCal(isoFields),
+      offset: offsetString,
+    }
+  },
+)
 
 export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
 export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek)

@@ -33,10 +33,14 @@ import {
   ZonedDateTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumberSign, bindArgs, identity } from '../internal/utils'
+import {
+  NumberSign,
+  bindArgs,
+  createLazyGenerator,
+  identity,
+} from '../internal/utils'
 import { prepCachedPlainDateFormat } from './intlFormatCache'
 import {
-  computeDateBasics,
   computeDateFields,
   computeDayOfYear,
   computeDaysInMonth,
@@ -75,7 +79,7 @@ export function fromFields(
   )
 }
 
-export const getFields = computeDateFields as (
+export const getFields = createLazyGenerator(computeDateFields) as (
   slots: PlainDateSlots<string>,
 ) => DateFields
 
@@ -115,7 +119,7 @@ export function withFields(
   return plainDateWithFields(
     createNativeDateModOps,
     slots,
-    computeDateBasics(slots),
+    getFields(slots),
     fields,
     options,
   )
@@ -148,8 +152,6 @@ export const compare = compareIsoDateFields as (
   slots1: PlainDateSlots<string>,
 ) => NumberSign
 
-export const toString = formatPlainDateIso<string>
-
 export function toZonedDateTime(
   slots: PlainDateSlots<string>,
   options: string | { timeZone: string; plainTime?: PlainTimeSlots },
@@ -168,7 +170,7 @@ export function toZonedDateTime(
 
 export const toPlainDateTime = plainDateToPlainDateTime as (
   plainDateSlots: PlainDateSlots<string>,
-  plainTimeSlots: PlainTimeSlots,
+  plainTimeSlots?: PlainTimeSlots,
 ) => PlainDateTimeSlots<string>
 
 export function toPlainYearMonth(
@@ -177,7 +179,7 @@ export function toPlainYearMonth(
   return plainDateToPlainYearMonth(
     createNativeYearMonthRefineOps,
     slots,
-    computeDateBasics(slots),
+    getFields(slots),
   )
 }
 
@@ -187,9 +189,11 @@ export function toPlainMonthDay(
   return plainDateToPlainMonthDay(
     createNativeMonthDayRefineOps,
     slots,
-    computeDateBasics(slots),
+    getFields(slots),
   )
 }
+
+export const toString = formatPlainDateIso<string>
 
 export function toLocaleString(
   slots: PlainDateSlots<string>,

@@ -19,7 +19,12 @@ import { OverflowOptions } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumberSign, bindArgs, identity } from '../internal/utils'
+import {
+  NumberSign,
+  bindArgs,
+  createLazyGenerator,
+  identity,
+} from '../internal/utils'
 import { prepCachedPlainTimeFormat } from './intlFormatCache'
 import { refineTimeZoneIdString } from './utils'
 
@@ -32,7 +37,7 @@ export const fromFields = refinePlainTimeBag
 
 export const fromString = parsePlainTime
 
-export const getFields = isoTimeFieldsToCal as (
+export const getFields = createLazyGenerator(isoTimeFieldsToCal) as (
   slots: PlainTimeSlots,
 ) => TimeFields
 

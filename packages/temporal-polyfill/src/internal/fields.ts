@@ -2,18 +2,6 @@ import { DurationFields } from './durationFields'
 import { Unit, unitNamesAsc } from './units'
 import { mapPropNamesToConstant, sortStrings } from './utils'
 
-// Basics
-// -----------------------------------------------------------------------------
-
-export interface YearBasics {
-  year: number
-}
-
-export interface DateBasics extends YearBasics {
-  month: number
-  day: number
-}
-
 // Fields
 // -----------------------------------------------------------------------------
 
@@ -22,7 +10,7 @@ export interface EraYearFields {
   eraYear: number
 }
 
-export type YearFields = YearBasics & Partial<EraYearFields>
+export type YearFields = Partial<EraYearFields> & { year: number }
 
 export interface MonthFields {
   monthCode: string
@@ -61,7 +49,7 @@ export type DateTimeBag = DateBag & TimeBag
 // Strict Bag (with complex expressions)
 // -----------------------------------------------------------------------------
 
-export type EraYearOrYear = EraYearFields | YearBasics
+export type EraYearOrYear = EraYearFields | { year: number }
 export type MonthCodeOrMonthAndYear =
   | { monthCode: string }
   | ({ month: number } & EraYearOrYear)
@@ -94,6 +82,7 @@ export interface DateStats extends YearMonthStats {
 
 // Field Names
 // -----------------------------------------------------------------------------
+// TODO: converge on 'alpha' naming or not
 
 export const timeFieldNamesAsc = unitNamesAsc.slice(
   0,

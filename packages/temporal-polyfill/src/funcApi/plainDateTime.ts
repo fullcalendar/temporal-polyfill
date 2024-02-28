@@ -45,10 +45,9 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumberSign, bindArgs } from '../internal/utils'
+import { NumberSign, bindArgs, createLazyGenerator } from '../internal/utils'
 import { prepCachedPlainDateTimeFormat } from './intlFormatCache'
 import {
-  computeDateBasics,
   computeDateFields,
   computeDayOfYear,
   computeDaysInMonth,
@@ -82,12 +81,14 @@ export function fromFields(
   )
 }
 
-export function getFields(slots: PlainDateTimeSlots<string>): DateTimeFields {
-  return {
-    ...computeDateFields(slots),
-    ...isoTimeFieldsToCal(slots),
-  }
-}
+export const getFields = createLazyGenerator(
+  (slots: PlainDateTimeSlots<string>): DateTimeFields => {
+    return {
+      ...computeDateFields(slots),
+      ...isoTimeFieldsToCal(slots),
+    }
+  },
+)
 
 export const dayOfWeek = computeIsoDayOfWeek as (
   slots: PlainDateTimeSlots<string>,
@@ -125,7 +126,7 @@ export function withFields(
   return plainDateTimeWithFields(
     createNativeDateModOps,
     plainDateTimeSlots,
-    computeDateBasics(plainDateTimeSlots),
+    getFields(plainDateTimeSlots),
     newFields,
     options,
   )
@@ -197,7 +198,7 @@ export function toPlainYearMonth(
   return plainDateTimeToPlainYearMonth(
     createNativeYearMonthRefineOps,
     plainDateTimeSlots,
-    computeDateBasics(plainDateTimeSlots),
+    computeDateFields(plainDateTimeSlots),
   )
 }
 
@@ -207,7 +208,7 @@ export function toPlainMonthDay(
   return plainDateTimeToPlainMonthDay(
     createNativeMonthDayRefineOps,
     plainDateTimeSlots,
-    computeDateBasics(plainDateTimeSlots),
+    computeDateFields(plainDateTimeSlots),
   )
 }
 

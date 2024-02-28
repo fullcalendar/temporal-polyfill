@@ -11,12 +11,7 @@ import {
   createNativeWeekOps,
 } from '../internal/calendarNativeQuery'
 import { requireString } from '../internal/cast'
-import {
-  DateBasics,
-  DateFields,
-  MonthDayFields,
-  YearMonthFields,
-} from '../internal/fields'
+import { DateFields, MonthDayFields, YearMonthFields } from '../internal/fields'
 import { DateSlots } from '../internal/slots'
 import { resolveTimeZoneId } from '../internal/timeZoneId'
 
@@ -46,12 +41,6 @@ export function refineTimeZoneIdString(id: string): string {
 
 // Fields
 // -----------------------------------------------------------------------------
-
-export function computeDateBasics(slots: DateSlots<string>): DateBasics {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month, day] = calendarOps.dateParts(slots)
-  return { year, month, day }
-}
 
 export function computeDateFields(slots: DateSlots<string>): DateFields {
   const calendarOps = createNativePartOps(slots.calendar)

@@ -82,7 +82,6 @@ export function computeIsoDaysInWeek(_isoDateFields: IsoDateFields) {
 }
 
 export function computeIsoMonthsInYear(_isoYear: number): number {
-  // for methods
   return isoMonthsInYear
 }
 
