@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import {
-  HOT_CACHE_FACTOR,
   expectDurationEquals,
   expectInstantEquals,
+  testHotCache,
 } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
@@ -199,40 +199,32 @@ describe('toZonedDateTime', () => {
 })
 
 describe('toLocaleString', () => {
-  it('is faster on repeated calls', () => {
-    const formatLocale = 'en'
-    const formatOptions = {
-      dateStyle: 'full' as const,
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const input = 1704063600000000000n
-    const output = 'Sunday, December 31, 2023'
-
-    const inst = InstantFns.create(input)
-    const t0 = performance.now()
-    const s0 = InstantFns.toLocaleString(inst, formatLocale, formatOptions)
-    const t1 = performance.now()
-    const s1 = InstantFns.toLocaleString(inst, formatLocale, formatOptions)
-    const t2 = performance.now()
-
-    expect(s0).toBe(output)
-    expect(s1).toBe(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    const inst = InstantFns.create(1704063600000000000n)
+    const s = testHotCache(() =>
+      InstantFns.toLocaleString(inst, locale, options),
+    )
+    expect(s).toEqual('Sunday, December 31, 2023')
   })
 })
 
 describe('toLocaleStringParts', () => {
-  it('is faster on repeated calls', () => {
-    const formatLocale = 'en'
-    const formatOptions = {
-      dateStyle: 'full' as const,
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const input = 1704063600000000000n
-    const output = [
+    const inst = InstantFns.create(1704063600000000000n)
+    const parts = testHotCache(() =>
+      InstantFns.toLocaleStringParts(inst, locale, options),
+    )
+    expect(parts).toEqual([
       { type: 'weekday', value: 'Sunday' },
       { type: 'literal', value: ', ' },
       { type: 'month', value: 'December' },
@@ -240,72 +232,44 @@ describe('toLocaleStringParts', () => {
       { type: 'day', value: '31' },
       { type: 'literal', value: ', ' },
       { type: 'year', value: '2023' },
-    ]
-
-    const inst = InstantFns.create(input)
-    const t0 = performance.now()
-    const p0 = InstantFns.toLocaleStringParts(inst, formatLocale, formatOptions)
-    const t1 = performance.now()
-    const p1 = InstantFns.toLocaleStringParts(inst, formatLocale, formatOptions)
-    const t2 = performance.now()
-
-    expect(p0).toEqual(output)
-    expect(p1).toEqual(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    ])
   })
 })
 
 describe('rangeToLocaleString', () => {
-  it('is faster on repeated calls', () => {
+  it('works', () => {
     const formatLocale = 'en'
     const formatOptions = {
       dateStyle: 'full' as const,
       timeZone: 'America/New_York',
     }
-    const input0 = 1704063600000000000n
-    const input1 = 1704150000000000000n // +1 day
-    const output = 'Sunday, December 31, 2023 – Monday, January 1, 2024'
-
-    const inst0 = InstantFns.create(input0)
-    const inst1 = InstantFns.create(input1)
-    const t0 = performance.now()
-    const s0 = InstantFns.rangeToLocaleString(
-      inst0,
-      inst1,
-      formatLocale,
-      formatOptions,
+    const inst0 = InstantFns.create(1704063600000000000n)
+    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
+    const s = testHotCache(() =>
+      InstantFns.rangeToLocaleString(inst0, inst1, formatLocale, formatOptions),
     )
-    const t1 = performance.now()
-    const s1 = InstantFns.rangeToLocaleString(
-      inst0,
-      inst1,
-      formatLocale,
-      formatOptions,
-    )
-    const t2 = performance.now()
-
-    expect(s0).toBe(output)
-    expect(s1).toBe(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    expect(s).toBe('Sunday, December 31, 2023 – Monday, January 1, 2024')
   })
 })
 
 describe('rangeToLocaleStringParts', () => {
-  it('is faster on repeated calls', () => {
+  it('works', () => {
     const formatLocale = 'en'
     const formatOptions = {
       dateStyle: 'full' as const,
       timeZone: 'America/New_York',
     }
-    const input0 = 1704063600000000000n
-    const input1 = 1704150000000000000n // +1 day
-    const output = [
+    const inst0 = InstantFns.create(1704063600000000000n)
+    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
+    const parts = testHotCache(() =>
+      InstantFns.rangeToLocaleStringParts(
+        inst0,
+        inst1,
+        formatLocale,
+        formatOptions,
+      ),
+    )
+    expect(parts).toEqual([
       { source: 'startRange', type: 'weekday', value: 'Sunday' },
       { source: 'startRange', type: 'literal', value: ', ' },
       { source: 'startRange', type: 'month', value: 'December' },
@@ -321,31 +285,6 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'endRange', type: 'day', value: '1' },
       { source: 'endRange', type: 'literal', value: ', ' },
       { source: 'endRange', type: 'year', value: '2024' },
-    ]
-
-    const inst0 = InstantFns.create(input0)
-    const inst1 = InstantFns.create(input1)
-    const t0 = performance.now()
-    const s0 = InstantFns.rangeToLocaleStringParts(
-      inst0,
-      inst1,
-      formatLocale,
-      formatOptions,
-    )
-    const t1 = performance.now()
-    const s1 = InstantFns.rangeToLocaleStringParts(
-      inst0,
-      inst1,
-      formatLocale,
-      formatOptions,
-    )
-    const t2 = performance.now()
-
-    expect(s0).toEqual(output)
-    expect(s1).toEqual(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    ])
   })
 })

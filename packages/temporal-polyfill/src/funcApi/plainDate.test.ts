@@ -3,13 +3,13 @@ import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 import * as PlainTimeFns from './plainTime'
 import {
-  HOT_CACHE_FACTOR,
   expectDurationEquals,
   expectPlainDateEquals,
   expectPlainDateTimeEquals,
   expectPlainMonthDayEquals,
   expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
+  testHotCache,
 } from './testUtils'
 
 describe('create', () => {
@@ -391,35 +391,29 @@ describe('toString', () => {
 })
 
 describe('toLocaleString', () => {
-  it('is faster on repeated calls', () => {
-    const formatLocale = 'en'
-    const formatOptions = {
-      dateStyle: 'full' as const,
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const output = 'Sunday, December 31, 2023'
-
     const pd = PlainDateFns.create(2023, 12, 31)
-    const t0 = performance.now()
-    const s0 = PlainDateFns.toLocaleString(pd, formatLocale, formatOptions)
-    const t1 = performance.now()
-    const s1 = PlainDateFns.toLocaleString(pd, formatLocale, formatOptions)
-    const t2 = performance.now()
-
-    expect(s0).toBe(output)
-    expect(s1).toBe(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    const s = testHotCache(() =>
+      PlainDateFns.toLocaleString(pd, locale, options),
+    )
+    expect(s).toBe('Sunday, December 31, 2023')
   })
 })
 
 describe('toLocaleStringParts', () => {
-  it('is faster on repeated calls', () => {
-    const formatLocale = 'en'
-    const formatOptions = { dateStyle: 'full' as const }
-    const output = [
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const parts = testHotCache(() =>
+      PlainDateFns.toLocaleStringParts(pd, locale, options),
+    )
+    expect(parts).toEqual([
       { type: 'weekday', value: 'Sunday' },
       { type: 'literal', value: ', ' },
       { type: 'month', value: 'December' },
@@ -427,62 +421,33 @@ describe('toLocaleStringParts', () => {
       { type: 'day', value: '31' },
       { type: 'literal', value: ', ' },
       { type: 'year', value: '2023' },
-    ]
-
-    const pd = PlainDateFns.create(2023, 12, 31)
-    const t0 = performance.now()
-    const p0 = PlainDateFns.toLocaleStringParts(pd, formatLocale, formatOptions)
-    const t1 = performance.now()
-    const p1 = PlainDateFns.toLocaleStringParts(pd, formatLocale, formatOptions)
-    const t2 = performance.now()
-
-    expect(p0).toEqual(output)
-    expect(p1).toEqual(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    ])
   })
 })
 
 describe('rangeToLocaleString', () => {
-  it('is faster on repeated calls', () => {
-    const formatLocale = 'en'
-    const formatOptions = { dateStyle: 'full' as const }
-    const output = 'Sunday, December 31, 2023 – Monday, January 1, 2024'
-
+  it('works', () => {
+    const locale = 'en'
+    const options = { dateStyle: 'full' as const }
     const pd0 = PlainDateFns.create(2023, 12, 31)
     const pd1 = PlainDateFns.create(2024, 1, 1)
-    const t0 = performance.now()
-    const s0 = PlainDateFns.rangeToLocaleString(
-      pd0,
-      pd1,
-      formatLocale,
-      formatOptions,
+    const s = testHotCache(() =>
+      PlainDateFns.rangeToLocaleString(pd0, pd1, locale, options),
     )
-    const t1 = performance.now()
-    const s1 = PlainDateFns.rangeToLocaleString(
-      pd0,
-      pd1,
-      formatLocale,
-      formatOptions,
-    )
-    const t2 = performance.now()
-
-    expect(s0).toBe(output)
-    expect(s1).toBe(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    expect(s).toBe('Sunday, December 31, 2023 – Monday, January 1, 2024')
   })
 })
 
 describe('rangeToLocaleStringParts', () => {
-  it('is faster on repeated calls', () => {
-    const formatLocale = 'en'
-    const formatOptions = { dateStyle: 'full' as const }
-    const output = [
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
+    const pd0 = PlainDateFns.create(2023, 12, 31)
+    const pd1 = PlainDateFns.create(2024, 1, 1)
+    const parts = testHotCache(() =>
+      PlainDateFns.rangeToLocaleStringParts(pd0, pd1, locale, options),
+    )
+    expect(parts).toEqual([
       { source: 'startRange', type: 'weekday', value: 'Sunday' },
       { source: 'startRange', type: 'literal', value: ', ' },
       { source: 'startRange', type: 'month', value: 'December' },
@@ -498,31 +463,6 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'endRange', type: 'day', value: '1' },
       { source: 'endRange', type: 'literal', value: ', ' },
       { source: 'endRange', type: 'year', value: '2024' },
-    ]
-
-    const pd0 = PlainDateFns.create(2023, 12, 31)
-    const pd1 = PlainDateFns.create(2024, 1, 1)
-    const t0 = performance.now()
-    const p0 = PlainDateFns.rangeToLocaleStringParts(
-      pd0,
-      pd1,
-      formatLocale,
-      formatOptions,
-    )
-    const t1 = performance.now()
-    const p1 = PlainDateFns.rangeToLocaleStringParts(
-      pd0,
-      pd1,
-      formatLocale,
-      formatOptions,
-    )
-    const t2 = performance.now()
-
-    expect(p0).toEqual(output)
-    expect(p1).toEqual(output)
-
-    if (HOT_CACHE_FACTOR) {
-      expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
-    }
+    ])
   })
 })

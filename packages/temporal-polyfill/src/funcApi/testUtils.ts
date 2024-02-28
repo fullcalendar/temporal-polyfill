@@ -16,13 +16,6 @@ import * as PlainTimeFns from './plainTime'
 import * as PlainYearMonthFns from './plainYearMonth'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-// Repeated calls to toLocaleString/etc should be faster because the internal
-// Intl.DateTimeFormat is cached. However, these Vitest tests sometimes give
-// odd results. If tests are run with describe/it.only, then second run is
-// usually 0.1, but often there's no speedup when tests are run in parallel
-// and not in isolation. Disable for now.
-export const HOT_CACHE_FACTOR = 0 // 0.5
-
 // Current
 // -----------------------------------------------------------------------------
 
@@ -289,4 +282,28 @@ function expectEpochNanosSimilar(
   epochNano1: bigint,
 ): boolean {
   return Math.abs(Number(epochNano0 - epochNano1)) < 1000
+}
+
+// Cache
+// -----------------------------------------------------------------------------
+
+// Repeated calls to toLocaleString/etc should be faster because the internal
+// Intl.DateTimeFormat is cached. However, these Vitest tests sometimes give
+// odd results. If tests are run with describe/it.only, then second run is
+// usually 0.1, but often there's no speedup when tests are run in parallel
+// and not in isolation. Disable for now.
+const HOT_CACHE_FACTOR = 0 // 0.5
+
+export function testHotCache<R>(op: () => R): R {
+  if (HOT_CACHE_FACTOR) {
+    const t0 = performance.now()
+    const r0 = op()
+    const t1 = performance.now()
+    const r1 = op()
+    const t2 = performance.now()
+
+    expect(r0).toEqual(r1)
+    expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+  }
+  return op()
 }
