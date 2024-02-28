@@ -78,6 +78,27 @@ export const getFields = memoize(computeDateFields, WeakMap) as (
   slots: PlainDateSlots<string>,
 ) => DateFields
 
+export function withFields(
+  slots: PlainDateSlots<string>,
+  fields: DateBag,
+  options?: OverflowOptions,
+): PlainDateSlots<string> {
+  return plainDateWithFields(
+    createNativeDateModOps,
+    slots,
+    getFields(slots),
+    fields,
+    options,
+  )
+}
+
+export function withCalendar(
+  slots: PlainDateSlots<string>,
+  calendarId: string,
+): PlainDateSlots<string> {
+  return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
+}
+
 export const dayOfWeek = computeIsoDayOfWeek as (
   slots: PlainDateSlots<string>,
 ) => number
@@ -105,27 +126,6 @@ export const monthsInYear = computeMonthsInYear as (
 export const inLeapYear = computeInLeapYear as (
   slots: PlainDateSlots<string>,
 ) => boolean
-
-export function withFields(
-  slots: PlainDateSlots<string>,
-  fields: DateBag,
-  options?: OverflowOptions,
-): PlainDateSlots<string> {
-  return plainDateWithFields(
-    createNativeDateModOps,
-    slots,
-    getFields(slots),
-    fields,
-    options,
-  )
-}
-
-export function withCalendar(
-  slots: PlainDateSlots<string>,
-  calendarId: string,
-): PlainDateSlots<string> {
-  return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
-}
 
 export const add = bindArgs(movePlainDate<string>, createNativeMoveOps, false)
 export const subtract = bindArgs(

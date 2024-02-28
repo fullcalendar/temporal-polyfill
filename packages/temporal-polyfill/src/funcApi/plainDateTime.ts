@@ -176,13 +176,13 @@ export const since = bindArgs(
 )
 
 export const round = roundPlainDateTime<string>
+
 export const equals = plainDateTimesEqual<string>
+
 export const compare = compareIsoDateTimeFields as (
   plainDateTimeSlots0: PlainDateTimeSlots<string>,
   plainDateTimeSlots1: PlainDateTimeSlots<string>,
 ) => NumberSign
-
-export const toString = formatPlainDateTimeIso<string>
 
 export const toZonedDateTime = bindArgs(
   plainDateTimeToZonedDateTime<string, string>,
@@ -216,6 +216,8 @@ export function toPlainMonthDay(
 export const toPlainTime = createPlainTimeSlots as (
   slots: PlainDateTimeSlots<string>,
 ) => PlainTimeSlots
+
+export const toString = formatPlainDateTimeIso<string>
 
 export function toLocaleString(
   slots: PlainDateTimeSlots<string>,

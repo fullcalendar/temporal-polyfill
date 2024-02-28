@@ -1,7 +1,11 @@
 import { expect } from 'vitest'
 import { bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
-import { IsoDateFields, IsoDateTimeFields } from '../internal/isoFields'
+import {
+  IsoDateFields,
+  IsoDateTimeFields,
+  IsoTimeFields,
+} from '../internal/isoFields'
 import { isoToEpochNano } from '../internal/timeMath'
 import { DurationBag, DurationSlots } from './duration'
 import * as InstantFns from './instant'
@@ -47,6 +51,15 @@ const isoDateDefaults = {
   isoYear: 0,
 }
 
+const isoTimeDefaults = {
+  isoHour: 0,
+  isoMicrosecond: 0,
+  isoMillisecond: 0,
+  isoMinute: 0,
+  isoNanosecond: 0,
+  isoSecond: 0,
+}
+
 const isoDateTimeDefaults = {
   isoDay: 0,
   isoHour: 0,
@@ -83,6 +96,11 @@ const plainDateTimeDefaults = {
   branding: 'PlainDateTime',
   calendar: 'iso8601',
   ...isoDateTimeDefaults,
+}
+
+const plainTimeDefaults = {
+  branding: 'PlainTime',
+  ...isoTimeDefaults,
 }
 
 const zonedDateTimeDefaults = {
@@ -160,6 +178,16 @@ export function expectZonedDateTimeEquals(
     ...zonedDateTimeDefaults,
     ...slots,
     epochNanoseconds: bigIntToBigNano(slots.epochNanoseconds),
+  })
+}
+
+export function expectPlainTimeEquals(
+  pt: PlainTimeFns.PlainTimeSlots,
+  slots: Partial<IsoTimeFields>,
+): void {
+  expectPropsEqualStrict(pt, {
+    ...plainTimeDefaults,
+    ...slots,
   })
 }
 

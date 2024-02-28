@@ -37,7 +37,7 @@ describe('fromString', () => {
 })
 
 describe('fromFields', () => {
-  it('works', () => {
+  it('works without options', () => {
     const pd = PlainDateFns.fromFields({
       calendar: 'hebrew',
       year: 5784,
