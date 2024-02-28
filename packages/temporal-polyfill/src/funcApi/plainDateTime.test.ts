@@ -9,6 +9,7 @@ import {
   expectPlainTimeEquals,
   expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
+  testHotCache,
 } from './testUtils'
 
 describe('create', () => {
@@ -437,5 +438,121 @@ describe('toString', () => {
       fractionalSecondDigits: 2,
     })
     expect(s).toBe('2024-02-27T12:30:00.00[u-ca=iso8601]')
+  })
+})
+
+describe('toLocaleString', () => {
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+      timeZone: 'America/New_York',
+    }
+    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const s = testHotCache(() =>
+      PlainDateTimeFns.toLocaleString(pdt, locale, options),
+    )
+    expect(s).toBe(
+      'Sunday, December 31, 2023 at 12:30:00 PM Eastern Standard Time',
+    )
+  })
+})
+
+describe('toLocaleStringParts', () => {
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+      timeZone: 'America/New_York',
+    }
+    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const parts = testHotCache(() =>
+      PlainDateTimeFns.toLocaleStringParts(pdt, locale, options),
+    )
+    expect(
+      // Hard to compare some weird whitespace characters
+      // Filter away whitespace-only parts
+      parts.filter((part) => part.value.trim()),
+    ).toEqual([
+      { type: 'weekday', value: 'Sunday' },
+      { type: 'literal', value: ', ' },
+      { type: 'month', value: 'December' },
+      { type: 'day', value: '31' },
+      { type: 'literal', value: ', ' },
+      { type: 'year', value: '2023' },
+      { type: 'literal', value: ' at ' },
+      { type: 'hour', value: '12' },
+      { type: 'literal', value: ':' },
+      { type: 'minute', value: '30' },
+      { type: 'literal', value: ':' },
+      { type: 'second', value: '00' },
+      { type: 'dayPeriod', value: 'PM' },
+      { type: 'timeZoneName', value: 'Eastern Standard Time' },
+    ])
+  })
+})
+
+describe('rangeToLocaleString', () => {
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+      timeZone: 'America/New_York',
+    }
+    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
+    const s = testHotCache(() =>
+      PlainDateTimeFns.rangeToLocaleString(pdt0, pdt1, locale, options),
+    )
+    expect(s).toBe(
+      'Sunday, December 31, 2023, 12:30:00 PM EST – 2:59:00 PM EST',
+    )
+  })
+})
+
+describe('rangeToLocaleStringParts', () => {
+  it('works', () => {
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+      timeZone: 'America/New_York',
+    }
+    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
+    const parts = testHotCache(() =>
+      PlainDateTimeFns.rangeToLocaleStringParts(pdt0, pdt1, locale, options),
+    )
+    expect(
+      // Hard to compare some weird whitespace characters
+      // Filter away whitespace-only parts
+      parts.filter((part) => part.value.trim()),
+    ).toEqual([
+      { source: 'shared', type: 'weekday', value: 'Sunday' },
+      { source: 'shared', type: 'literal', value: ', ' },
+      { source: 'shared', type: 'month', value: 'December' },
+      { source: 'shared', type: 'day', value: '31' },
+      { source: 'shared', type: 'literal', value: ', ' },
+      { source: 'shared', type: 'year', value: '2023' },
+      { source: 'shared', type: 'literal', value: ', ' },
+      { source: 'startRange', type: 'hour', value: '12' },
+      { source: 'startRange', type: 'literal', value: ':' },
+      { source: 'startRange', type: 'minute', value: '30' },
+      { source: 'startRange', type: 'literal', value: ':' },
+      { source: 'startRange', type: 'second', value: '00' },
+      { source: 'startRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'startRange', type: 'timeZoneName', value: 'EST' },
+      { source: 'shared', type: 'literal', value: ' – ' },
+      { source: 'endRange', type: 'hour', value: '2' },
+      { source: 'endRange', type: 'literal', value: ':' },
+      { source: 'endRange', type: 'minute', value: '59' },
+      { source: 'endRange', type: 'literal', value: ':' },
+      { source: 'endRange', type: 'second', value: '00' },
+      { source: 'endRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'endRange', type: 'timeZoneName', value: 'EST' },
+    ])
   })
 })
