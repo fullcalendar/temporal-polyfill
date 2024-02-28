@@ -200,12 +200,12 @@ describe('toZonedDateTime', () => {
 
 describe('toLocaleString', () => {
   it('works', () => {
+    const inst = InstantFns.create(1704063600000000000n)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const inst = InstantFns.create(1704063600000000000n)
     const s = testHotCache(() =>
       InstantFns.toLocaleString(inst, locale, options),
     )
@@ -215,12 +215,12 @@ describe('toLocaleString', () => {
 
 describe('toLocaleStringParts', () => {
   it('works', () => {
+    const inst = InstantFns.create(1704063600000000000n)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const inst = InstantFns.create(1704063600000000000n)
     const parts = testHotCache(() =>
       InstantFns.toLocaleStringParts(inst, locale, options),
     )
@@ -238,15 +238,15 @@ describe('toLocaleStringParts', () => {
 
 describe('rangeToLocaleString', () => {
   it('works', () => {
-    const formatLocale = 'en'
-    const formatOptions = {
+    const inst0 = InstantFns.create(1704063600000000000n)
+    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
+    const locale = 'en'
+    const options = {
       dateStyle: 'full' as const,
       timeZone: 'America/New_York',
     }
-    const inst0 = InstantFns.create(1704063600000000000n)
-    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
     const s = testHotCache(() =>
-      InstantFns.rangeToLocaleString(inst0, inst1, formatLocale, formatOptions),
+      InstantFns.rangeToLocaleString(inst0, inst1, locale, options),
     )
     expect(s).toBe('Sunday, December 31, 2023 – Monday, January 1, 2024')
   })
@@ -254,20 +254,15 @@ describe('rangeToLocaleString', () => {
 
 describe('rangeToLocaleStringParts', () => {
   it('works', () => {
-    const formatLocale = 'en'
-    const formatOptions = {
+    const inst0 = InstantFns.create(1704063600000000000n)
+    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
+    const locale = 'en'
+    const options = {
       dateStyle: 'full' as const,
       timeZone: 'America/New_York',
     }
-    const inst0 = InstantFns.create(1704063600000000000n)
-    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
     const parts = testHotCache(() =>
-      InstantFns.rangeToLocaleStringParts(
-        inst0,
-        inst1,
-        formatLocale,
-        formatOptions,
-      ),
+      InstantFns.rangeToLocaleStringParts(inst0, inst1, locale, options),
     )
     expect(parts).toEqual([
       { source: 'startRange', type: 'weekday', value: 'Sunday' },

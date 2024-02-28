@@ -392,12 +392,12 @@ describe('toString', () => {
 
 describe('toLocaleString', () => {
   it('works', () => {
+    const pd = PlainDateFns.create(2023, 12, 31)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const pd = PlainDateFns.create(2023, 12, 31)
     const s = testHotCache(() =>
       PlainDateFns.toLocaleString(pd, locale, options),
     )
@@ -407,9 +407,9 @@ describe('toLocaleString', () => {
 
 describe('toLocaleStringParts', () => {
   it('works', () => {
+    const pd = PlainDateFns.create(2023, 12, 31)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
-    const pd = PlainDateFns.create(2023, 12, 31)
     const parts = testHotCache(() =>
       PlainDateFns.toLocaleStringParts(pd, locale, options),
     )
@@ -427,10 +427,10 @@ describe('toLocaleStringParts', () => {
 
 describe('rangeToLocaleString', () => {
   it('works', () => {
-    const locale = 'en'
-    const options = { dateStyle: 'full' as const }
     const pd0 = PlainDateFns.create(2023, 12, 31)
     const pd1 = PlainDateFns.create(2024, 1, 1)
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
     const s = testHotCache(() =>
       PlainDateFns.rangeToLocaleString(pd0, pd1, locale, options),
     )
@@ -440,10 +440,10 @@ describe('rangeToLocaleString', () => {
 
 describe('rangeToLocaleStringParts', () => {
   it('works', () => {
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
     const pd0 = PlainDateFns.create(2023, 12, 31)
     const pd1 = PlainDateFns.create(2024, 1, 1)
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
     const parts = testHotCache(() =>
       PlainDateFns.rangeToLocaleStringParts(pd0, pd1, locale, options),
     )

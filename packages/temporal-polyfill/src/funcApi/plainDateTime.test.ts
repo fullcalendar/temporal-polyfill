@@ -443,13 +443,13 @@ describe('toString', () => {
 
 describe('toLocaleString', () => {
   it('works', () => {
+    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
     const s = testHotCache(() =>
       PlainDateTimeFns.toLocaleString(pdt, locale, options),
     )
@@ -461,13 +461,13 @@ describe('toLocaleString', () => {
 
 describe('toLocaleStringParts', () => {
   it('works', () => {
+    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
     const parts = testHotCache(() =>
       PlainDateTimeFns.toLocaleStringParts(pdt, locale, options),
     )
@@ -496,14 +496,14 @@ describe('toLocaleStringParts', () => {
 
 describe('rangeToLocaleString', () => {
   it('works', () => {
+    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
-    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
     const s = testHotCache(() =>
       PlainDateTimeFns.rangeToLocaleString(pdt0, pdt1, locale, options),
     )
@@ -515,14 +515,14 @@ describe('rangeToLocaleString', () => {
 
 describe('rangeToLocaleStringParts', () => {
   it('works', () => {
+    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: 'full',
       timeStyle: 'full',
       timeZone: 'America/New_York',
     }
-    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
-    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
     const parts = testHotCache(() =>
       PlainDateTimeFns.rangeToLocaleStringParts(pdt0, pdt1, locale, options),
     )
