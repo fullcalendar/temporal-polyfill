@@ -86,4 +86,4 @@ export const invalidSubstring = (substring: string) =>
 export const invalidFormatType = (branding: string) =>
   `Cannot format ${branding}`
 export const mismatchingFormatTypes = 'Mismatching types for formatting'
-export const forbiddenFormatTimeZone = 'Forbidden TimeZone'
+export const forbiddenFormatTimeZone = 'Cannot specify TimeZone'
