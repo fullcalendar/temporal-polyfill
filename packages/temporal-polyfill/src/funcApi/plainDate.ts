@@ -79,7 +79,7 @@ export function fromFields(
   )
 }
 
-export const getFields = createLazyGenerator(computeDateFields) as (
+export const getFields = createLazyGenerator(computeDateFields, WeakMap) as (
   slots: PlainDateSlots<string>,
 ) => DateFields
 

@@ -66,9 +66,10 @@ export function fromFields(
   )
 }
 
-export const getFields = createLazyGenerator(computeYearMonthFields) as (
-  slots: PlainYearMonthSlots<string>,
-) => YearMonthFields
+export const getFields = createLazyGenerator(
+  computeYearMonthFields,
+  WeakMap,
+) as (slots: PlainYearMonthSlots<string>) => YearMonthFields
 
 export const daysInMonth = computeDaysInMonth as (
   slots: PlainYearMonthSlots<string>,

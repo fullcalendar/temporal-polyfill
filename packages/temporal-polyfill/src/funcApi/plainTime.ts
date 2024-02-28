@@ -37,7 +37,7 @@ export const fromFields = refinePlainTimeBag
 
 export const fromString = parsePlainTime
 
-export const getFields = createLazyGenerator(isoTimeFieldsToCal) as (
+export const getFields = createLazyGenerator(isoTimeFieldsToCal, WeakMap) as (
   slots: PlainTimeSlots,
 ) => TimeFields
 

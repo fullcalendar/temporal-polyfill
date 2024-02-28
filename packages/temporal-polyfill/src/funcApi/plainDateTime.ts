@@ -88,6 +88,7 @@ export const getFields = createLazyGenerator(
       ...isoTimeFieldsToCal(slots),
     }
   },
+  WeakMap,
 )
 
 export const dayOfWeek = computeIsoDayOfWeek as (

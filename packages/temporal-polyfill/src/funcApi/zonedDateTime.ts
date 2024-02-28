@@ -128,6 +128,7 @@ export const getFields = createLazyGenerator(
       offset: offsetString,
     }
   },
+  WeakMap,
 )
 
 export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
