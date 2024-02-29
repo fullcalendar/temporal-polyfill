@@ -69,28 +69,27 @@ built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-day
 # (they police conflicting consecutive calls to dateUntil, but there's only 1 now)
 built-ins/Temporal/ZonedDateTime/prototype/since/date-and-time-durations-opposite-signs.js
 built-ins/Temporal/ZonedDateTime/prototype/until/date-and-time-durations-opposite-signs.js
-#NOTE: also see explicitly-disabled tests below in "CalendarRecord's dateAdd..."
 
 # SPEC-BUG
 # Ticket: TODO!
-# Test Branch: TODO!
-# NOTE: Best to report this after #2758 is merged. Too much feedback on top of feedback.
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-calendar-non-rel
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-calendar-non-rel
 #
 # CalendarRecord's dateAdd/(dateUntil?) methods are plucked but never used because
 # are (unit<=day && relativeTo:PlainDateTime) || (unit<day && relativeTo:ZonedDateTime)
 # Just don't pluck it.
-#
-built-ins/Temporal/Duration/prototype/add/order-of-operations.js
-built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
-built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/total/order-of-operations.js
-#built-ins/Temporal/Duration/compare/order-of-operations.js -- also elsewhere
-#NOTE: above test also have "Our onion-shell balancing algorithm..."
 
 # Combination of problems
 # Best to triage these after other PRs merged
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+built-ins/Temporal/Duration/compare/order-of-operations.js
+#
+# Why discrepancy between add/subtract
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+#built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
 
 # SPEC-BUG
 # Ticket: https://github.com/tc39/proposal-temporal/issues/2790
@@ -198,9 +197,13 @@ built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 ####################################################################################################
 
 # CALLING
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-more-calls-calendar-bag
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-more-calls-calendar-bag
+#
 # We pluck the CalendarRecord once for bag-refining and once for MarkerSystem
 # creation. Works out well with code reuse the ref impl does it in one pass.
 built-ins/Temporal/Duration/compare/order-of-operations.js
+#TODO: move this over
 
 # CALLING
 # In the spec, `AddDuration` adds dur0 y/m/w/d, then dur1 y/m/w/d, then combines and adds time parts.
