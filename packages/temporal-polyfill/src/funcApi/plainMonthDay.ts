@@ -74,8 +74,6 @@ export function withFields(
 
 export const equals = plainMonthDaysEqual<string>
 
-export const toString = formatPlainMonthDayIso<string>
-
 export function toPlainDate(
   plainMonthDaySlots: PlainMonthDaySlots<string>,
   bag: YearFields,
@@ -87,6 +85,8 @@ export function toPlainDate(
     bag,
   )
 }
+
+export const toString = formatPlainMonthDayIso<string>
 
 export function toLocaleString(
   slots: PlainMonthDaySlots<string>,

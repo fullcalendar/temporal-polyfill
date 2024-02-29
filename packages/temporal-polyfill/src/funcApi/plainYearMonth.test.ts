@@ -209,7 +209,6 @@ describe('toLocaleString', () => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
-      timeZone: 'America/New_York',
       calendar: 'iso8601', // required unfortunately
     }
     const s = testHotCache(() =>
@@ -226,7 +225,6 @@ describe('toLocaleStringParts', () => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
-      timeZone: 'America/New_York',
       calendar: 'iso8601', // required unfortunately
     }
     const parts = testHotCache(() =>
@@ -248,7 +246,6 @@ describe('rangeToLocaleString', () => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
-      timeZone: 'America/New_York',
       calendar: 'iso8601', // required unfortunately
     }
     const s = testHotCache(() =>
@@ -266,7 +263,6 @@ describe('rangeToLocaleStringParts', () => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
-      timeZone: 'America/New_York',
       calendar: 'iso8601', // required unfortunately
     }
     const parts = testHotCache(() =>

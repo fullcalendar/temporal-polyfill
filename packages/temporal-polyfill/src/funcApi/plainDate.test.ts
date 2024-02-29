@@ -394,10 +394,7 @@ describe('toLocaleString', () => {
   it('works', () => {
     const pd = PlainDateFns.create(2023, 12, 31)
     const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      dateStyle: 'full',
-      timeZone: 'America/New_York',
-    }
+    const options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
     const s = testHotCache(() =>
       PlainDateFns.toLocaleString(pd, locale, options),
     )
