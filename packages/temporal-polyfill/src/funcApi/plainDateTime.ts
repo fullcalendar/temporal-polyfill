@@ -140,7 +140,7 @@ export const withPlainDate = plainDateTimeWithPlainDate as (
 
 export const withPlainTime = plainDateTimeWithPlainTime as (
   plainDateTimeSlots: PlainDateTimeSlots<string>,
-  plainTimeSlots: PlainTimeSlots,
+  plainTimeSlots?: PlainTimeSlots,
 ) => PlainDateTimeSlots<string>
 
 export function withCalendar(

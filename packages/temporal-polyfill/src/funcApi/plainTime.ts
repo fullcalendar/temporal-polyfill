@@ -28,9 +28,9 @@ export type { PlainTimeSlots, TimeBag }
 
 export const create = constructPlainTimeSlots
 
-export const fromFields = refinePlainTimeBag
-
 export const fromString = parsePlainTime
+
+export const fromFields = refinePlainTimeBag
 
 export const getFields = memoize(isoTimeFieldsToCal, WeakMap) as (
   slots: PlainTimeSlots,
@@ -51,13 +51,14 @@ export const until = bindArgs(diffPlainTimes, false)
 export const since = bindArgs(diffPlainTimes, true)
 
 export const round = roundPlainTime
+
 export const equals = plainTimesEqual
 export const compare = compareIsoTimeFields as (
   slots0: PlainTimeSlots,
   slots1: PlainTimeSlots,
 ) => NumberSign
 
-export const toString = formatPlainTimeIso
+export const toPlainDateTime = plainTimeToPlainDateTime<string>
 
 export const toZonedDateTime = bindArgs(
   plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
@@ -66,7 +67,7 @@ export const toZonedDateTime = bindArgs(
   queryNativeTimeZone,
 )
 
-export const toPlainDateTime = plainTimeToPlainDateTime<string>
+export const toString = formatPlainTimeIso
 
 export function toLocaleString(
   slots: PlainTimeSlots,

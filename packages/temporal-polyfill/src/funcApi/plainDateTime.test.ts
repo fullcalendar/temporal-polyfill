@@ -144,7 +144,7 @@ describe('withPlainDate', () => {
 })
 
 describe('withPlainTime', () => {
-  it('works', () => {
+  it('works with a time argument', () => {
     const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
     const pt = PlainTimeFns.create(3) // 3:00
     const pdt1 = PlainDateTimeFns.withPlainTime(pdt0, pt)
@@ -153,6 +153,16 @@ describe('withPlainTime', () => {
       isoMonth: 1,
       isoDay: 1,
       isoHour: 3,
+    })
+  })
+
+  it('works without an argument', () => {
+    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
+    const pdt1 = PlainDateTimeFns.withPlainTime(pdt0)
+    expectPlainDateTimeEquals(pdt1, {
+      isoYear: 2024,
+      isoMonth: 1,
+      isoDay: 1,
     })
   })
 })
@@ -501,14 +511,11 @@ describe('toLocaleStringParts', () => {
     const parts = testHotCache(() =>
       PlainDateTimeFns.toLocaleStringParts(pdt, locale, options),
     )
-    expect(
-      // Hard to compare some weird whitespace characters
-      // Filter away whitespace-only parts
-      parts.filter((part) => part.value.trim()),
-    ).toEqual([
+    expect(parts).toEqual([
       { type: 'weekday', value: 'Sunday' },
       { type: 'literal', value: ', ' },
       { type: 'month', value: 'December' },
+      { type: 'literal', value: ' ' },
       { type: 'day', value: '31' },
       { type: 'literal', value: ', ' },
       { type: 'year', value: '2023' },
@@ -518,7 +525,9 @@ describe('toLocaleStringParts', () => {
       { type: 'minute', value: '30' },
       { type: 'literal', value: ':' },
       { type: 'second', value: '00' },
+      { type: 'literal', value: ' ' },
       { type: 'dayPeriod', value: 'PM' },
+      { type: 'literal', value: ' ' },
       { type: 'timeZoneName', value: 'Eastern Standard Time' },
     ])
   })
@@ -556,14 +565,11 @@ describe('rangeToLocaleStringParts', () => {
     const parts = testHotCache(() =>
       PlainDateTimeFns.rangeToLocaleStringParts(pdt0, pdt1, locale, options),
     )
-    expect(
-      // Hard to compare some weird whitespace characters
-      // Filter away whitespace-only parts
-      parts.filter((part) => part.value.trim()),
-    ).toEqual([
+    expect(parts).toEqual([
       { source: 'shared', type: 'weekday', value: 'Sunday' },
       { source: 'shared', type: 'literal', value: ', ' },
       { source: 'shared', type: 'month', value: 'December' },
+      { source: 'shared', type: 'literal', value: ' ' },
       { source: 'shared', type: 'day', value: '31' },
       { source: 'shared', type: 'literal', value: ', ' },
       { source: 'shared', type: 'year', value: '2023' },
@@ -573,7 +579,9 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'startRange', type: 'minute', value: '30' },
       { source: 'startRange', type: 'literal', value: ':' },
       { source: 'startRange', type: 'second', value: '00' },
+      { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'timeZoneName', value: 'EST' },
       { source: 'shared', type: 'literal', value: ' – ' },
       { source: 'endRange', type: 'hour', value: '2' },
@@ -581,7 +589,9 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'endRange', type: 'minute', value: '59' },
       { source: 'endRange', type: 'literal', value: ':' },
       { source: 'endRange', type: 'second', value: '00' },
+      { source: 'endRange', type: 'literal', value: ' ' },
       { source: 'endRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'endRange', type: 'literal', value: ' ' },
       { source: 'endRange', type: 'timeZoneName', value: 'EST' },
     ])
   })

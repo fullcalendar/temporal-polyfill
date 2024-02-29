@@ -238,7 +238,7 @@ describe('withPlainDate', () => {
 })
 
 describe('withPlainTime', () => {
-  it('works', () => {
+  it('works with a time argument', () => {
     const zdt0 = ZonedDateTimeFns.create(
       1709055000000000000n,
       'America/New_York',
@@ -262,9 +262,31 @@ describe('withPlainTime', () => {
       offset: '-05:00',
     })
   })
-})
 
-// ---
+  it('works with a time argument', () => {
+    const zdt0 = ZonedDateTimeFns.create(
+      1709055000000000000n,
+      'America/New_York',
+    )
+    const zdt1 = ZonedDateTimeFns.withPlainTime(zdt0)
+    const combinedFields = ZonedDateTimeFns.getFields(zdt1)
+    expect(combinedFields).toEqual({
+      era: undefined,
+      eraYear: undefined,
+      year: 2024,
+      monthCode: 'M02',
+      month: 2,
+      day: 27,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      microsecond: 0,
+      millisecond: 0,
+      nanosecond: 0,
+      offset: '-05:00',
+    })
+  })
+})
 
 describe('dayOfWeek', () => {
   it('works', () => {
@@ -687,14 +709,11 @@ describe('toLocaleStringParts', () => {
     const parts = testHotCache(() =>
       ZonedDateTimeFns.toLocaleStringParts(zdt, locale, options),
     )
-    expect(
-      // Hard to compare some weird whitespace characters
-      // Filter away whitespace-only parts
-      parts.filter((part) => part.value.trim()),
-    ).toEqual([
+    expect(parts).toEqual([
       { type: 'weekday', value: 'Sunday' },
       { type: 'literal', value: ', ' },
       { type: 'month', value: 'December' },
+      { type: 'literal', value: ' ' },
       { type: 'day', value: '31' },
       { type: 'literal', value: ', ' },
       { type: 'year', value: '2023' },
@@ -704,7 +723,9 @@ describe('toLocaleStringParts', () => {
       { type: 'minute', value: '30' },
       { type: 'literal', value: ':' },
       { type: 'second', value: '00' },
+      { type: 'literal', value: ' ' },
       { type: 'dayPeriod', value: 'PM' },
+      { type: 'literal', value: ' ' },
       { type: 'timeZoneName', value: 'Eastern Standard Time' },
     ])
   })
@@ -768,14 +789,11 @@ describe('rangeToLocaleStringParts', () => {
     const parts = testHotCache(() =>
       ZonedDateTimeFns.rangeToLocaleStringParts(zdt0, zdt1, locale, options),
     )
-    expect(
-      // Hard to compare some weird whitespace characters
-      // Filter away whitespace-only parts
-      parts.filter((part) => part.value.trim()),
-    ).toEqual([
+    expect(parts).toEqual([
       { source: 'shared', type: 'weekday', value: 'Sunday' },
       { source: 'shared', type: 'literal', value: ', ' },
       { source: 'shared', type: 'month', value: 'December' },
+      { source: 'shared', type: 'literal', value: ' ' },
       { source: 'shared', type: 'day', value: '31' },
       { source: 'shared', type: 'literal', value: ', ' },
       { source: 'shared', type: 'year', value: '2023' },
@@ -785,7 +803,9 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'startRange', type: 'minute', value: '30' },
       { source: 'startRange', type: 'literal', value: ':' },
       { source: 'startRange', type: 'second', value: '00' },
+      { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'timeZoneName', value: 'EST' },
       { source: 'shared', type: 'literal', value: ' – ' },
       { source: 'endRange', type: 'hour', value: '2' },
@@ -793,7 +813,9 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'endRange', type: 'minute', value: '59' },
       { source: 'endRange', type: 'literal', value: ':' },
       { source: 'endRange', type: 'second', value: '00' },
+      { source: 'endRange', type: 'literal', value: ' ' },
       { source: 'endRange', type: 'dayPeriod', value: 'PM' },
+      { source: 'endRange', type: 'literal', value: ' ' },
       { source: 'endRange', type: 'timeZoneName', value: 'EST' },
     ])
   })
