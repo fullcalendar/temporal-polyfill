@@ -70,19 +70,6 @@ export const getFields = memoize(computeYearMonthFields, WeakMap) as (
   slots: PlainYearMonthSlots<string>,
 ) => YearMonthFields
 
-export const daysInMonth = computeDaysInMonth as (
-  slots: PlainYearMonthSlots<string>,
-) => number
-export const daysInYear = computeDaysInYear as (
-  slots: PlainYearMonthSlots<string>,
-) => number
-export const monthsInYear = computeMonthsInYear as (
-  slots: PlainYearMonthSlots<string>,
-) => number
-export const inLeapYear = computeInLeapYear as (
-  slots: PlainYearMonthSlots<string>,
-) => boolean
-
 export function withFields(
   slots: PlainYearMonthSlots<string>,
   fields: YearMonthBag,
@@ -96,6 +83,19 @@ export function withFields(
     options,
   )
 }
+
+export const daysInMonth = computeDaysInMonth as (
+  slots: PlainYearMonthSlots<string>,
+) => number
+export const daysInYear = computeDaysInYear as (
+  slots: PlainYearMonthSlots<string>,
+) => number
+export const monthsInYear = computeMonthsInYear as (
+  slots: PlainYearMonthSlots<string>,
+) => number
+export const inLeapYear = computeInLeapYear as (
+  slots: PlainYearMonthSlots<string>,
+) => boolean
 
 export const add = bindArgs(
   movePlainYearMonth<string>,
@@ -125,20 +125,19 @@ export const compare = compareIsoDateFields as (
   slots1: PlainYearMonthSlots<string>,
 ) => NumberSign
 
-export const toString = formatPlainYearMonthIso<string>
-
 export function toPlainDate(
-  plainYearMonthSlots: PlainYearMonthSlots<string>,
-  plainYearMonthFields: YearMonthFields,
+  slots: PlainYearMonthSlots<string>,
   bag: { day: number },
 ): PlainDateSlots<string> {
   return plainYearMonthToPlainDate(
     createNativeDateModOps,
-    plainYearMonthSlots,
-    plainYearMonthFields,
+    slots,
+    getFields(slots),
     bag,
   )
 }
+
+export const toString = formatPlainYearMonthIso<string>
 
 export function toLocaleString(
   slots: PlainYearMonthSlots<string>,

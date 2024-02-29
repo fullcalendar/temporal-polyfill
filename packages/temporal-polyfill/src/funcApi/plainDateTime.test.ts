@@ -290,7 +290,7 @@ describe('subtract', () => {
 })
 
 describe('until', () => {
-  it('works with no options', () => {
+  it('works without options', () => {
     const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10)
     const pdt1 = PlainDateTimeFns.create(2024, 2, 27, 12)
     const d = PlainDateTimeFns.until(pdt0, pdt1)
@@ -314,7 +314,7 @@ describe('until', () => {
 })
 
 describe('since', () => {
-  it('works with no options', () => {
+  it('works without options', () => {
     const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10)
     const pdt1 = PlainDateTimeFns.create(2024, 2, 27, 12)
     const d = PlainDateTimeFns.since(pdt0, pdt1)

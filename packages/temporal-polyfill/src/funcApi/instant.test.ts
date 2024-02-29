@@ -122,7 +122,7 @@ describe('since', () => {
 })
 
 describe('round', () => {
-  it('works with no simple string unit', () => {
+  it('works without simple string unit', () => {
     const inst0 = InstantFns.fromString('2024-01-01T00:30:00+01:00')
     const inst1 = InstantFns.round(inst0, 'hour')
     expectInstantEquals(inst1, 1704067200000000000n)

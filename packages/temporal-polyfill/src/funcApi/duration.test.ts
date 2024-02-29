@@ -6,7 +6,7 @@ import { expectDurationEquals } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
-  it('called with no args', () => {
+  it('called without args', () => {
     const d = DurationFns.create()
     expectDurationEquals(d, {})
   })

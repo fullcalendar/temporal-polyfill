@@ -431,7 +431,7 @@ describe('subtract', () => {
 })
 
 describe('until', () => {
-  it('works with no options', () => {
+  it('works without options', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -463,7 +463,7 @@ describe('until', () => {
 })
 
 describe('since', () => {
-  it('works with no options', () => {
+  it('works without options', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )

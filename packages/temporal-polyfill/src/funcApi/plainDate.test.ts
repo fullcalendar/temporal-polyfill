@@ -224,7 +224,7 @@ describe('subtract', () => {
 })
 
 describe('until', () => {
-  it('works with no options', () => {
+  it('works without options', () => {
     const pd0 = PlainDateFns.create(2023, 1, 25)
     const pd1 = PlainDateFns.create(2024, 2, 27)
     const d = PlainDateFns.until(pd0, pd1)
@@ -246,7 +246,7 @@ describe('until', () => {
 })
 
 describe('since', () => {
-  it('works with no options', () => {
+  it('works without options', () => {
     const pd0 = PlainDateFns.create(2023, 1, 25)
     const pd1 = PlainDateFns.create(2024, 2, 27)
     const d = PlainDateFns.since(pd0, pd1)
@@ -329,7 +329,7 @@ describe('toZonedDateTime', () => {
 })
 
 describe('toPlainDateTime', () => {
-  it('works with no arg', () => {
+  it('works without arg', () => {
     const pd = PlainDateFns.create(2024, 2, 27, 'hebrew')
     const pdt = PlainDateFns.toPlainDateTime(pd)
     expectPlainDateTimeEquals(pdt, {
