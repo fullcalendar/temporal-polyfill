@@ -8,7 +8,6 @@ import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
 import { DurationFields } from '../internal/durationFields'
 import {
-  MarkerSlots,
   absDuration,
   addDurations,
   getDurationBlank,
@@ -18,12 +17,13 @@ import {
 import { DurationBag } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
-import { parseDuration, parseZonedOrPlainDateTime } from '../internal/isoParse'
+import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
 import {
   DurationRoundOptions,
   RelativeToOptions,
   TotalUnitOptionsWithRel,
 } from '../internal/optionsRefine'
+import { RelativeToSlots } from '../internal/relativeSystem'
 import {
   BrandingSlots,
   DurationBranding,
@@ -190,7 +190,7 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
 
 function refinePublicRelativeTo(
   relativeTo: ZonedDateTimeArg | PlainDateTimeArg | PlainDateArg | undefined,
-): MarkerSlots<CalendarSlot, TimeZoneSlot> | undefined {
+): RelativeToSlots<CalendarSlot, TimeZoneSlot> | undefined {
   if (relativeTo !== undefined) {
     if (isObjectLike(relativeTo)) {
       const slots = (getSlots(relativeTo) || {}) as Partial<BrandingSlots>
@@ -217,6 +217,6 @@ function refinePublicRelativeTo(
       return { ...res, calendar }
     }
 
-    return parseZonedOrPlainDateTime(relativeTo)
+    return parseRelativeToSlots(relativeTo)
   }
 }

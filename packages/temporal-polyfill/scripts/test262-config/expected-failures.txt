@@ -206,16 +206,9 @@ built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 # MISC NON-COMPLIANT ACCESS (slightly different algos for code size)
 ####################################################################################################
 
-# CALLING (TODO: FIX!)
-#
-# Duration::compare, two problems:
-# 1. Our marker system converts ZonedDateTime->PlainDateTime very frequently
-#    for calendar date-adding. The ref polyfill precomputes the PlainDateTime.
-# 2. We have "HACK" around plucking calendarOps in compareDurations.
-#    Not good for tree-shaking in func API.
-#
-# (also a mixture of #2789 and "CalendarRecord's dateAdd method is plucked")
-# (unique problems start happening line 260 onwards)
+# CALLING
+# We pluck the CalendarRecord once for bag-refining and once for MarkerSystem
+# creation. Works out well with code reuse The ref impl does it in one pass.
 built-ins/Temporal/Duration/compare/order-of-operations.js
 
 # CALLING

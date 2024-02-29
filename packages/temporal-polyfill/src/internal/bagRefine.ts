@@ -34,7 +34,7 @@ import {
   durationFieldNamesAlpha,
   durationFieldNamesAsc,
 } from './durationFields'
-import { MarkerSlotsNoCalendar, checkDurationUnits } from './durationMath'
+import { checkDurationUnits } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
   DateBag,
@@ -89,6 +89,7 @@ import {
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './optionsRefine'
+import { RelativeToSlotsNoCalendar } from './relativeSystem'
 import {
   DurationSlots,
   PlainDateSlots,
@@ -166,7 +167,7 @@ export function refineMaybeZonedDateTimeBag<C, TA, T>(
   getTimeZoneOps: (timeZoneArg: T) => TimeZoneOps,
   calendarOps: DateRefineOps<C>,
   bag: ZonedDateTimeBag<unknown, TA>,
-): MarkerSlotsNoCalendar<T> {
+): RelativeToSlotsNoCalendar<T> {
   const fields = refineCalendarFields(
     calendarOps,
     bag,

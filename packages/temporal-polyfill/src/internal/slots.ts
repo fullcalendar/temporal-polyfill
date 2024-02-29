@@ -144,35 +144,43 @@ export interface EpochSlots {
   epochNanoseconds: BigNano
 }
 
-export type DateSlots<C> = IsoDateFields & { calendar: C }
+export type DateSlots<C> = IsoDateFields & { calendar: C } // TODO: kill?
+export type DateTimeSlots<C> = IsoDateTimeFields & { calendar: C }
 export type ZonedEpochSlots<C, T> = EpochSlots & { timeZone: T; calendar: C }
 
 export type PlainDateSlots<C> = IsoDateFields & {
   calendar: C
   branding: typeof PlainDateBranding
 }
+
 export type PlainTimeSlots = IsoTimeFields & {
   branding: typeof PlainTimeBranding
 }
+
 export type PlainDateTimeSlots<C> = IsoDateTimeFields & {
   calendar: C
   branding: typeof PlainDateTimeBranding
 }
+
 export type ZonedDateTimeSlots<C, T> = ZonedEpochSlots<C, T> & {
   branding: typeof ZonedDateTimeBranding
 }
+
 export type PlainMonthDaySlots<C> = IsoDateFields & {
   calendar: C
   branding: typeof PlainMonthDayBranding
 }
+
 export type PlainYearMonthSlots<C> = IsoDateFields & {
   calendar: C
   branding: typeof PlainYearMonthBranding
 }
+
 export type DurationSlots = DurationFields & {
   branding: typeof DurationBranding
   sign: NumberSign // extra data
 }
+
 export type InstantSlots = {
   epochNanoseconds: BigNano
   branding: typeof InstantBranding

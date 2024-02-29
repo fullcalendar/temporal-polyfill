@@ -1,15 +1,16 @@
 import { compareBigNanos } from './bigNano'
 import { MoveOps } from './calendarOps'
 import { durationFieldNamesAsc } from './durationFields'
-import {
-  MarkerSlots,
-  MarkerSystem,
-  createMarkerSystem,
-  getLargestDurationUnit,
-} from './durationMath'
+import { getLargestDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import { moveRelativeMarker } from './move'
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
+import {
+  RelativeToSlots,
+  createRelativeSystem,
+  relativeMarkerToEpochNano,
+} from './relativeSystem'
 import {
   DurationSlots,
   IdLike,
@@ -53,7 +54,7 @@ export function compareZonedDateTimes<C, T>(
 }
 
 export function compareDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => MoveOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   durationSlots0: DurationSlots,
@@ -61,7 +62,7 @@ export function compareDurations<RA, C, T>(
   options?: RelativeToOptions<RA>,
 ): NumberSign {
   const normalOptions = normalizeOptions(options)
-  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
+  const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
   const largestUnit = Math.max(
     getLargestDurationUnit(durationSlots0),
     getLargestDurationUnit(durationSlots1),
@@ -76,7 +77,7 @@ export function compareDurations<RA, C, T>(
     largestUnit < Unit.Day ||
     (largestUnit === Unit.Day &&
       // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds))
+      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
   ) {
     return compareBigNanos(
       givenFieldsToBigNano(durationSlots0, Unit.Day, durationFieldNamesAsc),
@@ -84,19 +85,25 @@ export function compareDurations<RA, C, T>(
     )
   }
 
-  if (!markerSlots) {
+  if (!relativeToSlots) {
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, markerToEpochNano, moveMarker] = createMarkerSystem(
-    getCalendarOps as any, // any=HACK because don't need diffing
+  const [marker, calendarOps, timeZoneOps] = createRelativeSystem(
+    getCalendarOps,
     getTimeZoneOps,
-    markerSlots,
-  ) as MarkerSystem<any>
+    relativeToSlots,
+  )
 
   return compareBigNanos(
-    markerToEpochNano(moveMarker(marker, durationSlots0)),
-    markerToEpochNano(moveMarker(marker, durationSlots1)),
+    relativeMarkerToEpochNano(
+      moveRelativeMarker(durationSlots0, marker, calendarOps, timeZoneOps),
+      timeZoneOps,
+    ),
+    relativeMarkerToEpochNano(
+      moveRelativeMarker(durationSlots1, marker, calendarOps, timeZoneOps),
+      timeZoneOps,
+    ),
   )
 }
 

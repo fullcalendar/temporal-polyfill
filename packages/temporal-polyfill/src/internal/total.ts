@@ -6,69 +6,72 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import {
-  DiffMarkers,
-  MarkerSlots,
-  MarkerSystem,
-  MarkerToEpochNano,
-  MoveMarker,
   clearDurationFields,
   computeDurationSign,
-  createMarkerSystem,
   durationFieldsToBigNano,
   getLargestDurationUnit,
   spanDuration,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { moveRelativeMarker } from './move'
 import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
+import {
+  RelativeMarkerSlots,
+  RelativeToSlots,
+  createRelativeSystem,
+  relativeMarkerToEpochNano,
+} from './relativeSystem'
 import { DurationSlots } from './slots'
 import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
 export function totalDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   options: TotalUnitOptionsWithRel<RA> | UnitName,
 ): number {
   const durationLargestUnit = getLargestDurationUnit(slots)
-  const [totalUnit, markerSlots] = refineTotalOptions(options, refineRelativeTo)
+  const [totalUnit, relativeToSlots] = refineTotalOptions(
+    options,
+    refineRelativeTo,
+  )
   const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
 
   if (
     maxLargestUnit < Unit.Day ||
     (maxLargestUnit === Unit.Day &&
-      !(markerSlots && (markerSlots as any).epochNanoseconds)) // has uniform days?
+      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds)) // has uniform days?
   ) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
 
-  if (!markerSlots) {
+  if (!relativeToSlots) {
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const markerSystem = createMarkerSystem(
+  const relativeSystem = createRelativeSystem(
     getCalendarOps,
     getTimeZoneOps,
-    markerSlots,
-  ) as MarkerSystem<any>
+    relativeToSlots,
+  )
 
   return totalRelativeDuration(
-    ...spanDuration(slots, undefined, totalUnit, ...markerSystem),
+    ...spanDuration(slots, undefined, totalUnit, ...relativeSystem),
     totalUnit,
-    ...markerSystem,
+    ...relativeSystem,
   )
 }
 
-function totalRelativeDuration<M>(
+function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit,
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
-  _diffMarkers?: DiffMarkers<M>,
+  // RelativeSystem...
+  marker: RelativeMarkerSlots,
+  calendarOps: DiffOps,
+  timeZoneOps?: TimeZoneOps,
 ): number {
   const sign = computeDurationSign(durationFields)
 
@@ -76,10 +79,10 @@ function totalRelativeDuration<M>(
     clearDurationFields(durationFields, totalUnit - 1),
     totalUnit,
     sign,
-    // marker system...
+    // RelativeSystem...
     marker,
-    markerToEpochNano,
-    moveMarker,
+    calendarOps,
+    timeZoneOps,
   )
 
   const frac = computeEpochNanoFrac(epochNano0, epochNano1, endEpochNano)
@@ -100,23 +103,33 @@ export function totalBigNano(bigNano: BigNano, totalUnit: DayTimeUnit): number {
   return bigNanoToNumber(bigNano, unitNanoMap[totalUnit], true) // exact=true
 }
 
-export function clampRelativeDuration<M>(
+export function clampRelativeDuration(
   durationFields: DurationFields,
   clampUnit: Unit,
   clampDistance: number,
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
+  // RelativeSystem...
+  marker: RelativeMarkerSlots,
+  calendarOps: DiffOps,
+  timeZoneOps?: TimeZoneOps,
 ) {
   const clampDurationFields = {
     ...durationFieldDefaults,
     [durationFieldNamesAsc[clampUnit]]: clampDistance,
   }
-  const marker0 = moveMarker(marker, durationFields)
-  const marker1 = moveMarker(marker0, clampDurationFields)
-  const epochNano0 = markerToEpochNano(marker0)
-  const epochNano1 = markerToEpochNano(marker1)
+  const marker0 = moveRelativeMarker(
+    durationFields,
+    marker,
+    calendarOps,
+    timeZoneOps,
+  )
+  const marker1 = moveRelativeMarker(
+    clampDurationFields,
+    marker0,
+    calendarOps,
+    timeZoneOps,
+  )
+  const epochNano0 = relativeMarkerToEpochNano(marker0, timeZoneOps)
+  const epochNano1 = relativeMarkerToEpochNano(marker1, timeZoneOps)
   return [epochNano0, epochNano1]
 }
 

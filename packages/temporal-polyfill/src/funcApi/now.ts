@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import {
-  getCurrentEpochNanoseconds,
+  getCurrentEpochNano,
   getCurrentIsoDateTime,
   getCurrentTimeZoneId,
 } from '../internal/current'
@@ -22,7 +22,7 @@ import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 export const timeZoneId = getCurrentTimeZoneId
 
 export function instant(): InstantSlots {
-  return createInstantSlots(getCurrentEpochNanoseconds())
+  return createInstantSlots(getCurrentEpochNano())
 }
 
 export function zonedDateTime(
@@ -30,7 +30,7 @@ export function zonedDateTime(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): ZonedDateTimeSlots<string, string> {
   return createZonedDateTimeSlots(
-    getCurrentEpochNanoseconds(),
+    getCurrentEpochNano(),
     refineTimeZoneIdString(timeZoneId),
     refineCalendarIdString(calendarId),
   )
@@ -40,7 +40,7 @@ export function zonedDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): ZonedDateTimeSlots<string, string> {
   return createZonedDateTimeSlots(
-    getCurrentEpochNanoseconds(),
+    getCurrentEpochNano(),
     refineTimeZoneIdString(timeZoneId),
     isoCalendarId,
   )

@@ -57,14 +57,6 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 // ISO <-> Epoch conversions (on passed-in instances)
 // -----------------------------------------------------------------------------
 
-export function zonedEpochNanoToIso(
-  timeZoneOps: TimeZoneOffsetOps,
-  epochNano: BigNano,
-): IsoDateTimeFields {
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
-  return epochNanoToIso(epochNano, offsetNano)
-}
-
 export const zonedEpochSlotsToIso = memoize(
   _zonedEpochSlotsToIso,
   WeakMap,

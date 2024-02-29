@@ -29,6 +29,7 @@ import {
 } from './isoFields'
 import { isoMonthsInYear } from './isoMath'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
+import { RelativeMarkerSlots } from './relativeSystem'
 import {
   DurationSlots,
   InstantSlots,
@@ -37,6 +38,7 @@ import {
   PlainTimeSlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
+  ZonedEpochSlots,
   createInstantSlots,
   createPlainDateSlots,
   createPlainDateTimeSlots,
@@ -55,7 +57,7 @@ import {
 import {
   TimeZoneOps,
   getSingleInstantFor,
-  zonedEpochNanoToIso,
+  zonedEpochSlotsToIso,
 } from './timeZoneOps'
 import { Unit, givenFieldsToBigNano, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
@@ -84,14 +86,13 @@ export function moveZonedDateTime<C, T>(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots<C, T> {
-  // correct calling order. switch moveZonedEpochNano arg order?
   const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
   const calendarOps = getCalendarOps(zonedDateTimeSlots.calendar)
 
-  const movedEpochNanoseconds = moveZonedEpochNano(
+  const movedEpochNanoseconds = moveZonedEpochSlots(
     calendarOps,
     timeZoneOps,
-    zonedDateTimeSlots.epochNanoseconds,
+    zonedDateTimeSlots,
     doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     options,
   )
@@ -189,6 +190,25 @@ export function movePlainTime(
   )
 }
 
+export function moveRelativeMarker(
+  durationFields: DurationFields,
+  // RelativeSystem...
+  slots: RelativeMarkerSlots,
+  calendarOps: MoveOps,
+  timeZoneOps?: TimeZoneOps,
+): RelativeMarkerSlots {
+  if (timeZoneOps) {
+    const epochNanoseconds = moveZonedEpochSlots(
+      calendarOps,
+      timeZoneOps,
+      slots as ZonedEpochSlots<unknown, unknown>,
+      durationFields,
+    )
+    return { epochNanoseconds } as ZonedEpochSlots<unknown, unknown>
+  }
+  return moveDateTime(calendarOps, slots as IsoDateTimeFields, durationFields)
+}
+
 // Low-Level
 // -----------------------------------------------------------------------------
 
@@ -201,20 +221,24 @@ function moveEpochNano(
   )
 }
 
-export function moveZonedEpochNano(
+/*
+timeZoneOps must be derived from zonedEpochSlots.timeZone
+*/
+export function moveZonedEpochSlots(
   calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps,
-  epochNano: BigNano,
+  slots: ZonedEpochSlots<unknown, unknown>,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): BigNano {
   const timeOnlyNano = durationFieldsToBigNano(durationFields, Unit.Hour)
+  let epochNano = slots.epochNanoseconds
 
   if (!durationHasDateParts(durationFields)) {
     epochNano = addBigNanos(epochNano, timeOnlyNano)
     refineOverflowOptions(options) // for validation only
   } else {
-    const isoDateTimeFields = zonedEpochNanoToIso(timeZoneOps, epochNano)
+    const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneOps)
     const movedIsoDateFields = moveDateEfficient(
       calendarOps,
       isoDateTimeFields,

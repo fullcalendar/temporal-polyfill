@@ -1,6 +1,6 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import {
-  getCurrentEpochNanoseconds,
+  getCurrentEpochNano,
   getCurrentIsoDateTime,
   getCurrentTimeZoneId,
 } from '../internal/current'
@@ -34,7 +34,7 @@ export const Now = Object.defineProperties(
       },
 
       instant(): Instant {
-        return createInstant(createInstantSlots(getCurrentEpochNanoseconds()))
+        return createInstant(createInstantSlots(getCurrentEpochNano()))
       },
 
       zonedDateTime(
@@ -43,7 +43,7 @@ export const Now = Object.defineProperties(
       ): ZonedDateTime {
         return createZonedDateTime(
           createZonedDateTimeSlots(
-            getCurrentEpochNanoseconds(),
+            getCurrentEpochNano(),
             refineTimeZoneSlot(timeZone),
             refineCalendarSlot(calendar),
           ),
@@ -55,7 +55,7 @@ export const Now = Object.defineProperties(
       ): ZonedDateTime {
         return createZonedDateTime(
           createZonedDateTimeSlots(
-            getCurrentEpochNanoseconds(),
+            getCurrentEpochNano(),
             refineTimeZoneSlot(timeZone),
             isoCalendarId,
           ),

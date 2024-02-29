@@ -19,6 +19,7 @@ import {
 import { moveToMonthStart } from './move'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
+import { RelativeToSlots } from './relativeSystem'
 import {
   DateSlots,
   DurationSlots,
@@ -29,7 +30,6 @@ import {
   PlainTimeSlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
-  ZonedEpochSlots,
   createDurationSlots,
   createInstantSlots,
   createPlainDateSlots,
@@ -97,9 +97,9 @@ export function parseInstant(s: string): InstantSlots {
   return createInstantSlots(epochNanoseconds)
 }
 
-export function parseZonedOrPlainDateTime(
+export function parseRelativeToSlots(
   s: string,
-): DateSlots<string> | ZonedEpochSlots<string, string> {
+): RelativeToSlots<string, string> {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized) {

@@ -1,6 +1,6 @@
 import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
 import { DiffOps } from './calendarOps'
-import { diffDateTimesExact, diffZonedEpochNanoExact } from './diff'
+import { diffRelativeMarkers } from './diff'
 import {
   DurationFields,
   DurationTimeFields,
@@ -10,12 +10,7 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
-import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  isoTimeFieldDefaults,
-} from './isoFields'
-import { moveDateTime, moveZonedEpochNano } from './move'
+import { moveRelativeMarker } from './move'
 import { Overflow } from './options'
 import {
   DurationRoundOptions,
@@ -23,9 +18,14 @@ import {
   normalizeOptions,
   refineDurationRoundOptions,
 } from './optionsRefine'
+import {
+  RelativeMarkerSlots,
+  RelativeToSlots,
+  createRelativeSystem,
+  relativeMarkerToEpochNano,
+} from './relativeSystem'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { DurationSlots, createDurationSlots } from './slots'
-import { isoToEpochNano } from './timeMath'
 import { TimeZoneOps } from './timeZoneOps'
 import {
   DayTimeUnit,
@@ -37,100 +37,54 @@ import {
   nanoToGivenFields,
   unitNanoMap,
 } from './units'
-import { NumberSign, bindArgs, clampEntity, identity } from './utils'
+import { NumberSign, clampEntity } from './utils'
 
 const maxCalendarUnit = 2 ** 32 - 1 // inclusive
-
-// Marker System
-// -----------------------------------------------------------------------------
-
-export type MarkerSlotsNoCalendar<T> =
-  | {
-      epochNanoseconds: BigNano
-      timeZone: T
-    }
-  | IsoDateTimeFields
-
-export type MarkerSlots<C, T> =
-  | { epochNanoseconds: BigNano; timeZone: T; calendar: C }
-  | (IsoDateFields & { calendar: C })
-
-export type MarkerToEpochNano<M> = (marker: M) => BigNano
-export type MoveMarker<M> = (marker: M, durationFields: DurationFields) => M
-export type DiffMarkers<M> = (
-  marker0: M,
-  marker1: M,
-  largeUnit: Unit,
-) => DurationFields
-export type MarkerSystem<M> = [
-  M,
-  MarkerToEpochNano<M>,
-  MoveMarker<M>,
-  DiffMarkers<M>,
-]
-
-export function createMarkerSystem<C, T>(
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  markerSlots: MarkerSlots<C, T>,
-): MarkerSystem<BigNano> | MarkerSystem<IsoDateTimeFields> {
-  const { calendar, timeZone, epochNanoseconds } = markerSlots as {
-    calendar: C
-    timeZone?: T
-    epochNanoseconds?: BigNano
-  }
-
-  const calendarOps = getCalendarOps(calendar)
-
-  if (epochNanoseconds) {
-    const timeZoneOps = getTimeZoneOps(timeZone!)
-
-    return [
-      epochNanoseconds,
-      identity as MarkerToEpochNano<BigNano>,
-      bindArgs(moveZonedEpochNano, calendarOps, timeZoneOps),
-      bindArgs(diffZonedEpochNanoExact, calendarOps, timeZoneOps),
-    ]
-  }
-
-  return [
-    { ...markerSlots, ...isoTimeFieldDefaults } as IsoDateTimeFields,
-    isoToEpochNano as MarkerToEpochNano<IsoDateTimeFields>,
-    bindArgs(moveDateTime, calendarOps),
-    bindArgs(diffDateTimesExact, calendarOps),
-  ]
-}
 
 /*
 Rebalances duration(s)
 */
-export function spanDuration<M>(
+export function spanDuration(
   durationFields0: DurationFields,
   durationFields1: DurationFields | undefined, // HACKy
   largestUnit: Unit, // TODO: more descrimination?
-  // marker system...
-  marker: M,
-  markerToEpochNano: MarkerToEpochNano<M>,
-  moveMarker: MoveMarker<M>,
-  diffMarkers: DiffMarkers<M>,
+  // RelativeSystem...
+  marker: RelativeMarkerSlots,
+  calendarOps: DiffOps,
+  timeZoneOps?: TimeZoneOps,
 ): [DurationFields, BigNano] {
-  let endMarker = moveMarker(marker, durationFields0)
+  let endMarker = moveRelativeMarker(
+    durationFields0,
+    marker,
+    calendarOps,
+    timeZoneOps,
+  )
 
-  // better way to do this?
   if (durationFields1) {
-    endMarker = moveMarker(endMarker, durationFields1)
+    endMarker = moveRelativeMarker(
+      durationFields1,
+      endMarker,
+      calendarOps,
+      timeZoneOps,
+    )
   }
 
-  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+  const balancedDuration = diffRelativeMarkers(
+    largestUnit,
+    marker,
+    endMarker,
+    calendarOps,
+    timeZoneOps,
+  )
 
-  return [balancedDuration, markerToEpochNano(endMarker)]
+  return [balancedDuration, relativeMarkerToEpochNano(endMarker, timeZoneOps)]
 }
 
 // Adding
 // -----------------------------------------------------------------------------
 
 export function addDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   doSubtract: boolean,
@@ -139,7 +93,7 @@ export function addDurations<RA, C, T>(
   options?: RelativeToOptions<RA>,
 ): DurationSlots {
   const normalOptions = normalizeOptions(options)
-  const markerSlots = refineRelativeTo(normalOptions.relativeTo)
+  const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
   const largestUnit = Math.max(
     getLargestDurationUnit(slots),
     getLargestDurationUnit(otherSlots),
@@ -149,7 +103,7 @@ export function addDurations<RA, C, T>(
     largestUnit < Unit.Day ||
     (largestUnit === Unit.Day &&
       // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds))
+      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
   ) {
     return createDurationSlots(
       checkDurationUnits(
@@ -163,7 +117,7 @@ export function addDurations<RA, C, T>(
     )
   }
 
-  if (!markerSlots) {
+  if (!relativeToSlots) {
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
@@ -171,14 +125,13 @@ export function addDurations<RA, C, T>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const markerSystem = createMarkerSystem(
-    getCalendarOps,
-    getTimeZoneOps,
-    markerSlots,
-  ) as MarkerSystem<any>
-
   return createDurationSlots(
-    spanDuration(slots, otherSlots, largestUnit, ...markerSystem)[0],
+    spanDuration(
+      slots,
+      otherSlots,
+      largestUnit,
+      ...createRelativeSystem(getCalendarOps, getTimeZoneOps, relativeToSlots),
+    )[0],
   )
 }
 
@@ -202,19 +155,24 @@ function addDayTimeDurations(
   }
 }
 
-// Rounding (with marker system)
+// Rounding (with RelativeSystem)
 // -----------------------------------------------------------------------------
 
 export function roundDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => MarkerSlots<C, T> | undefined,
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
   options: DurationRoundOptions<RA>,
 ): DurationSlots {
   const durationLargestUnit = getLargestDurationUnit(slots)
-  const [largestUnit, smallestUnit, roundingInc, roundingMode, markerSlots] =
-    refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
+  const [
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+    relativeToSlots,
+  ] = refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
 
   const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
 
@@ -222,7 +180,7 @@ export function roundDuration<RA, C, T>(
     maxLargestUnit < Unit.Day ||
     (maxLargestUnit === Unit.Day &&
       // has uniform days?
-      !(markerSlots && (markerSlots as any).epochNanoseconds))
+      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
   ) {
     return createDurationSlots(
       checkDurationUnits(
@@ -237,15 +195,15 @@ export function roundDuration<RA, C, T>(
     )
   }
 
-  if (!markerSlots) {
+  if (!relativeToSlots) {
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const markerSystem = createMarkerSystem(
+  const relativeSystem = createRelativeSystem(
     getCalendarOps,
     getTimeZoneOps,
-    markerSlots,
-  ) as MarkerSystem<any>
+    relativeToSlots,
+  )
 
   let transplantedWeeks = 0
   if (slots.weeks && smallestUnit === Unit.Week) {
@@ -257,7 +215,7 @@ export function roundDuration<RA, C, T>(
     slots,
     undefined,
     largestUnit,
-    ...markerSystem,
+    ...relativeSystem,
   )
 
   const origSign = slots.sign
@@ -277,7 +235,7 @@ export function roundDuration<RA, C, T>(
       smallestUnit,
       roundingInc,
       roundingMode,
-      ...markerSystem,
+      ...relativeSystem,
     )
   }
 
