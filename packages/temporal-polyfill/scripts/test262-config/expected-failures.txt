@@ -10,29 +10,23 @@
 # "Dec 30th 1970 to Apr 30th 1973 is 27 months, 30 days, not 28 months" // typo! Dec 31st
 
 ####################################################################################################
-# TEST262 FORK NOTES
-####################################################################################################
-#
-# Fork: https://github.com/fullcalendar/test262
-# `main` is an integration of:
-#   - "Tests for correct intermediate value in ZonedDateTime difference/rounding"
-#     https://github.com/tc39/test262/pull/4012
-#     (for https://github.com/tc39/proposal-temporal/pull/2760)
-#   - https://github.com/fullcalendar/test262/tree/fewer-calls-offset-prefer-reject
-#   - https://github.com/fullcalendar/test262/tree/fewer-calls-rel-rounding
-#   - https://github.com/fullcalendar/test262/tree/fewer-calls-zdt-time-rounding
-
-####################################################################################################
 # SPEC BUGS
 ####################################################################################################
 
 # SPEC-BUG
+# PR: https://github.com/tc39/proposal-temporal/pull/2760 (ptomato)
+# Test PR: https://github.com/tc39/test262/pull/4012
+# Test Branch: https://github.com/ptomato/test262/tree/temporal-2760
+# Test Diff: https://github.com/tc39/test262/pull/4012/files
+#
+# "Tests for correct intermediate value in ZonedDateTime difference/rounding"
+
+# SPEC-BUG
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2742
+# PR: https://github.com/tc39/proposal-temporal/pull/2758 (ptomato)
+#
 # "Fix Duration rounding relative to ZonedDateTime"
 # (refactors Duration::round/total to be more DRY with since/until)
-# Reported: https://github.com/tc39/proposal-temporal/issues/2742
-# Bugfix PR: https://github.com/tc39/proposal-temporal/pull/2758
-#
-# The following will start passing once PR is merged...
 #
 built-ins/Temporal/Duration/prototype/round/dst-rounding-result.js
 built-ins/Temporal/Duration/prototype/total/dst-rounding-result.js
@@ -61,78 +55,75 @@ built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-day
 built-ins/Temporal/ZonedDateTime/prototype/since/normalized-time-duration-to-days-range-errors.js
 built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-days-range-errors.js
 
-# SPEC-BUG (TODO: create ticket)
+# SPEC-BUG
+# Ticket: TODO!
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rel-rounding
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rel-rounding
+#
 # Our onion-shell rounding algorithm results in fewer calls to dateAdd/dateUntil.
 # One likely reason: we short-circuit if the direction of rounding is not outward.
-#
 # Ref polyfill seems to retread a lot of ground:
 # RoundDuration + (BalanceTimeDuration/AdjustRoundedDurationDays) + BalanceDateDurationRelative
 #
-# Updates in tests
-# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-rel-rounding?expand=1
-###built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
-###built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
-###built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
-###built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
-###built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
-###built-ins/Temporal/Duration/prototype/round/calendar-dateuntil-called-with-singular-largestunit.js
-###built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateadd-called-with-options-undefined.js
-###built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateadd-called-with-options-undefined.js
-###built-ins/Temporal/Duration/prototype/round/dateuntil-field.js
-###built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
-###built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
-#
-# kill these tests
+# In addition to contents of Test Branch:
 # (they police conflicting consecutive calls to dateUntil, but there's only 1 now)
 built-ins/Temporal/ZonedDateTime/prototype/since/date-and-time-durations-opposite-signs.js
 built-ins/Temporal/ZonedDateTime/prototype/until/date-and-time-durations-opposite-signs.js
+#NOTE: also see explicitly-disabled tests below in "CalendarRecord's dateAdd..."
+
+# SPEC-BUG
+# Ticket: TODO!
+# Test Branch: TODO!
+# NOTE: Best to report this after #2758 is merged. Too much feedback on top of feedback.
+#
+# CalendarRecord's dateAdd/(dateUntil?) methods are plucked but never used because
+# are (unit<=day && relativeTo:PlainDateTime) || (unit<day && relativeTo:ZonedDateTime)
+# Just don't pluck it.
+#
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+#built-ins/Temporal/Duration/compare/order-of-operations.js -- also elsewhere
+#NOTE: above test also have "Our onion-shell balancing algorithm..."
 
 # Combination of problems
 # Best to triage these after other PRs merged
 built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
 
-# SPEC-BUG (TODO: create ticket)
-# Best to report this after #2758 is merged. Too much feedback on top of feedback.
+# SPEC-BUG
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2790
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-zdt-time-rounding (WIP!)
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-zdt-time-rounding
 #
-# CalendarRecord's dateAdd/(dateUntil?) methods are plucked but never used because
-# are (unit<=day && relativeTo:PlainDateTime) || (unit<day && relativeTo:ZonedDateTime)
-# Just don't pluck it.
-#
-# (may also be in combo with "Our onion-shell balancing algorithm...")
-built-ins/Temporal/Duration/prototype/add/order-of-operations.js
-built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
-built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/total/order-of-operations.js
-
-# SPEC-BUG (https://github.com/tc39/proposal-temporal/issues/2790)
 # It's not necessary to compute hours-in-day when rounding time parts.
 # (hours-in-day needs 2 extra getPossibleInstantsFor calls)
+# More importantly, results in a bug (see Ticket)
+#
+# In addition to contents of Test Branch:
 built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
 built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum-forward-offset-shift.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-out-of-range-forward-offset-shift.js
-#
-# Updated in tests (WIP)
-# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-zdt-time-rounding?expand=1
-###built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
 
-# SPEC-BUG (https://github.com/tc39/proposal-temporal/pull/2789)
+# SPEC-BUG
+# Ticket: https://github.com/tc39/proposal-temporal/pull/2789
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-offset-prefer-reject
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-offset-prefer-reject
+#
 # Instant disambiguation with refer/reject of multiple results from
 # getPossibleInstantsFor() can avoid a call to getOffsetNanosecondsFor
 # by deriving each candidate's offset by comparing it to the UTC-zoned y/m/d/etc
-#
-# Updated in tests
-# https://github.com/tc39/test262/compare/main...fullcalendar:test262:fewer-calls-offset-prefer-reject?expand=1
-###built-ins/Temporal/ZonedDateTime/from/order-of-operations.js
-###built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
-###built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
-###built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ambiguous-wall-clock-time.js
 
-# SPEC-BUG (https://github.com/tc39/proposal-temporal/issues/2788)
+# SPEC-BUG
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2788
+# Test Branch: TODO!
+#
 # A ZonedDateTime should only need to call its timeZone's getOffsetNanosecondsFor
 # once during its existence and then cache the resulting ISO values.
+#
 built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 
 # TODO: review and report our algorithms that are more efficient than ref polyfill
@@ -208,7 +199,7 @@ built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 # CALLING
 # We pluck the CalendarRecord once for bag-refining and once for MarkerSystem
-# creation. Works out well with code reuse The ref impl does it in one pass.
+# creation. Works out well with code reuse the ref impl does it in one pass.
 built-ins/Temporal/Duration/compare/order-of-operations.js
 
 # CALLING
@@ -225,6 +216,7 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # TODO: advocate for this change
 # Replaces lots of calls to Calendar::fields/dateFromFields for calls to Calendar::day
 # Huge difference. 39 vs 58 calls in subtract/order-of-operations.js
+# TODO: make a Branch
 #
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
