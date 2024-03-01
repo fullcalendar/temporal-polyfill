@@ -230,6 +230,11 @@ export function createFormatForPrep(
     options.timeZone = forcedTimeZoneId
   } else {
     options.timeZone = utcTimeZoneId
+
+    // ensure timeStyle doesn't display time zone
+    if (['full', 'long'].includes(options.timeStyle!)) {
+      options.timeStyle = 'medium'
+    }
   }
 
   return new RawDateTimeFormat(locales, options)

@@ -247,11 +247,7 @@ describe('rangeToLocaleString', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
     const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }
+    const options: Intl.DateTimeFormatOptions = { timeStyle: 'long' }
     const s = testHotCache(() =>
       PlainTimeFns.rangeToLocaleString(pt0, pt1, locale, options),
     )
@@ -264,11 +260,7 @@ describe('rangeToLocaleStringParts', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
     const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }
+    const options: Intl.DateTimeFormatOptions = { timeStyle: 'long' }
     const parts = testHotCache(() =>
       PlainTimeFns.rangeToLocaleStringParts(pt0, pt1, locale, options),
     )
