@@ -136,21 +136,18 @@ export function createDurationSlots(
 
 // -----------------------------------------------------------------------------
 
-export interface BrandingSlots {
-  branding: string
-}
+export type BrandingSlots = { branding: string }
 
-export interface EpochSlots {
-  epochNanoseconds: BigNano
-}
+export type EpochSlots = { epochNanoseconds: BigNano }
+export type EpochAndZoneSlots<T> = EpochSlots & { timeZone: T }
 
-export type DateSlots<C> = IsoDateFields & { calendar: C } // TODO: kill?
+export type DateSlots<C> = IsoDateFields & { calendar: C }
 export type DateTimeSlots<C> = IsoDateTimeFields & { calendar: C }
-export type ZonedEpochSlots<C, T> = EpochSlots & { timeZone: T; calendar: C }
+export type ZonedEpochSlots<C, T> = EpochAndZoneSlots<T> & { calendar: C }
 
 export type PlainDateSlots<C> = IsoDateFields & {
-  calendar: C
   branding: typeof PlainDateBranding
+  calendar: C
 }
 
 export type PlainTimeSlots = IsoTimeFields & {
@@ -158,8 +155,8 @@ export type PlainTimeSlots = IsoTimeFields & {
 }
 
 export type PlainDateTimeSlots<C> = IsoDateTimeFields & {
-  calendar: C
   branding: typeof PlainDateTimeBranding
+  calendar: C
 }
 
 export type ZonedDateTimeSlots<C, T> = ZonedEpochSlots<C, T> & {
@@ -167,13 +164,13 @@ export type ZonedDateTimeSlots<C, T> = ZonedEpochSlots<C, T> & {
 }
 
 export type PlainMonthDaySlots<C> = IsoDateFields & {
-  calendar: C
   branding: typeof PlainMonthDayBranding
+  calendar: C
 }
 
 export type PlainYearMonthSlots<C> = IsoDateFields & {
-  calendar: C
   branding: typeof PlainYearMonthBranding
+  calendar: C
 }
 
 export type DurationSlots = DurationFields & {
@@ -182,27 +179,31 @@ export type DurationSlots = DurationFields & {
 }
 
 export type InstantSlots = {
-  epochNanoseconds: BigNano
   branding: typeof InstantBranding
+  epochNanoseconds: BigNano
 }
 
 // Epoch Slot Getters
 // -----------------------------------------------------------------------------
 
-export function getEpochSeconds(slots: EpochSlots) {
+export function getEpochSec(slots: EpochSlots): number {
   return epochNanoToSec(slots.epochNanoseconds)
 }
 
-export function getEpochMilliseconds(slots: EpochSlots) {
+export function getEpochMilli(slots: EpochSlots): number {
   return epochNanoToMilli(slots.epochNanoseconds)
 }
 
-export function getEpochMicroseconds(slots: EpochSlots) {
+export function getEpochMicro(slots: EpochSlots): bigint {
   return epochNanoToMicro(slots.epochNanoseconds)
 }
 
-export function getEpochNanoseconds(slots: EpochSlots) {
+export function getEpochNano(slots: EpochSlots): bigint {
   return bigNanoToBigInt(slots.epochNanoseconds)
+}
+
+export function extractEpochNano(slots: EpochSlots): BigNano {
+  return slots.epochNanoseconds
 }
 
 // ID-like

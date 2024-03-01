@@ -4,7 +4,7 @@ import {
   IsoDateTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
-import { DateSlots, ZonedEpochSlots } from './slots'
+import { DateSlots, EpochAndZoneSlots, ZonedEpochSlots } from './slots'
 import { isoToEpochNano } from './timeMath'
 import { TimeZoneOps } from './timeZoneOps'
 
@@ -12,9 +12,7 @@ import { TimeZoneOps } from './timeZoneOps'
 export type RelativeToSlots<C, T> = DateSlots<C> | ZonedEpochSlots<C, T>
 
 // the "origin", returned from bag refining
-export type RelativeToSlotsNoCalendar<T> =
-  | IsoDateFields
-  | { epochNanoseconds: BigNano; timeZone: T }
+export type RelativeToSlotsNoCalendar<T> = IsoDateFields | EpochAndZoneSlots<T>
 
 // a date marker that's moved away from the "origin"
 export type RelativeMarkerSlots =

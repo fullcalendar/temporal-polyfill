@@ -17,10 +17,10 @@ import { roundInstant } from '../internal/round'
 import {
   InstantSlots,
   ZonedDateTimeSlots,
-  getEpochMicroseconds,
-  getEpochMilliseconds,
-  getEpochNanoseconds,
-  getEpochSeconds,
+  getEpochMicro,
+  getEpochMilli,
+  getEpochNano,
+  getEpochSec,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { bindArgs } from '../internal/utils'
@@ -38,16 +38,14 @@ export const fromEpochMilliseconds = epochMilliToInstant
 export const fromEpochMicroseconds = epochMicroToInstant
 export const fromEpochNanoseconds = epochNanoToInstant
 
-export const epochSeconds = getEpochSeconds as (slots: InstantSlots) => number
-export const epochMilliseconds = getEpochMilliseconds as (
+export const epochSeconds = getEpochSec as (slots: InstantSlots) => number
+export const epochMilliseconds = getEpochMilli as (
   slots: InstantSlots,
 ) => number
-export const epochMicroseconds = getEpochMicroseconds as (
+export const epochMicroseconds = getEpochMicro as (
   slots: InstantSlots,
 ) => bigint
-export const epochNanoseconds = getEpochNanoseconds as (
-  slots: InstantSlots,
-) => bigint
+export const epochNanoseconds = getEpochNano as (slots: InstantSlots) => bigint
 
 export const add = bindArgs(moveInstant, false)
 export const subtract = bindArgs(moveInstant, true)

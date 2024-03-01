@@ -41,10 +41,10 @@ import {
   PlainMonthDaySlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
-  getEpochMicroseconds,
-  getEpochMilliseconds,
-  getEpochNanoseconds,
-  getEpochSeconds,
+  getEpochMicro,
+  getEpochMilli,
+  getEpochNano,
+  getEpochSec,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
@@ -96,16 +96,16 @@ export function fromFields(
   )
 }
 
-export const epochSeconds = getEpochSeconds as (
+export const epochSeconds = getEpochSec as (
   slots: ZonedDateTimeSlots<string, string>,
 ) => number
-export const epochMilliseconds = getEpochMilliseconds as (
+export const epochMilliseconds = getEpochMilli as (
   slots: ZonedDateTimeSlots<string, string>,
 ) => number
-export const epochMicroseconds = getEpochMicroseconds as (
+export const epochMicroseconds = getEpochMicro as (
   slots: ZonedDateTimeSlots<string, string>,
 ) => bigint
-export const epochNanoseconds = getEpochNanoseconds as (
+export const epochNanoseconds = getEpochNano as (
   slots: ZonedDateTimeSlots<string, string>,
 ) => bigint
 

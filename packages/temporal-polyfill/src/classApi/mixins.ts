@@ -9,10 +9,10 @@ import {
   PlainMonthDayBranding,
   PlainYearMonthBranding,
   createPlainDateSlots,
-  getEpochMicroseconds,
-  getEpochMilliseconds,
-  getEpochNanoseconds,
-  getEpochSeconds,
+  getEpochMicro,
+  getEpochMilli,
+  getEpochNano,
+  getEpochSec,
   getId,
 } from '../internal/slots'
 import {
@@ -173,10 +173,10 @@ export const timeGetters = mapPropNames((_name, i) => {
 // -----------------------------------------------------------------------------
 
 export const epochGetters = {
-  epochSeconds: getEpochSeconds,
-  epochMilliseconds: getEpochMilliseconds,
-  epochMicroseconds: getEpochMicroseconds,
-  epochNanoseconds: getEpochNanoseconds,
+  epochSeconds: getEpochSec,
+  epochMilliseconds: getEpochMilli,
+  epochMicroseconds: getEpochMicro,
+  epochNanoseconds: getEpochNano,
 }
 
 // Misc

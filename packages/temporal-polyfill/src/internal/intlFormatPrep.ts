@@ -9,7 +9,13 @@ import {
   isoTimeFieldDefaults,
 } from './isoFields'
 import { isoEpochOriginYear } from './isoMath'
-import { IdLike, getId } from './slots'
+import {
+  EpochAndZoneSlots,
+  EpochSlots,
+  IdLike,
+  extractEpochNano,
+  getId,
+} from './slots'
 import { epochNanoToMilli } from './timeMath'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { getSingleInstantFor } from './timeZoneOps'
@@ -191,10 +197,6 @@ function isoTimeFieldsToEpochNano(
   })
 }
 
-function extractEpochNano(slots: BasicInstantSlots): BigNano {
-  return slots.epochNanoseconds
-}
-
 // Configs
 // -----------------------------------------------------------------------------
 
@@ -205,17 +207,10 @@ export type ClassFormatConfig<S> = [
   getForcedTimeZoneId?: (...slotsList: S[]) => string,
 ]
 
-type EpochNanoConverter<S> = (
+export type EpochNanoConverter<S> = (
   slots: S,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ) => BigNano
-
-// TODO: weird
-export type BasicInstantSlots = { epochNanoseconds: BigNano }
-export type BasicZonedDateTimeSlots = {
-  timeZone: IdLike
-  epochNanoseconds: BigNano
-}
 
 export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [
   transformYearMonthOptions,
@@ -239,16 +234,12 @@ export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
   transformTimeOptions,
   isoTimeFieldsToEpochNano,
 ]
-export const instantConfig: ClassFormatConfig<BasicInstantSlots> = [
+export const instantConfig: ClassFormatConfig<EpochSlots> = [
   transformEpochOptions,
   extractEpochNano,
 ]
-export const zonedDateTimeConfig: ClassFormatConfig<BasicZonedDateTimeSlots> = [
-  transformZonedEpochOptions,
-  extractEpochNano,
-  false,
-  getCommonTimeZoneId,
-]
+export const zonedDateTimeConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> =
+  [transformZonedEpochOptions, extractEpochNano, false, getCommonTimeZoneId]
 
 const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
 
