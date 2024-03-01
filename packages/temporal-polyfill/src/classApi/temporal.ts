@@ -3,7 +3,9 @@ import {
   createStringTagDescriptors,
 } from '../internal/utils'
 
-// public
+// put first. prevents circ dep in vitest for some reason
+import { ZonedDateTime } from './zonedDateTime'
+
 import { Calendar } from './calendar'
 import { Duration } from './duration'
 import { Instant } from './instant'
@@ -14,7 +16,6 @@ import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
 import { TimeZone } from './timeZone'
-import { ZonedDateTime } from './zonedDateTime'
 
 export const Temporal = Object.defineProperties(
   {},
