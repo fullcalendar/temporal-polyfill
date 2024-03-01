@@ -17,8 +17,7 @@ import { diffPlainYearMonth } from '../internal/diff'
 import { YearMonthBag, YearMonthFields } from '../internal/fields'
 import {
   createFormatPrepper,
-  isoDateFieldsToEpochNano,
-  transformYearMonthOptions,
+  plainYearMonthConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
@@ -148,7 +147,7 @@ export const toString = formatPlainYearMonthIso<string>
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  [transformYearMonthOptions, isoDateFieldsToEpochNano, true],
+  plainYearMonthConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

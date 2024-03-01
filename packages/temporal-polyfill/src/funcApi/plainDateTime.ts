@@ -25,8 +25,7 @@ import { diffPlainDateTimes } from '../internal/diff'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import {
   createFormatPrepper,
-  isoDateFieldsToEpochNano,
-  transformDateTimeOptions,
+  plainDateTimeConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
@@ -228,7 +227,7 @@ export const toString = formatPlainDateTimeIso<string>
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  [transformDateTimeOptions, isoDateFieldsToEpochNano],
+  plainDateTimeConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

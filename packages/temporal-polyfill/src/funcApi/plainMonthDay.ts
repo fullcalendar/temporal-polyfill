@@ -15,8 +15,7 @@ import { plainMonthDayToPlainDate } from '../internal/convert'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/fields'
 import {
   createFormatPrepper,
-  isoDateFieldsToEpochNano,
-  transformMonthDayOptions,
+  plainMonthDayConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainMonthDayIso } from '../internal/isoFormat'
@@ -97,7 +96,7 @@ export const toString = formatPlainMonthDayIso<string>
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  [transformMonthDayOptions, isoDateFieldsToEpochNano, true],
+  plainMonthDayConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

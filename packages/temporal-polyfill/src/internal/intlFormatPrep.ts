@@ -2,13 +2,7 @@ import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
-import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  IsoTimeFields,
-  isoTimeFieldDefaults,
-} from './isoFields'
-import { isoEpochOriginYear } from './isoMath'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
   EpochAndZoneSlots,
   EpochSlots,
@@ -16,9 +10,12 @@ import {
   extractEpochNano,
   getId,
 } from './slots'
-import { epochNanoToMilli } from './timeMath'
-import { queryNativeTimeZone } from './timeZoneNative'
-import { getSingleInstantFor } from './timeZoneOps'
+import {
+  epochNanoToMilli,
+  isoTimeFieldsToBigNano,
+  isoToEpochNano,
+} from './timeMath'
+import { utcTimeZoneId } from './timeZoneConfig'
 import { excludePropsByName, hasAnyPropsByName } from './utils'
 
 /*
@@ -135,69 +132,39 @@ function createOptionsTransformer(
   }
 }
 
-export const transformMonthDayOptions = createOptionsTransformer(
+const transformMonthDayOptions = createOptionsTransformer(
   monthDayStandardNames,
   monthDayFallbacks,
   monthDayExclusions,
 )
-export const transformYearMonthOptions = createOptionsTransformer(
+const transformYearMonthOptions = createOptionsTransformer(
   yearMonthStandardNames,
   yearMonthFallbacks,
   yearMonthExclusions,
 )
-export const transformDateOptions = createOptionsTransformer(
+const transformDateOptions = createOptionsTransformer(
   dateStandardNames,
   dateFallbacks,
   dateExclusions,
 )
-export const transformDateTimeOptions = createOptionsTransformer(
+const transformDateTimeOptions = createOptionsTransformer(
   dateTimeStandardNames,
   dateTimeFallbacks,
   timeZoneNameStrs,
 )
-export const transformTimeOptions = createOptionsTransformer(
+const transformTimeOptions = createOptionsTransformer(
   timeStandardNames,
   timeFallbacks,
   timeExclusions,
 )
-export const transformInstantOptions = createOptionsTransformer(
+const transformInstantOptions = createOptionsTransformer(
   dateTimeStandardNames,
   dateTimeFallbacks,
 )
-export const transformZonedOptions = createOptionsTransformer(
+const transformZonedOptions = createOptionsTransformer(
   zonedStandardNames,
   zonedFallbacks,
 )
-
-// Specific Epoch Nano Converters
-// -----------------------------------------------------------------------------
-
-export function isoDateFieldsToEpochNano(
-  isoFields: IsoDateTimeFields | IsoDateFields,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): BigNano {
-  const timeZoneNative = queryNativeTimeZone(resolvedOptions.timeZone)
-
-  return getSingleInstantFor(timeZoneNative, {
-    ...isoTimeFieldDefaults,
-    isoHour: 12, // for whole-day dates, will not dst-shift into prev/next day
-    ...isoFields,
-  })
-}
-
-export function isoTimeFieldsToEpochNano(
-  internals: IsoTimeFields,
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): BigNano {
-  const timeZoneNative = queryNativeTimeZone(resolvedOptions.timeZone)
-
-  return getSingleInstantFor(timeZoneNative, {
-    isoYear: isoEpochOriginYear,
-    isoMonth: 1,
-    isoDay: 1,
-    ...internals,
-  })
-}
 
 // Config Utils
 // -----------------------------------------------------------------------------
@@ -261,6 +228,8 @@ export function createFormatForPrep(
       throw new TypeError(errorMessages.forbiddenFormatTimeZone)
     }
     options.timeZone = forcedTimeZoneId
+  } else {
+    options.timeZone = utcTimeZoneId
   }
 
   return new RawDateTimeFormat(locales, options)
@@ -279,7 +248,33 @@ function getForcedCommonTimeZone(
 
 // Config Data
 // -----------------------------------------------------------------------------
-// Guaranteed to be the same across APIs
+
+export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [
+  transformYearMonthOptions,
+  isoToEpochNano as (isoFields: IsoDateFields) => BigNano,
+  true, // strictCalendarChecks
+]
+
+export const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [
+  transformMonthDayOptions,
+  isoToEpochNano as (isoFields: IsoDateFields) => BigNano,
+  true, // strictCalendarChecks
+]
+
+export const plainDateConfig: ClassFormatConfig<IsoDateFields> = [
+  transformDateOptions,
+  isoToEpochNano as (isoFields: IsoDateFields) => BigNano,
+]
+
+export const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
+  transformDateTimeOptions,
+  isoToEpochNano as (isoFields: IsoDateTimeFields) => BigNano,
+]
+
+export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
+  transformTimeOptions,
+  isoTimeFieldsToBigNano,
+]
 
 export const instantConfig: ClassFormatConfig<EpochSlots> = [
   transformInstantOptions,

@@ -13,8 +13,7 @@ import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
 import {
   createFormatPrepper,
-  isoTimeFieldsToEpochNano,
-  transformTimeOptions,
+  plainTimeConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../internal/isoFormat'
@@ -78,7 +77,7 @@ export const toString = formatPlainTimeIso
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  [transformTimeOptions, isoTimeFieldsToEpochNano],
+  plainTimeConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

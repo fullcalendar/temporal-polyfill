@@ -2,47 +2,13 @@ import {
   ClassFormatConfig,
   createFormatPrepper,
   instantConfig,
-  isoDateFieldsToEpochNano,
-  isoTimeFieldsToEpochNano,
-  transformDateOptions,
-  transformDateTimeOptions,
-  transformMonthDayOptions,
-  transformTimeOptions,
-  transformYearMonthOptions,
+  plainDateConfig,
+  plainDateTimeConfig,
+  plainMonthDayConfig,
+  plainTimeConfig,
+  plainYearMonthConfig,
   zonedDateTimeConfig,
 } from '../internal/intlFormatPrep'
-import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  IsoTimeFields,
-} from '../internal/isoFields'
-
-const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [
-  transformYearMonthOptions,
-  isoDateFieldsToEpochNano,
-  true, // strictCalendarChecks
-]
-
-const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [
-  transformMonthDayOptions,
-  isoDateFieldsToEpochNano,
-  true, // strictCalendarChecks
-]
-
-const plainDateConfig: ClassFormatConfig<IsoDateFields> = [
-  transformDateOptions,
-  isoDateFieldsToEpochNano,
-]
-
-const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
-  transformDateTimeOptions,
-  isoDateFieldsToEpochNano,
-]
-
-const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
-  transformTimeOptions,
-  isoTimeFieldsToEpochNano,
-]
 
 // For Intl.DateTimeFormat
 // -----------------------------------------------------------------------------

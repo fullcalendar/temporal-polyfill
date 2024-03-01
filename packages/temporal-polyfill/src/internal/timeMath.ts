@@ -109,7 +109,11 @@ export function checkEpochNanoInBounds(
 // -----------------------------------------------------------------------------
 
 export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
-  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[1]
+  return isoTimeFieldsToBigNano(isoTimeFields)[1]
+}
+
+export function isoTimeFieldsToBigNano(isoTimeFields: IsoTimeFields): BigNano {
+  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
