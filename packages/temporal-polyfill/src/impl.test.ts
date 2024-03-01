@@ -7,6 +7,33 @@ describe('Temporal.Duration', () => {
     const s = d.toLocaleString(d)
     expect(s).toBeTruthy()
   })
+
+  it('gives readable error message when no valid field', () => {
+    let error: TypeError | undefined
+
+    try {
+      const d = Temporal.Duration.from({ day: 5 })
+      expect(d).toBeTruthy() // won't reach
+    } catch (e: any) {
+      error = e
+    }
+
+    expect(error).toBeInstanceOf(TypeError)
+    expect(error!.toString()).toMatch(
+      [
+        'days',
+        'hours',
+        'microseconds',
+        'milliseconds',
+        'minutes',
+        'months',
+        'nanoseconds',
+        'seconds',
+        'weeks',
+        'years',
+      ].join(','),
+    )
+  })
 })
 
 describe('Intl.DateTimeFormat', () => {

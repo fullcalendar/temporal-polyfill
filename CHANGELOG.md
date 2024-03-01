@@ -1,6 +1,7 @@
 v0.2.3 (2024-02-29)
 -------------------
 
+- fix: more readable error message when no valid fields specified (#30)
 - fix: non-iso/gregory calendars dayOfYear/weekOfYear off-by-one
 - conformance to latest spec
   - yearOfWeek/weekOfYear should return undefined for non-iso/gregory calendars

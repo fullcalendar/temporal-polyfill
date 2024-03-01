@@ -595,7 +595,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
   } as DurationFields
 
   if (!hasAny) {
-    throw new RangeError(errorMessages.noValidFields)
+    throw new RangeError(errorMessages.noValidFields(durationFieldNamesAsc))
   }
 
   if (parseSign(parts[1]) < 0) {

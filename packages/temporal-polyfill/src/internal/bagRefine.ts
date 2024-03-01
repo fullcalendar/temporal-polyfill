@@ -421,7 +421,7 @@ function refineFields(
   // only check zero fields during .with() calls
   // for .from() calls, empty-bag-checking will happen within the CalendarImpl
   if (disallowEmpty && !anyMatching) {
-    throw new TypeError(errorMessages.noValidFields)
+    throw new TypeError(errorMessages.noValidFields(validFieldNames))
   }
 
   return res
