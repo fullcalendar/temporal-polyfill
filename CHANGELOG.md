@@ -1,3 +1,15 @@
+v0.2.3 (2024-02-29)
+-------------------
+
+- fix: non-iso/gregory calendars dayOfYear/weekOfYear off-by-one
+- conformance to latest spec
+  - yearOfWeek/weekOfYear should return undefined for non-iso/gregory calendars
+  - updates to since/until algorithm
+  - more validation of custom timeZones' returned instants
+  - more validation of Duration units, max values
+  - prevent legacy ICU time zone IDs
+  - don't normalize the islamicc calenadar name to islamic-civil
+
 v0.2.2 (2024-02-20)
 -------------------
 
