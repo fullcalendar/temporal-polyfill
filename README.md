@@ -3,7 +3,7 @@
 
 A lightweight polyfill for [Temporal](https://tc39.es/proposal-temporal/docs/), successor to the JavaScript `Date` object.
 
-Only 20.0 kB, with near-perfect [spec compliance](#spec-compliance).
+Only 20 kB, with near-perfect [spec compliance](#spec-compliance).
 
 
 ## Table of Contents
@@ -131,10 +131,10 @@ Compliance with the latest version of the Temporal spec (Nov 2023) is near-perfe
 
 The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) has:
 
-- 6811 *total* Temporal-related test files
-- 6138 *passed* by `temporal-polyfill`
+- 6968 *total* Temporal-related test files
+- 6327 *passed* by `temporal-polyfill`
 - 495 *skipped* due to superficial method descriptor non-compliance
-- 178 *skipped* due to other aforementioned intentional deviations
+- 146 *skipped* due to other aforementioned intentional deviations
 
 
 ## Browser Support

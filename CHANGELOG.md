@@ -1,4 +1,4 @@
-v0.2.3 (2024-02-29)
+v0.2.3 (2024-03-01)
 -------------------
 
 - fix: more readable error message when no valid fields specified (#30)
