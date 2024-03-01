@@ -41,7 +41,7 @@ console.log(Temporal.Now.zonedDateTimeISO().toString())
 Use a `<script>` tags with a CDN link:
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.2.2/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.2.3/global.min.js'></script>
 <script>
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
@@ -96,7 +96,7 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Spec date</td>
     <td>
-      Nov 2023
+      Mar 2024
     </td>
     <td>
       May 2023
