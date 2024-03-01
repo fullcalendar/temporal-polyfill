@@ -40,7 +40,7 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepPlainYearMonthFormat } from './intlDateTimeFormat'
+import { prepPlainYearMonthFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
   createCalendarFromSlots,

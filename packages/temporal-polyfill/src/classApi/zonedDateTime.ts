@@ -72,7 +72,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { Instant, createInstant } from './instant'
-import { prepZonedDateTimeFormat } from './intlDateTimeFormat'
+import { prepZonedDateTimeFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
   createCalendarFromSlots,

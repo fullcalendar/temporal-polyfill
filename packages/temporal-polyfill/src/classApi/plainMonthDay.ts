@@ -30,7 +30,7 @@ import {
   createMonthDayModOps,
   createMonthDayRefineOps,
 } from './calendarOpsQuery'
-import { prepPlainMonthDayFormat } from './intlDateTimeFormat'
+import { prepPlainMonthDayFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
   createCalendarFromSlots,

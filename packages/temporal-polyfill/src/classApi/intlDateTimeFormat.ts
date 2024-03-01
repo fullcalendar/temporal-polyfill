@@ -1,16 +1,8 @@
 import * as errorMessages from '../internal/errorMessages'
 import {
-  ClassFormatConfig,
   FormatPrepper,
   createFormatForPrep,
   createFormatPrepper,
-  instantConfig,
-  plainDateConfig,
-  plainDateTimeConfig,
-  plainMonthDayConfig,
-  plainTimeConfig,
-  plainYearMonthConfig,
-  zonedDateTimeConfig,
 } from '../internal/intlFormatPrep'
 import {
   LocalesArg,
@@ -21,6 +13,7 @@ import {
 import { BrandingSlots } from '../internal/slots'
 import { Classlike, memoize, pluckProps } from '../internal/utils'
 import { Instant } from './instant'
+import { classFormatConfigs } from './intlFormatConfig'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
@@ -29,7 +22,7 @@ import { PlainYearMonth } from './plainYearMonth'
 import { getSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
-type TemporalFormattable =
+export type TemporalFormattable =
   | Instant
   | PlainDate
   | PlainDateTime
@@ -108,19 +101,6 @@ function createProxiedMethod(methodName: string) {
   }
 }
 
-// Config
-// -----------------------------------------------------------------------------
-
-const classFormatConfigs: Record<string, ClassFormatConfig<any>> = {
-  PlainYearMonth: plainYearMonthConfig,
-  PlainMonthDay: plainMonthDayConfig,
-  PlainDate: plainDateConfig,
-  PlainDateTime: plainDateTimeConfig,
-  PlainTime: plainTimeConfig,
-  Instant: instantConfig,
-  // ZonedDateTime not allowed to be formatted by Intl.DateTimeFormat
-}
-
 // Internals
 // -----------------------------------------------------------------------------
 
@@ -190,16 +170,3 @@ function createFormatPrepperForBranding<S extends BrandingSlots>(
     memoize(createFormatForPrep),
   )
 }
-
-// Format Prepping for each class' toLocaleString
-// (best place for this?)
-// -----------------------------------------------------------------------------
-
-export const prepPlainYearMonthFormat =
-  createFormatPrepper(plainYearMonthConfig)
-export const prepPlainMonthDayFormat = createFormatPrepper(plainMonthDayConfig)
-export const prepPlainDateFormat = createFormatPrepper(plainDateConfig)
-export const prepPlainDateTimeFormat = createFormatPrepper(plainDateTimeConfig)
-export const prepPlainTimeFormat = createFormatPrepper(plainTimeConfig)
-export const prepInstantFormat = createFormatPrepper(instantConfig)
-export const prepZonedDateTimeFormat = createFormatPrepper(zonedDateTimeConfig)

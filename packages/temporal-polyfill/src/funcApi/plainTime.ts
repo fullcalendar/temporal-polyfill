@@ -11,6 +11,11 @@ import {
 } from '../internal/convert'
 import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
+import {
+  createFormatPrepper,
+  isoTimeFieldsToEpochNano,
+  transformTimeOptions,
+} from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
@@ -20,7 +25,7 @@ import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
-import { prepCachedPlainTimeFormat } from './intlFormatCache'
+import { createFormatCache } from './intlFormatCache'
 import { refineTimeZoneIdString } from './utils'
 
 // TODO: rename to keep scope? Slots/Fields/Bag?
@@ -69,16 +74,20 @@ export const toZonedDateTime = bindArgs(
 
 export const toString = formatPlainTimeIso
 
+// Intl Formatting
+// -----------------------------------------------------------------------------
+
+const prepFormat = createFormatPrepper(
+  [transformTimeOptions, isoTimeFieldsToEpochNano],
+  /*@__PURE__*/ createFormatCache(),
+)
+
 export function toLocaleString(
   slots: PlainTimeSlots,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedPlainTimeFormat(
-    locales,
-    options,
-    slots,
-  )
+  const [format, epochMilli] = prepFormat(locales, options, slots)
   return format.format(epochMilli)
 }
 
@@ -87,11 +96,7 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedPlainTimeFormat(
-    locales,
-    options,
-    slots,
-  )
+  const [format, epochMilli] = prepFormat(locales, options, slots)
   return format.formatToParts(epochMilli)
 }
 
@@ -101,7 +106,7 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(
+  const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     slots0,
@@ -116,7 +121,7 @@ export function rangeToLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainTimeFormat(
+  const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     slots0,

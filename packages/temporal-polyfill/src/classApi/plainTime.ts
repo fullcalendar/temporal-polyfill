@@ -43,7 +43,7 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepPlainTimeFormat } from './intlDateTimeFormat'
+import { prepPlainTimeFormat } from './intlFormatConfig'
 import { neverValueOf, removeBranding, timeGetters } from './mixins'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'

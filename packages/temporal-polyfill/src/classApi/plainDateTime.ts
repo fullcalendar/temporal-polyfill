@@ -71,7 +71,7 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepPlainDateTimeFormat } from './intlDateTimeFormat'
+import { prepPlainDateTimeFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
   createCalendarFromSlots,

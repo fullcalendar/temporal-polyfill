@@ -17,6 +17,11 @@ import {
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
 import { DateBag, DateFields } from '../internal/fields'
+import {
+  createFormatPrepper,
+  isoDateFieldsToEpochNano,
+  transformDateOptions,
+} from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
@@ -34,7 +39,7 @@ import {
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
-import { prepCachedPlainDateFormat } from './intlFormatCache'
+import { createFormatCache } from './intlFormatCache'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -190,16 +195,20 @@ export function toPlainMonthDay(
 
 export const toString = formatPlainDateIso<string>
 
+// Intl Formatting
+// -----------------------------------------------------------------------------
+
+const prepFormat = createFormatPrepper(
+  [transformDateOptions, isoDateFieldsToEpochNano],
+  /*@__PURE__*/ createFormatCache(),
+)
+
 export function toLocaleString(
   slots: PlainDateSlots<string>,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedPlainDateFormat(
-    locales,
-    options,
-    slots,
-  )
+  const [format, epochMilli] = prepFormat(locales, options, slots)
   return format.format(epochMilli)
 }
 
@@ -208,11 +217,7 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedPlainDateFormat(
-    locales,
-    options,
-    slots,
-  )
+  const [format, epochMilli] = prepFormat(locales, options, slots)
   return format.formatToParts(epochMilli)
 }
 
@@ -222,7 +227,7 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateFormat(
+  const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     slots0,
@@ -237,7 +242,7 @@ export function rangeToLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainDateFormat(
+  const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     slots0,

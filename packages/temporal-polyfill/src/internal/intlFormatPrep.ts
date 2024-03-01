@@ -135,36 +135,36 @@ function createOptionsTransformer(
   }
 }
 
-const transformMonthDayOptions = createOptionsTransformer(
+export const transformMonthDayOptions = createOptionsTransformer(
   monthDayStandardNames,
   monthDayFallbacks,
   monthDayExclusions,
 )
-const transformYearMonthOptions = createOptionsTransformer(
+export const transformYearMonthOptions = createOptionsTransformer(
   yearMonthStandardNames,
   yearMonthFallbacks,
   yearMonthExclusions,
 )
-const transformDateOptions = createOptionsTransformer(
+export const transformDateOptions = createOptionsTransformer(
   dateStandardNames,
   dateFallbacks,
   dateExclusions,
 )
-const transformDateTimeOptions = createOptionsTransformer(
+export const transformDateTimeOptions = createOptionsTransformer(
   dateTimeStandardNames,
   dateTimeFallbacks,
   timeZoneNameStrs,
 )
-const transformTimeOptions = createOptionsTransformer(
+export const transformTimeOptions = createOptionsTransformer(
   timeStandardNames,
   timeFallbacks,
   timeExclusions,
 )
-const transformInstantOptions = createOptionsTransformer(
+export const transformInstantOptions = createOptionsTransformer(
   dateTimeStandardNames,
   dateTimeFallbacks,
 )
-const transformZonedOptions = createOptionsTransformer(
+export const transformZonedOptions = createOptionsTransformer(
   zonedStandardNames,
   zonedFallbacks,
 )
@@ -172,7 +172,7 @@ const transformZonedOptions = createOptionsTransformer(
 // Specific Epoch Nano Converters
 // -----------------------------------------------------------------------------
 
-function isoDateFieldsToEpochNano(
+export function isoDateFieldsToEpochNano(
   isoFields: IsoDateTimeFields | IsoDateFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): BigNano {
@@ -185,7 +185,7 @@ function isoDateFieldsToEpochNano(
   })
 }
 
-function isoTimeFieldsToEpochNano(
+export function isoTimeFieldsToEpochNano(
   internals: IsoTimeFields,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ): BigNano {
@@ -199,7 +199,7 @@ function isoTimeFieldsToEpochNano(
   })
 }
 
-// Configs
+// Config Utils
 // -----------------------------------------------------------------------------
 
 export type ClassFormatConfig<S> = [
@@ -213,35 +213,6 @@ export type EpochNanoConverter<S> = (
   slots: S,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ) => BigNano
-
-export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [
-  transformYearMonthOptions,
-  isoDateFieldsToEpochNano,
-  true,
-]
-export const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [
-  transformMonthDayOptions,
-  isoDateFieldsToEpochNano,
-  true,
-]
-export const plainDateConfig: ClassFormatConfig<IsoDateFields> = [
-  transformDateOptions,
-  isoDateFieldsToEpochNano,
-]
-export const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
-  transformDateTimeOptions,
-  isoDateFieldsToEpochNano,
-]
-export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
-  transformTimeOptions,
-  isoTimeFieldsToEpochNano,
-]
-export const instantConfig: ClassFormatConfig<EpochSlots> = [
-  transformInstantOptions,
-  extractEpochNano,
-]
-export const zonedDateTimeConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> =
-  [transformZonedOptions, extractEpochNano, false, getCommonTimeZoneId]
 
 const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
 
@@ -295,6 +266,29 @@ export function createFormatForPrep(
   return new RawDateTimeFormat(locales, options)
 }
 
+function getForcedCommonTimeZone(
+  slots0?: { timeZone: IdLike }, // actually needed
+  slots1?: { timeZone: IdLike }, // optional!
+): string {
+  const timeZoneId = getId(slots0!.timeZone)
+  if (slots1 && getId(slots1.timeZone) !== timeZoneId) {
+    throw new RangeError(errorMessages.mismatchingTimeZones)
+  }
+  return timeZoneId
+}
+
+// Config Data
+// -----------------------------------------------------------------------------
+// Guaranteed to be the same across APIs
+
+export const instantConfig: ClassFormatConfig<EpochSlots> = [
+  transformInstantOptions,
+  extractEpochNano,
+]
+
+export const zonedDateTimeConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> =
+  [transformZonedOptions, extractEpochNano, false, getForcedCommonTimeZone]
+
 // General Epoch Conversion
 // -----------------------------------------------------------------------------
 
@@ -330,18 +324,4 @@ function checkCalendarsCompatible(
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
-}
-
-// -----------------------------------------------------------------------------
-
-// specifically for formatting... rename
-function getCommonTimeZoneId(
-  slots0?: { timeZone: IdLike }, // actually needed
-  slots1?: { timeZone: IdLike }, // optional!
-): string {
-  const timeZoneId = getId(slots0!.timeZone)
-  if (slots1 && getId(slots1.timeZone) !== timeZoneId) {
-    throw new RangeError(errorMessages.mismatchingTimeZones)
-  }
-  return timeZoneId
 }

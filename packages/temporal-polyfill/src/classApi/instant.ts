@@ -36,7 +36,7 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepInstantFormat } from './intlDateTimeFormat'
+import { prepInstantFormat } from './intlFormatConfig'
 import { epochGetters, neverValueOf } from './mixins'
 import { createSlotClass, getSlots } from './slotClass'
 import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'

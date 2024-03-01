@@ -15,6 +15,11 @@ import { constructPlainYearMonthSlots } from '../internal/construct'
 import { plainYearMonthToPlainDate } from '../internal/convert'
 import { diffPlainYearMonth } from '../internal/diff'
 import { YearMonthBag, YearMonthFields } from '../internal/fields'
+import {
+  createFormatPrepper,
+  isoDateFieldsToEpochNano,
+  transformYearMonthOptions,
+} from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
@@ -22,7 +27,7 @@ import { movePlainYearMonth } from '../internal/move'
 import { OverflowOptions } from '../internal/optionsRefine'
 import { PlainDateSlots, PlainYearMonthSlots } from '../internal/slots'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
-import { prepCachedPlainYearMonthFormat } from './intlFormatCache'
+import { createFormatCache } from './intlFormatCache'
 import {
   computeDaysInMonth,
   computeDaysInYear,
@@ -139,16 +144,20 @@ export function toPlainDate(
 
 export const toString = formatPlainYearMonthIso<string>
 
+// Intl Formatting
+// -----------------------------------------------------------------------------
+
+const prepFormat = createFormatPrepper(
+  [transformYearMonthOptions, isoDateFieldsToEpochNano, true],
+  /*@__PURE__*/ createFormatCache(),
+)
+
 export function toLocaleString(
   slots: PlainYearMonthSlots<string>,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepCachedPlainYearMonthFormat(
-    locales,
-    options,
-    slots,
-  )
+  const [format, epochMilli] = prepFormat(locales, options, slots)
   return format.format(epochMilli)
 }
 
@@ -157,11 +166,7 @@ export function toLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepCachedPlainYearMonthFormat(
-    locales,
-    options,
-    slots,
-  )
+  const [format, epochMilli] = prepFormat(locales, options, slots)
   return format.formatToParts(epochMilli)
 }
 
@@ -171,7 +176,7 @@ export function rangeToLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainYearMonthFormat(
+  const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     slots0,
@@ -186,7 +191,7 @@ export function rangeToLocaleStringParts(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli0, epochMilli1] = prepCachedPlainYearMonthFormat(
+  const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     slots0,
