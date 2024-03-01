@@ -9,8 +9,7 @@ import { defineConfig } from 'vitest/config'
 import { extensions } from './scripts/lib/config'
 
 export default defineConfig(async () => {
-  const currentNpmScript = process.env.npm_lifecycle_event || ''
-  const isDev = currentNpmScript && currentNpmScript.endsWith(':dev')
+  const isDev = /:(dev|debug)$/.test(process.env.npm_lifecycle_event || '')
 
   return {
     test: {

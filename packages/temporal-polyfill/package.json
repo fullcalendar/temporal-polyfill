@@ -34,6 +34,7 @@
     "test": "pnpm run vitest && pnpm run test262",
     "vitest": "vitest run",
     "vitest:dev": "vitest dev",
+    "vitest:debug": "vitest run --no-isolate --no-file-parallelism --test-timeout 3600000",
     "test262": "./scripts/test262.js",
     "clean": "./scripts/clean.js --tsc",
     "size": "./scripts/size.js"
