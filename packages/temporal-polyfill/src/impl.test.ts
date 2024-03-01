@@ -36,6 +36,30 @@ describe('Temporal.Duration', () => {
   })
 })
 
+describe('Temporal.ZonedDateTime', () => {
+  describe('round', () => {
+    it('only accepts day/time smallestUnit', () => {
+      const zdt0 = new Temporal.ZonedDateTime(
+        1709254884041880537n,
+        'America/New_York',
+      )
+      let error: RangeError | undefined
+
+      try {
+        const zdt1 = zdt0.round({ smallestUnit: 'year' })
+        expect(zdt1).toBeTruthy() // won't reach
+      } catch (e: any) {
+        error = e
+      }
+
+      expect(error).toBeInstanceOf(RangeError)
+      expect(error!.toString()).toMatch('year') // provided
+      expect(error!.toString()).toMatch('day') // max
+      expect(error!.toString()).toMatch('nanosecond') // min
+    })
+  })
+})
+
 describe('Intl.DateTimeFormat', () => {
   describe('constructor', () => {
     // https://github.com/fullcalendar/temporal-polyfill/issues/25

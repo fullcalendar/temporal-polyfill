@@ -23,6 +23,7 @@ import {
   UnitName,
   nanoInUtcDay,
   unitNameMap,
+  unitNamesAsc,
   unitNanoMap,
 } from './units'
 import { bindArgs, clampEntity, isObjectLike } from './utils'
@@ -675,10 +676,12 @@ function refineUnitOption<O>(
     unit = durationFieldIndexes[unitStr as DurationFieldName]
   }
   if (unit === undefined) {
-    throw new RangeError(errorMessages.invalidEntity(optionName, unitStr))
+    throw new RangeError(
+      errorMessages.invalidChoice(optionName, unitStr, unitNameMap),
+    )
   }
 
-  clampEntity(optionName, unit, minUnit, maxUnit, Overflow.Reject)
+  clampEntity(optionName, unit, minUnit, maxUnit, Overflow.Reject, unitNamesAsc)
   return unit
 }
 
@@ -696,7 +699,9 @@ function refineChoiceOption<O>(
   const enumStr = toString(enumArg as string)
   const enumNum = enumNameMap[enumStr]
   if (enumNum === undefined) {
-    throw new RangeError(errorMessages.invalidEntity(optionName, enumStr))
+    throw new RangeError(
+      errorMessages.invalidChoice(optionName, enumStr, enumNameMap),
+    )
   }
   return enumNum
 }

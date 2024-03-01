@@ -11,12 +11,22 @@ export const invalidBigInt = (arg: any) => `Invalid bigint: ${arg}`
 export const forbiddenSymbolToString = 'Cannot convert Symbol to string'
 export const forbiddenNullish = 'Cannot be null or undefined'
 export const invalidObject = 'Invalid object'
+
 export const numberOutOfRange = (
   entityName: string,
-  val: number,
-  min: number,
-  max: number,
-) => `${entityName} ${val} must be between ${min}-${max}`
+  val: number | string,
+  min: number | string,
+  max: number | string,
+  choices?: string[],
+): string =>
+  choices
+    ? numberOutOfRange(
+        entityName,
+        choices[val as number],
+        choices[min as number],
+        choices[max as number],
+      )
+    : invalidEntity(entityName, val) + `; must be between ${min}-${max}`
 
 // Entity/Fields/Bags
 export const invalidEntity = (fieldName: string, val: any) =>
@@ -29,6 +39,13 @@ export const duplicateFields = (fieldName: string) =>
 export const noValidFields = (validFields: string[]) =>
   'No valid fields: ' + validFields.join()
 export const invalidBag = 'Invalid bag'
+
+export const invalidChoice = (
+  fieldName: string,
+  val: string,
+  choiceMap: Record<string, number>,
+) =>
+  invalidEntity(fieldName, val) + '; must be ' + Object.keys(choiceMap).join()
 
 // Class-related
 export const forbiddenValueOf = 'Cannot use valueOf'

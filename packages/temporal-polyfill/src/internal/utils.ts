@@ -36,12 +36,13 @@ export function clampEntity(
   min: number,
   max: number,
   overflow?: Overflow,
+  choices?: string[],
 ): number {
   const clamped = clampNumber(num, min, max)
 
   if (overflow && num !== clamped) {
     throw new RangeError(
-      errorMessages.numberOutOfRange(entityName, num, min, max),
+      errorMessages.numberOutOfRange(entityName, num, min, max, choices),
     )
   }
 
