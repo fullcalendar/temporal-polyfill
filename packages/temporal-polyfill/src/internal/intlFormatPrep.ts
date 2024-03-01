@@ -34,7 +34,7 @@ const numericStr = 'numeric'
 const timeZoneNameStrs: OptionNames = ['timeZoneName']
 
 // Fallbacks
-// ---------
+// (Used if no Standard Options provided, after Exclusions)
 
 const monthDayFallbacks: Intl.DateTimeFormatOptions = {
   month: numericStr,
@@ -62,49 +62,52 @@ const zonedFallbacks: Intl.DateTimeFormatOptions = {
   timeZoneName: 'short',
 }
 
-// Valid Names
-// -----------
-// TODO: rename to 'standard'. sounds like others are invalid
-
-const monthDayValidNames = Object.keys(monthDayFallbacks) as OptionNames
-const yearMonthValidNames = Object.keys(yearMonthFallbacks) as OptionNames
 const dateFallbackNames = Object.keys(dateFallbacks) as OptionNames
 const timeFallbackNames = Object.keys(timeFallbacks) as OptionNames
 
-const dateValidNames: OptionNames = [
+// Standard Options
+// (See notes for Fallbacks and Exclusions)
+
+const monthDayStandardNames = Object.keys(monthDayFallbacks) as OptionNames
+const yearMonthStandardNames = Object.keys(yearMonthFallbacks) as OptionNames
+
+const dateStandardNames: OptionNames = [
   ...dateFallbackNames,
   'weekday',
   'dateStyle',
 ]
-const timeValidNames: OptionNames = [
+const timeStandardNames: OptionNames = [
   ...timeFallbackNames,
   'dayPeriod',
   'timeStyle',
 ]
-const dateTimeValidNames: OptionNames = [...dateValidNames, ...timeValidNames]
-const zonedValidNames: OptionNames = [
-  ...dateTimeValidNames,
+const dateTimeStandardNames: OptionNames = [
+  ...dateStandardNames,
+  ...timeStandardNames,
+]
+const zonedStandardNames: OptionNames = [
+  ...dateTimeStandardNames,
   ...timeZoneNameStrs,
 ]
 
 // Exclusions
-// ----------
+// (Silently removed)
 
-const dateExclusions: OptionNames = [...timeZoneNameStrs, ...timeValidNames]
-const timeExclusions: OptionNames = [...timeZoneNameStrs, ...dateValidNames]
+const dateExclusions: OptionNames = [...timeZoneNameStrs, ...timeStandardNames]
+const timeExclusions: OptionNames = [...timeZoneNameStrs, ...dateStandardNames]
 const yearMonthExclusions: OptionNames = [
   ...timeZoneNameStrs,
   'day',
   'weekday',
   'dateStyle',
-  ...timeValidNames,
+  ...timeStandardNames,
 ]
 const monthDayExclusions: OptionNames = [
   ...timeZoneNameStrs,
   'year',
   'weekday',
   'dateStyle',
-  ...timeValidNames,
+  ...timeStandardNames,
 ]
 
 // Transformer Funcs
@@ -115,16 +118,16 @@ export type OptionsTransformer = (
 ) => Intl.DateTimeFormatOptions
 
 function createOptionsTransformer(
-  validNames: OptionNames,
+  standardNames: OptionNames,
   fallbacks: Intl.DateTimeFormatOptions,
-  excludedNames: OptionNames = [],
+  exclusions: OptionNames = [],
 ): OptionsTransformer {
-  const excludedNameSet = new Set(excludedNames)
+  const excludedNameSet = new Set(exclusions)
 
   return (options: Intl.DateTimeFormatOptions) => {
     options = excludePropsByName(excludedNameSet, options)
 
-    if (!hasAnyPropsByName(options, validNames)) {
+    if (!hasAnyPropsByName(options, standardNames)) {
       Object.assign(options, fallbacks)
     }
 
@@ -133,37 +136,36 @@ function createOptionsTransformer(
 }
 
 const transformMonthDayOptions = createOptionsTransformer(
-  monthDayValidNames,
+  monthDayStandardNames,
   monthDayFallbacks,
   monthDayExclusions,
 )
 const transformYearMonthOptions = createOptionsTransformer(
-  yearMonthValidNames,
+  yearMonthStandardNames,
   yearMonthFallbacks,
   yearMonthExclusions,
 )
 const transformDateOptions = createOptionsTransformer(
-  dateValidNames,
+  dateStandardNames,
   dateFallbacks,
   dateExclusions,
 )
 const transformDateTimeOptions = createOptionsTransformer(
-  dateTimeValidNames,
+  dateTimeStandardNames,
   dateTimeFallbacks,
   timeZoneNameStrs,
 )
 const transformTimeOptions = createOptionsTransformer(
-  timeValidNames,
+  timeStandardNames,
   timeFallbacks,
   timeExclusions,
 )
-// TOOD: rename to 'instant'?
-const transformEpochOptions = createOptionsTransformer(
-  dateTimeValidNames,
+const transformInstantOptions = createOptionsTransformer(
+  dateTimeStandardNames,
   dateTimeFallbacks,
 )
-const transformZonedEpochOptions = createOptionsTransformer(
-  zonedValidNames,
+const transformZonedOptions = createOptionsTransformer(
+  zonedStandardNames,
   zonedFallbacks,
 )
 
@@ -235,11 +237,11 @@ export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
   isoTimeFieldsToEpochNano,
 ]
 export const instantConfig: ClassFormatConfig<EpochSlots> = [
-  transformEpochOptions,
+  transformInstantOptions,
   extractEpochNano,
 ]
 export const zonedDateTimeConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> =
-  [transformZonedEpochOptions, extractEpochNano, false, getCommonTimeZoneId]
+  [transformZonedOptions, extractEpochNano, false, getCommonTimeZoneId]
 
 const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
 
