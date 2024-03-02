@@ -37,13 +37,13 @@ interface IntlDateFields {
   era: string | undefined
   eraYear: number | undefined
   year: number
-  month: string // string!
+  monthString: string
   day: number
 }
 
 interface IntlYearMonths {
   monthEpochMilli: number[]
-  monthStrToIndex: Record<string, number>
+  monthStringToIndex: Record<string, number>
 }
 
 export interface IntlCalendar extends NativeCalendar {
@@ -96,7 +96,7 @@ function createIntlYearMonthCache(
     let epochMilli = isoArgsToEpochMilli(year - yearCorrection)!
     let intlFields: IntlDateFields
     const milliReversed: number[] = []
-    const monthStrsReversed: string[] = []
+    const monthStringsReversed: string[] = []
 
     // move beyond current year
     do {
@@ -110,7 +110,7 @@ function createIntlYearMonthCache(
       // only record the epochMilli if current year
       if (intlFields.year === year) {
         milliReversed.push(epochMilli)
-        monthStrsReversed.push(intlFields.month)
+        monthStringsReversed.push(intlFields.monthString)
       }
 
       // move to last day of previous month
@@ -119,7 +119,7 @@ function createIntlYearMonthCache(
 
     return {
       monthEpochMilli: milliReversed.reverse(),
-      monthStrToIndex: mapPropNamesToIndex(monthStrsReversed.reverse()),
+      monthStringToIndex: mapPropNamesToIndex(monthStringsReversed.reverse()),
     }
   }
 
@@ -135,7 +135,7 @@ function parseIntlDateFields(
 ): IntlDateFields {
   return {
     ...parseIntlYear(intlParts, calendarIdBase),
-    month: intlParts.month, // a short month string
+    monthString: intlParts.month,
     day: parseInt(intlParts.day),
   }
 }
@@ -206,9 +206,9 @@ export function computeIntlMonth(
   this: IntlCalendar,
   isoFields: IsoDateFields,
 ): number {
-  const { year, month } = this.queryFields(isoFields)
-  const { monthStrToIndex } = this.queryYearMonths(year)
-  return monthStrToIndex[month] + 1
+  const { year, monthString } = this.queryFields(isoFields)
+  const { monthStringToIndex } = this.queryYearMonths(year)
+  return monthStringToIndex[monthString] + 1
 }
 
 export function computeIntlDay(
@@ -222,9 +222,9 @@ export function computeIntlDateParts(
   this: IntlCalendar,
   isoFields: IsoDateFields,
 ): DateParts {
-  const { year, month, day } = this.queryFields(isoFields)
-  const { monthStrToIndex } = this.queryYearMonths(year)
-  return [year, monthStrToIndex[month] + 1, day]
+  const { year, monthString, day } = this.queryFields(isoFields)
+  const { monthStringToIndex } = this.queryYearMonths(year)
+  return [year, monthStringToIndex[monthString] + 1, day]
 }
 
 export function computeIsoFieldsFromIntlParts(
@@ -267,11 +267,11 @@ export function computeIntlLeapMonth(
   this: IntlCalendar,
   year: number,
 ): number | undefined {
-  const currentMonthStrs = queryMonthStrs(this, year)
-  const prevMonthStrs = queryMonthStrs(this, year - 1)
-  const currentLength = currentMonthStrs.length
+  const currentMonthStrings = queryMonthStrings(this, year)
+  const prevMonthStrings = queryMonthStrings(this, year - 1)
+  const currentLength = currentMonthStrings.length
 
-  if (currentLength > prevMonthStrs.length) {
+  if (currentLength > prevMonthStrings.length) {
     // hardcoded leap month. usually means complex month-code schemes
     const leapMonthMeta = getCalendarLeapMonthMeta(this) as number // hack for <0
     if (leapMonthMeta < 0) {
@@ -279,7 +279,7 @@ export function computeIntlLeapMonth(
     }
 
     for (let i = 0; i < currentLength; i++) {
-      if (currentMonthStrs[i] !== prevMonthStrs[i]) {
+      if (currentMonthStrings[i] !== prevMonthStrings[i]) {
         return i + 1 // convert to 1-based
       }
     }
@@ -404,6 +404,6 @@ export function computeIntlYearMonthForMonthDay(
 
 // -----------------------------------------------------------------------------
 
-function queryMonthStrs(intlCalendar: IntlCalendar, year: number): string[] {
-  return Object.keys(intlCalendar.queryYearMonths(year).monthStrToIndex)
+function queryMonthStrings(intlCalendar: IntlCalendar, year: number): string[] {
+  return Object.keys(intlCalendar.queryYearMonths(year).monthStringToIndex)
 }
