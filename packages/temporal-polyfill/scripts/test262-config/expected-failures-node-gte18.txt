@@ -1,5 +1,6 @@
-# Really picky about whitespace between characters
-# Nothing we can do about this since it relies on Intl.DateTimeFormat
+# Don't try to workaround buggy behavior in Node 18-20
+# Caused by https://bugs.chromium.org/p/chromium/issues/detail?id=1416538
+# Remove these lines after that bug is fixed.
 staging/Intl402/Temporal/old/date-time-format.js
 staging/Intl402/Temporal/old/datetime-toLocaleString.js
 staging/Intl402/Temporal/old/instant-toLocaleString.js
