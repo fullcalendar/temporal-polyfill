@@ -164,6 +164,13 @@ built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
+# SPEC-BUG
+# Ticket: TODO!
+#
+# PlainDateTime::toLocaleString should not be swayed by timeZone in any way
+#
+staging/Intl402/Temporal/old/datetime-toLocaleString.js
+
 # TODO: review and report our algorithms that are more efficient than ref polyfill
 # - native-internal YMD diffing
 #   - ours doesn't use loops. faster?
