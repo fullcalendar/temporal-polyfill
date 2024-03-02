@@ -223,11 +223,11 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # Discussion: https://github.com/tc39/proposal-temporal/issues/2794
 #
 # Our algorithm leverages Calendar::day instead of Calendar::fields/dateFromFields
-# to get the PlainYearMonth to start-of-month for add/subtract/until/since,
-# despite the risk of ICU updating historic calendars for skipped days in months.
-# Better for tree-shaking.
-# `createIntlYearMonthCache` makes this assumption too (tho nudging is possible)
-# Very hard for `computeIntlEpochMilli`
+# to get the PlainYearMonth to start-of-month for add/subtract/until/since.
+# Better for tree-shaking for the fns api.
+#
+# Despite the risk of ICU creating new historic calendars with skipped days.
+# (see note in intlMath)
 #
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js

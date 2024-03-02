@@ -107,21 +107,25 @@ function createIntlYearDataCache(
       // move to start-of-month
       epochMilli += (1 - intlFields.day) * milliInDay
 
-      /*
-      // Calendar systems could skip days-in-month in olden times
+      // Yet-to-be-created hybrid calendar systems (such as one that bridges
+      // from Julian-to-Gregorian) could theoretically skips days in a month,
+      // making that day # of the last day != # days in the month:
       // https://github.com/tc39/proposal-temporal/issues/1315#issuecomment-781264909
-      // If any days-in-month were skipped, epochMilli would be moved *before*
-      // the start-of-month, so move forward by a day until within month again.
-      // Only bother to do this if the date is before the epoch.
-      if (epochMilli < 0) {
-        while (
-          epochMilliToIntlFields(epochMilli).monthString !==
-          intlFields.monthString
-        ) {
-          epochMilli += milliInDay
-        }
-      }
-      */
+      //
+      // This would break our algorithm as epochMilli would be moved *before*
+      // the start-of-month. The code below nudges the day back in bounds.
+      //
+      // if (epochMilli < 0) {
+      //   while (
+      //     epochMilliToIntlFields(epochMilli).monthString !==
+      //     intlFields.monthString
+      //   ) {
+      //     epochMilli += milliInDay
+      //   }
+      // }
+      //
+      // However, other parts of the code (like computeIntlEpochMilli) would
+      // somehow need to be adjusted too. Not worth it.
 
       // only record the epochMilli if current year
       if (intlFields.year === year) {
