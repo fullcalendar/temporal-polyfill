@@ -107,6 +107,7 @@ function createIntlYearDataCache(
       // move to start-of-month
       epochMilli += (1 - intlFields.day) * milliInDay
 
+      /*
       // Calendar systems could skip days-in-month in olden times
       // https://github.com/tc39/proposal-temporal/issues/1315#issuecomment-781264909
       // If any days-in-month were skipped, epochMilli would be moved *before*
@@ -120,6 +121,7 @@ function createIntlYearDataCache(
           epochMilli += milliInDay
         }
       }
+      */
 
       // only record the epochMilli if current year
       if (intlFields.year === year) {

@@ -226,7 +226,8 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # to get the PlainYearMonth to start-of-month for add/subtract/until/since,
 # despite the risk of ICU updating historic calendars for skipped days in months.
 # Better for tree-shaking.
-# Our createIntlYearMonthCache makes this assumption too.
+# `createIntlYearMonthCache` makes this assumption too (tho nudging is possible)
+# Very hard for `computeIntlEpochMilli`
 #
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
