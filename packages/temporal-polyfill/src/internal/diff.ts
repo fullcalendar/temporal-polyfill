@@ -23,10 +23,16 @@ import {
   isoTimeFieldNamesAsc,
 } from './isoFields'
 import { isoMonthsInYear } from './isoMath'
-import { moveByIsoDays, moveToMonthStart } from './move'
+import { MarkerToEpochNano, MoveMarker } from './markerSystem'
+import {
+  moveByIsoDays,
+  moveDateEfficient,
+  moveDateTime,
+  moveToMonthStart,
+  moveZonedEpochSlots,
+} from './move'
 import { RoundingMode } from './options'
 import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'
-import { RelativeMarkerSlots } from './relativeSystem'
 import {
   computeNanoInc,
   roundBigNano,
@@ -43,6 +49,7 @@ import {
   ZonedDateTimeSlots,
   ZonedEpochSlots,
   createDurationSlots,
+  extractEpochNano,
   isIdLikeEqual,
 } from './slots'
 import {
@@ -144,10 +151,10 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
         smallestUnit,
         roundingInc,
         roundingMode,
-        // RelativeSystem...
+        // MarkerMoveSystem...
         zonedDateTimeSlots0,
-        calendarOps,
-        timeZoneOps,
+        extractEpochNano as MarkerToEpochNano,
+        bindArgs(moveZonedEpochSlots, calendarOps, timeZoneOps) as MoveMarker,
       )
     }
   }
@@ -208,9 +215,10 @@ export function diffPlainDateTimes<C extends IdLike>(
         smallestUnit,
         roundingInc,
         roundingMode,
-        // RelativeSystem...
+        // MarkerMoveSystem...
         plainDateTimeSlots0,
-        calendarOps,
+        isoToEpochNano as MarkerToEpochNano,
+        bindArgs(moveDateTime, calendarOps) as MoveMarker,
       )
     }
   }
@@ -323,9 +331,10 @@ function diffDateLike(
         smallestUnit,
         roundingInc,
         roundingMode,
-        // RelativeSystem...
-        { ...startIsoFields, ...isoTimeFieldDefaults },
-        calendarOps,
+        // MarkerMoveSystem...
+        startIsoFields,
+        isoToEpochNano as MarkerToEpochNano,
+        bindArgs(moveDateEfficient, calendarOps) as MoveMarker,
       )
     }
   }
@@ -364,39 +373,14 @@ export function diffPlainTimes(
   )
 }
 
-export function diffRelativeMarkers(
-  largestUnit: Unit,
-  // RelativeSystem (w/ two points)...
-  slots0: RelativeMarkerSlots,
-  slots1: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
-): DurationFields {
-  if (timeZoneOps) {
-    return diffZonedEpochSlotsExact(
-      calendarOps,
-      timeZoneOps,
-      slots0 as ZonedEpochSlots<unknown, unknown>,
-      slots1 as ZonedEpochSlots<unknown, unknown>,
-      largestUnit,
-    )
-  }
-  return diffDateTimesExact(
-    calendarOps,
-    slots0 as IsoDateTimeFields,
-    slots1 as IsoDateTimeFields,
-    largestUnit,
-  )
-}
-
 // Exact Diffing
 // -----------------------------------------------------------------------------
 
 export function diffZonedEpochSlotsExact(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
-  slots0: ZonedEpochSlots<unknown, unknown>,
-  slots1: ZonedEpochSlots<unknown, unknown>,
+  slots0: ZonedEpochSlots,
+  slots1: ZonedEpochSlots,
   largestUnit: Unit,
   origOptions?: DiffOptions,
 ): DurationFields {
@@ -463,8 +447,8 @@ function diffZonedEpochNanoViaCalendar(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   sign: NumberSign,
-  slots0: ZonedEpochSlots<unknown, unknown>,
-  slots1: ZonedEpochSlots<unknown, unknown>,
+  slots0: ZonedEpochSlots,
+  slots1: ZonedEpochSlots,
   largestUnit: Unit,
   origOptions?: DiffOptions,
 ): DurationFields {

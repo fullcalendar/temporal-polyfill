@@ -4,13 +4,13 @@ import { durationFieldNamesAsc } from './durationFields'
 import { getLargestDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
-import { moveRelativeMarker } from './move'
-import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
   RelativeToSlots,
-  createRelativeSystem,
-  relativeMarkerToEpochNano,
-} from './relativeSystem'
+  anyMarkerToEpochNano,
+  createMarkerSystem,
+  createMoveMarker,
+} from './markerSystem'
+import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
   DurationSlots,
   IdLike,
@@ -89,21 +89,16 @@ export function compareDurations<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, calendarOps, timeZoneOps] = createRelativeSystem(
+  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
+  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
 
   return compareBigNanos(
-    relativeMarkerToEpochNano(
-      moveRelativeMarker(durationSlots0, marker, calendarOps, timeZoneOps),
-      timeZoneOps,
-    ),
-    relativeMarkerToEpochNano(
-      moveRelativeMarker(durationSlots1, marker, calendarOps, timeZoneOps),
-      timeZoneOps,
-    ),
+    anyMarkerToEpochNano(moveMarker(marker, durationSlots0)),
+    anyMarkerToEpochNano(moveMarker(marker, durationSlots1)),
   )
 }
 

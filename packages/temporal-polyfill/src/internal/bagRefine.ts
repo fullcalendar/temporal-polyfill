@@ -80,6 +80,7 @@ import {
   isoMonthsInYear,
 } from './isoMath'
 import { parseOffsetNano } from './isoParse'
+import { RelativeToSlotsNoCalendar } from './markerSystem'
 import { OffsetDisambig, Overflow } from './options'
 import {
   OverflowOptions,
@@ -89,7 +90,6 @@ import {
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './optionsRefine'
-import { RelativeToSlotsNoCalendar } from './relativeSystem'
 import {
   DurationSlots,
   PlainDateSlots,

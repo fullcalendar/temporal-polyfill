@@ -6,7 +6,6 @@ import {
   createBigNano,
   diffBigNanos,
 } from './bigNano'
-import { DiffOps } from './calendarOps'
 import {
   DurationFieldName,
   DurationFields,
@@ -26,7 +25,13 @@ import {
   IsoTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
-import { moveByIsoDays, moveRelativeMarker } from './move'
+import {
+  DiffMarkers,
+  Marker,
+  MarkerToEpochNano,
+  MoveMarker,
+} from './markerSystem'
+import { moveByIsoDays } from './move'
 import {
   EpochDisambig,
   OffsetDisambig,
@@ -35,10 +40,7 @@ import {
 } from './options'
 import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 import {
-  RelativeMarkerSlots,
-  relativeMarkerToEpochNano,
-} from './relativeSystem'
-import {
+  EpochSlots,
   InstantSlots,
   PlainDateTimeSlots,
   PlainTimeSlots,
@@ -254,7 +256,7 @@ export function roundTimeToNano(
   )
 }
 
-// Duration (w/o RelativeSystem)
+// Duration
 // -----------------------------------------------------------------------------
 
 export function roundDayTimeDuration(
@@ -316,15 +318,16 @@ export function roundRelativeDuration(
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  // RelativeSystem...
-  marker: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
+  // MarkerDiffSystem...
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
+  _diffMarkers?: DiffMarkers,
 ): DurationFields {
   const nudgeFunc = (
     smallestUnit > Unit.Day
       ? nudgeRelativeDuration
-      : timeZoneOps && smallestUnit < Unit.Day
+      : (marker as EpochSlots).epochNanoseconds && smallestUnit < Unit.Day
         ? nudgeRelativeDurationTime
         : nudgeDurationDayTime
   ) as typeof nudgeRelativeDuration // most general
@@ -336,10 +339,10 @@ export function roundRelativeDuration(
     smallestUnit,
     roundingInc,
     roundingMode,
-    // RelativeSystem for nudgeRelativeDuration...
+    // MarkerMoveSystem...
     marker,
-    calendarOps,
-    timeZoneOps,
+    markerToEpochNano,
+    moveMarker,
   )
 
   // grew a day/week/month/year?
@@ -349,10 +352,10 @@ export function roundRelativeDuration(
       roundedEpochNano,
       largestUnit,
       Math.max(Unit.Day, smallestUnit),
-      // RelativeSystem...
+      // MarkerMoveSystem...
       marker,
-      calendarOps,
-      timeZoneOps,
+      markerToEpochNano,
+      moveMarker,
     )
   }
 
@@ -487,10 +490,10 @@ function nudgeRelativeDurationTime(
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number,
   roundingMode: RoundingMode,
-  // RelativeSystem...
-  marker: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
+  // MarkerMoveSystem...
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: BigNano,
@@ -509,10 +512,10 @@ function nudgeRelativeDurationTime(
     { ...durationFields, ...durationTimeFieldDefaults },
     Unit.Day,
     sign,
-    // RelativeSystem...
+    // MarkerMoveSystem...
     marker,
-    calendarOps,
-    timeZoneOps,
+    markerToEpochNano,
+    moveMarker,
   )
 
   const daySpanEpochNanoseconds = bigNanoToNumber(
@@ -547,10 +550,10 @@ function nudgeRelativeDuration(
   smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingMode,
-  // RelativeSystem...
-  marker: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
+  // MarkerMoveSystem...
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
 ): [
   durationFields: DurationFields,
   movedEpochNano: BigNano,
@@ -572,10 +575,10 @@ function nudgeRelativeDuration(
     baseDurationFields,
     smallestUnit,
     roundingInc * sign,
-    // RelativeSystem...
+    // MarkerMoveSystem...
     marker,
-    calendarOps,
-    timeZoneOps,
+    markerToEpochNano,
+    moveMarker,
   )
 
   // usually between 0-1, however can be higher when weeks aren't bounded by months
@@ -603,10 +606,10 @@ function bubbleRelativeDuration(
   endEpochNano: BigNano,
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year
-  // RelativeSystem...
-  marker: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
+  // MarkerMoveSystem...
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
 ): DurationFields {
   const sign = computeDurationSign(durationFields)
 
@@ -626,9 +629,8 @@ function bubbleRelativeDuration(
     )
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 
-    const thresholdEpochNano = relativeMarkerToEpochNano(
-      moveRelativeMarker(baseDurationFields, marker, calendarOps, timeZoneOps),
-      timeZoneOps,
+    const thresholdEpochNano = markerToEpochNano(
+      moveMarker(marker, baseDurationFields),
     )
     const beyondThreshold = bigNanoToNumber(
       diffBigNanos(thresholdEpochNano, endEpochNano),

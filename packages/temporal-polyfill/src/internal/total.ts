@@ -13,14 +13,15 @@ import {
   spanDuration,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { moveRelativeMarker } from './move'
-import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
 import {
-  RelativeMarkerSlots,
+  DiffMarkers,
+  Marker,
+  MarkerToEpochNano,
+  MoveMarker,
   RelativeToSlots,
-  createRelativeSystem,
-  relativeMarkerToEpochNano,
-} from './relativeSystem'
+  createMarkerDiffSystem,
+} from './markerSystem'
+import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
 import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
@@ -51,16 +52,16 @@ export function totalDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const relativeSystem = createRelativeSystem(
+  const diffSystem = createMarkerDiffSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
 
   return totalRelativeDuration(
-    ...spanDuration(slots, undefined, totalUnit, ...relativeSystem),
+    ...spanDuration(slots, undefined, totalUnit, ...diffSystem),
     totalUnit,
-    ...relativeSystem,
+    ...diffSystem,
   )
 }
 
@@ -68,10 +69,11 @@ function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit,
-  // RelativeSystem...
-  marker: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
+  // MarkerDiffSystem...
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
+  _diffMarkers?: DiffMarkers,
 ): number {
   const sign = computeDurationSign(durationFields)
 
@@ -79,10 +81,10 @@ function totalRelativeDuration(
     clearDurationFields(durationFields, totalUnit - 1),
     totalUnit,
     sign,
-    // RelativeSystem...
+    // MarkerSystem...
     marker,
-    calendarOps,
-    timeZoneOps,
+    markerToEpochNano,
+    moveMarker,
   )
 
   const frac = computeEpochNanoFrac(epochNano0, epochNano1, endEpochNano)
@@ -107,29 +109,19 @@ export function clampRelativeDuration(
   durationFields: DurationFields,
   clampUnit: Unit,
   clampDistance: number,
-  // RelativeSystem...
-  marker: RelativeMarkerSlots,
-  calendarOps: DiffOps,
-  timeZoneOps?: TimeZoneOps,
+  // MarkerMoveSystem...
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
 ) {
   const clampDurationFields = {
     ...durationFieldDefaults,
     [durationFieldNamesAsc[clampUnit]]: clampDistance,
   }
-  const marker0 = moveRelativeMarker(
-    durationFields,
-    marker,
-    calendarOps,
-    timeZoneOps,
-  )
-  const marker1 = moveRelativeMarker(
-    clampDurationFields,
-    marker0,
-    calendarOps,
-    timeZoneOps,
-  )
-  const epochNano0 = relativeMarkerToEpochNano(marker0, timeZoneOps)
-  const epochNano1 = relativeMarkerToEpochNano(marker1, timeZoneOps)
+  const marker0 = moveMarker(marker, durationFields)
+  const marker1 = moveMarker(marker0, clampDurationFields)
+  const epochNano0 = markerToEpochNano(marker0)
+  const epochNano1 = markerToEpochNano(marker1)
   return [epochNano0, epochNano1]
 }
 

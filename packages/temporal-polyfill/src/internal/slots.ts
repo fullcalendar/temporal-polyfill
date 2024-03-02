@@ -140,10 +140,12 @@ export type BrandingSlots = { branding: string }
 
 export type EpochSlots = { epochNanoseconds: BigNano }
 export type EpochAndZoneSlots<T> = EpochSlots & { timeZone: T }
+export type ZonedEpochSlots<C = unknown, T = unknown> = EpochAndZoneSlots<T> & {
+  calendar: C
+}
 
 export type DateSlots<C> = IsoDateFields & { calendar: C }
 export type DateTimeSlots<C> = IsoDateTimeFields & { calendar: C }
-export type ZonedEpochSlots<C, T> = EpochAndZoneSlots<T> & { calendar: C }
 
 export type PlainDateSlots<C> = IsoDateFields & {
   branding: typeof PlainDateBranding
@@ -200,6 +202,10 @@ export function getEpochMicro(slots: EpochSlots): bigint {
 
 export function getEpochNano(slots: EpochSlots): bigint {
   return bigNanoToBigInt(slots.epochNanoseconds)
+}
+
+export function extractEpochNano(slots: EpochSlots): BigNano {
+  return slots.epochNanoseconds
 }
 
 // ID-like
