@@ -109,11 +109,7 @@ export function checkEpochNanoInBounds(
 // -----------------------------------------------------------------------------
 
 export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
-  return isoTimeFieldsToBigNano(isoTimeFields)[1]
-}
-
-export function isoTimeFieldsToBigNano(isoTimeFields: IsoTimeFields): BigNano {
-  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)
+  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[1]
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
@@ -271,7 +267,7 @@ If out-of-bounds, returns undefined
 */
 export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
   const [legacyDate, daysNudged] = isoToLegacyDate(...args)
-  const epochMilli = legacyDate.getTime()
+  const epochMilli = legacyDate.valueOf()
 
   if (!isNaN(epochMilli)) {
     return epochMilli - daysNudged * milliInDay

@@ -1,4 +1,3 @@
-import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
@@ -7,15 +6,12 @@ import {
   EpochAndZoneSlots,
   EpochSlots,
   IdLike,
-  extractEpochNano,
+  getEpochMilli,
   getId,
 } from './slots'
-import {
-  epochNanoToMilli,
-  isoTimeFieldsToBigNano,
-  isoToEpochNano,
-} from './timeMath'
+import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
+import { nanoInMilli } from './units'
 import { excludePropsByName, hasAnyPropsByName } from './utils'
 
 /*
@@ -171,7 +167,7 @@ const transformZonedOptions = createOptionsTransformer(
 
 export type ClassFormatConfig<S> = [
   optionsTransformer: OptionsTransformer,
-  epochNanoConverter: EpochNanoConverter<S>,
+  slotsToEpochMilli: EpochNanoConverter<S>,
   strictCalendarChecks?: boolean,
   getForcedTimeZoneId?: (...slotsList: S[]) => string,
 ]
@@ -179,7 +175,7 @@ export type ClassFormatConfig<S> = [
 export type EpochNanoConverter<S> = (
   slots: S,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-) => BigNano
+) => number
 
 const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
 
@@ -256,38 +252,38 @@ function getForcedCommonTimeZone(
 
 export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [
   transformYearMonthOptions,
-  isoToEpochNano as (isoFields: IsoDateFields) => BigNano,
+  isoToEpochMilli as (isoFields: IsoDateFields) => number,
   true, // strictCalendarChecks
 ]
 
 export const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [
   transformMonthDayOptions,
-  isoToEpochNano as (isoFields: IsoDateFields) => BigNano,
+  isoToEpochMilli as (isoFields: IsoDateFields) => number,
   true, // strictCalendarChecks
 ]
 
 export const plainDateConfig: ClassFormatConfig<IsoDateFields> = [
   transformDateOptions,
-  isoToEpochNano as (isoFields: IsoDateFields) => BigNano,
+  isoToEpochMilli as (isoFields: IsoDateFields) => number,
 ]
 
 export const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
   transformDateTimeOptions,
-  isoToEpochNano as (isoFields: IsoDateTimeFields) => BigNano,
+  isoToEpochMilli as (isoFields: IsoDateTimeFields) => number,
 ]
 
 export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
   transformTimeOptions,
-  isoTimeFieldsToBigNano,
+  (isoFields: IsoTimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
 ]
 
 export const instantConfig: ClassFormatConfig<EpochSlots> = [
   transformInstantOptions,
-  extractEpochNano,
+  getEpochMilli,
 ]
 
 export const zonedDateTimeConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> =
-  [transformZonedOptions, extractEpochNano, false, getForcedCommonTimeZone]
+  [transformZonedOptions, getEpochMilli, false, getForcedCommonTimeZone]
 
 // General Epoch Conversion
 // -----------------------------------------------------------------------------
@@ -297,7 +293,7 @@ function toEpochMillis<S>(
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
   ...slotsList: S[]
 ): number[] {
-  const [, slotsToEpochNano, strictCalendarCheck] = config
+  const [, slotsToEpochMilli, strictCalendarCheck] = config
 
   return slotsList.map((slots: S) => {
     if ((slots as any).calendar) {
@@ -308,8 +304,7 @@ function toEpochMillis<S>(
       )
     }
 
-    const epochNano = slotsToEpochNano(slots, resolvedOptions)
-    return epochNanoToMilli(epochNano)
+    return slotsToEpochMilli(slots, resolvedOptions)
   })
 }
 

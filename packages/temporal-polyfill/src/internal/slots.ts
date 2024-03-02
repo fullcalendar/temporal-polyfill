@@ -202,10 +202,6 @@ export function getEpochNano(slots: EpochSlots): bigint {
   return bigNanoToBigInt(slots.epochNanoseconds)
 }
 
-export function extractEpochNano(slots: EpochSlots): BigNano {
-  return slots.epochNanoseconds
-}
-
 // ID-like
 // -----------------------------------------------------------------------------
 
