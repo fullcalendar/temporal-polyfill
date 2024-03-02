@@ -126,45 +126,6 @@ built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-out-of-
 built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
 
 # SPEC-BUG
-# Ticket: https://github.com/tc39/proposal-temporal/issues/2794
-#
-# PlainYearMonth arithmetics should leverage Calendar::day instead of
-# Calendar::fields/dateFromFields
-#
-built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
-built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
-built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/since/order-of-operations.js
-built-ins/Temporal/PlainYearMonth/prototype/until/calendar-datefromfields-called-with-options-undefined.js
-built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fields-iterable.js
-built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/until/order-of-operations.js
-built-ins/Temporal/PlainYearMonth/prototype/add/order-of-operations.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/order-of-operations.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-datefromfields-called.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-yearmonthfromfields-called-with-null-prototype-options.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-datefromfields-called.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fromfields-called-with-null-prototype-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-yearmonthfromfields-called-with-null-prototype-options.js
-built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/end-of-month-out-of-range.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fields-iterable.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fields-iterable.js
-built-ins/Temporal/PlainYearMonth/prototype/add/constructor-in-calendar-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/add/duplicate-calendar-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/add/proto-in-calendar-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/constructor-in-calendar-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/duplicate-calendar-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/proto-in-calendar-fields.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
-built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options.js
-built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
-
-# SPEC-BUG
 # Ticket: TODO!
 #
 # PlainDateTime::toLocaleString should not be swayed by timeZone in any way
@@ -257,6 +218,48 @@ built-ins/Temporal/Duration/compare/order-of-operations.js
 #   +dur0.timeparts +dur0.ymwd +dur1.timeparts +dur1.ymwd
 # Same ultimate results but different calls to Calendar::dateAdd w/ different intermediate durations.
 built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
+
+# CALLING
+# Discussion: https://github.com/tc39/proposal-temporal/issues/2794
+#
+# Our algorithm leverages Calendar::day instead of Calendar::fields/dateFromFields
+# to get the PlainYearMonth to start-of-month for add/subtract/until/since,
+# despite the risk of ICU updating historic calendars for skipped days in months.
+# Better for tree-shaking.
+# Our createIntlYearMonthCache makes this assumption too.
+#
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/end-of-month-out-of-range.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/add/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/proto-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/proto-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
 
 ####################################################################################################
 # OBJECTS GIVEN TO PROTOCOLS
