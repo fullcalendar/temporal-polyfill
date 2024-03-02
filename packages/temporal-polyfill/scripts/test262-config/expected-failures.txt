@@ -56,7 +56,7 @@ built-ins/Temporal/ZonedDateTime/prototype/since/normalized-time-duration-to-day
 built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-days-range-errors.js
 
 # SPEC-BUG
-# Ticket: TODO!
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2792
 # Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rounding-rel
 # Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rounding-rel
 #
@@ -71,7 +71,7 @@ built-ins/Temporal/ZonedDateTime/prototype/since/date-and-time-durations-opposit
 built-ins/Temporal/ZonedDateTime/prototype/until/date-and-time-durations-opposite-signs.js
 
 # SPEC-BUG
-# Ticket: TODO!
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2791
 # Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rounding-day-pd
 # Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rounding-day-pd
 #
@@ -227,7 +227,10 @@ built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
 # Better for tree-shaking for the fns api.
 #
 # Despite the risk of ICU creating new historic calendars with skipped days.
-# (see note in intlMath)
+# (see note in intlMath.ts)
+#
+# TODO: make a calendar whitelist to fail on creation of these new calendars.
+# (Leverage what's in calendarConfig.ts)
 #
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
 built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
