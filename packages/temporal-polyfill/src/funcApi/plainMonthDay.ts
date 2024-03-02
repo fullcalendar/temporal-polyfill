@@ -13,10 +13,7 @@ import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
 import { plainMonthDayToPlainDate } from '../internal/convert'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/fields'
-import {
-  createFormatPrepper,
-  plainMonthDayConfig,
-} from '../internal/intlFormatPrep'
+import { createFormatPrepper, monthDayConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainMonthDayIso } from '../internal/isoFormat'
 import { parsePlainMonthDay } from '../internal/isoParse'
@@ -96,7 +93,7 @@ export const toString = formatPlainMonthDayIso<string>
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  plainMonthDayConfig,
+  monthDayConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

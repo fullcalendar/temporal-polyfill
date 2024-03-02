@@ -17,10 +17,7 @@ import {
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
 import { DateBag, DateFields } from '../internal/fields'
-import {
-  createFormatPrepper,
-  plainDateConfig,
-} from '../internal/intlFormatPrep'
+import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
@@ -198,7 +195,7 @@ export const toString = formatPlainDateIso<string>
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  plainDateConfig,
+  dateConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

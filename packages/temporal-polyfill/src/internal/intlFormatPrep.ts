@@ -113,7 +113,7 @@ export type OptionsTransformer = (
 function createOptionsTransformer(
   standardNames: OptionNames,
   fallbacks: Intl.DateTimeFormatOptions,
-  exclusions: OptionNames = [],
+  exclusions?: OptionNames,
 ): OptionsTransformer {
   const excludedNameSet = new Set(exclusions)
 
@@ -122,6 +122,17 @@ function createOptionsTransformer(
 
     if (!hasAnyPropsByName(options, standardNames)) {
       Object.assign(options, fallbacks)
+    }
+
+    // HACK: this condition is a proxy for whether this is a Plain type
+    // The Plain types are silently forced to UTC
+    if (exclusions) {
+      options.timeZone = utcTimeZoneId
+
+      // ensure timeStyle doesn't display time zone
+      if (['full', 'long'].includes(options.timeStyle!)) {
+        options.timeStyle = 'medium'
+      }
     }
 
     return options
@@ -177,7 +188,8 @@ export type EpochNanoConverter<S> = (
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
 ) => number
 
-const emptyOptions: Intl.DateTimeFormatOptions = {} // constant reference for caching
+// stable reference for caching
+const emptyOptions: Intl.DateTimeFormatOptions = {}
 
 export type FormatPrepper<S> = (
   locales: LocalesArg | undefined,
@@ -200,7 +212,7 @@ export function createFormatPrepper<S>(
 
   return (locales, options = emptyOptions, ...slotsList: S[]) => {
     const subformat = queryFormat(
-      getForcedTimeZoneId ? getForcedTimeZoneId(...slotsList) : undefined,
+      getForcedTimeZoneId && getForcedTimeZoneId(...slotsList),
       locales,
       options,
       transformOptions,
@@ -224,13 +236,6 @@ export function createFormatForPrep(
       throw new TypeError(errorMessages.forbiddenFormatTimeZone)
     }
     options.timeZone = forcedTimeZoneId
-  } else {
-    options.timeZone = utcTimeZoneId
-
-    // ensure timeStyle doesn't display time zone
-    if (['full', 'long'].includes(options.timeStyle!)) {
-      options.timeStyle = 'medium'
-    }
   }
 
   return new RawDateTimeFormat(locales, options)
@@ -250,29 +255,29 @@ function getForcedCommonTimeZone(
 // Config Data
 // -----------------------------------------------------------------------------
 
-export const plainYearMonthConfig: ClassFormatConfig<IsoDateFields> = [
+export const yearMonthConfig: ClassFormatConfig<IsoDateFields> = [
   transformYearMonthOptions,
   isoToEpochMilli as (isoFields: IsoDateFields) => number,
   true, // strictCalendarChecks
 ]
 
-export const plainMonthDayConfig: ClassFormatConfig<IsoDateFields> = [
+export const monthDayConfig: ClassFormatConfig<IsoDateFields> = [
   transformMonthDayOptions,
   isoToEpochMilli as (isoFields: IsoDateFields) => number,
   true, // strictCalendarChecks
 ]
 
-export const plainDateConfig: ClassFormatConfig<IsoDateFields> = [
+export const dateConfig: ClassFormatConfig<IsoDateFields> = [
   transformDateOptions,
   isoToEpochMilli as (isoFields: IsoDateFields) => number,
 ]
 
-export const plainDateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
+export const dateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
   transformDateTimeOptions,
   isoToEpochMilli as (isoFields: IsoDateTimeFields) => number,
 ]
 
-export const plainTimeConfig: ClassFormatConfig<IsoTimeFields> = [
+export const timeConfig: ClassFormatConfig<IsoTimeFields> = [
   transformTimeOptions,
   (isoFields: IsoTimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
 ]
@@ -282,8 +287,12 @@ export const instantConfig: ClassFormatConfig<EpochSlots> = [
   getEpochMilli,
 ]
 
-export const zonedDateTimeConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> =
-  [transformZonedOptions, getEpochMilli, false, getForcedCommonTimeZone]
+export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> = [
+  transformZonedOptions,
+  getEpochMilli,
+  false, // strictCalendarChecks
+  getForcedCommonTimeZone,
+]
 
 // General Epoch Conversion
 // -----------------------------------------------------------------------------

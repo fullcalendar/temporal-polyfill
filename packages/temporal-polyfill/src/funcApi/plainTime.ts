@@ -11,10 +11,7 @@ import {
 } from '../internal/convert'
 import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
-import {
-  createFormatPrepper,
-  plainTimeConfig,
-} from '../internal/intlFormatPrep'
+import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
@@ -77,7 +74,7 @@ export const toString = formatPlainTimeIso
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  plainTimeConfig,
+  timeConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 

@@ -23,10 +23,7 @@ import {
 } from '../internal/convert'
 import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
-import {
-  createFormatPrepper,
-  zonedDateTimeConfig,
-} from '../internal/intlFormatPrep'
+import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
@@ -283,7 +280,7 @@ export const toString = bindArgs(
 // -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
-  zonedDateTimeConfig,
+  zonedConfig,
   /*@__PURE__*/ createFormatCache(),
 )
 
