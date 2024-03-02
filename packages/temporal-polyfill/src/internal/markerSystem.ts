@@ -43,7 +43,12 @@ export function createMarkerSystem<C, CO, T>(
     ]
   }
 
-  return [{ ...relativeToSlots, ...isoTimeFieldDefaults }, calendarOps]
+  return [
+    // convert IsoDateFields->IsoDateTimeFields
+    // because expected in createMoveMarker/createDiffMarkers
+    { ...relativeToSlots, ...isoTimeFieldDefaults },
+    calendarOps,
+  ]
 }
 
 // Atomic Operations
