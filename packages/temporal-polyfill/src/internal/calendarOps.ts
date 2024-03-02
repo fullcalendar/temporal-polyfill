@@ -17,35 +17,43 @@ export type DateFromFieldsOp<C> = (
   fields: DateBag,
   options?: OverflowOptions,
 ) => PlainDateSlots<C>
+
 export type YearMonthFromFieldsOp<C> = (
   fields: YearMonthBag,
   options?: OverflowOptions,
 ) => PlainYearMonthSlots<C>
+
 export type MonthDayFromFieldsOp<C> = (
   fields: DateBag,
   options?: OverflowOptions,
 ) => PlainMonthDaySlots<C>
+
 export type FieldsOp = (fieldNames: string[]) => string[]
+
 export type MergeFieldsOp = (
   fields: DateBag,
   additionalFields: DateBag,
 ) => DateBag
+
 export type DateAddOp = (
   isoFields: IsoDateFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ) => IsoDateFields
+
 export type DateUntilOp = (
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
   largestUnit: Unit,
   origOptions?: DiffOptions,
 ) => DurationFields
+
 export type DayOp = (isoFields: IsoDateFields) => number
 
 // Refine
 // (assumes received fields are ALREADY refined)
 // TODO: have these functions return the branding too?
+
 export type DateRefineOps<C> = {
   dateFromFields: DateFromFieldsOp<C>
   fields: FieldsOp
@@ -70,7 +78,9 @@ export type MonthDayModOps<C> = MonthDayRefineOps<C> & {
 }
 
 // Math
+
 export type MoveOps = { dateAdd: DateAddOp }
 export type DiffOps = { dateAdd: DateAddOp; dateUntil: DateUntilOp }
+
 export type YearMonthMoveOps = MoveOps & { day: DayOp }
 export type YearMonthDiffOps = DiffOps & { day: DayOp }

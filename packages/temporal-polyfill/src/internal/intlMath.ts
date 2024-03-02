@@ -41,14 +41,14 @@ interface IntlDateFields {
   day: number
 }
 
-interface IntlYearMonths {
-  monthEpochMilli: number[]
+interface IntlYearData {
+  monthEpochMillis: number[]
   monthStringToIndex: Record<string, number>
 }
 
 export interface IntlCalendar extends NativeCalendar {
   queryFields: (isoFields: IsoDateFields) => IntlDateFields
-  queryYearMonths: (year: number) => IntlYearMonths
+  queryYearData: (year: number) => IntlYearData
 }
 
 // -----------------------------------------------------------------------------
@@ -70,7 +70,7 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   return {
     id: calendarId,
     queryFields: createIntlFieldCache(epochMilliToIntlFields),
-    queryYearMonths: createIntlYearMonthCache(epochMilliToIntlFields),
+    queryYearData: createIntlYearDataCache(epochMilliToIntlFields),
   }
 }
 
@@ -86,16 +86,16 @@ function createIntlFieldCache(
   }, WeakMap)
 }
 
-function createIntlYearMonthCache(
+function createIntlYearDataCache(
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
-): (year: number) => IntlYearMonths {
+): (year: number) => IntlYearData {
   const yearAtEpoch = epochMilliToIntlFields(0).year
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
   function buildYear(year: number) {
     let epochMilli = isoArgsToEpochMilli(year - yearCorrection)!
     let intlFields: IntlDateFields
-    const milliReversed: number[] = []
+    const millisReversed: number[] = []
     const monthStringsReversed: string[] = []
 
     // move beyond current year
@@ -123,7 +123,7 @@ function createIntlYearMonthCache(
 
       // only record the epochMilli if current year
       if (intlFields.year === year) {
-        milliReversed.push(epochMilli)
+        millisReversed.push(epochMilli)
         monthStringsReversed.push(intlFields.monthString)
       }
 
@@ -132,7 +132,7 @@ function createIntlYearMonthCache(
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
     return {
-      monthEpochMilli: milliReversed.reverse(),
+      monthEpochMillis: millisReversed.reverse(),
       monthStringToIndex: mapPropNamesToIndex(monthStringsReversed.reverse()),
     }
   }
@@ -221,7 +221,7 @@ export function computeIntlMonth(
   isoFields: IsoDateFields,
 ): number {
   const { year, monthString } = this.queryFields(isoFields)
-  const { monthStringToIndex } = this.queryYearMonths(year)
+  const { monthStringToIndex } = this.queryYearData(year)
   return monthStringToIndex[monthString] + 1
 }
 
@@ -237,7 +237,7 @@ export function computeIntlDateParts(
   isoFields: IsoDateFields,
 ): DateParts {
   const { year, monthString, day } = this.queryFields(isoFields)
-  const { monthStringToIndex } = this.queryYearMonths(year)
+  const { monthStringToIndex } = this.queryYearData(year)
   return [year, monthStringToIndex[monthString] + 1, day]
 }
 
@@ -261,7 +261,7 @@ export function computeIntlEpochMilli(
   day = 1,
 ): number {
   return (
-    this.queryYearMonths(year).monthEpochMilli[month - 1] +
+    this.queryYearData(year).monthEpochMillis[month - 1] +
     (day - 1) * milliInDay
   )
 }
@@ -320,22 +320,23 @@ export function computeIntlDaysInYear(
   return diffEpochMilliByDay(milli, milliNext)
 }
 
+// is this correct now?
 export function computeIntlDaysInMonth(
   this: IntlCalendar,
   year: number,
   month: number,
 ): number {
-  const { monthEpochMilli } = this.queryYearMonths(year)
+  const { monthEpochMillis } = this.queryYearData(year)
   let nextMonth = month + 1
-  let nextMonthEpochMilli = monthEpochMilli
+  let nextMonthEpochMilli = monthEpochMillis
 
-  if (nextMonth > monthEpochMilli.length) {
+  if (nextMonth > monthEpochMillis.length) {
     nextMonth = 1
-    nextMonthEpochMilli = this.queryYearMonths(year + 1).monthEpochMilli
+    nextMonthEpochMilli = this.queryYearData(year + 1).monthEpochMillis
   }
 
   return diffEpochMilliByDay(
-    monthEpochMilli[month - 1],
+    monthEpochMillis[month - 1],
     nextMonthEpochMilli[nextMonth - 1],
   )
 }
@@ -357,7 +358,7 @@ export function computeIntlMonthsInYear(
   this: IntlCalendar,
   year: number,
 ): number {
-  return this.queryYearMonths(year).monthEpochMilli.length
+  return this.queryYearData(year).monthEpochMillis.length
 }
 
 export function computeIntlEraParts(
@@ -419,5 +420,5 @@ export function computeIntlYearMonthForMonthDay(
 // -----------------------------------------------------------------------------
 
 function queryMonthStrings(intlCalendar: IntlCalendar, year: number): string[] {
-  return Object.keys(intlCalendar.queryYearMonths(year).monthStringToIndex)
+  return Object.keys(intlCalendar.queryYearData(year).monthStringToIndex)
 }

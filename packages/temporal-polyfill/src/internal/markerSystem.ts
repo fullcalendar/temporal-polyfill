@@ -74,7 +74,7 @@ export function createMoveMarker(
   if (timeZoneOps) {
     return bindArgs(moveZonedEpochSlots, calendarOps, timeZoneOps) as Callable
   }
-  return bindArgs(moveDateTime as Callable, calendarOps)
+  return bindArgs(moveDateTime, calendarOps) as Callable
 }
 
 export function createDiffMarkers(
