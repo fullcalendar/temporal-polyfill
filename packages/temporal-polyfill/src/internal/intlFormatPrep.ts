@@ -219,7 +219,7 @@ export function createFormatPrepper<S>(
     )
 
     const resolvedOptions = subformat.resolvedOptions()
-    return [subformat, ...toEpochMillis(config, resolvedOptions, ...slotsList)]
+    return [subformat, ...toEpochMillis(config, resolvedOptions, slotsList)]
   }
 }
 
@@ -300,7 +300,7 @@ export const monthDayConfig: ClassFormatConfig<IsoDateFields> = [
 function toEpochMillis<S>(
   config: ClassFormatConfig<S>,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-  ...slotsList: S[]
+  slotsList: S[],
 ): number[] {
   const [, slotsToEpochMilli, strictCalendarCheck] = config
 
