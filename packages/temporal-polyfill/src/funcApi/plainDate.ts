@@ -62,6 +62,9 @@ export type Fields = DateFields
 export type Bag = DateBag
 export type BagWithCalendar = PlainDateBag<string>
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = bindArgs(
   constructPlainDateSlots<string, string>,
   refineCalendarIdString,
@@ -72,11 +75,9 @@ export const create = bindArgs(
   calendar?: string,
 ) => Record
 
-export const fromString = parsePlainDate as (s: string) => Record
-
 export function fromFields(
   fields: BagWithCalendar,
-  options?: OverflowOptions, // ???
+  options?: OverflowOptions,
 ): Record {
   return refinePlainDateBag(
     createNativeDateRefineOps(getCalendarIdFromBag(fields)),
@@ -85,27 +86,14 @@ export function fromFields(
   )
 }
 
+export const fromString = parsePlainDate as (s: string) => Record
+
+// Getters
+// -----------------------------------------------------------------------------
+
 export const getFields = memoize(computeDateFields, WeakMap) as (
   record: Record,
 ) => Fields
-
-export function withFields(
-  record: Record,
-  fields: Bag,
-  options?: OverflowOptions, // ???
-): Record {
-  return plainDateWithFields(
-    createNativeDateModOps,
-    record,
-    getFields(record),
-    fields,
-    options,
-  )
-}
-
-export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarIdString(calendar))
-}
 
 export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
@@ -128,6 +116,30 @@ export const daysInYear = computeDaysInYear as (record: Record) => number
 export const monthsInYear = computeMonthsInYear as (record: Record) => number
 
 export const inLeapYear = computeInLeapYear as (record: Record) => boolean
+
+// Setters
+// -----------------------------------------------------------------------------
+
+export function withFields(
+  record: Record,
+  fields: Bag,
+  options?: OverflowOptions,
+): Record {
+  return plainDateWithFields(
+    createNativeDateModOps,
+    record,
+    getFields(record),
+    fields,
+    options,
+  )
+}
+
+export function withCalendar(record: Record, calendar: string): Record {
+  return slotsWithCalendar(record, refineCalendarIdString(calendar))
+}
+
+// Math
+// -----------------------------------------------------------------------------
 
 export const add = bindArgs(
   movePlainDate<string>,
@@ -179,6 +191,9 @@ export const compare = compareIsoDateFields as (
   record1: Record,
 ) => NumberSign
 
+// Conversion
+// -----------------------------------------------------------------------------
+
 export function toZonedDateTime(
   record: Record,
   options: string | { timeZone: string; plainTime?: PlainTimeFns.Record },
@@ -216,13 +231,13 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
   )
 }
 
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = formatPlainDateIso<string> as (
   record: Record,
   options?: CalendarDisplayOptions,
 ) => string
-
-// Intl Formatting
-// -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
   dateConfig,

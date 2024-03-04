@@ -89,13 +89,14 @@ export type BagForCreation = ZonedDateTimeBag<string, string>
 export type Bag = DateTimeBag
 export type ISOFields = ZonedIsoFields<string, string>
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
   refineCalendarIdString,
   refineTimeZoneIdString,
 ) as (epochNanoseconds: bigint, timeZone: string, calendar?: string) => Record
-
-export const fromString = parseZonedDateTime
 
 export function fromFields(
   fields: BagForCreation,
@@ -112,22 +113,10 @@ export function fromFields(
   )
 }
 
-export const epochSeconds = getEpochSec as (record: Record) => number
+export const fromString = parseZonedDateTime
 
-export const epochMilliseconds = getEpochMilli as (record: Record) => number
-
-export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
-
-export const epochNanoseconds = getEpochNano as (record: Record) => bigint
-
-export function offsetNanoseconds(record: Record): number {
-  return zonedEpochSlotsToIso(record, queryNativeTimeZone).offsetNanoseconds
-}
-
-export const getISOFields = bindArgs(
-  buildZonedIsoFields<string, string>,
-  queryNativeTimeZone,
-) as (record: Record) => ISOFields
+// Getters
+// -----------------------------------------------------------------------------
 
 export const getFields = memoize((record: Record): Fields => {
   const isoFields = zonedEpochSlotsToIso(record, queryNativeTimeZone)
@@ -140,44 +129,22 @@ export const getFields = memoize((record: Record): Fields => {
   }
 }, WeakMap)
 
-export function withFields(
-  record: Record,
-  fields: Bag,
-  options?: ZonedFieldOptions,
-): Record {
-  return zonedDateTimeWithFields(
-    createNativeDateModOps,
-    queryNativeTimeZone,
-    record,
-    getFields(record),
-    fields,
-    options,
-  )
-}
-
-export function withTimeZone(record: Record, timeZone: string): Record {
-  return slotsWithTimeZone(record, refineTimeZoneIdString(timeZone))
-}
-
-export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarIdString(calendar))
-}
-
-export const withPlainDate = bindArgs(
-  zonedDateTimeWithPlainDate<string, string>,
+export const getISOFields = bindArgs(
+  buildZonedIsoFields<string, string>,
   queryNativeTimeZone,
-) as (
-  zonedDateTimeRecord: Record,
-  plainDateRecord: PlainDateFns.Record,
-) => Record
+) as (record: Record) => ISOFields
 
-export const withPlainTime = bindArgs(
-  zonedDateTimeWithPlainTime<string, string>,
-  queryNativeTimeZone,
-) as (
-  zonedDateTimeRecord: Record,
-  plainTimeRecord?: PlainTimeFns.Record,
-) => Record
+export const epochSeconds = getEpochSec as (record: Record) => number
+
+export const epochMilliseconds = getEpochMilli as (record: Record) => number
+
+export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
+
+export const epochNanoseconds = getEpochNano as (record: Record) => bigint
+
+export function offsetNanoseconds(record: Record): number {
+  return zonedEpochSlotsToIso(record, queryNativeTimeZone).offsetNanoseconds
+}
 
 export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek) as (
   record: Record,
@@ -215,15 +182,55 @@ export const inLeapYear = adaptDateFunc(computeInLeapYear) as (
   record: Record,
 ) => boolean
 
-export const startOfDay = bindArgs(
-  computeStartOfDay<string, string>,
-  queryNativeTimeZone,
-) as (record: Record) => Record
-
 export const hoursInDay = bindArgs(
   computeHoursInDay<string, string>,
   queryNativeTimeZone,
 ) as (record: Record) => number
+
+// Setters
+// -----------------------------------------------------------------------------
+
+export function withFields(
+  record: Record,
+  fields: Bag,
+  options?: ZonedFieldOptions,
+): Record {
+  return zonedDateTimeWithFields(
+    createNativeDateModOps,
+    queryNativeTimeZone,
+    record,
+    getFields(record),
+    fields,
+    options,
+  )
+}
+
+export function withCalendar(record: Record, calendar: string): Record {
+  return slotsWithCalendar(record, refineCalendarIdString(calendar))
+}
+
+export function withTimeZone(record: Record, timeZone: string): Record {
+  return slotsWithTimeZone(record, refineTimeZoneIdString(timeZone))
+}
+
+export const withPlainDate = bindArgs(
+  zonedDateTimeWithPlainDate<string, string>,
+  queryNativeTimeZone,
+) as (
+  zonedDateTimeRecord: Record,
+  plainDateRecord: PlainDateFns.Record,
+) => Record
+
+export const withPlainTime = bindArgs(
+  zonedDateTimeWithPlainTime<string, string>,
+  queryNativeTimeZone,
+) as (
+  zonedDateTimeRecord: Record,
+  plainTimeRecord?: PlainTimeFns.Record,
+) => Record
+
+// Math
+// -----------------------------------------------------------------------------
 
 export const add = bindArgs(
   moveZonedDateTime<string, string>,
@@ -274,6 +281,11 @@ export const round = bindArgs(
   queryNativeTimeZone,
 ) as (record: Record, options: RoundOptions | UnitName) => Record
 
+export const startOfDay = bindArgs(
+  computeStartOfDay<string, string>,
+  queryNativeTimeZone,
+) as (record: Record) => Record
+
 export const equals = zonedDateTimesEqual<string, string> as (
   record0: Record,
   record1: Record,
@@ -283,6 +295,9 @@ export const compare = compareZonedDateTimes<string, string> as (
   record0: Record,
   record1: Record,
 ) => NumberSign
+
+// Conversion
+// -----------------------------------------------------------------------------
 
 export const toPlainDateTime = bindArgs(
   zonedDateTimeToPlainDateTime<string, string>,
@@ -315,13 +330,13 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
   )
 }
 
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = bindArgs(
   formatZonedDateTimeIso<string, string>,
   queryNativeTimeZone,
 ) as (record: Record, options?: ZonedDateTimeDisplayOptions) => string
-
-// Intl Formatting
-// -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
   zonedConfig,
@@ -376,7 +391,7 @@ export function rangeToLocaleStringParts(
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-// Utils
+// Internal Utils
 // -----------------------------------------------------------------------------
 
 function adaptDateFunc<R>(

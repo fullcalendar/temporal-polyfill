@@ -38,11 +38,12 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<InstantSlots>
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = constructInstantSlots as (
   epochNanoseconds: bigint,
 ) => Record
-
-export const fromString = parseInstant as (s: string) => Record
 
 export const fromEpochSeconds = epochSecToInstant as (
   epochSeconds: number,
@@ -60,6 +61,11 @@ export const fromEpochNanoseconds = epochNanoToInstant as (
   epochNanoseconds: bigint,
 ) => Record
 
+export const fromString = parseInstant as (s: string) => Record
+
+// Getters
+// -----------------------------------------------------------------------------
+
 export const epochSeconds = getEpochSec as (record: Record) => number
 
 export const epochMilliseconds = getEpochMilli as (record: Record) => number
@@ -67,6 +73,9 @@ export const epochMilliseconds = getEpochMilli as (record: Record) => number
 export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
 
 export const epochNanoseconds = getEpochNano as (record: Record) => bigint
+
+// Math
+// -----------------------------------------------------------------------------
 
 export const add = bindArgs(moveInstant, false) as (
   instantRecord: Record,
@@ -106,12 +115,8 @@ export const compare = compareInstants as (
   record1: Record,
 ) => NumberSign
 
-export function toZonedDateTimeISO(
-  record: Record,
-  timeZone: string,
-): ZonedDateTimeFns.Record {
-  return instantToZonedDateTime(record, refineTimeZoneIdString(timeZone))
-}
+// Conversion
+// -----------------------------------------------------------------------------
 
 export function toZonedDateTime(
   record: Record,
@@ -126,6 +131,16 @@ export function toZonedDateTime(
   )
 }
 
+export function toZonedDateTimeISO(
+  record: Record,
+  timeZone: string,
+): ZonedDateTimeFns.Record {
+  return instantToZonedDateTime(record, refineTimeZoneIdString(timeZone))
+}
+
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = bindArgs(
   formatInstantIso<string, string>,
   refineTimeZoneIdString,
@@ -135,9 +150,6 @@ export const toString = bindArgs(
   // TODO: better reusable type...
   options?: InstantDisplayOptions<string>,
 ) => string
-
-// Intl Formatting
-// -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
   instantConfig,

@@ -49,6 +49,9 @@ export type Fields = YearMonthFields
 export type Bag = YearMonthBag
 export type BagWithCalendar = PlainYearMonthBag<string>
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = bindArgs(
   constructPlainYearMonthSlots<string, string>,
   refineCalendarIdString,
@@ -58,11 +61,6 @@ export const create = bindArgs(
   calendar?: string,
   referenceIsoDay?: number,
 ) => Record
-
-export const fromString = bindArgs(
-  parsePlainYearMonth,
-  createNativeYearMonthParseOps,
-) as (s: string) => Record
 
 export function fromFields(
   bag: BagWithCalendar,
@@ -75,9 +73,28 @@ export function fromFields(
   )
 }
 
+export const fromString = bindArgs(
+  parsePlainYearMonth,
+  createNativeYearMonthParseOps,
+) as (s: string) => Record
+
+// Getters
+// -----------------------------------------------------------------------------
+
 export const getFields = memoize(computeYearMonthFields, WeakMap) as (
   record: Record,
 ) => Fields
+
+export const daysInMonth = computeDaysInMonth as (record: Record) => number
+
+export const daysInYear = computeDaysInYear as (record: Record) => number
+
+export const monthsInYear = computeMonthsInYear as (record: Record) => number
+
+export const inLeapYear = computeInLeapYear as (record: Record) => boolean
+
+// Setters
+// -----------------------------------------------------------------------------
 
 export function withFields(
   record: Record,
@@ -93,13 +110,8 @@ export function withFields(
   )
 }
 
-export const daysInMonth = computeDaysInMonth as (record: Record) => number
-
-export const daysInYear = computeDaysInYear as (record: Record) => number
-
-export const monthsInYear = computeMonthsInYear as (record: Record) => number
-
-export const inLeapYear = computeInLeapYear as (record: Record) => boolean
+// Math
+// -----------------------------------------------------------------------------
 
 export const add = bindArgs(
   movePlainYearMonth<string>,
@@ -151,6 +163,9 @@ export const compare = compareIsoDateFields as (
   record1: Record,
 ) => NumberSign
 
+// Conversion
+// -----------------------------------------------------------------------------
+
 export function toPlainDate(
   record: Record,
   bag: { day: number },
@@ -163,13 +178,13 @@ export function toPlainDate(
   )
 }
 
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = formatPlainYearMonthIso<string> as (
   record: Record,
   options?: CalendarDisplayOptions,
 ) => string
-
-// Intl Formatting
-// -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
   yearMonthConfig,

@@ -35,6 +35,9 @@ export type RelativeToArg =
   | PlainDateTimeFns.Record
   | PlainDateFns.Record
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = constructDurationSlots as (
   years?: number,
   months?: number,
@@ -48,14 +51,29 @@ export const create = constructDurationSlots as (
   nanoseconds?: number,
 ) => Record
 
+export const fromFields = refineDurationBag as (bag: Bag) => Record
+
 export const fromString = parseDuration as (s: string) => Record
 
-export const fromFields = refineDurationBag as (bag: Bag) => Record
+// Getters
+// -----------------------------------------------------------------------------
+
+export const blank = getDurationBlank as (record: Record) => boolean
+
+// Setters
+// -----------------------------------------------------------------------------
 
 export const withFields = durationWithFields as (
   record: Record,
   bag: Bag,
 ) => Record
+
+// Math
+// -----------------------------------------------------------------------------
+
+export const negated = negateDuration as (record: Record) => Record
+
+export const abs = absDuration as (record: Record) => Record
 
 export const add = bindArgs(
   addDurations<RelativeToArg, string, string>,
@@ -81,10 +99,6 @@ export const subtract = bindArgs(
   options?: RelativeToOptions<RelativeToArg>,
 ) => Record
 
-export const negated = negateDuration as (record: Record) => Record
-
-export const abs = absDuration as (record: Record) => Record
-
 export const round = bindArgs(
   roundDuration<RelativeToArg, string, string>,
   identity,
@@ -102,6 +116,20 @@ export const total = bindArgs(
   options?: TotalUnitOptionsWithRel<RelativeToArg> | UnitName,
 ) => number
 
+export const compare = bindArgs(
+  compareDurations<RelativeToArg, string, string>,
+  identity,
+  createNativeDiffOps,
+  queryNativeTimeZone,
+) as (
+  record0: Record,
+  record1: Record,
+  options?: RelativeToOptions<RelativeToArg>,
+) => NumberSign
+
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = formatDurationIso as (
   record: Record,
   options?: TimeDisplayOptions,
@@ -116,16 +144,3 @@ export function toLocaleString(
     ? new (Intl as any).DurationFormat(locales, options).format(record)
     : formatDurationIso(record)
 }
-
-export const blank = getDurationBlank as (record: Record) => boolean
-
-export const compare = bindArgs(
-  compareDurations<RelativeToArg, string, string>,
-  identity,
-  createNativeDiffOps,
-  queryNativeTimeZone,
-) as (
-  record0: Record,
-  record1: Record,
-  options?: RelativeToOptions<RelativeToArg>,
-) => NumberSign

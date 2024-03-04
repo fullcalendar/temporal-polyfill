@@ -37,6 +37,9 @@ export type Fields = MonthDayFields
 export type Bag = MonthDayBag
 export type BagWithCalendar = PlainMonthDayBag<string>
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = bindArgs(
   constructPlainMonthDaySlots<string, string>,
   refineCalendarIdString,
@@ -46,11 +49,6 @@ export const create = bindArgs(
   calendar?: string,
   referenceIsoYear?: number,
 ) => Record
-
-export const fromString = bindArgs(
-  parsePlainMonthDay,
-  createNativeMonthDayParseOps,
-) as (s: string) => Record
 
 export function fromFields(
   fields: BagWithCalendar,
@@ -66,6 +64,14 @@ export function fromFields(
     options,
   )
 }
+
+export const fromString = bindArgs(
+  parsePlainMonthDay,
+  createNativeMonthDayParseOps,
+) as (s: string) => Record
+
+// Getters / Setters
+// -----------------------------------------------------------------------------
 
 export const getFields = memoize(computeMonthDayFields, WeakMap) as (
   record: Record,
@@ -85,10 +91,16 @@ export function withFields(
   )
 }
 
+// Math
+// -----------------------------------------------------------------------------
+
 export const equals = plainMonthDaysEqual<string> as (
   record0: Record,
   record1: Record,
 ) => boolean
+
+// Conversion
+// -----------------------------------------------------------------------------
 
 export function toPlainDate(
   record: Record,
@@ -102,13 +114,13 @@ export function toPlainDate(
   )
 }
 
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = formatPlainMonthDayIso<string> as (
   record: Record,
   options?: CalendarDisplayOptions,
 ) => string
-
-// Intl Formatting
-// -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
   monthDayConfig,

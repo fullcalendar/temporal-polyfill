@@ -39,6 +39,9 @@ export type Fields = TimeFields
 export type Bag = TimeBag
 // for creation... PlainTimeBag
 
+// Creation / Parsing
+// -----------------------------------------------------------------------------
+
 export const create = constructPlainTimeSlots as (
   isoHour?: number,
   isoMinute?: number,
@@ -48,12 +51,15 @@ export const create = constructPlainTimeSlots as (
   isoNanosecond?: number,
 ) => Record
 
-export const fromString = parsePlainTime as (s: string) => Record
-
 export const fromFields = refinePlainTimeBag as (
   bag: Bag,
   options?: OverflowOptions,
 ) => Record
+
+export const fromString = parsePlainTime as (s: string) => Record
+
+// Getters / Setters
+// -----------------------------------------------------------------------------
 
 export const getFields = memoize(isoTimeFieldsToCal, WeakMap) as (
   record: Record,
@@ -66,6 +72,9 @@ export function withFields(
 ): Record {
   return plainTimeWithFields(getFields(record), mod, options)
 }
+
+// Math
+// -----------------------------------------------------------------------------
 
 export const add = bindArgs(movePlainTime, false) as (
   plainTimeRecord: Record,
@@ -104,10 +113,8 @@ export const compare = compareIsoTimeFields as (
   record1: Record,
 ) => NumberSign
 
-export const toPlainDateTime = plainTimeToPlainDateTime<string> as (
-  plainTimeRecord: Record,
-  plainDateRecord: PlainDateFns.Record,
-) => PlainDateTimeFns.Record
+// Conversion
+// -----------------------------------------------------------------------------
 
 export const toZonedDateTime = bindArgs(
   plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
@@ -119,13 +126,18 @@ export const toZonedDateTime = bindArgs(
   options: { timeZone: string; plainDate: PlainDateFns.Record },
 ) => ZonedDateTimeFns.Record
 
+export const toPlainDateTime = plainTimeToPlainDateTime<string> as (
+  plainTimeRecord: Record,
+  plainDateRecord: PlainDateFns.Record,
+) => PlainDateTimeFns.Record
+
+// Formatting
+// -----------------------------------------------------------------------------
+
 export const toString = formatPlainTimeIso as (
   record: Record,
   options?: TimeDisplayOptions,
 ) => string
-
-// Intl Formatting
-// -----------------------------------------------------------------------------
 
 const prepFormat = createFormatPrepper(
   timeConfig,
