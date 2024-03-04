@@ -35,12 +35,16 @@ import {
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
 import { moveZonedDateTime } from '../internal/move'
-import { ZonedFieldOptions } from '../internal/optionsRefine'
+import {
+  DiffOptions,
+  OverflowOptions,
+  RoundingOptions,
+  ZonedDateTimeDisplayOptions,
+  ZonedFieldOptions,
+} from '../internal/optionsRefine'
 import { roundZonedDateTime } from '../internal/round'
 import {
   DateSlots,
-  PlainMonthDaySlots,
-  PlainYearMonthSlots,
   ZonedDateTimeSlots,
   getEpochMicro,
   getEpochMilli,
@@ -50,13 +54,21 @@ import {
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   ZonedDateTimeFields,
+  ZonedIsoFields,
   buildZonedIsoFields,
   computeHoursInDay,
   computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
-import { bindArgs, memoize } from '../internal/utils'
+import { UnitName } from '../internal/units'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
+import * as PlainDateFns from './plainDate'
+import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainMonthDayFns from './plainMonthDay'
+import * as PlainTimeFns from './plainTime'
+import * as PlainYearMonthFns from './plainYearMonth'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -71,21 +83,24 @@ import {
   refineTimeZoneIdString,
 } from './utils'
 
-// TODO: rename to keep scope? Slots/Fields/Bag?
-export type { ZonedDateTimeSlots, ZonedDateTimeBag, DateTimeBag }
+export type Record = Readonly<ZonedDateTimeSlots<string, string>>
+export type Fields = ZonedDateTimeFields
+export type BagForCreation = ZonedDateTimeBag<string, string>
+export type Bag = DateTimeBag
+export type ISOFields = ZonedIsoFields<string, string>
 
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
   refineCalendarIdString,
   refineTimeZoneIdString,
-)
+) as (epochNanoseconds: bigint, timeZone: string, calendar?: string) => Record
 
 export const fromString = parseZonedDateTime
 
 export function fromFields(
-  fields: ZonedDateTimeBag<string, string>,
+  fields: BagForCreation,
   options?: ZonedFieldOptions,
-): ZonedDateTimeSlots<string, string> {
+): Record {
   const calendarId = getCalendarIdFromBag(fields)
   return refineZonedDateTimeBag(
     refineTimeZoneIdString,
@@ -97,184 +112,213 @@ export function fromFields(
   )
 }
 
-export const epochSeconds = getEpochSec as (
-  slots: ZonedDateTimeSlots<string, string>,
-) => number
-export const epochMilliseconds = getEpochMilli as (
-  slots: ZonedDateTimeSlots<string, string>,
-) => number
-export const epochMicroseconds = getEpochMicro as (
-  slots: ZonedDateTimeSlots<string, string>,
-) => bigint
-export const epochNanoseconds = getEpochNano as (
-  slots: ZonedDateTimeSlots<string, string>,
-) => bigint
+export const epochSeconds = getEpochSec as (record: Record) => number
 
-export function offsetNanoseconds(
-  slots: ZonedDateTimeSlots<string, string>,
-): number {
-  return zonedEpochSlotsToIso(slots, queryNativeTimeZone).offsetNanoseconds
+export const epochMilliseconds = getEpochMilli as (record: Record) => number
+
+export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
+
+export const epochNanoseconds = getEpochNano as (record: Record) => bigint
+
+export function offsetNanoseconds(record: Record): number {
+  return zonedEpochSlotsToIso(record, queryNativeTimeZone).offsetNanoseconds
 }
 
-// not memoized
 export const getISOFields = bindArgs(
   buildZonedIsoFields<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record) => ISOFields
 
-export const getFields = memoize(
-  (
-    zonedDateTimeSlots: ZonedDateTimeSlots<string, string>,
-  ): ZonedDateTimeFields => {
-    const isoFields = zonedEpochSlotsToIso(
-      zonedDateTimeSlots,
-      queryNativeTimeZone,
-    )
-    const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
+export const getFields = memoize((record: Record): Fields => {
+  const isoFields = zonedEpochSlotsToIso(record, queryNativeTimeZone)
+  const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
-    return {
-      ...computeDateFields(isoFields),
-      ...isoTimeFieldsToCal(isoFields),
-      offset: offsetString,
-    }
-  },
-  WeakMap,
-)
+  return {
+    ...computeDateFields(isoFields),
+    ...isoTimeFieldsToCal(isoFields),
+    offset: offsetString,
+  }
+}, WeakMap)
 
 export function withFields(
-  slots: ZonedDateTimeSlots<string, string>,
-  fields: DateTimeBag,
+  record: Record,
+  fields: Bag,
   options?: ZonedFieldOptions,
-): ZonedDateTimeSlots<string, string> {
+): Record {
   return zonedDateTimeWithFields(
     createNativeDateModOps,
     queryNativeTimeZone,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
     fields,
     options,
   )
 }
 
-export function withTimeZone(
-  slots: ZonedDateTimeSlots<string, string>,
-  timeZoneId: string,
-): ZonedDateTimeSlots<string, string> {
-  return slotsWithTimeZone(slots, refineTimeZoneIdString(timeZoneId))
+export function withTimeZone(record: Record, timeZone: string): Record {
+  return slotsWithTimeZone(record, refineTimeZoneIdString(timeZone))
 }
 
-export function withCalendar(
-  slots: ZonedDateTimeSlots<string, string>,
-  calendarId: string,
-): ZonedDateTimeSlots<string, string> {
-  return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
+export function withCalendar(record: Record, calendar: string): Record {
+  return slotsWithCalendar(record, refineCalendarIdString(calendar))
 }
 
 export const withPlainDate = bindArgs(
   zonedDateTimeWithPlainDate<string, string>,
   queryNativeTimeZone,
-)
+) as (
+  zonedDateTimeRecord: Record,
+  plainDateRecord: PlainDateFns.Record,
+) => Record
 
 export const withPlainTime = bindArgs(
   zonedDateTimeWithPlainTime<string, string>,
   queryNativeTimeZone,
-)
+) as (
+  zonedDateTimeRecord: Record,
+  plainTimeRecord?: PlainTimeFns.Record,
+) => Record
 
-export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek)
-export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek)
-export const weekOfYear = adaptDateFunc(computeWeekOfYear)
-export const yearOfWeek = adaptDateFunc(computeYearOfWeek)
-export const dayOfYear = adaptDateFunc(computeDayOfYear)
-export const daysInMonth = adaptDateFunc(computeDaysInMonth)
-export const daysInYear = adaptDateFunc(computeDaysInYear)
-export const monthsInYear = adaptDateFunc(computeMonthsInYear)
-export const inLeapYear = adaptDateFunc(computeInLeapYear)
+export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek) as (
+  record: Record,
+) => number
+
+export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek) as (
+  record: Record,
+) => number
+
+export const weekOfYear = adaptDateFunc(computeWeekOfYear) as (
+  record: Record,
+) => number | undefined
+
+export const yearOfWeek = adaptDateFunc(computeYearOfWeek) as (
+  record: Record,
+) => number | undefined
+
+export const dayOfYear = adaptDateFunc(computeDayOfYear) as (
+  record: Record,
+) => number
+
+export const daysInMonth = adaptDateFunc(computeDaysInMonth) as (
+  record: Record,
+) => number
+
+export const daysInYear = adaptDateFunc(computeDaysInYear) as (
+  record: Record,
+) => number
+
+export const monthsInYear = adaptDateFunc(computeMonthsInYear) as (
+  record: Record,
+) => number
+
+export const inLeapYear = adaptDateFunc(computeInLeapYear) as (
+  record: Record,
+) => boolean
 
 export const startOfDay = bindArgs(
   computeStartOfDay<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record) => Record
 
 export const hoursInDay = bindArgs(
   computeHoursInDay<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record) => number
 
 export const add = bindArgs(
   moveZonedDateTime<string, string>,
   createNativeMoveOps,
   queryNativeTimeZone,
   false,
-)
+) as (
+  zonedDateTimeRecord: Record,
+  durationRecord: DurationFns.Record,
+  options?: OverflowOptions,
+) => Record
 
 export const subtract = bindArgs(
   moveZonedDateTime<string, string>,
   createNativeMoveOps,
   queryNativeTimeZone,
   true,
-)
+) as (
+  zonedDateTimeRecord: Record,
+  durationRecord: DurationFns.Record,
+  options?: OverflowOptions,
+) => Record
 
 export const until = bindArgs(
   diffZonedDateTimes<string, string>,
   createNativeDiffOps,
   queryNativeTimeZone,
   false,
-)
+) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
 
 export const since = bindArgs(
   diffZonedDateTimes<string, string>,
   createNativeDiffOps,
   queryNativeTimeZone,
   true,
-)
+) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
 
 export const round = bindArgs(
   roundZonedDateTime<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record, options: RoundingOptions | UnitName) => Record
 
-export const equals = zonedDateTimesEqual<string, string>
-export const compare = compareZonedDateTimes<string, string>
+export const equals = zonedDateTimesEqual<string, string> as (
+  record0: Record,
+  record1: Record,
+) => boolean
+
+export const compare = compareZonedDateTimes<string, string> as (
+  record0: Record,
+  record1: Record,
+) => NumberSign
 
 export const toPlainDateTime = bindArgs(
   zonedDateTimeToPlainDateTime<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record) => PlainDateTimeFns.Record
 
 export const toPlainDate = bindArgs(
   zonedDateTimeToPlainDate<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record) => PlainDateFns.Record
 
 export const toPlainTime = bindArgs(
   zonedDateTimeToPlainTime<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record) => PlainTimeFns.Record
 
-export function toPlainYearMonth(
-  slots: ZonedDateTimeSlots<string, string>,
-): PlainYearMonthSlots<string> {
+export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
   return zonedDateTimeToPlainYearMonth(
     createNativeYearMonthRefineOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
   )
 }
 
-export function toPlainMonthDay(
-  slots: ZonedDateTimeSlots<string, string>,
-): PlainMonthDaySlots<string> {
+export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
   return zonedDateTimeToPlainMonthDay(
     createNativeMonthDayRefineOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
   )
 }
 
 export const toString = bindArgs(
   formatZonedDateTimeIso<string, string>,
   queryNativeTimeZone,
-)
+) as (record: Record, options?: ZonedDateTimeDisplayOptions) => string
 
 // Intl Formatting
 // -----------------------------------------------------------------------------
@@ -285,49 +329,49 @@ const prepFormat = createFormatPrepper(
 )
 
 export function toLocaleString(
-  slots: ZonedDateTimeSlots<string, string>,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.format(epochMilli)
 }
 
 export function toLocaleStringParts(
-  slots: ZonedDateTimeSlots<string, string>,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.formatToParts(epochMilli)
 }
 
 export function rangeToLocaleString(
-  slots0: ZonedDateTimeSlots<string, string>,
-  slots1: ZonedDateTimeSlots<string, string>,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
 export function rangeToLocaleStringParts(
-  slots0: ZonedDateTimeSlots<string, string>,
-  slots1: ZonedDateTimeSlots<string, string>,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
@@ -337,8 +381,8 @@ export function rangeToLocaleStringParts(
 
 function adaptDateFunc<R>(
   dateFunc: (dateSlots: DateSlots<string>) => R,
-): (slots: ZonedDateTimeSlots<string, string>) => R {
-  return (slots: ZonedDateTimeSlots<string, string>) => {
-    return dateFunc(zonedEpochSlotsToIso(slots, queryNativeTimeZone))
+): (record: Record) => R {
+  return (record: Record) => {
+    return dateFunc(zonedEpochSlotsToIso(record, queryNativeTimeZone))
   }
 }

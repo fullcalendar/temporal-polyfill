@@ -1,4 +1,8 @@
-import { plainDateWithFields, refinePlainDateBag } from '../internal/bagRefine'
+import {
+  PlainDateBag,
+  plainDateWithFields,
+  refinePlainDateBag,
+} from '../internal/bagRefine'
 import {
   createNativeDateModOps,
   createNativeDateRefineOps,
@@ -24,18 +28,20 @@ import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
 import { slotsWithCalendar } from '../internal/modify'
 import { movePlainDate } from '../internal/move'
-import { OverflowOptions } from '../internal/optionsRefine'
 import {
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainMonthDaySlots,
-  PlainTimeSlots,
-  PlainYearMonthSlots,
-  ZonedDateTimeSlots,
-} from '../internal/slots'
+  CalendarDisplayOptions,
+  DiffOptions,
+  OverflowOptions,
+} from '../internal/optionsRefine'
+import { PlainDateSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
+import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainMonthDayFns from './plainMonthDay'
+import * as PlainTimeFns from './plainTime'
+import * as PlainYearMonthFns from './plainYearMonth'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -49,25 +55,29 @@ import {
   refineCalendarIdString,
   refineTimeZoneIdString,
 } from './utils'
+import * as ZonedDateTimeFns from './zonedDateTime'
 
-// TODO: do Readonly<> everywhere?
-// OR do it on the PlainDateSlots?
-// TODO: name all args properly like 'plainDateSlots'???
-
-// TODO: rename to keep scope? Slots/Fields/Bag?
-export type { PlainDateSlots, DateBag }
+export type Record = Readonly<PlainDateSlots<string>>
+export type Fields = DateFields
+export type Bag = DateBag
+export type BagWithCalendar = PlainDateBag<string>
 
 export const create = bindArgs(
   constructPlainDateSlots<string, string>,
   refineCalendarIdString,
-)
+) as (
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+  calendar?: string,
+) => Record
 
-export const fromString = parsePlainDate
+export const fromString = parsePlainDate as (s: string) => Record
 
 export function fromFields(
-  fields: DateBag & { calendar?: string },
-  options?: OverflowOptions,
-): PlainDateSlots<string> {
+  fields: BagWithCalendar,
+  options?: OverflowOptions, // ???
+): Record {
   return refinePlainDateBag(
     createNativeDateRefineOps(getCalendarIdFromBag(fields)),
     fields,
@@ -76,82 +86,103 @@ export function fromFields(
 }
 
 export const getFields = memoize(computeDateFields, WeakMap) as (
-  slots: PlainDateSlots<string>,
-) => DateFields
+  record: Record,
+) => Fields
 
 export function withFields(
-  slots: PlainDateSlots<string>,
-  fields: DateBag,
-  options?: OverflowOptions,
-): PlainDateSlots<string> {
+  record: Record,
+  fields: Bag,
+  options?: OverflowOptions, // ???
+): Record {
   return plainDateWithFields(
     createNativeDateModOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
     fields,
     options,
   )
 }
 
-export function withCalendar(
-  slots: PlainDateSlots<string>,
-  calendarId: string,
-): PlainDateSlots<string> {
-  return slotsWithCalendar(slots, refineCalendarIdString(calendarId))
+export function withCalendar(record: Record, calendar: string): Record {
+  return slotsWithCalendar(record, refineCalendarIdString(calendar))
 }
 
-export const dayOfWeek = computeIsoDayOfWeek as (
-  slots: PlainDateSlots<string>,
-) => number
-export const daysInWeek = computeIsoDaysInWeek as (
-  slots: PlainDateSlots<string>,
-) => number
-export const weekOfYear = computeWeekOfYear as (
-  slots: PlainDateSlots<string>,
-) => number | undefined
-export const yearOfWeek = computeYearOfWeek as (
-  slots: PlainDateSlots<string>,
-) => number | undefined
-export const dayOfYear = computeDayOfYear as (
-  slots: PlainDateSlots<string>,
-) => number
-export const daysInMonth = computeDaysInMonth as (
-  slots: PlainDateSlots<string>,
-) => number
-export const daysInYear = computeDaysInYear as (
-  slots: PlainDateSlots<string>,
-) => number
-export const monthsInYear = computeMonthsInYear as (
-  slots: PlainDateSlots<string>,
-) => number
-export const inLeapYear = computeInLeapYear as (
-  slots: PlainDateSlots<string>,
-) => boolean
+export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
-export const add = bindArgs(movePlainDate<string>, createNativeMoveOps, false)
+export const daysInWeek = computeIsoDaysInWeek as (record: Record) => number
+
+export const weekOfYear = computeWeekOfYear as (
+  record: Record,
+) => number | undefined
+
+export const yearOfWeek = computeYearOfWeek as (
+  record: Record,
+) => number | undefined
+
+export const dayOfYear = computeDayOfYear as (record: Record) => number
+
+export const daysInMonth = computeDaysInMonth as (record: Record) => number
+
+export const daysInYear = computeDaysInYear as (record: Record) => number
+
+export const monthsInYear = computeMonthsInYear as (record: Record) => number
+
+export const inLeapYear = computeInLeapYear as (record: Record) => boolean
+
+export const add = bindArgs(
+  movePlainDate<string>,
+  createNativeMoveOps,
+  false,
+) as (
+  plainDateRecord: Record,
+  durationRecord: DurationFns.Record,
+  options?: OverflowOptions,
+) => Record
+
 export const subtract = bindArgs(
   movePlainDate<string>,
   createNativeMoveOps,
   true,
-)
+) as (
+  plainDateRecord: Record,
+  durationRecord: DurationFns.Record,
+  options?: OverflowOptions,
+) => Record
 
 export const until = bindArgs(
   diffPlainDates<string>,
   createNativeDiffOps,
   false,
-)
-export const since = bindArgs(diffPlainDates<string>, createNativeDiffOps, true)
+) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
 
-export const equals = plainDatesEqual<string>
+export const since = bindArgs(
+  diffPlainDates<string>,
+  createNativeDiffOps,
+  true,
+) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
+
+export const equals = plainDatesEqual<string> as (
+  record0: Record,
+  record1: Record,
+) => boolean
+
 export const compare = compareIsoDateFields as (
-  slots0: PlainDateSlots<string>,
-  slots1: PlainDateSlots<string>,
+  record0: Record,
+  record1: Record,
 ) => NumberSign
 
 export function toZonedDateTime(
-  slots: PlainDateSlots<string>,
-  options: string | { timeZone: string; plainTime?: PlainTimeSlots },
-): ZonedDateTimeSlots<string, string> {
+  record: Record,
+  options: string | { timeZone: string; plainTime?: PlainTimeFns.Record },
+): ZonedDateTimeFns.Record {
   const optionsObj =
     typeof options === 'string' ? { timeZone: options } : options
 
@@ -159,37 +190,36 @@ export function toZonedDateTime(
     refineTimeZoneIdString,
     identity,
     queryNativeTimeZone,
-    slots,
+    record,
     optionsObj,
   )
 }
 
 export const toPlainDateTime = plainDateToPlainDateTime as (
-  plainDateSlots: PlainDateSlots<string>,
-  plainTimeSlots?: PlainTimeSlots,
-) => PlainDateTimeSlots<string>
+  plainDateRecord: Record,
+  plainTimeRecord?: PlainTimeFns.Record,
+) => PlainDateTimeFns.Record
 
-export function toPlainYearMonth(
-  slots: PlainDateSlots<string>,
-): PlainYearMonthSlots<string> {
+export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
   return plainDateToPlainYearMonth(
     createNativeYearMonthRefineOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
   )
 }
 
-export function toPlainMonthDay(
-  slots: PlainDateSlots<string>,
-): PlainMonthDaySlots<string> {
+export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
   return plainDateToPlainMonthDay(
     createNativeMonthDayRefineOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
   )
 }
 
-export const toString = formatPlainDateIso<string>
+export const toString = formatPlainDateIso<string> as (
+  record: Record,
+  options?: CalendarDisplayOptions,
+) => string
 
 // Intl Formatting
 // -----------------------------------------------------------------------------
@@ -200,49 +230,49 @@ const prepFormat = createFormatPrepper(
 )
 
 export function toLocaleString(
-  slots: PlainDateSlots<string>,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.format(epochMilli)
 }
 
 export function toLocaleStringParts(
-  slots: PlainDateSlots<string>,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.formatToParts(epochMilli)
 }
 
 export function rangeToLocaleString(
-  slots0: PlainDateSlots<string>,
-  slots1: PlainDateSlots<string>,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
 export function rangeToLocaleStringParts(
-  slots0: PlainDateSlots<string>,
-  slots1: PlainDateSlots<string>,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

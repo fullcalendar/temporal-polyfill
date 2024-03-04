@@ -5,11 +5,6 @@ import {
   getCurrentTimeZoneId,
 } from '../internal/current'
 import {
-  InstantSlots,
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainTimeSlots,
-  ZonedDateTimeSlots,
   createInstantSlots,
   createPlainDateSlots,
   createPlainDateTimeSlots,
@@ -17,18 +12,23 @@ import {
   createZonedDateTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import * as InstantFns from './instant'
+import * as PlainDateFns from './plainDate'
+import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainTimeFns from './plainTime'
 import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
+import * as ZonedDateTimeFns from './zonedDateTime'
 
 export const timeZoneId = getCurrentTimeZoneId
 
-export function instant(): InstantSlots {
+export function instant(): InstantFns.Record {
   return createInstantSlots(getCurrentEpochNano())
 }
 
 export function zonedDateTime(
   calendarId: string,
   timeZoneId: string = getCurrentTimeZoneId(),
-): ZonedDateTimeSlots<string, string> {
+): ZonedDateTimeFns.Record {
   return createZonedDateTimeSlots(
     getCurrentEpochNano(),
     refineTimeZoneIdString(timeZoneId),
@@ -38,7 +38,7 @@ export function zonedDateTime(
 
 export function zonedDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): ZonedDateTimeSlots<string, string> {
+): ZonedDateTimeFns.Record {
   return createZonedDateTimeSlots(
     getCurrentEpochNano(),
     refineTimeZoneIdString(timeZoneId),
@@ -49,7 +49,7 @@ export function zonedDateTimeISO(
 export function plainDateTime(
   calendarId: string,
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainDateTimeSlots<string> {
+): PlainDateTimeFns.Record {
   return createPlainDateTimeSlots(
     getCurrentIsoDateTime(
       queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
@@ -60,7 +60,7 @@ export function plainDateTime(
 
 export function plainDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainDateTimeSlots<string> {
+): PlainDateTimeFns.Record {
   return createPlainDateTimeSlots(
     getCurrentIsoDateTime(
       queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
@@ -72,7 +72,7 @@ export function plainDateTimeISO(
 export function plainDate(
   calendarId: string,
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainDateSlots<string> {
+): PlainDateFns.Record {
   return createPlainDateSlots(
     getCurrentIsoDateTime(
       queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
@@ -83,7 +83,7 @@ export function plainDate(
 
 export function plainDateISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainDateSlots<string> {
+): PlainDateFns.Record {
   return createPlainDateSlots(
     getCurrentIsoDateTime(
       queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),
@@ -94,7 +94,7 @@ export function plainDateISO(
 
 export function plainTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainTimeSlots {
+): PlainTimeFns.Record {
   return createPlainTimeSlots(
     getCurrentIsoDateTime(
       queryNativeTimeZone(refineTimeZoneIdString(timeZoneId)),

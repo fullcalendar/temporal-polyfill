@@ -7,7 +7,7 @@ import {
   IsoTimeFields,
 } from '../internal/isoFields'
 import { isoToEpochNano } from '../internal/timeMath'
-import { DurationBag, DurationSlots } from './duration'
+import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -29,7 +29,7 @@ export function getCurrentInstant() {
 export function getCurrentZonedDateTime(
   calendar: string,
   timeZone: string,
-): ZonedDateTimeFns.ZonedDateTimeSlots<string, string> {
+): ZonedDateTimeFns.Record {
   return InstantFns.toZonedDateTime(getCurrentInstant(), { timeZone, calendar })
 }
 
@@ -124,7 +124,7 @@ const durationSlotDefaults = {
 }
 
 export function expectPlainDateEquals(
-  pd: PlainDateFns.PlainDateSlots<string>,
+  pd: PlainDateFns.Record,
   slots: Partial<IsoDateFields & { calendar: string }>,
 ): void {
   expectPropsEqualStrict(pd, {
@@ -134,7 +134,7 @@ export function expectPlainDateEquals(
 }
 
 export function expectPlainYearMonthEquals(
-  pym: PlainYearMonthFns.PlainYearMonthSlots<string>,
+  pym: PlainYearMonthFns.Record,
   slots: Partial<IsoDateFields & { calendar: string }>,
 ): void {
   expectPropsEqualStrict(pym, {
@@ -144,7 +144,7 @@ export function expectPlainYearMonthEquals(
 }
 
 export function expectPlainMonthDayEquals(
-  pym: PlainMonthDayFns.PlainMonthDaySlots<string>,
+  pym: PlainMonthDayFns.Record,
   slots: Partial<IsoDateFields & { calendar: string }>,
 ): void {
   expectPropsEqualStrict(pym, {
@@ -154,7 +154,7 @@ export function expectPlainMonthDayEquals(
 }
 
 export function expectPlainDateTimeEquals(
-  pdt: PlainDateTimeFns.PlainDateTimeSlots<string>,
+  pdt: PlainDateTimeFns.Record,
   slots: Partial<IsoDateTimeFields & { calendar: string }>,
 ): void {
   expectPropsEqualStrict(pdt, {
@@ -164,7 +164,7 @@ export function expectPlainDateTimeEquals(
 }
 
 export function expectZonedDateTimeEquals(
-  zdt: ZonedDateTimeFns.ZonedDateTimeSlots<string, string>,
+  zdt: ZonedDateTimeFns.Record,
   slots: { epochNanoseconds: bigint; timeZone: string; calendar?: string },
 ): void {
   expectPropsEqualStrict(zdt, {
@@ -175,7 +175,7 @@ export function expectZonedDateTimeEquals(
 }
 
 export function expectPlainTimeEquals(
-  pt: PlainTimeFns.PlainTimeSlots,
+  pt: PlainTimeFns.Record,
   slots: Partial<IsoTimeFields>,
 ): void {
   expectPropsEqualStrict(pt, {
@@ -185,7 +185,7 @@ export function expectPlainTimeEquals(
 }
 
 export function expectInstantEquals(
-  inst: InstantFns.InstantSlots,
+  inst: InstantFns.Record,
   epochNanoseconds: bigint,
 ): void {
   expectPropsEqualStrict(inst, {
@@ -194,7 +194,10 @@ export function expectInstantEquals(
   })
 }
 
-export function expectDurationEquals(d: DurationSlots, bag: DurationBag): void {
+export function expectDurationEquals(
+  d: DurationFns.Record,
+  bag: DurationFns.Bag,
+): void {
   const bagToSlots = {
     ...durationSlotDefaults,
     ...bag,
@@ -214,8 +217,8 @@ function expectPropsEqualStrict(obj0: {}, obj1: {}): void {
 // -----------------------------------------------------------------------------
 
 export function expectInstantsSimilar(
-  inst0: InstantFns.InstantSlots,
-  inst1: InstantFns.InstantSlots,
+  inst0: InstantFns.Record,
+  inst1: InstantFns.Record,
 ): void {
   expect(inst0.branding).toBe('Instant')
   expect(inst1.branding).toBe('Instant')
@@ -226,8 +229,8 @@ export function expectInstantsSimilar(
 }
 
 export function expectZonedDateTimesSimilar(
-  zdt0: ZonedDateTimeFns.ZonedDateTimeSlots<string, string>,
-  zdt1: ZonedDateTimeFns.ZonedDateTimeSlots<string, string>,
+  zdt0: ZonedDateTimeFns.Record,
+  zdt1: ZonedDateTimeFns.Record,
 ): void {
   expect(zdt0.branding).toBe('ZonedDateTime')
   expect(zdt1.branding).toBe('ZonedDateTime')
@@ -240,8 +243,8 @@ export function expectZonedDateTimesSimilar(
 }
 
 export function expectPlainDateTimesSimilar(
-  pdt0: PlainDateTimeFns.PlainDateTimeSlots<string>,
-  pdt1: PlainDateTimeFns.PlainDateTimeSlots<string>,
+  pdt0: PlainDateTimeFns.Record,
+  pdt1: PlainDateTimeFns.Record,
 ): void {
   expect(pdt0.branding).toBe('PlainDateTime')
   expect(pdt1.branding).toBe('PlainDateTime')
@@ -253,8 +256,8 @@ export function expectPlainDateTimesSimilar(
 }
 
 export function expectPlainDatesSimilar(
-  pd0: PlainDateFns.PlainDateSlots<string>,
-  pd1: PlainDateFns.PlainDateSlots<string>,
+  pd0: PlainDateFns.Record,
+  pd1: PlainDateFns.Record,
 ): void {
   expect(pd0.branding).toBe('PlainDate')
   expect(pd1.branding).toBe('PlainDate')
@@ -266,8 +269,8 @@ export function expectPlainDatesSimilar(
 }
 
 export function expectPlainTimesSimilar(
-  pt0: PlainTimeFns.PlainTimeSlots,
-  pt1: PlainTimeFns.PlainTimeSlots,
+  pt0: PlainTimeFns.Record,
+  pt1: PlainTimeFns.Record,
 ): void {
   expect(pt0.branding).toBe('PlainTime')
   expect(pt1.branding).toBe('PlainTime')

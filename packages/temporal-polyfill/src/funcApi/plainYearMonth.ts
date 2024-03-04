@@ -1,4 +1,5 @@
 import {
+  PlainYearMonthBag,
   plainYearMonthWithFields,
   refinePlainYearMonthBag,
 } from '../internal/bagRefine'
@@ -23,10 +24,16 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
 import { movePlainYearMonth } from '../internal/move'
-import { OverflowOptions } from '../internal/optionsRefine'
-import { PlainDateSlots, PlainYearMonthSlots } from '../internal/slots'
+import {
+  CalendarDisplayOptions,
+  DiffOptions,
+  OverflowOptions,
+} from '../internal/optionsRefine'
+import { PlainYearMonthSlots } from '../internal/slots'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
+import * as PlainDateFns from './plainDate'
 import {
   computeDaysInMonth,
   computeDaysInYear,
@@ -37,32 +44,30 @@ import {
   refineCalendarIdString,
 } from './utils'
 
-// TODO: rename to keep scope? Slots/Fields/Bag?
-export type { PlainYearMonthSlots, YearMonthBag }
+export type Record = Readonly<PlainYearMonthSlots<string>>
+export type Fields = YearMonthFields
+export type Bag = YearMonthBag
+export type BagWithCalendar = PlainYearMonthBag<string>
 
-export function create(
+export const create = bindArgs(
+  constructPlainYearMonthSlots<string, string>,
+  refineCalendarIdString,
+) as (
   isoYear: number,
   isoMonth: number,
   calendar?: string,
   referenceIsoDay?: number,
-): PlainYearMonthSlots<string> {
-  return constructPlainYearMonthSlots(
-    refineCalendarIdString,
-    isoYear,
-    isoMonth,
-    calendar,
-    referenceIsoDay,
-  )
-}
+) => Record
 
-export function fromString(s: string): PlainYearMonthSlots<string> {
-  return parsePlainYearMonth(createNativeYearMonthParseOps, s)
-}
+export const fromString = bindArgs(
+  parsePlainYearMonth,
+  createNativeYearMonthParseOps,
+) as (s: string) => Record
 
 export function fromFields(
-  bag: YearMonthBag & { calendar?: string },
+  bag: BagWithCalendar,
   options?: OverflowOptions,
-): PlainYearMonthSlots<string> {
+): Record {
   return refinePlainYearMonthBag(
     createNativeYearMonthRefineOps(getCalendarIdFromBag(bag)),
     bag,
@@ -71,77 +76,97 @@ export function fromFields(
 }
 
 export const getFields = memoize(computeYearMonthFields, WeakMap) as (
-  slots: PlainYearMonthSlots<string>,
-) => YearMonthFields
+  record: Record,
+) => Fields
 
 export function withFields(
-  slots: PlainYearMonthSlots<string>,
-  fields: YearMonthBag,
+  record: Record,
+  fields: Bag,
   options?: OverflowOptions,
-): PlainYearMonthSlots<string> {
+): Record {
   return plainYearMonthWithFields(
     createNativeYearMonthModOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
     fields,
     options,
   )
 }
 
-export const daysInMonth = computeDaysInMonth as (
-  slots: PlainYearMonthSlots<string>,
-) => number
-export const daysInYear = computeDaysInYear as (
-  slots: PlainYearMonthSlots<string>,
-) => number
-export const monthsInYear = computeMonthsInYear as (
-  slots: PlainYearMonthSlots<string>,
-) => number
-export const inLeapYear = computeInLeapYear as (
-  slots: PlainYearMonthSlots<string>,
-) => boolean
+export const daysInMonth = computeDaysInMonth as (record: Record) => number
+
+export const daysInYear = computeDaysInYear as (record: Record) => number
+
+export const monthsInYear = computeMonthsInYear as (record: Record) => number
+
+export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 
 export const add = bindArgs(
   movePlainYearMonth<string>,
   createNativeYearMonthMoveOps,
   false,
-)
+) as (
+  plainYearMonthFields: Record,
+  durationRecord: DurationFns.Record,
+  options?: OverflowOptions,
+) => Record
+
 export const subtract = bindArgs(
   movePlainYearMonth<string>,
   createNativeYearMonthMoveOps,
   true,
-)
+) as (
+  plainYearMonthFields: Record,
+  durationRecord: DurationFns.Record,
+  options?: OverflowOptions,
+) => Record
 
 export const until = bindArgs(
   diffPlainYearMonth<string>,
   createNativeYearMonthDiffOps,
   false,
-)
+) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
+
 export const since = bindArgs(
   diffPlainYearMonth<string>,
   createNativeYearMonthDiffOps,
   true,
-)
+) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
 
-export const equals = plainYearMonthsEqual<string>
+export const equals = plainYearMonthsEqual<string> as (
+  record0: Record,
+  record1: Record,
+) => boolean
+
 export const compare = compareIsoDateFields as (
-  slots0: PlainYearMonthSlots<string>,
-  slots1: PlainYearMonthSlots<string>,
+  record0: Record,
+  record1: Record,
 ) => NumberSign
 
 export function toPlainDate(
-  slots: PlainYearMonthSlots<string>,
+  record: Record,
   bag: { day: number },
-): PlainDateSlots<string> {
+): PlainDateFns.Record {
   return plainYearMonthToPlainDate(
     createNativeDateModOps,
-    slots,
-    getFields(slots),
+    record,
+    getFields(record),
     bag,
   )
 }
 
-export const toString = formatPlainYearMonthIso<string>
+export const toString = formatPlainYearMonthIso<string> as (
+  record: Record,
+  options?: CalendarDisplayOptions,
+) => string
 
 // Intl Formatting
 // -----------------------------------------------------------------------------
@@ -152,49 +177,49 @@ const prepFormat = createFormatPrepper(
 )
 
 export function toLocaleString(
-  slots: PlainYearMonthSlots<string>,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.format(epochMilli)
 }
 
 export function toLocaleStringParts(
-  slots: PlainYearMonthSlots<string>,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.formatToParts(epochMilli)
 }
 
 export function rangeToLocaleString(
-  slots0: PlainYearMonthSlots<string>,
-  slots1: PlainYearMonthSlots<string>,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
 export function rangeToLocaleStringParts(
-  slots0: PlainYearMonthSlots<string>,
-  slots1: PlainYearMonthSlots<string>,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }

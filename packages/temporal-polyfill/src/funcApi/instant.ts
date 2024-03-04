@@ -9,85 +9,132 @@ import {
   instantToZonedDateTime,
 } from '../internal/convert'
 import { diffInstants } from '../internal/diff'
+import { DurationFieldName } from '../internal/durationFields'
 import { createFormatPrepper, instantConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
 import { parseInstant } from '../internal/isoParse'
 import { moveInstant } from '../internal/move'
+import {
+  DiffOptions,
+  InstantDisplayOptions,
+  RoundingOptions,
+} from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
   InstantSlots,
-  ZonedDateTimeSlots,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
   getEpochSec,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { bindArgs } from '../internal/utils'
+import { UnitName } from '../internal/units'
+import { NumberSign, bindArgs } from '../internal/utils'
+import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
+import * as ZonedDateTimeFns from './zonedDateTime'
 
-// TODO: rename to keep scope? Slots?
-export type { InstantSlots }
+export type Record = Readonly<InstantSlots>
 
-export const create = constructInstantSlots
-export const fromString = parseInstant
+export const create = constructInstantSlots as (
+  epochNanoseconds: bigint,
+) => Record
 
-export const fromEpochSeconds = epochSecToInstant
-export const fromEpochMilliseconds = epochMilliToInstant
-export const fromEpochMicroseconds = epochMicroToInstant
-export const fromEpochNanoseconds = epochNanoToInstant
+export const fromString = parseInstant as (s: string) => Record
 
-export const epochSeconds = getEpochSec as (slots: InstantSlots) => number
-export const epochMilliseconds = getEpochMilli as (
-  slots: InstantSlots,
-) => number
-export const epochMicroseconds = getEpochMicro as (
-  slots: InstantSlots,
-) => bigint
-export const epochNanoseconds = getEpochNano as (slots: InstantSlots) => bigint
+export const fromEpochSeconds = epochSecToInstant as (
+  epochSeconds: number,
+) => Record
 
-export const add = bindArgs(moveInstant, false)
-export const subtract = bindArgs(moveInstant, true)
+export const fromEpochMilliseconds = epochMilliToInstant as (
+  epochMilliseconds: number,
+) => Record
 
-export const until = bindArgs(diffInstants, false)
-export const since = bindArgs(diffInstants, true)
+export const fromEpochMicroseconds = epochMicroToInstant as (
+  epochMicroseconds: bigint,
+) => Record
 
-export const round = roundInstant
+export const fromEpochNanoseconds = epochNanoToInstant as (
+  epochNanoseconds: bigint,
+) => Record
 
-export const equals = instantsEqual
+export const epochSeconds = getEpochSec as (record: Record) => number
 
-export const compare = compareInstants
+export const epochMilliseconds = getEpochMilli as (record: Record) => number
+
+export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
+
+export const epochNanoseconds = getEpochNano as (record: Record) => bigint
+
+export const add = bindArgs(moveInstant, false) as (
+  instantRecord: Record,
+  durationRecord: DurationFns.Record,
+) => Record
+
+export const subtract = bindArgs(moveInstant, true) as (
+  instantRecord: Record,
+  durationRecord: DurationFns.Record,
+) => Record
+
+export const until = bindArgs(diffInstants, false) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
+
+export const since = bindArgs(diffInstants, true) as (
+  record0: Record,
+  record1: Record,
+  options?: DiffOptions,
+) => DurationFns.Record
+
+export const round = roundInstant as (
+  record: Record,
+  // TODO: better reusable type...
+  options?: RoundingOptions | UnitName | DurationFieldName,
+) => Record
+
+export const equals = instantsEqual as (
+  record0: Record,
+  record1: Record,
+) => boolean
+
+export const compare = compareInstants as (
+  record0: Record,
+  record1: Record,
+) => NumberSign
+
+export function toZonedDateTimeISO(
+  record: Record,
+  timeZone: string,
+): ZonedDateTimeFns.Record {
+  return instantToZonedDateTime(record, refineTimeZoneIdString(timeZone))
+}
+
+export function toZonedDateTime(
+  record: Record,
+  options: { timeZone: string; calendar: string },
+): ZonedDateTimeFns.Record {
+  const refinedObj = requireObjectLike(options)
+
+  return instantToZonedDateTime(
+    record,
+    refineTimeZoneIdString(refinedObj.timeZone),
+    refineCalendarIdString(refinedObj.calendar),
+  )
+}
 
 export const toString = bindArgs(
   formatInstantIso<string, string>,
   refineTimeZoneIdString,
   queryNativeTimeZone,
-)
-
-export function toZonedDateTimeISO(
-  instantSlots: InstantSlots,
-  timeZoneSlot: string,
-): ZonedDateTimeSlots<string, string> {
-  return instantToZonedDateTime(
-    instantSlots,
-    refineTimeZoneIdString(timeZoneSlot),
-  )
-}
-
-export function toZonedDateTime(
-  instantSlots: InstantSlots,
-  options: { timeZone: string; calendar: string },
-): ZonedDateTimeSlots<string, string> {
-  const refinedObj = requireObjectLike(options)
-
-  return instantToZonedDateTime(
-    instantSlots,
-    refineTimeZoneIdString(refinedObj.timeZone),
-    refineCalendarIdString(refinedObj.calendar),
-  )
-}
+) as (
+  record: Record,
+  // TODO: better reusable type...
+  options?: InstantDisplayOptions<string>,
+) => string
 
 // Intl Formatting
 // -----------------------------------------------------------------------------
@@ -98,49 +145,49 @@ const prepFormat = createFormatPrepper(
 )
 
 export function toLocaleString(
-  slots: InstantSlots,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.format(epochMilli)
 }
 
 export function toLocaleStringParts(
-  slots: InstantSlots,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepFormat(locales, options, slots)
+  const [format, epochMilli] = prepFormat(locales, options, record)
   return format.formatToParts(epochMilli)
 }
 
 export function rangeToLocaleString(
-  slots0: InstantSlots,
-  slots1: InstantSlots,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRange(epochMilli0, epochMilli1!)
 }
 
 export function rangeToLocaleStringParts(
-  slots0: InstantSlots,
-  slots1: InstantSlots,
+  record0: Record,
+  record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormatPart[] {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
-    slots0,
-    slots1,
+    record0,
+    record1,
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
