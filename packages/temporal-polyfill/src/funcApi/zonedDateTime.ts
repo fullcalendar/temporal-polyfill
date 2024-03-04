@@ -38,7 +38,7 @@ import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  RoundingOptions,
+  RoundOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../internal/optionsRefine'
@@ -272,7 +272,7 @@ export const since = bindArgs(
 export const round = bindArgs(
   roundZonedDateTime<string, string>,
   queryNativeTimeZone,
-) as (record: Record, options: RoundingOptions | UnitName) => Record
+) as (record: Record, options: RoundOptions | UnitName) => Record
 
 export const equals = zonedDateTimesEqual<string, string> as (
   record0: Record,

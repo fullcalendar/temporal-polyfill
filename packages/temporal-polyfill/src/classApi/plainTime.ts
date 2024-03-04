@@ -20,7 +20,7 @@ import { movePlainTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  RoundingOptions,
+  RoundOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
@@ -97,10 +97,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
         diffPlainTimes(true, slots, toPlainTimeSlots(otherArg), options),
       )
     },
-    round(
-      slots: PlainTimeSlots,
-      options: RoundingOptions | UnitName,
-    ): PlainTime {
+    round(slots: PlainTimeSlots, options: RoundOptions | UnitName): PlainTime {
       return createPlainTime(roundPlainTime(slots, options))
     },
     equals(slots: PlainTimeSlots, other: PlainTimeArg): boolean {

@@ -32,7 +32,7 @@ import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
-  RoundingOptions,
+  RoundOptions,
   copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
@@ -218,7 +218,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     },
     round(
       slots: PlainDateTimeSlots<CalendarSlot>,
-      options: RoundingOptions | UnitName,
+      options: RoundOptions | UnitName,
     ): PlainDateTime {
       return createPlainDateTime(roundPlainDateTime(slots, options))
     },

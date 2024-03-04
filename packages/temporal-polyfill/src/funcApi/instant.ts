@@ -18,7 +18,7 @@ import { moveInstant } from '../internal/move'
 import {
   DiffOptions,
   InstantDisplayOptions,
-  RoundingOptions,
+  RoundOptions,
 } from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
@@ -93,7 +93,7 @@ export const since = bindArgs(diffInstants, true) as (
 export const round = roundInstant as (
   record: Record,
   // TODO: better reusable type...
-  options?: RoundingOptions | UnitName | DurationFieldName,
+  options?: RoundOptions | UnitName | DurationFieldName,
 ) => Record
 
 export const equals = instantsEqual as (

@@ -17,7 +17,7 @@ import { moveInstant } from '../internal/move'
 import {
   DiffOptions,
   InstantDisplayOptions,
-  RoundingOptions,
+  RoundOptions,
 } from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
@@ -79,7 +79,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
         diffInstants(true, slots, toInstantSlots(otherArg), options),
       )
     },
-    round(slots: InstantSlots, options: RoundingOptions | UnitName): Instant {
+    round(slots: InstantSlots, options: RoundOptions | UnitName): Instant {
       return createInstant(roundInstant(slots, options))
     },
     equals(slots: InstantSlots, otherArg: InstantArg): boolean {

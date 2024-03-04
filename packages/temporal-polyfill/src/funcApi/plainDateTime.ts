@@ -40,7 +40,7 @@ import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
-  RoundingOptions,
+  RoundOptions,
 } from '../internal/optionsRefine'
 import { roundPlainDateTime } from '../internal/round'
 import {
@@ -195,7 +195,7 @@ export const since = bindArgs(
 
 export const round = roundPlainDateTime<string> as (
   record: Record,
-  options: RoundingOptions,
+  options: RoundOptions,
 ) => Record
 
 export const equals = plainDateTimesEqual<string> as (

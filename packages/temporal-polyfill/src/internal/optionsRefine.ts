@@ -55,7 +55,7 @@ export type RoundTuple = [
   RoundingMode,
 ]
 
-export type RoundingOptions = SmallestUnitOptions &
+export type RoundOptions = SmallestUnitOptions &
   RoundingIncOptions &
   RoundingModeOptions
 
@@ -332,7 +332,7 @@ export function refineDurationRoundOptions<RA, R>(
 Always related to time
 */
 export function refineRoundOptions(
-  options: RoundingOptions | UnitName | DurationFieldName,
+  options: RoundOptions | UnitName | DurationFieldName,
   maxUnit: DayTimeUnit = Unit.Day,
   solarMode?: boolean,
 ): RoundTuple {

@@ -19,7 +19,7 @@ import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
 import {
   OverflowOptions,
-  RoundingOptions,
+  RoundOptions,
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
@@ -91,7 +91,7 @@ export const since = bindArgs(diffPlainTimes, true) as (
 
 export const round = roundPlainTime as (
   record: Record,
-  options: RoundingOptions | UnitName,
+  options: RoundOptions | UnitName,
 ) => Record
 
 export const equals = plainTimesEqual as (
