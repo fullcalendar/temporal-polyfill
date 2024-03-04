@@ -113,7 +113,10 @@ export function fromFields(
   )
 }
 
-export const fromString = parseZonedDateTime
+export const fromString = parseZonedDateTime as (
+  s: string,
+  options?: ZonedFieldOptions,
+) => Record
 
 // Getters
 // -----------------------------------------------------------------------------
