@@ -139,31 +139,6 @@ function createOptionsTransformer(
   }
 }
 
-const transformMonthDayOptions = createOptionsTransformer(
-  monthDayStandardNames,
-  monthDayFallbacks,
-  monthDayExclusions,
-)
-const transformYearMonthOptions = createOptionsTransformer(
-  yearMonthStandardNames,
-  yearMonthFallbacks,
-  yearMonthExclusions,
-)
-const transformDateOptions = createOptionsTransformer(
-  dateStandardNames,
-  dateFallbacks,
-  dateExclusions,
-)
-const transformDateTimeOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  dateTimeFallbacks,
-  timeZoneNameStrs,
-)
-const transformTimeOptions = createOptionsTransformer(
-  timeStandardNames,
-  timeFallbacks,
-  timeExclusions,
-)
 const transformInstantOptions = createOptionsTransformer(
   dateTimeStandardNames,
   dateTimeFallbacks,
@@ -171,6 +146,31 @@ const transformInstantOptions = createOptionsTransformer(
 const transformZonedOptions = createOptionsTransformer(
   zonedStandardNames,
   zonedFallbacks,
+)
+const transformDateTimeOptions = createOptionsTransformer(
+  dateTimeStandardNames,
+  dateTimeFallbacks,
+  timeZoneNameStrs,
+)
+const transformDateOptions = createOptionsTransformer(
+  dateStandardNames,
+  dateFallbacks,
+  dateExclusions,
+)
+const transformTimeOptions = createOptionsTransformer(
+  timeStandardNames,
+  timeFallbacks,
+  timeExclusions,
+)
+const transformYearMonthOptions = createOptionsTransformer(
+  yearMonthStandardNames,
+  yearMonthFallbacks,
+  yearMonthExclusions,
+)
+const transformMonthDayOptions = createOptionsTransformer(
+  monthDayStandardNames,
+  monthDayFallbacks,
+  monthDayExclusions,
 )
 
 // Config Utils
