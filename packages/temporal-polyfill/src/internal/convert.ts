@@ -12,7 +12,7 @@ import {
   YearMonthRefineOps,
 } from './calendarOps'
 import { requireObjectLike, toBigInt } from './cast'
-import { MonthDayFields, YearFields, YearMonthFields } from './fields'
+import { EraYearOrYear, MonthDayFields, YearMonthFields } from './fields'
 import {
   IsoDateTimeFields,
   IsoTimeFields,
@@ -251,7 +251,7 @@ export function plainMonthDayToPlainDate<C>(
   getCalendarOps: (calendar: C) => DateModOps<C>,
   plainMonthDaySlots: PlainMonthDaySlots<C>,
   plainMonthDayFields: MonthDayFields,
-  bag: YearFields,
+  bag: EraYearOrYear,
 ): PlainDateSlots<C> {
   const calendarSlot = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)

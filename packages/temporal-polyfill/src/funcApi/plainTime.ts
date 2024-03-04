@@ -1,4 +1,5 @@
 import {
+  PlainTimeBag,
   isoTimeFieldsToCal,
   plainTimeWithFields,
   refinePlainTimeBag,
@@ -14,6 +15,7 @@ import { diffPlainTimes } from '../internal/diff'
 import { TimeBag, TimeFields } from '../internal/fields'
 import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
@@ -36,8 +38,9 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<PlainTimeSlots>
 export type Fields = TimeFields
-export type Bag = TimeBag
-// for creation... PlainTimeBag
+export type CreateFields = PlainTimeBag
+export type UpdateFields = TimeBag
+export type ISOFields = IsoTimeFields
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -52,25 +55,30 @@ export const create = constructPlainTimeSlots as (
 ) => Record
 
 export const fromFields = refinePlainTimeBag as (
-  bag: Bag,
+  fields: CreateFields,
   options?: OverflowOptions,
 ) => Record
 
 export const fromString = parsePlainTime as (s: string) => Record
 
-// Getters / Setters
+// Getters
 // -----------------------------------------------------------------------------
 
 export const getFields = memoize(isoTimeFieldsToCal, WeakMap) as (
   record: Record,
 ) => Fields
 
+export const getISOFields = identity as (record: Record) => ISOFields
+
+// Setters
+// -----------------------------------------------------------------------------
+
 export function withFields(
   record: Record,
-  mod: Bag,
+  fields: UpdateFields,
   options?: OverflowOptions,
 ): Record {
-  return plainTimeWithFields(getFields(record), mod, options)
+  return plainTimeWithFields(getFields(record), fields, options)
 }
 
 // Math

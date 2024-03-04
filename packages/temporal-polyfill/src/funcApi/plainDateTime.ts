@@ -26,6 +26,7 @@ import { diffPlainDateTimes } from '../internal/diff'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoDateTimeFields } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
@@ -49,7 +50,7 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -72,8 +73,9 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<PlainDateTimeSlots<string>>
 export type Fields = DateTimeFields
-export type Bag = DateTimeBag
-export type BagWithCalendar = PlainDateTimeBag<string>
+export type CreateFields = PlainDateTimeBag<string>
+export type UpdateFields = DateTimeBag
+export type ISOFields = IsoDateTimeFields
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -95,7 +97,7 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  fields: BagWithCalendar,
+  fields: CreateFields,
   options?: OverflowOptions,
 ): Record {
   return refinePlainDateTimeBag(
@@ -116,6 +118,8 @@ export const getFields = memoize((record: Record): Fields => {
     ...isoTimeFieldsToCal(record),
   }
 }, WeakMap)
+
+export const getISOFields = identity as (record: Record) => ISOFields
 
 export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
@@ -144,14 +148,14 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 
 export function withFields(
   record: Record,
-  bag: Bag,
+  fields: UpdateFields,
   options?: OverflowOptions,
 ): Record {
   return plainDateTimeWithFields(
     createNativeDateModOps,
     record,
     getFields(record),
-    bag,
+    fields,
     options,
   )
 }

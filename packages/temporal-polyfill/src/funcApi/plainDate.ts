@@ -23,6 +23,7 @@ import { diffPlainDates } from '../internal/diff'
 import { DateBag, DateFields } from '../internal/fields'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoDateFields } from '../internal/isoFields'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
@@ -59,8 +60,9 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<PlainDateSlots<string>>
 export type Fields = DateFields
-export type Bag = DateBag
-export type BagWithCalendar = PlainDateBag<string>
+export type CreateFields = PlainDateBag<string>
+export type UpdateFields = DateBag
+export type ISOFields = IsoDateFields
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -76,7 +78,7 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  fields: BagWithCalendar,
+  fields: CreateFields,
   options?: OverflowOptions,
 ): Record {
   return refinePlainDateBag(
@@ -94,6 +96,8 @@ export const fromString = parsePlainDate as (s: string) => Record
 export const getFields = memoize(computeDateFields, WeakMap) as (
   record: Record,
 ) => Fields
+
+export const getISOFields = identity as (record: Record) => ISOFields
 
 export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
@@ -122,7 +126,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 
 export function withFields(
   record: Record,
-  fields: Bag,
+  fields: UpdateFields,
   options?: OverflowOptions,
 ): Record {
   return plainDateWithFields(

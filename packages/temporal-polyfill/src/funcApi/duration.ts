@@ -29,7 +29,8 @@ import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<DurationSlots>
-export type Bag = DurationBag
+export type CreateFields = DurationBag
+export type UpdateFields = DurationBag
 export type RelativeToArg =
   | ZonedDateTimeFns.Record
   | PlainDateTimeFns.Record
@@ -51,7 +52,7 @@ export const create = constructDurationSlots as (
   nanoseconds?: number,
 ) => Record
 
-export const fromFields = refineDurationBag as (bag: Bag) => Record
+export const fromFields = refineDurationBag as (fields: CreateFields) => Record
 
 export const fromString = parseDuration as (s: string) => Record
 
@@ -65,7 +66,7 @@ export const blank = getDurationBlank as (record: Record) => boolean
 
 export const withFields = durationWithFields as (
   record: Record,
-  bag: Bag,
+  fields: UpdateFields,
 ) => Record
 
 // Math

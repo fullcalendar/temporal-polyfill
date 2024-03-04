@@ -13,9 +13,10 @@ import {
 import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
 import { plainMonthDayToPlainDate } from '../internal/convert'
-import { MonthDayBag, MonthDayFields, YearFields } from '../internal/fields'
+import { EraYearOrYear, MonthDayBag, MonthDayFields } from '../internal/fields'
 import { createFormatPrepper, monthDayConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoDateFields } from '../internal/isoFields'
 import { formatPlainMonthDayIso } from '../internal/isoFormat'
 import { parsePlainMonthDay } from '../internal/isoParse'
 import {
@@ -23,7 +24,7 @@ import {
   OverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainMonthDaySlots } from '../internal/slots'
-import { bindArgs, memoize } from '../internal/utils'
+import { bindArgs, identity, memoize } from '../internal/utils'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 import {
@@ -34,8 +35,10 @@ import {
 
 export type Record = Readonly<PlainMonthDaySlots<string>>
 export type Fields = MonthDayFields
-export type Bag = MonthDayBag
-export type BagWithCalendar = PlainMonthDayBag<string>
+export type CreateFields = PlainMonthDayBag<string>
+export type UpdateFields = MonthDayBag
+export type ISOFields = IsoDateFields
+export type ToPlainDateFields = EraYearOrYear
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -51,7 +54,7 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  fields: BagWithCalendar,
+  fields: CreateFields,
   options?: OverflowOptions,
 ): Record {
   const calendarMaybe = extractCalendarIdFromBag(fields)
@@ -70,23 +73,28 @@ export const fromString = bindArgs(
   createNativeMonthDayParseOps,
 ) as (s: string) => Record
 
-// Getters / Setters
+// Getters
 // -----------------------------------------------------------------------------
 
 export const getFields = memoize(computeMonthDayFields, WeakMap) as (
   record: Record,
 ) => Fields
 
+export const getISOFields = identity as (record: Record) => ISOFields
+
+// Setters
+// -----------------------------------------------------------------------------
+
 export function withFields(
   record: Record,
-  bag: Bag,
+  fields: UpdateFields,
   options?: OverflowOptions,
 ): Record {
   return plainMonthDayWithFields(
     createNativeMonthDayModOps,
     record,
     getFields(record),
-    bag,
+    fields,
     options,
   )
 }
@@ -104,13 +112,13 @@ export const equals = plainMonthDaysEqual<string> as (
 
 export function toPlainDate(
   record: Record,
-  bag: YearFields,
+  fields: ToPlainDateFields,
 ): PlainDateFns.Record {
   return plainMonthDayToPlainDate(
     createNativeDateModOps,
     record,
     getFields(record),
-    bag,
+    fields,
   )
 }
 

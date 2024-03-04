@@ -21,6 +21,7 @@ import {
   yearMonthConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoDateFields } from '../internal/isoFields'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
 import { movePlainYearMonth } from '../internal/move'
@@ -30,7 +31,7 @@ import {
   OverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainYearMonthSlots } from '../internal/slots'
-import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -46,8 +47,9 @@ import {
 
 export type Record = Readonly<PlainYearMonthSlots<string>>
 export type Fields = YearMonthFields
-export type Bag = YearMonthBag
-export type BagWithCalendar = PlainYearMonthBag<string>
+export type CreateFields = PlainYearMonthBag<string>
+export type UpdateFields = YearMonthBag
+export type ISOFields = IsoDateFields
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -63,12 +65,12 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  bag: BagWithCalendar,
+  fields: CreateFields,
   options?: OverflowOptions,
 ): Record {
   return refinePlainYearMonthBag(
-    createNativeYearMonthRefineOps(getCalendarIdFromBag(bag)),
-    bag,
+    createNativeYearMonthRefineOps(getCalendarIdFromBag(fields)),
+    fields,
     options,
   )
 }
@@ -85,6 +87,8 @@ export const getFields = memoize(computeYearMonthFields, WeakMap) as (
   record: Record,
 ) => Fields
 
+export const getISOFields = identity as (record: Record) => ISOFields
+
 export const daysInMonth = computeDaysInMonth as (record: Record) => number
 
 export const daysInYear = computeDaysInYear as (record: Record) => number
@@ -98,7 +102,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 
 export function withFields(
   record: Record,
-  fields: Bag,
+  fields: UpdateFields,
   options?: OverflowOptions,
 ): Record {
   return plainYearMonthWithFields(
@@ -168,13 +172,13 @@ export const compare = compareIsoDateFields as (
 
 export function toPlainDate(
   record: Record,
-  bag: { day: number },
+  fields: { day: number },
 ): PlainDateFns.Record {
   return plainYearMonthToPlainDate(
     createNativeDateModOps,
     record,
     getFields(record),
-    bag,
+    fields,
   )
 }
 

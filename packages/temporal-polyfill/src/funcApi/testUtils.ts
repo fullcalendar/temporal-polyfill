@@ -196,11 +196,11 @@ export function expectInstantEquals(
 
 export function expectDurationEquals(
   d: DurationFns.Record,
-  bag: DurationFns.Bag,
+  fields: DurationFns.CreateFields,
 ): void {
   const bagToSlots = {
     ...durationSlotDefaults,
-    ...bag,
+    ...fields,
   }
   expectPropsEqualStrict(d, {
     ...bagToSlots,

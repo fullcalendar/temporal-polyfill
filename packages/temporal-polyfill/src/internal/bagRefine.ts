@@ -46,7 +46,6 @@ import {
   MonthFields,
   TimeBag,
   TimeFields,
-  YearFields,
   YearMonthBag,
   YearMonthFields,
   allYearFieldNames,
@@ -741,7 +740,7 @@ export function convertToPlainYearMonth<C>(
 export function convertPlainMonthDayToDate<C>(
   calendarOps: DateModOps<C>,
   input: { monthCode: string; day: number },
-  bag: YearFields,
+  bag: EraYearOrYear,
 ): PlainDateSlots<C> {
   return convertToIso(
     calendarOps,
