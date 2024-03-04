@@ -117,11 +117,6 @@ export function toPlainDate(
 // Formatting
 // -----------------------------------------------------------------------------
 
-export const toString = formatPlainMonthDayIso<string> as (
-  record: Record,
-  options?: CalendarDisplayOptions,
-) => string
-
 const prepFormat = createFormatPrepper(
   monthDayConfig,
   /*@__PURE__*/ createFormatCache(),
@@ -174,3 +169,8 @@ export function rangeToLocaleStringParts(
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
+
+export const toString = formatPlainMonthDayIso<string> as (
+  record: Record,
+  options?: CalendarDisplayOptions,
+) => string

@@ -255,33 +255,6 @@ function getForcedCommonTimeZone(
 // Config Data
 // -----------------------------------------------------------------------------
 
-export const yearMonthConfig: ClassFormatConfig<IsoDateFields> = [
-  transformYearMonthOptions,
-  isoToEpochMilli as (isoFields: IsoDateFields) => number,
-  true, // strictCalendarChecks
-]
-
-export const monthDayConfig: ClassFormatConfig<IsoDateFields> = [
-  transformMonthDayOptions,
-  isoToEpochMilli as (isoFields: IsoDateFields) => number,
-  true, // strictCalendarChecks
-]
-
-export const dateConfig: ClassFormatConfig<IsoDateFields> = [
-  transformDateOptions,
-  isoToEpochMilli as (isoFields: IsoDateFields) => number,
-]
-
-export const dateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
-  transformDateTimeOptions,
-  isoToEpochMilli as (isoFields: IsoDateTimeFields) => number,
-]
-
-export const timeConfig: ClassFormatConfig<IsoTimeFields> = [
-  transformTimeOptions,
-  (isoFields: IsoTimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
-]
-
 export const instantConfig: ClassFormatConfig<EpochSlots> = [
   transformInstantOptions,
   getEpochMilli,
@@ -292,6 +265,33 @@ export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> = [
   getEpochMilli,
   false, // strictCalendarChecks
   getForcedCommonTimeZone,
+]
+
+export const dateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
+  transformDateTimeOptions,
+  isoToEpochMilli as (isoFields: IsoDateTimeFields) => number,
+]
+
+export const dateConfig: ClassFormatConfig<IsoDateFields> = [
+  transformDateOptions,
+  isoToEpochMilli as (isoFields: IsoDateFields) => number,
+]
+
+export const timeConfig: ClassFormatConfig<IsoTimeFields> = [
+  transformTimeOptions,
+  (isoFields: IsoTimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
+]
+
+export const yearMonthConfig: ClassFormatConfig<IsoDateFields> = [
+  transformYearMonthOptions,
+  isoToEpochMilli as (isoFields: IsoDateFields) => number,
+  true, // strictCalendarChecks
+]
+
+export const monthDayConfig: ClassFormatConfig<IsoDateFields> = [
+  transformMonthDayOptions,
+  isoToEpochMilli as (isoFields: IsoDateFields) => number,
+  true, // strictCalendarChecks
 ]
 
 // General Epoch Conversion

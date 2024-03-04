@@ -67,6 +67,12 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     with(slots: DurationSlots, mod: DurationBag): Duration {
       return createDuration(durationWithFields(slots, mod))
     },
+    negated(slots: DurationSlots): Duration {
+      return createDuration(negateDuration(slots))
+    },
+    abs(slots: DurationSlots): Duration {
+      return createDuration(absDuration(slots))
+    },
     add(
       slots: DurationSlots,
       otherArg: DurationArg,
@@ -101,12 +107,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
         ),
       )
     },
-    negated(slots: DurationSlots): Duration {
-      return createDuration(negateDuration(slots))
-    },
-    abs(slots: DurationSlots): Duration {
-      return createDuration(absDuration(slots))
-    },
     round(
       slots: DurationSlots,
       options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>,
@@ -135,7 +135,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
         options,
       )
     },
-    toString: formatDurationIso,
     toLocaleString(
       slots: DurationSlots,
       locales?: LocalesArg,
@@ -145,6 +144,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
         ? new (Intl as any).DurationFormat(locales, options).format(this)
         : formatDurationIso(slots)
     },
+    toString: formatDurationIso,
     toJSON(slots: DurationSlots): string {
       return formatDurationIso(slots)
     },

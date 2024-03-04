@@ -58,12 +58,6 @@ export const [TimeZone, createTimeZone] = createSlotClass(
     },
   },
   {
-    toString(slots: TimeZoneClassSlots) {
-      return slots.id
-    },
-    toJSON(slots: TimeZoneClassSlots) {
-      return slots.id
-    },
     getPossibleInstantsFor(
       { native }: TimeZoneClassSlots,
       plainDateTimeArg: PlainDateTimeArg,
@@ -137,6 +131,12 @@ export const [TimeZone, createTimeZone] = createSlotClass(
     },
     equals(_slots: TimeZoneClassSlots, otherArg: TimeZoneArg): boolean {
       return !!isTimeZoneSlotsEqual(this, refineTimeZoneSlot(otherArg))
+    },
+    toString(slots: TimeZoneClassSlots) {
+      return slots.id
+    },
+    toJSON(slots: TimeZoneClassSlots) {
+      return slots.id
     },
   },
   {

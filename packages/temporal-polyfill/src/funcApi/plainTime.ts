@@ -134,11 +134,6 @@ export const toPlainDateTime = plainTimeToPlainDateTime<string> as (
 // Formatting
 // -----------------------------------------------------------------------------
 
-export const toString = formatPlainTimeIso as (
-  record: Record,
-  options?: TimeDisplayOptions,
-) => string
-
 const prepFormat = createFormatPrepper(
   timeConfig,
   /*@__PURE__*/ createFormatCache(),
@@ -192,3 +187,8 @@ export function rangeToLocaleStringParts(
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
+
+export const toString = formatPlainTimeIso as (
+  record: Record,
+  options?: TimeDisplayOptions,
+) => string

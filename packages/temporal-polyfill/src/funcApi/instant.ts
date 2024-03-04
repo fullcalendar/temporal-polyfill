@@ -141,16 +141,6 @@ export function toZonedDateTimeISO(
 // Formatting
 // -----------------------------------------------------------------------------
 
-export const toString = bindArgs(
-  formatInstantIso<string, string>,
-  refineTimeZoneIdString,
-  queryNativeTimeZone,
-) as (
-  record: Record,
-  // TODO: better reusable type...
-  options?: InstantDisplayOptions<string>,
-) => string
-
 const prepFormat = createFormatPrepper(
   instantConfig,
   /*@__PURE__*/ createFormatCache(),
@@ -203,3 +193,13 @@ export function rangeToLocaleStringParts(
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
+
+export const toString = bindArgs(
+  formatInstantIso<string, string>,
+  refineTimeZoneIdString,
+  queryNativeTimeZone,
+) as (
+  record: Record,
+  // TODO: better reusable type...
+  options?: InstantDisplayOptions<string>,
+) => string

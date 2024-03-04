@@ -60,6 +60,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
   constructPlainTimeSlots,
   timeGetters,
   {
+    getISOFields: removeBranding,
     with(
       _slots: PlainTimeSlots,
       mod: TimeBag,
@@ -103,18 +104,6 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     equals(slots: PlainTimeSlots, other: PlainTimeArg): boolean {
       return plainTimesEqual(slots, toPlainTimeSlots(other))
     },
-    toString: formatPlainTimeIso,
-    toJSON(slots: PlainTimeSlots): string {
-      return formatPlainTimeIso(slots)
-    },
-    toLocaleString(
-      slots: PlainTimeSlots,
-      locales?: LocalesArg,
-      options?: Intl.DateTimeFormatOptions,
-    ): string {
-      const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
-      return format.format(epochMilli)
-    },
     toZonedDateTime(
       slots: PlainTimeSlots,
       options: { timeZone: TimeZoneArg; plainDate: PlainDateArg },
@@ -137,7 +126,18 @@ export const [PlainTime, createPlainTime] = createSlotClass(
         plainTimeToPlainDateTime(slots, toPlainDateSlots(plainDateArg)),
       )
     },
-    getISOFields: removeBranding,
+    toLocaleString(
+      slots: PlainTimeSlots,
+      locales?: LocalesArg,
+      options?: Intl.DateTimeFormatOptions,
+    ): string {
+      const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
+      return format.format(epochMilli)
+    },
+    toString: formatPlainTimeIso,
+    toJSON(slots: PlainTimeSlots): string {
+      return formatPlainTimeIso(slots)
+    },
     valueOf: neverValueOf,
   },
   {

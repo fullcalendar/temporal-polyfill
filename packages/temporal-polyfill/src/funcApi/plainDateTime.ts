@@ -259,11 +259,6 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
 // Formatting
 // -----------------------------------------------------------------------------
 
-export const toString = formatPlainDateTimeIso<string> as (
-  record: Record,
-  options?: DateTimeDisplayOptions,
-) => string
-
 const prepFormat = createFormatPrepper(
   dateTimeConfig,
   /*@__PURE__*/ createFormatCache(),
@@ -316,3 +311,8 @@ export function rangeToLocaleStringParts(
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
+
+export const toString = formatPlainDateTimeIso<string> as (
+  record: Record,
+  options?: DateTimeDisplayOptions,
+) => string

@@ -15,6 +15,7 @@ import {
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import {
+  zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
   zonedDateTimeToPlainMonthDay,
@@ -63,6 +64,7 @@ import {
 import { UnitName } from '../internal/units'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
+import * as InstantFns from './instant'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -302,6 +304,10 @@ export const compare = compareZonedDateTimes<string, string> as (
 // Conversion
 // -----------------------------------------------------------------------------
 
+export const toInstant = zonedDateTimeToInstant as (
+  record: Record,
+) => InstantFns.Record
+
 export const toPlainDateTime = bindArgs(
   zonedDateTimeToPlainDateTime<string, string>,
   queryNativeTimeZone,
@@ -335,11 +341,6 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
 
 // Formatting
 // -----------------------------------------------------------------------------
-
-export const toString = bindArgs(
-  formatZonedDateTimeIso<string, string>,
-  queryNativeTimeZone,
-) as (record: Record, options?: ZonedDateTimeDisplayOptions) => string
 
 const prepFormat = createFormatPrepper(
   zonedConfig,
@@ -393,6 +394,11 @@ export function rangeToLocaleStringParts(
   )
   return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
 }
+
+export const toString = bindArgs(
+  formatZonedDateTimeIso<string, string>,
+  queryNativeTimeZone,
+) as (record: Record, options?: ZonedDateTimeDisplayOptions) => string
 
 // Internal Utils
 // -----------------------------------------------------------------------------

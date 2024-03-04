@@ -130,11 +130,6 @@ export const compare = bindArgs(
 // Formatting
 // -----------------------------------------------------------------------------
 
-export const toString = formatDurationIso as (
-  record: Record,
-  options?: TimeDisplayOptions,
-) => string
-
 export function toLocaleString(
   record: Record,
   locales?: LocalesArg,
@@ -144,3 +139,8 @@ export function toLocaleString(
     ? new (Intl as any).DurationFormat(locales, options).format(record)
     : formatDurationIso(record)
 }
+
+export const toString = formatDurationIso as (
+  record: Record,
+  options?: TimeDisplayOptions,
+) => string

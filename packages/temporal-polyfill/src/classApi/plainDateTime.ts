@@ -28,7 +28,6 @@ import {
 } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
 import {
-  DateTimeDisplayOptions,
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
@@ -114,6 +113,8 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ...timeGetters,
   },
   {
+    getISOFields: removeBranding,
+    getCalendar: createCalendarFromSlots,
     with(
       slots: PlainDateTimeSlots<CalendarSlot>,
       mod: DateTimeBag,
@@ -129,15 +130,12 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
         ),
       )
     },
-    withPlainTime(
+    withCalendar(
       slots: PlainDateTimeSlots<CalendarSlot>,
-      plainTimeArg?: PlainTimeArg,
+      calendarArg: CalendarArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        plainDateTimeWithPlainTime(
-          slots,
-          optionalToPlainTimeFields(plainTimeArg),
-        ),
+        slotsWithCalendar(slots, refineCalendarSlot(calendarArg)),
       )
     },
     withPlainDate(
@@ -148,12 +146,15 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
         plainDateTimeWithPlainDate(slots, toPlainDateSlots(plainDateArg)),
       )
     },
-    withCalendar(
+    withPlainTime(
       slots: PlainDateTimeSlots<CalendarSlot>,
-      calendarArg: CalendarArg,
+      plainTimeArg?: PlainTimeArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        slotsWithCalendar(slots, refineCalendarSlot(calendarArg)),
+        plainDateTimeWithPlainTime(
+          slots,
+          optionalToPlainTimeFields(plainTimeArg),
+        ),
       )
     },
     add(
@@ -228,27 +229,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): boolean {
       return plainDateTimesEqual(slots, toPlainDateTimeSlots(otherArg))
     },
-    toString(
-      slots: PlainDateTimeSlots<CalendarSlot>,
-      options?: DateTimeDisplayOptions,
-    ): string {
-      return formatPlainDateTimeIso(slots, options)
-    },
-    toJSON(slots: PlainDateTimeSlots<CalendarSlot>): string {
-      return formatPlainDateTimeIso(slots)
-    },
-    toLocaleString(
-      slots: PlainDateTimeSlots<CalendarSlot>,
-      locales?: LocalesArg,
-      options?: Intl.DateTimeFormatOptions,
-    ) {
-      const [format, epochMilli] = prepPlainDateTimeFormat(
-        locales,
-        options,
-        slots,
-      )
-      return format.format(epochMilli)
-    },
     toZonedDateTime(
       slots: PlainDateTimeSlots<CalendarSlot>,
       timeZoneArg: TimeZoneArg,
@@ -266,6 +246,9 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     toPlainDate(slots: PlainDateTimeSlots<CalendarSlot>): PlainDate {
       return createPlainDate(createPlainDateSlots(slots))
     },
+    toPlainTime(slots: PlainDateTimeSlots<CalendarSlot>): PlainTime {
+      return createPlainTime(createPlainTimeSlots(slots))
+    },
     toPlainYearMonth(slots: PlainDateTimeSlots<CalendarSlot>): PlainYearMonth {
       return createPlainYearMonth(
         plainDateTimeToPlainYearMonth(createYearMonthRefineOps, slots, this),
@@ -276,11 +259,22 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
         plainDateTimeToPlainMonthDay(createMonthDayRefineOps, slots, this),
       )
     },
-    toPlainTime(slots: PlainDateTimeSlots<CalendarSlot>): PlainTime {
-      return createPlainTime(createPlainTimeSlots(slots))
+    toLocaleString(
+      slots: PlainDateTimeSlots<CalendarSlot>,
+      locales?: LocalesArg,
+      options?: Intl.DateTimeFormatOptions,
+    ) {
+      const [format, epochMilli] = prepPlainDateTimeFormat(
+        locales,
+        options,
+        slots,
+      )
+      return format.format(epochMilli)
     },
-    getISOFields: removeBranding,
-    getCalendar: createCalendarFromSlots,
+    toString: formatPlainDateTimeIso,
+    toJSON(slots: PlainDateTimeSlots<CalendarSlot>): string {
+      return formatPlainDateTimeIso(slots)
+    },
     valueOf: neverValueOf,
   },
   {

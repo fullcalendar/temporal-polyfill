@@ -85,6 +85,36 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
     equals(slots: InstantSlots, otherArg: InstantArg): boolean {
       return instantsEqual(slots, toInstantSlots(otherArg))
     },
+    toZonedDateTime(
+      slots: InstantSlots,
+      options: { timeZone: TimeZoneArg; calendar: CalendarArg },
+    ): ZonedDateTime {
+      const refinedObj = requireObjectLike(options)
+
+      return createZonedDateTime(
+        instantToZonedDateTime(
+          slots,
+          refineTimeZoneSlot(refinedObj.timeZone),
+          refineCalendarSlot(refinedObj.calendar),
+        ),
+      )
+    },
+    toZonedDateTimeISO(
+      slots: InstantSlots,
+      timeZoneArg: TimeZoneArg,
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        instantToZonedDateTime(slots, refineTimeZoneSlot(timeZoneArg)),
+      )
+    },
+    toLocaleString(
+      slots: InstantSlots,
+      locales?: LocalesArg,
+      options?: Intl.DateTimeFormatOptions,
+    ): string {
+      const [format, epochMilli] = prepInstantFormat(locales, options, slots)
+      return format.format(epochMilli)
+    },
     toString(
       slots: InstantSlots,
       options?: InstantDisplayOptions<TimeZoneSlot>,
@@ -101,36 +131,6 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
         refineTimeZoneSlot,
         createTimeZoneOffsetOps,
         slots,
-      )
-    },
-    toLocaleString(
-      slots: InstantSlots,
-      locales?: LocalesArg,
-      options?: Intl.DateTimeFormatOptions,
-    ): string {
-      const [format, epochMilli] = prepInstantFormat(locales, options, slots)
-      return format.format(epochMilli)
-    },
-    toZonedDateTimeISO(
-      slots: InstantSlots,
-      timeZoneArg: TimeZoneArg,
-    ): ZonedDateTime {
-      return createZonedDateTime(
-        instantToZonedDateTime(slots, refineTimeZoneSlot(timeZoneArg)),
-      )
-    },
-    toZonedDateTime(
-      slots: InstantSlots,
-      options: { timeZone: TimeZoneArg; calendar: CalendarArg },
-    ): ZonedDateTime {
-      const refinedObj = requireObjectLike(options)
-
-      return createZonedDateTime(
-        instantToZonedDateTime(
-          slots,
-          refineTimeZoneSlot(refinedObj.timeZone),
-          refineCalendarSlot(refinedObj.calendar),
-        ),
       )
     },
     valueOf: neverValueOf,

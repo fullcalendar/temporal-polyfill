@@ -56,6 +56,8 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
       ...monthDayGetters,
     },
     {
+      getISOFields: removeBranding,
+      getCalendar: createCalendarFromSlots,
       with(
         slots: PlainMonthDaySlots<CalendarSlot>,
         mod: MonthDayBag,
@@ -77,9 +79,13 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
       ): boolean {
         return plainMonthDaysEqual(slots, toPlainMonthDaySlots(otherArg))
       },
-      toString: formatPlainMonthDayIso,
-      toJSON(slots: PlainMonthDaySlots<CalendarSlot>): string {
-        return formatPlainMonthDayIso(slots)
+      toPlainDate(
+        slots: PlainMonthDaySlots<CalendarSlot>,
+        bag: YearFields,
+      ): PlainDate {
+        return createPlainDate(
+          plainMonthDayToPlainDate(createDateModOps, slots, this, bag),
+        )
       },
       toLocaleString(
         slots: PlainMonthDaySlots<CalendarSlot>,
@@ -93,16 +99,10 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         )
         return format.format(epochMilli)
       },
-      toPlainDate(
-        slots: PlainMonthDaySlots<CalendarSlot>,
-        bag: YearFields,
-      ): PlainDate {
-        return createPlainDate(
-          plainMonthDayToPlainDate(createDateModOps, slots, this, bag),
-        )
+      toString: formatPlainMonthDayIso,
+      toJSON(slots: PlainMonthDaySlots<CalendarSlot>): string {
+        return formatPlainMonthDayIso(slots)
       },
-      getISOFields: removeBranding,
-      getCalendar: createCalendarFromSlots,
       valueOf: neverValueOf,
     },
     {
