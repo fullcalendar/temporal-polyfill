@@ -39,7 +39,7 @@ import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  RoundOptions as GenericRoundOptions,
+  RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../internal/optionsRefine'
@@ -94,7 +94,7 @@ export type ISOFields = ZonedIsoFields<string, string>
 export type AssignmentOptions = ZonedFieldOptions
 export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions // TODO: more specific
-export type RoundOptions = GenericRoundOptions // TODO: more specific
+export type RoundOptions = RoundingOptions // TODO: more specific
 export type ToStringOptions = ZonedDateTimeDisplayOptions
 
 // Creation / Parsing

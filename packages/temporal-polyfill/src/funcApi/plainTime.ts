@@ -21,7 +21,7 @@ import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
 import {
   OverflowOptions,
-  RoundOptions as GenericRoundOptions,
+  RoundingOptions,
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
@@ -44,7 +44,7 @@ export type ISOFields = IsoTimeFields
 
 export type AssignmentOptions = OverflowOptions
 export type DifferenceOptions = DiffOps // TODO: more specific
-export type RoundOptions = GenericRoundOptions // TODO: more specific
+export type RoundOptions = RoundingOptions // TODO: more specific
 export type ToStringOptions = TimeDisplayOptions
 export type ToZonedDateTimeOptions = {
   timeZone: string

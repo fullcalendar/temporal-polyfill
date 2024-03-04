@@ -41,7 +41,7 @@ import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
-  RoundOptions as GenericRoundOptions,
+  RoundingOptions,
 } from '../internal/optionsRefine'
 import { roundPlainDateTime } from '../internal/round'
 import {
@@ -80,7 +80,7 @@ export type ISOFields = IsoDateTimeFields
 export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions // TODO: more specific units
-export type RoundOptions = GenericRoundOptions // TODO: more specific units
+export type RoundOptions = RoundingOptions // TODO: more specific units
 export type ToZonedDateTimeOptions = EpochDisambigOptions
 export type ToStringOptions = DateTimeDisplayOptions
 

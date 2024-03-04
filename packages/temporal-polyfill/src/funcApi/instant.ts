@@ -18,7 +18,7 @@ import { moveInstant } from '../internal/move'
 import {
   DiffOptions,
   InstantDisplayOptions,
-  RoundOptions as GenericRoundOptions,
+  RoundingOptions,
 } from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
@@ -39,7 +39,7 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 export type Record = Readonly<InstantSlots>
 
 export type DifferenceOptions = DiffOptions
-export type RoundOptions = GenericRoundOptions // TODO: more specific
+export type RoundOptions = RoundingOptions // TODO: more specific
 export type ToStringOptions = InstantDisplayOptions<string>
 export type ToZonedDateTimeOptions = {
   timeZone: string

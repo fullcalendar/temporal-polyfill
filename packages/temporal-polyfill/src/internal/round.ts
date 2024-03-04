@@ -38,7 +38,7 @@ import {
   RoundingMode,
   roundingModeFuncs,
 } from './options'
-import { RoundOptions, refineRoundOptions } from './optionsRefine'
+import { RoundingOptions, refineRoundOptions } from './optionsRefine'
 import {
   EpochSlots,
   InstantSlots,
@@ -83,7 +83,7 @@ import { divModFloor, divTrunc } from './utils'
 
 export function roundInstant(
   instantSlots: InstantSlots,
-  options: RoundOptions | UnitName | DurationFieldName,
+  options: RoundingOptions | UnitName | DurationFieldName,
 ): InstantSlots {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
     options,
@@ -105,7 +105,7 @@ export function roundInstant(
 export function roundZonedDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  options: RoundOptions | UnitName,
+  options: RoundingOptions | UnitName,
 ): ZonedDateTimeSlots<C, T> {
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
@@ -147,7 +147,7 @@ export function roundZonedDateTime<C, T>(
 
 export function roundPlainDateTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  options: RoundOptions | UnitName,
+  options: RoundingOptions | UnitName,
 ): PlainDateTimeSlots<C> {
   const roundedIsoFields = roundDateTime(
     plainDateTimeSlots,
@@ -159,7 +159,7 @@ export function roundPlainDateTime<C>(
 
 export function roundPlainTime(
   slots: PlainTimeSlots,
-  options: RoundOptions | UnitName,
+  options: RoundingOptions | UnitName,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
     roundTime(

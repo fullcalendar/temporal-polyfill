@@ -28,7 +28,7 @@ import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  RoundOptions,
+  RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
   copyOptions,
@@ -271,7 +271,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     },
     round(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-      options: RoundOptions | UnitName,
+      options: RoundingOptions | UnitName,
     ): ZonedDateTime {
       return createZonedDateTime(
         roundZonedDateTime(createTimeZoneOps, slots, options),
