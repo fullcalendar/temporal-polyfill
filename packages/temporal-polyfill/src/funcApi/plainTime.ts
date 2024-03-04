@@ -21,7 +21,7 @@ import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
 import {
   OverflowOptions,
-  RoundOptions,
+  RoundOptions as GenericRoundOptions,
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
@@ -42,6 +42,15 @@ export type CreateFields = PlainTimeBag
 export type UpdateFields = TimeBag
 export type ISOFields = IsoTimeFields
 
+export type AssignmentOptions = OverflowOptions
+export type DifferenceOptions = DiffOps // TODO: more specific
+export type RoundOptions = GenericRoundOptions // TODO: more specific
+export type ToStringOptions = TimeDisplayOptions
+export type ToZonedDateTimeOptions = {
+  timeZone: string
+  plainDate: PlainDateFns.Record
+}
+
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
@@ -56,7 +65,7 @@ export const create = constructPlainTimeSlots as (
 
 export const fromFields = refinePlainTimeBag as (
   fields: CreateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ) => Record
 
 export const fromString = parsePlainTime as (s: string) => Record
@@ -76,7 +85,7 @@ export const getISOFields = identity as (record: Record) => ISOFields
 export function withFields(
   record: Record,
   fields: UpdateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return plainTimeWithFields(getFields(record), fields, options)
 }
@@ -97,18 +106,18 @@ export const subtract = bindArgs(movePlainTime, true) as (
 export const until = bindArgs(diffPlainTimes, false) as (
   record0: Record,
   record1: Record,
-  options?: DiffOps,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const since = bindArgs(diffPlainTimes, true) as (
   record0: Record,
   record1: Record,
-  options?: DiffOps,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const round = roundPlainTime as (
   record: Record,
-  options: RoundOptions | UnitName,
+  options: UnitName | RoundOptions,
 ) => Record
 
 export const equals = plainTimesEqual as (
@@ -131,7 +140,7 @@ export const toZonedDateTime = bindArgs(
   queryNativeTimeZone,
 ) as (
   plainTimeRecord: Record,
-  options: { timeZone: string; plainDate: PlainDateFns.Record },
+  options: ToZonedDateTimeOptions,
 ) => ZonedDateTimeFns.Record
 
 export const toPlainDateTime = plainTimeToPlainDateTime<string> as (
@@ -198,5 +207,5 @@ export function rangeToLocaleStringParts(
 
 export const toString = formatPlainTimeIso as (
   record: Record,
-  options?: TimeDisplayOptions,
+  options?: ToStringOptions,
 ) => string

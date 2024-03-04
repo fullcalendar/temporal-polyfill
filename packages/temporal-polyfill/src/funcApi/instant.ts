@@ -18,7 +18,7 @@ import { moveInstant } from '../internal/move'
 import {
   DiffOptions,
   InstantDisplayOptions,
-  RoundOptions,
+  RoundOptions as GenericRoundOptions,
 } from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
@@ -37,6 +37,14 @@ import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<InstantSlots>
+
+export type DifferenceOptions = DiffOptions
+export type RoundOptions = GenericRoundOptions // TODO: more specific
+export type ToStringOptions = InstantDisplayOptions<string>
+export type ToZonedDateTimeOptions = {
+  timeZone: string
+  calendar: string
+}
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -90,19 +98,18 @@ export const subtract = bindArgs(moveInstant, true) as (
 export const until = bindArgs(diffInstants, false) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const since = bindArgs(diffInstants, true) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const round = roundInstant as (
   record: Record,
-  // TODO: better reusable type...
-  options?: RoundOptions | UnitName | DurationFieldName,
+  options?: UnitName | DurationFieldName | RoundOptions,
 ) => Record
 
 export const equals = instantsEqual as (
@@ -120,7 +127,7 @@ export const compare = compareInstants as (
 
 export function toZonedDateTime(
   record: Record,
-  options: { timeZone: string; calendar: string },
+  options: ToZonedDateTimeOptions,
 ): ZonedDateTimeFns.Record {
   const refinedObj = requireObjectLike(options)
 
@@ -198,8 +205,4 @@ export const toString = bindArgs(
   formatInstantIso<string, string>,
   refineTimeZoneIdString,
   queryNativeTimeZone,
-) as (
-  record: Record,
-  // TODO: better reusable type...
-  options?: InstantDisplayOptions<string>,
-) => string
+) as (record: Record, options?: ToStringOptions) => string

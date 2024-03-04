@@ -39,7 +39,7 @@ import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  RoundOptions,
+  RoundOptions as GenericRoundOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../internal/optionsRefine'
@@ -91,6 +91,12 @@ export type CreateFields = ZonedDateTimeBag<string, string>
 export type UpdateFields = DateTimeBag
 export type ISOFields = ZonedIsoFields<string, string>
 
+export type AssignmentOptions = ZonedFieldOptions
+export type ArithmeticOptions = OverflowOptions
+export type DifferenceOptions = DiffOptions // TODO: more specific
+export type RoundOptions = GenericRoundOptions // TODO: more specific
+export type ToStringOptions = ZonedDateTimeDisplayOptions
+
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
@@ -102,7 +108,7 @@ export const create = bindArgs(
 
 export function fromFields(
   fields: CreateFields,
-  options?: ZonedFieldOptions,
+  options?: AssignmentOptions,
 ): Record {
   const calendarId = getCalendarIdFromBag(fields)
   return refineZonedDateTimeBag(
@@ -117,7 +123,7 @@ export function fromFields(
 
 export const fromString = parseZonedDateTime as (
   s: string,
-  options?: ZonedFieldOptions,
+  options?: AssignmentOptions,
 ) => Record
 
 // Getters
@@ -198,7 +204,7 @@ export const hoursInDay = bindArgs(
 export function withFields(
   record: Record,
   fields: UpdateFields,
-  options?: ZonedFieldOptions,
+  options?: AssignmentOptions,
 ): Record {
   return zonedDateTimeWithFields(
     createNativeDateModOps,
@@ -245,7 +251,7 @@ export const add = bindArgs(
 ) as (
   zonedDateTimeRecord: Record,
   durationRecord: DurationFns.Record,
-  options?: OverflowOptions,
+  options?: ArithmeticOptions,
 ) => Record
 
 export const subtract = bindArgs(
@@ -256,7 +262,7 @@ export const subtract = bindArgs(
 ) as (
   zonedDateTimeRecord: Record,
   durationRecord: DurationFns.Record,
-  options?: OverflowOptions,
+  options?: ArithmeticOptions,
 ) => Record
 
 export const until = bindArgs(
@@ -267,7 +273,7 @@ export const until = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const since = bindArgs(
@@ -278,13 +284,13 @@ export const since = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const round = bindArgs(
   roundZonedDateTime<string, string>,
   queryNativeTimeZone,
-) as (record: Record, options: RoundOptions | UnitName) => Record
+) as (record: Record, options: UnitName | RoundOptions) => Record
 
 export const startOfDay = bindArgs(
   computeStartOfDay<string, string>,
@@ -398,7 +404,7 @@ export function rangeToLocaleStringParts(
 export const toString = bindArgs(
   formatZonedDateTimeIso<string, string>,
   queryNativeTimeZone,
-) as (record: Record, options?: ZonedDateTimeDisplayOptions) => string
+) as (record: Record, options?: ToStringOptions) => string
 
 // Internal Utils
 // -----------------------------------------------------------------------------

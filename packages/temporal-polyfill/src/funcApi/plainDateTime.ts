@@ -41,7 +41,7 @@ import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
-  RoundOptions,
+  RoundOptions as GenericRoundOptions,
 } from '../internal/optionsRefine'
 import { roundPlainDateTime } from '../internal/round'
 import {
@@ -77,6 +77,13 @@ export type CreateFields = PlainDateTimeBag<string>
 export type UpdateFields = DateTimeBag
 export type ISOFields = IsoDateTimeFields
 
+export type AssignmentOptions = OverflowOptions
+export type ArithmeticOptions = OverflowOptions
+export type DifferenceOptions = DiffOptions // TODO: more specific units
+export type RoundOptions = GenericRoundOptions // TODO: more specific units
+export type ToZonedDateTimeOptions = EpochDisambigOptions
+export type ToStringOptions = DateTimeDisplayOptions
+
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
@@ -98,7 +105,7 @@ export const create = bindArgs(
 
 export function fromFields(
   fields: CreateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return refinePlainDateTimeBag(
     createNativeDateRefineOps(getCalendarIdFromBag(fields)),
@@ -149,7 +156,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 export function withFields(
   record: Record,
   fields: UpdateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return plainDateTimeWithFields(
     createNativeDateModOps,
@@ -181,13 +188,21 @@ export const add = bindArgs(
   movePlainDateTime<string>,
   createNativeMoveOps,
   false,
-) as (plainDateTimeRecord: Record, durationRecord: DurationFns.Record) => Record
+) as (
+  plainDateTimeRecord: Record,
+  durationRecord: DurationFns.Record,
+  options?: ArithmeticOptions,
+) => Record
 
 export const subtract = bindArgs(
   movePlainDateTime<string>,
   createNativeMoveOps,
   true,
-) as (plainDateTimeRecord: Record, durationRecord: DurationFns.Record) => Record
+) as (
+  plainDateTimeRecord: Record,
+  durationRecord: DurationFns.Record,
+  options?: ArithmeticOptions,
+) => Record
 
 export const until = bindArgs(
   diffPlainDateTimes<string>,
@@ -196,7 +211,7 @@ export const until = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const since = bindArgs(
@@ -206,7 +221,7 @@ export const since = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const round = roundPlainDateTime<string> as (
@@ -233,7 +248,7 @@ export const toZonedDateTime = bindArgs(
 ) as (
   record: Record,
   timeZone: string,
-  options?: EpochDisambigOptions,
+  options?: ToZonedDateTimeOptions,
 ) => ZonedDateTimeFns.Record
 
 export const toPlainDate = createPlainDateSlots as (
@@ -318,5 +333,5 @@ export function rangeToLocaleStringParts(
 
 export const toString = formatPlainDateTimeIso<string> as (
   record: Record,
-  options?: DateTimeDisplayOptions,
+  options?: ToStringOptions,
 ) => string

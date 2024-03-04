@@ -40,6 +40,9 @@ export type UpdateFields = MonthDayBag
 export type ISOFields = IsoDateFields
 export type ToPlainDateFields = EraYearOrYear
 
+export type AssignmentOptions = OverflowOptions
+export type ToStringOptions = CalendarDisplayOptions
+
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
@@ -55,7 +58,7 @@ export const create = bindArgs(
 
 export function fromFields(
   fields: CreateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   const calendarMaybe = extractCalendarIdFromBag(fields)
   const calendar = calendarMaybe || isoCalendarId
@@ -88,7 +91,7 @@ export const getISOFields = identity as (record: Record) => ISOFields
 export function withFields(
   record: Record,
   fields: UpdateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return plainMonthDayWithFields(
     createNativeMonthDayModOps,
@@ -180,5 +183,5 @@ export function rangeToLocaleStringParts(
 
 export const toString = formatPlainMonthDayIso<string> as (
   record: Record,
-  options?: CalendarDisplayOptions,
+  options?: ToStringOptions,
 ) => string

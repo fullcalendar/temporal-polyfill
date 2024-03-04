@@ -50,6 +50,12 @@ export type Fields = YearMonthFields
 export type CreateFields = PlainYearMonthBag<string>
 export type UpdateFields = YearMonthBag
 export type ISOFields = IsoDateFields
+export type ToPlainDateFields = { day: number }
+
+export type AssignmentOptions = OverflowOptions
+export type ArithmeticOptions = OverflowOptions
+export type DifferenceOptions = DiffOptions // TODO: more specific
+export type ToStringOptions = CalendarDisplayOptions
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -66,7 +72,7 @@ export const create = bindArgs(
 
 export function fromFields(
   fields: CreateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return refinePlainYearMonthBag(
     createNativeYearMonthRefineOps(getCalendarIdFromBag(fields)),
@@ -103,7 +109,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 export function withFields(
   record: Record,
   fields: UpdateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return plainYearMonthWithFields(
     createNativeYearMonthModOps,
@@ -124,7 +130,7 @@ export const add = bindArgs(
 ) as (
   plainYearMonthFields: Record,
   durationRecord: DurationFns.Record,
-  options?: OverflowOptions,
+  options?: ArithmeticOptions,
 ) => Record
 
 export const subtract = bindArgs(
@@ -134,7 +140,7 @@ export const subtract = bindArgs(
 ) as (
   plainYearMonthFields: Record,
   durationRecord: DurationFns.Record,
-  options?: OverflowOptions,
+  options?: ArithmeticOptions,
 ) => Record
 
 export const until = bindArgs(
@@ -144,7 +150,7 @@ export const until = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const since = bindArgs(
@@ -154,7 +160,7 @@ export const since = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const equals = plainYearMonthsEqual<string> as (
@@ -172,7 +178,7 @@ export const compare = compareIsoDateFields as (
 
 export function toPlainDate(
   record: Record,
-  fields: { day: number },
+  fields: ToPlainDateFields,
 ): PlainDateFns.Record {
   return plainYearMonthToPlainDate(
     createNativeDateModOps,
@@ -240,5 +246,5 @@ export function rangeToLocaleStringParts(
 
 export const toString = formatPlainYearMonthIso<string> as (
   record: Record,
-  options?: CalendarDisplayOptions,
+  options?: ToStringOptions,
 ) => string

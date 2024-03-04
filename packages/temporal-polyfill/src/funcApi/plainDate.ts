@@ -36,6 +36,7 @@ import {
 } from '../internal/optionsRefine'
 import { PlainDateSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { UnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
@@ -64,6 +65,15 @@ export type CreateFields = PlainDateBag<string>
 export type UpdateFields = DateBag
 export type ISOFields = IsoDateFields
 
+export type AssignmentOptions = OverflowOptions
+export type ArithmeticOptions = OverflowOptions
+export type DifferenceOptions = DiffOptions // TODO: more specific units
+export type ToStringOptions = CalendarDisplayOptions
+export type ToZonedDateTimeOptions = {
+  timeZone: string
+  plainTime?: PlainTimeFns.Record
+}
+
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
@@ -79,7 +89,7 @@ export const create = bindArgs(
 
 export function fromFields(
   fields: CreateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return refinePlainDateBag(
     createNativeDateRefineOps(getCalendarIdFromBag(fields)),
@@ -127,7 +137,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 export function withFields(
   record: Record,
   fields: UpdateFields,
-  options?: OverflowOptions,
+  options?: AssignmentOptions,
 ): Record {
   return plainDateWithFields(
     createNativeDateModOps,
@@ -152,7 +162,7 @@ export const add = bindArgs(
 ) as (
   plainDateRecord: Record,
   durationRecord: DurationFns.Record,
-  options?: OverflowOptions,
+  options?: ArithmeticOptions,
 ) => Record
 
 export const subtract = bindArgs(
@@ -162,7 +172,7 @@ export const subtract = bindArgs(
 ) as (
   plainDateRecord: Record,
   durationRecord: DurationFns.Record,
-  options?: OverflowOptions,
+  options?: ArithmeticOptions,
 ) => Record
 
 export const until = bindArgs(
@@ -172,7 +182,7 @@ export const until = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const since = bindArgs(
@@ -182,7 +192,7 @@ export const since = bindArgs(
 ) as (
   record0: Record,
   record1: Record,
-  options?: DiffOptions,
+  options?: DifferenceOptions,
 ) => DurationFns.Record
 
 export const equals = plainDatesEqual<string> as (
@@ -200,7 +210,7 @@ export const compare = compareIsoDateFields as (
 
 export function toZonedDateTime(
   record: Record,
-  options: string | { timeZone: string; plainTime?: PlainTimeFns.Record },
+  options: UnitName | ToZonedDateTimeOptions,
 ): ZonedDateTimeFns.Record {
   const optionsObj =
     typeof options === 'string' ? { timeZone: options } : options
@@ -293,5 +303,5 @@ export function rangeToLocaleStringParts(
 
 export const toString = formatPlainDateIso<string> as (
   record: Record,
-  options?: CalendarDisplayOptions,
+  options?: ToStringOptions,
 ) => string

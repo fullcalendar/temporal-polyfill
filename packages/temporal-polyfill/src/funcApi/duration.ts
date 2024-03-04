@@ -36,6 +36,12 @@ export type RelativeToArg =
   | PlainDateTimeFns.Record
   | PlainDateFns.Record
 
+export type ArithmeticOptions = RelativeToOptions<RelativeToArg>
+export type RoundOptions = DurationRoundOptions<RelativeToArg>
+export type TotalOptions = TotalUnitOptionsWithRel<RelativeToArg>
+export type CompareOptions = RelativeToOptions<RelativeToArg>
+export type ToStringOptions = TimeDisplayOptions
+
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
@@ -82,11 +88,7 @@ export const add = bindArgs(
   createNativeDiffOps,
   queryNativeTimeZone,
   false,
-) as (
-  record0: Record,
-  record1: Record,
-  options?: RelativeToOptions<RelativeToArg>,
-) => Record
+) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const subtract = bindArgs(
   addDurations<RelativeToArg, string, string>,
@@ -94,39 +96,28 @@ export const subtract = bindArgs(
   createNativeDiffOps,
   queryNativeTimeZone,
   true,
-) as (
-  record0: Record,
-  record1: Record,
-  options?: RelativeToOptions<RelativeToArg>,
-) => Record
+) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const round = bindArgs(
   roundDuration<RelativeToArg, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
-) as (record: Record, options?: DurationRoundOptions<RelativeToArg>) => Record
+) as (record: Record, options?: RoundOptions) => Record
 
 export const total = bindArgs(
   totalDuration<RelativeToArg, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
-) as (
-  record: Record,
-  options?: TotalUnitOptionsWithRel<RelativeToArg> | UnitName,
-) => number
+) as (record: Record, options?: TotalOptions | UnitName) => number
 
 export const compare = bindArgs(
   compareDurations<RelativeToArg, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
-) as (
-  record0: Record,
-  record1: Record,
-  options?: RelativeToOptions<RelativeToArg>,
-) => NumberSign
+) as (record0: Record, record1: Record, options?: CompareOptions) => NumberSign
 
 // Formatting
 // -----------------------------------------------------------------------------
@@ -143,5 +134,5 @@ export function toLocaleString(
 
 export const toString = formatDurationIso as (
   record: Record,
-  options?: TimeDisplayOptions,
+  options?: ToStringOptions,
 ) => string
