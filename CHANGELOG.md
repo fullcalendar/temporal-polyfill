@@ -90,7 +90,7 @@ v0.0.6 (2022-04-06)
 v0.0.5 (2022-03-16)
 -------------------
 
-- Intl.DateTimeFormat corretly polyfilled to customize output based on Temporal type
+- Intl.DateTimeFormat correctly polyfilled to customize output based on Temporal type
 - fixes to TimeZone object
 
 

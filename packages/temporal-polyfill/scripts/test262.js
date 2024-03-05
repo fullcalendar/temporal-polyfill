@@ -35,7 +35,7 @@ yargs(hideBin(process.argv))
           requiresArg: false,
           default: 10,
           type: 'number',
-          description: 'Maxiumum allowed number of failures before aborting',
+          description: 'Maximum allowed number of failures before aborting',
         })
         .option('esm', {
           requiresArg: false,
