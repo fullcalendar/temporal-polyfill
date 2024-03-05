@@ -112,7 +112,9 @@ Use a `<script>` tags with a CDN link:
     <td>
       <code>import 'temporal-polyfill/global'</code>
     </td>
-    <td>Not currently possible</td>
+    <td>
+      <code>import { Temporal } from '@js-temporal/polyfill'</code>
+    </td>
   </tr>
 </table>
 
