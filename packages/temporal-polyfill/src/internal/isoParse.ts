@@ -391,7 +391,7 @@ const dateTimeRegExpStr =
 // which only ever runs on strings already parsed by annotationsRegExpStr
 const annotationRegExpStr = '\\[(!?)([^\\]]*)\\]' // critical:1, annotation:2
 
-// Limit the number of annotations (maximum 9) to prevet reDoS attack
+// Limit the number of annotations (maximum 9) to prevent reDoS attack
 const annotationsRegExpStr = `((?:${annotationRegExpStr}){0,9})` // multiple
 
 const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationsRegExpStr)

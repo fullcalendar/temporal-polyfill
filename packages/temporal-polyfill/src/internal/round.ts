@@ -523,7 +523,7 @@ function nudgeRelativeDurationTime(
   )
   const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
 
-  // TODO: document. somthing to do with rounding a zdt to the next day
+  // TODO: document. something to do with rounding a zdt to the next day
   if (!beyondDay || Math.sign(beyondDay) === sign) {
     dayDelta += sign
     roundedTimeNano = roundByInc(beyondDay, nanoInc, roundingMode)
