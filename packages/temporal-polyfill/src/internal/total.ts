@@ -31,7 +31,7 @@ export function totalDuration<RA, C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
-  options: TotalUnitOptionsWithRel<RA> | UnitName,
+  options: UnitName | TotalUnitOptionsWithRel<RA>,
 ): number {
   const durationLargestUnit = getLargestDurationUnit(slots)
   const [totalUnit, relativeToSlots] = refineTotalOptions(

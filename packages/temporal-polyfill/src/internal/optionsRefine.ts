@@ -17,8 +17,12 @@ import {
   TimeZoneDisplay,
 } from './options'
 import {
+  DateUnitName,
   DayTimeUnit,
+  DayTimeUnitName,
+  StrictUnitName,
   TimeUnit,
+  TimeUnitName,
   Unit,
   UnitName,
   nanoInUtcDay,
@@ -37,8 +41,8 @@ export type ZonedFieldOptions = OverflowOptions &
 
 export type ZonedFieldTuple = [Overflow, OffsetDisambig, EpochDisambig]
 
-export type DiffOptions = LargestUnitOptions &
-  SmallestUnitOptions &
+export type DiffOptions<UN extends UnitName> = LargestUnitOptions<UN> &
+  SmallestUnitOptions<UN> &
   RoundingIncOptions &
   RoundingModeOptions
 
@@ -55,11 +59,11 @@ export type RoundTuple = [
   RoundingMode,
 ]
 
-export type RoundingOptions = SmallestUnitOptions &
-  RoundingIncOptions &
-  RoundingModeOptions
+export type RoundingOptions<UN extends DayTimeUnitName> =
+  SmallestUnitOptions<UN> & RoundingIncOptions & RoundingModeOptions
 
-export type DurationRoundOptions<RA> = DiffOptions & RelativeToOptions<RA>
+export type DurationRoundOptions<RA> = DiffOptions<UnitName> &
+  RelativeToOptions<RA>
 
 export type DurationRoundTuple<R> = [...DiffTuple, R]
 
@@ -69,8 +73,7 @@ export type TimeDisplayTuple = [
   subsecDigits: SubsecDigits | -1 | undefined, // TODO: change -1 to null?
 ]
 
-// TODO: lock-down subset of Unit here?
-export type TimeDisplayOptions = SmallestUnitOptions &
+export type TimeDisplayOptions = SmallestUnitOptions<TimeUnitName> &
   RoundingModeOptions &
   SubsecDigitsOptions
 
@@ -94,16 +97,15 @@ export type DateTimeDisplayOptions = CalendarDisplayOptions & TimeDisplayOptions
 
 export type DateTimeDisplayTuple = [CalendarDisplay, ...TimeDisplayTuple]
 
-interface SmallestUnitOptions {
-  smallestUnit?: UnitName | DurationFieldName
+export interface SmallestUnitOptions<UN extends UnitName> {
+  smallestUnit?: UN
 }
 
-// TODO: rename to CalendarDiffOptions?
-export interface LargestUnitOptions {
-  largestUnit?: UnitName | DurationFieldName
+export interface LargestUnitOptions<UN extends UnitName> {
+  largestUnit?: UN
 }
 
-interface TotalUnitOptions {
+export interface TotalUnitOptions {
   unit: UnitName | DurationFieldName
 }
 
@@ -242,20 +244,17 @@ export function refineEpochDisambigOptions(
   return refineEpochDisambig(normalizeOptions(options))
 }
 
-/*
-For simple Calendar class diffing (only y/m/w/d units)
-*/
-export function refineCalendarDiffOptions(
-  options: LargestUnitOptions | undefined, // TODO: definitely make large-unit type via generics
+export function refineDateDiffOptions(
+  options: LargestUnitOptions<DateUnitName> | undefined,
 ): Unit {
   // TODO: only year/month/week/day?
   options = normalizeOptions(options)
   return refineLargestUnit(options, Unit.Year, Unit.Day, true)!
 }
 
-export function refineDiffOptions(
+export function refineDiffOptions<UN extends UnitName>(
   roundingModeInvert: boolean | undefined,
-  options: DiffOptions | undefined,
+  options: DiffOptions<UN> | undefined,
   defaultLargestUnit: Unit,
   maxUnit = Unit.Year,
   minUnit = Unit.Nanosecond,
@@ -331,12 +330,15 @@ export function refineDurationRoundOptions<RA, R>(
 /*
 Always related to time
 */
-export function refineRoundOptions(
-  options: RoundingOptions | UnitName | DurationFieldName,
+export function refineRoundOptions<UN extends DayTimeUnitName>(
+  options: UN | RoundingOptions<UN>,
   maxUnit: DayTimeUnit = Unit.Day,
   solarMode?: boolean,
 ): RoundTuple {
-  options = normalizeUnitNameOptions(options, smallestUnitStr)
+  options = normalizeUnitNameOptions<UN, RoundingOptions<UN>>(
+    options,
+    smallestUnitStr,
+  )
 
   // alphabetical
   let roundingInc = parseRoundingIncInteger(options)
@@ -355,10 +357,13 @@ export function refineRoundOptions(
 }
 
 export function refineTotalOptions<RA, R>(
-  options: TotalUnitOptionsWithRel<RA> | UnitName,
+  options: UnitName | TotalUnitOptionsWithRel<RA>,
   refineRelativeTo: (relativeTo?: RA) => R | undefined,
 ): [Unit, R | undefined] {
-  options = normalizeUnitNameOptions(options, totalUnitStr)
+  options = normalizeUnitNameOptions<UnitName, TotalUnitOptionsWithRel<RA>>(
+    options,
+    totalUnitStr,
+  )
 
   // alphabetical
   const relativeToInternals = refineRelativeTo(options[relativeToName])
@@ -465,12 +470,14 @@ function refineSmallestUnitAndSubsecDigits(
 // Individual Refining (simple)
 // -----------------------------------------------------------------------------
 
+// generic. callers should type-narrow the results
 const refineSmallestUnit = bindArgs(
-  refineUnitOption<SmallestUnitOptions>,
+  refineUnitOption<SmallestUnitOptions<UnitName>>,
   smallestUnitStr,
 )
+// generic. callers should type-narrow the results
 const refineLargestUnit = bindArgs(
-  refineUnitOption<LargestUnitOptions>,
+  refineUnitOption<LargestUnitOptions<UnitName>>,
   largestUnitStr,
 )
 const refineTotalUnit = bindArgs(
@@ -603,8 +610,8 @@ export function normalizeOptions<O extends {}>(options: O | undefined): O {
   return requireObjectLike(options)
 }
 
-function normalizeUnitNameOptions<O extends {}>(
-  options: O | UnitName | DurationFieldName,
+function normalizeUnitNameOptions<UN extends UnitName, O extends {}>(
+  options: O | UN,
   optionName: keyof O,
 ): O {
   if (typeof options === 'string') {
@@ -670,7 +677,7 @@ function refineUnitOption<O>(
     return ensureDefined ? minUnit : null
   }
 
-  let unit = unitNameMap[unitStr as UnitName]
+  let unit = unitNameMap[unitStr as StrictUnitName]
 
   if (unit === undefined) {
     unit = durationFieldIndexes[unitStr as DurationFieldName]

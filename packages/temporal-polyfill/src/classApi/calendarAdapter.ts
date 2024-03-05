@@ -18,7 +18,7 @@ import {
   createDurationSlots,
   createPlainDateSlots,
 } from '../internal/slots'
-import { Unit, unitNamesAsc } from '../internal/units'
+import { DateUnitName, Unit, unitNamesAsc } from '../internal/units'
 import { Callable, bindArgs } from '../internal/utils'
 import { CalendarProtocol, CalendarSlot } from './calendar'
 import { createDuration, getDurationSlots } from './duration'
@@ -120,7 +120,7 @@ function dateUntilAdapter(
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
   largestUnit: Unit,
-  origOptions?: DiffOptions,
+  origOptions?: DiffOptions<DateUnitName>,
 ): DurationSlots {
   return getDurationSlots(
     dateUntil.call(

@@ -61,7 +61,7 @@ import {
   computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
-import { UnitName } from '../internal/units'
+import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
@@ -93,8 +93,8 @@ export type ISOFields = ZonedIsoFields<string, string>
 
 export type AssignmentOptions = ZonedFieldOptions
 export type ArithmeticOptions = OverflowOptions
-export type DifferenceOptions = DiffOptions // TODO: more specific
-export type RoundOptions = RoundingOptions // TODO: more specific
+export type DifferenceOptions = DiffOptions<UnitName>
+export type RoundOptions = RoundingOptions<DayTimeUnitName>
 export type ToStringOptions = ZonedDateTimeDisplayOptions
 
 // Creation / Parsing
@@ -290,7 +290,7 @@ export const since = bindArgs(
 export const round = bindArgs(
   roundZonedDateTime<string, string>,
   queryNativeTimeZone,
-) as (record: Record, options: UnitName | RoundOptions) => Record
+) as (record: Record, options: DayTimeUnitName | RoundOptions) => Record
 
 export const startOfDay = bindArgs(
   computeStartOfDay<string, string>,

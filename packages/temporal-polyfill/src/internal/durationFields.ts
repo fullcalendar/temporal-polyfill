@@ -22,10 +22,24 @@ export interface DurationTimeFields {
 }
 
 export type DurationFields = DurationDateFields & DurationTimeFields
-export type DurationFieldName = keyof DurationFields
 
 // Field Names
 // -----------------------------------------------------------------------------
+
+export type DurationYearMonthFieldName = 'years' | 'months'
+export type DurationDateFieldName =
+  | DurationYearMonthFieldName
+  | 'weeks'
+  | 'days'
+export type DurationTimeFieldName =
+  | 'hours'
+  | 'minutes'
+  | 'seconds'
+  | 'milliseconds'
+  | 'microseconds'
+  | 'nanoseconds'
+export type DurationDayTimeFieldName = 'day' | DurationTimeFieldName
+export type DurationFieldName = DurationDateFieldName | DurationTimeFieldName
 
 export const durationFieldNamesAsc = unitNamesAsc.map(
   (unitName) => unitName + 's',

@@ -7,7 +7,6 @@ import {
   diffBigNanos,
 } from './bigNano'
 import {
-  DurationFieldName,
   DurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
@@ -68,9 +67,10 @@ import {
 } from './total'
 import {
   DayTimeUnit,
+  DayTimeUnitName,
   TimeUnit,
+  TimeUnitName,
   Unit,
-  UnitName,
   givenFieldsToBigNano,
   nanoInMinute,
   nanoInUtcDay,
@@ -83,7 +83,7 @@ import { divModFloor, divTrunc } from './utils'
 
 export function roundInstant(
   instantSlots: InstantSlots,
-  options: RoundingOptions | UnitName | DurationFieldName,
+  options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): InstantSlots {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
     options,
@@ -105,7 +105,7 @@ export function roundInstant(
 export function roundZonedDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-  options: RoundingOptions | UnitName,
+  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeSlots<C, T> {
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
   const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
@@ -147,7 +147,7 @@ export function roundZonedDateTime<C, T>(
 
 export function roundPlainDateTime<C>(
   plainDateTimeSlots: PlainDateTimeSlots<C>,
-  options: RoundingOptions | UnitName,
+  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeSlots<C> {
   const roundedIsoFields = roundDateTime(
     plainDateTimeSlots,
@@ -159,7 +159,7 @@ export function roundPlainDateTime<C>(
 
 export function roundPlainTime(
   slots: PlainTimeSlots,
-  options: RoundingOptions | UnitName,
+  options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
     roundTime(

@@ -124,8 +124,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     total(
       slots: DurationSlots,
       options:
-        | TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg>
-        | UnitName,
+        | UnitName
+        | TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg>,
     ): number {
       return totalDuration(
         refinePublicRelativeTo,

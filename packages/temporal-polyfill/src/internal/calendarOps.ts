@@ -7,7 +7,7 @@ import {
   PlainMonthDaySlots,
   PlainYearMonthSlots,
 } from './slots'
-import { Unit } from './units'
+import { DateUnitName, Unit } from './units'
 
 // Operations for internal use!
 
@@ -45,7 +45,7 @@ export type DateUntilOp = (
   isoFields0: IsoDateFields,
   isoFields1: IsoDateFields,
   largestUnit: Unit,
-  origOptions?: DiffOptions,
+  origOptions?: DiffOptions<DateUnitName>,
 ) => DurationFields
 
 export type DayOp = (isoFields: IsoDateFields) => number

@@ -36,7 +36,7 @@ import {
 } from '../internal/optionsRefine'
 import { PlainDateSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { UnitName } from '../internal/units'
+import { DateUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
@@ -67,7 +67,7 @@ export type ISOFields = IsoDateFields
 
 export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
-export type DifferenceOptions = DiffOptions // TODO: more specific units
+export type DifferenceOptions = DiffOptions<DateUnitName>
 export type ToStringOptions = CalendarDisplayOptions
 export type ToZonedDateTimeOptions = {
   timeZone: string
@@ -210,7 +210,7 @@ export const compare = compareIsoDateFields as (
 
 export function toZonedDateTime(
   record: Record,
-  options: UnitName | ToZonedDateTimeOptions,
+  options: string | ToZonedDateTimeOptions,
 ): ZonedDateTimeFns.Record {
   const optionsObj =
     typeof options === 'string' ? { timeZone: options } : options

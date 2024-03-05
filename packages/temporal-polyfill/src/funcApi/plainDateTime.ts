@@ -50,6 +50,7 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
@@ -79,8 +80,8 @@ export type ISOFields = IsoDateTimeFields
 
 export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
-export type DifferenceOptions = DiffOptions // TODO: more specific units
-export type RoundOptions = RoundingOptions // TODO: more specific units
+export type DifferenceOptions = DiffOptions<UnitName>
+export type RoundOptions = RoundingOptions<DayTimeUnitName>
 export type ToZonedDateTimeOptions = EpochDisambigOptions
 export type ToStringOptions = DateTimeDisplayOptions
 

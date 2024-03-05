@@ -4,7 +4,6 @@ import {
   plainTimeWithFields,
   refinePlainTimeBag,
 } from '../internal/bagRefine'
-import { DiffOps } from '../internal/calendarOps'
 import { compareIsoTimeFields, plainTimesEqual } from '../internal/compare'
 import { constructPlainTimeSlots } from '../internal/construct'
 import {
@@ -20,6 +19,7 @@ import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { movePlainTime } from '../internal/move'
 import {
+  DiffOptions,
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
@@ -27,7 +27,7 @@ import {
 import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { UnitName } from '../internal/units'
+import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
@@ -43,8 +43,8 @@ export type UpdateFields = TimeBag
 export type ISOFields = IsoTimeFields
 
 export type AssignmentOptions = OverflowOptions
-export type DifferenceOptions = DiffOps // TODO: more specific
-export type RoundOptions = RoundingOptions // TODO: more specific
+export type DifferenceOptions = DiffOptions<TimeUnitName>
+export type RoundOptions = RoundingOptions<TimeUnitName>
 export type ToStringOptions = TimeDisplayOptions
 export type ToZonedDateTimeOptions = {
   timeZone: string
@@ -117,7 +117,7 @@ export const since = bindArgs(diffPlainTimes, true) as (
 
 export const round = roundPlainTime as (
   record: Record,
-  options: UnitName | RoundOptions,
+  options: TimeUnitName | RoundOptions,
 ) => Record
 
 export const equals = plainTimesEqual as (

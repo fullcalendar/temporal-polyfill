@@ -27,7 +27,7 @@ import {
   ZonedDateTimeSlots,
   createInstantSlots,
 } from '../internal/slots'
-import { UnitName, nanoInMilli } from '../internal/units'
+import { TimeUnitName, nanoInMilli } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import { CalendarArg, CalendarSlot, refineCalendarSlot } from './calendar'
 import {
@@ -64,7 +64,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
     until(
       slots: InstantSlots,
       otherArg: InstantArg,
-      options?: DiffOptions,
+      options?: DiffOptions<TimeUnitName>,
     ): Duration {
       return createDuration(
         diffInstants(false, slots, toInstantSlots(otherArg), options),
@@ -73,13 +73,16 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
     since(
       slots: InstantSlots,
       otherArg: InstantArg,
-      options?: DiffOptions,
+      options?: DiffOptions<TimeUnitName>,
     ): Duration {
       return createDuration(
         diffInstants(true, slots, toInstantSlots(otherArg), options),
       )
     },
-    round(slots: InstantSlots, options: RoundingOptions | UnitName): Instant {
+    round(
+      slots: InstantSlots,
+      options: TimeUnitName | RoundingOptions<TimeUnitName>,
+    ): Instant {
       return createInstant(roundInstant(slots, options))
     },
     equals(slots: InstantSlots, otherArg: InstantArg): boolean {

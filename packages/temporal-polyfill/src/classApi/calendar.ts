@@ -24,13 +24,14 @@ import { parseCalendarId } from '../internal/isoParse'
 import {
   LargestUnitOptions,
   OverflowOptions,
-  refineCalendarDiffOptions,
+  refineDateDiffOptions,
 } from '../internal/optionsRefine'
 import {
   BrandingSlots,
   createDurationSlots,
   createPlainDateSlots,
 } from '../internal/slots'
+import { DateUnitName } from '../internal/units'
 import { excludeUndefinedProps, isObjectLike } from '../internal/utils'
 import {
   Duration,
@@ -96,14 +97,14 @@ const calendarMethods = {
     { native }: CalendarClassSlots,
     plainDateArg0: PlainDateArg,
     plainDateArg1: PlainDateArg,
-    options?: LargestUnitOptions,
+    options?: LargestUnitOptions<DateUnitName>,
   ): Duration {
     return createDuration(
       createDurationSlots(
         native.dateUntil(
           toPlainDateSlots(plainDateArg0),
           toPlainDateSlots(plainDateArg1),
-          refineCalendarDiffOptions(options),
+          refineDateDiffOptions(options),
         ),
       ),
     )
@@ -285,7 +286,7 @@ export interface CalendarProtocol {
   dateUntil(
     dateArg0: PlainDateArg,
     dateArg1: PlainDateArg,
-    options?: LargestUnitOptions,
+    options?: LargestUnitOptions<DateUnitName>,
   ): Duration
   fields(fieldNames: Iterable<string>): Iterable<string>
   mergeFields(

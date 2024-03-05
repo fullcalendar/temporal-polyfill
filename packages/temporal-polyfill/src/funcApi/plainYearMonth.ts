@@ -31,6 +31,7 @@ import {
   OverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainYearMonthSlots } from '../internal/slots'
+import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
@@ -54,7 +55,7 @@ export type ToPlainDateFields = { day: number }
 
 export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
-export type DifferenceOptions = DiffOptions // TODO: more specific
+export type DifferenceOptions = DiffOptions<YearMonthUnitName>
 export type ToStringOptions = CalendarDisplayOptions
 
 // Creation / Parsing

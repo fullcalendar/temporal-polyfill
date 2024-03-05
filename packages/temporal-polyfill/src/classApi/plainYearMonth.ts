@@ -20,6 +20,7 @@ import {
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
+import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
@@ -116,7 +117,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       until(
         slots: PlainYearMonthSlots<CalendarSlot>,
         otherArg: PlainYearMonthArg,
-        options?: DiffOptions,
+        options?: DiffOptions<YearMonthUnitName>,
       ): Duration {
         return createDuration(
           diffPlainYearMonth(
@@ -131,7 +132,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       since(
         slots: PlainYearMonthSlots<CalendarSlot>,
         otherArg: PlainYearMonthArg,
-        options?: DiffOptions,
+        options?: DiffOptions<YearMonthUnitName>,
       ): Duration {
         return createDuration(
           diffPlainYearMonth(

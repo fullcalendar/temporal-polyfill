@@ -48,7 +48,7 @@ import {
   createPlainDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
-import { UnitName } from '../internal/units'
+import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
@@ -190,7 +190,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     until(
       slots: PlainDateTimeSlots<CalendarSlot>,
       otherArg: PlainDateTimeArg,
-      options?: DiffOptions,
+      options?: DiffOptions<UnitName>,
     ): Duration {
       return createDuration(
         diffPlainDateTimes(
@@ -205,7 +205,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     since(
       slots: PlainDateTimeSlots<CalendarSlot>,
       otherArg: PlainDateTimeArg,
-      options?: DiffOptions,
+      options?: DiffOptions<UnitName>,
     ): Duration {
       return createDuration(
         diffPlainDateTimes(
@@ -219,7 +219,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     },
     round(
       slots: PlainDateTimeSlots<CalendarSlot>,
-      options: RoundingOptions | UnitName,
+      options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
     ): PlainDateTime {
       return createPlainDateTime(roundPlainDateTime(slots, options))
     },

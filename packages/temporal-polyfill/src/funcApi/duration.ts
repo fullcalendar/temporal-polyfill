@@ -110,7 +110,7 @@ export const total = bindArgs(
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
-) as (record: Record, options?: TotalOptions | UnitName) => number
+) as (record: Record, options?: UnitName | TotalOptions) => number
 
 export const compare = bindArgs(
   compareDurations<RelativeToArg, string, string>,

@@ -1,4 +1,11 @@
 import { BigNano } from './bigNano'
+import {
+  DurationDateFieldName,
+  DurationDayTimeFieldName,
+  DurationFieldName,
+  DurationTimeFieldName,
+  DurationYearMonthFieldName,
+} from './durationFields'
 import { divModTrunc, divTrunc, modTrunc } from './utils'
 
 export const enum Unit {
@@ -14,9 +21,6 @@ export const enum Unit {
   Year = 9,
 }
 
-// TODO: more convenient type for OR-ing with DurationFields (for plural?)
-export type UnitName = keyof typeof unitNameMap
-
 export type TimeUnit =
   | Unit.Nanosecond
   | Unit.Microsecond
@@ -27,7 +31,30 @@ export type TimeUnit =
 
 export type DayTimeUnit = Unit.Day | TimeUnit
 
+// Names
 // -----------------------------------------------------------------------------
+
+// singular
+export type StrictYearMonthUnitName = 'year' | 'month'
+export type StrictDateUnitName = StrictYearMonthUnitName | 'week' | 'day'
+export type StrictTimeUnitName =
+  | 'hour'
+  | 'minute'
+  | 'second'
+  | 'millisecond'
+  | 'microsecond'
+  | 'nanosecond'
+export type StrictDayTimeUnitName = 'day' | StrictTimeUnitName
+export type StrictUnitName = StrictDateUnitName | StrictTimeUnitName
+
+// singular OR plural
+export type YearMonthUnitName =
+  | StrictYearMonthUnitName
+  | DurationYearMonthFieldName
+export type DateUnitName = StrictDateUnitName | DurationDateFieldName
+export type TimeUnitName = StrictTimeUnitName | DurationTimeFieldName
+export type DayTimeUnitName = StrictDayTimeUnitName | DurationDayTimeFieldName
+export type UnitName = StrictUnitName | DurationFieldName
 
 export const unitNameMap = {
   nanosecond: Unit.Nanosecond,

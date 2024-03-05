@@ -34,7 +34,7 @@ import {
   ZonedDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
-import { UnitName } from '../internal/units'
+import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import { CalendarSlot } from './calendar'
 import {
@@ -83,7 +83,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     until(
       slots: PlainTimeSlots,
       otherArg: PlainTimeArg,
-      options?: DiffOptions,
+      options?: DiffOptions<TimeUnitName>,
     ): Duration {
       return createDuration(
         diffPlainTimes(false, slots, toPlainTimeSlots(otherArg), options),
@@ -92,7 +92,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     since(
       slots: PlainTimeSlots,
       otherArg: PlainTimeArg,
-      options?: DiffOptions,
+      options?: DiffOptions<TimeUnitName>,
     ): Duration {
       return createDuration(
         diffPlainTimes(true, slots, toPlainTimeSlots(otherArg), options),
@@ -100,7 +100,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     },
     round(
       slots: PlainTimeSlots,
-      options: RoundingOptions | UnitName,
+      options: TimeUnitName | RoundingOptions<TimeUnitName>,
     ): PlainTime {
       return createPlainTime(roundPlainTime(slots, options))
     },

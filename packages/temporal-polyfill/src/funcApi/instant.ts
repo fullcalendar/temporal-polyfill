@@ -9,7 +9,6 @@ import {
   instantToZonedDateTime,
 } from '../internal/convert'
 import { diffInstants } from '../internal/diff'
-import { DurationFieldName } from '../internal/durationFields'
 import { createFormatPrepper, instantConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
@@ -29,7 +28,7 @@ import {
   getEpochSec,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { UnitName } from '../internal/units'
+import { TimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
@@ -38,8 +37,8 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<InstantSlots>
 
-export type DifferenceOptions = DiffOptions
-export type RoundOptions = RoundingOptions // TODO: more specific
+export type DifferenceOptions = DiffOptions<TimeUnitName>
+export type RoundOptions = RoundingOptions<TimeUnitName>
 export type ToStringOptions = InstantDisplayOptions<string>
 export type ToZonedDateTimeOptions = {
   timeZone: string
@@ -109,7 +108,7 @@ export const since = bindArgs(diffInstants, true) as (
 
 export const round = roundInstant as (
   record: Record,
-  options?: UnitName | DurationFieldName | RoundOptions,
+  options?: UnitName | RoundOptions,
 ) => Record
 
 export const equals = instantsEqual as (

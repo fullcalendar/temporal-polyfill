@@ -49,7 +49,7 @@ import {
   computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
-import { UnitName } from '../internal/units'
+import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import {
   CalendarArg,
@@ -236,7 +236,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     until(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
       otherArg: ZonedDateTimeArg,
-      options?: DiffOptions,
+      options?: DiffOptions<UnitName>,
     ): Duration {
       return createDuration(
         createDurationSlots(
@@ -254,7 +254,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     since(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
       otherArg: ZonedDateTimeArg,
-      options?: DiffOptions,
+      options?: DiffOptions<UnitName>,
     ): Duration {
       return createDuration(
         createDurationSlots(
@@ -271,7 +271,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     },
     round(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
-      options: RoundingOptions | UnitName,
+      options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
     ): ZonedDateTime {
       return createZonedDateTime(
         roundZonedDateTime(createTimeZoneOps, slots, options),
