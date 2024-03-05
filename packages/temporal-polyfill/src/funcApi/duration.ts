@@ -31,15 +31,15 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 export type Record = Readonly<DurationSlots>
 export type CreateFields = DurationBag
 export type UpdateFields = DurationBag
-export type RelativeToArg =
+export type RelativeToRecord =
   | ZonedDateTimeFns.Record
   | PlainDateTimeFns.Record
   | PlainDateFns.Record
 
-export type ArithmeticOptions = RelativeToOptions<RelativeToArg>
-export type RoundOptions = DurationRoundOptions<RelativeToArg>
-export type TotalOptions = TotalUnitOptionsWithRel<RelativeToArg>
-export type CompareOptions = RelativeToOptions<RelativeToArg>
+export type ArithmeticOptions = RelativeToOptions<RelativeToRecord>
+export type RoundOptions = DurationRoundOptions<RelativeToRecord>
+export type TotalOptions = TotalUnitOptionsWithRel<RelativeToRecord>
+export type CompareOptions = RelativeToOptions<RelativeToRecord>
 export type ToStringOptions = TimeDisplayOptions
 
 // Creation / Parsing
@@ -83,7 +83,7 @@ export const negated = negateDuration as (record: Record) => Record
 export const abs = absDuration as (record: Record) => Record
 
 export const add = bindArgs(
-  addDurations<RelativeToArg, string, string>,
+  addDurations<RelativeToRecord, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
@@ -91,7 +91,7 @@ export const add = bindArgs(
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const subtract = bindArgs(
-  addDurations<RelativeToArg, string, string>,
+  addDurations<RelativeToRecord, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
@@ -99,21 +99,21 @@ export const subtract = bindArgs(
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const round = bindArgs(
-  roundDuration<RelativeToArg, string, string>,
+  roundDuration<RelativeToRecord, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record: Record, options?: RoundOptions) => Record
 
 export const total = bindArgs(
-  totalDuration<RelativeToArg, string, string>,
+  totalDuration<RelativeToRecord, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record: Record, options?: UnitName | TotalOptions) => number
 
 export const compare = bindArgs(
-  compareDurations<RelativeToArg, string, string>,
+  compareDurations<RelativeToRecord, string, string>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
