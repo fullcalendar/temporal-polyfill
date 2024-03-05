@@ -74,8 +74,8 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<PlainDateTimeSlots<string>>
 export type Fields = DateTimeFields
-export type CreateFields = PlainDateTimeBag<string>
-export type UpdateFields = DateTimeBag
+export type FromFields = PlainDateTimeBag<string>
+export type WithFields = DateTimeBag
 export type ISOFields = IsoDateTimeFields
 
 export type AssignmentOptions = OverflowOptions
@@ -105,7 +105,7 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  fields: CreateFields,
+  fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
   return refinePlainDateTimeBag(
@@ -156,7 +156,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 
 export function withFields(
   record: Record,
-  fields: UpdateFields,
+  fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
   return plainDateTimeWithFields(

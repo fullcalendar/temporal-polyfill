@@ -35,8 +35,8 @@ import {
 
 export type Record = Readonly<PlainMonthDaySlots<string>>
 export type Fields = MonthDayFields
-export type CreateFields = PlainMonthDayBag<string>
-export type UpdateFields = MonthDayBag
+export type FromFields = PlainMonthDayBag<string>
+export type WithFields = MonthDayBag
 export type ISOFields = IsoDateFields
 export type ToPlainDateFields = EraYearOrYear
 
@@ -57,7 +57,7 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  fields: CreateFields,
+  fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
   const calendarMaybe = extractCalendarIdFromBag(fields)
@@ -90,7 +90,7 @@ export const getISOFields = identity as (record: Record) => ISOFields
 
 export function withFields(
   record: Record,
-  fields: UpdateFields,
+  fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
   return plainMonthDayWithFields(

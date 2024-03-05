@@ -48,8 +48,8 @@ import {
 
 export type Record = Readonly<PlainYearMonthSlots<string>>
 export type Fields = YearMonthFields
-export type CreateFields = PlainYearMonthBag<string>
-export type UpdateFields = YearMonthBag
+export type FromFields = PlainYearMonthBag<string>
+export type WithFields = YearMonthBag
 export type ISOFields = IsoDateFields
 export type ToPlainDateFields = { day: number }
 
@@ -72,7 +72,7 @@ export const create = bindArgs(
 ) => Record
 
 export function fromFields(
-  fields: CreateFields,
+  fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
   return refinePlainYearMonthBag(
@@ -109,7 +109,7 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 
 export function withFields(
   record: Record,
-  fields: UpdateFields,
+  fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
   return plainYearMonthWithFields(

@@ -87,8 +87,8 @@ import {
 
 export type Record = Readonly<ZonedDateTimeSlots<string, string>>
 export type Fields = ZonedDateTimeFields
-export type CreateFields = ZonedDateTimeBag<string, string>
-export type UpdateFields = DateTimeBag
+export type FromFields = ZonedDateTimeBag<string, string>
+export type WithFields = DateTimeBag
 export type ISOFields = ZonedIsoFields<string, string>
 
 export type AssignmentOptions = ZonedFieldOptions
@@ -107,7 +107,7 @@ export const create = bindArgs(
 ) as (epochNanoseconds: bigint, timeZone: string, calendar?: string) => Record
 
 export function fromFields(
-  fields: CreateFields,
+  fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
   const calendarId = getCalendarIdFromBag(fields)
@@ -203,7 +203,7 @@ export const hoursInDay = bindArgs(
 
 export function withFields(
   record: Record,
-  fields: UpdateFields,
+  fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
   return zonedDateTimeWithFields(

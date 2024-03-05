@@ -38,8 +38,8 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<PlainTimeSlots>
 export type Fields = TimeFields
-export type CreateFields = PlainTimeBag
-export type UpdateFields = TimeBag
+export type FromFields = PlainTimeBag
+export type WithFields = TimeBag
 export type ISOFields = IsoTimeFields
 
 export type AssignmentOptions = OverflowOptions
@@ -64,7 +64,7 @@ export const create = constructPlainTimeSlots as (
 ) => Record
 
 export const fromFields = refinePlainTimeBag as (
-  fields: CreateFields,
+  fields: FromFields,
   options?: AssignmentOptions,
 ) => Record
 
@@ -84,7 +84,7 @@ export const getISOFields = identity as (record: Record) => ISOFields
 
 export function withFields(
   record: Record,
-  fields: UpdateFields,
+  fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
   return plainTimeWithFields(getFields(record), fields, options)
