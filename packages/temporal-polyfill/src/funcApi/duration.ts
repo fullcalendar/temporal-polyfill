@@ -2,6 +2,7 @@ import { durationWithFields, refineDurationBag } from '../internal/bagRefine'
 import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
+import { DurationFields } from '../internal/durationFields'
 import {
   absDuration,
   addDurations,
@@ -19,7 +20,7 @@ import {
   RelativeToOptions,
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
-import { DurationSlots } from '../internal/slots'
+import { BrandingSlots, DurationBranding } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
@@ -28,7 +29,15 @@ import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = Readonly<DurationSlots>
+export type Record = Readonly<DurationFields> & {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  readonly branding: typeof DurationBranding
+
+  readonly sign: NumberSign
+}
+
 export type FromFields = DurationBag
 export type WithFields = DurationBag
 export type RelativeToRecord =
@@ -61,6 +70,10 @@ export const create = constructDurationSlots as (
 export const fromFields = refineDurationBag as (fields: FromFields) => Record
 
 export const fromString = parseDuration as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === DurationBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

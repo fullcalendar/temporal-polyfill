@@ -34,7 +34,7 @@ import {
   DiffOptions,
   OverflowOptions,
 } from '../internal/optionsRefine'
-import { PlainDateSlots } from '../internal/slots'
+import { BrandingSlots, PlainDateBranding } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -60,7 +60,33 @@ import {
 } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = Readonly<PlainDateSlots<string>>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  readonly branding: typeof PlainDateBranding
+
+  /**
+   * @deprecated Use the calendarId() function instead.
+   */
+  readonly calendar: string
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoYear: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMonth: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoDay: number
+}
+
 export type Fields = DateFields
 export type FromFields = PlainDateBag<string>
 export type WithFields = DateBag
@@ -100,6 +126,10 @@ export function fromFields(
 }
 
 export const fromString = parsePlainDate as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === PlainDateBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

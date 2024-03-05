@@ -23,7 +23,7 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../internal/optionsRefine'
-import { PlainMonthDaySlots } from '../internal/slots'
+import { BrandingSlots, PlainMonthDayBranding } from '../internal/slots'
 import { bindArgs, identity, memoize } from '../internal/utils'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -34,7 +34,33 @@ import {
   refineCalendarIdString,
 } from './utils'
 
-export type Record = Readonly<PlainMonthDaySlots<string>>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  readonly branding: typeof PlainMonthDayBranding
+
+  /**
+   * @deprecated Use the calendarId() function instead.
+   */
+  readonly calendar: string
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoYear: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMonth: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoDay: number
+}
+
 export type Fields = MonthDayFields
 export type FromFields = PlainMonthDayBag<string>
 export type WithFields = MonthDayBag
@@ -76,6 +102,10 @@ export const fromString = bindArgs(
   parsePlainMonthDay,
   createNativeMonthDayParseOps,
 ) as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === PlainMonthDayBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

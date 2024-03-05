@@ -4,6 +4,7 @@ import {
   refineZonedDateTimeBag,
   zonedDateTimeWithFields,
 } from '../internal/bagRefine'
+import { BigNano } from '../internal/bigNano'
 import {
   createNativeDateModOps,
   createNativeDateRefineOps,
@@ -45,8 +46,9 @@ import {
 } from '../internal/optionsRefine'
 import { roundZonedDateTime } from '../internal/round'
 import {
+  BrandingSlots,
   DateSlots,
-  ZonedDateTimeSlots,
+  ZonedDateTimeBranding,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
@@ -86,7 +88,28 @@ import {
   refineTimeZoneIdString,
 } from './utils'
 
-export type Record = Readonly<ZonedDateTimeSlots<string, string>>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  readonly branding: typeof ZonedDateTimeBranding
+
+  /**
+   * @deprecated Use the calendarId() function instead.
+   */
+  readonly calendar: string
+
+  /**
+   * @deprecated Use the timeZoneId() function instead.
+   */
+  readonly timeZone: string
+
+  /**
+   * @deprecated Use the epochNanoseconds() function instead.
+   */
+  readonly epochNanoseconds: BigNano
+}
+
 export type Fields = ZonedDateTimeFields
 export type FromFields = ZonedDateTimeBag<string, string>
 export type WithFields = DateTimeBag
@@ -126,6 +149,10 @@ export const fromString = parseZonedDateTime as (
   s: string,
   options?: AssignmentOptions,
 ) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === ZonedDateTimeBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

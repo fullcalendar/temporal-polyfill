@@ -30,7 +30,7 @@ import {
   DiffOptions,
   OverflowOptions,
 } from '../internal/optionsRefine'
-import { PlainYearMonthSlots } from '../internal/slots'
+import { BrandingSlots, PlainYearMonthBranding } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
@@ -47,7 +47,33 @@ import {
   refineCalendarIdString,
 } from './utils'
 
-export type Record = Readonly<PlainYearMonthSlots<string>>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  readonly branding: typeof PlainYearMonthBranding
+
+  /**
+   * @deprecated Use the calendarId() function instead.
+   */
+  readonly calendar: string
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoYear: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMonth: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoDay: number
+}
+
 export type Fields = YearMonthFields
 export type FromFields = PlainYearMonthBag<string>
 export type WithFields = YearMonthBag
@@ -87,6 +113,10 @@ export const fromString = bindArgs(
   parsePlainYearMonth,
   createNativeYearMonthParseOps,
 ) as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === PlainYearMonthBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

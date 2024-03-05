@@ -25,7 +25,11 @@ import {
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
-import { PlainDateSlots, PlainTimeSlots } from '../internal/slots'
+import {
+  BrandingSlots,
+  PlainDateSlots,
+  PlainTimeBranding,
+} from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -36,7 +40,43 @@ import * as PlainDateTimeFns from './plainDateTime'
 import { refineTimeZoneIdString } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = Readonly<PlainTimeSlots>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  branding: typeof PlainTimeBranding
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoHour: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMinute: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoSecond: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMillisecond: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMicrosecond: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoNanosecond: number
+}
+
 export type Fields = TimeFields
 export type FromFields = PlainTimeBag
 export type WithFields = TimeBag
@@ -69,6 +109,10 @@ export const fromFields = refinePlainTimeBag as (
 ) => Record
 
 export const fromString = parsePlainTime as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === PlainTimeBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

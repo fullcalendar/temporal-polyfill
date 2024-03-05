@@ -45,7 +45,8 @@ import {
 } from '../internal/optionsRefine'
 import { roundPlainDateTime } from '../internal/round'
 import {
-  PlainDateTimeSlots,
+  BrandingSlots,
+  PlainDateTimeBranding,
   createPlainDateSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
@@ -73,7 +74,63 @@ import {
 } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = Readonly<PlainDateTimeSlots<string>>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  branding: typeof PlainDateTimeBranding
+
+  /**
+   * @deprecated Use the calendarId() function instead.
+   */
+  readonly calendar: string
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoYear: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMonth: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoDay: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoHour: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMinute: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoSecond: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMillisecond: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoMicrosecond: number
+
+  /**
+   * @deprecated Use the getISOFields() function instead.
+   */
+  readonly isoNanosecond: number
+}
+
 export type Fields = DateTimeFields
 export type FromFields = PlainDateTimeBag<string>
 export type WithFields = DateTimeBag
@@ -117,6 +174,10 @@ export function fromFields(
 }
 
 export const fromString = parsePlainDateTime as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === PlainDateTimeBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------

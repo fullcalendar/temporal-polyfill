@@ -1,3 +1,4 @@
+import { BigNano } from '../internal/bigNano'
 import { requireObjectLike } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { constructInstantSlots } from '../internal/construct'
@@ -21,7 +22,8 @@ import {
 } from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
-  InstantSlots,
+  BrandingSlots,
+  InstantBranding,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
@@ -35,7 +37,17 @@ import { createFormatCache } from './intlFormatCache'
 import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = Readonly<InstantSlots>
+export type Record = {
+  /**
+   * @deprecated Use the isInstance() function instead.
+   */
+  readonly branding: typeof InstantBranding
+
+  /**
+   * @deprecated Use the epochNanoseconds() function instead.
+   */
+  readonly epochNanoseconds: BigNano
+}
 
 export type DifferenceOptions = DiffOptions<TimeUnitName>
 export type RoundOptions = RoundingOptions<TimeUnitName>
@@ -69,6 +81,10 @@ export const fromEpochNanoseconds = epochNanoToInstant as (
 ) => Record
 
 export const fromString = parseInstant as (s: string) => Record
+
+export function isInstance(record: BrandingSlots): boolean {
+  return record.branding === InstantBranding
+}
 
 // Getters
 // -----------------------------------------------------------------------------
