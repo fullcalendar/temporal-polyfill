@@ -390,7 +390,7 @@ export function rangeToLocaleString(
     record0,
     record1,
   )
-  return (format as any).formatRange(epochMilli0, epochMilli1!)
+  return format.formatRange(epochMilli0, epochMilli1!)
 }
 
 export function rangeToLocaleStringParts(
@@ -398,14 +398,14 @@ export function rangeToLocaleStringParts(
   record1: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Intl.DateTimeFormatPart[] {
+): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
   const [format, epochMilli0, epochMilli1] = prepFormat(
     locales,
     options,
     record0,
     record1,
   )
-  return (format as any).formatRangeToParts(epochMilli0, epochMilli1!)
+  return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
 export const toString = bindArgs(

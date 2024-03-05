@@ -30,7 +30,7 @@ export function createFormatCache(): FormatQuerier {
           options,
           transformOptions,
         )
-        map.set(key, format)
+        map.set(key, format!)
       }
 
       return format
