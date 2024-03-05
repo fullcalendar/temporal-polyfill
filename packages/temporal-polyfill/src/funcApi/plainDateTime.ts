@@ -291,7 +291,7 @@ export const since = bindArgs(
 
 export const round = roundPlainDateTime<string> as (
   record: Record,
-  options: RoundOptions,
+  options: DayTimeUnitName | RoundOptions,
 ) => Record
 
 export const equals = plainDateTimesEqual<string> as (

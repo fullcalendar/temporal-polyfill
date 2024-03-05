@@ -177,7 +177,7 @@ export type PlainYearMonthSlots<C> = IsoDateFields & {
 
 export type DurationSlots = DurationFields & {
   branding: typeof DurationBranding
-  sign: NumberSign // extra data
+  sign: NumberSign // computed data
 }
 
 export type InstantSlots = {

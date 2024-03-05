@@ -68,14 +68,14 @@
       "./fns/plaindate": {
         "src": "funcApi/plainDate"
       },
+      "./fns/plaintime": {
+        "src": "funcApi/plainTime"
+      },
       "./fns/plainyearmonth": {
         "src": "funcApi/plainYearMonth"
       },
       "./fns/plainmonthday": {
         "src": "funcApi/plainMonthDay"
-      },
-      "./fns/plaintime": {
-        "src": "funcApi/plainTime"
       },
       "./fns/duration": {
         "src": "funcApi/duration"
