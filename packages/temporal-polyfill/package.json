@@ -51,11 +51,7 @@
       "./global": {
         "types": "typeOverrides/global",
         "iife": true
-      }
-    }
-  },
-  "disabledBuildConfig": {
-    "export": {
+      },
       "./fns/instant": {
         "src": "funcApi/instant"
       },

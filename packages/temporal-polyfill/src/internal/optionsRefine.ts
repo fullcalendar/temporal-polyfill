@@ -1,3 +1,4 @@
+import { Temporal as TemporalSpec } from 'temporal-spec'
 import {
   requireObjectLike,
   requirePropDefined,
@@ -105,7 +106,7 @@ export interface LargestUnitOptions<UN extends UnitName> {
 }
 
 export interface TotalUnitOptions {
-  unit: UnitName | DurationFieldName
+  unit: UnitName
 }
 
 export type InstantDisplayOptions<TA> = { timeZone?: TA } & TimeDisplayOptions
@@ -113,39 +114,39 @@ export type InstantDisplayOptions<TA> = { timeZone?: TA } & TimeDisplayOptions
 export type InstantDisplayTuple<TA> = [TA | undefined, ...TimeDisplayTuple]
 
 export interface OverflowOptions {
-  overflow?: keyof typeof overflowMap
+  overflow?: TemporalSpec.AssignmentOptions['overflow']
 }
 
 export interface EpochDisambigOptions {
-  disambiguation?: keyof typeof epochDisambigMap
+  disambiguation?: TemporalSpec.ToInstantOptions['disambiguation']
 }
 
 export interface OffsetDisambigOptions {
-  offset?: keyof typeof offsetDisambigMap
+  offset?: TemporalSpec.OffsetDisambiguationOptions['offset']
 }
 
 export interface CalendarDisplayOptions {
-  calendarName?: keyof typeof calendarDisplayMap
+  calendarName?: TemporalSpec.ShowCalendarOption['calendarName']
 }
 
 export interface TimeZoneDisplayOptions {
-  timeZoneName?: keyof typeof timeZoneDisplayMap
+  timeZoneName?: TemporalSpec.ZonedDateTimeToStringOptions['timeZoneName']
 }
 
 export interface OffsetDisplayOptions {
-  offset?: keyof typeof offsetDisplayMap
+  offset?: TemporalSpec.ZonedDateTimeToStringOptions['offset']
 }
 
 export interface RoundingModeOptions {
-  roundingMode?: keyof typeof roundingModeMap
+  roundingMode?: TemporalSpec.DifferenceOptions<any>['roundingMode']
 }
 
 export interface RoundingIncOptions {
-  roundingIncrement?: number
+  roundingIncrement?: TemporalSpec.DifferenceOptions<any>['roundingIncrement']
 }
 
 export interface SubsecDigitsOptions {
-  fractionalSecondDigits?: SubsecDigits
+  fractionalSecondDigits?: SubsecDigits // TODO: accept 'auto' ?
 }
 
 // Config

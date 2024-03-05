@@ -61,6 +61,7 @@ async function buildConfigs(pkgDir, isDev) {
   const chunkNamesEnabled = isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
   const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
+  const funcApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'funcApi') + pathSep
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -136,7 +137,7 @@ async function buildConfigs(pkgDir, isDev) {
         // because temporal-spec/global was being imported from index.
         {
           renderChunk(code) {
-            return code.replace(/^import ['"][^'"]*['"](;|$)/m, '')
+            return code.replace(/^import ['"][^'"]*['"](;|$)/gm, '')
           },
         },
       ],
@@ -146,7 +147,21 @@ async function buildConfigs(pkgDir, isDev) {
         entryFileNames: '[name]' + extensions.dts,
         chunkFileNames: chunkBase + extensions.dts,
         minifyInternalExports: false,
-        manualChunks: manuallyResolveChunk,
+        manualChunks(id) {
+          // HACK to ensure fns/* files own their own stuff
+          if (id.startsWith(funcApiSrcBase)) {
+            const moduleName = id
+              .substring(funcApiSrcBase.length)
+              .replace(/\.d\.ts/, '')
+            if (!moduleName.includes(pathSep)) {
+              return 'fns/' + moduleName
+            }
+          }
+
+          if (id.startsWith(internalSrcBase)) {
+            return 'internal'
+          }
+        },
       },
     })
   }
