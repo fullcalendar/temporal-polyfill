@@ -30,6 +30,7 @@ import * as PlainDateFns from './plainDate'
 import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
+  getCalendarId,
   refineCalendarIdString,
 } from './utils'
 
@@ -84,6 +85,8 @@ export const getFields = memoize(computeMonthDayFields, WeakMap) as (
 ) => Fields
 
 export const getISOFields = identity as (record: Record) => ISOFields
+
+export const calendarId = getCalendarId as (record: Record) => string
 
 // Setters
 // -----------------------------------------------------------------------------

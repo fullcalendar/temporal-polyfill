@@ -80,6 +80,7 @@ import {
   computeMonthsInYear,
   computeWeekOfYear,
   computeYearOfWeek,
+  getCalendarId,
   getCalendarIdFromBag,
   refineCalendarIdString,
   refineTimeZoneIdString,
@@ -144,6 +145,12 @@ export const getISOFields = bindArgs(
   buildZonedIsoFields<string, string>,
   queryNativeTimeZone,
 ) as (record: Record) => ISOFields
+
+export const calendarId = getCalendarId as (record: Record) => string
+
+export function timeZoneId(record: Record): string {
+  return record.timeZone
+}
 
 export const epochSeconds = getEpochSec as (record: Record) => number
 

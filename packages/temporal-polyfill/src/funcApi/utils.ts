@@ -18,6 +18,10 @@ import { resolveTimeZoneId } from '../internal/timeZoneId'
 // Calendar / TimeZone ID
 // -----------------------------------------------------------------------------
 
+export function getCalendarId(slots: { calendar: string }): string {
+  return slots.calendar
+}
+
 export function getCalendarIdFromBag(bag: { calendar?: string }): string {
   return extractCalendarIdFromBag(bag) || isoCalendarId
 }

@@ -53,6 +53,7 @@ import {
   computeMonthsInYear,
   computeWeekOfYear,
   computeYearOfWeek,
+  getCalendarId,
   getCalendarIdFromBag,
   refineCalendarIdString,
   refineTimeZoneIdString,
@@ -108,6 +109,8 @@ export const getFields = memoize(computeDateFields, WeakMap) as (
 ) => Fields
 
 export const getISOFields = identity as (record: Record) => ISOFields
+
+export const calendarId = getCalendarId as (record: Record) => string
 
 export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 

@@ -42,6 +42,7 @@ import {
   computeInLeapYear,
   computeMonthsInYear,
   computeYearMonthFields,
+  getCalendarId,
   getCalendarIdFromBag,
   refineCalendarIdString,
 } from './utils'
@@ -95,6 +96,8 @@ export const getFields = memoize(computeYearMonthFields, WeakMap) as (
 ) => Fields
 
 export const getISOFields = identity as (record: Record) => ISOFields
+
+export const calendarId = getCalendarId as (record: Record) => string
 
 export const daysInMonth = computeDaysInMonth as (record: Record) => number
 
