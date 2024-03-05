@@ -15,9 +15,9 @@ import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration } from '../internal/isoParse'
 import {
   DurationRoundOptions,
+  DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
-  TotalUnitOptionsWithRel,
 } from '../internal/optionsRefine'
 import { DurationSlots } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
@@ -38,7 +38,7 @@ export type RelativeToRecord =
 
 export type ArithmeticOptions = RelativeToOptions<RelativeToRecord>
 export type RoundOptions = DurationRoundOptions<RelativeToRecord>
-export type TotalOptions = TotalUnitOptionsWithRel<RelativeToRecord>
+export type TotalOptions = DurationTotalOptions<RelativeToRecord>
 export type CompareOptions = RelativeToOptions<RelativeToRecord>
 export type ToStringOptions = TimeDisplayOptions
 

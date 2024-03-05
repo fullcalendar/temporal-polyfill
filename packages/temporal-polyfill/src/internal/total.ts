@@ -21,7 +21,7 @@ import {
   RelativeToSlots,
   createMarkerDiffSystem,
 } from './markerSystem'
-import { TotalUnitOptionsWithRel, refineTotalOptions } from './optionsRefine'
+import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
 import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
@@ -31,7 +31,7 @@ export function totalDuration<RA, C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
-  options: UnitName | TotalUnitOptionsWithRel<RA>,
+  options: UnitName | DurationTotalOptions<RA>,
 ): number {
   const durationLargestUnit = getLargestDurationUnit(slots)
   const [totalUnit, relativeToSlots] = refineTotalOptions(

@@ -21,8 +21,8 @@ import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
 import { RelativeToSlots } from '../internal/markerSystem'
 import {
   DurationRoundOptions,
+  DurationTotalOptions,
   RelativeToOptions,
-  TotalUnitOptionsWithRel,
 } from '../internal/optionsRefine'
 import {
   BrandingSlots,
@@ -123,9 +123,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     },
     total(
       slots: DurationSlots,
-      options:
-        | UnitName
-        | TotalUnitOptionsWithRel<PlainDateArg | ZonedDateTimeArg>,
+      options: UnitName | DurationTotalOptions<PlainDateArg | ZonedDateTimeArg>,
     ): number {
       return totalDuration(
         refinePublicRelativeTo,

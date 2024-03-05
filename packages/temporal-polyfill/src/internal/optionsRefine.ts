@@ -90,8 +90,7 @@ export type ZonedDateTimeDisplayTuple = [
 ]
 
 export type RelativeToOptions<RA> = { relativeTo?: RA }
-export type TotalUnitOptionsWithRel<RA> = TotalUnitOptions &
-  RelativeToOptions<RA>
+export type DurationTotalOptions<RA> = TotalUnitOptions & RelativeToOptions<RA>
 
 export type DateTimeDisplayOptions = CalendarDisplayOptions & TimeDisplayOptions
 
@@ -357,10 +356,10 @@ export function refineRoundOptions<UN extends DayTimeUnitName>(
 }
 
 export function refineTotalOptions<RA, R>(
-  options: UnitName | TotalUnitOptionsWithRel<RA>,
+  options: UnitName | DurationTotalOptions<RA>,
   refineRelativeTo: (relativeTo?: RA) => R | undefined,
 ): [Unit, R | undefined] {
-  options = normalizeUnitNameOptions<UnitName, TotalUnitOptionsWithRel<RA>>(
+  options = normalizeUnitNameOptions<UnitName, DurationTotalOptions<RA>>(
     options,
     totalUnitStr,
   )
