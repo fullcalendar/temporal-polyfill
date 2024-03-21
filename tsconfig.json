@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "module": "node16",
+    "moduleResolution": "node16",
+    "strict": true,
+    "target": "es2022",
+    "noEmit": false,
+    "types": ["node"]
+  }
+}
