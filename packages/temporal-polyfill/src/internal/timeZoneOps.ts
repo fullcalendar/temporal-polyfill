@@ -1,32 +1,17 @@
-import {
-  BigNano,
-  addBigNanoAndNumber,
-  bigNanoToNumber,
-  diffBigNanos,
-} from './bigNano'
+import { BigNano, bigNanoToNumber, diffBigNanos, moveBigNano } from './bigNano'
 import * as errorMessages from './errorMessages'
 import { DateTimeFields } from './fields'
-import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  isoDateTimeFieldNamesAlpha,
-  isoTimeFieldDefaults,
-} from './isoFields'
+import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
-import { moveByIsoDays } from './move'
 import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
-import {
-  ZonedDateTimeSlots,
-  ZonedEpochSlots,
-  createZonedDateTimeSlots,
-} from './slots'
+import { ZonedDateTimeSlots, ZonedEpochSlots } from './slots'
 import {
   epochNanoToIso,
   isoToEpochNano,
   isoToEpochNanoWithOffset,
 } from './timeMath'
-import { nanoInHour, nanoInUtcDay } from './units'
+import { nanoInUtcDay } from './units'
 import { memoize, pluckProps } from './utils'
 
 export type OffsetNanosecondsOp = (epochNano: BigNano) => number
@@ -224,85 +209,12 @@ function computeGapNear(
   zonedEpochNano: BigNano,
 ): number {
   const startOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    addBigNanoAndNumber(zonedEpochNano, -nanoInUtcDay),
+    moveBigNano(zonedEpochNano, -nanoInUtcDay),
   )
   const endOffsetNano = timeZoneOps.getOffsetNanosecondsFor(
-    addBigNanoAndNumber(zonedEpochNano, nanoInUtcDay),
+    moveBigNano(zonedEpochNano, nanoInUtcDay),
   )
   return validateTimeZoneGap(endOffsetNano - startOffsetNano)
-}
-
-// Computations (on passed-in instances)
-// -----------------------------------------------------------------------------
-
-export function computeStartOfDay<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-): ZonedDateTimeSlots<C, T> {
-  let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const timeZoneOps = getTimeZoneOps(timeZone)
-
-  const isoFields = {
-    ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
-    ...isoTimeFieldDefaults,
-  }
-
-  epochNanoseconds = getMatchingInstantFor(
-    timeZoneOps,
-    isoFields,
-    undefined, // offsetNanoseconds
-    OffsetDisambig.Reject,
-    EpochDisambig.Compat,
-    true, // fuzzy
-  )
-
-  return createZonedDateTimeSlots(epochNanoseconds, timeZone, calendar)
-}
-
-export function computeHoursInDay<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-): number {
-  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
-
-  return computeTimeInDay(
-    timeZoneOps,
-    zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
-    nanoInHour,
-  )
-}
-
-/*
-Defaults to returning nanoseconds, but can be custom
-*/
-export function computeTimeInDay(
-  timeZoneOps: TimeZoneOps,
-  isoFields: IsoDateFields,
-  divisorNano?: number,
-): number {
-  isoFields = { ...isoFields, ...isoTimeFieldDefaults }
-
-  // TODO: have getSingleInstantFor accept IsoDateFields?
-  const epochNano0 = getSingleInstantFor(timeZoneOps, {
-    ...isoFields,
-    ...isoTimeFieldDefaults,
-  })
-  const epochNano1 = getSingleInstantFor(timeZoneOps, {
-    ...moveByIsoDays(isoFields, 1),
-    ...isoTimeFieldDefaults,
-  })
-
-  const res = bigNanoToNumber(
-    diffBigNanos(epochNano0, epochNano1),
-    divisorNano,
-    true, // exact
-  )
-
-  if (res <= 0) {
-    throw new RangeError(errorMessages.invalidProtocolResults)
-  }
-
-  return res
 }
 
 // Utils

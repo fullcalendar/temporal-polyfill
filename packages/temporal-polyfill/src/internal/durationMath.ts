@@ -19,7 +19,7 @@ import {
 } from './markerSystem'
 import { Overflow } from './options'
 import {
-  DurationRoundOptions,
+  DurationRoundingOptions,
   RelativeToOptions,
   normalizeOptions,
   refineDurationRoundOptions,
@@ -151,7 +151,7 @@ export function roundDuration<RA, C, T>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   slots: DurationSlots,
-  options: DurationRoundOptions<RA>,
+  options: DurationRoundingOptions<RA>,
 ): DurationSlots {
   const durationLargestUnit = getLargestDurationUnit(slots)
   const [
@@ -366,22 +366,6 @@ export function nanoToDurationTimeFields(
     largestUnit,
     durationFieldNamesAsc as (keyof DurationTimeFields)[],
   )
-}
-
-/*
-Returns all units
-*/
-export function clearDurationFields(
-  durationFields: DurationFields,
-  largestUnitToClear: Unit,
-): DurationFields {
-  const copy = { ...durationFields }
-
-  for (let unit: Unit = Unit.Nanosecond; unit <= largestUnitToClear; unit++) {
-    copy[durationFieldNamesAsc[unit]] = 0
-  }
-
-  return copy
 }
 
 // Utils

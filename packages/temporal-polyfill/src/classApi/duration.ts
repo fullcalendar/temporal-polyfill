@@ -20,7 +20,7 @@ import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
 import { RelativeToSlots } from '../internal/markerSystem'
 import {
-  DurationRoundOptions,
+  DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
 } from '../internal/optionsRefine'
@@ -109,7 +109,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     },
     round(
       slots: DurationSlots,
-      options: DurationRoundOptions<PlainDateArg | ZonedDateTimeArg>,
+      options: DurationRoundingOptions<PlainDateArg | ZonedDateTimeArg>,
     ): Duration {
       return createDuration(
         roundDuration(

@@ -17,7 +17,7 @@ import {
   isoEpochFirstLeapYear,
 } from './isoMath'
 import { RelativeToSlots } from './markerSystem'
-import { moveToMonthStart } from './move'
+import { moveToDayOfMonth } from './move'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import {
@@ -189,7 +189,7 @@ export function parsePlainYearMonth(
 
   const isoFields = parsePlainDate(s)
   const calendarOps = getCalendarOps(isoFields.calendar)
-  const movedIsoFields = moveToMonthStart(calendarOps, isoFields)
+  const movedIsoFields = moveToDayOfMonth(calendarOps, isoFields)
 
   return createPlainYearMonthSlots({
     ...isoFields, // has calendar

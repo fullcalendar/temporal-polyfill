@@ -14,6 +14,7 @@ import {
   EpochMilliOp,
   LeapMonthOp,
   NativeCalendar,
+  NativeConvertOps,
   NativeDateModOps,
   NativeDateRefineOps,
   NativeDayOfYearOps,
@@ -26,6 +27,7 @@ import {
   NativeMonthDayRefineOps,
   NativeMonthsInYearOps,
   NativeMoveOps,
+  NativeMoveOpsOnly,
   NativePartOps,
   NativeStandardOps,
   NativeWeekOps,
@@ -203,14 +205,18 @@ export const isoMonthDayModOps: NativeMonthDayModOps = {
 // Math
 // ----
 
-const isoMoveOpsOnly = {
+const isoConvertOps: NativeConvertOps = {
   dateParts: computeIsoDateParts,
+  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
+  monthAdd: isoMonthAdd,
+}
+
+const isoMoveOpsOnly: NativeMoveOpsOnly = {
+  ...isoConvertOps,
   monthCodeParts: computeIsoMonthCodeParts,
   monthsInYearPart: computeIsoMonthsInYear,
   daysInMonthParts: computeIsoDaysInMonth,
-  monthAdd: isoMonthAdd,
   leapMonth: noop as LeapMonthOp,
-  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
 }
 
 export const isoMoveOps: NativeMoveOps = {
@@ -220,7 +226,7 @@ export const isoMoveOps: NativeMoveOps = {
 
 export const isoDiffOps: NativeDiffOps = {
   ...nativeDiffBase,
-  ...isoMoveOps,
+  ...isoMoveOpsOnly,
   monthsInYearSpan: computeIsoMonthsInYearSpan,
 }
 
@@ -374,14 +380,18 @@ export const intlMonthDayModOps: Omit<NativeMonthDayModOps, 'id'> = {
 // Math
 // ----
 
-const intlMoveOpsOnly = {
+const intlConvertOps: NativeConvertOps = {
   dateParts: computeIntlDateParts,
+  epochMilli: computeIntlEpochMilli,
+  monthAdd: intlMonthAdd,
+}
+
+const intlMoveOpsOnly: NativeMoveOpsOnly = {
+  ...intlConvertOps,
   monthCodeParts: computeIntlMonthCodeParts,
   monthsInYearPart: computeIntlMonthsInYear,
   daysInMonthParts: computeIntlDaysInMonth,
-  monthAdd: intlMonthAdd,
   leapMonth: computeIntlLeapMonth,
-  epochMilli: computeIntlEpochMilli,
 }
 
 export const intlMoveOps: NativeMoveOps = {
@@ -522,6 +532,10 @@ export const createNativeMonthDayModOps = createNativeOpsCreator(
 )
 
 // Math
+export const createNativeConvertOps = createNativeOpsCreator(
+  isoConvertOps,
+  intlConvertOps,
+)
 export const createNativeMoveOps = createNativeOpsCreator(
   isoMoveOps,
   intlMoveOps,

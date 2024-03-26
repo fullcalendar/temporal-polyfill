@@ -73,6 +73,7 @@ export const invalidProtocolResults = 'Invalid protocol results'
 export const mismatchingCalendars = 'Mismatching Calendars'
 export const invalidCalendar = (calendarId: string) =>
   `Invalid Calendar: ${calendarId}`
+export const unsupportedWeekNumbers = 'Calendar week operations forbidden'
 
 // TimeZone
 export const mismatchingTimeZones = 'Mismatching TimeZones'

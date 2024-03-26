@@ -28,7 +28,7 @@ import {
   moveByIsoDays,
   moveDateEfficient,
   moveDateTime,
-  moveToMonthStart,
+  moveToDayOfMonth,
   moveZonedEpochSlots,
 } from './move'
 import { RoundingMode } from './options'
@@ -259,7 +259,7 @@ export function diffPlainDates<C extends IdLike>(
   )
 
   return diffDateLike(
-    invert || false,
+    invert,
     () => getCalendarOps(calendarSlot),
     plainDateSlots0,
     plainDateSlots1,
@@ -290,10 +290,10 @@ export function diffPlainYearMonth<C extends IdLike>(
   const calendarOps = getCalendarOps(calendarSlot)
 
   return diffDateLike(
-    invert || false,
+    invert,
     () => calendarOps,
-    moveToMonthStart(calendarOps, plainYearMonthSlots0),
-    moveToMonthStart(calendarOps, plainYearMonthSlots1),
+    moveToDayOfMonth(calendarOps, plainYearMonthSlots0),
+    moveToDayOfMonth(calendarOps, plainYearMonthSlots1),
     ...optionsTuple,
     optionsCopy,
   )
@@ -453,14 +453,12 @@ export function diffDateTimesExact(
 // Diffing Via Calendar
 // -----------------------------------------------------------------------------
 
-function diffZonedEpochNanoViaCalendar(
-  calendarOps: DiffOps,
+export function diffZonedEpochNanoViaCalendar(
   timeZoneOps: TimeZoneOps,
   sign: NumberSign,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
-  largestUnit: Unit,
-  origOptions?: DiffOptions<UnitName>,
+  diffIsoDateFields: (a: IsoDateFields, b: IsoDateFields) => DurationFields,
 ): DurationFields {
   const startIsoFields = zonedEpochSlotsToIso(slots0, timeZoneOps)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
@@ -576,7 +574,19 @@ function diffEpochNanoExact(
   }
 }
 
-function diffByDay(
+export function diffByWeekAndDay(
+  startIsoFields: IsoDateFields,
+  endIsoFields: IsoDateFields,
+): DurationFields {
+  const [weeks, days] = divModTrunc(diffDays(startIsoFields, endIsoFields), 7)
+  return {
+    ...durationFieldDefaults,
+    weeks,
+    days,
+  }
+}
+
+export function diffByDay(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
 ): DurationFields {
@@ -749,7 +759,7 @@ export function computeIntlMonthsInYearSpan(
 
 // -----------------------------------------------------------------------------
 
-function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
+export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   if (!isIdLikeEqual(a, b)) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
@@ -757,7 +767,7 @@ function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
   return a
 }
 
-function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
+export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
   if (!isTimeZoneSlotsEqual(a, b)) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }

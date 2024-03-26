@@ -1,4 +1,4 @@
-import { BigNano, addBigNanoAndNumber, numberToBigNano } from './bigNano'
+import { BigNano, moveBigNano, numberToBigNano } from './bigNano'
 import { hashIntlFormatParts } from './intlFormatUtils'
 import { parseIntlPartsYear } from './intlMath'
 import { IsoDateTimeFields } from './isoFields'
@@ -77,7 +77,7 @@ export class IntlTimeZone implements NativeTimeZone {
 
     return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
       return checkEpochNanoInBounds(
-        addBigNanoAndNumber(numberToBigNano(epochSec, nanoInSec), subsecNano),
+        moveBigNano(numberToBigNano(epochSec, nanoInSec), subsecNano),
       )
     })
   }

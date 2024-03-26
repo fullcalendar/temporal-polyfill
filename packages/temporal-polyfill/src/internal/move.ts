@@ -1,6 +1,7 @@
 import { BigNano, addBigNanos } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import {
+  DayOfYearOp,
   NativeMoveOps,
   YearMonthParts,
   monthCodeNumberToMonth,
@@ -27,7 +28,7 @@ import {
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { isoMonthsInYear } from './isoMath'
+import { computeIsoDayOfWeek, isoMonthsInYear } from './isoMath'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
@@ -148,7 +149,7 @@ export function movePlainYearMonth<C>(
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
-  let isoDateFields = moveToMonthStart(calendarOps, plainYearMonthSlots)
+  let isoDateFields = moveToDayOfMonth(calendarOps, plainYearMonthSlots)
 
   if (doSubtract) {
     durationSlots = negateDuration(durationSlots)
@@ -170,7 +171,7 @@ export function movePlainYearMonth<C>(
   )
 
   return createPlainYearMonthSlots(
-    moveToMonthStart(calendarOps, movedIsoDateFields),
+    moveToDayOfMonth(calendarOps, movedIsoDateFields),
     calendarSlot,
   )
 }
@@ -290,6 +291,7 @@ export function moveDateEfficient(
   const days =
     durationFields.days +
     givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
+
   if (days) {
     return checkIsoDateInBounds(moveByIsoDays(isoDateFields, days))
   }
@@ -297,11 +299,27 @@ export function moveDateEfficient(
   return isoDateFields
 }
 
-export function moveToMonthStart(
+export function moveToDayOfYear(
+  calendarOps: { dayOfYear: DayOfYearOp },
+  isoFields: IsoDateFields,
+  dayOfYear = 1,
+): IsoDateFields {
+  return moveByIsoDays(isoFields, dayOfYear - calendarOps.dayOfYear(isoFields))
+}
+
+export function moveToDayOfMonth(
   calendarOps: { day: DayOp },
   isoFields: IsoDateFields,
+  dayOfMonth = 1,
 ): IsoDateFields {
-  return moveByIsoDays(isoFields, 1 - calendarOps.day(isoFields))
+  return moveByIsoDays(isoFields, dayOfMonth - calendarOps.day(isoFields))
+}
+
+export function moveToDayOfWeek(
+  isoFields: IsoDateFields,
+  dayOfWeek = 1,
+): IsoDateFields {
+  return moveByIsoDays(isoFields, dayOfWeek - computeIsoDayOfWeek(isoFields))
 }
 
 function moveTime(

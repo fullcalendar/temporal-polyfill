@@ -287,6 +287,20 @@ export function allPropsEqual(
   return true
 }
 
+export function zeroOutProps(
+  propNames: string[],
+  props: Record<string, number>,
+  clearUntilI: number,
+): Record<string, number> {
+  const copy = { ...props }
+
+  for (let i = 0; i < clearUntilI; i++) {
+    copy[propNames[i]] = 0
+  }
+
+  return copy
+}
+
 // Function
 // -----------------------------------------------------------------------------
 

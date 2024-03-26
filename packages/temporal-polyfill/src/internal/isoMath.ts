@@ -104,6 +104,9 @@ export function computeIsoInLeapYear(isoYear: number): boolean {
   return isoYear % 4 === 0 && (isoYear % 100 !== 0 || isoYear % 400 === 0)
 }
 
+/*
+TODO: somehow converge with computeIntlDayOfYear by making an abstract ops?
+*/
 export function computeIsoDayOfYear(isoDateFields: IsoDateFields): number {
   return (
     diffEpochMilliByDay(

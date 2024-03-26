@@ -1,8 +1,10 @@
 import { Unit, unitNamesAsc } from './units'
 import {
+  bindArgs,
   mapPropNamesToConstant,
   mapPropNamesToIndex,
   sortStrings,
+  zeroOutProps,
 } from './utils'
 
 export interface DurationDateFields {
@@ -68,3 +70,8 @@ export const durationTimeFieldDefaults = mapPropNamesToConstant(
   durationTimeFieldNamesAsc,
   0,
 )
+
+export const clearDurationFields = bindArgs(
+  zeroOutProps,
+  durationFieldNamesAsc,
+) as unknown as (durationFields: DurationFields, unit: Unit) => DurationFields

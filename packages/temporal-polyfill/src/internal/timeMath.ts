@@ -1,9 +1,9 @@
 import {
   BigNano,
-  addBigNanoAndNumber,
   bigNanoToBigInt,
   compareBigNanos,
   divModBigNano,
+  moveBigNano,
   numberToBigNano,
 } from './bigNano'
 import * as errorMessages from './errorMessages'
@@ -303,7 +303,7 @@ export function epochNanoToIso(
   epochNano: BigNano,
   offsetNano: number,
 ): IsoDateTimeFields {
-  let [days, timeNano] = addBigNanoAndNumber(epochNano, offsetNano)
+  let [days, timeNano] = moveBigNano(epochNano, offsetNano)
 
   // convert to start-of-day and time-of-day
   if (timeNano < 0) {
@@ -318,25 +318,17 @@ export function epochNanoToIso(
   )
   const epochMilli = days * milliInDay + timeMilli
 
-  return {
-    ...epochMilliToIso(epochMilli),
-    isoMicrosecond,
-    isoNanosecond,
-  }
+  return epochMilliToIso(epochMilli, isoMicrosecond, isoNanosecond)
 }
 
 /*
 Accommodates epochMillis that are slightly out-of-range
 */
-export function epochMilliToIso(epochMilli: number): {
-  isoYear: number
-  isoMonth: number
-  isoDay: number
-  isoHour: number
-  isoMinute: number
-  isoSecond: number
-  isoMillisecond: number
-} {
+export function epochMilliToIso(
+  epochMilli: number,
+  isoMicrosecond = 0,
+  isoNanosecond = 0,
+): IsoDateTimeFields {
   const daysOver = // beyond min/max
     Math.ceil(Math.max(0, Math.abs(epochMilli) - maxMilli) / milliInDay) *
     Math.sign(epochMilli)
@@ -352,5 +344,7 @@ export function epochMilliToIso(epochMilli: number): {
     legacyDate.getUTCMinutes(),
     legacyDate.getUTCSeconds(),
     legacyDate.getUTCMilliseconds(),
+    isoMicrosecond,
+    isoNanosecond,
   ])
 }

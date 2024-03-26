@@ -17,6 +17,8 @@ import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
 import { padNumber2 } from './utils'
 
+// TODO: move most of these types into CalendarOps?
+
 // Struct Types
 export type DateParts = [year: number, month: number, day: number]
 export type EraParts = [era: string | undefined, eraYear: number | undefined]
@@ -120,14 +122,17 @@ export type NativeMonthDayModOps = NativeMonthDayRefineOps & {
 // Math
 // -----------------------------------------------------------------------------
 
-export interface NativeMoveOpsOnly {
+export type NativeConvertOps = {
   dateParts: DatePartsOp
+  epochMilli: EpochMilliOp
+  monthAdd: MonthAddOp // not really for converting, but useful
+}
+
+export type NativeMoveOpsOnly = NativeConvertOps & {
   monthCodeParts: MonthCodePartsOp
   monthsInYearPart: MonthsInYearPartOp
   daysInMonthParts: DaysInMonthPartsOp
-  monthAdd: MonthAddOp
   leapMonth: LeapMonthOp
-  epochMilli: EpochMilliOp
 }
 
 export type NativeMoveOps = MoveOps & NativeMoveOpsOnly

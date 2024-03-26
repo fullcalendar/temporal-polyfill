@@ -1,27 +1,29 @@
 import {
   BigNano,
-  addBigNanoAndNumber,
   addBigNanos,
   bigNanoToNumber,
   createBigNano,
   diffBigNanos,
+  moveBigNano,
 } from './bigNano'
 import {
   DurationFields,
+  clearDurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
 } from './durationFields'
 import {
-  clearDurationFields,
   computeDurationSign,
   durationFieldsToBigNano,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
+import * as errorMessages from './errorMessages'
 import {
   IsoDateTimeFields,
   IsoTimeFields,
+  clearIsoFields,
   isoTimeFieldDefaults,
 } from './isoFields'
 import {
@@ -37,13 +39,15 @@ import {
   RoundingMode,
   roundingModeFuncs,
 } from './options'
-import { RoundingOptions, refineRoundOptions } from './optionsRefine'
+import { RoundingOptions, refineRoundingOptions } from './optionsRefine'
 import {
+  DateTimeSlots,
   EpochSlots,
   InstantSlots,
   PlainDateTimeSlots,
   PlainTimeSlots,
   ZonedDateTimeSlots,
+  ZonedEpochSlots,
   createInstantSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
@@ -57,14 +61,11 @@ import {
 } from './timeMath'
 import {
   TimeZoneOps,
-  computeTimeInDay,
   getMatchingInstantFor,
+  getSingleInstantFor,
+  zonedEpochSlotsToIso,
 } from './timeZoneOps'
-import {
-  clampRelativeDuration,
-  computeEpochNanoFrac,
-  totalBigNano,
-} from './total'
+import { clampRelativeDuration, computeEpochNanoFrac } from './total'
 import {
   DayTimeUnit,
   DayTimeUnitName,
@@ -72,6 +73,7 @@ import {
   TimeUnitName,
   Unit,
   givenFieldsToBigNano,
+  nanoInHour,
   nanoInMinute,
   nanoInUtcDay,
   unitNanoMap,
@@ -85,7 +87,7 @@ export function roundInstant(
   instantSlots: InstantSlots,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): InstantSlots {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
     Unit.Hour,
     true, // solarMode
@@ -102,13 +104,17 @@ export function roundInstant(
   )
 }
 
+/*
+ONLY day & time
+*/
 export function roundZonedDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeSlots<C, T> {
   let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundOptions(options)
+  const [smallestUnit, roundingInc, roundingMode] =
+    refineRoundingOptions(options)
 
   // short circuit (elsewhere? consolidate somehow?)
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
@@ -116,104 +122,132 @@ export function roundZonedDateTime<C, T>(
   }
 
   const timeZoneOps = getTimeZoneOps(timeZone)
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
-  let isoDateTimeFields = {
-    ...epochNanoToIso(epochNanoseconds, offsetNano),
-    calendar, // repeat below?
-  }
 
-  isoDateTimeFields = {
-    calendar,
-    ...roundDateTime(
-      isoDateTimeFields,
+  if (smallestUnit === Unit.Day) {
+    epochNanoseconds = roundZonedEpoch(
+      computeDayInterval,
+      timeZoneOps,
+      zonedDateTimeSlots,
+      roundingMode,
+      roundingInc,
+    )
+  } else {
+    const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
+    const isoFields = epochNanoToIso(epochNanoseconds, offsetNano)
+    // TODO: ^optimize with zonedEpochSlotsToIso?
+
+    const roundedIsoFields = roundDateTime(
+      isoFields,
       smallestUnit as DayTimeUnit,
       roundingInc,
       roundingMode,
+    )
+    epochNanoseconds = getMatchingInstantFor(
       timeZoneOps,
-    ),
+      roundedIsoFields,
+      offsetNano,
+      OffsetDisambig.Prefer, // keep old offsetNano if possible
+      EpochDisambig.Compat,
+      true, // fuzzy
+    )
   }
-
-  epochNanoseconds = getMatchingInstantFor(
-    timeZoneOps,
-    isoDateTimeFields,
-    offsetNano,
-    OffsetDisambig.Prefer, // keep old offsetNano if possible
-    EpochDisambig.Compat,
-    true, // fuzzy
-  )
 
   return createZonedDateTimeSlots(epochNanoseconds, timeZone, calendar)
 }
 
+/*
+ONLY day & time
+*/
 export function roundPlainDateTime<C>(
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
+  slots: PlainDateTimeSlots<C>,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeSlots<C> {
   const roundedIsoFields = roundDateTime(
-    plainDateTimeSlots,
-    ...(refineRoundOptions(options) as [DayTimeUnit, number, RoundingMode]),
+    slots,
+    ...(refineRoundingOptions(options) as [DayTimeUnit, number, RoundingMode]),
   )
-
-  return createPlainDateTimeSlots(roundedIsoFields, plainDateTimeSlots.calendar)
+  return createPlainDateTimeSlots(roundedIsoFields, slots.calendar)
 }
 
 export function roundPlainTime(
   slots: PlainTimeSlots,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): PlainTimeSlots {
-  return createPlainTimeSlots(
-    roundTime(
-      slots,
-      ...(refineRoundOptions(options, Unit.Hour) as [
-        TimeUnit,
-        number,
-        RoundingMode,
-      ]),
-    ),
+  const roundedIsoFields = roundTime(
+    slots,
+    ...(refineRoundingOptions(options, Unit.Hour) as [
+      TimeUnit,
+      number,
+      RoundingMode,
+    ]),
   )
+  return createPlainTimeSlots(roundedIsoFields)
+}
+
+// Zoned Utils (weird place for this)
+// -----------------------------------------------------------------------------
+
+export function computeZonedHoursInDay<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  slots: ZonedDateTimeSlots<C, T>,
+): number {
+  const timeZoneOps = getTimeZoneOps(slots.timeZone)
+  const isoFields = zonedEpochSlotsToIso(slots, timeZoneOps)
+  const [isoFields1, isoFields0] = computeDayInterval(isoFields)
+  const epochNano0 = getSingleInstantFor(timeZoneOps, isoFields0)
+  const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
+
+  const hoursExact = bigNanoToNumber(
+    diffBigNanos(epochNano0, epochNano1),
+    nanoInHour,
+    true, // exact
+  )
+
+  if (hoursExact <= 0) {
+    throw new RangeError(errorMessages.invalidProtocolResults)
+  }
+
+  return hoursExact
 }
 
 // Low-Level
 // -----------------------------------------------------------------------------
+
+export function roundZonedEpoch<C>(
+  computeInterval: (
+    isoFields: DateTimeSlots<C>,
+    roundingInc: number,
+  ) => DateTimeInterval,
+  timeZoneOps: TimeZoneOps,
+  slots: ZonedEpochSlots<C, unknown>,
+  roundingMode: RoundingMode,
+  roundingInc: number,
+): BigNano {
+  const isoSlots = zonedEpochSlotsToIso(slots, timeZoneOps)
+  const [isoFields1, isoFields0] = computeInterval(isoSlots, roundingInc)
+  const epochNano0 = getSingleInstantFor(timeZoneOps, isoFields0)
+  const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
+  const frac = computeEpochNanoFrac(
+    epochNano0,
+    epochNano1,
+    slots.epochNanoseconds,
+  )
+  const grow = roundWithMode(frac, roundingMode)
+  const epochNanoRounded = grow ? epochNano1 : epochNano0
+  return epochNanoRounded
+}
 
 function roundDateTime(
   isoFields: IsoDateTimeFields,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  timeZoneOps?: TimeZoneOps | undefined,
 ): IsoDateTimeFields {
-  if (smallestUnit === Unit.Day) {
-    return roundDateTimeToDay(isoFields, timeZoneOps, roundingMode)
-  }
-
   return roundDateTimeToNano(
     isoFields,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )
-}
-
-function roundDateTimeToDay(
-  isoFields: IsoDateTimeFields,
-  timeZoneOps: TimeZoneOps | undefined,
-  roundingMode: RoundingMode,
-): IsoDateTimeFields {
-  if (timeZoneOps) {
-    const nanoInDay = computeTimeInDay(timeZoneOps, isoFields)
-    const roundedTimeNano = roundByInc(
-      isoTimeFieldsToNano(isoFields),
-      nanoInDay,
-      roundingMode,
-    )
-    const dayDelta = roundedTimeNano / nanoInDay
-
-    return checkIsoDateTimeInBounds({
-      ...moveByIsoDays(isoFields, dayDelta),
-      ...isoTimeFieldDefaults,
-    })
-  }
-  return roundDateTimeToNano(isoFields, nanoInUtcDay, roundingMode)
 }
 
 export function roundDateTimeToNano(
@@ -255,6 +289,64 @@ export function roundTimeToNano(
     roundByInc(isoTimeFieldsToNano(isoFields), nanoInc, roundingMode),
   )
 }
+
+// Utils: Interval & Floor
+// -----------------------------------------------------------------------------
+
+export type DateTimeEdge = [IsoDateTimeFields, ...any[]]
+export type DateTimeInterval = [
+  exclEnd: IsoDateTimeFields, // end is first!
+  start: IsoDateTimeFields,
+]
+
+export function computeZonedEdge<C, T>(
+  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+  computeEdge: (slots: DateTimeSlots<C>) => DateTimeEdge,
+  slots: ZonedDateTimeSlots<C, T>,
+): ZonedDateTimeSlots<C, T> {
+  const { timeZone, calendar } = slots
+  const timeZoneOps = getTimeZoneOps(timeZone)
+  const isoFields = zonedEpochSlotsToIso(slots, timeZoneOps)
+  const [isoFields1] = computeEdge(isoFields)
+  const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
+  return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
+}
+
+export function computeDayInterval(
+  isoFields: IsoDateTimeFields,
+  roundingInc = 1,
+): DateTimeInterval {
+  const [isoFields0] = computeDayFloor(isoFields)
+  const isoFields1 = {
+    ...moveByIsoDays(isoFields0, roundingInc),
+    ...isoTimeFieldDefaults,
+  }
+  return [isoFields1, isoFields0] // end is first!
+}
+
+export const computeDayFloor = (isoFields: IsoDateTimeFields): DateTimeEdge => [
+  clearIsoFields(isoFields, Unit.Day),
+]
+
+export const computeHourFloor = (
+  isoFields: IsoDateTimeFields,
+): DateTimeEdge => [clearIsoFields(isoFields, Unit.Hour)]
+
+export const computeMinuteFloor = (
+  isoFields: IsoDateTimeFields,
+): DateTimeEdge => [clearIsoFields(isoFields, Unit.Minute)]
+
+export const computeSecondFloor = (
+  isoFields: IsoDateTimeFields,
+): DateTimeEdge => [clearIsoFields(isoFields, Unit.Second)]
+
+export const computeMillisecondFloor = (
+  isoFields: IsoDateTimeFields,
+): DateTimeEdge => [clearIsoFields(isoFields, Unit.Millisecond)]
+
+export const computeMicrosecondFloor = (
+  isoFields: IsoDateTimeFields,
+): DateTimeEdge => [clearIsoFields(isoFields, Unit.Microsecond)]
 
 // Duration
 // -----------------------------------------------------------------------------
@@ -312,7 +404,6 @@ TODO: caller should short-circuit if
 */
 export function roundRelativeDuration(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
-  // ^has sign
   endEpochNano: BigNano,
   largestUnit: Unit,
   smallestUnit: Unit,
@@ -328,7 +419,7 @@ export function roundRelativeDuration(
     smallestUnit > Unit.Day
       ? nudgeRelativeDuration
       : (marker as EpochSlots).epochNanoseconds && smallestUnit < Unit.Day
-        ? nudgeRelativeDurationTime
+        ? nudgeZonedDurationTime
         : nudgeDurationDayTime
   ) as typeof nudgeRelativeDuration // most general
 
@@ -392,10 +483,8 @@ export function roundBigNano(
   useDayOrigin?: boolean,
 ): BigNano {
   if (smallestUnit === Unit.Day) {
-    return [
-      roundByInc(totalBigNano(bigNano, Unit.Day), roundingInc, roundingMode),
-      0,
-    ]
+    const daysExact = bigNanoToNumber(bigNano, nanoInUtcDay, true)
+    return [roundByInc(daysExact, roundingInc, roundingMode), 0]
   }
 
   return roundBigNanoByInc(
@@ -429,7 +518,7 @@ export function roundBigNanoByInc(
   return createBigNano(days + dayDelta, roundedTimeNano)
 }
 
-function roundWithMode(num: number, roundingMode: RoundingMode): number {
+export function roundWithMode(num: number, roundingMode: RoundingMode): number {
   return roundingModeFuncs[roundingMode](num)
 }
 
@@ -480,10 +569,10 @@ function nudgeDurationDayTime(
 }
 
 /*
-Handles crazy DST edge case
-Time ONLY. Days must use full-on marker moving
+Handles DST edge cases
+ONLY time
 */
-function nudgeRelativeDurationTime(
+function nudgeZonedDurationTime(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: BigNano, // NOT NEEDED, just for conformance
   _largestUnit: Unit,
@@ -523,13 +612,14 @@ function nudgeRelativeDurationTime(
   )
   const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
 
-  // TODO: document. something to do with rounding a zdt to the next day
+  // rounded-time at start-of next day or beyond?
+  // if so, rerun rounding with origin as next day
   if (!beyondDay || Math.sign(beyondDay) === sign) {
     dayDelta += sign
     roundedTimeNano = roundByInc(beyondDay, nanoInc, roundingMode)
-    endEpochNano = addBigNanoAndNumber(dayEpochNano1, roundedTimeNano)
+    endEpochNano = moveBigNano(dayEpochNano1, roundedTimeNano)
   } else {
-    endEpochNano = addBigNanoAndNumber(dayEpochNano0, roundedTimeNano)
+    endEpochNano = moveBigNano(dayEpochNano0, roundedTimeNano)
   }
 
   const durationTimeFields = nanoToDurationTimeFields(roundedTimeNano)
@@ -543,7 +633,10 @@ function nudgeRelativeDurationTime(
   return [nudgedDurationFields, endEpochNano, Boolean(dayDelta)]
 }
 
-function nudgeRelativeDuration(
+/*
+TODO: make abstract Marker type? will make calling more convenient
+*/
+export function nudgeRelativeDuration(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: BigNano,
   _largestUnit: Unit,
@@ -562,10 +655,7 @@ function nudgeRelativeDuration(
   const sign = computeDurationSign(durationFields)
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
 
-  const baseDurationFields = clearDurationFields(
-    durationFields,
-    smallestUnit - 1,
-  )
+  const baseDurationFields = clearDurationFields(durationFields, smallestUnit)
   const truncedVal =
     divTrunc(durationFields[smallestUnitFieldName], roundingInc) * roundingInc
 
@@ -623,10 +713,7 @@ function bubbleRelativeDuration(
       continue
     }
 
-    const baseDurationFields = clearDurationFields(
-      durationFields,
-      currentUnit - 1,
-    )
+    const baseDurationFields = clearDurationFields(durationFields, currentUnit)
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 
     const thresholdEpochNano = markerToEpochNano(

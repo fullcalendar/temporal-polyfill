@@ -44,7 +44,12 @@ import {
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../internal/optionsRefine'
-import { roundZonedDateTime } from '../internal/round'
+import {
+  computeDayFloor,
+  computeZonedEdge,
+  computeZonedHoursInDay,
+  roundZonedDateTime,
+} from '../internal/round'
 import {
   BrandingSlots,
   DateSlots,
@@ -59,8 +64,6 @@ import {
   ZonedDateTimeFields,
   ZonedIsoFields,
   buildZonedIsoFields,
-  computeHoursInDay,
-  computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
 import { DayTimeUnitName, UnitName } from '../internal/units'
@@ -228,7 +231,7 @@ export const inLeapYear = adaptDateFunc(computeInLeapYear) as (
 ) => boolean
 
 export const hoursInDay = bindArgs(
-  computeHoursInDay<string, string>,
+  computeZonedHoursInDay<string, string>,
   queryNativeTimeZone,
 ) as (record: Record) => number
 
@@ -327,8 +330,9 @@ export const round = bindArgs(
 ) as (record: Record, options: DayTimeUnitName | RoundOptions) => Record
 
 export const startOfDay = bindArgs(
-  computeStartOfDay<string, string>,
+  computeZonedEdge<string, string>,
   queryNativeTimeZone,
+  computeDayFloor,
 ) as (record: Record) => Record
 
 export const equals = zonedDateTimesEqual<string, string> as (

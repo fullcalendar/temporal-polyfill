@@ -15,7 +15,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration } from '../internal/isoParse'
 import {
-  DurationRoundOptions,
+  DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
@@ -46,7 +46,7 @@ export type RelativeToRecord =
   | PlainDateFns.Record
 
 export type ArithmeticOptions = RelativeToOptions<RelativeToRecord>
-export type RoundOptions = DurationRoundOptions<RelativeToRecord>
+export type RoundOptions = DurationRoundingOptions<RelativeToRecord>
 export type TotalOptions = DurationTotalOptions<RelativeToRecord>
 export type CompareOptions = RelativeToOptions<RelativeToRecord>
 export type ToStringOptions = TimeDisplayOptions

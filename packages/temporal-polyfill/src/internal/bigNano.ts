@@ -28,16 +28,16 @@ export function createBigNano(days: number, timeNano: number): BigNano {
 // Math
 // -----------------------------------------------------------------------------
 
-export function addBigNanoAndNumber(a: BigNano, b: number): BigNano {
-  return createBigNano(a[0], a[1] + b)
-}
-
 export function addBigNanos(
   a: BigNano,
   b: BigNano,
   sign: NumberSign = 1,
 ): BigNano {
   return createBigNano(a[0] + b[0] * sign, a[1] + b[1] * sign)
+}
+
+export function moveBigNano(a: BigNano, b: number): BigNano {
+  return createBigNano(a[0], a[1] + b)
 }
 
 export function diffBigNanos(a: BigNano, b: BigNano): BigNano {

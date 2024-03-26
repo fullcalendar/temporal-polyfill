@@ -2,11 +2,11 @@ import { BigNano, bigNanoToNumber, diffBigNanos } from './bigNano'
 import { DiffOps } from './calendarOps'
 import {
   DurationFields,
+  clearDurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
 } from './durationFields'
 import {
-  clearDurationFields,
   computeDurationSign,
   durationFieldsToBigNano,
   getLargestDurationUnit,
@@ -65,7 +65,7 @@ export function totalDuration<RA, C, T>(
   )
 }
 
-function totalRelativeDuration(
+export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit,
@@ -78,7 +78,7 @@ function totalRelativeDuration(
   const sign = computeDurationSign(durationFields)
 
   const [epochNano0, epochNano1] = clampRelativeDuration(
-    clearDurationFields(durationFields, totalUnit - 1),
+    clearDurationFields(durationFields, totalUnit),
     totalUnit,
     sign,
     // MarkerSystem...
@@ -95,15 +95,15 @@ function totalDayTimeDuration(
   durationFields: DurationFields,
   totalUnit: DayTimeUnit,
 ): number {
-  return totalBigNano(durationFieldsToBigNano(durationFields), totalUnit)
+  return bigNanoToNumber(
+    durationFieldsToBigNano(durationFields),
+    unitNanoMap[totalUnit],
+    true, // exact
+  )
 }
 
 // Utils for points-within-intervals
 // -----------------------------------------------------------------------------
-
-export function totalBigNano(bigNano: BigNano, totalUnit: DayTimeUnit): number {
-  return bigNanoToNumber(bigNano, unitNanoMap[totalUnit], true) // exact=true
-}
 
 export function clampRelativeDuration(
   durationFields: DurationFields,

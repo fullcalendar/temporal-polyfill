@@ -34,7 +34,12 @@ import {
   copyOptions,
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
-import { roundZonedDateTime } from '../internal/round'
+import {
+  computeDayFloor,
+  computeZonedEdge,
+  computeZonedHoursInDay,
+  roundZonedDateTime,
+} from '../internal/round'
 import {
   ZonedDateTimeBranding,
   ZonedDateTimeSlots,
@@ -45,8 +50,6 @@ import {
   FixedIsoFields,
   ZonedIsoFields,
   buildZonedIsoFields,
-  computeHoursInDay,
-  computeStartOfDay,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
 import { DayTimeUnitName, UnitName } from '../internal/units'
@@ -130,7 +133,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return getId(slots.timeZone)
     },
     hoursInDay(slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>): number {
-      return computeHoursInDay(createTimeZoneOps, slots)
+      return computeZonedHoursInDay(createTimeZoneOps, slots)
     },
   },
   {
@@ -280,7 +283,9 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     startOfDay(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
     ): ZonedDateTime {
-      return createZonedDateTime(computeStartOfDay(createTimeZoneOps, slots))
+      return createZonedDateTime(
+        computeZonedEdge(createTimeZoneOps, computeDayFloor, slots),
+      )
     },
     equals(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,

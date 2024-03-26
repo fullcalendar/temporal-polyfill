@@ -1,4 +1,10 @@
-import { mapPropNamesToConstant, sortStrings } from './utils'
+import { DayTimeUnit } from './units'
+import {
+  bindArgs,
+  mapPropNamesToConstant,
+  sortStrings,
+  zeroOutProps,
+} from './utils'
 
 export interface IsoDateFields {
   isoDay: number
@@ -52,3 +58,11 @@ export const isoTimeFieldDefaults = mapPropNamesToConstant(
   isoTimeFieldNamesAlpha,
   0,
 )
+
+export const clearIsoFields = bindArgs(
+  zeroOutProps,
+  isoDateTimeFieldNamesAsc,
+) as unknown as (
+  isoFields: IsoDateTimeFields,
+  unit: DayTimeUnit,
+) => IsoDateTimeFields
