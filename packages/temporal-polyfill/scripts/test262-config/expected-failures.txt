@@ -93,28 +93,25 @@ built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 
 # SPEC-BUG
 # Ticket: https://github.com/tc39/proposal-temporal/issues/2790
+# PR: https://github.com/tc39/proposal-temporal/pull/2797
 # Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rounding-time-zdt (WIP!)
 # Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rounding-time-zdt
 #
 # It's not necessary to compute hours-in-day when rounding time parts.
 # (hours-in-day needs 2 extra getPossibleInstantsFor calls)
 # More importantly, results in a bug (see Ticket)
-#
-# In addition to contents of Test Branch:
-built-ins/Temporal/ZonedDateTime/prototype/round/timezone-getpossibleinstantsfor-iterable.js
-built-ins/Temporal/ZonedDateTime/prototype/round/getpossibleinstantsfor-called-with-iso8601-calendar.js
-built-ins/Temporal/ZonedDateTime/prototype/round/div-zero.js
-built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum-forward-offset-shift.js
-built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-out-of-range-forward-offset-shift.js
 
 # SPEC-BUG
-# Ticket: https://github.com/tc39/proposal-temporal/pull/2789
+# PR: https://github.com/tc39/proposal-temporal/pull/2789
 # Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-offset-prefer-reject
 # Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-offset-prefer-reject
 #
 # Instant disambiguation with refer/reject of multiple results from
 # getPossibleInstantsFor() can avoid a call to getOffsetNanosecondsFor
 # by deriving each candidate's offset by comparing it to the UTC-zoned y/m/d/etc
+#
+# In addition to contents of Test Branch:
+built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum-forward-offset-shift.js
 
 # SPEC-BUG
 # Ticket: TODO!
