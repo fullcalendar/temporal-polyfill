@@ -16,9 +16,15 @@ import {
 } from './move'
 import {
   DateSlots,
+  DateTimeSlots,
   ZonedDateTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
+import {
+  checkEpochNanoInBounds,
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+} from './timeMath'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneOps'
 import { bindArgs } from './utils'
@@ -34,17 +40,14 @@ function zonedSlotsWithTransform(
   const { timeZone, calendar } = slots
   const timeZoneOps = queryNativeTimeZone(timeZone)
   const isoSlots = zonedEpochSlotsToIso(slots, timeZoneOps)
-
   const transformedIsoSlots = {
     ...isoSlots,
     ...transformIso(isoSlots, num),
   }
-
-  return createZonedDateTimeSlots(
+  const epochNano1 = checkEpochNanoInBounds(
     getSingleInstantFor(timeZoneOps, transformedIsoSlots),
-    timeZone,
-    calendar,
   )
+  return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
 }
 
 function slotsWithWeekOfYear<S extends DateSlots<string>>(
@@ -101,36 +104,84 @@ export const zdt_withWeekOfYear = bindArgs(
   slotsWithWeekOfYear,
 )
 
-export function pd_or_pdt_withDayOfYear<S extends DateSlots<string>>(
-  slots: S,
+// -----------------------------------------------------------------------------
+
+export function pd_withDayOfYear(
+  slots: DateSlots<string>,
   dayOfYear: number,
-): S {
+): DateSlots<string> {
   const calendarOps = createNativeDayOfYearOps(slots.calendar)
-  return {
+  return checkIsoDateInBounds({
     ...slots,
     ...moveToDayOfYear(calendarOps, slots, dayOfYear),
-  }
+  })
 }
 
-export function pd_or_pdt_withDayOfMonth<S extends DateSlots<string>>(
-  slots: S,
+export function pd_withDayOfMonth(
+  slots: DateSlots<string>,
   dayOfMonth: number,
-): S {
+): DateSlots<string> {
   const calendarOps = createNativeYearMonthParseOps(slots.calendar)
-  return {
+  return checkIsoDateInBounds({
     ...slots,
     ...moveToDayOfMonth(calendarOps, slots, dayOfMonth),
-  }
+  })
 }
 
-export function pd_or_pdt_withDayOfWeek<S extends DateSlots<string>>(
-  slots: S,
+export function pd_withDayOfWeek(
+  slots: DateSlots<string>,
   dayOfWeek: number,
-): S {
-  return {
+): DateSlots<string> {
+  return checkIsoDateInBounds({
     ...slots,
     ...moveToDayOfWeek(slots, dayOfWeek),
-  }
+  })
 }
 
-export const pd_or_pdt_withWeekOfYear = slotsWithWeekOfYear
+export function pd_withWeekOfYear(
+  slots: DateSlots<string>,
+  weekOfYear: number,
+): DateSlots<string> {
+  return checkIsoDateInBounds(slotsWithWeekOfYear(slots, weekOfYear))
+}
+
+// -----------------------------------------------------------------------------
+
+export function pdt_withDayOfYear(
+  slots: DateTimeSlots<string>,
+  dayOfYear: number,
+): DateTimeSlots<string> {
+  const calendarOps = createNativeDayOfYearOps(slots.calendar)
+  return checkIsoDateTimeInBounds({
+    ...slots,
+    ...moveToDayOfYear(calendarOps, slots, dayOfYear),
+  })
+}
+
+export function pdt_withDayOfMonth(
+  slots: DateTimeSlots<string>,
+  dayOfMonth: number,
+): DateTimeSlots<string> {
+  const calendarOps = createNativeYearMonthParseOps(slots.calendar)
+  return checkIsoDateTimeInBounds({
+    ...slots,
+    ...moveToDayOfMonth(calendarOps, slots, dayOfMonth),
+  })
+}
+
+export function pdt_withDayOfWeek(
+  slots: DateTimeSlots<string>,
+  dayOfWeek: number,
+): DateTimeSlots<string> {
+  return checkIsoDateTimeInBounds({
+    ...slots,
+    ...moveToDayOfWeek(slots, dayOfWeek),
+  })
+}
+
+export function pdt_withWeekOfYear(
+  slots: DateTimeSlots<string>,
+  weekOfYear: number,
+): DateTimeSlots<string> {
+  return checkIsoDateTimeInBounds(slotsWithWeekOfYear(slots, weekOfYear))
+}
