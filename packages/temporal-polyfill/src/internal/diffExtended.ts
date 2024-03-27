@@ -13,7 +13,7 @@ import {
 import { DurationFields } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { Marker, MarkerToEpochNano, MoveMarker } from './markerSystem'
-import { moveDateTime, moveZonedEpochSlots } from './move'
+import { moveDateTime, moveZonedEpochs } from './move'
 import {
   RoundingMathOptions,
   RoundingModeName,
@@ -53,7 +53,7 @@ function diffZonedLargeUnits(
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
     bindArgs(zonedEpochRangeToIso, timeZoneOps) as MarkersToIsoFields,
-    bindArgs(moveZonedEpochSlots, calendarOps, timeZoneOps) as MoveMarker,
+    bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
       calendarOps.dateUntil(f0, f1, unit),
     unit,
@@ -104,7 +104,7 @@ function diffZonedDayLikeUnits(
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
     bindArgs(zonedEpochRangeToIso, timeZoneOps) as MarkersToIsoFields,
-    bindArgs(moveZonedEpochSlots, calendarOps, timeZoneOps) as MoveMarker,
+    bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as MoveMarker,
     diffIsoFields,
     unit,
     record0,

@@ -1,13 +1,13 @@
 import { BigNano } from './bigNano'
 import { DiffOps, MoveOps } from './calendarOps'
-import { diffDateTimesEfficient, diffZonedEpochsEfficient } from './diff'
+import { diffDateTimes, diffZonedEpochs } from './diff'
 import { DurationFields } from './durationFields'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   isoTimeFieldDefaults,
 } from './isoFields'
-import { moveDateTime, moveZonedEpochSlots } from './move'
+import { moveDateTime, moveZonedEpochs } from './move'
 import { DateSlots, EpochAndZoneSlots, ZonedEpochSlots } from './slots'
 import { isoToEpochNano } from './timeMath'
 import { TimeZoneOps } from './timeZoneOps'
@@ -72,7 +72,7 @@ export function createMoveMarker(
   timeZoneOps: TimeZoneOps | undefined,
 ): MoveMarker {
   if (timeZoneOps) {
-    return bindArgs(moveZonedEpochSlots, calendarOps, timeZoneOps) as Callable
+    return bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as Callable
   }
   return bindArgs(moveDateTime, calendarOps) as Callable
 }
@@ -82,13 +82,9 @@ export function createDiffMarkers(
   timeZoneOps: TimeZoneOps | undefined,
 ): DiffMarkers {
   if (timeZoneOps) {
-    return bindArgs(
-      diffZonedEpochsEfficient,
-      calendarOps,
-      timeZoneOps,
-    ) as Callable
+    return bindArgs(diffZonedEpochs, calendarOps, timeZoneOps) as Callable
   }
-  return bindArgs(diffDateTimesEfficient, calendarOps) as Callable
+  return bindArgs(diffDateTimes, calendarOps) as Callable
 }
 
 export function anyMarkerToEpochNano(marker: Marker): BigNano {

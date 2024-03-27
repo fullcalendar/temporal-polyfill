@@ -26,10 +26,10 @@ import { isoMonthsInYear } from './isoMath'
 import { MarkerToEpochNano, MoveMarker } from './markerSystem'
 import {
   moveByIsoDays,
-  moveDateEfficient,
+  moveDate,
   moveDateTime,
   moveToDayOfMonth,
-  moveZonedEpochSlots,
+  moveZonedEpochs,
 } from './move'
 import { RoundingMode } from './options'
 import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'
@@ -143,7 +143,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
     const timeZoneOps = getTimeZoneOps(timeZoneSlot)
     const calendarOps = getCalendarOps(calendarSlot)
 
-    durationFields = diffZonedEpochs(
+    durationFields = diffZonedEpochsViaCalendar(
       calendarOps,
       timeZoneOps,
       slots0,
@@ -163,7 +163,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
       // MarkerMoveSystem...
       slots0,
       extractEpochNano as MarkerToEpochNano,
-      bindArgs(moveZonedEpochSlots, calendarOps, timeZoneOps) as MoveMarker,
+      bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as MoveMarker,
     )
   }
 
@@ -209,7 +209,7 @@ export function diffPlainDateTimes<C extends IdLike>(
   } else {
     const calendarOps = getCalendarOps(calendarSlot)
 
-    durationFields = diffDateTimes(
+    durationFields = diffDateTimesViaCalendar(
       calendarOps,
       plainDateTimeSlots0,
       plainDateTimeSlots1,
@@ -352,7 +352,7 @@ function diffDateLike(
         // MarkerMoveSystem...
         startIsoFields,
         isoToEpochNano as MarkerToEpochNano,
-        bindArgs(moveDateEfficient, calendarOps) as MoveMarker,
+        bindArgs(moveDate, calendarOps) as MoveMarker,
       )
     }
   }
@@ -394,10 +394,10 @@ export function diffPlainTimes(
   )
 }
 
-// Exact Diffing (no rounding): Efficient
+// Exact Diffing (no rounding): Attempt Day/Time, fallback to Calendar
 // -----------------------------------------------------------------------------
 
-export function diffZonedEpochsEfficient(
+export function diffZonedEpochs(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   slots0: ZonedEpochSlots,
@@ -418,7 +418,7 @@ export function diffZonedEpochsEfficient(
     )
   }
 
-  return diffZonedEpochs(
+  return diffZonedEpochsViaCalendar(
     calendarOps,
     timeZoneOps,
     slots0,
@@ -429,7 +429,7 @@ export function diffZonedEpochsEfficient(
   )
 }
 
-export function diffDateTimesEfficient(
+export function diffDateTimes(
   calendarOps: DiffOps,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
@@ -451,7 +451,7 @@ export function diffDateTimesEfficient(
     )
   }
 
-  return diffDateTimes(
+  return diffDateTimesViaCalendar(
     calendarOps,
     startIsoFields,
     endIsoFields,
@@ -461,7 +461,7 @@ export function diffDateTimesEfficient(
   )
 }
 
-// Exact Diffing (no rounding): Low-Level Work
+// Exact Diffing (no rounding): Directly w/ Calendar
 // -----------------------------------------------------------------------------
 
 export function zonedEpochRangeToIso(
@@ -501,7 +501,7 @@ export function zonedEpochRangeToIso(
   return [startIsoFields, midIsoFields, timeDiffNano]
 }
 
-function diffZonedEpochs(
+function diffZonedEpochsViaCalendar(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   slots0: ZonedEpochSlots,
@@ -532,7 +532,7 @@ function diffZonedEpochs(
   return dateTimeDiff
 }
 
-function diffDateTimes(
+function diffDateTimesViaCalendar(
   calendarOps: DiffOps,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,

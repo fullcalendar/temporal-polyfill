@@ -92,7 +92,7 @@ export function moveZonedDateTime<C, T>(
 
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
-    ...moveZonedEpochSlots(
+    ...moveZonedEpochs(
       calendarOps,
       timeZoneOps,
       zonedDateTimeSlots,
@@ -130,7 +130,7 @@ export function movePlainDate<C>(
 ): PlainDateSlots<C> {
   const { calendar } = plainDateSlots
   return createPlainDateSlots(
-    moveDateEfficient(
+    moveDate(
       getCalendarOps(calendar),
       plainDateSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
@@ -204,7 +204,7 @@ function moveEpochNano(
 /*
 timeZoneOps must be derived from zonedEpochSlots.timeZone
 */
-export function moveZonedEpochSlots(
+export function moveZonedEpochs(
   calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps,
   slots: ZonedEpochSlots,
@@ -219,7 +219,7 @@ export function moveZonedEpochSlots(
     refineOverflowOptions(options) // for validation only
   } else {
     const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneOps)
-    const movedIsoDateFields = moveDateEfficient(
+    const movedIsoDateFields = moveDate(
       calendarOps,
       isoDateTimeFields,
       {
@@ -256,7 +256,7 @@ export function moveDateTime(
     durationFields,
   )
 
-  const movedIsoDateFields = moveDateEfficient(
+  const movedIsoDateFields = moveDate(
     calendarOps,
     isoDateTimeFields, // only date parts will be used
     {
@@ -276,7 +276,7 @@ export function moveDateTime(
 /*
 Skips calendar if moving days only
 */
-export function moveDateEfficient(
+export function moveDate(
   calendarOps: MoveOps,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
