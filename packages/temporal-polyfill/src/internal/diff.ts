@@ -78,9 +78,6 @@ import { NumberSign, bindArgs, divModTrunc, pluckProps } from './utils'
 // High-level
 // -----------------------------------------------------------------------------
 
-/*
-Does rounding
-*/
 export function diffInstants(
   invert: boolean,
   instantSlots0: InstantSlots,
@@ -95,7 +92,7 @@ export function diffInstants(
     Unit.Hour,
   ) as [TimeUnit, TimeUnit, number, RoundingMode]
 
-  const durationFields = diffAndRoundEpochNanos(
+  const durationFields = diffEpochNanos(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
     ...optionsTuple,
@@ -106,9 +103,6 @@ export function diffInstants(
   )
 }
 
-/*
-Does rounding
-*/
 export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
@@ -130,7 +124,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   if (!sign) {
     durationFields = durationFieldDefaults
   } else if (largestUnit < Unit.Day) {
-    durationFields = diffAndRoundEpochNanos(
+    durationFields = diffEpochNanos(
       epochNano0,
       epochNano1,
       largestUnit as TimeUnit,
@@ -172,9 +166,6 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   )
 }
 
-/*
-Does rounding
-*/
 export function diffPlainDateTimes<C extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   invert: boolean,
@@ -198,7 +189,7 @@ export function diffPlainDateTimes<C extends IdLike>(
   if (!sign) {
     durationFields = durationFieldDefaults
   } else if (largestUnit <= Unit.Day) {
-    durationFields = diffAndRoundEpochNanos(
+    durationFields = diffEpochNanos(
       startEpochNano,
       endEpochNano,
       largestUnit as DayTimeUnit,
@@ -237,9 +228,6 @@ export function diffPlainDateTimes<C extends IdLike>(
   )
 }
 
-/*
-Does rounding
-*/
 export function diffPlainDates<C extends IdLike>(
   getCalendarOps: (calendarSlot: C) => DiffOps,
   invert: boolean,
@@ -270,9 +258,6 @@ export function diffPlainDates<C extends IdLike>(
   )
 }
 
-/*
-Does rounding
-*/
 export function diffPlainYearMonth<C extends IdLike>(
   getCalendarOps: (calendar: C) => YearMonthDiffOps,
   invert: boolean,
@@ -304,9 +289,6 @@ export function diffPlainYearMonth<C extends IdLike>(
   )
 }
 
-/*
-Does rounding
-*/
 function diffDateLike(
   invert: boolean,
   getCalendarOps: () => DiffOps,
@@ -362,9 +344,6 @@ function diffDateLike(
   )
 }
 
-/*
-Does rounding
-*/
 export function diffPlainTimes(
   invert: boolean,
   plainTimeSlots0: IsoTimeFields,
@@ -397,7 +376,7 @@ export function diffPlainTimes(
 // Exact Diffing (no rounding): Attempt Day/Time, fallback to Calendar
 // -----------------------------------------------------------------------------
 
-export function diffZonedEpochs(
+export function diffZonedEpochsExact(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   slots0: ZonedEpochSlots,
@@ -411,7 +390,7 @@ export function diffZonedEpochs(
     return durationFieldDefaults
   }
   if (largestUnit < Unit.Day) {
-    return diffEpochNanos(
+    return diffEpochNanosExact(
       slots0.epochNanoseconds,
       slots1.epochNanoseconds,
       largestUnit as DayTimeUnit,
@@ -429,7 +408,7 @@ export function diffZonedEpochs(
   )
 }
 
-export function diffDateTimes(
+export function diffDateTimesExact(
   calendarOps: DiffOps,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
@@ -444,7 +423,7 @@ export function diffDateTimes(
     return durationFieldDefaults
   }
   if (largestUnit <= Unit.Day) {
-    return diffEpochNanos(
+    return diffEpochNanosExact(
       startEpochNano,
       endEpochNano,
       largestUnit as DayTimeUnit,
@@ -569,7 +548,7 @@ function diffDateTimesViaCalendar(
 // Diffing Via Epoch Nanoseconds
 // -----------------------------------------------------------------------------
 
-function diffAndRoundEpochNanos(
+function diffEpochNanos(
   startEpochNano: BigNano,
   endEpochNano: BigNano,
   largestUnit: DayTimeUnit,
@@ -591,7 +570,7 @@ function diffAndRoundEpochNanos(
   }
 }
 
-function diffEpochNanos(
+function diffEpochNanosExact(
   startEpochNano: BigNano,
   endEpochNano: BigNano,
   largestUnit: DayTimeUnit,
