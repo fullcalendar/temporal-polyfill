@@ -196,7 +196,7 @@ export function expectInstantEquals(
 
 export function expectDurationEquals(
   d: DurationFns.Record,
-  fields: DurationFns.CreateFields,
+  fields: DurationFns.WithFields,
 ): void {
   const bagToSlots = {
     ...durationSlotDefaults,

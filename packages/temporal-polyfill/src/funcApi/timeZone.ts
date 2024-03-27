@@ -1,5 +1,5 @@
 import { createInstantSlots } from '../internal/slots'
-import { getTimeZoneEssence, refineTimeZoneId } from '../internal/timeZoneId'
+import { getTimeZoneAtomic, refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { bindArgs } from '../internal/utils'
 import * as InstantFns from './instant'
@@ -26,8 +26,8 @@ function getTransition(
 }
 
 export const getNextTransition = bindArgs(getTransition, 1)
-export const getPrevTransition = bindArgs(getTransition, -1)
+export const getPreviousTransition = bindArgs(getTransition, -1)
 
 export function equals(timeZoneId0: string, timeZoneId1: string): boolean {
-  return getTimeZoneEssence(timeZoneId0) === getTimeZoneEssence(timeZoneId1)
+  return getTimeZoneAtomic(timeZoneId0) === getTimeZoneAtomic(timeZoneId1)
 }
