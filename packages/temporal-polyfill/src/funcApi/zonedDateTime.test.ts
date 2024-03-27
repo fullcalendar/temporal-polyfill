@@ -133,6 +133,17 @@ describe('offsetNanoseconds', () => {
   })
 })
 
+describe('offset', () => {
+  it('works', () => {
+    const zdt = ZonedDateTimeFns.create(
+      1709055000000000000n,
+      'America/New_York',
+    )
+    const offsetString = ZonedDateTimeFns.offset(zdt)
+    expect(offsetString).toBe('-05:00')
+  })
+})
+
 describe('getISOFields', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.create(

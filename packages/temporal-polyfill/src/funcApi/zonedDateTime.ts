@@ -194,6 +194,10 @@ export function offsetNanoseconds(record: Record): number {
   return zonedEpochSlotsToIso(record, queryNativeTimeZone).offsetNanoseconds
 }
 
+export function offset(record: Record): string {
+  return formatOffsetNano(offsetNanoseconds(record))
+}
+
 export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek) as (
   record: Record,
 ) => number
