@@ -20,6 +20,7 @@ import {
   IsoDateTimeFields,
   IsoTimeFields,
   isoTimeFieldDefaults,
+  isoTimeFieldNamesAsc,
 } from './isoFields'
 import { isoMonthsInYear } from './isoMath'
 import { MarkerToEpochNano, MoveMarker } from './markerSystem'
@@ -72,7 +73,7 @@ import {
   milliInDay,
   nanoInUtcDay,
 } from './units'
-import { NumberSign, bindArgs, divModTrunc } from './utils'
+import { NumberSign, bindArgs, divModTrunc, pluckProps } from './utils'
 
 // High-level
 // -----------------------------------------------------------------------------
@@ -149,7 +150,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
       slots0,
       slots1,
       largestUnit,
-      optionsCopy as DiffOptions<DateUnitName>,
+      optionsCopy,
     )
 
     durationFields = roundRelativeDuration(
@@ -474,6 +475,7 @@ export function zonedEpochRangeToIso(
   timeDiffNano: number,
 ] {
   const startIsoFields = zonedEpochSlotsToIso(slots0, timeZoneOps)
+  const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
   const endIsoFields = zonedEpochSlotsToIso(slots1, timeZoneOps)
   const endEpochNano = slots1.epochNanoseconds
   let midIsoFields: IsoDateTimeFields
@@ -488,8 +490,8 @@ export function zonedEpochRangeToIso(
     }
 
     midIsoFields = {
-      ...startIsoFields, // for time
       ...moveByIsoDays(endIsoFields, cnt++ * -sign),
+      ...startIsoTimeFields,
     }
     midEpochNano = getSingleInstantFor(timeZoneOps, midIsoFields)
     midSign = compareBigNanos(endEpochNano, midEpochNano)
@@ -506,7 +508,7 @@ function diffZonedEpochs(
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   largestUnit: Unit,
-  origOptions?: DiffOptions<DateUnitName>,
+  origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const [isoFields0, isoFields1, timeDiffNano] = zonedEpochRangeToIso(
     timeZoneOps,
@@ -518,7 +520,12 @@ function diffZonedEpochs(
   const dateDiff =
     largestUnit === Unit.Day
       ? diffByDay(isoFields0, isoFields1)
-      : calendarOps.dateUntil(isoFields0, isoFields1, largestUnit, origOptions)
+      : calendarOps.dateUntil(
+          isoFields0,
+          isoFields1,
+          largestUnit,
+          origOptions as DiffOptions<DateUnitName>,
+        )
 
   const timeDiff = nanoToDurationTimeFields(timeDiffNano)
   const dateTimeDiff = { ...dateDiff, ...timeDiff }
