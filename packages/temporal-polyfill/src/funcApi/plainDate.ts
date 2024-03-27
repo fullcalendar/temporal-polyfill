@@ -34,7 +34,7 @@ import {
   DiffOptions,
   OverflowOptions,
 } from '../internal/optionsRefine'
-import { BrandingSlots, PlainDateBranding } from '../internal/slots'
+import { PlainDateBranding } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -127,8 +127,8 @@ export function fromFields(
 
 export const fromString = parsePlainDate as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === PlainDateBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === PlainDateBranding
 }
 
 // Getters

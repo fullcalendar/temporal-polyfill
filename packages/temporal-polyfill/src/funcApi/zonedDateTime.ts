@@ -51,7 +51,6 @@ import {
   roundZonedDateTime,
 } from '../internal/round'
 import {
-  BrandingSlots,
   DateSlots,
   ZonedDateTimeBranding,
   getEpochMicro,
@@ -153,8 +152,8 @@ export const fromString = parseZonedDateTime as (
   options?: AssignmentOptions,
 ) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === ZonedDateTimeBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === ZonedDateTimeBranding
 }
 
 // Getters

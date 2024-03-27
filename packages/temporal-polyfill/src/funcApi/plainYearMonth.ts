@@ -30,7 +30,7 @@ import {
   DiffOptions,
   OverflowOptions,
 } from '../internal/optionsRefine'
-import { BrandingSlots, PlainYearMonthBranding } from '../internal/slots'
+import { PlainYearMonthBranding } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
@@ -114,8 +114,8 @@ export const fromString = bindArgs(
   createNativeYearMonthParseOps,
 ) as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === PlainYearMonthBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === PlainYearMonthBranding
 }
 
 // Getters

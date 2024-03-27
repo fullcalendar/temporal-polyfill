@@ -22,7 +22,6 @@ import {
 } from '../internal/optionsRefine'
 import { roundInstant } from '../internal/round'
 import {
-  BrandingSlots,
   InstantBranding,
   getEpochMicro,
   getEpochMilli,
@@ -82,8 +81,8 @@ export const fromEpochNanoseconds = epochNanoToInstant as (
 
 export const fromString = parseInstant as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === InstantBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === InstantBranding
 }
 
 // Getters

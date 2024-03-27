@@ -29,6 +29,22 @@ describe('create', () => {
   })
 })
 
+describe('isInstance', () => {
+  it('returns true for actual instance', () => {
+    const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
+    expect(PlainYearMonthFns.isInstance(pym)).toBe(true)
+  })
+
+  it('returns false for other type of instance', () => {
+    const dur = DurationFns.create()
+    expect(PlainYearMonthFns.isInstance(dur)).toBe(false)
+  })
+
+  it('returns false for undefined', () => {
+    expect(PlainYearMonthFns.isInstance(undefined)).toBe(false)
+  })
+})
+
 describe('fromString', () => {
   it('works', () => {
     const pym = PlainYearMonthFns.fromString('2024-06-01[u-ca=gregory]')

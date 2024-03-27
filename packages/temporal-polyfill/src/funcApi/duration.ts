@@ -20,7 +20,7 @@ import {
   RelativeToOptions,
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
-import { BrandingSlots, DurationBranding } from '../internal/slots'
+import { DurationBranding } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
@@ -71,8 +71,8 @@ export const fromFields = refineDurationBag as (fields: FromFields) => Record
 
 export const fromString = parseDuration as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === DurationBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === DurationBranding
 }
 
 // Getters

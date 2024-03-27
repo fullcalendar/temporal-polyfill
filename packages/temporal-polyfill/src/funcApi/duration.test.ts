@@ -46,6 +46,22 @@ describe('create', () => {
   })
 })
 
+describe('isInstance', () => {
+  it('returns true for actual instance', () => {
+    const d = DurationFns.create()
+    expect(DurationFns.isInstance(d)).toBe(true)
+  })
+
+  it('returns false for other type of instance', () => {
+    const pd = PlainDateFns.create(2024, 1, 1)
+    expect(DurationFns.isInstance(pd)).toBe(false)
+  })
+
+  it('returns false for undefined', () => {
+    expect(DurationFns.isInstance(undefined)).toBe(false)
+  })
+})
+
 describe('fromString', () => {
   it('parses a simple string', () => {
     const d = DurationFns.fromString('P1D')

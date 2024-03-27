@@ -23,7 +23,7 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../internal/optionsRefine'
-import { BrandingSlots, PlainMonthDayBranding } from '../internal/slots'
+import { PlainMonthDayBranding } from '../internal/slots'
 import { bindArgs, identity, memoize } from '../internal/utils'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -103,8 +103,8 @@ export const fromString = bindArgs(
   createNativeMonthDayParseOps,
 ) as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === PlainMonthDayBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === PlainMonthDayBranding
 }
 
 // Getters

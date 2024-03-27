@@ -20,6 +20,22 @@ describe('create', () => {
   })
 })
 
+describe('isInstance', () => {
+  it('returns true for actual instance', () => {
+    const pt = PlainTimeFns.create(12, 30)
+    expect(PlainTimeFns.isInstance(pt)).toBe(true)
+  })
+
+  it('returns false for other type of instance', () => {
+    const dur = DurationFns.create()
+    expect(PlainTimeFns.isInstance(dur)).toBe(false)
+  })
+
+  it('returns false for undefined', () => {
+    expect(PlainTimeFns.isInstance(undefined)).toBe(false)
+  })
+})
+
 describe('fromString', () => {
   it('works', () => {
     const pt = PlainTimeFns.fromString('12:30')

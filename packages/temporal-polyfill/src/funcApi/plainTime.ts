@@ -25,11 +25,7 @@ import {
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
-import {
-  BrandingSlots,
-  PlainDateSlots,
-  PlainTimeBranding,
-} from '../internal/slots'
+import { PlainDateSlots, PlainTimeBranding } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -110,8 +106,8 @@ export const fromFields = refinePlainTimeBag as (
 
 export const fromString = parsePlainTime as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === PlainTimeBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === PlainTimeBranding
 }
 
 // Getters

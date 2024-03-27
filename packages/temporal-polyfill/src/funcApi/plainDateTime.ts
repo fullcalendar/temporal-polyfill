@@ -45,7 +45,6 @@ import {
 } from '../internal/optionsRefine'
 import { roundPlainDateTime } from '../internal/round'
 import {
-  BrandingSlots,
   PlainDateTimeBranding,
   createPlainDateSlots,
   createPlainTimeSlots,
@@ -175,8 +174,8 @@ export function fromFields(
 
 export const fromString = parsePlainDateTime as (s: string) => Record
 
-export function isInstance(record: BrandingSlots): boolean {
-  return record.branding === PlainDateTimeBranding
+export function isInstance(record: any): record is Record {
+  return Boolean(record) && record.branding === PlainDateTimeBranding
 }
 
 // Getters

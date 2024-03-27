@@ -40,6 +40,25 @@ describe('create', () => {
   })
 })
 
+describe('isInstance', () => {
+  it('returns true for actual instance', () => {
+    const zdt = ZonedDateTimeFns.create(
+      1709055000000000000n,
+      'America/New_York',
+    )
+    expect(ZonedDateTimeFns.isInstance(zdt)).toBe(true)
+  })
+
+  it('returns false for other type of instance', () => {
+    const dur = DurationFns.create()
+    expect(ZonedDateTimeFns.isInstance(dur)).toBe(false)
+  })
+
+  it('returns false for undefined', () => {
+    expect(ZonedDateTimeFns.isInstance(undefined)).toBe(false)
+  })
+})
+
 describe('fromString', () => {
   it('can parse with a timeZone', () => {
     const zdt = ZonedDateTimeFns.fromString(
