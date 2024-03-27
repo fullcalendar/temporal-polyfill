@@ -2,6 +2,7 @@ import {
   BigNano,
   addBigNanos,
   bigNanoToNumber,
+  compareBigNanos,
   createBigNano,
   diffBigNanos,
   moveBigNano,
@@ -109,15 +110,15 @@ ONLY day & time
 */
 export function roundZonedDateTime<C, T>(
   getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+  slots: ZonedDateTimeSlots<C, T>,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeSlots<C, T> {
-  let { epochNanoseconds, timeZone, calendar } = zonedDateTimeSlots
+  let { epochNanoseconds, timeZone, calendar } = slots
   const [smallestUnit, roundingInc, roundingMode] =
     refineRoundingOptions(options)
 
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
-    return zonedDateTimeSlots
+    return slots
   }
 
   const timeZoneOps = getTimeZoneOps(timeZone)
@@ -126,7 +127,7 @@ export function roundZonedDateTime<C, T>(
     epochNanoseconds = roundZonedEpoch(
       computeDayInterval,
       timeZoneOps,
-      zonedDateTimeSlots,
+      slots,
       roundingMode,
       roundingInc,
     )
@@ -224,13 +225,19 @@ export function roundZonedEpoch<C>(
 ): BigNano {
   const isoSlots = zonedEpochSlotsToIso(slots, timeZoneOps)
   const [isoFields1, isoFields0] = computeInterval(isoSlots, roundingInc)
+
+  const epochNano = slots.epochNanoseconds
   const epochNano0 = getSingleInstantFor(timeZoneOps, isoFields0)
   const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
-  const frac = computeEpochNanoFrac(
-    epochNano0,
-    epochNano1,
-    slots.epochNanoseconds,
-  )
+
+  if (
+    compareBigNanos(epochNano, epochNano0) === -1 ||
+    compareBigNanos(epochNano, epochNano1) === 1
+  ) {
+    throw new RangeError(errorMessages.invalidProtocolResults)
+  }
+
+  const frac = computeEpochNanoFrac(epochNano0, epochNano1, epochNano)
   const grow = roundWithMode(frac, roundingMode)
   const epochNanoRounded = grow ? epochNano1 : epochNano0
   return epochNanoRounded

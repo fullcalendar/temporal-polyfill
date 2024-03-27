@@ -134,6 +134,6 @@ export function computeEpochNanoFrac(
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const numer = bigNanoToNumber(diffBigNanos(epochNano0, epochNanoProgress))
-  return numer / denom
+  const number = bigNanoToNumber(diffBigNanos(epochNano0, epochNanoProgress))
+  return number / denom
 }
