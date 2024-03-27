@@ -197,3 +197,35 @@ export const pd_addDays = bindArgs(
   addDays,
   checkIsoDateInBounds,
 )
+
+// -----------------------------------------------------------------------------
+
+function reversed<S>(
+  f: (slots: S, units: number) => S,
+): (slots: S, units: number) => S {
+  return (slots, units) => {
+    return f(slots, -units)
+  }
+}
+
+export const zdt_subtractYears = reversed(zdt_addYears)
+export const zdt_subtractMonths = reversed(zdt_addMonths)
+export const zdt_subtractWeeks = reversed(zdt_addWeeks)
+export const zdt_subtractDays = reversed(zdt_addDays)
+export const zdt_subtractHours = reversed(zdt_addHours)
+export const zdt_subtractMinutes = reversed(zdt_addMinutes)
+export const zdt_subtractSeconds = reversed(zdt_addSeconds)
+export const zdt_subtractMilliseconds = reversed(zdt_addMilliseconds)
+export const zdt_subtractMicroseconds = reversed(zdt_addMicroseconds)
+export const zdt_subtractNanoseconds = reversed(zdt_addNanoseconds)
+
+export const pdt_subtractYears = reversed(pdt_addYears)
+export const pdt_subtractMonths = reversed(pdt_addMonths)
+export const pdt_subtractWeeks = reversed(pdt_addWeeks)
+export const pdt_subtractDays = reversed(pdt_addDays)
+export const pdt_subtractHours = reversed(pdt_addHours)
+export const pdt_subtractMinutes = reversed(pdt_addMinutes)
+export const pdt_subtractSeconds = reversed(pdt_addSeconds)
+export const pdt_subtractMilliseconds = reversed(pdt_addMilliseconds)
+export const pdt_subtractMicroseconds = reversed(pdt_addMicroseconds)
+export const pdt_subtractNanoseconds = reversed(pdt_addNanoseconds)
