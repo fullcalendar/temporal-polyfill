@@ -146,9 +146,9 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
     durationFields = diffZonedEpochs(
       calendarOps,
       timeZoneOps,
-      sign,
       slots0,
       slots1,
+      sign,
       largestUnit,
       optionsCopy,
     )
@@ -211,9 +211,9 @@ export function diffPlainDateTimes<C extends IdLike>(
 
     durationFields = diffDateTimes(
       calendarOps,
-      sign,
       plainDateTimeSlots0,
       plainDateTimeSlots1,
+      sign,
       largestUnit,
       optionsCopy,
     )
@@ -421,9 +421,9 @@ export function diffZonedEpochsEfficient(
   return diffZonedEpochs(
     calendarOps,
     timeZoneOps,
-    sign,
     slots0,
     slots1,
+    sign,
     largestUnit,
     origOptions as DiffOptions<DateUnitName>,
   )
@@ -453,9 +453,9 @@ export function diffDateTimesEfficient(
 
   return diffDateTimes(
     calendarOps,
-    sign,
     startIsoFields,
     endIsoFields,
+    sign,
     largestUnit,
     origOptions,
   )
@@ -466,9 +466,9 @@ export function diffDateTimesEfficient(
 
 export function zonedEpochRangeToIso(
   timeZoneOps: TimeZoneOps,
-  sign: NumberSign,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
+  sign: NumberSign,
 ): [
   isoFields0: IsoDateTimeFields,
   isoFields1: IsoDateTimeFields,
@@ -504,17 +504,17 @@ export function zonedEpochRangeToIso(
 function diffZonedEpochs(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
-  sign: NumberSign,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
+  sign: NumberSign,
   largestUnit: Unit,
   origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const [isoFields0, isoFields1, timeDiffNano] = zonedEpochRangeToIso(
     timeZoneOps,
-    sign,
     slots0,
     slots1,
+    sign,
   )
 
   const dateDiff =
@@ -534,9 +534,9 @@ function diffZonedEpochs(
 
 function diffDateTimes(
   calendarOps: DiffOps,
-  sign: NumberSign,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
+  sign: NumberSign,
   largestUnit: Unit,
   origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
@@ -605,7 +605,7 @@ function diffEpochNanos(
   }
 }
 
-export function diffByWeekAndDay(
+export function diffByWeek(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
 ): DurationFields {
