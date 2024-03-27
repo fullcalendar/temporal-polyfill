@@ -116,7 +116,6 @@ export function roundZonedDateTime<C, T>(
   const [smallestUnit, roundingInc, roundingMode] =
     refineRoundingOptions(options)
 
-  // short circuit (elsewhere? consolidate somehow?)
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return zonedDateTimeSlots
   }
@@ -399,8 +398,7 @@ export function balanceDayTimeDurationByInc(
 }
 
 /*
-TODO: caller should short-circuit if
-  !sign || (smallestUnit === Unit.Nanosecond && roundingInc === 1)
+NOTE: caller should short-circuit if !sign
 */
 export function roundRelativeDuration(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
@@ -415,6 +413,10 @@ export function roundRelativeDuration(
   moveMarker: MoveMarker,
   _diffMarkers?: DiffMarkers,
 ): DurationFields {
+  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
+    return durationFields
+  }
+
   const nudgeFunc = (
     smallestUnit > Unit.Day
       ? nudgeRelativeDuration

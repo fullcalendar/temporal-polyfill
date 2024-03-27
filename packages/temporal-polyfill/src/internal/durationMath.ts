@@ -212,10 +212,7 @@ export function roundDuration<RA, C, T>(
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
 
-  if (
-    balancedSign &&
-    !(smallestUnit === Unit.Nanosecond && roundingInc === 1)
-  ) {
+  if (balancedSign) {
     balancedDuration = roundRelativeDuration(
       balancedDuration,
       endEpochNano,
