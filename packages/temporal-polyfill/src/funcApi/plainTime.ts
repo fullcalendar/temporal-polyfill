@@ -26,6 +26,7 @@ import {
 } from '../internal/optionsRefine'
 import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeBranding } from '../internal/slots'
+import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -33,7 +34,6 @@ import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
-import { refineTimeZoneIdString } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = {
@@ -175,7 +175,7 @@ export const compare = compareIsoTimeFields as (
 
 export const toZonedDateTime = bindArgs(
   plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
-  refineTimeZoneIdString,
+  refineTimeZoneId,
   identity,
   queryNativeTimeZone,
 ) as (

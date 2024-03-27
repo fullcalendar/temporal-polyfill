@@ -4,6 +4,7 @@ import {
   plainDateTimeWithFields,
   refinePlainDateTimeBag,
 } from '../internal/bagRefine'
+import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
   createNativeDateRefineOps,
@@ -69,7 +70,6 @@ import {
   computeYearOfWeek,
   getCalendarId,
   getCalendarIdFromBag,
-  refineCalendarIdString,
 } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
@@ -147,7 +147,7 @@ export type ToStringOptions = DateTimeDisplayOptions
 
 export const create = bindArgs(
   constructPlainDateTimeSlots<string, string>,
-  refineCalendarIdString,
+  refineCalendarId,
 ) as (
   isoYear: number,
   isoMonth: number,
@@ -232,7 +232,7 @@ export function withFields(
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarIdString(calendar))
+  return slotsWithCalendar(record, refineCalendarId(calendar))
 }
 
 export const withPlainDate = plainDateTimeWithPlainDate as (

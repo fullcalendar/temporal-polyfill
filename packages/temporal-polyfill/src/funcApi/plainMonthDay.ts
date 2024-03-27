@@ -4,6 +4,7 @@ import {
   refinePlainMonthDayBag,
 } from '../internal/bagRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
+import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
   createNativeMonthDayModOps,
@@ -31,7 +32,6 @@ import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
   getCalendarId,
-  refineCalendarIdString,
 } from './utils'
 
 export type Record = {
@@ -75,7 +75,7 @@ export type ToStringOptions = CalendarDisplayOptions
 
 export const create = bindArgs(
   constructPlainMonthDaySlots<string, string>,
-  refineCalendarIdString,
+  refineCalendarId,
 ) as (
   isoMonth: number,
   isoDay: number,

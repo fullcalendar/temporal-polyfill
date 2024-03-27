@@ -3,6 +3,7 @@ import {
   plainYearMonthWithFields,
   refinePlainYearMonthBag,
 } from '../internal/bagRefine'
+import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
   createNativeYearMonthDiffOps,
@@ -44,7 +45,6 @@ import {
   computeYearMonthFields,
   getCalendarId,
   getCalendarIdFromBag,
-  refineCalendarIdString,
 } from './utils'
 
 export type Record = {
@@ -90,7 +90,7 @@ export type ToStringOptions = CalendarDisplayOptions
 
 export const create = bindArgs(
   constructPlainYearMonthSlots<string, string>,
-  refineCalendarIdString,
+  refineCalendarId,
 ) as (
   isoYear: number,
   isoMonth: number,

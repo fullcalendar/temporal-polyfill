@@ -9,7 +9,7 @@ import {
   getRequiredYearMonthFields,
   isoCalendarId,
 } from '../internal/calendarConfig'
-import { resolveCalendarId } from '../internal/calendarId'
+import { refineCalendarId, resolveCalendarId } from '../internal/calendarId'
 import { NativeStandardOps } from '../internal/calendarNative'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { requireNonNullish, requireString } from '../internal/cast'
@@ -185,7 +185,7 @@ const calendarMethods = {
 export const [Calendar] = createSlotClass(
   'Calendar',
   (id: string): CalendarClassSlots => {
-    const slotId = resolveCalendarId(requireString(id))
+    const slotId = refineCalendarId(id)
     const calendarNative = createNativeStandardOps(slotId)
     return {
       branding: 'Calendar',

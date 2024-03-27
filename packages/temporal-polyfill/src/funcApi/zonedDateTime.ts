@@ -5,6 +5,7 @@ import {
   zonedDateTimeWithFields,
 } from '../internal/bagRefine'
 import { BigNano } from '../internal/bigNano'
+import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
   createNativeDateRefineOps,
@@ -58,6 +59,7 @@ import {
   getEpochNano,
   getEpochSec,
 } from '../internal/slots'
+import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   ZonedDateTimeFields,
@@ -86,8 +88,6 @@ import {
   computeYearOfWeek,
   getCalendarId,
   getCalendarIdFromBag,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
 } from './utils'
 
 export type Record = {
@@ -128,8 +128,8 @@ export type ToStringOptions = ZonedDateTimeDisplayOptions
 
 export const create = bindArgs(
   constructZonedDateTimeSlots<string, string, string, string>,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
+  refineCalendarId,
+  refineTimeZoneId,
 ) as (epochNanoseconds: bigint, timeZone: string, calendar?: string) => Record
 
 export function fromFields(
@@ -138,7 +138,7 @@ export function fromFields(
 ): Record {
   const calendarId = getCalendarIdFromBag(fields)
   return refineZonedDateTimeBag(
-    refineTimeZoneIdString,
+    refineTimeZoneId,
     queryNativeTimeZone,
     createNativeDateRefineOps(calendarId),
     calendarId,
@@ -257,11 +257,11 @@ export function withFields(
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarIdString(calendar))
+  return slotsWithCalendar(record, refineCalendarId(calendar))
 }
 
 export function withTimeZone(record: Record, timeZone: string): Record {
-  return slotsWithTimeZone(record, refineTimeZoneIdString(timeZone))
+  return slotsWithTimeZone(record, refineTimeZoneId(timeZone))
 }
 
 export const withPlainDate = bindArgs(

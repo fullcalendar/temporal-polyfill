@@ -1,5 +1,5 @@
 import { isoCalendarId } from '../internal/calendarConfig'
-import { resolveCalendarId } from '../internal/calendarId'
+import { refineCalendarId } from '../internal/calendarId'
 import { formatMonthCode } from '../internal/calendarNative'
 import {
   createNativeDayOfYearOps,
@@ -10,10 +10,8 @@ import {
   createNativePartOps,
   createNativeWeekOps,
 } from '../internal/calendarNativeQuery'
-import { requireString } from '../internal/cast'
 import { DateFields, MonthDayFields, YearMonthFields } from '../internal/fields'
 import { DateSlots } from '../internal/slots'
-import { resolveTimeZoneId } from '../internal/timeZoneId'
 
 // Calendar / TimeZone ID
 // -----------------------------------------------------------------------------
@@ -31,16 +29,8 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }):
   | undefined {
   const { calendar } = bag
   if (calendar !== undefined) {
-    return refineCalendarIdString(calendar)
+    return refineCalendarId(calendar)
   }
-}
-
-export function refineCalendarIdString(id: string): string {
-  return resolveCalendarId(requireString(id))
-}
-
-export function refineTimeZoneIdString(id: string): string {
-  return resolveTimeZoneId(requireString(id))
 }
 
 // Fields

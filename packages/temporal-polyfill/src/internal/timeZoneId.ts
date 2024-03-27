@@ -1,9 +1,14 @@
+import { requireString } from './cast'
 import * as errorMessages from './errorMessages'
 import { RawDateTimeFormat, standardLocaleId } from './intlFormatUtils'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './isoParse'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { capitalize, memoize } from './utils'
+
+export function refineTimeZoneId(id: string): string {
+  return resolveTimeZoneId(requireString(id))
+}
 
 export function resolveTimeZoneId(id: string): string {
   const essence = getTimeZoneEssence(id)

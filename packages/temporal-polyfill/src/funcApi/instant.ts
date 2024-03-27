@@ -1,4 +1,5 @@
 import { BigNano } from '../internal/bigNano'
+import { refineCalendarId } from '../internal/calendarId'
 import { requireObjectLike } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { constructInstantSlots } from '../internal/construct'
@@ -28,12 +29,12 @@ import {
   getEpochNano,
   getEpochSec,
 } from '../internal/slots'
+import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
-import { refineCalendarIdString, refineTimeZoneIdString } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = {
@@ -147,8 +148,8 @@ export function toZonedDateTime(
 
   return instantToZonedDateTime(
     record,
-    refineTimeZoneIdString(refinedObj.timeZone),
-    refineCalendarIdString(refinedObj.calendar),
+    refineTimeZoneId(refinedObj.timeZone),
+    refineCalendarId(refinedObj.calendar),
   )
 }
 
@@ -156,7 +157,7 @@ export function toZonedDateTimeISO(
   record: Record,
   timeZone: string,
 ): ZonedDateTimeFns.Record {
-  return instantToZonedDateTime(record, refineTimeZoneIdString(timeZone))
+  return instantToZonedDateTime(record, refineTimeZoneId(timeZone))
 }
 
 // Formatting
@@ -217,6 +218,6 @@ export function rangeToLocaleStringParts(
 
 export const toString = bindArgs(
   formatInstantIso<string, string>,
-  refineTimeZoneIdString,
+  refineTimeZoneId,
   queryNativeTimeZone,
 ) as (record: Record, options?: ToStringOptions) => string

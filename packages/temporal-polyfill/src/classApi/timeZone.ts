@@ -14,7 +14,7 @@ import {
   createPlainDateTimeSlots,
 } from '../internal/slots'
 import { epochNanoToIso } from '../internal/timeMath'
-import { resolveTimeZoneId } from '../internal/timeZoneId'
+import { refineTimeZoneId, resolveTimeZoneId } from '../internal/timeZoneId'
 import { NativeTimeZone, queryNativeTimeZone } from '../internal/timeZoneNative'
 import { getSingleInstantFor } from '../internal/timeZoneOps'
 import { isObjectLike } from '../internal/utils'
@@ -44,7 +44,7 @@ export type TimeZoneClassSlots = BrandingSlots & {
 export const [TimeZone, createTimeZone] = createSlotClass(
   'TimeZone',
   (id: string): TimeZoneClassSlots => {
-    const slotId = resolveTimeZoneId(id)
+    const slotId = refineTimeZoneId(id)
     const timeZoneNative = queryNativeTimeZone(slotId)
     return {
       branding: 'TimeZone',

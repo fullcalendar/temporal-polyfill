@@ -3,6 +3,7 @@ import {
   plainDateWithFields,
   refinePlainDateBag,
 } from '../internal/bagRefine'
+import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
   createNativeDateRefineOps,
@@ -35,6 +36,7 @@ import {
   OverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainDateBranding } from '../internal/slots'
+import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -55,8 +57,6 @@ import {
   computeYearOfWeek,
   getCalendarId,
   getCalendarIdFromBag,
-  refineCalendarIdString,
-  refineTimeZoneIdString,
 } from './utils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
@@ -106,7 +106,7 @@ export type ToZonedDateTimeOptions = {
 
 export const create = bindArgs(
   constructPlainDateSlots<string, string>,
-  refineCalendarIdString,
+  refineCalendarId,
 ) as (
   isoYear: number,
   isoMonth: number,
@@ -182,7 +182,7 @@ export function withFields(
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarIdString(calendar))
+  return slotsWithCalendar(record, refineCalendarId(calendar))
 }
 
 // Math
@@ -249,7 +249,7 @@ export function toZonedDateTime(
     typeof options === 'string' ? { timeZone: options } : options
 
   return plainDateToZonedDateTime(
-    refineTimeZoneIdString,
+    refineTimeZoneId,
     identity,
     queryNativeTimeZone,
     record,

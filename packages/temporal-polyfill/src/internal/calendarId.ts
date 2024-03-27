@@ -1,6 +1,11 @@
 import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
+import { requireString } from './cast'
 import * as errorMessages from './errorMessages'
 import { queryCalendarIntlFormat } from './intlMath'
+
+export function refineCalendarId(id: string): string {
+  return resolveCalendarId(requireString(id))
+}
 
 export function resolveCalendarId(id: string): string {
   id = id.toLowerCase() // normalize
