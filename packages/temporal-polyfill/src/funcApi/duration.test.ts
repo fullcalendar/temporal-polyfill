@@ -7,13 +7,13 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
   it('called without args', () => {
-    const d = DurationFns.create()
-    expectDurationEquals(d, {})
+    const dur = DurationFns.create()
+    expectDurationEquals(dur, {})
   })
 
   it('called with some args', () => {
-    const d = DurationFns.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-    expectDurationEquals(d, {
+    const dur = DurationFns.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    expectDurationEquals(dur, {
       years: 1,
       months: 2,
       weeks: 3,
@@ -25,12 +25,12 @@ describe('create', () => {
       microseconds: 9,
       nanoseconds: 10,
     })
-    expect(d.sign).toBe(1)
+    expect(dur.sign).toBe(1)
   })
 
   it('called with some args (negative)', () => {
-    const d = DurationFns.create(-1, -2, -3, -4, -5, -6, -7, -8, -9, -10)
-    expectDurationEquals(d, {
+    const dur = DurationFns.create(-1, -2, -3, -4, -5, -6, -7, -8, -9, -10)
+    expectDurationEquals(dur, {
       years: -1,
       months: -2,
       weeks: -3,
@@ -42,14 +42,14 @@ describe('create', () => {
       microseconds: -9,
       nanoseconds: -10,
     })
-    expect(d.sign).toBe(-1)
+    expect(dur.sign).toBe(-1)
   })
 })
 
 describe('isInstance', () => {
   it('returns true for actual instance', () => {
-    const d = DurationFns.create()
-    expect(DurationFns.isInstance(d)).toBe(true)
+    const dur = DurationFns.create()
+    expect(DurationFns.isInstance(dur)).toBe(true)
   })
 
   it('returns false for other type of instance', () => {
@@ -64,16 +64,16 @@ describe('isInstance', () => {
 
 describe('fromString', () => {
   it('parses a simple string', () => {
-    const d = DurationFns.fromString('P1D')
-    expectDurationEquals(d, { days: 1 })
+    const dur = DurationFns.fromString('P1D')
+    expectDurationEquals(dur, { days: 1 })
   })
 })
 
 describe('fromFields', () => {
   it('refines simple fields', () => {
     const bag = { days: 1 }
-    const d = DurationFns.fromFields(bag)
-    expectDurationEquals(d, bag)
+    const dur = DurationFns.fromFields(bag)
+    expectDurationEquals(dur, bag)
   })
 })
 
@@ -87,40 +87,40 @@ describe('withFields', () => {
 
 describe('blank', () => {
   it('gives true for blank duration', () => {
-    const d = DurationFns.create()
-    expect(DurationFns.blank(d)).toBe(true)
+    const dur = DurationFns.create()
+    expect(DurationFns.blank(dur)).toBe(true)
   })
 
   it('gives false for a non-blank duration', () => {
-    const d = DurationFns.create(1)
-    expect(DurationFns.blank(d)).toBe(false)
+    const dur = DurationFns.create(1)
+    expect(DurationFns.blank(dur)).toBe(false)
   })
 })
 
 describe('negated', () => {
   it('reverses a positive duration to a negative', () => {
-    const d = DurationFns.create(1)
-    const neg = DurationFns.negated(d)
+    const dur = DurationFns.create(1)
+    const neg = DurationFns.negated(dur)
     expectDurationEquals(neg, { years: -1 })
   })
 
   it('reverses a negative duration to a positive', () => {
-    const d = DurationFns.create(-1)
-    const neg = DurationFns.negated(d)
+    const dur = DurationFns.create(-1)
+    const neg = DurationFns.negated(dur)
     expectDurationEquals(neg, { years: 1 })
   })
 })
 
 describe('abs', () => {
   it('absolutizes a negative duration to positive', () => {
-    const d = DurationFns.create(-1)
-    const abs = DurationFns.abs(d)
+    const dur = DurationFns.create(-1)
+    const abs = DurationFns.abs(dur)
     expectDurationEquals(abs, { years: 1 })
   })
 
   it('leaves a positive duration untouched', () => {
-    const d = DurationFns.create(1)
-    const abs = DurationFns.abs(d)
+    const dur = DurationFns.create(1)
+    const abs = DurationFns.abs(dur)
     expectDurationEquals(abs, { years: 1 })
   })
 })
@@ -193,15 +193,15 @@ describe('subtract', () => {
 
 describe('round', () => {
   it('rounds days without needing relativeTo', () => {
-    const d = DurationFns.fromFields({ days: 1, hours: 13 })
-    const rounded = DurationFns.round(d, { smallestUnit: 'days' })
+    const dur = DurationFns.fromFields({ days: 1, hours: 13 })
+    const rounded = DurationFns.round(dur, { smallestUnit: 'days' })
     expectDurationEquals(rounded, { days: 2 })
   })
 
   it('rounds months with PlainDate relativeTo', () => {
-    const d = DurationFns.fromFields({ months: 1, days: 15 })
+    const dur = DurationFns.fromFields({ months: 1, days: 15 })
     const pd = PlainDateFns.create(2024, 1, 1)
-    const rounded = DurationFns.round(d, {
+    const rounded = DurationFns.round(dur, {
       smallestUnit: 'months',
       relativeTo: pd,
     })
@@ -209,9 +209,9 @@ describe('round', () => {
   })
 
   it('rounds months with PlainDateTime relativeTo', () => {
-    const d = DurationFns.fromFields({ months: 1, days: 15 })
+    const dur = DurationFns.fromFields({ months: 1, days: 15 })
     const pdt = PlainDateTimeFns.create(2024, 1, 1, 12)
-    const rounded = DurationFns.round(d, {
+    const rounded = DurationFns.round(dur, {
       smallestUnit: 'months',
       relativeTo: pdt,
     })
@@ -219,9 +219,9 @@ describe('round', () => {
   })
 
   it('rounds months with ZonedDateTime relativeTo', () => {
-    const d = DurationFns.fromFields({ months: 1, days: 15 })
+    const dur = DurationFns.fromFields({ months: 1, days: 15 })
     const zdt = ZonedDateTimeFns.fromString('2024-01-01[America/New_York]')
-    const rounded = DurationFns.round(d, {
+    const rounded = DurationFns.round(dur, {
       smallestUnit: 'months',
       relativeTo: zdt,
     })
@@ -231,29 +231,29 @@ describe('round', () => {
 
 describe('total', () => {
   it('totals days without needing relativeTo', () => {
-    const d = DurationFns.fromFields({ days: 1, hours: 12 })
-    const total = DurationFns.total(d, { unit: 'days' })
+    const dur = DurationFns.fromFields({ days: 1, hours: 12 })
+    const total = DurationFns.total(dur, { unit: 'days' })
     expect(total).toBe(1.5)
   })
 
   it('totals months with PlainDate relativeTo', () => {
-    const d = DurationFns.fromFields({ months: 1, days: 14 })
+    const dur = DurationFns.fromFields({ months: 1, days: 14 })
     const pd = PlainDateFns.create(2023, 1, 1)
-    const total = DurationFns.total(d, { unit: 'months', relativeTo: pd })
+    const total = DurationFns.total(dur, { unit: 'months', relativeTo: pd })
     expect(total).toBe(1.5) // b/c Feb 2023 has 28 days
   })
 
   it('totals months with PlainDateTime relativeTo', () => {
-    const d = DurationFns.fromFields({ months: 1, days: 14 })
+    const dur = DurationFns.fromFields({ months: 1, days: 14 })
     const pdt = PlainDateTimeFns.create(2023, 1, 1, 12)
-    const total = DurationFns.total(d, { unit: 'months', relativeTo: pdt })
+    const total = DurationFns.total(dur, { unit: 'months', relativeTo: pdt })
     expect(total).toBe(1.5) // b/c Feb 2023 has 28 days
   })
 
   it('totals months with ZonedDateTime relativeTo', () => {
-    const d = DurationFns.fromFields({ months: 1, days: 14 })
+    const dur = DurationFns.fromFields({ months: 1, days: 14 })
     const zdt = ZonedDateTimeFns.fromString('2023-01-01[America/New_York]')
-    const total = DurationFns.total(d, { unit: 'months', relativeTo: zdt })
+    const total = DurationFns.total(dur, { unit: 'months', relativeTo: zdt })
     expect(total).toBe(1.5) // b/c Feb 2023 has 28 days
   })
 })
@@ -293,20 +293,28 @@ describe('compare', () => {
 
 describe('toString', () => {
   it('can output day and time units', () => {
-    const d = DurationFns.fromFields({ days: 2, hours: 12 })
-    const s = DurationFns.toString(d)
+    const dur = DurationFns.fromFields({ days: 2, hours: 12 })
+    const s = DurationFns.toString(dur)
     expect(s).toBe('P2DT12H')
   })
 
   it('can output subsecond units', () => {
-    const d = DurationFns.fromFields({ days: 2, hours: 12, milliseconds: 500 })
-    const s = DurationFns.toString(d)
+    const dur = DurationFns.fromFields({
+      days: 2,
+      hours: 12,
+      milliseconds: 500,
+    })
+    const s = DurationFns.toString(dur)
     expect(s).toBe('P2DT12H0.5S')
   })
 
   it('can round subsecond units', () => {
-    const d = DurationFns.fromFields({ days: 2, hours: 12, milliseconds: 500 })
-    const s = DurationFns.toString(d, {
+    const dur = DurationFns.fromFields({
+      days: 2,
+      hours: 12,
+      milliseconds: 500,
+    })
+    const s = DurationFns.toString(dur, {
       smallestUnit: 'seconds',
       roundingMode: 'halfExpand',
     })
@@ -316,8 +324,8 @@ describe('toString', () => {
 
 describe('toLocaleString', () => {
   it('most likely falls back to toString', () => {
-    const d = DurationFns.fromFields({ days: 2 })
-    const s = DurationFns.toLocaleString(d)
+    const dur = DurationFns.fromFields({ days: 2 })
+    const s = DurationFns.toLocaleString(dur)
     expect(s).toBeTruthy()
   })
 })
