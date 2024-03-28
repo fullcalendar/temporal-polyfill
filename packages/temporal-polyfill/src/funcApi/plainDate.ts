@@ -24,22 +24,58 @@ import { diffPlainDates } from '../internal/diff'
 import { DateBag, DateFields } from '../internal/fields'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoDateFields } from '../internal/isoFields'
+import { IsoDateFields, IsoDateTimeFields } from '../internal/isoFields'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
 import { slotsWithCalendar } from '../internal/modify'
-import { movePlainDate } from '../internal/move'
+import { moveByDays, movePlainDate } from '../internal/move'
+import {
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  reversedMove,
+} from '../internal/moveExtended'
 import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
+  refineRoundingMathOptions,
 } from '../internal/optionsRefine'
-import { PlainDateBranding } from '../internal/slots'
+import { IsoDateTimeInterval } from '../internal/round'
+import {
+  computeIsoWeekCeil,
+  computeIsoWeekFloor,
+  computeIsoWeekInterval,
+  computeMonthCeil,
+  computeMonthFloor,
+  computeMonthInterval,
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+  roundDateTimeToInterval,
+} from '../internal/roundExtended'
+import {
+  DateSlots,
+  PlainDateBranding,
+  createPlainDateSlots,
+} from '../internal/slots'
+import {
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+} from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { DateUnitName } from '../internal/units'
+import { DateUnitName, Unit } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  slotsWithWeekOfYear,
+} from '../internal/withExtended'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -338,3 +374,135 @@ export const toString = formatPlainDateIso<string> as (
   record: Record,
   options?: ToStringOptions,
 ) => string
+
+// Non-standard: With
+// -----------------------------------------------------------------------------
+
+export function withDayOfYear(
+  record: Record,
+  dayOfYear: number,
+  options?: OverflowOptions,
+): Record {
+  return checkIsoDateInBounds(moveToDayOfYear(record, dayOfYear, options))
+}
+
+export function withDayOfMonth(
+  record: Record,
+  dayOfMonth: number,
+  options?: OverflowOptions,
+): Record {
+  return checkIsoDateInBounds(moveToDayOfMonth(record, dayOfMonth, options))
+}
+
+export function withDayOfWeek(
+  record: Record,
+  dayOfWeek: number,
+  options?: OverflowOptions,
+): Record {
+  return checkIsoDateInBounds(moveToDayOfWeek(record, dayOfWeek, options))
+}
+
+export function withWeekOfYear(
+  record: Record,
+  weekOfYear: number,
+  options?: OverflowOptions,
+): Record {
+  return checkIsoDateInBounds(slotsWithWeekOfYear(record, weekOfYear, options))
+}
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+export function addYears(record: Record, years: number): Record {
+  return checkIsoDateInBounds(moveByYears(record, years))
+}
+
+export function addMonths(record: Record, months: number): Record {
+  return checkIsoDateInBounds(moveByMonths(record, months))
+}
+
+export function addWeeks(record: Record, weeks: number): Record {
+  return checkIsoDateInBounds(moveByIsoWeeks(record, weeks))
+}
+
+export function addDays(record: Record, days: number): Record {
+  return checkIsoDateInBounds(moveByDays(record, days))
+}
+
+// Non-standard: Subtract
+// -----------------------------------------------------------------------------
+
+export const subtractYears = reversedMove(addYears)
+export const subtractMonths = reversedMove(addMonths)
+export const subtractWeeks = reversedMove(addWeeks)
+export const subtractDays = reversedMove(addDays)
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+export const roundToYear = bindArgs(
+  roundToInterval,
+  Unit.Year,
+  computeYearInterval,
+)
+
+export const roundToMonth = bindArgs(
+  roundToInterval,
+  Unit.Month,
+  computeMonthInterval,
+)
+
+export const roundToWeek = bindArgs(
+  roundToInterval,
+  Unit.Week,
+  computeIsoWeekInterval,
+)
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export const startOfYear = aligned(computeYearFloor)
+export const startOfMonth = aligned(computeMonthFloor)
+export const startOfWeek = aligned(computeIsoWeekFloor)
+
+// Non-standard: End-of-Unit (EXCL)
+// -----------------------------------------------------------------------------
+
+export const endOfYearExcl = aligned(computeYearCeil)
+export const endOfMonthExcl = aligned(computeMonthCeil)
+export const endOfWeekExcl = aligned(computeIsoWeekCeil)
+
+// Non-standard: End-of-Unit (INCL)
+// -----------------------------------------------------------------------------
+
+export const endOfYearIncl = aligned(computeYearCeil, -1)
+export const endOfMonthIncl = aligned(computeMonthCeil, -1)
+export const endOfWeekIncl = aligned(computeIsoWeekCeil, -1)
+
+// Non-standard: Utils
+// -----------------------------------------------------------------------------
+
+function roundToInterval(
+  unit: Unit,
+  computeInterval: (isoFields: DateSlots<string>) => IsoDateTimeInterval,
+  record: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+): Record {
+  const [, roundingMode] = refineRoundingMathOptions(unit, options)
+  const slots1 = {
+    ...record,
+    ...roundDateTimeToInterval(computeInterval, record, roundingMode),
+  }
+  return createPlainDateSlots(checkIsoDateTimeInBounds(slots1))
+}
+
+function aligned(
+  computeAlignment: (slots: DateSlots<string>) => IsoDateTimeFields,
+  dayDelta = 0,
+): (slots: Record) => Record {
+  return (slots) => {
+    const isoFields = moveByDays(computeAlignment(slots), dayDelta)
+    const slots1 = { ...slots, ...isoFields }
+    return createPlainDateSlots(checkIsoDateInBounds(slots1))
+  }
+}

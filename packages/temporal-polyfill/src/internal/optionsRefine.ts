@@ -378,16 +378,12 @@ export function refineRoundingMathOptions(
   return [roundingInc, roundingMode]
 }
 
-/*
-Always allows roundingInc for larger units.
-Used by funcApi.
-*/
 export function refineUnitDiffOptions(
   smallestUnit: Unit,
   options: RoundingModeName | RoundingMathOptions,
 ): RoundingMathTuple | [undefined, undefined] {
   if (options !== undefined) {
-    return refineRoundingMathOptions(smallestUnit, options, true)
+    return refineRoundingMathOptions(smallestUnit, options)
   }
   return [] as unknown as [undefined, undefined]
 }

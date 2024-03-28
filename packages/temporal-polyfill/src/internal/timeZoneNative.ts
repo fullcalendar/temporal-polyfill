@@ -44,7 +44,7 @@ export class FixedTimeZone implements NativeTimeZone {
   }
 
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): BigNano[] {
-    return [isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)]
+    return [isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)!]
   }
 
   getTransition(): BigNano | undefined {

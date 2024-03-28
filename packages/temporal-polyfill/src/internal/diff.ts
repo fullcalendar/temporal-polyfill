@@ -25,10 +25,10 @@ import {
 import { isoMonthsInYear } from './isoMath'
 import { MarkerToEpochNano, MoveMarker } from './markerSystem'
 import {
-  moveByIsoDays,
+  moveByDays,
   moveDate,
   moveDateTime,
-  moveToDayOfMonth,
+  moveToDayOfMonthUnsafe,
   moveZonedEpochs,
 } from './move'
 import { RoundingMode } from './options'
@@ -282,8 +282,8 @@ export function diffPlainYearMonth<C extends IdLike>(
   return diffDateLike(
     invert,
     () => calendarOps,
-    moveToDayOfMonth(calendarOps, plainYearMonthSlots0),
-    moveToDayOfMonth(calendarOps, plainYearMonthSlots1),
+    moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots0),
+    moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots1),
     ...optionsTuple,
     optionsCopy,
   )
@@ -469,7 +469,7 @@ export function zonedEpochRangeToIso(
     }
 
     midIsoFields = {
-      ...moveByIsoDays(endIsoFields, cnt++ * -sign),
+      ...moveByDays(endIsoFields, cnt++ * -sign),
       ...startIsoTimeFields,
     }
     midEpochNano = getSingleInstantFor(timeZoneOps, midIsoFields)
@@ -529,7 +529,7 @@ function diffDateTimesViaCalendar(
 
   // move start-fields forward so time-diff-sign matches date-diff-sign
   if (timeSign === -sign) {
-    midIsoFields = moveByIsoDays(startIsoFields, sign)
+    midIsoFields = moveByDays(startIsoFields, sign)
     timeNano += nanoInUtcDay * sign
   }
 
@@ -584,18 +584,6 @@ function diffEpochNanosExact(
   }
 }
 
-export function diffByWeek(
-  startIsoFields: IsoDateFields,
-  endIsoFields: IsoDateFields,
-): DurationFields {
-  const [weeks, days] = divModTrunc(diffDays(startIsoFields, endIsoFields), 7)
-  return {
-    ...durationFieldDefaults,
-    weeks,
-    days,
-  }
-}
-
 export function diffByDay(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
@@ -606,7 +594,7 @@ export function diffByDay(
   }
 }
 
-function diffDays(
+export function diffDays(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
 ): number {

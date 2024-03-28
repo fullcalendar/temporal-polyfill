@@ -5,12 +5,12 @@ import { bigNanoToNumber, compareBigNanos, diffBigNanos } from './bigNano'
 import { createNativeDiffOps, createNativeMoveOps } from './calendarNativeQuery'
 import {
   diffByDay,
-  diffByWeek,
+  diffDays,
   getCommonCalendarSlot,
   getCommonTimeZoneSlot,
   zonedEpochRangeToIso,
 } from './diff'
-import { DurationFields } from './durationFields'
+import { DurationFields, durationFieldDefaults } from './durationFields'
 import { IsoDateFields } from './isoFields'
 import { Marker, MarkerToEpochNano, MoveMarker } from './markerSystem'
 import { moveDateTime, moveZonedEpochs } from './move'
@@ -33,7 +33,19 @@ import {
   nanoInMinute,
   nanoInSec,
 } from './units'
-import { NumberSign, bindArgs } from './utils'
+import { NumberSign, bindArgs, divModTrunc } from './utils'
+
+function diffByIsoWeek(
+  startIsoFields: IsoDateFields,
+  endIsoFields: IsoDateFields,
+): DurationFields {
+  const [weeks, days] = divModTrunc(diffDays(startIsoFields, endIsoFields), 7)
+  return {
+    ...durationFieldDefaults,
+    weeks,
+    days,
+  }
+}
 
 // Utils: Large Units (years, months)
 // -----------------------------------------------------------------------------
@@ -235,7 +247,7 @@ export const zdt_diffYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const zdt_diffMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
 export const zdt_diffWeeks = bindArgs(
   diffZonedDayLikeUnits,
-  diffByWeek,
+  diffByIsoWeek,
   Unit.Week,
 )
 export const zdt_diffDays = bindArgs(diffZonedDayLikeUnits, diffByDay, Unit.Day)
@@ -270,7 +282,7 @@ export const pd_or_pdt_diffYears = bindArgs(diffPlainLargeUnits, Unit.Year)
 export const pd_or_pdt_diffMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
 export const pd_or_pdt_diffWeeks = bindArgs(
   diffPlainDayLikeUnits,
-  diffByWeek,
+  diffByIsoWeek,
   Unit.Week,
 )
 export const pd_or_pdt_diffDays = bindArgs(

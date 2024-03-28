@@ -35,9 +35,8 @@ import {
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
 import {
-  computeDayFloor,
-  computeZonedEdge,
   computeZonedHoursInDay,
+  computeZonedStartOfDay,
   roundZonedDateTime,
 } from '../internal/round'
 import {
@@ -283,9 +282,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     startOfDay(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
     ): ZonedDateTime {
-      return createZonedDateTime(
-        computeZonedEdge(createTimeZoneOps, computeDayFloor, slots),
-      )
+      return computeZonedStartOfDay(createTimeZoneOps, slots)
     },
     equals(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,

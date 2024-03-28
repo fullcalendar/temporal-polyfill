@@ -1,12 +1,11 @@
 import { BigNano, addBigNanos } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import {
-  DayOfYearOp,
   NativeMoveOps,
   YearMonthParts,
   monthCodeNumberToMonth,
 } from './calendarNative'
-import { DayOp, MoveOps, YearMonthMoveOps } from './calendarOps'
+import { DayOps, MoveOps, YearMonthMoveOps } from './calendarOps'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -28,7 +27,7 @@ import {
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { computeIsoDayOfWeek, isoMonthsInYear } from './isoMath'
+import { isoMonthsInYear } from './isoMath'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
@@ -149,7 +148,10 @@ export function movePlainYearMonth<C>(
 ): PlainYearMonthSlots<C> {
   const calendarSlot = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarSlot)
-  let isoDateFields = moveToDayOfMonth(calendarOps, plainYearMonthSlots)
+  let isoDateFields: IsoDateFields = moveToDayOfMonthUnsafe(
+    calendarOps,
+    plainYearMonthSlots,
+  )
 
   if (doSubtract) {
     durationSlots = negateDuration(durationSlots)
@@ -161,7 +163,7 @@ export function movePlainYearMonth<C>(
       ...durationFieldDefaults,
       months: 1,
     })
-    isoDateFields = moveByIsoDays(isoDateFields, -1)
+    isoDateFields = moveByDays(isoDateFields, -1)
   }
 
   const movedIsoDateFields = calendarOps.dateAdd(
@@ -171,7 +173,7 @@ export function movePlainYearMonth<C>(
   )
 
   return createPlainYearMonthSlots(
-    moveToDayOfMonth(calendarOps, movedIsoDateFields),
+    moveToDayOfMonthUnsafe(calendarOps, movedIsoDateFields),
     calendarSlot,
   )
 }
@@ -293,33 +295,21 @@ export function moveDate(
     givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
 
   if (days) {
-    return checkIsoDateInBounds(moveByIsoDays(isoDateFields, days))
+    return checkIsoDateInBounds(moveByDays(isoDateFields, days))
   }
 
   return isoDateFields
 }
 
-export function moveToDayOfYear(
-  calendarOps: { dayOfYear: DayOfYearOp },
-  isoFields: IsoDateFields,
-  dayOfYear = 1,
-): IsoDateFields {
-  return moveByIsoDays(isoFields, dayOfYear - calendarOps.dayOfYear(isoFields))
-}
-
-export function moveToDayOfMonth(
-  calendarOps: { day: DayOp },
-  isoFields: IsoDateFields,
+/*
+Callers should ensure in-bounds
+*/
+export function moveToDayOfMonthUnsafe<F extends IsoDateFields>(
+  calendarOps: DayOps,
+  isoFields: F,
   dayOfMonth = 1,
-): IsoDateFields {
-  return moveByIsoDays(isoFields, dayOfMonth - calendarOps.day(isoFields))
-}
-
-export function moveToDayOfWeek(
-  isoFields: IsoDateFields,
-  dayOfWeek = 1,
-): IsoDateFields {
-  return moveByIsoDays(isoFields, dayOfWeek - computeIsoDayOfWeek(isoFields))
+): F {
+  return moveByDays(isoFields, dayOfMonth - calendarOps.day(isoFields))
 }
 
 function moveTime(
@@ -455,14 +445,15 @@ export function intlMonthAdd(
   return [year, month]
 }
 
-export function moveByIsoDays(
-  isoDateFields: IsoDateFields,
+export function moveByDays<F extends IsoDateFields>(
+  isoFields: F,
   days: number,
-): IsoDateFields {
+): F {
   if (days) {
-    isoDateFields = epochMilliToIso(
-      isoToEpochMilli(isoDateFields)! + days * milliInDay,
-    )
+    return {
+      ...isoFields,
+      ...epochMilliToIso(isoToEpochMilli(isoFields)! + days * milliInDay),
+    }
   }
-  return isoDateFields
+  return isoFields
 }

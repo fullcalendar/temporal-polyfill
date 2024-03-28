@@ -6,13 +6,14 @@ import {
 import { computeCalendarIdBase } from './calendarId'
 import {
   DateRefineOps,
-  DayOp,
+  DayOps,
   DiffOps,
   MergeFieldsOp,
   MonthDayRefineOps,
   MoveOps,
   YearMonthRefineOps,
 } from './calendarOps'
+import { diffEpochMilliByDay } from './diff'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
 import { padNumber2 } from './utils'
@@ -27,6 +28,7 @@ export type YearMonthParts = [year: number, month: number]
 export type WeekParts = [
   weekOfYear: number | undefined,
   yearOfWeek: number | undefined,
+  weeksInYear: number | undefined,
 ]
 
 // Function Types
@@ -142,8 +144,8 @@ export type NativeDiffOps = DiffOps &
     monthsInYearSpan: MonthsInYearSpanOp
   }
 
-export type NativeYearMonthMoveOps = NativeMoveOps & { day: DayOp }
-export type NativeYearMonthDiffOps = NativeDiffOps & { day: DayOp }
+export type NativeYearMonthMoveOps = NativeMoveOps & DayOps
+export type NativeYearMonthDiffOps = NativeDiffOps & DayOps
 
 // Parts & Stats
 // -----------------------------------------------------------------------------
@@ -196,6 +198,8 @@ export interface NativeDaysInYearOps {
 
 export interface NativeDayOfYearOps {
   dayOfYear: DayOfYearOp
+  dateParts: DatePartsOp
+  epochMilli: EpochMilliOp
 }
 
 export interface NativeWeekOps {
@@ -220,13 +224,6 @@ export function computeNativeYearOfWeek(
 
 // String Parsing
 // -----------------------------------------------------------------------------
-
-/*
-TODO: rename. used for other purposes
-*/
-export interface NativeYearMonthParseOps {
-  day: DayOp
-}
 
 export interface NativeMonthDayParseOps {
   dateParts: DatePartsOp
@@ -254,7 +251,7 @@ export type NativeStandardOps = NativeYearMonthRefineOps &
   NativeEraYearOps &
   NativeMonthCodeOps &
   NativePartOps &
-  NativeYearMonthParseOps &
+  DayOps & // for PlainYearMonth parsing
   NativeMonthDayParseOps &
   NativeWeekOps & {
     mergeFields: MergeFieldsOp // for 'mod' ops
@@ -300,6 +297,16 @@ export function computeNativeDaysInYear(
 ): number {
   const [year] = this.dateParts(isoFields)
   return this.daysInYearPart(year)
+}
+
+export function computeNativeDayOfYear(
+  this: { dateParts: DatePartsOp; epochMilli: EpochMilliOp },
+  isoFields: IsoDateFields,
+): number {
+  const [year] = this.dateParts(isoFields)
+  const milli0 = this.epochMilli(year)
+  const milli1 = this.epochMilli(year + 1)
+  return diffEpochMilliByDay(milli0, milli1) + 1
 }
 
 export function computeNativeEra(

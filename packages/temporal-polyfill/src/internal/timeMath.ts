@@ -1,7 +1,7 @@
 import {
   BigNano,
+  bigNanoOutside,
   bigNanoToBigInt,
-  compareBigNanos,
   divModBigNano,
   moveBigNano,
   numberToBigNano,
@@ -95,11 +95,7 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(
 export function checkEpochNanoInBounds(
   epochNano: BigNano | undefined,
 ): BigNano {
-  if (
-    !epochNano ||
-    compareBigNanos(epochNano, epochNanoMin) === -1 || // epochNano < epochNanoMin
-    compareBigNanos(epochNano, epochNanoMax) === 1 // epochNano > epochNanoMax
-  ) {
+  if (!epochNano || bigNanoOutside(epochNano, epochNanoMin, epochNanoMax)) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
   return epochNano
@@ -230,17 +226,15 @@ Ensures in bounds
 export function isoToEpochNanoWithOffset(
   isoFields: IsoDateTimeFields,
   offsetNano: number,
-): BigNano {
+): BigNano | undefined {
   const [newIsoTimeFields, dayDelta] = nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoFields) - offsetNano,
   )
-  const epochNano = isoToEpochNano({
+  return isoToEpochNano({
     ...isoFields,
     isoDay: isoFields.isoDay + dayDelta,
     ...newIsoTimeFields,
   })
-
-  return checkEpochNanoInBounds(epochNano)
 }
 
 // ISO Arguments -> Epoch

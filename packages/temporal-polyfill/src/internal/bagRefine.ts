@@ -914,7 +914,7 @@ export function nativeMonthDayFromFields(
   }
 
   return createPlainMonthDaySlots(
-    this.isoFields(normalYear, normalMonth, normalDay),
+    checkIsoDateInBounds(this.isoFields(normalYear, normalMonth, normalDay)),
     this.id || isoCalendarId,
   )
 }

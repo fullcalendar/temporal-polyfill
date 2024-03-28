@@ -308,15 +308,15 @@ function formatDurationSlots(
   const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
-  const [wholeSeconds, subsecNano] = divModBigNano(
+  const [wholeSec, subsecNano] = divModBigNano(
     givenFieldsToBigNano(abs, Unit.Second, durationFieldNamesAsc),
     nanoInSec,
     divModTrunc,
   )
-  checkDurationTimeUnit(wholeSeconds)
+  checkDurationTimeUnit(wholeSec)
 
   const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)
-  const forceSeconds =
+  const forceSec =
     // a numeric subsecDigits specified?
     // allow `undefined` in comparison - will evaluate to false
     (subsecDigits as number) >= 0 ||
@@ -334,13 +334,12 @@ function formatDurationSlots(
       'W': formatDurationNumber(abs.weeks),
       'D': formatDurationNumber(abs.days),
     }) +
-    (hours || minutes || wholeSeconds || forceSeconds
+    (hours || minutes || wholeSec || forceSec
       ? 'T' +
         formatDurationFragments({
           'H': formatDurationNumber(hours),
           'M': formatDurationNumber(minutes),
-          'S':
-            formatDurationNumber(wholeSeconds, forceSeconds) + subsecNanoString,
+          'S': formatDurationNumber(wholeSec, forceSec) + subsecNanoString,
         })
       : '')
   )

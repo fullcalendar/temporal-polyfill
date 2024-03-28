@@ -74,4 +74,4 @@ export const durationTimeFieldDefaults = mapPropNamesToConstant(
 export const clearDurationFields = bindArgs(
   zeroOutProps,
   durationFieldNamesAsc,
-) as unknown as (durationFields: DurationFields, unit: Unit) => DurationFields
+) as unknown as (unit: Unit, durationFields: DurationFields) => DurationFields

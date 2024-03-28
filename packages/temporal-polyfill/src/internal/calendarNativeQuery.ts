@@ -34,9 +34,9 @@ import {
   NativeYearMonthDiffOps,
   NativeYearMonthModOps,
   NativeYearMonthMoveOps,
-  NativeYearMonthParseOps,
   NativeYearMonthRefineOps,
   WeekParts,
+  computeNativeDayOfYear,
   computeNativeDaysInMonth,
   computeNativeDaysInYear,
   computeNativeEra,
@@ -49,6 +49,7 @@ import {
 } from './calendarNative'
 import {
   DateRefineOps,
+  DayOps,
   DiffOps,
   MonthDayRefineOps,
   MoveOps,
@@ -62,7 +63,6 @@ import {
 import {
   computeIntlDateParts,
   computeIntlDay,
-  computeIntlDayOfYear,
   computeIntlDaysInMonth,
   computeIntlDaysInYear,
   computeIntlEpochMilli,
@@ -81,7 +81,6 @@ import {
   computeIsoDateParts,
   computeIsoDay,
   computeIsoDayOfWeek,
-  computeIsoDayOfYear,
   computeIsoDaysInMonth,
   computeIsoDaysInWeek,
   computeIsoDaysInYear,
@@ -139,6 +138,7 @@ const nativeStandardBase = {
   monthsInYear: computeNativeMonthsInYear,
   daysInMonth: computeNativeDaysInMonth,
   daysInYear: computeNativeDaysInYear,
+  dayOfYear: computeNativeDayOfYear,
   era: computeNativeEra,
   eraYear: computeNativeEraYear,
   monthCode: computeNativeMonthCode,
@@ -230,14 +230,18 @@ export const isoDiffOps: NativeDiffOps = {
   monthsInYearSpan: computeIsoMonthsInYearSpan,
 }
 
+export const isoDayOps: DayOps = {
+  day: computeIsoDay,
+}
+
 export const isoYearMonthMoveOps: NativeYearMonthMoveOps = {
   ...isoMoveOps,
-  day: computeIsoDay,
+  ...isoDayOps,
 }
 
 export const isoYearMonthDiffOps: NativeYearMonthDiffOps = {
   ...isoDiffOps,
-  day: computeIsoDay,
+  ...isoDayOps,
 }
 
 // Parts & Stats
@@ -274,7 +278,9 @@ export const isoDaysInYearOps: NativeDaysInYearOps = {
 }
 
 export const isoDayOfYearOps: NativeDayOfYearOps = {
-  dayOfYear: computeIsoDayOfYear,
+  dayOfYear: computeNativeDayOfYear,
+  dateParts: computeIsoDateParts,
+  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
 }
 
 export const isoWeekOps: NativeWeekOps = {
@@ -285,10 +291,6 @@ export const isoWeekOps: NativeWeekOps = {
 
 // String Parsing
 // --------------
-
-export const isoYearMonthParseOps: NativeYearMonthParseOps = {
-  day: computeIsoDay,
-}
 
 export const isoMonthDayParseOps: NativeMonthDayParseOps = {
   dateParts: computeIsoDateParts,
@@ -313,7 +315,6 @@ export const isoStandardOps: NativeStandardOps = {
   monthsInYearSpan: computeIsoMonthsInYearSpan,
   daysInMonthParts: computeIsoDaysInMonth,
   daysInYearPart: computeIsoDaysInYear,
-  dayOfYear: computeIsoDayOfYear,
   isoFields: computeIsoFieldsFromParts,
   epochMilli: isoArgsToEpochMilli as EpochMilliOp,
   monthAdd: isoMonthAdd,
@@ -405,14 +406,18 @@ export const intlDiffOps: NativeDiffOps = {
   monthsInYearSpan: computeIntlMonthsInYearSpan,
 }
 
+export const intlDayOps: DayOps = {
+  day: computeIntlDay,
+}
+
 export const intlYearMonthMoveOps: NativeYearMonthMoveOps = {
   ...intlMoveOps,
-  day: computeIntlDay,
+  ...intlDayOps,
 }
 
 export const intlYearMonthDiffOps: NativeYearMonthDiffOps = {
   ...intlDiffOps,
-  day: computeIntlDay,
+  ...intlDayOps,
 }
 
 // Parts & Stats
@@ -449,7 +454,9 @@ export const intlDaysInYearOps: NativeDaysInYearOps = {
 }
 
 export const intlDayOfYearOps: NativeDayOfYearOps = {
-  dayOfYear: computeIntlDayOfYear,
+  dayOfYear: computeNativeDayOfYear,
+  dateParts: computeIntlDateParts,
+  epochMilli: computeIntlEpochMilli,
 }
 
 export const intlWeekOps: NativeWeekOps = {
@@ -460,10 +467,6 @@ export const intlWeekOps: NativeWeekOps = {
 
 // String Parsing
 // --------------
-
-export const intlYearMonthParseOps: NativeYearMonthParseOps = {
-  day: computeIntlDay,
-}
 
 export const intlMonthDayParseOps: NativeMonthDayParseOps = {
   dateParts: computeIntlDateParts,
@@ -488,7 +491,6 @@ export const intlStandardOps: Omit<NativeStandardOps, 'id'> = {
   monthsInYearSpan: computeIntlMonthsInYearSpan,
   daysInMonthParts: computeIntlDaysInMonth,
   daysInYearPart: computeIntlDaysInYear,
-  dayOfYear: computeIntlDayOfYear,
   isoFields: computeIsoFieldsFromIntlParts,
   epochMilli: computeIntlEpochMilli,
   monthAdd: intlMonthAdd,
@@ -585,8 +587,8 @@ export const createNativeWeekOps = createNativeOpsCreator(
 
 // String Parsing
 export const createNativeYearMonthParseOps = createNativeOpsCreator(
-  isoYearMonthParseOps,
-  intlYearMonthParseOps,
+  isoDayOps,
+  intlDayOps,
 )
 export const createNativeMonthDayParseOps = createNativeOpsCreator(
   isoMonthDayParseOps,

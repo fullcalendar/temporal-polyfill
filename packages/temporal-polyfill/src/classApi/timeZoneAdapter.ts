@@ -51,6 +51,7 @@ function getPossibleInstantsForAdapter(
   const epochNanoLen = epochNanos.length
   if (epochNanoLen > 1) {
     epochNanos.sort(compareBigNanos)
+
     validateTimeZoneGap(
       bigNanoToNumber(
         diffBigNanos(epochNanos[0], epochNanos[epochNanoLen - 1]),

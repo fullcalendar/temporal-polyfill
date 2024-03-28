@@ -128,8 +128,14 @@ export function plainDateTimeToZonedDateTime<C, TZ>(
   timeZoneSlot: TZ,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots<C, TZ> {
+  const epochNano = dateToEpochNano(
+    getTimeZoneOps,
+    timeZoneSlot,
+    plainDateTimeSlots,
+    options,
+  )
   return createZonedDateTimeSlots(
-    dateToEpochNano(getTimeZoneOps, timeZoneSlot, plainDateTimeSlots, options),
+    checkEpochNanoInBounds(epochNano),
     timeZoneSlot,
     plainDateTimeSlots.calendar,
   )
@@ -162,13 +168,10 @@ function dateToEpochNano<TZ>(
   timeZoneSlot: TZ,
   isoFields: IsoDateTimeFields,
   options?: EpochDisambigOptions,
-): BigNano {
+): BigNano | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
   const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-
-  return checkEpochNanoInBounds(
-    getSingleInstantFor(timeZoneOps, isoFields, epochDisambig),
-  )
+  return getSingleInstantFor(timeZoneOps, isoFields, epochDisambig)
 }
 
 // PlainDate -> *

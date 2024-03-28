@@ -1,9 +1,7 @@
 import { isoCalendarId } from './calendarConfig'
 import { resolveCalendarId } from './calendarId'
-import {
-  NativeMonthDayParseOps,
-  NativeYearMonthParseOps,
-} from './calendarNative'
+import { NativeMonthDayParseOps } from './calendarNative'
+import { DayOps } from './calendarOps'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
@@ -17,7 +15,7 @@ import {
   isoEpochFirstLeapYear,
 } from './isoMath'
 import { RelativeToSlots } from './markerSystem'
-import { moveToDayOfMonth } from './move'
+import { moveToDayOfMonthUnsafe } from './move'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import {
@@ -40,6 +38,7 @@ import {
   createZonedDateTimeSlots,
 } from './slots'
 import {
+  checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
@@ -94,7 +93,7 @@ export function parseInstant(s: string): InstantSlots {
     offsetNano,
   )
 
-  return createInstantSlots(epochNanoseconds)
+  return createInstantSlots(checkEpochNanoInBounds(epochNanoseconds))
 }
 
 export function parseRelativeToSlots(
@@ -175,7 +174,7 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
 }
 
 export function parsePlainYearMonth(
-  getCalendarOps: (calendarId: string) => NativeYearMonthParseOps,
+  getCalendarOps: (calendarId: string) => DayOps,
   s: string,
 ): PlainYearMonthSlots<string> {
   const organized = parseYearMonthOnly(requireString(s))
@@ -187,14 +186,11 @@ export function parsePlainYearMonth(
     )
   }
 
-  const isoFields = parsePlainDate(s)
-  const calendarOps = getCalendarOps(isoFields.calendar)
-  const movedIsoFields = moveToDayOfMonth(calendarOps, isoFields)
+  const isoSlots = parsePlainDate(s)
+  const calendarOps = getCalendarOps(isoSlots.calendar)
+  const moveIsoSlots = moveToDayOfMonthUnsafe(calendarOps, isoSlots)
 
-  return createPlainYearMonthSlots({
-    ...isoFields, // has calendar
-    ...movedIsoFields,
-  })
+  return createPlainYearMonthSlots(moveIsoSlots)
 }
 
 function requireIsoCalendar(organized: { calendar: string }): void {
@@ -232,7 +228,9 @@ export function parsePlainMonthDay(
     isLeapMonth,
     day,
   )! // !HACK
-  const isoFields = calendarOps.isoFields(year, month, day)
+  const isoFields = checkIsoDateInBounds(
+    calendarOps.isoFields(year, month, day),
+  )
 
   return createPlainMonthDaySlots(isoFields, calendar)
 }

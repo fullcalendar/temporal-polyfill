@@ -82,5 +82,7 @@ export type MonthDayModOps<C> = MonthDayRefineOps<C> & {
 export type MoveOps = { dateAdd: DateAddOp }
 export type DiffOps = { dateAdd: DateAddOp; dateUntil: DateUntilOp }
 
-export type YearMonthMoveOps = MoveOps & { day: DayOp }
-export type YearMonthDiffOps = DiffOps & { day: DayOp }
+export type DayOps = { day: DayOp }
+
+export type YearMonthMoveOps = MoveOps & DayOps
+export type YearMonthDiffOps = DiffOps & DayOps

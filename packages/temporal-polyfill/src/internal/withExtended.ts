@@ -3,185 +3,87 @@ WIP. Ultimately for funcApi
 */
 import {
   createNativeDayOfYearOps,
+  createNativeDaysInMonthOps,
+  createNativeDaysInYearOps,
   createNativeWeekOps,
   createNativeYearMonthParseOps,
 } from './calendarNativeQuery'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
-import {
-  moveByIsoDays,
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-} from './move'
-import {
-  DateSlots,
-  DateTimeSlots,
-  ZonedDateTimeSlots,
-  createZonedDateTimeSlots,
-} from './slots'
-import {
-  checkEpochNanoInBounds,
-  checkIsoDateInBounds,
-  checkIsoDateTimeInBounds,
-} from './timeMath'
-import { queryNativeTimeZone } from './timeZoneNative'
-import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneOps'
-import { bindArgs } from './utils'
+import { computeIsoDayOfWeek } from './isoMath'
+import { moveByDays, moveToDayOfMonthUnsafe } from './move'
+import { moveByIsoWeeks } from './moveExtended'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
+import { DateSlots } from './slots'
+import { clampEntity } from './utils'
 
-// Generic
-// -----------------------------------------------------------------------------
-
-function zonedSlotsWithTransform(
-  transformIso: (isoSlots: DateSlots<string>, num: number) => IsoDateFields,
-  slots: ZonedDateTimeSlots<string, string>,
-  num: number,
-): ZonedDateTimeSlots<string, string> {
-  const { timeZone, calendar } = slots
-  const timeZoneOps = queryNativeTimeZone(timeZone)
-  const isoSlots = zonedEpochSlotsToIso(slots, timeZoneOps)
-  const transformedIsoSlots = {
-    ...isoSlots,
-    ...transformIso(isoSlots, num),
-  }
-  const epochNano1 = checkEpochNanoInBounds(
-    getSingleInstantFor(timeZoneOps, transformedIsoSlots),
+export function moveToDayOfYear<S extends DateSlots<string>>(
+  slots: S,
+  dayOfYear: number,
+  options: OverflowOptions | undefined,
+): S {
+  const overflow = refineOverflowOptions(options)
+  const { calendar } = slots
+  const daysInYear = createNativeDaysInYearOps(calendar).daysInYear(slots)
+  const normDayOfYear = clampEntity(
+    'dayOfMonth',
+    dayOfYear,
+    1,
+    daysInYear,
+    overflow,
   )
-  return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
+
+  const currentDayOfYear = createNativeDayOfYearOps(calendar).dayOfYear(slots)
+  return moveByDays(slots, normDayOfYear - currentDayOfYear)
 }
 
-function slotsWithWeekOfYear<S extends DateSlots<string>>(
+export function moveToDayOfMonth<S extends DateSlots<string>>(
+  slots: S,
+  day: number,
+  options: OverflowOptions | undefined,
+): S {
+  const overflow = refineOverflowOptions(options)
+  const { calendar } = slots
+  const daysInMonth = createNativeDaysInMonthOps(calendar).daysInMonth(slots)
+  const normDayOfMonth = clampEntity('day', day, 1, daysInMonth, overflow)
+
+  return moveToDayOfMonthUnsafe(
+    createNativeYearMonthParseOps(calendar),
+    slots,
+    normDayOfMonth,
+  )
+}
+
+export function moveToDayOfWeek<S extends IsoDateFields>(
+  slots: S,
+  dayOfWeek: number,
+  options: OverflowOptions | undefined,
+): S {
+  const overflow = refineOverflowOptions(options)
+  const normDayOfWeek = clampEntity('dayOfWeek', dayOfWeek, 1, 7, overflow)
+  return moveByDays(slots, normDayOfWeek - computeIsoDayOfWeek(slots))
+}
+
+export function slotsWithWeekOfYear<S extends DateSlots<string>>(
   slots: S,
   weekOfYear: number,
+  options: OverflowOptions | undefined,
 ): S {
-  const { calendar } = slots
-  const calendarOps = createNativeWeekOps(calendar)
+  const overflow = refineOverflowOptions(options)
+  const calendarOps = createNativeWeekOps(slots.calendar)
+  const [currentWeekOfYear, , weeksInYear] = calendarOps.weekParts(slots)
 
-  const currentWeekOfYear = calendarOps.weekOfYear(slots)
   if (currentWeekOfYear === undefined) {
     throw new RangeError(errorMessages.unsupportedWeekNumbers)
   }
 
-  return {
-    ...slots, // for possible time
-    ...moveByIsoDays(slots, (weekOfYear - currentWeekOfYear) * 7),
-  }
-}
-
-// -----------------------------------------------------------------------------
-
-export function zdt_withDayOfYear(
-  slots: ZonedDateTimeSlots<string, string>,
-  dayOfYear: number,
-): ZonedDateTimeSlots<string, string> {
-  const calendarOps = createNativeDayOfYearOps(slots.calendar)
-  return zonedSlotsWithTransform(
-    bindArgs(moveToDayOfYear, calendarOps),
-    slots,
-    dayOfYear,
+  const normWeekOfYear = clampEntity(
+    'weekOfYear',
+    weekOfYear,
+    1,
+    weeksInYear!,
+    overflow,
   )
-}
 
-export function zdt_withDayOfMonth(
-  slots: ZonedDateTimeSlots<string, string>,
-  dayOfMonth: number,
-): ZonedDateTimeSlots<string, string> {
-  const calendarOps = createNativeYearMonthParseOps(slots.calendar)
-  return zonedSlotsWithTransform(
-    bindArgs(moveToDayOfMonth, calendarOps),
-    slots,
-    dayOfMonth,
-  )
-}
-
-export const zdt_withDayOfWeek = bindArgs(
-  zonedSlotsWithTransform,
-  moveToDayOfWeek,
-)
-
-export const zdt_withWeekOfYear = bindArgs(
-  zonedSlotsWithTransform,
-  slotsWithWeekOfYear,
-)
-
-// -----------------------------------------------------------------------------
-
-export function pd_withDayOfYear(
-  slots: DateSlots<string>,
-  dayOfYear: number,
-): DateSlots<string> {
-  const calendarOps = createNativeDayOfYearOps(slots.calendar)
-  return checkIsoDateInBounds({
-    ...slots,
-    ...moveToDayOfYear(calendarOps, slots, dayOfYear),
-  })
-}
-
-export function pd_withDayOfMonth(
-  slots: DateSlots<string>,
-  dayOfMonth: number,
-): DateSlots<string> {
-  const calendarOps = createNativeYearMonthParseOps(slots.calendar)
-  return checkIsoDateInBounds({
-    ...slots,
-    ...moveToDayOfMonth(calendarOps, slots, dayOfMonth),
-  })
-}
-
-export function pd_withDayOfWeek(
-  slots: DateSlots<string>,
-  dayOfWeek: number,
-): DateSlots<string> {
-  return checkIsoDateInBounds({
-    ...slots,
-    ...moveToDayOfWeek(slots, dayOfWeek),
-  })
-}
-
-export function pd_withWeekOfYear(
-  slots: DateSlots<string>,
-  weekOfYear: number,
-): DateSlots<string> {
-  return checkIsoDateInBounds(slotsWithWeekOfYear(slots, weekOfYear))
-}
-
-// -----------------------------------------------------------------------------
-
-export function pdt_withDayOfYear(
-  slots: DateTimeSlots<string>,
-  dayOfYear: number,
-): DateTimeSlots<string> {
-  const calendarOps = createNativeDayOfYearOps(slots.calendar)
-  return checkIsoDateTimeInBounds({
-    ...slots,
-    ...moveToDayOfYear(calendarOps, slots, dayOfYear),
-  })
-}
-
-export function pdt_withDayOfMonth(
-  slots: DateTimeSlots<string>,
-  dayOfMonth: number,
-): DateTimeSlots<string> {
-  const calendarOps = createNativeYearMonthParseOps(slots.calendar)
-  return checkIsoDateTimeInBounds({
-    ...slots,
-    ...moveToDayOfMonth(calendarOps, slots, dayOfMonth),
-  })
-}
-
-export function pdt_withDayOfWeek(
-  slots: DateTimeSlots<string>,
-  dayOfWeek: number,
-): DateTimeSlots<string> {
-  return checkIsoDateTimeInBounds({
-    ...slots,
-    ...moveToDayOfWeek(slots, dayOfWeek),
-  })
-}
-
-export function pdt_withWeekOfYear(
-  slots: DateTimeSlots<string>,
-  weekOfYear: number,
-): DateTimeSlots<string> {
-  return checkIsoDateTimeInBounds(slotsWithWeekOfYear(slots, weekOfYear))
+  return moveByIsoWeeks(slots, normWeekOfYear - currentWeekOfYear)
 }

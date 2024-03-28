@@ -63,6 +63,6 @@ export const clearIsoFields = bindArgs(
   zeroOutProps,
   isoDateTimeFieldNamesAsc,
 ) as unknown as (
-  isoFields: IsoDateTimeFields,
   unit: DayTimeUnit,
+  isoFields: IsoDateTimeFields,
 ) => IsoDateTimeFields

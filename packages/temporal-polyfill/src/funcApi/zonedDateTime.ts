@@ -4,7 +4,12 @@ import {
   refineZonedDateTimeBag,
   zonedDateTimeWithFields,
 } from '../internal/bagRefine'
-import { BigNano } from '../internal/bigNano'
+import {
+  BigNano,
+  addBigNanos,
+  moveBigNano,
+  numberToBigNano,
+} from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
@@ -28,6 +33,7 @@ import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
 import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { IsoDateTimeFields } from '../internal/isoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
@@ -37,38 +43,86 @@ import {
   zonedDateTimeWithPlainDate,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
-import { moveZonedDateTime } from '../internal/move'
+import { moveByDays, moveZonedDateTime } from '../internal/move'
+import {
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  reversedMove,
+} from '../internal/moveExtended'
 import {
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
+  refineRoundingMathOptions,
 } from '../internal/optionsRefine'
 import {
+  IsoDateTimeInterval,
+  alignZonedEpoch,
   computeDayFloor,
-  computeZonedEdge,
   computeZonedHoursInDay,
+  computeZonedStartOfDay,
   roundZonedDateTime,
+  roundZonedEpochToInterval,
 } from '../internal/round'
 import {
+  computeHourFloor,
+  computeIsoWeekCeil,
+  computeIsoWeekFloor,
+  computeIsoWeekInterval,
+  computeMicroFloor,
+  computeMilliFloor,
+  computeMinuteFloor,
+  computeMonthCeil,
+  computeMonthFloor,
+  computeMonthInterval,
+  computeSecFloor,
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+} from '../internal/roundExtended'
+import {
   DateSlots,
+  DateTimeSlots,
   ZonedDateTimeBranding,
+  createZonedDateTimeSlots,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
   getEpochSec,
 } from '../internal/slots'
+import { checkEpochNanoInBounds } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   ZonedDateTimeFields,
   ZonedIsoFields,
   buildZonedIsoFields,
+  getSingleInstantFor,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneOps'
-import { DayTimeUnitName, UnitName } from '../internal/units'
+import {
+  DayTimeUnitName,
+  Unit,
+  UnitName,
+  nanoInHour,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInMinute,
+  nanoInSec,
+  nanoInUtcDay,
+} from '../internal/units'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  slotsWithWeekOfYear,
+} from '../internal/withExtended'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import { createFormatCache } from './intlFormatCache'
@@ -333,9 +387,8 @@ export const round = bindArgs(
 ) as (record: Record, options: DayTimeUnitName | RoundOptions) => Record
 
 export const startOfDay = bindArgs(
-  computeZonedEdge<string, string>,
+  computeZonedStartOfDay<string, string>,
   queryNativeTimeZone,
-  computeDayFloor,
 ) as (record: Record) => Record
 
 export const equals = zonedDateTimesEqual<string, string> as (
@@ -455,5 +508,201 @@ function adaptDateFunc<R>(
 ): (record: Record) => R {
   return (record: Record) => {
     return dateFunc(zonedEpochSlotsToIso(record, queryNativeTimeZone))
+  }
+}
+
+// Non-standard: With
+// -----------------------------------------------------------------------------
+
+export const withDayOfYear = bindArgs(slotsWithTransform, moveToDayOfYear)
+export const withDayOfMonth = bindArgs(slotsWithTransform, moveToDayOfMonth)
+export const withDayOfWeek = bindArgs(slotsWithTransform, moveToDayOfWeek)
+export const withWeekOfYear = bindArgs(slotsWithTransform, slotsWithWeekOfYear)
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+export const addYears = bindArgs(moveByDateUnit, moveByYears)
+export const addMonths = bindArgs(moveByDateUnit, moveByMonths)
+export const addWeeks = bindArgs(moveByDateUnit, moveByIsoWeeks)
+export const addDays = bindArgs(moveByDateUnit, moveByDays)
+export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
+export const addMinutes = bindArgs(moveByTimeUnit, nanoInMinute)
+export const addSeconds = bindArgs(moveByTimeUnit, nanoInSec)
+export const addMilliseconds = bindArgs(moveByTimeUnit, nanoInMilli)
+export const addMicroseconds = bindArgs(moveByTimeUnit, nanoInMicro)
+export const addNanoseconds = bindArgs(moveByTimeUnit, 1)
+
+// Non-standard: Subtract
+// -----------------------------------------------------------------------------
+
+export const subtractYears = reversedMove(addYears)
+export const subtractMonths = reversedMove(addMonths)
+export const subtractWeeks = reversedMove(addWeeks)
+export const subtractDays = reversedMove(addDays)
+export const subtractHours = reversedMove(addHours)
+export const subtractMinutes = reversedMove(addMinutes)
+export const subtractSeconds = reversedMove(addSeconds)
+export const subtractMilliseconds = reversedMove(addMilliseconds)
+export const subtractMicroseconds = reversedMove(addMicroseconds)
+export const subtractNanoseconds = reversedMove(addNanoseconds)
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+export const roundToYear = bindArgs(
+  rountToInterval,
+  Unit.Year,
+  computeYearInterval,
+)
+
+export const roundToMonth = bindArgs(
+  rountToInterval,
+  Unit.Month,
+  computeMonthInterval,
+)
+
+export const roundToWeek = bindArgs(
+  rountToInterval,
+  Unit.Week,
+  computeIsoWeekInterval,
+)
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export const startOfYear = aligned(computeYearFloor)
+export const startOfMonth = aligned(computeMonthFloor)
+export const startOfWeek = aligned(computeIsoWeekFloor)
+export const startOfHour = aligned(computeHourFloor)
+export const startOfMinute = aligned(computeMinuteFloor)
+export const startOfSecond = aligned(computeSecFloor)
+export const startOfMillisecond = aligned(computeMilliFloor)
+export const startOfMicrosecond = aligned(computeMicroFloor)
+
+// Non-standard: Start-of-Unit (EXCL)
+// -----------------------------------------------------------------------------
+
+export const endOfYearExcl = aligned(computeYearCeil)
+export const endOfMonthExcl = aligned(computeMonthCeil)
+export const endOfWeekExcl = aligned(computeIsoWeekCeil)
+export const endOfDayExcl = aligned(computeDayFloor, nanoInUtcDay)
+export const endOfHourExcl = aligned(computeHourFloor, nanoInHour)
+export const endOfMinuteExcl = aligned(computeMinuteFloor, nanoInMinute)
+export const endOfSecondExcl = aligned(computeSecFloor, nanoInSec)
+export const endOfMillisecondExcl = aligned(computeMilliFloor, nanoInMilli)
+export const endOfMicrosecondExcl = aligned(computeMicroFloor, nanoInMicro)
+
+// Non-standard: Start-of-Unit (INCL)
+// -----------------------------------------------------------------------------
+
+export const endOfYearIncl = aligned(computeYearCeil, -1)
+export const endOfMonthIncl = aligned(computeMonthCeil, -1)
+export const endOfWeekIncl = aligned(computeIsoWeekCeil, -1)
+export const endOfDayIncl = aligned(computeDayFloor, nanoInUtcDay - 1)
+export const endOfHourIncl = aligned(computeHourFloor, nanoInHour - 1)
+export const endOfMinuteIncl = aligned(computeMinuteFloor, nanoInMinute - 1)
+export const endOfSecondIncl = aligned(computeSecFloor, nanoInSec - 1)
+export const endOfMillisecondIncl = aligned(computeMilliFloor, nanoInMilli - 1)
+export const endOfMicrosecondIncl = aligned(computeMicroFloor, nanoInMicro - 1)
+
+// Non-standard: Utils
+// -----------------------------------------------------------------------------
+
+function slotsWithTransform(
+  transformIso: (
+    isoSlots: DateTimeSlots<string>,
+    units: number,
+    options?: OverflowOptions,
+  ) => IsoDateTimeFields,
+  record: Record,
+  units: number,
+  options?: OverflowOptions,
+): Record {
+  const { timeZone, calendar } = record
+  const timeZoneOps = queryNativeTimeZone(timeZone)
+  const isoSlots = zonedEpochSlotsToIso(record, timeZoneOps)
+  const transformedIsoSlots = transformIso(isoSlots, units, options)
+  const epochNano1 = getSingleInstantFor(timeZoneOps, transformedIsoSlots)
+
+  return createZonedDateTimeSlots(
+    checkEpochNanoInBounds(epochNano1),
+    timeZone,
+    calendar,
+  )
+}
+
+function moveByDateUnit(
+  moveIso: (
+    isoSlots: DateTimeSlots<string>,
+    units: number,
+  ) => IsoDateTimeFields,
+  record: Record,
+  units: number,
+): Record {
+  const timeZoneOps = queryNativeTimeZone(record.timeZone)
+  const isoSlots0 = zonedEpochSlotsToIso(record, timeZoneOps)
+  const isoSlots1 = moveIso(isoSlots0, units)
+  const epochNano1 = getSingleInstantFor(timeZoneOps, isoSlots1)
+
+  return {
+    ...record,
+    epochNanoseconds: checkEpochNanoInBounds(epochNano1),
+  }
+}
+
+function moveByTimeUnit(
+  nanoInUnit: number,
+  record: Record,
+  units: number,
+): Record {
+  const epochNano1 = addBigNanos(
+    record.epochNanoseconds,
+    numberToBigNano(units, nanoInUnit),
+  )
+  return {
+    ...record,
+    epochNanoseconds: checkEpochNanoInBounds(epochNano1),
+  }
+}
+
+function rountToInterval(
+  unit: Unit,
+  computeInterval: (isoFields: DateSlots<string>) => IsoDateTimeInterval,
+  record: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+): Record {
+  const { timeZone, calendar } = record
+  const [, roundingMode] = refineRoundingMathOptions(unit, options)
+  const timeZoneOps = queryNativeTimeZone(timeZone)
+  const epochNano1 = roundZonedEpochToInterval(
+    computeInterval,
+    timeZoneOps,
+    record,
+    roundingMode,
+  )
+  return createZonedDateTimeSlots(
+    checkEpochNanoInBounds(epochNano1),
+    timeZone,
+    calendar,
+  )
+}
+
+function aligned(
+  computeAlignment: (record: DateTimeSlots<string>) => IsoDateTimeFields,
+  nanoDelta = 0,
+): (record: Record) => Record {
+  return (record) => {
+    const { timeZone, calendar } = record
+    const timeZoneOps = queryNativeTimeZone(timeZone)
+    const epochNano1 = moveBigNano(
+      alignZonedEpoch(computeAlignment, timeZoneOps, record),
+      nanoDelta,
+    )
+    return createZonedDateTimeSlots(
+      checkEpochNanoInBounds(epochNano1),
+      timeZone,
+      calendar,
+    )
   }
 }

@@ -78,7 +78,7 @@ export function totalRelativeDuration(
   const sign = computeDurationSign(durationFields)
 
   const [epochNano0, epochNano1] = clampRelativeDuration(
-    clearDurationFields(durationFields, totalUnit),
+    clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
     // MarkerSystem...
@@ -87,7 +87,7 @@ export function totalRelativeDuration(
     moveMarker,
   )
 
-  const frac = computeEpochNanoFrac(epochNano0, epochNano1, endEpochNano)
+  const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
   return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
 }
 
@@ -126,9 +126,9 @@ export function clampRelativeDuration(
 }
 
 export function computeEpochNanoFrac(
+  epochNanoProgress: BigNano,
   epochNano0: BigNano,
   epochNano1: BigNano,
-  epochNanoProgress: BigNano,
 ): number {
   const denom = bigNanoToNumber(diffBigNanos(epochNano0, epochNano1))
   if (!denom) {

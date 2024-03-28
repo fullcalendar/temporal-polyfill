@@ -17,14 +17,13 @@ import {
   hashIntlFormatParts,
   standardLocaleId,
 } from './intlFormatUtils'
-import { IsoDateFields, isoTimeFieldDefaults } from './isoFields'
+import { IsoDateFields } from './isoFields'
 import {
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
   isoMonthsInYear,
 } from './isoMath'
 import {
-  checkIsoDateInBounds,
   epochMilliToIso,
   isoArgsToEpochMilli,
   isoToEpochMilli,
@@ -253,11 +252,7 @@ export function computeIsoFieldsFromIntlParts(
   month?: number,
   day?: number,
 ): IsoDateFields {
-  // check might be redundant if happens in epochMilliToIso/queryDateStart
-  // TODO: i don't like that this is happening here
-  return checkIsoDateInBounds({
-    ...epochMilliToIso(computeIntlEpochMilli.call(this, year, month, day)),
-  })
+  return epochMilliToIso(computeIntlEpochMilli.call(this, year, month, day))
 }
 
 export function computeIntlEpochMilli(
@@ -326,7 +321,6 @@ export function computeIntlDaysInYear(
   return diffEpochMilliByDay(milli, milliNext)
 }
 
-// is this correct now?
 export function computeIntlDaysInMonth(
   this: IntlCalendar,
   year: number,
@@ -345,22 +339,6 @@ export function computeIntlDaysInMonth(
     monthEpochMillis[month - 1],
     nextMonthEpochMilli[nextMonth - 1],
   )
-}
-
-/*
-TODO: somehow converge with computeIsoDayOfYear by making an abstract ops?
-*/
-export function computeIntlDayOfYear(
-  this: IntlCalendar,
-  isoFields: IsoDateFields,
-): number {
-  const dayEpochMilli = isoToEpochMilli({
-    ...isoFields,
-    ...isoTimeFieldDefaults,
-  })!
-  const { year } = this.queryFields(isoFields)
-  const yearStartEpochMilli = computeIntlEpochMilli.call(this, year)
-  return diffEpochMilliByDay(yearStartEpochMilli, dayEpochMilli) + 1
 }
 
 export function computeIntlMonthsInYear(

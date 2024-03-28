@@ -51,6 +51,17 @@ export function compareBigNanos(a: BigNano, b: BigNano): NumberSign {
   return compareNumbers(a[0], b[0]) || compareNumbers(a[1], b[1])
 }
 
+export function bigNanoOutside(
+  subject: BigNano,
+  rangeStart: BigNano,
+  rangeEndExcl: BigNano,
+): boolean {
+  return (
+    compareBigNanos(subject, rangeStart) === -1 ||
+    compareBigNanos(subject, rangeEndExcl) === 1
+  )
+}
+
 // Conversion
 // -----------------------------------------------------------------------------
 
