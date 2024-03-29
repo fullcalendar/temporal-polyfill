@@ -196,7 +196,7 @@ function diffZonedDayLikeUnits(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
-  const [isoFields0, isoFields1, timeDiff] = zonedEpochRangeToIso(
+  const [isoFields0, isoFields1, remainderNano] = zonedEpochRangeToIso(
     timeZoneOps,
     record0,
     record1,
@@ -204,7 +204,7 @@ function diffZonedDayLikeUnits(
   )
   let nanoDiff = moveBigNano(
     diffBigNanos(isoToEpochNano(isoFields0)!, isoToEpochNano(isoFields1)!),
-    timeDiff,
+    remainderNano,
   )
 
   if (roundingInc) {
