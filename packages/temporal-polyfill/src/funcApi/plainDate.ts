@@ -21,12 +21,6 @@ import {
   plainDateToZonedDateTime,
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
-import {
-  diffPlainDays,
-  diffPlainMonths,
-  diffPlainWeeks,
-  diffPlainYears,
-} from '../internal/diffExtended'
 import { DateBag, DateFields } from '../internal/fields'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -37,12 +31,6 @@ import { parsePlainDate } from '../internal/isoParse'
 import { slotsWithCalendar } from '../internal/modify'
 import { moveByDays, movePlainDate } from '../internal/move'
 import {
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
-  reversedMove,
-} from '../internal/moveExtended'
-import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
@@ -51,18 +39,6 @@ import {
   refineRoundingMathOptions,
 } from '../internal/optionsRefine'
 import { IsoDateTimeInterval } from '../internal/round'
-import {
-  computeIsoWeekCeil,
-  computeIsoWeekFloor,
-  computeIsoWeekInterval,
-  computeMonthCeil,
-  computeMonthFloor,
-  computeMonthInterval,
-  computeYearCeil,
-  computeYearFloor,
-  computeYearInterval,
-  roundDateTimeToInterval,
-} from '../internal/roundExtended'
 import {
   DateSlots,
   PlainDateBranding,
@@ -77,18 +53,6 @@ import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName, Unit } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import {
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  slotsWithWeekOfYear,
-} from '../internal/withExtended'
-import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
-import * as PlainDateTimeFns from './plainDateTime'
-import * as PlainMonthDayFns from './plainMonthDay'
-import * as PlainTimeFns from './plainTime'
-import * as PlainYearMonthFns from './plainYearMonth'
-import {
   computeDateFields,
   computeDayOfYear,
   computeDaysInMonth,
@@ -99,7 +63,41 @@ import {
   computeYearOfWeek,
   getCalendarId,
   getCalendarIdFromBag,
-} from './utils'
+} from './calendarUtils'
+import {
+  diffPlainDays,
+  diffPlainMonths,
+  diffPlainWeeks,
+  diffPlainYears,
+} from './diffUtils'
+import * as DurationFns from './duration'
+import { createFormatCache } from './intlFormatCache'
+import {
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  reversedMove,
+  slotsWithWeekOfYear,
+} from './moveUtils'
+import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainMonthDayFns from './plainMonthDay'
+import * as PlainTimeFns from './plainTime'
+import * as PlainYearMonthFns from './plainYearMonth'
+import {
+  computeIsoWeekCeil,
+  computeIsoWeekFloor,
+  computeIsoWeekInterval,
+  computeMonthCeil,
+  computeMonthFloor,
+  computeMonthInterval,
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+  roundDateTimeToInterval,
+} from './roundUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = {

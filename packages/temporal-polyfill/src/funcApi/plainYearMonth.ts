@@ -34,9 +34,6 @@ import {
 import { PlainYearMonthBranding } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
-import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
-import * as PlainDateFns from './plainDate'
 import {
   computeDaysInMonth,
   computeDaysInYear,
@@ -45,7 +42,10 @@ import {
   computeYearMonthFields,
   getCalendarId,
   getCalendarIdFromBag,
-} from './utils'
+} from './calendarUtils'
+import * as DurationFns from './duration'
+import { createFormatCache } from './intlFormatCache'
+import * as PlainDateFns from './plainDate'
 
 export type Record = {
   /**

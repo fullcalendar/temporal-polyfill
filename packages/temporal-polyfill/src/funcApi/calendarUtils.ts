@@ -13,7 +13,7 @@ import {
 import { DateFields, MonthDayFields, YearMonthFields } from '../internal/fields'
 import { DateSlots } from '../internal/slots'
 
-// Calendar / TimeZone ID
+// Calendar ID
 // -----------------------------------------------------------------------------
 
 export function getCalendarId(slots: { calendar: string }): string {

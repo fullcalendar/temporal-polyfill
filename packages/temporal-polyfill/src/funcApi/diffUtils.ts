@@ -1,34 +1,40 @@
-/*
-WIP. Ultimately for funcApi
-*/
 import {
   bigNanoToNumber,
   compareBigNanos,
   diffBigNanos,
   moveBigNano,
-} from './bigNano'
-import { createNativeDiffOps } from './calendarNativeQuery'
+} from '../internal/bigNano'
+import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import {
   getCommonCalendarSlot,
   getCommonTimeZoneSlot,
   zonedEpochRangeToIso,
-} from './diff'
-import { DurationFields } from './durationFields'
-import { IsoDateFields } from './isoFields'
-import { Marker, MarkerToEpochNano, MoveMarker } from './markerSystem'
-import { moveDateTime, moveZonedEpochs } from './move'
+} from '../internal/diff'
+import { DurationFields } from '../internal/durationFields'
+import { IsoDateFields } from '../internal/isoFields'
+import { Marker, MarkerToEpochNano, MoveMarker } from '../internal/markerSystem'
+import { moveDateTime, moveZonedEpochs } from '../internal/move'
 import {
   RoundingMathOptions,
   RoundingModeName,
   refineUnitDiffOptions,
-} from './optionsRefine'
-import { roundBigNanoByInc, roundByInc } from './round'
-import { DateSlots, ZonedDateTimeSlots, extractEpochNano } from './slots'
-import { isoToEpochNano } from './timeMath'
-import { queryNativeTimeZone } from './timeZoneNative'
-import { totalRelativeDuration } from './total'
-import { DayTimeUnit, Unit, nanoInUtcDay, nanoInUtcWeek } from './units'
-import { NumberSign, bindArgs } from './utils'
+} from '../internal/optionsRefine'
+import { roundBigNanoByInc, roundByInc } from '../internal/round'
+import {
+  DateSlots,
+  ZonedDateTimeSlots,
+  extractEpochNano,
+} from '../internal/slots'
+import { isoToEpochNano } from '../internal/timeMath'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { totalRelativeDuration } from '../internal/total'
+import {
+  DayTimeUnit,
+  Unit,
+  nanoInUtcDay,
+  nanoInUtcWeek,
+} from '../internal/units'
+import { NumberSign, bindArgs } from '../internal/utils'
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
@@ -116,6 +122,61 @@ function diffPlainLargeUnits<S extends DateSlots<string>>(
   )
 }
 
+// Date Units (years, months, weeks, days)
+// -----------------------------------------------------------------------------
+
+type MarkersToIsoFields = (
+  m0: Marker,
+  m1: Marker,
+  sign: NumberSign,
+) => [IsoDateFields, IsoDateFields, ...any[]]
+
+function identityMarkersToIsoFields(
+  m0: IsoDateFields,
+  m1: IsoDateFields,
+): [IsoDateFields, IsoDateFields] {
+  return [m0, m1]
+}
+
+function diffDateUnits(
+  markerToEpochNano: MarkerToEpochNano,
+  markersToIsoFields: MarkersToIsoFields,
+  moveMarker: MoveMarker,
+  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
+  unit: Unit,
+  marker0: Marker,
+  marker1: Marker,
+  options: RoundingModeName | RoundingMathOptions | undefined,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const startEpochNano = markerToEpochNano(marker0)
+  const endEpochNano = markerToEpochNano(marker1)
+
+  const sign = compareBigNanos(endEpochNano, startEpochNano)
+  if (!sign) {
+    return 0
+  }
+
+  const [isoFields0, isoFields1] = markersToIsoFields(marker0, marker1, sign)
+  const durationFields = diffIsoFields(isoFields0, isoFields1)
+
+  let res = totalRelativeDuration(
+    durationFields,
+    endEpochNano,
+    unit,
+    // MarkerMoveSystem...
+    marker0,
+    markerToEpochNano,
+    moveMarker,
+  )
+
+  if (roundingInc) {
+    res = roundByInc(res, roundingInc, roundingMode!)
+  }
+
+  return res
+}
+
 // Day/Time Units
 // -----------------------------------------------------------------------------
 
@@ -181,59 +242,4 @@ function diffDayTimeLikeUnit(
   }
 
   return bigNanoToNumber(nanoDiff, nanoInUnit, !roundingInc)
-}
-
-// Date Utils (years, months, weeks, days)
-// -----------------------------------------------------------------------------
-
-type MarkersToIsoFields = (
-  m0: Marker,
-  m1: Marker,
-  sign: NumberSign,
-) => [IsoDateFields, IsoDateFields, ...any[]]
-
-function identityMarkersToIsoFields(
-  m0: IsoDateFields,
-  m1: IsoDateFields,
-): [IsoDateFields, IsoDateFields] {
-  return [m0, m1]
-}
-
-function diffDateUnits(
-  markerToEpochNano: MarkerToEpochNano,
-  markersToIsoFields: MarkersToIsoFields,
-  moveMarker: MoveMarker,
-  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
-  unit: Unit,
-  marker0: Marker,
-  marker1: Marker,
-  options: RoundingModeName | RoundingMathOptions | undefined,
-): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-  const startEpochNano = markerToEpochNano(marker0)
-  const endEpochNano = markerToEpochNano(marker1)
-
-  const sign = compareBigNanos(endEpochNano, startEpochNano)
-  if (!sign) {
-    return 0
-  }
-
-  const [isoFields0, isoFields1] = markersToIsoFields(marker0, marker1, sign)
-  const durationFields = diffIsoFields(isoFields0, isoFields1)
-
-  let res = totalRelativeDuration(
-    durationFields,
-    endEpochNano,
-    unit,
-    // MarkerMoveSystem...
-    marker0,
-    markerToEpochNano,
-    moveMarker,
-  )
-
-  if (roundingInc) {
-    res = roundByInc(res, roundingInc, roundingMode!)
-  }
-
-  return res
 }

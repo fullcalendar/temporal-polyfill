@@ -1,23 +1,20 @@
-/*
-WIP. Ultimately for funcApi
-*/
-import { createNativeConvertOps } from './calendarNativeQuery'
+import { createNativeConvertOps } from '../internal/calendarNativeQuery'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   clearIsoFields,
   isoTimeFieldDefaults,
-} from './isoFields'
-import { computeIsoDayOfWeek } from './isoMath'
-import { moveByDays } from './move'
-import { moveByIsoWeeks } from './moveExtended'
-import { RoundingMode } from './options'
-import { IsoDateTimeInterval, roundWithMode } from './round'
-import { DateSlots } from './slots'
-import { epochMilliToIso, isoToEpochNano } from './timeMath'
-import { computeEpochNanoFrac } from './total'
-import { Unit } from './units'
-import { bindArgs } from './utils'
+} from '../internal/isoFields'
+import { computeIsoDayOfWeek } from '../internal/isoMath'
+import { moveByDays } from '../internal/move'
+import { RoundingMode } from '../internal/options'
+import { IsoDateTimeInterval, roundWithMode } from '../internal/round'
+import { DateSlots } from '../internal/slots'
+import { epochMilliToIso, isoToEpochNano } from '../internal/timeMath'
+import { computeEpochNanoFrac } from '../internal/total'
+import { Unit } from '../internal/units'
+import { bindArgs } from '../internal/utils'
+import { moveByIsoWeeks } from './moveUtils'
 
 /*
 For year/month/week only

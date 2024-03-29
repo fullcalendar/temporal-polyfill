@@ -26,13 +26,13 @@ import {
 } from '../internal/optionsRefine'
 import { PlainMonthDayBranding } from '../internal/slots'
 import { bindArgs, identity, memoize } from '../internal/utils'
-import { createFormatCache } from './intlFormatCache'
-import * as PlainDateFns from './plainDate'
 import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
   getCalendarId,
-} from './utils'
+} from './calendarUtils'
+import { createFormatCache } from './intlFormatCache'
+import * as PlainDateFns from './plainDate'
 
 export type Record = {
   /**
