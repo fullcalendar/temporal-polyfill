@@ -443,50 +443,13 @@ export function diffDateTimesExact(
 // Exact Diffing (no rounding): Directly w/ Calendar
 // -----------------------------------------------------------------------------
 
-export function zonedEpochRangeToIso(
-  timeZoneOps: TimeZoneOps,
-  slots0: ZonedEpochSlots,
-  slots1: ZonedEpochSlots,
-  sign: NumberSign,
-): [
-  isoFields0: IsoDateTimeFields,
-  isoFields1: IsoDateTimeFields,
-  timeDiffNano: number,
-] {
-  const startIsoFields = zonedEpochSlotsToIso(slots0, timeZoneOps)
-  const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
-  const endIsoFields = zonedEpochSlotsToIso(slots1, timeZoneOps)
-  const endEpochNano = slots1.epochNanoseconds
-  let midIsoFields: IsoDateTimeFields
-  let midEpochNano: BigNano
-  let midSign: NumberSign
-  let cnt = 0
-
-  // Might need multiple backoffs: one for simple time overage, other for end being in DST gap
-  do {
-    if (cnt > 2) {
-      throw new RangeError(errorMessages.invalidProtocolResults)
-    }
-
-    midIsoFields = {
-      ...moveByDays(endIsoFields, cnt++ * -sign),
-      ...startIsoTimeFields,
-    }
-    midEpochNano = getSingleInstantFor(timeZoneOps, midIsoFields)
-    midSign = compareBigNanos(endEpochNano, midEpochNano)
-  } while (midSign === -sign)
-
-  const timeDiffNano = bigNanoToNumber(diffBigNanos(midEpochNano, endEpochNano))
-  return [startIsoFields, midIsoFields, timeDiffNano]
-}
-
 function diffZonedEpochsViaCalendar(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
-  sign: NumberSign,
-  largestUnit: Unit,
+  sign: NumberSign, // guaranteed non-zero
+  largestUnit: Unit, // year/month/week/day
   origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const [isoFields0, isoFields1, timeDiffNano] = zonedEpochRangeToIso(
@@ -511,26 +474,84 @@ function diffZonedEpochsViaCalendar(
   return dateTimeDiff
 }
 
+export function zonedEpochRangeToIso(
+  timeZoneOps: TimeZoneOps,
+  slots0: ZonedEpochSlots,
+  slots1: ZonedEpochSlots,
+  sign: NumberSign, // guaranteed non-zero
+): [
+  isoFields0: IsoDateTimeFields,
+  isoFields1: IsoDateTimeFields,
+  timeDiffNano: number,
+] {
+  const startIsoFields = zonedEpochSlotsToIso(slots0, timeZoneOps)
+  const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
+  const endIsoFields = zonedEpochSlotsToIso(slots1, timeZoneOps)
+  const endEpochNano = slots1.epochNanoseconds
+  let dayCorrection = 0
+
+  // If wall-clock will be overshot, guaranteed 1-day correction
+  const startTimeNano = isoTimeFieldsToNano(startIsoFields)
+  const endTimeNano = isoTimeFieldsToNano(endIsoFields)
+  const timeNano = endTimeNano - startTimeNano
+  const timeSign = Math.sign(timeNano)
+  if (timeSign === -sign) {
+    dayCorrection++
+  }
+
+  // The intermediate datetime after adding date-only units
+  let midIsoFields: IsoDateTimeFields
+  let midEpochNano: BigNano
+
+  // Computes intermediate zdt after date-unit add
+  // Returns `true` if the date-only adding overshot the end-point
+  // Increments dayCorrection for next run
+  function updateMid(): boolean {
+    midIsoFields = {
+      ...moveByDays(endIsoFields, dayCorrection++ * -sign),
+      ...startIsoTimeFields,
+    }
+    midEpochNano = getSingleInstantFor(timeZoneOps, midIsoFields)
+    return compareBigNanos(endEpochNano, midEpochNano) === -sign
+  }
+
+  if (updateMid()) {
+    // Inconsistent date/time diffs
+    // If moving forwards in time, DST might have shifted wall-clock time forward,
+    // so try backing off one day.
+    // If moving backwards in time, DST never shifts wall-clock backwards,
+    // so we know for sure there's an error without backing off.
+    if (sign === -1 || updateMid()) {
+      throw new RangeError(errorMessages.invalidProtocolResults)
+    }
+  }
+
+  const timeDiffNano = bigNanoToNumber(
+    diffBigNanos(midEpochNano!, endEpochNano),
+  )
+  return [startIsoFields, midIsoFields!, timeDiffNano]
+}
+
 function diffDateTimesViaCalendar(
   calendarOps: DiffOps,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
-  sign: NumberSign,
-  largestUnit: Unit,
+  sign: NumberSign, // guaranteed non-zero
+  largestUnit: Unit, // year/month/week
   origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const startTimeNano = isoTimeFieldsToNano(startIsoFields)
   const endTimeNano = isoTimeFieldsToNano(endIsoFields)
-  let timeNano = endTimeNano - startTimeNano
-  const timeSign = Math.sign(timeNano)
 
-  // simulate startDate plus time fields (because that happens before adding date)
+  // The intermediate iso-DATE after adding TIME-only units
+  // (because PlainDateTime moving adds time units first)
   let midIsoFields: IsoDateFields = startIsoFields
 
-  // move start-fields forward so time-diff-sign matches date-diff-sign
-  if (timeSign === -sign) {
+  // If date/time diffs conflict, move intermediate date one day forward
+  let timeDiffNano = endTimeNano - startTimeNano
+  if (Math.sign(timeDiffNano) === -sign) {
     midIsoFields = moveByDays(startIsoFields, sign)
-    timeNano += nanoInUtcDay * sign
+    timeDiffNano += nanoInUtcDay * sign
   }
 
   const dateDiff = calendarOps.dateUntil(
@@ -539,9 +560,9 @@ function diffDateTimesViaCalendar(
     largestUnit,
     origOptions as DiffOptions<DateUnitName>,
   )
-  const timeDiff = nanoToDurationTimeFields(timeNano)
-  const dateTimeDiff = { ...dateDiff, ...timeDiff }
 
+  const timeDiff = nanoToDurationTimeFields(timeDiffNano)
+  const dateTimeDiff = { ...dateDiff, ...timeDiff }
   return dateTimeDiff
 }
 

@@ -40,9 +40,6 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 #
 # When Duration::round() stops using NormalizedTimeDurationToDays, because of consolidation,
 # consecutive conflicting calls to getPossibleInstantsFor won't be policed in the same way
-built-ins/Temporal/Duration/prototype/round/throws-in-balance-duration-when-sign-mismatched-with-zoned-date-time.js
-built-ins/Temporal/Duration/prototype/round/zero-day-length.js
-built-ins/Temporal/Duration/prototype/total/zero-day-length.js
 built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
 built-ins/Temporal/Duration/prototype/round/date-and-time-durations-opposite-signs.js
