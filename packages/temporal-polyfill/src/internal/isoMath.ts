@@ -7,7 +7,6 @@ import {
   NativeDayOfYearOps,
   WeekParts,
   YearMonthParts,
-  computeNativeDayOfYear,
 } from './calendarNative'
 import { hashIntlFormatParts } from './intlFormatUtils'
 import { parseIntlYear, queryCalendarIntlFormat } from './intlMath'
@@ -122,7 +121,7 @@ export function computeIsoWeekParts(
   const minDaysInWeek = this.id ? 1 : 4 // iso=4, gregory/japanese=1
 
   const isoDayOfWeek = computeIsoDayOfWeek(isoDateFields)
-  const isoDayOfYear = computeNativeDayOfYear.call(this, isoDateFields)
+  const isoDayOfYear = this.dayOfYear(isoDateFields)
 
   // 0-based
   // analyze current date, relative to calendar-decided start-of-week

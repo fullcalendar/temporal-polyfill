@@ -284,6 +284,7 @@ export const isoDayOfYearOps: NativeDayOfYearOps = {
 }
 
 export const isoWeekOps: NativeWeekOps = {
+  ...isoDayOfYearOps,
   weekOfYear: computeNativeWeekOfYear,
   yearOfWeek: computeNativeYearOfWeek,
   weekParts: computeIsoWeekParts,
@@ -460,6 +461,7 @@ export const intlDayOfYearOps: NativeDayOfYearOps = {
 }
 
 export const intlWeekOps: NativeWeekOps = {
+  ...intlDayOfYearOps,
   weekOfYear: computeNativeWeekOfYear,
   yearOfWeek: computeNativeYearOfWeek,
   weekParts: () => [] as unknown as WeekParts,

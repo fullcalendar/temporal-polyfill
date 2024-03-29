@@ -203,7 +203,7 @@ export interface NativeDayOfYearOps {
   epochMilli: EpochMilliOp
 }
 
-export interface NativeWeekOps {
+export interface NativeWeekOps extends NativeDayOfYearOps {
   weekOfYear: WeekOfYearOp
   yearOfWeek: YearOfWeekOp
   weekParts: WeekPartsOp
