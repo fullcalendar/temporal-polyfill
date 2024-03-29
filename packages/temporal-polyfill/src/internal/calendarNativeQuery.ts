@@ -548,6 +548,7 @@ export const createNativeDiffOps = createNativeOpsCreator(
   isoDiffOps,
   intlDiffOps,
 )
+export const createNativeDayOps = createNativeOpsCreator(isoDayOps, intlDayOps)
 export const createNativeYearMonthMoveOps = createNativeOpsCreator(
   isoYearMonthMoveOps,
   intlYearMonthMoveOps,
@@ -588,10 +589,6 @@ export const createNativeWeekOps = createNativeOpsCreator(
 )
 
 // String Parsing
-export const createNativeYearMonthParseOps = createNativeOpsCreator(
-  isoDayOps,
-  intlDayOps,
-)
 export const createNativeMonthDayParseOps = createNativeOpsCreator(
   isoMonthDayParseOps,
   intlMonthDayParseOps,

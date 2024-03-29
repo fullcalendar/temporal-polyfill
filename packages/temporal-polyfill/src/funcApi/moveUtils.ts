@@ -1,10 +1,10 @@
 import { createNativeConvertOps } from '../internal/calendarNativeQuery'
 import {
   createNativeDayOfYearOps,
+  createNativeDayOps,
   createNativeDaysInMonthOps,
   createNativeDaysInYearOps,
   createNativeWeekOps,
-  createNativeYearMonthParseOps,
 } from '../internal/calendarNativeQuery'
 import * as errorMessages from '../internal/errorMessages'
 import { IsoDateFields } from '../internal/isoFields'
@@ -96,7 +96,7 @@ export function moveToDayOfMonth<S extends DateSlots<string>>(
   const normDayOfMonth = clampEntity('day', day, 1, daysInMonth, overflow)
 
   return moveToDayOfMonthUnsafe(
-    createNativeYearMonthParseOps(calendar),
+    createNativeDayOps(calendar),
     slots,
     normDayOfMonth,
   )

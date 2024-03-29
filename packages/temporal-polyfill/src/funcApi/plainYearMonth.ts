@@ -6,10 +6,10 @@ import {
 import { refineCalendarId } from '../internal/calendarId'
 import {
   createNativeDateModOps,
+  createNativeDayOps,
   createNativeYearMonthDiffOps,
   createNativeYearMonthModOps,
   createNativeYearMonthMoveOps,
-  createNativeYearMonthParseOps,
   createNativeYearMonthRefineOps,
 } from '../internal/calendarNativeQuery'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
@@ -109,10 +109,9 @@ export function fromFields(
   )
 }
 
-export const fromString = bindArgs(
-  parsePlainYearMonth,
-  createNativeYearMonthParseOps,
-) as (s: string) => Record
+export const fromString = bindArgs(parsePlainYearMonth, createNativeDayOps) as (
+  s: string,
+) => Record
 
 export function isInstance(record: any): record is Record {
   return Boolean(record) && record.branding === PlainYearMonthBranding
