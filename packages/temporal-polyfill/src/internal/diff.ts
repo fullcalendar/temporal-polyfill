@@ -534,8 +534,8 @@ function diffDateTimesViaCalendar(
   }
 
   const dateDiff = calendarOps.dateUntil(
-    { ...midIsoFields, ...isoTimeFieldDefaults },
-    { ...endIsoFields, ...isoTimeFieldDefaults },
+    midIsoFields,
+    endIsoFields,
     largestUnit,
     origOptions as DiffOptions<DateUnitName>,
   )
@@ -584,6 +584,9 @@ function diffEpochNanosExact(
   }
 }
 
+/*
+Partial days are trunc()'d
+*/
 export function diffByDay(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
@@ -594,6 +597,9 @@ export function diffByDay(
   }
 }
 
+/*
+Partial days are trunc()'d
+*/
 export function diffDays(
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
@@ -604,11 +610,14 @@ export function diffDays(
   )
 }
 
+/*
+Partial days are trunc()'d
+*/
 export function diffEpochMilliByDay(
   epochMilli0: number,
   epochMilli1: number,
 ): number {
-  return Math.floor((epochMilli1 - epochMilli0) / milliInDay)
+  return Math.trunc((epochMilli1 - epochMilli0) / milliInDay)
 }
 
 // Native
@@ -622,7 +631,10 @@ export function nativeDateUntil(
 ): DurationFields {
   if (largestUnit <= Unit.Week) {
     let weeks = 0
-    let days = diffDays(startIsoFields, endIsoFields)
+    let days = diffDays(
+      { ...startIsoFields, ...isoTimeFieldDefaults },
+      { ...endIsoFields, ...isoTimeFieldDefaults },
+    )
 
     if (largestUnit === Unit.Week) {
       ;[weeks, days] = divModTrunc(days, 7)
