@@ -86,6 +86,7 @@ export const nanoInSec = 1_000_000_000
 export const nanoInMinute = 60_000_000_000
 export const nanoInHour = 3_600_000_000_000
 export const nanoInUtcDay = 86_400_000_000_000
+export const nanoInUtcWeek = nanoInUtcDay * 7
 
 export const unitNanoMap = [
   1, // nano-in-nano

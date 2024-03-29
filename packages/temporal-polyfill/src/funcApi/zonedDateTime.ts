@@ -29,12 +29,13 @@ import {
   zonedDateTimeToPlainTime,
   zonedDateTimeToPlainYearMonth,
 } from '../internal/convert'
-import { diffByDay, diffZonedDateTimes } from '../internal/diff'
+import { diffZonedDateTimes } from '../internal/diff'
 import {
-  diffByIsoWeek,
-  diffZonedDayLikeUnits,
-  diffZonedLargeUnits,
+  diffZonedDays,
+  diffZonedMonths,
   diffZonedTimeUnits,
+  diffZonedWeeks,
+  diffZonedYears,
 } from '../internal/diffExtended'
 import { DateTimeBag } from '../internal/fields'
 import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
@@ -615,14 +616,11 @@ export const endOfMicrosecondIncl = aligned(computeMicroFloor, nanoInMicro - 1)
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------
 
-export const diffYears = bindArgs(diffZonedLargeUnits, Unit.Year)
-export const diffMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
-export const diffWeeks = bindArgs(
-  diffZonedDayLikeUnits,
-  Unit.Week,
-  diffByIsoWeek,
-)
-export const diffDays = bindArgs(diffZonedDayLikeUnits, Unit.Day, diffByDay)
+export const diffYears = diffZonedYears
+export const diffMonths = diffZonedMonths
+export const diffWeeks = diffZonedWeeks
+export const diffDays = diffZonedDays
+
 export const diffHours = bindArgs(diffZonedTimeUnits, Unit.Hour)
 export const diffMinutes = bindArgs(
   diffZonedTimeUnits,
