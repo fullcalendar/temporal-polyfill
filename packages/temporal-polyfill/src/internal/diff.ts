@@ -291,7 +291,7 @@ export function diffPlainYearMonth<C extends IdLike>(
 
 function diffDateLike(
   invert: boolean,
-  getCalendarOps: () => DiffOps,
+  getCalendarOps: () => DiffOps, // TODO: devise better system!
   startIsoFields: IsoDateFields,
   endIsoFields: IsoDateFields,
   largestUnit: Unit, // TODO: large field
@@ -604,14 +604,11 @@ export function diffDays(
   )
 }
 
-/*
-Must always be given start-of-day
-*/
 export function diffEpochMilliByDay(
   epochMilli0: number,
   epochMilli1: number,
 ): number {
-  return Math.round((epochMilli1 - epochMilli0) / milliInDay)
+  return Math.floor((epochMilli1 - epochMilli0) / milliInDay)
 }
 
 // Native

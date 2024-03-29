@@ -282,7 +282,9 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     startOfDay(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
     ): ZonedDateTime {
-      return computeZonedStartOfDay(createTimeZoneOps, slots)
+      return createZonedDateTime(
+        computeZonedStartOfDay(createTimeZoneOps, slots),
+      )
     },
     equals(
       slots: ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,

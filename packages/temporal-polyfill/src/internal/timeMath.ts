@@ -221,20 +221,22 @@ export function isoToEpochNano(
 
 /*
 For converting to proper epochNano values
-Ensures in bounds
+CALLERS DO NOT NEED TO CHECK in-bounds!
+(Result should be considered a finalized "Instant")
 */
 export function isoToEpochNanoWithOffset(
   isoFields: IsoDateTimeFields,
   offsetNano: number,
-): BigNano | undefined {
+): BigNano {
   const [newIsoTimeFields, dayDelta] = nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoFields) - offsetNano,
   )
-  return isoToEpochNano({
+  const epochNano = isoToEpochNano({
     ...isoFields,
     isoDay: isoFields.isoDay + dayDelta,
     ...newIsoTimeFields,
   })
+  return checkEpochNanoInBounds(epochNano)
 }
 
 // ISO Arguments -> Epoch

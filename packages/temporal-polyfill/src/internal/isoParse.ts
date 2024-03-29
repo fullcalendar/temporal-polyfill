@@ -38,7 +38,6 @@ import {
   createZonedDateTimeSlots,
 } from './slots'
 import {
-  checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
@@ -93,7 +92,7 @@ export function parseInstant(s: string): InstantSlots {
     offsetNano,
   )
 
-  return createInstantSlots(checkEpochNanoInBounds(epochNanoseconds))
+  return createInstantSlots(epochNanoseconds)
 }
 
 export function parseRelativeToSlots(

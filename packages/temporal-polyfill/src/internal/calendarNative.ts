@@ -16,6 +16,7 @@ import {
 import { diffEpochMilliByDay } from './diff'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields } from './isoFields'
+import { isoToEpochMilli } from './timeMath'
 import { padNumber2 } from './utils'
 
 // TODO: move most of these types into CalendarOps?
@@ -300,12 +301,12 @@ export function computeNativeDaysInYear(
 }
 
 export function computeNativeDayOfYear(
-  this: { dateParts: DatePartsOp; epochMilli: EpochMilliOp },
+  this: NativeDayOfYearOps,
   isoFields: IsoDateFields,
 ): number {
   const [year] = this.dateParts(isoFields)
   const milli0 = this.epochMilli(year)
-  const milli1 = this.epochMilli(year + 1)
+  const milli1 = isoToEpochMilli(isoFields)!
   return diffEpochMilliByDay(milli0, milli1) + 1
 }
 
