@@ -137,7 +137,7 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
     const timeZoneOps = getTimeZoneOps(timeZoneSlot)
     const calendarOps = getCalendarOps(calendarSlot)
 
-    durationFields = diffZonedEpochsViaCalendar(
+    durationFields = diffZonedEpochsBig(
       calendarOps,
       timeZoneOps,
       slots0,
@@ -200,7 +200,7 @@ export function diffPlainDateTimes<C extends IdLike>(
   } else {
     const calendarOps = getCalendarOps(calendarSlot)
 
-    durationFields = diffDateTimesViaCalendar(
+    durationFields = diffDateTimesBig(
       calendarOps,
       plainDateTimeSlots0,
       plainDateTimeSlots1,
@@ -374,7 +374,7 @@ export function diffPlainTimes(
   )
 }
 
-// Exact Diffing (no rounding): Attempt Day/Time, fallback to Calendar
+// Exact Diffing (no rounding): Attempt small units, fallback to big units
 // -----------------------------------------------------------------------------
 
 export function diffZonedEpochsExact(
@@ -398,7 +398,7 @@ export function diffZonedEpochsExact(
     )
   }
 
-  return diffZonedEpochsViaCalendar(
+  return diffZonedEpochsBig(
     calendarOps,
     timeZoneOps,
     slots0,
@@ -431,7 +431,7 @@ export function diffDateTimesExact(
     )
   }
 
-  return diffDateTimesViaCalendar(
+  return diffDateTimesBig(
     calendarOps,
     startIsoFields,
     endIsoFields,
@@ -441,10 +441,10 @@ export function diffDateTimesExact(
   )
 }
 
-// Exact Diffing (no rounding): Directly w/ Calendar
+// Exact Diffing (no rounding): Big units (years/weeks/months/days?)
 // -----------------------------------------------------------------------------
 
-function diffZonedEpochsViaCalendar(
+function diffZonedEpochsBig(
   calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
   slots0: ZonedEpochSlots,
@@ -531,7 +531,7 @@ export function zonedEpochRangeToIso(
   return [startIsoFields, midIsoFields!, remainderNano]
 }
 
-function diffDateTimesViaCalendar(
+function diffDateTimesBig(
   calendarOps: DiffOps,
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
