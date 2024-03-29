@@ -21,6 +21,12 @@ import {
   plainDateToZonedDateTime,
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
+import {
+  diffPlainDays,
+  diffPlainMonths,
+  diffPlainWeeks,
+  diffPlainYears,
+} from '../internal/diffExtended'
 import { DateBag, DateFields } from '../internal/fields'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -478,6 +484,33 @@ export const endOfWeekExcl = aligned(computeIsoWeekCeil)
 export const endOfYearIncl = aligned(computeYearCeil, -1)
 export const endOfMonthIncl = aligned(computeMonthCeil, -1)
 export const endOfWeekIncl = aligned(computeIsoWeekCeil, -1)
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+export const diffYears = diffPlainYears as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffMonths = diffPlainMonths as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffWeeks = diffPlainWeeks as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffDays = diffPlainDays as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
 
 // Non-standard: Utils
 // -----------------------------------------------------------------------------

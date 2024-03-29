@@ -24,33 +24,26 @@ import { DateSlots, ZonedDateTimeSlots, extractEpochNano } from './slots'
 import { isoToEpochNano } from './timeMath'
 import { queryNativeTimeZone } from './timeZoneNative'
 import { totalRelativeDuration } from './total'
-import {
-  TimeUnit,
-  Unit,
-  nanoInHour,
-  nanoInMicro,
-  nanoInMilli,
-  nanoInMinute,
-  nanoInSec,
-} from './units'
+import { TimeUnit, Unit, nanoInHour } from './units'
 import { NumberSign, bindArgs, divModTrunc } from './utils'
 
-function diffByIsoWeek(
-  startIsoFields: IsoDateFields,
-  endIsoFields: IsoDateFields,
-): DurationFields {
-  const [weeks, days] = divModTrunc(diffDays(startIsoFields, endIsoFields), 7)
-  return {
-    ...durationFieldDefaults,
-    weeks,
-    days,
-  }
-}
+export const diffPlainYears = bindArgs(diffPlainLargeUnits, Unit.Year)
+export const diffPlainMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
+export const diffPlainWeeks = bindArgs(
+  diffPlainDayLikeUnits,
+  Unit.Week,
+  diffByIsoWeek,
+)
+export const diffPlainDays = bindArgs(
+  diffPlainDayLikeUnits,
+  Unit.Day,
+  diffByDay,
+)
 
-// Utils: Large Units (years, months)
+// Large Units (years, months)
 // -----------------------------------------------------------------------------
 
-function diffZonedLargeUnits(
+export function diffZonedLargeUnits(
   unit: Unit,
   record0: ZonedDateTimeSlots<string, string>,
   record1: ZonedDateTimeSlots<string, string>,
@@ -97,12 +90,12 @@ function diffPlainLargeUnits<S extends DateSlots<string>>(
   )
 }
 
-// Utils: Day-Like Units (weeks, days)
+// Day-Like Units (weeks, days)
 // -----------------------------------------------------------------------------
 
-function diffZonedDayLikeUnits(
-  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
+export function diffZonedDayLikeUnits(
   unit: Unit,
+  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
   record0: ZonedDateTimeSlots<string, string>,
   record1: ZonedDateTimeSlots<string, string>,
   options: RoundingModeName | RoundingMathOptions | undefined,
@@ -126,8 +119,8 @@ function diffZonedDayLikeUnits(
 }
 
 function diffPlainDayLikeUnits<S extends DateSlots<string>>(
-  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
   unit: Unit,
+  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
   record0: S,
   record1: S,
   options: RoundingModeName | RoundingMathOptions | undefined,
@@ -147,7 +140,46 @@ function diffPlainDayLikeUnits<S extends DateSlots<string>>(
   )
 }
 
-// Utils: Date Units (years, months, weeks, days)
+// Time Units
+// -----------------------------------------------------------------------------
+
+export const diffZonedTimeUnits = bindArgs(
+  diffTimeUnits,
+  extractEpochNano as MarkerToEpochNano,
+)
+
+export const diffPlainTimeUnits = bindArgs(
+  diffTimeUnits,
+  isoToEpochNano as MarkerToEpochNano,
+)
+
+function diffTimeUnits(
+  markerToEpochNano: MarkerToEpochNano,
+  unit: TimeUnit,
+  nanoInUnit: number,
+  record0: Marker,
+  record1: Marker,
+  options?: RoundingModeName | RoundingMathOptions,
+) {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+
+  let nanoDiff = diffBigNanos(
+    markerToEpochNano(record0),
+    markerToEpochNano(record1),
+  )
+
+  if (roundingInc) {
+    nanoDiff = roundBigNanoByInc(
+      nanoDiff,
+      nanoInHour * roundingInc,
+      roundingMode!,
+    )
+  }
+
+  return bigNanoToNumber(nanoDiff, nanoInUnit, !roundingInc)
+}
+
+// Date Utils (years, months, weeks, days)
 // -----------------------------------------------------------------------------
 
 type MarkersToIsoFields = (
@@ -202,118 +234,14 @@ function diffDateUnits(
   return res
 }
 
-// Utils: Time Units
-// -----------------------------------------------------------------------------
-
-const diffZonedTimeUnits = bindArgs(
-  diffTimeUnits,
-  extractEpochNano as MarkerToEpochNano,
-)
-
-const diffPlainTimeUnits = bindArgs(
-  diffTimeUnits,
-  isoToEpochNano as MarkerToEpochNano,
-)
-
-function diffTimeUnits(
-  markerToEpochNano: MarkerToEpochNano,
-  nanoInUnit: number,
-  unit: TimeUnit,
-  record0: Marker,
-  record1: Marker,
-  options?: RoundingModeName | RoundingMathOptions,
-) {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-
-  let nanoDiff = diffBigNanos(
-    markerToEpochNano(record0),
-    markerToEpochNano(record1),
-  )
-
-  if (roundingInc) {
-    nanoDiff = roundBigNanoByInc(
-      nanoDiff,
-      nanoInHour * roundingInc,
-      roundingMode!,
-    )
+export function diffByIsoWeek(
+  startIsoFields: IsoDateFields,
+  endIsoFields: IsoDateFields,
+): DurationFields {
+  const [weeks, days] = divModTrunc(diffDays(startIsoFields, endIsoFields), 7)
+  return {
+    ...durationFieldDefaults,
+    weeks,
+    days,
   }
-
-  return bigNanoToNumber(nanoDiff, nanoInUnit, !roundingInc)
 }
-
-// -----------------------------------------------------------------------------
-
-export const zdt_diffYears = bindArgs(diffZonedLargeUnits, Unit.Year)
-export const zdt_diffMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
-export const zdt_diffWeeks = bindArgs(
-  diffZonedDayLikeUnits,
-  diffByIsoWeek,
-  Unit.Week,
-)
-export const zdt_diffDays = bindArgs(diffZonedDayLikeUnits, diffByDay, Unit.Day)
-export const zdt_diffHours = bindArgs(diffZonedTimeUnits, nanoInHour, Unit.Hour)
-export const zdt_diffMinutes = bindArgs(
-  diffZonedTimeUnits,
-  nanoInMinute,
-  Unit.Minute,
-)
-export const zdt_diffSeconds = bindArgs(
-  diffZonedTimeUnits,
-  nanoInSec,
-  Unit.Second,
-)
-export const zdt_diffMilliseconds = bindArgs(
-  diffZonedTimeUnits,
-  nanoInMilli,
-  Unit.Millisecond,
-)
-export const zdt_diffMicroseconds = bindArgs(
-  diffZonedTimeUnits,
-  nanoInMicro,
-  Unit.Microsecond,
-)
-export const zdt_diffNanoseconds = bindArgs(
-  diffZonedTimeUnits,
-  1,
-  Unit.Nanosecond,
-)
-
-export const pd_or_pdt_diffYears = bindArgs(diffPlainLargeUnits, Unit.Year)
-export const pd_or_pdt_diffMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
-export const pd_or_pdt_diffWeeks = bindArgs(
-  diffPlainDayLikeUnits,
-  diffByIsoWeek,
-  Unit.Week,
-)
-export const pd_or_pdt_diffDays = bindArgs(
-  diffPlainDayLikeUnits,
-  diffByDay,
-  Unit.Day,
-)
-
-export const pdt_diffHours = bindArgs(diffPlainTimeUnits, nanoInHour, Unit.Hour)
-export const pdt_diffMinutes = bindArgs(
-  diffPlainTimeUnits,
-  nanoInMinute,
-  Unit.Minute,
-)
-export const pdt_diffSeconds = bindArgs(
-  diffPlainTimeUnits,
-  nanoInSec,
-  Unit.Second,
-)
-export const pdt_diffMilliseconds = bindArgs(
-  diffPlainTimeUnits,
-  nanoInMilli,
-  Unit.Millisecond,
-)
-export const pdt_diffMicroseconds = bindArgs(
-  diffPlainTimeUnits,
-  nanoInMicro,
-  Unit.Microsecond,
-)
-export const pdt_diffNanoseconds = bindArgs(
-  diffPlainTimeUnits,
-  1,
-  Unit.Nanosecond,
-)

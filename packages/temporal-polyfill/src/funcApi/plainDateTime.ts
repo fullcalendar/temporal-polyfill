@@ -25,6 +25,13 @@ import {
   plainDateTimeToZonedDateTime,
 } from '../internal/convert'
 import { diffPlainDateTimes } from '../internal/diff'
+import {
+  diffPlainDays,
+  diffPlainMonths,
+  diffPlainTimeUnits,
+  diffPlainWeeks,
+  diffPlainYears,
+} from '../internal/diffExtended'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -590,6 +597,57 @@ export const endOfMinuteIncl = aligned(computeMinuteFloor, nanoInMinute - 1)
 export const endOfSecondIncl = aligned(computeSecFloor, nanoInSec - 1)
 export const endOfMillisecondIncl = aligned(computeMilliFloor, nanoInMilli - 1)
 export const endOfMicrosecondIncl = aligned(computeMicroFloor, nanoInMicro - 1)
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+export const diffYears = diffPlainYears as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffMonths = diffPlainMonths as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffWeeks = diffPlainWeeks as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffDays = diffPlainDays as (
+  record0: Record,
+  record1: Record,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number
+
+export const diffHours = bindArgs(diffPlainTimeUnits, Unit.Hour, nanoInHour)
+
+export const diffMinutes = bindArgs(
+  diffPlainTimeUnits,
+  Unit.Minute,
+  nanoInMinute,
+)
+
+export const diffSeconds = bindArgs(diffPlainTimeUnits, Unit.Second, nanoInSec)
+
+export const diffMilliseconds = bindArgs(
+  diffPlainTimeUnits,
+  Unit.Millisecond,
+  nanoInMilli,
+)
+
+export const diffMicroseconds = bindArgs(
+  diffPlainTimeUnits,
+  Unit.Microsecond,
+  nanoInMicro,
+)
+
+export const diffNanoseconds = bindArgs(diffPlainTimeUnits, 1, Unit.Nanosecond)
 
 // Non-standard: Utils
 // -----------------------------------------------------------------------------
