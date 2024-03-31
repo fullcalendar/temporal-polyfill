@@ -45,8 +45,7 @@ const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 Rebalances duration(s)
 */
 export function spanDuration(
-  durationFields0: DurationFields,
-  durationFields1: DurationFields | undefined, // HACKy
+  durationFields: DurationFields,
   largestUnit: Unit, // TODO: more descrimination?
   // MarkerDiffSystem...
   marker: Marker,
@@ -54,12 +53,7 @@ export function spanDuration(
   moveMarker: MoveMarker,
   diffMarkers: DiffMarkers,
 ): [DurationFields, BigNano] {
-  let endMarker = moveMarker(marker, durationFields0)
-
-  if (durationFields1) {
-    endMarker = moveMarker(endMarker, durationFields1)
-  }
-
+  const endMarker = moveMarker(marker, durationFields)
   const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
   return [balancedDuration, markerToEpochNano(endMarker)]
 }
@@ -109,18 +103,16 @@ export function addDurations<RA, C, T>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  return createDurationSlots(
-    spanDuration(
-      slots,
-      otherSlots,
-      largestUnit,
-      ...createMarkerDiffSystem(
-        getCalendarOps,
-        getTimeZoneOps,
-        relativeToSlots,
-      ),
-    )[0],
+  const [marker, , moveMarker, diffMarkers] = createMarkerDiffSystem(
+    getCalendarOps,
+    getTimeZoneOps,
+    relativeToSlots,
   )
+  const midMarker = moveMarker(marker, slots)
+  const endMarker = moveMarker(midMarker, otherSlots)
+  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+
+  return createDurationSlots(balancedDuration)
 }
 
 function addDayTimeDurations(
@@ -201,7 +193,6 @@ export function roundDuration<RA, C, T>(
 
   let [balancedDuration, endEpochNano] = spanDuration(
     slots,
-    undefined,
     largestUnit,
     ...diffSystem,
   )

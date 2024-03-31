@@ -59,7 +59,7 @@ export function totalDuration<RA, C, T>(
   )
 
   return totalRelativeDuration(
-    ...spanDuration(slots, undefined, totalUnit, ...diffSystem),
+    ...spanDuration(slots, totalUnit, ...diffSystem),
     totalUnit,
     ...diffSystem,
   )
