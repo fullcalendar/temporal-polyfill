@@ -1,5 +1,4 @@
 import { BigNano, addBigNanos } from './bigNano'
-import { isoCalendarId } from './calendarConfig'
 import {
   NativeMoveOps,
   YearMonthParts,
@@ -226,14 +225,13 @@ export function moveZonedEpochs(
       isoDateTimeFields,
       {
         ...durationFields, // date parts
-        ...durationTimeFieldDefaults, // time parts
+        ...durationTimeFieldDefaults, // ZERO-OUT time parts
       },
       options,
     )
     const movedIsoDateTimeFields = {
       ...movedIsoDateFields, // date parts (could be a superset)
       ...pluckProps(isoTimeFieldNamesAsc, isoDateTimeFields), // time parts
-      calendar: isoCalendarId, // NOT USED but whatever
     }
     epochNano = addBigNanos(
       getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
