@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "temporal-utils",
+  "version": "0.0.0",
+  "title": "Temporal Utils",
+  "description": "Temporal Utils",
+  "author": {
+    "name": "Adam Shaw",
+    "email": "arshaw@users.noreply.github.com",
+    "url": "http://arshaw.com/"
+  },
+  "license": "MIT",
+  "copyright": "2024 Adam Shaw",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git"
+  },
+  "scripts": {},
+  "type": "module",
+  "dependencies": {
+    "temporal-spec": "^0.2.0"
+  }
+}

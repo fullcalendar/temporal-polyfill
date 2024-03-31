@@ -157,6 +157,12 @@ importers:
         specifier: ^0.2.9
         version: 0.2.9
 
+  packages/temporal-utils:
+    dependencies:
+      temporal-spec:
+        specifier: ^0.2.0
+        version: link:../temporal-spec
+
 packages:
 
   /@aashutoshrathi/word-wrap@1.2.6:
