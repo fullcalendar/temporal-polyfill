@@ -363,13 +363,13 @@ function balanceDayTimeDuration(
   roundingMode: RoundingMode,
 ): Partial<DurationFields> {
   const bigNano = durationFieldsToBigNano(durationFields)
-  const roundedLargeNano = roundBigNano(
+  const roundedBigNano = roundBigNano(
     bigNano,
     smallestUnit,
     roundingInc,
     roundingMode,
   )
-  return nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
+  return nanoToDurationDayTimeFields(roundedBigNano, largestUnit)
 }
 
 export function balanceDayTimeDurationByInc(
@@ -379,8 +379,8 @@ export function balanceDayTimeDurationByInc(
   roundingMode: RoundingMode,
 ): Partial<DurationFields> {
   const bigNano = durationFieldsToBigNano(durationFields, largestUnit)
-  const roundedLargeNano = roundBigNanoByInc(bigNano, nanoInc, roundingMode)
-  return nanoToDurationDayTimeFields(roundedLargeNano, largestUnit)
+  const roundedBigNano = roundBigNanoByInc(bigNano, nanoInc, roundingMode)
+  return nanoToDurationDayTimeFields(roundedBigNano, largestUnit)
 }
 
 /*
@@ -407,8 +407,8 @@ export function roundRelativeDuration(
     smallestUnit > Unit.Day
       ? nudgeRelativeDuration
       : (marker as EpochSlots).epochNanoseconds && smallestUnit < Unit.Day
-        ? nudgeZonedDurationTime
-        : nudgeDurationDayTime
+        ? nudgeZonedTimeDuration
+        : nudgeDayTimeDuration
   ) as typeof nudgeRelativeDuration // most general
 
   let [roundedDurationFields, roundedEpochNano, grewBigUnit] = nudgeFunc(
@@ -517,7 +517,7 @@ These functions actually do the heavy-lifting of rounding to a higher/lower mark
 and return the (day) delta. Also return the (potentially) unbalanced new duration.
 */
 
-function nudgeDurationDayTime(
+function nudgeDayTimeDuration(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: BigNano, // NOT NEEDED, just for adding result to
   largestUnit: DayTimeUnit,
@@ -560,7 +560,7 @@ function nudgeDurationDayTime(
 Handles DST edge cases
 ONLY time
 */
-function nudgeZonedDurationTime(
+function nudgeZonedTimeDuration(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
   endEpochNano: BigNano, // NOT NEEDED, just for conformance
   _largestUnit: Unit,
