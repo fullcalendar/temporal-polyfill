@@ -585,31 +585,18 @@ export const startOfSecond = aligned(computeSecFloor)
 export const startOfMillisecond = aligned(computeMilliFloor)
 export const startOfMicrosecond = aligned(computeMicroFloor)
 
-// Non-standard: Start-of-Unit (EXCL)
+// Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
 
-export const endOfYearExcl = aligned(computeYearCeil)
-export const endOfMonthExcl = aligned(computeMonthCeil)
-export const endOfWeekExcl = aligned(computeIsoWeekCeil)
-export const endOfDayExcl = aligned(computeDayFloor, nanoInUtcDay)
-export const endOfHourExcl = aligned(computeHourFloor, nanoInHour)
-export const endOfMinuteExcl = aligned(computeMinuteFloor, nanoInMinute)
-export const endOfSecondExcl = aligned(computeSecFloor, nanoInSec)
-export const endOfMillisecondExcl = aligned(computeMilliFloor, nanoInMilli)
-export const endOfMicrosecondExcl = aligned(computeMicroFloor, nanoInMicro)
-
-// Non-standard: Start-of-Unit (INCL)
-// -----------------------------------------------------------------------------
-
-export const endOfYearIncl = aligned(computeYearCeil, -1)
-export const endOfMonthIncl = aligned(computeMonthCeil, -1)
-export const endOfWeekIncl = aligned(computeIsoWeekCeil, -1)
-export const endOfDayIncl = aligned(computeDayFloor, nanoInUtcDay - 1)
-export const endOfHourIncl = aligned(computeHourFloor, nanoInHour - 1)
-export const endOfMinuteIncl = aligned(computeMinuteFloor, nanoInMinute - 1)
-export const endOfSecondIncl = aligned(computeSecFloor, nanoInSec - 1)
-export const endOfMillisecondIncl = aligned(computeMilliFloor, nanoInMilli - 1)
-export const endOfMicrosecondIncl = aligned(computeMicroFloor, nanoInMicro - 1)
+export const endOfYear = aligned(computeYearCeil, -1)
+export const endOfMonth = aligned(computeMonthCeil, -1)
+export const endOfWeek = aligned(computeIsoWeekCeil, -1)
+export const endOfDay = aligned(computeDayFloor, nanoInUtcDay - 1)
+export const endOfHour = aligned(computeHourFloor, nanoInHour - 1)
+export const endOfMinute = aligned(computeMinuteFloor, nanoInMinute - 1)
+export const endOfSecond = aligned(computeSecFloor, nanoInSec - 1)
+export const endOfMillisecond = aligned(computeMilliFloor, nanoInMilli - 1)
+export const endOfMicrosecond = aligned(computeMicroFloor, nanoInMicro - 1)
 
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------

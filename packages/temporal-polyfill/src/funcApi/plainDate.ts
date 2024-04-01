@@ -469,19 +469,12 @@ export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
 
-// Non-standard: End-of-Unit (EXCL)
+// Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
 
-export const endOfYearExcl = aligned(computeYearCeil)
-export const endOfMonthExcl = aligned(computeMonthCeil)
-export const endOfWeekExcl = aligned(computeIsoWeekCeil)
-
-// Non-standard: End-of-Unit (INCL)
-// -----------------------------------------------------------------------------
-
-export const endOfYearIncl = aligned(computeYearCeil, -1)
-export const endOfMonthIncl = aligned(computeMonthCeil, -1)
-export const endOfWeekIncl = aligned(computeIsoWeekCeil, -1)
+export const endOfYear = aligned(computeYearCeil, -1)
+export const endOfMonth = aligned(computeMonthCeil, -1)
+export const endOfWeek = aligned(computeIsoWeekCeil, -1)
 
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------
