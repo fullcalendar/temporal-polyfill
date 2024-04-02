@@ -214,7 +214,7 @@ export function computeZonedStartOfDay<C, T>(
   const { timeZone, calendar } = slots
   const timeZoneOps = getTimeZoneOps(timeZone)
   const epochNano1 = alignZonedEpoch(computeDayFloor, timeZoneOps, slots)
-  // nuding within-day guarantees in-bounds
+  // nudging within-day guarantees in-bounds
   return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
 }
 
@@ -485,7 +485,7 @@ export function roundBigNano(
 
 export function roundBigNanoByInc(
   bigNano: BigNano,
-  nanoInc: number, // REQUIRED: not larger than a day
+  nanoInc: number, // REQUIRED: a single day must be divisible by this!
   roundingMode: RoundingMode,
   useDayOrigin?: boolean,
 ): BigNano {

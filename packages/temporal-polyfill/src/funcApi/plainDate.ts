@@ -36,7 +36,7 @@ import {
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  refineRoundingMathOptions,
+  refineUnitRoundOptions,
 } from '../internal/optionsRefine'
 import { IsoDateTimeInterval } from '../internal/round'
 import {
@@ -44,10 +44,7 @@ import {
   PlainDateBranding,
   createPlainDateSlots,
 } from '../internal/slots'
-import {
-  checkIsoDateInBounds,
-  checkIsoDateTimeInBounds,
-} from '../internal/timeMath'
+import { checkIsoDateInBounds } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName, Unit } from '../internal/units'
@@ -73,6 +70,7 @@ import {
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import {
+  moveByDaysStrict,
   moveByIsoWeeks,
   moveByMonths,
   moveByYears,
@@ -387,7 +385,9 @@ export function withDayOfYear(
   dayOfYear: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateInBounds(moveToDayOfYear(record, dayOfYear, options))
+  return createPlainDateSlots(
+    checkIsoDateInBounds(moveToDayOfYear(record, dayOfYear, options)),
+  )
 }
 
 export function withDayOfMonth(
@@ -395,7 +395,9 @@ export function withDayOfMonth(
   dayOfMonth: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateInBounds(moveToDayOfMonth(record, dayOfMonth, options))
+  return createPlainDateSlots(
+    checkIsoDateInBounds(moveToDayOfMonth(record, dayOfMonth, options)),
+  )
 }
 
 export function withDayOfWeek(
@@ -403,7 +405,9 @@ export function withDayOfWeek(
   dayOfWeek: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateInBounds(moveToDayOfWeek(record, dayOfWeek, options))
+  return createPlainDateSlots(
+    checkIsoDateInBounds(moveToDayOfWeek(record, dayOfWeek, options)),
+  )
 }
 
 export function withWeekOfYear(
@@ -411,26 +415,42 @@ export function withWeekOfYear(
   weekOfYear: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateInBounds(slotsWithWeekOfYear(record, weekOfYear, options))
+  return createPlainDateSlots(
+    checkIsoDateInBounds(slotsWithWeekOfYear(record, weekOfYear, options)),
+  )
 }
 
 // Non-standard: Move
 // -----------------------------------------------------------------------------
 
-export function addYears(record: Record, years: number): Record {
-  return checkIsoDateInBounds(moveByYears(record, years))
+export function addYears(
+  record: Record,
+  years: number,
+  options?: OverflowOptions,
+): Record {
+  // No need for createPlainDateTimeSlots because moveByYears guarantees IsoDateFields
+  return checkIsoDateInBounds(moveByYears(record, years, options))
 }
 
-export function addMonths(record: Record, months: number): Record {
-  return checkIsoDateInBounds(moveByMonths(record, months))
+export function addMonths(
+  record: Record,
+  months: number,
+  options?: OverflowOptions,
+): Record {
+  // No need for createPlainDateTimeSlots because moveByMonths guarantees IsoDateFields
+  return checkIsoDateInBounds(moveByMonths(record, months, options))
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
-  return checkIsoDateInBounds(moveByIsoWeeks(record, weeks))
+  return createPlainDateSlots(
+    checkIsoDateInBounds(moveByIsoWeeks(record, weeks)),
+  )
 }
 
 export function addDays(record: Record, days: number): Record {
-  return checkIsoDateInBounds(moveByDays(record, days))
+  return createPlainDateSlots(
+    checkIsoDateInBounds(moveByDaysStrict(record, days)),
+  )
 }
 
 // Non-standard: Subtract
@@ -509,24 +529,28 @@ export const diffDays = diffPlainDays as (
 function roundToInterval(
   unit: Unit,
   computeInterval: (isoFields: DateSlots<string>) => IsoDateTimeInterval,
-  record: Record,
+  record0: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
-  const [, roundingMode] = refineRoundingMathOptions(unit, options)
-  const slots1 = {
-    ...record,
-    ...roundDateTimeToInterval(computeInterval, record, roundingMode),
-  }
-  return createPlainDateSlots(checkIsoDateTimeInBounds(slots1))
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+  const isoFields = roundDateTimeToInterval(
+    computeInterval,
+    record0,
+    roundingMode,
+  )
+  return createPlainDateSlots(
+    checkIsoDateInBounds({ ...record0, ...isoFields }),
+  )
 }
 
 function aligned(
   computeAlignment: (slots: DateSlots<string>) => IsoDateTimeFields,
   dayDelta = 0,
-): (slots: Record) => Record {
-  return (slots) => {
-    const isoFields = moveByDays(computeAlignment(slots), dayDelta)
-    const slots1 = { ...slots, ...isoFields }
-    return createPlainDateSlots(checkIsoDateInBounds(slots1))
+): (record: Record) => Record {
+  return (record0) => {
+    const isoFields = moveByDays(computeAlignment(record0), dayDelta)
+    return createPlainDateSlots(
+      checkIsoDateInBounds({ ...record0, ...isoFields }),
+    )
   }
 }

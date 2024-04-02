@@ -27,6 +27,7 @@ import {
   isoTimeFieldNamesAsc,
 } from './isoFields'
 import { isoMonthsInYear } from './isoMath'
+import { Overflow } from './options'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
@@ -347,38 +348,13 @@ export function nativeDateAdd(
   )[0]
 
   if (years || months) {
-    let [year, month, day] = this.dateParts(isoDateFields)
-
-    if (years) {
-      const [monthCodeNumber, isLeapMonth] = this.monthCodeParts(year, month)
-      year += years
-      month = monthCodeNumberToMonth(
-        monthCodeNumber,
-        isLeapMonth,
-        this.leapMonth(year),
-      )
-      month = clampEntity(
-        'month',
-        month,
-        1,
-        this.monthsInYearPart(year),
-        overflow,
-      )
-    }
-
-    if (months) {
-      ;[year, month] = this.monthAdd(year, month, months)
-    }
-
-    day = clampEntity(
-      'day',
-      day,
-      1,
-      this.daysInMonthParts(year, month),
+    epochMilli = nativeYearMonthAdd(
+      this,
+      isoDateFields,
+      years,
+      months,
       overflow,
     )
-
-    epochMilli = this.epochMilli(year, month, day)
   } else if (weeks || days) {
     epochMilli = isoToEpochMilli(isoDateFields)
   } else {
@@ -388,6 +364,50 @@ export function nativeDateAdd(
   epochMilli! += (weeks * 7 + days) * milliInDay
 
   return checkIsoDateInBounds(epochMilliToIso(epochMilli!))
+}
+
+/*
+Callers should skip calling if years and months are both zero
+*/
+export function nativeYearMonthAdd(
+  moveOps: NativeMoveOps,
+  isoDateFields: IsoDateFields,
+  years: number,
+  months: number,
+  overflow: Overflow,
+): number {
+  let [year, month, day] = moveOps.dateParts(isoDateFields)
+
+  if (years) {
+    const [monthCodeNumber, isLeapMonth] = moveOps.monthCodeParts(year, month)
+    year += years
+    month = monthCodeNumberToMonth(
+      monthCodeNumber,
+      isLeapMonth,
+      moveOps.leapMonth(year),
+    )
+    month = clampEntity(
+      'month',
+      month,
+      1,
+      moveOps.monthsInYearPart(year),
+      overflow,
+    )
+  }
+
+  if (months) {
+    ;[year, month] = moveOps.monthAdd(year, month, months)
+  }
+
+  day = clampEntity(
+    'day',
+    day,
+    1,
+    moveOps.daysInMonthParts(year, month),
+    overflow,
+  )
+
+  return moveOps.epochMilli(year, month, day)
 }
 
 // ISO / Intl Utils
@@ -446,7 +466,7 @@ export function intlMonthAdd(
 export function moveByDays<F extends IsoDateFields>(
   isoFields: F,
   days: number,
-): F {
+): F & Partial<IsoTimeFields> {
   if (days) {
     return {
       ...isoFields,

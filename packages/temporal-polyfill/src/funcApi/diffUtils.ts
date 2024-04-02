@@ -1,4 +1,5 @@
 import {
+  bigNanoToExactDays,
   bigNanoToNumber,
   compareBigNanos,
   diffBigNanos,
@@ -28,47 +29,34 @@ import {
 import { isoToEpochNano } from '../internal/timeMath'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalRelativeDuration } from '../internal/total'
-import {
-  DayTimeUnit,
-  Unit,
-  nanoInUtcDay,
-  nanoInUtcWeek,
-} from '../internal/units'
+import { TimeUnit, Unit } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
-export const diffZonedWeeks = bindArgs(
-  diffZonedDayLikeUnits,
-  Unit.Week,
-  nanoInUtcWeek,
-)
-export const diffZonedDays = bindArgs(
-  diffZonedDayLikeUnits,
-  Unit.Day,
-  nanoInUtcDay,
-)
+export const diffZonedWeeks = bindArgs(diffZonedDayLikeUnits, Unit.Week, 7)
+export const diffZonedDays = bindArgs(diffZonedDayLikeUnits, Unit.Day, 1)
 export const diffZonedTimeUnits = bindArgs(
-  diffDayTimeLikeUnit,
+  diffTimeUnit,
   extractEpochNano as MarkerToEpochNano,
 )
 
 export const diffPlainYears = bindArgs(diffPlainLargeUnits, Unit.Year)
 export const diffPlainMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
 export const diffPlainWeeks = bindArgs(
-  diffDayTimeLikeUnit,
+  diffPlainDayLikeUnit,
   isoToEpochNano as MarkerToEpochNano,
   Unit.Week,
-  nanoInUtcWeek,
+  7,
 )
 export const diffPlainDays = bindArgs(
-  diffDayTimeLikeUnit,
+  diffPlainDayLikeUnit,
   isoToEpochNano as MarkerToEpochNano,
   Unit.Day,
-  nanoInUtcDay,
+  1,
 )
 export const diffPlainTimeUnits = bindArgs(
-  diffDayTimeLikeUnit,
+  diffTimeUnit,
   isoToEpochNano as MarkerToEpochNano,
 )
 
@@ -177,15 +165,15 @@ function diffDateUnits(
   return res
 }
 
-// Day/Time Units
+// Day-Like Units (weeks, days)
 // -----------------------------------------------------------------------------
 
 function diffZonedDayLikeUnits(
-  unit: Unit,
-  nanoInUnit: number,
+  unit: Unit.Week | Unit.Day,
+  daysInUnit: number,
   record0: ZonedDateTimeSlots<string, string>,
   record1: ZonedDateTimeSlots<string, string>,
-  options: RoundingModeName | RoundingMathOptions | undefined,
+  options?: RoundingModeName | RoundingMathOptions | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
@@ -202,25 +190,49 @@ function diffZonedDayLikeUnits(
     record1,
     sign,
   )
-  let nanoDiff = moveBigNano(
+  const nanoDiff = moveBigNano(
     diffBigNanos(isoToEpochNano(isoFields0)!, isoToEpochNano(isoFields1)!),
     remainderNano,
   )
 
+  let res = bigNanoToExactDays(nanoDiff) / daysInUnit
+
   if (roundingInc) {
-    nanoDiff = roundBigNanoByInc(
-      nanoDiff,
-      nanoInUnit * roundingInc,
-      roundingMode!,
-    )
+    res = roundByInc(res, roundingInc, roundingMode!)
   }
 
-  return bigNanoToNumber(nanoDiff, nanoInUnit, !roundingInc)
+  return res
 }
 
-function diffDayTimeLikeUnit(
+function diffPlainDayLikeUnit(
   markerToEpochNano: MarkerToEpochNano,
-  unit: DayTimeUnit | Unit.Week,
+  unit: Unit.Week | Unit.Day,
+  daysInUnit: number,
+  record0: Marker,
+  record1: Marker,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const nanoDiff = diffBigNanos(
+    markerToEpochNano(record0),
+    markerToEpochNano(record1),
+  )
+
+  let res = bigNanoToExactDays(nanoDiff) / daysInUnit
+
+  if (roundingInc) {
+    res = roundByInc(res, roundingInc, roundingMode!)
+  }
+
+  return res
+}
+
+// Time Units
+// -----------------------------------------------------------------------------
+
+function diffTimeUnit(
+  markerToEpochNano: MarkerToEpochNano,
+  unit: TimeUnit,
   nanoInUnit: number,
   record0: Marker,
   record1: Marker,

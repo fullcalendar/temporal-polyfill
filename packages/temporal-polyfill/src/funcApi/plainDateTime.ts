@@ -14,6 +14,7 @@ import {
   createNativeMoveOps,
   createNativeYearMonthRefineOps,
 } from '../internal/calendarNativeQuery'
+import { toStrictInteger } from '../internal/cast'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
@@ -37,7 +38,7 @@ import {
   plainDateTimeWithPlainTime,
   slotsWithCalendar,
 } from '../internal/modify'
-import { moveByDays, movePlainDateTime } from '../internal/move'
+import { movePlainDateTime } from '../internal/move'
 import {
   DateTimeDisplayOptions,
   DiffOptions,
@@ -46,7 +47,7 @@ import {
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
-  refineRoundingMathOptions,
+  refineUnitRoundOptions,
 } from '../internal/optionsRefine'
 import {
   IsoDateTimeInterval,
@@ -58,6 +59,7 @@ import {
   DateTimeSlots,
   PlainDateTimeBranding,
   createPlainDateSlots,
+  createPlainDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
 import {
@@ -100,6 +102,7 @@ import {
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import {
+  moveByDaysStrict,
   moveByIsoWeeks,
   moveByMonths,
   moveByYears,
@@ -461,6 +464,7 @@ export const toString = formatPlainDateTimeIso<string> as (
 
 // Non-standard: With
 // -----------------------------------------------------------------------------
+// No need for createPlainDateTimeSlots because move* utils return self
 
 export function withDayOfYear(
   record: Record,
@@ -498,13 +502,22 @@ export function withWeekOfYear(
 
 // Non-standard: Add
 // -----------------------------------------------------------------------------
+// No need for createPlainDateTimeSlots because move* utils return self
 
-export function addYears(record: Record, years: number): Record {
-  return checkIsoDateTimeInBounds(moveByYears(record, years))
+export function addYears(
+  record: Record,
+  years: number,
+  options?: OverflowOptions,
+): Record {
+  return checkIsoDateTimeInBounds(moveByYears(record, years, options))
 }
 
-export function addMonths(record: Record, months: number): Record {
-  return checkIsoDateTimeInBounds(moveByMonths(record, months))
+export function addMonths(
+  record: Record,
+  months: number,
+  options?: OverflowOptions,
+): Record {
+  return checkIsoDateTimeInBounds(moveByMonths(record, months, options))
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
@@ -512,7 +525,7 @@ export function addWeeks(record: Record, weeks: number): Record {
 }
 
 export function addDays(record: Record, days: number): Record {
-  return checkIsoDateTimeInBounds(moveByDays(record, days))
+  return checkIsoDateTimeInBounds(moveByDaysStrict(record, days))
 }
 
 export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
@@ -632,7 +645,7 @@ export const diffMicroseconds = bindArgs(
   nanoInMicro,
 )
 
-export const diffNanoseconds = bindArgs(diffPlainTimeUnits, 1, Unit.Nanosecond)
+export const diffNanoseconds = bindArgs(diffPlainTimeUnits, Unit.Nanosecond, 1)
 
 // Non-standard: Utils
 // -----------------------------------------------------------------------------
@@ -643,10 +656,15 @@ function moveByTimeUnit(
   units: number,
 ): Record {
   const epochNano0 = isoToEpochNano(record)!
-  const epochNano1 = addBigNanos(epochNano0, numberToBigNano(units, nanoInUnit))
+  const epochNano1 = addBigNanos(
+    epochNano0,
+    numberToBigNano(toStrictInteger(units), nanoInUnit),
+  )
+
+  // No need for createPlainDateTimeSlots because...
   return checkIsoDateTimeInBounds({
     ...record,
-    ...epochNanoToIso(epochNano1, 0),
+    ...epochNanoToIso(epochNano1, 0), // ...guaranteed ONLY ISO fields
   })
 }
 
@@ -656,24 +674,31 @@ function roundToInterval(
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
-  const [, roundingMode] = refineRoundingMathOptions(unit, options)
-  return checkIsoDateTimeInBounds(
-    roundDateTimeToInterval(computeInterval, record, roundingMode),
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+
+  return createPlainDateTimeSlots(
+    checkIsoDateTimeInBounds(
+      roundDateTimeToInterval(computeInterval, record, roundingMode),
+    ),
   )
 }
 
 function aligned(
   computeAlignment: (slots: DateTimeSlots<string>) => IsoDateTimeFields,
   nanoDelta = 0,
-): (slots: Record) => Record {
-  return (slots) => {
-    let isoFields = computeAlignment(slots)
+): (record: Record) => Record {
+  return (record0) => {
+    let isoFields = computeAlignment(record0)
+
     if (nanoDelta) {
       isoFields = epochNanoToIso(isoToEpochNano(isoFields)!, nanoDelta)
     }
-    return checkIsoDateTimeInBounds({
-      ...slots,
-      ...isoFields,
-    })
+
+    return createPlainDateTimeSlots(
+      checkIsoDateTimeInBounds({
+        ...record0,
+        ...isoFields,
+      }),
+    )
   }
 }

@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import { bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
+import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
 import {
   IsoDateFields,
@@ -165,12 +165,19 @@ export function expectPlainDateTimeEquals(
 
 export function expectZonedDateTimeEquals(
   zdt: ZonedDateTimeFns.Record,
-  slots: { epochNanoseconds: bigint; timeZone: string; calendar?: string },
+  slots: {
+    epochNanoseconds: bigint | BigNano
+    timeZone: string
+    calendar?: string
+  },
 ): void {
   expectPropsEqualStrict(zdt, {
     ...zonedDateTimeDefaults,
     ...slots,
-    epochNanoseconds: bigIntToBigNano(slots.epochNanoseconds),
+    epochNanoseconds:
+      typeof slots.epochNanoseconds === 'bigint'
+        ? bigIntToBigNano(slots.epochNanoseconds)
+        : slots.epochNanoseconds,
   })
 }
 

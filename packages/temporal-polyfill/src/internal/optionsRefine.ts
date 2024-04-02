@@ -356,7 +356,7 @@ export function refineRoundingOptions<UN extends DayTimeUnitName>(
   return [smallestUnit, roundingInc, roundingMode]
 }
 
-export function refineRoundingMathOptions(
+function refineRoundingMathOptions(
   smallestUnit: Unit,
   options: RoundingModeName | RoundingMathOptions,
   allowManyLargeUnits?: boolean,
@@ -378,6 +378,9 @@ export function refineRoundingMathOptions(
   return [roundingInc, roundingMode]
 }
 
+/*
+For funcApi
+*/
 export function refineUnitDiffOptions(
   smallestUnit: Unit,
   options: RoundingModeName | RoundingMathOptions,
@@ -386,6 +389,19 @@ export function refineUnitDiffOptions(
     return refineRoundingMathOptions(smallestUnit, options)
   }
   return [] as unknown as [undefined, undefined]
+}
+
+/*
+For funcApi
+*/
+export function refineUnitRoundOptions(
+  smallestUnit: Unit,
+  options: RoundingModeName | RoundingMathOptions,
+): RoundingMathTuple {
+  if (options !== undefined) {
+    return refineRoundingMathOptions(smallestUnit, options)
+  }
+  return [1, RoundingMode.HalfExpand]
 }
 
 export function refineTotalOptions<RA, R>(

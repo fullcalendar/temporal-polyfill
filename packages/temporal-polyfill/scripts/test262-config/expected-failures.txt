@@ -29,7 +29,10 @@
 # (refactors Duration::round/total to be more DRY with since/until)
 #
 built-ins/Temporal/Duration/prototype/round/dst-rounding-result.js
+built-ins/Temporal/Duration/prototype/round/dst-rounding-result-fullcalendar.js
+# ^see built-ins/Temporal/Duration/prototype/round/dst-rounding-result-fullcalendar.js
 built-ins/Temporal/Duration/prototype/total/dst-rounding-result.js
+# ^see built-ins/Temporal/Duration/prototype/total/dst-rounding-result-fullcalendar.js
 intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
 built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-4.js

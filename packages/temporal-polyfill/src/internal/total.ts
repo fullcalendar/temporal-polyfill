@@ -43,7 +43,8 @@ export function totalDuration<RA, C, T>(
   if (
     maxLargestUnit < Unit.Day ||
     (maxLargestUnit === Unit.Day &&
-      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds)) // has uniform days?
+      // has uniform days?
+      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
   ) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
@@ -76,7 +77,6 @@ export function totalRelativeDuration(
   _diffMarkers?: DiffMarkers,
 ): number {
   const sign = computeDurationSign(durationFields)
-
   const [epochNano0, epochNano1] = clampRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,

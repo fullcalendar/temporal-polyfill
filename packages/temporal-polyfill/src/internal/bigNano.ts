@@ -104,6 +104,10 @@ export function bigNanoToNumber(
   return days * wholeInDay + (whole + (exact ? remainderNano / divisorNano : 0))
 }
 
+export function bigNanoToExactDays(bigNano: BigNano): number {
+  return bigNano[0] + bigNano[1] / nanoInUtcDay
+}
+
 export function divModBigNano(
   bigNano: BigNano,
   divisorNano: number,

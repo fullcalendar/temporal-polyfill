@@ -29,6 +29,10 @@ import {
 } from './units'
 import { clampProp, divModFloor, divModTrunc, zipProps } from './utils'
 
+/*
+TODO: move all check* calls as late as possible, right before record-creation, even for moving!
+*/
+
 const maxDays = 100000000
 const maxMilli = maxDays * milliInDay
 const epochNanoMax: BigNano = [maxDays, 0]
