@@ -484,10 +484,14 @@ describe('rangeToLocaleStringParts', () => {
 // -----------------------------------------------------------------------------
 
 describe('withDayOfYear', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.withDayOfYear(pd, 5),
+      PlainDateFns.fromString('2024-01-05'),
+    )
+    expectPlainDateEquals(
+      PlainDateFns.withDayOfYear(pd, '5.5' as any),
       PlainDateFns.fromString('2024-01-05'),
     )
   })
@@ -502,20 +506,28 @@ describe('withDayOfYear', () => {
 })
 
 describe('withDayOfMonth', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.withDayOfMonth(pd, 5),
+      PlainDateFns.withFields(pd, { day: 5 }),
+    )
+    expectPlainDateEquals(
+      PlainDateFns.withDayOfMonth(pd, '5.5' as any),
       PlainDateFns.withFields(pd, { day: 5 }),
     )
   })
 })
 
 describe('withDayOfWeek', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.withDayOfWeek(pd, 4),
+      PlainDateFns.fromString('2024-02-29'),
+    )
+    expectPlainDateEquals(
+      PlainDateFns.withDayOfWeek(pd, '4.5' as any),
       PlainDateFns.fromString('2024-02-29'),
     )
   })
@@ -530,13 +542,20 @@ describe('withDayOfWeek', () => {
 })
 
 describe('withWeekOfYear', () => {
-  it('works with ISO calendar', () => {
-    const pd0 = PlainDateFns.fromString(
-      '2024-02-27', // weekOfYear:9, yearOfWeek:2024
-    )
+  it('works with ISO calendar (and coercing to integer)', () => {
+    // weekOfYear:9, yearOfWeek:2024
+    const pd0 = PlainDateFns.fromString('2024-02-27')
+    const pdExp = PlainDateFns.fromString('2024-07-02')
+    const yearExp = 2024
+
     const pd1 = PlainDateFns.withWeekOfYear(pd0, 27)
-    expectPlainDateEquals(pd1, PlainDateFns.fromString('2024-07-02'))
-    expect(PlainDateFns.yearOfWeek(pd1)).toBe(2024)
+    expectPlainDateEquals(PlainDateFns.withWeekOfYear(pd0, 27), pdExp)
+    expect(PlainDateFns.yearOfWeek(pd1)).toBe(yearExp)
+
+    // coerce...
+    const pd2 = PlainDateFns.withWeekOfYear(pd0, '27.5' as any)
+    expectPlainDateEquals(pd2, pdExp)
+    expect(PlainDateFns.yearOfWeek(pd2)).toBe(yearExp)
   })
 
   it('errors on calendars that do not support week numbers', () => {
@@ -551,12 +570,15 @@ describe('withWeekOfYear', () => {
 // -----------------------------------------------------------------------------
 
 describe('addYears', () => {
-  it('works without options', () => {
+  it('works without options (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.addYears(pd, 5),
       PlainDateFns.add(pd, DurationFns.fromFields({ years: 5 })),
     )
+    expect(() => {
+      PlainDateFns.addYears(pd, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -576,12 +598,15 @@ describe('addYears', () => {
 })
 
 describe('addMonths', () => {
-  it('works', () => {
+  it('works without options (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.addMonths(pd, 5),
       PlainDateFns.add(pd, DurationFns.fromFields({ months: 5 })),
     )
+    expect(() => {
+      PlainDateFns.addMonths(pd, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -601,22 +626,28 @@ describe('addMonths', () => {
 })
 
 describe('addWeeks', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.addWeeks(pd, 300),
       PlainDateFns.add(pd, DurationFns.fromFields({ weeks: 300 })),
     )
+    expect(() => {
+      PlainDateFns.addWeeks(pd, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
-describe('addDays', () => {
+describe('addDays (and throws on non-integers)', () => {
   it('works', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.addDays(pd, 300),
       PlainDateFns.add(pd, DurationFns.fromFields({ days: 300 })),
     )
+    expect(() => {
+      PlainDateFns.addDays(pd, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
@@ -624,12 +655,15 @@ describe('addDays', () => {
 // -----------------------------------------------------------------------------
 
 describe('subtractYears', () => {
-  it('works without options', () => {
+  it('works without options (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.subtractYears(pd, 5),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ years: 5 })),
     )
+    expect(() => {
+      PlainDateFns.subtractYears(pd, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -651,12 +685,15 @@ describe('subtractYears', () => {
 })
 
 describe('subtractMonths', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.subtractMonths(pd, 5),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ months: 5 })),
     )
+    expect(() => {
+      PlainDateFns.subtractMonths(pd, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -676,22 +713,28 @@ describe('subtractMonths', () => {
 })
 
 describe('subtractWeeks', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.subtractWeeks(pd, 300),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ weeks: 300 })),
     )
+    expect(() => {
+      PlainDateFns.subtractWeeks(pd, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractDays', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
     expectPlainDateEquals(
       PlainDateFns.subtractDays(pd, 300),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ days: 300 })),
     )
+    expect(() => {
+      PlainDateFns.subtractDays(pd, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 

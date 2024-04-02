@@ -607,10 +607,14 @@ describe('rangeToLocaleStringParts', () => {
 // -----------------------------------------------------------------------------
 
 describe('withDayOfYear', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfYear(pdt, 5),
+      PlainDateTimeFns.fromString('2024-01-05T12:30:00'),
+    )
+    expectPlainDateTimeEquals(
+      PlainDateTimeFns.withDayOfYear(pdt, '5.5' as any),
       PlainDateTimeFns.fromString('2024-01-05T12:30:00'),
     )
   })
@@ -625,20 +629,28 @@ describe('withDayOfYear', () => {
 })
 
 describe('withDayOfMonth', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfMonth(pdt, 5),
+      PlainDateTimeFns.withFields(pdt, { day: 5 }),
+    )
+    expectPlainDateTimeEquals(
+      PlainDateTimeFns.withDayOfMonth(pdt, '5.5' as any),
       PlainDateTimeFns.withFields(pdt, { day: 5 }),
     )
   })
 })
 
 describe('withDayOfWeek', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfWeek(pdt, 4),
+      PlainDateTimeFns.fromString('2024-02-29T12:30:00'),
+    )
+    expectPlainDateTimeEquals(
+      PlainDateTimeFns.withDayOfWeek(pdt, '4.5' as any),
       PlainDateTimeFns.fromString('2024-02-29T12:30:00'),
     )
   })
@@ -653,16 +665,20 @@ describe('withDayOfWeek', () => {
 })
 
 describe('withWeekOfYear', () => {
-  it('works with ISO calendar', () => {
-    const pdt0 = PlainDateTimeFns.fromString(
-      '2024-02-27T12:30:00', // weekOfYear:9, yearOfWeek:2024
-    )
+  it('works with ISO calendar (and coerces to integer)', () => {
+    // weekOfYear:9, yearOfWeek:2024
+    const pdt0 = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdExp = PlainDateTimeFns.fromString('2024-07-02T12:30:00')
+    const yearExp = 2024
+
     const pdt1 = PlainDateTimeFns.withWeekOfYear(pdt0, 27)
-    expectPlainDateTimeEquals(
-      pdt1,
-      PlainDateTimeFns.fromString('2024-07-02T12:30:00'),
-    )
-    expect(PlainDateTimeFns.yearOfWeek(pdt1)).toBe(2024)
+    expectPlainDateTimeEquals(pdt1, pdExp)
+    expect(PlainDateTimeFns.yearOfWeek(pdt1)).toBe(yearExp)
+
+    // coerce...
+    const pdt2 = PlainDateTimeFns.withWeekOfYear(pdt0, '27.5' as any)
+    expectPlainDateTimeEquals(pdt2, pdExp)
+    expect(PlainDateTimeFns.yearOfWeek(pdt2)).toBe(yearExp)
   })
 
   it('errors on calendars that do not support week numbers', () => {
@@ -677,12 +693,15 @@ describe('withWeekOfYear', () => {
 // -----------------------------------------------------------------------------
 
 describe('addYears', () => {
-  it('works without options', () => {
+  it('works without options (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addYears(pdt, 5),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ years: 5 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addYears(pdt, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -702,12 +721,15 @@ describe('addYears', () => {
 })
 
 describe('addMonths', () => {
-  it('works', () => {
+  it('works without options (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMonths(pdt, 5),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ months: 5 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addMonths(pdt, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -731,82 +753,106 @@ describe('addMonths', () => {
 })
 
 describe('addWeeks', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addWeeks(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ weeks: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addWeeks(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addDays', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addDays(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ days: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addDays(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addHours', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addHours(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ hours: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addHours(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addMinutes', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMinutes(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ minutes: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addMinutes(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addSeconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addSeconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ seconds: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addSeconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addMilliseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMilliseconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ milliseconds: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addMilliseconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addMicroseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMicroseconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ microseconds: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addMicroseconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addNanoseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addNanoseconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ nanoseconds: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.addNanoseconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
@@ -814,12 +860,15 @@ describe('addNanoseconds', () => {
 // -----------------------------------------------------------------------------
 
 describe('subtractYears', () => {
-  it('works without options', () => {
+  it('works without options (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractYears(pdt, 5),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ years: 5 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractYears(pdt, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -839,12 +888,15 @@ describe('subtractYears', () => {
 })
 
 describe('subtractMonths', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMonths(pdt, 5),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ months: 5 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractMonths(pdt, 5.5)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -868,57 +920,72 @@ describe('subtractMonths', () => {
 })
 
 describe('subtractWeeks', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractWeeks(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ weeks: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractWeeks(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractDays', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractDays(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ days: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractDays(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractHours', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractHours(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ hours: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractHours(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractMinutes', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMinutes(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ minutes: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractMinutes(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractSeconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractSeconds(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ seconds: 300 })),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractSeconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractMilliseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMilliseconds(pdt, 300),
@@ -927,11 +994,14 @@ describe('subtractMilliseconds', () => {
         DurationFns.fromFields({ milliseconds: 300 }),
       ),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractMilliseconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractMicroseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMicroseconds(pdt, 300),
@@ -940,11 +1010,14 @@ describe('subtractMicroseconds', () => {
         DurationFns.fromFields({ microseconds: 300 }),
       ),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractMicroseconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractNanoseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractNanoseconds(pdt, 300),
@@ -953,6 +1026,9 @@ describe('subtractNanoseconds', () => {
         DurationFns.fromFields({ nanoseconds: 300 }),
       ),
     )
+    expect(() => {
+      PlainDateTimeFns.subtractNanoseconds(pdt, 300.5)
+    }).toThrowError(RangeError)
   })
 })
 

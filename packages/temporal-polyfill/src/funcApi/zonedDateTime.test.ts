@@ -855,84 +855,119 @@ describe('rangeToLocaleStringParts', () => {
 // -----------------------------------------------------------------------------
 
 describe('withDayOfYear', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
-    const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
-    expectZonedDateTimeEquals(zdt1, {
+    const zdtExp = {
       // 2024-01-05T12:30:00[America/New_York]
       epochNanoseconds: 1704475800000000000n,
       timeZone: 'America/New_York',
-    })
+    }
+
+    const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
+    expectZonedDateTimeEquals(zdt1, zdtExp)
+
+    // coerce...
+    const zdt2 = ZonedDateTimeFns.withDayOfYear(zdt0, '5.5' as any)
+    expectZonedDateTimeEquals(zdt2, zdtExp)
   })
 
   it('works with non-ISO calendar', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
     )
-    const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
-    expectZonedDateTimeEquals(zdt1, {
+    const zdtExp = {
       // 2023-09-20T12:30:00-04:00[America/New_York][u-ca=hebrew]
       epochNanoseconds: 1695227400000000000n,
       timeZone: 'America/New_York',
       calendar: 'hebrew',
-    })
+    }
+
+    const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
+    expectZonedDateTimeEquals(zdt1, zdtExp)
+
+    // coerce...
+    const zdt2 = ZonedDateTimeFns.withDayOfYear(zdt0, '5.5' as any)
+    expectZonedDateTimeEquals(zdt2, zdtExp)
   })
 })
 
 describe('withDayOfMonth', () => {
-  it('works with ISO calendar', () => {
-    const zdt0 = ZonedDateTimeFns.fromString(
+  it('works with ISO calendar (and coerces to integer)', () => {
+    const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
-    const zdt1 = ZonedDateTimeFns.withDayOfMonth(zdt0, 5)
     expectZonedDateTimeEquals(
-      zdt1,
-      ZonedDateTimeFns.withFields(zdt0, { day: 5 }),
+      ZonedDateTimeFns.withDayOfMonth(zdt, 5),
+      ZonedDateTimeFns.withFields(zdt, { day: 5 }),
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.withDayOfMonth(zdt, '5.5' as any),
+      ZonedDateTimeFns.withFields(zdt, { day: 5 }),
     )
   })
 })
 
 describe('withDayOfWeek', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
-    const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
-    expectZonedDateTimeEquals(zdt1, {
+    const zdtExp = {
       // 2024-02-29T12:30:00[America/New_York]
       epochNanoseconds: 1709227800000000000n,
       timeZone: 'America/New_York',
-    })
+    }
+
+    const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
+    expectZonedDateTimeEquals(zdt1, zdtExp)
+
+    // coerce...
+    const zdt2 = ZonedDateTimeFns.withDayOfWeek(zdt0, '4.5' as any)
+    expectZonedDateTimeEquals(zdt2, zdtExp)
   })
 
   it('works with non-ISO calendar', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
     )
-    const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
-    expectZonedDateTimeEquals(zdt1, {
+    const zdtExp = {
       // 2024-02-29T12:30:00[America/New_York][u-ca=hebrew]
       epochNanoseconds: 1709227800000000000n,
       timeZone: 'America/New_York',
       calendar: 'hebrew',
-    })
+    }
+
+    const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
+    expectZonedDateTimeEquals(zdt1, zdtExp)
+
+    // coerce...
+    const zdt2 = ZonedDateTimeFns.withDayOfWeek(zdt0, '4.5' as any)
+    expectZonedDateTimeEquals(zdt2, zdtExp)
   })
 })
 
 describe('withWeekOfYear', () => {
-  it('works with ISO calendar', () => {
+  it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]', // weekOfYear:9, yearOfWeek:2024
     )
-    const zdt1 = ZonedDateTimeFns.withWeekOfYear(zdt0, 27)
-    expectZonedDateTimeEquals(zdt1, {
+    const zdtExp = {
       // 2024-07-02T12:30:00-04:00[America/New_York]
       epochNanoseconds: 1719937800000000000n,
       timeZone: 'America/New_York',
-    })
-    expect(ZonedDateTimeFns.yearOfWeek(zdt1)).toBe(2024)
+    }
+    const yearExp = 2024
+
+    const zdt1 = ZonedDateTimeFns.withWeekOfYear(zdt0, 27)
+    expectZonedDateTimeEquals(zdt1, zdtExp)
+    expect(ZonedDateTimeFns.yearOfWeek(zdt1)).toBe(yearExp)
+
+    // coerce...
+    const zdt2 = ZonedDateTimeFns.withWeekOfYear(zdt0, '27.5' as any)
+    expectZonedDateTimeEquals(zdt2, zdtExp)
+    expect(ZonedDateTimeFns.yearOfWeek(zdt2)).toBe(yearExp)
   })
 
   it('errors on calendars that do not support week numbers', () => {
@@ -949,7 +984,7 @@ describe('withWeekOfYear', () => {
 // -----------------------------------------------------------------------------
 
 describe('addYears', () => {
-  it('works without options', () => {
+  it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -957,6 +992,9 @@ describe('addYears', () => {
       ZonedDateTimeFns.addYears(zdt, 5),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ years: 5 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addYears(zdt, '5.5' as any)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -980,7 +1018,7 @@ describe('addYears', () => {
 })
 
 describe('addMonths', () => {
-  it('works', () => {
+  it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -988,6 +1026,9 @@ describe('addMonths', () => {
       ZonedDateTimeFns.addMonths(zdt, 5),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ months: 5 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addMonths(zdt, '5.5' as any)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -1011,7 +1052,7 @@ describe('addMonths', () => {
 })
 
 describe('addWeeks', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1019,11 +1060,14 @@ describe('addWeeks', () => {
       ZonedDateTimeFns.addWeeks(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ weeks: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addWeeks(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addDays', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1031,11 +1075,14 @@ describe('addDays', () => {
       ZonedDateTimeFns.addDays(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ days: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addDays(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addHours', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1043,11 +1090,14 @@ describe('addHours', () => {
       ZonedDateTimeFns.addHours(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ hours: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addHours(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addMinutes', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1055,11 +1105,14 @@ describe('addMinutes', () => {
       ZonedDateTimeFns.addMinutes(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ minutes: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addMinutes(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addSeconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1067,10 +1120,13 @@ describe('addSeconds', () => {
       ZonedDateTimeFns.addSeconds(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ seconds: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addSeconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
-describe('addMilliseconds', () => {
+describe('addMilliseconds (and throws on non-integers)', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
@@ -1079,11 +1135,14 @@ describe('addMilliseconds', () => {
       ZonedDateTimeFns.addMilliseconds(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ milliseconds: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addMilliseconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addMicroseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1091,11 +1150,14 @@ describe('addMicroseconds', () => {
       ZonedDateTimeFns.addMicroseconds(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ microseconds: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addMicroseconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('addNanoseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1103,6 +1165,9 @@ describe('addNanoseconds', () => {
       ZonedDateTimeFns.addNanoseconds(zdt, 300),
       ZonedDateTimeFns.add(zdt, DurationFns.fromFields({ nanoseconds: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.addNanoseconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
@@ -1110,7 +1175,7 @@ describe('addNanoseconds', () => {
 // -----------------------------------------------------------------------------
 
 describe('subtractYears', () => {
-  it('works without options', () => {
+  it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1118,6 +1183,9 @@ describe('subtractYears', () => {
       ZonedDateTimeFns.subtractYears(zdt, 5),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ years: 5 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractYears(zdt, '5.5' as any)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -1141,7 +1209,7 @@ describe('subtractYears', () => {
 })
 
 describe('subtractMonths', () => {
-  it('works', () => {
+  it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1149,6 +1217,9 @@ describe('subtractMonths', () => {
       ZonedDateTimeFns.subtractMonths(zdt, 5),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ months: 5 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractMonths(zdt, '5.5' as any)
+    }).toThrowError(RangeError)
   })
 
   it('works with explicit constrain overflow option', () => {
@@ -1172,7 +1243,7 @@ describe('subtractMonths', () => {
 })
 
 describe('subtractWeeks', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1180,11 +1251,14 @@ describe('subtractWeeks', () => {
       ZonedDateTimeFns.subtractWeeks(zdt, 300),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ weeks: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractWeeks(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractDays', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1192,11 +1266,14 @@ describe('subtractDays', () => {
       ZonedDateTimeFns.subtractDays(zdt, 300),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ days: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractDays(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractHours', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1204,11 +1281,14 @@ describe('subtractHours', () => {
       ZonedDateTimeFns.subtractHours(zdt, 300),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ hours: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractHours(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractMinutes', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1216,11 +1296,14 @@ describe('subtractMinutes', () => {
       ZonedDateTimeFns.subtractMinutes(zdt, 300),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ minutes: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractMinutes(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractSeconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1228,11 +1311,14 @@ describe('subtractSeconds', () => {
       ZonedDateTimeFns.subtractSeconds(zdt, 300),
       ZonedDateTimeFns.subtract(zdt, DurationFns.fromFields({ seconds: 300 })),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractSeconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractMilliseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1243,11 +1329,14 @@ describe('subtractMilliseconds', () => {
         DurationFns.fromFields({ milliseconds: 300 }),
       ),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractMilliseconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractMicroseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1258,11 +1347,14 @@ describe('subtractMicroseconds', () => {
         DurationFns.fromFields({ microseconds: 300 }),
       ),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractMicroseconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
 describe('subtractNanoseconds', () => {
-  it('works', () => {
+  it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
@@ -1273,6 +1365,9 @@ describe('subtractNanoseconds', () => {
         DurationFns.fromFields({ nanoseconds: 300 }),
       ),
     )
+    expect(() => {
+      ZonedDateTimeFns.subtractNanoseconds(zdt, '300.5' as any)
+    }).toThrowError(RangeError)
   })
 })
 
