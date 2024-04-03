@@ -16,6 +16,7 @@ import {
   MoveMarker,
   RelativeToSlots,
   createMarkerDiffSystem,
+  isUniformUnit,
 } from './markerSystem'
 import { Overflow } from './options'
 import {
@@ -72,23 +73,18 @@ export function addDurations<RA, C, T>(
 ): DurationSlots {
   const normalOptions = normalizeOptions(options)
   const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
-  const largestUnit = Math.max(
+  const maxUnit = Math.max(
     getLargestDurationUnit(slots),
     getLargestDurationUnit(otherSlots),
   ) as Unit
 
-  if (
-    largestUnit < Unit.Day ||
-    (largestUnit === Unit.Day &&
-      // has uniform days?
-      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
-  ) {
+  if (isUniformUnit(maxUnit, relativeToSlots)) {
     return createDurationSlots(
       checkDurationUnits(
         addDayTimeDurations(
           slots,
           otherSlots,
-          largestUnit as DayTimeUnit,
+          maxUnit as DayTimeUnit,
           doSubtract,
         ),
       ),
@@ -110,7 +106,7 @@ export function addDurations<RA, C, T>(
   )
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
-  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+  const balancedDuration = diffMarkers(marker, endMarker, maxUnit)
 
   return createDurationSlots(balancedDuration)
 }
@@ -154,19 +150,14 @@ export function roundDuration<RA, C, T>(
     relativeToSlots,
   ] = refineDurationRoundOptions(options, durationLargestUnit, refineRelativeTo)
 
-  const maxLargestUnit = Math.max(durationLargestUnit, largestUnit)
+  const maxUnit = Math.max(durationLargestUnit, largestUnit)
 
-  if (
-    maxLargestUnit < Unit.Day ||
-    (maxLargestUnit === Unit.Day &&
-      // has uniform days?
-      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
-  ) {
+  if (isUniformUnit(maxUnit, relativeToSlots)) {
     return createDurationSlots(
       checkDurationUnits(
         roundDayTimeDuration(
           slots,
-          largestUnit as DayTimeUnit, // guaranteed <= maxLargestUnit <= Unit.Day
+          largestUnit as DayTimeUnit,
           smallestUnit as DayTimeUnit,
           roundingInc,
           roundingMode,
@@ -294,7 +285,7 @@ export function checkDurationTimeUnit(n: number): void {
 // Field <-> Nanosecond Conversion
 // -----------------------------------------------------------------------------
 
-export function durationTimeFieldsToLargeNanoStrict(
+export function durationTimeFieldsToBigNanoStrict(
   fields: DurationFields,
 ): BigNano {
   if (durationHasDateParts(fields)) {

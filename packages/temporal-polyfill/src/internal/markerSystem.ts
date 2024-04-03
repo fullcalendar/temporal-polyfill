@@ -35,11 +35,11 @@ export function createMarkerSystem<C, CO, T>(
 ): MarkerSystem<CO> {
   const calendarOps = getCalendarOps(relativeToSlots.calendar)
 
-  if ((relativeToSlots as ZonedEpochSlots<C, T>).epochNanoseconds) {
+  if (isZonedEpochSlots(relativeToSlots)) {
     return [
-      relativeToSlots as ZonedEpochSlots<C, T>,
+      relativeToSlots,
       calendarOps,
-      getTimeZoneOps((relativeToSlots as ZonedEpochSlots<C, T>).timeZone),
+      getTimeZoneOps(relativeToSlots.timeZone),
     ]
   }
 
@@ -92,6 +92,21 @@ export function anyMarkerToEpochNano(marker: Marker): BigNano {
     (marker as ZonedEpochSlots).epochNanoseconds ||
     isoToEpochNano(marker as IsoDateTimeFields)!
   )
+}
+
+export function isZonedEpochSlots(
+  marker: Marker | undefined,
+): marker is ZonedEpochSlots {
+  return (marker &&
+    (marker as ZonedEpochSlots).epochNanoseconds) as unknown as boolean
+}
+
+/*
+For PlainDate(Time) markers, days+time are uniform
+For ZonedDateTime markers, only time is uniform (days can vary in length)
+*/
+export function isUniformUnit(unit: Unit, marker: Marker | undefined): boolean {
+  return unit <= Unit.Day - (isZonedEpochSlots(marker) ? 1 : 0)
 }
 
 // System w/ Diff Operations

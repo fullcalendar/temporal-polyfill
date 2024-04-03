@@ -1,9 +1,8 @@
 import { BigNano, divModBigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
-import { durationFieldNamesAsc } from './durationFields'
 import {
   checkDurationTimeUnit,
-  getLargestDurationUnit,
+  durationFieldsToBigNano,
   negateDurationFields,
 } from './durationMath'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
@@ -27,9 +26,9 @@ import {
   refineZonedDateTimeDisplayOptions,
 } from './optionsRefine'
 import {
-  balanceDayTimeDurationByInc,
   roundBigNanoByInc,
   roundDateTimeToNano,
+  roundDayTimeDurationByInc,
   roundTimeToNano,
   roundToMinute,
 } from './round'
@@ -50,7 +49,6 @@ import { utcTimeZoneId } from './timeZoneConfig'
 import { TimeZoneOffsetOps } from './timeZoneOps'
 import {
   Unit,
-  givenFieldsToBigNano,
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
@@ -166,12 +164,7 @@ export function formatDurationIso(
   if (nanoInc > 1) {
     slots = {
       ...slots,
-      ...balanceDayTimeDurationByInc(
-        slots,
-        Math.min(getLargestDurationUnit(slots), Unit.Day),
-        nanoInc,
-        roundingMode,
-      ),
+      ...roundDayTimeDurationByInc(slots, nanoInc, roundingMode),
     }
   }
 
@@ -309,7 +302,7 @@ function formatDurationSlots(
   const { hours, minutes } = abs
 
   const [wholeSec, subsecNano] = divModBigNano(
-    givenFieldsToBigNano(abs, Unit.Second, durationFieldNamesAsc),
+    durationFieldsToBigNano(abs, Unit.Second),
     nanoInSec,
     divModTrunc,
   )

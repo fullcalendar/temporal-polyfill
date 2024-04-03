@@ -8,13 +8,12 @@ import { DayOps, MoveOps, YearMonthMoveOps } from './calendarOps'
 import {
   DurationFields,
   durationFieldDefaults,
-  durationFieldNamesAsc,
   durationTimeFieldDefaults,
 } from './durationFields'
 import {
   durationFieldsToBigNano,
   durationHasDateParts,
-  durationTimeFieldsToLargeNanoStrict,
+  durationTimeFieldsToBigNanoStrict,
   negateDuration,
   negateDurationFields,
 } from './durationMath'
@@ -59,7 +58,7 @@ import {
   getSingleInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneOps'
-import { Unit, givenFieldsToBigNano, milliInDay } from './units'
+import { Unit, milliInDay } from './units'
 import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 
 // High-Level
@@ -199,7 +198,7 @@ function moveEpochNano(
   durationFields: DurationFields,
 ): BigNano {
   return checkEpochNanoInBounds(
-    addBigNanos(epochNano, durationTimeFieldsToLargeNanoStrict(durationFields)),
+    addBigNanos(epochNano, durationTimeFieldsToBigNanoStrict(durationFields)),
   )
 }
 
@@ -290,8 +289,7 @@ export function moveDate(
   refineOverflowOptions(options) // for validation only
 
   const days =
-    durationFields.days +
-    givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
+    durationFields.days + durationFieldsToBigNano(durationFields, Unit.Hour)[0]
 
   if (days) {
     return checkIsoDateInBounds(moveByDays(isoDateFields, days))
@@ -315,10 +313,9 @@ function moveTime(
   isoFields: IsoTimeFields,
   durationFields: DurationFields,
 ): [IsoTimeFields, number] {
-  const [durDays, durTimeNano] = givenFieldsToBigNano(
+  const [durDays, durTimeNano] = durationFieldsToBigNano(
     durationFields,
     Unit.Hour,
-    durationFieldNamesAsc,
   )
   const [newIsoFields, overflowDays] = nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoFields) + durTimeNano,
@@ -341,11 +338,7 @@ export function nativeDateAdd(
   let epochMilli: number | undefined
 
   // convert time fields to days
-  days += givenFieldsToBigNano(
-    durationFields,
-    Unit.Hour,
-    durationFieldNamesAsc,
-  )[0]
+  days += durationFieldsToBigNano(durationFields, Unit.Hour)[0]
 
   if (years || months) {
     epochMilli = nativeYearMonthAdd(

@@ -1,7 +1,7 @@
 import { compareBigNanos } from './bigNano'
 import { MoveOps } from './calendarOps'
 import { durationFieldNamesAsc } from './durationFields'
-import { getLargestDurationUnit } from './durationMath'
+import { durationFieldsToBigNano, getLargestDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
@@ -9,6 +9,7 @@ import {
   anyMarkerToEpochNano,
   createMarkerSystem,
   createMoveMarker,
+  isUniformUnit,
 } from './markerSystem'
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
@@ -27,7 +28,7 @@ import {
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
 import { TimeZoneOps } from './timeZoneOps'
-import { Unit, givenFieldsToBigNano } from './units'
+import { Unit } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'
 
 // High-Level Compare
@@ -73,15 +74,10 @@ export function compareDurations<RA, C, T>(
     return 0
   }
 
-  if (
-    largestUnit < Unit.Day ||
-    (largestUnit === Unit.Day &&
-      // has uniform days?
-      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
-  ) {
+  if (isUniformUnit(largestUnit, relativeToSlots)) {
     return compareBigNanos(
-      givenFieldsToBigNano(durationSlots0, Unit.Day, durationFieldNamesAsc),
-      givenFieldsToBigNano(durationSlots1, Unit.Day, durationFieldNamesAsc),
+      durationFieldsToBigNano(durationSlots0),
+      durationFieldsToBigNano(durationSlots1),
     )
   }
 

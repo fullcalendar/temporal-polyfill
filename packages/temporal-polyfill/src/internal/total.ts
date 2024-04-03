@@ -20,6 +20,7 @@ import {
   MoveMarker,
   RelativeToSlots,
   createMarkerDiffSystem,
+  isUniformUnit,
 } from './markerSystem'
 import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
@@ -38,14 +39,9 @@ export function totalDuration<RA, C, T>(
     options,
     refineRelativeTo,
   )
-  const maxLargestUnit = Math.max(totalUnit, durationLargestUnit)
+  const maxUnit = Math.max(totalUnit, durationLargestUnit)
 
-  if (
-    maxLargestUnit < Unit.Day ||
-    (maxLargestUnit === Unit.Day &&
-      // has uniform days?
-      !(relativeToSlots && (relativeToSlots as any).epochNanoseconds))
-  ) {
+  if (isUniformUnit(maxUnit, relativeToSlots)) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
 

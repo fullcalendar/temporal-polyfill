@@ -2,6 +2,7 @@ import {
   BigNano,
   addBigNanos,
   bigNanoOutside,
+  bigNanoToExactDays,
   bigNanoToNumber,
   createBigNano,
   diffBigNanos,
@@ -17,6 +18,7 @@ import {
 import {
   computeDurationSign,
   durationFieldsToBigNano,
+  getLargestDurationUnit,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
@@ -27,6 +29,7 @@ import {
   Marker,
   MarkerToEpochNano,
   MoveMarker,
+  isZonedEpochSlots,
 } from './markerSystem'
 import { moveByDays } from './move'
 import {
@@ -38,7 +41,6 @@ import {
 import { RoundingOptions, refineRoundingOptions } from './optionsRefine'
 import {
   DateTimeSlots,
-  EpochSlots,
   InstantSlots,
   PlainDateTimeSlots,
   PlainTimeSlots,
@@ -68,7 +70,6 @@ import {
   TimeUnit,
   TimeUnitName,
   Unit,
-  givenFieldsToBigNano,
   nanoInHour,
   nanoInMinute,
   nanoInUtcDay,
@@ -260,6 +261,7 @@ export function roundZonedEpochToInterval<C>(
 
 // Rounding Time-based Units
 // -----------------------------------------------------------------------------
+// TODO: combine with below?
 
 function roundDateTime(
   isoFields: IsoDateTimeFields,
@@ -314,6 +316,21 @@ export function roundTimeToNano(
   )
 }
 
+/*
+Common operation
+Always uses halfExpand
+*/
+export function roundToMinute(offsetNano: number): number {
+  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
+}
+
+export function computeNanoInc(
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+): number {
+  return unitNanoMap[smallestUnit] * roundingInc
+}
+
 // Interval / Floor Funcs
 // -----------------------------------------------------------------------------
 
@@ -336,6 +353,25 @@ export function computeDayFloor(
 // Duration
 // -----------------------------------------------------------------------------
 
+/*
+No rebalancing to units larger than days!
+Returns partial result, to be merged with other duration fields
+*/
+export function roundDayTimeDurationByInc(
+  durationFields: DurationFields,
+  nanoInc: number,
+  roundingMode: RoundingMode,
+): Partial<DurationFields> {
+  const maxUnit = Math.min(getLargestDurationUnit(durationFields), Unit.Day) // force <= Day
+  const bigNano = durationFieldsToBigNano(durationFields, maxUnit)
+  const roundedBigNano = roundBigNanoByInc(bigNano, nanoInc, roundingMode)
+  return nanoToDurationDayTimeFields(roundedBigNano, maxUnit)
+}
+
+/*
+No rebalancing to units larger than days!
+Returns ALL duration fields, some zeroed out
+*/
 export function roundDayTimeDuration(
   durationFields: DurationFields,
   largestUnit: DayTimeUnit,
@@ -343,25 +379,6 @@ export function roundDayTimeDuration(
   roundingInc: number,
   roundingMode: RoundingMode,
 ): DurationFields {
-  return {
-    ...durationFieldDefaults,
-    ...balanceDayTimeDuration(
-      durationFields,
-      largestUnit,
-      smallestUnit,
-      roundingInc,
-      roundingMode,
-    ),
-  }
-}
-
-function balanceDayTimeDuration(
-  durationFields: DurationFields,
-  largestUnit: DayTimeUnit,
-  smallestUnit: DayTimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingMode,
-): Partial<DurationFields> {
   const bigNano = durationFieldsToBigNano(durationFields)
   const roundedBigNano = roundBigNano(
     bigNano,
@@ -369,18 +386,10 @@ function balanceDayTimeDuration(
     roundingInc,
     roundingMode,
   )
-  return nanoToDurationDayTimeFields(roundedBigNano, largestUnit)
-}
-
-export function balanceDayTimeDurationByInc(
-  durationFields: DurationFields,
-  largestUnit: DayTimeUnit,
-  nanoInc: number, // REQUIRED: not larger than a day
-  roundingMode: RoundingMode,
-): Partial<DurationFields> {
-  const bigNano = durationFieldsToBigNano(durationFields, largestUnit)
-  const roundedBigNano = roundBigNanoByInc(bigNano, nanoInc, roundingMode)
-  return nanoToDurationDayTimeFields(roundedBigNano, largestUnit)
+  return {
+    ...durationFieldDefaults,
+    ...nanoToDurationDayTimeFields(roundedBigNano, largestUnit),
+  }
 }
 
 /*
@@ -406,7 +415,7 @@ export function roundRelativeDuration(
   const nudgeFunc = (
     smallestUnit > Unit.Day
       ? nudgeRelativeDuration
-      : (marker as EpochSlots).epochNanoseconds && smallestUnit < Unit.Day
+      : isZonedEpochSlots(marker) && smallestUnit < Unit.Day
         ? nudgeZonedTimeDuration
         : nudgeDayTimeDuration
   ) as typeof nudgeRelativeDuration // most general
@@ -430,7 +439,7 @@ export function roundRelativeDuration(
       roundedDurationFields,
       roundedEpochNano,
       largestUnit,
-      Math.max(Unit.Day, smallestUnit),
+      Math.max(Unit.Day, smallestUnit), // force to Day or larger
       // MarkerMoveSystem...
       marker,
       markerToEpochNano,
@@ -443,25 +452,7 @@ export function roundRelativeDuration(
 
 // Rounding Numbers
 // -----------------------------------------------------------------------------
-
-export function computeNanoInc(
-  smallestUnit: DayTimeUnit,
-  roundingInc: number,
-): number {
-  return unitNanoMap[smallestUnit] * roundingInc
-}
-
-export function roundByInc(
-  num: number,
-  inc: number,
-  roundingMode: RoundingMode,
-): number {
-  return roundWithMode(num / inc, roundingMode) * inc
-}
-
-export function roundToMinute(offsetNano: number): number {
-  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
-}
+// TODO: merge with above
 
 export function roundBigNano(
   bigNano: BigNano,
@@ -471,8 +462,9 @@ export function roundBigNano(
   useDayOrigin?: boolean,
 ): BigNano {
   if (smallestUnit === Unit.Day) {
-    const daysExact = bigNanoToNumber(bigNano, nanoInUtcDay, true)
-    return [roundByInc(daysExact, roundingInc, roundingMode), 0]
+    const daysExact = bigNanoToExactDays(bigNano)
+    const daysRounded = roundByInc(daysExact, roundingInc, roundingMode)
+    return [daysRounded, 0]
   }
 
   return roundBigNanoByInc(
@@ -504,6 +496,18 @@ export function roundBigNanoByInc(
   )
 
   return createBigNano(days + dayDelta, roundedTimeNano)
+}
+
+/*
+Never receives smallestUnit/roundingIncrement
+Use computeNanoInc for that
+*/
+export function roundByInc(
+  num: number,
+  inc: number,
+  roundingMode: RoundingMode,
+): number {
+  return roundWithMode(num / inc, roundingMode) * inc
 }
 
 export function roundWithMode(num: number, roundingMode: RoundingMode): number {
@@ -538,11 +542,14 @@ function nudgeDayTimeDuration(
     roundingMode,
   )
   const nanoDiff = diffBigNanos(bigNano, roundedBigNano)
+
+  // Did the # of days expand? [0] is BigNano's day-unit
   const expandedBigUnit = Math.sign(roundedBigNano[0] - bigNano[0]) === sign
 
+  // Convert back to day-and-time field
   const roundedDayTimeFields = nanoToDurationDayTimeFields(
     roundedBigNano,
-    Math.min(largestUnit, Unit.Day),
+    Math.min(largestUnit, Unit.Day), // force to Day or smaller
   )
   const nudgedDurationFields = {
     ...durationFields,
@@ -577,11 +584,10 @@ function nudgeZonedTimeDuration(
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const sign = computeDurationSign(durationFields)
-  let [dayDelta, timeNano] = givenFieldsToBigNano(
-    durationFields,
-    Unit.Hour,
-    durationFieldNamesAsc,
-  )
+
+  // dayDelta ALWAYS zero here because durationFields time-units already balanced up to days
+  let [dayDelta, timeNano] = durationFieldsToBigNano(durationFields, Unit.Hour)
+
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 

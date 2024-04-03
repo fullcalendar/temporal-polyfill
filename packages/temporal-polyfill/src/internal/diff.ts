@@ -357,10 +357,9 @@ export function diffPlainTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, optionsCopy, Unit.Hour, Unit.Hour)
 
-  const nanoInc = computeNanoInc(smallestUnit as TimeUnit, roundingInc)
   const timeDiffNano = roundByInc(
     diffTimes(plainTimeSlots0, plainTimeSlots1),
-    nanoInc,
+    computeNanoInc(smallestUnit as TimeUnit, roundingInc),
     roundingMode,
   )
 
