@@ -17,19 +17,43 @@ const nanoInMinute = 60000000000
 const nanoInHour = 3600000000000
 
 export function endOfYear<T extends YearMonthObj>(date: T): T {
-  return startOfYear(date).add({ years: 1 }).subtract({ nanoseconds: 1 }) as T
+  return startOfYear(date)
+    .add({ years: 1 })
+    .subtract(
+      (date as DateTimeObj).nanosecond !== undefined
+        ? { nanoseconds: 1 }
+        : { days: 1 },
+    ) as T
 }
 
 export function endOfMonth<T extends DateObj>(date: T): T {
-  return startOfMonth(date).add({ months: 1 }).subtract({ nanoseconds: 1 }) as T
+  return startOfMonth(date)
+    .add({ months: 1 })
+    .subtract(
+      (date as DateTimeObj).nanosecond !== undefined
+        ? { nanoseconds: 1 }
+        : { days: 1 },
+    ) as T
 }
 
-export function endOfWeek<T extends DateTimeObj>(date: T): T {
-  return startOfWeek(date).add({ weeks: 1 }).subtract({ nanoseconds: 1 }) as T
+export function endOfWeek<T extends DateObj>(date: T): T {
+  return startOfWeek(date)
+    .add({ weeks: 1 })
+    .subtract(
+      (date as DateTimeObj).nanosecond !== undefined
+        ? { nanoseconds: 1 }
+        : { days: 1 },
+    ) as T
 }
 
 export function endOfDay<T extends DateTimeObj>(date: T): T {
-  return date.withPlainTime().add({ days: 1 }).subtract({ nanoseconds: 1 }) as T
+  if (date.withPlainTime) {
+    return date
+      .withPlainTime()
+      .add({ days: 1 })
+      .subtract({ nanoseconds: 1 }) as T
+  }
+  return date // in case PlainDate passed in, not moved to next day
 }
 
 export function endOfHour<T extends DateTimeObj>(date: T): T {

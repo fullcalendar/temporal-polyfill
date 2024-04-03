@@ -26,11 +26,17 @@ export function startOfMonth<T extends DateObj>(date: T): T {
 }
 
 export function startOfWeek<T extends DateObj>(date: T): T {
-  return withDayOfWeek(date, 1)
+  const movedDate = withDayOfWeek(date, 1)
+  return (movedDate as DateTimeObj).withPlainTime
+    ? ((movedDate as DateTimeObj).withPlainTime() as T)
+    : movedDate
 }
 
 export function startOfDay<T extends DateTimeObj>(dateTime: T): T {
-  return dateTime.withPlainTime() as T
+  if (dateTime.withPlainTime) {
+    return dateTime.withPlainTime() as T
+  }
+  return dateTime // in case PlainDate passed in, no error
 }
 
 export function startOfHour<T extends DateTimeObj>(dateTime: T): T {

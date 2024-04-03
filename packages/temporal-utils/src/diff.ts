@@ -1,15 +1,5 @@
 import type { Temporal } from 'temporal-spec'
-import {
-  DateObj,
-  DateTimeObj,
-  YearMonthObj,
-  normalizeRoundingOptions,
-} from './utils'
-
-export type DiffOptions = {
-  roundingMode?: Temporal.RoundingMode
-  roundingIncrement?: number
-}
+import { DateObj, DateTimeObj, YearMonthObj } from './utils'
 
 export type DiffFunc<T extends YearMonthObj = DateTimeObj> = (
   date0: T,
@@ -17,16 +7,18 @@ export type DiffFunc<T extends YearMonthObj = DateTimeObj> = (
   options?: Temporal.RoundingMode | DiffOptions,
 ) => number
 
-function createDiffFunc(unit: Temporal.DateTimeUnit): DiffFunc {
+function createDiffFunc(
+  unit: Temporal.PluralUnit<Temporal.DateTimeUnit>,
+): DiffFunc {
   return (date0, date1, options) => {
-    const normOptions = normalizeRoundingOptions(options) || {}
+    const normOptions = normalizeDiffOptions(options)
 
     if (normOptions.roundingMode) {
       return date0.until(date1, {
         ...normOptions,
         largestUnit: unit,
         smallestUnit: unit,
-      }).years
+      })[unit]
     }
 
     return date0
@@ -41,19 +33,33 @@ function createDiffFunc(unit: Temporal.DateTimeUnit): DiffFunc {
   }
 }
 
-export const diffYears = createDiffFunc('year') as DiffFunc<YearMonthObj>
-export const diffMonths = createDiffFunc('month') as DiffFunc<DateObj>
-export const diffWeeks = createDiffFunc('week') as DiffFunc<DateObj>
-export const diffDays = createDiffFunc('day') as DiffFunc<DateObj>
-export const diffHours = createDiffFunc('hour') as DiffFunc<DateTimeObj>
-export const diffMinutes = createDiffFunc('minute') as DiffFunc<DateTimeObj>
-export const diffSeconds = createDiffFunc('second') as DiffFunc<DateTimeObj>
+export const diffYears = createDiffFunc('years') as DiffFunc<YearMonthObj>
+export const diffMonths = createDiffFunc('months') as DiffFunc<DateObj>
+export const diffWeeks = createDiffFunc('weeks') as DiffFunc<DateObj>
+export const diffDays = createDiffFunc('days') as DiffFunc<DateObj>
+export const diffHours = createDiffFunc('hours') as DiffFunc<DateTimeObj>
+export const diffMinutes = createDiffFunc('minutes') as DiffFunc<DateTimeObj>
+export const diffSeconds = createDiffFunc('seconds') as DiffFunc<DateTimeObj>
 export const diffMilliseconds = createDiffFunc(
-  'millisecond',
+  'milliseconds',
 ) as DiffFunc<DateTimeObj>
 export const diffMicroseconds = createDiffFunc(
-  'microsecond',
+  'microseconds',
 ) as DiffFunc<DateTimeObj>
 export const diffNanoseconds = createDiffFunc(
-  'nanosecond',
+  'nanoseconds',
 ) as DiffFunc<DateTimeObj>
+
+// Options
+// -----------------------------------------------------------------------------
+
+export type DiffOptions = {
+  roundingMode?: Temporal.RoundingMode
+  roundingIncrement?: number
+}
+
+export function normalizeDiffOptions(
+  options: Temporal.RoundingMode | DiffOptions | undefined,
+): DiffOptions {
+  return typeof options === 'string' ? { roundingMode: options } : options || {}
+}
