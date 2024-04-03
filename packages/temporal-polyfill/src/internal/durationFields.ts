@@ -52,7 +52,7 @@ export const durationFieldNamesAlpha = sortStrings(durationFieldNamesAsc)
 export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
   0,
   Unit.Day,
-)
+) as DurationTimeFieldName[]
 
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
 export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(1)
