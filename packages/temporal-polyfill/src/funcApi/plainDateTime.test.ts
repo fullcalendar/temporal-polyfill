@@ -1348,18 +1348,11 @@ describe('endOfMicrosecond', () => {
 // -----------------------------------------------------------------------------
 
 describe('diffYears', () => {
-  it('gives exact result when no options/roundingMode specified, no offset change', () => {
+  it('gives exact result when no options/roundingMode specified', () => {
     const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
     const pdt1 = PlainDateTimeFns.fromString('2026-04-20T12:30:00')
     const years = PlainDateTimeFns.diffYears(pdt0, pdt1)
     expect(years).toBeCloseTo(1.75) // b/c nanosecond arithmetics, not month-based
-  })
-
-  it('gives exact result when no options/roundingMode specified, offset change', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2026-01-20T12:30:00')
-    const years = PlainDateTimeFns.diffYears(pdt0, pdt1)
-    expect(years).toBeCloseTo(1.504, 3)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
@@ -1374,15 +1367,13 @@ describe('diffYears', () => {
     const pdt1 = PlainDateTimeFns.fromString('2026-04-20T12:30:00')
     const years = PlainDateTimeFns.diffYears(pdt0, pdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const yearsInc = PlainDateTimeFns.diffYears(pdt0, pdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(years).toBe(1)
-    expect(() => {
-      PlainDateTimeFns.diffYears(pdt0, pdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(yearsInc).toBe(3)
   })
 })
 
@@ -1406,15 +1397,13 @@ describe('diffMonths', () => {
     const pdt1 = PlainDateTimeFns.fromString('2024-04-10T12:30:00')
     const months = PlainDateTimeFns.diffMonths(pdt0, pdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const monthsInc = PlainDateTimeFns.diffMonths(pdt0, pdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(months).toBe(1)
-    expect(() => {
-      PlainDateTimeFns.diffMonths(pdt0, pdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(monthsInc).toBe(3)
   })
 })
 
@@ -1438,15 +1427,13 @@ describe('diffWeeks', () => {
     const pdt1 = PlainDateTimeFns.fromString('2024-03-16T15:30:00')
     const weeks = PlainDateTimeFns.diffWeeks(pdt0, pdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const weeksInc = PlainDateTimeFns.diffWeeks(pdt0, pdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(weeks).toBe(1)
-    expect(() => {
-      PlainDateTimeFns.diffWeeks(pdt0, pdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(weeksInc).toBe(3)
   })
 })
 
@@ -1470,15 +1457,13 @@ describe('diffDays', () => {
     const pdt1 = PlainDateTimeFns.fromString('2024-03-15T15:30:00')
     const days = PlainDateTimeFns.diffDays(pdt0, pdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const daysInc = PlainDateTimeFns.diffDays(pdt0, pdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 7,
     })
     expect(days).toBe(10)
-    expect(() => {
-      PlainDateTimeFns.diffDays(pdt0, pdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(daysInc).toBe(14)
   })
 })
 

@@ -195,6 +195,10 @@ async function buildConfigs(pkgDir, isDev) {
           manualChunks: manuallyResolveChunk,
           minifyInternalExports: false,
           hoistTransitiveImports: false,
+          // If you're tempted to write sourcemaps to ESM, don't!
+          // They don't play well with vitest it seems. Not accurate.
+          //// sourcemap: isDev,
+          //// sourcemapExcludeSources: true,
           plugins: [
             !isDev && pureTopLevel(),
             !isDev &&

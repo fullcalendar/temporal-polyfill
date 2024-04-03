@@ -859,11 +859,9 @@ describe('withDayOfYear', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
-    const zdtExp = {
-      // 2024-01-05T12:30:00[America/New_York]
-      epochNanoseconds: 1704475800000000000n,
-      timeZone: 'America/New_York',
-    }
+    const zdtExp = ZonedDateTimeFns.fromString(
+      '2024-01-05T12:30:00[America/New_York]',
+    )
 
     const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
     expectZonedDateTimeEquals(zdt1, zdtExp)
@@ -877,12 +875,9 @@ describe('withDayOfYear', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
     )
-    const zdtExp = {
-      // 2023-09-20T12:30:00-04:00[America/New_York][u-ca=hebrew]
-      epochNanoseconds: 1695227400000000000n,
-      timeZone: 'America/New_York',
-      calendar: 'hebrew',
-    }
+    const zdtExp = ZonedDateTimeFns.fromString(
+      '2023-09-20T12:30:00-04:00[America/New_York][u-ca=hebrew]',
+    )
 
     const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
     expectZonedDateTimeEquals(zdt1, zdtExp)
@@ -914,11 +909,9 @@ describe('withDayOfWeek', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
     )
-    const zdtExp = {
-      // 2024-02-29T12:30:00[America/New_York]
-      epochNanoseconds: 1709227800000000000n,
-      timeZone: 'America/New_York',
-    }
+    const zdtExp = ZonedDateTimeFns.fromString(
+      '2024-02-29T12:30:00[America/New_York]',
+    )
 
     const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
     expectZonedDateTimeEquals(zdt1, zdtExp)
@@ -953,11 +946,9 @@ describe('withWeekOfYear', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]', // weekOfYear:9, yearOfWeek:2024
     )
-    const zdtExp = {
-      // 2024-07-02T12:30:00-04:00[America/New_York]
-      epochNanoseconds: 1719937800000000000n,
-      timeZone: 'America/New_York',
-    }
+    const zdtExp = ZonedDateTimeFns.fromString(
+      '2024-07-02T12:30:00-04:00[America/New_York]',
+    )
     const yearExp = 2024
 
     const zdt1 = ZonedDateTimeFns.withWeekOfYear(zdt0, 27)
@@ -1811,15 +1802,13 @@ describe('diffYears', () => {
     )
     const years = ZonedDateTimeFns.diffYears(zdt0, zdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const yearsInc = ZonedDateTimeFns.diffYears(zdt0, zdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(years).toBe(1)
-    expect(() => {
-      ZonedDateTimeFns.diffYears(zdt0, zdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(yearsInc).toBe(3)
   })
 })
 
@@ -1855,15 +1844,13 @@ describe('diffMonths', () => {
     )
     const months = ZonedDateTimeFns.diffMonths(zdt0, zdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const monthsInc = ZonedDateTimeFns.diffMonths(zdt0, zdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(months).toBe(1)
-    expect(() => {
-      ZonedDateTimeFns.diffMonths(zdt0, zdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(monthsInc).toBe(3)
   })
 })
 
@@ -1901,13 +1888,12 @@ describe('diffWeeks', () => {
       roundingMode: 'floor',
       roundingIncrement: 1,
     })
+    const weeksInc = ZonedDateTimeFns.diffWeeks(zdt0, zdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
+    })
     expect(weeks).toBe(1)
-    expect(() => {
-      ZonedDateTimeFns.diffWeeks(zdt0, zdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(weeksInc).toBe(3)
   })
 })
 
@@ -1943,15 +1929,13 @@ describe('diffDays', () => {
     )
     const days = ZonedDateTimeFns.diffDays(zdt0, zdt1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const daysInc = ZonedDateTimeFns.diffDays(zdt0, zdt1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 7,
     })
     expect(days).toBe(10)
-    expect(() => {
-      ZonedDateTimeFns.diffDays(zdt0, zdt1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(daysInc).toBe(14)
   })
 })
 

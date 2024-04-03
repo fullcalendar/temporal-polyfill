@@ -386,7 +386,7 @@ export function refineUnitDiffOptions(
   options: RoundingModeName | RoundingMathOptions,
 ): RoundingMathTuple | [undefined, undefined] {
   if (options !== undefined) {
-    return refineRoundingMathOptions(smallestUnit, options)
+    return refineRoundingMathOptions(smallestUnit, options, true)
   }
   return [] as unknown as [undefined, undefined]
 }

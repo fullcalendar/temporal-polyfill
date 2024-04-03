@@ -913,18 +913,11 @@ describe('endOfWeek', () => {
 // -----------------------------------------------------------------------------
 
 describe('diffYears', () => {
-  it('gives exact result when no options/roundingMode specified, no offset change', () => {
+  it('gives exact result when no options/roundingMode specified', () => {
     const pd0 = PlainDateFns.fromString('2024-07-20')
     const pd1 = PlainDateFns.fromString('2026-04-20')
     const years = PlainDateFns.diffYears(pd0, pd1)
     expect(years).toBeCloseTo(1.75) // b/c nanosecond arithmetics, not month-based
-  })
-
-  it('gives exact result when no options/roundingMode specified, offset change', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-20')
-    const pd1 = PlainDateFns.fromString('2026-01-20')
-    const years = PlainDateFns.diffYears(pd0, pd1)
-    expect(years).toBeCloseTo(1.504, 3)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
@@ -939,15 +932,13 @@ describe('diffYears', () => {
     const pd1 = PlainDateFns.fromString('2026-04-20')
     const years = PlainDateFns.diffYears(pd0, pd1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const yearsInc = PlainDateFns.diffYears(pd0, pd1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(years).toBe(1)
-    expect(() => {
-      PlainDateFns.diffYears(pd0, pd1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(yearsInc).toBe(3)
   })
 })
 
@@ -971,15 +962,13 @@ describe('diffMonths', () => {
     const pd1 = PlainDateFns.fromString('2024-04-10')
     const months = PlainDateFns.diffMonths(pd0, pd1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const monthsInc = PlainDateFns.diffMonths(pd0, pd1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(months).toBe(1)
-    expect(() => {
-      PlainDateFns.diffMonths(pd0, pd1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(monthsInc).toBe(3)
   })
 })
 
@@ -1003,14 +992,42 @@ describe('diffWeeks', () => {
     const pd1 = PlainDateFns.fromString('2024-03-16')
     const weeks = PlainDateFns.diffWeeks(pd0, pd1, {
       roundingMode: 'floor',
-      roundingIncrement: 1,
+    })
+    const weeksInc = PlainDateFns.diffWeeks(pd0, pd1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
     })
     expect(weeks).toBe(1)
-    expect(() => {
-      PlainDateFns.diffWeeks(pd0, pd1, {
-        roundingMode: 'floor',
-        roundingIncrement: 2,
-      })
-    }).toThrowError(RangeError)
+    expect(weeksInc).toBe(3)
+  })
+})
+
+describe('diffDays', () => {
+  it('gives integer result when no options/roundingMode specified', () => {
+    const pd0 = PlainDateFns.fromString('2024-03-05')
+    const pd1 = PlainDateFns.fromString('2024-03-15')
+    const days = PlainDateFns.diffDays(pd0, pd1)
+    expect(days).toBe(10)
+  })
+
+  it('gives integer result with roundingMode single arg', () => {
+    const pd0 = PlainDateFns.fromString('2024-03-05')
+    const pd1 = PlainDateFns.fromString('2024-03-15')
+    const days = PlainDateFns.diffDays(pd0, pd1, 'floor')
+    expect(days).toBe(10)
+  })
+
+  it('gives rounded result with options object', () => {
+    const pd0 = PlainDateFns.fromString('2024-03-05')
+    const pd1 = PlainDateFns.fromString('2024-03-15')
+    const days = PlainDateFns.diffDays(pd0, pd1, {
+      roundingMode: 'floor',
+    })
+    const daysInc = PlainDateFns.diffDays(pd0, pd1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 7,
+    })
+    expect(days).toBe(10)
+    expect(daysInc).toBe(14)
   })
 })
