@@ -49,4 +49,4 @@ jobs:
         run: pnpm run build
 
       - name: Test
-        run: pnpm run test --node-version=${{ matrix.node }}
+        run: TEST262_NODE_VERSION=${{ matrix.node }} pnpm run test

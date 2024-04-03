@@ -21,7 +21,7 @@
     "ci": "pnpm run clean && pnpm run lint && pnpm run build && pnpm run test",
     "lint": "pnpm -r run lint",
     "build": "pnpm -r run build",
-    "test": "pnpm -r --filter=!@js-temporal/temporal-test262-runner run test",
+    "test": "pnpm -r --stream --filter=!@js-temporal/temporal-test262-runner run test",
     "clean": "pnpm -r run clean"
   },
   "devDependencies": {

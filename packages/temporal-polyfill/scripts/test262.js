@@ -49,29 +49,26 @@ yargs(hideBin(process.argv))
           default: false,
           type: 'boolean',
           description: 'Whether to test the minified bundle',
-        })
-        .option('node-version', {
-          requiresArg: true,
-          type: 'string',
-          description: 'Force a specific version of Node',
         }),
     async (options) => {
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
+      const requestedNodeVersion = process.env.TEST262_NODE_VERSION
 
       // If different version of Node requested, spawn a new process
-      if (
-        options.nodeVersion &&
-        options.nodeVersion !== currentNodeVersion &&
-        !process.env.NODE_VERSION // not already executing a forced-version call
-      ) {
+      if (requestedNodeVersion && requestedNodeVersion !== currentNodeVersion) {
         return await execLive(
           ['pnpm', 'exec', 'node', ...process.argv.slice(1)],
           {
             cwd: process.cwd(),
             env: {
               ...filterEnv(process.env),
-              NODE_VERSION: options.nodeVersion, // forces PNPM to use specific version (see .npmrc)
+
+              // Forces PNPM to use specific version (see .npmrc)
+              PNPM_NODE_VERSION: requestedNodeVersion,
+
+              // Clear requestedNodeVersion for spawned process
+              TEST262_NODE_VERSION: '',
             },
           },
         )
