@@ -162,6 +162,16 @@ importers:
       temporal-spec:
         specifier: ^0.2.0
         version: link:../temporal-spec
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.5.1
+        version: 1.5.1
+      temporal-polyfill:
+        specifier: workspace:*
+        version: link:../temporal-polyfill/dist
+      vitest:
+        specifier: ^1.2.2
+        version: 1.2.2(@types/node@18.11.9)(terser@5.27.0)
 
 packages:
 
