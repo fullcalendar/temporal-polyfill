@@ -14,12 +14,14 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
-  DiffMarkers,
   Marker,
   MarkerToEpochNano,
   MoveMarker,
   RelativeToSlots,
-  createMarkerDiffSystem,
+  createDiffMarkers,
+  createMarkerSystem,
+  createMarkerToEpochNano,
+  createMoveMarker,
   isUniformUnit,
 } from './markerSystem'
 import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
@@ -49,16 +51,28 @@ export function totalDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const diffSystem = createMarkerDiffSystem(
+  const [marker, caledarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
+  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
+  const moveMarker = createMoveMarker(caledarOps, timeZoneOps)
+  const diffMarkers = createDiffMarkers(caledarOps, timeZoneOps)
 
   return totalRelativeDuration(
-    ...spanDuration(slots, totalUnit, ...diffSystem),
+    ...spanDuration(
+      slots,
+      totalUnit,
+      marker,
+      markerToEpochNano,
+      moveMarker,
+      diffMarkers,
+    ),
     totalUnit,
-    ...diffSystem,
+    marker,
+    markerToEpochNano,
+    moveMarker,
   )
 }
 
@@ -66,18 +80,15 @@ export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit,
-  // MarkerDiffSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
-  _diffMarkers?: DiffMarkers,
 ): number {
   const sign = computeDurationSign(durationFields)
   const [epochNano0, epochNano1] = clampRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
-    // MarkerSystem...
     marker,
     markerToEpochNano,
     moveMarker,
@@ -105,7 +116,6 @@ export function clampRelativeDuration(
   durationFields: DurationFields,
   clampUnit: Unit,
   clampDistance: number,
-  // MarkerMoveSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,

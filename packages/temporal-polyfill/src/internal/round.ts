@@ -25,7 +25,6 @@ import {
 import * as errorMessages from './errorMessages'
 import { IsoDateTimeFields, IsoTimeFields, clearIsoFields } from './isoFields'
 import {
-  DiffMarkers,
   Marker,
   MarkerToEpochNano,
   MoveMarker,
@@ -402,11 +401,9 @@ export function roundRelativeDuration(
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  // MarkerDiffSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
-  _diffMarkers?: DiffMarkers,
 ): DurationFields {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return durationFields
@@ -427,7 +424,6 @@ export function roundRelativeDuration(
     smallestUnit,
     roundingInc,
     roundingMode,
-    // MarkerMoveSystem...
     marker,
     markerToEpochNano,
     moveMarker,
@@ -440,7 +436,6 @@ export function roundRelativeDuration(
       roundedEpochNano,
       largestUnit,
       Math.max(Unit.Day, smallestUnit), // force to Day or larger
-      // MarkerMoveSystem...
       marker,
       markerToEpochNano,
       moveMarker,
@@ -574,7 +569,6 @@ function nudgeZonedTimeDuration(
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number,
   roundingMode: RoundingMode,
-  // MarkerMoveSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
@@ -595,7 +589,6 @@ function nudgeZonedTimeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
     Unit.Day,
     sign,
-    // MarkerMoveSystem...
     marker,
     markerToEpochNano,
     moveMarker,
@@ -637,7 +630,6 @@ export function nudgeRelativeDuration(
   smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingMode,
-  // MarkerMoveSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
@@ -659,7 +651,6 @@ export function nudgeRelativeDuration(
     baseDurationFields,
     smallestUnit,
     roundingInc * sign,
-    // MarkerMoveSystem...
     marker,
     markerToEpochNano,
     moveMarker,
@@ -690,7 +681,6 @@ function bubbleRelativeDuration(
   endEpochNano: BigNano,
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year
-  // MarkerMoveSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,

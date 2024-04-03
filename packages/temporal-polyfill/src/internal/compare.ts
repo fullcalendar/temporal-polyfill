@@ -6,8 +6,8 @@ import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
   RelativeToSlots,
-  anyMarkerToEpochNano,
   createMarkerSystem,
+  createMarkerToEpochNano,
   createMoveMarker,
   isUniformUnit,
 } from './markerSystem'
@@ -90,11 +90,12 @@ export function compareDurations<RA, C, T>(
     getTimeZoneOps,
     relativeToSlots,
   )
+  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
   const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
 
   return compareBigNanos(
-    anyMarkerToEpochNano(moveMarker(marker, durationSlots0)),
-    anyMarkerToEpochNano(moveMarker(marker, durationSlots1)),
+    markerToEpochNano(moveMarker(marker, durationSlots0)),
+    markerToEpochNano(moveMarker(marker, durationSlots1)),
   )
 }
 

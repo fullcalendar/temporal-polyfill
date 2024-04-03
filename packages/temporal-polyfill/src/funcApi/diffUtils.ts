@@ -152,7 +152,6 @@ function diffDateUnits(
     durationFields,
     endEpochNano,
     unit,
-    // MarkerMoveSystem...
     marker0,
     markerToEpochNano,
     moveMarker,

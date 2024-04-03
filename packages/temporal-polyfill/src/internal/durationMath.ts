@@ -15,7 +15,10 @@ import {
   MarkerToEpochNano,
   MoveMarker,
   RelativeToSlots,
-  createMarkerDiffSystem,
+  createDiffMarkers,
+  createMarkerSystem,
+  createMarkerToEpochNano,
+  createMoveMarker,
   isUniformUnit,
 } from './markerSystem'
 import { Overflow } from './options'
@@ -48,7 +51,6 @@ Rebalances duration(s)
 export function spanDuration(
   durationFields: DurationFields,
   largestUnit: Unit, // TODO: more descrimination?
-  // MarkerDiffSystem...
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
@@ -99,11 +101,14 @@ export function addDurations<RA, C, T>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const [marker, , moveMarker, diffMarkers] = createMarkerDiffSystem(
+  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
+  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
+  const diffMarkers = createDiffMarkers(calendarOps, timeZoneOps)
+
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
   const balancedDuration = diffMarkers(marker, endMarker, maxUnit)
@@ -170,11 +175,14 @@ export function roundDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const diffSystem = createMarkerDiffSystem(
+  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
+  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
+  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
+  const diffMarkers = createDiffMarkers(calendarOps, timeZoneOps)
 
   let transplantedWeeks = 0
   if (slots.weeks && smallestUnit === Unit.Week) {
@@ -185,7 +193,10 @@ export function roundDuration<RA, C, T>(
   let [balancedDuration, endEpochNano] = spanDuration(
     slots,
     largestUnit,
-    ...diffSystem,
+    marker,
+    markerToEpochNano,
+    moveMarker,
+    diffMarkers,
   )
 
   const origSign = slots.sign
@@ -202,7 +213,9 @@ export function roundDuration<RA, C, T>(
       smallestUnit,
       roundingInc,
       roundingMode,
-      ...diffSystem,
+      marker,
+      markerToEpochNano,
+      moveMarker,
     )
   }
 

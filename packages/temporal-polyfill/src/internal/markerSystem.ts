@@ -8,7 +8,12 @@ import {
   isoTimeFieldDefaults,
 } from './isoFields'
 import { moveDateTime, moveZonedEpochs } from './move'
-import { DateSlots, EpochAndZoneSlots, ZonedEpochSlots } from './slots'
+import {
+  DateSlots,
+  EpochAndZoneSlots,
+  ZonedEpochSlots,
+  extractEpochNano,
+} from './slots'
 import { isoToEpochNano } from './timeMath'
 import { TimeZoneOps } from './timeZoneOps'
 import { Unit } from './units'
@@ -22,9 +27,6 @@ export type RelativeToSlotsNoCalendar<T> = IsoDateFields | EpochAndZoneSlots<T>
 
 // a date marker that's moved away from the "origin"
 export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
-
-// Generic System
-// -----------------------------------------------------------------------------
 
 export type MarkerSystem<CO> = [Marker, CO, TimeZoneOps?]
 
@@ -54,6 +56,8 @@ export function createMarkerSystem<C, CO, T>(
 // Atomic Operations
 // -----------------------------------------------------------------------------
 
+export type MarkerToEpochNano = (marker: Marker) => BigNano
+
 export type MoveMarker = (
   marker: Marker,
   durationFields: DurationFields,
@@ -65,7 +69,11 @@ export type DiffMarkers = (
   largestUnit: Unit,
 ) => DurationFields
 
-export type MarkerToEpochNano = (marker: Marker) => BigNano
+export function createMarkerToEpochNano(
+  timeZoneOps: TimeZoneOps | undefined,
+): MarkerToEpochNano {
+  return (timeZoneOps ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
+}
 
 export function createMoveMarker(
   calendarOps: MoveOps,
@@ -87,12 +95,8 @@ export function createDiffMarkers(
   return bindArgs(diffDateTimesExact, calendarOps) as Callable
 }
 
-export function anyMarkerToEpochNano(marker: Marker): BigNano {
-  return (
-    (marker as ZonedEpochSlots).epochNanoseconds ||
-    isoToEpochNano(marker as IsoDateTimeFields)!
-  )
-}
+// Utils
+// -----------------------------------------------------------------------------
 
 export function isZonedEpochSlots(
   marker: Marker | undefined,
@@ -107,29 +111,4 @@ For ZonedDateTime markers, only time is uniform (days can vary in length)
 */
 export function isUniformUnit(unit: Unit, marker: Marker | undefined): boolean {
   return unit <= Unit.Day - (isZonedEpochSlots(marker) ? 1 : 0)
-}
-
-// System w/ Diff Operations
-// -----------------------------------------------------------------------------
-
-export type MarkerMoveSystem = [Marker, MarkerToEpochNano, MoveMarker]
-
-export type MarkerDiffSystem = [...MarkerMoveSystem, DiffMarkers]
-
-export function createMarkerDiffSystem<C, T>(
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  relativeToSlots: RelativeToSlots<C, T>,
-): MarkerDiffSystem {
-  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
-    getCalendarOps,
-    getTimeZoneOps,
-    relativeToSlots,
-  )
-  return [
-    marker,
-    anyMarkerToEpochNano,
-    createMoveMarker(calendarOps, timeZoneOps),
-    createDiffMarkers(calendarOps, timeZoneOps),
-  ]
 }
