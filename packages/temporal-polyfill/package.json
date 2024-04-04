@@ -93,6 +93,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
     "@js-temporal/temporal-test262-runner": "workspace:*",
+    "@swc/core": "1.4.11",
     "@types/node": "^18.11.9",
     "concurrently": "^8.2.0",
     "export-size": "workspace:*",
@@ -100,6 +101,7 @@
     "rollup": "^4.9.6",
     "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-swc3": "^0.11.0",
     "terser": "^5.27.0",
     "typescript": "~5.3.3",
     "vitest": "^1.2.2",
@@ -109,6 +111,10 @@
     "@biomejs/biome": [
       "BUG: Pinned to 1.5.1 due to this regression in 1.5.3:",
       "https://github.com/biomejs/biome/issues/1654"
+    ],
+    "@swc/core": [
+      "Locked a version to test workaround for this bug:",
+      "https://github.com/swc-project/swc/issues/8806"
     ]
   }
 }

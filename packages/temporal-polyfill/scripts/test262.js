@@ -101,9 +101,15 @@ yargs(hideBin(process.argv))
         min = min || Boolean(Math.floor(currentNodeMajorVersion / 2) % 2)
       }
 
-      const polyfillPath = // from package root
-        (esm ? './dist/.bundled/global' : './dist/global') +
-        (min ? extensions.iifeMin : extensions.iife)
+      const esmOpt = process.env.TEST262_ESM
+
+      // from package root
+      const polyfillPath = esmOpt
+        ? './dist/.bundled/global' +
+          (esmOpt === 'terser' || esmOpt === 'swc'
+            ? '.' + esmOpt + extensions.iifeMin
+            : extensions.iife)
+        : './dist/global' + extensions.iife
 
       console.log(`Testing ${polyfillPath} with Node ${currentNodeVersion} ...`)
 

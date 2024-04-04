@@ -10,6 +10,7 @@ import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import sourcemaps from 'rollup-plugin-sourcemaps'
+import { minify as swcMinify } from 'rollup-plugin-swc3'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
 import { terserSimple } from './lib/terser-simple.js'
@@ -18,33 +19,39 @@ const argv = process.argv.slice(2)
 writeBundles(
   joinPaths(process.argv[1], '../..'),
   argv.includes('--dev'),
-  argv.includes('--esm') || process.env.CI,
+  argv.includes('--esm') || process.env.TEST262_ESM === '1',
+  argv.includes('--esm-terser') || process.env.TEST262_ESM === 'terser',
+  argv.includes('--esm-swc') || process.env.TEST262_ESM === 'swc',
 )
 
-async function writeBundles(pkgDir, isDev, bundleDistEsm) {
+async function writeBundles(
+  pkgDir,
+  isDev,
+  bundleEsm,
+  bundleEsmTerser,
+  bundleEsmSwc,
+) {
   const configs = await buildConfigs(pkgDir, isDev)
   await (isDev ? watchWithConfigs : buildWithConfigs)(configs)
 
-  if (bundleDistEsm) {
+  if (bundleEsm || bundleEsmTerser || bundleEsmSwc) {
     const esmBundle = await rollupBuild({
       input: joinPaths(pkgDir, 'dist', 'global' + extensions.esm),
     })
-    await Promise.all([
-      esmBundle.write({
-        format: 'iife',
-        file: joinPaths(pkgDir, 'dist', '.bundled', 'global' + extensions.iife),
-      }),
-      esmBundle.write({
-        format: 'iife',
-        file: joinPaths(
-          pkgDir,
-          'dist',
-          '.bundled',
-          'global' + extensions.iifeMin,
-        ),
-        plugins: [terserSimple()],
-      }),
-    ])
+
+    const filename =
+      'global' +
+      (bundleEsmTerser
+        ? '.terser' + extensions.iifeMin
+        : bundleEsmSwc
+          ? '.swc' + extensions.iifeMin
+          : extensions.iife)
+
+    await esmBundle.write({
+      format: 'iife',
+      file: joinPaths(pkgDir, 'dist', '.bundled', filename),
+      plugins: [bundleEsmTerser && terserSimple(), bundleEsmSwc && swcMinify()],
+    })
   }
 }
 

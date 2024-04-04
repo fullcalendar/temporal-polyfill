@@ -17,7 +17,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [14.21.3, 16.20.0, 18.19.0, 20.10.0]
+        TEST262_NODE_VERSION: [14.21.3, 16.20.0, 18.19.0, 20.10.0]
+        include:
+          - TEST262_NODE_VERSION: 14.21.3
+            TEST262_ESM: 1
+            LINTING: 1
+          - TEST262_NODE_VERSION: 16.20.0
+            TEST262_ESM: terser
+          - TEST262_NODE_VERSION: 18.19.0
+            TEST262_ESM: swc
 
     steps:
       - name: Checkout
@@ -41,12 +49,14 @@ jobs:
         run: pnpm install
 
       - name: Lint
-        # Only for the first Node version
-        if: matrix.node == '14.21.3'
+        if: matrix.LINTING
         run: pnpm run lint
 
       - name: Build
         run: pnpm run build
 
       - name: Test
-        run: TEST262_NODE_VERSION=${{ matrix.node }} pnpm run test
+        run: >
+          TEST262_NODE_VERSION=${{ matrix.TEST262_NODE_VERSION }}
+          TEST262_ESM=${{ matrix.TEST262_ESM }}
+          pnpm run test
