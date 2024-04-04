@@ -197,7 +197,17 @@ async function buildConfigs(pkgDir, isDev) {
         {
           format: 'es',
           dir: 'dist',
-          entryFileNames: '[name]' + extensions.esm,
+          entryFileNames(chunkInfo) {
+            const exportName = chunkInfo.name
+            const exportPath = exportName === 'index' ? '.' : './' + exportName
+
+            return (
+              exportName +
+              (exportMap[exportPath].iife
+                ? extensions.esmWhenIife
+                : extensions.esm)
+            )
+          },
           chunkFileNames: chunkBase + extensions.esm,
           manualChunks: manuallyResolveChunk,
           minifyInternalExports: false,

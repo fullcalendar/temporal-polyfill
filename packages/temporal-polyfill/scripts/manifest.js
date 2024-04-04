@@ -26,6 +26,10 @@ async function writePkgJson(pkgDir, isDev) {
     const exportName =
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
+    const esmExtension = exportConfig.iife
+      ? extensions.esmWhenIife
+      : extensions.esm
+
     distExportMap[exportPath] = {
       types: !isDev
         ? './' + exportName + extensions.dts
@@ -34,14 +38,14 @@ async function writePkgJson(pkgDir, isDev) {
           extensions.dts,
 
       require: './' + exportName + extensions.cjs,
-      import: './' + exportName + extensions.esm,
-      default: './' + exportName + extensions.esm,
+      import: './' + exportName + esmExtension,
+      default: './' + exportName + esmExtension,
     }
 
     if (exportConfig.iife) {
       sideEffectsList.push(
         './' + exportName + extensions.cjs,
-        './' + exportName + extensions.esm,
+        './' + exportName + esmExtension,
         './' + exportName + extensions.iife,
         './' + exportName + extensions.iifeMin,
       )
