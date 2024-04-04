@@ -53,7 +53,9 @@ jobs:
         run: pnpm run lint
 
       - name: Build
-        run: pnpm run build
+        run: >
+          TEST262_ESM=${{ matrix.TEST262_ESM }}
+          pnpm run build
 
       - name: Test
         run: >

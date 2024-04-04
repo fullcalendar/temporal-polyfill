@@ -93,22 +93,13 @@ yargs(hideBin(process.argv))
         expectedFailureFiles.push('expected-failures-node-gte18.txt')
       }
 
-      let { esm, min } = options
-
-      // Let CI decide. Try all permutations based on Node LTS version
-      if (process.env.CI) {
-        esm = esm || Boolean(Math.floor(currentNodeMajorVersion / 4) % 2)
-        min = min || Boolean(Math.floor(currentNodeMajorVersion / 2) % 2)
-      }
-
       const esmOpt = process.env.TEST262_ESM
+      const esmOptIsMin = esmOpt === 'terser' || esmOpt === 'swc'
 
       // from package root
       const polyfillPath = esmOpt
         ? './dist/.bundled/global' +
-          (esmOpt === 'terser' || esmOpt === 'swc'
-            ? '.' + esmOpt + extensions.iifeMin
-            : extensions.iife)
+          (esmOptIsMin ? '.' + esmOpt + extensions.iifeMin : extensions.iife)
         : './dist/global' + extensions.iife
 
       console.log(`Testing ${polyfillPath} with Node ${currentNodeVersion} ...`)
