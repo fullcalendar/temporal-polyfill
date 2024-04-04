@@ -168,14 +168,13 @@ export function roundPlainTime(
   slots: PlainTimeSlots,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): PlainTimeSlots {
-  const roundedIsoFields = roundTime(
-    slots,
-    ...(refineRoundingOptions(options, Unit.Hour) as [
-      TimeUnit,
-      number,
-      RoundingMode,
-    ]),
-  )
+  // workaround for https://github.com/swc-project/swc/issues/8806
+  const [a, b, c] = refineRoundingOptions(options, Unit.Hour) as [
+    TimeUnit,
+    number,
+    RoundingMode,
+  ]
+  const roundedIsoFields = roundTime(slots, a, b, c)
   return createPlainTimeSlots(roundedIsoFields)
 }
 

@@ -89,12 +89,19 @@ export function formatZonedDateTimeIso<C extends IdLike, T extends IdLike>(
   zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
+  const [a, b, c, d, e, f] = refineZonedDateTimeDisplayOptions(options)
   return formatZonedEpochNanoIso(
     getTimeZoneOps,
     zonedDateTimeSlots0.calendar,
     zonedDateTimeSlots0.timeZone,
     zonedDateTimeSlots0.epochNanoseconds,
-    ...refineZonedDateTimeDisplayOptions(options),
+    // workaround for https://github.com/swc-project/swc/issues/8806
+    a,
+    b,
+    c,
+    d,
+    e,
+    f,
   )
 }
 
@@ -102,10 +109,15 @@ export function formatPlainDateTimeIso<C extends IdLike>(
   plainDateTimeSlots0: PlainDateTimeSlots<C>,
   options?: DateTimeDisplayOptions,
 ): string {
+  const [a, b, c, d] = refineDateTimeDisplayOptions(options)
   return formatDateTimeIso(
     plainDateTimeSlots0.calendar,
     plainDateTimeSlots0,
-    ...refineDateTimeDisplayOptions(options),
+    // workaround for https://github.com/swc-project/swc/issues/8806
+    a,
+    b,
+    c,
+    d,
   )
 }
 
@@ -148,7 +160,14 @@ export function formatPlainTimeIso(
   slots: PlainTimeSlots,
   options?: TimeDisplayOptions,
 ): string {
-  return formatTimeIso(slots, ...refineTimeDisplayOptions(options))
+  const [a, b, c] = refineTimeDisplayOptions(options)
+  return formatTimeIso(
+    slots,
+    // workaround for https://github.com/swc-project/swc/issues/8806
+    a,
+    b,
+    c,
+  )
 }
 
 export function formatDurationIso(
