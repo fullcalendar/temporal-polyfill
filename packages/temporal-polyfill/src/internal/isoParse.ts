@@ -669,8 +669,9 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
     } else if (name === 'u-ca') {
       calendarIds.push(val)
       calendarIsCritical ||= isCritical
-    } else if (isCritical) {
-      throw new RangeError(errorMessages.invalidSubstring(whole)) // Critical annotation not used
+    } else if (isCritical || /[A-Z]/.test(name)) {
+      // Critical annotation not used, or uppercase disallowed
+      throw new RangeError(errorMessages.invalidSubstring(whole))
     }
 
     return ''
