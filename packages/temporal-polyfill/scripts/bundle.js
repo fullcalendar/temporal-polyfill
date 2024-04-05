@@ -6,7 +6,7 @@ import {
   resolve as resolvePath,
   sep as pathSep,
 } from 'path'
-import { readFile } from 'fs/promises'
+import { copyFile, readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import sourcemaps from 'rollup-plugin-sourcemaps'
@@ -146,12 +146,31 @@ async function buildConfigs(pkgDir, isDev) {
       plugins: [
         // Will not bundle external packages by default
         dts(),
-        // WORKAROUND: dts plugin was including empty import statements,
-        // despite attempting hoistTransitiveImports:false. Especially bad
-        // because temporal-spec/global was being imported from index.
+
         {
+          // WORKAROUND: dts plugin was including empty import statements,
+          // despite attempting hoistTransitiveImports:false. Especially bad
+          // because temporal-spec/global was being imported from index.
           renderChunk(code) {
             return code.replace(/^import ['"][^'"]*['"](;|$)/gm, '')
+          },
+
+          // Copy .d.ts to .d.cts (for CJS types)
+          async writeBundle(_options, bundle) {
+            for (const bundlePath in bundle) {
+              let outputPath = bundlePath
+              outputPath = outputPath.replace(
+                // HACK
+                extensions.esmWhenIifePrefix + extensions.dts,
+                '',
+              )
+              outputPath = outputPath.replace(extensions.dts, '')
+              outputPath += '.d.cts'
+              await copyFile(
+                joinPaths(pkgDir, 'dist', bundlePath),
+                joinPaths(pkgDir, 'dist', outputPath),
+              )
+            }
           },
         },
       ],
