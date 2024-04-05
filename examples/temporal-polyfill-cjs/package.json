@@ -1,7 +1,9 @@
 {
-  "name": "temporal-polyfill-bug",
-  "version": "1.0.0",
+  "private": true,
+  "name": "temporal-polyfill-cjs",
+  "version": "0.0.0",
   "description": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "typecheck": "tsc --build tsconfig.json"
@@ -10,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "temporal-polyfill": "^0.2.3"
+    "temporal-polyfill": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

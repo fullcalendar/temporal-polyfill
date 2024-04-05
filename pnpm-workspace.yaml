@@ -4,3 +4,4 @@ packages:
   - ./packages/temporal-utils
   - ./packages/temporal-test262-runner
   - ./packages/export-size
+  - ./examples/*
