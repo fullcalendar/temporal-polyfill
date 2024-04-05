@@ -1,3 +1,12 @@
+
+v0.2.4 (2024-04-05)
+-------------------
+
+- fix: Typescript error when using CommonJS module outputs (#35)
+- fix: PlainTime.toString() throws error with SWC minifier (#36)
+- fix: temporal-spec types updated for weekOfYear/yearOfWeek returning undefined
+
+
 v0.2.3 (2024-03-01)
 -------------------
 
