@@ -65,9 +65,10 @@ async function buildConfigs(pkgDir, isDev) {
   const iifeConfigs = []
   const dtsInputs = {}
   const dtsConfigs = []
-  const chunkNamesEnabled = isDev
+  const chunkNamesEnabled = true // isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
   const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
+  const classApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'classApi') + pathSep
   const funcApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'funcApi') + pathSep
 
   for (const exportPath in exportMap) {
@@ -130,6 +131,12 @@ async function buildConfigs(pkgDir, isDev) {
     if (id.startsWith(internalSrcBase)) {
       return 'internal'
     }
+    if (id.startsWith(funcApiSrcBase)) {
+      return 'funcApi'
+    }
+    if (id.startsWith(classApiSrcBase)) {
+      return 'classApi'
+    }
   }
 
   if (!isDev && Object.keys(dtsInputs).length) {
@@ -176,6 +183,12 @@ async function buildConfigs(pkgDir, isDev) {
 
           if (id.startsWith(internalSrcBase)) {
             return 'internal'
+          }
+          if (id.startsWith(funcApiSrcBase)) {
+            return 'funcApi'
+          }
+          if (id.startsWith(classApiSrcBase)) {
+            return 'classApi'
           }
         },
       },
