@@ -584,6 +584,9 @@ function nudgeZonedTimeDuration(
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 
+  /*
+  TODO: make DRY with hoursInDay?
+  */
   const [dayEpochNano0, dayEpochNano1] = clampRelativeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
     Unit.Day,
@@ -696,6 +699,9 @@ function bubbleRelativeDuration(
       continue
     }
 
+    /*
+    TODO: consolidate with clamping?
+    */
     const baseDurationFields = clearDurationFields(currentUnit, durationFields)
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 

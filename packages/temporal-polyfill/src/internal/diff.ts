@@ -457,7 +457,7 @@ function diffZonedEpochsBig(
   )
 
   const dateDiff =
-    largestUnit === Unit.Day
+    largestUnit === Unit.Day // TODO: use this optimization elsewhere too
       ? diffByDay(isoFields0, isoFields1)
       : calendarOps.dateUntil(
           isoFields0,

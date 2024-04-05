@@ -69,6 +69,9 @@ built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-day
 # (they police conflicting consecutive calls to dateUntil, but there's only 1 now)
 built-ins/Temporal/ZonedDateTime/prototype/since/date-and-time-durations-opposite-signs.js
 built-ins/Temporal/ZonedDateTime/prototype/until/date-and-time-durations-opposite-signs.js
+# (similar policing concept but with dateAdd)
+built-ins/Temporal/PlainDateTime/prototype/since/result-mixed-sign.js
+built-ins/Temporal/PlainDateTime/prototype/until/result-mixed-sign.js
 
 # SPEC-BUG
 # Ticket: https://github.com/tc39/proposal-temporal/issues/2791
