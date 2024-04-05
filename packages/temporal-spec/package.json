@@ -16,17 +16,15 @@
   "type": "module",
   "types": "./index.d.ts",
   "main": "./index.cjs",
-  "module": "./index.mjs",
+  "module": "./index.js",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
       "require": "./index.cjs",
-      "import": "./index.mjs"
+      "import": "./index.js"
     },
     "./global": {
-      "types": "./global.d.ts",
       "require": "./global.cjs",
-      "import": "./global.mjs"
+      "import": "./global.js"
     }
   }
 }
