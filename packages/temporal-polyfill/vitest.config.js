@@ -30,9 +30,8 @@ function entryPointResolve(manifest) {
     const exportName =
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
-    const esmExtension = exportConfig.iife
-      ? extensions.esmWhenIife
-      : extensions.esm
+    const esmExtension =
+      (exportConfig.iife ? extensions.esmWhenIifePrefix : '') + extensions.esm
 
     const srcPath = resolvePath('src', (exportConfig.src || exportName) + '.ts')
     const distPath = resolvePath('dist', exportName + esmExtension)

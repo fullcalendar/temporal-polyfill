@@ -19,27 +19,40 @@ async function writePkgJson(pkgDir, isDev) {
   const exportMap = srcManifest.buildConfig.exports
   const distExportMap = {}
   const sideEffectsList = []
-  let iifeMinPath
+
+  let rootCjsPath
+  let rootEsmPath
+  let rootTypesPath
+  let rootIifeMinPath
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
     const exportName =
       exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
 
-    const esmExtension = exportConfig.iife
-      ? extensions.esmWhenIife
-      : extensions.esm
+    const esmExtension =
+      (exportConfig.iife ? extensions.esmWhenIifePrefix : '') + extensions.esm
+    const esmPath = './' + exportName + esmExtension
+    const cjsPath = './' + exportName + extensions.cjs
+    const typesPath = isDev
+      ? './.tsc/' +
+        (exportConfig.types || exportConfig.src || exportName) +
+        extensions.dts
+      : './' + exportName + extensions.dts
 
     distExportMap[exportPath] = {
-      types: !isDev
-        ? './' + exportName + extensions.dts
-        : './.tsc/' +
-          (exportConfig.types || exportConfig.src || exportName) +
-          extensions.dts,
+      require: cjsPath,
+      import: isDev ? { types: typesPath, default: esmPath } : esmPath,
+    }
 
-      require: './' + exportName + extensions.cjs,
-      import: './' + exportName + esmExtension,
-      default: './' + exportName + esmExtension,
+    if (!rootCjsPath) {
+      rootCjsPath = cjsPath
+    }
+    if (!rootEsmPath) {
+      rootEsmPath = esmPath
+    }
+    if (!rootTypesPath) {
+      rootTypesPath = typesPath
     }
 
     if (exportConfig.iife) {
@@ -49,21 +62,22 @@ async function writePkgJson(pkgDir, isDev) {
         './' + exportName + extensions.iife,
         './' + exportName + extensions.iifeMin,
       )
-      if (!iifeMinPath) {
-        iifeMinPath = './' + exportName + extensions.iifeMin
+
+      if (!rootIifeMinPath) {
+        rootIifeMinPath = './' + exportName + extensions.iifeMin
       }
     }
   }
 
-  distManifest.types = distExportMap['.'].types
-  distManifest.main = distExportMap['.'].require
-  distManifest.module = distExportMap['.'].import
+  distManifest.main = rootCjsPath
+  distManifest.types = rootTypesPath
+  distManifest.module = rootEsmPath
+  distManifest.exports = distExportMap
 
-  if (iifeMinPath) {
-    distManifest.unpkg = distManifest.jsdelivr = iifeMinPath
+  if (rootIifeMinPath) {
+    distManifest.unpkg = distManifest.jsdelivr = rootIifeMinPath
   }
 
-  distManifest.exports = distExportMap
   distManifest.sideEffects = sideEffectsList.length ? sideEffectsList : false
 
   delete distManifest.private

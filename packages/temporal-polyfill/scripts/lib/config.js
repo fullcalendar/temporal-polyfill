@@ -1,6 +1,6 @@
 export const extensions = {
   esm: '.js',
-  esmWhenIife: '.esm.js',
+  esmWhenIifePrefix: '.esm',
   cjs: '.cjs',
   iife: '.js',
   iifeMin: '.min.js',

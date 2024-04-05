@@ -151,7 +151,16 @@ async function buildConfigs(pkgDir, isDev) {
       output: {
         format: 'es',
         dir: 'dist',
-        entryFileNames: '[name]' + extensions.dts,
+        entryFileNames(chunkInfo) {
+          const exportName = chunkInfo.name
+          const exportPath = exportName === 'index' ? '.' : './' + exportName
+
+          const dtsExtension =
+            (exportMap[exportPath].iife ? extensions.esmWhenIifePrefix : '') +
+            extensions.dts
+
+          return exportName + dtsExtension
+        },
         chunkFileNames: chunkBase + extensions.dts,
         minifyInternalExports: false,
         manualChunks(id) {
@@ -201,12 +210,11 @@ async function buildConfigs(pkgDir, isDev) {
             const exportName = chunkInfo.name
             const exportPath = exportName === 'index' ? '.' : './' + exportName
 
-            return (
-              exportName +
-              (exportMap[exportPath].iife
-                ? extensions.esmWhenIife
-                : extensions.esm)
-            )
+            const esmExtension =
+              (exportMap[exportPath].iife ? extensions.esmWhenIifePrefix : '') +
+              extensions.esm
+
+            return exportName + esmExtension
           },
           chunkFileNames: chunkBase + extensions.esm,
           manualChunks: manuallyResolveChunk,
