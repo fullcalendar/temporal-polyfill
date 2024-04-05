@@ -55,19 +55,21 @@ const zonedFallbacks: Intl.DateTimeFormatOptions = {
   timeZoneName: 'short',
 }
 
+const yearMonthFallbackNames = Object.keys(yearMonthFallbacks) as OptionNames
+const monthDayFallbackNames = Object.keys(monthDayFallbacks) as OptionNames
 const dateFallbackNames = Object.keys(dateFallbacks) as OptionNames
 const timeFallbackNames = Object.keys(timeFallbacks) as OptionNames
 
 // Standard Options
 // (See notes for Fallbacks and Exclusions)
 
-const monthDayStandardNames = Object.keys(monthDayFallbacks) as OptionNames
-const yearMonthStandardNames = Object.keys(yearMonthFallbacks) as OptionNames
-
+const dateStyleNames = ['dateStyle'] as OptionNames
+const yearMonthStandardNames = [...yearMonthFallbackNames, ...dateStyleNames]
+const monthDayStandardNames = [...monthDayFallbackNames, ...dateStyleNames]
 const dateStandardNames: OptionNames = [
   ...dateFallbackNames,
+  ...dateStyleNames,
   'weekday',
-  'dateStyle',
 ]
 const timeStandardNames: OptionNames = [
   ...timeFallbackNames,
@@ -92,14 +94,12 @@ const yearMonthExclusions: OptionNames = [
   ...timeZoneNameStrs,
   'day',
   'weekday',
-  'dateStyle',
   ...timeStandardNames,
 ]
 const monthDayExclusions: OptionNames = [
   ...timeZoneNameStrs,
   'year',
   'weekday',
-  'dateStyle',
   ...timeStandardNames,
 ]
 
