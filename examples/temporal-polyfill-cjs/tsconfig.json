@@ -6,7 +6,8 @@
     "moduleResolution": "node16",
     "strict": true,
     "target": "es2022",
-    "noEmit": false,
-    "types": ["node"]
+    "types": ["node"],
+    "outDir": "dist",
+    "declaration": true
   }
 }

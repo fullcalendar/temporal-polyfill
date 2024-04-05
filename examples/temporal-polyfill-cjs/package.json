@@ -6,7 +6,8 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "typecheck": "tsc --build tsconfig.json"
+    "build": "tsc --build tsconfig.json",
+    "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
