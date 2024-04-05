@@ -42,7 +42,10 @@ async function writePkgJson(pkgDir, isDev) {
 
     distExportMap[exportPath] = {
       require: cjsPath,
-      import: isDev ? { types: typesPath, default: esmPath } : esmPath,
+      import:
+        isDev || exportConfig.iife
+          ? { types: typesPath, default: esmPath }
+          : esmPath,
     }
 
     if (!rootCjsPath) {

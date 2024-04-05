@@ -159,11 +159,6 @@ async function buildConfigs(pkgDir, isDev) {
           async writeBundle(_options, bundle) {
             for (const bundlePath in bundle) {
               let outputPath = bundlePath
-              outputPath = outputPath.replace(
-                // HACK
-                extensions.esmWhenIifePrefix + extensions.dts,
-                '',
-              )
               outputPath = outputPath.replace(extensions.dts, '')
               outputPath += '.d.cts'
               await copyFile(
@@ -177,16 +172,7 @@ async function buildConfigs(pkgDir, isDev) {
       output: {
         format: 'es',
         dir: 'dist',
-        entryFileNames(chunkInfo) {
-          const exportName = chunkInfo.name
-          const exportPath = exportName === 'index' ? '.' : './' + exportName
-
-          const dtsExtension =
-            (exportMap[exportPath].iife ? extensions.esmWhenIifePrefix : '') +
-            extensions.dts
-
-          return exportName + dtsExtension
-        },
+        entryFileNames: '[name]' + extensions.dts,
         chunkFileNames: chunkBase + extensions.dts,
         minifyInternalExports: false,
         manualChunks(id) {
