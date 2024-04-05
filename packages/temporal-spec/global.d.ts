@@ -645,8 +645,8 @@ declare global {
       eraYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number | undefined;
       dayOfWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
       dayOfYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
-      weekOfYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
-      yearOfWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
+      weekOfYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number | undefined;
+      yearOfWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number | undefined;
       daysInWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
       daysInMonth(
         date: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainYearMonth | PlainDateLike | string
@@ -736,8 +736,8 @@ declare global {
       eraYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number | undefined;
       dayOfWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
       dayOfYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
-      weekOfYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
-      yearOfWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
+      weekOfYear(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number | undefined;
+      yearOfWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number | undefined;
       daysInWeek(date: Temporal.PlainDate | Temporal.PlainDateTime | PlainDateLike | string): number;
       daysInMonth(
         date: Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainYearMonth | PlainDateLike | string
@@ -823,8 +823,8 @@ declare global {
       getCalendar(): CalendarProtocol;
       readonly dayOfWeek: number;
       readonly dayOfYear: number;
-      readonly weekOfYear: number;
-      readonly yearOfWeek: number;
+      readonly weekOfYear: number | undefined;
+      readonly yearOfWeek: number | undefined;
       readonly daysInWeek: number;
       readonly daysInYear: number;
       readonly daysInMonth: number;
@@ -939,8 +939,8 @@ declare global {
       getCalendar(): CalendarProtocol;
       readonly dayOfWeek: number;
       readonly dayOfYear: number;
-      readonly weekOfYear: number;
-      readonly yearOfWeek: number;
+      readonly weekOfYear: number | undefined;
+      readonly yearOfWeek: number | undefined;
       readonly daysInWeek: number;
       readonly daysInYear: number;
       readonly daysInMonth: number;
@@ -1283,8 +1283,8 @@ declare global {
       getCalendar(): CalendarProtocol;
       readonly dayOfWeek: number;
       readonly dayOfYear: number;
-      readonly weekOfYear: number;
-      readonly yearOfWeek: number;
+      readonly weekOfYear: number | undefined;
+      readonly yearOfWeek: number | undefined;
       readonly hoursInDay: number;
       readonly daysInWeek: number;
       readonly daysInMonth: number;
