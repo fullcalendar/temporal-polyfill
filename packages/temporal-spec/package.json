@@ -14,8 +14,8 @@
     "directory": "packages/temporal-spec"
   },
   "type": "module",
-  "types": "./index.d.ts",
   "main": "./index.cjs",
+  "types": "./index.d.ts",
   "module": "./index.js",
   "exports": {
     ".": {

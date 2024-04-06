@@ -1,4 +1,4 @@
-# Demonstration of CommonJS/ESM interop bug
+# Test case for [#35] (FIXED)
 
 ```shell-session
 $ pnpm run typecheck
@@ -17,3 +17,5 @@ Found 1 error.
 
  ELIFECYCLE  Command failed with exit code 1.
 ```
+
+[#35]: https://github.com/fullcalendar/temporal-polyfill/issues/35
