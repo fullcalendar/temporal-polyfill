@@ -22,6 +22,7 @@ v0.2.3 (2024-03-01)
   - prevent legacy ICU time zone IDs
   - don't normalize the islamicc calenadar name to islamic-civil
 
+
 v0.2.2 (2024-02-20)
 -------------------
 

@@ -171,7 +171,7 @@ The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262
   <tr>
     <td colspan='6'>
       <br />
-      <strong>For non-ISO/gregory calendars to work, requirements are higher:</strong>
+      <strong>For non-ISO/gregory calendars, requirements are higher:</strong>
     </td>
   </tr>
   <tr>
