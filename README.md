@@ -1,9 +1,9 @@
 
 # temporal-polyfill
 
-A lightweight polyfill for [Temporal](https://tc39.es/proposal-temporal/docs/), successor to the JavaScript `Date` object.
+A lightweight polyfill for [Temporal](https://tc39.es/proposal-temporal/docs/), successor to the JavaScript `Date` object
 
-Only 20 kB, with near-perfect [spec compliance](#spec-compliance).
+Only 20 kB, [spec compliant](#spec-compliance)
 
 
 ## Table of Contents
@@ -41,7 +41,7 @@ console.log(Temporal.Now.zonedDateTimeISO().toString())
 Use a `<script>` tags with a CDN link:
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.2.3/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.2.4/global.min.js'></script>
 <script>
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
@@ -86,7 +86,7 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Spec compliance</td>
     <td>
-      Strict compliance for common API.<br />
+      Strict compliance for built-in types.<br />
       Relaxed compliance for subclassing<br />built-in types.
     </td>
     <td>
@@ -96,7 +96,7 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Spec date</td>
     <td>
-      Mar 2024
+      Apr 2024
     </td>
     <td>
       May 2023
@@ -119,21 +119,20 @@ Use a `<script>` tags with a CDN link:
 
 ## Spec Compliance
 
-All calendar systems (ex: `chinese`, `persian`) and time zones are supported.
+All calendar systems (ex: `chinese`, `persian`) and all time zones are supported.
 
-Compliance with the latest version of the Temporal spec (Nov 2023) is near-perfect with the following intentional deviations:
+Compliance with the latest version of the Temporal spec (Apr 2024) is near-perfect with the following intentional deviations:
 
-- `Duration::toString` does not display units greater than `Number.MAX_SAFE_INTEGER` according to spec. Precision is chosen differently.
-- *Custom implementations* of Calendars and TimeZones are queried differently. Only affects those subclassing built-in classes, which is extremely rare. See the CALLING entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
-- There are believed to be 3 bugs in the Temporal spec itself, one of which [has been reported](https://github.com/tc39/proposal-temporal/issues/2742). See SPEC-BUG entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test-config/expected-failures.txt).
+- *Custom implementations* of Calendars and TimeZones are queried differently. Only affects those subclassing built-in classes, which is extremely rare. See the CALLING entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
+- There are believed to be 3 bugs in the Temporal spec itself. See SPEC-BUG entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
 - `Intl.DateTimeFormat` has not been polyfilled to accept number-offset values for the `timeZone` option.
 - Method descriptors and `Function::length` are not strictly compliant due to ES-related space-saving techniques.
 
 The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) has:
 
-- 6968 *total* Temporal-related test files
-- 6327 *passed* by `temporal-polyfill`
-- 495 *skipped* due to superficial method descriptor non-compliance
+- 7100 *total* Temporal-related test files
+- 6463 *passed* by `temporal-polyfill`
+- 491 *skipped* due to superficial method descriptor non-compliance
 - 146 *skipped* due to other aforementioned intentional deviations
 
 
@@ -142,7 +141,7 @@ The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262
 <table>
   <tr>
     <td colspan='6'>
-      <strong>Minimum required browsers:</strong>
+      <strong>Minimum required browsers for ISO/gregory calendars:</strong>
     </td>
   </tr>
   <tr>
@@ -167,6 +166,21 @@ The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262
     <td>Safari 10<br />(Sep 2016)</td>
     <td>Safari iOS 10<br />(Sep 2016)</td>
     <td>Edge 15<br />(Apr 2017)</td>
+    <td>Node.js 14<br />(Apr 2020)</td>
+  </tr>
+  <tr>
+    <td colspan='6'>
+      <br />
+      <strong>For non-ISO calendars to work, requirements are higher:</strong>
+    </td>
+  </tr>
+  <tr>
+    <!-- https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_calendar_parameter -->
+    <td>Chrome 80<br />(Feb 2020)</td>
+    <td>Firefox 76<br />(May 2020)</td>
+    <td>Safari 14.1<br />(Apr 2021)</td>
+    <td>Safari iOS 14.5<br />(Apr 2021)</td>
+    <td>Edge 80<br />(Feb 2020)</td>
     <td>Node.js 14<br />(Apr 2020)</td>
   </tr>
 </table>
@@ -203,54 +217,9 @@ Node.js is always 14 because the test-runner doesn't work with lower
 
 ## BigInt Considerations
 
-This polyfill works fine in environments that do not support [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt).
+This polyfill *does not depend on [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) support*. Internally, no operations leverage BigInt arithmetics. :thumbsup:
 
-However, to use methods that accept/emit them, your browser [must support BigInt](https://caniuse.com/bigint).
-
-Here's how to sidestep this browser compatibility issue:
-
-<table>
-  <tr>
-    <th>❌ Avoid microseconds/nanoseconds</th>
-    <th>✅ Use milliseconds instead</th>
-  </tr>
-  <tr>
-    <td><code>instant.epochMicroseconds</code></td>
-    <td><code>instant.epochMilliseconds</code></td>
-  </tr>
-  <tr>
-    <td><code>instant.epochNanoseconds</code></td>
-    <td><code>instant.epochMilliseconds</code></td>
-  </tr>
-  <tr>
-    <td><code>Temporal.Instant.fromEpochMicroseconds(micro)</code></td>
-    <td><code>Temporal.Instant.fromEpochMilliseconds(milli)</code></td>
-  </tr>
-  <tr>
-    <td><code>Temporal.Instant.fromEpochNanoseconds(nano)</code></td>
-    <td><code>Temporal.Instant.fromEpochMilliseconds(milli)</code></td>
-  </tr>
-  <tr>
-    <td><code>new Temporal.Instant(nano)</code></td>
-    <td><code>Temporal.Instant.fromEpochMilliseconds(milli)</code></td>
-  </tr>
-  <tr>
-    <td><code>zonedDateTime.epochMicroseconds</code></td>
-    <td><code>zonedDateTime.epochMilliseconds</code></td>
-  </tr>
-  <tr>
-    <td><code>zonedDateTime.epochNanoseconds</code></td>
-    <td><code>zonedDateTime.epochMilliseconds</code></td>
-  </tr>
-  <tr>
-    <td>
-      <code>new Temporal.ZonedDateTime(nano, tz, cal)</code>
-    </td>
-    <td>
-      <code>Temporal.Instant.fromEpochMilliseconds(milli)</code><br />
-      <code>&nbsp;&nbsp;.toZonedDateTimeISO() // or toZonedDateTime</code>
-    </td>
-</table>
+However, *if you plan to use methods that accepting/emitting BigInts*, your environment must support it. Alternatively, you can avoid using these methods altogether. [There's a cheatsheet](https://gist.github.com/arshaw/1ef4bf945d68654b86cef2dd8471c48f) to help you.
 
 
 ## Tree-shakable API
