@@ -9,7 +9,7 @@ import {
 import {
   computeDurationSign,
   durationFieldsToBigNano,
-  getLargestDurationUnit,
+  getMaxDurationUnit,
   spanDuration,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
@@ -36,12 +36,12 @@ export function totalDuration<RA, C, T>(
   slots: DurationSlots,
   options: UnitName | DurationTotalOptions<RA>,
 ): number {
-  const durationLargestUnit = getLargestDurationUnit(slots)
+  const maxDurationUnit = getMaxDurationUnit(slots)
   const [totalUnit, relativeToSlots] = refineTotalOptions(
     options,
     refineRelativeTo,
   )
-  const maxUnit = Math.max(totalUnit, durationLargestUnit)
+  const maxUnit = Math.max(totalUnit, maxDurationUnit)
 
   if (isUniformUnit(maxUnit, relativeToSlots)) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)

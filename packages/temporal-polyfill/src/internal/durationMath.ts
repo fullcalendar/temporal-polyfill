@@ -76,8 +76,8 @@ export function addDurations<RA, C, T>(
   const normalOptions = normalizeOptions(options)
   const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
   const maxUnit = Math.max(
-    getLargestDurationUnit(slots),
-    getLargestDurationUnit(otherSlots),
+    getMaxDurationUnit(slots),
+    getMaxDurationUnit(otherSlots),
   ) as Unit
 
   if (isUniformUnit(maxUnit, relativeToSlots)) {
@@ -146,7 +146,7 @@ export function roundDuration<RA, C, T>(
   slots: DurationSlots,
   options: DurationRoundingOptions<RA>,
 ): DurationSlots {
-  const durationLargestUnit = getLargestDurationUnit(slots)
+  const durationLargestUnit = getMaxDurationUnit(slots)
   const [
     largestUnit,
     smallestUnit,
@@ -367,7 +367,7 @@ export function durationHasDateParts(fields: DurationFields): boolean {
   return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))
 }
 
-export function getLargestDurationUnit(fields: DurationFields): Unit {
+export function getMaxDurationUnit(fields: DurationFields): Unit {
   let unit: Unit = Unit.Year
 
   for (; unit > Unit.Nanosecond; unit--) {

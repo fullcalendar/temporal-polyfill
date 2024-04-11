@@ -18,7 +18,7 @@ import {
 import {
   computeDurationSign,
   durationFieldsToBigNano,
-  getLargestDurationUnit,
+  getMaxDurationUnit,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
@@ -360,7 +360,7 @@ export function roundDayTimeDurationByInc(
   nanoInc: number,
   roundingMode: RoundingMode,
 ): Partial<DurationFields> {
-  const maxUnit = Math.min(getLargestDurationUnit(durationFields), Unit.Day) // force <= Day
+  const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day) // force <= Day
   const bigNano = durationFieldsToBigNano(durationFields, maxUnit)
   const roundedBigNano = roundBigNanoByInc(bigNano, nanoInc, roundingMode)
   return nanoToDurationDayTimeFields(roundedBigNano, maxUnit)

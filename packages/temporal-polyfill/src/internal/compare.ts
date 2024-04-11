@@ -1,7 +1,7 @@
 import { compareBigNanos } from './bigNano'
 import { MoveOps } from './calendarOps'
 import { durationFieldNamesAsc } from './durationFields'
-import { durationFieldsToBigNano, getLargestDurationUnit } from './durationMath'
+import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
@@ -64,9 +64,9 @@ export function compareDurations<RA, C, T>(
 ): NumberSign {
   const normalOptions = normalizeOptions(options)
   const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
-  const largestUnit = Math.max(
-    getLargestDurationUnit(durationSlots0),
-    getLargestDurationUnit(durationSlots1),
+  const maxUnit = Math.max(
+    getMaxDurationUnit(durationSlots0),
+    getMaxDurationUnit(durationSlots1),
   ) as Unit
 
   // fast-path if fields identical
@@ -74,7 +74,7 @@ export function compareDurations<RA, C, T>(
     return 0
   }
 
-  if (isUniformUnit(largestUnit, relativeToSlots)) {
+  if (isUniformUnit(maxUnit, relativeToSlots)) {
     return compareBigNanos(
       durationFieldsToBigNano(durationSlots0),
       durationFieldsToBigNano(durationSlots1),
