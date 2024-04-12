@@ -60,16 +60,18 @@ export function totalDuration<RA, C, T>(
   const moveMarker = createMoveMarker(timeZoneOps)
   const diffMarkers = createDiffMarkers(timeZoneOps)
 
+  const [balancedDuration, endMarker] = spanDuration(
+    calendarOps,
+    slots,
+    totalUnit,
+    marker,
+    moveMarker,
+    diffMarkers,
+  )
+
   return totalRelativeDuration(
-    ...spanDuration(
-      calendarOps,
-      slots,
-      totalUnit,
-      marker,
-      markerToEpochNano,
-      moveMarker,
-      diffMarkers,
-    ),
+    balancedDuration,
+    markerToEpochNano(endMarker),
     totalUnit,
     calendarOps,
     marker,
@@ -97,7 +99,6 @@ export function totalRelativeDuration(
     markerToEpochNano,
     moveMarker,
   )
-
   const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
   return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
 }

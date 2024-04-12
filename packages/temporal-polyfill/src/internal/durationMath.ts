@@ -12,7 +12,6 @@ import * as errorMessages from './errorMessages'
 import {
   DiffMarkers,
   Marker,
-  MarkerToEpochNano,
   MoveMarker,
   RelativeToSlots,
   createDiffMarkers,
@@ -53,10 +52,9 @@ export function spanDuration(
   durationFields: DurationFields,
   largestUnit: Unit, // TODO: more descrimination?
   marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
   diffMarkers: DiffMarkers,
-): [DurationFields, BigNano] {
+): [DurationFields, Marker] {
   const endMarker = moveMarker(calendarOps, marker, durationFields)
   const balancedDuration = diffMarkers(
     calendarOps,
@@ -64,7 +62,7 @@ export function spanDuration(
     endMarker,
     largestUnit,
   )
-  return [balancedDuration, markerToEpochNano(endMarker)]
+  return [balancedDuration, endMarker]
 }
 
 // Adding
@@ -196,12 +194,11 @@ export function roundDuration<RA, C, T>(
     slots = { ...slots, weeks: 0 }
   }
 
-  let [balancedDuration, endEpochNano] = spanDuration(
+  let [balancedDuration, endMarker] = spanDuration(
     calendarOps,
     slots,
     largestUnit,
     marker,
-    markerToEpochNano,
     moveMarker,
     diffMarkers,
   )
@@ -215,7 +212,7 @@ export function roundDuration<RA, C, T>(
   if (balancedSign) {
     balancedDuration = roundRelativeDuration(
       balancedDuration,
-      endEpochNano,
+      markerToEpochNano(endMarker),
       largestUnit,
       smallestUnit,
       roundingInc,
