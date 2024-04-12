@@ -432,7 +432,7 @@ export function roundRelativeDuration(
   )
 
   // grew a day/week/month/year?
-  if (grewBigUnit) {
+  if (grewBigUnit && smallestUnit !== Unit.Week) {
     roundedDurationFields = bubbleRelativeDuration(
       roundedDurationFields,
       roundedEpochNano,

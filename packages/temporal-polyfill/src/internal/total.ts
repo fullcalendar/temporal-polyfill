@@ -10,7 +10,6 @@ import {
   computeDurationSign,
   durationFieldsToBigNano,
   getMaxDurationUnit,
-  spanDuration,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
@@ -60,13 +59,12 @@ export function totalDuration<RA, C, T>(
   const moveMarker = createMoveMarker(timeZoneOps)
   const diffMarkers = createDiffMarkers(timeZoneOps)
 
-  const [balancedDuration, endMarker] = spanDuration(
+  const endMarker = moveMarker(calendarOps, marker, slots)
+  const balancedDuration = diffMarkers(
     calendarOps,
-    slots,
-    totalUnit,
     marker,
-    moveMarker,
-    diffMarkers,
+    endMarker,
+    totalUnit,
   )
 
   return totalRelativeDuration(

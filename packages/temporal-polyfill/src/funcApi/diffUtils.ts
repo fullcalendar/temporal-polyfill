@@ -10,7 +10,7 @@ import { MoveOps } from '../internal/calendarOps'
 import {
   getCommonCalendarSlot,
   getCommonTimeZoneSlot,
-  zonedEpochRangeToIso,
+  prepareZonedEpochDiff,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
@@ -78,7 +78,7 @@ function diffZonedLargeUnits(
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
-    bindArgs(zonedEpochRangeToIso, timeZoneOps) as MarkersToIsoFields,
+    bindArgs(prepareZonedEpochDiff, timeZoneOps) as MarkersToIsoFields,
     bindArgs(moveZonedEpochs, timeZoneOps) as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
       calendarOps.dateUntil(f0, f1, unit),
@@ -188,7 +188,7 @@ function diffZonedDayLikeUnits(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
-  const [isoFields0, isoFields1, remainderNano] = zonedEpochRangeToIso(
+  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
     timeZoneOps,
     record0,
     record1,
