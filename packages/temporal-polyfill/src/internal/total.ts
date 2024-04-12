@@ -65,6 +65,9 @@ export function totalDuration<RA, C, T>(
     false, // viaWeeks... TODO: stripe out functionality for tree-shaking
   )
 
+  // !!! if isUniformUnit(totalUnit, relativeToSlots)
+  // !!!   then use totalDayTimeDuration() here!!!
+
   return totalRelativeDuration(
     balancedDuration,
     endEpochNano,
@@ -78,7 +81,7 @@ export function totalDuration<RA, C, T>(
 export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
-  totalUnit: Unit, // guaranteed >=Day
+  totalUnit: Unit, // guaranteed >=Day !!!
   calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps | undefined,
   startIsoDateTime: IsoDateTimeFields,
@@ -111,9 +114,13 @@ function totalDayTimeDuration(
 // Utils for points-within-intervals
 // -----------------------------------------------------------------------------
 
+/*
+BAD: called with hours and lower!!!
+  via totalDuration -> totalRelativeDuration
+*/
 export function clampRelativeDuration(
   baseDurationFields: DurationFields, // guaranteed no time fields
-  clampUnit: Unit, // guaranteed >=Day
+  clampUnit: Unit, // guaranteed >=Day --- not true!!!!
   clampDistance: number,
   calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps | undefined,
