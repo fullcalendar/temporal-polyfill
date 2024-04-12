@@ -7,9 +7,9 @@ import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
   RelativeToSlots,
   createMarkerSystem,
-  createMarkerToEpochNano,
-  createMoveMarker,
   isUniformUnit,
+  markerToIsoDateTime,
+  moveMarkerIsoDateTime,
 } from './markerSystem'
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
@@ -85,18 +85,30 @@ export function compareDurations<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
+  // after here,
+  // `maxUnit` is considered >=Day
+
   const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
 
-  return compareBigNanos(
-    markerToEpochNano(moveMarker(marker, durationSlots0)),
-    markerToEpochNano(moveMarker(marker, durationSlots1)),
+  const isoDateTime = markerToIsoDateTime(timeZoneOps, marker)
+  const epochNano0 = moveMarkerIsoDateTime(
+    calendarOps,
+    timeZoneOps,
+    isoDateTime,
+    durationSlots0,
   )
+  const epochNano1 = moveMarkerIsoDateTime(
+    calendarOps,
+    timeZoneOps,
+    isoDateTime,
+    durationSlots1,
+  )
+
+  return compareBigNanos(epochNano0, epochNano1)
 }
 
 // Low-Level Compare

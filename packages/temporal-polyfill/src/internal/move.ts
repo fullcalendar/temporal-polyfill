@@ -19,13 +19,9 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IntlCalendar, computeIntlMonthsInYear } from './intlMath'
-import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  IsoTimeFields,
-  isoTimeFieldNamesAsc,
-} from './isoFields'
+import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import { isoMonthsInYear } from './isoMath'
+import { joinIsoDateAndTime, splitDuration } from './markerSystem'
 import { Overflow } from './options'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
@@ -59,7 +55,7 @@ import {
   zonedEpochSlotsToIso,
 } from './timeZoneOps'
 import { Unit, milliInDay } from './units'
-import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
+import { clampEntity, divTrunc, modTrunc } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -212,30 +208,19 @@ export function moveZonedEpochs(
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): EpochSlots {
-  const timeOnlyNano = durationFieldsToBigNano(durationFields, Unit.Hour)
   let epochNano = slots.epochNanoseconds
 
   if (!durationHasDateParts(durationFields)) {
-    epochNano = addBigNanos(epochNano, timeOnlyNano)
+    const durationTimeNano = durationFieldsToBigNano(durationFields, Unit.Hour)
+    epochNano = addBigNanos(epochNano, durationTimeNano)
     refineOverflowOptions(options) // for validation only
   } else {
-    const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneOps)
-    const movedIsoDateFields = moveDate(
+    epochNano = moveZonedIsoDateTime(
       calendarOps,
-      isoDateTimeFields,
-      {
-        ...durationFields, // date parts
-        ...durationTimeFieldDefaults, // ZERO-OUT time parts
-      },
+      timeZoneOps,
+      zonedEpochSlotsToIso(slots, timeZoneOps),
+      durationFields,
       options,
-    )
-    const movedIsoDateTimeFields = {
-      ...movedIsoDateFields, // date parts (could be a superset)
-      ...pluckProps(isoTimeFieldNamesAsc, isoDateTimeFields), // time parts
-    }
-    epochNano = addBigNanos(
-      getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
-      timeOnlyNano,
     )
   }
 
@@ -244,26 +229,49 @@ export function moveZonedEpochs(
   }
 }
 
+/*
+TODO: make DRY with `moveMarkerIsoDateTime`
+*/
+function moveZonedIsoDateTime(
+  calendarOps: MoveOps,
+  timeZoneOps: TimeZoneOps,
+  isoDateTime: IsoDateTimeFields,
+  durationFields: DurationFields, // has Day units or larger
+  options?: OverflowOptions,
+): BigNano {
+  const [durationDateFields, durationTimeNano] = splitDuration(durationFields)
+  const movedIsoDate = moveDate(
+    calendarOps,
+    isoDateTime,
+    durationDateFields,
+    options,
+  )
+  const movedIsoDateTime = joinIsoDateAndTime(movedIsoDate, isoDateTime)
+  return addBigNanos(
+    getSingleInstantFor(timeZoneOps, movedIsoDateTime),
+    durationTimeNano,
+  )
+}
+
 export function moveDateTime(
   calendarOps: MoveOps,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): IsoDateTimeFields {
-  // could have over 24 hours in certain zones
   const [movedIsoTimeFields, dayDelta] = moveTime(
     isoDateTimeFields,
     durationFields,
   )
-
+  const durationDateFields = {
+    ...durationFields, // date parts
+    ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
+    days: durationFields.days + dayDelta,
+  }
   const movedIsoDateFields = moveDate(
     calendarOps,
     isoDateTimeFields, // only date parts will be used
-    {
-      ...durationFields, // date parts
-      ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
-      days: durationFields.days + dayDelta,
-    },
+    durationDateFields,
     options,
   )
 
@@ -287,9 +295,10 @@ export function moveDate(
   }
 
   refineOverflowOptions(options) // for validation only
+  // do this validation here?
 
-  const days =
-    durationFields.days + durationFieldsToBigNano(durationFields, Unit.Hour)[0]
+  const daysFromTime = durationFieldsToBigNano(durationFields, Unit.Hour)[0]
+  const days = durationFields.days + daysFromTime
 
   if (days) {
     return checkIsoDateInBounds(moveByDays(isoDateFields, days))

@@ -6,59 +6,46 @@ import {
   moveBigNano,
 } from '../internal/bigNano'
 import { createNativeDiffOps } from '../internal/calendarNativeQuery'
+import { DiffOps } from '../internal/calendarOps'
 import {
+  diffDatesBig,
   getCommonCalendarSlot,
   getCommonTimeZoneSlot,
-  zonedEpochRangeToIso,
+  prepareZonedEpochDiff,
 } from '../internal/diff'
-import { DurationFields } from '../internal/durationFields'
-import { IsoDateFields } from '../internal/isoFields'
-import { Marker, MarkerToEpochNano, MoveMarker } from '../internal/markerSystem'
-import { moveDateTime, moveZonedEpochs } from '../internal/move'
+import {
+  Marker,
+  markerToEpochNano,
+  markerToIsoDateTime,
+  prepareMarkerIsoDateTimeDiff,
+} from '../internal/markerSystem'
 import {
   RoundingMathOptions,
   RoundingModeName,
   refineUnitDiffOptions,
 } from '../internal/optionsRefine'
 import { roundBigNanoByInc, roundByInc } from '../internal/round'
-import {
-  DateSlots,
-  ZonedDateTimeSlots,
-  extractEpochNano,
-} from '../internal/slots'
+import { DateSlots, ZonedDateTimeSlots } from '../internal/slots'
 import { isoToEpochNano } from '../internal/timeMath'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { TimeZoneOps } from '../internal/timeZoneOps'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit } from '../internal/units'
-import { NumberSign, bindArgs } from '../internal/utils'
+import { bindArgs } from '../internal/utils'
+
+// TODO: better types
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
 export const diffZonedWeeks = bindArgs(diffZonedDayLikeUnits, Unit.Week, 7)
 export const diffZonedDays = bindArgs(diffZonedDayLikeUnits, Unit.Day, 1)
-export const diffZonedTimeUnits = bindArgs(
-  diffTimeUnit,
-  extractEpochNano as MarkerToEpochNano,
-)
+export const diffZonedTimeUnits = diffTimeUnit // TODO: better type
 
 export const diffPlainYears = bindArgs(diffPlainLargeUnits, Unit.Year)
 export const diffPlainMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
-export const diffPlainWeeks = bindArgs(
-  diffPlainDayLikeUnit,
-  isoToEpochNano as MarkerToEpochNano,
-  Unit.Week,
-  7,
-)
-export const diffPlainDays = bindArgs(
-  diffPlainDayLikeUnit,
-  isoToEpochNano as MarkerToEpochNano,
-  Unit.Day,
-  1,
-)
-export const diffPlainTimeUnits = bindArgs(
-  diffTimeUnit,
-  isoToEpochNano as MarkerToEpochNano,
-)
+export const diffPlainWeeks = bindArgs(diffPlainDayLikeUnit, Unit.Week, 7)
+export const diffPlainDays = bindArgs(diffPlainDayLikeUnit, Unit.Day, 1)
+export const diffPlainTimeUnits = diffTimeUnit // TODO: better type
 
 // Large Units (years, months)
 // -----------------------------------------------------------------------------
@@ -76,11 +63,8 @@ function diffZonedLargeUnits(
   const calendarOps = createNativeDiffOps(calendarSlot)
 
   return diffDateUnits(
-    extractEpochNano as MarkerToEpochNano,
-    bindArgs(zonedEpochRangeToIso, timeZoneOps) as MarkersToIsoFields,
-    bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as MoveMarker,
-    (f0: IsoDateFields, f1: IsoDateFields) =>
-      calendarOps.dateUntil(f0, f1, unit),
+    calendarOps,
+    timeZoneOps,
     unit,
     record0,
     record1,
@@ -97,64 +81,51 @@ function diffPlainLargeUnits<S extends DateSlots<string>>(
   const calendarSlot = getCommonCalendarSlot(record0.calendar, record1.calendar)
   const calendarOps = createNativeDiffOps(calendarSlot)
 
-  return diffDateUnits(
-    isoToEpochNano as MarkerToEpochNano,
-    identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(moveDateTime, calendarOps) as MoveMarker,
-    (f0: IsoDateFields, f1: IsoDateFields) =>
-      calendarOps.dateUntil(f0, f1, unit),
-    unit,
-    record0,
-    record1,
-    options,
-  )
+  return diffDateUnits(calendarOps, undefined, unit, record0, record1, options)
 }
 
 // Date Units (years, months, weeks, days)
 // -----------------------------------------------------------------------------
 
-type MarkersToIsoFields = (
-  m0: Marker,
-  m1: Marker,
-  sign: NumberSign,
-) => [IsoDateFields, IsoDateFields, ...any[]]
-
-function identityMarkersToIsoFields(
-  m0: IsoDateFields,
-  m1: IsoDateFields,
-): [IsoDateFields, IsoDateFields] {
-  return [m0, m1]
-}
-
+/*
+TODO: restore ability to diff by day (w/o calendar)... good for tree-shaking
+*/
 function diffDateUnits(
-  markerToEpochNano: MarkerToEpochNano,
-  markersToIsoFields: MarkersToIsoFields,
-  moveMarker: MoveMarker,
-  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
+  calendarOps: DiffOps,
+  timeZoneOps: TimeZoneOps | undefined,
   unit: Unit,
   marker0: Marker,
   marker1: Marker,
   options: RoundingModeName | RoundingMathOptions | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+
   const startEpochNano = markerToEpochNano(marker0)
   const endEpochNano = markerToEpochNano(marker1)
-
   const sign = compareBigNanos(endEpochNano, startEpochNano)
   if (!sign) {
     return 0
   }
 
-  const [isoFields0, isoFields1] = markersToIsoFields(marker0, marker1, sign)
-  const durationFields = diffIsoFields(isoFields0, isoFields1)
+  const startIsoDateTime = markerToIsoDateTime(timeZoneOps, marker0)
+  const endIsoDateTime = markerToIsoDateTime(timeZoneOps, marker1)
+  const [diffDate0, diffDate1] = prepareMarkerIsoDateTimeDiff(
+    timeZoneOps,
+    startIsoDateTime,
+    endIsoDateTime,
+    endEpochNano,
+    sign,
+  )
+
+  const durationFields = diffDatesBig(calendarOps, diffDate0, diffDate1, unit)
 
   let res = totalRelativeDuration(
     durationFields,
     endEpochNano,
     unit,
-    marker0,
-    markerToEpochNano,
-    moveMarker,
+    calendarOps,
+    timeZoneOps,
+    startIsoDateTime,
   )
 
   if (roundingInc) {
@@ -183,7 +154,7 @@ function diffZonedDayLikeUnits(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
-  const [isoFields0, isoFields1, remainderNano] = zonedEpochRangeToIso(
+  const [isoFields0, isoFields1, durationTimeNano] = prepareZonedEpochDiff(
     timeZoneOps,
     record0,
     record1,
@@ -191,7 +162,7 @@ function diffZonedDayLikeUnits(
   )
   const nanoDiff = moveBigNano(
     diffBigNanos(isoToEpochNano(isoFields0)!, isoToEpochNano(isoFields1)!),
-    remainderNano,
+    durationTimeNano,
   )
 
   let res = bigNanoToExactDays(nanoDiff) / daysInUnit
@@ -204,7 +175,6 @@ function diffZonedDayLikeUnits(
 }
 
 function diffPlainDayLikeUnit(
-  markerToEpochNano: MarkerToEpochNano,
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
   record0: Marker,
@@ -230,7 +200,6 @@ function diffPlainDayLikeUnit(
 // -----------------------------------------------------------------------------
 
 function diffTimeUnit(
-  markerToEpochNano: MarkerToEpochNano,
   unit: TimeUnit,
   nanoInUnit: number,
   record0: Marker,

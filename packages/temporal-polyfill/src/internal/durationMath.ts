@@ -1,5 +1,6 @@
 import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
 import { DiffOps } from './calendarOps'
+import { diffDatesBig } from './diff'
 import {
   DurationFields,
   DurationTimeFields,
@@ -9,18 +10,21 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
+import { IsoDateTimeFields } from './isoFields'
 import {
-  DiffMarkers,
   Marker,
-  MarkerToEpochNano,
-  MoveMarker,
   RelativeToSlots,
-  createDiffMarkers,
   createMarkerSystem,
-  createMarkerToEpochNano,
-  createMoveMarker,
   isUniformUnit,
+  joinIsoDateAndTime,
+  markerEpochNanoToIsoDateTime,
+  markerIsoDateTimeToEpochNano,
+  markerToIsoDateTime,
+  moveMarkerIsoDateTime,
+  prepareMarkerIsoDateTimeDiff,
+  splitDuration,
 } from './markerSystem'
+import { moveDate } from './move'
 import { Overflow } from './options'
 import {
   DurationRoundingOptions,
@@ -45,20 +49,58 @@ import { NumberSign, clampEntity } from './utils'
 
 const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 
-/*
-Rebalances duration(s)
-*/
-export function spanDuration(
-  durationFields: DurationFields,
-  largestUnit: Unit, // TODO: more descrimination?
+export function balanceDuration(
+  calendarOps: DiffOps,
+  timeZoneOps: TimeZoneOps | undefined,
   marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
-  diffMarkers: DiffMarkers,
-): [DurationFields, BigNano] {
-  const endMarker = moveMarker(marker, durationFields)
-  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
-  return [balancedDuration, markerToEpochNano(endMarker)]
+  durationSlots: DurationSlots,
+  largestUnit: Unit,
+  viaWeeks: boolean, // can only be true if largestUnit>Week
+): [DurationFields, IsoDateTimeFields, BigNano] {
+  const isoDateTime0 = markerToIsoDateTime(timeZoneOps, marker)
+  const epochNano1 = moveMarkerIsoDateTime(
+    calendarOps,
+    timeZoneOps,
+    isoDateTime0,
+    durationSlots,
+  )
+  const isoDateTime1 = markerEpochNanoToIsoDateTime(timeZoneOps, epochNano1)
+  const [isoDate0, isoDate1, timeNano] = prepareMarkerIsoDateTimeDiff(
+    timeZoneOps,
+    isoDateTime0,
+    isoDateTime1,
+    epochNano1,
+    durationSlots.sign,
+  )
+
+  // TODO: make tree-shakeable b/c total() doesn't need viaWeek
+  let dateDiff: any
+  if (viaWeeks) {
+    const isoDateMid = moveDate(calendarOps, isoDate0, {
+      ...durationFieldDefaults,
+      years: durationSlots.years,
+      months: durationSlots.months,
+    })
+    const ymDiff = calendarOps.dateUntil(isoDate0, isoDateMid, largestUnit)
+    const wdDiff = calendarOps.dateUntil(isoDateMid, isoDate1, Unit.Week)
+    dateDiff = {
+      ...wdDiff,
+      years: ymDiff.years,
+      months: ymDiff.months,
+    }
+  } else {
+    dateDiff = diffDatesBig(
+      calendarOps,
+      isoDate0,
+      isoDate1,
+      Math.max(Unit.Day, largestUnit), // ensure >=Day
+    )
+  }
+
+  const timeDiff = nanoToDurationTimeFields(timeNano)
+  const balancedDuration = { ...dateDiff, ...timeDiff }
+
+  return [balancedDuration, isoDateTime0, epochNano1]
 }
 
 // Adding
@@ -97,6 +139,9 @@ export function addDurations<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
+  // At this point,
+  // maxUnit >=Day
+
   if (doSubtract) {
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
@@ -106,14 +151,34 @@ export function addDurations<RA, C, T>(
     getTimeZoneOps,
     relativeToSlots,
   )
-  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
-  const diffMarkers = createDiffMarkers(calendarOps, timeZoneOps)
 
-  const midMarker = moveMarker(marker, slots)
-  const endMarker = moveMarker(midMarker, otherSlots)
-  const balancedDuration = diffMarkers(marker, endMarker, maxUnit)
+  const [durDateFields0, durTimeNano0] = splitDuration(slots)
+  const [durDateFields1, durTimeNano1] = splitDuration(otherSlots)
 
-  return createDurationSlots(balancedDuration)
+  // Move
+  const isoDateTime0 = markerToIsoDateTime(timeZoneOps, marker)
+  const isoDate1 = moveDate(calendarOps, isoDateTime0, durDateFields0)
+  const isoDate2 = moveDate(calendarOps, isoDate1, durDateFields1)
+  const isoDateTime2 = joinIsoDateAndTime(isoDate2, isoDateTime0)
+  const epochNano2 = markerIsoDateTimeToEpochNano(timeZoneOps, isoDateTime2)
+  const epochNano3 = addBigNanos(
+    epochNano2,
+    addBigNanos(durTimeNano0, durTimeNano1),
+  )
+  const isoDateTime3 = markerEpochNanoToIsoDateTime(timeZoneOps, epochNano3)
+
+  // Diff
+  const [diffDate0, diffDate1, timeDiffNano] = prepareMarkerIsoDateTimeDiff(
+    timeZoneOps,
+    isoDateTime0,
+    isoDateTime3,
+    epochNano3,
+    slots.sign,
+  )
+  return createDurationSlots({
+    ...diffDatesBig(calendarOps, diffDate0, diffDate1, maxUnit),
+    ...nanoToDurationTimeFields(timeDiffNano),
+  })
 }
 
 function addDayTimeDurations(
@@ -180,23 +245,14 @@ export function roundDuration<RA, C, T>(
     getTimeZoneOps,
     relativeToSlots,
   )
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
-  const diffMarkers = createDiffMarkers(calendarOps, timeZoneOps)
 
-  let transplantedWeeks = 0
-  if (slots.weeks && smallestUnit === Unit.Week) {
-    transplantedWeeks = slots.weeks
-    slots = { ...slots, weeks: 0 }
-  }
-
-  let [balancedDuration, endEpochNano] = spanDuration(
+  let [balancedDuration, startIsoDateTime, endEpochNano] = balanceDuration(
+    calendarOps,
+    timeZoneOps,
+    marker,
     slots,
     largestUnit,
-    marker,
-    markerToEpochNano,
-    moveMarker,
-    diffMarkers,
+    smallestUnit === Unit.Week && largestUnit > Unit.Week,
   )
 
   const origSign = slots.sign
@@ -213,13 +269,11 @@ export function roundDuration<RA, C, T>(
       smallestUnit,
       roundingInc,
       roundingMode,
-      marker,
-      markerToEpochNano,
-      moveMarker,
+      calendarOps,
+      timeZoneOps,
+      startIsoDateTime,
     )
   }
-
-  balancedDuration.weeks += transplantedWeeks // HACK (mutating)
 
   return createDurationSlots(balancedDuration)
 }

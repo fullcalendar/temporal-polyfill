@@ -1,23 +1,25 @@
-import { BigNano } from './bigNano'
-import { DiffOps, MoveOps } from './calendarOps'
-import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
-import { DurationFields } from './durationFields'
+import { BigNano, addBigNanos } from './bigNano'
+import { MoveOps } from './calendarOps'
+import { prepareDateTimeDiff, prepareZonedDateTimeDiff } from './diff'
+import { DurationFields, durationTimeFieldDefaults } from './durationFields'
+import { durationFieldsToBigNano } from './durationMath'
 import {
   IsoDateFields,
   IsoDateTimeFields,
+  IsoTimeFields,
   isoTimeFieldDefaults,
+  isoTimeFieldNamesAsc,
 } from './isoFields'
-import { moveDateTime, moveZonedEpochs } from './move'
+import { moveDate } from './move'
+import { DateSlots, EpochAndZoneSlots, ZonedEpochSlots } from './slots'
+import { epochNanoToIso, isoToEpochNano } from './timeMath'
 import {
-  DateSlots,
-  EpochAndZoneSlots,
-  ZonedEpochSlots,
-  extractEpochNano,
-} from './slots'
-import { isoToEpochNano } from './timeMath'
-import { TimeZoneOps } from './timeZoneOps'
+  TimeZoneOps,
+  getSingleInstantFor,
+  zonedEpochSlotsToIso,
+} from './timeZoneOps'
 import { Unit } from './units'
-import { Callable, bindArgs } from './utils'
+import { NumberSign, pluckProps } from './utils'
 
 // the "origin"
 export type RelativeToSlots<C, T> = DateSlots<C> | ZonedEpochSlots<C, T>
@@ -47,52 +49,110 @@ export function createMarkerSystem<C, CO, T>(
 
   return [
     // convert IsoDateFields->IsoDateTimeFields
-    // because expected in createMoveMarker/createDiffMarkers
     { ...relativeToSlots, ...isoTimeFieldDefaults },
     calendarOps,
   ]
 }
 
-// Atomic Operations
+// Split / Join
 // -----------------------------------------------------------------------------
 
-export type MarkerToEpochNano = (marker: Marker) => BigNano
-
-export type MoveMarker = (
-  marker: Marker,
+export function splitDuration(
   durationFields: DurationFields,
-) => Marker
-
-export type DiffMarkers = (
-  marker0: Marker,
-  marker1: Marker,
-  largestUnit: Unit,
-) => DurationFields
-
-export function createMarkerToEpochNano(
-  timeZoneOps: TimeZoneOps | undefined,
-): MarkerToEpochNano {
-  return (timeZoneOps ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
+): [DurationFields, BigNano] {
+  return [
+    { ...durationFields, ...durationTimeFieldDefaults },
+    durationFieldsToBigNano(durationFields, Unit.Hour),
+  ]
 }
 
-export function createMoveMarker(
+export function joinIsoDateAndTime(
+  isoDate: IsoDateFields,
+  isoTime: IsoTimeFields,
+): IsoDateTimeFields {
+  return {
+    ...isoDate,
+    ...pluckProps(isoTimeFieldNamesAsc, isoTime),
+  }
+}
+
+// Marker Operations
+// -----------------------------------------------------------------------------
+
+export function markerToIsoDateTime(
+  timeZoneOps: TimeZoneOps | undefined,
+  marker: Marker,
+): IsoDateTimeFields {
+  if (timeZoneOps) {
+    return zonedEpochSlotsToIso(marker as ZonedEpochSlots, timeZoneOps)
+  }
+  return { ...(marker as IsoDateFields), ...isoTimeFieldDefaults }
+}
+
+export function markerToEpochNano(marker: Marker): BigNano {
+  if ((marker as ZonedEpochSlots).epochNanoseconds) {
+    return (marker as ZonedEpochSlots).epochNanoseconds
+  }
+  return isoToEpochNano(marker as IsoDateFields)!
+}
+
+/*
+TODO: make DRY with `moveZonedIsoDateTime`
+*/
+export function moveMarkerIsoDateTime(
   calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps | undefined,
-): MoveMarker {
-  if (timeZoneOps) {
-    return bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as Callable
-  }
-  return bindArgs(moveDateTime, calendarOps) as Callable
+  isoDateTime: IsoDateTimeFields,
+  durationFields: DurationFields,
+): BigNano {
+  const [durationDateFields, durationTimeNano] = splitDuration(durationFields)
+  const movedIsoDate = moveDate(calendarOps, isoDateTime, durationDateFields)
+  const movedIsoDateTime = joinIsoDateAndTime(movedIsoDate, isoDateTime)
+  return addBigNanos(
+    markerIsoDateTimeToEpochNano(timeZoneOps, movedIsoDateTime),
+    durationTimeNano,
+  )
 }
 
-export function createDiffMarkers(
-  calendarOps: DiffOps,
+export function markerIsoDateTimeToEpochNano(
   timeZoneOps: TimeZoneOps | undefined,
-): DiffMarkers {
+  isoDateTime: IsoDateTimeFields,
+): BigNano {
   if (timeZoneOps) {
-    return bindArgs(diffZonedEpochsExact, calendarOps, timeZoneOps) as Callable
+    return getSingleInstantFor(timeZoneOps, isoDateTime)
   }
-  return bindArgs(diffDateTimesExact, calendarOps) as Callable
+  return isoToEpochNano(isoDateTime)!
+}
+
+export function markerEpochNanoToIsoDateTime(
+  timeZoneOps: TimeZoneOps | undefined,
+  epochNano: BigNano,
+): IsoDateTimeFields {
+  if (timeZoneOps) {
+    // like what zonedEpochSlotsToIso does
+    const offsetNanoseconds = timeZoneOps.getOffsetNanosecondsFor(epochNano)
+    return epochNanoToIso(epochNano, offsetNanoseconds)
+  }
+  return epochNanoToIso(epochNano, 0)
+}
+
+export function prepareMarkerIsoDateTimeDiff(
+  timeZoneOps: TimeZoneOps | undefined,
+  startIsoDateTime: IsoDateTimeFields,
+  endIsoDateTime: IsoDateTimeFields,
+  endEpochNano: BigNano,
+  sign: NumberSign,
+): [IsoDateFields, IsoDateFields, number] {
+  if (timeZoneOps) {
+    return prepareZonedDateTimeDiff(
+      timeZoneOps,
+      startIsoDateTime,
+      endIsoDateTime,
+      endEpochNano,
+      sign,
+    )
+  }
+  return prepareDateTimeDiff(startIsoDateTime, endIsoDateTime, sign)
 }
 
 // Utils

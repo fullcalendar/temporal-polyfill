@@ -1,29 +1,28 @@
 import { BigNano, bigNanoToNumber, diffBigNanos } from './bigNano'
-import { DiffOps } from './calendarOps'
+import { DiffOps, MoveOps } from './calendarOps'
 import {
   DurationFields,
   clearDurationFields,
   durationFieldDefaults,
   durationFieldNamesAsc,
+  durationTimeFieldDefaults,
 } from './durationFields'
 import {
+  balanceDuration,
   computeDurationSign,
   durationFieldsToBigNano,
   getMaxDurationUnit,
-  spanDuration,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { IsoDateTimeFields } from './isoFields'
 import {
-  Marker,
-  MarkerToEpochNano,
-  MoveMarker,
   RelativeToSlots,
-  createDiffMarkers,
   createMarkerSystem,
-  createMarkerToEpochNano,
-  createMoveMarker,
   isUniformUnit,
+  joinIsoDateAndTime,
+  markerIsoDateTimeToEpochNano,
 } from './markerSystem'
+import { moveDate } from './move'
 import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
 import { TimeZoneOps } from './timeZoneOps'
@@ -51,47 +50,47 @@ export function totalDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, caledarOps, timeZoneOps] = createMarkerSystem(
+  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(caledarOps, timeZoneOps)
-  const diffMarkers = createDiffMarkers(caledarOps, timeZoneOps)
+
+  const [balancedDuration, startIsoDateTime, endEpochNano] = balanceDuration(
+    calendarOps,
+    timeZoneOps,
+    marker,
+    slots,
+    totalUnit,
+    false, // viaWeeks... TODO: stripe out functionality for tree-shaking
+  )
 
   return totalRelativeDuration(
-    ...spanDuration(
-      slots,
-      totalUnit,
-      marker,
-      markerToEpochNano,
-      moveMarker,
-      diffMarkers,
-    ),
+    balancedDuration,
+    endEpochNano,
     totalUnit,
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    calendarOps,
+    timeZoneOps,
+    startIsoDateTime,
   )
 }
 
 export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
-  totalUnit: Unit,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  totalUnit: Unit, // guaranteed >=Day
+  calendarOps: MoveOps,
+  timeZoneOps: TimeZoneOps | undefined,
+  startIsoDateTime: IsoDateTimeFields,
 ): number {
   const sign = computeDurationSign(durationFields)
   const [epochNano0, epochNano1] = clampRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    calendarOps,
+    timeZoneOps,
+    startIsoDateTime,
   )
 
   const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
@@ -113,22 +112,40 @@ function totalDayTimeDuration(
 // -----------------------------------------------------------------------------
 
 export function clampRelativeDuration(
-  durationFields: DurationFields,
-  clampUnit: Unit,
+  baseDurationFields: DurationFields, // guaranteed no time fields
+  clampUnit: Unit, // guaranteed >=Day
   clampDistance: number,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  calendarOps: MoveOps,
+  timeZoneOps: TimeZoneOps | undefined,
+  startIsoDateTime: IsoDateTimeFields,
 ) {
   const clampDurationFields = {
     ...durationFieldDefaults,
     [durationFieldNamesAsc[clampUnit]]: clampDistance,
   }
-  const marker0 = moveMarker(marker, durationFields)
-  const marker1 = moveMarker(marker0, clampDurationFields)
-  const epochNano0 = markerToEpochNano(marker0)
-  const epochNano1 = markerToEpochNano(marker1)
-  return [epochNano0, epochNano1]
+
+  const windowIsoDate0 = moveDate(calendarOps, startIsoDateTime, {
+    ...baseDurationFields,
+    ...durationTimeFieldDefaults, // no time bubble-up
+  })
+  const windowIsoDate1 = moveDate(
+    calendarOps,
+    windowIsoDate0,
+    clampDurationFields,
+  )
+  const windowIsoDateTime0 = joinIsoDateAndTime(
+    windowIsoDate0,
+    startIsoDateTime,
+  )
+  const windowIsoDateTime1 = joinIsoDateAndTime(
+    windowIsoDate1,
+    startIsoDateTime,
+  )
+
+  return [
+    markerIsoDateTimeToEpochNano(timeZoneOps, windowIsoDateTime0),
+    markerIsoDateTimeToEpochNano(timeZoneOps, windowIsoDateTime1),
+  ]
 }
 
 export function computeEpochNanoFrac(
