@@ -59,11 +59,13 @@ export function createMarkerSystem<C, CO, T>(
 export type MarkerToEpochNano = (marker: Marker) => BigNano
 
 export type MoveMarker = (
+  calendarOps: MoveOps,
   marker: Marker,
   durationFields: DurationFields,
 ) => Marker
 
 export type DiffMarkers = (
+  calendarOps: DiffOps,
   marker0: Marker,
   marker1: Marker,
   largestUnit: Unit,
@@ -76,23 +78,21 @@ export function createMarkerToEpochNano(
 }
 
 export function createMoveMarker(
-  calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps | undefined,
 ): MoveMarker {
   if (timeZoneOps) {
-    return bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as Callable
+    return bindArgs(moveZonedEpochs, timeZoneOps) as Callable
   }
-  return bindArgs(moveDateTime, calendarOps) as Callable
+  return moveDateTime as Callable
 }
 
 export function createDiffMarkers(
-  calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps | undefined,
 ): DiffMarkers {
   if (timeZoneOps) {
-    return bindArgs(diffZonedEpochsExact, calendarOps, timeZoneOps) as Callable
+    return bindArgs(diffZonedEpochsExact, timeZoneOps) as Callable
   }
-  return bindArgs(diffDateTimesExact, calendarOps) as Callable
+  return diffDateTimesExact as Callable
 }
 
 // Utils

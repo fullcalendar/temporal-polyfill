@@ -6,6 +6,7 @@ import {
   moveBigNano,
 } from '../internal/bigNano'
 import { createNativeDiffOps } from '../internal/calendarNativeQuery'
+import { MoveOps } from '../internal/calendarOps'
 import {
   getCommonCalendarSlot,
   getCommonTimeZoneSlot,
@@ -78,10 +79,11 @@ function diffZonedLargeUnits(
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
     bindArgs(zonedEpochRangeToIso, timeZoneOps) as MarkersToIsoFields,
-    bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as MoveMarker,
+    bindArgs(moveZonedEpochs, timeZoneOps) as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
       calendarOps.dateUntil(f0, f1, unit),
     unit,
+    calendarOps,
     record0,
     record1,
     options,
@@ -100,10 +102,11 @@ function diffPlainLargeUnits<S extends DateSlots<string>>(
   return diffDateUnits(
     isoToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(moveDateTime, calendarOps) as MoveMarker,
+    moveDateTime as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
       calendarOps.dateUntil(f0, f1, unit),
     unit,
+    calendarOps,
     record0,
     record1,
     options,
@@ -132,6 +135,7 @@ function diffDateUnits(
   moveMarker: MoveMarker,
   diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
   unit: Unit,
+  calendarOps: MoveOps,
   marker0: Marker,
   marker1: Marker,
   options: RoundingModeName | RoundingMathOptions | undefined,
@@ -152,6 +156,7 @@ function diffDateUnits(
     durationFields,
     endEpochNano,
     unit,
+    calendarOps,
     marker0,
     markerToEpochNano,
     moveMarker,

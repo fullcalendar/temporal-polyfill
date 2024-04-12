@@ -1,5 +1,5 @@
 import { BigNano, bigNanoToNumber, diffBigNanos } from './bigNano'
-import { DiffOps } from './calendarOps'
+import { DiffOps, MoveOps } from './calendarOps'
 import {
   DurationFields,
   clearDurationFields,
@@ -51,17 +51,18 @@ export function totalDuration<RA, C, T>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, caledarOps, timeZoneOps] = createMarkerSystem(
+  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
     getCalendarOps,
     getTimeZoneOps,
     relativeToSlots,
   )
   const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(caledarOps, timeZoneOps)
-  const diffMarkers = createDiffMarkers(caledarOps, timeZoneOps)
+  const moveMarker = createMoveMarker(timeZoneOps)
+  const diffMarkers = createDiffMarkers(timeZoneOps)
 
   return totalRelativeDuration(
     ...spanDuration(
+      calendarOps,
       slots,
       totalUnit,
       marker,
@@ -70,6 +71,7 @@ export function totalDuration<RA, C, T>(
       diffMarkers,
     ),
     totalUnit,
+    calendarOps,
     marker,
     markerToEpochNano,
     moveMarker,
@@ -80,12 +82,14 @@ export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit,
+  calendarOps: MoveOps,
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
 ): number {
   const sign = computeDurationSign(durationFields)
   const [epochNano0, epochNano1] = clampRelativeDuration(
+    calendarOps,
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
@@ -113,6 +117,7 @@ function totalDayTimeDuration(
 // -----------------------------------------------------------------------------
 
 export function clampRelativeDuration(
+  calendarOps: MoveOps,
   durationFields: DurationFields,
   clampUnit: Unit,
   clampDistance: number,
@@ -124,8 +129,8 @@ export function clampRelativeDuration(
     ...durationFieldDefaults,
     [durationFieldNamesAsc[clampUnit]]: clampDistance,
   }
-  const marker0 = moveMarker(marker, durationFields)
-  const marker1 = moveMarker(marker0, clampDurationFields)
+  const marker0 = moveMarker(calendarOps, marker, durationFields)
+  const marker1 = moveMarker(calendarOps, marker0, clampDurationFields)
   const epochNano0 = markerToEpochNano(marker0)
   const epochNano1 = markerToEpochNano(marker1)
   return [epochNano0, epochNano1]

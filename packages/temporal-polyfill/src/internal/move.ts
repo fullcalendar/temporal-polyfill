@@ -91,8 +91,8 @@ export function moveZonedDateTime<C, T>(
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
-      calendarOps,
       timeZoneOps,
+      calendarOps,
       zonedDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -206,8 +206,8 @@ function moveEpochNano(
 timeZoneOps must be derived from zonedEpochSlots.timeZone
 */
 export function moveZonedEpochs(
-  calendarOps: MoveOps,
   timeZoneOps: TimeZoneOps,
+  calendarOps: MoveOps,
   slots: ZonedEpochSlots,
   durationFields: DurationFields,
   options?: OverflowOptions,

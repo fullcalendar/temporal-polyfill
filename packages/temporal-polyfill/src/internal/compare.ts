@@ -91,11 +91,11 @@ export function compareDurations<RA, C, T>(
     relativeToSlots,
   )
   const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
+  const moveMarker = createMoveMarker(timeZoneOps)
 
   return compareBigNanos(
-    markerToEpochNano(moveMarker(marker, durationSlots0)),
-    markerToEpochNano(moveMarker(marker, durationSlots1)),
+    markerToEpochNano(moveMarker(calendarOps, marker, durationSlots0)),
+    markerToEpochNano(moveMarker(calendarOps, marker, durationSlots1)),
   )
 }
 

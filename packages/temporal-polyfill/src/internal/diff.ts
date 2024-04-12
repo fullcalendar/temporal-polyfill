@@ -154,9 +154,10 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
       smallestUnit,
       roundingInc,
       roundingMode,
+      calendarOps,
       slots0,
       extractEpochNano as MarkerToEpochNano,
-      bindArgs(moveZonedEpochs, calendarOps, timeZoneOps) as MoveMarker,
+      bindArgs(moveZonedEpochs, timeZoneOps) as MoveMarker,
     )
   }
 
@@ -215,9 +216,10 @@ export function diffPlainDateTimes<C extends IdLike>(
       smallestUnit,
       roundingInc,
       roundingMode,
+      calendarOps,
       plainDateTimeSlots0,
       isoToEpochNano as MarkerToEpochNano,
-      bindArgs(moveDateTime, calendarOps) as MoveMarker,
+      moveDateTime as MoveMarker,
     )
   }
 
@@ -332,9 +334,10 @@ function diffDateLike(
         smallestUnit,
         roundingInc,
         roundingMode,
+        calendarOps,
         startIsoFields,
         isoToEpochNano as MarkerToEpochNano,
-        bindArgs(moveDate, calendarOps) as MoveMarker,
+        moveDate as MoveMarker,
       )
     }
   }
@@ -374,8 +377,8 @@ export function diffPlainTimes(
 // -----------------------------------------------------------------------------
 
 export function diffZonedEpochsExact(
-  calendarOps: DiffOps,
   timeZoneOps: TimeZoneOps,
+  calendarOps: DiffOps,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   largestUnit: Unit,

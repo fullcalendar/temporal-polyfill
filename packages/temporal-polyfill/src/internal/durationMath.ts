@@ -49,6 +49,7 @@ const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 Rebalances duration(s)
 */
 export function spanDuration(
+  calendarOps: DiffOps,
   durationFields: DurationFields,
   largestUnit: Unit, // TODO: more descrimination?
   marker: Marker,
@@ -56,8 +57,13 @@ export function spanDuration(
   moveMarker: MoveMarker,
   diffMarkers: DiffMarkers,
 ): [DurationFields, BigNano] {
-  const endMarker = moveMarker(marker, durationFields)
-  const balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+  const endMarker = moveMarker(calendarOps, marker, durationFields)
+  const balancedDuration = diffMarkers(
+    calendarOps,
+    marker,
+    endMarker,
+    largestUnit,
+  )
   return [balancedDuration, markerToEpochNano(endMarker)]
 }
 
@@ -106,12 +112,12 @@ export function addDurations<RA, C, T>(
     getTimeZoneOps,
     relativeToSlots,
   )
-  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
-  const diffMarkers = createDiffMarkers(calendarOps, timeZoneOps)
+  const moveMarker = createMoveMarker(timeZoneOps)
+  const diffMarkers = createDiffMarkers(timeZoneOps)
 
-  const midMarker = moveMarker(marker, slots)
-  const endMarker = moveMarker(midMarker, otherSlots)
-  const balancedDuration = diffMarkers(marker, endMarker, maxUnit)
+  const midMarker = moveMarker(calendarOps, marker, slots)
+  const endMarker = moveMarker(calendarOps, midMarker, otherSlots)
+  const balancedDuration = diffMarkers(calendarOps, marker, endMarker, maxUnit)
 
   return createDurationSlots(balancedDuration)
 }
@@ -181,8 +187,8 @@ export function roundDuration<RA, C, T>(
     relativeToSlots,
   )
   const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(calendarOps, timeZoneOps)
-  const diffMarkers = createDiffMarkers(calendarOps, timeZoneOps)
+  const moveMarker = createMoveMarker(timeZoneOps)
+  const diffMarkers = createDiffMarkers(timeZoneOps)
 
   let transplantedWeeks = 0
   if (slots.weeks && smallestUnit === Unit.Week) {
@@ -191,6 +197,7 @@ export function roundDuration<RA, C, T>(
   }
 
   let [balancedDuration, endEpochNano] = spanDuration(
+    calendarOps,
     slots,
     largestUnit,
     marker,
@@ -213,6 +220,7 @@ export function roundDuration<RA, C, T>(
       smallestUnit,
       roundingInc,
       roundingMode,
+      calendarOps,
       marker,
       markerToEpochNano,
       moveMarker,
