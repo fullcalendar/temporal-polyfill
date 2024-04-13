@@ -3,7 +3,6 @@ import { DiffOps, MoveOps } from './calendarOps'
 import {
   DurationFields,
   clearDurationFields,
-  durationFieldDefaults,
   durationFieldNamesAsc,
 } from './durationFields'
 import {
@@ -67,6 +66,10 @@ export function totalDuration<RA, C, T>(
     totalUnit,
   )
 
+  if (isUniformUnit(totalUnit, relativeToSlots)) {
+    return totalDayTimeDuration(balancedDuration, totalUnit as DayTimeUnit)
+  }
+
   return totalRelativeDuration(
     balancedDuration,
     markerToEpochNano(endMarker),
@@ -81,7 +84,7 @@ export function totalDuration<RA, C, T>(
 export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
-  totalUnit: Unit,
+  totalUnit: Unit, // always >=Day
   calendarOps: MoveOps,
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
@@ -118,18 +121,20 @@ function totalDayTimeDuration(
 export function clampRelativeDuration(
   calendarOps: MoveOps,
   durationFields: DurationFields,
-  clampUnit: Unit,
+  clampUnit: Unit, // always >=Day
   clampDistance: number,
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
 ) {
-  const clampDurationFields = {
-    ...durationFieldDefaults,
-    [durationFieldNamesAsc[clampUnit]]: clampDistance,
+  const unitName = durationFieldNamesAsc[clampUnit]
+  const durationPlusDistance = {
+    ...durationFields,
+    [unitName]: durationFields[unitName] + clampDistance,
   }
+
   const marker0 = moveMarker(calendarOps, marker, durationFields)
-  const marker1 = moveMarker(calendarOps, marker0, clampDurationFields)
+  const marker1 = moveMarker(calendarOps, marker, durationPlusDistance)
   const epochNano0 = markerToEpochNano(marker0)
   const epochNano1 = markerToEpochNano(marker1)
   return [epochNano0, epochNano1]

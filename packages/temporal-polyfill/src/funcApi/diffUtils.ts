@@ -134,7 +134,7 @@ function diffDateUnits(
   markersToIsoFields: MarkersToIsoFields,
   moveMarker: MoveMarker,
   diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
-  unit: Unit,
+  unit: Unit, // guaranteed Y/M/W
   calendarOps: MoveOps,
   marker0: Marker,
   marker1: Marker,

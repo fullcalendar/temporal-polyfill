@@ -123,6 +123,10 @@ built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum
 #
 staging/Intl402/Temporal/old/datetime-toLocaleString.js
 
+# SPEC-BUG
+# "Duration::total incorrect result with DST"
+# https://github.com/tc39/proposal-temporal/issues/2817
+
 # TODO: review and report our algorithms that are more efficient than ref polyfill
 # - native-internal YMD diffing
 #   - ours doesn't use loops. faster?
