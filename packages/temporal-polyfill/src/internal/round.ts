@@ -29,6 +29,7 @@ import {
   Marker,
   MarkerToEpochNano,
   MoveMarker,
+  isUniformUnit,
   isZonedEpochSlots,
 } from './markerSystem'
 import { moveByDays } from './move'
@@ -411,7 +412,7 @@ export function roundRelativeDuration(
   }
 
   const nudgeFunc = (
-    smallestUnit > Unit.Day
+    !isUniformUnit(smallestUnit, marker)
       ? nudgeRelativeDuration
       : isZonedEpochSlots(marker) && smallestUnit < Unit.Day
         ? nudgeZonedTimeDuration
