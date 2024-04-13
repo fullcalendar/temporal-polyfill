@@ -19,6 +19,7 @@ import {
   createMarkerToEpochNano,
   createMoveMarker,
   isUniformUnit,
+  isZonedEpochSlots,
 } from './markerSystem'
 import { Overflow } from './options'
 import {
@@ -115,7 +116,7 @@ export function addDurations<RA, C, T>(
         addDayTimeDurations(
           slots,
           otherSlots,
-          maxUnit as DayTimeUnit,
+          maxUnit as DayTimeUnit, // largestUnit
           doSubtract,
         ),
       ),
@@ -186,7 +187,9 @@ export function roundDuration<RA, C, T>(
 
   const maxUnit = Math.max(durationLargestUnit, largestUnit)
 
-  if (isUniformUnit(maxUnit, relativeToSlots)) {
+  // Don't do nanosecond-only rounding if ZDT because rounding hours/mins/etc
+  // could balance-up to days, which could vary based on time zone
+  if (!isZonedEpochSlots(relativeToSlots) && maxUnit <= Unit.Day) {
     return createDurationSlots(
       checkDurationUnits(
         roundDayTimeDuration(
