@@ -584,20 +584,17 @@ function nudgeZonedTimeDuration(
 ] {
   const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
 
-  // dayDelta ALWAYS zero here because durationFields time-units already balanced up to days
-  let [dayDelta, timeNano] = durationFieldsToBigNano(durationFields, Unit.Hour)
-
+  const timeYoNano = bigNanoToNumber(
+    durationFieldsToBigNano(durationFields, Unit.Hour),
+  )
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
-  let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
+  let roundedTimeNano = roundByInc(timeYoNano, nanoInc, roundingMode)
 
-  /*
-  TODO: make DRY with hoursInDay?
-  */
   const [dayEpochNano0, dayEpochNano1] = clampRelativeDuration(
     calendarOps,
     { ...durationFields, ...durationTimeFieldDefaults },
-    Unit.Day,
-    sign,
+    Unit.Day, // clampUnit
+    sign, // clampDistance
     marker,
     markerToEpochNano,
     moveMarker,
@@ -607,6 +604,7 @@ function nudgeZonedTimeDuration(
     diffBigNanos(dayEpochNano0, dayEpochNano1),
   )
   const beyondDayNano = roundedTimeNano - daySpanNano
+  let dayDelta = 0
 
   // rounded-time at start-of next day or beyond?
   // if so, rerun rounding with origin as next day

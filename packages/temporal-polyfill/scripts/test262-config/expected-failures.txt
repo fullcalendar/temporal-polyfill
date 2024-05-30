@@ -16,10 +16,6 @@
 # total 'years' with 1-nanosecond duration
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
 
-# Bug with accidentally assuming 24-hour days
-built-ins/Temporal/Duration/prototype/round/dst-balancing-result.js
-built-ins/Temporal/Duration/prototype/round/dst-rounding-result.js
-
 # Duration::round is now non-compliant with week math
 built-ins/Temporal/Duration/prototype/round/largestunit-smallestunit-combinations-relativeto.js
 built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
