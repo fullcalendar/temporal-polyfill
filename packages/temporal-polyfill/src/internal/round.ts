@@ -582,7 +582,7 @@ function nudgeZonedTimeDuration(
   nudgedEpochNano: BigNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const sign = computeDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
 
   // dayDelta ALWAYS zero here because durationFields time-units already balanced up to days
   let [dayDelta, timeNano] = durationFieldsToBigNano(durationFields, Unit.Hour)
@@ -603,16 +603,16 @@ function nudgeZonedTimeDuration(
     moveMarker,
   )
 
-  const daySpanEpochNanoseconds = bigNanoToNumber(
+  const daySpanNano = bigNanoToNumber(
     diffBigNanos(dayEpochNano0, dayEpochNano1),
   )
-  const beyondDay = roundedTimeNano - daySpanEpochNanoseconds
+  const beyondDayNano = roundedTimeNano - daySpanNano
 
   // rounded-time at start-of next day or beyond?
   // if so, rerun rounding with origin as next day
-  if (!beyondDay || Math.sign(beyondDay) === sign) {
+  if (!beyondDayNano || Math.sign(beyondDayNano) === sign) {
     dayDelta += sign
-    roundedTimeNano = roundByInc(beyondDay, nanoInc, roundingMode)
+    roundedTimeNano = roundByInc(beyondDayNano, nanoInc, roundingMode)
     endEpochNano = moveBigNano(dayEpochNano1, roundedTimeNano)
   } else {
     endEpochNano = moveBigNano(dayEpochNano0, roundedTimeNano)
@@ -648,7 +648,7 @@ export function nudgeRelativeDuration(
   movedEpochNano: BigNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const sign = computeDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
 
   const baseDurationFields = clearDurationFields(smallestUnit, durationFields)
@@ -697,7 +697,7 @@ function bubbleRelativeDuration(
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
 ): DurationFields {
-  const sign = computeDurationSign(durationFields)
+  const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
 
   for (
     let currentUnit: Unit = smallestUnit + 1;
@@ -718,11 +718,11 @@ function bubbleRelativeDuration(
     const thresholdEpochNano = markerToEpochNano(
       moveMarker(calendarOps, marker, baseDurationFields),
     )
-    const beyondThreshold = bigNanoToNumber(
+    const beyondThresholdNano = bigNanoToNumber(
       diffBigNanos(thresholdEpochNano, endEpochNano),
     )
 
-    if (!beyondThreshold || Math.sign(beyondThreshold) === sign) {
+    if (!beyondThresholdNano || Math.sign(beyondThresholdNano) === sign) {
       durationFields = baseDurationFields
     } else {
       break
