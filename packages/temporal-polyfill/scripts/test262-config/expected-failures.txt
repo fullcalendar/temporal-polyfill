@@ -28,45 +28,11 @@
 # "Fix Duration rounding relative to ZonedDateTime"
 # (refactors Duration::round/total to be more DRY with since/until)
 #
-intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
-built-ins/Temporal/Duration/prototype/round/timezone-getpossibleinstantsfor-iterable.js
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-4.js
 #
 # The mock doesn't expect consecutive calls to getPossibleInstantsFor,
 # which the new Duration::round/total algorithm has
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
-#
-# When Duration::round() stops using NormalizedTimeDurationToDays, because of consolidation,
-# consecutive conflicting calls to getPossibleInstantsFor won't be policed in the same way
-built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-normalized-time-duration-to-days-range-errors.js
-built-ins/Temporal/Duration/prototype/round/date-and-time-durations-opposite-signs.js
-built-ins/Temporal/Duration/prototype/round/normalized-time-duration-to-days-loop-arbitrarily.js
-#
-# Above PR also refactors other diffing, and cuts out certain uses of NormalizedTimeDurationToDays,
-# which changes how consecutive conflicting calls to getPossibleInstantsFor are policed
-built-ins/Temporal/ZonedDateTime/prototype/since/normalized-time-duration-to-days-loop-arbitrarily.js
-built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-days-loop-arbitrarily.js
-built-ins/Temporal/ZonedDateTime/prototype/since/normalized-time-duration-to-days-range-errors.js
-built-ins/Temporal/ZonedDateTime/prototype/until/normalized-time-duration-to-days-range-errors.js
-
-# SPEC-BUG
-# Ticket: https://github.com/tc39/proposal-temporal/issues/2792
-# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rounding-rel
-# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rounding-rel
-#
-# Our onion-shell rounding algorithm results in fewer calls to dateAdd/dateUntil.
-# One likely reason: we short-circuit if the direction of rounding is not outward.
-# Ref polyfill seems to retread a lot of ground:
-# RoundDuration + (BalanceTimeDuration/AdjustRoundedDurationDays) + BalanceDateDurationRelative
-#
-# In addition to contents of Test Branch:
-# (they police conflicting consecutive calls to dateUntil, but there's only 1 now)
-built-ins/Temporal/ZonedDateTime/prototype/since/date-and-time-durations-opposite-signs.js
-built-ins/Temporal/ZonedDateTime/prototype/until/date-and-time-durations-opposite-signs.js
-# (similar policing concept but with dateAdd)
-built-ins/Temporal/PlainDateTime/prototype/since/result-mixed-sign.js
-built-ins/Temporal/PlainDateTime/prototype/until/result-mixed-sign.js
 
 # SPEC-BUG
 # Ticket: https://github.com/tc39/proposal-temporal/issues/2791
@@ -127,10 +93,7 @@ staging/Intl402/Temporal/old/datetime-toLocaleString.js
 #   - ours doesn't use loops. faster?
 #   - ours is generalized for ISO and Intl. smaller code size
 # - code smell in ref polyfill
-#   - NanosecondsToDays
-#   - NormalizedTimeDurationToDays (related to #2758)
-#   - UnbalanceDateDurationRelative
-#     (in #2758, no longer used for Duration::round/total, just for Duration::compare)
+#   - UnbalanceDateDurationRelative (just for Duration::compare)
 
 ####################################################################################################
 # PRECISION
@@ -301,10 +264,8 @@ built-ins/Temporal/PlainDate/prototype/inLeapYear/custom.js
 built-ins/Temporal/PlainDate/prototype/month/custom.js
 built-ins/Temporal/PlainDate/prototype/monthCode/custom.js
 built-ins/Temporal/PlainDate/prototype/monthsInYear/custom.js
-built-ins/Temporal/PlainDate/prototype/since/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainDate/prototype/subtract/custom.js
 built-ins/Temporal/PlainDate/prototype/since/custom.js
-built-ins/Temporal/PlainDate/prototype/until/calendar-dateadd-called-with-plaindate-instance.js
 built-ins/Temporal/PlainDate/prototype/until/custom.js
 built-ins/Temporal/PlainDate/prototype/weekOfYear/custom.js
 built-ins/Temporal/PlainDate/prototype/with/custom.js
