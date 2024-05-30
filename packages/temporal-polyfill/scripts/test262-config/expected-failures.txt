@@ -10,29 +10,37 @@
 # "Dec 30th 1970 to Apr 30th 1973 is 27 months, 30 days, not 28 months" // typo! Dec 31st
 
 ####################################################################################################
-# SPEC BUGS
+# OUR BUGS
 ####################################################################################################
 
-# SPEC-BUG
-# PR: https://github.com/tc39/proposal-temporal/pull/2760 (ptomato)
-# Test PR: https://github.com/tc39/test262/pull/4012
-# Test Branch: https://github.com/ptomato/test262/tree/temporal-2760
-# Test Diff: https://github.com/tc39/test262/pull/4012/files
-#
-# "Tests for correct intermediate value in ZonedDateTime difference/rounding"
-
-# SPEC-BUG
-# Ticket: https://github.com/tc39/proposal-temporal/issues/2742
-# PR: https://github.com/tc39/proposal-temporal/pull/2758 (ptomato)
-#
-# "Fix Duration rounding relative to ZonedDateTime"
-# (refactors Duration::round/total to be more DRY with since/until)
-#
-built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-4.js
-#
-# The mock doesn't expect consecutive calls to getPossibleInstantsFor,
-# which the new Duration::round/total algorithm has
+# total 'years' with 1-nanosecond duration
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
+
+# Bug with accidentally assuming 24-hour days
+built-ins/Temporal/Duration/prototype/round/dst-balancing-result.js
+built-ins/Temporal/Duration/prototype/round/dst-rounding-result.js
+
+# Duration::round is now non-compliant with week math
+built-ins/Temporal/Duration/prototype/round/largestunit-smallestunit-combinations-relativeto.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-expand.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-floor.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfCeil.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfEven.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfExpand.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfFloor.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-halfTrunc.js
+built-ins/Temporal/Duration/prototype/round/roundingmode-trunc.js
+#
+# related. just about calendar access
+built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
+
+####################################################################################################
+# SPEC BUGS
+####################################################################################################
 
 # SPEC-BUG
 # Ticket: https://github.com/tc39/proposal-temporal/issues/2791
@@ -42,28 +50,6 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 # CalendarRecord's dateAdd/(dateUntil?) methods are plucked but never used because
 # are (unit<=day && relativeTo:PlainDateTime) || (unit<day && relativeTo:ZonedDateTime)
 # Just don't pluck it.
-
-# Combination of problems
-# Best to triage these after other PRs merged
-built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
-built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
-built-ins/Temporal/Duration/prototype/round/order-of-operations.js
-built-ins/Temporal/Duration/prototype/total/order-of-operations.js
-built-ins/Temporal/Duration/compare/order-of-operations.js
-#
-# Why discrepancy between add/subtract
-built-ins/Temporal/Duration/prototype/add/order-of-operations.js
-#built-ins/Temporal/Duration/prototype/subtract/order-of-operations.js
-
-# SPEC-BUG
-# Ticket: https://github.com/tc39/proposal-temporal/issues/2790
-# PR: https://github.com/tc39/proposal-temporal/pull/2797
-# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rounding-time-zdt (WIP!)
-# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rounding-time-zdt
-#
-# It's not necessary to compute hours-in-day when rounding time parts.
-# (hours-in-day needs 2 extra getPossibleInstantsFor calls)
-# More importantly, results in a bug (see Ticket)
 
 # SPEC-BUG
 # PR: https://github.com/tc39/proposal-temporal/pull/2789
@@ -78,22 +64,11 @@ built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum-forward-offset-shift.js
 
 # SPEC-BUG
-# Ticket: TODO!
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2795
 #
 # PlainDateTime::toLocaleString should not be swayed by timeZone in any way
 #
 staging/Intl402/Temporal/old/datetime-toLocaleString.js
-
-# SPEC-BUG
-# "Duration::total incorrect result with DST"
-# https://github.com/tc39/proposal-temporal/issues/2817
-
-# TODO: review and report our algorithms that are more efficient than ref polyfill
-# - native-internal YMD diffing
-#   - ours doesn't use loops. faster?
-#   - ours is generalized for ISO and Intl. smaller code size
-# - code smell in ref polyfill
-#   - UnbalanceDateDurationRelative (just for Duration::compare)
 
 ####################################################################################################
 # PRECISION
@@ -103,6 +78,7 @@ staging/Intl402/Temporal/old/datetime-toLocaleString.js
 # We do not "perform long division to calculate the fractional part of the quotient
 # remainder / n with more accuracy than 64-bit floating point division" because we don't
 # use bigint, and even if we did, it's overly tedious to do string manipulation to simulate this
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-4.js
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
 # PRECISION (TimeZone subclass/protocol only)
@@ -162,7 +138,7 @@ built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 ####################################################################################################
-# MISC NON-COMPLIANT ACCESS (slightly different algos for code size)
+# MISC NON-COMPLIANT ACCESS
 ####################################################################################################
 
 # CALLING
@@ -226,6 +202,18 @@ built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options
 built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
+
+# CALLING
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+built-ins/Temporal/Duration/compare/order-of-operations.js
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
 
 ####################################################################################################
 # OBJECTS GIVEN TO PROTOCOLS
