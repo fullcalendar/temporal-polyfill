@@ -1,4 +1,13 @@
 
+v0.2.5 (2024-05-30)
+-------------------
+
+- conformance to latest spec (May 2024)
+- fix: Chrome on Android reporting wrong era for islamic calendars (#39)
+- fix: Bug with eras on Firefox 96 - 105
+  (https://bugzilla.mozilla.org/show_bug.cgi?id=1752253)
+
+
 v0.2.4 (2024-04-05)
 -------------------
 

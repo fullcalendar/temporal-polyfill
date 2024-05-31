@@ -57,11 +57,6 @@ export const eraOriginsByCalendarId: {
   },
 }
 
-export const eraRemaps: Record<string, string> = {
-  'bc': 'bce',
-  'ad': 'ce',
-}
-
 export const leapMonthMetas: Record<string, number> = {
   'chinese': 13, // (positive) max possible leap month
   'dangi': 13, // "

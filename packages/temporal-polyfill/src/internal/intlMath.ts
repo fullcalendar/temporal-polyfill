@@ -1,4 +1,4 @@
-import { eraOriginsByCalendarId, eraRemaps } from './calendarConfig'
+import { eraOriginsByCalendarId } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
   DateParts,
@@ -173,8 +173,26 @@ export function parseIntlYear(
 
   if (intlParts.era) {
     const eraOrigins = eraOriginsByCalendarId[calendarIdBase]
+
     if (eraOrigins !== undefined) {
-      era = normalizeShortEra(intlParts.era)
+      era =
+        calendarIdBase === 'islamic'
+          ? 'ah' // https://github.com/fullcalendar/temporal-polyfill/issues/39
+          : intlParts.era
+              .normalize('NFD') // 'Shōwa' -> 'Showa'
+              .toLowerCase() // 'Before R.O.C.' -> 'before r.o.c.'
+              .replace(/[^a-z0-9]/g, '') // 'before r.o.c.' -> 'beforeroc'
+
+      // Firefox 96 introduced a bug where the `'short'` format of the era
+      // option mistakenly returns the one-letter (narrow) format instead. The
+      // code below handles either the correct or Firefox-buggy format. See
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1752253
+      if (era === 'bc' || era === 'b') {
+        era = 'bce'
+      } else if (era === 'ad' || era === 'a') {
+        era = 'ce'
+      }
+
       eraYear = year // TODO: will this get optimized to next line?
       year = eraYearToYear(eraYear, eraOrigins[era] || 0)
     }
@@ -201,15 +219,6 @@ export const queryCalendarIntlFormat = memoize(
       day: 'numeric',
     }),
 )
-
-function normalizeShortEra(formattedEra: string): string {
-  formattedEra = formattedEra
-    .normalize('NFD') // 'Shōwa' -> 'Showa'
-    .toLowerCase() // 'Before R.O.C.' -> 'before r.o.c.'
-    .replace(/[^a-z0-9]/g, '') // 'before r.o.c.' -> 'beforeroc'
-
-  return eraRemaps[formattedEra] || formattedEra
-}
 
 // Intl-Calendar methods
 // -----------------------------------------------------------------------------
