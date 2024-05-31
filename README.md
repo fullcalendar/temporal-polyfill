@@ -130,10 +130,10 @@ Compliance with the latest version of the Temporal spec (Apr 2024) is near-perfe
 
 The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) has:
 
-- 7100 *total* Temporal-related test files
-- 6463 *passed* by `temporal-polyfill`
+- 7102 *total* Temporal-related test files
+- 6477 *passed* by `temporal-polyfill`
 - 491 *skipped* due to superficial method descriptor non-compliance
-- 146 *skipped* due to other aforementioned intentional deviations
+- 134 *skipped* due to other aforementioned intentional deviations
 
 
 ## Browser Support
@@ -219,7 +219,7 @@ Node.js is always 14 because the test-runner doesn't work with lower
 
 This polyfill does NOT depend on [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) support. Internally, no operations leverage BigInt arithmetics. :thumbsup:
 
-However, if you plan to use methods that accepting/emitting BigInts, your environment must support it. Alternatively, you can avoid using these methods altogether. [There's a cheatsheet](https://gist.github.com/arshaw/1ef4bf945d68654b86cef2dd8471c48f) to help you.
+However, if you plan to use methods that accept/emit BigInts, your environment must support it. Alternatively, you can avoid using these methods altogether. [There's a cheatsheet](https://gist.github.com/arshaw/1ef4bf945d68654b86cef2dd8471c48f) to help you.
 
 
 ## Tree-shakable API
